@@ -9,20 +9,36 @@ import template from './action_status_table.html';
 
 const app = uiModules.get('xpack/watcher');
 
-app.directive('actionStatusTable', function () {
+app.directive('actionStatusTable', function ($injector, i18n) {
   return {
     restrict: 'E',
     replace: true,
     template: template,
     scope: {
       actionStatuses: '=',
+      actionErrors: '=',
       sortField: '=',
       sortReverse: '=',
       onSortChange: '=',
       onActionAcknowledge: '=',
+      showErrors: '='
     },
     bindToController: true,
     controllerAs: 'actionStatusTable',
-    controller: class ActionStatusTableController {}
+    controller: class ActionStatusTableController {
+      getLabelErrors(actionId) {
+        const errors = this.actionErrors[actionId];
+        const total = errors.length;
+
+        const label = i18n('xpack.watcher.sections.watchDetail.actionStatusTotalErrors', {
+          defaultMessage: '{total, number} {total, plural, one {error} other {errors}}',
+          values: {
+            total,
+          }
+        });
+
+        return label;
+      }
+    }
   };
 });

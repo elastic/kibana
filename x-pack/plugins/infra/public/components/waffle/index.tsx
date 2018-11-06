@@ -7,7 +7,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraMetricType, InfraNodeType } from '../../../common/graphql/types';
+import { InfraMetricType, InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
 import {
   isWaffleMapGroupWithGroups,
   isWaffleMapGroupWithNodes,
@@ -19,6 +19,7 @@ import {
   InfraWaffleMapGroup,
   InfraWaffleMapOptions,
 } from '../../lib/lib';
+import { KueryFilterQuery } from '../../store/local/waffle_filter';
 import { createFormatter } from '../../utils/formatters';
 import { AutoSizer } from '../auto_sizer';
 import { InfraLoadingPanel } from '../loading';
@@ -33,6 +34,8 @@ interface Props {
   map: InfraWaffleData;
   loading: boolean;
   reload: () => void;
+  onDrilldown: (filter: KueryFilterQuery) => void;
+  timeRange: InfraTimerangeInput;
 }
 
 interface MetricFormatter {
@@ -88,7 +91,7 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
 
 export class Waffle extends React.Component<Props, {}> {
   public render() {
-    const { loading, map, reload } = this.props;
+    const { loading, map, reload, timeRange } = this.props;
     if (loading) {
       return <InfraLoadingPanel height="100%" width="100%" text="Loading data" />;
     } else if (!loading && map && map.length === 0) {
@@ -130,7 +133,7 @@ export class Waffle extends React.Component<Props, {}> {
               data-test-subj="waffleMap"
             >
               <WaffleMapInnerContainer>
-                {groupsWithLayout.map(this.renderGroup(bounds))}
+                {groupsWithLayout.map(this.renderGroup(bounds, timeRange))}
               </WaffleMapInnerContainer>
               <Legend
                 formatter={this.formatter}
@@ -159,11 +162,17 @@ export class Waffle extends React.Component<Props, {}> {
     return formatter(val);
   };
 
-  private handleDrilldown() {
+  private handleDrilldown = (filter: string) => {
+    this.props.onDrilldown({
+      kind: 'kuery',
+      expression: filter,
+    });
     return;
-  }
+  };
 
-  private renderGroup = (bounds: InfraWaffleMapBounds) => (group: InfraWaffleMapGroup) => {
+  private renderGroup = (bounds: InfraWaffleMapBounds, timeRange: InfraTimerangeInput) => (
+    group: InfraWaffleMapGroup
+  ) => {
     if (isWaffleMapGroupWithGroups(group)) {
       return (
         <GroupOfGroups
@@ -174,6 +183,7 @@ export class Waffle extends React.Component<Props, {}> {
           formatter={this.formatter}
           bounds={bounds}
           nodeType={this.props.nodeType}
+          timeRange={timeRange}
         />
       );
     }
@@ -188,6 +198,7 @@ export class Waffle extends React.Component<Props, {}> {
           isChild={false}
           bounds={bounds}
           nodeType={this.props.nodeType}
+          timeRange={timeRange}
         />
       );
     }

@@ -69,12 +69,17 @@ export class VisualizeDataLoader {
 
   public async fetch(params: RequestHandlerParams): Promise<any> {
     this.vis.filters = { timeRange: params.timeRange };
+    this.vis.requestError = undefined;
+    this.vis.showRequestError = false;
 
     try {
       // searchSource is only there for courier request handler
       const requestHandlerResponse = await this.requestHandler(this.vis, {
         partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
         ...params,
+        filters: params.filters
+          ? params.filters.filter(filter => !filter.meta.disabled)
+          : undefined,
       });
 
       // No need to call the response handler when there have been no data nor has been there changes
@@ -92,19 +97,27 @@ export class VisualizeDataLoader {
         this.visData = await Promise.resolve(this.responseHandler(requestHandlerResponse));
       }
       return this.visData;
-    } catch (e) {
+    } catch (error) {
       params.searchSource.cancelQueued();
-      this.vis.requestError = e;
-      if (isTermSizeZeroError(e)) {
+
+      this.vis.requestError = error;
+      this.vis.showRequestError =
+        error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
+
+      // tslint:disable-next-line
+      console.error(error);
+
+      if (isTermSizeZeroError(error)) {
         return toastNotifications.addDanger(
           `Your visualization ('${this.vis.title}') has an error: it has a term ` +
             `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
             `the error.`
         );
       }
+
       toastNotifications.addDanger({
         title: 'Error in visualization',
-        text: e.message,
+        text: error.message,
       });
     }
   }

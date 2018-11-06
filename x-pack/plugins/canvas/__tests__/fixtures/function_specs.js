@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { Fn } from '../../common/lib/fn';
 import { functions as browserFns } from '../../canvas_plugin_src/functions/browser';
 import { functions as commonFns } from '../../canvas_plugin_src/functions/common';

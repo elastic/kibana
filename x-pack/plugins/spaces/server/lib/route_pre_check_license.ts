@@ -9,12 +9,12 @@ import Boom from 'boom';
 export function routePreCheckLicense(server: any) {
   const xpackMainPlugin = server.plugins.xpack_main;
   const pluginId = 'spaces';
-  return function forbidApiAccess(request: any, reply: any) {
+  return function forbidApiAccess(request: any) {
     const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
     if (!licenseCheckResults.showSpaces) {
-      reply(Boom.forbidden(licenseCheckResults.linksMessage));
+      return Boom.forbidden(licenseCheckResults.linksMessage);
     } else {
-      reply();
+      return '';
     }
   };
 }

@@ -11,7 +11,7 @@ import createHistory from 'history/createMemoryHistory';
 import {
   toQuery,
   fromQuery,
-  KibanaLinkComponent,
+  UnconnectedKibanaLink,
   RelativeLinkComponent,
   encodeKibanaSearchParams,
   decodeKibanaSearchParams,
@@ -182,7 +182,7 @@ describe('RelativeLinkComponent', () => {
   });
 });
 
-describe('KibanaLinkComponent', () => {
+describe('UnconnectedKibanaLink', () => {
   let wrapper;
 
   beforeEach(() => {
@@ -191,27 +191,27 @@ describe('KibanaLinkComponent', () => {
         interval: 'auto',
         query: {
           language: 'lucene',
-          query: `context.service.name:myServiceName AND error.grouping_key:myGroupId`
+          query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
         },
         sort: { '@timestamp': 'desc' }
       }
     };
 
     wrapper = mount(
-      <KibanaLinkComponent
+      <UnconnectedKibanaLink
         location={{ search: '' }}
         pathname={'/app/kibana'}
         hash={'/discover'}
         query={discoverQuery}
       >
         Go to Discover
-      </KibanaLinkComponent>
+      </UnconnectedKibanaLink>
     );
   });
 
   it('should have correct url', () => {
     expect(wrapper.find('a').prop('href')).toBe(
-      "myBasePath/app/kibana#/discover?_g=&_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))"
+      'myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:\'context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"\'),sort:(\'@timestamp\':desc))&_g=(time:(from:now-24h,mode:quick,to:now))'
     );
   });
 

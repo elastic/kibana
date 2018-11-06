@@ -4,21 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import io from 'socket.io-client';
 import { functionsRegistry } from '../common/lib/functions_registry';
-import { loadBrowserPlugins } from './lib/load_browser_plugins';
+import { getBrowserRegistries } from './lib/browser_registries';
 
+const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
 let socket;
 
-export function createSocket() {
-  const basePath = chrome.getBasePath();
-  socket = io(undefined, { path: `${basePath}/socket.io` });
+export async function createSocket(basePath) {
+  if (socket != null) return socket;
 
-  socket.on('getFunctionList', () => {
-    const pluginsLoaded = loadBrowserPlugins();
+  return new Promise((resolve, rej) => {
+    const reject = p => {
+      socket = null; // reset the socket on errors
+      rej(p);
+    };
 
-    pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
+    socket = io({
+      path: `${basePath}/socket.io`,
+      transports: ['polling', 'websocket'],
+      transportOptions: {
+        polling: {
+          extraHeaders: {
+            'kbn-xsrf': 'professionally-crafted-string-of-text',
+          },
+        },
+      },
+      timeout: SOCKET_CONNECTION_TIMEOUT,
+      // ensure socket.io always tries polling first, otherwise auth will fail
+      rememberUpgrade: false,
+    });
+
+    socket.on('getFunctionList', () => {
+      const pluginsLoaded = getBrowserRegistries();
+      pluginsLoaded.then(() => socket.emit('functionList', functionsRegistry.toJS()));
+    });
+
+    socket.on('connect', () => {
+      resolve();
+    });
+
+    function errorHandler(err) {
+      // 'connectionFailed' returns an object with a reason prop
+      // other error cases provide their own error
+      reject(err.reason ? new Error(err.reason) : err);
+    }
+
+    socket.on('connectionFailed', errorHandler);
+    socket.on('connect_error', errorHandler);
+    socket.on('connect_timeout', errorHandler);
   });
 }
 

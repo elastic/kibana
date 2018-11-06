@@ -8,7 +8,8 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { createSocket } from '../../socket';
 import { initialize as initializeInterpreter } from '../../lib/interpreter';
-import { getAppReady } from '../../state/selectors/app';
+import { populateBrowserRegistries } from '../../lib/browser_registries';
+import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 import { trackRouteChange } from './track_route_change';
 import { App as Component } from './app';
@@ -19,25 +20,42 @@ const mapStateToProps = state => {
 
   return {
     appState: typeof appState === 'object' ? appState : { ready: appState },
+    basePath: getBasePath(state),
   };
 };
 
 const mapDispatchToProps = dispatch => ({
-  setAppReady: async () => {
-    // initialize the socket and interpreter
-    createSocket();
-    await initializeInterpreter();
+  // TODO: the correct socket path should come from upstream, using the constant here is not ideal
+  setAppReady: basePath => async () => {
+    try {
+      // initialize the socket and interpreter
+      await createSocket(basePath);
+      await populateBrowserRegistries();
+      await initializeInterpreter();
 
-    // set app state to ready
-    dispatch(appReady());
+      // set app state to ready
+      dispatch(appReady());
+    } catch (e) {
+      dispatch(appError(e));
+    }
   },
   setAppError: payload => dispatch(appError(payload)),
 });
 
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
+    setAppReady: dispatchProps.setAppReady(stateProps.basePath),
+  };
+};
+
 export const App = compose(
   connect(
     mapStateToProps,
-    mapDispatchToProps
+    mapDispatchToProps,
+    mergeProps
   ),
   withProps(() => ({
     onRouteChange: trackRouteChange,
