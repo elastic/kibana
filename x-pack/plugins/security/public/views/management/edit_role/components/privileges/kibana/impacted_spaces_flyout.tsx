@@ -21,7 +21,6 @@ import { UserProfile } from '../../../../../../../../xpack_main/public/services/
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
-import './impacted_spaces_flyout.less';
 
 interface Props {
   role: Role;

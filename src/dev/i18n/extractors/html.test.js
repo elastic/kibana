@@ -24,8 +24,12 @@ const htmlSourceBuffer = Buffer.from(`
   <div>
     <p
       i18n-id="kbn.dashboard.id-1"
-      i18n-default-message="Message text 1"
+      i18n-default-message="Message text 1 {value}"
       i18n-context="Message context 1"
+      i18n-values="{
+        value: 'Multiline
+                string',
+      }"
     ></p>
   </div>
   <div>
@@ -71,6 +75,16 @@ describe('dev/i18n/extractors/html', () => {
 <p
   i18n-id="message-id"
 ></p>
+`);
+
+    expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws on i18n filter usage in angular directive argument', () => {
+    const source = Buffer.from(`\
+<div
+  ng-options="mode as ('metricVis.colorModes.' + mode | i18n: { defaultMessage: mode }) for mode in collections.metricColorMode"
+></div>
 `);
 
     expect(() => extractHtmlMessages(source).next()).toThrowErrorMatchingSnapshot();

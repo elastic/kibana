@@ -261,8 +261,13 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('userFormUserNameInput', userObj.username);
       await testSubjects.setValue('passwordInput', userObj.password);
       await testSubjects.setValue('passwordConfirmationInput', userObj.confirmPassword);
-      await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
-      await testSubjects.setValue('userFormEmailInput', userObj.email);
+      if (userObj.fullname) {
+        await testSubjects.setValue('userFormFullNameInput', userObj.fullname);
+      }
+      if (userObj.email) {
+        await testSubjects.setValue('userFormEmailInput', userObj.email);
+      }
+
       log.debug('Add roles: ', userObj.roles);
       const rolesToAdd = userObj.roles || [];
       for (let i = 0; i < rolesToAdd.length; i++) {

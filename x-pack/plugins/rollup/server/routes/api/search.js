@@ -19,7 +19,7 @@ export function registerSearchRoute(server) {
     config: {
       pre: [ licensePreRouting ]
     },
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -30,14 +30,13 @@ export function registerSearchRoute(server) {
           })
         ));
 
-        const results = await Promise.all(requests);
-        reply(results);
+        return await Promise.all(requests);
       } catch(err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          return wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        return wrapUnknownError(err);
       }
     },
   });

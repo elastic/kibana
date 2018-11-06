@@ -8,7 +8,6 @@
 import React from 'react';
 
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,6 +16,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import { ExperimentalBadge } from '../experimental_badge';
 
 export function WelcomeContent() {
 
@@ -29,7 +30,9 @@ export function WelcomeContent() {
         <EuiTitle size="m">
           <h3>
             Visualize data from a log file &nbsp;
-            <EuiBetaBadge label="Experimental" tooltipContent="Experimental feature. We'd love to hear your feedback." />
+            <ExperimentalBadge
+              tooltipContent="Experimental feature. We'd love to hear your feedback."
+            />
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -53,7 +56,7 @@ export function WelcomeContent() {
           <EuiFlexItem>
             <EuiText>
               <p>
-                JSON
+                Delimited text files, such as CSV and TSV
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -66,7 +69,7 @@ export function WelcomeContent() {
           <EuiFlexItem>
             <EuiText>
               <p>
-                Delimited text files, such as CSV and TSV
+                Newline-delimited JSON
               </p>
             </EuiText>
           </EuiFlexItem>
