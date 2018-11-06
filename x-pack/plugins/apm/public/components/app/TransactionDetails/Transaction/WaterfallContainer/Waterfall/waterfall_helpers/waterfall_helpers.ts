@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy, indexBy, sortBy } from 'lodash';
+import {
+  first,
+  flatten,
+  groupBy,
+  indexBy,
+  isEmpty,
+  sortBy,
+  uniq
+} from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
@@ -12,12 +20,18 @@ export interface IWaterfallIndex {
   [key: string]: IWaterfallItem;
 }
 
+export interface IWaterfallGroup {
+  [key: string]: IWaterfallItem[];
+}
+
 export interface IWaterfall {
-  duration: number;
+  traceRoot?: Transaction;
+  traceRootDuration?: number;
+  duration?: number;
   services: string[];
-  childrenCount: number;
-  root: IWaterfallItem;
+  items: IWaterfallItem[];
   itemsById: IWaterfallIndex;
+  getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
 }
 
 interface IWaterfallItemBase {
@@ -28,24 +42,21 @@ interface IWaterfallItemBase {
   duration: number;
   timestamp: number;
   offset: number;
+  skew: number;
+  childIds?: Array<IWaterfallItemBase['id']>;
 }
 
 interface IWaterfallItemTransaction extends IWaterfallItemBase {
   transaction: Transaction;
   docType: 'transaction';
-  children?: Array<IWaterfallItemSpan | IWaterfallItemTransaction>;
 }
 
 interface IWaterfallItemSpan extends IWaterfallItemBase {
-  parentTransaction: Transaction;
   span: Span;
   docType: 'span';
-  children?: Array<IWaterfallItemSpan | IWaterfallItemTransaction>;
 }
 
 export type IWaterfallItem = IWaterfallItemSpan | IWaterfallItemTransaction;
-
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 function getTransactionItem(
   transaction: Transaction
@@ -58,6 +69,7 @@ function getTransactionItem(
       duration: transaction.transaction.duration.us,
       timestamp: new Date(transaction['@timestamp']).getTime() * 1000,
       offset: 0,
+      skew: 0,
       docType: 'transaction',
       transaction
     };
@@ -71,14 +83,13 @@ function getTransactionItem(
     duration: transaction.transaction.duration.us,
     timestamp: transaction.timestamp.us,
     offset: 0,
+    skew: 0,
     docType: 'transaction',
     transaction
   };
 }
 
-type PartialSpanItem = Omit<IWaterfallItemSpan, 'parentTransaction'>;
-
-function getSpanItem(span: Span): PartialSpanItem {
+function getSpanItem(span: Span): IWaterfallItemSpan {
   if (span.version === 'v1') {
     return {
       id: span.span.id,
@@ -89,6 +100,7 @@ function getSpanItem(span: Span): PartialSpanItem {
       timestamp:
         new Date(span['@timestamp']).getTime() * 1000 + span.span.start.us,
       offset: 0,
+      skew: 0,
       docType: 'span',
       span
     };
@@ -102,66 +114,99 @@ function getSpanItem(span: Span): PartialSpanItem {
     duration: span.span.duration.us,
     timestamp: span.timestamp.us,
     offset: 0,
+    skew: 0,
     docType: 'span',
     span
   };
 }
 
-export function getWaterfallRoot(
-  items: Array<PartialSpanItem | IWaterfallItemTransaction>,
+function getClockSkew(
+  item: IWaterfallItem,
+  itemsById: IWaterfallIndex,
+  parentTransactionSkew: number
+) {
+  switch (item.docType) {
+    case 'span':
+      return parentTransactionSkew;
+    case 'transaction': {
+      if (!item.parentId) {
+        return 0;
+      }
+
+      const parentItem = itemsById[item.parentId];
+
+      // For some reason the parent span and related transactions might be missing.
+      if (!parentItem) {
+        return 0;
+      }
+
+      // determine if child starts before the parent, and in that case how much
+      const diff = parentItem.timestamp + parentItem.skew - item.timestamp;
+
+      // If child transaction starts after parent span there is no clock skew
+      if (diff < 0) {
+        return 0;
+      }
+
+      // latency can only be calculated if parent duration is larger than child duration
+      const latency = Math.max(parentItem.duration - item.duration, 0);
+      const skew = diff + latency / 2;
+      return skew;
+    }
+  }
+}
+
+export function getWaterfallItems(
+  childrenByParentId: IWaterfallGroup,
+  itemsById: IWaterfallIndex,
   entryTransactionItem: IWaterfallItem
 ) {
-  const itemsByParentId = groupBy(
-    items,
-    item => (item.parentId ? item.parentId : 'root')
-  );
-  const itemsById: IWaterfallIndex = {};
+  function getSortedChildren(
+    item: IWaterfallItem,
+    parentTransactionSkew: number
+  ): IWaterfallItem[] {
+    const skew = getClockSkew(item, itemsById, parentTransactionSkew);
+    const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
-  const itemsByTransactionId = indexBy(
-    items.filter(item => item.docType === 'transaction'),
-    item => item.id
-  ) as { [key: string]: IWaterfallItemTransaction };
+    item.childIds = children.map(child => child.id);
+    item.offset = item.timestamp - entryTransactionItem.timestamp;
+    item.skew = skew;
 
-  function getWithChildren(
-    item: PartialSpanItem | IWaterfallItemTransaction
-  ): IWaterfallItem {
-    const children = itemsByParentId[item.id] || [];
-    const nextChildren = sortBy(children, 'timestamp').map(getWithChildren);
-    let fullItem;
-
-    // add parent transaction to spans
-    if (item.docType === 'span') {
-      fullItem = {
-        parentTransaction:
-          itemsByTransactionId[item.span.transaction.id].transaction,
-        ...item,
-        offset: item.timestamp - entryTransactionItem.timestamp,
-        children: nextChildren
-      };
-    } else {
-      fullItem = {
-        ...item,
-        offset: item.timestamp - entryTransactionItem.timestamp,
-        children: nextChildren
-      };
-    }
-
-    // TODO: Think about storing this tree as a single, flat, indexed structure
-    // with "children" being an array of ids, instead of it being a real tree
-    itemsById[item.id] = fullItem;
-
-    return fullItem;
+    const deepChildren = flatten(
+      children.map(child => getSortedChildren(child, skew))
+    );
+    return [item, ...deepChildren];
   }
 
-  return { root: getWithChildren(entryTransactionItem), itemsById };
+  return getSortedChildren(entryTransactionItem, 0);
+}
+
+function getTraceRoot(childrenByParentId: IWaterfallGroup) {
+  const item = first(childrenByParentId.root);
+  if (item && item.docType === 'transaction') {
+    return item.transaction;
+  }
+}
+
+function getServices(items: IWaterfallItem[]) {
+  const serviceNames = items.map(item => item.serviceName);
+  return uniq(serviceNames);
 }
 
 export function getWaterfall(
   hits: Array<Span | Transaction>,
-  services: string[],
   entryTransaction: Transaction
 ): IWaterfall {
-  const items = hits
+  if (isEmpty(hits)) {
+    return {
+      services: [],
+      items: [],
+      itemsById: {},
+      getTransactionById: () => undefined
+    };
+  }
+
+  const filteredHits = hits
     .filter(hit => {
       const docType = hit.processor.event;
       return ['span', 'transaction'].includes(docType);
@@ -178,13 +223,37 @@ export function getWaterfall(
       }
     });
 
+  const childrenByParentId = groupBy(
+    filteredHits,
+    hit => (hit.parentId ? hit.parentId : 'root')
+  );
   const entryTransactionItem = getTransactionItem(entryTransaction);
-  const { root, itemsById } = getWaterfallRoot(items, entryTransactionItem);
+  const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');
+  const items = getWaterfallItems(
+    childrenByParentId,
+    itemsById,
+    entryTransactionItem
+  );
+  const traceRoot = getTraceRoot(childrenByParentId);
+
+  const getTransactionById = (id?: IWaterfallItem['id']) => {
+    if (!id) {
+      return;
+    }
+
+    const item = itemsById[id];
+    if (item.docType === 'transaction') {
+      return item.transaction;
+    }
+  };
+
   return {
-    duration: root.duration,
-    services,
-    childrenCount: hits.length,
-    root,
-    itemsById
+    traceRoot,
+    traceRootDuration: traceRoot && traceRoot.transaction.duration.us,
+    duration: entryTransaction.transaction.duration.us,
+    services: getServices(items),
+    items,
+    itemsById,
+    getTransactionById
   };
 }

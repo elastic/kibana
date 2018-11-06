@@ -12,11 +12,36 @@ import { routeExpressionProvider } from '../lib/route_expression';
 import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread';
 import { server as serverEnv } from '../lib/route_expression/server';
+import { getRequest } from '../lib/get_request';
+import { API_ROUTE } from '../../common/lib/constants';
+
+async function getModifiedRequest(server, socket) {
+  try {
+    return await getRequest(server, socket.handshake);
+  } catch (err) {
+    // on errors, notify the client and close the connection
+    socket.emit('connectionFailed', { reason: err.message || 'Socket connection failed' });
+    socket.disconnect(true);
+    return false;
+  }
+}
 
 export function socketApi(server) {
+  // add a POST ping route for `getRequest` to use
+  // TODO: remove this once we have upstream socket support
+  server.route({
+    method: 'POST',
+    path: `${API_ROUTE}/ping`,
+    handler: () => 'pong',
+  });
+
   const io = socket(server.listener, { path: '/socket.io' });
 
-  io.on('connection', socket => {
+  io.on('connection', async socket => {
+    // 'request' is the modified hapi request object
+    const request = await getModifiedRequest(server, socket);
+    if (!request) return; // do nothing without the request object
+
     const types = typesRegistry.toJS();
     const { serialize, deserialize } = serializeProvider(types);
 
@@ -24,7 +49,7 @@ export function socketApi(server) {
     // Note that ORDER MATTERS here. The environments will be tried in this order. Do not reorder this array.
     const routeExpression = routeExpressionProvider([
       thread({ onFunctionNotFound, serialize, deserialize }),
-      serverEnv({ onFunctionNotFound, socket, server }),
+      serverEnv({ onFunctionNotFound, request, server }),
       browser({ onFunctionNotFound, socket, serialize, deserialize }),
     ]);
 
@@ -38,13 +63,14 @@ export function socketApi(server) {
       );
     });
 
-    const handler = ({ ast, context, id }) => {
-      return (
-        routeExpression(ast, deserialize(context))
-          .then(value => socket.emit(`resp:${id}`, { type: 'msgSuccess', value: serialize(value) }))
-          // TODO: I don't think it is possible to hit this right now? Maybe ever?
-          .catch(e => socket.emit(`resp:${id}`, { type: 'msgError', value: e }))
-      );
+    const handler = async ({ ast, context, id }) => {
+      try {
+        const value = await routeExpression(ast, deserialize(context));
+        socket.emit(`resp:${id}`, { type: 'msgSuccess', value: serialize(value) });
+      } catch (err) {
+        // TODO: I don't think it is possible to hit this right now? Maybe ever?
+        socket.emit(`resp:${id}`, { type: 'msgError', value: err });
+      }
     };
 
     socket.on('run', handler);
