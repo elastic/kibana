@@ -18,7 +18,12 @@ import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
 import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_modal/save_status_modal.html';
-import { createSearchItems, createJobForSaving } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import {
+  createSearchItems,
+  createJobForSaving,
+  checkCardinalitySuccess,
+  getMinimalValidJob
+} from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadIndexPatterns, loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { ML_JOB_FIELD_TYPES, ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { ALLOWED_DATA_UNITS } from 'plugins/ml/../common/constants/validation';
@@ -156,6 +161,7 @@ module.controller('MlNewJob',
           $scope.ui.validation.tabs[tab].valid = valid;
         }
       },
+      cardinalityValidator: { status: 0, message: '' },
       jsonText: '',
       changeTab: changeTab,
       influencers: [],
@@ -181,6 +187,7 @@ module.controller('MlNewJob',
       types: {},
       isDatafeed: true,
       useDedicatedIndex: false,
+      enableModelPlot: false,
       modelMemoryLimit: '',
       modelMemoryLimitDefault: jobDefaults.anomaly_detectors.model_memory_limit,
 
@@ -648,6 +655,53 @@ module.controller('MlNewJob',
         $scope.job.results_index_name = '';
       } else {
         delete $scope.job.results_index_name;
+      }
+    };
+
+    // TODO: in add detectors function - run this function again if relevant fields added/updated
+    $scope.setModelPlotEnabled = function () {
+      // TODO: first check if job.analysis_config.detectors has fields that we can actually run cardinality on. Separate function?
+      const STATUS = {
+        FAILED: -1,
+        NOT_RUNNING: 0,
+        RUNNING: 1,
+        FINISHED: 2,
+        WARNING: 3,
+      };
+
+      if ($scope.ui.enableModelPlot === true) {
+        $scope.job.model_plot_config = {
+          enabled: true
+        };
+        // return early if there's nothing to run a check on yet.
+        if ($scope.job.analysis_config.detectors.length === 0) {
+          return;
+        }
+
+        const tempJob = mlJobService.cloneJob($scope.job);
+        _.merge(tempJob, getMinimalValidJob());
+        console.log('temp job sent for cardinality check:', tempJob); // remove
+
+        ml.validateCardinality(tempJob)
+          .then((response) => {
+            const validationResult = checkCardinalitySuccess(response);
+
+            if (validationResult.success === true) {
+              $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+            } else {
+              $scope.ui.cardinalityValidator.message = `Creating model plots is resource intensive and not recommended
+                  where the cardinality of the selected fields is greater than 100. Estimated cardinality
+                  for this job is ${validationResult.highCardinality}.
+                  If you enable model plot with this configuration we recommend you use a dedicated results index.`;
+
+              $scope.ui.cardinalityValidator.status = STATUS.WARNING;
+            }
+          })
+          .catch((error) => { console.log('Cardinality check error:', error); });
+      } else {
+        $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+        $scope.ui.cardinalityValidator.message = '';
+        delete $scope.job.model_plot_config;
       }
     };
 

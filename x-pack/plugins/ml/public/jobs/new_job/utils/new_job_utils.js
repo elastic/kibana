@@ -141,3 +141,17 @@ export function checkCardinalitySuccess(data) {
 
   return response;
 }
+
+export function getMinimalValidJob() {
+  return {
+    analysis_config: {
+      bucket_span: '15m',
+      detectors: [],
+      influencers: []
+    },
+    data_description: { time_field: '@timestamp' },
+    datafeed_config: {
+      indices: []
+    }
+  };
+}
