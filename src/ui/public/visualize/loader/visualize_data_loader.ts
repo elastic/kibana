@@ -77,6 +77,9 @@ export class VisualizeDataLoader {
       const requestHandlerResponse = await this.requestHandler(this.vis, {
         partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
         ...params,
+        filters: params.filters
+          ? params.filters.filter(filter => !filter.meta.disabled)
+          : undefined,
       });
 
       // No need to call the response handler when there have been no data nor has been there changes

@@ -1,20 +1,7 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
 
 /**
@@ -24,15 +11,20 @@
  * intl context around them.
  */
 
-import React from 'react';
-import { I18nProvider, intlShape } from '@kbn/i18n/react';
-import { mount, shallow, render } from 'enzyme';
+import { I18nProvider, InjectedIntl, intlShape } from '@kbn/i18n/react';
+import { mount, ReactWrapper, render, shallow } from 'enzyme';
+import React, { ReactElement, ValidationMap } from 'react';
 
 // Use fake component to extract `intl` property to use in tests.
-const { intl } = mount(<I18nProvider><br /></I18nProvider>)
-  .find('IntlProvider').instance().getChildContext();
+const { intl } = (mount(
+  <I18nProvider>
+    <br />
+  </I18nProvider>
+).find('IntlProvider') as ReactWrapper<{}, {}, import('react-intl').IntlProvider>)
+  .instance()
+  .getChildContext();
 
-function getOptions(context = {}, childContextTypes = {}, props = []) {
+function getOptions(context = {}, childContextTypes = {}, props = {}) {
   return {
     context: {
       ...context,
@@ -49,8 +41,8 @@ function getOptions(context = {}, childContextTypes = {}, props = []) {
 /**
  * When using React-Intl `injectIntl` on components, props.intl is required.
  */
-function nodeWithIntlProp(node) {
-  return React.cloneElement(node, { intl });
+function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: InjectedIntl }> {
+  return React.cloneElement<any>(node, { intl });
 }
 
 /**
@@ -60,13 +52,20 @@ function nodeWithIntlProp(node) {
  *  @param options properties to pass into shallow wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function shallowWithIntl(node, { context, childContextTypes, ...props } = {}) {
+export function shallowWithIntl<T>(
+  node: ReactElement<T>,
+  {
+    context,
+    childContextTypes,
+    ...props
+  }: {
+    context?: any;
+    childContextTypes?: ValidationMap<any>;
+  } = {}
+) {
   const options = getOptions(context, childContextTypes, props);
 
-  return shallow(
-    nodeWithIntlProp(node),
-    options,
-  );
+  return shallow(nodeWithIntlProp(node), options);
 }
 
 /**
@@ -76,13 +75,20 @@ export function shallowWithIntl(node, { context, childContextTypes, ...props } =
  *  @param options properties to pass into mount wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function mountWithIntl(node, { context, childContextTypes, ...props } = {}) {
+export function mountWithIntl<T>(
+  node: ReactElement<T>,
+  {
+    context,
+    childContextTypes,
+    ...props
+  }: {
+    context?: any;
+    childContextTypes?: ValidationMap<any>;
+  } = {}
+) {
   const options = getOptions(context, childContextTypes, props);
 
-  return mount(
-    nodeWithIntlProp(node),
-    options,
-  );
+  return mount(nodeWithIntlProp(node), options);
 }
 
 /**
@@ -92,11 +98,18 @@ export function mountWithIntl(node, { context, childContextTypes, ...props } = {
  *  @param options properties to pass into render wrapper
  *  @return The wrapper instance around the rendered output with intl object in context
  */
-export function renderWithIntl(node, { context, childContextTypes, ...props } = {}) {
+export function renderWithIntl<T>(
+  node: ReactElement<T>,
+  {
+    context,
+    childContextTypes,
+    ...props
+  }: {
+    context?: any;
+    childContextTypes?: ValidationMap<any>;
+  } = {}
+) {
   const options = getOptions(context, childContextTypes, props);
 
-  return render(
-    nodeWithIntlProp(node),
-    options,
-  );
+  return render(nodeWithIntlProp(node), options);
 }
