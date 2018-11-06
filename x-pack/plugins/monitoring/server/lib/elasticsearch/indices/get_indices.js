@@ -45,7 +45,7 @@ export function handleResponse(resp, min, max, shardStats) {
     let status;
     let statusSort;
     let unassignedShards;
-    if (!shardStatsForIndex && shardStatsForIndex.status) {
+    if (shardStatsForIndex && shardStatsForIndex.status) {
       status = shardStatsForIndex.status;
       unassignedShards = getUnassignedShards(shardStatsForIndex);
 
