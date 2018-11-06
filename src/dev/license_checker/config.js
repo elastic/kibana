@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// The following list applies to packages both
+// used as dependencies or dev dependencies
 export const LICENSE_WHITELIST = [
   'Elastic-License',
   '(BSD-2-Clause OR MIT OR Apache-2.0)',
@@ -62,12 +64,13 @@ export const LICENSE_WHITELIST = [
   'WTFPL',
 ];
 
-// The following whitelist and overrides only applies
-// when we are
+// The following list only applies to licenses that
+// we wanna allow in packages only used as dev dependencies
 export const DEV_ONLY_LICENSE_WHITELIST = [
   'MPL-2.0'
 ];
 
+// Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
   'scriptjs@2.5.8': ['MIT'], // license header appended in the dist
   'react-lib-adler32@1.0.1': ['BSD'], // adler32 extracted from react source
