@@ -17,10 +17,13 @@
  * under the License.
  */
 
-export function FilterBarProvider({ getService }) {
+import Keys from 'leadfoot/keys';
+
+export function FilterBarProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const PageObjects = getPageObjects(['common', 'header']);
 
   async function typeIntoReactSelect(testSubj, value) {
     const select = await testSubjects.find(testSubj);
@@ -42,12 +45,14 @@ export function FilterBarProvider({ getService }) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterEnabled(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterPinned(key) {
@@ -76,6 +81,7 @@ export function FilterBarProvider({ getService }) {
         }
       }));
       await testSubjects.click('saveFilter');
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickEditFilter(key, value) {
