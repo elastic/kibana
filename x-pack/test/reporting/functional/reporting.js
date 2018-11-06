@@ -12,6 +12,7 @@ import { promisify } from 'bluebird';
 import { checkIfPdfsMatch, checkIfPngsMatch } from './lib';
 const writeFileAsync = promisify(fs.writeFile);
 const mkdirAsync = promisify(mkdirp);
+const SEVEN_MINUTES = 7 * 60 * 1000; // 7 Minutes
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
@@ -85,8 +86,14 @@ export default function ({ getService, getPageObjects }) {
       describe('Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+<<<<<<< HEAD
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
+=======
+          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
+          // report than phantom.
+          this.timeout(SEVEN_MINUTES);
+>>>>>>> Bumpin' timeout to see if tests actually pass or if they're stuck
 
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.reporting.setTimepickerInDataRange();
@@ -124,8 +131,14 @@ export default function ({ getService, getPageObjects }) {
 
         it('matches same baseline report with margins turned on', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+<<<<<<< HEAD
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
+=======
+          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
+          // report than phantom.
+          this.timeout(SEVEN_MINUTES);
+>>>>>>> Bumpin' timeout to see if tests actually pass or if they're stuck
 
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.dashboard.useMargins(true);
@@ -158,8 +171,14 @@ export default function ({ getService, getPageObjects }) {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+<<<<<<< HEAD
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
+=======
+          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
+          // report than phantom.
+          this.timeout(SEVEN_MINUTES);
+>>>>>>> Bumpin' timeout to see if tests actually pass or if they're stuck
 
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
@@ -207,8 +226,14 @@ export default function ({ getService, getPageObjects }) {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
+<<<<<<< HEAD
           // function is taking about 15 seconds per comparison in jenkins.
           this.timeout(360000);
+=======
+          // function is taking about 15 seconds per comparison in jenkins. Also Chromium takes a lot longer to generate a
+          // report than phantom.
+          this.timeout(SEVEN_MINUTES);
+>>>>>>> Bumpin' timeout to see if tests actually pass or if they're stuck
 
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.reporting.setTimepickerInDataRange();
