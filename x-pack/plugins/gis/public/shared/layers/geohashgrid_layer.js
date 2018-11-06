@@ -89,7 +89,6 @@ export class GeohashGridLayer extends ALayer {
       });
     }
 
-    //todo: similar problem as OL here. keeping track of data via MB source directly
     const mbSourceAfter = mbMap.getSource(this.getId());
     const sourceDataRequest = this.getSourceDataRequest();
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
