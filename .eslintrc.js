@@ -420,6 +420,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/scripts/*.js',
         'x-pack/plugins/canvas/tasks/*.js',
         'x-pack/plugins/canvas/tasks/**/*.js',
         'x-pack/plugins/canvas/__tests__/**/*',
