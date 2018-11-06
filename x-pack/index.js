@@ -16,6 +16,7 @@ import { watcher } from './plugins/watcher';
 import { grokdebugger } from './plugins/grokdebugger';
 import { dashboardMode } from './plugins/dashboard_mode';
 import { logstash } from './plugins/logstash';
+import { beats } from './plugins/beats_management';
 import { apm } from './plugins/apm';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
@@ -26,6 +27,7 @@ import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
+import { rollup } from './plugins/rollup';
 
 module.exports = function (kibana) {
   return [
@@ -42,6 +44,7 @@ module.exports = function (kibana) {
     grokdebugger(kibana),
     dashboardMode(kibana),
     logstash(kibana),
+    beats(kibana),
     apm(kibana),
     canvas(kibana),
     licenseManagement(kibana),
@@ -51,5 +54,6 @@ module.exports = function (kibana) {
     notifications(kibana),
     kueryAutocomplete(kibana),
     infra(kibana),
+    rollup(kibana),
   ];
 };

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './tag_cloud.less';
 import './tag_cloud_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';

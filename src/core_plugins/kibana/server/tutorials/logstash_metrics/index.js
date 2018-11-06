@@ -31,7 +31,7 @@ export function logstashMetricsSpecProvider(server, context) {
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.shortDescription', {
-      defaultMessage: 'Fetch interal metrics from a Logstash server.',
+      defaultMessage: 'Fetch internal metrics from a Logstash server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.longDescription', {
       defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Logstash server. \

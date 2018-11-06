@@ -9,7 +9,6 @@ import { toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
 import template from './account.html';
 import '../management/change_password_form/change_password_form';
-import './account.less';
 import '../../services/shield_user';
 
 routes.when('/account', {

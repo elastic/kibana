@@ -12,9 +12,9 @@ import {
   sortKeysByConfig,
   getPropertyTabNames
 } from '..';
-import { getFeatureDocs } from '../../../../utils/documentation';
+import { getAgentFeatureDocsUrl } from '../../../../utils/documentation/agents';
 
-jest.mock('../../../../utils/documentation');
+jest.mock('../../../../utils/documentation/agents');
 jest.mock('../propertyConfig.json', () => [
   {
     key: 'testProperty',
@@ -105,32 +105,13 @@ describe('getPropertyTabNames', () => {
 });
 
 describe('AgentFeatureTipMessage component', () => {
-  let mockDocs;
-  const featureName = '';
-  const agentName = '';
-
-  beforeEach(() => {
-    mockDocs = {
-      text: 'Mock Docs Text',
-      url: 'mock-url'
-    };
-    getFeatureDocs.mockImplementation(() => mockDocs);
-  });
+  const featureName = 'user';
+  const agentName = 'nodejs';
 
   it('should render when docs are returned', () => {
-    expect(
-      shallow(
-        <AgentFeatureTipMessage
-          featureName={featureName}
-          agentName={agentName}
-        />
-      )
-    ).toMatchSnapshot();
-    expect(getFeatureDocs).toHaveBeenCalledWith(featureName, agentName);
-  });
+    const mockDocs = 'mock-url';
+    getAgentFeatureDocsUrl.mockImplementation(() => mockDocs);
 
-  it('should render when docs are returned, but missing a url', () => {
-    delete mockDocs.url;
     expect(
       shallow(
         <AgentFeatureTipMessage
@@ -139,10 +120,11 @@ describe('AgentFeatureTipMessage component', () => {
         />
       )
     ).toMatchSnapshot();
+    expect(getAgentFeatureDocsUrl).toHaveBeenCalledWith(featureName, agentName);
   });
 
   it('should render null empty string when no docs are returned', () => {
-    mockDocs = null;
+    getAgentFeatureDocsUrl.mockImplementation(() => null);
     expect(
       shallow(
         <AgentFeatureTipMessage

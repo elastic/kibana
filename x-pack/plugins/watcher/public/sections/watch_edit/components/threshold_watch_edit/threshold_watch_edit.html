@@ -22,9 +22,11 @@
     >
       <section class="kuiVerticalRhythm">
         <header>
-          <h2 class="kuiSubTitle">
-            Matching the following condition
-          </h2>
+          <h2
+            class="kuiSubTitle"
+            i18n-id="xpack.watcher.sections.watchEdit.threshold.matchingFollowingConditionTitle"
+            i18n-default-message="Matching the following condition"
+          ></h2>
         </header>
       </section>
 
@@ -93,7 +95,10 @@
         ng-disabled="thresholdWatchEdit.saveDisabled"
         ng-click="thresholdWatchEdit.onWatchSave()">
         <span class="kuiButton__inner">
-          <span>Save</span>
+          <span
+            i18n-id="xpack.watcher.sections.watchEdit.threshold.saveButtonLabel"
+            i18n-default-message="Save"
+          ></span>
         </span>
       </button>
 

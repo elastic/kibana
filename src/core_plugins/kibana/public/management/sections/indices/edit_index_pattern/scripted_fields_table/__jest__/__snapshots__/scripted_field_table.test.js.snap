@@ -188,7 +188,7 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
         confirmButtonText="Delete"
         onCancel={[Function]}
         onConfirm={[Function]}
-        title="Delete scripted field '{fieldName}'?"
+        title="Delete scripted field 'ScriptedField'?"
       />
     </eui-overlay-mask>
   </div>

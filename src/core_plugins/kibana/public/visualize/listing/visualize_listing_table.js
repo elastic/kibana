@@ -148,6 +148,7 @@ export class VisualizeListingTable extends Component {
         <img
           className="visListingTable__typeImage"
           aria-hidden="true"
+          alt=""
           src={item.type.image}
         />
       );

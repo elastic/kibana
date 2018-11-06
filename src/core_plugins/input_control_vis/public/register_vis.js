@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './vis.less';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
