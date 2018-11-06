@@ -5,6 +5,7 @@
  */
 
 import { EuiPageContentBody, EuiTitle } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { InfraMetricData } from '../../../common/graphql/types';
@@ -19,24 +20,34 @@ interface Props {
   loading: boolean;
   nodeName: string;
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
+  intl: InjectedIntl;
 }
 
 interface State {
   crosshairValue: number | null;
 }
 
-export class Metrics extends React.PureComponent<Props, State> {
+class MetricsUI extends React.PureComponent<Props, State> {
   public readonly state = {
     crosshairValue: null,
   };
 
   public render() {
+    const { intl } = this.props;
     if (this.props.loading) {
       return (
         <InfraLoadingPanel
           height="100vh"
           width="auto"
-          text={`Loading data for ${this.props.nodeName}`}
+          text={intl.formatMessage(
+            {
+              id: 'xpack.infra.metrics.loadingNodeDataText',
+              defaultMessage: 'Loading data for {nodeName}',
+            },
+            {
+              nodeName: this.props.nodeName,
+            }
+          )}
         />
       );
     }
@@ -48,7 +59,15 @@ export class Metrics extends React.PureComponent<Props, State> {
       <React.Fragment key={layout.id}>
         <EuiPageContentBody>
           <EuiTitle size="m">
-            <h2 id={layout.id}>{`${layout.label} Overview`}</h2>
+            <h2 id={layout.id}>
+              <FormattedMessage
+                id="xpack.infra.metrics.labelOverviewTitle"
+                defaultMessage="{label} Overview"
+                values={{
+                  label: layout.label,
+                }}
+              />
+            </h2>
           </EuiTitle>
         </EuiPageContentBody>
         {layout.sections.map(this.renderSection(layout))}
@@ -82,3 +101,5 @@ export class Metrics extends React.PureComponent<Props, State> {
     });
   };
 }
+
+export const Metrics = injectI18n(MetricsUI);

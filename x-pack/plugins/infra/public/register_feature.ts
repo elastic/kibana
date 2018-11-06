@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueCategory,
   FeatureCatalogueRegistryProvider,
@@ -13,9 +14,13 @@ const APP_ID = 'infra';
 
 FeatureCatalogueRegistryProvider.register(() => ({
   id: 'infraops',
-  title: 'InfraOps',
-  description:
-    'Explore infrastructure metrics and logs for common servers, containers, and services.',
+  title: i18n.translate('xpack.infra.registerFeatures.infraOpsTitle', {
+    defaultMessage: 'InfraOps',
+  }),
+  description: i18n.translate('xpack.infra.registerFeatures.infraOpsDescription', {
+    defaultMessage:
+      'Explore infrastructure metrics and logs for common servers, containers, and services.',
+  }),
   icon: 'infraApp',
   path: `/app/${APP_ID}#home`,
   showOnHomePage: true,
@@ -24,9 +29,13 @@ FeatureCatalogueRegistryProvider.register(() => ({
 
 FeatureCatalogueRegistryProvider.register(() => ({
   id: 'infralogging',
-  title: 'Logs',
-  description:
-    'Stream logs in real time or scroll through historical views in a console-like experience.',
+  title: i18n.translate('xpack.infra.registerFeatures.logsTitle', {
+    defaultMessage: 'Logs',
+  }),
+  description: i18n.translate('xpack.infra.registerFeatures.logsDescription', {
+    defaultMessage:
+      'Stream logs in real time or scroll through historical views in a console-like experience.',
+  }),
   icon: 'loggingApp',
   path: `/app/${APP_ID}#logs`,
   showOnHomePage: true,

@@ -5,6 +5,7 @@
  */
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
@@ -18,9 +19,10 @@ interface Props {
   nodeType: InfraNodeType;
   isPopoverOpen: boolean;
   closePopover: () => void;
+  intl: InjectedIntl;
 }
 
-export const NodeContextMenu: React.SFC<Props> = ({
+const NodeContextMenuUI: React.SFC<Props> = ({
   options,
   timeRange,
   children,
@@ -28,6 +30,7 @@ export const NodeContextMenu: React.SFC<Props> = ({
   isPopoverOpen,
   closePopover,
   nodeType,
+  intl,
 }) => {
   const nodeName = node.path.length > 0 ? node.path[node.path.length - 1].value : undefined;
   const nodeLogsUrl = nodeName
@@ -54,7 +57,10 @@ export const NodeContextMenu: React.SFC<Props> = ({
         ...(nodeLogsUrl
           ? [
               {
-                name: `View logs`,
+                name: intl.formatMessage({
+                  id: 'xpack.infra.nodeContextMenu.viewLogsName',
+                  defaultMessage: 'View logs',
+                }),
                 href: nodeLogsUrl,
               },
             ]
@@ -62,7 +68,10 @@ export const NodeContextMenu: React.SFC<Props> = ({
         ...(nodeDetailUrl
           ? [
               {
-                name: `View metrics`,
+                name: intl.formatMessage({
+                  id: 'xpack.infra.nodeContextMenu.viewMetricsName',
+                  defaultMessage: 'View metrics',
+                }),
                 href: nodeDetailUrl,
               },
             ]
@@ -83,3 +92,5 @@ export const NodeContextMenu: React.SFC<Props> = ({
     </EuiPopover>
   );
 };
+
+export const NodeContextMenu = injectI18n(NodeContextMenuUI);

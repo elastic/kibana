@@ -11,34 +11,105 @@ import {
   EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { InfraMetricInput, InfraMetricType, InfraNodeType } from '../../../common/graphql/types';
 interface Props {
   nodeType: InfraNodeType;
   metric: InfraMetricInput;
   onChange: (metric: InfraMetricInput) => void;
+  intl: InjectedIntl;
 }
+
+const CPUUsage = i18n.translate('xpack.infra.waffleMetricControls.optionsCPUUsageText', {
+  defaultMessage: 'CPU Usage',
+});
+
+const MemoryUsage = i18n.translate('xpack.infra.waffleMetricControls.optionsMemoryUsageText', {
+  defaultMessage: 'Memory Usage',
+});
+
+const InboundTraffic = i18n.translate(
+  'xpack.infra.waffleMetricControls.optionsInboundTrafficText',
+  {
+    defaultMessage: 'Inbound Traffic',
+  }
+);
+
+const OutboundTraffic = i18n.translate(
+  'xpack.infra.waffleMetricControls.optionsOutboundTrafficText',
+  {
+    defaultMessage: 'Outbound Traffic',
+  }
+);
 
 const OPTIONS = {
   [InfraNodeType.pod]: [
-    { text: 'CPU Usage', value: InfraMetricType.cpu },
-    { text: 'Memory Usage', value: InfraMetricType.memory },
-    { text: 'Inbound Traffic', value: InfraMetricType.rx },
-    { text: 'Outbound Traffic', value: InfraMetricType.tx },
+    {
+      text: CPUUsage,
+      value: InfraMetricType.cpu,
+    },
+    {
+      text: MemoryUsage,
+      value: InfraMetricType.memory,
+    },
+    {
+      text: InboundTraffic,
+      value: InfraMetricType.rx,
+    },
+    {
+      text: OutboundTraffic,
+      value: InfraMetricType.tx,
+    },
   ],
   [InfraNodeType.container]: [
-    { text: 'CPU Usage', value: InfraMetricType.cpu },
-    { text: 'Memory Usage', value: InfraMetricType.memory },
-    { text: 'Inbound Traffic', value: InfraMetricType.rx },
-    { text: 'Outbound Traffic', value: InfraMetricType.tx },
+    {
+      text: CPUUsage,
+      value: InfraMetricType.cpu,
+    },
+    {
+      text: MemoryUsage,
+      value: InfraMetricType.memory,
+    },
+    {
+      text: InboundTraffic,
+      value: InfraMetricType.rx,
+    },
+    {
+      text: OutboundTraffic,
+      value: InfraMetricType.tx,
+    },
   ],
   [InfraNodeType.host]: [
-    { text: 'CPU Usage', value: InfraMetricType.cpu },
-    { text: 'Memory Usage', value: InfraMetricType.memory },
-    { text: 'Load', value: InfraMetricType.load },
-    { text: 'Inbound Traffic', value: InfraMetricType.rx },
-    { text: 'Outbound Traffic', value: InfraMetricType.tx },
-    { text: 'Log Rate', value: InfraMetricType.logRate },
+    {
+      text: CPUUsage,
+      value: InfraMetricType.cpu,
+    },
+    {
+      text: MemoryUsage,
+      value: InfraMetricType.memory,
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleMetricControls.optionsLoadText', {
+        defaultMessage: 'Load',
+      }),
+      value: InfraMetricType.load,
+    },
+    {
+      text: InboundTraffic,
+      value: InfraMetricType.rx,
+    },
+    {
+      text: OutboundTraffic,
+      value: InfraMetricType.tx,
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleMetricControls.optionsHostLogRateText', {
+        defaultMessage: 'Log Rate',
+      }),
+      value: InfraMetricType.logRate,
+    },
   ],
 };
 
@@ -47,14 +118,19 @@ const initialState = {
 };
 type State = Readonly<typeof initialState>;
 
-export class WaffleMetricControls extends React.PureComponent<Props, State> {
+class WaffleMetricControlsUI extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { metric } = this.props;
+    const { metric, intl } = this.props;
     const options = OPTIONS[this.props.nodeType];
     const value = metric.type;
     if (!options.length || !value) {
-      throw Error('Unable to select options or value for metric.');
+      throw Error(
+        intl.formatMessage({
+          id: 'xpack.infra.waffleMetricControls.unableToSelectMetricErrorTitle',
+          defaultMessage: 'Unable to select options or value for metric.',
+        })
+      );
     }
     const currentLabel = options.find(o => o.value === metric.type);
     if (!currentLabel) {
@@ -73,7 +149,11 @@ export class WaffleMetricControls extends React.PureComponent<Props, State> {
     ];
     const button = (
       <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        Metric: {currentLabel.text}
+        <FormattedMessage
+          id="xpack.infra.waffleMetricControls.metricButtonLabel"
+          defaultMessage="Metric: "
+        />
+        {currentLabel.text}
       </EuiFilterButton>
     );
 
@@ -104,3 +184,5 @@ export class WaffleMetricControls extends React.PureComponent<Props, State> {
     this.handleClose();
   };
 }
+
+export const WaffleMetricControls = injectI18n(WaffleMetricControlsUI);

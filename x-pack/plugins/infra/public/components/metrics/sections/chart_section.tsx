@@ -16,6 +16,7 @@ import {
   EuiXAxis,
   EuiYAxis,
 } from '@elastic/eui/lib/experimental';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import Color from 'color';
 import { get } from 'lodash';
 import moment from 'moment';
@@ -42,6 +43,7 @@ interface Props {
   onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
   crosshairValue?: number;
   onCrosshairUpdate?: (crosshairValue: number) => void;
+  intl: InjectedIntl;
 }
 
 const isInfraMetricLayoutVisualizationType = (
@@ -115,9 +117,9 @@ const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean => {
   return series.data.length < 2;
 };
 
-export class ChartSection extends React.PureComponent<Props> {
+class ChartSectionUI extends React.PureComponent<Props> {
   public render() {
-    const { crosshairValue, section, metric, onCrosshairUpdate } = this.props;
+    const { crosshairValue, section, metric, onCrosshairUpdate, intl } = this.props;
     const { visConfig } = section;
     const crossHairProps = {
       crosshairValue,
@@ -139,11 +141,16 @@ export class ChartSection extends React.PureComponent<Props> {
       chartProps.yDomain = [bounds.min, bounds.max];
     }
     if (!metric) {
-      chartProps.statusText = 'Missing data';
+      chartProps.statusText = intl.formatMessage({
+        id: 'xpack.infra.chartSection.missingMetricDataText',
+        defaultMessage: 'Missing data',
+      });
     }
     if (metric.series.some(seriesHasLessThen2DataPoints)) {
-      chartProps.statusText =
-        'Not enough data points to render chart, try increasing the time range.';
+      chartProps.statusText = intl.formatMessage({
+        id: 'xpack.infra.chartSection.notEnoughDataPointsToRenderText',
+        defaultMessage: 'Not enough data points to render chart, try increasing the time range.',
+      });
     }
     const formatter = get(visConfig, 'formatter', InfraFormatterType.number);
     const formatterTemplate = get(visConfig, 'formatterTemplate', '{{value}}');
@@ -215,6 +222,8 @@ export class ChartSection extends React.PureComponent<Props> {
     }
   };
 }
+
+export const ChartSection = injectI18n(ChartSectionUI);
 
 interface DomainArea {
   startX: moment.Moment;

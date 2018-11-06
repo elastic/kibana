@@ -5,6 +5,7 @@
  */
 
 import { EuiKeyPadMenu, EuiKeyPadMenuItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import {
   InfraMetricInput,
@@ -24,13 +25,37 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
   public render() {
     return (
       <EuiKeyPadMenu>
-        <EuiKeyPadMenuItem label="Hosts" onClick={this.handleClick(InfraNodeType.host)}>
+        <EuiKeyPadMenuItem
+          label={
+            <FormattedMessage
+              id="xpack.infra.waffleNodeTypeSwitcher.hostsLabel"
+              defaultMessage="Hosts"
+            />
+          }
+          onClick={this.handleClick(InfraNodeType.host)}
+        >
           <img src="../plugins/infra/images/hosts.svg" className="euiIcon euiIcon--large" />
         </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
+        <EuiKeyPadMenuItem
+          label={
+            <FormattedMessage
+              id="xpack.infra.waffleNodeTypeSwitcher.kubernetesLabel"
+              defaultMessage="Kubernetes"
+            />
+          }
+          onClick={this.handleClick(InfraNodeType.pod)}
+        >
           <img src="../plugins/infra/images/k8.svg" className="euiIcon euiIcon--large" />
         </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem label="Docker" onClick={this.handleClick(InfraNodeType.container)}>
+        <EuiKeyPadMenuItem
+          label={
+            <FormattedMessage
+              id="xpack.infra.waffleNodeTypeSwitcher.dockerLabel"
+              defaultMessage="Docker"
+            />
+          }
+          onClick={this.handleClick(InfraNodeType.container)}
+        >
           <img src="../plugins/infra/images/docker.svg" className="euiIcon euiIcon--large" />
         </EuiKeyPadMenuItem>
       </EuiKeyPadMenu>

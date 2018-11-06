@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { find } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
@@ -29,14 +31,30 @@ import {
 } from '@elastic/eui';
 
 const commonDates = [
-  'Today',
-  'Yesterday',
-  'This week',
-  'Week to date',
-  'This month',
-  'Month to date',
-  'This year',
-  'Year to date',
+  i18n.translate('xpack.infra.rangeDatePicker.commonDatesTodayText', {
+    defaultMessage: 'Today',
+  }),
+  i18n.translate('xpack.infra.rangeDatePicker.commonDatesYesterdayText', {
+    defaultMessage: 'Yesterday',
+  }),
+  i18n.translate('xpack.infra.rangeDatePicker.commonDatesThisWeekText', {
+    defaultMessage: 'This week',
+  }),
+  i18n.translate('xpack.infra.rangeDatePicker.commonDatesWeekToDateText', {
+    defaultMessage: 'Week to date',
+  }),
+  i18n.translate('xpack.infra.rangeDatePicker.commonDatesThisMonthText', {
+    defaultMessage: 'This month',
+  }),
+  i18n.translate('xpack.infra.rangeDatePicker.commonDatesMonthToDateText', {
+    defaultMessage: 'Month to date',
+  }),
+  i18n.translate('xpack.infra.rangeDatePicker.commonDatesThisYearText', {
+    defaultMessage: 'This year',
+  }),
+  i18n.translate('xpack.infra.rangeDatePicker.commonDatesYearToDateText', {
+    defaultMessage: 'Year to date',
+  }),
 ];
 
 interface RangeDatePickerProps {
@@ -51,6 +69,7 @@ interface RangeDatePickerProps {
   disabled?: boolean;
   isLoading?: boolean;
   ref?: React.RefObject<any>;
+  intl: InjectedIntl;
 }
 
 export interface RecentlyUsed {
@@ -67,10 +86,7 @@ interface RangeDatePickerState {
   quickSelectUnit: string;
 }
 
-export class RangeDatePicker extends React.PureComponent<
-  RangeDatePickerProps,
-  RangeDatePickerState
-> {
+class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeDatePickerState> {
   public readonly state = {
     startDate: this.props.startDate,
     endDate: this.props.endDate,
@@ -81,7 +97,7 @@ export class RangeDatePicker extends React.PureComponent<
   };
 
   public render() {
-    const { isLoading, disabled } = this.props;
+    const { isLoading, disabled, intl } = this.props;
     const { startDate, endDate } = this.state;
     const quickSelectButton = (
       <EuiButtonEmpty
@@ -89,7 +105,10 @@ export class RangeDatePicker extends React.PureComponent<
         style={{ borderRight: 'none' }}
         onClick={this.onButtonClick}
         disabled={disabled}
-        aria-label="Date quick select"
+        aria-label={intl.formatMessage({
+          id: 'xpack.infra.rangeDatePicker.dateQuickSelectAriaLabel',
+          defaultMessage: 'Date quick select',
+        })}
         size="xs"
         iconType="arrowDown"
         iconSide="right"
@@ -137,7 +156,10 @@ export class RangeDatePicker extends React.PureComponent<
               onChange={this.handleChangeStart}
               isInvalid={startDate && endDate ? startDate > endDate : false}
               fullWidth
-              aria-label="Start date"
+              aria-label={intl.formatMessage({
+                id: 'xpack.infra.rangeDatePicker.startDateAriaLabel',
+                defaultMessage: 'Start date',
+              })}
               disabled={disabled}
               shouldCloseOnSelect
               showTimeSelect
@@ -152,7 +174,10 @@ export class RangeDatePicker extends React.PureComponent<
               fullWidth
               disabled={disabled}
               isLoading={isLoading}
-              aria-label="End date"
+              aria-label={intl.formatMessage({
+                id: 'xpack.infra.rangeDatePicker.endDateAriaLabel',
+                defaultMessage: 'End date',
+              })}
               shouldCloseOnSelect
               showTimeSelect
               popperPlacement="top-end"
@@ -214,15 +239,22 @@ export class RangeDatePicker extends React.PureComponent<
   };
 
   private managedStartEndDateFromType(type: string, from?: string, to?: string) {
+    const { intl } = this.props;
     let { startDate, endDate } = this.state;
     let recentlyUsed: RecentlyUsed[] = this.state.recentlyUsed;
     let textJustUsed = type;
 
     if (type === 'quick-select') {
-      textJustUsed = `Last ${this.state.quickSelectTime} ${singularize(
-        this.state.quickSelectUnit,
-        this.state.quickSelectTime
-      )}`;
+      textJustUsed = intl.formatMessage(
+        {
+          id: 'xpack.infra.rangeDatePicker.lastQuickSelectTimeText',
+          defaultMessage: 'Last {quickSelectTime} {quickSelectTimeUnit}',
+        },
+        {
+          quickSelectTime: this.state.quickSelectTime,
+          quickSelectTimeUnit: singularize(this.state.quickSelectUnit, this.state.quickSelectTime),
+        }
+      );
       startDate = moment().subtract(this.state.quickSelectTime, this.state
         .quickSelectUnit as moment.unitOfTime.DurationConstructor);
       endDate = moment();
@@ -281,32 +313,123 @@ export class RangeDatePicker extends React.PureComponent<
   }
 
   private renderQuickSelect = () => {
+    const { intl } = this.props;
     const lastOptions = [
-      { value: 'seconds', text: singularize('seconds', this.state.quickSelectTime) },
-      { value: 'minutes', text: singularize('minutes', this.state.quickSelectTime) },
-      { value: 'hours', text: singularize('hours', this.state.quickSelectTime) },
-      { value: 'days', text: singularize('days', this.state.quickSelectTime) },
-      { value: 'weeks', text: singularize('weeks', this.state.quickSelectTime) },
-      { value: 'months', text: singularize('months', this.state.quickSelectTime) },
-      { value: 'years', text: singularize('years', this.state.quickSelectTime) },
+      {
+        value: 'seconds',
+        text: intl.formatMessage(
+          {
+            id: 'xpack.infra.rangeDatePicker.lastOptionsSecondsText',
+            defaultMessage: '{quickSelectTime, plural, one {second} other {seconds}}',
+          },
+          {
+            quickSelectTime: this.state.quickSelectTime,
+          }
+        ),
+      },
+      {
+        value: 'minutes',
+        text: intl.formatMessage(
+          {
+            id: 'xpack.infra.rangeDatePicker.lastOptionsMinutesText',
+            defaultMessage: '{quickSelectTime, plural, one {minute} other {minutes}}',
+          },
+          {
+            quickSelectTime: this.state.quickSelectTime,
+          }
+        ),
+      },
+      {
+        value: 'hours',
+        text: intl.formatMessage(
+          {
+            id: 'xpack.infra.rangeDatePicker.lastOptionsHoursText',
+            defaultMessage: '{quickSelectTime, plural, one {hour} other {hours}}',
+          },
+          {
+            quickSelectTime: this.state.quickSelectTime,
+          }
+        ),
+      },
+      {
+        value: 'days',
+        text: intl.formatMessage(
+          {
+            id: 'xpack.infra.rangeDatePicker.lastOptionsDaysText',
+            defaultMessage: '{quickSelectTime, plural, one {day} other {days}}',
+          },
+          {
+            quickSelectTime: this.state.quickSelectTime,
+          }
+        ),
+      },
+      {
+        value: 'weeks',
+        text: intl.formatMessage(
+          {
+            id: 'xpack.infra.rangeDatePicker.lastOptionsWeeksText',
+            defaultMessage: '{quickSelectTime, plural, one {week} other {weeks}}',
+          },
+          {
+            quickSelectTime: this.state.quickSelectTime,
+          }
+        ),
+      },
+      {
+        value: 'months',
+        text: intl.formatMessage(
+          {
+            id: 'xpack.infra.rangeDatePicker.lastOptionsMonthsText',
+            defaultMessage: '{quickSelectTime, plural, one {month} other {months}}',
+          },
+          {
+            quickSelectTime: this.state.quickSelectTime,
+          }
+        ),
+      },
+      {
+        value: 'years',
+        text: intl.formatMessage(
+          {
+            id: 'xpack.infra.rangeDatePicker.lastOptionsYearsText',
+            defaultMessage: '{quickSelectTime, plural, one {year} other {years}}',
+          },
+          {
+            quickSelectTime: this.state.quickSelectTime,
+          }
+        ),
+      },
     ];
 
     return (
       <Fragment>
         <EuiTitle size="xxxs">
-          <span>Quick select</span>
+          <span>
+            <FormattedMessage
+              id="xpack.infra.rangeDatePicker.quickSelectTitle"
+              defaultMessage="Quick select"
+            />
+          </span>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="s">
-              <span>Last</span>
+              <span>
+                <FormattedMessage
+                  id="xpack.infra.rangeDatePicker.lastQuickSelectTitle"
+                  defaultMessage="Last"
+                />
+              </span>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow>
               <EuiFieldNumber
-                aria-label="Count of"
+                aria-label={intl.formatMessage({
+                  id: 'xpack.infra.rangeDatePicker.countOfFormRowAriaLabel',
+                  defaultMessage: 'Count of',
+                })}
                 defaultValue="1"
                 value={this.state.quickSelectTime}
                 step={0}
@@ -330,7 +453,10 @@ export class RangeDatePicker extends React.PureComponent<
           <EuiFlexItem grow={false}>
             <EuiFormRow>
               <EuiButton onClick={() => this.closePopover('quick-select')} style={{ minWidth: 0 }}>
-                Apply
+                <FormattedMessage
+                  id="xpack.infra.rangeDatePicker.applyFormRowButtonLabel"
+                  defaultMessage="Apply"
+                />
               </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>
@@ -363,7 +489,12 @@ export class RangeDatePicker extends React.PureComponent<
     return (
       <Fragment>
         <EuiTitle size="xxxs">
-          <span>Commonly used</span>
+          <span>
+            <FormattedMessage
+              id="xpack.infra.rangeDatePicker.renderCommonlyUsedLinksTitle"
+              defaultMessage="Commonly used"
+            />
+          </span>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">
@@ -400,7 +531,12 @@ export class RangeDatePicker extends React.PureComponent<
     return (
       <Fragment>
         <EuiTitle size="xxxs">
-          <span>Recently used date ranges</span>
+          <span>
+            <FormattedMessage
+              id="xpack.infra.rangeDatePicker.recentlyUsedDateRangesTitle"
+              defaultMessage="Recently used date ranges"
+            />
+          </span>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s">
@@ -414,3 +550,5 @@ export class RangeDatePicker extends React.PureComponent<
 }
 
 const singularize = (str: string, qty: number) => (qty === 1 ? str.slice(0, -1) : str);
+
+export const RangeDatePicker = injectI18n(RangeDatePickerUI);

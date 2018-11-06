@@ -5,6 +5,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
@@ -41,32 +42,34 @@ export class Node extends React.PureComponent<Props, State> {
     const color = colorFromValue(options.legend, rawValue, bounds);
     const value = formatter(rawValue);
     return (
-      <NodeContextMenu
-        node={node}
-        nodeType={nodeType}
-        isPopoverOpen={isPopoverOpen}
-        closePopover={this.closePopover}
-        options={options}
-        timeRange={timeRange}
-      >
-        <EuiToolTip position="top" content={`${node.name} | ${value}`}>
-          <NodeContainer
-            style={{ width: squareSize || 0, height: squareSize || 0 }}
-            onClick={this.togglePopover}
-          >
-            <SquareOuter color={color}>
-              <SquareInner color={color}>
-                {valueMode && (
-                  <ValueInner>
-                    <Label color={color}>{node.name}</Label>
-                    <Value color={color}>{value}</Value>
-                  </ValueInner>
-                )}
-              </SquareInner>
-            </SquareOuter>
-          </NodeContainer>
-        </EuiToolTip>
-      </NodeContextMenu>
+      <I18nProvider>
+        <NodeContextMenu
+          node={node}
+          nodeType={nodeType}
+          isPopoverOpen={isPopoverOpen}
+          closePopover={this.closePopover}
+          options={options}
+          timeRange={timeRange}
+        >
+          <EuiToolTip position="top" content={`${node.name} | ${value}`}>
+            <NodeContainer
+              style={{ width: squareSize || 0, height: squareSize || 0 }}
+              onClick={this.togglePopover}
+            >
+              <SquareOuter color={color}>
+                <SquareInner color={color}>
+                  {valueMode && (
+                    <ValueInner>
+                      <Label color={color}>{node.name}</Label>
+                      <Value color={color}>{value}</Value>
+                    </ValueInner>
+                  )}
+                </SquareInner>
+              </SquareOuter>
+            </NodeContainer>
+          </EuiToolTip>
+        </NodeContextMenu>
+      </I18nProvider>
     );
   }
 

@@ -15,6 +15,7 @@
     "tagCloud": "src/core_plugins/tagcloud",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
+    "xpack.infra": "x-pack/plugins/infra",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.security": "x-pack/plugins/security",

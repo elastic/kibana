@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -36,6 +37,7 @@ interface Props {
   reload: () => void;
   onDrilldown: (filter: KueryFilterQuery) => void;
   timeRange: InfraTimerangeInput;
+  intl: InjectedIntl;
 }
 
 interface MetricFormatter {
@@ -89,17 +91,40 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
   return { min: min(values), max: max(values) };
 };
 
-export class Waffle extends React.Component<Props, {}> {
+class WaffleUI extends React.Component<Props, {}> {
   public render() {
-    const { loading, map, reload, timeRange } = this.props;
+    const { loading, map, reload, timeRange, intl } = this.props;
     if (loading) {
-      return <InfraLoadingPanel height="100%" width="100%" text="Loading data" />;
+      return (
+        <InfraLoadingPanel
+          height="100%"
+          width="100%"
+          text={intl.formatMessage({
+            id: 'xpack.infra.waffle.loadingDataText',
+            defaultMessage: 'Loading data',
+          })}
+        />
+      );
     } else if (!loading && map && map.length === 0) {
       return (
         <EuiEmptyPrompt
-          title={<h2>There is no data to display.</h2>}
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.infra.waffle.noDataToDisplayTitle"
+                defaultMessage="There is no data to display."
+              />
+            </h2>
+          }
           titleSize="m"
-          body={<p>Try adjusting your time or filter.</p>}
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.infra.waffle.tryAdjustingTimeOrFilterText"
+                defaultMessage="Try adjusting your time or filter."
+              />
+            </p>
+          }
           actions={
             <EuiButton
               iconType="refresh"
@@ -109,7 +134,10 @@ export class Waffle extends React.Component<Props, {}> {
                 reload();
               }}
             >
-              Check for new data
+              <FormattedMessage
+                id="xpack.infra.waffle.checkNewDataButtonLabel"
+                defaultMessage="Check for new data"
+              />
             </EuiButton>
           }
           data-test-subj="noMetricsDataPrompt"
@@ -204,6 +232,8 @@ export class Waffle extends React.Component<Props, {}> {
     }
   };
 }
+
+export const Waffle = injectI18n(WaffleUI);
 
 const WaffleMapOuterContiner = styled.div`
   flex: 1 0 0;

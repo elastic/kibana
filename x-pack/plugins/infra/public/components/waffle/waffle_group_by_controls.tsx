@@ -12,6 +12,8 @@ import {
   EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { InfraNodeType, InfraPathInput, InfraPathType } from '../../../common/graphql/types';
 
@@ -19,25 +21,92 @@ interface Props {
   nodeType: InfraNodeType;
   groupBy: InfraPathInput[];
   onChange: (groupBy: InfraPathInput[]) => void;
+  intl: InjectedIntl;
 }
 
 const OPTIONS = {
   [InfraNodeType.pod]: [
-    { text: 'Namespace', type: InfraPathType.terms, field: 'kubernetes.namespace' },
-    { text: 'Node', type: InfraPathType.terms, field: 'kubernetes.node.name' },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsNamespaceText', {
+        defaultMessage: 'Namespace',
+      }),
+      type: InfraPathType.terms,
+      field: 'kubernetes.namespace',
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsNodeText', {
+        defaultMessage: 'Node',
+      }),
+      type: InfraPathType.terms,
+      field: 'kubernetes.node.name',
+    },
   ],
   [InfraNodeType.container]: [
-    { text: 'Host', type: InfraPathType.terms, field: 'host.name' },
-    { text: 'Availability Zone', type: InfraPathType.terms, field: 'meta.cloud.availability_zone' },
-    { text: 'Machine Type', type: InfraPathType.terms, field: 'meta.cloud.machine_type' },
-    { text: 'Project ID', type: InfraPathType.terms, field: 'meta.cloud.project_id' },
-    { text: 'Provider', type: InfraPathType.terms, field: 'meta.cloud.provider' },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsHostText', {
+        defaultMessage: 'Host',
+      }),
+      type: InfraPathType.terms,
+      field: 'host.name',
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsAvailabilityZoneText', {
+        defaultMessage: 'Availability Zone',
+      }),
+      type: InfraPathType.terms,
+      field: 'meta.cloud.availability_zone',
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsMachineTypeText', {
+        defaultMessage: 'Machine Type',
+      }),
+      type: InfraPathType.terms,
+      field: 'meta.cloud.machine_type',
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsProjectIDText', {
+        defaultMessage: 'Project ID',
+      }),
+      type: InfraPathType.terms,
+      field: 'meta.cloud.project_id',
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsProviderText', {
+        defaultMessage: 'Provider',
+      }),
+      type: InfraPathType.terms,
+      field: 'meta.cloud.provider',
+    },
   ],
   [InfraNodeType.host]: [
-    { text: 'Availability Zone', type: InfraPathType.terms, field: 'meta.cloud.availability_zone' },
-    { text: 'Machine Type', type: InfraPathType.terms, field: 'meta.cloud.machine_type' },
-    { text: 'Project ID', type: InfraPathType.terms, field: 'meta.cloud.project_id' },
-    { text: 'Cloud Provider', type: InfraPathType.terms, field: 'meta.cloud.provider' },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsAvailabilityZoneText', {
+        defaultMessage: 'Availability Zone',
+      }),
+      type: InfraPathType.terms,
+      field: 'meta.cloud.availability_zone',
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsMachineTypeText', {
+        defaultMessage: 'Machine Type',
+      }),
+      type: InfraPathType.terms,
+      field: 'meta.cloud.machine_type',
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsProjectIDText', {
+        defaultMessage: 'Project ID',
+      }),
+      type: InfraPathType.terms,
+      field: 'meta.cloud.project_id',
+    },
+    {
+      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsCloudProviderText', {
+        defaultMessage: 'Cloud Provider',
+      }),
+      type: InfraPathType.terms,
+      field: 'meta.cloud.provider',
+    },
   ],
 };
 
@@ -46,18 +115,32 @@ const initialState = {
 };
 type State = Readonly<typeof initialState>;
 
-export class WaffleGroupByControls extends React.PureComponent<Props, State> {
+class WaffleGroupByControlsUI extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
+    const { intl } = this.props;
     const { nodeType, groupBy } = this.props;
     const options = OPTIONS[nodeType];
     if (!options.length) {
-      throw Error(`Unable to select group by options for ${nodeType}`);
+      throw Error(
+        intl.formatMessage(
+          {
+            id: 'xpack.infra.waffleGroupByControls.unableToSelectGroupErrorTitle',
+            defaultMessage: 'Unable to select group by options for {nodeType}',
+          },
+          {
+            nodeType,
+          }
+        )
+      );
     }
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 'firstPanel',
-        title: 'Select up to two groupings',
+        title: intl.formatMessage({
+          id: 'xpack.infra.waffleGroupByControls.selectTwoGroupingsTitle',
+          defaultMessage: 'Select up to two groupings',
+        }),
         items: options.map(o => {
           const icon = groupBy.some(g => g.field === o.field) ? 'check' : 'empty';
           const panel = { name: o.text, onClick: this.handleClick(o.field), icon };
@@ -66,26 +149,40 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
       },
     ];
     const buttonBody =
-      groupBy.length > 0
-        ? groupBy
-            .map(g => options.find(o => o.field === g.field))
-            .filter(o => o != null)
-            // In this map the `o && o.field` is totally unnecessary but Typescript is
-            // too stupid to realize that the filter above prevents the next map from being null
-            .map(o => (
-              <EuiBadge
-                key={o && o.field}
-                iconType="cross"
-                iconOnClick={this.handleRemove((o && o.field) || '')}
-                iconOnClickAriaLabel={`Remove ${o && o.text} grouping`}
-              >
-                {o && o.text}
-              </EuiBadge>
-            ))
-        : 'All';
+      groupBy.length > 0 ? (
+        groupBy
+          .map(g => options.find(o => o.field === g.field))
+          .filter(o => o != null)
+          // In this map the `o && o.field` is totally unnecessary but Typescript is
+          // too stupid to realize that the filter above prevents the next map from being null
+          .map(o => (
+            <EuiBadge
+              key={o && o.field}
+              iconType="cross"
+              iconOnClick={this.handleRemove((o && o.field) || '')}
+              iconOnClickAriaLabel={intl.formatMessage(
+                {
+                  id: 'xpack.infra.waffleGroupByControls.removeGroupingItemAriaLabel',
+                  defaultMessage: 'Remove {itemOrText} grouping',
+                },
+                {
+                  itemOrText: o && o.text,
+                }
+              )}
+            >
+              {o && o.text}
+            </EuiBadge>
+          ))
+      ) : (
+        <FormattedMessage id="xpack.infra.waffleGroupByControls.allTitle" defaultMessage="All" />
+      );
     const button = (
       <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        Group By: {buttonBody}
+        <FormattedMessage
+          id="xpack.infra.waffleGroupByControls.groupByButtonLabel"
+          defaultMessage="Group By: "
+        />
+        {buttonBody}
       </EuiFilterButton>
     );
 
@@ -130,3 +227,5 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
     }
   };
 }
+
+export const WaffleGroupByControls = injectI18n(WaffleGroupByControlsUI);

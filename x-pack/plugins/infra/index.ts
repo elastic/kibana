@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
@@ -19,31 +20,43 @@ export function infra(kibana: any) {
     require: ['kibana', 'elasticsearch'],
     uiExports: {
       app: {
-        description: 'Explore your infrastructure',
+        description: i18n.translate('xpack.infra.infraOpsDescriptions', {
+          defaultMessage: 'Explore your infrastructure',
+        }),
         icon: 'plugins/infra/images/infra_mono_white.svg',
         main: 'plugins/infra/app',
-        title: 'InfraOps',
+        title: i18n.translate('xpack.infra.infraOpsTitle', {
+          defaultMessage: 'InfraOps',
+        }),
         listed: false,
         url: `/app/${APP_ID}#/home`,
       },
       home: ['plugins/infra/register_feature'],
       links: [
         {
-          description: 'Explore your infrastructure',
+          description: i18n.translate('xpack.infra.infraOpsDescriptions', {
+            defaultMessage: 'Explore your infrastructure',
+          }),
           icon: 'plugins/infra/images/infra_mono_white.svg',
           euiIconType: 'infraApp',
           id: 'infra:home',
           order: 8000,
-          title: 'Infra Ops',
+          title: i18n.translate('xpack.infra.infraOpsTitle', {
+            defaultMessage: 'InfraOps',
+          }),
           url: `/app/${APP_ID}#/home`,
         },
         {
-          description: 'Explore your logs',
+          description: i18n.translate('xpack.infra.logsDescriptions', {
+            defaultMessage: 'Explore your logs',
+          }),
           icon: 'plugins/infra/images/logging_mono_white.svg',
           euiIconType: 'loggingApp',
           id: 'infra:logs',
           order: 8001,
-          title: 'Logs',
+          title: i18n.translate('xpack.infra.logsTitle', {
+            defaultMessage: 'Logs',
+          }),
           url: `/app/${APP_ID}#/logs`,
         },
       ],
