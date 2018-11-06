@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { GraphQLSchema } from 'graphql';
 import { Request, ResponseToolkit, Server } from 'hapi';
 
@@ -103,7 +104,11 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     request: InfraFrameworkRequest<Request>
   ): InfraFrameworkIndexPatternsService {
     if (!isServerWithIndexPatternsServiceFactory(this.server)) {
-      throw new Error('Failed to access indexPatternsService for the request');
+      throw new Error(
+        i18n.translate('xpack.infra.infraKibanaBackendFrameworkAdapter.failedToAccessErrorTitle', {
+          defaultMessage: 'Failed to access indexPatternsService for the request',
+        })
+      );
     }
     return this.server.indexPatternsServiceFactory({
       callCluster: async (method: string, args: [object], ...rest: any[]) => {

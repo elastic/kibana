@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 import { InfraPathInput, InfraPathType } from '../../../../common/graphql/types';
 import { InfraNodeType } from './adapter_types';
 
@@ -39,15 +40,35 @@ const moreThenOneEntityType = (path: InfraPathInput[]) => {
 
 export function extractGroupByAndNodeFromPath(path: InfraPathInput[]) {
   if (moreThenOneEntityType(path)) {
-    throw new Error('There can be only one entity type in the path.');
+    throw new Error(
+      i18n.translate(
+        'xpack.infra.extractGroupByAndNodeFromPath.onlyOneEntityTypeInThePathErrorTitle',
+        {
+          defaultMessage: 'There can be only one entity type in the path.',
+        }
+      )
+    );
   }
   if (path.length > 3) {
-    throw new Error('The path can only have a maximum of 3 elements.');
+    throw new Error(
+      i18n.translate(
+        'xpack.infra.extractGroupByAndNodeFromPath.maxThreeElementsInThePathErrorTitle',
+        {
+          defaultMessage: 'The path can only have a maximum of 3 elements.',
+        }
+      )
+    );
   }
   const nodePart = path[path.length - 1];
   if (!isEntityType(nodePart)) {
     throw new Error(
-      'The last element in the path should be either a "hosts", "containers" or "pods" path type.'
+      i18n.translate(
+        'xpack.infra.extractGroupByAndNodeFromPath.lastElementInPathContainErrorTitle',
+        {
+          defaultMessage:
+            'The last element in the path should be either a "hosts", "containers" or "pods" path type.',
+        }
+      )
     );
   }
   const nodeType = getNodeType(nodePart.type);

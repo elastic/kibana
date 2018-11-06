@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 const intervalUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
 const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + intervalUnits.join('|') + ')$');
 
@@ -27,5 +29,9 @@ export const getBucketSizeInSeconds = (interval: string): number => {
   if (matches) {
     return parseFloat(matches[1]) * units[matches[2]];
   }
-  throw new Error('Invalid interval string format.');
+  throw new Error(
+    i18n.translate('xpack.infra.getBucketSizeInSeconds.invalidInternalStringFormatErrorTitle', {
+      defaultMessage: 'Invalid interval string format.',
+    })
+  );
 };

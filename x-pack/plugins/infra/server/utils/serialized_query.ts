@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { UserInputError } from 'apollo-server-errors';
 
 import { JsonObject } from '../../common/typed_json';
@@ -19,16 +20,28 @@ export const parseFilterQuery = (
         ['string', 'number', 'boolean'].includes(typeof parsedFilterQuery) ||
         Array.isArray(parsedFilterQuery)
       ) {
-        throw new Error('expected value to be an object');
+        throw new Error(
+          i18n.translate('xpack.infra.parseFilterQuery.needValueAsObjectErrorTitle', {
+            defaultMessage: 'expected value to be an object',
+          })
+        );
       }
       return parsedFilterQuery;
     } else {
       return undefined;
     }
   } catch (err) {
-    throw new UserInputError(`Failed to parse query: ${err}`, {
-      query: filterQuery,
-      originalError: err,
-    });
+    throw new UserInputError(
+      i18n.translate('xpack.infra.parseFilterQuery.failedToParseQueryErrorTitle', {
+        defaultMessage: 'Failed to parse query: {err}',
+        values: {
+          err,
+        },
+      }),
+      {
+        query: filterQuery,
+        originalError: err,
+      }
+    );
   }
 };

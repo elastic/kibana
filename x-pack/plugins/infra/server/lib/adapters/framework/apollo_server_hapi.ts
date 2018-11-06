@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import Boom from 'boom';
 import { Plugin, Request, ResponseToolkit, RouteOptions, Server } from 'hapi';
@@ -23,7 +24,11 @@ export const graphqlHapi: Plugin<HapiGraphQLPluginOptions> = {
   name: 'graphql',
   register: (server: Server, options: HapiGraphQLPluginOptions) => {
     if (!options || !options.graphqlOptions) {
-      throw new Error('Apollo Server requires options.');
+      throw new Error(
+        i18n.translate('xpack.infra.graphqlHapi.apolloServerRequiresOptionsErrorTitle', {
+          defaultMessage: 'Apollo Server requires options.',
+        })
+      );
     }
 
     server.route({
@@ -96,7 +101,11 @@ export const graphiqlHapi: Plugin<HapiGraphiQLPluginOptions> = {
   name: 'graphiql',
   register: (server: Server, options: HapiGraphiQLPluginOptions) => {
     if (!options || !options.graphiqlOptions) {
-      throw new Error('Apollo Server GraphiQL requires options.');
+      throw new Error(
+        i18n.translate('xpack.infra.graphqlHapi.apolloServerGraphiQLRequiresOptionsErrorTitle', {
+          defaultMessage: 'Apollo Server GraphiQL requires options.',
+        })
+      );
     }
 
     server.route({

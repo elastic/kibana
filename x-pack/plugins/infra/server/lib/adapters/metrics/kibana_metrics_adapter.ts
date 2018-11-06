@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
 import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../../common/graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
@@ -44,7 +45,14 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
     if (!validNode) {
-      throw new Error(`${options.nodeId} does not exist.`);
+      throw new Error(
+        i18n.translate('xpack.infra.kibanaMetricsAdapter.idDoesNotExistErrorTitle', {
+          defaultMessage: '{nodeId} does not exist.',
+          values: {
+            nodeId: options.nodeId,
+          },
+        })
+      );
     }
 
     const requests = options.metrics.map(metricId => {
@@ -59,7 +67,14 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
           return metricIds.map((id: string) => {
             const infraMetricId: InfraMetric = (InfraMetric as any)[id];
             if (!infraMetricId) {
-              throw new Error(`${id} is not a valid InfraMetric`);
+              throw new Error(
+                i18n.translate('xpack.infra.kibanaMetricsAdapter.noValidInfraMetricIdErrorTitle', {
+                  defaultMessage: '{id} is not a valid InfraMetric',
+                  values: {
+                    id,
+                  },
+                })
+              );
             }
             const panel = result[infraMetricId];
             return {

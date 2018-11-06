@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import { isNumber } from 'lodash';
 import moment from 'moment';
@@ -41,7 +42,11 @@ function createNodeMetrics(
   const bucketSize = getBucketSizeInSeconds(timerange.interval);
   const lastBucket = findLastFullBucket(bucket, bucketSize, options);
   if (!lastBucket) {
-    throw new Error('Date histogram returned an empty set of buckets.');
+    throw new Error(
+      i18n.translate('xpack.infra.createNodeMetrics.emptySetOfBucketsInDateHistogramErrorTitle', {
+        defaultMessage: 'Date histogram returned an empty set of buckets.',
+      })
+    );
   }
   const metricObj = lastBucket[metric.type];
   const value = (metricObj && (metricObj.normalized_value || metricObj.value)) || 0;

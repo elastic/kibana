@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { i18n } from '@kbn/i18n';
 
 export class InfraSources {
   constructor(private readonly adapter: InfraSourcesAdapter) {}
@@ -12,7 +13,14 @@ export class InfraSources {
     const requestedSourceConfiguration = sourceConfigurations[sourceId];
 
     if (!requestedSourceConfiguration) {
-      throw new Error(`Failed to find source '${sourceId}'`);
+      throw new Error(
+        i18n.translate('xpack.infra.infraSources.failedToFindSourceErrorTitle', {
+          defaultMessage: 'Failed to find source {sourceId}',
+          values: {
+            sourceId: "'" + sourceId + "'",
+          },
+        })
+      );
     }
 
     return requestedSourceConfiguration;
