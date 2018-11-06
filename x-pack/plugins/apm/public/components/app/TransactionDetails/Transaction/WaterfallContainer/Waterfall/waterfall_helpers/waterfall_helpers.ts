@@ -28,12 +28,12 @@ export interface IWaterfallGroup {
 
 export interface IWaterfall {
   traceRoot?: Transaction;
-  traceRootDuration?: number;
+  traceRootDuration: number;
 
   /**
    * Duration in us
    */
-  duration?: number;
+  duration: number;
   services: string[];
   items: IWaterfallItem[];
   itemsById: IWaterfallIndex;
@@ -244,6 +244,19 @@ function getDuration(items: IWaterfallItem[]) {
   return timestampEnd - timestampStart;
 }
 
+function createGetTransactionById(itemsById: IWaterfallIndex) {
+  return (id?: IWaterfallItem['id']) => {
+    if (!id) {
+      return;
+    }
+
+    const item = itemsById[id];
+    if (item.docType === 'transaction') {
+      return item.transaction;
+    }
+  };
+}
+
 export function getWaterfall(
   hits: Array<Span | Transaction>,
   entryTransaction: Transaction
@@ -251,6 +264,8 @@ export function getWaterfall(
   if (isEmpty(hits)) {
     return {
       services: [],
+      duration: 0,
+      traceRootDuration: 0,
       items: [],
       itemsById: {},
       getTransactionById: () => undefined,
@@ -287,28 +302,22 @@ export function getWaterfall(
     entryTransactionItem
   );
   const traceRoot = getTraceRoot(childrenByParentId);
-  const services = getServices(items);
   const duration = getDuration(items);
-
-  const getTransactionById = (id?: IWaterfallItem['id']) => {
-    if (!id) {
-      return;
-    }
-
-    const item = itemsById[id];
-    if (item.docType === 'transaction') {
-      return item.transaction;
-    }
-  };
+  const traceRootDuration = traceRoot
+    ? traceRoot.transaction.duration.us
+    : duration;
+  const services = getServices(items);
+  const getTransactionById = createGetTransactionById(itemsById);
+  const serviceColors = getServiceColors(services);
 
   return {
     traceRoot,
-    traceRootDuration: traceRoot && traceRoot.transaction.duration.us,
+    traceRootDuration,
     duration,
     services,
     items,
     itemsById,
     getTransactionById,
-    serviceColors: getServiceColors(services)
+    serviceColors
   };
 }

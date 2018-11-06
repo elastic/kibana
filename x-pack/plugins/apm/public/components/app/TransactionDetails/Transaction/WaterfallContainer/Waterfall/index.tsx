@@ -128,6 +128,7 @@ export class Waterfall extends Component<Props> {
           <Timeline
             agentMarks={this.props.agentMarks}
             duration={waterfall.duration}
+            traceRootDuration={waterfall.traceRootDuration}
             height={waterfallHeight}
             margins={TIMELINE_MARGINS}
           />
@@ -156,8 +157,3 @@ export class Waterfall extends Component<Props> {
     });
   }
 }
-
-// TODO: the agent marks and note about dropped spans were removed. Need to be re-added
-//   agentMarks: PropTypes.array,
-//   agentName: PropTypes.string.isRequired,
-//   droppedSpans: PropTypes.number.isRequired,
