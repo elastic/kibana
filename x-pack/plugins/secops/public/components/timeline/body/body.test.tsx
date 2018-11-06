@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { Body } from '.';
+import { mockECSData } from '../../../pages/mock/mock_ecs';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { headers } from './column_headers/headers';
 import { Sort } from './sort';
@@ -23,6 +24,7 @@ describe('ColumnHeaders', () => {
       const wrapper = mount(
         <Body
           columnHeaders={headers}
+          data={mockECSData}
           dataProviders={mockDataProviders}
           sort={sort}
           onColumnSorted={noop}
