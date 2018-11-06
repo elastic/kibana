@@ -25,7 +25,7 @@ import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 
 
 uiModules.get('kibana')
-  .directive('vislibLegend', function (Private, $timeout, l18n) {
+  .directive('vislibLegend', function (Private, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
 
     return {
