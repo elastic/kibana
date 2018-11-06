@@ -74,7 +74,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._metrics = null;
     this._joinField = null;
-    this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
+    this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]].value;
     this._lineWeight = 1;
     this._tooltipFormatter = () => '';
     this._attribution = attribution;
