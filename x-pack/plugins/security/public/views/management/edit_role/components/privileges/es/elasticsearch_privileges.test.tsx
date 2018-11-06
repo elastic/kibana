@@ -37,7 +37,9 @@ test('it renders without crashing', () => {
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
   };
-  const wrapper = shallowWithIntl(<ElasticsearchPrivileges.WrappedComponent {...props} />);
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges.WrappedComponent {...props} intl={null as any} />
+  );
   expect(wrapper).toMatchSnapshot();
 });
 
@@ -64,7 +66,9 @@ test('it renders ClusterPrivileges', () => {
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
   };
-  const wrapper = mountWithIntl(<ElasticsearchPrivileges.WrappedComponent {...props} />);
+  const wrapper = mountWithIntl(
+    <ElasticsearchPrivileges.WrappedComponent {...props} intl={null as any} />
+  );
   expect(wrapper.find(ClusterPrivileges)).toHaveLength(1);
 });
 
@@ -91,6 +95,8 @@ test('it renders IndexPrivileges', () => {
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
   };
-  const wrapper = mountWithIntl(<ElasticsearchPrivileges.WrappedComponent {...props} />);
+  const wrapper = mountWithIntl(
+    <ElasticsearchPrivileges.WrappedComponent {...props} intl={null as any} />
+  );
   expect(wrapper.find(IndexPrivileges)).toHaveLength(1);
 });
