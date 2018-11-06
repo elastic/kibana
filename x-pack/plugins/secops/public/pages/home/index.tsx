@@ -56,8 +56,8 @@ const sort: Sort = {
 // Pass the column and row renders down as well
 export interface EventRenderer {
   isInstance: (data: ECS) => boolean;
-  renderMultiClolumn: (data: ECS) => boolean;
-  renderColumn: (columnName: string, data: ECS) => boolean;
+  renderMultiClolumn: (data: ECS) => React.ReactNode;
+  renderColumn: (columnName: string, data: ECS) => React.ReactNode;
 }
 
 export const HomePage = pure(() => (

@@ -6,7 +6,7 @@
 
 import { ECS } from '../../components/timeline/ecs';
 
-export const mockECSData: Readonly<ECS[]> = [
+export const mockECSData: ECS[] = [
   {
     _id: '1',
     '@timestamp': '2018-11-05T19:03:25.937Z',

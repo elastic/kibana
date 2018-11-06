@@ -98,19 +98,19 @@ export const Body = pure<Props>(
       />
       <EuiHorizontalRule margin="xs" />
       <ScrollableArea>
-        {data.map(datum => (
-          <Row key={datum.event.id}>
+        {data.map(ecs => (
+          <Row key={ecs.event.id}>
             <TimeGutter />
             <Transitionable>
               <Pin type="pin" size="l" />
-              <Cell size="xs">{moment(datum['@timestamp']).format('YYYY-MM-DD')}</Cell>
-              <Cell size="xs">{datum.event.severity}</Cell>
-              <Cell size="xs">{datum.event.category}</Cell>
-              <Cell size="xs">{datum.event.type}</Cell>
-              <Cell size="xs">{datum.event.module}</Cell>
-              <Cell size="xs">{datum.user.name}</Cell>
+              <Cell size="xs">{moment(ecs['@timestamp']).format('YYYY-MM-DD')}</Cell>
+              <Cell size="xs">{ecs.event.severity}</Cell>
+              <Cell size="xs">{ecs.event.category}</Cell>
+              <Cell size="xs">{ecs.event.type}</Cell>
+              <Cell size="xs">{ecs.event.module}</Cell>
+              <Cell size="xs">{ecs.user.name}</Cell>
               <Cell size="xs">
-                {datum.event.severity} / {datum.event.module} / {datum.event.category}
+                {ecs.event.severity} / {ecs.event.module} / {ecs.event.category}
               </Cell>
             </Transitionable>
           </Row>
