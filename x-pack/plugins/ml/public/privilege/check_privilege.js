@@ -7,7 +7,7 @@
 
 
 import { getPrivileges } from 'plugins/ml/privilege/get_privileges';
-import { getLicenseHasExpired } from 'plugins/ml/license/check_license';
+import { hasLicenseExpired } from 'plugins/ml/license/check_license';
 
 let privileges = {};
 
@@ -16,7 +16,7 @@ export function checkGetJobsPrivilege(Private, Promise, kbnUrl) {
     getPrivileges()
       .then((priv) => {
         privileges = priv;
-        // the minimum privilege for using ML is being able to get the jobs list.
+        // the minimum privilege for using ML with a platinum license is being able to get the jobs list.
         // all other functionality is controlled by the return privileges object
         if (privileges.canGetJobs) {
           return resolve(privileges);
@@ -45,10 +45,27 @@ export function checkCreateJobsPrivilege(Private, Promise, kbnUrl) {
   });
 }
 
+export function checkFindFileStructurePrivilege(Private, Promise, kbnUrl) {
+  return new Promise((resolve, reject) => {
+    getPrivileges()
+      .then((priv) => {
+        privileges = priv;
+        // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
+        // all other functionality is controlled by the return privileges object
+        if (privileges.canFindFileStructure) {
+          return resolve(privileges);
+        } else {
+          kbnUrl.redirect('/access-denied');
+          return reject();
+        }
+      });
+  });
+}
+
 // check the privilege type and the license to see whether a user has permission to access a feature.
 // takes the name of the privilege variable as specified in get_privileges.js
 export function checkPermission(privilegeType) {
-  const licenseHasExpired = getLicenseHasExpired();
+  const licenseHasExpired = hasLicenseExpired();
   return (privileges[privilegeType] === true && licenseHasExpired !== true);
 }
 
@@ -56,7 +73,7 @@ export function checkPermission(privilegeType) {
 // expired or if they don't have the privilege to press that button
 export function createPermissionFailureMessage(privilegeType) {
   let message = '';
-  const licenseHasExpired = getLicenseHasExpired();
+  const licenseHasExpired = hasLicenseExpired();
   if (licenseHasExpired) {
     message = 'Your license has expired.';
   } else if (privilegeType === 'canCreateJob') {

@@ -8,6 +8,7 @@ import { BaseWatch } from './base_watch';
 import uuid from 'uuid';
 import { WATCH_TYPES, SORT_ORDERS, COMPARATORS } from 'plugins/watcher/../common/constants';
 import { getTimeUnitsLabel } from 'plugins/watcher/lib/get_time_units_label';
+import { i18n } from '@kbn/i18n';
 
 const DEFAULT_VALUES = {
   AGG_TYPE: 'count',
@@ -56,13 +57,22 @@ export class ThresholdWatch extends BaseWatch {
   }
 
   get titleDescription() {
-    const staticPart = `Send an alert when a specific condition is met.`;
+    const staticPart = i18n.translate('xpack.watcher.models.thresholdWatch.sendAlertOnSpecificConditionTitleDescription', {
+      defaultMessage: 'Send an alert when a specific condition is met.'
+    });
     if (isNaN(this.triggerIntervalSize)) {
       return staticPart;
     }
 
     const timeUnitLabel = getTimeUnitsLabel(this.triggerIntervalUnit, this.triggerIntervalSize);
-    return `${staticPart} This will run every ${this.triggerIntervalSize} ${timeUnitLabel}.`;
+    const dynamicPartText = i18n.translate('xpack.watcher.models.thresholdWatch.thresholdWatchIntervalTitleDescription', {
+      defaultMessage: 'This will run every {triggerIntervalSize} {timeUnitLabel}.',
+      values: {
+        triggerIntervalSize: this.triggerIntervalSize,
+        timeUnitLabel
+      }
+    });
+    return `${staticPart} ${dynamicPartText}`;
   }
 
   get upstreamJson() {
@@ -93,9 +103,13 @@ export class ThresholdWatch extends BaseWatch {
     return DEFAULT_VALUES;
   }
 
-  static typeName = 'Threshold Alert';
+  static typeName = i18n.translate('xpack.watcher.models.thresholdWatch.typeName', {
+    defaultMessage: 'Threshold Alert'
+  });
   static iconClass = '';
-  static selectMessage = 'Send an alert on a specific condition';
+  static selectMessage = i18n.translate('xpack.watcher.models.thresholdWatch.selectMessageText', {
+    defaultMessage: 'Send an alert on a specific condition'
+  });
   static isCreatable = true;
   static selectSortOrder = 1;
 }

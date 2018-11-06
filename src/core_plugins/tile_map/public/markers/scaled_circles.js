@@ -99,7 +99,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     }
 
     const titleText = this.getLabel();
-    const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
+    const $title = $('<div>').addClass('visMapLegend__title').text(titleText);
     jqueryDiv.append($title);
 
     this._legendColors.forEach((color) => {
@@ -214,7 +214,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
 
 function makeLegendColors(colorRampKey) {
-  const colorRamp = truncatedColorMaps[colorRampKey];
+  const colorRamp = _.get(truncatedColorMaps[colorRampKey], 'value');
   return colorUtil.getLegendColors(colorRamp);
 }
 

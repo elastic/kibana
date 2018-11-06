@@ -25,6 +25,7 @@ import {
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { optInToTelemetry } from '../../../lib/telemetry';
+import { FormattedMessage } from '@kbn/i18n/react';
 const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
 const securityDocumentationLink = `${esBase}/security-settings.html`;
 
@@ -56,12 +57,15 @@ export class StartTrial extends React.PureComponent {
     return (
       <EuiOverlayMask>
         <EuiModal
-          className="licenseManagement__modal"
+          className="licManagement__modal"
           onClose={this.cancel}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
-            Start your free 30-day trial
+              <FormattedMessage
+                id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalTitle"
+                defaultMessage="Start your free 30-day trial"
+              />
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
@@ -69,40 +73,97 @@ export class StartTrial extends React.PureComponent {
               <div>
                 <EuiText>
                   <p>
-                This trial is for the full set of{' '}
-                    <EuiLink
-                      href="https://www.elastic.co/subscriptions/xpack"
-                      target="_blank"
-                    >
-                  Platinum features
-                    </EuiLink> of the Elastic Stack. You&apos;ll get immediate access to:
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription"
+                      defaultMessage="This trial is for the full set of {platinumLicenseFeaturesLinkText} of the Elastic Stack.
+                      You&apos;ll get immediate access to:"
+                      values={{
+                        platinumLicenseFeaturesLinkText: (
+                          <EuiLink
+                            href="https://www.elastic.co/subscriptions/xpack"
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.platinumLicenseFeaturesLinkText"
+                              defaultMessage="Platinum features"
+                            />
+                          </EuiLink>
+                        )
+                      }}
+                    />
                   </p>
                   <ul>
-                    <li>Machine learning</li>
-                    <li>Alerting</li>
-                    <li>Graph capabilities</li>
-                    <li>JDBC connectivity for SQL</li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.mashingLearningFeatureTitle"
+                        defaultMessage="Machine learning"
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.alertingFeatureTitle"
+                        defaultMessage="Alerting"
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.graphCapabilitiesFeatureTitle"
+                        defaultMessage="Graph capabilities"
+                      />
+                    </li>
+                    <li>
+                      <FormattedMessage
+                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.dateBaseConnectivityFeatureTitle"
+                        defaultMessage="{jdbcStandart} connectivity for {sqlDateBase}"
+                        values={{
+                          jdbcStandart: 'JDBC',
+                          sqlDateBase: 'SQL'
+                        }}
+                      />
+                    </li>
                   </ul>
                   <p>
-                Security features, such as authentication (native, AD/LDAP, SAML,
-                PKI), role-based access control, and auditing, require
-                configuration. See the{' '}
-                    <EuiLink
-                      href={securityDocumentationLink}
-                      target="_blank"
-                    >
-                  documentation
-                    </EuiLink>{' '}
-                for instructions.
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityFeaturesConfigurationDescription"
+                      defaultMessage="Security features, such as authentication ({authenticationTypeList}),
+                      role-based access control, and auditing, require configuration.
+                      See the {securityDocumentationLinkText} for instructions."
+                      values={{
+                        authenticationTypeList: 'native, AD/LDAP, SAML, PKI',
+                        securityDocumentationLinkText: (
+                          <EuiLink
+                            href={securityDocumentationLink}
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              // eslint-disable-next-line max-len
+                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityDocumentationLinkText"
+                              defaultMessage="documentation"
+                            />
+                          </EuiLink>
+                        )
+                      }}
+                    />
                   </p>
                   <p>
-                By starting this trial, you agree that it is subject to these{' '}
-                    <EuiLink
-                      href="https://elastic.co/legal/trial_license"
-                      target="_blank"
-                    >
-                  terms and conditions
-                    </EuiLink>.
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsDescription"
+                      defaultMessage="By starting this trial, you agree that it is subject to these {termsAndConditionsLinkText}."
+                      values={{
+                        termsAndConditionsLinkText: (
+                          <EuiLink
+                            href="https://elastic.co/legal/trial_license"
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              // eslint-disable-next-line max-len
+                              id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsLinkText"
+                              defaultMessage="terms and conditions"
+                            />
+                          </EuiLink>
+                        )
+                      }}
+                    />
                   </p>
                 </EuiText>
               </div>
@@ -114,18 +175,21 @@ export class StartTrial extends React.PureComponent {
               <EuiFlexItem grow={false}>
                 <TelemetryOptIn isStartTrial={true} ref={(ref) => {this.telemetryOptIn = ref; }}/>
               </EuiFlexItem>
-              <EuiFlexItem grow={false} className="licenseManagement__ieFlex">
+              <EuiFlexItem grow={false} className="licManagement__ieFlex">
                 <EuiFlexGroup responsive={false}>
-                  <EuiFlexItem grow={false} className="licenseManagement__ieFlex">
+                  <EuiFlexItem grow={false} className="licManagement__ieFlex">
                     <EuiButtonEmpty
                       data-test-subj="confirmModalCancelButton"
                       onClick={this.cancel}
                       buttonRef={this.cancelRef}
                     >
-                Cancel
+                      <FormattedMessage
+                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModal.cancelButtonLabel"
+                        defaultMessage="Cancel"
+                      />
                     </EuiButtonEmpty>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false} className="licenseManagement__ieFlex">
+                  <EuiFlexItem grow={false} className="licManagement__ieFlex">
                     <EuiButton
                       data-test-subj="confirmModalConfirmButton"
                       onClick={this.startLicenseTrial}
@@ -133,7 +197,10 @@ export class StartTrial extends React.PureComponent {
                       buttonRef={this.confirmRef}
                       color="primary"
                     >
-              Start my trial
+                      <FormattedMessage
+                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModal.startTrialButtonLabel"
+                        defaultMessage="Start my trial"
+                      />
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -152,27 +219,42 @@ export class StartTrial extends React.PureComponent {
     }
     const description = (
       <span>
-        Experience what security, machine learning, and all our other{' '}
-        <EuiLink
-          href="https://www.elastic.co/subscriptions/xpack"
-          target="_blank"
-        >
-          Platinum features
-        </EuiLink>{' '}
-        have to offer.
+        <FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.startTrial.platinumFeaturesExperienceDescription"
+          defaultMessage="Experience what security, machine learning, and all our other {platinumLicenseFeaturesLinkText} have to offer."
+          values={{
+            platinumLicenseFeaturesLinkText: (
+              <EuiLink
+                href="https://www.elastic.co/subscriptions/xpack"
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.licenseMgmt.licenseDashboard.startTrial.platinumLicenseFeaturesLinkText"
+                  defaultMessage="Platinum features"
+                />
+              </EuiLink>
+            )
+          }}
+        />
       </span>
     );
 
     const footer = (
       <EuiButton data-test-subj="startTrialButton" onClick={() => this.setState({ showConfirmation: true })}>
-        Start trial
+        <FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.startTrial.startTrialButtonLabel"
+          defaultMessage="Start trial"
+        />
       </EuiButton>
     );
     return (
       <EuiFlexItem>
         {this.acknowledgeModal()}
         <EuiCard
-          title="Start a 30-day trial"
+          title={(<FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.startTrialTitle"
+            defaultMessage="Start a 30-day trial"
+          />)}
           description={description}
           footer={footer}
         />

@@ -11,7 +11,8 @@ body.canvas-isFullscreen {
   }
 
   // hide all the interface parts
-  nav.global-nav,
+  nav.global-nav, // K6 global side nav
+  .header-global-wrapper, // K7 global top nav
   .canvasLayout__stageHeader,
   .canvasLayout__sidebar,
   .canvasLayout__footer,
@@ -19,7 +20,13 @@ body.canvas-isFullscreen {
     display: none;
   }
 
+  // remove space for K7 global top nav
+  .header-global-wrapper + .app-wrapper {
+    top: 0;
+  }
+
   .canvasLayout__stageContentOverflow {
+    display: block; // fixes center alignment for Safari
     overflow: visible;
     position: static;
     top: auto;

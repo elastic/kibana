@@ -32,7 +32,8 @@ import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
   createSearchItems,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { MultiMetricJobServiceProvider } from './create_job_service';
@@ -64,6 +65,7 @@ module
   .controller('MlCreateMultiMetricJob', function (
     $scope,
     $route,
+    $timeout,
     Private,
     AppState) {
 
@@ -128,6 +130,7 @@ module
       formValid: false,
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
+      cardinalityValidator: { status: 0, message: '' },
       aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
       fields: [],
       splitFields: [],
@@ -200,6 +203,7 @@ module
       description: '',
       jobGroups: [],
       useDedicatedIndex: false,
+      enableModelPlot: false,
       isSparseData: false,
       modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT
     };
@@ -495,6 +499,8 @@ module
                     $scope.formConfig.end,
                     'explorer');
 
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
+
                   loadCharts();
                 })
                 .catch((resp) => {
@@ -508,6 +514,9 @@ module
           });
       }
     };
+
+    // expose this function so it can be used in the enable model plot checkbox directive
+    $scope.getJobFromConfig = mlMultiMetricJobService.getJobFromConfig;
 
     addJobValidationMethods($scope, mlMultiMetricJobService);
 
@@ -547,6 +556,7 @@ module
                   }
                 } else {
                   $scope.jobState = JOB_STATE.FINISHED;
+                  focusOnResultsLink('job_finished_view_results_link', $timeout);
                 }
                 jobCheck();
               });

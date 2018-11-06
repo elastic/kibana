@@ -16,10 +16,9 @@ import {
 } from '../../../../style/variables';
 import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
-
 import { StickyProperties } from '../../../shared/StickyProperties';
 import { Tab, HeaderMedium } from '../../../shared/UIComponents';
-import DiscoverButton from '../../../shared/DiscoverButton';
+import { DiscoverButton } from '../../../shared/DiscoverButton';
 import {
   PropertiesTable,
   getPropertyTabNames
@@ -94,28 +93,33 @@ function DetailView({ errorGroup, urlParams, location }) {
     {
       label: 'Timestamp',
       fieldName: '@timestamp',
-      val: timestamp
+      val: timestamp,
+      width: '50%'
     },
     {
       fieldName: REQUEST_URL_FULL,
       label: 'URL',
       val: url,
-      truncated: true
+      truncated: true,
+      width: '50%'
     },
     {
       label: 'Request method',
       fieldName: 'context.request.method',
-      val: get(errorGroup.data, 'error.context.request.method', 'N/A')
+      val: get(errorGroup.data, 'error.context.request.method', 'N/A'),
+      width: '25%'
     },
     {
       label: 'Handled',
       fieldName: 'error.exception.handled',
-      val: get(errorGroup.data, 'error.error.exception.handled', 'N/A')
+      val: get(errorGroup.data, 'error.error.exception.handled', 'N/A'),
+      width: '25%'
     },
     {
       label: 'User ID',
       fieldName: USER_ID,
-      val: get(errorGroup.data.error, USER_ID, 'N/A')
+      val: get(errorGroup.data.error, USER_ID, 'N/A'),
+      width: '50%'
     }
   ];
 
@@ -143,7 +147,7 @@ function DetailView({ errorGroup, urlParams, location }) {
       interval: 'auto',
       query: {
         language: 'lucene',
-        query: `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:${groupId}${
+        query: `${SERVICE_NAME}:"${serviceName}" AND ${ERROR_GROUP_ID}:"${groupId}"${
           urlParams.kuery ? ` AND ${urlParams.kuery}` : ``
         }`
       },
@@ -166,7 +170,9 @@ function DetailView({ errorGroup, urlParams, location }) {
         </DiscoverButton>
       </HeaderContainer>
 
-      <StickyProperties stickyProperties={stickyProperties} />
+      <TabContentContainer>
+        <StickyProperties stickyProperties={stickyProperties} />
+      </TabContentContainer>
 
       <TabContainer>
         {tabs.map(key => {

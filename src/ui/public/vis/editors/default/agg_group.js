@@ -24,6 +24,7 @@ import './agg_add';
 import { uiModules } from '../../../modules';
 import aggGroupTemplate from './agg_group.html';
 import { move } from '../../../utils/collection';
+import { aggGroupNameMaps } from './agg_group_names';
 
 uiModules
   .get('app/visualize')
@@ -35,6 +36,7 @@ uiModules
       scope: true,
       link: function ($scope, $el, attr) {
         $scope.groupName = attr.groupName;
+        $scope.groupNameLabel = aggGroupNameMaps()[$scope.groupName];
         $scope.$bind('group', 'state.aggs.bySchemaGroup["' + $scope.groupName + '"]');
         $scope.$bind('schemas', 'vis.type.schemas["' + $scope.groupName + '"]');
 

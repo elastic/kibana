@@ -19,11 +19,12 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { flattenDeep } from 'lodash';
+import { debounce, flattenDeep } from 'lodash';
 import { Header } from './components/header';
 import { Flyout } from './components/flyout';
 import { Relationships } from './components/relationships';
 import { Table } from './components/table';
+import { toastNotifications } from 'ui/notify';
 
 import {
   EuiSpacer,
@@ -50,7 +51,7 @@ import {
   getRelationships,
   getSavedObjectLabel,
 } from '../../lib';
-import { ensureMinimumTime } from '../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export const INCLUDED_TYPES = [
   'index-pattern',
@@ -59,7 +60,7 @@ export const INCLUDED_TYPES = [
   'search',
 ];
 
-export class ObjectsTable extends Component {
+class ObjectsTableUI extends Component {
   static propTypes = {
     savedObjectsClient: PropTypes.object.isRequired,
     indexPatterns: PropTypes.object.isRequired,
@@ -101,9 +102,15 @@ export class ObjectsTable extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    this._isMounted = true;
     this.fetchSavedObjects();
     this.fetchCounts();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+    this.debouncedFetch.cancel();
   }
 
   fetchCounts = async () => {
@@ -150,51 +157,68 @@ export class ObjectsTable extends Component {
     }));
   };
 
-  fetchSavedObjects = async () => {
+  fetchSavedObjects = () => {
+    this.setState({
+      isSearching: true,
+    }, this.debouncedFetch);
+  }
+
+  debouncedFetch = debounce(async () => {
     const { savedObjectsClient } = this.props;
-    const { activeQuery, page, perPage } = this.state;
+    const { activeQuery: query, page, perPage } = this.state;
+    const { queryText, visibleTypes } = parseQuery(query);
+    const findOptions = {
+      search: queryText ? `${queryText}*` : undefined,
+      perPage,
+      page: page + 1,
+      fields: ['title', 'id'],
+      searchFields: ['title'],
+      type: INCLUDED_TYPES.filter(
+        type => !visibleTypes || visibleTypes.includes(type)
+      ),
+    };
+    if (findOptions.type.length > 1) {
+      findOptions.sortField = 'type';
+    }
 
-    this.setState({ isSearching: true });
-
-    const { queryText, visibleTypes } = parseQuery(activeQuery);
-
-    let savedObjects = [];
-    let filteredItemCount = 0;
-
-    const type = INCLUDED_TYPES.filter(
-      type => !visibleTypes || visibleTypes.includes(type)
-    );
-
-    // TODO: is there a good way to stop existing calls if the input changes?
-    await ensureMinimumTime(
-      (async () => {
-        const filteredSavedObjects = await savedObjectsClient.find({
-          search: queryText ? `${queryText}*` : undefined,
-          perPage,
-          page: page + 1,
-          sortField: 'type',
-          fields: ['title', 'id'],
-          searchFields: ['title'],
-          type,
+    let resp;
+    try {
+      resp = await savedObjectsClient.find(findOptions);
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({
+          isSearching: false,
         });
+      }
+      toastNotifications.addDanger({
+        title: `Unable find saved objects`,
+        text: `${error}`,
+      });
+      return;
+    }
 
-        savedObjects = filteredSavedObjects.savedObjects.map(savedObject => ({
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.setState(({ activeQuery }) => {
+      // ignore results for old requests
+      if (activeQuery.text !== query.text) {
+        return {};
+      }
+
+      return {
+        savedObjects: resp.savedObjects.map(savedObject => ({
           title: savedObject.attributes.title,
           type: savedObject.type,
           id: savedObject.id,
           icon: getSavedObjectIcon(savedObject.type),
-        }));
-
-        filteredItemCount = filteredSavedObjects.total;
-      })()
-    );
-
-    this.setState({
-      savedObjects,
-      filteredItemCount,
-      isSearching: false,
+        })),
+        filteredItemCount: resp.total,
+        isSearching: false,
+      };
     });
-  };
+  }, 300);
 
   refreshData = async () => {
     await Promise.all([this.fetchSavedObjects(), this.fetchCounts()]);
@@ -383,6 +407,7 @@ export class ObjectsTable extends Component {
       isDeleting,
       selectedSavedObjects,
     } = this.state;
+    const { intl } = this.props;
 
     if (!isShowingDeleteConfirmModal) {
       return null;
@@ -406,20 +431,47 @@ export class ObjectsTable extends Component {
 
       modal = (
         <EuiConfirmModal
-          title="Delete saved objects"
+          title={
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModalTitle"
+              defaultMessage="Delete saved objects"
+            />
+          }
           onCancel={onCancel}
           onConfirm={onConfirm}
-          cancelButtonText="Cancel"
-          confirmButtonText={isDeleting ? 'Deleting...' : 'Delete'}
+          cancelButtonText={(
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          )}
+          confirmButtonText={
+            isDeleting
+              ? (<FormattedMessage
+                id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
+                defaultMessage="Deleting…"
+              />)
+              :  (<FormattedMessage
+                id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+                defaultMessage="Delete"
+              />)
+          }
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
-          <p>This action will delete the following saved objects:</p>
+          <p>
+            <FormattedMessage
+              id="kbn.management.objects.deleteSavedObjectsConfirmModalDescription"
+              defaultMessage="This action will delete the following saved objects:"
+            />
+          </p>
           <EuiInMemoryTable
             items={selectedSavedObjects}
             columns={[
               {
                 field: 'type',
-                name: 'Type',
+                name: intl.formatMessage({
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName', defaultMessage: 'Type'
+                }),
                 width: '50px',
                 render: type => (
                   <EuiToolTip
@@ -432,7 +484,9 @@ export class ObjectsTable extends Component {
               },
               {
                 field: 'id',
-                name: 'Id/Name',
+                name: intl.formatMessage({
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id/Name'
+                }),
               },
             ]}
             pagination={true}
@@ -464,18 +518,34 @@ export class ObjectsTable extends Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={`Export ${filteredItemCount} ${filteredItemCount === 1 ? 'object' : 'objects'}`}
+          title={(<FormattedMessage
+            id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
+            defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+            values={{
+              filteredItemCount
+            }}
+          />)}
           onCancel={() =>
             this.setState({ isShowingExportAllOptionsModal: false })
           }
           onConfirm={this.onExportAll}
-          cancelButtonText="Cancel"
-          confirmButtonText="Export All"
+          cancelButtonText={(
+            <FormattedMessage id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel" defaultMessage="Cancel"/>
+          )}
+          confirmButtonText={(
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+              defaultMessage="Export All"
+            />
+          )}
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
           <p>
-            Select which types to export. The number in parentheses indicates
-            how many of this type are available to export.
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+              defaultMessage="Select which types to export. The number in parentheses indicates
+              how many of this type are available to export."
+            />
           </p>
           <EuiCheckboxGroup
             options={exportAllOptions}
@@ -522,7 +592,11 @@ export class ObjectsTable extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}>
+          <EuiPageContent
+            verticalPosition="center"
+            horizontalPosition="center"
+            style={{ maxWidth: 1000, marginTop: 16, marginBottom: 16 }}
+          >
             {this.renderFlyout()}
             {this.renderRelationships()}
             {this.renderDeleteConfirmModal()}
@@ -560,3 +634,5 @@ export class ObjectsTable extends Component {
     );
   }
 }
+
+export const ObjectsTable = injectI18n(ObjectsTableUI);

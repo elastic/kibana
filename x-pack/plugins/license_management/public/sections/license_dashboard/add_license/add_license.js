@@ -8,19 +8,28 @@ import React from 'react';
 import { BASE_PATH } from '../../../../common/constants';
 
 import { EuiCard, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const AddLicense = ({ uploadPath = `#${BASE_PATH}upload_license` }) => {
   return (
     <EuiCard
-      title="Update your license"
-      description="If you already have a new license, upload it now."
+      title={(<FormattedMessage
+        id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseTitle"
+        defaultMessage="Update your license"
+      />)}
+      description={(<FormattedMessage
+        id="xpack.licenseMgmt.licenseDashboard.addLicense.useAvailableLicenseDescription"
+        defaultMessage="If you already have a new license, upload it now."
+      />)}
       footer={
         <EuiButton
           data-test-subj="updateLicenseButton"
-          className="licenseManagement__marginTop"
           href={uploadPath}
         >
-          Update license
+          <FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseButtonLabel"
+            defaultMessage="Update license"
+          />
         </EuiButton>
       }
     />

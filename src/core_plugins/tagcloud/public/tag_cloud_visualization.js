@@ -23,7 +23,7 @@ import { take } from 'rxjs/operators';
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
 
-
+import { I18nProvider } from '@kbn/i18n/react';
 import { Label } from './label';
 import { FeedbackMessage } from './feedback_message';
 
@@ -35,7 +35,7 @@ export class TagCloudVisualization {
     this._containerNode = node;
 
     const cloudContainer = document.createElement('div');
-    cloudContainer.classList.add('tagcloud-vis');
+    cloudContainer.classList.add('tgcVis');
     cloudContainer.setAttribute('data-test-subj', 'tagCloudVisualization');
     this._containerNode.appendChild(cloudContainer);
 
@@ -57,7 +57,7 @@ export class TagCloudVisualization {
     this._feedbackNode = document.createElement('div');
     this._containerNode.appendChild(this._feedbackNode);
     this._feedbackMessage = React.createRef();
-    render(<FeedbackMessage ref={this._feedbackMessage} />, this._feedbackNode);
+    render(<I18nProvider><FeedbackMessage ref={this._feedbackMessage} /></I18nProvider>, this._feedbackNode);
 
     this._labelNode = document.createElement('div');
     this._containerNode.appendChild(this._labelNode);

@@ -20,9 +20,18 @@
 import { extractPugMessages } from './pug';
 
 describe('dev/i18n/extractors/pug', () => {
-  test('extracts messages from pug template', () => {
+  test('extracts messages from pug template with interpolation', () => {
     const source = Buffer.from(`\
-#{i18n('message-id', { defaultMessage: 'Default message', context: 'Message context' })}
+#{i18n('message-id', { defaultMessage: 'Default message', description: 'Message description' })}
+`);
+    const [messageObject] = extractPugMessages(source);
+
+    expect(messageObject).toMatchSnapshot();
+  });
+
+  test('extracts messages from pug template without interpolation', () => {
+    const source = Buffer.from(`\
+.kibanaWelcomeText(data-error-message=i18n('message-id', { defaultMessage: 'Default message', description: 'Message description' }))
 `);
     const [messageObject] = extractPugMessages(source);
 
@@ -31,7 +40,7 @@ describe('dev/i18n/extractors/pug', () => {
 
   test('throws on empty id', () => {
     const source = Buffer.from(`\
-#{i18n('', { defaultMessage: 'Default message', context: 'Message context' })}
+h1= i18n('', { defaultMessage: 'Default message', description: 'Message description' })
 `);
 
     expect(() => extractPugMessages(source).next()).toThrowErrorMatchingSnapshot();
@@ -39,7 +48,7 @@ describe('dev/i18n/extractors/pug', () => {
 
   test('throws on missing default message', () => {
     const source = Buffer.from(`\
-#{i18n('message-id', { context: 'Message context' })}
+#{i18n('message-id', { description: 'Message description' })}
 `);
 
     expect(() => extractPugMessages(source).next()).toThrowErrorMatchingSnapshot();
