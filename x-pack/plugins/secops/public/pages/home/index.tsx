@@ -16,6 +16,7 @@ import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { Sort } from '../../components/timeline/body/sort';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
+import { ECS } from '../../components/timeline/ecs';
 import {
   OnColumnSorted,
   OnDataProviderRemoved,
@@ -23,6 +24,7 @@ import {
   OnRangeSelected,
 } from '../../components/timeline/events';
 import { WhoAmI } from '../../containers/who_am_i';
+import { mockECSData } from '../mock/mock_ecs';
 
 import { NotFoundPage } from '../404';
 import { Hosts } from '../hosts';
@@ -50,6 +52,14 @@ const sort: Sort = {
   sortDirection: 'descending',
 };
 
+// Pass the data to the TimeLine
+// Pass the column and row renders down as well
+export interface EventRenderer {
+  isInstance: (data: ECS) => boolean;
+  renderMultiClolumn: (data: ECS) => React.ReactNode;
+  renderColumn: (columnName: string, data: ECS) => React.ReactNode;
+}
+
 export const HomePage = pure(() => (
   <PageContainer>
     <Navigation />
@@ -66,6 +76,7 @@ export const HomePage = pure(() => (
         <Timeline
           columnHeaders={headers}
           dataProviders={mockDataProviders}
+          data={mockECSData}
           onColumnSorted={onColumnSorted}
           onDataProviderRemoved={onDataProviderRemoved}
           onFilterChange={onFilterChange}
