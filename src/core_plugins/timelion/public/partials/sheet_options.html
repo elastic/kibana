@@ -10,10 +10,7 @@
       <label
         for="timelionColCount"
         i18n-id="timelion.topNavMenu.options.columnsCountLabel"
-        i18n-default-message="Columns {smallHelpText}"
-        i18n-values="{
-          smallHelpText: '<small>' + translations.sheetOptionsColumnsHelpText + '</small>',
-        }"
+        i18n-default-message="Columns (Column count must divide evenly into 12)"
       ></label>
       <select class="form-control"
         id="timelionColCount"
@@ -26,10 +23,7 @@
       <label
         for="timelionRowCount"
         i18n-id="timelion.topNavMenu.options.rowsCountLabel"
-        i18n-default-message="Rows {smallHelpText}"
-        i18n-values="{
-          smallHelpText: '<small>' + translations.sheetOptionsRowsHelpText + '</small>',
-        }"
+        i18n-default-message="Rows (This is a target based on the current window height)"
       ></label>
       <select class="form-control"
         id="timelionRowCount"

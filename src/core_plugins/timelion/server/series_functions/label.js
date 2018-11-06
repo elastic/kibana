@@ -32,8 +32,7 @@ export default new Chainable('label', {
       types: ['string'],
       help: i18n.translate('timelion.help.functions.label.args.labelHelpText', {
         defaultMessage:
-          'Legend value for series. You can use $1, $2, etc, in the string to match up with the \
-regex capture groups',
+          'Legend value for series. You can use $1, $2, etc, in the string to match up with the regex capture groups',
       }),
     },
     {

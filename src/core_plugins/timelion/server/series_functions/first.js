@@ -29,8 +29,7 @@ export default new Chainable('first', {
     }
   ],
   help: i18n.translate('timelion.help.functions.firstHelpText', {
-    defaultMessage:
-      'This is an internal function that simply returns the input seriesList. Don\'t use this',
+    defaultMessage: `This is an internal function that simply returns the input seriesList. Don't use this`,
   }),
   fn: function firstFn(args) {
     return alter(args, function (eachSeries) {

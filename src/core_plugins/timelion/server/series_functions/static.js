@@ -30,8 +30,7 @@ export default new Datasource ('static', {
       types: ['number', 'string'],
       help: i18n.translate('timelion.help.functions.static.args.valueHelpText', {
         defaultMessage:
-          'The single value to to display, you can also pass several values and I will interpolate \
-them evenly across your time range.',
+          'The single value to to display, you can also pass several values and I will interpolate them evenly across your time range.',
       }),
     },
     {

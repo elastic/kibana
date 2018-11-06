@@ -81,8 +81,7 @@ ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (g
       types: ['number', 'seriesList', 'null'],
       help: i18n.translate('timelion.help.functions.condition.args.ifHelpText', {
         defaultMessage:
-          'The value to which the point will be compared. \
-If you pass a seriesList here the first series will be used',
+          'The value to which the point will be compared. If you pass a seriesList here the first series will be used',
       }),
     },
     {
@@ -90,8 +89,7 @@ If you pass a seriesList here the first series will be used',
       types: ['number', 'seriesList', 'null'],
       help: i18n.translate('timelion.help.functions.condition.args.thenHelpText', {
         defaultMessage:
-          'The value the point will be set to if the comparison is true. \
-If you pass a seriesList here the first series will be used',
+          'The value the point will be set to if the comparison is true. If you pass a seriesList here the first series will be used',
       }),
     },
     {
@@ -99,8 +97,7 @@ If you pass a seriesList here the first series will be used',
       types: ['number', 'seriesList', 'null'],
       help: i18n.translate('timelion.help.functions.condition.args.elseHelpText', {
         defaultMessage:
-          'The value the point will be set to if the comparison is false. \
-If you pass a seriesList here the first series will be used',
+          'The value the point will be set to if the comparison is false. If you pass a seriesList here the first series will be used',
       }),
     }
   ],

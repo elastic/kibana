@@ -40,8 +40,7 @@ If passing a seriesList it must contain exactly 1 series.',
   ],
   help: i18n.translate('timelion.help.functions.maxHelpText', {
     defaultMessage:
-      'Maximum values of one or more series in a seriesList to each position, in each series, \
-of the input seriesList',
+      'Maximum values of one or more series in a seriesList to each position, in each series, of the input seriesList',
   }),
   fn: function maxFn(args) {
     return reduce(args, function (a, b) {

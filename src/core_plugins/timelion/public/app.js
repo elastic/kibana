@@ -113,15 +113,6 @@ app.controller('timelion', function (
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;
 
-  $scope.translations = {
-    sheetOptionsColumnsHelpText: i18n('timelion.topNavMenu.options.columnsCountHelpText', {
-      defaultMessage: 'Column count must divide evenly into 12',
-    }),
-    sheetOptionsRowsHelpText: i18n('timelion.topNavMenu.options.rowsCountHelpText', {
-      defaultMessage: 'This is a target based on the current window height',
-    }),
-  };
-
   $scope.topNavMenu = [{
     key: 'new',
     description: i18n('timelion.topNavMenu.newDescription', {
@@ -158,7 +149,7 @@ app.controller('timelion', function (
           toastNotifications.addSuccess(i18n(
             'timelion.topNavMenu.delete.modal.successNotificationText',
             {
-              defaultMessage: 'Deleted \'{title}\'',
+              defaultMessage: `Deleted '{title}'`,
               values: { title },
             }
           ));
@@ -172,14 +163,14 @@ app.controller('timelion', function (
           defaultMessage: 'Delete',
         }),
         title: i18n('timelion.topNavMenu.delete.modalTitle', {
-          defaultMessage: 'Delete Timelion sheet \'{title}\'?',
+          defaultMessage: `Delete Timelion sheet '{title}'?`,
           values: { title }
         }),
       };
 
       confirmModal(
         i18n('timelion.topNavMenu.delete.modal.warningText', {
-          defaultMessage: 'You can\'t recover deleted sheets.',
+          defaultMessage: `You can't recover deleted sheets.`,
         }),
         confirmModalOptions
       );
@@ -332,7 +323,7 @@ app.controller('timelion', function (
       if (id) {
         toastNotifications.addSuccess(
           i18n('timelion.saveSheet.successNotificationText', {
-            defaultMessage: 'Saved sheet \'{title}\'',
+            defaultMessage: `Saved sheet '{title}'`,
             values: { title: savedSheet.title },
           })
         );
@@ -356,7 +347,7 @@ app.controller('timelion', function (
         if (id) {
           toastNotifications.addSuccess(
             i18n('timelion.saveExpression.successNotificationText', {
-              defaultMessage: 'Saved expression \'{title}\'',
+              defaultMessage: `Saved expression '{title}'`,
               values: { title: savedExpression.title },
             }),
           );

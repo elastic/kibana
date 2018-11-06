@@ -36,10 +36,10 @@ export default new Chainable('holt', {
       types: ['number'],
       help: i18n.translate('timelion.help.functions.holt.args.alphaHelpText', {
         defaultMessage:
-          '\n\
-        Smoothing weight from 0 to 1.\n\
-        Increasing alpha will make the new series more closely follow the original.\n\
-        Lowering it will make the series smoother',
+          `
+        Smoothing weight from 0 to 1.
+        Increasing alpha will make the new series more closely follow the original.
+        Lowering it will make the series smoother`,
       }),
     },
     {
@@ -47,10 +47,10 @@ export default new Chainable('holt', {
       types: ['number'],
       help: i18n.translate('timelion.help.functions.holt.args.betaHelpText', {
         defaultMessage:
-          '\n\
-        Trending weight from 0 to 1.\n\
-        Increasing beta will make rising/falling lines continue to rise/fall longer.\n\
-        Lowering it will make the function learn the new trend faster',
+          `
+        Trending weight from 0 to 1.
+        Increasing beta will make rising/falling lines continue to rise/fall longer.
+        Lowering it will make the function learn the new trend faster`,
       }),
     },
     {
@@ -58,11 +58,11 @@ export default new Chainable('holt', {
       types: ['number'],
       help: i18n.translate('timelion.help.functions.holt.args.gammaHelpText', {
         defaultMessage:
-          '\n\
-        Seasonal weight from 0 to 1. Does your data look like a wave?\n\
-        Increasing this will give recent seasons more importance, thus changing the wave form faster.\n\
-        Lowering it will reduce the importance of new seasons, making history more important.\n\
-        ',
+          `
+        Seasonal weight from 0 to 1. Does your data look like a wave?
+        Increasing this will give recent seasons more importance, thus changing the wave form faster.
+        Lowering it will reduce the importance of new seasons, making history more important.
+        `,
       }),
     },
     {
@@ -78,19 +78,19 @@ export default new Chainable('holt', {
       types: ['number', 'null'],
       help: i18n.translate('timelion.help.functions.holt.args.sampleHelpText', {
         defaultMessage:
-          '\n\
-      The number of seasons to sample before starting to "predict" in a seasonal series.\n\
-      (Only useful with gamma, Default: all)',
+          `
+      The number of seasons to sample before starting to "predict" in a seasonal series.
+      (Only useful with gamma, Default: all)`,
       }),
     }
   ],
   help: i18n.translate('timelion.help.functions.holtHelpText', {
     defaultMessage:
-      '\n\
-    Sample the beginning of a series and use it to forecast what should happen\n\
-    via several optional parameters. In general, like everything, this is crappy at predicting the\n\
-    future. You\'re much better off using it to predict what should be happening right now, for the\n\
-    purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.',
+      `
+    Sample the beginning of a series and use it to forecast what should happen
+    via several optional parameters. In general, like everything, this is crappy at predicting the
+    future. You're much better off using it to predict what should be happening right now, for the
+    purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.`,
   }),
   fn: function expsmoothFn(args, tlConfig) {
 

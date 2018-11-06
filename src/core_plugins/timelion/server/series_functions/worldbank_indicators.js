@@ -29,7 +29,7 @@ export default new Datasource ('worldbank_indicators', {
       name: 'country', // countries/all/indicators/SP.POP.TOTL
       types: ['string', 'null'],
       help: i18n.translate('timelion.help.functions.worldbankIndicators.args.countryHelpText', {
-        defaultMessage: 'Worldbank country identifier. Usually the country\'s 2 letter code',
+        defaultMessage: `Worldbank country identifier. Usually the country's 2 letter code`,
       }),
     },
     {
@@ -37,8 +37,8 @@ export default new Datasource ('worldbank_indicators', {
       types: ['string', 'null'],
       help: i18n.translate('timelion.help.functions.worldbankIndicators.args.indicatorHelpText', {
         defaultMessage:
-          'The indicator code to use. You\'ll have to look this up on {worldbankUrl}. \
-Often pretty obtuse. E.g., {indicatorExample} is population',
+          `The indicator code to use. You'll have to look this up on {worldbankUrl}. \
+Often pretty obtuse. E.g., {indicatorExample} is population`,
         values: {
           worldbankUrl: 'data.worldbank.org',
           indicatorExample: 'SP.POP.TOTL',
@@ -49,11 +49,11 @@ Often pretty obtuse. E.g., {indicatorExample} is population',
   aliases: ['wbi'],
   help: i18n.translate('timelion.help.functions.worldbankIndicatorsHelpText', {
     defaultMessage:
-      '\n\
-    [experimental]\n\
-    Pull data from {worldbankUrl} using the country name and indicator. The worldbank provides\n\
-    mostly yearly data, and often has no data for the current year. Try {offsetQuery} if you get no data for recent\n\
-    time ranges.',
+      `
+    [experimental]
+    Pull data from {worldbankUrl} using the country name and indicator. The worldbank provides
+    mostly yearly data, and often has no data for the current year. Try {offsetQuery} if you get no data for recent
+    time ranges.`,
     values: {
       worldbankUrl: 'http://data.worldbank.org/',
       offsetQuery: 'offset=-1y',

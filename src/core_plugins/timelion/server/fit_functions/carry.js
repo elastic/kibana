@@ -30,7 +30,7 @@ export default function carry(dataTuples, targetTuples) {
   if (dataTuples.length > targetTuples.length) {
     throw new Error (
       i18n.translate('timelion.fitFunctions.carry.downSampleErrorMessage', {
-        defaultMessage: 'Don\'t use the \'carry\' fit method to down sample, use \'scale\' or \'average\'',
+        defaultMessage: `Don't use the 'carry' fit method to down sample, use 'scale' or 'average'`,
       })
     );
   }

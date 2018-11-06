@@ -40,11 +40,11 @@ export default new Datasource ('worldbank', {
   aliases: ['wb'],
   help: i18n.translate('timelion.help.functions.worldbankHelpText', {
     defaultMessage:
-      '\n\
-    [experimental]\n\
-    Pull data from {worldbankUrl} using path to series.\n\
-    The worldbank provides mostly yearly data, and often has no data for the current year.\n\
-    Try {offsetQuery} if you get no data for recent time ranges.',
+      `
+    [experimental]
+    Pull data from {worldbankUrl} using path to series.
+    The worldbank provides mostly yearly data, and often has no data for the current year.
+    Try {offsetQuery} if you get no data for recent time ranges.`,
     values: {
       worldbankUrl: 'http://data.worldbank.org/',
       offsetQuery: 'offset=-1y',

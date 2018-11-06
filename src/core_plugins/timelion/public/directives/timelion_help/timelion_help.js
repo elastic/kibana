@@ -47,7 +47,7 @@ app.directive('timelionHelp', function ($http, i18n) {
             defaultMessage: 'Previous',
           }),
           dontShowHelpButtonLabel: i18n('timelion.help.dontShowHelpButtonLabel', {
-            defaultMessage: 'Don\'t show this again',
+            defaultMessage: `Don't show this again`,
           }),
           strongNextText: i18n('timelion.help.welcome.content.strongNextText', {
             defaultMessage: 'Next',
