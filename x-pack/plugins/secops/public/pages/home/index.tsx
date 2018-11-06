@@ -161,7 +161,7 @@ export const HomePage = pure(() => (
               padding: '5px',
             }}
           >
-            <EuiSearchBar />
+            <EuiSearchBar onChange={noop} />
           </div>
           <div
             data-test-subj="pane1ScrollContainer"
