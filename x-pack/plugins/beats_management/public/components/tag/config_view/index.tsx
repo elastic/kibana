@@ -69,9 +69,9 @@ export class ConfigView extends React.Component<ComponentProps, any> {
             <h2>
               {this.editMode
                 ? this.props.onSave
-                  ? 'Edit configuration'
-                  : 'View configuration'
-                : 'Add configuration'}
+                  ? 'Edit configuration block'
+                  : 'View configuration block'
+                : 'Add configuration block'}
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
