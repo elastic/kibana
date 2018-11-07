@@ -26,6 +26,7 @@ import { setupVersionCheck } from './version_check';
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
+import { setupPrototypePollutionValidation } from './prototype_pollution';
 
 export default async function (kbnServer, server, config) {
   kbnServer.server = new Hapi.Server(kbnServer.core.serverOptions);
@@ -118,4 +119,5 @@ export default async function (kbnServer, server, config) {
 
   setupVersionCheck(server, config);
   setupXsrf(server, config);
+  setupPrototypePollutionValidation(server);
 }
