@@ -41,8 +41,7 @@ export const createEventsResolvers = (
         filterQuery: parseFilterQuery(args.filterQuery || ''),
         fields: fields.map(f => f.replace('events.', '')),
       };
-      const data = libs.events.getEvents(req, options);
-      return data;
+      return libs.events.getEvents(req, options);
     },
   },
 });
