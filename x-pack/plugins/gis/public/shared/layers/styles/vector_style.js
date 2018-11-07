@@ -12,6 +12,8 @@ import {
   EuiFlexItem
 } from '@elastic/eui';
 import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
+import { ColorGradient } from '../../icons/color_gradient';
+import { getHexColorRangeStrings } from '../../utils/color_utils';
 import _ from 'lodash';
 
 
@@ -128,6 +130,10 @@ export class VectorStyle {
     };
   })();
 
+  getColorRamp() {
+    const { color } = this._descriptor.properties.fillColor.options;
+    return color ? <ColorGradient color={color}/> : null;
+  }
 
   static computeScaledValues(featureCollection, field) {
     const fieldName = field.name;
@@ -192,23 +198,20 @@ export class VectorStyle {
     if (!this._descriptor.properties[property] || !this._descriptor.properties[property].options) {
       return null;
     }
-
-    if (this._descriptor.properties[property].options.fieldValue) {
+    const { fieldValue, color } = this._descriptor.properties[property].options;
+    if (fieldValue && color) {
+      const colorRange = getHexColorRangeStrings(color, 8)
+        .reduce((accu, curColor, idx, srcArr) => {
+          accu = [ ...accu, idx / srcArr.length, curColor ];
+          return accu;
+        }, []);
       const originalFieldName = this._descriptor.properties[property].options.fieldValue.name;
       const targetName = VectorStyle.getComputedFieldName(originalFieldName);
       return [
         'interpolate',
         ['linear'],
         ['get', targetName],
-        0 / 8, '#F2F12D',
-        1 / 8, '#EED322',
-        2 / 8, '#E6B71E',
-        3 / 8, '#DA9C20',
-        4 / 8, '#CA8323',
-        5 / 8, '#B86B25',
-        6 / 8, '#A25626',
-        7 / 8, '#8B4225',
-        8 / 8, '#723122'
+        ...colorRange
       ];
     } else {
       return null;

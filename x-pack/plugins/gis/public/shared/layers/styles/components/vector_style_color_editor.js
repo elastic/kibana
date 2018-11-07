@@ -69,10 +69,11 @@ export class VectorStyleColorEditor extends React.Component {
       return staticStyle;
     };
 
-    const changeToDynamicColor = (field) => {
+    const changeToDynamicColor = (field, color) => {
       const dynamicStyle = {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
+          color,
           fieldValue: field ? field.value : undefined
         }
       };

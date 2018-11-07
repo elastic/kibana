@@ -141,6 +141,10 @@ export class ALayer {
     console.log('Icon not available for this layer type');
   }
 
+  getTOCDetails() {
+    return null;
+  }
+
   getId() {
     return this._descriptor.id;
   }

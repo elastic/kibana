@@ -138,7 +138,8 @@ export const getLayerList = createSelector(
   getLayerListRaw,
   getDataSources,
   (layerList, dataSources) => {
-    return layerList.map(layerDescriptor => createLayerInstance(layerDescriptor, dataSources));
+    return layerList.map(layerDescriptor =>
+      createLayerInstance(layerDescriptor, dataSources));
   });
 
 export const getTemporaryLayers = createSelector(getLayerList, (layerList) => layerList.filter(layer => layer.isTemporary()));

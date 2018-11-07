@@ -8,17 +8,14 @@ import React from 'react';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { getLegendColors } from 'ui/vis/map/color_util';
 
-export const ColorGradient = ({ style }) => {
-  const { Blues, Greens, Greys, Reds } = vislibColorMaps; // Placeholder
+export const ColorGradient = ({ color }) => {
   const GRADIENT_INTERVALS = 7;
-  const legendColors = getLegendColors(Blues, GRADIENT_INTERVALS);
-  const background = getLinearGradient(legendColors, GRADIENT_INTERVALS);
+  const rgbColorStrings = getLegendColors(vislibColorMaps[color], GRADIENT_INTERVALS);
+  const background = getLinearGradient(rgbColorStrings, GRADIENT_INTERVALS);
   return (
     <div
       className="colorGradient"
-      style={{
-        background
-      }}
+      style={{ background }}
     />
   );
 };

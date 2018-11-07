@@ -84,6 +84,23 @@ export class VectorLayer extends ALayer {
     return this._style.getIcon(isPointsOnly);
   }
 
+  getColorRamp() {
+    // TODO: Determine if can be data-driven first
+    return this._style.getColorRamp();
+  }
+
+  getTOCDetails() {
+    if (this._joins && this._joins.length) {
+      return (
+        <React.Fragment>
+          {this.getColorRamp()}
+        </React.Fragment>
+      );
+    } else {
+      return null;
+    }
+  }
+
   async getStringFields() {
     return await this._source.getStringFields();
   }
