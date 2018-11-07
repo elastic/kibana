@@ -25,7 +25,7 @@ export const beatsListAssignmentOptions: AssignmentControlSchema[] = [
     name: 'Unenroll selected',
     showWarning: true,
     warningHeading: 'Unenroll selected beats?',
-    warningMessage: 'The selected Beat(s) will no longer use central management',
+    warningMessage: 'The selected Beats will no longer use central management',
     action: AssignmentActionType.Delete,
     danger: true,
   },
