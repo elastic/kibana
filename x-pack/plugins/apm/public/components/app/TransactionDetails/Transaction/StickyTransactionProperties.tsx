@@ -55,7 +55,7 @@ export function StickyTransactionProperties({
     },
     {
       label: '% of trace',
-      val: asPercent(duration, totalDuration),
+      val: asPercent(duration, totalDuration, 'N/A'),
       width: '25%'
     },
     {
