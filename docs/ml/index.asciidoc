@@ -18,7 +18,7 @@ jobs and understanding results.
 
 If you have a basic license, you can use the *Data Visualizer* to learn more 
 about the data that you've stored in {es} and to identify possible fields for 
-{ml} analysis.
+{ml} analysis:
 
 [role="screenshot"]
 image::ml/images/ml-data-visualizer-sample.jpg[Data Visualizer for sample flight data]
@@ -33,14 +33,15 @@ and manage jobs and {dfeeds} from the *Job Management* pane:
 [role="screenshot"]
 image::ml/images/ml-job-management.jpg[Job Management]
 
-You can use the *Settings* pane to add scheduled events to calendars and to
-associate these calendars with your jobs:
+You can use the *Settings* pane to create and edit 
+{stack-ov}/ml-calendars.html[calendars] and the filters that are used in 
+{stack-ov}/ml-rules.html[custom rules]:
 
 [role="screenshot"]
-image::ml/images/ml-calendar-management.jpg[Calendar Management]
+image::ml/images/ml-settings.jpg[Calendar Management]
 
 The *Anomaly Explorer* and *Single Metric Viewer* display the results of your
-{ml} jobs.  For example:
+{ml} jobs. For example:
 
 [role="screenshot"]
 image::ml/images/ml-single-metric-viewer.jpg[Single Metric Viewer]
@@ -56,4 +57,4 @@ For more information about {ml}, see
 
 include::creating-jobs.asciidoc[]
 include::job-tips.asciidoc[]
-//TO-DO: Add info about creating watch
+
