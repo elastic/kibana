@@ -8,6 +8,7 @@ import { groupBy, indexBy } from 'lodash';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import {
+  getClockSkew,
   getWaterfallItems,
   IWaterfallIndex,
   IWaterfallItem
@@ -99,6 +100,81 @@ describe('waterfall_helpers', () => {
       expect(
         getWaterfallItems(childrenByParentId, itemsById, entryTransactionItem)
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('getClockSkew', () => {
+    it('should adjust when child starts before parent', () => {
+      const item = {
+        docType: 'transaction',
+        timestamp: 0,
+        duration: 50
+      } as IWaterfallItem;
+
+      const parentItem = {
+        timestamp: 100,
+        skew: 5,
+        duration: 100
+      } as IWaterfallItem;
+      const parentTransactionSkew = 1337;
+
+      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(130);
+    });
+
+    it('should adjust when child starts after parent has ended', () => {
+      const item = {
+        docType: 'transaction',
+        timestamp: 250,
+        duration: 50
+      } as IWaterfallItem;
+
+      const parentItem = {
+        timestamp: 100,
+        skew: 5,
+        duration: 100
+      } as IWaterfallItem;
+      const parentTransactionSkew = 1337;
+
+      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(-120);
+    });
+
+    it('should not adjust when child starts within parent duration', () => {
+      const item = {
+        docType: 'transaction',
+        timestamp: 150,
+        duration: 50
+      } as IWaterfallItem;
+
+      const parentItem = {
+        timestamp: 100,
+        skew: 5,
+        duration: 100
+      } as IWaterfallItem;
+      const parentTransactionSkew = 1337;
+
+      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(0);
+    });
+
+    it('should return parentTransactionSkew for spans', () => {
+      const item = {
+        docType: 'span'
+      } as IWaterfallItem;
+
+      const parentItem = {} as IWaterfallItem;
+      const parentTransactionSkew = 1337;
+
+      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(1337);
+    });
+
+    it('should handle missing parentItem', () => {
+      const item = {
+        docType: 'transaction'
+      } as IWaterfallItem;
+
+      const parentItem = undefined;
+      const parentTransactionSkew = 1337;
+
+      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(0);
     });
   });
 });
