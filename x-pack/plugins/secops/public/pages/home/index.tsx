@@ -11,9 +11,11 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import SplitPane from 'react-split-pane';
+import { LinkToPage } from '../../components/link_to';
 import {
   PageContainer,
   PageContent,
@@ -46,7 +48,11 @@ import {
 } from '../../components/timeline/events';
 
 import { mockECSData } from '../mock/mock_ecs';
-import { Placeholders } from './visualization_placeholder';
+
+import { NotFoundPage } from '../404';
+import { Hosts } from '../hosts';
+import { Network } from '../network';
+import { Overview } from '../overview';
 
 const onColumnSorted: OnColumnSorted = sorted => {
   alert(`column sorted: ${JSON.stringify(sorted)}`);
@@ -108,7 +114,14 @@ export const HomePage = pure(() => (
           </Pane1Header>
           <PaneScrollContainer data-test-subj="pane1ScrollContainer">
             <Pane1FlexContent data-test-subj="pane1FlexContent">
-              <Placeholders count={10} />
+              <Switch>
+                <Redirect from="/" exact={true} to="/overview" />
+                <Route path="/overview" component={Overview} />
+                <Route path="/hosts" component={Hosts} />
+                <Route path="/network" component={Network} />
+                <Route path="/link-to" component={LinkToPage} />
+                <Route component={NotFoundPage} />
+              </Switch>
             </Pane1FlexContent>
           </PaneScrollContainer>
         </Pane1>
