@@ -16,10 +16,10 @@
       ng-mouseenter="highlight($event)"
       ng-mouseleave="unhighlight($event)"
       data-label="{{legendData.label}}"
-      class="legend-value color"
+      class="visLegend__value color"
     >
 
-      <div class="legend-value-container" ng-keydown="onLegendEntryKeydown($event, this)">
+      <div ng-keydown="onLegendEntryKeydown($event, this)">
         <div
           kbn-accessible-click
           data-label="{{legendData.label}}"

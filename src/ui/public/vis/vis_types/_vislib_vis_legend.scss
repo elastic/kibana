@@ -19,21 +19,21 @@
   overflow: hidden;
 
   // flex-direction re-aligns toggle button
-  .visVisType--legend-left & {
+  .visLib--legend-left & {
     flex-direction: row-reverse;
   }
 
-  .visVisType--legend-right & {
+  .visLib--legend-right & {
     flex-direction: row;
   }
 
-  .visVisType--legend-top & {
+  .visLib--legend-top & {
     flex-direction: column-reverse;
     width: 100%;
     padding-left: $euiSizeL;
 
   }
-  .visVisType--legend-bottom & {
+  .visLib--legend-bottom & {
     flex-direction: column;
     width: 100%;
     padding-left: $euiSizeL;
@@ -47,12 +47,12 @@
     overflow-x: hidden;
     overflow-y: auto;
 
-    .visVisType--legend-top &,
-    .visVisType--legend-bottom & {
+    .visLib--legend-top &,
+    .visLib--legend-bottom & {
       width: auto;
       overflow-y: hidden;
 
-      .legend-value {
+      .visLegend__value {
         display: inline-block;
       }
     }
@@ -63,7 +63,7 @@
   }
 }
 
-.legend-value {
+.visLegend__value {
   cursor: pointer;
   padding: $euiSizeXS;
   display: flex;

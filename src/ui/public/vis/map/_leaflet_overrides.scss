@@ -21,7 +21,7 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 .leaflet-clickable {
   &:hover {
     stroke-width: $euiSizeS;
-    stroke-opacity: 0.8
+    stroke-opacity: 0.8;
   }
 }
 

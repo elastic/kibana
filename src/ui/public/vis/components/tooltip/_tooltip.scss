@@ -11,11 +11,7 @@
   color: $euiColorGhost;
   border-radius: $euiBorderRadius;
   word-wrap: break-word;
-  max-width: 320px;
-
-  // display: flex;
-  // align-items: center;
-  // padding: 0 $euiSizeS;
+  max-width: $euiSizeXL * 10;
 
   > :last-child {
     margin-bottom: $euiSizeS;
