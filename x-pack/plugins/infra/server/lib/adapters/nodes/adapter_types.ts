@@ -228,7 +228,8 @@ export type InfraAgg =
   | InfraDerivativeAgg
   | InfraAvgAgg
   | InfraMaxAgg
-  | InfraCumulativeSumAgg;
+  | InfraCumulativeSumAgg
+  | undefined;
 export interface InfraNodeMetricAgg {
   [key: string]: InfraAgg;
 }

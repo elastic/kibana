@@ -46,7 +46,10 @@ export class VisualizeEmbeddable extends Embeddable  {
   };
 
   getInspectorAdapters() {
-    return this.savedVisualization.vis.API.inspectorAdapters;
+    if (!this.handler) {
+      return undefined;
+    }
+    return this.handler.inspectorAdapters;
   }
 
   getEmbeddableState() {
