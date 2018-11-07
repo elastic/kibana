@@ -23,6 +23,10 @@ module.exports = {
     'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
     'types/all': path.join(sourceDir, 'types/register.js'),
   },
+
+  // there were problems with the node and web targets since this code is actually
+  // targetting both the browser and node.js. If there was a hybrid target we'd use
+  // it, but this seems to work either way.
   target: 'webworker',
 
   output: {
