@@ -26,7 +26,7 @@ export function FileTooLarge({ fileSize, maxFileSize }) {
     errorText = (
       <p>
         The size of the file you selected for upload is {fileSizeFormatted} which
-        which exceeds the maximum permitted size of {maxFileSizeFormatted}
+        exceeds the maximum permitted size of {maxFileSizeFormatted}
       </p>
     );
   } else {
