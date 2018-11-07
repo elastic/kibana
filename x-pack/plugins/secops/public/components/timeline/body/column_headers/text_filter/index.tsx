@@ -8,10 +8,10 @@ import { EuiFieldText } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
 import { OnFilterChange } from '../../../events';
 import { ColumnId } from '../../column_id';
-import styled from 'styled-components';
 
 interface Props {
   columnId: ColumnId;
