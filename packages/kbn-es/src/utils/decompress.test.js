@@ -37,21 +37,21 @@ const esFolder = path.resolve(tmpFolder, '.es');
 const zipSnapshot = path.resolve(dataFolder, 'snapshot.zip');
 const tarGzSnapshot = path.resolve(dataFolder, 'snapshot.tar.gz');
 
-beforeAll(async () => {
-  await mkdirp(tmpFolder);
-  await mkdirp(dataFolder);
-  await mkdirp(esFolder);
+beforeAll(() => {
+  mkdirp.sync(tmpFolder);
+  mkdirp.sync(dataFolder);
+  mkdirp.sync(esFolder);
 
   fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.zip'), zipSnapshot);
   fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.tar.gz'), tarGzSnapshot);
 });
 
-afterAll(async () => {
-  await del(tmpFolder, { force: true });
+afterAll(() => {
+  del.sync(tmpFolder, { force: true });
 });
 
-afterEach(async () => {
-  await del(esFolder, { force: true });
+afterEach(() => {
+  del.sync(tmpFolder, { force: true });
 });
 
 test('zip strips root directory', async () => {
