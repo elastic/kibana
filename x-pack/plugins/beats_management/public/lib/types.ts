@@ -4,23 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkUser } from './adapters/framework/adapter_types';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
-import { FrameworkInfo } from './adapters/framework/adapter_types';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
-import React from 'react';
+import { FrameworkAdapter } from './adapters/framework/adapter_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './beats';
 import { ElasticsearchLib } from './elasticsearch';
@@ -51,28 +37,6 @@ export interface YamlConfigSchema {
   defaultValue?: string;
   required?: boolean;
   parseValidResult?: (value: any) => any;
-}
-
-export interface FrameworkAdapter {
-  // Instance vars
-  info?: FrameworkInfo | null;
-  // Methods
-  renderUIAtPath(path: string, component: React.ReactElement<any>): Promise<void>;
-  registerManagementSection(settings: {
-    id?: string;
-    name: string;
-    iconName: string;
-    order?: number;
-  }): void;
-  registerManagementUI(settings: {
-    id?: string;
-    name: string;
-    basePath: string;
-    visable?: boolean;
-    order?: number;
-  }): void;
-  getCurrentUser(): FrameworkUser;
-  setUISettings(key: string, value: any): void;
 }
 
 export interface FramworkAdapterConstructable {

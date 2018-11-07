@@ -7,14 +7,8 @@
 import { IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { FrameworkInfo, FrameworkUser } from './adapter_types';
-
-import {
-  BufferedKibanaServiceCall,
-  FrameworkAdapter,
-  KibanaAdapterServiceRefs,
-  KibanaUIConfig,
-} from '../../types';
+import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
+import { FrameworkAdapter, FrameworkInfo, FrameworkUser } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public info: FrameworkInfo | null = null;
@@ -39,7 +33,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   };
 
-  public getCurrentUser() {
+  public get currentUser() {
     return this.shieldUser!;
   }
 

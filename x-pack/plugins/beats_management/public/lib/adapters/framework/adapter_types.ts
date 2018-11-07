@@ -5,6 +5,28 @@
  */
 import * as t from 'io-ts';
 
+export interface FrameworkAdapter {
+  // Instance vars
+  info?: FrameworkInfo | null;
+  currentUser: FrameworkUser;
+  // Methods
+  renderUIAtPath(path: string, component: React.ReactElement<any>): Promise<void>;
+  registerManagementSection(settings: {
+    id?: string;
+    name: string;
+    iconName: string;
+    order?: number;
+  }): void;
+  registerManagementUI(settings: {
+    id?: string;
+    name: string;
+    basePath: string;
+    visable?: boolean;
+    order?: number;
+  }): void;
+  setUISettings(key: string, value: any): void;
+}
+
 export const RuntimeFrameworkInfo = t.type({
   basePath: t.string,
   license: t.type({
