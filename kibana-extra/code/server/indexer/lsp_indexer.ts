@@ -180,9 +180,9 @@ export class LspIndexer extends AbstractIndexer {
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const response = await this.lspService.sendRequest('textDocument/full', {
       textDocument: {
-        uri: lspDocUri,
-        reference: this.options.enableGlobalReference,
+        uri: lspDocUri
       },
+      reference: this.options.enableGlobalReference
     });
 
     const symbolNames = new Set<string>();
