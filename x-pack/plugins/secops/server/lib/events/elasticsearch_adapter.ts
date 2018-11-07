@@ -74,20 +74,20 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       },
     ];
 
-    let agg = {};
-    if (options.fields.includes('kpiEventType')) {
-      agg = {
-        count_event_type: {
-          terms: {
-            field: 'event.type',
-            size: 5,
-            order: {
-              _count: 'desc',
+    const agg = options.fields.includes('kpiEventType')
+      ? {
+          count_event_type: {
+            terms: {
+              field: 'event.type',
+              size: 5,
+              order: {
+                _count: 'desc',
+              },
             },
           },
-        },
-      };
-    }
+        }
+      : {};
+
     const query = {
       allowNoIndices: true,
       index: options.sourceConfiguration.fileAlias,
@@ -133,13 +133,14 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       query
     );
 
-    let kpiEventType: KpiItem[] = [];
-    if (response.aggregations && response.aggregations.count_event_type) {
-      kpiEventType = response.aggregations.count_event_type.buckets.map(item => ({
-        value: item.key,
-        count: item.doc_count,
-      }));
-    }
+    const kpiEventType: KpiItem[] =
+      response.aggregations && response.aggregations.count_event_type
+        ? response.aggregations.count_event_type.buckets.map(item => ({
+            value: item.key,
+            count: item.doc_count,
+          }))
+        : [];
+
     const hits = response.hits.hits;
     const events = hits.map(formatEventsData(Fields)) as [EventItem];
 
