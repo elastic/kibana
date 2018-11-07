@@ -77,7 +77,7 @@ export class VisualizeDataLoader {
       const requestHandlerResponse = await this.requestHandler({
         partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
         isHierarchical: this.vis.isHierarchical(),
-        params: this.vis.params,
+        visParams: this.vis.params,
         ...params,
         filters: params.filters
           ? params.filters.filter(filter => !filter.meta.disabled)

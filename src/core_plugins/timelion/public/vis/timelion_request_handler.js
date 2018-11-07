@@ -31,10 +31,10 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
 
   return {
     name: 'timelion',
-    handler: function ({ aggs, timeRange, filters, query, params }) {
+    handler: function ({ aggs, timeRange, filters, query, visParams }) {
 
       return new Promise((resolve, reject) => {
-        const expression = params.expression;
+        const expression = visParams.expression;
         if (!expression) return;
 
         const httpResult = $http.post('../api/timelion/run', {
@@ -45,7 +45,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
             }
           },
           time: _.extend(timeRange, {
-            interval: params.interval,
+            interval: visParams.interval,
             timezone: timezone
           }),
         })

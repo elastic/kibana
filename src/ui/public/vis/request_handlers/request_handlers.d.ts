@@ -37,7 +37,7 @@ export interface RequestHandlerParams {
   partialRows?: boolean;
   inspectorAdapters?: Adapters;
   isHierarchical?: boolean;
-  params?: any;
+  visParams?: any;
 }
 
 export type RequestHandler = <T>(params: RequestHandlerParams) => T;

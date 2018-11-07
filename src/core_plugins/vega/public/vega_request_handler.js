@@ -33,10 +33,10 @@ export function VegaRequestHandlerProvider(Private, es, serviceSettings) {
 
     name: 'vega',
 
-    handler({ aggs, timeRange, filters, query, params }) {
+    handler({ aggs, timeRange, filters, query, visParams }) {
       timeCache.setTimeRange(timeRange);
       const filtersDsl = buildEsQuery(aggs.indexPattern, [query], filters);
-      const vp = new VegaParser(params.spec, searchCache, timeCache, filtersDsl, serviceSettings);
+      const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
       return vp.parseAsync();
     }
 

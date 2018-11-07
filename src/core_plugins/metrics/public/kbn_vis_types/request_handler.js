@@ -28,10 +28,10 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
 
   return {
     name: 'metrics',
-    handler: function ({ aggs, uiState, timeRange, filters, query, params }) {
+    handler: function ({ aggs, uiState, timeRange, filters, query, visParams }) {
       const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
-        const panel = params;
+        const panel = visParams;
         const uiStateObj = uiState.get(panel.type, {});
         const parsedTimeRange = timefilter.calculateBounds(timeRange);
         const scaledDataFormat = config.get('dateFormat:scaled');
