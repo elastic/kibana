@@ -3,16 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 
 import { App } from './app';
 import { ccrStore } from './store';
 
-export const renderReact = async (elem) => {
+export const renderReact = async (elem: HTMLElement) => {
   render(
     <I18nProvider>
       <Provider store={ccrStore}>

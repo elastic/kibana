@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  loadAutoFollowPatterns
-} from './auto_follow_pattern';
+import { combineReducers } from 'redux';
+import { reducer as autoFollowPattern } from './auto_follow_pattern';
 
-export {
-  apiStart,
-  apiEnd
-} from './api';
+export const ccr = combineReducers({
+  autoFollowPattern,
+});

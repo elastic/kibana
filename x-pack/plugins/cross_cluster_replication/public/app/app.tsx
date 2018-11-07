@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { BASE_PATH } from '../../common/constants';
 
 import { AutoFollowPatternList } from './sections/auto_follow_pattern';

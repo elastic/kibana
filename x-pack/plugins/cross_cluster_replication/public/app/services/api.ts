@@ -29,9 +29,8 @@ export const loadAutoFollowPatterns = async () => {
   /**
    * Temp to test async call with apiMiddleware
    */
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
-      console.log('Loading clusters done!');
       resolve({ good: 'job' });
     }, 2000);
   });

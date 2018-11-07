@@ -5,13 +5,17 @@
  */
 
 import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
 
-import { loadAutoFollowPatterns } from '../../../store/actions';
+import { AutoFollowPatternActions as a } from '../../../store/actions';
 
 import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follow_pattern_list';
 
-const mapDispatchToProps = (dispatch) => ({
-  loadAutoFollowPatterns: () => dispatch(loadAutoFollowPatterns())
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  loadAutoFollowPatterns: () => dispatch(a.loadAutoFollowPatterns()),
 });
 
-export const AutoFollowPatternList = connect(null, mapDispatchToProps)(AutoFollowPatternListView);
+export const AutoFollowPatternList = connect(
+  null,
+  mapDispatchToProps
+)(AutoFollowPatternListView);

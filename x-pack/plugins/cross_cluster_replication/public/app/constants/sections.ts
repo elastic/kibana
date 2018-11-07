@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import {
-  EuiButton
-} from '@elastic/eui';
-
-export const AutoFollowPatternList = ({ loadAutoFollowPatterns }) => (
-  <EuiButton onClick={() => loadAutoFollowPatterns()}>Test Redux API Middleware</EuiButton>
-);
+export const SECTIONS = {
+  AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
+  INDEX_FOLLOWER: 'indexFollower',
+};

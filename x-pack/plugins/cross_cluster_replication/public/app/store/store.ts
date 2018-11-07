@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore, applyMiddleware, compose } from 'redux';
+import { applyMiddleware, compose, createStore } from 'redux';
 
-import apiMiddleware from './api_middleware';
+import { apiMiddleware } from './api_middleware';
 import { ccr } from './reducers';
 
 function createCrossClusterReplicationStore(initialState = {}) {
-  const enhancers = [ applyMiddleware(apiMiddleware) ];
+  const enhancers = [applyMiddleware(apiMiddleware)];
 
-  window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
-  return createStore(
-    ccr,
-    initialState,
-    compose(...enhancers)
-  );
+  if ((window as any).__REDUX_DEVTOOLS_EXTENSION__) {
+    enhancers.push((window as any).__REDUX_DEVTOOLS_EXTENSION__());
+  }
+  return createStore(ccr, initialState, compose(...enhancers));
 }
 
 export const ccrStore = createCrossClusterReplicationStore();

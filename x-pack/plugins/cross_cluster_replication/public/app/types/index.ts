@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SECTIONS = {
-  AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
-  INDEX_FOLLOWER: 'indexFollower'
-};
+export * from './auto_follow_pattern';
+export * from './common';
+export * from './redux';
