@@ -7,4 +7,6 @@
 import React from 'react';
 import { pure } from 'recompose';
 
-export const Hosts = pure(() => <div>Hello Hosts</div>);
+import { Placeholders } from '../../components/visualization_placeholder';
+
+export const Hosts = pure(() => <Placeholders count={10} myRoute="Hosts" />);

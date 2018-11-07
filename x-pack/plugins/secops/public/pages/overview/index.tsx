@@ -7,4 +7,6 @@
 import React from 'react';
 import { pure } from 'recompose';
 
-export const Overview = pure(() => <div>Hello Overview</div>);
+import { Placeholders } from '../../components/visualization_placeholder';
+
+export const Overview = pure(() => <Placeholders count={10} myRoute="Overview" />);
