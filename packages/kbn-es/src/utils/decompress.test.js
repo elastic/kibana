@@ -24,11 +24,6 @@ const mkdirp = require('mkdirp');
 const del = require('del');
 const os = require('os');
 
-// NOTE: we just remove mock-fs from this tests and instead
-// apply a real fs usage over a temp folder because mock-fs
-// has a bug on node >= 10.5 with the streams that was not
-// yet solved.
-// https://github.com/tschaub/mock-fs/issues/238
 const fixturesFolder = path.resolve(__dirname, '__fixtures__');
 const randomDir = Math.random().toString(36);
 const tmpFolder = path.resolve(os.tmpdir(), randomDir);
