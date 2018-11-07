@@ -9,7 +9,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-const mockModalInstance = { close: function () { }, dismiss: function () { } };
+const mockModalInstance = { close: function () {}, dismiss: function () {} };
 
 describe('ML - Detector Filter Modal Controller', () => {
   beforeEach(() => {

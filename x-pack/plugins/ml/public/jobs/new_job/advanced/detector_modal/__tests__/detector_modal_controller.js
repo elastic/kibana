@@ -11,21 +11,21 @@ import expect from 'expect.js';
 
 const mockModalInstance = { close: function () {}, dismiss: function () {} };
 
-describe('ML - Confirm Modal Controller', () => {
+describe('ML - Detector Modal Controller', () => {
   beforeEach(() => {
     ngMock.module('kibana');
   });
 
-  it('Initialize Confirm Modal Controller', (done) => {
+  it('Initialize Detector Modal Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlConfirmModal', {
+      $controller('MlDetectorModal', {
         $scope: scope,
         $modalInstance: mockModalInstance,
         params: {}
       });
 
-      expect(scope.okLabel).to.be('OK');
+      expect(scope.title).to.eql('Add new detector');
       done();
     });
   });
