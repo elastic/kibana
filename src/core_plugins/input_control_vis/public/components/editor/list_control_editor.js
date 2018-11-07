@@ -54,6 +54,7 @@ export class ListControlEditor extends Component {
     const isNewFieldName = prevState.prevFieldName !== nextProps.controlParams.fieldName;
     if (!prevState.isLoadingFieldType && isNewFieldName) {
       return {
+        prevFieldName: nextProps.controlParams.fieldName,
         isLoadingFieldType: true,
       };
     }

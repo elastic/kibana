@@ -5,15 +5,11 @@
  */
 
 import { routes } from './server/routes';
-import { functionsRegistry } from './common/lib/functions_registry';
+import { functionsRegistry } from './common/lib';
 import { commonFunctions } from './common/functions';
-import { loadServerPlugins } from './server/lib/load_server_plugins';
+import { populateServerRegistries } from './server/lib/server_registries';
 import { registerCanvasUsageCollector } from './server/usage';
-import {
-  ecommerceSavedObjects,
-  flightsSavedObjects,
-  webLogsSavedObjects,
-} from './server/sample_data';
+import { loadSampleData } from './server/sample_data';
 
 export default async function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
@@ -34,30 +30,10 @@ export default async function(server /*options*/) {
   // There are some common functions that use private APIs, load them here
   commonFunctions.forEach(func => functionsRegistry.register(func));
 
-  await loadServerPlugins();
-  routes(server);
   registerCanvasUsageCollector(server);
+  loadSampleData(server);
 
-  const now = new Date();
-  const nowTimestamp = now.toISOString();
-  function updateCanvasWorkpadTimestamps(savedObjects) {
-    return savedObjects.map(savedObject => {
-      if (savedObject.type === 'canvas-workpad') {
-        savedObject.attributes['@timestamp'] = nowTimestamp;
-        savedObject.attributes['@created'] = nowTimestamp;
-      }
-
-      return savedObject;
-    });
-  }
-
-  server.addSavedObjectsToSampleDataset(
-    'ecommerce',
-    updateCanvasWorkpadTimestamps(ecommerceSavedObjects)
-  );
-  server.addSavedObjectsToSampleDataset(
-    'flights',
-    updateCanvasWorkpadTimestamps(flightsSavedObjects)
-  );
-  server.addSavedObjectsToSampleDataset('logs', updateCanvasWorkpadTimestamps(webLogsSavedObjects));
+  // Do not initialize the app until the registries are populated
+  await populateServerRegistries(['serverFunctions', 'types']);
+  routes(server);
 }

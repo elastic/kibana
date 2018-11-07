@@ -168,7 +168,7 @@ export default class BaseOptimizer {
         {
           test,
           include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
-          exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+          exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
         }
       ];
     };
@@ -476,7 +476,7 @@ export default class BaseOptimizer {
       Stats.presetToOptions('minimal')
     ));
 
-    throw Boom.internal(
+    return Boom.internal(
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
       stats.toJson(defaults({
         warningsFilter: STATS_WARNINGS_FILTER,

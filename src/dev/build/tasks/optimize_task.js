@@ -39,8 +39,7 @@ export const OptimizeBuildTask = {
     const kibanaArgs = [
       '--env.name=production',
       '--logging.json=false',
-      '--plugins.initialize=false',
-      '--server.autoListen=false',
+      '--optimize',
     ];
 
     log.info('Running bin/kibana to trigger the optimizer');
@@ -50,7 +49,6 @@ export const OptimizeBuildTask = {
       env: {
         FORCE_DLL_CREATION: 'true'
       },
-      exitAfter: /Optimization .+ complete/
     });
 
     // clean up temporary node install

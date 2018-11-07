@@ -212,13 +212,13 @@ function VisEditor(
     description: 'Open Inspector for visualization',
     testId: 'openInspectorButton',
     disableButton() {
-      return !vis.hasInspector();
+      return !vis.hasInspector || !vis.hasInspector();
     },
     run() {
       vis.openInspector().bindToAngularScope($scope);
     },
     tooltip() {
-      if (!vis.hasInspector()) {
+      if (!vis.hasInspector || !vis.hasInspector()) {
         return 'This visualization doesn\'t support any inspectors.';
       }
     }
@@ -416,13 +416,15 @@ function VisEditor(
           }
         });
         return { id };
-      }, (err) => {
+      }, (error) => {
+        // eslint-disable-next-line
+        console.error(error);
         toastNotifications.addDanger({
           title: `Error on saving '${savedVis.title}'`,
-          text: err.message,
+          text: error.message,
           'data-test-subj': 'saveVisualizationError',
         });
-        return { error: err };
+        return { error };
       });
   }
 

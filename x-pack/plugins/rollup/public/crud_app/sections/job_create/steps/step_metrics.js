@@ -10,7 +10,6 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +28,7 @@ import {
 
 import {
   FieldChooser,
+  StepError,
 } from './components';
 
 export class StepMetricsUi extends Component {
@@ -189,10 +189,8 @@ export class StepMetricsUi extends Component {
               <p>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepMetricsDescription"
-                  defaultMessage={`
-                    Select the metrics that should be collected while rolling up data. By default,
-                    only the doc_counts are collected for each group.
-                  `}
+                  defaultMessage="Select the metrics to collect while rolling up data. By default,
+                    only doc_counts are collected for each group."
                 />
               </p>
             </EuiText>
@@ -252,16 +250,7 @@ export class StepMetricsUi extends Component {
       return null;
     }
 
-    return (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={errorMetrics}
-          color="danger"
-          iconType="cross"
-        />
-      </Fragment>
-    );
+    return <StepError title={errorMetrics} />;
   }
 }
 
