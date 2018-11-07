@@ -18,13 +18,24 @@
  */
 
 import React, { Component } from 'react';
-import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
+import { createFilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filters';
+import { createPhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 import { FilterItem } from 'ui/filter_bar/react/filter_item';
+
+const filters = [
+  createPhraseFilter({ field: 'response', value: 200, index: 'foo' }),
+  createPhraseFilter({ field: 'extension', value: 'jpg', index: 'foo' }),
+  createPhraseFilter({ field: 'bytes', value: 2000, index: 'foo' }),
+];
+
+const filterBarFilters = filters.map(createFilterBarFilter);
 
 export class FilterBar extends Component {
   public render() {
-    return (
-      <FilterItem filter={new PhraseFilter({ field: 'response', value: 200, index: 'foo' })} />
-    );
+    const filterItems = filterBarFilters.map(filterBarFilter => {
+      return <FilterItem filter={filterBarFilter} />;
+    });
+
+    return filterItems;
   }
 }

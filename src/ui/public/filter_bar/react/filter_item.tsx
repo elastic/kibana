@@ -17,13 +17,123 @@
  * under the License.
  */
 
-import React, { SFC } from 'react';
-import { Filter } from 'ui/filter_bar/filters';
+import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { Component } from 'react';
+import { FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filters';
 
 interface Props {
-  filter: Filter;
+  filter: FilterBarFilter;
+  className?: string;
 }
 
-export const FilterItem: SFC<Props> = props => {
-  return <div>{props.filter.getDisplayText()}</div>;
-};
+interface State {
+  isPopoverOpen: boolean;
+}
+
+export class FilterItem extends Component<Props, State> {
+  public state = {
+    isPopoverOpen: false,
+  };
+
+  public render() {
+    const classes = classNames(
+      'globalFilterItem',
+      {
+        'globalFilterItem-isDisabled': this.props.filter.disabled,
+        'globalFilterItem-isPinned': false,
+        'globalFilterItem-isExcluded': this.props.filter.negate,
+      },
+      this.props.className
+    );
+
+    let prefix = null;
+    if (this.props.filter.negate) {
+      prefix = <span>NOT </span>;
+    }
+
+    const badge = (
+      <EuiBadge
+        id={'foo'}
+        className={classes}
+        title={'foo'}
+        iconOnClick={() => {
+          return;
+        }}
+        iconOnClickAriaLabel={`Delete filter`}
+        iconType="cross"
+        // @ts-ignore
+        iconSide="right"
+        onClick={this.togglePopover}
+        onClickAriaLabel="Filter actions"
+        closeButtonProps={{
+          // Removing tab focus on close button because the same option can be optained through the context menu
+          // Also, we may want to add a `DEL` keyboard press functionality
+          tabIndex: '-1',
+        }}
+      >
+        {prefix}
+        <span>{this.props.filter.getDisplayText()}</span>
+      </EuiBadge>
+    );
+
+    const panelTree = {
+      id: 0,
+      items: [
+        {
+          name: `${this.props.filter.pinned ? 'Unpin' : 'Pin across all apps'}`,
+          icon: 'pin',
+          onClick: () => {
+            this.closePopover();
+          },
+        },
+        {
+          name: `${this.props.filter.negate ? 'Include results' : 'Exclude results'}`,
+          icon: `${this.props.filter.negate ? 'plusInCircle' : 'minusInCircle'}`,
+          onClick: () => {
+            this.closePopover();
+          },
+        },
+        {
+          name: `${this.props.filter.disabled ? 'Re-enable' : 'Temporarily disable'}`,
+          icon: `${this.props.filter.disabled ? 'eye' : 'eyeClosed'}`,
+          onClick: () => {
+            this.closePopover();
+          },
+        },
+        {
+          name: 'Delete',
+          icon: 'trash',
+          onClick: () => {
+            this.closePopover();
+          },
+        },
+      ],
+    };
+
+    return (
+      <EuiPopover
+        id={`popoverFor_${this.props.filter.getDisplayText()}`}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover}
+        button={badge}
+        anchorPosition="downCenter"
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu initialPanelId={0} panels={[panelTree]} />
+      </EuiPopover>
+    );
+  }
+
+  private closePopover = () => {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  };
+
+  private togglePopover = () => {
+    this.setState({
+      isPopoverOpen: !this.state.isPopoverOpen,
+    });
+  };
+}

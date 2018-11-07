@@ -17,27 +17,13 @@
  * under the License.
  */
 
-import { createFilter, CreateFilterOptions, Filter } from 'ui/filter_bar/filters/index';
+import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 
-export type PhraseFilter = Filter & {
-  field: string;
-  value: string | number;
-};
-
-interface CreatePhraseFilterOptions {
-  field: string;
-  value: string | number;
-}
-
-export function createPhraseFilter(
-  options: CreatePhraseFilterOptions & CreateFilterOptions
-): PhraseFilter {
-  const baseFilter = createFilter(options);
-  const { field, value } = options;
+export function createFilterBarPhraseFilter(filter: PhraseFilter) {
   return {
-    ...baseFilter,
-    type: 'PhraseFilter',
-    field,
-    value,
+    ...filter,
+    getDisplayText: () => {
+      return `${filter.field} : ${filter.value}`;
+    },
   };
 }

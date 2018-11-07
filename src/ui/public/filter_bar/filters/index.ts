@@ -18,8 +18,30 @@
  */
 
 export interface Filter {
+  type: string;
   disabled: boolean;
   negate: boolean;
+  pinned: boolean;
   index: string;
-  getDisplayText: () => string;
+}
+
+export interface CreateFilterOptions {
+  disabled?: boolean;
+  negate?: boolean;
+  pinned?: boolean;
+  index: string;
+}
+
+export function createFilter({
+  index,
+  negate = false,
+  disabled = false,
+  pinned = false,
+}: CreateFilterOptions) {
+  return {
+    index,
+    negate,
+    disabled,
+    pinned,
+  };
 }
