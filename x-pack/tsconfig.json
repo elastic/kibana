@@ -1,31 +1,14 @@
 {
   "extends": "../tsconfig.json",
-  "include": [
-    "common/**/*",
-    "server/**/*",
-    "plugins/**/*",
-  ],
-  "exclude": [
-    "test/**/*"
-  ],
+  "include": ["common/**/*", "server/**/*", "plugins/**/*"],
+  "exclude": ["test/**/*", "plugins/secops/node_modules/react-split-pane"],
   "compilerOptions": {
     "paths": {
-      "ui/*": [
-        "src/ui/public/*"
-      ],
-      "plugins/xpack_main/*": [
-        "x-pack/plugins/xpack_main/public/*"
-      ],
-      "plugins/security/*": [
-        "x-pack/plugins/security/public/*"
-      ],
-      "plugins/spaces/*": [
-        "x-pack/plugins/spaces/public/*"
-      ]
+      "ui/*": ["src/ui/public/*"],
+      "plugins/xpack_main/*": ["x-pack/plugins/xpack_main/public/*"],
+      "plugins/security/*": ["x-pack/plugins/security/public/*"],
+      "plugins/spaces/*": ["x-pack/plugins/spaces/public/*"]
     },
-    "types": [
-      "node",
-      "jest"
-    ]
+    "types": ["node", "jest"]
   }
 }
