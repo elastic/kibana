@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { dirname, extname } from 'path';
+import path from 'path';
 import { createWriteStream } from 'fs';
 import archiver from 'archiver';
 
@@ -26,10 +26,11 @@ import { mkdirp } from '../lib';
 function compress(type, options = {}, source, destination) {
   const output = createWriteStream(destination);
   const archive = archiver(type, options);
+  const name = source.split(path.sep).slice(-1)[0];
 
   archive.pipe(output);
 
-  return archive.directory(source, '.').finalize();
+  return archive.directory(source, name).finalize();
 }
 
 export const CreateArchivesTask = {
@@ -42,9 +43,9 @@ export const CreateArchivesTask = {
 
       log.info('archiving', source, 'to', destination);
 
-      await mkdirp(dirname(destination));
+      await mkdirp(path.dirname(destination));
 
-      switch (extname(destination)) {
+      switch (path.extname(destination)) {
         case '.zip':
           await compress('zip', { zlib: { level: 9 } }, source, destination);
           break;
