@@ -48,10 +48,10 @@ module.exports = {
       });
 
       this.plugin('done', function(stats) {
-        if (stats.compilation.errors && stats.compilation.errors.length) {
-          if (isWatch) console.error(stats.compilation.errors[0]);
-          else throw stats.compilation.errors[0];
-        }
+        if (!stats.hasErrors()) return;
+        const errorMessage = stats.toString('errors-only');
+        if (isWatch) console.error(errorMessage);
+        else throw new Error(errorMessage);
       });
     },
     new CopyWebpackPlugin([
