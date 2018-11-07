@@ -27,6 +27,8 @@ import xmlBuilder from 'xmlbuilder';
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../xml';
 
+const dateNow = Date.now.bind(Date);
+
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
@@ -47,11 +49,11 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   );
 
   const setStartTime = (node) => {
-    node.startTime = Date.now();
+    node.startTime = dateNow();
   };
 
   const setEndTime = node => {
-    node.endTime = Date.now();
+    node.endTime = dateNow();
   };
 
   const getFullTitle = node => {
