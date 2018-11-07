@@ -120,7 +120,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "^4.0.2",
-    "@elastic/eui": "4.5.1",
+    "@elastic/eui": "4.8.0",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/node-phantom-simple": "2.2.4",
     "@elastic/numeral": "2.3.2",
