@@ -31,6 +31,8 @@ import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call
 // tslint:disable-next-line:no-var-requires
 const { getTypes } = require('../../../mappings');
 
+const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
+
 export interface FullIndexInfo {
   aliases: { [name: string]: object };
   exists: boolean;
@@ -201,7 +203,7 @@ export async function createIndex(
   index: string,
   mappings?: IndexMapping
 ) {
-  await callCluster('indices.create', { body: { mappings }, index });
+  await callCluster('indices.create', { body: { mappings, settings }, index });
 }
 
 export async function deleteIndex(callCluster: CallCluster, index: string) {
@@ -224,7 +226,7 @@ export async function convertToAlias(
   batchSize: number
 ) {
   await callCluster('indices.create', {
-    body: { mappings: info.mappings },
+    body: { mappings: info.mappings, settings },
     index: info.indexName,
   });
 
