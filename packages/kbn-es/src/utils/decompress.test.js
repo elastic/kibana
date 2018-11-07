@@ -18,30 +18,47 @@
  */
 
 const { decompress } = require('./decompress');
-const mockFs = require('mock-fs');
 const fs = require('fs');
 const path = require('path');
+const mkdirp = require('mkdirp');
+const del = require('del');
 
-beforeEach(() => {
-  mockFs({
-    '/data': {
-      'snapshot.zip': fs.readFileSync(path.resolve(__dirname, '__fixtures__/snapshot.zip')),
-      'snapshot.tar.gz': fs.readFileSync(path.resolve(__dirname, '__fixtures__/snapshot.tar.gz')),
-    },
-    '/.es': {},
-  });
+// NOTE: we just remove mock-fs from this tests and instead
+// apply a real fs usage over a temp folder because mock-fs
+// has a bug on node >= 10.5 with the streams that was not
+// yet solved.
+// https://github.com/tschaub/mock-fs/issues/238
+const fixturesFolder = path.resolve(__dirname, '__fixtures__');
+const tmpFolder = path.resolve(fixturesFolder, '__tmp__');
+const dataFolder = path.resolve(tmpFolder, 'data');
+const esFolder = path.resolve(tmpFolder, '.es');
+
+const zipSnapshot = path.resolve(dataFolder, 'snapshot.zip');
+const tarGzSnapshot = path.resolve(dataFolder, 'snapshot.tar.gz');
+
+beforeAll(async () => {
+  await mkdirp(tmpFolder);
+  await mkdirp(dataFolder);
+  await mkdirp(esFolder);
+
+  fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.zip'), zipSnapshot);
+  fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.tar.gz'), tarGzSnapshot);
 });
 
-afterEach(() => {
-  mockFs.restore();
+afterAll(async () => {
+  await del(tmpFolder);
+});
+
+afterEach(async () => {
+  await del(esFolder);
 });
 
 test('zip strips root directory', async () => {
-  await decompress('/data/snapshot.zip', '/.es/foo');
-  expect(fs.readdirSync('/.es/foo/bin')).toContain('elasticsearch.bat');
+  await decompress(zipSnapshot, path.resolve(esFolder, 'foo'));
+  expect(fs.readdirSync(path.resolve(esFolder, 'foo/bin'))).toContain('elasticsearch.bat');
 });
 
 test('tar strips root directory', async () => {
-  await decompress('/data/snapshot.tar.gz', '/.es/foo');
-  expect(fs.readdirSync('/.es/foo/bin')).toContain('elasticsearch');
+  await decompress(tarGzSnapshot, path.resolve(esFolder, 'foo'));
+  expect(fs.readdirSync(path.resolve(esFolder, 'foo/bin'))).toContain('elasticsearch');
 });

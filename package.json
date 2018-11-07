@@ -333,7 +333,7 @@
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.3.0",
     "mocha": "3.3.0",
-    "mock-fs": "^4.4.2",
+    "mock-fs": "^4.7.0",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
     "nock": "8.0.0",
