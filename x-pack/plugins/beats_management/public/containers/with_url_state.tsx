@@ -88,7 +88,9 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
 }
 export const WithURLState = withRouter<any>(WithURLStateComponent);
 
-export function withUrlState<OP>(UnwrappedComponent: React.ComponentType<OP>): React.SFC<any> {
+export function withUrlState<OP>(
+  UnwrappedComponent: React.ComponentType<OP & URLStateProps>
+): React.SFC<any> {
   return (origProps: OP) => {
     return (
       <WithURLState>
