@@ -25,6 +25,7 @@ import { createDataCluster } from './lib/create_data_cluster';
 import { createAdminCluster } from './lib/create_admin_cluster';
 import { clientLogger } from './lib/client_logger';
 import { createClusters } from './lib/create_clusters';
+import { createProxy } from './lib/create_proxy';
 import filterHeaders from './lib/filter_headers';
 
 const DEFAULT_REQUEST_HEADERS = [ 'authorization' ];
