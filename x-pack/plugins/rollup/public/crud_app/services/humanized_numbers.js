@@ -41,6 +41,7 @@ export function getOrdinalValue(number) {
   //   values: { number },
   // });
 
+  // Protects against falsey (including 0) values
   const num = number && number.toString();
   let lastDigit = num && num.substr(-1);
   let ordinal;
