@@ -17,7 +17,7 @@ import {
 
 const EventFieldsMap = {
   timestamp: '@timestamp',
-  'host.hostName': 'host.name',
+  'host.hostname': 'host.name',
   'host.ip': 'host.ip',
   'event.type': 'event.type',
   'event.severity': 'event.severity',
@@ -27,8 +27,8 @@ const EventFieldsMap = {
   'source.port': 'source_ecs.port',
   'destination.ip': 'destination.ip',
   'destination.port': 'destination.port',
-  'geo.region_name': 'destination.geo.country_iso_code',
-  'geo.country_iso_code': 'destination.geo.region_name',
+  'geo.region_name': 'destination.geo.region_name',
+  'geo.country_iso_code': 'destination.geo.country_iso_code',
 };
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
