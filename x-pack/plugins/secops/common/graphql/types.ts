@@ -1,12 +1,33 @@
 /* tslint:disable */
+/*
+     * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+     * or more contributor license agreements. Licensed under the Elastic License;
+     * you may not use this file except in compliance with the Elastic License.
+     */
+
 import { GraphQLResolveInfo } from 'graphql';
 
-type Resolver<Result, Args = any> = (
-  parent: any,
+export type Resolver<Result, Parent = any, Context = any, Args = any> = (
+  parent: Parent,
   args: Args,
-  context: any,
+  context: Context,
   info: GraphQLResolveInfo
 ) => Promise<Result> | Result;
+
+export type SubscriptionResolver<Result, Parent = any, Context = any, Args = any> = {
+  subscribe<R = Result, P = Parent>(
+    parent: P,
+    args: Args,
+    context: Context,
+    info: GraphQLResolveInfo
+  ): AsyncIterator<R | Result>;
+  resolve?<R = Result, P = Parent>(
+    parent: P,
+    args: Args,
+    context: Context,
+    info: GraphQLResolveInfo
+  ): R | Result | Promise<R | Result>;
+};
 
 export interface Query {
   source: Source /** Get a security data source by id */;
@@ -16,7 +37,7 @@ export interface Query {
 export interface Source {
   id: string /** The id of the source */;
   configuration: SourceConfiguration /** The raw configuration of the source */;
-  getSuricataEvents: SuricataEvents[] /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+  getEvents?: EventsData | null /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
   whoAmI?: SayMyName | null /** Just a simple example to get the app name */;
 }
 /** A set of configuration options for a security data source */
@@ -34,116 +55,58 @@ export interface SourceFields {
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
 }
 
-export interface SuricataEvents {
-  timestamp: string;
-  eventType: string;
-  flowId: string;
-  proto: string;
-  srcIp: string;
-  srcPort: number;
-  destIp: string;
-  destPort: number;
-  geoRegionName: string;
-  geoCountryIsoCode: string;
+export interface EventsData {
+  kpiEventType: KpiItem[];
+  events: EventItem[];
+}
+
+export interface KpiItem {
+  value: string;
+  count: number;
+}
+
+export interface EventItem {
+  timestamp?: string | null;
+  host?: HostEcsFields | null;
+  event?: EventEcsFields | null;
+  source?: SourceEcsFields | null;
+  destination?: DestinationEcsFields | null;
+  geo?: GeoEcsFields | null;
+  suricata?: SuricataEcsFields | null;
+}
+
+export interface HostEcsFields {
+  hostname?: string | null;
+  ip?: string | null;
+}
+
+export interface EventEcsFields {
+  type?: string | null;
+  severity?: number | null;
+}
+
+export interface SourceEcsFields {
+  ip?: string | null;
+  port?: string | null;
+}
+
+export interface DestinationEcsFields {
+  ip?: string | null;
+  port?: string | null;
+}
+
+export interface GeoEcsFields {
+  country_iso_code?: string | null;
+  region_name?: string | null;
+}
+
+export interface SuricataEcsFields {
+  flow_id?: string | null;
+  proto?: string | null;
 }
 
 export interface SayMyName {
   appName: string /** The id of the source */;
-}
-
-export namespace QueryResolvers {
-  export interface Resolvers {
-    source?: SourceResolver /** Get a security data source by id */;
-    allSources?: AllSourcesResolver /** Get a list of all security data sources */;
-  }
-
-  export type SourceResolver = Resolver<Source, SourceArgs>;
-  export interface SourceArgs {
-    id: string /** The id of the source */;
-  }
-
-  export type AllSourcesResolver = Resolver<Source[]>;
-}
-
-export namespace SourceResolvers {
-  export interface Resolvers {
-    id?: IdResolver /** The id of the source */;
-    configuration?: ConfigurationResolver /** The raw configuration of the source */;
-    getSuricataEvents?: GetSuricataEventsResolver /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
-    whoAmI?: WhoAmIResolver /** Just a simple example to get the app name */;
-  }
-
-  export type IdResolver = Resolver<string>;
-  export type ConfigurationResolver = Resolver<SourceConfiguration>;
-  export type GetSuricataEventsResolver = Resolver<SuricataEvents[], GetSuricataEventsArgs>;
-  export interface GetSuricataEventsArgs {
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-  }
-
-  export type WhoAmIResolver = Resolver<SayMyName | null>;
-}
-/** A set of configuration options for a security data source */
-export namespace SourceConfigurationResolvers {
-  export interface Resolvers {
-    fileAlias?: FileAliasResolver /** The alias to read file data from */;
-    fields?: FieldsResolver /** The field mapping to use for this source */;
-  }
-
-  export type FileAliasResolver = Resolver<string>;
-  export type FieldsResolver = Resolver<SourceFields>;
-}
-/** A mapping of semantic fields to their document counterparts */
-export namespace SourceFieldsResolvers {
-  export interface Resolvers {
-    container?: ContainerResolver /** The field to identify a container by */;
-    host?: HostResolver /** The fields to identify a host by */;
-    message?: MessageResolver /** The fields that may contain the log event message. The first field found win. */;
-    pod?: PodResolver /** The field to identify a pod by */;
-    tiebreaker?: TiebreakerResolver /** The field to use as a tiebreaker for log events that have identical timestamps */;
-    timestamp?: TimestampResolver /** The field to use as a timestamp for metrics and logs */;
-  }
-
-  export type ContainerResolver = Resolver<string>;
-  export type HostResolver = Resolver<string>;
-  export type MessageResolver = Resolver<string[]>;
-  export type PodResolver = Resolver<string>;
-  export type TiebreakerResolver = Resolver<string>;
-  export type TimestampResolver = Resolver<string>;
-}
-
-export namespace SuricataEventsResolvers {
-  export interface Resolvers {
-    timestamp?: TimestampResolver;
-    eventType?: EventTypeResolver;
-    flowId?: FlowIdResolver;
-    proto?: ProtoResolver;
-    srcIp?: SrcIpResolver;
-    srcPort?: SrcPortResolver;
-    destIp?: DestIpResolver;
-    destPort?: DestPortResolver;
-    geoRegionName?: GeoRegionNameResolver;
-    geoCountryIsoCode?: GeoCountryIsoCodeResolver;
-  }
-
-  export type TimestampResolver = Resolver<string>;
-  export type EventTypeResolver = Resolver<string>;
-  export type FlowIdResolver = Resolver<string>;
-  export type ProtoResolver = Resolver<string>;
-  export type SrcIpResolver = Resolver<string>;
-  export type SrcPortResolver = Resolver<number>;
-  export type DestIpResolver = Resolver<string>;
-  export type DestPortResolver = Resolver<number>;
-  export type GeoRegionNameResolver = Resolver<string>;
-  export type GeoCountryIsoCodeResolver = Resolver<string>;
-}
-
-export namespace SayMyNameResolvers {
-  export interface Resolvers {
-    appName?: AppNameResolver /** The id of the source */;
-  }
-
-  export type AppNameResolver = Resolver<string>;
 }
 
 export interface TimerangeInput {
@@ -154,10 +117,346 @@ export interface TimerangeInput {
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
-export interface GetSuricataEventsSourceArgs {
+export interface GetEventsSourceArgs {
   timerange: TimerangeInput;
   filterQuery?: string | null;
 }
+
+export namespace QueryResolvers {
+  export interface Resolvers<Context = any> {
+    source?: SourceResolver<Source, any, Context> /** Get a security data source by id */;
+    allSources?: AllSourcesResolver<
+      Source[],
+      any,
+      Context
+    > /** Get a list of all security data sources */;
+  }
+
+  export type SourceResolver<R = Source, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context,
+    SourceArgs
+  >;
+  export interface SourceArgs {
+    id: string /** The id of the source */;
+  }
+
+  export type AllSourcesResolver<R = Source[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace SourceResolvers {
+  export interface Resolvers<Context = any> {
+    id?: IdResolver<string, any, Context> /** The id of the source */;
+    configuration?: ConfigurationResolver<
+      SourceConfiguration,
+      any,
+      Context
+    > /** The raw configuration of the source */;
+    getEvents?: GetEventsResolver<
+      EventsData | null,
+      any,
+      Context
+    > /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+    whoAmI?: WhoAmIResolver<
+      SayMyName | null,
+      any,
+      Context
+    > /** Just a simple example to get the app name */;
+  }
+
+  export type IdResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type ConfigurationResolver<
+    R = SourceConfiguration,
+    Parent = any,
+    Context = any
+  > = Resolver<R, Parent, Context>;
+  export type GetEventsResolver<R = EventsData | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context,
+    GetEventsArgs
+  >;
+  export interface GetEventsArgs {
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  }
+
+  export type WhoAmIResolver<R = SayMyName | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+/** A set of configuration options for a security data source */
+export namespace SourceConfigurationResolvers {
+  export interface Resolvers<Context = any> {
+    fileAlias?: FileAliasResolver<string, any, Context> /** The alias to read file data from */;
+    fields?: FieldsResolver<
+      SourceFields,
+      any,
+      Context
+    > /** The field mapping to use for this source */;
+  }
+
+  export type FileAliasResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FieldsResolver<R = SourceFields, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+/** A mapping of semantic fields to their document counterparts */
+export namespace SourceFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    container?: ContainerResolver<string, any, Context> /** The field to identify a container by */;
+    host?: HostResolver<string, any, Context> /** The fields to identify a host by */;
+    message?: MessageResolver<
+      string[],
+      any,
+      Context
+    > /** The fields that may contain the log event message. The first field found win. */;
+    pod?: PodResolver<string, any, Context> /** The field to identify a pod by */;
+    tiebreaker?: TiebreakerResolver<
+      string,
+      any,
+      Context
+    > /** The field to use as a tiebreaker for log events that have identical timestamps */;
+    timestamp?: TimestampResolver<
+      string,
+      any,
+      Context
+    > /** The field to use as a timestamp for metrics and logs */;
+  }
+
+  export type ContainerResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type HostResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type MessageResolver<R = string[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PodResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type TiebreakerResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TimestampResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace EventsDataResolvers {
+  export interface Resolvers<Context = any> {
+    kpiEventType?: KpiEventTypeResolver<KpiItem[], any, Context>;
+    events?: EventsResolver<EventItem[], any, Context>;
+  }
+
+  export type KpiEventTypeResolver<R = KpiItem[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type EventsResolver<R = EventItem[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace KpiItemResolvers {
+  export interface Resolvers<Context = any> {
+    value?: ValueResolver<string, any, Context>;
+    count?: CountResolver<number, any, Context>;
+  }
+
+  export type ValueResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type CountResolver<R = number, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+}
+
+export namespace EventItemResolvers {
+  export interface Resolvers<Context = any> {
+    timestamp?: TimestampResolver<string | null, any, Context>;
+    host?: HostResolver<HostEcsFields | null, any, Context>;
+    event?: EventResolver<EventEcsFields | null, any, Context>;
+    source?: SourceResolver<SourceEcsFields | null, any, Context>;
+    destination?: DestinationResolver<DestinationEcsFields | null, any, Context>;
+    geo?: GeoResolver<GeoEcsFields | null, any, Context>;
+    suricata?: SuricataResolver<SuricataEcsFields | null, any, Context>;
+  }
+
+  export type TimestampResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type HostResolver<R = HostEcsFields | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type EventResolver<R = EventEcsFields | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type SourceResolver<R = SourceEcsFields | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type DestinationResolver<
+    R = DestinationEcsFields | null,
+    Parent = any,
+    Context = any
+  > = Resolver<R, Parent, Context>;
+  export type GeoResolver<R = GeoEcsFields | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type SuricataResolver<
+    R = SuricataEcsFields | null,
+    Parent = any,
+    Context = any
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HostEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    hostname?: HostnameResolver<string | null, any, Context>;
+    ip?: IpResolver<string | null, any, Context>;
+  }
+
+  export type HostnameResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace EventEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    type?: TypeResolver<string | null, any, Context>;
+    severity?: SeverityResolver<number | null, any, Context>;
+  }
+
+  export type TypeResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type SeverityResolver<R = number | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace SourceEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    ip?: IpResolver<string | null, any, Context>;
+    port?: PortResolver<string | null, any, Context>;
+  }
+
+  export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PortResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace DestinationEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    ip?: IpResolver<string | null, any, Context>;
+    port?: PortResolver<string | null, any, Context>;
+  }
+
+  export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PortResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace GeoEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    country_iso_code?: CountryIsoCodeResolver<string | null, any, Context>;
+    region_name?: RegionNameResolver<string | null, any, Context>;
+  }
+
+  export type CountryIsoCodeResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type RegionNameResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace SuricataEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    flow_id?: FlowIdResolver<string | null, any, Context>;
+    proto?: ProtoResolver<string | null, any, Context>;
+  }
+
+  export type FlowIdResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type ProtoResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace SayMyNameResolvers {
+  export interface Resolvers<Context = any> {
+    appName?: AppNameResolver<string, any, Context> /** The id of the source */;
+  }
+
+  export type AppNameResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
 export namespace WhoAmIQuery {
   export type Variables = {
     sourceId: string;

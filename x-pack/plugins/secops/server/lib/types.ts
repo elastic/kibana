@@ -5,12 +5,12 @@
  */
 
 import { ConfigurationAdapter } from './configuration';
+import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { SourceConfigurations, Sources } from './sources';
-import { Suricata } from './suricata';
 
 export interface AppDomainLibs {
-  suricata: Suricata;
+  events: Events;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
