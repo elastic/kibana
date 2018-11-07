@@ -5,28 +5,35 @@
  */
 
 import {
-  EuiDatePicker,
-  EuiDatePickerRange,
-  // @ts-ignore
-  EuiHeaderLogo,
   EuiHorizontalRule,
-  EuiPanel,
   // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
-import { first, last, noop, range as fpRange } from 'lodash/fp';
-import moment, { Moment } from 'moment';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
 import SplitPane from 'react-split-pane';
-import { PageContainer, PageContent, PageHeader } from '../../components/page';
+import {
+  PageContainer,
+  PageContent,
+  PageHeader,
+  Pane1,
+  Pane1FlexContent,
+  Pane1Header,
+  Pane1Style,
+  Pane2,
+  Pane2Style,
+  PaneScrollContainer,
+  ResizerStyle,
+  SubHeader,
+  SubHeaderDatePicker,
+} from '../../components/page';
+import { DatePicker } from '../../components/page/date_picker';
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
-import { getDateRange } from '../../components/timeline/body/mini_map/date_ranges';
 import { Sort } from '../../components/timeline/body/sort';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import {
@@ -35,7 +42,7 @@ import {
   OnFilterChange,
   OnRangeSelected,
 } from '../../components/timeline/events';
-import { WhoAmI } from '../../containers/who_am_i';
+import { Placeholders } from './visualization_placeholder';
 
 const onColumnSorted: OnColumnSorted = sorted => {
   alert(`column sorted: ${JSON.stringify(sorted)}`);
@@ -58,47 +65,7 @@ const sort: Sort = {
   sortDirection: 'descending',
 };
 
-const VisualizationPlaceholder = styled(EuiPanel)`
-  && {
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
-    margin: 5px;
-    padding: 5px 5px 5px 10px;
-    width: 500px;
-    height: 309px;
-  }
-`;
-
 const maxTimelineWidth = 1125;
-
-const dates: Date[] = getDateRange('day');
-const startDate: Moment = moment(first(dates));
-const endDate: Moment = moment(last(dates));
-
-const DatePicker: React.SFC = () => (
-  <EuiDatePickerRange
-    startDateControl={
-      <EuiDatePicker
-        selected={startDate}
-        onChange={noop}
-        isInvalid={false}
-        aria-label="Start date"
-        showTimeSelect
-      />
-    }
-    endDateControl={
-      <EuiDatePicker
-        selected={endDate}
-        onChange={noop}
-        isInvalid={false}
-        aria-label="End date"
-        showTimeSelect
-      />
-    }
-  />
-);
 
 export const HomePage = pure(() => (
   <PageContainer data-test-subj="pageContainer">
@@ -106,121 +73,50 @@ export const HomePage = pure(() => (
       <Navigation data-test-subj="navigation" />
     </PageHeader>
     <PageContent data-test-subj="pageContent">
-      <div
-        data-test-subj="subHeader"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-        }}
-      >
-        <div
-          data-test-subj="datePickerContainer"
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            margin: '5px 0 5px 0',
-          }}
-        >
+      <SubHeader data-test-subj="subHeader">
+        <SubHeaderDatePicker data-test-subj="datePickerContainer">
           <DatePicker />
-        </div>
+        </SubHeaderDatePicker>
         <EuiHorizontalRule margin="none" />
-      </div>
+      </SubHeader>
 
       <SplitPane
+        data-test-subj="splitPane"
         split="vertical"
         defaultSize="75%"
         primary="second"
-        pane1Style={{
-          height: '100%',
-        }}
+        pane1Style={Pane1Style}
         pane2Style={{
-          height: '100%',
+          ...Pane2Style,
           maxWidth: `${maxTimelineWidth}px`,
         }}
-        resizerStyle={{
-          border: '5px solid #909AA1',
-          backgroundClip: 'padding-box',
-          cursor: 'col-resize',
-          margin: '5px',
-          zIndex: 1,
-        }}
+        resizerStyle={ResizerStyle}
       >
-        <div
-          data-test-subj="pane1"
-          style={{
-            height: '100%',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            data-test-subj="pane1Header"
-            style={{
-              display: 'flex',
-              margin: '5px',
-              padding: '5px',
-            }}
-          >
+        <Pane1 data-test-subj="pane1">
+          <Pane1Header data-test-subj="pane1Header">
             <EuiSearchBar onChange={noop} />
-          </div>
-          <div
-            data-test-subj="pane1ScrollContainer"
-            style={{
-              height: '100%',
-              overflowY: 'scroll',
-            }}
-          >
-            <div
-              data-test-subj="pane1Content"
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                padding: '5px',
-                height: '100%',
-              }}
-            >
-              {fpRange(0, 10).map(p => (
-                <VisualizationPlaceholder
-                  data-test-subj="visualizationPlaceholder"
-                  key={`visualizationPlaceholder-${p}`}
-                >
-                  <WhoAmI sourceId="default">{({ appName }) => <div>{appName}</div>}</WhoAmI>
-                </VisualizationPlaceholder>
-              ))}
-            </div>
-          </div>
-        </div>
+          </Pane1Header>
+          <PaneScrollContainer data-test-subj="pane1ScrollContainer">
+            <Pane1FlexContent data-test-subj="pane1FlexContent">
+              <Placeholders count={10} />
+            </Pane1FlexContent>
+          </PaneScrollContainer>
+        </Pane1>
 
-        <div
-          data-test-subj="pane2"
-          style={{
-            height: '100%',
-            overflow: 'hidden',
-          }}
-        >
-          <div data-test-subj="pane2Header" />
-          <div
-            data-test-subj="pane2ScrollContainer"
-            style={{
-              height: '100%',
-              overflowY: 'scroll',
-            }}
-          >
-            <div data-test-subj="pane2Content">
-              <Timeline
-                columnHeaders={headers}
-                dataProviders={mockDataProviders}
-                onColumnSorted={onColumnSorted}
-                onDataProviderRemoved={onDataProviderRemoved}
-                onFilterChange={onFilterChange}
-                onRangeSelected={onRangeSelected}
-                sort={sort}
-                width={maxTimelineWidth}
-              />
-            </div>
-          </div>
-        </div>
+        <Pane2 data-test-subj="pane2">
+          <PaneScrollContainer data-test-subj="pane2ScrollContainer">
+            <Timeline
+              columnHeaders={headers}
+              dataProviders={mockDataProviders}
+              onColumnSorted={onColumnSorted}
+              onDataProviderRemoved={onDataProviderRemoved}
+              onFilterChange={onFilterChange}
+              onRangeSelected={onRangeSelected}
+              sort={sort}
+              width={maxTimelineWidth}
+            />
+          </PaneScrollContainer>
+        </Pane2>
       </SplitPane>
     </PageContent>
     <Footer />

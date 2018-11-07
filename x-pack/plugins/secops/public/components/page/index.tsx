@@ -5,6 +5,7 @@
  */
 
 import { EuiPage } from '@elastic/eui';
+import * as React from 'react';
 import styled from 'styled-components';
 
 export const PageContainer = styled.div`
@@ -43,3 +44,62 @@ export const FooterContainer = styled.div`
   padding: 8px 8px;
   text-align: left;
 `;
+
+export const SubHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
+export const SubHeaderDatePicker = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin: 5px 0 5px 0;
+`;
+
+export const PaneScrollContainer = styled.div`
+  height: 100%;
+  overflow-y: scroll;
+`;
+
+export const Pane1 = styled.div`
+  height: 100%;
+  overflow: hidden;
+`;
+
+/** For use with the `SplitPane` `pane1Style` prop */
+export const Pane1Style: React.CSSProperties = {
+  height: '100%',
+  marginTop: '5px',
+};
+
+export const Pane1FlexContent = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: 100%;
+`;
+
+export const Pane1Header = styled.div`
+  display: flex;
+`;
+
+export const Pane2 = styled.div`
+  height: 100%;
+  overflow-x: scroll;
+  overflow-y: hidden;
+`;
+
+/** For use with the `SplitPane` `pane2Style` prop */
+export const Pane2Style: React.CSSProperties = {
+  height: '100%',
+};
+
+/** For use with the `SplitPane` `resizerStyle` prop */
+export const ResizerStyle: React.CSSProperties = {
+  border: '5px solid #909AA1',
+  backgroundClip: 'padding-box',
+  cursor: 'col-resize',
+  margin: '5px',
+  zIndex: 1,
+};
