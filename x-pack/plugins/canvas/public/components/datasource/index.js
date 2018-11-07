@@ -9,8 +9,8 @@ import { connect } from 'react-redux';
 import { withState, withHandlers, compose } from 'recompose';
 import { get } from 'lodash';
 import { datasourceRegistry } from '../../expression_types';
+import { getFunctionDefinitions } from '../../lib/function_definitions';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
-import { getFunctionDefinitions } from '../../state/selectors/app';
 import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
 
