@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { REQUIRED_LICENSES } from '../common/constants';
 import { Header } from './components/layouts/header';
 import { BreadcrumbConsumer, RouteWithBreadcrumb } from './components/route_with_breadcrumb';
 import { FrontendLibs } from './lib/types';
@@ -38,8 +39,13 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           )}
         </BreadcrumbConsumer>
         <Switch>
-          {libs.framework.licenseExpired() && <Route render={() => <InvalidLicensePage />} />}
-          {!libs.framework.securityEnabled() && <Route render={() => <EnforceSecurityPage />} />}
+          {!libs.framework.info ||
+            (!REQUIRED_LICENSES.includes(libs.framework.info.license.type) && (
+              <Route render={() => <InvalidLicensePage />} />
+            ))}
+          {!libs.framework.info!.security.enabled && (
+            <Route render={() => <EnforceSecurityPage />} />
+          )}
           {!libs.framework.getCurrentUser() ||
             (!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
               !libs.framework.getCurrentUser().roles.includes('superuser') && (
