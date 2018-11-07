@@ -15,6 +15,7 @@ exports[`after fetch hideWriteControls 1`] = `
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <h2>
           <EuiTextColor
@@ -60,6 +61,7 @@ exports[`after fetch initialFilter 1`] = `
           >
             <EuiTitle
               size="l"
+              textTransform="none"
             >
               <h1>
                 Dashboards
@@ -273,6 +275,7 @@ exports[`after fetch renders table rows 1`] = `
           >
             <EuiTitle
               size="l"
+              textTransform="none"
             >
               <h1>
                 Dashboards
@@ -426,6 +429,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           >
             <EuiTitle
               size="l"
+              textTransform="none"
             >
               <h1>
                 Dashboards

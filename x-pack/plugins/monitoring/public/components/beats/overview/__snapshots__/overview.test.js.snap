@@ -32,6 +32,7 @@ exports[`Overview that overview page renders normally 1`] = `
         >
           <EuiTitle
             size="s"
+            textTransform="none"
           >
             <h3>
               Active Beats in Last Day
@@ -79,6 +80,7 @@ exports[`Overview that overview page renders normally 1`] = `
         >
           <EuiTitle
             size="s"
+            textTransform="none"
           >
             <h3>
               Top 5 Beat Types in Last Day
@@ -118,6 +120,7 @@ exports[`Overview that overview page renders normally 1`] = `
         >
           <EuiTitle
             size="s"
+            textTransform="none"
           >
             <h3>
               Top 5 Versions in Last Day

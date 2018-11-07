@@ -17,6 +17,7 @@ exports[`Header should render normally 1`] = `
     >
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -111,6 +112,7 @@ exports[`Header should render normally 1`] = `
   />
   <EuiText
     grow={true}
+    size="m"
   >
     <p>
       <EuiTextColor
