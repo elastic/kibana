@@ -1,0 +1,4 @@
+KBN_CI_JOB:
+  - selenium
+  - intake
+  - x-pack
