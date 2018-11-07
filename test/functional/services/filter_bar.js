@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Keys from 'leadfoot/keys';
+//import Keys from 'selenium-webdriver/lib/input';
 import { By } from 'selenium-webdriver';
 
 export function FilterBarProvider({ getService }) {
@@ -93,7 +93,10 @@ export function FilterBarProvider({ getService }) {
         for (let j = 0; j < fieldValues.length; j++) {
           // await paramFields[i].type(fieldValues[j]);
           await find.setValueElement(paramFields[i], fieldValues[j]);
-          await remote.pressKeys(Keys.RETURN);
+          const highlight = await remote.findElement(By.css('.ui-select-highlight'));
+          await highlight.click();
+          // pressKey does not work on Mac/Chrome
+          // await remote.pressKeys(Keys.RETURN);
         }
       }
       await testSubjects.click('saveFilter');

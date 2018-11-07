@@ -895,7 +895,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getInspectorTableData() {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const inspectorPanel = await testSubjects.find('inspectorPanel');
-      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
+      const tableBody = await retry.try(async () => inspectorPanel.findElement(By.css('tbody')));
       // Convert the data into a nested array format:
       // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
       const rows = await tableBody.findElements(By.tagName('tr'));

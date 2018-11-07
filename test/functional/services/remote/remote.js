@@ -246,6 +246,27 @@ export async function RemoteProvider({ getService }) {
 
       async goBack() {
         await driver.navigate().back();
+      },
+
+      async waitForElementNotPresent(selectorObj) {
+        await driver.wait(() => {
+          return driver.findElements(selectorObj).then((elements) => {
+            if (elements.length <= 0) {
+              return true;
+            }
+            return false;
+          });
+        },
+        defaultFindTimeout,
+        `The element ${selectorObj} was still present when it should have disappeared.`);
+      },
+
+      async isElementVisible(selectorObj) {
+        try {
+          return await driver.findElement(selectorObj).isDisplayed();
+        } catch (err) {
+          return false;
+        }
       }
     };
   }

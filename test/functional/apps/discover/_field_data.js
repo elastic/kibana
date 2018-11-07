@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
         // marks is the style that highlights the text in yellow
         const marks = await PageObjects.discover.getMarks();
         expect(marks.length).to.be(50);
-        expect(marks.indexOf('php')).to.be(0);
+        expect(await marks[0].getText()).to.be('php');
       });
 
       it('search type:apache should show the correct hit count', async function () {
