@@ -6,11 +6,8 @@
 import * as React from 'react';
 import { NoDataLayout } from '../components/layouts/no_data';
 
-export const NoAccessPage: React.SFC<any> = () => (
-  <NoDataLayout title="Access denied" actionSection={[]}>
-    <p>
-      You are not authorized to access Beats central management. To use Beats central management,
-      you need the privileges granted by the `beats_admin` role.
-    </p>
+export const EnforceSecurityPage: React.SFC<any> = () => (
+  <NoDataLayout title="Security is not enabled" actionSection={[]}>
+    <p>You must enable security in Kibana and Elasticsearch to use Beats central management.</p>
   </NoDataLayout>
 );
