@@ -13,10 +13,7 @@ exports.runGulpTask = function(name) {
 };
 
 exports.runKibanaScript = function(name, args = []) {
-  const { resolve } = require('path');
-
   process.chdir(resolve(__dirname, '../../../..'));
   process.argv.splice(2, 0, ...args);
-
   require('../../../../scripts/' + name);
 };
