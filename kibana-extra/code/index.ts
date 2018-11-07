@@ -71,7 +71,7 @@ export default (kibana: any) =>
         // The frequency which each repo tries to index. 1 day by default.
         indexRepoFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
         // timeout a request over 30s.
-        lspRequestTimeoutMs: Joi.number().default(moment.duration(30, 'second').asSeconds()),
+        lspRequestTimeoutMs: Joi.number().default(moment.duration(30, 'second').asMilliseconds()),
         repos: Joi.array().default([]),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         isAdmin: Joi.boolean().default(true), // If we show the admin buttons
