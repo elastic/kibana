@@ -740,6 +740,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       expect(errorToast).to.be(true);
     }
 
+    async clickLoadSavedVisButton() {
+      // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
+      // element as a child instead of building the breadcrumbs dynamically.
+      await find.clickByCssSelector('[href="#/visualize"]');
+    }
+
     async filterVisByName(vizName) {
       const input = await find.byCssSelector('input[name="filter"]');
       await input.click();
@@ -761,8 +767,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async loadSavedVisualization(vizName) {
-      await PageObjects.common.navigateToApp('visualize');
+    async loadSavedVisualization(vizName, { navigateToVisualize = true } = {}) {
+      if (navigateToVisualize) {
+        await this.clickLoadSavedVisButton();
+      }
       await this.openSavedVisualization(vizName);
     }
 
