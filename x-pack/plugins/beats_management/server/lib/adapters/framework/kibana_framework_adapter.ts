@@ -62,9 +62,6 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
-    if (!this.isSecurityEnabled()) {
-      return;
-    }
     this.server.route({
       handler: {
         directory: {
@@ -101,7 +98,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
         if (
           wrappedRequest.user.kind === 'authenticated' &&
-          !wrappedRequest.user.roles.includes('superuser') &&
+          (!wrappedRequest.user.roles.includes('superuser') || !wrappedRequest.user.roles) &&
           difference(requiredRoles, wrappedRequest.user.roles).length !== 0
         ) {
           return h.response().code(403);
@@ -125,13 +122,6 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return null;
     }
   }
-
-  private isSecurityEnabled = () => {
-    return (
-      this.server.plugins.xpack_main.info.isAvailable() &&
-      this.server.plugins.xpack_main.info.feature('security').isEnabled()
-    );
-  };
 
   // TODO make key a param
   private validateConfig() {
@@ -172,6 +162,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return {
         securityEnabled: true,
         licenseValid: false,
+        licenseExpired: false,
         message: `Your ${licenseType} license does not support Beats central management features. Please upgrade your license.`,
       };
     }
@@ -180,7 +171,8 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     if (!isLicenseActive) {
       return {
         securityEnabled: true,
-        licenseValid: false,
+        licenseValid: true,
+        licenseExpired: true,
         message: `You cannot edit, create, or delete your Beats central management configurations because your ${licenseType} license has expired.`,
       };
     }
@@ -193,6 +185,8 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return {
         securityEnabled: false,
         licenseValid: true,
+        licenseExpired: false,
+
         message,
       };
     }
@@ -201,6 +195,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     return {
       securityEnabled: true,
       licenseValid: true,
+      licenseExpired: false,
     };
   }
 }

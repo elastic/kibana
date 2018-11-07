@@ -437,5 +437,17 @@ module.exports = {
         ],
       },
     },
+    {
+      files: ['x-pack/plugins/canvas/public/**/*'],
+      env: {
+        browser: true,
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*'],
+      env: {
+        jquery: true,
+      },
+    },
   ],
 };
