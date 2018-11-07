@@ -16,7 +16,7 @@ import {
 export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'containerOverview',
-    label: 'Container Overview',
+    label: 'Container',
     sections: [
       {
         id: InfraMetric.containerOverview,
@@ -44,7 +44,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
               formatterTemplate: '{{value}}/s',
             },
             tx: {
-              name: 'Outbound (RX)',
+              name: 'Outbound (TX)',
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.bits,
               formatterTemplate: '{{value}}/s',

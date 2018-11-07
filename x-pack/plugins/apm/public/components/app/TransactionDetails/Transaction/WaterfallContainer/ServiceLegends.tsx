@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { px, unit } from '../../../../../style/variables';
 // @ts-ignore
 import Legend from '../../../../shared/charts/Legend';
+import { IServiceColors } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
 const Legends = styled.div`
   display: flex;
 
-  div {
+  > * {
     margin-right: ${px(unit)};
     &:last-child {
       margin-right: 0;
@@ -22,14 +24,15 @@ const Legends = styled.div`
 `;
 
 interface Props {
-  serviceColors: {
-    [key: string]: string;
-  };
+  serviceColors: IServiceColors;
 }
 
 export function ServiceLegends({ serviceColors }: Props) {
   return (
     <Legends>
+      <EuiTitle size="xxxs">
+        <span>Services</span>
+      </EuiTitle>
       {Object.entries(serviceColors).map(([label, color]) => (
         <Legend key={color} color={color} text={label} />
       ))}

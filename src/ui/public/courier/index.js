@@ -27,6 +27,7 @@ export {
   decorateQuery,
   buildQueryFromFilters,
   luceneStringToDsl,
+  BuildESQueryProvider
 } from './search_source';
 
 export {

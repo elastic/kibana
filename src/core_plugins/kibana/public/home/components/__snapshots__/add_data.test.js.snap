@@ -832,7 +832,7 @@ exports[`mlEnabled 1`] = `
           type="button"
         >
           <FormattedMessage
-            defaultMessage="Import a JSON, CSV, or log file"
+            defaultMessage="Import a CSV, NDJSON, or log file"
             id="kbn.home.addData.uploadFileLink"
             values={Object {}}
           />
