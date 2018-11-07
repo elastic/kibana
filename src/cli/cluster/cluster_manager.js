@@ -96,7 +96,7 @@ export default class ClusterManager {
         protocol: config.get('server.ssl.enabled') ? 'https' : 'http',
         hostname: config.get('server.host'),
         port: config.get('server.port'),
-        pathname: this.basePathProxy.basePath,
+        pathname: (this.basePathProxy ? this.basePathProxy.basePath : ''),
       }));
     }
 
