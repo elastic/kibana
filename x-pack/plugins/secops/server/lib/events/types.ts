@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SourceConfiguration, SuricataEvents, TimerangeInput } from '../../../common/graphql/types';
+import { EventsData, SourceConfiguration, TimerangeInput } from '../../../common/graphql/types';
 import { JsonObject } from '../../../common/typed_json';
 import { FrameworkRequest } from '../framework';
 
-export interface SuricataAdapter {
-  getEvents(req: FrameworkRequest, options: SuricataRequestOptions): Promise<SuricataEvents[]>;
+export interface EventsAdapter {
+  getEvents(req: FrameworkRequest, options: EventsRequestOptions): Promise<EventsData>;
 }
 
 export type ESQuery = ESRangeQuery | ESQueryStringQuery | ESMatchQuery | JsonObject;
@@ -41,10 +41,11 @@ export interface ESQueryStringQuery {
   };
 }
 
-export interface SuricataRequestOptions {
+export interface EventsRequestOptions {
   sourceConfiguration: SourceConfiguration;
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
+  fields: string[];
 }
 
 export interface SearchResponse<T> {
@@ -97,4 +98,19 @@ export interface EventData extends SearchHit {
     // tslint:disable-next-line:no-any
     [field: string]: any;
   };
+  aggregations: {
+    // tslint:disable-next-line:no-any
+    [agg: string]: any;
+  };
 }
+
+export interface TermAggregation {
+  [agg: string]: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}
+
+export type EventFilterQuery = JsonObject;

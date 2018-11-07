@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createSuricataResolvers } from './resolvers';
-export { suricataSchema } from './schema.gql';
+export { createEventsResolvers } from './resolvers';
+export { eventsSchema } from './schema.gql';

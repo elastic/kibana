@@ -7,10 +7,10 @@
 import { Server } from 'hapi';
 
 import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
+import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
 import { Sources } from '../sources';
 import { ConfigurationSourcesAdapter } from '../sources/configuration_sources_adapter';
-import { ElasticsearchSuricataAdapter, Suricata } from '../suricata';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
 
 export function compose(server: Server): AppBackendLibs {
@@ -19,7 +19,7 @@ export function compose(server: Server): AppBackendLibs {
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
 
   const domainLibs: AppDomainLibs = {
-    suricata: new Suricata(new ElasticsearchSuricataAdapter(framework)),
+    events: new Events(new ElasticsearchEventsAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {
