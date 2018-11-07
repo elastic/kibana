@@ -151,7 +151,7 @@ describe('Timeline', () => {
 
         wrapper
           .find('[data-test-subj="textFilter"]')
-          .at(1)
+          .at(2)
           .simulate('change', { target: { value: newFilter } });
 
         expect(mockOnFilterChange).toBeCalledWith({

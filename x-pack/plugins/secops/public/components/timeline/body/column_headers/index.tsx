@@ -29,18 +29,18 @@ const ColumnHeadersSpan = styled.span`
 
 const ColumnHeaderContainer = styled.div``;
 
+const Flex = styled.div`
+  display: flex;
+  margin-left: 3px;
+  width: 100%;
+`;
+
 /** Renders the timeline header columns */
 export const ColumnHeaders = pure<Props>(
   ({ columnHeaders, onColumnSorted = noop, onFilterChange = noop, onRangeSelected, sort }) => (
     <ColumnHeadersSpan data-test-subj="columnHeaders">
       <RangePicker selected={'1 Day'} onRangeSelected={onRangeSelected} />
-      <div
-        style={{
-          display: 'flex',
-          marginLeft: '3px',
-          width: '100%',
-        }}
-      >
+      <Flex>
         {columnHeaders.map(header => (
           <ColumnHeaderContainer data-test-subj="columnHeaderContainer" key={header.id}>
             <Header
@@ -51,7 +51,7 @@ export const ColumnHeaders = pure<Props>(
             />
           </ColumnHeaderContainer>
         ))}
-      </div>
+      </Flex>
     </ColumnHeadersSpan>
   )
 );

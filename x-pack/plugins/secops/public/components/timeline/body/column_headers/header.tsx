@@ -62,10 +62,11 @@ interface Props {
   sort: Sort;
 }
 
-const HeaderContainer = styled.div`
+const HeaderContainer = styled.div<{ minwidth: string }>`
   display: flex;
   flex-direction: column;
   margin-top: 8px;
+  min-width: ${props => props.minwidth};
 `;
 
 const HeaderDiv = styled.div`
@@ -95,9 +96,7 @@ export const Header = pure<Props>(
       <HeaderContainer
         data-test-subj="headerContainer"
         key={header.id}
-        style={{
-          minWidth: `${header.minWidth}px`,
-        }}
+        minwidth={`${header.minWidth}px`}
       >
         <HeaderDiv data-test-subj="header" onClick={onClick}>
           <Text data-test-subj="headerText">{header.text}</Text>

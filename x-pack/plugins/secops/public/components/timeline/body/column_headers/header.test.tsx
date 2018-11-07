@@ -62,15 +62,14 @@ describe('Header', () => {
     });
 
     describe('minWidth', () => {
-      test('it applies the value of the minWidth prop to the headerContainer', () => {
+      test('it applies the value of the minwidth prop to the headerContainer', () => {
         const wrapper = mount(<Header sort={sort} header={columnHeader} />);
-
         expect(
           wrapper
             .find('[data-test-subj="headerContainer"]')
             .first()
-            .prop('style')
-        ).toHaveProperty('minWidth', `${columnHeader.minWidth}px`);
+            .props()
+        ).toHaveProperty('minwidth', `${columnHeader.minWidth}px`);
       });
     });
   });

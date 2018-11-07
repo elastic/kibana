@@ -8,6 +8,7 @@ import { EuiFieldText } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
 import { OnFilterChange } from '../../../events';
 import { ColumnId } from '../../column_id';
@@ -21,6 +22,10 @@ interface Props {
 }
 
 export const DEFAULT_PLACEHOLDER = 'Filter';
+
+const FieldText = styled(EuiFieldText)<{ minwidth: string }>`
+  min-width: ${props => props.minwidth};
+`;
 
 /** Renders a text-based column filter */
 export const TextFilter = pure<Props>(
@@ -36,11 +41,9 @@ export const TextFilter = pure<Props>(
     };
 
     return (
-      <EuiFieldText
+      <FieldText
         data-test-subj="textFilter"
-        style={{
-          minWidth: `${minWidth}px`,
-        }}
+        minwidth={`${minWidth}px`}
         placeholder={placeholder}
         value={filter}
         onChange={onChange}

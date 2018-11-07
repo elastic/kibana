@@ -29,12 +29,14 @@ interface Props {
   width: number;
 }
 
-const TimelineDiv = styled.div`
+const TimelineDiv = styled.div<{ width: string; height: string }>`
   display: flex;
   flex-direction: column;
   min-height: 700px;
   overflow: none;
   user-select: none;
+  width: ${props => props.width};
+  height: ${props => props.height};
 `;
 
 const defaultHeight = '100%';
@@ -53,7 +55,7 @@ export const Timeline = pure<Props>(
     sort,
     width,
   }) => (
-    <TimelineDiv data-test-subj="timeline" style={{ width: `${width}px`, height }}>
+    <TimelineDiv data-test-subj="timeline" width={`${width}px`} height={height}>
       <TimelineHeader
         dataProviders={dataProviders}
         onDataProviderRemoved={onDataProviderRemoved}
