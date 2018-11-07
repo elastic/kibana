@@ -5,10 +5,11 @@
  */
 
 import uniqBy from 'lodash.uniqby';
-import { functionsRegistry } from '../../common/lib/functions_registry';
 import { getServerFunctions } from '../state/selectors/app';
+import { getBrowserRegistries } from './browser_registries';
 
-export function getFunctionDefinitions(state) {
+export async function getFunctionDefinitions(state) {
+  const { browserFunctions } = await getBrowserRegistries();
   const serverFunctions = getServerFunctions(state);
-  return uniqBy(serverFunctions.concat(functionsRegistry.toArray()), 'name');
+  return uniqBy(serverFunctions.concat(browserFunctions.toArray()), 'name');
 }

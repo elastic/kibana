@@ -28,7 +28,7 @@ const storage = new Storage(getWindow().localStorage);
 const mapStateToProps = state => ({
   pageId: getSelectedPage(state),
   element: getSelectedElement(state),
-  functionDefinitions: getFunctionDefinitions(state),
+  functionDefinitionsPromise: getFunctionDefinitions(state),
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -65,6 +65,10 @@ const expressionLifecycle = lifecycle({
       });
     }
   },
+  componentDidMount() {
+    const { functionDefinitionsPromise, setFunctionDefinitions } = this.props;
+    functionDefinitionsPromise.then(defs => setFunctionDefinitions(defs));
+  },
 });
 
 export const Expression = compose(
@@ -73,6 +77,7 @@ export const Expression = compose(
     mapDispatchToProps,
     mergeProps
   ),
+  withState('functionDefinitions', 'setFunctionDefinitions', []),
   withState('formState', 'setFormState', ({ expression }) => ({
     expression,
     dirty: false,
