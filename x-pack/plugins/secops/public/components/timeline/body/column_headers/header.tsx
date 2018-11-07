@@ -76,7 +76,6 @@ const HeaderDiv = styled.div`
 
 const Text = styled(EuiText)`
   display: inline;
-  padding-left: 5px;
 `;
 
 /** Renders a header */

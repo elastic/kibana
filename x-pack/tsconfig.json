@@ -27,9 +27,6 @@
         "x-pack/test_utils/*"
       ]
     },
-    "types": [
-      "node",
-      "jest"
-    ]
+    "types": ["node", "jest"]
   }
 }

@@ -16,7 +16,7 @@ import { Sort } from './sort';
 describe('ColumnHeaders', () => {
   describe('rendering', () => {
     const sort: Sort = {
-      columnId: 'time',
+      columnId: '@timestamp',
       sortDirection: 'descending',
     };
 

@@ -4,13 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  EuiHorizontalRule,
+  // @ts-ignore
+  EuiSearchBar,
+} from '@elastic/eui';
+import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
-import { LinkToPage } from '../../components/link_to';
-import { PageContainer, PageContent } from '../../components/page';
+import SplitPane from 'react-split-pane';
+import {
+  PageContainer,
+  PageContent,
+  PageHeader,
+  Pane1,
+  Pane1FlexContent,
+  Pane1Header,
+  Pane1Style,
+  Pane2,
+  Pane2Style,
+  Pane2TimelineContainer,
+  PaneScrollContainer,
+  ResizerStyle,
+  SubHeader,
+  SubHeaderDatePicker,
+} from '../../components/page';
+import { DatePicker } from '../../components/page/date_picker';
+import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
@@ -23,13 +44,9 @@ import {
   OnFilterChange,
   OnRangeSelected,
 } from '../../components/timeline/events';
-import { WhoAmI } from '../../containers/who_am_i';
-import { mockECSData } from '../mock/mock_ecs';
 
-import { NotFoundPage } from '../404';
-import { Hosts } from '../hosts';
-import { Network } from '../network';
-import { Overview } from '../overview';
+import { mockECSData } from '../mock/mock_ecs';
+import { Placeholders } from './visualization_placeholder';
 
 const onColumnSorted: OnColumnSorted = sorted => {
   alert(`column sorted: ${JSON.stringify(sorted)}`);
@@ -47,62 +64,72 @@ const onFilterChange: OnFilterChange = filter => {
   alert(`filter changed: ${JSON.stringify(filter)}`);
 };
 
-const sort: Sort = {
-  columnId: 'time',
-  sortDirection: 'descending',
-};
-
-// Pass the data to the TimeLine
-// Pass the column and row renders down as well
 export interface EventRenderer {
   isInstance: (data: ECS) => boolean;
   renderMultiClolumn: (data: ECS) => React.ReactNode;
   renderColumn: (columnName: string, data: ECS) => React.ReactNode;
 }
 
+const sort: Sort = {
+  columnId: '@timestamp',
+  sortDirection: 'descending',
+};
+
+const maxTimelineWidth = 1125;
+
 export const HomePage = pure(() => (
-  <PageContainer>
-    <Navigation />
-    <PageContent>
-      <Divide>
-        <Switch>
-          <Redirect from="/" exact={true} to="/overview" />
-          <Route path="/overview" component={Overview} />
-          <Route path="/hosts" component={Hosts} />
-          <Route path="/network" component={Network} />
-          <Route path="/link-to" component={LinkToPage} />
-          <Route component={NotFoundPage} />
-        </Switch>
-        <Timeline
-          columnHeaders={headers}
-          dataProviders={mockDataProviders}
-          data={mockECSData}
-          onColumnSorted={onColumnSorted}
-          onDataProviderRemoved={onDataProviderRemoved}
-          onFilterChange={onFilterChange}
-          onRangeSelected={onRangeSelected}
-          sort={sort}
-          width={900}
-        />
-      </Divide>
+  <PageContainer data-test-subj="pageContainer">
+    <PageHeader data-test-subj="pageHeader">
+      <Navigation data-test-subj="navigation" />
+    </PageHeader>
+    <PageContent data-test-subj="pageContent">
+      <SubHeader data-test-subj="subHeader">
+        <SubHeaderDatePicker data-test-subj="datePickerContainer">
+          <DatePicker />
+        </SubHeaderDatePicker>
+        <EuiHorizontalRule margin="none" />
+      </SubHeader>
+
+      <SplitPane
+        data-test-subj="splitPane"
+        split="vertical"
+        defaultSize="75%"
+        primary="second"
+        pane1Style={Pane1Style}
+        pane2Style={{
+          ...Pane2Style,
+          maxWidth: `${maxTimelineWidth}px`,
+        }}
+        resizerStyle={ResizerStyle}
+      >
+        <Pane1 data-test-subj="pane1">
+          <Pane1Header data-test-subj="pane1Header">
+            <EuiSearchBar onChange={noop} />
+          </Pane1Header>
+          <PaneScrollContainer data-test-subj="pane1ScrollContainer">
+            <Pane1FlexContent data-test-subj="pane1FlexContent">
+              <Placeholders count={10} />
+            </Pane1FlexContent>
+          </PaneScrollContainer>
+        </Pane1>
+
+        <Pane2 data-test-subj="pane2">
+          <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
+            <Timeline
+              columnHeaders={headers}
+              dataProviders={mockDataProviders}
+              data={mockECSData}
+              onColumnSorted={onColumnSorted}
+              onDataProviderRemoved={onDataProviderRemoved}
+              onFilterChange={onFilterChange}
+              onRangeSelected={onRangeSelected}
+              sort={sort}
+              width={maxTimelineWidth}
+            />
+          </Pane2TimelineContainer>
+        </Pane2>
+      </SplitPane>
     </PageContent>
-    <Footer>
-      <WhoAmI sourceId="default">{({ appName }) => <h1>Hello {appName}</h1>}</WhoAmI>
-    </Footer>
+    <Footer />
   </PageContainer>
 ));
-
-const Footer = styled.div`
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  color: #666;
-  padding: 8px 8px;
-  text-align: center;
-`;
-
-const Divide = styled.div`
-  display: flex;
-  flex-direction: row;
-`;

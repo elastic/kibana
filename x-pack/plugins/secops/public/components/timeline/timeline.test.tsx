@@ -17,7 +17,7 @@ import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 describe('Timeline', () => {
   const sort: Sort = {
-    columnId: 'time',
+    columnId: '@timestamp',
     sortDirection: 'descending',
   };
 
