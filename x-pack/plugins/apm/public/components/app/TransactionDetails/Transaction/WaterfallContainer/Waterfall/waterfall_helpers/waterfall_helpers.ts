@@ -28,7 +28,7 @@ export interface IWaterfallGroup {
 
 export interface IWaterfall {
   traceRoot?: Transaction;
-  traceRootDuration: number;
+  traceRootDuration?: number;
 
   /**
    * Duration in us
@@ -145,8 +145,8 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
 
 export function getClockSkew(
   item: IWaterfallItem,
-  parentItem: IWaterfallItem | undefined,
-  parentTransactionSkew: number
+  parentTransactionSkew: number,
+  parentItem?: IWaterfallItem
 ) {
   switch (item.docType) {
     case 'span':
@@ -182,15 +182,14 @@ export function getClockSkew(
 
 export function getWaterfallItems(
   childrenByParentId: IWaterfallGroup,
-  itemsById: IWaterfallIndex,
   entryTransactionItem: IWaterfallItem
 ) {
   function getSortedChildren(
     item: IWaterfallItem,
-    parentTransactionSkew: number
+    parentTransactionSkew: number,
+    parentItem?: IWaterfallItem
   ): IWaterfallItem[] {
-    const parentItem = item.parentId ? itemsById[item.parentId] : undefined;
-    const skew = getClockSkew(item, parentItem, parentTransactionSkew);
+    const skew = getClockSkew(item, parentTransactionSkew, parentItem);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
@@ -198,7 +197,7 @@ export function getWaterfallItems(
     item.skew = skew;
 
     const deepChildren = flatten(
-      children.map(child => getSortedChildren(child, skew))
+      children.map(child => getSortedChildren(child, skew, item))
     );
     return [item, ...deepChildren];
   }
@@ -265,7 +264,6 @@ export function getWaterfall(
     return {
       services: [],
       duration: 0,
-      traceRootDuration: 0,
       items: [],
       itemsById: {},
       getTransactionById: () => undefined,
@@ -296,16 +294,10 @@ export function getWaterfall(
   );
   const entryTransactionItem = getTransactionItem(entryTransaction);
   const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');
-  const items = getWaterfallItems(
-    childrenByParentId,
-    itemsById,
-    entryTransactionItem
-  );
+  const items = getWaterfallItems(childrenByParentId, entryTransactionItem);
   const traceRoot = getTraceRoot(childrenByParentId);
   const duration = getDuration(items);
-  const traceRootDuration = traceRoot
-    ? traceRoot.transaction.duration.us
-    : duration;
+  const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
   const services = getServices(items);
   const getTransactionById = createGetTransactionById(itemsById);
   const serviceColors = getServiceColors(services);

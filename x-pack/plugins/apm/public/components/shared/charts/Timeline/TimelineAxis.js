@@ -16,8 +16,8 @@ import { getTimeFormatter } from '../../../../utils/formatters';
 
 // Remove any tick that is too close to traceRootDuration
 const getXAxisTickValues = (tickValues, traceRootDuration) => {
-  if (!tickValues) {
-    return [];
+  if (traceRootDuration == null) {
+    return tickValues;
   }
 
   const padding = (tickValues[1] - tickValues[0]) / 2;
@@ -73,11 +73,13 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
                 }}
               />
 
-              <LastTickValue
-                x={xScale(traceRootDuration)}
-                value={tickFormat(traceRootDuration)}
-                marginTop={28}
-              />
+              {traceRootDuration && (
+                <LastTickValue
+                  x={xScale(traceRootDuration)}
+                  value={tickFormat(traceRootDuration)}
+                  marginTop={28}
+                />
+              )}
 
               {agentMarks.map(agentMark => (
                 <AgentMarker
