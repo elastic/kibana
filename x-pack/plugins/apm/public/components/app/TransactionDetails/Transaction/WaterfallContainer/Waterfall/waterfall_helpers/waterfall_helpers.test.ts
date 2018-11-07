@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy, indexBy } from 'lodash';
+import { groupBy } from 'lodash';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import {
   getClockSkew,
   getWaterfallItems,
-  IWaterfallIndex,
   IWaterfallItem
 } from './waterfall_helpers';
 
@@ -95,10 +94,9 @@ describe('waterfall_helpers', () => {
         items,
         hit => (hit.parentId ? hit.parentId : 'root')
       );
-      const itemsById: IWaterfallIndex = indexBy(items, 'id');
       const entryTransactionItem = childrenByParentId.root[0];
       expect(
-        getWaterfallItems(childrenByParentId, itemsById, entryTransactionItem)
+        getWaterfallItems(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
   });
@@ -118,7 +116,7 @@ describe('waterfall_helpers', () => {
       } as IWaterfallItem;
       const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(130);
+      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(130);
     });
 
     it('should adjust when child starts after parent has ended', () => {
@@ -135,7 +133,7 @@ describe('waterfall_helpers', () => {
       } as IWaterfallItem;
       const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(-120);
+      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(-120);
     });
 
     it('should not adjust when child starts within parent duration', () => {
@@ -152,7 +150,7 @@ describe('waterfall_helpers', () => {
       } as IWaterfallItem;
       const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(0);
+      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(0);
     });
 
     it('should return parentTransactionSkew for spans', () => {
@@ -163,7 +161,7 @@ describe('waterfall_helpers', () => {
       const parentItem = {} as IWaterfallItem;
       const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(1337);
+      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(1337);
     });
 
     it('should handle missing parentItem', () => {
@@ -174,7 +172,7 @@ describe('waterfall_helpers', () => {
       const parentItem = undefined;
       const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(0);
+      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(0);
     });
   });
 });
