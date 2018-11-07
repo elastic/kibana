@@ -93,4 +93,8 @@ Visualization.propTypes = {
   getConfig: PropTypes.func
 };
 
+Visualization.defaultProps = {
+  className: 'tvbVis'
+};
+
 export default Visualization;
