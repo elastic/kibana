@@ -6,11 +6,11 @@
 import * as React from 'react';
 import { NoDataLayout } from '../components/layouts/no_data';
 
-export const NoAccessPage: React.SFC<any> = () => (
-  <NoDataLayout title="Access denied" actionSection={[]}>
+export const InvalidLicensePage: React.SFC<any> = () => (
+  <NoDataLayout title="Expired license" actionSection={[]}>
     <p>
-      You are not authorized to access Beats central management. To use Beats central management,
-      you need the privileges granted by the `beats_admin` role.
+      Your current license is expired. Enrolled Beats will continue to work, but you need a valid
+      license to access the Beats Management UI.
     </p>
   </NoDataLayout>
 );
