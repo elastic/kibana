@@ -28,7 +28,7 @@ export class BatchIndexHelper {
       },
     });
     this.batch.push(body);
-    if (this.batch.length === this.batchSize * 2) {
+    if (this.batch.length >= this.batchSize * 2) {
       await this.flush();
     }
   }
