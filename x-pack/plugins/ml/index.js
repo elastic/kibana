@@ -24,6 +24,7 @@ import { filtersRoutes } from './server/routes/filters';
 import { resultsServiceRoutes } from './server/routes/results_service';
 import { jobServiceRoutes } from './server/routes/job_service';
 import { jobAuditMessagesRoutes } from './server/routes/job_audit_messages';
+import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
 
 export const ml = (kibana) => {
   return new kibana.Plugin({
@@ -40,8 +41,15 @@ export const ml = (kibana) => {
         euiIconType: 'machineLearningApp',
         main: 'plugins/ml/app',
       },
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
-      home: ['plugins/ml/register_feature']
+      home: ['plugins/ml/register_feature'],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          mlEnabled: config.get('xpack.ml.enabled'),
+        };
+      },
     },
 
 
@@ -58,12 +66,12 @@ export const ml = (kibana) => {
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
-          function forbidApiAccess(request, reply) {
+          function forbidApiAccess() {
             const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
             if (licenseCheckResults.isAvailable) {
-              reply();
+              return null;
             } else {
-              reply(Boom.forbidden(licenseCheckResults.message));
+              throw Boom.forbidden(licenseCheckResults.message);
             }
           }
         ]
@@ -91,6 +99,7 @@ export const ml = (kibana) => {
       resultsServiceRoutes(server, commonRouteConfig);
       jobServiceRoutes(server, commonRouteConfig);
       jobAuditMessagesRoutes(server, commonRouteConfig);
+      fileDataVisualizerRoutes(server, commonRouteConfig);
     }
 
   });

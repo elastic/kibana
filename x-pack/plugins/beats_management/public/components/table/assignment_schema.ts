@@ -6,65 +6,60 @@
 
 import { AssignmentActionType } from './table';
 
-export enum AssignmentComponentType {
-  Action,
-  Popover,
-  SelectionCount,
-  TagBadgeList,
-}
-
 export interface AssignmentControlSchema {
+  id?: number;
   name: string;
-  type: AssignmentComponentType;
   danger?: boolean;
   action?: AssignmentActionType;
   showWarning?: boolean;
   warningHeading?: string;
   warningMessage?: string;
   lazyLoad?: boolean;
-  children?: AssignmentControlSchema[];
+  panel?: AssignmentControlSchema;
   grow?: boolean;
 }
 
 export const beatsListAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.Action,
     grow: false,
-    name: 'Disenroll selected',
+    name: 'Unenroll selected',
     showWarning: true,
-    warningHeading: 'Disenroll beats',
-    warningMessage: 'This will disenroll the selected beat(s) from centralized management',
+    warningHeading: 'Unenroll beats?',
+    warningMessage: 'This will unenroll the selected beat(s) from centralized management',
     action: AssignmentActionType.Delete,
     danger: true,
   },
   {
-    type: AssignmentComponentType.Popover,
     name: 'Set tags',
     grow: false,
     lazyLoad: true,
-    children: [
-      {
-        name: 'Assign tags',
-        type: AssignmentComponentType.TagBadgeList,
-      },
-    ],
+    panel: {
+      id: 1,
+      name: 'Assign tags',
+    },
   },
+];
+
+export const tagListAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.SelectionCount,
-    grow: true,
-    name: 'selectionCount',
+    danger: true,
+    grow: false,
+    name: 'Remove tag(s)',
+    showWarning: true,
+    warningHeading: 'Remove tag(s)',
+    warningMessage: 'Remove the tag?',
+    action: AssignmentActionType.Delete,
   },
 ];
 
 export const tagConfigAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.Action,
     danger: true,
     grow: false,
-    name: 'Detach beat(s)',
+    name: 'Remove tag(s)',
     showWarning: true,
-    warningHeading: 'Detatch beats',
-    warningMessage: 'This will detatch the selected beat(s) from this tag.',
+    warningHeading: 'Remove tag(s)',
+    warningMessage: 'Remove the tag from the selected beat(s)?',
     action: AssignmentActionType.Delete,
   },
 ];

@@ -39,6 +39,7 @@ export const LogsPageContent: React.SFC = () => (
                       isReloading,
                       items,
                       lastLoadedTime,
+                      loadNewerEntries,
                     }) => (
                       <ScrollableLogTextStreamView
                         hasMoreAfterEnd={hasMoreAfterEnd}
@@ -50,6 +51,7 @@ export const LogsPageContent: React.SFC = () => (
                         items={items}
                         jumpToTarget={jumpToTargetPosition}
                         lastLoadedTime={lastLoadedTime}
+                        loadNewerItems={loadNewerEntries}
                         reportVisibleInterval={reportVisiblePositions}
                         scale={textScale}
                         target={targetPosition}
@@ -104,14 +106,14 @@ export const LogsPageContent: React.SFC = () => (
 );
 
 const LogPageEventStreamColumn = styled.div`
-  flex: 1 0 0;
+  flex: 1 0 0%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
 `;
 
 const LogPageMinimapColumn = styled.div`
-  flex: 1 0 0;
+  flex: 1 0 0%;
   overflow: hidden;
   min-width: 100px;
   max-width: 100px;

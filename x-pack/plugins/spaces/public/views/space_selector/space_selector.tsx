@@ -13,7 +13,6 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -83,22 +82,21 @@ export class SpaceSelector extends Component<Props, State> {
     }
 
     return (
-      <EuiPage className="spaceSelector__page" data-test-subj="kibanaSpaceSelector">
+      <EuiPage className="spcSpaceSelector" data-test-subj="kibanaSpaceSelector">
         <EuiPageBody>
-          <EuiPageHeader className="spaceSelector__heading">
-            <EuiPageHeaderSection className="spaceSelector__logoHeader">
-              <div className="spaceSelector__logoCircle">
-                <EuiIcon size="xxl" type={`logoKibana`} />
-              </div>
-
-              <EuiSpacer />
-
-              <EuiTitle size="l" className="euiTextColor--ghost">
-                <p>Select your space</p>
-              </EuiTitle>
-            </EuiPageHeaderSection>
+          <EuiPageHeader className="spcSpaceSelector__heading">
+            <EuiSpacer size="xxl" />
+            <span className="spcSpaceSelector__logo">
+              <EuiIcon size="xxl" type={`logoKibana`} />
+            </span>
+            <EuiTitle size="l">
+              <h1>Select your space</h1>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <p>You can change your space at anytime</p>
+            </EuiText>
           </EuiPageHeader>
-          <EuiPageContent className="spaceSelector__pageContent">
+          <EuiPageContent className="spcSpaceSelector__pageContent">
             <EuiFlexGroup
               // @ts-ignore
               direction="column"
@@ -106,12 +104,6 @@ export class SpaceSelector extends Component<Props, State> {
               responsive={false}
             >
               {this.getSearchField()}
-
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <p>You can change your space at anytime.</p>
-                </EuiText>
-              </EuiFlexItem>
             </EuiFlexGroup>
 
             <EuiSpacer size="xl" />
@@ -141,9 +133,9 @@ export class SpaceSelector extends Component<Props, State> {
       return null;
     }
     return (
-      <EuiFlexItem className="spaceSelector__searchHolder">
+      <EuiFlexItem className="spcSpaceSelector__searchHolder">
         <EuiFieldSearch
-          className="spaceSelector__searchField"
+          className="spcSpaceSelector__searchField"
           placeholder="Find a space"
           incremental={true}
           // @ts-ignore

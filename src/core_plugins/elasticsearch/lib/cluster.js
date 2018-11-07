@@ -34,7 +34,10 @@ export class Cluster {
 
     this._clients = new Set();
     this._client = this.createClient();
-    this._noAuthClient = this.createClient({ auth: false }, { ignoreCertAndKey: true });
+    this._noAuthClient = this.createClient(
+      { auth: false },
+      { ignoreCertAndKey: !this.getSsl().alwaysPresentCertificate }
+    );
 
     return this;
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
 import { first, sortBy, sortByOrder, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -46,11 +46,13 @@ export interface ControlDefinitions {
 }
 
 export interface TableType {
+  itemType: 'Beats' | 'Tags';
   columnDefinitions: ColumnDefinition[];
   controlDefinitions(items: any[]): ControlDefinitions;
 }
 
 export const BeatsTableType: TableType = {
+  itemType: 'Beats',
   columnDefinitions: [
     {
       field: 'name',
@@ -83,12 +85,41 @@ export const BeatsTableType: TableType = {
     },
     {
       // TODO: update to use actual metadata field
-      field: 'event_rate',
-      name: 'Event rate',
-      sortable: true,
+      field: 'config_status',
+      name: 'Config Status',
+      render: (value: string, beat: CMPopulatedBeat) => {
+        let color: IconColor = 'success';
+        let statusText = 'OK';
+        let tooltipText = 'Beat successfully applied latest config';
+
+        switch (beat.config_status) {
+          case 'UNKNOWN':
+            color = 'subdued';
+            statusText = 'Offline';
+            if (moment().diff(beat.last_checkin, 'minutes') >= 10) {
+              tooltipText = 'This Beat has not connected to kibana in over 10min';
+            } else {
+              tooltipText = 'This Beat has not yet been started.';
+            }
+            break;
+          case 'ERROR':
+            color = 'danger';
+            statusText = 'Error';
+            tooltipText = 'Please check the logs of this Beat for error details';
+            break;
+        }
+
+        return (
+          <EuiFlexGroup wrap responsive={true} gutterSize="xs">
+            <EuiToolTip content={tooltipText}>
+              <EuiHealth color={color}>{statusText}</EuiHealth>
+            </EuiToolTip>
+          </EuiFlexGroup>
+        );
+      },
+      sortable: false,
     },
     {
-      // TODO: update to use actual metadata field
       field: 'full_tags',
       name: 'Last config update',
       render: (tags: BeatTag[]) =>
@@ -120,6 +151,7 @@ export const BeatsTableType: TableType = {
 };
 
 export const TagsTableType: TableType = {
+  itemType: 'Tags',
   columnDefinitions: [
     {
       field: 'id',
@@ -162,6 +194,7 @@ export const TagsTableType: TableType = {
 };
 
 export const BeatDetailTagsTable: TableType = {
+  itemType: 'Tags',
   columnDefinitions: [
     {
       field: 'id',

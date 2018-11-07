@@ -91,10 +91,7 @@ export default function (plugin, server) {
     return true;
   }
 
-  server.ext('onPreStop', (request, reply) => {
-    stopChecking();
-    reply();
-  });
+  server.ext('onPreStop', stopChecking);
 
   return {
     waitUntilReady: waitUntilReady,
@@ -103,5 +100,4 @@ export default function (plugin, server) {
     stop: stopChecking,
     isRunning: function () { return !!timeoutId; },
   };
-
 }

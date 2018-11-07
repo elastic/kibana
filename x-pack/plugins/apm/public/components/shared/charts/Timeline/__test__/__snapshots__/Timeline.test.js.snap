@@ -57,21 +57,18 @@ exports[`Timeline should render with data 1`] = `
             }
           }
         >
-          <div>
-            Hello - i am a header
-          </div>
           <div
             className="rv-xy-plot "
             style={
               Object {
-                "height": "40px",
+                "height": "100px",
                 "width": "1000px",
               }
             }
           >
             <svg
               className="rv-xy-plot__inner"
-              height={40}
+              height={100}
               onClick={[Function]}
               onDoubleClick={[Function]}
               onMouseDown={[Function]}
@@ -94,7 +91,7 @@ exports[`Timeline should render with data 1`] = `
               >
                 <g
                   className="rv-xy-plot__axis__ticks"
-                  transform="translate(0, 40)"
+                  transform="translate(0, 100)"
                 >
                   <g
                     className="rv-xy-plot__axis__tick"
@@ -133,7 +130,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       0
                     </text>
@@ -147,7 +144,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(87.9408646541237, 0)"
+                    transform="translate(90, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -175,7 +172,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       20 ms
                     </text>
@@ -189,7 +186,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(175.8817293082474, 0)"
+                    transform="translate(180, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -217,7 +214,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       40 ms
                     </text>
@@ -231,7 +228,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(263.82259396237106, 0)"
+                    transform="translate(270, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -259,7 +256,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       60 ms
                     </text>
@@ -273,7 +270,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(351.7634586164948, 0)"
+                    transform="translate(360, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -301,7 +298,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       80 ms
                     </text>
@@ -315,7 +312,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(439.7043232706185, 0)"
+                    transform="translate(450, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -343,7 +340,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       100 ms
                     </text>
@@ -357,7 +354,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(527.6451879247421, 0)"
+                    transform="translate(540, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -385,7 +382,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       120 ms
                     </text>
@@ -399,7 +396,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(615.5860525788659, 0)"
+                    transform="translate(630, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -427,7 +424,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       140 ms
                     </text>
@@ -441,7 +438,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(703.5269172329896, 0)"
+                    transform="translate(720, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -469,7 +466,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       160 ms
                     </text>
@@ -483,7 +480,7 @@ exports[`Timeline should render with data 1`] = `
                         },
                       }
                     }
-                    transform="translate(791.4677818871132, 0)"
+                    transform="translate(810, 0)"
                   >
                     <line
                       className="rv-xy-plot__axis__tick__line"
@@ -511,7 +508,7 @@ exports[`Timeline should render with data 1`] = `
                         }
                       }
                       textAnchor="middle"
-                      transform="translate(0, -8)"
+                      transform="translate(0, -20)"
                     >
                       180 ms
                     </text>
@@ -519,21 +516,22 @@ exports[`Timeline should render with data 1`] = `
                 </g>
               </g>
               <g
-                transform="translate(950, 40)"
+                transform="translate(950, 28)"
               >
                 <text
                   dy="0"
                   textAnchor="middle"
                   transform="translate(0, -8)"
                 >
-                  205 ms
+                  200 ms
                 </text>
               </g>
             </svg>
             <div
               style={
                 Object {
-                  "left": "484.2043232706185px",
+                  "bottom": 0,
+                  "left": "494.5px",
                   "position": "absolute",
                 }
               }
@@ -562,7 +560,8 @@ exports[`Timeline should render with data 1`] = `
             <div
               style={
                 Object {
-                  "left": "528.1747555976804px",
+                  "bottom": 0,
+                  "left": "539.5px",
                   "position": "absolute",
                 }
               }
@@ -591,7 +590,8 @@ exports[`Timeline should render with data 1`] = `
             <div
               style={
                 Object {
-                  "left": "879.9382142141751px",
+                  "bottom": 0,
+                  "left": "899.5px",
                   "position": "absolute",
                 }
               }
@@ -673,8 +673,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={87.9408646541237}
-                x2={87.9408646541237}
+                x1={90}
+                x2={90}
                 y1={0}
                 y2={116}
               />
@@ -685,8 +685,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={175.8817293082474}
-                x2={175.8817293082474}
+                x1={180}
+                x2={180}
                 y1={0}
                 y2={116}
               />
@@ -697,8 +697,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={263.82259396237106}
-                x2={263.82259396237106}
+                x1={270}
+                x2={270}
                 y1={0}
                 y2={116}
               />
@@ -709,8 +709,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={351.7634586164948}
-                x2={351.7634586164948}
+                x1={360}
+                x2={360}
                 y1={0}
                 y2={116}
               />
@@ -721,8 +721,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={439.7043232706185}
-                x2={439.7043232706185}
+                x1={450}
+                x2={450}
                 y1={0}
                 y2={116}
               />
@@ -733,8 +733,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={527.6451879247421}
-                x2={527.6451879247421}
+                x1={540}
+                x2={540}
                 y1={0}
                 y2={116}
               />
@@ -745,8 +745,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={615.5860525788659}
-                x2={615.5860525788659}
+                x1={630}
+                x2={630}
                 y1={0}
                 y2={116}
               />
@@ -757,8 +757,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={703.5269172329896}
-                x2={703.5269172329896}
+                x1={720}
+                x2={720}
                 y1={0}
                 y2={116}
               />
@@ -769,8 +769,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={791.4677818871132}
-                x2={791.4677818871132}
+                x1={810}
+                x2={810}
                 y1={0}
                 y2={116}
               />
@@ -781,8 +781,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#f5f5f5",
                   }
                 }
-                x1={879.408646541237}
-                x2={879.408646541237}
+                x1={900}
+                x2={900}
                 y1={0}
                 y2={116}
               />
@@ -798,8 +798,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#999999",
                   }
                 }
-                x1={439.7043232706185}
-                x2={439.7043232706185}
+                x1={450}
+                x2={450}
                 y1={0}
                 y2={116}
               />
@@ -810,8 +810,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#999999",
                   }
                 }
-                x1={483.6747555976803}
-                x2={483.6747555976803}
+                x1={495.00000000000006}
+                x2={495.00000000000006}
                 y1={0}
                 y2={116}
               />
@@ -822,8 +822,8 @@ exports[`Timeline should render with data 1`] = `
                     "stroke": "#999999",
                   }
                 }
-                x1={835.4382142141751}
-                x2={835.4382142141751}
+                x1={855}
+                x2={855}
                 y1={0}
                 y2={116}
               />

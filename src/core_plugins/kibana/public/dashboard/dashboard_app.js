@@ -56,6 +56,7 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -63,7 +64,6 @@ const app = uiModules.get('app/dashboard', [
   'react',
   'kibana/courier',
   'kibana/config',
-  'kibana/typeahead',
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
@@ -183,7 +183,12 @@ app.directive('dashboardApp', function ($injector) {
       // Push breadcrumbs to new header navigation
       const updateBreadcrumbs = () => {
         breadcrumbState.set([
-          { text: 'Dashboard', href: $scope.landingPageUrl() },
+          {
+            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+              defaultMessage: 'Dashboard',
+            }),
+            href: $scope.landingPageUrl()
+          },
           { text: $scope.getDashTitle() }
         ]);
       };

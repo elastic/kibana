@@ -20,7 +20,6 @@
 import { getConfig, createRunner } from './lib';
 
 import {
-  BootstrapTask,
   BuildPackagesTask,
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
@@ -62,6 +61,8 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    versionQualifier,
+    targetAllPlatforms,
   } = options;
 
   log.verbose('building distributables with options:', {
@@ -72,10 +73,13 @@ export async function buildDistributables(options) {
     createArchives,
     createRpmPackage,
     createDebPackage,
+    versionQualifier,
   });
 
   const config = await getConfig({
     isRelease,
+    versionQualifier,
+    targetAllPlatforms
   });
 
   const run = createRunner({
@@ -90,7 +94,6 @@ export async function buildDistributables(options) {
    */
   await run(VerifyEnvTask);
   await run(CleanTask);
-  await run(BootstrapTask);
   await run(downloadFreshNode ? DownloadNodeBuildsTask : VerifyExistingNodeBuildsTask);
   await run(ExtractNodeBuildsTask);
 

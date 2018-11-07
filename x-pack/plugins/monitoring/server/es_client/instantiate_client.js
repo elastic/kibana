@@ -42,7 +42,7 @@ export function exposeClient(server) {
 
   const esPlugin = server.plugins.elasticsearch;
   const cluster = esPlugin.createCluster('monitoring', config);
-  server.on('close', bindKey(cluster, 'close'));
+  server.events.on('stop', bindKey(cluster, 'close'));
 
   server.log([LOGGING_TAG, 'es-client'], `config sourced from: ${configSource} cluster`);
 }
