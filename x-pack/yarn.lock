@@ -26,10 +26,10 @@
   dependencies:
     moment "^2.13.0"
 
-"@elastic/eui@4.5.1-logos-tooltip":
-  version "4.5.1-logos-tooltip"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.5.1-logos-tooltip.tgz#5cea9fa455ac3c56aff4550daa640b84609f32db"
-  integrity sha512-je8IOGkFvWeVova7zCWgaeib0I1RZg0awETjxGnOxcIVSTBNtpJ3a673sS8IYPCPAfywl5hEYDAhF5+AkmglRw==
+"@elastic/eui@4.5.1-logos-tooltip-betabadge":
+  version "4.5.1-logos-tooltip-betabadge"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-4.5.1-logos-tooltip-betabadge.tgz#ece95e0368c76b8c26c14fab79f90bf0e54f4837"
+  integrity sha512-fu+Edy27bY8H9D+PLCBKKqHIDn4Vgl7aK+F1P54/XCtw4kRaF7N4eJFawBj0/n4Qaax7Dtqugr8BWC8Hf3LgOw==
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
