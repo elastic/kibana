@@ -61,7 +61,11 @@ export function ensureEsVersion(server, kibanaVersion) {
 
         // It's acceptable if ES and Kibana versions are not the same so long as
         // they are not incompatible, but we should warn about it
-        if (esNode.version !== kibanaVersion) {
+        // In development we ignore, this can be expected when testing against snapshots
+        // or across version qualifiers
+        const isProd = server.config().get('env.prod');
+        const versionMismatch = esNode.version !== kibanaVersion;
+        if (isProd && versionMismatch) {
           warningNodes.push(esNode);
         }
       });
