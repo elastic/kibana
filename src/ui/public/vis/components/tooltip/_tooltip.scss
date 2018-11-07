@@ -26,17 +26,13 @@
   }
 
   table {
-    .tooltip-label {
+    .visTooltip__label {
       font-weight: $euiFontWeightMedium;
       color: shade($euiColorGhost, 20%);
     }
 
     td,th {
       padding: $euiSizeXS;
-
-      &.row-bucket {
-        word-break: break-all;
-      }
     }
   }
 }

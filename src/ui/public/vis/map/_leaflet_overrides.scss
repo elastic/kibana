@@ -93,10 +93,6 @@ $visMapLeafletSprite: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
   table {
     td,th {
       padding: $euiSizeXS;
-
-      &.row-bucket {
-        word-break: break-all;
-      }
     }
   }
 }
