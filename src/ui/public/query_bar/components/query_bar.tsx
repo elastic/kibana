@@ -421,6 +421,16 @@ export class QueryBar extends Component<Props, State> {
     });
   };
 
+  public onClosePopover = () => {
+    if (!this.inputRef) {
+      return;
+    }
+    const ref = this.inputRef;
+    setTimeout(() => {
+      ref.focus();
+    }, 0);
+  };
+
   public componentDidMount() {
     this.persistedLog = new PersistedLog(
       `typeahead:${this.props.appName}-${this.state.query.language}`,
@@ -498,6 +508,7 @@ export class QueryBar extends Component<Props, State> {
                       <QueryLanguageSwitcher
                         language={this.state.query.language}
                         onSelectLanguage={this.onSelectLanguage}
+                        onClosePopover={this.onClosePopover}
                       />
                     </div>
                   </div>

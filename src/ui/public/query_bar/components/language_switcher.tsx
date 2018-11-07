@@ -46,6 +46,7 @@ interface State {
 interface Props {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
+  onClosePopover: () => void;
 }
 
 export class QueryLanguageSwitcher extends Component<Props, State> {
@@ -129,6 +130,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
     this.setState({
       isPopoverOpen: false,
     });
+    this.props.onClosePopover();
   };
 
   private onSwitchChange = () => {
