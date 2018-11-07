@@ -33,6 +33,7 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.json'],
+    mainFields: ['browser', 'main'],
   },
 
   plugins: [
