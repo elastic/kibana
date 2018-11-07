@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import React from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { REQUIRED_LICENSES } from '../common/constants';
@@ -39,11 +40,10 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           )}
         </BreadcrumbConsumer>
         <Switch>
-          {!libs.framework.info ||
-            (!REQUIRED_LICENSES.includes(libs.framework.info.license.type) && (
-              <Route render={() => <InvalidLicensePage />} />
-            ))}
-          {!libs.framework.info!.security.enabled && (
+          {!REQUIRED_LICENSES.includes(get(libs, 'framework.info.license.type', 'oss')) && (
+            <Route render={() => <InvalidLicensePage />} />
+          )}
+          {!get(libs, 'framework.info!.security.enabled', false) && (
             <Route render={() => <EnforceSecurityPage />} />
           )}
           {!libs.framework.getCurrentUser() ||

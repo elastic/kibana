@@ -8,12 +8,8 @@ import { IModule, IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import {
-  BufferedKibanaServiceCall,
-  FrameworkAdapter,
-  KibanaAdapterServiceRefs,
-  KibanaUIConfig,
-} from '../../lib';
+import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
+import { FrameworkAdapter, FrameworkInfo, FrameworkUser } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public appState: object;
@@ -54,15 +50,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   };
 
-  public render = (component: React.ReactElement<any>) => {
-    this.rootComponent = component;
-  };
-
-  public hasValidLicense() {
-    if (!this.xpackInfo) {
-      return false;
-    }
-    return this.xpackInfo.get('features.beats_management.licenseValid', false);
+  public get currentUser() {
+    return this.shieldUser!;
   }
 
   public licenseExpired() {

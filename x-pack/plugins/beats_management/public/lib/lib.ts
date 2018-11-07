@@ -6,7 +6,7 @@
 
 import { IModule, IScope } from 'angular';
 import { AxiosRequestConfig } from 'axios';
-import React from 'react';
+import { FrameworkAdapter } from './adapters/framework/adapter_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './beats';
 import { ElasticsearchLib } from './elasticsearch';
@@ -37,30 +37,6 @@ export interface YamlConfigSchema {
   defaultValue?: string;
   required?: boolean;
   parseValidResult?: (value: any) => any;
-}
-
-export interface FrameworkAdapter {
-  // Instance vars
-  appState?: object;
-  kbnVersion?: string;
-  baseURLPath: string;
-  registerManagementSection(pluginId: string, displayName: string, basePath: string): void;
-  getDefaultUserRoles(): string[];
-  // Methods
-  getCurrentUser(): {
-    email: string | null;
-    enabled: boolean;
-    full_name: string | null;
-    metadata: { _reserved: true };
-    roles: string[];
-    scope: string[];
-    username: string;
-  };
-  licenseExpired(): boolean;
-  securityEnabled(): boolean;
-  hasValidLicense(): boolean;
-  setUISettings(key: string, value: any): void;
-  render(component: React.ReactElement<any>): void;
 }
 
 export interface FramworkAdapterConstructable {
