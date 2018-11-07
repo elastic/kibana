@@ -8,11 +8,11 @@ import { rootSchema } from '../../common/graphql/root/schema.gql';
 import { getSourceQueryMock } from '../graphql/sources/source.mock';
 import { getAllSourcesQueryMock } from '../graphql/sources/sources.mock';
 import { Logger } from '../utils/logger';
+import { eventsSchema } from './events/schema.gql';
 import { sourcesSchema } from './sources/schema.gql';
-import { suricataSchema } from './suricata/schema.gql';
 import { whoAmISchema } from './who_am_i/schema.gql';
 
-export const schemas = [rootSchema, sourcesSchema, suricataSchema, whoAmISchema];
+export const schemas = [rootSchema, sourcesSchema, eventsSchema, whoAmISchema];
 
 // The types from graphql-tools/src/mock.ts 'any' based. I add slightly
 // stricter types here, but these should go away when graphql-tools using something
