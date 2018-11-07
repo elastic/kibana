@@ -92,6 +92,12 @@ const DataDrivenColumns = styled.div`
   width: 100%;
 `;
 
+const ColumnRender = styled.div<{ minwidth: string; maxwidth: string }>`
+  max-width: ${props => props.minwidth};
+  min-width: ${props => props.maxwidth};
+  white-space: nowrap;
+`;
+
 const defaultHeight = '100%';
 
 interface RenderColumnStubParams {
@@ -121,17 +127,14 @@ const renderColumnStub = ({
   };
 
   return (
-    <div
+    <ColumnRender
       key={`cell-${columnName}`}
       data-test-subj="cellContainer"
-      style={{
-        maxWidth: `${minWidth}px`,
-        minWidth: `${minWidth}px`,
-        whiteSpace: 'nowrap',
-      }}
+      maxwidth={`${minWidth}px`}
+      minwidth={`${minWidth}px`}
     >
       {getCell()}
-    </div>
+    </ColumnRender>
   );
 };
 
