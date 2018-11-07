@@ -6,10 +6,7 @@
 
 
 
+import './datafeed_service';
+import './job_timepicker_modal_controller';
 import './styles/main.less';
-import './new_job_controller';
-import './detectors_list_directive';
-import './save_status_modal';
-import './field_select_directive';
-import 'plugins/ml/components/job_group_select';
-import 'plugins/ml/jobs/components/job_timepicker_modal';
+import 'plugins/ml/jobs/new_job/simple/components/watcher';
