@@ -22,6 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
 const del = require('del');
+const os = require('os');
 
 // NOTE: we just remove mock-fs from this tests and instead
 // apply a real fs usage over a temp folder because mock-fs
@@ -29,7 +30,7 @@ const del = require('del');
 // yet solved.
 // https://github.com/tschaub/mock-fs/issues/238
 const fixturesFolder = path.resolve(__dirname, '__fixtures__');
-const tmpFolder = path.resolve(fixturesFolder, '__tmp__');
+const tmpFolder = path.resolve(os.tmpdir(), 'kbn_es_decompress_fixtures');
 const dataFolder = path.resolve(tmpFolder, 'data');
 const esFolder = path.resolve(tmpFolder, '.es');
 
@@ -46,11 +47,11 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await del(tmpFolder);
+  await del(tmpFolder, { force: true });
 });
 
 afterEach(async () => {
-  await del(esFolder);
+  await del(esFolder, { force: true });
 });
 
 test('zip strips root directory', async () => {
