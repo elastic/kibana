@@ -1,11 +1,11 @@
-@import (reference) "~ui/styles/variables";
-
+// SASSTODO: Too risky to change to BEM naming
 .visualize {
   display: flex;
   flex: 1 1 100%;
   overflow-x: hidden;
 }
 
+// SASSTODO: Too risky to change to BEM naming
 .visualization {
   display: flex;
   flex-direction: column;
@@ -13,23 +13,18 @@
   width: 100%;
   overflow: auto;
   position: relative;
-  padding: 8px 8px 8px 8px;
+  padding: $euiSizeS;
   flex: 1 1 100%;
-
-  .k4tip {
-    white-space: pre-line;
-  }
 
   /**
    * 1. Expand to fill the container but accept being squeezed smaller by the spy, even so small
    *    that it disappears entirely.
    */
-  .vis-container {
+  .visChart__container {
     flex: 1 1 0; /* 1 */
     display: flex;
     flex-direction: row;
     overflow: auto;
-    -webkit-transition: opacity 0.01s;
     transition: opacity 0.01s;
 
     // IE11 Hack
@@ -37,50 +32,32 @@
     // Normally we would just set flex: 1 1 0%, which works as expected in IE11.
     // Unfortunately, a recent bug in Firefox causes this rule to be ignored, so we
     // have to use an IE-specific hack instead.
-    _:-ms-fullscreen, :root  & {
+    @include internetExplorerOnly(){
       flex: 1 0;
     }
-
   }
 
+  // SASSTODO: Can't find exact usage
   .loading {
-    opacity: @loading-opacity;
+    opacity: 0.5;
   }
 
+  // SASSTODO: Can't find exact usage
   .spinner {
     position: absolute;
     top: 40%;
     left: 0;
     right: 0;
     z-index: 20;
-    opacity: @loading-opacity;
+    opacity: 0.5;
   }
 }
 
-.visualize-chart {
+.visChart {
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
 }
 
-/**
- * 1. Expand to fill the container and accept being squeezed smaller by the spy.
- */
-.visualize-error {
-  flex: 1 1 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  .top { align-self: flex-start; }
-  .item { }
-  .bottom { align-self: flex-end; }
-}
 
-/**
- * 1. Prevent large request errors from overflowing the container
- */
-.visualize-request-error {
-  max-width: 100%;
-  max-height: 100%;
-}

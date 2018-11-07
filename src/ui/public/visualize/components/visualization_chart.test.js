@@ -79,7 +79,7 @@ describe('<VisualizationChart/>', () => {
     const wrapper = mount(<VisualizationChart vis={vis} />);
     jest.runAllTimers();
     await renderPromise;
-    expect(wrapper.find('.visualize-chart').text()).toMatch(/markdown/);
+    expect(wrapper.find('.visChart').text()).toMatch(/markdown/);
   });
 
   it('should re-render on param change', async () => {
@@ -96,7 +96,7 @@ describe('<VisualizationChart/>', () => {
     jest.runAllTimers();
     await renderPromise;
 
-    expect(wrapper.find('.visualize-chart').text()).toBe('new text');
+    expect(wrapper.find('.visChart').text()).toBe('new text');
     expect(renderComplete).toHaveBeenCalledTimes(2);
   });
 });

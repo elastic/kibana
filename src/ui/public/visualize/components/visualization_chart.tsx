@@ -87,13 +87,13 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
 
   public render() {
     return (
-      <div className="vis-container" tabIndex={0} ref={this.containerDiv}>
+      <div className="visChart__container" tabIndex={0} ref={this.containerDiv}>
         <span className="kuiScreenReaderOnly">
           {this.props.vis.type.title} visualization, not yet accessible
         </span>
         <div
           aria-hidden={!this.props.vis.type.isAccessible}
-          className="visualize-chart"
+          className="visChart"
           ref={this.chartDiv}
         />
       </div>

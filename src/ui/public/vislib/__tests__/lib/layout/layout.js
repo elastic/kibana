@@ -147,7 +147,7 @@ dateHistogramArray.forEach(function (data, i) {
     describe('appendElem Method', function () {
       beforeEach(function () {
         vis.handler.layout.appendElem(vis.el, 'svg', 'column');
-        vis.handler.layout.appendElem('.visualize-chart', 'div', 'test');
+        vis.handler.layout.appendElem('.visChart', 'div', 'test');
       });
 
       it('should append DOM element to el with a class name', function () {

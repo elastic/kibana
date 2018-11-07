@@ -160,7 +160,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       // 3). get the visWrapper__chart elements
         .then(function () {
           return getRemote()
-          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visualize-chart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
+          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
             .findAllByCssSelector('svg > g > g.series > rect') // rect
             .then(function (chartTypes) {
               function getChartType(chart) {
