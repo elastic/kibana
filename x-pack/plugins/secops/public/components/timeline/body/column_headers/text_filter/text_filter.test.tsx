@@ -28,11 +28,11 @@ describe('TextFilter', () => {
     });
 
     describe('minWidth', () => {
-      test('it applies the value of the minWidth prop to the input', () => {
+      test('it applies the value of the minwidth prop to the input', () => {
         const minWidth = 150;
         const wrapper = mount(<TextFilter columnId="foo" minWidth={minWidth} />);
 
-        expect(wrapper.find('input').prop('style')).toHaveProperty('minWidth', `${minWidth}px`);
+        expect(wrapper.find('input').props()).toHaveProperty('minwidth', `${minWidth}px`);
       });
     });
 

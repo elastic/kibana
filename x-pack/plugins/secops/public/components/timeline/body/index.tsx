@@ -31,11 +31,13 @@ interface Props {
   width: number;
 }
 
-const BodyDiv = styled.div`
+const BodyDiv = styled.div<{ width: string; height: string }>`
   display: flex;
   flex-direction: column;
   margin: 20px 5px 5px 8px;
   overflow: auto;
+  width: ${props => props.width};
+  height: ${props => props.height};
 `;
 
 const ScrollableArea = styled.div`
@@ -90,6 +92,12 @@ const DataDrivenColumns = styled.div`
   width: 100%;
 `;
 
+const ColumnRender = styled.div<{ minwidth: string; maxwidth: string }>`
+  max-width: ${props => props.minwidth};
+  min-width: ${props => props.maxwidth};
+  white-space: nowrap;
+`;
+
 const defaultHeight = '100%';
 
 interface RenderColumnStubParams {
@@ -119,17 +127,14 @@ const renderColumnStub = ({
   };
 
   return (
-    <div
+    <ColumnRender
       key={`cell-${columnName}`}
       data-test-subj="cellContainer"
-      style={{
-        maxWidth: `${minWidth}px`,
-        minWidth: `${minWidth}px`,
-        whiteSpace: 'nowrap',
-      }}
+      maxwidth={`${minWidth}px`}
+      minwidth={`${minWidth}px`}
     >
       {getCell()}
-    </div>
+    </ColumnRender>
   );
 };
 
@@ -145,7 +150,7 @@ export const Body = pure<Props>(
     sort,
     width,
   }) => (
-    <BodyDiv data-test-subj="body" style={{ width: `${width - 10}px`, height }}>
+    <BodyDiv data-test-subj="body" width={`${width - 10}px`} height={height}>
       <ColumnHeaders
         columnHeaders={columnHeaders}
         onColumnSorted={onColumnSorted}

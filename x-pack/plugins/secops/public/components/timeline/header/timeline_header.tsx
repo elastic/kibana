@@ -18,14 +18,15 @@ interface Props {
   width: number;
 }
 
-const Header = styled.header`
+const Header = styled.header<{ width: string }>`
   display: 'flex';
   flex-direction: 'column';
+  width: ${props => props.width};
 `;
 
 /** Renders the timeline header */
 export const TimelineHeader = pure<Props>(({ dataProviders, onDataProviderRemoved, width }) => (
-  <Header data-test-subj="timelineHeader" style={{ width: `${width}px` }}>
+  <Header data-test-subj="timelineHeader" width={`${width}px`}>
     <DataProviders dataProviders={dataProviders} onDataProviderRemoved={onDataProviderRemoved} />
   </Header>
 ));
