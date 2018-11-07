@@ -22,8 +22,11 @@ export const eventsSchema = gql`
   }
 
   type EventEcsFields {
-    type: String
+    category: String
+    id: Float
+    module: String
     severity: Float
+    type: String
   }
 
   type GeoEcsFields {
@@ -46,19 +49,29 @@ export const eventsSchema = gql`
     port: String
   }
 
-  type SuricataEcsFields {
-    flow_id: String
+  type SuricataAlertData {
+    signature: String
+    signature_id: Float
+  }
+
+  type SuricataEveData {
+    alert: SuricataAlertData
+    flow_id: Float
     proto: String
   }
 
+  type SuricataEcsFields {
+    eve: SuricataEveData
+  }
+
   type EventItem {
-    timestamp: String
-    host: HostEcsFields
-    event: EventEcsFields
-    source: SourceEcsFields
     destination: DestinationEcsFields
+    event: EventEcsFields
     geo: GeoEcsFields
+    host: HostEcsFields
+    source: SourceEcsFields
     suricata: SuricataEcsFields
+    timestamp: String
   }
 
   type EventsData {

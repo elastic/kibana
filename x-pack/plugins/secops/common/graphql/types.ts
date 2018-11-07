@@ -66,28 +66,13 @@ export interface KpiItem {
 }
 
 export interface EventItem {
-  timestamp?: string | null;
-  host?: HostEcsFields | null;
-  event?: EventEcsFields | null;
-  source?: SourceEcsFields | null;
   destination?: DestinationEcsFields | null;
+  event?: EventEcsFields | null;
   geo?: GeoEcsFields | null;
+  host?: HostEcsFields | null;
+  source?: SourceEcsFields | null;
   suricata?: SuricataEcsFields | null;
-}
-
-export interface HostEcsFields {
-  hostname?: string | null;
-  ip?: string | null;
-}
-
-export interface EventEcsFields {
-  type?: string | null;
-  severity?: number | null;
-}
-
-export interface SourceEcsFields {
-  ip?: string | null;
-  port?: string | null;
+  timestamp?: string | null;
 }
 
 export interface DestinationEcsFields {
@@ -95,14 +80,42 @@ export interface DestinationEcsFields {
   port?: string | null;
 }
 
+export interface EventEcsFields {
+  category?: string | null;
+  id?: number | null;
+  module?: string | null;
+  severity?: number | null;
+  type?: string | null;
+}
+
 export interface GeoEcsFields {
   country_iso_code?: string | null;
   region_name?: string | null;
 }
 
+export interface HostEcsFields {
+  hostname?: string | null;
+  ip?: string | null;
+}
+
+export interface SourceEcsFields {
+  ip?: string | null;
+  port?: string | null;
+}
+
 export interface SuricataEcsFields {
-  flow_id?: string | null;
+  eve?: SuricataEveData | null;
+}
+
+export interface SuricataEveData {
+  alert?: SuricataAlertData | null;
+  flow_id?: number | null;
   proto?: string | null;
+}
+
+export interface SuricataAlertData {
+  signature?: string | null;
+  signature_id?: number | null;
 }
 
 export interface SayMyName {
@@ -291,16 +304,26 @@ export namespace KpiItemResolvers {
 
 export namespace EventItemResolvers {
   export interface Resolvers<Context = any> {
-    timestamp?: TimestampResolver<string | null, any, Context>;
-    host?: HostResolver<HostEcsFields | null, any, Context>;
-    event?: EventResolver<EventEcsFields | null, any, Context>;
-    source?: SourceResolver<SourceEcsFields | null, any, Context>;
     destination?: DestinationResolver<DestinationEcsFields | null, any, Context>;
+    event?: EventResolver<EventEcsFields | null, any, Context>;
     geo?: GeoResolver<GeoEcsFields | null, any, Context>;
+    host?: HostResolver<HostEcsFields | null, any, Context>;
+    source?: SourceResolver<SourceEcsFields | null, any, Context>;
     suricata?: SuricataResolver<SuricataEcsFields | null, any, Context>;
+    timestamp?: TimestampResolver<string | null, any, Context>;
   }
 
-  export type TimestampResolver<R = string | null, Parent = any, Context = any> = Resolver<
+  export type DestinationResolver<
+    R = DestinationEcsFields | null,
+    Parent = any,
+    Context = any
+  > = Resolver<R, Parent, Context>;
+  export type EventResolver<R = EventEcsFields | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type GeoResolver<R = GeoEcsFields | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
@@ -310,22 +333,7 @@ export namespace EventItemResolvers {
     Parent,
     Context
   >;
-  export type EventResolver<R = EventEcsFields | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
   export type SourceResolver<R = SourceEcsFields | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type DestinationResolver<
-    R = DestinationEcsFields | null,
-    Parent = any,
-    Context = any
-  > = Resolver<R, Parent, Context>;
-  export type GeoResolver<R = GeoEcsFields | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
@@ -335,56 +343,7 @@ export namespace EventItemResolvers {
     Parent = any,
     Context = any
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace HostEcsFieldsResolvers {
-  export interface Resolvers<Context = any> {
-    hostname?: HostnameResolver<string | null, any, Context>;
-    ip?: IpResolver<string | null, any, Context>;
-  }
-
-  export type HostnameResolver<R = string | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-}
-
-export namespace EventEcsFieldsResolvers {
-  export interface Resolvers<Context = any> {
-    type?: TypeResolver<string | null, any, Context>;
-    severity?: SeverityResolver<number | null, any, Context>;
-  }
-
-  export type TypeResolver<R = string | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type SeverityResolver<R = number | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-}
-
-export namespace SourceEcsFieldsResolvers {
-  export interface Resolvers<Context = any> {
-    ip?: IpResolver<string | null, any, Context>;
-    port?: PortResolver<string | null, any, Context>;
-  }
-
-  export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type PortResolver<R = string | null, Parent = any, Context = any> = Resolver<
+  export type TimestampResolver<R = string | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
@@ -409,6 +368,42 @@ export namespace DestinationEcsFieldsResolvers {
   >;
 }
 
+export namespace EventEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    category?: CategoryResolver<string | null, any, Context>;
+    id?: IdResolver<number | null, any, Context>;
+    module?: ModuleResolver<string | null, any, Context>;
+    severity?: SeverityResolver<number | null, any, Context>;
+    type?: TypeResolver<string | null, any, Context>;
+  }
+
+  export type CategoryResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IdResolver<R = number | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type ModuleResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type SeverityResolver<R = number | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TypeResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
 export namespace GeoEcsFieldsResolvers {
   export interface Resolvers<Context = any> {
     country_iso_code?: CountryIsoCodeResolver<string | null, any, Context>;
@@ -427,18 +422,90 @@ export namespace GeoEcsFieldsResolvers {
   >;
 }
 
+export namespace HostEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    hostname?: HostnameResolver<string | null, any, Context>;
+    ip?: IpResolver<string | null, any, Context>;
+  }
+
+  export type HostnameResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace SourceEcsFieldsResolvers {
+  export interface Resolvers<Context = any> {
+    ip?: IpResolver<string | null, any, Context>;
+    port?: PortResolver<string | null, any, Context>;
+  }
+
+  export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PortResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
 export namespace SuricataEcsFieldsResolvers {
   export interface Resolvers<Context = any> {
-    flow_id?: FlowIdResolver<string | null, any, Context>;
+    eve?: EveResolver<SuricataEveData | null, any, Context>;
+  }
+
+  export type EveResolver<R = SuricataEveData | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace SuricataEveDataResolvers {
+  export interface Resolvers<Context = any> {
+    alert?: AlertResolver<SuricataAlertData | null, any, Context>;
+    flow_id?: FlowIdResolver<number | null, any, Context>;
     proto?: ProtoResolver<string | null, any, Context>;
   }
 
-  export type FlowIdResolver<R = string | null, Parent = any, Context = any> = Resolver<
+  export type AlertResolver<R = SuricataAlertData | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FlowIdResolver<R = number | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
   >;
   export type ProtoResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace SuricataAlertDataResolvers {
+  export interface Resolvers<Context = any> {
+    signature?: SignatureResolver<string | null, any, Context>;
+    signature_id?: SignatureIdResolver<number | null, any, Context>;
+  }
+
+  export type SignatureResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type SignatureIdResolver<R = number | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
