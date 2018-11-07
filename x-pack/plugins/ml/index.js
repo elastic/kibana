@@ -63,6 +63,23 @@ export const ml = (kibana) => {
         xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
+      xpackMainPlugin.registerFeature({
+        id: 'ml',
+        name: 'Machine Learning',
+        icon: 'mlApp',
+        privileges: {
+          all: {
+            api: [],
+            app: ['ml'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['ml'],
+          },
+        }
+      });
+
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [

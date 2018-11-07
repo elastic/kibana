@@ -49,7 +49,7 @@ const serializePrivileges = (application, privilegeMap) => {
   };
 };
 
-export async function registerPrivilegesWithCluster(server) {
+export async function registerPrivilegesWithCluster(server, features) {
 
   const { authorization } = server.plugins.security;
   const { types: savedObjectTypes } = server.savedObjects;
@@ -73,7 +73,7 @@ export async function registerPrivilegesWithCluster(server) {
     return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application])).length > 0;
   };
 
-  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions);
+  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions, features);
   const expectedPrivileges = serializePrivileges(application, privilegeMap);
 
   server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);

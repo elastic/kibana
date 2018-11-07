@@ -17,7 +17,8 @@ export function initPublicRolesApi(server) {
 
   const { application, actions } = server.plugins.security.authorization;
   const savedObjectTypes = server.savedObjects.types;
-  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions);
+  const features = server.plugins.xpack_main.getFeatures();
+  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions, features);
 
   initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
   initPutRolesApi(server, callWithRequest, routePreCheckLicenseFn, privilegeMap, application);

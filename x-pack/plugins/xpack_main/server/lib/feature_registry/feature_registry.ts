@@ -6,6 +6,17 @@
 
 import { IconType } from '@elastic/eui';
 import _ from 'lodash';
+
+export interface PrivilegeDefinition {
+  api?: string[];
+  app: string[];
+  savedObject: {
+    all: string[];
+    read: string[];
+  };
+  ui: string[];
+}
+
 export interface Feature {
   id: string;
   name: string;
@@ -13,6 +24,9 @@ export interface Feature {
   validLicenses?: Array<'basic' | 'gold' | 'platinum'>;
   icon?: IconType;
   description?: string;
+  privileges?: {
+    [key: string]: PrivilegeDefinition;
+  };
 }
 
 const features: Record<string, Feature> = {};
