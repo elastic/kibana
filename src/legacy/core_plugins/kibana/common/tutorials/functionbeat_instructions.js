@@ -72,7 +72,7 @@ export const createFunctionbeatInstructions = context => ({
         },
       }),
       commands: [
-        'PS > cd C:\\Program Files\\Functionbeat',
+        'cd "C:\\Program Files\\Functionbeat"',
       ],
     }
   },
@@ -101,7 +101,7 @@ The `setup` command checks the Elasticsearch configuration and loads the \
 Kibana index pattern. It is normally safe to omit this command.',
       }),
       commands: [
-        'PS C:\\Program Files\\Functionbeat> functionbeat.exe setup',
+        'functionbeat.exe setup',
         'PS C:\\Program Files\\Functionbeat> functionbeat.exe deploy fn_cloudwatch_logs',
       ],
     },
