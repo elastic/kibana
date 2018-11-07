@@ -36,12 +36,15 @@ import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { Sort } from '../../components/timeline/body/sort';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
+import { ECS } from '../../components/timeline/ecs';
 import {
   OnColumnSorted,
   OnDataProviderRemoved,
   OnFilterChange,
   OnRangeSelected,
 } from '../../components/timeline/events';
+
+import { mockECSData } from '../mock/mock_ecs';
 import { Placeholders } from './visualization_placeholder';
 
 const onColumnSorted: OnColumnSorted = sorted => {
@@ -59,6 +62,12 @@ const onRangeSelected: OnRangeSelected = range => {
 const onFilterChange: OnFilterChange = filter => {
   alert(`filter changed: ${JSON.stringify(filter)}`);
 };
+
+export interface EventRenderer {
+  isInstance: (data: ECS) => boolean;
+  renderMultiClolumn: (data: ECS) => React.ReactNode;
+  renderColumn: (columnName: string, data: ECS) => React.ReactNode;
+}
 
 const sort: Sort = {
   columnId: 'time',
@@ -108,6 +117,7 @@ export const HomePage = pure(() => (
             <Timeline
               columnHeaders={headers}
               dataProviders={mockDataProviders}
+              data={mockECSData}
               onColumnSorted={onColumnSorted}
               onDataProviderRemoved={onDataProviderRemoved}
               onFilterChange={onFilterChange}

@@ -7,7 +7,9 @@
 import { mount } from 'enzyme';
 import { noop, omit } from 'lodash/fp';
 import * as React from 'react';
+
 import { Timeline } from '.';
+import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
 import { Sort } from './body/sort';
@@ -24,6 +26,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <Timeline
           columnHeaders={headers}
+          data={mockECSData}
           dataProviders={mockDataProviders}
           onColumnSorted={noop}
           onDataProviderRemoved={noop}
@@ -41,6 +44,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <Timeline
           columnHeaders={headers}
+          data={mockECSData}
           dataProviders={mockDataProviders}
           onColumnSorted={noop}
           onDataProviderRemoved={noop}
@@ -63,6 +67,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={mockOnColumnSorted}
             onDataProviderRemoved={noop}
@@ -92,6 +97,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={mockOnDataProviderRemoved}
@@ -132,6 +138,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={allColumnsHaveTextFilters}
+            data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={noop}
@@ -162,6 +169,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={noop}
