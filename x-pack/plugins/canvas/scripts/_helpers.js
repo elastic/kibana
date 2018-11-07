@@ -8,7 +8,7 @@ const { resolve } = require('path');
 
 exports.runGulpTask = function(name) {
   process.chdir(resolve(__dirname, '../../..'));
-  process.argv.splice(2, 0, name);
+  process.argv.splice(1, 1, require.resolve('gulp/bin/gulp'), name);
   require('gulp/bin/gulp');
 };
 
