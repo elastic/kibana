@@ -89,6 +89,9 @@ export const getLayerListRaw = ({ map }) => map.layerList ?  map.layerList : [];
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
+export const getMapBuffer = ({ map }) => map.mapState.buffer ?
+  map.mapState.buffer : {};
+
 export const getMapZoom = ({ map }) => map.mapState.zoom ?
   map.mapState.zoom : 0;
 
@@ -112,11 +115,13 @@ export const getMetadata = ({ config }) => config && config.meta;
 
 export const getDataFilters = createSelector(
   getMapExtent,
+  getMapBuffer,
   getMapZoom,
   getTimeFilters,
-  (mapExtent, mapZoom, timeFilters) => {
+  (mapExtent, mapBuffer, mapZoom, timeFilters) => {
     return {
       extent: mapExtent,
+      buffer: mapBuffer,
       zoom: mapZoom,
       timeFilters: timeFilters
     };

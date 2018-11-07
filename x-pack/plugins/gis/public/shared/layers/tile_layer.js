@@ -42,9 +42,7 @@ export class TileLayer extends ALayer {
     }
 
     mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-    if (!this._descriptor.showAtAllZoomLevels) {
-      mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    }
+    mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
 
   }
 

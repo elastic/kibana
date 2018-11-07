@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import turf from 'turf';
+import turfBooleanContains from '@turf/boolean-contains';
+
 import { GIS_API_PATH } from '../../common/constants';
 import { getLayerList, getDataFilters, getSelectedLayer } from '../selectors/map_selectors';
 
@@ -34,8 +37,8 @@ const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
-    startLoading: (dataId, requestToken, initData) => dispatch(startDataLoad(layerId, dataId, requestToken, initData)),
-    stopLoading: (dataId, requestToken, returnData) => dispatch(endDataLoad(layerId, dataId, requestToken, returnData)),
+    startLoading: (dataId, requestToken, meta) => dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
+    stopLoading: (dataId, requestToken, data, meta) => dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
     onRefreshStyle: async () => {
       await dispatch({
@@ -127,6 +130,41 @@ export function mapExtentChanged(newMapConstants) {
   return async (dispatch, getState) => {
     const state = getState();
     const dataFilters = getDataFilters(state);
+    const { extent, zoom: newZoom } = newMapConstants;
+    const { buffer, zoom: currentZoom } = dataFilters;
+
+    if (extent) {
+      let doesBufferContainExtent = false;
+      if (buffer) {
+        const bufferGeometry = turf.bboxPolygon([
+          buffer.min_lon,
+          buffer.min_lat,
+          buffer.max_lon,
+          buffer.max_lat
+        ]);
+        const extentGeometry = turf.bboxPolygon([
+          extent.min_lon,
+          extent.min_lat,
+          extent.max_lon,
+          extent.max_lat
+        ]);
+
+        doesBufferContainExtent = turfBooleanContains(bufferGeometry, extentGeometry);
+      }
+
+      if (!doesBufferContainExtent || currentZoom !== newZoom) {
+        const scaleFactor = 0.5; // TODO put scale factor in store and fetch with selector
+        const width = extent.max_lon - extent.min_lon;
+        const height = extent.max_lat - extent.min_lat;
+        dataFilters.buffer = {
+          min_lon: extent.min_lon - width * scaleFactor,
+          min_lat: extent.min_lat - height * scaleFactor,
+          max_lon: extent.max_lon + width * scaleFactor,
+          max_lat: extent.max_lat + height * scaleFactor
+        };
+      }
+    }
+
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapState: {
@@ -149,12 +187,13 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
   });
 }
 
-export function endDataLoad(layerId, dataId, requestToken, data) {
+export function endDataLoad(layerId, dataId, requestToken, data, meta) {
   return ({
     type: LAYER_DATA_LOAD_ENDED,
     layerId,
     dataId,
     data,
+    meta,
     requestToken
   });
 }
@@ -189,15 +228,6 @@ export function updateLayerLabel(id, newLabel) {
     newValue: newLabel,
   };
 }
-
-// export function updateLayerShowAtAllZoomLevels(id, showAtAllZoomLevels) {
-//   return {
-//     type: UPDATE_LAYER_PROP,
-//     id,
-//     propName: 'showAtAllZoomLevels',
-//     newValue: showAtAllZoomLevels,
-//   };
-// }
 
 export function updateLayerMinZoom(id, minZoom) {
   return {
@@ -278,6 +308,7 @@ export function clearTemporaryStyles() {
 
 export function setJoinsForLayer(layer, joins) {
   return async (dispatch, getState) => {
+    console.warn('Not Implemented: must remove any styles that are driven by join-fields that are no longer present');
     await dispatch({
       type: SET_JOINS,
       layer: layer,

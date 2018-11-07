@@ -23,7 +23,7 @@ import { useResizeChecker } from '../sense_editor_resize';
 
 require('ui/modules')
   .get('app/sense')
-  .directive('senseHistoryViewer', function () {
+  .directive('senseHistoryViewer', function (i18n) {
     return {
       restrict: 'E',
       scope: {
@@ -42,7 +42,9 @@ require('ui/modules')
             viewer.setValue(s);
             viewer.clearSelection();
           } else {
-            viewer.getSession().setValue('No history available');
+            viewer.getSession().setValue(
+              i18n('console.historyPage.noHistoryTextMessage', { defaultMessage: 'No history available' })
+            );
           }
         });
 

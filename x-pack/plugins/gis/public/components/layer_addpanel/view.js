@@ -37,7 +37,6 @@ export class AddLayerPanel extends React.Component {
     this.state = {
       label: '',
       sourceType: '',
-      // showAtAllZoomLevels: false,
       minZoom: 0,
       maxZoom: 24,
     };
@@ -47,12 +46,11 @@ export class AddLayerPanel extends React.Component {
     this.layer = source.createDefaultLayer({
       temporary: true,
       label: this.state.label,
-      showAtAllZoomLevels: this.state.showAtAllZoomLevels,
       minZoom: this.state.minZoom,
       maxZoom: this.state.maxZoom,
     });
     this.props.previewLayer(this.layer);
-  }
+  };
 
   _onLabelChange = (label) => {
     this.setState({ label });
@@ -60,18 +58,7 @@ export class AddLayerPanel extends React.Component {
     if (this.layer) {
       this.props.updateLabel(this.layer.getId(), label);
     }
-  }
-
-  // _onShowAtAllZoomLevelsChange = (event) => {
-  //   const isChecked = event.target.checked;
-  //   this.setState({
-  //     showAtAllZoomLevels: isChecked,
-  //   });
-  //
-  //   if (this.layer) {
-  //     this.props.updateShowAtAllZoomLevels(this.layer.getId(), isChecked);
-  //   }
-  // };
+  };
 
   _onZoomRangeChange = () => {
     if (this.layer) {
@@ -259,10 +246,6 @@ export class AddLayerPanel extends React.Component {
   }
 
   _renderZoomSliders() {
-    // if (this.state.showAtAllZoomLevels) {
-    //   return;
-    // }
-
     return (
       <Fragment>
         <EuiFormRow

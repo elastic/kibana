@@ -109,7 +109,11 @@ export class VectorLayer extends ALayer {
 
     const numberFields = await this._source.getNumberFields();
     const numberFieldOptions = numberFields.map(name => {
-      return { label: name, origin: 'source' };
+      return {
+        label: name,
+        name: name,
+        origin: 'source'
+      };
     });
     const joinFields = this._joins.map(join => {
       return {
@@ -151,13 +155,8 @@ export class VectorLayer extends ALayer {
     if (timeAware) {
       updateDueToTime = !_.isEqual(meta.timeFilters, filters.timeFilters);
     }
-    let updateDueToExtent = false;
-    if (extentAware) {
-      //todo: should have same padding logic here as in geohash_grid
-      updateDueToExtent = !_.isEqual(meta.extent, filters.extent);
-    }
 
-    return !updateDueToTime && !updateDueToExtent;
+    return !updateDueToTime && !this.updateDueToExtent(source, meta, filters);
 
   }
 
@@ -214,12 +213,13 @@ export class VectorLayer extends ALayer {
           featureCollection: sourceDataRequest.getData()
         };
       }
-      startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
-      const data = await this._source.getGeoJson({
+      startLoading(sourceDataId, requestToken, dataFilters);
+      const layerName = await this.getDisplayName();
+      const { data, meta } = await this._source.getGeoJson({
         layerId: this.getId(),
-        layerName: this.getDisplayName()
+        layerName
       }, dataFilters);
-      stopLoading(sourceDataId, requestToken, data);
+      stopLoading(sourceDataId, requestToken, data, meta);
       return {
         refreshed: true,
         featureCollection: data
@@ -303,28 +303,70 @@ export class VectorLayer extends ALayer {
     }
   }
 
-  _syncStylePropertiesWithMb(mbMap) {
-    const isPointsOnly = this._isPointsOnly();
-    if (isPointsOnly) {
-      const pointLayerId = this.getId() +  '_circle';
-      this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
-      mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-      if (!this._descriptor.showAtAllZoomLevels) {
-        mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-      }
-      this._addTooltipListeners(mbMap, pointLayerId);
-    } else {
-      const fillLayerId = this.getId() + '_fill';
-      const strokeLayerId = this.getId() + '_line';
-      this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, strokeLayerId, this.isTemporary());
-      mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-      mbMap.setLayoutProperty(strokeLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
-      if (!this._descriptor.showAtAllZoomLevels) {
-        mbMap.setLayerZoomRange(strokeLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-        mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-      }
-      this._addTooltipListeners(mbMap, fillLayerId);
+  _setMbPointsProperties(mbMap) {
+    const sourceId = this.getId();
+    const pointLayerId = this.getId() +  '_circle';
+    const pointLayer = mbMap.getLayer(pointLayerId);
+    if (!pointLayer) {
+      mbMap.addLayer({
+        id: pointLayerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {}
+      });
+      mbMap.setFilter(pointLayerId, ['any', ['==', ['geometry-type'], 'Point'], ['==', ['geometry-type'], 'MultiPoint']]);
     }
+    this._style.setMBPaintPropertiesForPoints(mbMap, this.getId(), pointLayerId, this.isTemporary());
+    mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this._addTooltipListeners(mbMap, pointLayerId);
+  }
+
+  _setMbLinePolygonProeprties(mbMap) {
+    const sourceId = this.getId();
+    const fillLayerId = this.getId() + '_fill';
+    const lineLayerId = this.getId() + '_line';
+    if (!mbMap.getLayer(fillLayerId)) {
+      mbMap.addLayer({
+        id: fillLayerId,
+        type: 'fill',
+        source: sourceId,
+        paint: {}
+      });
+      mbMap.setFilter(fillLayerId, [
+        'any',
+        ['==', ['geometry-type'], 'Polygon'],
+        ['==', ['geometry-type'], 'MultiPolygon'],
+        ['==', ['geometry-type'], 'LineString'],
+        ['==', ['geometry-type'], 'MultiLineString']
+      ]);
+    }
+    if (!mbMap.getLayer(lineLayerId)) {
+      mbMap.addLayer({
+        id: lineLayerId,
+        type: 'line',
+        source: sourceId,
+        paint: {}
+      });
+      mbMap.setFilter(lineLayerId, [
+        'any',
+        ['==', ['geometry-type'], 'Polygon'],
+        ['==', ['geometry-type'], 'MultiPolygon'],
+        ['==', ['geometry-type'], 'LineString'],
+        ['==', ['geometry-type'], 'MultiLineString']
+      ]);
+    }
+    this._style.setMBPaintProperties(mbMap, this.getId(), fillLayerId, lineLayerId, this.isTemporary());
+    mbMap.setLayoutProperty(fillLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this._addTooltipListeners(mbMap, fillLayerId);
+  }
+
+  _syncStylePropertiesWithMb(mbMap) {
+    this._setMbPointsProperties(mbMap);
+    this._setMbLinePolygonProeprties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap) {

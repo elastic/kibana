@@ -53,7 +53,6 @@ export class DynamicColorSelection extends React.Component {
     }));
   }
 
-
   render() {
     const options = this.props.fields.map(field => {
       return { label: field.label, value: field };

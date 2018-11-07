@@ -326,6 +326,19 @@ module.exports = {
     },
 
     /**
+     * disable jsx-a11y for kbn-ui-framework
+     */
+    {
+      files: ['packages/kbn-ui-framework/**'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+        'jsx-a11y/anchor-has-content': 'off',
+        'jsx-a11y/tabindex-no-positive': 'off',
+        'jsx-a11y/aria-role': 'off',
+      },
+    },
+
+    /**
      * Monitoring overrides
      */
     {
@@ -345,6 +358,17 @@ module.exports = {
     /**
      * Canvas overrides
      */
+    {
+      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: resolve(__dirname, 'x-pack'),
+          },
+        ],
+      },
+    },
     {
       files: ['x-pack/plugins/canvas/**/*'],
       plugins: ['prettier'],
@@ -404,17 +428,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack/',
-          },
-        ],
-      },
-    },
-    {
       files: [
         'x-pack/plugins/canvas/gulpfile.js',
         'x-pack/plugins/canvas/tasks/*.js',
@@ -428,7 +441,6 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
-            packageDir: './x-pack/',
           },
         ],
       },
@@ -437,12 +449,6 @@ module.exports = {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*'],
       globals: { canvas: true, $: true },
       rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack/',
-          },
-        ],
         'import/no-unresolved': [
           'error',
           {

@@ -68,7 +68,10 @@ export class KibanaRegionmapSource extends VectorSource {
 
   async getGeoJson() {
     const fileSource = this._regionList.find(source => source.name === this._descriptor.name);
-    return VectorSource.getGeoJson(fileSource, fileSource.url);
+    const featureCollection = await VectorSource.getGeoJson(fileSource, fileSource.url);
+    return {
+      data: featureCollection
+    };
   }
 
   async getStringFields() {

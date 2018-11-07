@@ -5,13 +5,11 @@
  */
 
 // tslint:disable-next-line  no-var-requires
-const numeral = require('@elastic/numeral');
 import React from 'react';
 
 import { first } from 'lodash';
 import { Span } from '../../../../../../../../typings/Span';
-// @ts-ignore
-import { asMillis } from '../../../../../../../utils/formatters';
+import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 // @ts-ignore
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
@@ -32,13 +30,16 @@ function getPrimaryType(type: string) {
 
 interface Props {
   span: Span;
-  totalDuration: number;
+  totalDuration?: number;
 }
 
 export function StickySpanProperties({ span, totalDuration }: Props) {
+  if (!totalDuration) {
+    return null;
+  }
+
   const spanName = span.span.name;
   const spanDuration = span.span.duration.us;
-  const relativeDuration = spanDuration / totalDuration;
   const spanTypeLabel = getSpanLabel(getPrimaryType(span.span.type));
 
   const stickyProperties = [
@@ -64,7 +65,7 @@ export function StickySpanProperties({ span, totalDuration }: Props) {
     },
     {
       label: '% of transaction',
-      val: numeral(relativeDuration).format('0.00%'),
+      val: asPercent(spanDuration, totalDuration),
       width: '50%'
     }
   ];
