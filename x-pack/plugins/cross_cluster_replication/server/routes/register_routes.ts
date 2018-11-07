@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Temp disable eslint...
+import { registerAutoFollowPatternRoutes } from './api/register_auto_follow_pattern_routes';
 
-/* eslint-disable */
-
-export function registerRoutes(server) {
-  // TODO
+export function registerRoutes(server: any) {
+  registerAutoFollowPatternRoutes(server);
 }

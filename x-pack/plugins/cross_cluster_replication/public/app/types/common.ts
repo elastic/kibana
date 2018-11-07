@@ -5,3 +5,7 @@
  */
 
 export type FunctionType = (...args: any[]) => any;
+
+export interface HttpRequestError {
+  [key: string]: any;
+}

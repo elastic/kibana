@@ -17,8 +17,6 @@ const initialState: AutoFollowPatternState = {
   selectedId: null,
 };
 
-// Reducers
-
 export const reducer = (state = initialState, action: Actions) => {
   switch (action.type) {
     case t.AUTO_FOLLOW_PATTERN_LOAD_SUCCESS: {

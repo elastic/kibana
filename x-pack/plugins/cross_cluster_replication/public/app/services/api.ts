@@ -4,34 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Temp disable eslint...
-
-/* eslint-disable */
-
 import chrome from 'ui/chrome';
+import { API_BASE_PATH } from '../../../common/constants';
 
-const apiPrefix = chrome.addBasePath('/api/cross_cluster_replication');
+const apiPrefix = chrome.addBasePath(API_BASE_PATH);
 
-// This is an Angular service, which is why we use this provider pattern to access it within
-// our React app.
-let httpClient;
+// This is an Angular service, which is why we use this provider pattern
+// to access it within our React app.
+let httpClient: any;
 
-export function setHttpClient(client) {
+export function setHttpClient(client: any) {
   httpClient = client;
 }
 
 // ---
 
 export const loadAutoFollowPatterns = async () => {
-  // const { data: { clusters } } = await httpClient.get(`${apiPrefix}/clusters`);
-  // return clusters;
-
-  /**
-   * Temp to test async call with apiMiddleware
-   */
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve({ good: 'job' });
-    }, 2000);
-  });
+  return await httpClient
+    .get(`${apiPrefix}/auto_follow_patterns`)
+    .then((response: any) => response.data);
 };

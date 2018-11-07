@@ -4,22 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { API_STATUS } from '../../constants';
+import { SECTIONS } from '../../constants';
+import { HttpRequestError } from '../../types';
+import * as t from '../action_types';
+import { ApiActions } from '../actions';
 
-/**
- * I am seeing here a state for the API Requests status
- * per section.
- *
- * Example:
- * --------------
- * {
- *   status: {
- *     cluster: 'saving',
- *     followPattern: 'idle'
- *   },
- *   errors: {
- *     cluster: null,
- *     followPattern: null
- *   }
- * }
- */
+export interface AutoFollowPatternState {
+  status: { [key: string]: string };
+  error: { [key: string]: HttpRequestError | null };
+}
+
+const initialState: AutoFollowPatternState = {
+  status: {
+    [SECTIONS.AUTO_FOLLOW_PATTERN]: 'idle',
+    [SECTIONS.INDEX_FOLLOWER]: 'idle',
+  },
+  error: {
+    [SECTIONS.AUTO_FOLLOW_PATTERN]: null,
+    [SECTIONS.INDEX_FOLLOWER]: null,
+  },
+};
+
+export const reducer = (state = initialState, action: ApiActions) => {
+  switch (action.type) {
+    case t.API_START: {
+      return { ...state, status: { ...state.status, [action.payload.scope]: 'loading' } };
+    }
+    case t.API_END: {
+      return { ...state, status: { ...state.status, [action.payload.scope]: 'idle' } };
+    }
+    case t.API_ERROR: {
+      return { ...state, error: { ...state.error, [action.payload.scope]: 'idle' } };
+    }
+    default:
+      return state;
+  }
+};

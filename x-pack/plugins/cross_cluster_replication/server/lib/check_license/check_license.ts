@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function checkLicense(xpackLicenseInfo) {
+export function checkLicense(xpackLicenseInfo: any) {
   const pluginName = 'Cross Cluster Replication';
 
   // If, for some reason, we cannot get the license information
@@ -14,17 +14,11 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: `You cannot use ${pluginName} because license information is not available at this time.`
+      message: `You cannot use ${pluginName} because license information is not available at this time.`,
     };
   }
 
-  const VALID_LICENSE_MODES = [
-    'trial',
-    'basic',
-    'standard',
-    'gold',
-    'platinum'
-  ];
+  const VALID_LICENSE_MODES = ['trial', 'basic', 'standard', 'gold', 'platinum'];
 
   const isLicenseModeValid = xpackLicenseInfo.license.isOneOf(VALID_LICENSE_MODES);
   const isLicenseActive = xpackLicenseInfo.license.isActive();
@@ -35,7 +29,7 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       isAvailable: false,
       showLinks: false,
-      message: `Your ${licenseType} license does not support ${pluginName}. Please upgrade your license.`
+      message: `Your ${licenseType} license does not support ${pluginName}. Please upgrade your license.`,
     };
   }
 
@@ -45,7 +39,7 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: `You cannot use ${pluginName} because your ${licenseType} license has expired.`
+      message: `You cannot use ${pluginName} because your ${licenseType} license has expired.`,
     };
   }
 
@@ -53,6 +47,6 @@ export function checkLicense(xpackLicenseInfo) {
   return {
     isAvailable: true,
     showLinks: true,
-    enableLinks: true
+    enableLinks: true,
   };
 }

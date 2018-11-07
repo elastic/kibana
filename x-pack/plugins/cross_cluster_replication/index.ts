@@ -5,24 +5,22 @@
  */
 
 import { resolve } from 'path';
+import { PLUGIN } from './common/constants';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { registerRoutes } from './server/routes/register_routes';
-import { PLUGIN } from './common/constants';
 
-export function crossClusterReplication(kibana) {
+export function crossClusterReplication(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: `${__dirname}/public/index.scss`,
-      managementSections: [
-        'plugins/cross_cluster_replication',
-      ]
+      managementSections: ['plugins/cross_cluster_replication'],
     },
-    init: function initCcrPlugin(server) {
+    init: function initCcrPlugin(server: any) {
       registerLicenseChecker(server);
       registerRoutes(server);
-    }
+    },
   });
 }

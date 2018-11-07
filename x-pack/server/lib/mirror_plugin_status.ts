@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function mirrorPluginStatus(upstreamPlugin, downstreamPlugin, ...statesToMirror) {
+export function mirrorPluginStatus(
+  upstreamPlugin: any,
+  downstreamPlugin: any,
+  ...statesToMirror: string[]
+) {
   upstreamPlugin.status.setMaxListeners(20); // We need more than the default, which is 10
 
-  function mirror(previousState, previousMsg, newState, newMsg) {
+  function mirror(previousState: any, previousMsg: string | null, newState: any, newMsg: string) {
     if (newState) {
       downstreamPlugin.status[newState](newMsg);
     }
