@@ -132,7 +132,9 @@ export class VectorStyle {
 
   getColorRamp() {
     const { color } = this._descriptor.properties.fillColor.options;
-    return color ? <ColorGradient color={color}/> : null;
+    return color && this._isPropertyDynamic('fillColor')
+      ? <ColorGradient color={color}/>
+      : null;
   }
 
   static computeScaledValues(featureCollection, field) {
@@ -198,14 +200,14 @@ export class VectorStyle {
     if (!this._descriptor.properties[property] || !this._descriptor.properties[property].options) {
       return null;
     }
-    const { fieldValue, color } = this._descriptor.properties[property].options;
-    if (fieldValue && color) {
+    const { field, color } = this._descriptor.properties[property].options;
+    if (field && color) {
       const colorRange = getHexColorRangeStrings(color, 8)
         .reduce((accu, curColor, idx, srcArr) => {
           accu = [ ...accu, idx / srcArr.length, curColor ];
           return accu;
         }, []);
-      const originalFieldName = this._descriptor.properties[property].options.fieldValue.name;
+      const originalFieldName = this._descriptor.properties[property].options.field.name;
       const targetName = VectorStyle.getComputedFieldName(originalFieldName);
       return [
         'interpolate',
