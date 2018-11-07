@@ -26,19 +26,21 @@ export const VisualizationPlaceholder = styled(EuiPanel)`
   }
 `;
 
-export interface PlaceholdersProps {
+interface Props {
   count: number;
 }
 
 /** TODO: delete this stub */
-export const Placeholders = pure<PlaceholdersProps>(({ count }) => (
+export const Placeholders = pure<Props>(({ count }) => (
   <React.Fragment>
     {range(0, count).map(p => (
       <VisualizationPlaceholder
         data-test-subj="visualizationPlaceholder"
         key={`visualizationPlaceholder-${p}`}
       >
-        <WhoAmI sourceId="default">{({ appName }) => <div>{appName}</div>}</WhoAmI>
+        <WhoAmI data-test-subj="whoAmI" sourceId="default">
+          {({ appName }) => <div>{appName}</div>}
+        </WhoAmI>
       </VisualizationPlaceholder>
     ))}
   </React.Fragment>

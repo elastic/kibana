@@ -20,6 +20,7 @@ interface Props {
   columnHeaders: ColumnHeader[];
   data: ECS[];
   dataProviders: DataProvider[];
+  height?: number | string;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
@@ -36,12 +37,15 @@ const TimelineDiv = styled.div`
   user-select: none;
 `;
 
+const defaultHeight = '100%';
+
 /** The parent Timeline component */
 export const Timeline = pure<Props>(
   ({
     columnHeaders,
     dataProviders,
     data,
+    height = defaultHeight,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
@@ -49,7 +53,7 @@ export const Timeline = pure<Props>(
     sort,
     width,
   }) => (
-    <TimelineDiv data-test-subj="timeline" style={{ width: `${width}px` }}>
+    <TimelineDiv data-test-subj="timeline" style={{ width: `${width}px`, height }}>
       <TimelineHeader
         dataProviders={dataProviders}
         onDataProviderRemoved={onDataProviderRemoved}

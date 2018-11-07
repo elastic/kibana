@@ -21,6 +21,7 @@ interface Props {
   columnHeaders: ColumnHeader[];
   data: ECS[];
   dataProviders: DataProvider[];
+  height?: number | string;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
@@ -37,7 +38,7 @@ const BodyDiv = styled.div`
 `;
 
 const ScrollableArea = styled.div`
-  height: 400px;
+  height: 100%;
   overflow-y: scroll;
   margin-top: 5px;
 `;
@@ -85,10 +86,21 @@ const Pin = styled(EuiIcon)`
   color: grey;
 `;
 
+const defaultHeight = '100%';
+
 /** Renders the timeline body */
 export const Body = pure<Props>(
-  ({ columnHeaders, data, onColumnSorted, onFilterChange, onRangeSelected, sort, width }) => (
-    <BodyDiv data-test-subj="body" style={{ width: `${width - 10}px` }}>
+  ({
+    columnHeaders,
+    data,
+    height = defaultHeight,
+    onColumnSorted,
+    onFilterChange,
+    onRangeSelected,
+    sort,
+    width,
+  }) => (
+    <BodyDiv data-test-subj="body" style={{ width: `${width - 10}px`, height }}>
       <ColumnHeaders
         columnHeaders={columnHeaders}
         onColumnSorted={onColumnSorted}

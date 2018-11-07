@@ -24,6 +24,7 @@ import {
   Pane1Style,
   Pane2,
   Pane2Style,
+  Pane2TimelineContainer,
   PaneScrollContainer,
   ResizerStyle,
   SubHeader,
@@ -113,7 +114,7 @@ export const HomePage = pure(() => (
         </Pane1>
 
         <Pane2 data-test-subj="pane2">
-          <PaneScrollContainer data-test-subj="pane2ScrollContainer">
+          <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
             <Timeline
               columnHeaders={headers}
               dataProviders={mockDataProviders}
@@ -125,7 +126,7 @@ export const HomePage = pure(() => (
               sort={sort}
               width={maxTimelineWidth}
             />
-          </PaneScrollContainer>
+          </Pane2TimelineContainer>
         </Pane2>
       </SplitPane>
     </PageContent>

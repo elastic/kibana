@@ -31,23 +31,26 @@ export const FlexPage = styled(EuiPage)`
 `;
 
 export const PageHeader = styled.div`
-  display: flex;
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
+  display: flex;
+  user-select: none;
 `;
 
 export const FooterContainer = styled.div`
-  position: relative;
-  left: 0;
   bottom: 0;
-  width: 100%;
   color: #666;
+  left: 0;
   padding: 8px 8px;
+  position: relative;
   text-align: left;
+  user-select: none;
+  width: 100%;
 `;
 
 export const SubHeader = styled.div`
   display: flex;
   flex-direction: column;
+  user-select: none;
   width: 100%;
 `;
 
@@ -65,6 +68,7 @@ export const PaneScrollContainer = styled.div`
 export const Pane1 = styled.div`
   height: 100%;
   overflow: hidden;
+  user-select: none;
 `;
 
 /** For use with the `SplitPane` `pane1Style` prop */
@@ -88,12 +92,17 @@ export const Pane2 = styled.div`
   height: 100%;
   overflow-x: scroll;
   overflow-y: hidden;
+  user-select: none;
 `;
 
 /** For use with the `SplitPane` `pane2Style` prop */
 export const Pane2Style: React.CSSProperties = {
   height: '100%',
 };
+
+export const Pane2TimelineContainer = styled.div`
+  height: 100%;
+`;
 
 /** For use with the `SplitPane` `resizerStyle` prop */
 export const ResizerStyle: React.CSSProperties = {
