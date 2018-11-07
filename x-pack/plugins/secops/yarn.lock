@@ -26,6 +26,11 @@
   dependencies:
     "@types/color-convert" "*"
 
+"@types/inline-style-prefixer@3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@types/inline-style-prefixer/-/inline-style-prefixer-3.0.1.tgz#8541e636b029124b747952e9a28848286d2b5bf6"
+  integrity sha512-+kbOcYW1/noncDwRryRoB9tH87IYcMfdBGvw98iocK39LtTA2DFL7agmk4UHW/GxjzVfwrxfjlLrqrgA7MCtmg==
+
 "@types/lodash@^4.14.110":
   version "4.14.117"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.117.tgz#695a7f514182771a1e0f4345d189052ee33c8778"

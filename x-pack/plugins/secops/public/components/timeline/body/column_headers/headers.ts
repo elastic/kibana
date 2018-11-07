@@ -16,7 +16,7 @@ export const DEFAULT_EVENT_COLUMN_WIDTH = 300;
 export const headers: ColumnHeader[] = [
   {
     columnHeaderType: 'not-filtered',
-    id: 'time',
+    id: '@timestamp',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: 'Time',
   },

@@ -40,7 +40,7 @@ export const FooterContainer = styled.div`
   bottom: 0;
   color: #666;
   left: 0;
-  padding: 8px 8px;
+  padding: 8px;
   position: relative;
   text-align: left;
   user-select: none;

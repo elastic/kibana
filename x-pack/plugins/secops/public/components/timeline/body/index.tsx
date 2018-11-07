@@ -5,6 +5,7 @@
  */
 
 import { EuiHorizontalRule, EuiIcon, EuiText } from '@elastic/eui';
+import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -68,8 +69,6 @@ const Transitionable = styled.span`
 
 const Cell = styled(EuiText)`
   overflow: hidden;
-  min-width: 100px;
-  max-width: 100px;
   margin-right: 6px;
 `;
 
@@ -86,7 +85,53 @@ const Pin = styled(EuiIcon)`
   color: grey;
 `;
 
+const DataDrivenColumns = styled.div`
+  display: flex;
+  width: 100%;
+`;
+
 const defaultHeight = '100%';
+
+interface RenderColumnStubParams {
+  columnName: string;
+  data: ECS;
+  minWidth: number;
+}
+
+const renderColumnStub = ({
+  columnName,
+  data,
+  minWidth,
+}: RenderColumnStubParams): React.ReactNode => {
+  const getCell = () => {
+    switch (columnName) {
+      case '@timestamp':
+        return <Cell size="xs">{moment(data['@timestamp']).format('YYYY-MM-DD')}</Cell>;
+      case 'event':
+        return (
+          <Cell size="xs">
+            {data.event.severity} / {data.event.module} / {data.event.category}
+          </Cell>
+        );
+      default:
+        return <Cell size="xs">{getOr('--', `event.${columnName}`, data)}</Cell>;
+    }
+  };
+
+  return (
+    <div
+      key={`cell-${columnName}`}
+      data-test-subj="cellContainer"
+      style={{
+        maxWidth: `${minWidth}px`,
+        minWidth: `${minWidth}px`,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {getCell()}
+    </div>
+  );
+};
 
 /** Renders the timeline body */
 export const Body = pure<Props>(
@@ -115,15 +160,11 @@ export const Body = pure<Props>(
             <TimeGutter />
             <Transitionable>
               <Pin type="pin" size="l" />
-              <Cell size="xs">{moment(ecs['@timestamp']).format('YYYY-MM-DD')}</Cell>
-              <Cell size="xs">{ecs.event.severity}</Cell>
-              <Cell size="xs">{ecs.event.category}</Cell>
-              <Cell size="xs">{ecs.event.type}</Cell>
-              <Cell size="xs">{ecs.event.module}</Cell>
-              <Cell size="xs">{ecs.user.name}</Cell>
-              <Cell size="xs">
-                {ecs.event.severity} / {ecs.event.module} / {ecs.event.category}
-              </Cell>
+              <DataDrivenColumns data-test-subj="dataDrivenColumns">
+                {columnHeaders.map(header =>
+                  renderColumnStub({ columnName: header.id, data: ecs, minWidth: header.minWidth })
+                )}
+              </DataDrivenColumns>
             </Transitionable>
           </Row>
         ))}

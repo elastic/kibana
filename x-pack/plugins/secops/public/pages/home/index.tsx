@@ -71,7 +71,7 @@ export interface EventRenderer {
 }
 
 const sort: Sort = {
-  columnId: 'time',
+  columnId: '@timestamp',
   sortDirection: 'descending',
 };
 
