@@ -54,8 +54,52 @@ export function MochaReporterProvider({ getService }) {
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         const extraNameParts = [];
 
-        for (const tag of config.get('suiteTags.include')) {
-          extraNameParts.push(`${tag}`);
+        if (config.get('suiteTags.include').includes('ciGroup1')) {
+          extraNameParts.push(`a`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup2')) {
+          extraNameParts.push(`b`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup3')) {
+          extraNameParts.push(`c`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup4')) {
+          extraNameParts.push(`d`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup5')) {
+          extraNameParts.push(`e`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup6')) {
+          extraNameParts.push(`f`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup7')) {
+          extraNameParts.push(`g`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup8')) {
+          extraNameParts.push(`h`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup9')) {
+          extraNameParts.push(`i`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup10')) {
+          extraNameParts.push(`j`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup11')) {
+          extraNameParts.push(`k`);
+        }
+
+        if (config.get('suiteTags.include').includes('ciGroup12')) {
+          extraNameParts.push(`l`);
         }
 
         setupJUnitReportGeneration(runner, {
