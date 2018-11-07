@@ -30,24 +30,21 @@ const os = require('os');
 // yet solved.
 // https://github.com/tschaub/mock-fs/issues/238
 const fixturesFolder = path.resolve(__dirname, '__fixtures__');
-const tmpFolder = path.resolve(os.tmpdir(), 'kbn_es_decompress_fixtures');
+const randomDir = Math.random().toString(36);
+const tmpFolder = path.resolve(os.tmpdir(), randomDir);
 const dataFolder = path.resolve(tmpFolder, 'data');
 const esFolder = path.resolve(tmpFolder, '.es');
 
 const zipSnapshot = path.resolve(dataFolder, 'snapshot.zip');
 const tarGzSnapshot = path.resolve(dataFolder, 'snapshot.tar.gz');
 
-beforeAll(() => {
+beforeEach(() => {
   mkdirp.sync(tmpFolder);
   mkdirp.sync(dataFolder);
   mkdirp.sync(esFolder);
 
   fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.zip'), zipSnapshot);
   fs.copyFileSync(path.resolve(fixturesFolder, 'snapshot.tar.gz'), tarGzSnapshot);
-});
-
-afterAll(() => {
-  del.sync(tmpFolder, { force: true });
 });
 
 afterEach(() => {
