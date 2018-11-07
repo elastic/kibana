@@ -154,7 +154,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
         }
 
         const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
-        this._vis.API.events.addFilter(this._chartData, 0, rowIndex, event);
+        this._vis.API.events.filter({ table: this._chartData, column: 0, row: rowIndex, value: event });
       });
 
       this._choroplethLayer.on('styleChanged', (event) => {
