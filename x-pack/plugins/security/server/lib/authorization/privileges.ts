@@ -4,66 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, mapValues } from 'lodash';
 import { Feature } from '../../../../xpack_main/types';
 import { IGNORED_TYPES } from '../../../common/constants';
+import { Actions } from './actions';
+import { FeaturesPrivileges, FeaturesPrivilegesBuilder } from './features_privileges_builder';
 
 interface PrivilegeMap {
   global: Record<string, string[]>;
-  features: Record<string, Record<string, string[]>>;
+  features: FeaturesPrivileges;
   space: Record<string, string[]>;
-}
-
-interface ActionDefinition {
-  api?: string[];
-  app: string[];
-  savedObject: {
-    all: string[];
-    read: string[];
-  };
-  space?: {
-    manage: boolean;
-  };
-  ui: string[];
 }
 
 export function buildPrivilegeMap(
   allSavedObjectTypes: string[],
-  actions: any,
+  actions: Actions,
   features: Feature[]
 ): PrivilegeMap {
   const validSavedObjectTypes = allSavedObjectTypes.filter(type => !IGNORED_TYPES.includes(type));
+  const featuresPrivilegesBuilder = new FeaturesPrivilegesBuilder(actions);
 
-  const buildActions = (actionDefinition: ActionDefinition) => {
-    return [
-      actions.login,
-      actions.version,
-      ...(actionDefinition.api ? actionDefinition.api.map(api => actions.api.get(api)) : []),
-      ...actionDefinition.app.map(appId => actions.app.get(appId)),
-      ...flatten(
-        actionDefinition.savedObject.all.map(types => actions.savedObject.allOperations(types))
-      ),
-      ...flatten(
-        actionDefinition.savedObject.read.map(types => actions.savedObject.readOperations(types))
-      ),
-      ...(actionDefinition.space && actionDefinition.space.manage ? actions.space.manage : []),
-      ...actionDefinition.ui.map(ui => actions.ui.get(ui)),
-    ];
-  };
-
-  const featurePrivileges = features
-    .filter(feature => feature.privileges)
-    .reduce((acc: Record<string, any>, feature) => {
-      acc[feature.id] = mapValues(feature.privileges!, privilegeDefinition =>
-        buildActions(privilegeDefinition)
-      );
-      return acc;
-    }, {});
-
-  // the following list of privileges should only be added to, you can safely remove actions, but not privileges as
-  // it's a backwards compatibility issue and we'll have to at least adjust registerPrivilegesWithCluster to support it
   return {
-    features: featurePrivileges,
+    features: featuresPrivilegesBuilder.build(features),
     global: {
       all: [
         actions.login,

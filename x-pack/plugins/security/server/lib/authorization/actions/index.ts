@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { actionsFactory } from './actions';
+export { Actions, actionsFactory } from './actions';

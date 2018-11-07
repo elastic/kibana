@@ -24,7 +24,7 @@ export interface Feature {
   validLicenses?: Array<'basic' | 'gold' | 'platinum'>;
   icon?: IconType;
   description?: string;
-  privileges?: {
+  privileges: {
     [key: string]: PrivilegeDefinition;
   };
 }
