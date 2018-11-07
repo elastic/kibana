@@ -78,7 +78,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickRegionMap() {
-      await this.clickVisEditorTab('region_map');
+      await this.clickVisType('region_map');
     }
 
     async clickMarkdownWidget() {
