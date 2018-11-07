@@ -21,7 +21,7 @@ interface Props {
   columnHeaders: ColumnHeader[];
   data: ECS[];
   dataProviders: DataProvider[];
-  height?: number | string;
+  height?: string;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;

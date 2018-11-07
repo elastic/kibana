@@ -48,6 +48,31 @@ interface NavigationState {
   selectedTabId: string;
 }
 
+const AddSources = styled.div`
+  position: relative;
+  top: -48px;
+`;
+
+const AddData = pure(() => (
+  <AddSources>
+    <EuiButton href="kibana#home/tutorial_directory/security">Add data</EuiButton>
+  </AddSources>
+));
+
+const AddDataContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  height: 0px;
+  justify-content: flex-end;
+  width: 100%;
+`;
+
+const NavigationContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
 export class Navigation extends React.PureComponent<{}, NavigationState> {
   public readonly state = {
     selectedTabId: navTabs.reduce((res, tab) => {
@@ -60,26 +85,12 @@ export class Navigation extends React.PureComponent<{}, NavigationState> {
 
   public render() {
     return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: '100%',
-        }}
-      >
+      <NavigationContainer>
         <EuiTabs>{this.renderTabs()}</EuiTabs>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            height: '0px',
-            justifyContent: 'flex-end',
-            width: '100%',
-          }}
-        >
+        <AddDataContainer>
           <AddData />
-        </div>
-      </div>
+        </AddDataContainer>
+      </NavigationContainer>
     );
   }
 
@@ -104,14 +115,3 @@ export class Navigation extends React.PureComponent<{}, NavigationState> {
       </EuiTab>
     ));
 }
-
-const AddData = pure(() => (
-  <AddSources>
-    <EuiButton href="kibana#home/tutorial_directory/security">Add data</EuiButton>
-  </AddSources>
-));
-
-const AddSources = styled.div`
-  position: relative;
-  top: -48px;
-`;
