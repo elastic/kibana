@@ -10,7 +10,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { WhoAmI } from '../../containers/who_am_i';
+import { WhoAmI } from '../containers/who_am_i';
 
 export const VisualizationPlaceholder = styled(EuiPanel)`
   && {
@@ -28,10 +28,11 @@ export const VisualizationPlaceholder = styled(EuiPanel)`
 
 interface Props {
   count: number;
+  myRoute: string;
 }
 
 /** TODO: delete this stub */
-export const Placeholders = pure<Props>(({ count }) => (
+export const Placeholders = pure<Props>(({ count, myRoute }) => (
   <React.Fragment>
     {range(0, count).map(p => (
       <VisualizationPlaceholder
@@ -39,7 +40,11 @@ export const Placeholders = pure<Props>(({ count }) => (
         key={`visualizationPlaceholder-${p}`}
       >
         <WhoAmI data-test-subj="whoAmI" sourceId="default">
-          {({ appName }) => <div>{appName}</div>}
+          {({ appName }) => (
+            <div>
+              {appName} {myRoute}
+            </div>
+          )}
         </WhoAmI>
       </VisualizationPlaceholder>
     ))}

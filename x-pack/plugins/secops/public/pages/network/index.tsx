@@ -7,4 +7,6 @@
 import React from 'react';
 import { pure } from 'recompose';
 
-export const Network = pure(() => <div>Hello Network</div>);
+import { Placeholders } from '../../components/visualization_placeholder';
+
+export const Network = pure(() => <Placeholders count={10} myRoute="Network" />);
