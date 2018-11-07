@@ -17,10 +17,5 @@
  * under the License.
  */
 
-export { ConfigService } from './config_service';
-export { RawConfigService } from './raw_config_service';
-export { Config, ConfigPath } from './config';
-/** @internal */
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { Env, CliArgs, PackageInfo } from './env';
-export { ConfigWithSchema } from './config_with_schema';
+export { PluginDiscoveryErrorType } from './plugin_discovery_error';
+export { discover } from './plugins_discovery';
