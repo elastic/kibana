@@ -1,9 +1,11 @@
+@import '../../vislib/variables';
+
 // NOTE: Some of the styles attempt to align with the TSVB legend
 
 .visLegend__toggle {
   align-self: flex-start;
   // Override .kuiCollapseButton
-  color: lightOrDarkTheme($visValueColor, $visValueColorReversed) !important;
+  color: $visValueColor !important;
 }
 
 .visLegend {
@@ -17,21 +19,21 @@
   overflow: hidden;
 
   // flex-direction re-aligns toggle button
-  .vislib-container--legend-left & {
+  .visVisType--legend-left & {
     flex-direction: row-reverse;
   }
 
-  .vislib-container--legend-right & {
+  .visVisType--legend-right & {
     flex-direction: row;
   }
 
-  .vislib-container--legend-top & {
+  .visVisType--legend-top & {
     flex-direction: column-reverse;
     width: 100%;
     padding-left: $euiSizeL;
 
   }
-  .vislib-container--legend-bottom & {
+  .visVisType--legend-bottom & {
     flex-direction: column;
     width: 100%;
     padding-left: $euiSizeL;
@@ -45,8 +47,8 @@
     overflow-x: hidden;
     overflow-y: auto;
 
-    .vislib-container--legend-top &,
-    .vislib-container--legend-bottom & {
+    .visVisType--legend-top &,
+    .visVisType--legend-bottom & {
       width: auto;
       overflow-y: hidden;
 
@@ -73,7 +75,7 @@
 }
 
 .visLegend__valueTitle {
-  color: lightOrDarkTheme($visTextColor, $visTextColorReversed);
+  color: $visTextColor;
 
   &:hover {
     text-decoration: underline;

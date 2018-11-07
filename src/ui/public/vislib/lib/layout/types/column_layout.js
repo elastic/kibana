@@ -54,75 +54,75 @@ export function VislibLibLayoutTypesColumnLayoutProvider(Private) {
       {
         parent: el,
         type: 'div',
-        class: 'vis-wrapper',
+        class: 'visWrapper',
         datum: data,
         children: [
           {
             type: 'div',
-            class: 'y-axis-col-wrapper',
+            class: 'visAxis--y',
             children: [
               {
                 type: 'div',
-                class: 'y-axis-spacer-block y-axis-spacer-block-top'
+                class: 'visAxis__spacer--y visAxis__spacer--y-top'
               },
               {
                 type: 'div',
-                class: 'y-axis-col axis-wrapper-left',
+                class: 'visAxis__column--y visAxis__column--left',
                 children: [
                   {
                     type: 'div',
-                    class: 'y-axis-chart-title',
+                    class: 'visAxis__splitTitles--y',
                     splits: chartTitleSplit
                   },
                   {
                     type: 'div',
-                    class: 'y-axis-div-wrapper',
+                    class: 'visAxis__splitAxes--y',
                     splits: yAxisSplit
                   }
                 ]
               },
               {
                 type: 'div',
-                class: 'y-axis-spacer-block y-axis-spacer-block-bottom'
+                class: 'visAxis__spacer--y visAxis__spacer--y-bottom'
               }
             ]
           },
           {
             type: 'div',
-            class: 'vis-col-wrapper',
+            class: 'visWrapper__column',
             children: [
               {
                 type: 'div',
-                class: 'x-axis-wrapper axis-wrapper-top',
+                class: 'visAxis--x visAxis__column--top',
                 children: [
                   {
                     type: 'div',
-                    class: 'x-axis-div-wrapper',
+                    class: 'visAxis__splitAxes--x',
                     splits: xAxisSplit
                   }
                 ]
               },
               {
                 type: 'div',
-                class: 'chart-wrapper',
+                class: 'visWrapper__chart',
                 splits: chartSplit
               },
               {
                 type: 'div',
-                class: 'vis-alerts'
+                class: 'visWrapper__alerts'
               },
               {
                 type: 'div',
-                class: 'x-axis-wrapper axis-wrapper-bottom',
+                class: 'visAxis--x visAxis__column--bottom',
                 children: [
                   {
                     type: 'div',
-                    class: 'x-axis-div-wrapper',
+                    class: 'visAxis__splitAxes--x',
                     splits: xAxisSplit
                   },
                   {
                     type: 'div',
-                    class: 'x-axis-chart-title',
+                    class: 'visAxis__splitTitles--x',
                     splits: chartTitleSplit
                   }
                 ]
@@ -131,26 +131,26 @@ export function VislibLibLayoutTypesColumnLayoutProvider(Private) {
           },
           {
             type: 'div',
-            class: 'y-axis-col-wrapper',
+            class: 'visAxis--y',
             children: [
               {
                 type: 'div',
-                class: 'y-axis-spacer-block y-axis-spacer-block-top'
+                class: 'visAxis__spacer--y visAxis__spacer--y-top'
               },
               {
                 type: 'div',
-                class: 'y-axis-col axis-wrapper-right',
+                class: 'visAxis__column--y visAxis__column--right',
                 children: [
                   {
                     type: 'div',
-                    class: 'y-axis-div-wrapper',
+                    class: 'visAxis__splitAxes--y',
                     splits: yAxisSplit
                   }
                 ]
               },
               {
                 type: 'div',
-                class: 'y-axis-spacer-block y-axis-spacer-block-bottom'
+                class: 'visAxis__spacer--y visAxis__spacer--y-bottom'
               }
             ]
           }

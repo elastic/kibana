@@ -67,7 +67,7 @@ export function VislibLibAlertsProvider() {
       const alerts = this.alerts;
       const vis = this.vis;
 
-      $(vis.el).find('.vis-alerts').append($('<div>').addClass('visAlerts__tray'));
+      $(vis.el).find('.visWrapper__alerts').append($('<div>').addClass('visAlerts__tray'));
       if (!alerts.size()) return;
       $(vis.el).find('.visAlerts__tray').append(alerts.value());
     }
@@ -87,7 +87,7 @@ export function VislibLibAlertsProvider() {
     }
 
     destroy() {
-      $(this.vis.el).find('.vis-alerts').remove();
+      $(this.vis.el).find('.visWrapper__alerts').remove();
     }
   }
 

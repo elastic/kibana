@@ -22,8 +22,8 @@ import $ from 'jquery';
 
 export function VislibLibLayoutSplitsColumnChartChartTitleSplitProvider() {
   /*
-   * Adds div DOM elements to either the `.y-axis-chart-title` element or the
-   * `.x-axis-chart-title` element based on the data layout.
+   * Adds div DOM elements to either the `.visAxis__splitTitles--y` element or the
+   * `.visAxis__splitTitles--x` element based on the data layout.
    * For example, if the data has rows, it returns the same number of
    * `.chart-title` elements as row objects.
    * if not data.rows or data.columns, return no chart titles
@@ -31,7 +31,7 @@ export function VislibLibLayoutSplitsColumnChartChartTitleSplitProvider() {
   return function (selection) {
     selection.each(function (data) {
       const div = d3.select(this);
-      const parent = $(this).parents('.vis-wrapper');
+      const parent = $(this).parents('.visWrapper');
 
       if (!data.series) {
         div.selectAll('.chart-title')
@@ -43,9 +43,9 @@ export function VislibLibLayoutSplitsColumnChartChartTitleSplitProvider() {
           .attr('class', 'chart-title');
 
         if (data.rows) {
-          parent.find('.x-axis-chart-title').remove();
+          parent.find('.visAxis__splitTitles--x').remove();
         } else {
-          parent.find('.y-axis-chart-title').remove();
+          parent.find('.visAxis__splitTitles--y').remove();
         }
 
         return div;

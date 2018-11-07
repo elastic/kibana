@@ -1,24 +1,24 @@
-.vislib-container {
+.visVisType {
   flex: 1 1 0; /* 1 */
   display: flex;
   flex-direction: row;
   overflow: auto;
 
-  &.vislib-container--legend-left {
+  &.visVisType--legend-left {
     flex-direction: row-reverse;
   }
-  &.vislib-container--legend-right {
+  &.visVisType--legend-right {
     flex-direction: row;
   }
-  &.vislib-container--legend-top {
+  &.visVisType--legend-top {
     flex-direction: column-reverse;
   }
-  &.vislib-container--legend-bottom {
+  &.visVisType--legend-bottom {
     flex-direction: column;
   }
 }
 
-.vislib-chart {
+.visVisType__chart {
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
@@ -32,7 +32,7 @@
   min-width: 0;
 }
 
-.vis-wrapper {
+.visWrapper {
   display: flex;
   flex: 1 1 100%;
   flex-direction: row;
@@ -42,13 +42,13 @@
   padding: 10px 0;
 }
 
-.vis-wrapper svg {
+.visWrapper svg {
   overflow: visible;
 }
 @vis-hover-opacity: 0.8;
 
 /* SVG Element Default Styling */
-.vis-wrapper {
+.visWrapper {
   rect {
     opacity: 1;
 
@@ -69,14 +69,14 @@
 }
 
 /* YAxis logic */
-.y-axis-col-wrapper {
+.visAxis--y {
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
 }
 
-.y-axis-col {
+.visAxis__column--y {
   display: flex;
   flex-direction: row;
   flex: 1 0 36px;
@@ -84,11 +84,11 @@
   min-width: 0;
 }
 
-.y-axis-spacer-block {
+.visAxis__spacer--y {
   min-height: 0px;
 }
 
-.y-axis-div-wrapper {
+.visAxis__splitAxes--y {
   display: flex;
   flex-direction: column;
   min-height: 20px;
@@ -107,7 +107,7 @@
   min-width: 1px;
 }
 
-.y-axis-chart-title {
+.visAxis__splitTitles--y {
   display: flex;
   flex-direction: column;
   min-height: 14px;
@@ -131,7 +131,7 @@
   fill: @vis-chart-title-color;
 }
 
-.vis-col-wrapper {
+.visWrapper__column {
   display: flex;
   flex: 1 0 0px;
   flex-direction: column;
@@ -139,7 +139,7 @@
   min-width: 0;
 }
 
-.chart-wrapper {
+.visWrapper__chart {
   display: flex;
   flex: 1 0 0px;
   overflow: visible;
@@ -148,17 +148,17 @@
   min-width: 0;
 }
 
-.chart-wrapper-row .chart-wrapper {
+.visWrapper__splitCharts--row .visWrapper__chart {
   margin-left: 0px;
   margin-right: 0px;
 }
 
-.chart-wrapper-column .chart-wrapper {
+.visWrapper__splitCharts--column .visWrapper__chart {
   margin-top: 0px;
   margin-bottom: 0px;
 }
 
-.chart-wrapper-column {
+.visWrapper__splitCharts--column {
   display: flex;
   flex: 1 0 20px;
   flex-direction: row;
@@ -166,7 +166,7 @@
   min-width: 0;
 }
 
-.chart-wrapper-row {
+.visWrapper__splitCharts--row {
   display: flex;
   flex-direction: column;
   flex: 1 1 100%;
@@ -198,7 +198,7 @@
   min-width: 0;
 }
 
-.x-axis-wrapper {
+.visAxis--x {
   display: flex;
   flex-direction: column;
   min-height: 0px;
@@ -206,14 +206,14 @@
   overflow: visible;
 }
 
-.x-axis-div-wrapper {
+.visAxis__splitAxes--x {
   display: flex;
   flex-direction: row;
   min-height: 0px;
   min-width: 0;
 }
 
-.x-axis-chart-title {
+.visAxis__splitTitles--x {
   display: flex;
   flex-direction: row;
   min-height: 1px;
@@ -236,15 +236,15 @@
   float: left; /* for some reason svg wont get positioned in top left corner of container div without this */
 }
 
-.axis-wrapper-top .axis-div svg {
+.visAxis__column--top .axis-div svg {
   margin-bottom: -5px;
 }
 
-.chart-first {
+.visWrapper__chart--first {
   margin-top: 0px;
   margin-left: 0px
 }
-.chart-last {
+.visWrapper__chart--last {
   margin-bottom: 0px;
   margin-right: 0px;
 }

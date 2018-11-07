@@ -90,7 +90,7 @@ export function VislibLibLayoutLayoutProvider(Private) {
       const position = axis.axisConfig.get('position');
       const chartTitle = new ChartTitle(visConfig);
 
-      const axisWrapperElement = $(this.el).find(`.axis-wrapper-${position}`);
+      const axisWrapperElement = $(this.el).find(`.visAxis__column--${position}`);
 
       axisWrapperElement.css('visibility', 'hidden');
       axis.render();
@@ -103,10 +103,10 @@ export function VislibLibLayoutLayoutProvider(Private) {
 
 
       if (axis.axisConfig.isHorizontal()) {
-        const spacerNodes = $(this.el).find(`.y-axis-spacer-block-${position}`);
+        const spacerNodes = $(this.el).find(`.visAxis__spacer--y-${position}`);
         spacerNodes.height(`${height}px`);
       } else {
-        axisWrapperElement.find('.y-axis-div-wrapper').width(`${width}px`);
+        axisWrapperElement.find('.visAxis__splitAxes--y').width(`${width}px`);
       }
     }
 

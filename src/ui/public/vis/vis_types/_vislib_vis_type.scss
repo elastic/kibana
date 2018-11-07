@@ -1,0 +1,26 @@
+.visVisType {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+
+  &.visVisType--legend-left {
+    flex-direction: row-reverse;
+  }
+  &.visVisType--legend-right {
+    flex-direction: row;
+  }
+  &.visVisType--legend-top {
+    flex-direction: column-reverse;
+  }
+  &.visVisType--legend-bottom {
+    flex-direction: column;
+  }
+}
+
+.visVisType__chart {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}

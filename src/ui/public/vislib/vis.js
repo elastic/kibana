@@ -105,7 +105,7 @@ export function VislibVisProvider(Private) {
      * @method destroy
      */
     destroy() {
-      const selection = d3.select(this.el).select('.vis-wrapper');
+      const selection = d3.select(this.el).select('.visWrapper');
 
       if (this.handler) this._runOnHandler('destroy');
 

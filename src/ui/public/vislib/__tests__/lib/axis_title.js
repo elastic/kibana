@@ -107,17 +107,17 @@ describe('Vislib AxisTitle Class Test Suite', function () {
     PersistedState = $injector.get('PersistedState');
 
     el = d3.select('body').append('div')
-      .attr('class', 'vis-wrapper');
+      .attr('class', 'visWrapper');
 
     el.append('div')
-      .attr('class', 'axis-wrapper-bottom')
+      .attr('class', 'visAxis__column--bottom')
       .append('div')
       .attr('class', 'axis-title y-axis-title')
       .style('height', '20px')
       .style('width', '20px');
 
     el.append('div')
-      .attr('class', 'axis-wrapper-left')
+      .attr('class', 'visAxis__column--left')
       .append('div')
       .attr('class', 'axis-title x-axis-title')
       .style('height', '20px')

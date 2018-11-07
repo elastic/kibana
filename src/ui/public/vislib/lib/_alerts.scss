@@ -1,10 +1,10 @@
-.vis-alerts {
+.visWrapper__alerts {
   position: relative;
 }
 
 .visAlerts__tray {
   position: absolute;
-  bottom: $euiSizeXS;
+  bottom: ($euiSizeXS+1px);
   left: 0;
   right: 0;
   list-style: none;

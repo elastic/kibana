@@ -61,7 +61,7 @@ export function PointSeriesPageProvider({ getService }) {
     getRightValueAxes() {
       return remote
         .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.axis-wrapper-right g.axis')
+        .findAllByCssSelector('.visAxis__column--right g.axis')
         .then(all => all.length);
     }
 

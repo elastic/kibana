@@ -132,7 +132,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return PageObjects.header.waitUntilLoadingHasFinished()
         .then(() => {
           return getRemote()
-            .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type');
+            .findByCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
         })
         .then(function setYAxisLabel(y) {
           return y
@@ -157,10 +157,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
                 });
             });
         })
-      // 3). get the chart-wrapper elements
+      // 3). get the visWrapper__chart elements
         .then(function () {
           return getRemote()
-          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
+          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visualize-chart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
             .findAllByCssSelector('svg > g > g.series > rect') // rect
             .then(function (chartTypes) {
               function getChartType(chart) {

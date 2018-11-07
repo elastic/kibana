@@ -73,16 +73,16 @@ dateHistogramArray.forEach(function (data, i) {
 
     describe('createLayout Method', function () {
       it('should append all the divs', function () {
-        expect($(vis.el).find('.vis-wrapper').length).to.be(1);
-        expect($(vis.el).find('.y-axis-col-wrapper').length).to.be(2);
-        expect($(vis.el).find('.vis-col-wrapper').length).to.be(1);
-        expect($(vis.el).find('.y-axis-col').length).to.be(2);
+        expect($(vis.el).find('.visWrapper').length).to.be(1);
+        expect($(vis.el).find('.visAxis--y').length).to.be(2);
+        expect($(vis.el).find('.visWrapper__column').length).to.be(1);
+        expect($(vis.el).find('.visAxis__column--y').length).to.be(2);
         expect($(vis.el).find('.y-axis-title').length).to.be.above(0);
-        expect($(vis.el).find('.y-axis-div-wrapper').length).to.be(2);
-        expect($(vis.el).find('.y-axis-spacer-block').length).to.be(4);
-        expect($(vis.el).find('.chart-wrapper').length).to.be(numberOfCharts);
-        expect($(vis.el).find('.x-axis-wrapper').length).to.be(2);
-        expect($(vis.el).find('.x-axis-div-wrapper').length).to.be(2);
+        expect($(vis.el).find('.visAxis__splitAxes--y').length).to.be(2);
+        expect($(vis.el).find('.visAxis__spacer--y').length).to.be(4);
+        expect($(vis.el).find('.visWrapper__chart').length).to.be(numberOfCharts);
+        expect($(vis.el).find('.visAxis--x').length).to.be(2);
+        expect($(vis.el).find('.visAxis__splitAxes--x').length).to.be(2);
         expect($(vis.el).find('.x-axis-title').length).to.be.above(0);
       });
     });

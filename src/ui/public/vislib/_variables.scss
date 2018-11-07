@@ -1,12 +1,7 @@
 // TODO: Use the same styles for TSVB and Vislib vis'
 $visLineColor: transparentize($euiColorFullShade,0.8);
-$visLineColorReversed: transparentize($euiColorFullShade,0.6);
-
 $visTextColor: transparentize($euiColorFullShade,0.6);
-$visTextColorReversed: transparentize($euiColorFullShade,0.4);
-
 $visValueColor: transparentize($euiColorFullShade,0.3);
-$visValueColorReversed: transparentize($euiColorFullShade,0.2);
 
 $visHoverBackgroundColor: transparentize($euiColorFullShade,0.9);
 $visHoverBackgroundColorReversed: transparentize($euiColorFullShade,0.9);
