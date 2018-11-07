@@ -60,11 +60,11 @@ const getFields = (
         if (item.kind === 'Field') {
           const field: FieldNode = item as FieldNode;
           if (field.name.kind === 'Name' && field.name.value.includes('kpi')) {
-            return res.concat(field.name.value);
+            return [...res, field.name.value];
           } else if (field.selectionSet && !isEmpty(field.selectionSet.selections)) {
             return getFields(field.selectionSet, res, postFields.concat(field.name.value));
           }
-          return res.concat(postFields.concat(field.name.value).join('.'));
+          return [...res, [...postFields, field.name.value].join('.')];
         }
         return res;
       },

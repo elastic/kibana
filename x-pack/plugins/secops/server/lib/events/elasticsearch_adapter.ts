@@ -49,7 +49,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
         if (EventFieldsMap.hasOwnProperty(f)) {
           const esField = Object.getOwnPropertyDescriptor(EventFieldsMap, f);
           if (esField && esField.value) {
-            res.push(esField.value);
+            res = [...res, esField.value];
           }
         }
         return res;
