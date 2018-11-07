@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const { resolve } = require('path');
-
-process.chdir(resolve(__dirname, '../../../..'));
-process.argv.splice(2, 0, 'x-pack/plugins/canvas/**/*.{js,jsx}');
-
-require('../../../../scripts/eslint');
+require('./_helpers').runKibanaScript('eslint', ['x-pack/plugins/canvas/**/*.{js,jsx}']);

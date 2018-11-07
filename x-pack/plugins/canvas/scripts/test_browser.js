@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-process.argv.splice(2, 0, 'canvas:test:browser');
-require('gulp/bin/gulp');
+require('./_helpers').runGulpTask('canvas:test:browser');

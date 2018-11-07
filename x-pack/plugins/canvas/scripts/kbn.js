@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-require('../../../../scripts/kbn');
+require('./_helpers').runKibanaScript('kbn');
