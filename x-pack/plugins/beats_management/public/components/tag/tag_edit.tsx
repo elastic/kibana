@@ -154,7 +154,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             <EuiHorizontalRule />
 
             <EuiTitle size="xs">
-              <h3>Beats assigned this tag</h3>
+              <h3>Beats with this tag</h3>
             </EuiTitle>
             <Table
               assignmentOptions={{
