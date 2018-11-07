@@ -238,7 +238,7 @@
     "redux-observable": "^1.0.0",
     "redux-thunk": "2.3.0",
     "redux-thunks": "^1.0.0",
-    "request": "^2.85.0",
+    "request": "^2.88.0",
     "reselect": "3.0.1",
     "resize-observer-polyfill": "^1.5.0",
     "rimraf": "^2.6.2",
