@@ -87,6 +87,7 @@ function buildRequest(req, config, esIndexPattern) {
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.time_since_last_read_millis',
       'aggregations.by_follower_index.buckets.key',
       'aggregations.by_follower_index.buckets.leader_index.buckets.key',
+      'aggregations.by_follower_index.buckets.leader_index.buckets.remote_cluster.buckets.key',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.key',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.ops_synced.value',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.lag_ops.value',
@@ -139,6 +140,14 @@ function buildRequest(req, config, esIndexPattern) {
               terms: {
                 field: 'ccr_stats.leader_index',
                 size: 1
+              },
+              aggs: {
+                remote_cluster: {
+                  terms: {
+                    field: 'ccr_stats.remote_cluster',
+                    size: 1
+                  }
+                }
               }
             },
             by_shard_id: {
@@ -201,12 +210,8 @@ export function ccrRoute(server) {
         const buckets = get(response, 'aggregations.by_follower_index.buckets');
         const data = buckets.reduce((accum, bucket) => {
           const leaderIndex = get(bucket, 'leader_index.buckets[0].key');
-          let follows = leaderIndex;
-          if (follows.includes(':')) {
-            const followsSplit = follows.split(':');
-            follows = `${followsSplit[1]} on ${followsSplit[0]}`;
-          }
-
+          const remoteCluster = get(bucket, 'leader_index.buckets[0].remote_cluster.buckets[0].key');
+          const follows = remoteCluster ? `${leaderIndex} on ${remoteCluster}` : leaderIndex;
           const stat = {
             id: bucket.key,
             index: bucket.key,
