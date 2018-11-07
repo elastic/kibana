@@ -73,7 +73,9 @@ export class CreateTagFragment extends React.PureComponent<TagPageProps, TagPage
             <EuiButton
               fill
               disabled={
-                this.state.tag.id === '' || this.state.tag.configuration_blocks.length === 0
+                this.state.tag.id.search(/^[a-zA-Z0-9-]+$/) === -1 ||
+                this.state.tag.id === '' ||
+                this.state.tag.configuration_blocks.length === 0
               }
               onClick={this.saveTag}
             >

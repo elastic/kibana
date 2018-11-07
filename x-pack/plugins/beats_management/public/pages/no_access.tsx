@@ -7,7 +7,7 @@ import * as React from 'react';
 import { NoDataLayout } from '../components/layouts/no_data';
 
 export const NoAccessPage: React.SFC<any> = () => (
-  <NoDataLayout title="Access Denied" actionSection={[]}>
+  <NoDataLayout title="Access denied" actionSection={[]}>
     <p>
       You are not authorized to access Beats central management. To use Beats central management,
       you need the privileges granted by the `beats_admin` role.
