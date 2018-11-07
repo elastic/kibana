@@ -15,7 +15,7 @@ interface PageProps extends URLStateProps<AppURLState>, RouteComponentProps<any>
   loadBeats: any;
   libs: FrontendLibs;
 }
-export class ReviewWalkthrough extends React.Component<PageProps, any> {
+export class FinishWalkthrough extends React.Component<PageProps, any> {
   constructor(props: PageProps) {
     super(props);
 
@@ -47,15 +47,10 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
           <EuiPageContent>
             <EuiEmptyPrompt
               iconType="logoBeats"
-              title={<h2>Congratulations!</h2>}
+              title={<h2>Your Beat is enrolled. What's next?</h2>}
               body={
                 <React.Fragment>
-                  <p>
-                    You have enrolled your first beat, and we have assigned your new tag with its
-                    configurations to it
-                  </p>
-                  <h3>Next Steps</h3>
-                  <p>All that is left to do is to start the beat you just enrolled.</p>
+                  <p>Start your Beat to check for configuration errors, then click Done.</p>
                 </React.Fragment>
               }
               actions={
@@ -103,4 +98,4 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
   };
 }
 
-export const ReviewWalkthroughPage = withUrlState<PageProps>(ReviewWalkthrough);
+export const FinishWalkthroughPage = withUrlState<PageProps>(FinishWalkthrough);
