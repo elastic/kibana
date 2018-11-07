@@ -41,12 +41,12 @@ export const eventsSchema = gql`
 
   type SourceEcsFields {
     ip: String
-    port: String
+    port: Float
   }
 
   type DestinationEcsFields {
     ip: String
-    port: String
+    port: Float
   }
 
   type SuricataAlertData {

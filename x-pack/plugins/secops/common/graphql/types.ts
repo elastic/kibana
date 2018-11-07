@@ -77,7 +77,7 @@ export interface EventItem {
 
 export interface DestinationEcsFields {
   ip?: string | null;
-  port?: string | null;
+  port?: number | null;
 }
 
 export interface EventEcsFields {
@@ -100,7 +100,7 @@ export interface HostEcsFields {
 
 export interface SourceEcsFields {
   ip?: string | null;
-  port?: string | null;
+  port?: number | null;
 }
 
 export interface SuricataEcsFields {
@@ -353,7 +353,7 @@ export namespace EventItemResolvers {
 export namespace DestinationEcsFieldsResolvers {
   export interface Resolvers<Context = any> {
     ip?: IpResolver<string | null, any, Context>;
-    port?: PortResolver<string | null, any, Context>;
+    port?: PortResolver<number | null, any, Context>;
   }
 
   export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
@@ -361,7 +361,7 @@ export namespace DestinationEcsFieldsResolvers {
     Parent,
     Context
   >;
-  export type PortResolver<R = string | null, Parent = any, Context = any> = Resolver<
+  export type PortResolver<R = number | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
@@ -443,7 +443,7 @@ export namespace HostEcsFieldsResolvers {
 export namespace SourceEcsFieldsResolvers {
   export interface Resolvers<Context = any> {
     ip?: IpResolver<string | null, any, Context>;
-    port?: PortResolver<string | null, any, Context>;
+    port?: PortResolver<number | null, any, Context>;
   }
 
   export type IpResolver<R = string | null, Parent = any, Context = any> = Resolver<
@@ -451,7 +451,7 @@ export namespace SourceEcsFieldsResolvers {
     Parent,
     Context
   >;
-  export type PortResolver<R = string | null, Parent = any, Context = any> = Resolver<
+  export type PortResolver<R = number | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
