@@ -139,6 +139,7 @@
     "joi": "6.10.1",
     "jquery": "^3.3.1",
     "jstimezonedetect": "1.0.5",
+    "kerberos": "^1.1.2",
     "lodash": "3.10.1",
     "lodash.clone": "^4.5.0",
     "lodash.keyby": "^4.6.0",

@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import os from 'os';
+import kerberos from 'kerberos';
 
 export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
@@ -23,6 +25,21 @@ export default function ({ getService }) {
         console.log(handshakeResponse.headers);
       });
 
+      it('should auth', async () => {
+        const service = `HTTP@${os.hostname()}`;
+        const mechOID = kerberos.GSS_MECH_OID_KRB5;
+        const principal = 'george@BUILD.ELASTIC.CO';
+
+        const client = await kerberos.initializeClient(service, { mechOID, principal });
+        const clientResponse = await client.step('');
+        console.log({ clientResponse });
+
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Authorization', `Negotiate ${clientResponse}`)
+          .expect(200);
+      });
     });
   });
 }

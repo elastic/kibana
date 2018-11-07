@@ -53,7 +53,7 @@ export default async function ({ readConfigFile }) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--optimize.enabled=false',
-        '--xpack.security.authProviders=["spnego"]',
+        '--xpack.security.authProviders=["kerberos"]',
       ],
     },
   };
