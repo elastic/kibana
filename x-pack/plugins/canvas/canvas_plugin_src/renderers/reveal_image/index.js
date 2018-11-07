@@ -5,7 +5,7 @@
  */
 
 import { elasticOutline } from '../../lib/elastic_outline';
-import { isValid } from '../../../common/lib/url';
+import { isValidUrl } from '../../../common/lib/url';
 import './reveal_image.scss';
 
 export const revealImage = () => ({
@@ -29,13 +29,13 @@ export const revealImage = () => ({
     img.className = 'revealImage__image';
     img.style.clipPath = getClipPath(config.percent, config.origin);
     img.style['-webkit-clip-path'] = getClipPath(config.percent, config.origin);
-    img.src = isValid(config.image) ? config.image : elasticOutline;
+    img.src = isValidUrl(config.image) ? config.image : elasticOutline;
     handlers.onResize(img.onload);
 
     // set up the underlay, "empty" image
     aligner.className = 'revealImageAligner';
     aligner.appendChild(img);
-    if (isValid(config.emptyImage)) {
+    if (isValidUrl(config.emptyImage)) {
       // only use empty image if one is provided
       aligner.style.backgroundImage = `url(${config.emptyImage})`;
     }

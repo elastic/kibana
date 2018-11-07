@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { px, unit } from '../../../../../style/variables';
 // @ts-ignore
 import Legend from '../../../../shared/charts/Legend';
+import { IServiceColors } from './Waterfall/waterfall_helpers/waterfall_helpers';
 
 const Legends = styled.div`
   display: flex;
@@ -23,9 +24,7 @@ const Legends = styled.div`
 `;
 
 interface Props {
-  serviceColors: {
-    [key: string]: string;
-  };
+  serviceColors: IServiceColors;
 }
 
 export function ServiceLegends({ serviceColors }: Props) {
