@@ -8,6 +8,7 @@ import { EsClient } from '@code/esqueue';
 import fs from 'fs';
 import util from 'util';
 
+import { ProgressReporter } from '.';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { toCanonicalUrl } from '../../common/uri_util';
 import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
@@ -51,7 +52,14 @@ export class LspIndexer extends AbstractIndexer {
   ) {
     super(repoUri, revision, client, log);
 
-    this.batchIndexHelper = new BatchIndexHelper(100, client, log);
+    this.batchIndexHelper = new BatchIndexHelper(client, log);
+  }
+
+  public async start(progressReporter?: ProgressReporter) {
+    const res = await super.start(progressReporter);
+    // Flush all the index request still in the cache for bulk index.
+    this.batchIndexHelper.flush();
+    return res;
   }
 
   protected async prepareIndexCreationRequests() {
@@ -180,9 +188,9 @@ export class LspIndexer extends AbstractIndexer {
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
     const response = await this.lspService.sendRequest('textDocument/full', {
       textDocument: {
-        uri: lspDocUri
+        uri: lspDocUri,
       },
-      reference: this.options.enableGlobalReference
+      reference: this.options.enableGlobalReference,
     });
 
     const symbolNames = new Set<string>();
@@ -210,7 +218,6 @@ export class LspIndexer extends AbstractIndexer {
         );
       }
       stats.set(IndexStatsKey.Reference, references.length);
-      await this.batchIndexHelper.flush();
     } else {
       this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
     }

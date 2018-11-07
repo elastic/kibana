@@ -9,12 +9,13 @@ import { EsClient } from '@code/esqueue';
 import { Log } from '../log';
 
 export class BatchIndexHelper {
+  public static DEFAULT_BATCH_SIZE = 1000;
   private batch: any[];
 
   constructor(
-    private batchSize: number,
     protected readonly client: EsClient,
-    protected readonly log: Log
+    protected readonly log: Log,
+    private batchSize: number = BatchIndexHelper.DEFAULT_BATCH_SIZE
   ) {
     this.batch = [];
   }
