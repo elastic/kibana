@@ -31,11 +31,13 @@ interface Props {
   width: number;
 }
 
-const BodyDiv = styled.div`
+const BodyDiv = styled.div<{ width: string; height: string }>`
   display: flex;
   flex-direction: column;
   margin: 20px 5px 5px 8px;
   overflow: auto;
+  width: ${props => props.width};
+  height: ${props => props.height};
 `;
 
 const ScrollableArea = styled.div`
@@ -145,7 +147,7 @@ export const Body = pure<Props>(
     sort,
     width,
   }) => (
-    <BodyDiv data-test-subj="body" style={{ width: `${width - 10}px`, height }}>
+    <BodyDiv data-test-subj="body" width={`${width - 10}px`} height={height}>
       <ColumnHeaders
         columnHeaders={columnHeaders}
         onColumnSorted={onColumnSorted}
