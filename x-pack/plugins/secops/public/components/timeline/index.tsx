@@ -36,6 +36,10 @@ interface StateProps {
 
 interface DispatchProps {
   createTimeline: ActionCreator<{ id: string }>;
+  updateData: ActionCreator<{
+    id: string;
+    data: ECS[];
+  }>;
   updateRange: ActionCreator<{
     id: string;
     range: Range;
@@ -121,6 +125,7 @@ export const StatefulTimeline = connect(
   mapStateToProps,
   {
     createTimeline: timelineActions.createTimeline,
+    updateData: timelineActions.updateData,
     updateRange: timelineActions.updateRange,
     updateSort: timelineActions.updateSort,
     removeProvider: timelineActions.removeProvider,

@@ -7,10 +7,13 @@
 import actionCreatorFactory from 'typescript-fsa';
 import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
+import { ECS } from '../../../components/timeline/ecs';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/timeline');
 
 export const createTimeline = actionCreator<{ id: string }>('CREATE_TIMELINE');
+
+export const updateData = actionCreator<{ id: string; data: ECS[] }>('UPDATE_DATA');
 
 export const updateRange = actionCreator<{ id: string; range: Range }>('UPDATE_RANGE');
 
