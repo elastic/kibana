@@ -18,9 +18,9 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 Set to `false` to disable {reporting}.
 
 `xpack.reporting.encryptionKey`::
-Set to any text string. By default, Kibana generates a random key when it starts,
-which causes pending reports to fail on restart. Configure this setting to use
-the same key across restarts.
+Set to any text string. By default, Kibana will generate a random key when it
+starts, which will cause pending reports to fail after restart. Configure this
+setting to preserve the same key across multiple restarts and multiple instances of Kibana.
 
 [float]
 [[reporting-kibana-server-settings]]
@@ -131,9 +131,10 @@ Defaults to `10485760` (10mB)
 ==== Advanced Settings
 
 `xpack.reporting.index`::
-Reporting uses a weekly index in Elasticsearch to store the reporting job and the report
-content. The index is automatically created if it does not already exist.
-Defaults to `.reporting`
+Reporting uses a weekly index in Elasticsearch to store the reporting job and
+the report content. The index is automatically created if it does not already
+exist. Configure this to a unique value, beginning with `.reporting-`, for every
+Kibana instance that has a unique `kibana.index` setting. Defaults to `.reporting`
 
 `xpack.reporting.roles.allow`::
 Specifies the roles in addition to superusers that can use reporting.
