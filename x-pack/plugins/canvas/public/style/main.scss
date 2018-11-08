@@ -29,10 +29,9 @@
   max-width: 100%;
 }
 
-#canvas-app body {
+#canvas-app {
   overflow-y: hidden;
 
-  // Todo: replace this with EuiToast
   .window-error {
     position: absolute;
     bottom: 10px;

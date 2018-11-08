@@ -30,7 +30,7 @@ const CourierRequestHandlerProvider = function () {
 
   return {
     name: 'courier',
-    handler: async function (vis, {
+    handler: async function ({
       searchSource,
       aggs,
       timeRange,
@@ -38,7 +38,9 @@ const CourierRequestHandlerProvider = function () {
       filters,
       forceFetch,
       partialRows,
+      isHierarchical,
       inspectorAdapters,
+      queryFilter
     }) {
 
       // Create a new search source that inherits the original search source
@@ -65,7 +67,7 @@ const CourierRequestHandlerProvider = function () {
       });
 
       requestSearchSource.setField('aggs', function () {
-        return aggs.toDsl(vis.isHierarchical());
+        return aggs.toDsl(isHierarchical);
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
@@ -130,24 +132,23 @@ const CourierRequestHandlerProvider = function () {
       }
 
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
-      const tabifyAggs = vis.getAggConfig();
       const tabifyParams = {
-        metricsAtAllLevels: vis.isHierarchical(),
+        metricsAtAllLevels: isHierarchical,
         partialRows,
         timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
       };
 
-      const tabifyCacheHash = calculateObjectHash({ tabifyAggs, ...tabifyParams });
+      const tabifyCacheHash = calculateObjectHash({ tabifyAggs: aggs, ...tabifyParams });
       // We only need to reexecute tabify, if either we did a new request or some input params to tabify changed
       const shouldCalculateNewTabify = shouldQuery || (searchSource.lastTabifyHash !== tabifyCacheHash);
 
       if (shouldCalculateNewTabify) {
         searchSource.lastTabifyHash = tabifyCacheHash;
-        searchSource.tabifiedResponse = tabifyAggResponse(tabifyAggs, searchSource.finalResponse, tabifyParams);
+        searchSource.tabifiedResponse = tabifyAggResponse(aggs, searchSource.finalResponse, tabifyParams);
       }
 
       inspectorAdapters.data.setTabularLoader(
-        () => buildTabularInspectorData(searchSource.tabifiedResponse, vis.API.queryFilter),
+        () => buildTabularInspectorData(searchSource.tabifiedResponse, queryFilter),
         { returnsFormattedValues: true }
       );
 

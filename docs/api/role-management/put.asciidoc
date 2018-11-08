@@ -85,7 +85,7 @@ PUT /api/security/role/my_kibana_role
         "grant" : [ "title", "body" ]
       },
       "query" : "{\"match\": {\"title\": \"foo\"}}"
-    } ],
+    } ]
   },
   "kibana": {
     "global": [],

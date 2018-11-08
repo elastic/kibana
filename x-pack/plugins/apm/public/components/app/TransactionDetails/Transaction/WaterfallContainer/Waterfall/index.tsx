@@ -19,6 +19,7 @@ import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
 import {
+  IServiceColors,
   IWaterfall,
   IWaterfallItem
 } from './waterfall_helpers/waterfall_helpers';
@@ -42,9 +43,7 @@ interface Props {
   urlParams: IUrlParams;
   waterfall: IWaterfall;
   location: any;
-  serviceColors: {
-    [key: string]: string;
-  };
+  serviceColors: IServiceColors;
 }
 
 export class Waterfall extends Component<Props> {
@@ -129,6 +128,7 @@ export class Waterfall extends Component<Props> {
           <Timeline
             agentMarks={this.props.agentMarks}
             duration={waterfall.duration}
+            traceRootDuration={waterfall.traceRootDuration}
             height={waterfallHeight}
             margins={TIMELINE_MARGINS}
           />
@@ -157,8 +157,3 @@ export class Waterfall extends Component<Props> {
     });
   }
 }
-
-// TODO: the agent marks and note about dropped spans were removed. Need to be re-added
-//   agentMarks: PropTypes.array,
-//   agentName: PropTypes.string.isRequired,
-//   droppedSpans: PropTypes.number.isRequired,
