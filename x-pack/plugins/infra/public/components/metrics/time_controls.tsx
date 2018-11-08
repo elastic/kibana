@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import styled from 'styled-components';
@@ -105,18 +105,16 @@ export class MetricsTimeControls extends React.Component<
 
     return (
       <MetricsTimeControlsContainer>
-        <I18nProvider>
-          <RangeDatePicker
-            key={`${currentTimeRange.from}-${currentTimeRange.to}`}
-            startDate={moment(currentTimeRange.from)}
-            endDate={moment(currentTimeRange.to)}
-            onChangeRangeTime={this.handleChangeDate}
-            isLoading={isLiveStreaming}
-            disabled={isLiveStreaming}
-            recentlyUsed={recentlyUsed}
-            ref={this.dateRangeRef}
-          />
-        </I18nProvider>
+        <RangeDatePicker
+          key={`${currentTimeRange.from}-${currentTimeRange.to}`}
+          startDate={moment(currentTimeRange.from)}
+          endDate={moment(currentTimeRange.to)}
+          onChangeRangeTime={this.handleChangeDate}
+          isLoading={isLiveStreaming}
+          disabled={isLiveStreaming}
+          recentlyUsed={recentlyUsed}
+          ref={this.dateRangeRef}
+        />
         {appendButton}
       </MetricsTimeControlsContainer>
     );

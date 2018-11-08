@@ -22,23 +22,23 @@ interface Props {
   intl: InjectedIntl;
 }
 
-const CPUUsage = i18n.translate('xpack.infra.waffleMetricControls.optionsCPUUsageText', {
+const CPUUsage = i18n.translate('xpack.infra.waffle.metricOptions.optionsCPUUsageText', {
   defaultMessage: 'CPU Usage',
 });
 
-const MemoryUsage = i18n.translate('xpack.infra.waffleMetricControls.optionsMemoryUsageText', {
+const MemoryUsage = i18n.translate('xpack.infra.waffle.metricOptions.optionsMemoryUsageText', {
   defaultMessage: 'Memory Usage',
 });
 
 const InboundTraffic = i18n.translate(
-  'xpack.infra.waffleMetricControls.optionsInboundTrafficText',
+  'xpack.infra.waffle.metricOptions.optionsInboundTrafficText',
   {
     defaultMessage: 'Inbound Traffic',
   }
 );
 
 const OutboundTraffic = i18n.translate(
-  'xpack.infra.waffleMetricControls.optionsOutboundTrafficText',
+  'xpack.infra.waffle.metricOptions.optionsOutboundTrafficText',
   {
     defaultMessage: 'Outbound Traffic',
   }
@@ -91,7 +91,7 @@ const OPTIONS = {
       value: InfraMetricType.memory,
     },
     {
-      text: i18n.translate('xpack.infra.waffleMetricControls.optionsLoadText', {
+      text: i18n.translate('xpack.infra.waffle.metricOptions.optionsLoadText', {
         defaultMessage: 'Load',
       }),
       value: InfraMetricType.load,
@@ -105,7 +105,7 @@ const OPTIONS = {
       value: InfraMetricType.tx,
     },
     {
-      text: i18n.translate('xpack.infra.waffleMetricControls.optionsHostLogRateText', {
+      text: i18n.translate('xpack.infra.waffle.metricOptions.optionsHostLogRateText', {
         defaultMessage: 'Log Rate',
       }),
       value: InfraMetricType.logRate,
@@ -127,7 +127,7 @@ class WaffleMetricControlsUI extends React.PureComponent<Props, State> {
     if (!options.length || !value) {
       throw Error(
         intl.formatMessage({
-          id: 'xpack.infra.waffleMetricControls.unableToSelectMetricErrorTitle',
+          id: 'xpack.infra.waffle.unableToSelectMetricErrorTitle',
           defaultMessage: 'Unable to select options or value for metric.',
         })
       );
@@ -149,10 +149,7 @@ class WaffleMetricControlsUI extends React.PureComponent<Props, State> {
     ];
     const button = (
       <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        <FormattedMessage
-          id="xpack.infra.waffleMetricControls.metricButtonLabel"
-          defaultMessage="Metric: "
-        />
+        <FormattedMessage id="xpack.infra.waffle.metricButtonLabel" defaultMessage="Metric: " />
         {currentLabel.text}
       </EuiFilterButton>
     );

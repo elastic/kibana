@@ -31,14 +31,14 @@ export class WaffleTimeControls extends React.Component<WaffleTimeControlsProps>
         onClick={this.stopLiveStreaming}
       >
         <FormattedMessage
-          id="xpack.infra.waffleTimeControls.stopRefreshingButtonLabel"
+          id="xpack.infra.waffleTime.stopRefreshingButtonLabel"
           defaultMessage="Stop refreshing"
         />
       </EuiButtonEmpty>
     ) : (
       <EuiButtonEmpty iconSide="left" iconType="play" onClick={this.startLiveStreaming}>
         <FormattedMessage
-          id="xpack.infra.waffleTimeControls.autoRefreshButtonLabel"
+          id="xpack.infra.waffleTime.autoRefreshButtonLabel"
           defaultMessage="Auto-refresh"
         />
       </EuiButtonEmpty>

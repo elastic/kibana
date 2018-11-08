@@ -20,12 +20,12 @@ export function infra(kibana: any) {
     require: ['kibana', 'elasticsearch'],
     uiExports: {
       app: {
-        description: i18n.translate('xpack.infra.infraOpsDescriptions', {
+        description: i18n.translate('xpack.infra.infrastructureDescriptions', {
           defaultMessage: 'Explore your infrastructure',
         }),
         icon: 'plugins/infra/images/infra_mono_white.svg',
         main: 'plugins/infra/app',
-        title: i18n.translate('xpack.infra.infraOpsTitle', {
+        title: i18n.translate('xpack.infra.infrastructureTitle', {
           defaultMessage: 'Infrastructure',
         }),
         listed: false,
@@ -34,27 +34,27 @@ export function infra(kibana: any) {
       home: ['plugins/infra/register_feature'],
       links: [
         {
-          description: i18n.translate('xpack.infra.infraOpsDescriptions', {
+          description: i18n.translate('xpack.infra.linkInfrastructureDescriptions', {
             defaultMessage: 'Explore your infrastructure',
           }),
           icon: 'plugins/infra/images/infra_mono_white.svg',
           euiIconType: 'infraApp',
           id: 'infra:home',
           order: 8000,
-          title: i18n.translate('xpack.infra.infraOpsTitle', {
+          title: i18n.translate('xpack.infra.linkInfrastructureTitle', {
             defaultMessage: 'Infrastructure',
           }),
           url: `/app/${APP_ID}#/home`,
         },
         {
-          description: i18n.translate('xpack.infra.logsDescriptions', {
+          description: i18n.translate('xpack.infra.linkLogsDescriptions', {
             defaultMessage: 'Explore your logs',
           }),
           icon: 'plugins/infra/images/logging_mono_white.svg',
           euiIconType: 'loggingApp',
           id: 'infra:logs',
           order: 8001,
-          title: i18n.translate('xpack.infra.logsTitle', {
+          title: i18n.translate('xpack.infra.linkLogsTitle', {
             defaultMessage: 'Logs',
           }),
           url: `/app/${APP_ID}#/logs`,

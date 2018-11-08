@@ -28,7 +28,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
         <EuiKeyPadMenuItem
           label={
             <FormattedMessage
-              id="xpack.infra.waffleNodeTypeSwitcher.hostsLabel"
+              id="xpack.infra.waffle.nodeTypeSwitcher.hostsLabel"
               defaultMessage="Hosts"
             />
           }
@@ -39,7 +39,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
         <EuiKeyPadMenuItem
           label={
             <FormattedMessage
-              id="xpack.infra.waffleNodeTypeSwitcher.kubernetesLabel"
+              id="xpack.infra.waffle.nodeTypeSwitcher.kubernetesLabel"
               defaultMessage="Kubernetes"
             />
           }
@@ -50,7 +50,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
         <EuiKeyPadMenuItem
           label={
             <FormattedMessage
-              id="xpack.infra.waffleNodeTypeSwitcher.dockerLabel"
+              id="xpack.infra.waffle.nodeTypeSwitcher.dockerLabel"
               defaultMessage="Docker"
             />
           }

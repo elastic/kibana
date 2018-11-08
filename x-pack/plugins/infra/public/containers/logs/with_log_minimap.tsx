@@ -29,37 +29,37 @@ export const WithLogMinimap = asChildFunctionRenderer(withLogMinimap);
 
 export const availableIntervalSizes = [
   {
-    label: i18n.translate('xpack.infra.minimapLogs.oneYearLabel', {
+    label: i18n.translate('xpack.infra.mapLogs.oneYearLabel', {
       defaultMessage: '1 Year',
     }),
     intervalSize: 1000 * 60 * 60 * 24 * 365,
   },
   {
-    label: i18n.translate('xpack.infra.minimapLogs.oneMonthLabel', {
+    label: i18n.translate('xpack.infra.mapLogs.oneMonthLabel', {
       defaultMessage: '1 Month',
     }),
     intervalSize: 1000 * 60 * 60 * 24 * 30,
   },
   {
-    label: i18n.translate('xpack.infra.minimapLogs.oneWeekLabel', {
+    label: i18n.translate('xpack.infra.mapLogs.oneWeekLabel', {
       defaultMessage: '1 Week',
     }),
     intervalSize: 1000 * 60 * 60 * 24 * 7,
   },
   {
-    label: i18n.translate('xpack.infra.minimapLogs.oneDayLabel', {
+    label: i18n.translate('xpack.infra.mapLogs.oneDayLabel', {
       defaultMessage: '1 Day',
     }),
     intervalSize: 1000 * 60 * 60 * 24,
   },
   {
-    label: i18n.translate('xpack.infra.minimapLogs.oneHourLabel', {
+    label: i18n.translate('xpack.infra.mapLogs.oneHourLabel', {
       defaultMessage: '1 Hour',
     }),
     intervalSize: 1000 * 60 * 60,
   },
   {
-    label: i18n.translate('xpack.infra.minimapLogs.oneMinuteLabel', {
+    label: i18n.translate('xpack.infra.mapLogs.oneMinuteLabel', {
       defaultMessage: '1 Minute',
     }),
     intervalSize: 1000 * 60,

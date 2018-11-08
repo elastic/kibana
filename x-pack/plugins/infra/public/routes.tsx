@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { History } from 'history';
 import React from 'react';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
@@ -20,15 +21,17 @@ interface RouterProps {
 
 export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
   return (
-    <Router history={history}>
-      <Switch>
-        <Redirect from="/" exact={true} to="/home" />
-        <Route path="/logs" component={LogsPage} />
-        <Route path="/home" component={HomePage} />
-        <Route path="/link-to" component={LinkToPage} />
-        <Route path="/metrics/:type/:node" component={MetricDetail} />
-        <Route component={NotFoundPage} />
-      </Switch>
-    </Router>
+    <I18nProvider>
+      <Router history={history}>
+        <Switch>
+          <Redirect from="/" exact={true} to="/home" />
+          <Route path="/logs" component={LogsPage} />
+          <Route path="/home" component={HomePage} />
+          <Route path="/link-to" component={LinkToPage} />
+          <Route path="/metrics/:type/:node" component={MetricDetail} />
+          <Route component={NotFoundPage} />
+        </Switch>
+      </Router>
+    </I18nProvider>
   );
 };

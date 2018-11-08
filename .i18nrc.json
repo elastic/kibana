@@ -26,6 +26,11 @@
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
     "src/ui/ui_render/ui_render_mixin.js",
     "x-pack/plugins/monitoring/public/components/cluster/overview/alerts_panel.js",
-    "x-pack/plugins/monitoring/public/directives/alerts/index.js"
+    "x-pack/plugins/monitoring/public/directives/alerts/index.js",
+    "x-pack/plugins/infra/node_modules/@types/lodash/common/common.d.ts",
+    "x-pack/plugins/infra/node_modules/@types/lodash/common/function.d.ts",
+    "x-pack/plugins/infra/node_modules/@types/lodash/fp.d.ts",
+    "x-pack/plugins/infra/public/utils/loading_state/loading_result.ts",
+    "x-pack/plugins/infra/server/lib/domains/log_entries_domain/log_entries_domain.ts"
   ]
 }

@@ -27,14 +27,14 @@ interface Props {
 const OPTIONS = {
   [InfraNodeType.pod]: [
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsNamespaceText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.namespaceLabel', {
         defaultMessage: 'Namespace',
       }),
       type: InfraPathType.terms,
       field: 'kubernetes.namespace',
     },
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsNodeText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.nodeLabel', {
         defaultMessage: 'Node',
       }),
       type: InfraPathType.terms,
@@ -43,35 +43,35 @@ const OPTIONS = {
   ],
   [InfraNodeType.container]: [
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsHostText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.hostLabel', {
         defaultMessage: 'Host',
       }),
       type: InfraPathType.terms,
       field: 'host.name',
     },
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsAvailabilityZoneText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.availabilityZoneLabel', {
         defaultMessage: 'Availability Zone',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.availability_zone',
     },
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsMachineTypeText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.machineTypeLabel', {
         defaultMessage: 'Machine Type',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.machine_type',
     },
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsProjectIDText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.projectIDLabel', {
         defaultMessage: 'Project ID',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.project_id',
     },
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsProviderText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.providerLabel', {
         defaultMessage: 'Provider',
       }),
       type: InfraPathType.terms,
@@ -80,28 +80,28 @@ const OPTIONS = {
   ],
   [InfraNodeType.host]: [
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsAvailabilityZoneText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.availabilityZoneLabel', {
         defaultMessage: 'Availability Zone',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.availability_zone',
     },
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsMachineTypeText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.machineTypeLabel', {
         defaultMessage: 'Machine Type',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.machine_type',
     },
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsProjectIDText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.projectIDLabel', {
         defaultMessage: 'Project ID',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.project_id',
     },
     {
-      text: i18n.translate('xpack.infra.waffleGroupByControls.optionsCloudProviderText', {
+      text: i18n.translate('xpack.infra.waffle.groupByOptions.cloudProviderLabel', {
         defaultMessage: 'Cloud Provider',
       }),
       type: InfraPathType.terms,
@@ -125,7 +125,7 @@ class WaffleGroupByControlsUI extends React.PureComponent<Props, State> {
       throw Error(
         intl.formatMessage(
           {
-            id: 'xpack.infra.waffleGroupByControls.unableToSelectGroupErrorTitle',
+            id: 'xpack.infra.waffle.unableToSelectGroupErrorMessage',
             defaultMessage: 'Unable to select group by options for {nodeType}',
           },
           {
@@ -138,7 +138,7 @@ class WaffleGroupByControlsUI extends React.PureComponent<Props, State> {
       {
         id: 'firstPanel',
         title: intl.formatMessage({
-          id: 'xpack.infra.waffleGroupByControls.selectTwoGroupingsTitle',
+          id: 'xpack.infra.waffle.selectTwoGroupingsTitle',
           defaultMessage: 'Select up to two groupings',
         }),
         items: options.map(o => {
@@ -162,11 +162,11 @@ class WaffleGroupByControlsUI extends React.PureComponent<Props, State> {
               iconOnClick={this.handleRemove((o && o.field) || '')}
               iconOnClickAriaLabel={intl.formatMessage(
                 {
-                  id: 'xpack.infra.waffleGroupByControls.removeGroupingItemAriaLabel',
-                  defaultMessage: 'Remove {itemOrText} grouping',
+                  id: 'xpack.infra.waffle.removeGroupingItemAriaLabel',
+                  defaultMessage: 'Remove {groupingItem} grouping',
                 },
                 {
-                  itemOrText: o && o.text,
+                  groupingItem: o && o.text,
                 }
               )}
             >
@@ -174,14 +174,11 @@ class WaffleGroupByControlsUI extends React.PureComponent<Props, State> {
             </EuiBadge>
           ))
       ) : (
-        <FormattedMessage id="xpack.infra.waffleGroupByControls.allTitle" defaultMessage="All" />
+        <FormattedMessage id="xpack.infra.waffle.groupByAllTitle" defaultMessage="All" />
       );
     const button = (
       <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        <FormattedMessage
-          id="xpack.infra.waffleGroupByControls.groupByButtonLabel"
-          defaultMessage="Group By: "
-        />
+        <FormattedMessage id="xpack.infra.waffle.groupByButtonLabel" defaultMessage="Group By: " />
         {buttonBody}
       </EuiFilterButton>
     );

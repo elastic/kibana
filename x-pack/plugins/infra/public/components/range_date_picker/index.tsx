@@ -31,28 +31,28 @@ import {
 } from '@elastic/eui';
 
 const commonDates = [
-  i18n.translate('xpack.infra.rangeDatePicker.commonDatesTodayText', {
+  i18n.translate('xpack.infra.rangeDatePicker.todayText', {
     defaultMessage: 'Today',
   }),
-  i18n.translate('xpack.infra.rangeDatePicker.commonDatesYesterdayText', {
+  i18n.translate('xpack.infra.rangeDatePicker.yesterdayText', {
     defaultMessage: 'Yesterday',
   }),
-  i18n.translate('xpack.infra.rangeDatePicker.commonDatesThisWeekText', {
+  i18n.translate('xpack.infra.rangeDatePicker.thisWeekText', {
     defaultMessage: 'This week',
   }),
-  i18n.translate('xpack.infra.rangeDatePicker.commonDatesWeekToDateText', {
+  i18n.translate('xpack.infra.rangeDatePicker.weekToDateText', {
     defaultMessage: 'Week to date',
   }),
-  i18n.translate('xpack.infra.rangeDatePicker.commonDatesThisMonthText', {
+  i18n.translate('xpack.infra.rangeDatePicker.thisMonthText', {
     defaultMessage: 'This month',
   }),
-  i18n.translate('xpack.infra.rangeDatePicker.commonDatesMonthToDateText', {
+  i18n.translate('xpack.infra.rangeDatePicker.monthToDateText', {
     defaultMessage: 'Month to date',
   }),
-  i18n.translate('xpack.infra.rangeDatePicker.commonDatesThisYearText', {
+  i18n.translate('xpack.infra.rangeDatePicker.thisYearText', {
     defaultMessage: 'This year',
   }),
-  i18n.translate('xpack.infra.rangeDatePicker.commonDatesYearToDateText', {
+  i18n.translate('xpack.infra.rangeDatePicker.yearToDateText', {
     defaultMessage: 'Year to date',
   }),
 ];
@@ -319,7 +319,7 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         value: 'seconds',
         text: intl.formatMessage(
           {
-            id: 'xpack.infra.rangeDatePicker.lastOptionsSecondsText',
+            id: 'xpack.infra.rangeDatePicker.unitOptions.secondsLabel',
             defaultMessage: '{quickSelectTime, plural, one {second} other {seconds}}',
           },
           {
@@ -331,7 +331,7 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         value: 'minutes',
         text: intl.formatMessage(
           {
-            id: 'xpack.infra.rangeDatePicker.lastOptionsMinutesText',
+            id: 'xpack.infra.rangeDatePicker.unitOptions.minutesLabel',
             defaultMessage: '{quickSelectTime, plural, one {minute} other {minutes}}',
           },
           {
@@ -343,7 +343,7 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         value: 'hours',
         text: intl.formatMessage(
           {
-            id: 'xpack.infra.rangeDatePicker.lastOptionsHoursText',
+            id: 'xpack.infra.rangeDatePicker.unitOptions.hoursLabel',
             defaultMessage: '{quickSelectTime, plural, one {hour} other {hours}}',
           },
           {
@@ -355,7 +355,7 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         value: 'days',
         text: intl.formatMessage(
           {
-            id: 'xpack.infra.rangeDatePicker.lastOptionsDaysText',
+            id: 'xpack.infra.rangeDatePicker.unitOptions.daysLabel',
             defaultMessage: '{quickSelectTime, plural, one {day} other {days}}',
           },
           {
@@ -367,7 +367,7 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         value: 'weeks',
         text: intl.formatMessage(
           {
-            id: 'xpack.infra.rangeDatePicker.lastOptionsWeeksText',
+            id: 'xpack.infra.rangeDatePicker.unitOptions.weeksLabel',
             defaultMessage: '{quickSelectTime, plural, one {week} other {weeks}}',
           },
           {
@@ -379,7 +379,7 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         value: 'months',
         text: intl.formatMessage(
           {
-            id: 'xpack.infra.rangeDatePicker.lastOptionsMonthsText',
+            id: 'xpack.infra.rangeDatePicker.unitOptions.monthsLabel',
             defaultMessage: '{quickSelectTime, plural, one {month} other {months}}',
           },
           {
@@ -391,7 +391,7 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         value: 'years',
         text: intl.formatMessage(
           {
-            id: 'xpack.infra.rangeDatePicker.lastOptionsYearsText',
+            id: 'xpack.infra.rangeDatePicker.unitOptions.yearsLabel',
             defaultMessage: '{quickSelectTime, plural, one {year} other {years}}',
           },
           {

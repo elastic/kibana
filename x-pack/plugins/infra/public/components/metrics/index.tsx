@@ -61,10 +61,10 @@ class MetricsUI extends React.PureComponent<Props, State> {
           <EuiTitle size="m">
             <h2 id={layout.id}>
               <FormattedMessage
-                id="xpack.infra.metrics.labelOverviewTitle"
-                defaultMessage="{label} Overview"
+                id="xpack.infra.metrics.layoutLabelOverviewTitle"
+                defaultMessage="{layoutLabel} Overview"
                 values={{
-                  label: layout.label,
+                  layoutLabel: layout.label,
                 }}
               />
             </h2>

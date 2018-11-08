@@ -111,7 +111,7 @@ class WaffleUI extends React.Component<Props, {}> {
           title={
             <h2>
               <FormattedMessage
-                id="xpack.infra.waffle.noDataToDisplayTitle"
+                id="xpack.infra.waffle.noDataTitle"
                 defaultMessage="There is no data to display."
               />
             </h2>
@@ -120,7 +120,7 @@ class WaffleUI extends React.Component<Props, {}> {
           body={
             <p>
               <FormattedMessage
-                id="xpack.infra.waffle.tryAdjustingTimeOrFilterText"
+                id="xpack.infra.waffle.noDataDescription"
                 defaultMessage="Try adjusting your time or filter."
               />
             </p>
