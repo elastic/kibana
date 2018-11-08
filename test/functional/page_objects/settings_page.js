@@ -273,7 +273,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndices();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
         await retry.try(async () => {
           await this.setIndexPatternField(indexPatternName);
