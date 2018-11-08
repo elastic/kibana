@@ -12,6 +12,7 @@ import { OptionControl } from '../table_controls';
 import { AssignmentOptions as AssignmentOptionsType, KueryBarProps } from './table';
 
 interface ControlBarProps {
+  itemType: string;
   assignmentOptions: AssignmentOptionsType;
   kueryBarProps?: KueryBarProps;
   selectionCount: number;
@@ -30,46 +31,28 @@ function ControlBarUi(props: ControlBarProps) {
     return null;
   }
 
-  const showSearch = type !== 'assignment' || selectionCount === 0;
-  const showAssignmentOptions = type === 'assignment' && selectionCount > 0;
-  const showPrimaryOptions = type === 'primary' && selectionCount > 0;
-
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      {showPrimaryOptions &&
-        schema.map(def => (
-          <EuiFlexItem key={def.name} grow={def.grow}>
-            <OptionControl
-              schema={def}
-              selectionCount={selectionCount}
-              actionHandler={actionHandler}
-              items={items}
-            />
-          </EuiFlexItem>
-        ))}
-      {showSearch &&
-        kueryBarProps && (
-          <EuiFlexItem>
-            <AutocompleteField
-              {...kueryBarProps}
-              placeholder={intl.formatMessage({
-                id: 'xpack.beatsManagement.table.filterResultsPlaceholder',
-                defaultMessage: 'Filter results',
-              })}
-            />
-          </EuiFlexItem>
-        )}
-      {showAssignmentOptions &&
-        schema.map(def => (
-          <EuiFlexItem key={def.name} grow={def.grow}>
-            <OptionControl
-              schema={def}
-              selectionCount={selectionCount}
-              actionHandler={actionHandler}
-              items={items}
-            />
-          </EuiFlexItem>
-        ))}
+      <EuiFlexItem grow={false}>
+        <OptionControl
+          itemType={props.itemType}
+          schema={schema}
+          selectionCount={selectionCount}
+          actionHandler={actionHandler}
+          items={items}
+        />
+      </EuiFlexItem>
+      {kueryBarProps && (
+        <EuiFlexItem>
+          <AutocompleteField
+            {...kueryBarProps}
+            placeholder={intl.formatMessage({
+              id: 'xpack.beatsManagement.table.filterResultsPlaceholder',
+              defaultMessage: 'Filter results',
+            })}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

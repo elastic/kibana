@@ -18,12 +18,12 @@
  */
 
 import _ from 'lodash';
-import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
-
+import { BuildESQueryProvider } from 'ui/courier';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
+
 const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
   const timezone = Private(timezoneProvider)();
-  const dashboardContext = Private(dashboardContextProvider);
+  const buildEsQuery = Private(BuildESQueryProvider);
 
   const notify = new Notifier({
     location: 'Timelion'
@@ -31,21 +31,21 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
 
   return {
     name: 'timelion',
-    handler: function (vis, { timeRange }) {
+    handler: function ({ aggs, timeRange, filters, query, visParams }) {
 
       return new Promise((resolve, reject) => {
-        const expression = vis.params.expression;
+        const expression = visParams.expression;
         if (!expression) return;
 
         const httpResult = $http.post('../api/timelion/run', {
           sheet: [expression],
           extended: {
             es: {
-              filter: dashboardContext()
+              filter: buildEsQuery(aggs.indexPattern, [query], filters)
             }
           },
           time: _.extend(timeRange, {
-            interval: vis.params.interval,
+            interval: visParams.interval,
             timezone: timezone
           }),
         })

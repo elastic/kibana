@@ -74,18 +74,18 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
                 this.props.onSave ? (
                   <FormattedMessage
                     id="xpack.beatsManagement.tagConfig.editConfigurationTitle"
-                    defaultMessage="Edit configuration"
+                    defaultMessage="Edit configuration block"
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.beatsManagement.tagConfig.viewConfigurationTitle"
-                    defaultMessage="View configuration"
+                    defaultMessage="View configuration block"
                   />
                 )
               ) : (
                 <FormattedMessage
                   id="xpack.beatsManagement.tagConfig.addConfigurationTitle"
-                  defaultMessage="Add configuration"
+                  defaultMessage="Add configuration block"
                 />
               )}
             </h2>

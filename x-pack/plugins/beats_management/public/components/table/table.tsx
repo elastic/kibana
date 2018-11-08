@@ -105,6 +105,7 @@ export class Table extends React.Component<TableProps, TableState> {
         {!hideTableControls &&
           assignmentOptions && (
             <ControlBar
+              itemType={type.itemType}
               assignmentOptions={assignmentOptions}
               kueryBarProps={kueryBarProps}
               selectionCount={this.state.selection.length}

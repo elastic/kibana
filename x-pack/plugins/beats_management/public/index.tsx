@@ -18,8 +18,8 @@ import { PageRouter } from './router';
 function startApp(libs: FrontendLibs) {
   libs.framework.registerManagementSection(
     'beats',
-    i18n.translate('xpack.beatsManagement.managementMainPage.beatsManagementLinkLabel', {
-      defaultMessage: 'Beats Management',
+    i18n.translate('xpack.beatsManagement.managementMainPage.centralManagementLinkLabel', {
+      defaultMessage: 'Central Management',
     }),
     BASE_PATH
   );

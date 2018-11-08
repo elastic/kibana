@@ -7,71 +7,54 @@
 import { i18n } from '@kbn/i18n';
 import { AssignmentActionType } from './table';
 
-export enum AssignmentComponentType {
-  Action,
-  Popover,
-  SelectionCount,
-  TagBadgeList,
-}
-
 export interface AssignmentControlSchema {
+  id?: number;
   name: string;
-  type: AssignmentComponentType;
   danger?: boolean;
   action?: AssignmentActionType;
   showWarning?: boolean;
   warningHeading?: string;
   warningMessage?: string;
   lazyLoad?: boolean;
-  children?: AssignmentControlSchema[];
+  panel?: AssignmentControlSchema;
   grow?: boolean;
 }
 
 export const beatsListAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.Action,
     grow: false,
-    name: i18n.translate('xpack.beatsManagement.beatsListAssignmentOptions.disenrollButtonLabel', {
-      defaultMessage: 'Disenroll selected',
+    name: i18n.translate('xpack.beatsManagement.beatsListAssignmentOptions.unenrollButtonLabel', {
+      defaultMessage: 'Unenroll selected',
     }),
     showWarning: true,
     warningHeading: i18n.translate(
-      'xpack.beatsManagement.beatsListAssignmentOptions.disenrollBeatsWarninigTitle',
-      { defaultMessage: 'Disenroll beats' }
+      'xpack.beatsManagement.beatsListAssignmentOptions.unenrollBeatsWarninigTitle',
+      { defaultMessage: 'Unenroll selected beats?' }
     ),
     warningMessage: i18n.translate(
-      'xpack.beatsManagement.beatsListAssignmentOptions.disenrollBeatsWarninigMessage',
-      { defaultMessage: 'This will disenroll the selected beat(s) from centralized management' }
+      'xpack.beatsManagement.beatsListAssignmentOptions.unenrollBeatsWarninigMessage',
+      { defaultMessage: 'The selected Beats will no longer use central management' }
     ),
     action: AssignmentActionType.Delete,
     danger: true,
   },
   {
-    type: AssignmentComponentType.Popover,
     name: i18n.translate('xpack.beatsManagement.beatsListAssignmentOptions.setTagsButtonLabel', {
       defaultMessage: 'Set tags',
     }),
     grow: false,
     lazyLoad: true,
-    children: [
-      {
-        name: i18n.translate('xpack.beatsManagement.beatsListAssignmentOptions.assignTagsName', {
-          defaultMessage: 'Assign tags',
-        }),
-        type: AssignmentComponentType.TagBadgeList,
-      },
-    ],
-  },
-  {
-    type: AssignmentComponentType.SelectionCount,
-    grow: true,
-    name: 'selectionCount',
+    panel: {
+      id: 1,
+      name: i18n.translate('xpack.beatsManagement.beatsListAssignmentOptions.assignTagsName', {
+        defaultMessage: 'Assign tags',
+      }),
+    },
   },
 ];
 
 export const tagListAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.Action,
     danger: true,
     grow: false,
     name: i18n.translate('xpack.beatsManagement.tagListAssignmentOptions.removeTagsButtonLabel', {
@@ -92,7 +75,6 @@ export const tagListAssignmentOptions: AssignmentControlSchema[] = [
 
 export const tagConfigAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.Action,
     danger: true,
     grow: false,
     name: i18n.translate('xpack.beatsManagement.tagConfigAssignmentOptions.removeTagsButtonLabel', {

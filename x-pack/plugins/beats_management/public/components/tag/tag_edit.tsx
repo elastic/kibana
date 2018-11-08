@@ -75,7 +75,7 @@ class TagEditUI extends React.PureComponent<TagEditProps, TagEditState> {
               <p>
                 <FormattedMessage
                   id="xpack.beatsManagement.tag.tagDetailsDescription"
-                  defaultMessage="Tags will apply the configurations below to all beats assigned this tag."
+                  defaultMessage="A tag is a group of configuration blocks that you can apply to one or more Beats."
                 />
               </p>
             </EuiText>
@@ -133,7 +133,7 @@ class TagEditUI extends React.PureComponent<TagEditProps, TagEditState> {
               <h3>
                 <FormattedMessage
                   id="xpack.beatsManagement.tag.tagConfigurationsTitle"
-                  defaultMessage="Tag Configurations"
+                  defaultMessage="Configuration blocks"
                 />
               </h3>
             </EuiTitle>
@@ -141,8 +141,8 @@ class TagEditUI extends React.PureComponent<TagEditProps, TagEditState> {
               <p>
                 <FormattedMessage
                   id="xpack.beatsManagement.tag.tagConfigurationsDescription"
-                  defaultMessage="Tags can have configurations for different types of Beats. For example, a tag can
-                    have two Metricbeat configurations and one Filebeat input configuration."
+                  defaultMessage="A tag can have configuration blocks for different types of Beats. For example, a tag
+                  can have two Metricbeat configuration blocks and one Filebeat input configuration block."
                 />
               </p>
             </EuiText>
@@ -175,7 +175,7 @@ class TagEditUI extends React.PureComponent<TagEditProps, TagEditState> {
               >
                 <FormattedMessage
                   id="xpack.beatsManagement.tag.addConfigurationButtonLabel"
-                  defaultMessage="Add configuration"
+                  defaultMessage="Add configuration block"
                 />
               </EuiButton>
             </div>
@@ -190,7 +190,7 @@ class TagEditUI extends React.PureComponent<TagEditProps, TagEditState> {
               <h3>
                 <FormattedMessage
                   id="xpack.beatsManagement.tag.beatsAssignedToTagTitle"
-                  defaultMessage="Beats assigned this tag"
+                  defaultMessage="Beats with this tag"
                 />
               </h3>
             </EuiTitle>

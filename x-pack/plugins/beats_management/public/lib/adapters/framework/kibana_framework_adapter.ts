@@ -59,11 +59,18 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.rootComponent = component;
   };
 
-  public hadValidLicense() {
+  public hasValidLicense() {
     if (!this.xpackInfo) {
       return false;
     }
     return this.xpackInfo.get('features.beats_management.licenseValid', false);
+  }
+
+  public licenseExpired() {
+    if (!this.xpackInfo) {
+      return false;
+    }
+    return this.xpackInfo.get('features.beats_management.licenseExpired', false);
   }
 
   public securityEnabled() {
@@ -84,8 +91,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
     this.register(this.uiModule);
+
     this.hookAngular(() => {
-      if (this.hadValidLicense() && this.securityEnabled()) {
+      if (this.hasValidLicense()) {
         const registerSection = () =>
           this.management.register(pluginId, {
             display: i18n.translate('xpack.beatsManagement.beatsDislayName', {
@@ -95,7 +103,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
             order: 30,
           });
         const getSection = () => this.management.getSection(pluginId);
-
         const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
 
         section.register(pluginId, {
@@ -135,7 +142,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       const xpackInfo = Private(this.XPackInfoProvider);
 
       this.xpackInfo = xpackInfo;
-      this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+      if (this.securityEnabled()) {
+        try {
+          this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+        } catch (e) {
+          // errors when security disabled, even though we check first because angular
+        }
+      }
 
       done();
     });

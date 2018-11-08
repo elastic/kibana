@@ -22,5 +22,5 @@ export { RawConfigService } from './raw_config_service';
 export { Config, ConfigPath } from './config';
 /** @internal */
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { Env, CliArgs } from './env';
+export { Env, CliArgs, PackageInfo } from './env';
 export { ConfigWithSchema } from './config_with_schema';

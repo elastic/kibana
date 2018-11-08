@@ -75,7 +75,9 @@ class CreateTagFragment extends React.PureComponent<TagPageProps, TagPageState> 
             <EuiButton
               fill
               disabled={
-                this.state.tag.id === '' || this.state.tag.configuration_blocks.length === 0
+                this.state.tag.id.search(/^[a-zA-Z0-9-]+$/) === -1 ||
+                this.state.tag.id === '' ||
+                this.state.tag.configuration_blocks.length === 0
               }
               onClick={this.saveTag}
             >
@@ -113,7 +115,7 @@ class CreateTagFragment extends React.PureComponent<TagPageProps, TagPageState> 
     this.props.setUrlState({
       createdTag: newTag.id,
     });
-    this.props.goTo(`/overview/initial/review`);
+    this.props.goTo(`/overview/initial/finish`);
   };
 }
 const CreateTagPageFragmentUi = withUrlState<TagPageProps>(CreateTagFragment);

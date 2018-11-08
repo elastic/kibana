@@ -26,7 +26,7 @@ export function TransactionDetailsRequest({
   render
 }: {
   urlParams: IUrlParams;
-  render: RRRRender<Transaction>;
+  render: RRRRender<Transaction | null>;
 }) {
   const { serviceName, start, end, transactionId, traceId, kuery } = urlParams;
 

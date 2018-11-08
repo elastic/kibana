@@ -12,7 +12,7 @@ export const NoAccessPage = injectI18n(({ intl }) => (
   <NoDataLayout
     title={intl.formatMessage({
       id: 'xpack.beatsManagement.noAccess.accessDeniedTitle',
-      defaultMessage: 'Access Denied',
+      defaultMessage: 'Access denied',
     })}
     actionSection={[]}
   >

@@ -27,8 +27,8 @@ import { ActivityPage } from './activity';
 import { BeatsPage } from './beats';
 import { CreateTagPageFragment } from './create_tag_fragment';
 import { EnrollBeatPage } from './enroll_fragment';
+import { FinishWalkthroughPage } from './finish_walkthrough';
 import { TagsPage } from './tags';
-import { ReviewWalkthroughPage } from './walkthrough_review';
 
 interface MainPagesProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
@@ -132,13 +132,13 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
         page: CreateTagPageFragment,
       },
       {
-        id: '/overview/initial/review',
+        id: '/overview/initial/finish',
         name: intl.formatMessage({
-          id: 'xpack.beatsManagement.enrollBeat.reviewStepLabel',
-          defaultMessage: 'Review',
+          id: 'xpack.beatsManagement.enrollBeat.finishStepLabel',
+          defaultMessage: 'finish',
         }),
         disabled: false,
-        page: ReviewWalkthroughPage,
+        page: FinishWalkthroughPage,
       },
     ];
 
