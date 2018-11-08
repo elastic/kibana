@@ -20,7 +20,7 @@ describe('ColumnHeaders', () => {
 
     test('it renders the other (data-driven) column headers', () => {
       const wrapper = mount(
-        <ColumnHeaders columnHeaders={headers} sort={sort} onRangeSelected={noop} />
+        <ColumnHeaders columnHeaders={headers} range="1 Day" sort={sort} onRangeSelected={noop} />
       );
 
       headers.forEach(h => {

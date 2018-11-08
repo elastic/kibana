@@ -18,6 +18,10 @@ export interface DataProvider {
    */
   enabled: boolean;
   /**
+   * Returns a query that, when executed, returns the data for this provider
+   */
+  getQuery: () => string;
+  /**
    * When `true`, boolean logic is applied to the data provider to negate it.
    * default: `false`
    */

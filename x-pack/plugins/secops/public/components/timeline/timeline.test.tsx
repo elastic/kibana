@@ -5,16 +5,16 @@
  */
 
 import { mount } from 'enzyme';
-import { noop, omit } from 'lodash/fp';
+import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
 
-import { Timeline } from '.';
 import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
+import { Timeline } from './timeline';
 
 describe('Timeline', () => {
   const sort: Sort = {
@@ -34,6 +34,7 @@ describe('Timeline', () => {
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          range={'1 Day'}
           rowRenderers={rowRenderers}
           sort={sort}
           width={1000}
@@ -54,6 +55,7 @@ describe('Timeline', () => {
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          range={'1 Day'}
           rowRenderers={rowRenderers}
           sort={sort}
           width={1000}
@@ -79,6 +81,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={noop}
+            range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
@@ -111,6 +114,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={mockOnDataProviderRemoved}
             onFilterChange={noop}
             onRangeSelected={noop}
+            range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
@@ -122,7 +126,10 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        const callbackParams = omit('render', mockOnDataProviderRemoved.mock.calls[0][0]);
+        const callbackParams = pick(
+          ['enabled', 'id', 'name', 'negated'],
+          mockOnDataProviderRemoved.mock.calls[0][0]
+        );
 
         expect(callbackParams).toEqual({
           enabled: true,
@@ -154,6 +161,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={noop}
             onFilterChange={mockOnFilterChange}
             onRangeSelected={noop}
+            range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
@@ -187,6 +195,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={mockOnRangeSelected}
+            range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={sort}
             width={1000}

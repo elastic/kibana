@@ -4,82 +4,135 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { defaultTo, noop } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
-import styled from 'styled-components';
-import { ECS } from './ecs';
+import { connect } from 'react-redux';
+import { ActionCreator } from 'typescript-fsa';
 
-import { Body } from './body';
+import { timelineActions } from '../../store';
+import { timelineDefaults } from '../../store/local/timeline/model';
+import { State } from '../../store/reducer';
+import { timelineByIdSelector } from '../../store/selectors';
 import { ColumnHeader } from './body/column_headers/column_header';
-import { ColumnRenderer } from './body/renderers';
-import { RowRenderer } from './body/renderers';
+import { Range } from './body/column_headers/range_picker/ranges';
+import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
-import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from './events';
-import { TimelineHeader } from './header/timeline_header';
+import { ECS } from './ecs';
+import { OnColumnSorted, OnDataProviderRemoved, OnRangeSelected } from './events';
+import { Timeline } from './timeline';
 
-interface Props {
-  columnHeaders: ColumnHeader[];
-  columnRenderers: ColumnRenderer[];
-  data: ECS[];
-  dataProviders: DataProvider[];
-  height?: string;
-  onColumnSorted: OnColumnSorted;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onFilterChange: OnFilterChange;
-  onRangeSelected: OnRangeSelected;
-  rowRenderers: RowRenderer[];
-  sort: Sort;
+export interface OwnProps {
+  id: string;
+  headers: ColumnHeader[];
   width: number;
 }
 
-const TimelineDiv = styled.div<{ width: string; height: string }>`
-  display: flex;
-  flex-direction: column;
-  min-height: 700px;
-  overflow: none;
-  user-select: none;
-  width: ${props => props.width};
-  height: ${props => props.height};
-`;
+interface StateProps {
+  dataProviders: DataProvider[];
+  data: ECS[];
+  range: Range;
+  sort: Sort;
+}
 
-const defaultHeight = '100%';
+interface DispatchProps {
+  createTimeline: ActionCreator<{ id: string }>;
+  addProvider: ActionCreator<{
+    id: string;
+    provider: DataProvider;
+  }>;
+  updateData: ActionCreator<{
+    id: string;
+    data: ECS[];
+  }>;
+  updateProviders: ActionCreator<{
+    id: string;
+    providers: DataProvider[];
+  }>;
+  updateRange: ActionCreator<{
+    id: string;
+    range: Range;
+  }>;
+  updateSort: ActionCreator<{
+    id: string;
+    sort: Sort;
+  }>;
+  removeProvider: ActionCreator<{
+    id: string;
+    providerId: string;
+  }>;
+}
 
-/** The parent Timeline component */
-export const Timeline = pure<Props>(
-  ({
-    columnHeaders,
-    columnRenderers,
-    dataProviders,
-    data,
-    height = defaultHeight,
-    onColumnSorted,
-    onDataProviderRemoved,
-    onFilterChange,
-    onRangeSelected,
-    rowRenderers,
-    sort,
-    width,
-  }) => (
-    <TimelineDiv data-test-subj="timeline" width={`${width}px`} height={height}>
-      <TimelineHeader
-        dataProviders={dataProviders}
-        onDataProviderRemoved={onDataProviderRemoved}
-        width={width}
-      />
-      <Body
-        columnHeaders={columnHeaders}
+type Props = OwnProps & StateProps & DispatchProps;
+
+class StatefulTimelineComponent extends React.PureComponent<Props> {
+  public componentDidMount() {
+    const { createTimeline, id } = this.props;
+
+    createTimeline({ id });
+  }
+
+  public render() {
+    const {
+      data,
+      dataProviders,
+      headers,
+      id,
+      range,
+      removeProvider,
+      sort,
+      updateRange,
+      updateSort,
+      width,
+    } = this.props;
+
+    const onColumnSorted: OnColumnSorted = sorted => {
+      updateSort({ id, sort: sorted });
+    };
+
+    const onDataProviderRemoved: OnDataProviderRemoved = dataProvider => {
+      removeProvider({ id, providerId: dataProvider.id });
+    };
+
+    const onRangeSelected: OnRangeSelected = selectedRange => {
+      updateRange({ id, range: selectedRange });
+    };
+
+    return (
+      <Timeline
+        columnHeaders={headers}
         columnRenderers={columnRenderers}
         dataProviders={dataProviders}
         data={data}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
-        onFilterChange={onFilterChange}
+        onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onRangeSelected={onRangeSelected}
+        range={range}
         rowRenderers={rowRenderers}
         sort={sort}
         width={width}
       />
-    </TimelineDiv>
-  )
-);
+    );
+  }
+}
+
+const mapStateToProps = (state: State, { id }: OwnProps) => {
+  const timeline = timelineByIdSelector(state)[id];
+  const { dataProviders, data, sort } = timeline || timelineDefaults;
+
+  return defaultTo({ id, dataProviders, data, sort }, timeline);
+};
+
+export const StatefulTimeline = connect(
+  mapStateToProps,
+  {
+    addProvider: timelineActions.addProvider,
+    createTimeline: timelineActions.createTimeline,
+    updateData: timelineActions.updateData,
+    updateProviders: timelineActions.updateProviders,
+    updateRange: timelineActions.updateRange,
+    updateSort: timelineActions.updateSort,
+    removeProvider: timelineActions.removeProvider,
+  }
+)(StatefulTimelineComponent);
