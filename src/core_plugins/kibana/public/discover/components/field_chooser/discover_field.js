@@ -99,16 +99,18 @@ app.directive('discoverField', function ($compile, i18n) {
           $scope.onShowDetails(field, recompute);
           detailScope = $scope.$new();
           detailScope.warnings = getWarnings(field);
-          detailScope.bucketAriaLabel = i18n('kbn.discover.fieldChooser.discoverField.bucketAriaLabel', {
-            defaultMessage: 'Value: {value}',
-            values: {
-              value: detailScope.bucket.display === ''
-                ? i18n('kbn.discover.fieldChooser.discoverField.emptyStringText', {
-                  defaultMessage: 'Empty string',
-                })
-                : detailScope.bucket.display,
-            },
-          });
+          detailScope.getBucketAriaLabel = (bucket) => {
+            return i18n('kbn.discover.fieldChooser.discoverField.bucketAriaLabel', {
+              defaultMessage: 'Value: {value}',
+              values: {
+                value: bucket.display === ''
+                  ? i18n('kbn.discover.fieldChooser.discoverField.emptyStringText', {
+                    defaultMessage: 'Empty string',
+                  })
+                  : bucket.display,
+              },
+            });
+          };
 
           detailsElem = $(detailsHtml);
           $compile(detailsElem)(detailScope);
