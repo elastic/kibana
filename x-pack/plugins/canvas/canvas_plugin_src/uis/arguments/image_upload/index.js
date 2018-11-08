@@ -16,7 +16,10 @@ import {
   EuiButton,
   EuiFieldText,
 } from '@elastic/eui';
+
+// TODO: (clintandrewhall) This is a quick fix for #25342 -- we should figure out how to use the overall component.
 import { Loading } from '../../../../public/components/loading/loading';
+
 import { FileUpload } from '../../../../public/components/file_upload';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
