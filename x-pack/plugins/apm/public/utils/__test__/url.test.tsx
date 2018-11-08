@@ -132,9 +132,9 @@ function getUnconnectedKibanLink() {
 describe('UnconnectedKibanaLink', () => {
   it('should have correct url', () => {
     const wrapper = getUnconnectedKibanLink();
-    const href = wrapper.find('EuiLink').prop('href');
+    const href = wrapper.find('EuiLink').prop('href') || '';
     const { _g, _a } = getUrlQuery(href);
-    const { pathname } = url.parse(href!);
+    const { pathname } = url.parse(href);
 
     expect(pathname).toBe('/app/kibana');
     expect(_a).toBe(
@@ -179,7 +179,7 @@ describe('UnconnectedKibanaLink', () => {
     expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
   });
 
-  it('should respect _g query', () => {
+  it('should merge in _g query values', () => {
     const discoverQuery = {
       _g: {
         ml: {
@@ -201,7 +201,9 @@ describe('UnconnectedKibanaLink', () => {
 
     const href = wrapper.find('EuiLink').prop('href') as string;
     const { _g } = getUrlQuery(href);
-    expect(_g).toBe('(ml:(jobIds:!(1337)))');
+    expect(_g).toBe(
+      '(ml:(jobIds:!(1337)),time:(from:now-24h,mode:quick,to:now))'
+    );
   });
 });
 
@@ -221,7 +223,7 @@ describe('ViewMLJob', () => {
       />
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('should have correct path props', () => {
@@ -237,7 +239,6 @@ describe('ViewMLJob', () => {
     expect(wrapper.prop('pathname')).toBe('/app/ml');
     expect(wrapper.prop('hash')).toBe('/timeseriesexplorer');
     expect(wrapper.prop('query')).toEqual({
-      _a: null,
       _g: {
         ml: {
           jobIds: ['myServiceName-myTransactionType-high_mean_response_time']

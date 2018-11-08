@@ -18,7 +18,13 @@ import { StringMap } from '../../typings/common';
 
 // Kibana default set in: https://github.com/elastic/kibana/blob/e13e47fc4eb6112f2a5401408e9f765eae90f55d/x-pack/plugins/apm/public/utils/timepicker/index.js#L31-L35
 // TODO: store this in config or a shared constant?
-const DEFAULT_KIBANA_TIME_RANGE = '(time:(from:now-24h,mode:quick,to:now))';
+const DEFAULT_KIBANA_TIME_RANGE = {
+  time: {
+    from: 'now-24h',
+    mode: 'quick',
+    to: 'now'
+  }
+};
 
 interface ViewMlJobArgs {
   serviceName: string;
@@ -33,15 +39,11 @@ export function ViewMLJob({
   location,
   children = 'View Job'
 }: ViewMlJobArgs) {
-  const currentG = risonSafeDecode(
-    getCurrentOrDefaultGArg(location.search._g)
-  ) as object;
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
   const jobId = `${serviceName}-${transactionType}-high_mean_response_time`;
   const query = {
     _g: {
-      ...currentG,
       ml: {
         jobIds: [jobId]
       }
@@ -86,10 +88,15 @@ function stringifyWithoutEncoding(query: StringMap) {
 function risonSafeDecode(value: string) {
   try {
     const decoded = rison.decode(value);
-    return isPlainObject(decoded) ? decoded : {};
+    return isPlainObject(decoded) ? (decoded as StringMap) : {};
   } catch (e) {
     return {};
   }
+}
+
+function decodeAndMergeG(g: string, toBeMerged?: StringMap) {
+  const decoded = risonSafeDecode(g);
+  return { ...DEFAULT_KIBANA_TIME_RANGE, ...decoded, ...toBeMerged };
 }
 
 export interface RelativeLinkComponentArgs {
@@ -142,6 +149,10 @@ export function RelativeLinkComponent({
 // The two components have different APIs: `path` vs `pathname` and one uses EuiLink the other react-router's Link (which behaves differently)
 // Suggestion: Deprecate RelativeLink, and clean up KibanaLink
 
+export interface QueryWithG extends StringMap {
+  _g?: StringMap;
+}
+
 export interface KibanaLinkArgs {
   location: {
     search?: string;
@@ -149,7 +160,7 @@ export interface KibanaLinkArgs {
   };
   pathname: string;
   hash?: string;
-  query?: StringMap;
+  query?: QueryWithG;
   disabled?: boolean;
   to?: StringMap;
   className?: string;
@@ -161,17 +172,6 @@ export interface KibanaLinkArgs {
  *
  * You must remember to pass in location in that case.
  */
-
-//
-function getCurrentOrDefaultGArg(g: string) {
-  // use "g" if it's set in the url and is not empty
-  if (!isEmpty(risonSafeDecode(g))) {
-    return g;
-  }
-
-  return DEFAULT_KIBANA_TIME_RANGE;
-}
-
 export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   location,
   pathname,
@@ -181,11 +181,10 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
 }) => {
   // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
+  const g = decodeAndMergeG(currentQuery._g, query._g);
   const nextQuery = {
     ...query,
-    _g: query._g
-      ? rison.encode(query._g)
-      : getCurrentOrDefaultGArg(currentQuery._g),
+    _g: rison.encode(g),
     _a: query._a ? rison.encode(query._a) : ''
   };
 

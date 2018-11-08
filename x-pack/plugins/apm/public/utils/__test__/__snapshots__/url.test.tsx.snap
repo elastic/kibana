@@ -31,7 +31,6 @@ exports[`ViewMLJob should render component 1`] = `
   pathname="/app/ml"
   query={
     Object {
-      "_a": null,
       "_g": Object {
         "ml": Object {
           "jobIds": Array [
