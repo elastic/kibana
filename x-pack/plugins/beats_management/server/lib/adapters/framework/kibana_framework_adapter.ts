@@ -77,6 +77,9 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     RouteRequest extends FrameworkWrappableRequest,
     RouteResponse extends FrameworkResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
+    const hasAny = (roles: string[], requiredRoles: string[]) =>
+      requiredRoles.some(r => roles.includes(r));
+
     const wrappedHandler = (licenseRequired: boolean, requiredRoles?: string[]) => async (
       request: any,
       h: any
@@ -98,7 +101,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
         if (
           wrappedRequest.user.kind === 'authenticated' &&
-          (!wrappedRequest.user.roles.includes(this.getSetting('xpack.beats.defaultUserRole')) ||
+          (!hasAny(wrappedRequest.user.roles, this.getSetting('xpack.beats.defaultUserRoles')) ||
             !wrappedRequest.user.roles) &&
           difference(requiredRoles, wrappedRequest.user.roles).length !== 0
         ) {
@@ -161,7 +164,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // License is not valid
     if (!isLicenseValid) {
       return {
-        defaultUserRole: this.getSetting('xpack.beats.defaultUserRole'),
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
         securityEnabled: true,
         licenseValid: false,
         licenseExpired: false,
@@ -172,7 +175,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // License is valid but not active, we go into a read-only mode.
     if (!isLicenseActive) {
       return {
-        defaultUserRole: this.getSetting('xpack.beats.defaultUserRole'),
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
         securityEnabled: true,
         licenseValid: true,
         licenseExpired: true,
@@ -186,7 +189,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         'Security must be enabled in order to use Beats central management features.' +
         ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
       return {
-        defaultUserRole: this.getSetting('xpack.beats.defaultUserRole'),
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
         securityEnabled: false,
         licenseValid: true,
         licenseExpired: false,
@@ -197,7 +200,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
     // License is valid and active
     return {
-      defaultUserRole: this.getSetting('xpack.beats.defaultUserRole'),
+      defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
       securityEnabled: true,
       licenseValid: true,
       licenseExpired: false,

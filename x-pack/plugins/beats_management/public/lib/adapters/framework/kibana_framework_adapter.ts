@@ -80,12 +80,12 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     return this.xpackInfo.get('features.beats_management.securityEnabled', false);
   }
 
-  public getDefaultUserRole() {
+  public getDefaultUserRoles() {
     if (!this.xpackInfo) {
-      return false;
+      return [];
     }
 
-    return this.xpackInfo.get('features.beats_management.defaultUserRole');
+    return this.xpackInfo.get('features.beats_management.defaultUserRoles');
   }
 
   public getCurrentUser() {

@@ -45,7 +45,7 @@ export interface FrameworkAdapter {
   kbnVersion?: string;
   baseURLPath: string;
   registerManagementSection(pluginId: string, displayName: string, basePath: string): void;
-  getDefaultUserRole(): string;
+  getDefaultUserRoles(): string[];
   // Methods
   getCurrentUser(): {
     email: string | null;
