@@ -14,7 +14,7 @@ Refer to the <<release-notes-6.5.0, {kib} 6.5.0 Release Notes>> for a list of bu
 other changes.
 
 [float]
-=== Organize your work in Spaces
+=== Organize your work in spaces
 
 Spaces is one of our most highly requested features. Spaces allow you to organize 
 your saved objects into meaningful categories.  For example, you might place all 
@@ -54,10 +54,10 @@ source by default, so you can experiment with it before connecting to your own d
 Canvas supports multiple languages for querying Elasticsearch: es docs, SQL, and Timelion syntax. 
 
 Canvas tools have rich styling capabilities, allowing users to change colors and 
-styles of both static and dynamic elements. Canvas is designed to be usable by everyone, 
-so you can tweak an element’s content and style using the UI, or go deeper and edit 
-the expressions that create the element or the css styling. In short, Canvas gives 
-you everything you need to showcase your live data, your way.  
+styles of both static and dynamic elements. Canvas is designed so you can tweak 
+an element’s content and style using the UI, or go deeper and edit the expressions 
+that create the element or the css styling. In short, Canvas gives you everything 
+you need to showcase your live data, your way.  
 
 [role="screenshot"]
 image::images/highlights_6_5_canvas.png[Canvas workpad with sample flight data set]
@@ -121,7 +121,7 @@ image::images/highlights_6_5_logs.gif[Animated view of log management features]
 The APM UI now supports distributed tracing as a beta feature in 6.5. Distributed 
 tracing enables you to analyze and view performance throughout your microservices 
 architecture by tracing all requests.  These requests range from the initial web 
-request to your front-end service to queries made to your back-end services. 
+request to your frontend service to queries made to your backend services. 
 This gives you a trace of how your services interact with one another and enables 
 you to pinpoint bottlenecks faster. 
 

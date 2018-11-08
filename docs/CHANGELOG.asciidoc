@@ -90,6 +90,24 @@ coming[6.5.0]
 See <<breaking-changes>>.
 
 [float]
+[[deprecation-6.5.0]]
+=== Deprecations
+
+Monitoring::
+* Deprecates `xpack:defaultAdminEmail` for monitoring alerts {pull}22195[#22195]
++
+The `xpack:defaultAdminEmail` UI Setting is deprecated for Monitoring, but is still 
+fully supported for the Watcher UI. To receive cluster alert notification emails, 
+configure `xpack.monitoring.cluster_alerts.email_notifications.email_address` in `kibana.yml`.
+
+[float]
+=== Kibana plugin API changes
+
+See https://www.elastic.co/blog/kibana-plugin-api-changes-in-6-5[Kibana plugin API changes in 6.5], which describes changes to the visualizations 
+response handler, data schema, and aggregations.
+
+
+[float]
 === New features
 
 * Spaces
@@ -180,6 +198,8 @@ Visualizations::
 
 APM::
 * Bumps `react-redux-request` to fix issue with identical requests firing multiple times {pull}21271[#21271]
+* Fixes how elements are positioned and adjusted on the timeline {pull}25097[#25097]
+* Fixes Rison issues {pull}25377[#25377]
 
 Dashboard::
 * Uses EuiPanel for dashboard panels {pull}22078[#22078]
@@ -214,7 +234,7 @@ Logstash::
 * Uses EUI in Logstash Management and removes all KUI controls and classes from the code {pull}22902[#22902]
 
 Machine Learning::
-* Ensures the Single day, Day range, and Time range options are accessible via a keyboard and screen reader when creating a calendar event in *Machine Learning > Settings > Calendar Management*{pull}23832[#23832]
+* Ensures the Single day, Day range, and Time range options are accessible via a keyboard and screen reader when creating a calendar event in Machine Learning > Settings > Calendar Management {pull}23832[#23832]
 * Ensures the search bar aligns when no job is selected (so no job actions are available) and prevents job actions from wrapping {pull}24334[#24334]
 * Fixes the positioning of the anomaly markers on the Single Metric Viewer chart when the chart aggregation interval is greater than the bucket span {pull}22055[#22055]
 * Makes the field type icon component, as used on the cards in the Data Visualizer, keyboard accessible {pull}22708[#22708]
@@ -258,13 +278,12 @@ Management::
 * Updates documentation links in the console for ingest node {pull}24535[#24535]
 * Adds autocomplete rules for CCR to Kibana console. Also fixes an issue with the documentation link URL manipulation {pull}24739[#24739]
 * Makes the Watcher table width 100% of the view {pull}21803[#21803]
-* Updates index pattern creation loading state to not have confusing 'Reticulating splines' message {pull}21977[#21977]
+* Updates index pattern creation loading state to not have confusing "Reticulating splines" message {pull}21977[#21977]
 * Reconciles Index Management selection state with index deletion {pull}22242[#22242]
 * Adds `repositionOnScroll` to popovers in the Inspect and Index Management detail panel {pull}23856[#23856]
 * Fixes structure of plural message {pull}24208[#24208]
 * Supports overriding `uiSettings` from the configuration file {pull}21628[#21628]
 * Fixes problem when filtering saved objects by single type  {pull}24950[#24950]
-
 
 Monitoring::
 * Supports legacy use cases for passthrough {pull}21211[#21211]
@@ -313,7 +332,7 @@ Operations::
 * Normalizes path for comparison on Windows {pull}23404[#23404]
 
 Platform::
-*  Updates the `url-overflow` redirect to use the `modifyUrl` helper to deal with the confusion of node’s `path` and `pathname` {pull}22435[#22435]
+* Updates the `url-overflow` redirect to use the `modifyUrl` helper to deal with the confusion of node’s `path` and `pathname` {pull}22435[#22435]
 * Introduces a new uiSetting `accessibility:disableAnimations`, which disables all non-essential animations in Kibana. {pull}21629[#21629]
 * Introduces `schema.any` {pull}21775[#21775]
 * Makes core logging independent from the legacy Kibana {pull}21831[#21831]
@@ -358,6 +377,7 @@ Platform::
 * Add support for interceptors. This makes it possible for plugins to transform request config and response of http requests made with kfetch.{pull}22128[#22128]
 * Improves how the Saved Objects client handles s RequestEntityTooLarge error from Elasticsearch {pull}22430[#22430]
 * Turns off the `no-multi-str` rule in eslint config {pull}22525[#22525]
+* Fixes a problem in which more than one search request error would result in an error {pull}24952[#24952]
 
 Querying &amp; Filtering::
 * Implements query bar component in React using some EUI components. {pull}23704[#23704]
@@ -369,7 +389,7 @@ Reporting::
 * Fixes problem where Chromium browser waited until `domcontentloaded` and not `networkidle0`, which caused the Report job to fail with a timeout error {pull}23586[#23586]
 * Fixes relative timezone bug for Chromium reports {pull}23652[#23652]
 * Improves text of pending status in job listing {pull}24300[#24300]
-* Updates ` _claimPendingJobs` so they have a valid job when updating encounters a version conflict {pull}21980[#21980]
+* Updates `_claimPendingJobs` so they have a valid job when updating encounters a version conflict {pull}21980[#21980]
 * Fixes error with Reporting URLs generated prior to 6.2 (when no layout parameter exists) {pull}23508[#23508]
 * Changes the Reporting layout code to TypeScript {pull}22454[#22454]
 
@@ -385,9 +405,6 @@ Sharing::
 * Converts Sharing top navigation to EUI {pull}21997[#21997]
 * Migrates reporting top navigation to Share context menu {pull}22596[#22596]
 * Migrates panel_state.js to panel_state.ts {pull}22515[#22515]
-
-
-
 
 Visualizations::
 * Fixes issue with heat map showing black tiles.  {pull}20753[#20753]
@@ -424,15 +441,9 @@ Visualizations::
 * Fixes courier issues causing `showMetricsOnAllLevels` to break {pull}24488[#24488]
 * Fixes “other” bucket so that it works on multiple aggregations.  Also fixes filtering on “other” bucket {pull}24217[#24217]
 * Generates the correct bucket keys regardless of query type {pull}25002[#25002]
+* Fixes Time Series Visual Builder state updates when changing index patterns {pull}24832[#24832]
 
 
-[float]
-[[deprecation-6.5.0]]
-=== Deprecations
-Monitoring::
-* Deprecates `xpack:defaultAdminEmail` for monitoring alerts {pull}22195[#22195]
-+
-The `xpack:defaultAdminEmail` UI Setting is deprecated for Monitoring, but is still fully supported for the Watcher UI. To receive cluster alert notification emails, configure `xpack.monitoring.cluster_alerts.email_notifications.email_address` in `kibana.yml`.
 
 
 
