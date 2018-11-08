@@ -14,10 +14,6 @@ import {
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
-interface HttpError extends Error {
-  statusCode?: number;
-}
-
 export async function getTransaction(
   transactionId: string,
   traceId: string | undefined,
@@ -58,15 +54,5 @@ export async function getTransaction(
   }
 
   const resp: SearchResponse<Transaction> = await client('search', params);
-  const result = oc(resp).hits.hits[0]._source();
-
-  if (result === undefined) {
-    const notFoundError = new Error(
-      `No results found for transaction ID ${transactionId} and trace ID ${traceId}`
-    ) as HttpError;
-    notFoundError.statusCode = 404;
-    throw notFoundError;
-  }
-
-  return result;
+  return oc(resp).hits.hits[0]._source() || null;
 }
