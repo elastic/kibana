@@ -7,7 +7,6 @@
 import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
-import { mockDataProviders } from '../../../components/timeline/data_providers/mock/mock_data_providers';
 import { ECS } from '../../../components/timeline/ecs';
 import { mockECSData } from '../../../pages/mock/mock_ecs';
 
@@ -22,7 +21,7 @@ export interface TimelineModel {
 export const timelineDefaults: Readonly<
   Pick<TimelineModel, 'dataProviders' | 'data' | 'range' | 'sort'>
 > = {
-  dataProviders: mockDataProviders,
+  dataProviders: [],
   data: mockECSData,
   range: '1 Day',
   sort: {

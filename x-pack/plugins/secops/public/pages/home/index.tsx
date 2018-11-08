@@ -96,7 +96,7 @@ export const HomePage = pure(() => (
 
         <Pane2 data-test-subj="pane2">
           <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
-            <StatefulTimeline id="home-page-timeline" headers={headers} width={maxTimelineWidth} />
+            <StatefulTimeline id="pane2-timeline" headers={headers} width={maxTimelineWidth} />
           </Pane2TimelineContainer>
         </Pane2>
       </SplitPane>

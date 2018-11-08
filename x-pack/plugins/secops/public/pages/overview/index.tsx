@@ -9,4 +9,6 @@ import { pure } from 'recompose';
 
 import { Placeholders } from '../../components/visualization_placeholder';
 
-export const Overview = pure(() => <Placeholders count={10} myRoute="Overview" />);
+export const Overview = pure(() => (
+  <Placeholders timelineId="pane2-timeline" count={10} myRoute="Overview" />
+));
