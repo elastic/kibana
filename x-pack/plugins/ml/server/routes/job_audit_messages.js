@@ -42,18 +42,4 @@ export function jobAuditMessagesRoutes(server, commonRouteConfig) {
     }
   });
 
-  server.route({
-    method: 'GET',
-    path: '/api/ml/job_audit_messages/summary',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
-      const { getAuditMessagesSummary } = jobAuditMessagesProvider(callWithRequest);
-      return getAuditMessagesSummary()
-        .catch(resp => wrapError(resp));
-    },
-    config: {
-      ...commonRouteConfig
-    }
-  });
-
 }
