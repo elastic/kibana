@@ -17,9 +17,16 @@
  * under the License.
  */
 
-/** @internal */
-export { PluginDiscoveryError, PluginDiscoveryErrorType } from './plugin_discovery_error';
-/** @internal */
-export { hasPluginManifest } from './plugin_manifest_parser';
-/** @internal */
-export { discover } from './plugins_discovery';
+import { ConfigService, Env } from '../server/config';
+import { LoggerFactory } from '../server/logging';
+
+/**
+ * Groups all main Kibana's core modules/systems/services that are consumed in a
+ * variety of places within the core itself.
+ * @internal
+ */
+export interface KibanaCore {
+  env: Env;
+  configService: ConfigService;
+  logger: LoggerFactory;
+}

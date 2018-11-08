@@ -27,22 +27,24 @@
  * in one of the known plugin locations (kibana/plugins/* or kibana-extra/*):
  *
  * ```ts
- * import { KibanaPlugin } from '../../kibana';
+ * import { PluginsCore } from '../../kibana';
  *
  * export interface SomePluginContract {
  *   setValue: (val: string) => void;
  * }
  *
- * class SomePlugin extends KibanaPlugin<SomePluginContract> {
- *   start(core) {
- *     let value = 'Hello World!';
+ * export plugin = (core: PluginsCore) => ({
+ *  start() {
+ *    core.logger.get().info('Hello from plugin!');
  *
- *     const router = core.http.createAndRegisterRouter('/some-path');
- *     router.get('/some-value', (req, res) => res.ok(value));
+ *    let value = 'Hello World!';
  *
- *     return { setValue: (val: string) => { value = val; } };
+ *    const router = core.http.createAndRegisterRouter('/some-path');
+ *    router.get('/some-value', (req, res) => res.ok(value));
+ *
+ *    return { setValue: (val: string) => { value = val; } };
  *   }
- * }
+ * });
  * ```
  *
  * **NOTE:** If the code is not needed in plugins, we can add a `at_internal` JSDoc
@@ -51,3 +53,4 @@
  */
 
 export { Logger, LoggerFactory } from './core/server/logging';
+export { PluginsCore } from './core/server/plugins';

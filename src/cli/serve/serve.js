@@ -165,7 +165,8 @@ export default function (program) {
       pluginDirCollector,
       [
         fromRoot('plugins'),
-        fromRoot('src/core_plugins')
+        fromRoot('src/core_plugins'),
+        fromRoot('src/plugins')
       ]
     )
     .option(

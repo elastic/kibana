@@ -61,7 +61,7 @@ beforeEach(() => {
     getConfig$: jest.fn().mockReturnValue(config$),
     atPath: jest.fn().mockReturnValue(new BehaviorSubject({})),
   } as any;
-  legacyService = new LegacyService(env, logger, configService);
+  legacyService = new LegacyService({ env, logger, configService });
 });
 
 afterEach(() => {
@@ -300,16 +300,16 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
   });
 
   test('creates ClusterManager without base path proxy.', async () => {
-    const devClusterLegacyService = new LegacyService(
-      Env.createDefault(
+    const devClusterLegacyService = new LegacyService({
+      env: Env.createDefault(
         getEnvOptions({
           cliArgs: { silent: true, basePath: false },
           isDevClusterMaster: true,
         })
       ),
       logger,
-      configService
-    );
+      configService,
+    });
 
     await devClusterLegacyService.start();
 
@@ -319,16 +319,16 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
   });
 
   test('creates ClusterManager with base path proxy.', async () => {
-    const devClusterLegacyService = new LegacyService(
-      Env.createDefault(
+    const devClusterLegacyService = new LegacyService({
+      env: Env.createDefault(
         getEnvOptions({
           cliArgs: { quiet: true, basePath: true },
           isDevClusterMaster: true,
         })
       ),
       logger,
-      configService
-    );
+      configService,
+    });
 
     await devClusterLegacyService.start();
 

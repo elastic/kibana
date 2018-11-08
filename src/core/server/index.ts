@@ -33,16 +33,14 @@ export class Server {
   private readonly legacy: LegacyCompatModule;
   private readonly log: Logger;
 
-  constructor(
-    private readonly configService: ConfigService,
-    logger: LoggerFactory,
-    private readonly env: Env
-  ) {
+  constructor(configService: ConfigService, logger: LoggerFactory, private readonly env: Env) {
     this.log = logger.get('server');
 
     this.http = new HttpModule(configService.atPath('server', HttpConfig), logger);
-    this.plugins = new PluginsModule(configService, logger, env);
-    this.legacy = new LegacyCompatModule(configService, logger, env);
+
+    const core = { env, configService, logger };
+    this.plugins = new PluginsModule(core);
+    this.legacy = new LegacyCompatModule(core);
   }
 
   public async start() {
@@ -60,15 +58,6 @@ export class Server {
 
     await this.plugins.service.start();
     await this.legacy.service.start(httpServerInfo);
-
-    const unhandledConfigPaths = await this.configService.getUnusedPaths();
-    if (unhandledConfigPaths.length > 0) {
-      // We don't throw here since unhandled paths are verified by the "legacy"
-      // Kibana right now, but this will eventually change.
-      this.log.trace(
-        `some config paths are not handled by the core: ${JSON.stringify(unhandledConfigPaths)}`
-      );
-    }
   }
 
   public async stop() {

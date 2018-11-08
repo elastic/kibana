@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { ConfigService, Env } from '../config';
-import { LoggerFactory } from '../logging';
+import { KibanaCore } from '../../types';
 import { PluginsService } from './plugins_service';
 
+/** @internal */
+export { hasPluginManifest } from './discovery';
+export { PluginsCore } from './plugins_core';
+
+/** @internal */
 export class PluginsModule {
   public readonly service: PluginsService;
 
-  constructor(private readonly configService: ConfigService, logger: LoggerFactory, env: Env) {
-    this.service = new PluginsService(env, logger, this.configService);
+  constructor(core: KibanaCore) {
+    this.service = new PluginsService(core);
   }
 }

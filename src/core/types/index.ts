@@ -17,9 +17,5 @@
  * under the License.
  */
 
-/** @internal */
-export { PluginDiscoveryError, PluginDiscoveryErrorType } from './plugin_discovery_error';
-/** @internal */
-export { hasPluginManifest } from './plugin_manifest_parser';
-/** @internal */
-export { discover } from './plugins_discovery';
+export { CoreService } from './core_service';
+export { KibanaCore } from './kibana_core';

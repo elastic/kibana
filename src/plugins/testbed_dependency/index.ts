@@ -17,9 +17,15 @@
  * under the License.
  */
 
-/** @internal */
-export { PluginDiscoveryError, PluginDiscoveryErrorType } from './plugin_discovery_error';
-/** @internal */
-export { hasPluginManifest } from './plugin_manifest_parser';
-/** @internal */
-export { discover } from './plugins_discovery';
+import { PluginsCore } from '../../../';
+
+export const plugin = (core: PluginsCore) => ({
+  start() {
+    core.logger.get().info(`Hello from TestBed Dependency plugin!`);
+    return { secret: 'my-secret-value' };
+  },
+
+  stop() {
+    core.logger.get().info(`Bye from TestBed Dependency plugin!`);
+  },
+});

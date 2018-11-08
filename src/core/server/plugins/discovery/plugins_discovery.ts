@@ -19,21 +19,17 @@
 
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from, merge, Observable, throwError } from 'rxjs';
-import { catchError, map, mergeMap, shareReplay } from 'rxjs/operators';
-import { PackageInfo } from '../../config';
+import { bindNodeCallback, from, merge, throwError } from 'rxjs';
+import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
+import { KibanaCore } from '../../../types';
 import { Logger } from '../../logging';
+import { Plugin } from '../plugin';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
-import { parseManifest, PluginManifest } from './plugin_manifest_parser';
+import { parseManifest } from './plugin_manifest_parser';
 
 const fsReadDir$ = bindNodeCallback(readdir);
 const fsStat$ = bindNodeCallback(stat);
-
-interface DiscoveryResult {
-  plugin?: { path: string; manifest: PluginManifest };
-  error?: PluginDiscoveryError;
-}
 
 /**
  * Tries to discover all possible plugins based on the provided plugin config.
@@ -42,10 +38,11 @@ interface DiscoveryResult {
  * all the errors that occurred during discovery process.
  *
  * @param config Plugin config instance.
- * @param packageInfo Kibana package info.
- * @param log Plugin discovery logger instance.
+ * @param core Kibana core values.
+ * @internal
  */
-export function discover(config: PluginsConfig, packageInfo: PackageInfo, log: Logger) {
+export function discover(config: PluginsConfig, core: KibanaCore) {
+  const log = core.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
   const discoveryResults$ = merge(
@@ -54,18 +51,16 @@ export function discover(config: PluginsConfig, packageInfo: PackageInfo, log: L
   ).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, packageInfo, log)
+        ? createPlugin$(pluginPathOrError, log, core)
         : [pluginPathOrError];
     }),
     shareReplay()
   );
 
   return {
-    plugin$: discoveryResults$.pipe(
-      mergeMap(entry => (entry.plugin !== undefined ? [entry.plugin] : []))
-    ),
+    plugin$: discoveryResults$.pipe(filter((entry): entry is Plugin => entry instanceof Plugin)),
     error$: discoveryResults$.pipe(
-      mergeMap(entry => (entry.error !== undefined ? [entry.error] : []))
+      filter((entry): entry is PluginDiscoveryError => !(entry instanceof Plugin))
     ),
   };
 }
@@ -90,10 +85,10 @@ function processScanDirs$(scanDirs: string[], log: Logger) {
             // these directories may contain files (e.g. `README.md` or `package.json`).
             // We shouldn't silently ignore the entries we couldn't get stat for though.
             mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
-            catchError(err => [wrapError(PluginDiscoveryError.invalidPluginDirectory(path, err))])
+            catchError(err => [PluginDiscoveryError.invalidPluginDirectory(path, err)])
           )
         ),
-        catchError(err => [wrapError(PluginDiscoveryError.invalidScanDirectory(dir, err))])
+        catchError(err => [PluginDiscoveryError.invalidScanDirectory(dir, err)])
       );
     })
   );
@@ -119,7 +114,7 @@ function processPaths$(paths: string[], log: Logger) {
             ? [path]
             : throwError(new Error(`${path} is not a directory.`));
         }),
-        catchError(err => [wrapError(PluginDiscoveryError.invalidPluginDirectory(path, err))])
+        catchError(err => [PluginDiscoveryError.invalidPluginDirectory(path, err)])
       );
     })
   );
@@ -130,27 +125,31 @@ function processPaths$(paths: string[], log: Logger) {
  * directory path and produces an error result if it fails to do so or plugin manifest
  * isn't valid.
  * @param path Path to the plugin directory where manifest should be loaded from.
- * @param packageInfo Kibana package info.
  * @param log Plugin discovery logger instance.
+ * @param core Kibana core values.
  */
-function createPlugin$(
-  path: string,
-  packageInfo: PackageInfo,
-  log: Logger
-): Observable<DiscoveryResult> {
-  return from(parseManifest(path, packageInfo)).pipe(
+function createPlugin$(path: string, log: Logger, core: KibanaCore) {
+  return from(parseManifest(path, core.env.packageInfo)).pipe(
     map(manifest => {
-      log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return { plugin: { path, manifest } };
-    }),
-    catchError(err => [wrapError(err)])
-  );
-}
+      const pluginDefinition = require(path);
+      if (!('plugin' in pluginDefinition)) {
+        throw PluginDiscoveryError.invalidDefinition(
+          path,
+          new Error(`Plugin does not export "plugin" definition.`)
+        );
+      }
 
-/**
- * Wraps `PluginDiscoveryError` into `DiscoveryResult` entry.
- * @param error Instance of the `PluginDiscoveryError` error.
- */
-function wrapError(error: PluginDiscoveryError): DiscoveryResult {
-  return { error };
+      const { plugin: initializer } = pluginDefinition as { plugin: () => any };
+      if (!initializer || typeof initializer !== 'function') {
+        throw PluginDiscoveryError.invalidDefinition(
+          path,
+          new Error(`Plugin definition should be a function.`)
+        );
+      }
+
+      log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
+      return new Plugin({ path, manifest, initializer }, core.logger.get('plugins', manifest.id));
+    }),
+    catchError(err => [err])
+  );
 }

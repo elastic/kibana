@@ -20,11 +20,11 @@
 import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
-import { CoreService } from '../../types/core_service';
-import { Config, ConfigService, Env } from '../config';
+import { CoreService, KibanaCore } from '../../types';
+import { Config } from '../config';
 import { DevConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpServerInfo } from '../http';
-import { Logger, LoggerFactory } from '../logging';
+import { Logger } from '../logging';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 interface LegacyKbnServer {
@@ -34,23 +34,20 @@ interface LegacyKbnServer {
   close: () => Promise<void>;
 }
 
+/** @internal */
 export class LegacyService implements CoreService {
   private readonly log: Logger;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
 
-  constructor(
-    private readonly env: Env,
-    private readonly logger: LoggerFactory,
-    private readonly configService: ConfigService
-  ) {
-    this.log = logger.get('legacy', 'service');
+  constructor(private readonly core: KibanaCore) {
+    this.log = core.logger.get('legacy-service');
   }
 
   public async start(httpServerInfo?: HttpServerInfo) {
     this.log.debug('starting legacy service');
 
-    const update$ = this.configService.getConfig$().pipe(
+    const update$ = this.core.configService.getConfig$().pipe(
       tap(config => {
         if (this.kbnServer !== undefined) {
           this.kbnServer.applyLoggingConfiguration(config.toRaw());
@@ -67,7 +64,7 @@ export class LegacyService implements CoreService {
       .pipe(
         first(),
         mergeMap(async config => {
-          if (this.env.isDevClusterMaster) {
+          if (this.core.env.isDevClusterMaster) {
             await this.createClusterManager(config);
             return;
           }
@@ -93,20 +90,21 @@ export class LegacyService implements CoreService {
   }
 
   private async createClusterManager(config: Config) {
-    const basePathProxy$ = this.env.cliArgs.basePath
+    const basePathProxy$ = this.core.env.cliArgs.basePath
       ? combineLatest(
-          this.configService.atPath('dev', DevConfig),
-          this.configService.atPath('server', HttpConfig)
+          this.core.configService.atPath('dev', DevConfig),
+          this.core.configService.atPath('server', HttpConfig)
         ).pipe(
           first(),
-          map(([devConfig, httpConfig]) => {
-            return new BasePathProxyServer(this.logger.get('server'), httpConfig, devConfig);
-          })
+          map(
+            ([devConfig, httpConfig]) =>
+              new BasePathProxyServer(this.core.logger.get('server'), httpConfig, devConfig)
+          )
         )
       : EMPTY;
 
     require('../../../cli/cluster/cluster_manager').create(
-      this.env.cliArgs,
+      this.core.env.cliArgs,
       config.toRaw(),
       await basePathProxy$.toPromise()
     );
@@ -127,16 +125,17 @@ export class LegacyService implements CoreService {
               listener: this.setupProxyListener(httpServerInfo.server),
             }
           : { autoListen: false },
+      handledConfigPaths: await this.core.configService.getUsedPaths(),
     });
 
     // The kbnWorkerType check is necessary to prevent the repl
     // from being started multiple times in different processes.
     // We only want one REPL.
-    if (this.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+    if (this.core.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
       require('../../../cli/repl').startRepl(kbnServer);
     }
 
-    const httpConfig = await this.configService
+    const httpConfig = await this.core.configService
       .atPath('server', HttpConfig)
       .pipe(first())
       .toPromise();
@@ -157,7 +156,7 @@ export class LegacyService implements CoreService {
 
   private setupProxyListener(server: HapiServer) {
     const legacyProxy = new LegacyPlatformProxy(
-      this.logger.get('legacy', 'proxy'),
+      this.core.logger.get('legacy-proxy'),
       server.listener
     );
 

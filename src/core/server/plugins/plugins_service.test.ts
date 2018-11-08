@@ -60,7 +60,7 @@ beforeEach(() => {
     env,
     logger
   );
-  pluginsService = new PluginsService(env, logger, configService);
+  pluginsService = new PluginsService({ env, logger, configService });
 });
 
 afterEach(() => {

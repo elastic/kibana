@@ -17,14 +17,17 @@
  * under the License.
  */
 
+/** @internal */
 export enum PluginDiscoveryErrorType {
   IncompatibleVersion = 'incompatible-version',
   InvalidScanDirectory = 'invalid-scan-dir',
   InvalidPluginDirectory = 'invalid-plugin-dir',
   InvalidManifest = 'invalid-manifest',
+  InvalidDefinition = 'invalid-definition',
   MissingManifest = 'missing-manifest',
 }
 
+/** @internal */
 export class PluginDiscoveryError extends Error {
   public static incompatibleVersion(path: string, cause: Error) {
     return new PluginDiscoveryError(PluginDiscoveryErrorType.IncompatibleVersion, path, cause);
@@ -40,6 +43,10 @@ export class PluginDiscoveryError extends Error {
 
   public static invalidManifest(path: string, cause: Error) {
     return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidManifest, path, cause);
+  }
+
+  public static invalidDefinition(path: string, cause: Error) {
+    return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidDefinition, path, cause);
   }
 
   public static missingManifest(path: string, cause: Error) {

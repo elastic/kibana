@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config';
+
 const mockReaddir = jest.fn();
 const mockReadFile = jest.fn();
 const mockStat = jest.fn();
@@ -26,8 +28,13 @@ jest.mock('fs', () => ({
   stat: mockStat,
 }));
 
+const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../../utils/package_json', () => ({ pkg: mockPackage }));
+
 import { resolve } from 'path';
+import { BehaviorSubject } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
+import { getEnvOptions } from '../../config/__mocks__/env';
 import { logger } from '../../logging/__mocks__';
 import { discover } from './plugins_discovery';
 
@@ -87,19 +94,38 @@ afterEach(() => {
 });
 
 test('properly scans folders and paths', async () => {
+  mockPackage.raw = {
+    branch: 'master',
+    version: '1.2.3',
+    build: {
+      distributable: true,
+      number: 1,
+      sha: '',
+    },
+  };
+
+  const env = Env.createDefault(getEnvOptions());
+  const configService = new ConfigService(
+    new BehaviorSubject<Config>(
+      new ObjectToConfigAdapter({
+        plugins: {
+          initialize: true,
+          scanDirs: ['one', 'two'],
+          paths: ['three', 'four'],
+        },
+      })
+    ),
+    env,
+    logger
+  );
+
   const { plugin$, error$ } = discover(
     {
       initialize: true,
       scanDirs: Object.values(TEST_PATHS.scanDirs),
       paths: Object.values(TEST_PATHS.paths),
     },
-    {
-      branch: 'master',
-      buildNum: 1,
-      buildSha: '',
-      version: '1.2.3',
-    },
-    logger.get()
+    { configService, env, logger }
   );
 
   await expect(plugin$.pipe(toArray()).toPromise()).resolves.toEqual(

@@ -29,18 +29,20 @@ export interface PackageInfo {
   buildSha: string;
 }
 
-interface EnvironmentMode {
+export interface EnvironmentMode {
   name: 'development' | 'production';
   dev: boolean;
   prod: boolean;
 }
 
+/** @internal */
 export interface EnvOptions {
   configs: string[];
   cliArgs: CliArgs;
   isDevClusterMaster: boolean;
 }
 
+/** @internal */
 export interface CliArgs {
   dev: boolean;
   envName?: string;
@@ -60,9 +62,13 @@ export class Env {
     return new Env(process.cwd(), options);
   }
 
+  /** @internal */
   public readonly configDir: string;
+  /** @internal */
   public readonly binDir: string;
+  /** @internal */
   public readonly logDir: string;
+  /** @internal */
   public readonly staticFilesDir: string;
 
   /**
@@ -77,16 +83,19 @@ export class Env {
 
   /**
    * Arguments provided through command line.
+   * @internal
    */
   public readonly cliArgs: Readonly<CliArgs>;
 
   /**
    * Paths to the configuration files.
+   * @internal
    */
   public readonly configs: ReadonlyArray<string>;
 
   /**
    * Indicates that this Kibana instance is run as development Node Cluster master.
+   * @internal
    */
   public readonly isDevClusterMaster: boolean;
 

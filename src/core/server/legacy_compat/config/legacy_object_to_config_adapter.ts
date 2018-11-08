@@ -34,6 +34,7 @@ interface LegacyLoggingConfig {
 /**
  * Represents adapter between config provided by legacy platform and `Config`
  * supported by the current platform.
+ * @internal
  */
 export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
   private static transformLogging(configValue: LegacyLoggingConfig = {}) {
