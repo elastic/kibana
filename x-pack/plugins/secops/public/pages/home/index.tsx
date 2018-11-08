@@ -37,17 +37,10 @@ import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { StatefulTimeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
-import { ECS } from '../../components/timeline/ecs';
 import { NotFoundPage } from '../404';
 import { Hosts } from '../hosts';
 import { Network } from '../network';
 import { Overview } from '../overview';
-
-export interface EventRenderer {
-  isInstance: (data: ECS) => boolean;
-  renderMultiClolumn: (data: ECS) => React.ReactNode;
-  renderColumn: (columnName: string, data: ECS) => React.ReactNode;
-}
 
 const maxTimelineWidth = 1125;
 

@@ -15,6 +15,7 @@ import { State } from '../../store/reducer';
 import { timelineByIdSelector } from '../../store/selectors';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Range } from './body/column_headers/range_picker/ranges';
+import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import { ECS } from './ecs';
@@ -100,6 +101,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     return (
       <Timeline
         columnHeaders={headers}
+        columnRenderers={columnRenderers}
         dataProviders={dataProviders}
         data={data}
         onColumnSorted={onColumnSorted}
@@ -107,6 +109,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         onFilterChange={noop}
         onRangeSelected={onRangeSelected}
         range={range}
+        rowRenderers={rowRenderers}
         sort={sort}
         width={width}
       />

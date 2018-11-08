@@ -5,8 +5,6 @@
  */
 
 import { EuiHorizontalRule, EuiIcon, EuiText } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
-import moment from 'moment';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -17,10 +15,12 @@ import { ECS } from '../ecs';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from '../events';
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
+import { ColumnRenderer, getColumnRenderer, getRowRenderer, RowRenderer } from './renderers';
 import { Sort } from './sort';
 
 interface Props {
   columnHeaders: ColumnHeader[];
+  columnRenderers: ColumnRenderer[];
   data: ECS[];
   dataProviders: DataProvider[];
   height?: string;
@@ -29,6 +29,7 @@ interface Props {
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
   range: Range;
+  rowRenderers: RowRenderer[];
   sort: Sort;
   width: number;
 }
@@ -53,22 +54,11 @@ const Row = styled.div`
   flex-direction: row;
   padding: 0;
   min-height: 40px;
-  cursor: pointer;
 `;
 
-const Transitionable = styled.span`
+const FlexRow = styled.span`
   display: flex;
   flex-direction: row;
-  transition: 700ms background, 700ms border-color, 1s transform, 1s box-shadow;
-  border-color: transparent;
-  transition-delay: 0s;
-  &:hover {
-    background: #f0f8ff;
-    border: 1px solid;
-    border-color: #d9d9d9;
-    transform: scale(1.025);
-    box-shadow: 0 2px 2px -1px rgba(153, 153, 153, 0.3), 0 1px 5px -2px rgba(153, 153, 153, 0.3);
-  }
 `;
 
 const Cell = styled(EuiText)`
@@ -98,59 +88,22 @@ const DataDrivenColumns = styled.div`
 const ColumnRender = styled.div<{ minwidth: string; maxwidth: string }>`
   max-width: ${props => props.minwidth};
   min-width: ${props => props.maxwidth};
-  white-space: nowrap;
 `;
 
 const defaultHeight = '100%';
-
-interface RenderColumnStubParams {
-  columnName: string;
-  data: ECS;
-  minWidth: number;
-}
-
-const renderColumnStub = ({
-  columnName,
-  data,
-  minWidth,
-}: RenderColumnStubParams): React.ReactNode => {
-  const getCell = () => {
-    switch (columnName) {
-      case '@timestamp':
-        return <Cell size="xs">{moment(data['@timestamp']).format('YYYY-MM-DD')}</Cell>;
-      case 'event':
-        return (
-          <Cell size="xs">
-            {data.event.severity} / {data.event.module} / {data.event.category}
-          </Cell>
-        );
-      default:
-        return <Cell size="xs">{getOr('--', `event.${columnName}`, data)}</Cell>;
-    }
-  };
-
-  return (
-    <ColumnRender
-      key={`cell-${columnName}`}
-      data-test-subj="cellContainer"
-      maxwidth={`${minWidth}px`}
-      minwidth={`${minWidth}px`}
-    >
-      {getCell()}
-    </ColumnRender>
-  );
-};
 
 /** Renders the timeline body */
 export const Body = pure<Props>(
   ({
     columnHeaders,
+    columnRenderers,
     data,
     height = defaultHeight,
     onColumnSorted,
     onFilterChange,
     onRangeSelected,
     range,
+    rowRenderers,
     sort,
     width,
   }) => (
@@ -168,14 +121,29 @@ export const Body = pure<Props>(
         {data.map(ecs => (
           <Row key={ecs._id}>
             <TimeGutter />
-            <Transitionable>
-              <Pin type="pin" size="l" />
-              <DataDrivenColumns data-test-subj="dataDrivenColumns">
-                {columnHeaders.map(header =>
-                  renderColumnStub({ columnName: header.id, data: ecs, minWidth: header.minWidth })
-                )}
-              </DataDrivenColumns>
-            </Transitionable>
+            {getRowRenderer(ecs, rowRenderers).renderRow(
+              ecs,
+              <FlexRow>
+                <Pin type="pin" size="l" />
+                <DataDrivenColumns data-test-subj="dataDrivenColumns">
+                  {columnHeaders.map(header => (
+                    <ColumnRender
+                      key={`cell-${header.id}`}
+                      data-test-subj="cellContainer"
+                      maxwidth={`${header.minWidth}px`}
+                      minwidth={`${header.minWidth}px`}
+                    >
+                      <Cell size="xs">
+                        {getColumnRenderer(header.id, columnRenderers, ecs).renderColumn(
+                          header.id,
+                          ecs
+                        )}
+                      </Cell>
+                    </ColumnRender>
+                  ))}
+                </DataDrivenColumns>
+              </FlexRow>
+            )}
           </Row>
         ))}
       </ScrollableArea>

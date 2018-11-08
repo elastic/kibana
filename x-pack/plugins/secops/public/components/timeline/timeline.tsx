@@ -12,6 +12,8 @@ import { ECS } from './ecs';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Range } from './body/column_headers/range_picker/ranges';
+import { ColumnRenderer } from './body/renderers';
+import { RowRenderer } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from './events';
@@ -19,6 +21,7 @@ import { TimelineHeader } from './header/timeline_header';
 
 interface Props {
   columnHeaders: ColumnHeader[];
+  columnRenderers: ColumnRenderer[];
   data: ECS[];
   dataProviders: DataProvider[];
   height?: string;
@@ -27,6 +30,7 @@ interface Props {
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
   range: Range;
+  rowRenderers: RowRenderer[];
   sort: Sort;
   width: number;
 }
@@ -47,6 +51,7 @@ const defaultHeight = '100%';
 export const Timeline = pure<Props>(
   ({
     columnHeaders,
+    columnRenderers,
     dataProviders,
     data,
     height = defaultHeight,
@@ -55,6 +60,7 @@ export const Timeline = pure<Props>(
     onFilterChange,
     onRangeSelected,
     range,
+    rowRenderers,
     sort,
     width,
   }) => (
@@ -66,6 +72,7 @@ export const Timeline = pure<Props>(
       />
       <Body
         columnHeaders={columnHeaders}
+        columnRenderers={columnRenderers}
         dataProviders={dataProviders}
         data={data}
         onColumnSorted={onColumnSorted}
@@ -73,6 +80,7 @@ export const Timeline = pure<Props>(
         onFilterChange={onFilterChange}
         onRangeSelected={onRangeSelected}
         range={range}
+        rowRenderers={rowRenderers}
         sort={sort}
         width={width}
       />

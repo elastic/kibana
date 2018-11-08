@@ -11,13 +11,14 @@ import * as React from 'react';
 import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
+import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { Timeline } from './timeline';
 
 describe('Timeline', () => {
   const sort: Sort = {
-    columnId: '@timestamp',
+    columnId: 'timestamp',
     sortDirection: 'descending',
   };
 
@@ -26,6 +27,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <Timeline
           columnHeaders={headers}
+          columnRenderers={columnRenderers}
           data={mockECSData}
           dataProviders={mockDataProviders}
           onColumnSorted={noop}
@@ -33,6 +35,7 @@ describe('Timeline', () => {
           onFilterChange={noop}
           onRangeSelected={noop}
           range={'1 Day'}
+          rowRenderers={rowRenderers}
           sort={sort}
           width={1000}
         />
@@ -45,6 +48,7 @@ describe('Timeline', () => {
       const wrapper = mount(
         <Timeline
           columnHeaders={headers}
+          columnRenderers={columnRenderers}
           data={mockECSData}
           dataProviders={mockDataProviders}
           onColumnSorted={noop}
@@ -52,6 +56,7 @@ describe('Timeline', () => {
           onFilterChange={noop}
           onRangeSelected={noop}
           range={'1 Day'}
+          rowRenderers={rowRenderers}
           sort={sort}
           width={1000}
         />
@@ -69,6 +74,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
             data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={mockOnColumnSorted}
@@ -76,6 +82,7 @@ describe('Timeline', () => {
             onFilterChange={noop}
             onRangeSelected={noop}
             range={'1 Day'}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -100,6 +107,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
             data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
@@ -107,6 +115,7 @@ describe('Timeline', () => {
             onFilterChange={noop}
             onRangeSelected={noop}
             range={'1 Day'}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -145,6 +154,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={allColumnsHaveTextFilters}
+            columnRenderers={columnRenderers}
             data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
@@ -152,6 +162,7 @@ describe('Timeline', () => {
             onFilterChange={mockOnFilterChange}
             onRangeSelected={noop}
             range={'1 Day'}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -177,6 +188,7 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
             data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
@@ -184,6 +196,7 @@ describe('Timeline', () => {
             onFilterChange={noop}
             onRangeSelected={mockOnRangeSelected}
             range={'1 Day'}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
