@@ -33,18 +33,19 @@ export function ViewMLJob({
   location,
   children = 'View Job'
 }: ViewMlJobArgs) {
-  const { _g, _a } = decodeKibanaSearchParams(location.search);
+  const currentG = risonSafeDecode(
+    getCurrentOrDefaultGArg(location.search._g)
+  ) as object;
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
   const jobId = `${serviceName}-${transactionType}-high_mean_response_time`;
   const query = {
     _g: {
-      ...(_g as object),
+      ...currentG,
       ml: {
         jobIds: [jobId]
       }
-    },
-    _a
+    }
   };
 
   return (
@@ -82,32 +83,13 @@ function stringifyWithoutEncoding(query: StringMap) {
   });
 }
 
-function decodeAsObject(value: string) {
+function risonSafeDecode(value: string) {
   try {
     const decoded = rison.decode(value);
     return isPlainObject(decoded) ? decoded : {};
   } catch (e) {
     return {};
   }
-}
-
-export function decodeKibanaSearchParams(search: string) {
-  const query = toQuery(search);
-  return {
-    _g:
-      query._g && typeof query._g === 'string'
-        ? decodeAsObject(query._g)
-        : null,
-    _a:
-      query._a && typeof query._a === 'string' ? decodeAsObject(query._a) : null
-  };
-}
-
-export function encodeKibanaSearchParams(query: StringMap) {
-  return stringifyWithoutEncoding({
-    _g: rison.encode(query._g),
-    _a: rison.encode(query._a)
-  });
 }
 
 export interface RelativeLinkComponentArgs {
@@ -183,7 +165,7 @@ export interface KibanaLinkArgs {
 //
 function getCurrentOrDefaultGArg(g: string) {
   // use "g" if it's set in the url and is not empty
-  if (g && !isEmpty(decodeAsObject(g))) {
+  if (!isEmpty(risonSafeDecode(g))) {
     return g;
   }
 

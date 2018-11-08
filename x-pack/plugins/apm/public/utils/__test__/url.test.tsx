@@ -12,87 +12,12 @@ import url from 'url';
 // @ts-ignore
 import { toJson } from '../testHelpers';
 import {
-  decodeKibanaSearchParams,
-  encodeKibanaSearchParams,
   fromQuery,
   RelativeLinkComponent,
   toQuery,
   UnconnectedKibanaLink,
   ViewMLJob
 } from '../url';
-
-describe('encodeKibanaSearchParams and decodeKibanaSearchParams should return the original string', () => {
-  it('should convert string to object', () => {
-    const search = `?_g=(ml:(jobIds:!(opbeans-node-request-high_mean_response_time)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2018-06-06T08:20:45.437Z',mode:absolute,to:'2018-06-14T21:56:58.505Z'))&_a=(filters:!(),mlSelectInterval:(interval:(display:Auto,val:auto)),mlSelectSeverity:(threshold:(display:warning,val:0)),mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*')))`;
-    const nextSearch = encodeKibanaSearchParams(
-      decodeKibanaSearchParams(search)
-    );
-    expect(search).toBe(`?${nextSearch}`);
-  });
-});
-
-describe('decodeKibanaSearchParams', () => {
-  it('when both _a and _g are defined', () => {
-    const search = `?_g=(ml:(jobIds:!(opbeans-node-request-high_mean_response_time)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2018-06-06T08:20:45.437Z',mode:absolute,to:'2018-06-14T21:56:58.505Z'))&_a=(filters:!(),mlSelectInterval:(interval:(display:Auto,val:auto)),mlSelectSeverity:(threshold:(display:warning,val:0)),mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*')))`;
-    const query = decodeKibanaSearchParams(search);
-    expect(query).toEqual({
-      _a: {
-        filters: [],
-        mlSelectInterval: { interval: { display: 'Auto', val: 'auto' } },
-        mlSelectSeverity: { threshold: { display: 'warning', val: 0 } },
-        mlTimeSeriesExplorer: {},
-        query: { query_string: { analyze_wildcard: true, query: '*' } }
-      },
-      _g: {
-        ml: { jobIds: ['opbeans-node-request-high_mean_response_time'] },
-        refreshInterval: { display: 'Off', pause: false, value: 0 },
-        time: {
-          from: '2018-06-06T08:20:45.437Z',
-          mode: 'absolute',
-          to: '2018-06-14T21:56:58.505Z'
-        }
-      }
-    });
-  });
-
-  it('when only _g is defined', () => {
-    const search = `?_g=(ml:(jobIds:!(opbeans-node-request-high_mean_response_time)))`;
-    const query = decodeKibanaSearchParams(search);
-    expect(query).toEqual({
-      _a: null,
-      _g: {
-        ml: { jobIds: ['opbeans-node-request-high_mean_response_time'] }
-      }
-    });
-  });
-});
-
-describe('encodeKibanaSearchParams', () => {
-  it('should convert object to string', () => {
-    const query = {
-      _a: {
-        filters: [],
-        mlSelectInterval: { interval: { display: 'Auto', val: 'auto' } },
-        mlSelectSeverity: { threshold: { display: 'warning', val: 0 } },
-        mlTimeSeriesExplorer: {},
-        query: { query_string: { analyze_wildcard: true, query: '*' } }
-      },
-      _g: {
-        ml: { jobIds: ['opbeans-node-request-high_mean_response_time'] },
-        refreshInterval: { display: 'Off', pause: false, value: 0 },
-        time: {
-          from: '2018-06-06T08:20:45.437Z',
-          mode: 'absolute',
-          to: '2018-06-14T21:56:58.505Z'
-        }
-      }
-    };
-    const search = encodeKibanaSearchParams(query);
-    expect(search).toBe(
-      `_g=(ml:(jobIds:!(opbeans-node-request-high_mean_response_time)),refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2018-06-06T08:20:45.437Z',mode:absolute,to:'2018-06-14T21:56:58.505Z'))&_a=(filters:!(),mlSelectInterval:(interval:(display:Auto,val:auto)),mlSelectSeverity:(threshold:(display:warning,val:0)),mlTimeSeriesExplorer:(),query:(query_string:(analyze_wildcard:!t,query:'*')))`
-    );
-  });
-});
 
 describe('toQuery', () => {
   it('should parse string to object', () => {
