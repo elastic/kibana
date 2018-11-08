@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  jest.clearAllMocks();
+  jest.restoreAllMocks();
 });
 
 test('returns config with local paths', () => {

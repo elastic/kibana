@@ -18,7 +18,9 @@
  */
 
 jest.mock('fs', () => ({
-  statSync: jest.fn()
+  statSync: jest.fn().mockImplementation(() => require('fs').statSync),
+  unlinkSync: jest.fn().mockImplementation(() => require('fs').unlinkSync),
+  mkdirSync: jest.fn().mockImplementation(() => require('fs').mkdirSync),
 }));
 
 import sinon from 'sinon';
@@ -26,6 +28,7 @@ import Logger from '../lib/logger';
 import { join } from 'path';
 import rimraf from 'rimraf';
 import mkdirp from 'mkdirp';
+import fs from 'fs';
 import { existingInstall, assertVersion } from './kibana';
 
 describe('kibana cli', function () {
@@ -122,12 +125,16 @@ describe('kibana cli', function () {
         });
 
         it('should throw an error if the plugin already exists.', function () {
+          fs.statSync = jest.fn().mockImplementationOnce(() => true);
           existingInstall(settings, logger);
           expect(logger.error.firstCall.args[0]).toMatch(/already exists/);
           expect(process.exit.called).toBe(true);
         });
 
         it('should not throw an error if the plugin does not exist.', function () {
+          fs.statSync = jest.fn().mockImplementationOnce(() => {
+            throw { code: 'ENOENT' };
+          });
           existingInstall(settings, logger);
           expect(logger.error.called).toBe(false);
         });
@@ -136,6 +143,6 @@ describe('kibana cli', function () {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 });

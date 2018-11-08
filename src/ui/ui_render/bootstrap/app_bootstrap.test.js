@@ -30,10 +30,6 @@ jest.mock('fs', () => ({
 import { AppBootstrap } from './app_bootstrap';
 
 describe('ui_render/AppBootstrap', () => {
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
-
   describe('getJsFile()', () => {
     test('resolves to a string', async () => {
       expect.assertions(1);
@@ -108,6 +104,10 @@ describe('ui_render/AppBootstrap', () => {
       expect(hash2).toHaveLength(40);
       expect(hash2).not.toEqual(hash1);
     });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 });
 

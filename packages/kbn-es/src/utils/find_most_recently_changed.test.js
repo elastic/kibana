@@ -50,5 +50,5 @@ test('returns newest file', () => {
 });
 
 afterAll(() => {
-  jest.clearAllMocks();
+  jest.restoreAllMocks();
 });

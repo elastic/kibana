@@ -228,6 +228,6 @@ describe('Keystore', () => {
   });
 
   afterAll(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 });
