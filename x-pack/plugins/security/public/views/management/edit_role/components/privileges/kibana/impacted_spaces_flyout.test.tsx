@@ -6,10 +6,7 @@
 
 import { EuiFlyout, EuiLink } from '@elastic/eui';
 import React from 'react';
-import {
-  mountWithIntl,
-  shallowWithIntl,
-} from '../../../../../../../../../test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
