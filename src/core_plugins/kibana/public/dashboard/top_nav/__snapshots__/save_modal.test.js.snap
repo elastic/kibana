@@ -11,7 +11,13 @@ exports[`renders DashboardSaveModal 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="Description"
+        label={
+          <FormattedMessage
+            defaultMessage="Description"
+            id="kbn.dashboard.topNav.saveModal.descriptionFormRowLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiTextArea
           compressed={true}
@@ -26,8 +32,20 @@ exports[`renders DashboardSaveModal 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        helpText="This changes the time filter to the currently selected time each time this dashboard is loaded."
-        label="Store time with dashboard"
+        helpText={
+          <FormattedMessage
+            defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+            values={Object {}}
+          />
+        }
+        label={
+          <FormattedMessage
+            defaultMessage="Store time with dashboard"
+            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+            values={Object {}}
+          />
+        }
       >
         <EuiSwitch
           checked={true}

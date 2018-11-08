@@ -15,7 +15,11 @@ exports[`render 1`] = `
       size="s"
     >
       <h1>
-        Add Panels
+        <FormattedMessage
+          defaultMessage="Add Panels"
+          id="kbn.dashboard.topNav.addPanelsTitle"
+          values={Object {}}
+        />
       </h1>
     </EuiTitle>
     <EuiTabs
@@ -54,7 +58,11 @@ exports[`render 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Add new Visualization
+          <FormattedMessage
+            defaultMessage="Add new Visualization"
+            id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       }
       key="visSavedObjectFinder"

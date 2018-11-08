@@ -33,7 +33,7 @@ exports[`renders DashboardGrid 1`] = `
       }
     }
   >
-    <Connect(DashboardPanel)
+    <Connect(InjectIntl(DashboardPanelUi))
       embeddableFactory={
         Object {
           "create": [MockFunction],
@@ -53,7 +53,7 @@ exports[`renders DashboardGrid 1`] = `
       }
     }
   >
-    <Connect(DashboardPanel)
+    <Connect(InjectIntl(DashboardPanelUi))
       embeddableFactory={
         Object {
           "create": [MockFunction],
