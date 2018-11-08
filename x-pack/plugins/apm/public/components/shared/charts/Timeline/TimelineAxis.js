@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { inRange } from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
@@ -14,14 +14,26 @@ import AgentMarker from './AgentMarker';
 import { colors, px } from '../../../../style/variables';
 import { getTimeFormatter } from '../../../../utils/formatters';
 
-// Remove last tick if it's too close to xMax
-const getXAxisTickValues = (tickValues, xMax) =>
-  _.last(tickValues) * 1.05 > xMax ? tickValues.slice(0, -1) : tickValues;
+// Remove any tick that is too close to traceRootDuration
+const getXAxisTickValues = (tickValues, traceRootDuration) => {
+  if (!tickValues) {
+    return [];
+  }
 
-function TimelineAxis({ plotValues, agentMarks }) {
+  const padding = (tickValues[1] - tickValues[0]) / 2;
+  const lowerBound = traceRootDuration - padding;
+  const upperBound = traceRootDuration + padding;
+
+  return tickValues.filter(value => {
+    const isInRange = inRange(value, lowerBound, upperBound);
+    return !isInRange && value !== traceRootDuration;
+  });
+};
+
+function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormat = getTimeFormatter(xMax);
-  const xAxisTickValues = getXAxisTickValues(tickValues, xMax);
+  const xAxisTickValues = getXAxisTickValues(tickValues, traceRootDuration);
 
   return (
     <Sticky disableCompensation>
@@ -62,8 +74,8 @@ function TimelineAxis({ plotValues, agentMarks }) {
               />
 
               <LastTickValue
-                x={xScale(xMax)}
-                value={tickFormat(xMax)}
+                x={xScale(traceRootDuration)}
+                value={tickFormat(traceRootDuration)}
                 marginTop={28}
               />
 

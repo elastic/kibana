@@ -28,7 +28,7 @@ The panel at the top shows the current cluster statistics, the charts show the
 search and indexing performance over time, and the table at the bottom shows
 information about any shards that are being recovered.
 
-image::monitoring/images/monitoring-overview.jpg["Elasticsearch Cluster Overview",link="images/monitoring-overview.jpg"]
+image::monitoring/images/monitoring-overview.png["Elasticsearch Cluster Overview",link="images/monitoring-overview.png"]
 
 TIP: Not sure what a chart is showing? Click the info button for a description
 of the metrics.
@@ -42,7 +42,7 @@ From there, you can dive into detailed metrics for particular nodes and indices.
 To view node metrics, click **Nodes**. The Nodes section shows the status
 of each node in your cluster.
 
-image::monitoring/images/monitoring-nodes.jpg["Elasticsearch Nodes",link="images/monitoring-nodes.jpg"]
+image::monitoring/images/monitoring-nodes.png["Elasticsearch Nodes",link="images/monitoring-nodes.png"]
 
 [float]
 [[nodes-page-overview]]
@@ -51,7 +51,7 @@ image::monitoring/images/monitoring-nodes.jpg["Elasticsearch Nodes",link="images
 Click the name of a node to view its node statistics over time. These represent
 high-level statistics collected from {es} that provide a good overview of health.
 
-image::monitoring/images/monitoring-node.jpg["Elasticsearch Node Overview",link="images/monitoring-node.jpg"]
+image::monitoring/images/monitoring-node.png["Elasticsearch Node Overview",link="images/monitoring-node.png"]
 
 [float]
 [[nodes-page-advanced]]
@@ -74,7 +74,7 @@ more advanced knowledge of {es}, such as poor garbage collection performance.
 To view index metrics, click **Indices**. The Indices section shows the same
 overall index and search metrics as the Overview and a table of your indices.
 
-image::monitoring/images/monitoring-indices.jpg["Elasticsearch Indices",link="images/monitoring-indices.jpg"]
+image::monitoring/images/monitoring-indices.png["Elasticsearch Indices",link="images/monitoring-indices.png"]
 
 [float]
 [[indices-page-overview]]
@@ -83,7 +83,7 @@ image::monitoring/images/monitoring-indices.jpg["Elasticsearch Indices",link="im
 From the Indices listing, you can view data for a particular index. To drill
 down into the data for a particular index, click its name in the Indices table.
 
-image::monitoring/images/monitoring-index.jpg["Elasticsearch Index Overview",link="images/monitoring-index.jpg"]
+image::monitoring/images/monitoring-index.png["Elasticsearch Index Overview",link="images/monitoring-index.png"]
 
 [float]
 [[indices-page-advanced]]

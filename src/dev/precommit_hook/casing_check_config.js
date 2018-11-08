@@ -185,7 +185,7 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/ui/public/styles/variables/bootstrap-mods.less',
   'src/ui/public/styles/variables/for-theme.less',
   'src/ui/public/typeahead/partials/typeahead-items.html',
-  'src/ui/public/utils/migrateLegacyQuery.js',
+  'src/ui/public/utils/migrate_legacy_query.js',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
   'packages/kbn-ui-framework/doc_site/src/images/elastic-logo.svg',
   'packages/kbn-ui-framework/doc_site/src/images/hint-arrow.svg',

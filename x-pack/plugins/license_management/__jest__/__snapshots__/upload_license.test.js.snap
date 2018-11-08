@@ -116,6 +116,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       <EuiTitle
         className="eui-textCenter"
         size="l"
+        textTransform="none"
       >
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
@@ -298,26 +299,29 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                   <EuiText
                                     data-test-subj="confirmModalBodyText"
                                     grow={true}
+                                    size="m"
                                   >
                                     <div
-                                      className="euiText"
+                                      className="euiText euiText--medium"
                                       data-test-subj="confirmModalBodyText"
                                     >
                                       <div>
                                         <EuiText
                                           grow={true}
+                                          size="m"
                                         >
                                           <div
-                                            className="euiText"
+                                            className="euiText euiText--medium"
                                           >
                                             Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
                                           </div>
                                         </EuiText>
                                         <EuiText
                                           grow={true}
+                                          size="m"
                                         >
                                           <div
-                                            className="euiText"
+                                            className="euiText euiText--medium"
                                           >
                                             <ul>
                                               <li
@@ -411,9 +415,10 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                 </EuiOverlayMask>
                 <EuiText
                   grow={true}
+                  size="m"
                 >
                   <div
-                    className="euiText"
+                    className="euiText euiText--medium"
                   >
                     <p>
                       <FormattedMessage
@@ -459,9 +464,10 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                   >
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <EuiFilePicker
                           compressed={false}
@@ -776,6 +782,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       <EuiTitle
         className="eui-textCenter"
         size="l"
+        textTransform="none"
       >
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
@@ -816,9 +823,10 @@ exports[`UploadLicense should display an error when ES says license is expired 1
               >
                 <EuiText
                   grow={true}
+                  size="m"
                 >
                   <div
-                    className="euiText"
+                    className="euiText euiText--medium"
                   >
                     <p>
                       <FormattedMessage
@@ -905,9 +913,10 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                     </EuiCallOut>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <EuiFilePicker
                           compressed={false}
@@ -1248,6 +1257,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       <EuiTitle
         className="eui-textCenter"
         size="l"
+        textTransform="none"
       >
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
@@ -1288,9 +1298,10 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
               >
                 <EuiText
                   grow={true}
+                  size="m"
                 >
                   <div
-                    className="euiText"
+                    className="euiText euiText--medium"
                   >
                     <p>
                       <FormattedMessage
@@ -1377,9 +1388,10 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                     </EuiCallOut>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <EuiFilePicker
                           compressed={false}
@@ -1720,6 +1732,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       <EuiTitle
         className="eui-textCenter"
         size="l"
+        textTransform="none"
       >
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
@@ -1760,9 +1773,10 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
               >
                 <EuiText
                   grow={true}
+                  size="m"
                 >
                   <div
-                    className="euiText"
+                    className="euiText euiText--medium"
                   >
                     <p>
                       <FormattedMessage
@@ -1849,9 +1863,10 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                     </EuiCallOut>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <EuiFilePicker
                           compressed={false}
@@ -2192,6 +2207,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       <EuiTitle
         className="eui-textCenter"
         size="l"
+        textTransform="none"
       >
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
@@ -2232,9 +2248,10 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
               >
                 <EuiText
                   grow={true}
+                  size="m"
                 >
                   <div
-                    className="euiText"
+                    className="euiText euiText--medium"
                   >
                     <p>
                       <FormattedMessage
@@ -2321,9 +2338,10 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                     </EuiCallOut>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <EuiFilePicker
                           compressed={false}

@@ -29,6 +29,7 @@ import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
 import { rollup } from './plugins/rollup';
 import { remoteClustersManagement } from './plugins/remote_clusters_management';
+import { crossClusterReplication } from './plugins/cross_cluster_replication';
 
 module.exports = function (kibana) {
   return [
@@ -57,5 +58,6 @@ module.exports = function (kibana) {
     infra(kibana),
     rollup(kibana),
     remoteClustersManagement(kibana),
+    crossClusterReplication(kibana),
   ];
 };
