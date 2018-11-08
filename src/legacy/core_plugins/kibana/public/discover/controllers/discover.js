@@ -65,6 +65,7 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
+import { createPhraseFilter } from '../../../../../ui/public/filter_bar/filters/phrase_filter';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -180,6 +181,37 @@ function discoverController(
   const shareContextMenuExtensions = Private(ShareContextMenuExtensionsRegistryProvider);
   const inspectorAdapters = {
     requests: new RequestAdapter()
+  };
+
+
+  $scope.reactFilters = [
+    createPhraseFilter({ field: 'response', value: 200, index: 'foo' }),
+    createPhraseFilter({ field: 'extension', value: 'jpg', index: 'foo' }),
+    createPhraseFilter({ field: 'bytes', value: 2000, index: 'foo' }),
+  ];
+
+  $scope.onToggleNegate = (filter) => {
+    const index = $scope.reactFilters.indexOf(filter);
+    $scope.reactFilters[index] = {
+      ...filter,
+      negate: !filter.negate
+    };
+  };
+
+  $scope.onTogglePin = (filter) => {
+    const index = $scope.reactFilters.indexOf(filter);
+    $scope.reactFilters[index] = {
+      ...filter,
+      pinned: !filter.pinned
+    };
+  };
+
+  $scope.onToggleDisabled = (filter) => {
+    const index = $scope.reactFilters.indexOf(filter);
+    $scope.reactFilters[index] = {
+      ...filter,
+      disabled: !filter.disabled
+    };
   };
 
   $scope.getDocLink = getDocLink;

@@ -21,7 +21,7 @@ import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 
 export function createFilterBarPhraseFilter(filter: PhraseFilter) {
   return {
-    ...filter,
+    filter,
     getDisplayText: () => {
       return `${filter.field} : ${filter.value}`;
     },

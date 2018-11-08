@@ -18,22 +18,41 @@
  */
 
 import React, { Component } from 'react';
-import { createFilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filters';
-import { createPhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
+import { Filter } from 'ui/filter_bar/filters';
+import { createFilterBarFilter, FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filters';
 import { FilterItem } from 'ui/filter_bar/react/filter_item';
 
-const filters = [
-  createPhraseFilter({ field: 'response', value: 200, index: 'foo' }),
-  createPhraseFilter({ field: 'extension', value: 'jpg', index: 'foo' }),
-  createPhraseFilter({ field: 'bytes', value: 2000, index: 'foo' }),
-];
+interface Props {
+  filters: Filter[];
+  onToggleNegate: (filter: Filter) => void;
+  onToggleDisabled: (filter: Filter) => void;
+  onTogglePin: (filter: Filter) => void;
+}
 
-const filterBarFilters = filters.map(createFilterBarFilter);
+export class FilterBar extends Component<Props> {
+  public onToggleNegate = (filter: FilterBarFilter) => {
+    this.props.onToggleNegate(filter.filter);
+  };
 
-export class FilterBar extends Component {
+  public onTogglePin = (filter: FilterBarFilter) => {
+    this.props.onTogglePin(filter.filter);
+  };
+
+  public onToggleDisabled = (filter: FilterBarFilter) => {
+    this.props.onToggleDisabled(filter.filter);
+  };
+
   public render() {
-    const filterItems = filterBarFilters.map(filterBarFilter => {
-      return <FilterItem filter={filterBarFilter} />;
+    const filterItems = this.props.filters.map(filter => {
+      const filterBarFilter = createFilterBarFilter(filter);
+      return (
+        <FilterItem
+          filter={filterBarFilter}
+          onToggleNegate={this.onToggleNegate}
+          onToggleDisabled={this.onToggleDisabled}
+          onTogglePin={this.onTogglePin}
+        />
+      );
     });
 
     return filterItems;

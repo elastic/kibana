@@ -25,6 +25,9 @@ import { FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filters';
 interface Props {
   filter: FilterBarFilter;
   className?: string;
+  onTogglePin: (filter: FilterBarFilter) => void;
+  onToggleNegate: (filter: FilterBarFilter) => void;
+  onToggleDisabled: (filter: FilterBarFilter) => void;
 }
 
 interface State {
@@ -37,18 +40,23 @@ export class FilterItem extends Component<Props, State> {
   };
 
   public render() {
+    const filter = this.props.filter;
+    const {
+      filter: { negate, disabled, pinned },
+    } = filter;
+
     const classes = classNames(
       'globalFilterItem',
       {
-        'globalFilterItem-isDisabled': this.props.filter.disabled,
+        'globalFilterItem-isDisabled': disabled,
         'globalFilterItem-isPinned': false,
-        'globalFilterItem-isExcluded': this.props.filter.negate,
+        'globalFilterItem-isExcluded': negate,
       },
       this.props.className
     );
 
     let prefix = null;
-    if (this.props.filter.negate) {
+    if (negate) {
       prefix = <span>NOT </span>;
     }
 
@@ -73,7 +81,7 @@ export class FilterItem extends Component<Props, State> {
         }}
       >
         {prefix}
-        <span>{this.props.filter.getDisplayText()}</span>
+        <span>{filter.getDisplayText()}</span>
       </EuiBadge>
     );
 
@@ -81,24 +89,27 @@ export class FilterItem extends Component<Props, State> {
       id: 0,
       items: [
         {
-          name: `${this.props.filter.pinned ? 'Unpin' : 'Pin across all apps'}`,
+          name: `${pinned ? 'Unpin' : 'Pin across all apps'}`,
           icon: 'pin',
           onClick: () => {
             this.closePopover();
+            this.props.onTogglePin(filter);
           },
         },
         {
-          name: `${this.props.filter.negate ? 'Include results' : 'Exclude results'}`,
-          icon: `${this.props.filter.negate ? 'plusInCircle' : 'minusInCircle'}`,
+          name: `${negate ? 'Include results' : 'Exclude results'}`,
+          icon: `${negate ? 'plusInCircle' : 'minusInCircle'}`,
           onClick: () => {
             this.closePopover();
+            this.props.onToggleNegate(filter);
           },
         },
         {
-          name: `${this.props.filter.disabled ? 'Re-enable' : 'Temporarily disable'}`,
-          icon: `${this.props.filter.disabled ? 'eye' : 'eyeClosed'}`,
+          name: `${disabled ? 'Re-enable' : 'Temporarily disable'}`,
+          icon: `${disabled ? 'eye' : 'eyeClosed'}`,
           onClick: () => {
             this.closePopover();
+            this.props.onToggleDisabled(filter);
           },
         },
         {
@@ -113,7 +124,7 @@ export class FilterItem extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id={`popoverFor_${this.props.filter.getDisplayText()}`}
+        id={`popoverFor_${filter.getDisplayText()}`}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={badge}

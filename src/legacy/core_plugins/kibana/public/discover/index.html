@@ -40,7 +40,12 @@
 
   <main class="container-fluid">
     <div class="row">
-      <react-filter-bar></react-filter-bar>
+      <react-filter-bar
+        filters="reactFilters"
+        on-toggle-negate="onToggleNegate"
+        on-toggle-pin="onTogglePin"
+        on-toggle-disabled="onToggleDisabled"
+      ></react-filter-bar>
       <filter-bar
         state="state"
         index-patterns="[indexPattern]"
@@ -91,11 +96,16 @@
               ng-hide="fetchError"
               class="dscOverlay"
             >
+<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/discover/index.html
               <div class="euiTitle" >
                 <h2
                   i18n-id="kbn.discover.searchingTitle"
                   i18n-default-message="Searching"
                 ></h2>
+=======
+              <div class="euiTitle">
+                <h2>Searching</h2>
+>>>>>>> wire up the callbacks for the FilterItem:src/core_plugins/kibana/public/discover/index.html
               </div>
               <div class="euiSpacer euiSpacer--m"></div>
               <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
@@ -139,7 +149,7 @@
                       ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
                       ng-blur="toggleInterval()"
                       data-test-subj="discoverIntervalSelect"
-                      >
+                    >
                     </select>
                     <span ng-if="bucketInterval.scaled">
                       <icon-tip
@@ -160,9 +170,15 @@
               </header>
 
               <div id="discoverHistogram"
+<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/discover/index.html
                  ng-show="vis && rows.length !== 0"
                  style="display: flex; height: 200px"
                 >
+=======
+                   ng-if="vis && rows.length !== 0"
+                   style="display: flex; height: 200px"
+              >
+>>>>>>> wire up the callbacks for the FilterItem:src/core_plugins/kibana/public/discover/index.html
               </div>
             </section>
 

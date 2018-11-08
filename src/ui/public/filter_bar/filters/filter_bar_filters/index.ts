@@ -21,9 +21,10 @@ import { Filter } from 'ui/filter_bar/filters';
 import { createFilterBarPhraseFilter } from 'ui/filter_bar/filters/filter_bar_filters/filter_bar_phrase_filter';
 import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 
-export type FilterBarFilter = Filter & {
+export interface FilterBarFilter {
+  filter: Filter;
   getDisplayText: () => string;
-};
+}
 
 export function createFilterBarFilter(filter: Filter): FilterBarFilter {
   switch (filter.type) {
