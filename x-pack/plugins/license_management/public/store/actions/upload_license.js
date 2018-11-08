@@ -9,10 +9,13 @@ import { addLicense } from '../actions/add_license';
 import { BASE_PATH } from '../../../common/constants/base_path';
 import { putLicense } from '../../lib/es';
 import { addUploadErrorMessage } from "./add_error_message";
+import { i18n } from '@kbn/i18n';
 
 export const uploadLicenseStatus = createAction('LICENSE_MANAGEMENT_UPLOAD_LICENSE_STATUS');
 
-const genericUploadError = 'Error encountered uploading license:';
+const genericUploadError = i18n.translate('xpack.licenseMgmt.uploadLicense.genericUploadErrorMessage', {
+  defaultMessage: 'Error encountered uploading license:'
+});
 
 const dispatchFromResponse = async (response, dispatch, currentLicenseType, newLicenseType, { xPackInfo, kbnUrl }) => {
   const { error, acknowledged, license_status: licenseStatus, acknowledge } = response;
@@ -22,10 +25,14 @@ const dispatchFromResponse = async (response, dispatch, currentLicenseType, newL
   } else if (acknowledged) {
     if (licenseStatus === 'invalid') {
       dispatch(uploadLicenseStatus({}));
-      dispatch(addUploadErrorMessage('The supplied license is not valid for this product.'));
+      dispatch(addUploadErrorMessage(i18n.translate('xpack.licenseMgmt.uploadLicense.invalidLicenseErrorMessage', {
+        defaultMessage: 'The supplied license is not valid for this product.'
+      })));
     } else if (licenseStatus === 'expired') {
       dispatch(uploadLicenseStatus({}));
-      dispatch(addUploadErrorMessage('The supplied license has expired.'));
+      dispatch(addUploadErrorMessage(i18n.translate('xpack.licenseMgmt.uploadLicense.expiredLicenseErrorMessage', {
+        defaultMessage: 'The supplied license has expired.'
+      })));
     } else {
       await xPackInfo.refresh();
       dispatch(addLicense(xPackInfo.get('license')));
@@ -38,9 +45,14 @@ const dispatchFromResponse = async (response, dispatch, currentLicenseType, newL
     // first message relates to command line interface, so remove it
     const messages = Object.values(acknowledge).slice(1);
     // messages can be in nested arrays
-    const first = `Some functionality will be lost if you replace your 
-        ${currentLicenseType.toUpperCase()} license with a
-        ${newLicenseType.toUpperCase()} license.  Review the list of features below.`;
+    const first = i18n.translate('xpack.licenseMgmt.uploadLicense.problemWithUploadedLicenseDescription', {
+      // eslint-disable-next-line max-len
+      defaultMessage: 'Some functionality will be lost if you replace your {currentLicenseType} license with a {newLicenseType} license. Review the list of features below.',
+      values: {
+        currentLicenseType: currentLicenseType.toUpperCase(),
+        newLicenseType: newLicenseType.toUpperCase()
+      }
+    });
     dispatch(uploadLicenseStatus({ acknowledge: true, messages: [ first, ...messages] }));
   }
 
@@ -53,13 +65,23 @@ export const uploadLicense = (licenseString, currentLicenseType, acknowledge) =>
     ({ type: newLicenseType } = JSON.parse(licenseString).license);
   } catch (err) {
     dispatch(uploadLicenseStatus({}));
-    return dispatch(addUploadErrorMessage(`${genericUploadError} Check your license file.`));
+    return dispatch(addUploadErrorMessage(
+      i18n.translate('xpack.licenseMgmt.uploadLicense.checkLicenseFileErrorMessage', {
+        defaultMessage: '{genericUploadError} Check your license file.',
+        values: {
+          genericUploadError
+        }
+      })
+    ));
   }
   try {
     const response = await putLicense(licenseString, acknowledge);
     await dispatchFromResponse(response, dispatch, currentLicenseType, newLicenseType, services);
   } catch (err) {
-    const message = (err.responseJSON && err.responseJSON.error.reason) ? err.responseJSON.error.reason : 'Unknown error.';
+    const message = (err.responseJSON && err.responseJSON.error.reason) ? err.responseJSON.error.reason : i18n.translate(
+      'xpack.licenseMgmt.uploadLicense.unknownErrorErrorMessage', {
+        defaultMessage: 'Unknown error.'
+      });
     dispatch(uploadLicenseStatus({}));
     dispatch(addUploadErrorMessage(`${genericUploadError} ${message}`));
   }

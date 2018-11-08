@@ -16,7 +16,6 @@ import {
 class ConfirmDeleteModalUi extends Component {
   static propTypes = {
     isSingleSelection: PropTypes.bool.isRequired,
-    entity: PropTypes.string.isRequired,
     jobs: PropTypes.array.isRequired,
     onCancel: PropTypes.func.isRequired,
     onConfirm: PropTypes.func.isRequired,
@@ -39,7 +38,6 @@ class ConfirmDeleteModalUi extends Component {
   render() {
     const {
       isSingleSelection,
-      entity,
       jobs,
       onCancel,
       onConfirm,
@@ -52,7 +50,7 @@ class ConfirmDeleteModalUi extends Component {
     if (isSingleSelection) {
       const { id, status } = jobs[0];
       title = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.modalTitleSingle',
+        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.deleteSingleJobTitle',
         defaultMessage: 'Delete rollup job \'{id}\'?',
       }, { id });
 
@@ -60,7 +58,7 @@ class ConfirmDeleteModalUi extends Component {
         content = (
           <p>
             <FormattedMessage
-              id="xpack.rollupJobs.jobActionMenu.deleteJob.deleteDescriptionSingleRunning"
+              id="xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.deleteSingleJobDescription"
               defaultMessage="This job has been started."
             />
           </p>
@@ -68,7 +66,7 @@ class ConfirmDeleteModalUi extends Component {
       }
     } else {
       title = intl.formatMessage({
-        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.modalTitleMultiple',
+        id: 'xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.multipleDeletionTitle',
         defaultMessage: 'Delete {count} rollup jobs?',
       }, { count: jobs.length });
 
@@ -76,12 +74,10 @@ class ConfirmDeleteModalUi extends Component {
         <Fragment>
           <p>
             <FormattedMessage
-              id="xpack.rollupJobs.jobActionMenu.deleteJob.deleteDescriptionMultiple"
-              defaultMessage="You are about to delete {mergedKeyword}"
-              values={{ mergedKeyword: isSingleSelection ? 'this' : 'these' }}
+              id="xpack.rollupJobs.jobActionMenu.deleteJob.confirmModal.multipleDeletionDescription"
+              defaultMessage="You are about to delete {isSingleSelection, plural, one {this job} other {these jobs}}"
+              values={{ isSingleSelection: isSingleSelection ? 1 : 0 }}
             />
-            {' '}
-            {entity}:
           </p>
           {this.renderJobs()}
         </Fragment>

@@ -23,7 +23,7 @@ import { platform as getOsPlatform } from 'os';
 import { getVersionInfo } from './version_info';
 import { createPlatform } from './platform';
 
-export async function getConfig({ isRelease, targetAllPlatforms }) {
+export async function getConfig({ isRelease, targetAllPlatforms, versionQualifier }) {
   const pkgPath = resolve(__dirname, '../../../../package.json');
   const pkg = require(pkgPath);
   const repoRoot = dirname(pkgPath);
@@ -33,6 +33,7 @@ export async function getConfig({ isRelease, targetAllPlatforms }) {
 
   const versionInfo = await getVersionInfo({
     isRelease,
+    versionQualifier,
     pkg,
   });
 

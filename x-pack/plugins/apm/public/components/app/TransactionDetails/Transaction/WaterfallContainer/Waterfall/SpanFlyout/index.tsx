@@ -11,6 +11,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiPortal,
   EuiTitle
 } from '@elastic/eui';
 import { get } from 'lodash';
@@ -18,7 +19,11 @@ import React from 'react';
 import styled from 'styled-components';
 
 // @ts-ignore
-import { SERVICE_LANGUAGE_NAME } from '../../../../../../../../common/constants';
+import {
+  SERVICE_LANGUAGE_NAME,
+  SPAN_HEX_ID,
+  SPAN_ID
+} from '../../../../../../../../common/constants';
 import { px, unit } from '../../../../../../../style/variables';
 
 // @ts-ignore
@@ -29,8 +34,7 @@ import { StickySpanProperties } from './StickySpanProperties';
 
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { Span } from '../../../../../../../../typings/Span';
-// @ts-ignore
-import DiscoverButton from '../../../../../../shared/DiscoverButton';
+import { DiscoverButton } from '../../../../../../shared/DiscoverButton';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
@@ -45,8 +49,8 @@ function getDiscoverQuery(span: Span) {
         language: 'lucene',
         query:
           span.version === 'v2'
-            ? `span.hex_id:${span.span.hex_id}`
-            : `span.id:${span.span.id}`
+            ? `${SPAN_HEX_ID}:"${span.span.hex_id}"`
+            : `${SPAN_ID}:"${span.span.id}"`
       }
     }
   };
@@ -54,8 +58,8 @@ function getDiscoverQuery(span: Span) {
 
 interface Props {
   span?: Span;
-  parentTransaction: Transaction;
-  totalDuration: number;
+  parentTransaction?: Transaction;
+  totalDuration?: number;
   onClose: () => void;
 }
 
@@ -69,36 +73,38 @@ export function SpanFlyout({
     return null;
   }
   const stackframes = span.span.stacktrace;
-  const codeLanguage = get(span, SERVICE_LANGUAGE_NAME);
+  const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
   const dbContext = span.context.db;
 
   return (
-    <EuiFlyout onClose={onClose} size="l">
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2>Span details</h2>
-            </EuiTitle>
-          </EuiFlexItem>
+    <EuiPortal>
+      <EuiFlyout onClose={onClose} size="m" ownFocus={true}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h2>Span details</h2>
+              </EuiTitle>
+            </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <DiscoverButton query={getDiscoverQuery(span)}>
-              {`View span in Discover`}
-            </DiscoverButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <FlyoutTopLevelProperties transaction={parentTransaction} />
-        <EuiHorizontalRule />
-        <StickySpanProperties span={span} totalDuration={totalDuration} />
-        <EuiHorizontalRule />
-        <DatabaseContext dbContext={dbContext} />
-        <StackTraceContainer>
-          <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
-        </StackTraceContainer>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+            <EuiFlexItem grow={false}>
+              <DiscoverButton query={getDiscoverQuery(span)}>
+                {`View span in Discover`}
+              </DiscoverButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <FlyoutTopLevelProperties transaction={parentTransaction} />
+          <EuiHorizontalRule />
+          <StickySpanProperties span={span} totalDuration={totalDuration} />
+          <EuiHorizontalRule />
+          <DatabaseContext dbContext={dbContext} />
+          <StackTraceContainer>
+            <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
+          </StackTraceContainer>
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    </EuiPortal>
   );
 }

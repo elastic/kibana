@@ -89,7 +89,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('data-shared-item title should update a saved search when using a custom panel title', async () => {
+    // TODO: flaky https://github.com/elastic/kibana/issues/24287
+    it.skip('data-shared-item title should update a saved search when using a custom panel title', async () => {
       const CUSTOM_SEARCH_TITLE = 'ima custom title for a search!';
       await dashboardPanelActions.setCustomPanelTitle(CUSTOM_SEARCH_TITLE, 'Rendering Test: saved search');
       await retry.try(async () => {

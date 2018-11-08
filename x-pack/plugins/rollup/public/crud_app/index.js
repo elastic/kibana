@@ -50,6 +50,9 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
       // e.g. to check license status per request.
       setHttp($injector.get('$http'));
 
+      // If returning to the app, we'll need to reset this state.
+      setUserHasLeftApp(false);
+
       $scope.$$postDigest(() => {
         const appElement = document.getElementById('rollupJobsReactRoot');
         renderReact(appElement);

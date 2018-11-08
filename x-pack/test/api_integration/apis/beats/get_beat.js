@@ -18,6 +18,42 @@ export default function ({ getService }) {
     beforeEach('load beats archive', () => esArchiver.load(archive));
     afterEach('unload beats archive', () => esArchiver.unload(archive));
 
+    it('should return no configurations for the beat without tags', async () => {
+      await es.index({
+        index: ES_INDEX_NAME,
+        type: ES_TYPE_NAME,
+        id: `beat:empty`,
+        body: {
+          type: 'beat',
+          beat: {
+            type: 'filebeat',
+            active: true,
+            host_ip: '1.2.3.4',
+            host_name: 'empty.com',
+            id: 'empty',
+            name: 'empty_filebeat',
+            access_token:
+              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI', // eslint-disable-line
+          },
+        },
+      });
+
+      const { body: apiResponse } = await supertest
+        .get('/api/beats/agent/empty/configuration')
+        .set(
+          'kbn-beats-access-token',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
+            'eyJjcmVhdGVkIjoiMjAxOC0wNi0zMFQwMzo0MjoxNS4yMzBaIiwiaWF0IjoxNTMwMzMwMTM1fQ.' +
+            'SSsX2Byyo1B1bGxV8C3G4QldhE5iH87EY_1r21-bwbI'
+        )
+        .expect(200);
+
+      const configurationBlocks = apiResponse.configuration_blocks;
+
+      expect(configurationBlocks).to.be.an(Array);
+      expect(configurationBlocks.length).to.be(0);
+    });
+
     it('should return merged configuration for the beat', async () => {
       const { body: apiResponse } = await supertest
         .get('/api/beats/agent/foo/configuration')

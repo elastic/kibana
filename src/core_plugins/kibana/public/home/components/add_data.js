@@ -229,7 +229,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
               >
                 <FormattedMessage
                   id="kbn.home.addData.uploadFileLink"
-                  defaultMessage="Import a JSON, CSV, or log file"
+                  defaultMessage="Import a CSV, NDJSON, or log file"
                 />
               </EuiLink>
             </EuiText>

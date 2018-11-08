@@ -61,6 +61,7 @@ exports[`InspectorPanel should render as expected 1`] = `
             >
               <EuiTitle
                 size="s"
+                textTransform="none"
               >
                 <h1
                   className="euiTitle euiTitle--small"
