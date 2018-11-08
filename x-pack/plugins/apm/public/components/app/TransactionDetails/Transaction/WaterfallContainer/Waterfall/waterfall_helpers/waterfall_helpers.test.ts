@@ -114,9 +114,8 @@ describe('waterfall_helpers', () => {
         skew: 5,
         duration: 100
       } as IWaterfallItem;
-      const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(130);
+      expect(getClockSkew(item, parentItem)).toBe(130);
     });
 
     it('should adjust when child starts after parent has ended', () => {
@@ -131,9 +130,8 @@ describe('waterfall_helpers', () => {
         skew: 5,
         duration: 100
       } as IWaterfallItem;
-      const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(-120);
+      expect(getClockSkew(item, parentItem)).toBe(-120);
     });
 
     it('should not adjust when child starts within parent duration', () => {
@@ -148,20 +146,22 @@ describe('waterfall_helpers', () => {
         skew: 5,
         duration: 100
       } as IWaterfallItem;
-      const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(0);
+      expect(getClockSkew(item, parentItem)).toBe(0);
     });
 
-    it('should return parentTransactionSkew for spans', () => {
+    it('should return parent skew for spans', () => {
       const item = {
         docType: 'span'
       } as IWaterfallItem;
 
-      const parentItem = {} as IWaterfallItem;
-      const parentTransactionSkew = 1337;
+      const parentItem = {
+        timestamp: 100,
+        skew: 5,
+        duration: 100
+      } as IWaterfallItem;
 
-      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(1337);
+      expect(getClockSkew(item, parentItem)).toBe(5);
     });
 
     it('should handle missing parentItem', () => {
@@ -170,9 +170,8 @@ describe('waterfall_helpers', () => {
       } as IWaterfallItem;
 
       const parentItem = undefined;
-      const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentTransactionSkew, parentItem)).toBe(0);
+      expect(getClockSkew(item, parentItem)).toBe(0);
     });
   });
 });

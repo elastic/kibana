@@ -145,18 +145,19 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
 
 export function getClockSkew(
   item: IWaterfallItem,
-  parentTransactionSkew: number,
   parentItem?: IWaterfallItem
 ) {
-  switch (item.docType) {
-    case 'span':
-      return parentTransactionSkew;
-    case 'transaction': {
-      // For some reason the parent span and related transactions might be missing.
-      if (!parentItem) {
-        return 0;
-      }
+  if (!parentItem) {
+    return 0;
+  }
 
+  switch (item.docType) {
+    // don't calculate skew for spans. Just use parent's skew
+    case 'span':
+      return parentItem.skew;
+
+    // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
+    case 'transaction': {
       const parentStart = parentItem.timestamp + parentItem.skew;
       const parentEnd = parentStart + parentItem.duration;
 
@@ -186,23 +187,21 @@ export function getWaterfallItems(
 ) {
   function getSortedChildren(
     item: IWaterfallItem,
-    parentTransactionSkew: number,
     parentItem?: IWaterfallItem
   ): IWaterfallItem[] {
-    const skew = getClockSkew(item, parentTransactionSkew, parentItem);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
     item.offset = item.timestamp - entryTransactionItem.timestamp;
-    item.skew = skew;
+    item.skew = getClockSkew(item, parentItem);
 
     const deepChildren = flatten(
-      children.map(child => getSortedChildren(child, skew, item))
+      children.map(child => getSortedChildren(child, item))
     );
     return [item, ...deepChildren];
   }
 
-  return getSortedChildren(entryTransactionItem, 0);
+  return getSortedChildren(entryTransactionItem);
 }
 
 function getTraceRoot(childrenByParentId: IWaterfallGroup) {
