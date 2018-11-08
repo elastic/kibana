@@ -11,14 +11,14 @@ exports[`KuiCodeEditor behavior hint element should be disabled when the ui ace 
   <p
     class="kuiText kuiVerticalRhythmSmall"
   >
-    Press Enter to start 
+    Press Enter to start
     editing
     .
   </p>
   <p
     class="kuiText kuiVerticalRhythmSmall"
   >
-    When you’re done, press Escape to stop 
+    When you’re done, press Escape to stop
     editing
     .
   </p>
@@ -36,14 +36,14 @@ exports[`KuiCodeEditor behavior hint element should be enabled when the ui ace b
   <p
     class="kuiText kuiVerticalRhythmSmall"
   >
-    Press Enter to start 
+    Press Enter to start
     editing
     .
   </p>
   <p
     class="kuiText kuiVerticalRhythmSmall"
   >
-    When you’re done, press Escape to stop 
+    When you’re done, press Escape to stop
     editing
     .
   </p>
@@ -61,14 +61,14 @@ exports[`KuiCodeEditor behavior hint element should be tabable 1`] = `
   <p
     class="kuiText kuiVerticalRhythmSmall"
   >
-    Press Enter to start 
+    Press Enter to start
     editing
     .
   </p>
   <p
     class="kuiText kuiVerticalRhythmSmall"
   >
-    When you’re done, press Escape to stop 
+    When you’re done, press Escape to stop
     editing
     .
   </p>
@@ -112,6 +112,7 @@ exports[`KuiCodeEditor is rendered 1`] = `
       wrap="off"
     />
     <div
+      aria-hidden="true"
       class="ace_gutter"
     >
       <div
@@ -225,6 +226,7 @@ exports[`KuiCodeEditor props isReadOnly renders alternate hint text 1`] = `
       wrap="off"
     />
     <div
+      aria-hidden="true"
       class="ace_gutter"
     >
       <div
