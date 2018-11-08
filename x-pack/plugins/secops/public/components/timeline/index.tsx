@@ -5,66 +5,68 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
-import styled from 'styled-components';
-import { ECS } from './ecs';
-
-import { Body } from './body';
+import { connect } from 'react-redux';
+import { ActionCreator } from 'typescript-fsa';
+import { mockECSData } from '../../pages/mock/mock_ecs';
+import { timelineActions } from '../../store';
+import { timelineDefaults } from '../../store/local/timeline/model';
+import { State } from '../../store/reducer';
+import { timelineByIdSelector } from '../../store/selectors';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
+import { ECS } from './ecs';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from './events';
-import { TimelineHeader } from './header/timeline_header';
+import { Timeline } from './timeline';
 
-interface Props {
-  columnHeaders: ColumnHeader[];
-  data: ECS[];
-  dataProviders: DataProvider[];
-  height?: string;
-  onColumnSorted: OnColumnSorted;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onFilterChange: OnFilterChange;
-  onRangeSelected: OnRangeSelected;
-  sort: Sort;
+const onColumnSorted: OnColumnSorted = sorted => {
+  alert(`column sorted: ${JSON.stringify(sorted)}`);
+};
+
+const onDataProviderRemoved: OnDataProviderRemoved = dataProvider => {
+  alert(`data provider removed: ${JSON.stringify(dataProvider)}`);
+};
+
+const onRangeSelected: OnRangeSelected = range => {
+  alert(`range selected: ${range}`);
+};
+
+const onFilterChange: OnFilterChange = filter => {
+  alert(`filter changed: ${JSON.stringify(filter)}`);
+};
+export interface OwnProps {
+  id: string;
+  headers: ColumnHeader[];
   width: number;
 }
 
-const TimelineDiv = styled.div<{ width: string; height: string }>`
-  display: flex;
-  flex-direction: column;
-  min-height: 700px;
-  overflow: none;
-  user-select: none;
-  width: ${props => props.width};
-  height: ${props => props.height};
-`;
+interface StateProps {
+  dataProviders: DataProvider[];
+  data: ECS[];
+  sort: Sort;
+}
 
-const defaultHeight = '100%';
+interface DispatchProps {
+  createTimeline: ActionCreator<{ id: string }>;
+}
 
-/** The parent Timeline component */
-export const Timeline = pure<Props>(
-  ({
-    columnHeaders,
-    dataProviders,
-    data,
-    height = defaultHeight,
-    onColumnSorted,
-    onDataProviderRemoved,
-    onFilterChange,
-    onRangeSelected,
-    sort,
-    width,
-  }) => (
-    <TimelineDiv data-test-subj="timeline" width={`${width}px`} height={height}>
-      <TimelineHeader
+type Props = OwnProps & StateProps & DispatchProps;
+
+class StatefulTimelineComponent extends React.PureComponent<Props> {
+  public componentDidMount() {
+    const { createTimeline, id } = this.props;
+
+    createTimeline({ id });
+  }
+
+  public render() {
+    const { headers, sort, width, dataProviders } = this.props;
+
+    return (
+      <Timeline
+        columnHeaders={headers}
         dataProviders={dataProviders}
-        onDataProviderRemoved={onDataProviderRemoved}
-        width={width}
-      />
-      <Body
-        columnHeaders={columnHeaders}
-        dataProviders={dataProviders}
-        data={data}
+        data={mockECSData}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={onFilterChange}
@@ -72,6 +74,27 @@ export const Timeline = pure<Props>(
         sort={sort}
         width={width}
       />
-    </TimelineDiv>
-  )
-);
+    );
+  }
+}
+
+const mapStateToProps = (state: State, { id }: OwnProps) => {
+  const timeline = timelineByIdSelector(state)[id];
+  const { dataProviders, data, sort } = timeline || timelineDefaults;
+
+  return timeline != null
+    ? timeline
+    : {
+        id,
+        dataProviders,
+        data,
+        sort,
+      };
+};
+
+export const StatefulTimeline = connect(
+  mapStateToProps,
+  {
+    createTimeline: timelineActions.createTimeline,
+  }
+)(StatefulTimelineComponent);

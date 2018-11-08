@@ -8,12 +8,12 @@ import { mount } from 'enzyme';
 import { noop, omit } from 'lodash/fp';
 import * as React from 'react';
 
-import { Timeline } from '.';
 import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
+import { Timeline } from './timeline';
 
 describe('Timeline', () => {
   const sort: Sort = {
