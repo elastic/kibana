@@ -20,22 +20,18 @@
 import _ from 'lodash';
 import html from './vislib_vis_legend.html';
 import { VislibLibDataProvider } from '../../vislib/lib/data';
-import { FilterBarClickHandlerProvider } from '../../filter_bar/filter_bar_click_handler';
 import { uiModules } from '../../modules';
 import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 
 
 uiModules.get('kibana')
-  .directive('vislibLegend', function (Private, getAppState, $timeout) {
+  .directive('vislibLegend', function (Private, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
-    const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
 
     return {
       restrict: 'E',
       template: html,
       link: function ($scope) {
-        const $state = getAppState();
-        const clickHandler = filterBarClickHandler($state);
         $scope.legendId = htmlIdGenerator()('legend');
         $scope.open = $scope.uiState.get('vis.legendOpen', true);
 
@@ -104,11 +100,11 @@ uiModules.get('kibana')
         };
 
         $scope.filter = function (legendData, negate) {
-          clickHandler({ point: legendData, negate: negate });
+          $scope.vis.API.events.filter({ datum: legendData.values, negate: negate });
         };
 
         $scope.canFilter = function (legendData) {
-          const filters = clickHandler({ point: legendData }, true) || [];
+          const filters = $scope.vis.API.events.filter({ datum: legendData.values }, { simulate: true });
           return filters.length;
         };
 
@@ -137,7 +133,7 @@ uiModules.get('kibana')
         function refresh() {
           const vislibVis = $scope.vis.vislibVis;
           if (!vislibVis || !vislibVis.visConfig) {
-            $scope.labels = [{ label: 'loading ...' }];
+            $scope.labels = [{ label: i18n('common.ui.vis.visTypes.legend.loadingLabel', { defaultMessage: 'loading…' }) }];
             return;
           }  // make sure vislib is defined at this point
 

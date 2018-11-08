@@ -359,17 +359,6 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: resolve(__dirname, 'x-pack'),
-          },
-        ],
-      },
-    },
-    {
       files: ['x-pack/plugins/canvas/**/*'],
       plugins: ['prettier'],
       rules: {
@@ -430,6 +419,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/scripts/*.js',
         'x-pack/plugins/canvas/tasks/*.js',
         'x-pack/plugins/canvas/tasks/**/*.js',
         'x-pack/plugins/canvas/__tests__/**/*',
@@ -455,6 +445,18 @@ module.exports = {
             ignore: ['!!raw-loader.+.svg$'],
           },
         ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/public/**/*'],
+      env: {
+        browser: true,
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*'],
+      env: {
+        jquery: true,
       },
     },
   ],

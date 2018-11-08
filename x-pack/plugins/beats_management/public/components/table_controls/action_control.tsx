@@ -5,10 +5,10 @@
  */
 
 import {
-  EuiButton,
   // @ts-ignore EuiConfirmModal typings not included in current EUI
   EuiConfirmModal,
   EuiOverlayMask,
+  EuiTextColor,
 } from '@elastic/eui';
 import React from 'react';
 import { AssignmentActionType } from '../table';
@@ -48,14 +48,14 @@ export class ActionControl extends React.PureComponent<ActionControlProps, Actio
     } = this.props;
     return (
       <div>
-        <EuiButton
-          color={danger ? 'danger' : 'primary'}
+        <EuiTextColor
+          color={danger ? 'danger' : 'default'}
           onClick={
             showWarning ? () => this.setState({ showModal: true }) : () => actionHandler(action)
           }
         >
           {name}
-        </EuiButton>
+        </EuiTextColor>
         {this.state.showModal && (
           <EuiOverlayMask>
             <EuiConfirmModal
