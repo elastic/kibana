@@ -10,7 +10,7 @@ import { getLegendColors } from 'ui/vis/map/color_util';
 
 export const ColorGradient = ({ color }) => {
   const GRADIENT_INTERVALS = 7;
-  const rgbColorStrings = getLegendColors(vislibColorMaps[color], GRADIENT_INTERVALS);
+  const rgbColorStrings = getLegendColors(vislibColorMaps[color].value, GRADIENT_INTERVALS);
   const background = getLinearGradient(rgbColorStrings, GRADIENT_INTERVALS);
   return (
     <div

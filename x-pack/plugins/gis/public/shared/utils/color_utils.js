@@ -14,7 +14,7 @@ export function getRGBColorRangeStrings(colorName, numberColors) {
     throw `${colorName} not found. Expected one of following values: \
       ${colorKeys}`;
   }
-  return getLegendColors(vislibColorMaps[colorName], numberColors);
+  return getLegendColors(vislibColorMaps[colorName].value, numberColors);
 }
 
 export function getHexColorRangeStrings(colorName, numberColors) {
