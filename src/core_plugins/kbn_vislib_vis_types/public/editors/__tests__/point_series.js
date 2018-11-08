@@ -158,4 +158,19 @@ describe('point series editor', function () {
     $parentScope.updateAxisTitle();
     expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Custom Title');
   });
+
+  it('should overwrite the custom title when the agg type changes', function () {
+    const aggConfig = new AggConfig($parentScope.vis.aggs, { type: 'avg', schema: 'metric', params: { field: 'bytes' } });
+
+    $parentScope.editorState.params.valueAxes[0].title.text = 'Custom Title';
+    $parentScope.editorState.aggs[0].params.customLabel = 'Custom Label';
+    $parentScope.updateAxisTitle();
+
+    $parentScope.vis.aggs.push(aggConfig);
+    $parentScope.vis.aggs.shift();
+    $parentScope.$digest();
+    $parentScope.updateAxisTitle();
+
+    expect($parentScope.editorState.params.valueAxes[0].title.text).to.equal('Average bytes');
+  });
 });
