@@ -19,22 +19,21 @@
 
 const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
 
-export function mergeVariables(
-  allDefaults: Record<string, any>,
-  ...incomingDefaults: Array<Record<string, any>>
-) {
-  return incomingDefaults.reduce((acc, defaults) => {
-    Object.entries(defaults).forEach(([key, value]) => {
+export function mergeVariables(...sources: Array<Record<string, any>>) {
+  const result: Record<string, any> = {};
+
+  for (const source of sources) {
+    Object.entries(source).forEach(([key, value]) => {
       if (ELIGIBLE_FLAT_MERGE_KEYS.includes(key)) {
-        acc[key] = {
+        result[key] = {
           ...value,
-          ...acc[key],
+          ...result[key],
         };
-      } else if (!acc.hasOwnProperty(key)) {
-        acc[key] = value;
+      } else if (!result.hasOwnProperty(key)) {
+        result[key] = value;
       }
     });
+  }
 
-    return acc;
-  }, allDefaults);
+  return result;
 }

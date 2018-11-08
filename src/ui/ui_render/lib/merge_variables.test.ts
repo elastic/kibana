@@ -37,18 +37,8 @@ describe('mergeVariables', () => {
       },
     };
 
-    const result = {};
+    const result = mergeVariables(someVariables, otherVariables);
 
-    mergeVariables(result, someVariables);
-    expect(result).toEqual({
-      name: 'value',
-      canFoo: true,
-      nested: {
-        anotherVariable: 'ok',
-      },
-    });
-
-    mergeVariables(result, otherVariables);
     expect(result).toEqual({
       name: 'value',
       canFoo: true,
@@ -63,7 +53,11 @@ describe('mergeVariables', () => {
     });
   });
 
-  it('merges multiple objects together, preferring the leftmost values', () => {
+  it('does not mutate the source objects', () => {
+    const original = {
+      var1: 'original',
+    };
+
     const set1 = {
       var1: 'value1',
       var2: 'value1',
@@ -82,11 +76,38 @@ describe('mergeVariables', () => {
       var4: 'value3',
     };
 
-    const result = {
+    mergeVariables(original, set1, set2, set3);
+
+    expect(original).toEqual({ var1: 'original' });
+    expect(set1).toEqual({ var1: 'value1', var2: 'value1' });
+    expect(set2).toEqual({ var1: 'value2', var2: 'value2', var3: 'value2' });
+    expect(set3).toEqual({ var1: 'value3', var2: 'value3', var3: 'value3', var4: 'value3' });
+  });
+
+  it('merges multiple objects together, preferring the leftmost values', () => {
+    const original = {
       var1: 'original',
     };
 
-    mergeVariables(result, set1, set2, set3);
+    const set1 = {
+      var1: 'value1',
+      var2: 'value1',
+    };
+
+    const set2 = {
+      var1: 'value2',
+      var2: 'value2',
+      var3: 'value2',
+    };
+
+    const set3 = {
+      var1: 'value3',
+      var2: 'value3',
+      var3: 'value3',
+      var4: 'value3',
+    };
+
+    const result = mergeVariables(original, set1, set2, set3);
 
     expect(result).toEqual({
       var1: 'original',
@@ -111,18 +132,7 @@ describe('mergeVariables', () => {
       },
     };
 
-    const result = {};
-
-    mergeVariables(result, someVariables);
-    expect(result).toEqual({
-      name: 'value',
-      canFoo: true,
-      nested: {
-        anotherVariable: 'ok',
-      },
-    });
-
-    mergeVariables(result, otherVariables);
+    const result = mergeVariables(someVariables, otherVariables);
     expect(result).toEqual({
       name: 'value',
       canFoo: true,
@@ -147,18 +157,8 @@ describe('mergeVariables', () => {
       },
     };
 
-    const result = {};
+    const result = mergeVariables(someVariables, otherVariables);
 
-    mergeVariables(result, someVariables);
-    expect(result).toEqual({
-      name: 'value',
-      canFoo: true,
-      uiCapabilities: {
-        firstCapability: 'ok',
-      },
-    });
-
-    mergeVariables(result, otherVariables);
     expect(result).toEqual({
       name: 'value',
       canFoo: true,
@@ -190,9 +190,7 @@ describe('mergeVariables', () => {
       },
     };
 
-    const result = {};
-
-    mergeVariables(result, someVariables, otherVariables);
+    const result = mergeVariables(someVariables, otherVariables);
     expect(result).toEqual({
       name: 'value',
       canFoo: true,
