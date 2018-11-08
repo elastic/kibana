@@ -16,6 +16,8 @@ exports[`i18n utils should not escape linebreaks 1`] = `
 "
 `;
 
+exports[`i18n utils should parse string concatenation 1`] = `"Very long concatenated string"`;
+
 exports[`i18n utils should throw if "values" has a value that is unused in the message 1`] = `
 "\\"values\\" object contains unused properties (\\"namespace.message.id\\"):
 [url]."
