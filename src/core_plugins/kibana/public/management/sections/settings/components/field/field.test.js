@@ -243,12 +243,15 @@ describe('Field', () => {
             ...component.instance().props.setting,
             value: userValue,
           } });
+
+          await component.instance().cancelChangeImage();
           component.update();
         });
 
         it('should be able to change value from existing value and save', async () => {
-          const newUserValue = `${userValue}=`;
           findTestSubject(component, `advancedSetting-changeImage-${setting.name}`).simulate('click');
+
+          const newUserValue = `${userValue}=`;
           await component.instance().onImageChange([newUserValue]);
           component.update();
           findTestSubject(component, `advancedSetting-saveEditField-${setting.name}`).simulate('click');
