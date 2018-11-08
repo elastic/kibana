@@ -34,9 +34,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const toTime = '2015-09-22 18:31:44.000';
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       log.debug('clickVisualBuilderChart');
-      await find.clickByPartialLinkText('Visual Builder');
+      await PageObjects.visualize.clickVisualBuilder();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
       await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.header.waitUntilLoadingHasFinished();
