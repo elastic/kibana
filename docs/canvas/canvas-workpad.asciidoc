@@ -1,0 +1,42 @@
+[[canvas-workpad]]
+=== Using the workpad
+
+You have a workpad you can mess with, so let’s mess with it. We’ll start 
+out easy and make a couple simple changes. 
+
+. Click the gauge chart in the top left (fun fact, these are actually pie charts). 
+. Try clicking the little red slice. If you click the number, you'll notice 
+you’ve actually selected a number element, not the gauge itself. 
++ 
+This element is now selected. Off to the left, you'll see that the side bar has changed. 
+This is where you can make changes to the element.
+
+. Try changing the color palette. Easy right? Click the Back button in your 
+browser to undo your change.
+
+. Try dragging the chart around the page. Grab the resize handles to make 
+the chart bigger and smaller.
+
+You can now click somewhere off of the element, but not on another element, 
+to deselect it. You will notice the sidebar changing again. You now have 
+access to the page and workpad-level settings. Feel free to change the page 
+background color or rename your workpad.
+
+Speaking of pages, Canvas workpads have multiple pages.
+
+. Click the arrow to the right of the *Page 1 of 2* text in the toolbar at the bottom. 
+You'll see a whole new view of the the eCommerce data.
+. Click the *Page 1 of 2* text to see a live preview of all of the pages in your 
+workpad.
+. Click the (+) button to create a new, blank page.
+. Click the *Add element* button in the top right hand corner of the page.
+. Add an *Area Chart.*
+
+You should now have a three-page workpad wired, and a new element connected 
+to some demo data.  Your next stop should probably be “Datasources and the 
+elements that love them” to learn how to take your new element and wire it 
+up to some real data.
+
+
+
+

@@ -1,0 +1,21 @@
+[[canvas]]
+= Canvas
+
+[partintro]
+--
+
+Congratulations on finding the Canvas application in {kib}. You are in for a treat. 
+Canvas is a whole new way of making data look amazing. Canvas combines data with 
+colors, shapes, text and your own imagination to bring dynamic, multi-page, 
+pixel perfect, data displays to screens large and small. 
+
+We made Canvas for people like us. We figure, you are probably people like us: 
+You make neat stuff and you want to show that neat stuff to others. Canvas is 
+for makers who are a little bit creative, a little bit technical, and whole lot of curious.
+
+--
+
+include::canvas/canvas-getting-started.asciidoc[]
+
+include::canvas/canvas-workpad.asciidoc[]
+
