@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { VectorStyleColorEditor } from './components/vector_style_color_editor';
+import { VectorStyleColorEditor } from './components/vector/color/vector_style_color_editor';
 
 import {
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import { FillableCircle, FillableVector } from '../../icons/additional_layer_ico
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import _ from 'lodash';
+import { VectorStyleSizeEditor } from './components/vector/size/vector_style_size_editor';
 
 
 const DEFAULT_COLOR = '#e6194b';
@@ -34,12 +35,6 @@ export class VectorStyle {
 
   static canEdit(styleInstance) {
     return styleInstance.constructor === VectorStyle;
-  }
-
-  static createDescriptorForSingleProperty(propertyType, propertyValue) {
-    return VectorStyle.createDescriptor({
-      [propertyType]: propertyValue
-    });
   }
 
   static createDescriptor(properties) {
@@ -82,6 +77,9 @@ export class VectorStyle {
               colorStyleDescriptor={properties.lineColor}
               layer={layer}
             />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <VectorStyleSizeEditor />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

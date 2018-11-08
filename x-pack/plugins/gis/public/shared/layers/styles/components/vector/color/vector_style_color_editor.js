@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { VectorStyle } from '../vector_style';
+import { VectorStyle } from '../../../vector_style';
 import { DynamicColorSelection } from './dynamic_color_selection';
 import { StaticColorSelection } from './static_color_selection';
 import _ from 'lodash';
@@ -69,11 +69,10 @@ export class VectorStyleColorEditor extends React.Component {
       return staticStyle;
     };
 
-    const changeToDynamicColor = (field, color) => {
+    const changeToDynamicColor = (field) => {
       const dynamicStyle = {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
-          color,
           field: field ? field.value : undefined
         }
       };
