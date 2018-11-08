@@ -53,22 +53,24 @@ const eventsColumns: Columns[] = [
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: (item: EventItem) => <span>{getOr('n/a', 'host.hostname', item)}</span>,
+    render: (item: EventItem) => (
+      <React.Fragment>{getOr('--', 'host.hostname', item)}</React.Fragment>
+    ),
   },
   {
     name: 'Event type',
     sortable: true,
     truncateText: true,
     hideForMobile: true,
-    render: (item: EventItem) => <span>{getOr('n/a', 'event.type', item)}</span>,
+    render: (item: EventItem) => <React.Fragment>{getOr('--', 'event.type', item)}</React.Fragment>,
   },
   {
     name: 'Source',
     truncateText: true,
     render: (item: EventItem) => (
-      <span>
-        {getOr('n/a', 'source.ip', item).slice(0, 12)} : {getOr('n/a', 'source.port', item)}
-      </span>
+      <React.Fragment>
+        {getOr('--', 'source.ip', item).slice(0, 12)} : {getOr('--', 'source.port', item)}
+      </React.Fragment>
     ),
   },
   {
@@ -76,10 +78,9 @@ const eventsColumns: Columns[] = [
     sortable: true,
     truncateText: true,
     render: (item: EventItem) => (
-      <span>
-        {getOr('n/a', 'destination.ip', item).slice(0, 12)} :
-        {getOr('n/a', 'destination.port', item)}
-      </span>
+      <React.Fragment>
+        {getOr('--', 'destination.ip', item).slice(0, 12)} : {getOr('--', 'destination.port', item)}
+      </React.Fragment>
     ),
   },
   {
@@ -87,9 +88,9 @@ const eventsColumns: Columns[] = [
     sortable: true,
     truncateText: true,
     render: (item: EventItem) => (
-      <span>
-        {getOr('n/a', 'geo.region_name', item)} - {getOr('n/a', 'geo.country_iso_code', item)}
-      </span>
+      <React.Fragment>
+        {getOr('--', 'geo.region_name', item)} - {getOr('--', 'geo.country_iso_code', item)}
+      </React.Fragment>
     ),
   },
 ];
