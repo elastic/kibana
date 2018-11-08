@@ -47,7 +47,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       // to re-compute the license check results for this plugin
       xpackMainPlugin.info
         .feature(PLUGIN.ID)
-        .registerLicenseCheckResultsGenerator(this.checkLicense);
+        .registerLicenseCheckResultsGenerator((xPackInfo: any) => this.checkLicense(xPackInfo));
     });
   }
   // TODO make base path a constructor level param
