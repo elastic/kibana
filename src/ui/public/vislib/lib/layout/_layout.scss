@@ -284,7 +284,7 @@
   /* Brush Styling */
   .brush .extent {
     shape-rendering: crispEdges;
-    stroke: $visHoverBackgroundColorReversed;
+    fill: $visHoverBackgroundColor;
   }
 
   .visAreaChart__overlapArea {
