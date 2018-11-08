@@ -6,26 +6,11 @@
 
 /* tslint:disable no-console */
 import { SearchParams, SearchResponse } from 'elasticsearch';
-import { Request } from 'hapi';
 import moment from 'moment';
+import { KibanaConfig, Request } from 'src/server/kbn_server';
 
 function decodeEsQuery(esQuery?: string): object {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
-}
-
-interface KibanaConfig {
-  get: (key: string) => any;
-}
-
-// Extend the defaults with the plugins and server methods we need.
-declare module 'hapi' {
-  interface PluginProperties {
-    elasticsearch: any;
-  }
-
-  interface Server {
-    config: () => KibanaConfig;
-  }
 }
 
 type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
@@ -49,7 +34,10 @@ export function setupRequest(req: Request) {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
-  function client<T>(type: string, params: SearchParams): SearchResponse<T> {
+  function client<T>(
+    type: string,
+    params: SearchParams
+  ): Promise<SearchResponse<T>> {
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
       console.log(
@@ -60,7 +48,7 @@ export function setupRequest(req: Request) {
       console.log(`GET ${params.index}/_search`);
       console.log(JSON.stringify(params.body, null, 4));
     }
-    return cluster.callWithRequest(req, type, params);
+    return cluster.callWithRequest<SearchResponse<T>>(req, type, params);
   }
 
   return {

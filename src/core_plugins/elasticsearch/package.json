@@ -1,4 +1,5 @@
 {
   "name": "elasticsearch",
-  "version": "kibana"
+  "version": "kibana",
+  "types": "index.d.ts"
 }

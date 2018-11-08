@@ -25,13 +25,6 @@ import {
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
 
-declare module 'hapi' {
-  interface PluginProperties {
-    elasticsearch: any;
-    kibana: any;
-  }
-}
-
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
   private server: Server;
