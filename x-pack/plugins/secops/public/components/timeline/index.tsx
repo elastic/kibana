@@ -104,6 +104,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         columnRenderers={columnRenderers}
         dataProviders={dataProviders}
         data={data}
+        id={id}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery

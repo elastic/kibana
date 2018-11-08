@@ -7,6 +7,7 @@
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
 import {
@@ -23,7 +24,9 @@ describe('DataProviders', () => {
       const dataProviders: DataProvider[] = [];
 
       const wrapper = mount(
-        <DataProviders dataProviders={dataProviders} onDataProviderRemoved={noop} />
+        <DragDropContext onDragEnd={noop}>
+          <DataProviders dataProviders={dataProviders} id="foo" onDataProviderRemoved={noop} />
+        </DragDropContext>
       );
 
       expect(wrapper.text()).toContain(dropMessage);
@@ -31,7 +34,9 @@ describe('DataProviders', () => {
 
     test('it should NOT render a placeholder given a non-empty collection of data providers', () => {
       const wrapper = mount(
-        <DataProviders dataProviders={mockDataProviders} onDataProviderRemoved={noop} />
+        <DragDropContext onDragEnd={noop}>
+          <DataProviders dataProviders={mockDataProviders} id="foo" onDataProviderRemoved={noop} />
+        </DragDropContext>
       );
 
       expect(wrapper.text()).not.toContain(dropMessage);
@@ -39,7 +44,9 @@ describe('DataProviders', () => {
 
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <DataProviders dataProviders={mockDataProviders} onDataProviderRemoved={noop} />
+        <DragDropContext onDragEnd={noop}>
+          <DataProviders dataProviders={mockDataProviders} id="foo" onDataProviderRemoved={noop} />
+        </DragDropContext>
       );
 
       mockDataProviderNames().forEach(name =>

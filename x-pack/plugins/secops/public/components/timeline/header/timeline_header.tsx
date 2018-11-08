@@ -13,6 +13,7 @@ import { DataProvider } from '../data_providers/data_provider';
 import { OnDataProviderRemoved } from '../events';
 
 interface Props {
+  id: string;
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
   width: number;
@@ -25,8 +26,12 @@ const Header = styled.header<{ width: string }>`
 `;
 
 /** Renders the timeline header */
-export const TimelineHeader = pure<Props>(({ dataProviders, onDataProviderRemoved, width }) => (
+export const TimelineHeader = pure<Props>(({ dataProviders, id, onDataProviderRemoved, width }) => (
   <Header data-test-subj="timelineHeader" width={`${width}px`}>
-    <DataProviders dataProviders={dataProviders} onDataProviderRemoved={onDataProviderRemoved} />
+    <DataProviders
+      dataProviders={dataProviders}
+      id={id}
+      onDataProviderRemoved={onDataProviderRemoved}
+    />
   </Header>
 ));

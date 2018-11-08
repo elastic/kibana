@@ -5,6 +5,7 @@
  */
 
 import * as React from 'react';
+import { Droppable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -14,6 +15,7 @@ import { Empty } from './empty';
 import { Providers } from './providers';
 
 interface Props {
+  id: string;
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
 }
@@ -28,6 +30,8 @@ const DropTargetDataProviders = styled.div`
   min-height: 100px;
   padding: 5px;
 `;
+
+const ReactDndDropTarget = styled.div``;
 
 /**
  * Renders the data providers section of the timeline.
@@ -46,12 +50,21 @@ const DropTargetDataProviders = styled.div`
  * the user to drop anything with a facet count into
  * the data pro section.
  */
-export const DataProviders = pure<Props>(({ dataProviders, onDataProviderRemoved }) => (
+export const DataProviders = pure<Props>(({ id, dataProviders, onDataProviderRemoved }) => (
   <DropTargetDataProviders data-test-subj="dataProviders">
-    {dataProviders.length ? (
-      <Providers dataProviders={dataProviders} onDataProviderRemoved={onDataProviderRemoved} />
-    ) : (
-      <Empty />
-    )}
+    <Droppable droppableId={`timeline-${id}-providers`}>
+      {provided => (
+        <ReactDndDropTarget innerRef={provided.innerRef} {...provided.droppableProps}>
+          {dataProviders.length ? (
+            <Providers
+              dataProviders={dataProviders}
+              onDataProviderRemoved={onDataProviderRemoved}
+            />
+          ) : (
+            <Empty />
+          )}
+        </ReactDndDropTarget>
+      )}
+    </Droppable>
   </DropTargetDataProviders>
 ));

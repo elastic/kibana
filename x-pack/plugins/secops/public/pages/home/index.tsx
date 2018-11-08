@@ -11,10 +11,11 @@ import {
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import SplitPane from 'react-split-pane';
 import { pure } from 'recompose';
 
-import SplitPane from 'react-split-pane';
 import { LinkToPage } from '../../components/link_to';
 import {
   PageContainer,
@@ -46,54 +47,56 @@ const maxTimelineWidth = 1125;
 
 export const HomePage = pure(() => (
   <PageContainer data-test-subj="pageContainer">
-    <PageHeader data-test-subj="pageHeader">
-      <Navigation data-test-subj="navigation" />
-    </PageHeader>
-    <PageContent data-test-subj="pageContent">
-      <SubHeader data-test-subj="subHeader">
-        <SubHeaderDatePicker data-test-subj="datePickerContainer">
-          <DatePicker />
-        </SubHeaderDatePicker>
-        <EuiHorizontalRule margin="none" />
-      </SubHeader>
+    <DragDropContext onDragEnd={noop}>
+      <PageHeader data-test-subj="pageHeader">
+        <Navigation data-test-subj="navigation" />
+      </PageHeader>
+      <PageContent data-test-subj="pageContent">
+        <SubHeader data-test-subj="subHeader">
+          <SubHeaderDatePicker data-test-subj="datePickerContainer">
+            <DatePicker />
+          </SubHeaderDatePicker>
+          <EuiHorizontalRule margin="none" />
+        </SubHeader>
 
-      <SplitPane
-        data-test-subj="splitPane"
-        split="vertical"
-        defaultSize="75%"
-        primary="second"
-        pane1Style={Pane1Style}
-        pane2Style={{
-          ...Pane2Style,
-          maxWidth: `${maxTimelineWidth}px`,
-        }}
-        resizerStyle={ResizerStyle}
-      >
-        <Pane1 data-test-subj="pane1">
-          <Pane1Header data-test-subj="pane1Header">
-            <EuiSearchBar onChange={noop} />
-          </Pane1Header>
-          <PaneScrollContainer data-test-subj="pane1ScrollContainer">
-            <Pane1FlexContent data-test-subj="pane1FlexContent">
-              <Switch>
-                <Redirect from="/" exact={true} to="/overview" />
-                <Route path="/overview" component={Overview} />
-                <Route path="/hosts" component={Hosts} />
-                <Route path="/network" component={Network} />
-                <Route path="/link-to" component={LinkToPage} />
-                <Route component={NotFoundPage} />
-              </Switch>
-            </Pane1FlexContent>
-          </PaneScrollContainer>
-        </Pane1>
+        <SplitPane
+          data-test-subj="splitPane"
+          split="vertical"
+          defaultSize="75%"
+          primary="second"
+          pane1Style={Pane1Style}
+          pane2Style={{
+            ...Pane2Style,
+            maxWidth: `${maxTimelineWidth}px`,
+          }}
+          resizerStyle={ResizerStyle}
+        >
+          <Pane1 data-test-subj="pane1">
+            <Pane1Header data-test-subj="pane1Header">
+              <EuiSearchBar onChange={noop} />
+            </Pane1Header>
+            <PaneScrollContainer data-test-subj="pane1ScrollContainer">
+              <Pane1FlexContent data-test-subj="pane1FlexContent">
+                <Switch>
+                  <Redirect from="/" exact={true} to="/overview" />
+                  <Route path="/overview" component={Overview} />
+                  <Route path="/hosts" component={Hosts} />
+                  <Route path="/network" component={Network} />
+                  <Route path="/link-to" component={LinkToPage} />
+                  <Route component={NotFoundPage} />
+                </Switch>
+              </Pane1FlexContent>
+            </PaneScrollContainer>
+          </Pane1>
 
-        <Pane2 data-test-subj="pane2">
-          <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
-            <StatefulTimeline id="pane2-timeline" headers={headers} width={maxTimelineWidth} />
-          </Pane2TimelineContainer>
-        </Pane2>
-      </SplitPane>
-    </PageContent>
-    <Footer />
+          <Pane2 data-test-subj="pane2">
+            <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
+              <StatefulTimeline id="pane2-timeline" headers={headers} width={maxTimelineWidth} />
+            </Pane2TimelineContainer>
+          </Pane2>
+        </SplitPane>
+      </PageContent>
+      <Footer />
+    </DragDropContext>
   </PageContainer>
 ));

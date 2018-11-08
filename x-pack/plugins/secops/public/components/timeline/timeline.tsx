@@ -25,6 +25,7 @@ interface Props {
   data: ECS[];
   dataProviders: DataProvider[];
   height?: string;
+  id: string;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
@@ -55,6 +56,7 @@ export const Timeline = pure<Props>(
     dataProviders,
     data,
     height = defaultHeight,
+    id,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
@@ -66,6 +68,7 @@ export const Timeline = pure<Props>(
   }) => (
     <TimelineDiv data-test-subj="timeline" width={`${width}px`} height={height}>
       <TimelineHeader
+        id={id}
         dataProviders={dataProviders}
         onDataProviderRemoved={onDataProviderRemoved}
         width={width}

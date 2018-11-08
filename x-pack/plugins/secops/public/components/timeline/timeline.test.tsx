@@ -7,6 +7,7 @@
 import { mount } from 'enzyme';
 import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
 
 import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
@@ -25,20 +26,22 @@ describe('Timeline', () => {
   describe('rendering', () => {
     test('it renders the timeline header', () => {
       const wrapper = mount(
-        <Timeline
-          columnHeaders={headers}
-          columnRenderers={columnRenderers}
-          data={mockECSData}
-          dataProviders={mockDataProviders}
-          onColumnSorted={noop}
-          onDataProviderRemoved={noop}
-          onFilterChange={noop}
-          onRangeSelected={noop}
-          range={'1 Day'}
-          rowRenderers={rowRenderers}
-          sort={sort}
-          width={1000}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <Timeline
+            columnHeaders={headers}
+            columnRenderers={columnRenderers}
+            data={mockECSData}
+            dataProviders={mockDataProviders}
+            onColumnSorted={noop}
+            onDataProviderRemoved={noop}
+            onFilterChange={noop}
+            onRangeSelected={noop}
+            range={'1 Day'}
+            rowRenderers={rowRenderers}
+            sort={sort}
+            width={1000}
+          />
+        </DragDropContext>
       );
 
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
@@ -46,20 +49,22 @@ describe('Timeline', () => {
 
     test('it renders the timeline body', () => {
       const wrapper = mount(
-        <Timeline
-          columnHeaders={headers}
-          columnRenderers={columnRenderers}
-          data={mockECSData}
-          dataProviders={mockDataProviders}
-          onColumnSorted={noop}
-          onDataProviderRemoved={noop}
-          onFilterChange={noop}
-          onRangeSelected={noop}
-          range={'1 Day'}
-          rowRenderers={rowRenderers}
-          sort={sort}
-          width={1000}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <Timeline
+            columnHeaders={headers}
+            columnRenderers={columnRenderers}
+            data={mockECSData}
+            dataProviders={mockDataProviders}
+            onColumnSorted={noop}
+            onDataProviderRemoved={noop}
+            onFilterChange={noop}
+            onRangeSelected={noop}
+            range={'1 Day'}
+            rowRenderers={rowRenderers}
+            sort={sort}
+            width={1000}
+          />
+        </DragDropContext>
       );
 
       expect(wrapper.find('[data-test-subj="body"]').exists()).toEqual(true);
@@ -72,20 +77,22 @@ describe('Timeline', () => {
         const mockOnColumnSorted = jest.fn();
 
         const wrapper = mount(
-          <Timeline
-            columnHeaders={headers}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={mockOnColumnSorted}
-            onDataProviderRemoved={noop}
-            onFilterChange={noop}
-            onRangeSelected={noop}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <DragDropContext onDragEnd={noop}>
+            <Timeline
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              data={mockECSData}
+              dataProviders={mockDataProviders}
+              onColumnSorted={mockOnColumnSorted}
+              onDataProviderRemoved={noop}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </DragDropContext>
         );
 
         wrapper
@@ -105,20 +112,22 @@ describe('Timeline', () => {
         const mockOnDataProviderRemoved = jest.fn();
 
         const wrapper = mount(
-          <Timeline
-            columnHeaders={headers}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={noop}
-            onDataProviderRemoved={mockOnDataProviderRemoved}
-            onFilterChange={noop}
-            onRangeSelected={noop}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <DragDropContext onDragEnd={noop}>
+            <Timeline
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              data={mockECSData}
+              dataProviders={mockDataProviders}
+              onColumnSorted={noop}
+              onDataProviderRemoved={mockOnDataProviderRemoved}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </DragDropContext>
         );
 
         wrapper
@@ -152,20 +161,22 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <Timeline
-            columnHeaders={allColumnsHaveTextFilters}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={noop}
-            onDataProviderRemoved={noop}
-            onFilterChange={mockOnFilterChange}
-            onRangeSelected={noop}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <DragDropContext onDragEnd={noop}>
+            <Timeline
+              columnHeaders={allColumnsHaveTextFilters}
+              columnRenderers={columnRenderers}
+              data={mockECSData}
+              dataProviders={mockDataProviders}
+              onColumnSorted={noop}
+              onDataProviderRemoved={noop}
+              onFilterChange={mockOnFilterChange}
+              onRangeSelected={noop}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </DragDropContext>
         );
 
         wrapper
@@ -186,20 +197,22 @@ describe('Timeline', () => {
         const mockOnRangeSelected = jest.fn();
 
         const wrapper = mount(
-          <Timeline
-            columnHeaders={headers}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={noop}
-            onDataProviderRemoved={noop}
-            onFilterChange={noop}
-            onRangeSelected={mockOnRangeSelected}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <DragDropContext onDragEnd={noop}>
+            <Timeline
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              data={mockECSData}
+              dataProviders={mockDataProviders}
+              onColumnSorted={noop}
+              onDataProviderRemoved={noop}
+              onFilterChange={noop}
+              onRangeSelected={mockOnRangeSelected}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </DragDropContext>
         );
 
         wrapper
