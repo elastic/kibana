@@ -1,12 +1,12 @@
 [[canvas-getting-started]]
 == Getting started with Canvas
 
-Getting started with Canvas is easy. Your best bet is to check out one 
+beta[]Getting started with Canvas is easy. Your best bet is to check out one 
 (or all) of the sample data sets that ship with {kib}. 
 
 . Click the {kib} logo in the upper left hand corner of your browser to navigate 
 to the {kib} home page.
-. Click *Load a data set and a Kibana dashboard*. This will also load a 
+. Click *Load a data set and a Kibana dashboard*. This also loads a 
 Canvas workpad to go with the data set.
 . Pick a data set. Let’s go with the eCommerce one for this example. 
 +  
@@ -15,6 +15,9 @@ some of that data for later.
 
 . Click the Canvas icon in the left hand navigation menu.
 . Find the *[eCommerce] Revenue Tracking* workpad and click on its name to open it.
+
+[role="screenshot"]
+image::images/canvas-ecommerce.png[]
 
 You’re in! The first thing to do is to make a copy of this 
 workpad so you can come back to it later if needed. We’ll be making a mess 
@@ -28,5 +31,4 @@ workpad from here, but let's not for now.
 . Click the *Clone* icon in the *[eCommerce] Revenue Tracking* row.
 +
 You now have a new workpad called *[eCommerce] Revenue Tracking - Copy*.
-
 
