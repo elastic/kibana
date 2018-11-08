@@ -48,28 +48,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       loadTestFile(require.resolve('./_create_and_add_embeddables'));
       loadTestFile(require.resolve('./_time_zones'));
       loadTestFile(require.resolve('./_dashboard_options'));
-
       loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-      loadTestFile(require.resolve('./_data_shared_attributes'));
-
       loadTestFile(require.resolve('./_embed_mode'));
       loadTestFile(require.resolve('./_full_screen_mode'));
       loadTestFile(require.resolve('./_dashboard_filter_bar'));
