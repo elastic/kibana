@@ -101,7 +101,7 @@ fully supported for the Watcher UI. To receive cluster alert notification emails
 configure `xpack.monitoring.cluster_alerts.email_notifications.email_address` in `kibana.yml`.
 
 [float]
-=== Kibana plugin API changes
+=== Plugin API changes
 
 See https://www.elastic.co/blog/kibana-plugin-api-changes-in-6-5[Kibana plugin API changes in 6.5], which describes changes to the visualizations 
 response handler, data schema, and aggregations.

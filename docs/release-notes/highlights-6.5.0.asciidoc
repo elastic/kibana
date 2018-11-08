@@ -86,6 +86,9 @@ Timelion, Visual Builder, and Vega visualizations. You can also create dashboard
 that use visualizations based on rolled up and raw data. Finally, both rolled up 
 and raw data are available in Discover.
 
+[role="screenshot"]
+image::images/highlights_6_5_rollup-viz.png[Beats management UI]
+
 [float]
 === Manage your Beats in a central location (beta)
 
