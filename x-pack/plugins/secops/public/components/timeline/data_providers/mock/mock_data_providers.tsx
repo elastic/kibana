@@ -27,6 +27,7 @@ const mockSourceNameToEventCount: NameToEventCount<number> = {
   'Provider 7': 533,
   'Provider 8': 429,
   'Provider 9': 706,
+  'Provider 10': 863,
 };
 
 /** Returns a collection of mock data provider names */
@@ -48,6 +49,7 @@ const Text = styled(EuiText)`
 export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEventCount).map(
   name => ({
     enabled: true,
+    getQuery: () => `query-for-provider-id-${name}`,
     id: `id-${name}`,
     name,
     negated: false,

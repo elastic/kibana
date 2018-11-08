@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { Range } from '../body/column_headers/range_picker/ranges';
 import { DataProvider } from '../data_providers/data_provider';
 import { ECS } from '../ecs';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from '../events';
@@ -27,6 +28,7 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
+  range: Range;
   rowRenderers: RowRenderer[];
   sort: Sort;
   width: number;
@@ -79,6 +81,7 @@ const Pin = styled(EuiIcon)`
 
 const DataDrivenColumns = styled.div`
   display: flex;
+  margin-left: 5px;
   width: 100%;
 `;
 
@@ -99,6 +102,7 @@ export const Body = pure<Props>(
     onColumnSorted,
     onFilterChange,
     onRangeSelected,
+    range,
     rowRenderers,
     sort,
     width,
@@ -109,6 +113,7 @@ export const Body = pure<Props>(
         onColumnSorted={onColumnSorted}
         onFilterChange={onFilterChange}
         onRangeSelected={onRangeSelected}
+        range={range}
         sort={sort}
       />
       <EuiHorizontalRule margin="xs" />
