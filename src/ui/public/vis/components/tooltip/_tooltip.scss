@@ -21,10 +21,12 @@
   > * {
     margin: $euiSizeS $euiSizeS 0;
   }
+  overflow-wrap: break-word;
 
   table {
     td,th {
       padding: $euiSizeXS;
+      vertical-align: bottom;
     }
   }
 }
