@@ -12,6 +12,11 @@ import { restoreHistory, undoHistory, redoHistory } from '../actions/history';
 import { initializeWorkpad } from '../actions/workpad';
 import { isAppReady } from '../selectors/app';
 
+function getHistoryState(state) {
+  // this is what gets written to browser history
+  return state.persistent;
+}
+
 export const historyMiddleware = ({ dispatch, getState }) => {
   // iterate over routes, injecting redux to action handlers
   const reduxInject = routes => {
@@ -99,14 +104,17 @@ export const historyMiddleware = ({ dispatch, getState }) => {
     // if app switched from not ready to ready, replace current state
     // this allows the back button to work correctly all the way to first page load
     if (!isAppReady(oldState) && isAppReady(newState)) {
-      history.replace(newState.persistent);
+      history.replace(getHistoryState(newState));
       return;
     }
 
     // if the persistent state changed, push it into the history
-    if (!isEqual(newState.persistent, oldState.persistent)) {
+    const oldHistoryState = getHistoryState(oldState);
+    const historyState = getHistoryState(newState);
+    if (!isEqual(historyState, oldHistoryState)) {
+      // if there are pending route changes, just replace current route (to avoid extra back/forth history entries)
       const useReplaceState = handlerState.pendingCount !== 0;
-      useReplaceState ? history.replace(newState.persistent) : history.push(newState.persistent);
+      useReplaceState ? history.replace(historyState) : history.push(historyState);
     }
   };
 };
