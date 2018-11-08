@@ -42,7 +42,9 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           {!libs.framework.securityEnabled() && <Route render={() => <EnforceSecurityPage />} />}
           {!libs.framework.getCurrentUser() ||
             (!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
-              !libs.framework.getCurrentUser().roles.includes('superuser') && (
+              !libs.framework
+                .getDefaultUserRoles()
+                .some(r => libs.framework.getCurrentUser().roles.includes(r)) && (
                 <Route render={() => <NoAccessPage />} />
               ))}
           <Route
