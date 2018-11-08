@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { INDEX_NAMES } from '../../../../common/constants/index_names';
 import { HBPingSortDirectionArg } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
@@ -18,11 +17,7 @@ export class ElasticsearchPingsAdapter implements HBPingsAdapter {
     this.database = database;
   }
 
-  public async getAll(
-    request: Request,
-    sort?: HBPingSortDirectionArg,
-    size?: number
-  ): Promise<Ping[]> {
+  public async getAll(request: any, sort?: HBPingSortDirectionArg, size?: number): Promise<Ping[]> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;
     const params = {

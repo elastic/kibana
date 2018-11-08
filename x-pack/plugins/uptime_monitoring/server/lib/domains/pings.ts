@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { HBPingSortDirectionArg } from '../../../common/domain_types';
 import { Ping } from '../../../common/graphql/types';
 import { HBPingsAdapter } from '../adapters/pings';
@@ -14,11 +13,7 @@ export class HBPingsDomain {
     this.adapter = adapter;
   }
 
-  public async getAll(
-    request: Request,
-    sort: HBPingSortDirectionArg,
-    size: number
-  ): Promise<Ping[]> {
+  public async getAll(request: any, sort?: HBPingSortDirectionArg, size?: number): Promise<Ping[]> {
     return this.adapter.getAll(request, sort, size);
   }
 }

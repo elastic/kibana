@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { HBPingSortDirectionArg } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
 
 export interface HBPingsAdapter {
-  getAll(request: Request, sort: HBPingSortDirectionArg, size: number): Promise<Ping[]>;
+  getAll(request: any, sort?: HBPingSortDirectionArg, size?: number): Promise<Ping[]>;
 }
