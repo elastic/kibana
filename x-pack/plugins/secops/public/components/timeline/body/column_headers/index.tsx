@@ -27,11 +27,12 @@ const ColumnHeadersSpan = styled.span`
   display: flex;
 `;
 
+/* stylelint-disable block-no-empty */
 const ColumnHeaderContainer = styled.div``;
 
 const Flex = styled.div`
   display: flex;
-  margin-left: 3px;
+  margin-left: 5px;
   width: 100%;
 `;
 

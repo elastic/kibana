@@ -21,5 +21,12 @@
 // import getopts from 'getopts';
 
 export function runStylelintCli() {
-  require('stylelint/lib/cli')('**/*.tsx');
+  const args = process.argv.slice(2);
+  let opts = '**/*.tsx';
+
+  if (args.length > 0) {
+    opts = args.map(el => `x-pack/plugins/${el}/**/*.tsx`).join(' ');
+  }
+
+  require('stylelint/lib/cli')(opts);
 }

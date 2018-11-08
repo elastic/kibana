@@ -47,7 +47,7 @@ const SuricataRow = styled.div`
   padding-top: 10px;
   padding-bottom: 20px;
   animation: ${dropInEffect} 2s;
-  margin-left -1px;
+  margin-left: -1px;
   transition: 700ms background, 700ms border-color, 1s transform, 1s box-shadow;
   transition-delay: 0s;
   &:hover {

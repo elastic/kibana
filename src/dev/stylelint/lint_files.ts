@@ -19,6 +19,7 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { File } from '../file';
+import { createFailError } from '../run';
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log
@@ -30,5 +31,11 @@ import { File } from '../file';
  */
 export async function lintFiles(log: ToolingLog, files: File[]) {
   const paths = files.map(file => file.getRelativePath());
-  require('stylelint/lib/cli')(paths);
+  await require('stylelint/lib/cli')(paths);
+
+  if (process.exitCode === 2) {
+    throw createFailError(`[stylelint] failure`, 1);
+  } else {
+    log.success('[stylelint] staged files linted successfully');
+  }
 }
