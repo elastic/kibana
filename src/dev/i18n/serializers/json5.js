@@ -32,14 +32,14 @@ export function serializeToJson5(messages, formats = i18n.formats) {
 
   for (const [mapKey, mapValue] of Array.isArray(messages) ? messages : Object.entries(messages)) {
     const formattedMessage = mapValue.message.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2');
-    const formattedContext = mapValue.context
-      ? mapValue.context.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
+    const formattedDescription = mapValue.description
+      ? mapValue.description.replace(ESCAPE_SINGLE_QUOTE_REGEX, '\\$1$2')
       : '';
 
     jsonBuffer = Buffer.concat([
       jsonBuffer,
       Buffer.from(`    '${mapKey}': '${formattedMessage}',`),
-      Buffer.from(formattedContext ? ` // ${formattedContext}\n` : '\n'),
+      Buffer.from(formattedDescription ? ` // ${formattedDescription}\n` : '\n'),
     ]);
   }
 

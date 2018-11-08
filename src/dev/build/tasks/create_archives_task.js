@@ -17,10 +17,21 @@
  * under the License.
  */
 
-import { dirname, extname } from 'path';
-import compressing from 'compressing';
+import path from 'path';
+import { createWriteStream } from 'fs';
+import archiver from 'archiver';
 
 import { mkdirp } from '../lib';
+
+function compress(type, options = {}, source, destination) {
+  const output = createWriteStream(destination);
+  const archive = archiver(type, options);
+  const name = source.split(path.sep).slice(-1)[0];
+
+  archive.pipe(output);
+
+  return archive.directory(source, name).finalize();
+}
 
 export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
@@ -32,15 +43,15 @@ export const CreateArchivesTask = {
 
       log.info('archiving', source, 'to', destination);
 
-      await mkdirp(dirname(destination));
+      await mkdirp(path.dirname(destination));
 
-      switch (extname(destination)) {
+      switch (path.extname(destination)) {
         case '.zip':
-          await compressing.zip.compressDir(source, destination);
+          await compress('zip', { zlib: { level: 9 } }, source, destination);
           break;
 
         case '.gz':
-          await compressing.tgz.compressDir(source, destination);
+          await compress('tar', { gzip: true, gzipOptions: { level: 9 } }, source, destination);
           break;
 
         default:

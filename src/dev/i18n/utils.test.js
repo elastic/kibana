@@ -37,7 +37,7 @@ ${callee}('plugin_1.id_1', {
     key: 'value',
   },
   defaultMessage: 'Message text',
-  context: 'Message context'
+  description: 'Message description'
 });
 `
 );
