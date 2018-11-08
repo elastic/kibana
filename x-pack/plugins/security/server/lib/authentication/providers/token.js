@@ -156,46 +156,13 @@ export class TokenAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    /*
-    POST /_xpack/security/oauth2/token
-    {
-      "grant_type" : "password",
-      "username" : "test_admin",
-      "password" : "x-pack-test-password"
-    }
-    {
-      "access_token" : "dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvbmx5IHRlc3QgZGF0YS4gZG8gbm90IHRyeSB0byByZWFkIHRva2VuIQ==",
-      "type" : "Bearer",
-      "expires_in" : 1200,
-      "refresh_token": "vLBPvmAB6KvwvJZr27cS"
-    }
-
-    Authorization: Bearer dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvbmx5IHRlc3QgZGF0YS4gZG8gbm90IHRyeSB0byByZWFkIHRva2VuIQ==
-
-    POST /_xpack/security/oauth2/token
-    {
-        "grant_type": "refresh_token",
-        "refresh_token": "vLBPvmAB6KvwvJZr27cS"
-    }
-    {
-      "access_token" : "dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvbmx5IHRlc3QgZGF0YS4gZG8gbm90IHRyeSB0byByZWFkIHRva2VuIQ==",
-      "type" : "Bearer",
-      "expires_in" : 1200,
-      "refresh_token": "vLBPvmAB6KvwvJZr27cS"
-    }
-
-    DELETE /_xpack/security/oauth2/token
-    {
-      "token" : "dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvbmx5IHRlc3QgZGF0YS4gZG8gbm90IHRyeSB0byByZWFkIHRva2VuIQ=="
-    }
-    */
     request.payload = {
       ...credentials,
       grant_type: 'password',
     };
 
     try {
-      // todo: get real endpoint name for es.js client
+      // todo: actual token auth logic
       const user = await this._options.client.callWithRequest(request, 'shield.token');
 
       this._options.log(['debug', 'security', 'token'], 'Request has been authenticated via request payload.');
@@ -224,40 +191,6 @@ export class TokenAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    /*
-    POST /_xpack/security/oauth2/token
-    {
-      "grant_type" : "password",
-      "username" : "test_admin",
-      "password" : "x-pack-test-password"
-    }
-    {
-      "access_token" : "dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvbmx5IHRlc3QgZGF0YS4gZG8gbm90IHRyeSB0byByZWFkIHRva2VuIQ==",
-      "type" : "Bearer",
-      "expires_in" : 1200,
-      "refresh_token": "vLBPvmAB6KvwvJZr27cS"
-    }
-
-    Authorization: Bearer dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvbmx5IHRlc3QgZGF0YS4gZG8gbm90IHRyeSB0byByZWFkIHRva2VuIQ==
-
-    POST /_xpack/security/oauth2/token
-    {
-        "grant_type": "refresh_token",
-        "refresh_token": "vLBPvmAB6KvwvJZr27cS"
-    }
-    {
-      "access_token" : "dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvbmx5IHRlc3QgZGF0YS4gZG8gbm90IHRyeSB0byByZWFkIHRva2VuIQ==",
-      "type" : "Bearer",
-      "expires_in" : 1200,
-      "refresh_token": "vLBPvmAB6KvwvJZr27cS"
-    }
-
-    DELETE /_xpack/security/oauth2/token
-    {
-      "token" : "dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvbmx5IHRlc3QgZGF0YS4gZG8gbm90IHRyeSB0byByZWFkIHRva2VuIQ=="
-    }
-    */
-
     request.headers.authorization = `Bearer ${accessToken}`;
 
     try {
@@ -274,7 +207,7 @@ export class TokenAuthenticationProvider {
       // We can't just set `authorization` to `undefined` or `null`, we should remove this property
       // entirely, otherwise `authorization` header without value will cause `callWithRequest` to crash if
       // it's called with this request once again down the line (e.g. in the next authentication provider).
-      //delete request.headers.authorization;
+      delete request.headers.authorization;
 
       return AuthenticationResult.failed(err);
     }
