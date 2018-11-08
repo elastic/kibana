@@ -9,7 +9,7 @@ import { pure } from 'recompose';
 
 import { EventItem, KpiItem } from '../../../common/graphql/types';
 import { BasicTable, Columns } from '../../components/basic_table';
-import { HoryzontalBarChart, HoryzontalBarChartData } from '../../components/horyzontal_bar_chart';
+import { HorizontalBarChart, HorizontalBarChartData } from '../../components/horizontal_bar_chart';
 import { Pane1FlexContent } from '../../components/page';
 import { Placeholders, VisualizationPlaceholder } from '../../components/visualization_placeholder';
 import { EventsQuery } from '../../containers/events';
@@ -19,7 +19,7 @@ export const Hosts = pure(() => (
     {({ events, kpiEventType, loading }) => (
       <Pane1FlexContent data-test-subj="pane1FlexContent">
         <VisualizationPlaceholder>
-          <HoryzontalBarChart
+          <HorizontalBarChart
             loading={loading}
             title="KPI event types"
             width={490}
@@ -28,7 +28,7 @@ export const Hosts = pure(() => (
               kpiEventType.map((i: KpiItem) => ({
                 x: i.count,
                 y: i.value,
-              })) as HoryzontalBarChartData[]
+              })) as HorizontalBarChartData[]
             }
           />
         </VisualizationPlaceholder>

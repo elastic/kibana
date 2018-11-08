@@ -17,20 +17,20 @@ import {
 
 import { LoadingPanel } from '../loading';
 
-export interface HoryzontalBarChartData {
+export interface HorizontalBarChartData {
   x: number;
   y: string;
 }
 
-interface HoryzontalBarChartProps {
-  barChartdata: HoryzontalBarChartData[];
+interface HorizontalBarChartProps {
+  barChartdata: HorizontalBarChartData[];
   width?: number;
   height?: number;
   title: string;
   loading: boolean;
 }
 
-export const HoryzontalBarChart = pure<HoryzontalBarChartProps>(
+export const HorizontalBarChart = pure<HorizontalBarChartProps>(
   ({ barChartdata, width, height, title, loading }) => {
     return loading ? (
       <LoadingPanel height="100%" width="100%" text="Loading data" />
