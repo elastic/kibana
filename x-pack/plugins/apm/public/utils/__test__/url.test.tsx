@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
+import { mount, ReactWrapper, shallow } from 'enzyme';
 import createHistory, { MemoryHistory } from 'history/createMemoryHistory';
 import React from 'react';
 import { Router } from 'react-router-dom';
