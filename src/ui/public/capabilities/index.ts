@@ -16,17 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uiModules } from 'ui/modules';
 
-uiModules.get('kibana')
-  .provider('discoverConfig', () => {
-    return {
-      $get() {
-        return {
-          getHideWriteControls() {
-            return false;
-          }
-        };
-      }
-    };
-  });
+export { uiCapabilities } from './ui_capabilities';

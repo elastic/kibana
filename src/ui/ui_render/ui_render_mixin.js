@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults } from 'lodash';
+import { defaults, defaultsDeep } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
@@ -40,7 +40,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
     defaultInjectedVars = defaultInjectedVarProviders
       .reduce((allDefaults, { fn, pluginSpec }) => (
-        defaults(
+        defaultsDeep(
           allDefaults,
           fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
         )
