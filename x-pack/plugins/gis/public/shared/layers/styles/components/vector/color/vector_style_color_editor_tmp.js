@@ -6,15 +6,11 @@
 
 import React from 'react';
 
-import {
-} from '@elastic/eui';
-
 import { StaticDynamicStyleSelector } from '../../static_dynamic_styling_option';
-import  { DynamicSizeSelection } from './dynamic_size_selection';
-import  { StaticSizeSelection } from './static_size_selection';
+import  { DynamicColorSelection } from './dynamic_color_selection';
+import  { StaticColorSelection } from './static_color_selection';
 
-export class VectorStyleSizeEditor extends React.Component {
-
+export class VectorStyleColorEditorTmp extends React.Component {
 
   constructor() {
     super();
@@ -28,8 +24,8 @@ export class VectorStyleSizeEditor extends React.Component {
       name={this.props.stylePropertyName}
       styleDescriptor={this.props.styleDescriptor}
       handlePropertyChange={this.props.handlePropertyChange}
-      DynamicSelector={DynamicSizeSelection}
-      StaticSelector={StaticSizeSelection}
+      DynamicSelector={DynamicColorSelection}
+      StaticSelector={StaticColorSelection}
     />);
   }
 }
