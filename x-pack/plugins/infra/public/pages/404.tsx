@@ -12,10 +12,10 @@ export class NotFoundPage extends React.PureComponent {
     return (
       <div>
         <FormattedMessage
-          id="xpack.infra.homePageError.noContentFoundErrorTitle"
+          id="xpack.infra.notFoundPage.noContentFoundErrorTitle"
           defaultMessage="No content found"
         />
       </div>
-    )
+    );
   }
 }

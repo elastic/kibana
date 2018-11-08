@@ -32,7 +32,7 @@ export const RedirectToNodeLogs = ({
       if (!configuredFields) {
         return (
           <LoadingPage
-            message={i18n.translate('xpack.infra.redirectToNodeLogs.loadingNodeTypeLogsMessage', {
+            message={i18n.translate('xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage', {
               defaultMessage: 'Loading {nodeType} logs',
               values: {
                 nodeType,

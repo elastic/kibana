@@ -47,7 +47,7 @@ const LogsToolbarUI: React.SFC<Props> = ({ intl }) => (
                   onSubmit={applyFilterQueryFromKueryExpression}
                   placeholder={intl.formatMessage({
                     id: 'xpack.infra.homePageLogsToolbar.searchFieldPlaceholder',
-                    defaultMessage: 'Search for log entries... (e.g. host.name:host-1)',
+                    defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
                   })}
                   suggestions={suggestions}
                   value={filterQueryDraft ? filterQueryDraft.expression : ''}
@@ -61,26 +61,22 @@ const LogsToolbarUI: React.SFC<Props> = ({ intl }) => (
         <LogCustomizationMenu>
           <WithLogMinimap>
             {({ availableIntervalSizes, intervalSize, setIntervalSize }) => (
-              <I18nProvider>
-                <LogMinimapScaleControls
-                  availableIntervalSizes={availableIntervalSizes}
-                  setIntervalSize={setIntervalSize}
-                  intervalSize={intervalSize}
-                />
-              </I18nProvider>
+              <LogMinimapScaleControls
+                availableIntervalSizes={availableIntervalSizes}
+                setIntervalSize={setIntervalSize}
+                intervalSize={intervalSize}
+              />
             )}
           </WithLogMinimap>
           <WithLogTextview>
             {({ availableTextScales, textScale, setTextScale, setTextWrap, wrap }) => (
               <>
-                <I18nProvider>
-                  <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
-                  <LogTextScaleControls
-                    availableTextScales={availableTextScales}
-                    textScale={textScale}
-                    setTextScale={setTextScale}
-                  />
-                </I18nProvider>
+                <LogTextWrapControls wrap={wrap} setTextWrap={setTextWrap} />
+                <LogTextScaleControls
+                  availableTextScales={availableTextScales}
+                  textScale={textScale}
+                  setTextScale={setTextScale}
+                />
               </>
             )}
           </WithLogTextview>

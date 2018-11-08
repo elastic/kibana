@@ -47,7 +47,7 @@ export const ErrorPageBody: React.SFC<{ message: string }> = ({ message }) => {
             <EuiTitle size="m">
               <h1>
                 <FormattedMessage
-                  id="xpack.infra.homePageError.oopsErrorTitle"
+                  id="xpack.infra.errorPage.unexpectedErrorTitle"
                   defaultMessage="Oops!"
                 />
               </h1>
@@ -58,7 +58,7 @@ export const ErrorPageBody: React.SFC<{ message: string }> = ({ message }) => {
           <EuiCallOut color="danger" title={message} iconType={'alert'}>
             <p>
               <FormattedMessage
-                id="xpack.infra.homePageError.clickBackButtonErrorTitle"
+                id="xpack.infra.errorPage.tryAgainDescription "
                 defaultMessage="Please click the back button and try again."
               />
             </p>

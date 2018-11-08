@@ -42,7 +42,7 @@ class LogsPageUI extends React.Component<Props> {
                   breadcrumbs={[
                     {
                       text: intl.formatMessage({
-                        id: 'xpack.infra.homePageLogsPage.logsTitle',
+                        id: 'xpack.infra.logsPage.logsBreadcrumbsText',
                         defaultMessage: 'Logs',
                       }),
                     },
@@ -56,15 +56,15 @@ class LogsPageUI extends React.Component<Props> {
                 {({ basePath }) => (
                   <EmptyPage
                     title={intl.formatMessage({
-                      id: 'xpack.infra.homePageLogsPage.youDontHaveLoggingIndicesTitle',
+                      id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
                       defaultMessage: "Looks like you don't have any logging indices.",
                     })}
                     message={intl.formatMessage({
-                      id: 'xpack.infra.homePageLogsPage.addSomeLoggingIndicesDescription',
+                      id: 'xpack.infra.logsPage.noLoggingIndicesDescription',
                       defaultMessage: "Let's add some!",
                     })}
                     actionLabel={intl.formatMessage({
-                      id: 'xpack.infra.homePageLogsPage.setupInstructionsActionLabel',
+                      id: 'xpack.infra.logsPage.noLoggingIndicesActionLabel',
                       defaultMessage: 'Setup Instructions',
                     })}
                     actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/logging`}

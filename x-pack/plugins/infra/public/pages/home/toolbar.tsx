@@ -23,21 +23,15 @@ import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
 const TITLES = {
-  [InfraNodeType.host]: i18n.translate('xpack.infra.homePageToolbar.homeToolbarHostsTitle', {
+  [InfraNodeType.host]: i18n.translate('xpack.infra.homePage.toolbar.hostsTitle', {
     defaultMessage: 'Hosts',
   }),
-  [InfraNodeType.pod]: i18n.translate(
-    'xpack.infra.homePageToolbar.homeToolbarKubernetesPodsTitle',
-    {
-      defaultMessage: 'Kubernetes Pods',
-    }
-  ),
-  [InfraNodeType.container]: i18n.translate(
-    'xpack.infra.homePageToolbar.homeToolbarDockerContainersTitle',
-    {
-      defaultMessage: 'Docker Containers',
-    }
-  ),
+  [InfraNodeType.pod]: i18n.translate('xpack.infra.homePage.toolbar.kubernetesPodsTitle', {
+    defaultMessage: 'Kubernetes Pods',
+  }),
+  [InfraNodeType.container]: i18n.translate('xpack.infra.homePage.toolbar.dockerContainersTitle', {
+    defaultMessage: 'Docker Containers',
+  }),
 };
 
 interface Props {
@@ -58,7 +52,7 @@ const HomeToolbarUI: React.SFC<Props> = ({ intl }) => (
         <EuiText color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.infra.homePageToolbar.showingLastOneMinuteDataText"
+              id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
               defaultMessage="Showing the last 1 minute of data from the time period"
             />
           </p>
@@ -95,7 +89,7 @@ const HomeToolbarUI: React.SFC<Props> = ({ intl }) => (
                   onChange={setFilterQueryDraftFromKueryExpression}
                   onSubmit={applyFilterQueryFromKueryExpression}
                   placeholder={intl.formatMessage({
-                    id: 'xpack.infra.homePageToolbar.searchFieldPlaceholder',
+                    id: 'xpack.infra.homePage.toolbar.searchForInfrastructureDataFieldPlaceholder',
                     defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
                   })}
                   suggestions={suggestions}

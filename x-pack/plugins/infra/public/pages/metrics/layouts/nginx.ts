@@ -16,14 +16,14 @@ import {
 export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'nginxOverview',
-    label: i18n.translate('xpack.infra.homePageMetrics.nginxLabel', {
+    label: i18n.translate('xpack.infra.metricsPage.nginxLabel', {
       defaultMessage: 'Nginx',
     }),
     requires: ['nginx'],
     sections: [
       {
         id: InfraMetric.nginxHits,
-        label: i18n.translate('xpack.infra.homePageMetrics.innerNginxHitsLabel', {
+        label: i18n.translate('xpack.infra.metricsPage.hitsSectionLabel', {
           defaultMessage: 'Hits',
         }),
         requires: ['nginx.access'],
@@ -41,7 +41,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxRequestRate,
-        label: i18n.translate('xpack.infra.homePageMetrics.innerNginxRequestRateLabel', {
+        label: i18n.translate('xpack.infra.metricsPage.requestRateSectionLabel', {
           defaultMessage: 'Request Rate',
         }),
         requires: ['nginx.statusstub'],
@@ -56,7 +56,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxActiveConnections,
-        label: i18n.translate('xpack.infra.homePageMetrics.innerNginxActiveConnectionsLabel', {
+        label: i18n.translate('xpack.infra.metricsPage.activeConnectionsSectionLabel', {
           defaultMessage: 'Active Connections',
         }),
         requires: ['nginx.statusstub'],
@@ -73,7 +73,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxRequestsPerConnection,
-        label: i18n.translate('xpack.infra.homePageMetrics.innerNginxConnectionRequestsLabel', {
+        label: i18n.translate('xpack.infra.metricsPage.requestsPerConnectionsSectionLabel', {
           defaultMessage: 'Requests per Connections',
         }),
         requires: ['nginx.statusstub'],
@@ -84,7 +84,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
             reqPerConns: {
               color: theme.eui.euiColorVis1,
               type: InfraMetricLayoutVisualizationType.bar,
-              name: i18n.translate('xpack.infra.homePageMetrics.connectionRequestsAliasName', {
+              name: i18n.translate('xpack.infra.metricsPage.visConfig.requestsAliasName', {
                 defaultMessage: 'reqs per conn',
               }),
             },

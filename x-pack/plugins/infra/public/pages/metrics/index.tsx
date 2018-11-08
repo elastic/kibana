@@ -71,7 +71,7 @@ class MetricDetailPageUI extends React.PureComponent<Props> {
         <Error
           message={intl.formatMessage(
             {
-              id: 'xpack.infra.homePageMetrics.metricDetailPageNodeTypeInvalidErrorMessage',
+              id: 'xpack.infra.metricDetailPage.notValidNodeTypeErrorMessage',
               defaultMessage: '{nodeType} is not a valid node type',
             },
             {
@@ -219,9 +219,7 @@ class MetricDetailPageUI extends React.PureComponent<Props> {
   };
 }
 
-const MetricDetailPage = injectI18n(MetricDetailPageUI);
-
-export const MetricDetail = withTheme(MetricDetailPage);
+export const MetricDetail = withTheme(injectI18n(MetricDetailPageUI));
 
 const EuiSideNavContainer = styled.div`
   position: fixed;

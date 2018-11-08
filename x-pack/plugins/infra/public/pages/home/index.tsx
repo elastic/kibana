@@ -45,15 +45,15 @@ class HomePageUI extends React.PureComponent<HomePageProps, {}> {
                 {({ basePath }) => (
                   <EmptyPage
                     title={intl.formatMessage({
-                      id: 'xpack.infra.homePage.youDontHaveMetricsIndicesTitle',
+                      id: 'xpack.infra.homePage.noMetricsIndicesTitle',
                       defaultMessage: "Looks like you don't have any metrics indices.",
                     })}
                     message={intl.formatMessage({
-                      id: 'xpack.infra.homePage.youDontHaveMetricsIndicesMessage',
+                      id: 'xpack.infra.homePage.noMetricsIndicesDescription',
                       defaultMessage: "Let's add some!",
                     })}
                     actionLabel={intl.formatMessage({
-                      id: 'xpack.infra.homePage.setupInstructionsActionLabel',
+                      id: 'xpack.infra.homePage.noMetricsIndicesActionLabel',
                       defaultMessage: 'Setup Instructions',
                     })}
                     actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
