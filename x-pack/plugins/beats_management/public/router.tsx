@@ -38,7 +38,9 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
         </BreadcrumbConsumer>
         <Switch>
           {!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
-            !libs.framework.getCurrentUser().roles.includes('superuser') && (
+            !libs.framework
+              .getCurrentUser()
+              .roles.includes(libs.framework.getDefaultUserRole()) && (
               <Route render={() => <NoAccessPage />} />
             )}
           <Route

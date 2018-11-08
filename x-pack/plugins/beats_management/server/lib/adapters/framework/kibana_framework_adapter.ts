@@ -101,7 +101,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
         if (
           wrappedRequest.user.kind === 'authenticated' &&
-          !wrappedRequest.user.roles.includes('superuser') &&
+          !wrappedRequest.user.roles.includes(this.getSetting('xpack.beats.defaultUserRole')) &&
           difference(requiredRoles, wrappedRequest.user.roles).length !== 0
         ) {
           return h.response().code(403);
@@ -170,6 +170,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // License is not valid
     if (!isLicenseValid) {
       return {
+        defaultUserRole: this.getSetting('xpack.beats.defaultUserRole'),
         securityEnabled: true,
         licenseValid: false,
         message: `Your ${licenseType} license does not support Beats central management features. Please upgrade your license.`,
@@ -179,6 +180,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // License is valid but not active, we go into a read-only mode.
     if (!isLicenseActive) {
       return {
+        defaultUserRole: this.getSetting('xpack.beats.defaultUserRole'),
         securityEnabled: true,
         licenseValid: false,
         message: `You cannot edit, create, or delete your Beats central management configurations because your ${licenseType} license has expired.`,
@@ -191,6 +193,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         'Security must be enabled in order to use Beats central management features.' +
         ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
       return {
+        defaultUserRole: this.getSetting('xpack.beats.defaultUserRole'),
         securityEnabled: false,
         licenseValid: true,
         message,
@@ -199,6 +202,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
     // License is valid and active
     return {
+      defaultUserRole: this.getSetting('xpack.beats.defaultUserRole'),
       securityEnabled: true,
       licenseValid: true,
     };
