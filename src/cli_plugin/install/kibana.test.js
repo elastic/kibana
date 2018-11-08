@@ -17,8 +17,11 @@
  * under the License.
  */
 
+jest.mock('fs', () => ({
+  statSync: jest.fn()
+}));
+
 import sinon from 'sinon';
-import mockFs from 'mock-fs';
 import Logger from '../lib/logger';
 import { join } from 'path';
 import rimraf from 'rimraf';
@@ -119,13 +122,9 @@ describe('kibana cli', function () {
         });
 
         it('should throw an error if the plugin already exists.', function () {
-          mockFs({ [`${pluginDir}/foo`]: {} });
-
           existingInstall(settings, logger);
           expect(logger.error.firstCall.args[0]).toMatch(/already exists/);
           expect(process.exit.called).toBe(true);
-
-          mockFs.restore();
         });
 
         it('should not throw an error if the plugin does not exist.', function () {
@@ -134,5 +133,9 @@ describe('kibana cli', function () {
         });
       });
     });
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
   });
 });

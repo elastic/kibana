@@ -13,7 +13,6 @@
     "getopts": "^2.0.6",
     "glob": "^7.1.2",
     "mkdirp": "^0.5.1",
-    "mock-fs": "^4.7.0",
     "node-fetch": "^2.0.0",
     "simple-git": "^1.91.0",
     "tar-fs": "^1.16.3",

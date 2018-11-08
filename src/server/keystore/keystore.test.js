@@ -17,7 +17,38 @@
  * under the License.
  */
 
-import mockFs from 'mock-fs';
+const mockProtectedKeystoreData = '1:4BnWfydL8NwFIQJg+VQKe0jlIs7uXtty6+++yaWPbSB'
+  + 'KIX3d9nPfQ20K1C6Xh26E/gMJAQ9jh7BxK0+W3lt/iDJBJn44wqX3pQ0189iGkNBL0ibDCc'
+  + 'tz4mRy6+hqwiLxiukpH8ELAJsff8LNNHr+gNzX/2k/GvB7nQ==';
+
+const mockUnprotectedKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDy'
+  + 'fGfJSy4mHBBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqh'
+  + 'I4lzJ9MRy21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
+
+jest.mock('fs', () => ({
+  readFileSync: jest.fn().mockImplementation((path) => {
+    if (path.includes('data/unprotected')) {
+      return JSON.stringify(mockUnprotectedKeystoreData);
+    }
+
+    if (path.includes('data/protected')) {
+      return JSON.stringify(mockProtectedKeystoreData);
+    }
+
+    if (path.includes('data/test') || path.includes('data/nonexistent')) {
+      throw { code: 'ENOENT' };
+    }
+
+    throw { code: 'EACCES' };
+  }),
+  existsSync: jest.fn().mockImplementation((path) => {
+    return path.includes('data/unprotected')
+      || path.includes('data/protected')
+      || path.includes('inaccessible');
+  }),
+  writeFileSync: jest.fn()
+}));
+
 import sinon from 'sinon';
 import { readFileSync } from 'fs';
 
@@ -26,28 +57,7 @@ import { Keystore } from './keystore';
 describe('Keystore', () => {
   const sandbox = sinon.createSandbox();
 
-  const protectedKeystoreData = '1:4BnWfydL8NwFIQJg+VQKe0jlIs7uXtty6+++yaWPbSB'
-    + 'KIX3d9nPfQ20K1C6Xh26E/gMJAQ9jh7BxK0+W3lt/iDJBJn44wqX3pQ0189iGkNBL0ibDCc'
-    + 'tz4mRy6+hqwiLxiukpH8ELAJsff8LNNHr+gNzX/2k/GvB7nQ==';
-
-  const unprotectedKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDy'
-    + 'fGfJSy4mHBBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqh'
-    + 'I4lzJ9MRy21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
-
-  beforeEach(() => {
-    mockFs({
-      '/data': {
-        'protected.keystore': protectedKeystoreData,
-        'unprotected.keystore': unprotectedKeystoreData,
-      },
-      '/inaccessible': mockFs.directory({
-        mode: '0000',
-      })
-    });
-  });
-
   afterEach(() => {
-    mockFs.restore();
     sandbox.restore();
   });
 
@@ -71,6 +81,7 @@ describe('Keystore', () => {
       const keystore = new Keystore(path);
       keystore.save();
 
+      readFileSync.mockReturnValueOnce(mockProtectedKeystoreData);
       const fileBuffer = readFileSync(path);
       const contents = fileBuffer.toString();
       const [version, data] = contents.split(':');
@@ -214,5 +225,9 @@ describe('Keystore', () => {
         expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
       }
     });
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
   });
 });

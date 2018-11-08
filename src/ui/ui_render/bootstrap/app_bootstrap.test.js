@@ -17,27 +17,23 @@
  * under the License.
  */
 
-import mockFs from 'mock-fs';
-import { resolve } from 'path';
-
 const mockTemplate = `
 {{appId}}
 {{bundlePath}}
 {{i18n 'foo' '{"defaultMessage": "bar"}'}}
 `;
 
-const templatePath = resolve(__dirname, 'template.js.hbs');
-
-beforeEach(() => {
-  mockFs({
-    [templatePath]: mockTemplate
-  });
-});
-afterEach(mockFs.restore);
+jest.mock('fs', () => ({
+  readFile: jest.fn().mockImplementation((path, encoding, cb) => cb(null, mockTemplate))
+}));
 
 import { AppBootstrap } from './app_bootstrap';
 
 describe('ui_render/AppBootstrap', () => {
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+
   describe('getJsFile()', () => {
     test('resolves to a string', async () => {
       expect.assertions(1);
