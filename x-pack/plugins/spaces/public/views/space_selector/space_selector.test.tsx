@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
+import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import chrome from 'ui/chrome';
-import { renderWithIntl, shallowWithIntl } from '../../../../../test_utils/enzyme_helpers';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { SpaceSelector } from './space_selector';

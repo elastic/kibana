@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { shallowWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { UserProfileProvider } from '../../../xpack_main/public/services/user_profile';
 import { ManageSpacesButton } from './manage_spaces_button';
 
