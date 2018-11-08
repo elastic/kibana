@@ -22,7 +22,7 @@ import process from 'process';
 
 import { pkg } from '../../../utils/package_json';
 
-interface PackageInfo {
+export interface PackageInfo {
   version: string;
   branch: string;
   buildNum: number;
@@ -61,7 +61,6 @@ export class Env {
   }
 
   public readonly configDir: string;
-  public readonly corePluginsDir: string;
   public readonly binDir: string;
   public readonly logDir: string;
   public readonly staticFilesDir: string;
@@ -96,7 +95,6 @@ export class Env {
    */
   constructor(readonly homeDir: string, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
-    this.corePluginsDir = resolve(this.homeDir, 'core_plugins');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');

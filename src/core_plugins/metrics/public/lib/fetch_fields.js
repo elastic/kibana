@@ -16,36 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { kfetch } from 'ui/kfetch';
+import { toastNotifications } from 'ui/notify';
 
-const FetchFieldsProvider = (Notifier, $http) => {
-  const notify = new Notifier({ location: 'Metrics' });
-  return (indexPatterns = ['*']) => {
-    if (!Array.isArray(indexPatterns)) indexPatterns = [indexPatterns];
-    return new Promise((resolve, reject) => {
-      const fields = {};
-
-      Promise.all(indexPatterns.map(pattern => {
-        const httpResult = $http.get(`../api/metrics/fields?index=${pattern}`)
-          .then(resp => resp.data)
-          .catch(resp => { throw resp.data; });
-
-        return httpResult
-          .then(resp => {
-            if (resp.length && pattern) {
-              fields[pattern] = resp;
-            }
-          })
-          .catch(resp => {
-            const err = new Error(resp.message);
-            err.stack = resp.stack;
-            notify.error(err);
-            reject(err);
-          });
-      })).then(() => {
-        resolve(fields);
+async function fetchFields(indexPatterns = ['*']) {
+  const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
+  try {
+    const indexFields = await Promise.all(patterns.map((pattern) => {
+      return kfetch({
+        method: 'GET',
+        pathname: '/api/metrics/fields',
+        query: {
+          index: pattern,
+        }
       });
+    }));
+    const fields = patterns.reduce((cumulatedFields, currentPattern, index) => {
+      return {
+        ...cumulatedFields,
+        [currentPattern]: indexFields[index]
+      };
+    }, {});
+    return fields;
+  } catch(error) {
+    toastNotifications.addDanger({
+      title: 'Unable to load index_pattern fields',
+      text: error.message,
     });
-  };
-};
+  }
+}
 
-export { FetchFieldsProvider };
+export { fetchFields };
