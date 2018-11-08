@@ -94,7 +94,9 @@ const handleWheel = (
 };
 
 const handleMouseDown = (commit, e, isEditable) => {
-  e.stopPropagation();
+  if (isEditable) {
+    e.stopPropagation();
+  }
   const { target, clientX, clientY, buttons, altKey, metaKey, shiftKey, ctrlKey } = e;
   if (buttons !== 1 || !isEditable) {
     resetHandler();

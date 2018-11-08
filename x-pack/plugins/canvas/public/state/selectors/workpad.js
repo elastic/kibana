@@ -29,7 +29,7 @@ export function getWorkpadPersisted(state) {
 }
 
 export function getWorkpadInfo(state) {
-  return omit(getWorkpad(state), ['pages']);
+  return omit(getWorkpad(state), ['pages', 'results']);
 }
 
 export function isWriteable(state) {
@@ -71,6 +71,12 @@ export function getWorkpadColors(state) {
 
 export function getAllElements(state) {
   return getPages(state).reduce((elements, page) => elements.concat(page.elements), []);
+}
+
+export function getResult(state, id) {
+  const result = getWorkpad(state).results[id];
+  console.log('result is ', result);
+  return result;
 }
 
 export function getGlobalFilterExpression(state) {

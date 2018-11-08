@@ -43,6 +43,10 @@ const options = {
           pattern: '/state/store',
           location: resolve(__dirname, '..', 'mocks', 'stateStore'),
         },
+        {
+          pattern: 'ui/embeddable',
+          location: resolve(__dirname, '..', 'mocks', 'embeddable'),
+        },
       ],
     ],
   ],

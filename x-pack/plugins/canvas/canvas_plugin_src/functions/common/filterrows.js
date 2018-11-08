@@ -23,6 +23,7 @@ export const filterrows = () => ({
     },
   },
   fn(context, { fn }) {
+    console.log('context is ', context);
     const checks = context.rows.map(row =>
       fn({
         ...context,
@@ -30,6 +31,7 @@ export const filterrows = () => ({
       })
     );
 
+    console.log('checks is ', checks);
     return Promise.all(checks)
       .then(results => context.rows.filter((row, i) => results[i]))
       .then(rows => ({

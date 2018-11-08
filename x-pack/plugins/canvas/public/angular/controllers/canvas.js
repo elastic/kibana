@@ -8,10 +8,12 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { App } from '../../components/app';
+import { factories } from 'ui/embeddable/embeddable_factories_registry';
 
-export function CanvasRootController(canvasStore, $scope, $element) {
+export function CanvasRootController(canvasStore, $scope, $element, Private) {
   const domNode = $element[0];
 
+  factories.initialize(Private);
   render(
     <Provider store={canvasStore}>
       <App />

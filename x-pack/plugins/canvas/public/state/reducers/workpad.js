@@ -13,14 +13,17 @@ import {
   setName,
   setWriteable,
   setWorkpadCSS,
+  setResult,
 } from '../actions/workpad';
-
 import { APP_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
 export const workpadReducer = handleActions(
   {
     [setWorkpad]: (workpadState, { payload }) => {
       recentlyAccessed.add(`${APP_ROUTE_WORKPAD}/${payload.id}`, payload.name, payload.id);
+      if (!payload.results) {
+        payload.results = {};
+      }
       return payload;
     },
 
@@ -43,6 +46,18 @@ export const workpadReducer = handleActions(
 
     [setWorkpadCSS]: (workpadState, { payload }) => {
       return { ...workpadState, css: payload };
+    },
+
+    [setResult]: (workpadState, { payload }) => {
+      const { result, id } = payload;
+      console.log('setting result for result id + ' + id + ' to ', result);
+      return {
+        ...workpadState,
+        results: {
+          ...workpadState.results,
+          [id]: result,
+        },
+      };
     },
   },
   {}

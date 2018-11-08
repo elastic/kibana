@@ -96,6 +96,11 @@ export const elementsReducer = handleActions(
       const { expression, pageId, elementId } = payload;
       return assignNodeProperties(workpadState, pageId, elementId, { expression });
     },
+    [actions.setResult]: (workpadState, { payload }) => {
+      const { result, pageId, elementId } = payload;
+      console.log('setting result for elem id + ' + elementId + ' to ', result);
+      return assignNodeProperties(workpadState, pageId, elementId, { result });
+    },
     [actions.setFilter]: (workpadState, { payload }) => {
       const { filter, pageId, elementId } = payload;
       return assignNodeProperties(workpadState, pageId, elementId, { filter });

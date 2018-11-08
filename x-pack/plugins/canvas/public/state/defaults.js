@@ -48,6 +48,7 @@ export const getDefaultWorkpad = () => {
     height: 720,
     css: DEFAULT_WORKPAD_CSS,
     page: 0,
+    results: {},
     pages: [page],
     colors: [
       '#37988d',

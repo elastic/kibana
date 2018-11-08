@@ -23,6 +23,8 @@ import 'ui/collapsible_sidebar';
 import './components/field_chooser/field_chooser';
 import './controllers/discover';
 import 'ui/doc_table/components/table_row';
+import 'ui/pager';
+
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 FeatureCatalogueRegistryProvider.register(i18n => {

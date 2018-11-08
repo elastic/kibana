@@ -8,6 +8,6 @@ import { functions as commonFunctions } from '../common';
 import { browser } from './browser';
 import { location } from './location';
 import { markdown } from './markdown';
-import { urlparam } from './urlparam';
+import { embeddable } from './embeddable';
 
-export const functions = [browser, location, markdown, urlparam, ...commonFunctions];
+export const functions = [browser, location, markdown, urlparam, embeddable, ...commonFunctions];

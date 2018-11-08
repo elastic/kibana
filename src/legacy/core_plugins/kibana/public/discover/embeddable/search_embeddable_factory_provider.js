@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import 'ui/pager';
 import { SearchEmbeddableFactory } from './search_embeddable_factory';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 

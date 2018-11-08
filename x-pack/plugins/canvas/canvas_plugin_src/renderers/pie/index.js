@@ -20,6 +20,7 @@ export const pie = () => ({
     if (!includes($.plot.plugins, piePlugin)) {
       $.plot.plugins.push(piePlugin);
     }
+    console.log('config in reg pie is ', config);
 
     config.options.legend.labelBoxBorderColor = 'transparent';
 
@@ -28,6 +29,7 @@ export const pie = () => ({
         // font color defaults to slice color if not specified
         const fontSpec = { ...config.font.spec, color: config.font.spec.color || slice.color };
         const labelDiv = document.createElement('div');
+
         Object.assign(labelDiv.style, fontSpec);
         const labelSpan = new DOMParser().parseFromString(label, 'text/html').body.firstChild;
         const lineBreak = document.createElement('br');
@@ -61,6 +63,28 @@ export const pie = () => ({
           $(domNode).empty();
         } else {
           plot = $.plot($(domNode), config.data, config.options);
+        }
+        if (config.events) {
+          config.events.forEach(event => {
+            if (event.trigger === 'onClick') {
+              console.log('binding events to event ', event);
+              $(domNode).bind('plotclick', (e, pos, item) => {
+                const triggerContext = {
+                  ...config,
+                  filter: item,
+                };
+                handlers.actions[event.actionId](triggerContext);
+              });
+            } else if (event.trigger === 'hover') {
+              $(domNode).bind('plothover', (e, pos, item) => {
+                const triggerContext = {
+                  ...config,
+                  filter: item,
+                };
+                handlers.actions[event.actionId](triggerContext);
+              });
+            }
+          });
         }
       } catch (e) {
         console.log(e);

@@ -22,6 +22,7 @@ import { exactly } from './exactly';
 import { filterrows } from './filterrows';
 import { font } from './font';
 import { formatdate } from './formatdate';
+import { castToCanvasFilter } from './castToCanvasFilter';
 import { formatnumber } from './formatnumber';
 import { getCell } from './getCell';
 import { gt } from './gt';
@@ -37,6 +38,7 @@ import { metric } from './metric';
 import { neq } from './neq';
 import { palette } from './palette';
 import { pie } from './pie';
+import { eventPie } from './event_pie';
 import { plot } from './plot';
 import { ply } from './ply';
 import { progress } from './progress';
@@ -57,8 +59,13 @@ import { timefilter } from './timefilter';
 import { timefilterControl } from './timefilterControl';
 import { switchFn } from './switch';
 import { caseFn } from './case';
+import { logContext } from './logContext';
+import { injectContext } from './injectContext';
+import { merge } from './merge';
 
 export const functions = [
+  injectContext,
+  merge,
   all,
   alterColumn,
   any,
@@ -67,12 +74,14 @@ export const functions = [
   columns,
   compare,
   containerStyle,
+  castToCanvasFilter,
   context,
   csv,
   date,
   doFn,
   dropdownControl,
   eq,
+  eventPie,
   exactly,
   filterrows,
   font,
@@ -86,6 +95,7 @@ export const functions = [
   image,
   lt,
   lte,
+  logContext,
   mapColumn,
   math,
   metric,

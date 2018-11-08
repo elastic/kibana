@@ -27,3 +27,19 @@ export const EmbeddableFactoriesRegistryProvider = uiRegistry({
   index: ['name'],
   name: 'embeddableFactories',
 });
+class EmbeddableFactories {
+  private factories: any = [];
+
+  public initialize(Private: any) {
+    this.factories = Private(EmbeddableFactoriesRegistryProvider);
+  }
+
+  public getFactoryByName(name: string) {
+    if (!this.factories) {
+      throw new Error('Not initialized yet!');
+    }
+    return this.factories.byName[name];
+  }
+}
+
+export const factories = new EmbeddableFactories();

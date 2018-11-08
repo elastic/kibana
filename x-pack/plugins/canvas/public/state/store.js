@@ -28,3 +28,7 @@ export function createStore(initialState) {
 export function getState() {
   return store.getState();
 }
+
+export function getStore() {
+  return store;
+}

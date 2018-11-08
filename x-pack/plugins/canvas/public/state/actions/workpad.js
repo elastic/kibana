@@ -43,3 +43,11 @@ export const setWorkpad = createThunk(
     } // load all the elements on the workpad
   }
 );
+
+export const setResult = createThunk('setResult', ({ dispatch }, result, id) => {
+  const _setResult = createAction('setResult');
+  console.log('setResult action with result id ' + id);
+  dispatch(_setResult({ result, id }));
+  console.log('setResult rendering everything');
+  dispatch(fetchAllRenderables());
+});

@@ -17,7 +17,8 @@ export const filters = () => ({
     types: ['null'],
   },
   help: 'Collect element filters on the workpad, usually to provide them to a data source',
-  fn: () => {
+  fn: (context, args, handlers) => {
+    console.log('handlers is ', handlers);
     const filterExpression = getGlobalFilterExpression(getState());
 
     if (filterExpression && filterExpression.length) {

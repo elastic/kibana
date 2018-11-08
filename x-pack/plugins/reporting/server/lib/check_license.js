@@ -25,6 +25,11 @@ const makeManagementFeature = (exportTypes) => {
         };
       }
 
+
+      if (true) {
+        console.log('hi');
+      }
+
       if (!license.isActive()) {
         return {
           showLinks: true,
