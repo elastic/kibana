@@ -87,9 +87,10 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
 >
   <EuiText
     grow={true}
+    size="m"
   >
     <div
-      className="euiText"
+      className="euiText euiText--medium"
     >
       <p>
         <FormattedMessage
@@ -148,6 +149,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                 <EuiText
                   className="licManagement__narrowText"
                   grow={true}
+                  size="m"
                 >
                   <p>
                     <FormattedMessage
@@ -241,6 +243,7 @@ exports[`TelemetryOptIn should display when telemetry not opted in 1`] = `
                   <EuiText
                     className="licManagement__narrowText"
                     grow={true}
+                    size="m"
                   >
                     <p>
                       <FormattedMessage

@@ -15,8 +15,8 @@ export function getFullscreen(state) {
   return get(state, 'transient.fullscreen', false);
 }
 
-export function getFunctionDefinitions(state) {
-  return get(state, 'app.functionDefinitions');
+export function getServerFunctions(state) {
+  return get(state, 'app.serverFunctions');
 }
 
 export function getAppReady(state) {

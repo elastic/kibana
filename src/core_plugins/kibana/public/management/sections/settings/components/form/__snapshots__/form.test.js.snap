@@ -45,6 +45,7 @@ exports[`Form should render normally 1`] = `
       <EuiForm>
         <EuiText
           grow={true}
+          size="m"
         >
           <EuiFlexGroup
             alignItems="baseline"
@@ -117,6 +118,7 @@ exports[`Form should render normally 1`] = `
       <EuiForm>
         <EuiText
           grow={true}
+          size="m"
         >
           <EuiFlexGroup
             alignItems="baseline"
@@ -172,6 +174,7 @@ exports[`Form should render normally 1`] = `
       <EuiForm>
         <EuiText
           grow={true}
+          size="m"
         >
           <EuiFlexGroup
             alignItems="baseline"

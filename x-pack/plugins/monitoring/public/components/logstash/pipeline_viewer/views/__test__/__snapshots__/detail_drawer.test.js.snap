@@ -36,6 +36,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
       >
         <EuiTitle
           size="m"
+          textTransform="none"
         >
           <h2>
             if
@@ -47,6 +48,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
   <EuiFlyoutBody>
     <EuiText
       grow={true}
+      size="m"
     >
       <div>
         <p>
@@ -105,6 +107,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
       >
         <EuiTitle
           size="m"
+          textTransform="none"
         >
           <h2>
             grok filter
@@ -116,6 +119,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
   <EuiFlyoutBody>
     <EuiText
       grow={true}
+      size="m"
     >
       <div>
         <p>
@@ -396,6 +400,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
       >
         <EuiTitle
           size="m"
+          textTransform="none"
         >
           <h2>
             grok filter
@@ -407,6 +412,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
   <EuiFlyoutBody>
     <EuiText
       grow={true}
+      size="m"
     >
       <p>
         This 
@@ -683,6 +689,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
       >
         <EuiTitle
           size="m"
+          textTransform="none"
         >
           <h2>
             queue
@@ -694,6 +701,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
   <EuiFlyoutBody>
     <EuiText
       grow={true}
+      size="m"
     >
       <p>
         This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline.
@@ -742,6 +750,7 @@ exports[`DetailDrawer component shows vertex title 1`] = `
       >
         <EuiTitle
           size="m"
+          textTransform="none"
         >
           <h2 />
         </EuiTitle>
@@ -751,6 +760,7 @@ exports[`DetailDrawer component shows vertex title 1`] = `
   <EuiFlyoutBody>
     <EuiText
       grow={true}
+      size="m"
     />
   </EuiFlyoutBody>
 </EuiFlyout>

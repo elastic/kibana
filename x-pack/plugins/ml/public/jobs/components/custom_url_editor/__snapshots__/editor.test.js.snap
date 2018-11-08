@@ -4,6 +4,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
 <React.Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
       Create new custom URL
@@ -98,6 +99,7 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
       label="Query entities"
     >
       <EuiComboBox
+        compressed={false}
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -165,6 +167,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
 <React.Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
       Create new custom URL
@@ -259,6 +262,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
       label="Query entities"
     >
       <EuiComboBox
+        compressed={false}
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -360,6 +364,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
 <React.Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
       Create new custom URL
@@ -454,6 +459,7 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
       label="Query entities"
     >
       <EuiComboBox
+        compressed={false}
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -551,6 +557,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
 <React.Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
       Create new custom URL
@@ -649,6 +656,7 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
       label="Query entities"
     >
       <EuiComboBox
+        compressed={false}
         fullWidth={false}
         isClearable={true}
         onChange={[Function]}
@@ -716,6 +724,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
 <React.Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
       Create new custom URL
@@ -803,6 +812,7 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
 <React.Fragment>
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h4>
       Create new custom URL

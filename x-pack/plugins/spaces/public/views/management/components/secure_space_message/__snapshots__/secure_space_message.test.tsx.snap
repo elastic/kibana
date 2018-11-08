@@ -10,6 +10,7 @@ exports[`SecureSpaceMessage renders if user profile allows security to be manage
   <EuiText
     className="eui-textCenter"
     grow={true}
+    size="m"
   >
     <p>
       Want to assign a role to a space? Go to Management and select
