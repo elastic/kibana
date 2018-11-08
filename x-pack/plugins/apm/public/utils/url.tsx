@@ -6,7 +6,7 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
-import { get, isPlainObject, mapValues } from 'lodash';
+import { get, isEmpty, isPlainObject, mapValues } from 'lodash';
 import qs from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -24,7 +24,7 @@ interface ViewMlJobArgs {
   serviceName: string;
   transactionType: string;
   location: any;
-  children: any;
+  children?: any;
 }
 
 export function ViewMLJob({
@@ -83,8 +83,12 @@ function stringifyWithoutEncoding(query: StringMap) {
 }
 
 function decodeAsObject(value: string) {
-  const decoded = rison.decode(value);
-  return isPlainObject(decoded) ? decoded : {};
+  try {
+    const decoded = rison.decode(value);
+    return isPlainObject(decoded) ? decoded : {};
+  } catch (e) {
+    return {};
+  }
 }
 
 export function decodeKibanaSearchParams(search: string) {
@@ -113,9 +117,9 @@ export interface RelativeLinkComponentArgs {
   };
   path: string;
   query?: StringMap;
-  disabled: boolean;
-  to: StringMap;
-  className: string;
+  disabled?: boolean;
+  to?: StringMap;
+  className?: string;
 }
 export function RelativeLinkComponent({
   location,
@@ -176,6 +180,16 @@ export interface KibanaLinkArgs {
  * You must remember to pass in location in that case.
  */
 
+//
+function getCurrentOrDefaultGArg(g: string) {
+  // use "g" if it's set in the url and is not empty
+  if (g && !isEmpty(decodeAsObject(g))) {
+    return g;
+  }
+
+  return DEFAULT_KIBANA_TIME_RANGE;
+}
+
 export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   location,
   pathname,
@@ -187,8 +201,9 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   const currentQuery = toQuery(location.search);
   const nextQuery = {
     ...query,
-    // use "_g" if it's set in the url, otherwise use default
-    _g: currentQuery._g || DEFAULT_KIBANA_TIME_RANGE,
+    _g: query._g
+      ? rison.encode(query._g)
+      : getCurrentOrDefaultGArg(currentQuery._g),
     _a: query._a ? rison.encode(query._a) : ''
   };
 

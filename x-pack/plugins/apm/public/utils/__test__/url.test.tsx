@@ -4,24 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
+import createHistory, { MemoryHistory } from 'history/createMemoryHistory';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { mount, shallow } from 'enzyme';
-import createHistory from 'history/createMemoryHistory';
+import url from 'url';
+// @ts-ignore
+import { toJson } from '../testHelpers';
 import {
-  toQuery,
-  fromQuery,
-  UnconnectedKibanaLink,
-  RelativeLinkComponent,
-  encodeKibanaSearchParams,
   decodeKibanaSearchParams,
+  encodeKibanaSearchParams,
+  fromQuery,
+  RelativeLinkComponent,
+  toQuery,
+  UnconnectedKibanaLink,
   ViewMLJob
 } from '../url';
-import { toJson } from '../testHelpers';
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: path => `myBasePath${path}`
-}));
 
 describe('encodeKibanaSearchParams and decodeKibanaSearchParams should return the original string', () => {
   it('should convert string to object', () => {
@@ -128,8 +126,8 @@ describe('fromQuery', () => {
 });
 
 describe('RelativeLinkComponent', () => {
-  let history;
-  let wrapper;
+  let history: MemoryHistory;
+  let wrapper: ReactWrapper;
 
   beforeEach(() => {
     history = createHistory();
@@ -182,22 +180,90 @@ describe('RelativeLinkComponent', () => {
   });
 });
 
-describe('UnconnectedKibanaLink', () => {
-  let wrapper;
+function getUnconnectedKibanLink() {
+  const discoverQuery = {
+    _a: {
+      interval: 'auto',
+      query: {
+        language: 'lucene',
+        query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
+      },
+      sort: { '@timestamp': 'desc' }
+    }
+  };
 
-  beforeEach(() => {
+  return shallow(
+    <UnconnectedKibanaLink
+      location={{ search: '' }}
+      pathname={'/app/kibana'}
+      hash={'/discover'}
+      query={discoverQuery}
+    >
+      Go to Discover
+    </UnconnectedKibanaLink>
+  );
+}
+
+describe('UnconnectedKibanaLink', () => {
+  it('should have correct url', () => {
+    const wrapper = getUnconnectedKibanLink();
+    const href = wrapper.find('EuiLink').prop('href');
+    const { _g, _a } = getUrlQuery(href);
+    const { pathname } = url.parse(href!);
+
+    expect(pathname).toBe('/app/kibana');
+    expect(_a).toBe(
+      '(interval:auto,query:(language:lucene,query:\'context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"\'),sort:(\'@timestamp\':desc))'
+    );
+    expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
+  });
+
+  it('should render correct markup', () => {
+    const wrapper = getUnconnectedKibanLink();
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('should include existing _g values in link href', () => {
+    const wrapper = getUnconnectedKibanLink();
+    wrapper.setProps({
+      location: {
+        search:
+          '?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-7d,mode:relative,to:now-1d))'
+      }
+    });
+    const href = wrapper.find('EuiLink').prop('href');
+    const { _g } = getUrlQuery(href);
+
+    expect(_g).toBe(
+      '(refreshInterval:(pause:!t,value:0),time:(from:now-7d,mode:relative,to:now-1d))'
+    );
+  });
+
+  it('should not throw due to hashed args', () => {
+    const wrapper = getUnconnectedKibanLink();
+    expect(() => {
+      wrapper.setProps({ location: { search: '?_g=H@whatever' } });
+    }).not.toThrow();
+  });
+
+  it('should use default time range when _g is empty', () => {
+    const wrapper = getUnconnectedKibanLink();
+    wrapper.setProps({ location: { search: '?_g=()' } });
+    const href = wrapper.find('EuiLink').prop('href') as string;
+    const { _g } = getUrlQuery(href);
+    expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
+  });
+
+  it('should respect _g query', () => {
     const discoverQuery = {
-      _a: {
-        interval: 'auto',
-        query: {
-          language: 'lucene',
-          query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
-        },
-        sort: { '@timestamp': 'desc' }
+      _g: {
+        ml: {
+          jobIds: [1337]
+        }
       }
     };
 
-    wrapper = shallow(
+    const wrapper = shallow(
       <UnconnectedKibanaLink
         location={{ search: '' }}
         pathname={'/app/kibana'}
@@ -207,31 +273,17 @@ describe('UnconnectedKibanaLink', () => {
         Go to Discover
       </UnconnectedKibanaLink>
     );
-  });
 
-  it('should have correct url', () => {
-    expect(wrapper.find('EuiLink').prop('href')).toBe(
-      'myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:\'context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"\'),sort:(\'@timestamp\':desc))&_g=(time:(from:now-24h,mode:quick,to:now))'
-    );
-  });
-
-  it('should render correct markup', () => {
-    expect(wrapper).toMatchSnapshot();
-  });
-
-  it('should include existing _g values in link href', () => {
-    wrapper.setProps({
-      location: {
-        search:
-          '?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-7d,mode:relative,to:now-1d))'
-      }
-    });
-    expect(wrapper).toMatchSnapshot();
-
-    wrapper.setProps({ location: { search: '?_g=H@whatever' } });
-    expect(wrapper).toMatchSnapshot();
+    const href = wrapper.find('EuiLink').prop('href') as string;
+    const { _g } = getUrlQuery(href);
+    expect(_g).toBe('(ml:(jobIds:!(1337)))');
   });
 });
+
+function getUrlQuery(href?: string) {
+  const hash = url.parse(href!).hash!.slice(1);
+  return url.parse(hash, true).query;
+}
 
 describe('ViewMLJob', () => {
   it('should render component', () => {
