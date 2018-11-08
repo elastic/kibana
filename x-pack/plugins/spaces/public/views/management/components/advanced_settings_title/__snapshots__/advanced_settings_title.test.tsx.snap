@@ -34,6 +34,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
   >
     <EuiText
       grow={true}
+      size="m"
     >
       <h1
         data-test-subj="managementSettingsTitle"

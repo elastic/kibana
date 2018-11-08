@@ -4,6 +4,7 @@ exports[`Header should render normally 1`] = `
 <div>
   <EuiTitle
     size="s"
+    textTransform="none"
   >
     <h3>
       <FormattedMessage
@@ -15,6 +16,7 @@ exports[`Header should render normally 1`] = `
   </EuiTitle>
   <EuiText
     grow={true}
+    size="m"
   >
     <p>
       <FormattedMessage

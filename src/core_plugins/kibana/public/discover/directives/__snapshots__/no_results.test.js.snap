@@ -50,7 +50,7 @@ Array [
         class="euiSpacer euiSpacer--xl"
       />
       <div
-        class="euiText"
+        class="euiText euiText--medium"
       >
         <h3>
           Refine your query
@@ -78,7 +78,7 @@ Array [
           class="euiDescriptionList__title"
         >
           <div
-            class="euiText"
+            class="euiText euiText--medium"
           >
             <strong>
               Find requests that contain the number 200, in any field
@@ -102,7 +102,7 @@ Array [
           class="euiDescriptionList__title"
         >
           <div
-            class="euiText"
+            class="euiText euiText--medium"
           >
             <strong>
               Find 200 in the status field
@@ -126,7 +126,7 @@ Array [
           class="euiDescriptionList__title"
         >
           <div
-            class="euiText"
+            class="euiText euiText--medium"
           >
             <strong>
               Find all status codes between 400-499
@@ -150,7 +150,7 @@ Array [
           class="euiDescriptionList__title"
         >
           <div
-            class="euiText"
+            class="euiText euiText--medium"
           >
             <strong>
               Find status codes 400-499 with the extension php
@@ -174,7 +174,7 @@ Array [
           class="euiDescriptionList__title"
         >
           <div
-            class="euiText"
+            class="euiText euiText--medium"
           >
             <strong>
               Find status codes 400-499 with the extension php or html
@@ -304,7 +304,7 @@ Array [
         class="euiSpacer euiSpacer--xl"
       />
       <div
-        class="euiText"
+        class="euiText euiText--medium"
       >
         <h3>
           Address shard failures
@@ -423,7 +423,7 @@ Array [
         class="euiSpacer euiSpacer--xl"
       />
       <div
-        class="euiText"
+        class="euiText euiText--medium"
       >
         <h3>
           Expand your time range
