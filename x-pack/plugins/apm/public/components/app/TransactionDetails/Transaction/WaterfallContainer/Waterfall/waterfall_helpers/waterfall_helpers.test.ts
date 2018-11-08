@@ -103,75 +103,75 @@ describe('waterfall_helpers', () => {
 
   describe('getClockSkew', () => {
     it('should adjust when child starts before parent', () => {
-      const item = {
+      const child = {
         docType: 'transaction',
         timestamp: 0,
         duration: 50
       } as IWaterfallItem;
 
-      const parentItem = {
+      const parent = {
         timestamp: 100,
-        skew: 5,
-        duration: 100
+        duration: 100,
+        skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(item, parentItem)).toBe(130);
+      expect(getClockSkew(child, parent)).toBe(130);
     });
 
     it('should adjust when child starts after parent has ended', () => {
-      const item = {
+      const child = {
         docType: 'transaction',
         timestamp: 250,
         duration: 50
       } as IWaterfallItem;
 
-      const parentItem = {
+      const parent = {
         timestamp: 100,
-        skew: 5,
-        duration: 100
+        duration: 100,
+        skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(item, parentItem)).toBe(-120);
+      expect(getClockSkew(child, parent)).toBe(-120);
     });
 
     it('should not adjust when child starts within parent duration', () => {
-      const item = {
+      const child = {
         docType: 'transaction',
         timestamp: 150,
         duration: 50
       } as IWaterfallItem;
 
-      const parentItem = {
+      const parent = {
         timestamp: 100,
-        skew: 5,
-        duration: 100
+        duration: 100,
+        skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(item, parentItem)).toBe(0);
+      expect(getClockSkew(child, parent)).toBe(0);
     });
 
     it('should return parent skew for spans', () => {
-      const item = {
+      const child = {
         docType: 'span'
       } as IWaterfallItem;
 
-      const parentItem = {
+      const parent = {
         timestamp: 100,
-        skew: 5,
-        duration: 100
+        duration: 100,
+        skew: 5
       } as IWaterfallItem;
 
-      expect(getClockSkew(item, parentItem)).toBe(5);
+      expect(getClockSkew(child, parent)).toBe(5);
     });
 
-    it('should handle missing parentItem', () => {
-      const item = {
+    it('should handle missing parent', () => {
+      const child = {
         docType: 'transaction'
       } as IWaterfallItem;
 
-      const parentItem = undefined;
+      const parent = undefined;
 
-      expect(getClockSkew(item, parentItem)).toBe(0);
+      expect(getClockSkew(child, parent)).toBe(0);
     });
   });
 });
