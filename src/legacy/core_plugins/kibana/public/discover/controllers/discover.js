@@ -214,6 +214,10 @@ function discoverController(
     };
   };
 
+  $scope.onDelete = (filterToDelete) => {
+    $scope.reactFilters = $scope.reactFilters.filter((filter) => filter !== filterToDelete);
+  };
+
   $scope.getDocLink = getDocLink;
   $scope.intervalOptions = intervalOptions;
   $scope.showInterval = false;

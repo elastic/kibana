@@ -28,6 +28,7 @@ interface Props {
   onTogglePin: (filter: FilterBarFilter) => void;
   onToggleNegate: (filter: FilterBarFilter) => void;
   onToggleDisabled: (filter: FilterBarFilter) => void;
+  onDelete: (filter: FilterBarFilter) => void;
 }
 
 interface State {
@@ -117,6 +118,7 @@ export class FilterItem extends Component<Props, State> {
           icon: 'trash',
           onClick: () => {
             this.closePopover();
+            this.props.onDelete(filter);
           },
         },
       ],

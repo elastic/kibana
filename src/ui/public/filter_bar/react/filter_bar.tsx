@@ -27,6 +27,7 @@ interface Props {
   onToggleNegate: (filter: Filter) => void;
   onToggleDisabled: (filter: Filter) => void;
   onTogglePin: (filter: Filter) => void;
+  onDelete: (filter: Filter) => void;
 }
 
 export class FilterBar extends Component<Props> {
@@ -42,6 +43,10 @@ export class FilterBar extends Component<Props> {
     this.props.onToggleDisabled(filter.filter);
   };
 
+  public onDelete = (filter: FilterBarFilter) => {
+    this.props.onDelete(filter.filter);
+  };
+
   public render() {
     const filterItems = this.props.filters.map(filter => {
       const filterBarFilter = createFilterBarFilter(filter);
@@ -51,6 +56,7 @@ export class FilterBar extends Component<Props> {
           onToggleNegate={this.onToggleNegate}
           onToggleDisabled={this.onToggleDisabled}
           onTogglePin={this.onTogglePin}
+          onDelete={this.onDelete}
         />
       );
     });
