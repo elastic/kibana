@@ -6,7 +6,9 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 
-import { createTimeline } from './actions';
+import { filter } from 'lodash/fp';
+import { Sort } from '../../../components/timeline/body/sort';
+import { createTimeline, removeProvider, updateSort } from './actions';
 import { timelineDefaults, TimelineModel } from './model';
 
 /** A map of id to timeline  */
@@ -38,10 +40,56 @@ const addNewTimeline = ({ id, timelineById }: AddNewTimelineParams): TimelineByI
   },
 });
 
+interface UpdateTimelineSortParams {
+  id: string;
+  sort: Sort;
+  timelineById: TimelineById;
+}
+
+const updateTimelineSort = ({ id, sort, timelineById }: UpdateTimelineSortParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sort,
+    },
+  };
+};
+
+interface RemoveTimelineProviderParams {
+  id: string;
+  providerId: string;
+  timelineById: TimelineById;
+}
+
+const removeTimelineProvider = ({
+  id,
+  providerId,
+  timelineById,
+}: RemoveTimelineProviderParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: filter(p => p.id !== providerId, timeline.dataProviders),
+    },
+  };
+};
+
 /** The reducer for all timeline actions  */
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(createTimeline, (state, { id }) => ({
     ...state,
     timelineById: addNewTimeline({ id, timelineById: state.timelineById }),
+  }))
+  .case(removeProvider, (state, { id, providerId }) => ({
+    ...state,
+    timelineById: removeTimelineProvider({ id, providerId, timelineById: state.timelineById }),
+  }))
+  .case(updateSort, (state, { id, sort }) => ({
+    ...state,
+    timelineById: updateTimelineSort({ id, sort, timelineById: state.timelineById }),
   }))
   .build();

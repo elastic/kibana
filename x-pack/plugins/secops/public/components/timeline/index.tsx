@@ -19,14 +19,6 @@ import { ECS } from './ecs';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from './events';
 import { Timeline } from './timeline';
 
-const onColumnSorted: OnColumnSorted = sorted => {
-  alert(`column sorted: ${JSON.stringify(sorted)}`);
-};
-
-const onDataProviderRemoved: OnDataProviderRemoved = dataProvider => {
-  alert(`data provider removed: ${JSON.stringify(dataProvider)}`);
-};
-
 const onRangeSelected: OnRangeSelected = range => {
   alert(`range selected: ${range}`);
 };
@@ -48,6 +40,14 @@ interface StateProps {
 
 interface DispatchProps {
   createTimeline: ActionCreator<{ id: string }>;
+  updateTimelineSort: ActionCreator<{
+    id: string;
+    sort: Sort;
+  }>;
+  removeProvider: ActionCreator<{
+    id: string;
+    providerId: string;
+  }>;
 }
 
 type Props = OwnProps & StateProps & DispatchProps;
@@ -60,7 +60,23 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
   }
 
   public render() {
-    const { headers, sort, width, dataProviders } = this.props;
+    const {
+      dataProviders,
+      headers,
+      id,
+      removeProvider,
+      sort,
+      updateTimelineSort,
+      width,
+    } = this.props;
+
+    const onColumnSorted: OnColumnSorted = sorted => {
+      updateTimelineSort({ id, sort: sorted });
+    };
+
+    const onDataProviderRemoved: OnDataProviderRemoved = dataProvider => {
+      removeProvider({ id, providerId: dataProvider.id });
+    };
 
     return (
       <Timeline
@@ -96,5 +112,7 @@ export const StatefulTimeline = connect(
   mapStateToProps,
   {
     createTimeline: timelineActions.createTimeline,
+    updateTimelineSort: timelineActions.updateSort,
+    removeProvider: timelineActions.removeProvider,
   }
 )(StatefulTimelineComponent);
