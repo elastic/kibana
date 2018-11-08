@@ -43,7 +43,7 @@ interface MainPagesState {
   loadedBeatsAtLeastOnce: boolean;
 }
 
-class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesState> {
+class MainPageComponent extends React.PureComponent<MainPagesProps, MainPagesState> {
   private mounted: boolean = false;
 
   constructor(props: MainPagesProps) {
@@ -251,4 +251,4 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
   };
 }
 
-export const MainPages = withUrlState<MainPagesProps>(MainPagesComponent);
+export const MainPage = withUrlState<MainPagesProps>(MainPageComponent);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { NoDataLayout } from '../components/layouts/no_data';
+import { NoDataLayout } from '../../components/layouts/no_data';
 
 export const NoAccessPage: React.SFC<any> = () => (
   <NoDataLayout title="Access denied" actionSection={[]}>

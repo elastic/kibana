@@ -56,3 +56,5 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
     )}
   </div>
 );
+
+export const FakePage = () => <div />;

@@ -12,12 +12,13 @@ import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { sample } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
-import { BeatTag, CMPopulatedBeat } from '../../../common/domain_types';
-import { AppURLState } from '../../app';
-import { PrimaryLayout } from '../../components/layouts/primary';
-import { TagEdit } from '../../components/tag';
-import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+
+import { BeatTag, CMPopulatedBeat } from '../../common/domain_types';
+import { AppURLState } from '../app';
+import { PrimaryLayout } from '../components/layouts/primary';
+import { TagEdit } from '../components/tag';
+import { URLStateProps, withUrlState } from '../containers/with_url_state';
+import { FrontendLibs } from '../lib/types';
 interface TagPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
   match: any;

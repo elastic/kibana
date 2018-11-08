@@ -108,3 +108,4 @@ export class CreateTagFragment extends React.PureComponent<TagPageProps, TagPage
   };
 }
 export const CreateTagPageFragment = withUrlState<TagPageProps>(CreateTagFragment);
+export const FakePage = () => <div />;

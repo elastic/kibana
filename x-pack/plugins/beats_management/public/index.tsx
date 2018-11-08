@@ -10,15 +10,15 @@ import { ThemeProvider } from 'styled-components';
 import { BASE_PATH } from '../common/constants';
 import { BreadcrumbProvider } from './components/route_with_breadcrumb';
 import { compose } from './lib/compose/kibana';
-import { FrontendLibs } from './lib/lib';
-import { PageRouter } from './router';
-
-function startApp(libs: FrontendLibs) {
-  libs.framework.registerManagementSection('beats', 'Central Management', BASE_PATH);
-  libs.framework.render(
+import { FrontendLibs } from './lib/types';
+import { AppRouter } from './router';
+import './utils/page_loader';
+async function startApp(libs: FrontendLibs) {
+  await libs.framework.renderUIAtPath(
+    '/management/beats_management',
     <ThemeProvider theme={{ eui: euiVars }}>
       <BreadcrumbProvider>
-        <PageRouter libs={libs} />
+        <AppRouter libs={libs} />
       </BreadcrumbProvider>
     </ThemeProvider>
   );
