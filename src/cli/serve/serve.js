@@ -184,6 +184,7 @@ export default function (program) {
   if (CAN_CLUSTER) {
     command
       .option('--dev', 'Run the server with development mode defaults')
+      .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
@@ -207,6 +208,7 @@ export default function (program) {
         configs: [].concat(opts.config || []),
         cliArgs: {
           dev: !!opts.dev,
+          open: !!opts.open,
           envName: unknownOptions.env ? unknownOptions.env.name : undefined,
           quiet: !!opts.quiet,
           silent: !!opts.silent,
