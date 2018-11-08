@@ -5,34 +5,34 @@
  */
 
 
+
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-// Import this way to be able to stub/mock `createSearchItems` later on in the test using sinon.
+// Import this way to be able to stub/mock functions later on in the tests using sinon.
 import * as newJobUtils from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import * as indexUtils from 'plugins/ml/util/index_utils';
 
-describe('ML - Advanced Job Wizard - New Job Controller', () => {
+describe('ML - Job Type Controller', () => {
   beforeEach(() => {
     ngMock.module('kibana');
   });
 
-  it('Initialize New Job Controller', (done) => {
-    const stub = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
+  it('Initialize Job Type Controller', (done) => {
+    const stub1 = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
       indexPattern: {},
       savedSearch: {},
       combinedQuery: {}
     }));
-
+    const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlNewJob', { $scope: scope });
+      $controller('MlNewJobStepJobType', { $scope: scope });
 
-      // This is just about initializing the controller and making sure
-      // all angularjs based dependencies get loaded without error.
-      // This simple scope test is just a final sanity check.
-      expect(scope.ui.pageTitle).to.be('Create a new job');
-      stub.restore();
+      expect(scope.indexWarningTitle).to.eql('Index pattern undefined is not time based');
+      stub1.restore();
+      stub2.restore();
       done();
     });
   });
