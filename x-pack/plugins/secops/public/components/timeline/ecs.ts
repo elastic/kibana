@@ -6,24 +6,43 @@
 
 export interface ECS {
   _id: string;
-  '@timestamp': string;
-  // TODO: The rest of these fields
+  timestamp: string;
+  host: {
+    hostname: string;
+    ip: string;
+  };
   event: {
     id: string;
     category: string;
     type: string;
     module: string;
     severity: number;
-    // TODO: The rest of these fields
+  };
+  suricata?: {
+    eve: {
+      flow_id: number;
+      proto: string;
+      alert: {
+        signature: string;
+        signature_id: number;
+      };
+    };
   };
   source: {
     ip: string;
-    hostname: string;
-    // TODO: The rest of these fields
+    port: number;
   };
-  user: {
+  destination: {
+    ip: string;
+    port: number;
+  };
+  geo: {
+    region_name: string;
+    country_iso_code: string;
+  };
+  user?: {
     id: string;
     name: string;
-    // TODO: The rest of these fields
   };
+  [key: string]: string | object | undefined;
 }

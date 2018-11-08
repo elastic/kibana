@@ -39,7 +39,6 @@ import { Timeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { Sort } from '../../components/timeline/body/sort';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
-import { ECS } from '../../components/timeline/ecs';
 import {
   OnColumnSorted,
   OnDataProviderRemoved,
@@ -49,6 +48,7 @@ import {
 
 import { mockECSData } from '../mock/mock_ecs';
 
+import { columnRenderers, rowRenderers } from '../../components/timeline/body/renderers';
 import { NotFoundPage } from '../404';
 import { Hosts } from '../hosts';
 import { Network } from '../network';
@@ -70,14 +70,8 @@ const onFilterChange: OnFilterChange = filter => {
   alert(`filter changed: ${JSON.stringify(filter)}`);
 };
 
-export interface EventRenderer {
-  isInstance: (data: ECS) => boolean;
-  renderMultiClolumn: (data: ECS) => React.ReactNode;
-  renderColumn: (columnName: string, data: ECS) => React.ReactNode;
-}
-
 const sort: Sort = {
-  columnId: '@timestamp',
+  columnId: 'timestamp',
   sortDirection: 'descending',
 };
 
@@ -130,12 +124,14 @@ export const HomePage = pure(() => (
           <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
             <Timeline
               columnHeaders={headers}
+              columnRenderers={columnRenderers}
               dataProviders={mockDataProviders}
               data={mockECSData}
               onColumnSorted={onColumnSorted}
               onDataProviderRemoved={onDataProviderRemoved}
               onFilterChange={onFilterChange}
               onRangeSelected={onRangeSelected}
+              rowRenderers={rowRenderers}
               sort={sort}
               width={maxTimelineWidth}
             />

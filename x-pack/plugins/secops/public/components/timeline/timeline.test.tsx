@@ -12,12 +12,13 @@ import { Timeline } from '.';
 import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
+import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 describe('Timeline', () => {
   const sort: Sort = {
-    columnId: '@timestamp',
+    columnId: 'timestamp',
     sortDirection: 'descending',
   };
 
@@ -26,12 +27,14 @@ describe('Timeline', () => {
       const wrapper = mount(
         <Timeline
           columnHeaders={headers}
+          columnRenderers={columnRenderers}
           data={mockECSData}
           dataProviders={mockDataProviders}
           onColumnSorted={noop}
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          rowRenderers={rowRenderers}
           sort={sort}
           width={1000}
         />
@@ -44,12 +47,14 @@ describe('Timeline', () => {
       const wrapper = mount(
         <Timeline
           columnHeaders={headers}
+          columnRenderers={columnRenderers}
           data={mockECSData}
           dataProviders={mockDataProviders}
           onColumnSorted={noop}
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          rowRenderers={rowRenderers}
           sort={sort}
           width={1000}
         />
@@ -67,12 +72,14 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
             data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={mockOnColumnSorted}
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={noop}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -97,12 +104,14 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
             data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={mockOnDataProviderRemoved}
             onFilterChange={noop}
             onRangeSelected={noop}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -138,12 +147,14 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={allColumnsHaveTextFilters}
+            columnRenderers={columnRenderers}
             data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={noop}
             onFilterChange={mockOnFilterChange}
             onRangeSelected={noop}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -169,12 +180,14 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
             data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={mockOnRangeSelected}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
