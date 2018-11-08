@@ -132,7 +132,7 @@ exports[`Timeline should render with data 1`] = `
                       textAnchor="middle"
                       transform="translate(0, -20)"
                     >
-                      0
+                      0 ms
                     </text>
                   </g>
                   <g
