@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type FunctionType = (...args: any[]) => any;
+export * from './auto_follow_pattern';
 
-export interface HttpRequestError {
-  [key: string]: any;
-}
+export * from './api';

@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction, Dispatch } from 'redux';
 import * as t from './action_types';
-import { Actions } from './actions/api';
+import { apiEnd, apiError, apiStart }  from './actions/api';
 
-const { apiEnd, apiError, apiStart } = Actions;
-
-export const apiMiddleware = ({ dispatch }: { dispatch: Dispatch }) => (
-  next: (action: AnyAction) => void
-) => async (action: AnyAction) => {
+export const apiMiddleware = ({ dispatch }) => next => async (action) => {
   next(action);
 
   if (action.type !== t.API) {
@@ -21,14 +16,14 @@ export const apiMiddleware = ({ dispatch }: { dispatch: Dispatch }) => (
 
   const { label, scope, handler } = action.payload;
 
-  dispatch(apiStart(label, scope));
+  dispatch(apiStart({ label, scope }));
 
   let response;
 
   try {
     response = await handler();
   } catch (error) {
-    dispatch(apiError(error, scope));
+    dispatch(apiError({ error, scope }));
     dispatch({
       type: `${label}_FAILURE`,
       payload: error,
@@ -40,5 +35,5 @@ export const apiMiddleware = ({ dispatch }: { dispatch: Dispatch }) => (
     type: `${label}_SUCCESS`,
     payload: response,
   });
-  dispatch(apiEnd(label, scope));
+  dispatch(apiEnd({ label, scope }));
 };

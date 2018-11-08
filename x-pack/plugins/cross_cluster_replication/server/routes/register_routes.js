@@ -6,6 +6,6 @@
 
 import { registerAutoFollowPatternRoutes } from './api/register_auto_follow_pattern_routes';
 
-export function registerRoutes(server: any) {
+export function registerRoutes(server) {
   registerAutoFollowPatternRoutes(server);
 }

@@ -6,14 +6,14 @@
 
 import { API_BASE_PATH } from '../../../common/constants';
 
-export const registerAutoFollowPatternRoutes = (server: any) => {
+export const registerAutoFollowPatternRoutes = (server) => {
   /**
    * Returns a list of all Auto Follow patterns
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns`,
     method: 'GET',
-    handler: async (request: any) => {
+    handler: async () => {
       return new Promise(resolve => {
         setTimeout(() => {
           resolve({

@@ -5,17 +5,25 @@
  */
 
 import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
 
-import { AutoFollowPatternActions as a } from '../../../store/actions';
+import { SECTIONS } from '../../../constants';
+import { getApiStatus, getApiError } from '../../../store/selectors';
+import { loadAutoFollowPatterns } from '../../../store/actions';
 
 import { AutoFollowPatternList as AutoFollowPatternListView } from './auto_follow_pattern_list';
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  loadAutoFollowPatterns: () => dispatch(a.loadAutoFollowPatterns()),
+const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
+
+const mapStateToProps = (state) => ({
+  apiStatus: getApiStatus(scope)(state),
+  apiError: getApiError(scope)(state),
+});
+
+const mapDispatchToProps = dispatch => ({
+  loadAutoFollowPatterns: () => dispatch(loadAutoFollowPatterns()),
 });
 
 export const AutoFollowPatternList = connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(AutoFollowPatternListView);

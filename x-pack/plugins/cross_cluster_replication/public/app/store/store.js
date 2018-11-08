@@ -12,8 +12,8 @@ import { ccr } from './reducers';
 function createCrossClusterReplicationStore(initialState = {}) {
   const enhancers = [applyMiddleware(apiMiddleware)];
 
-  if ((window as any).__REDUX_DEVTOOLS_EXTENSION__) {
-    enhancers.push((window as any).__REDUX_DEVTOOLS_EXTENSION__());
+  if (window.__REDUX_DEVTOOLS_EXTENSION__) {
+    enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
   }
   return createStore(ccr, initialState, compose(...enhancers));
 }

@@ -9,7 +9,7 @@ import { PLUGIN } from './common/constants';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { registerRoutes } from './server/routes/register_routes';
 
-export function crossClusterReplication(kibana: any) {
+export function crossClusterReplication(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     publicDir: resolve(__dirname, 'public'),
@@ -18,7 +18,7 @@ export function crossClusterReplication(kibana: any) {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: ['plugins/cross_cluster_replication'],
     },
-    init: function initCcrPlugin(server: any) {
+    init: function initCcrPlugin(server) {
       registerLicenseChecker(server);
       registerRoutes(server);
     },

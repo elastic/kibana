@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function checkLicense(xpackLicenseInfo: any) {
+export function checkLicense(xpackLicenseInfo) {
   const pluginName = 'Cross Cluster Replication';
 
   // If, for some reason, we cannot get the license information

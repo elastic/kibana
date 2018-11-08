@@ -5,21 +5,17 @@
  */
 
 import * as t from '../action_types';
-import { Actions } from '../actions/auto_follow_pattern';
 
-export interface AutoFollowPatternState {
-  byId: object;
-  selectedId: string | null;
-}
-
-const initialState: AutoFollowPatternState = {
+const initialState = {
   byId: {},
   selectedId: null,
 };
 
-export const reducer = (state = initialState, action: Actions) => {
+const success = action => `${action}_SUCCESS`;
+
+export const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case t.AUTO_FOLLOW_PATTERN_LOAD_SUCCESS: {
+    case success(t.AUTO_FOLLOW_PATTERN_LOAD): {
       return state;
     }
     default:

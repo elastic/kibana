@@ -11,16 +11,14 @@ const apiPrefix = chrome.addBasePath(API_BASE_PATH);
 
 // This is an Angular service, which is why we use this provider pattern
 // to access it within our React app.
-let httpClient: any;
+let httpClient;
 
-export function setHttpClient(client: any) {
+export function setHttpClient(client) {
   httpClient = client;
 }
 
 // ---
 
 export const loadAutoFollowPatterns = async () => {
-  return await httpClient
-    .get(`${apiPrefix}/auto_follow_patterns`)
-    .then((response: any) => response.data);
+  return await httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(response => response.data);
 };
