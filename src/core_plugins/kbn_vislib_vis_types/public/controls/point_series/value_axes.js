@@ -136,10 +136,11 @@ module.directive('vislibValueAxes', function () {
         }, 1);
       };
 
-      const lastAxisTitles = {};
+      const lastCustomLabels = {};
+      let lastMatchingSeriesAggType = ''; // We track this so we can know when the agg type is changed
       $scope.updateAxisTitle = function () {
         $scope.editorState.params.valueAxes.forEach((axis, axisNumber) => {
-          let label = '';
+          let newCustomLabel = '';
           const isFirst = axisNumber === 0;
           const matchingSeries = [];
           $scope.editorState.params.seriesParams.forEach((series, i) => {
@@ -154,16 +155,27 @@ module.directive('vislibValueAxes', function () {
               });
             }
           });
+
           if (matchingSeries.length === 1) {
-            label = matchingSeries[0].makeLabel();
+            newCustomLabel = matchingSeries[0].makeLabel();
           }
-          if (lastAxisTitles[axis.id] !== label && label !== '') {
-            // Only overwrite the custom title with the value axis label if it hasn't been changed
-            if (lastAxisTitles[axis.id] === axis.title.text) {
-              axis.title.text = label;
+
+          const matchingSeriesAggType = _.get(matchingSeries, '[0]type.name', '');
+
+          if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
+            const isFirstRender = Object.keys(lastCustomLabels).length === 0;
+            const aggTypeIsChanged = lastMatchingSeriesAggType !== matchingSeriesAggType;
+            const axisTitleIsEmpty = axis.title.text === '';
+            const lastCustomLabelMatchesAxisTitle = lastCustomLabels[axis.id] === axis.title.text;
+
+            if (!isFirstRender && (aggTypeIsChanged || axisTitleIsEmpty || lastCustomLabelMatchesAxisTitle)) {
+              axis.title.text = newCustomLabel; // Override axis title with new custom label
             }
-            lastAxisTitles[axis.id] = label;
+
+            lastCustomLabels[axis.id] = newCustomLabel;
           }
+
+          lastMatchingSeriesAggType = matchingSeriesAggType;
         });
       };
 
