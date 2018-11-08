@@ -137,7 +137,7 @@ export default class DynamicBaselineFlyout extends Component {
                     transactionType={transactionType}
                     location={location}
                   >
-                    View existing jobz
+                    View existing job
                   </ViewMLJob>
                 </p>
               </EuiCallOut>
