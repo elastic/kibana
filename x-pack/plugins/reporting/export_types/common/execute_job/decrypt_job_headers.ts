@@ -3,10 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+// @ts-ignore
 import { cryptoFactory } from '../../../server/lib/crypto';
+import { CryptoFactory, KbnServer, ReportingJob } from '../../../types';
 
-export const decryptJobHeaders = async ({ job, server }) => {
-  const crypto = cryptoFactory(server);
-  const decryptedHeaders = await crypto.decrypt(job.headers);
+export const decryptJobHeaders = async ({
+  job,
+  server,
+}: {
+  job: ReportingJob;
+  server: KbnServer;
+}) => {
+  const crypto: CryptoFactory = cryptoFactory(server);
+  const decryptedHeaders: string = await crypto.decrypt(job.headers);
   return { job, decryptedHeaders, server };
 };

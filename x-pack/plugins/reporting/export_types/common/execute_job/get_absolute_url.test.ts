@@ -7,24 +7,26 @@
 import { memoize } from 'lodash';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 
-const createMockServer = ({ settings = {} } = {}) => {
+const createMockServer = ({ settings = {} }: any) => {
   const mockServer = {
-    expose: () => {},
+    expose: () => {
+      '';
+    },
     config: memoize(() => {
       return {
-        get: jest.fn()
+        get: jest.fn(),
       };
     }),
     info: {
-      protocol: 'http'
-    }
+      protocol: 'http',
+    },
   };
 
-  const defaultSettings = {
+  const defaultSettings: any = {
     'server.host': 'something',
     'server.port': 8080,
     'server.basePath': '/tst',
-    'xpack.reporting.kibanaServer': {}
+    'xpack.reporting.kibanaServer': {},
   };
   mockServer.config().get.mockImplementation(key => {
     return key in settings ? settings[key] : defaultSettings[key];
@@ -34,8 +36,7 @@ const createMockServer = ({ settings = {} } = {}) => {
 };
 
 test(`by default it builds url using information from server.info.protocol and the server.config`, () => {
-  const mockServer = createMockServer();
-
+  const mockServer = createMockServer('');
   const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const absoluteUrl = getAbsoluteUrl();
   expect(absoluteUrl).toBe(`http://something:8080/tst/app/kibana`);
@@ -43,7 +44,7 @@ test(`by default it builds url using information from server.info.protocol and t
 
 test(`uses kibanaServer.protocol if specified`, () => {
   const settings = {
-    'xpack.reporting.kibanaServer.protocol': 'https'
+    'xpack.reporting.kibanaServer.protocol': 'https',
   };
   const mockServer = createMockServer({ settings });
 
@@ -54,7 +55,7 @@ test(`uses kibanaServer.protocol if specified`, () => {
 
 test(`uses kibanaServer.hostname if specified`, () => {
   const settings = {
-    'xpack.reporting.kibanaServer.hostname': 'something-else'
+    'xpack.reporting.kibanaServer.hostname': 'something-else',
   };
   const mockServer = createMockServer({ settings });
 
@@ -65,7 +66,7 @@ test(`uses kibanaServer.hostname if specified`, () => {
 
 test(`uses kibanaServer.port if specified`, () => {
   const settings = {
-    'xpack.reporting.kibanaServer.port': 8008
+    'xpack.reporting.kibanaServer.port': 8008,
   };
   const mockServer = createMockServer({ settings });
 
@@ -75,7 +76,7 @@ test(`uses kibanaServer.port if specified`, () => {
 });
 
 test(`uses the provided hash`, () => {
-  const mockServer = createMockServer();
+  const mockServer = createMockServer('');
 
   const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const hash = '/hash';
@@ -84,7 +85,7 @@ test(`uses the provided hash`, () => {
 });
 
 test(`uses the provided hash with queryString`, () => {
-  const mockServer = createMockServer();
+  const mockServer = createMockServer('');
 
   const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const hash = '/hash?querystring';
@@ -93,7 +94,7 @@ test(`uses the provided hash with queryString`, () => {
 });
 
 test(`uses the provided basePath`, () => {
-  const mockServer = createMockServer();
+  const mockServer = createMockServer('');
 
   const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const absoluteUrl = getAbsoluteUrl({ basePath: '/s/marketing' });
@@ -101,7 +102,7 @@ test(`uses the provided basePath`, () => {
 });
 
 test(`uses the path`, () => {
-  const mockServer = createMockServer();
+  const mockServer = createMockServer('');
 
   const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const path = '/app/canvas';
@@ -110,12 +111,10 @@ test(`uses the path`, () => {
 });
 
 test(`uses the search`, () => {
-  const mockServer = createMockServer();
+  const mockServer = createMockServer('');
 
   const getAbsoluteUrl = getAbsoluteUrlFactory(mockServer);
   const search = '_t=123456789';
   const absoluteUrl = getAbsoluteUrl({ search });
   expect(absoluteUrl).toBe(`http://something:8080/tst/app/kibana?${search}`);
 });
-
-

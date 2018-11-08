@@ -5,8 +5,20 @@
  */
 import { omit } from 'lodash';
 import { KBN_SCREENSHOT_HEADER_BLACKLIST } from '../../../common/constants';
+import { KbnServer, ReportingJob } from '../../../types';
 
-export const omitBlacklistedHeaders = ({ job, decryptedHeaders, server }) => {
-  const filteredHeaders = omit(decryptedHeaders, KBN_SCREENSHOT_HEADER_BLACKLIST);
+export const omitBlacklistedHeaders = ({
+  job,
+  decryptedHeaders,
+  server,
+}: {
+  job: ReportingJob;
+  decryptedHeaders: Record<string, string>;
+  server: KbnServer;
+}) => {
+  const filteredHeaders: Record<string, string> = omit(
+    decryptedHeaders,
+    KBN_SCREENSHOT_HEADER_BLACKLIST
+  );
   return { job, filteredHeaders, server };
 };
