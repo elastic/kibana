@@ -21,7 +21,6 @@ import {
   PageContent,
   PageHeader,
   Pane1,
-  Pane1FlexContent,
   Pane1Header,
   Pane1Style,
   Pane2,
@@ -35,45 +34,12 @@ import {
 import { DatePicker } from '../../components/page/date_picker';
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
-import { Timeline } from '../../components/timeline';
+import { StatefulTimeline } from '../../components/timeline';
 import { headers } from '../../components/timeline/body/column_headers/headers';
-import { Sort } from '../../components/timeline/body/sort';
-import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
-import {
-  OnColumnSorted,
-  OnDataProviderRemoved,
-  OnFilterChange,
-  OnRangeSelected,
-} from '../../components/timeline/events';
-
-import { mockECSData } from '../mock/mock_ecs';
-
-import { columnRenderers, rowRenderers } from '../../components/timeline/body/renderers';
 import { NotFoundPage } from '../404';
 import { Hosts } from '../hosts';
 import { Network } from '../network';
 import { Overview } from '../overview';
-
-const onColumnSorted: OnColumnSorted = sorted => {
-  alert(`column sorted: ${JSON.stringify(sorted)}`);
-};
-
-const onDataProviderRemoved: OnDataProviderRemoved = dataProvider => {
-  alert(`data provider removed: ${JSON.stringify(dataProvider)}`);
-};
-
-const onRangeSelected: OnRangeSelected = range => {
-  alert(`range selected: ${range}`);
-};
-
-const onFilterChange: OnFilterChange = filter => {
-  alert(`filter changed: ${JSON.stringify(filter)}`);
-};
-
-const sort: Sort = {
-  columnId: 'timestamp',
-  sortDirection: 'descending',
-};
 
 const maxTimelineWidth = 1125;
 
@@ -107,34 +73,20 @@ export const HomePage = pure(() => (
             <EuiSearchBar onChange={noop} />
           </Pane1Header>
           <PaneScrollContainer data-test-subj="pane1ScrollContainer">
-            <Pane1FlexContent data-test-subj="pane1FlexContent">
-              <Switch>
-                <Redirect from="/" exact={true} to="/overview" />
-                <Route path="/overview" component={Overview} />
-                <Route path="/hosts" component={Hosts} />
-                <Route path="/network" component={Network} />
-                <Route path="/link-to" component={LinkToPage} />
-                <Route component={NotFoundPage} />
-              </Switch>
-            </Pane1FlexContent>
+            <Switch>
+              <Redirect from="/" exact={true} to="/overview" />
+              <Route path="/overview" component={Overview} />
+              <Route path="/hosts" component={Hosts} />
+              <Route path="/network" component={Network} />
+              <Route path="/link-to" component={LinkToPage} />
+              <Route component={NotFoundPage} />
+            </Switch>
           </PaneScrollContainer>
         </Pane1>
 
         <Pane2 data-test-subj="pane2">
           <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
-            <Timeline
-              columnHeaders={headers}
-              columnRenderers={columnRenderers}
-              dataProviders={mockDataProviders}
-              data={mockECSData}
-              onColumnSorted={onColumnSorted}
-              onDataProviderRemoved={onDataProviderRemoved}
-              onFilterChange={onFilterChange}
-              onRangeSelected={onRangeSelected}
-              rowRenderers={rowRenderers}
-              sort={sort}
-              width={maxTimelineWidth}
-            />
+            <StatefulTimeline id="pane2-timeline" headers={headers} width={maxTimelineWidth} />
           </Pane2TimelineContainer>
         </Pane2>
       </SplitPane>

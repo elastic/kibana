@@ -33,6 +33,7 @@ describe('ColumnHeaders', () => {
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          range="1 Day"
           rowRenderers={rowRenderers}
           width={1000}
         />

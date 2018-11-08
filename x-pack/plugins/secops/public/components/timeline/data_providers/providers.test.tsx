@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import { noop, omit } from 'lodash/fp';
+import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
 import {
   getEventCount,
@@ -43,7 +43,10 @@ describe('Providers', () => {
         .first()
         .simulate('click');
 
-      const callbackParams = omit('render', mockOnDataProviderRemoved.mock.calls[0][0]);
+      const callbackParams = pick(
+        ['enabled', 'id', 'name', 'negated'],
+        mockOnDataProviderRemoved.mock.calls[0][0]
+      );
 
       expect(callbackParams).toEqual({
         enabled: true,

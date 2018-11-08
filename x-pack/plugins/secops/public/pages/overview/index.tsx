@@ -7,6 +7,11 @@
 import React from 'react';
 import { pure } from 'recompose';
 
+import { Pane1FlexContent } from '../../components/page';
 import { Placeholders } from '../../components/visualization_placeholder';
 
-export const Overview = pure(() => <Placeholders count={10} myRoute="Overview" />);
+export const Overview = pure(() => (
+  <Pane1FlexContent>
+    <Placeholders timelineId="pane2-timeline" count={10} myRoute="Overview" />
+  </Pane1FlexContent>
+));
