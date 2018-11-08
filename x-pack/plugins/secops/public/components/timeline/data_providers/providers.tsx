@@ -6,6 +6,7 @@
 
 import { EuiButtonIcon, EuiPanel, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
+import { Draggable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -62,6 +63,8 @@ const Spacer = styled(EuiSpacer)`
   border-left: 1px solid #ccc;
 `;
 
+const ProviderContainer = styled.div``; // required because react-beautiful-dnd cannot wrap EuiPanel directly
+
 /**
  * Renders an interactive card representation of the data providers. It also
  * affords uniform UI controls for the following actions:
@@ -71,12 +74,26 @@ const Spacer = styled(EuiSpacer)`
  */
 export const Providers = pure<Props>(({ dataProviders, onDataProviderRemoved }) => (
   <PanelProviders data-test-subj="providers">
-    {dataProviders.map(dataProvider => (
-      <PanelProvider data-test-subj="provider" key={dataProvider.id}>
-        {dataProvider.render()}
-        <Spacer />
-        <CloseButton onDataProviderRemoved={onDataProviderRemoved} dataProvider={dataProvider} />
-      </PanelProvider>
+    {dataProviders.map((dataProvider, i) => (
+      <Draggable draggableId={dataProvider.id} index={i} key={dataProvider.id}>
+        {provided => (
+          <ProviderContainer
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            innerRef={provided.innerRef}
+            data-test-subj="providerContainer"
+          >
+            <PanelProvider data-test-subj="provider">
+              {dataProvider.render()}
+              <Spacer />
+              <CloseButton
+                onDataProviderRemoved={onDataProviderRemoved}
+                dataProvider={dataProvider}
+              />
+            </PanelProvider>
+          </ProviderContainer>
+        )}
+      </Draggable>
     ))}
   </PanelProviders>
 ));
