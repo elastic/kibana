@@ -143,7 +143,6 @@ export class VectorStyleColorEditor extends React.Component {
 
 
   render() {
-
     if (this.state.colorStyleDesciptor === null) {
       this.state.colorStyleDesciptor = this.props.colorStyleDescriptor || VectorStyleColorEditor._getFallbackDescriptor();
     }
