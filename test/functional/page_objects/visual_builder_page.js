@@ -192,8 +192,24 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const tableView = await testSubjects.find('tableView');
       return await tableView.getVisibleText();
     }
-
-
+    async clickMetricPanelOptions() {
+      const button = await testSubjects.find('metricEditorPanelOptionsBtn');
+      await button.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+    async setIndexPatternValue(value) {
+      const el = await testSubjects.find('metricsIndexPatternInput');
+      await el.clearValue();
+      await el.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+    async selectIndexPatternTimeField(timeField) {
+      const el = await testSubjects.find('comboBoxSearchInput');
+      await el.clearValue();
+      await el.type(timeField);
+      await el.session.pressKeys(Keys.RETURN);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
   }
 
   return new VisualBuilderPage();

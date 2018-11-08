@@ -34,41 +34,18 @@ import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
 import { onBrushEvent } from '../utils/brush_event';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
-import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 import { timefilter } from 'ui/timefilter';
-
-import { Inspector } from '../inspector';
-import { RequestAdapter, DataAdapter } from '../inspector/adapters';
-
-const getTerms = (table, columnIndex, rowIndex) => {
-  if (rowIndex === -1) {
-    return [];
-  }
-
-  // get only rows where cell value matches current row for all the fields before columnIndex
-  const rows = table.rows.filter(row => {
-    return table.columns.every((column, i) => {
-      return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
-    });
-  });
-  const terms = rows.map(row => row[table.columns[columnIndex].id]);
-
-  return [...new Set(terms.filter(term => {
-    const notOther = term !== '__other__';
-    const notMissing = term !== '__missing__';
-    return notOther && notMissing;
-  }))];
-};
+import { VisFiltersProvider } from './vis_filters';
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
+  const visFilter = Private(VisFiltersProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -98,91 +75,15 @@ export function VisProvider(Private, indexPatterns, getAppState) {
         events: {
           // the filter method will be removed in the near feature
           // you should rather use addFilter method below
-          filter: (event) => {
-            let data = event.datum.aggConfigResult;
-            const filters = [];
-            while (data.$parent) {
-              const { key, rawData } = data.$parent;
-              const { table, column, row } = rawData;
-              filters.push(this.API.events.createFilter(table, column, row, key));
-              data = data.$parent;
-            }
-            const appState = getAppState();
-            filterBarPushFilters(appState)(_.flatten(filters));
-          },
-          createFilter: (data, columnIndex, rowIndex, cellValue) => {
-            const { aggConfig, id: columnId } = data.columns[columnIndex];
-            let filter = [];
-            const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
-            if (value === null || value === undefined) {
-              return;
-            }
-            if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
-              const terms = getTerms(data, columnIndex, rowIndex);
-              filter = aggConfig.createFilter(value, { terms });
-            } else {
-              filter = aggConfig.createFilter(value);
-            }
-            return filter;
-          },
-          addFilter: (data, columnIndex, rowIndex, cellValue) => {
-            const filter = this.API.events.createFilter(data, columnIndex, rowIndex, cellValue);
-            queryFilter.addFilters(filter);
-          }, brush: (event) => {
+          filter: visFilter.filter,
+          createFilter: visFilter.createFilter,
+          addFilter: visFilter.addFilter,
+          brush: (event) => {
             onBrushEvent(event, getAppState());
           }
         },
-        inspectorAdapters: this._getActiveInspectorAdapters(),
         getAppState,
       };
-    }
-
-    /**
-     * Open the inspector for this visualization.
-     * @return {InspectorSession} the handler for the session of this inspector.
-     */
-    openInspector() {
-      return Inspector.open(this.API.inspectorAdapters, {
-        title: this.title
-      });
-    }
-
-    hasInspector() {
-      return Inspector.isAvailable(this.API.inspectorAdapters);
-    }
-
-    /**
-     * Returns an object of all inspectors for this vis object.
-     * This must only be called after this.type has properly be initialized,
-     * since we need to read out data from the the vis type to check which
-     * inspectors are available.
-     */
-    _getActiveInspectorAdapters() {
-      const adapters = {};
-      const { inspectorAdapters: typeAdapters } = this.type;
-
-      // Add the requests inspector adapters if the vis type explicitly requested it via
-      // inspectorAdapters.requests: true in its definition or if it's using the courier
-      // request handler, since that will automatically log its requests.
-      if (typeAdapters && typeAdapters.requests || this.type.requestHandler === 'courier') {
-        adapters.requests = new RequestAdapter();
-      }
-
-      // Add the data inspector adapter if the vis type requested it or if the
-      // vis is using courier, since we know that courier supports logging
-      // its data.
-      if (typeAdapters && typeAdapters.data || this.type.requestHandler === 'courier') {
-        adapters.data = new DataAdapter();
-      }
-
-      // Add all inspectors, that are explicitly registered with this vis type
-      if (typeAdapters && typeAdapters.custom) {
-        Object.entries(typeAdapters.custom).forEach(([key, Adapter]) => {
-          adapters[key] = new Adapter();
-        });
-      }
-
-      return adapters;
     }
 
     setCurrentState(state) {

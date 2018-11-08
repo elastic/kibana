@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { PluginsModule } from './plugins';
+
 export { bootstrap } from './bootstrap';
 
 import { first } from 'rxjs/operators';
@@ -27,6 +29,7 @@ import { Logger, LoggerFactory } from './logging';
 
 export class Server {
   private readonly http: HttpModule;
+  private readonly plugins: PluginsModule;
   private readonly legacy: LegacyCompatModule;
   private readonly log: Logger;
 
@@ -38,6 +41,7 @@ export class Server {
     this.log = logger.get('server');
 
     this.http = new HttpModule(configService.atPath('server', HttpConfig), logger);
+    this.plugins = new PluginsModule(configService, logger, env);
     this.legacy = new LegacyCompatModule(configService, logger, env);
   }
 
@@ -54,6 +58,7 @@ export class Server {
       httpServerInfo = await this.http.service.start();
     }
 
+    await this.plugins.service.start();
     await this.legacy.service.start(httpServerInfo);
 
     const unhandledConfigPaths = await this.configService.getUnusedPaths();
@@ -70,6 +75,7 @@ export class Server {
     this.log.debug('stopping server');
 
     await this.legacy.service.stop();
+    await this.plugins.service.stop();
     await this.http.service.stop();
   }
 }
