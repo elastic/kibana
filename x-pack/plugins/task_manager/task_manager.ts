@@ -107,7 +107,7 @@ export class TaskManager {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
-  public registerTaskDefinitions(taskDefinitions: TaskDictionary<TaskDefinition>) {
+  public async registerTaskDefinitions(taskDefinitions: TaskDictionary<TaskDefinition>) {
     this.assertUninitialized('register task definitions');
     const duplicate = Object.keys(taskDefinitions).find(k => !!this.definitions[k]);
     if (duplicate) {
