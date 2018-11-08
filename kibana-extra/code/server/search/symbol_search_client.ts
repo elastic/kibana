@@ -48,6 +48,14 @@ export class SymbolSearchClient extends AbstractSearchClient {
             should: [
               {
                 prefix: {
+                  qname: {
+                    value: req.query,
+                    boost: 1.0,
+                  },
+                },
+              },
+              {
+                prefix: {
                   'symbolInformation.name': {
                     value: req.query,
                     boost: 1.0,

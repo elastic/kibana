@@ -30,11 +30,15 @@ export class BatchIndexHelper {
     });
     this.batch.push(body);
     if (this.batch.length >= this.batchSize * 2) {
-      await this.flush();
+      return await this.flush();
     }
   }
 
   public async flush() {
+    if (this.batch.length === 0) {
+      this.log.info(`0 index requests found. Skip.`);
+      return;
+    }
     this.log.info(`Batch index ${this.batch.length / 2} documents.`);
     const res = await this.client.bulk({ body: this.batch });
     this.batch = [];

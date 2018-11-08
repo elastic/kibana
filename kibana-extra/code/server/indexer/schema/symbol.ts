@@ -9,7 +9,8 @@ import { RepositoryUri } from '../../../model';
 
 export const SymbolSchema = {
   qname: {
-    type: 'keyword',
+    type: 'text',
+    analyzer: 'qname_path_hierarchy_analyzer',
   },
   symbolInformation: {
     properties: {

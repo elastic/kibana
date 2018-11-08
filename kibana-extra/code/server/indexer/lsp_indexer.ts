@@ -194,40 +194,45 @@ export class LspIndexer extends AbstractIndexer {
       .set(IndexStatsKey.File, 0);
     const { repoUri, revision, filePath, localRepoPath } = request;
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
-    const response = await this.lspService.sendRequest('textDocument/full', {
-      textDocument: {
-        uri: lspDocUri,
-      },
-      reference: this.options.enableGlobalReference,
-    });
-
     const symbolNames = new Set<string>();
-    if (response && response.result.length > 0) {
-      const { symbols, references } = response.result[0];
-      for (const symbol of symbols) {
-        await this.batchIndexHelper.index(
-          SymbolIndexName(repoUri),
-          SymbolTypeName,
-          `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${symbol.symbolInformation.name}`,
-          symbol
-        );
-        symbolNames.add(symbol.symbolInformation.name);
-      }
-      stats.set(IndexStatsKey.Symbol, symbols.length);
 
-      for (const ref of references) {
-        await this.batchIndexHelper.index(
-          ReferenceIndexName(repoUri),
-          ReferenceTypeName,
-          `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${ref.location.uri}:${
-            ref.location.range.start.line
-          }:${ref.location.range.start.character}`,
-          ref
-        );
+    try {
+      const response = await this.lspService.sendRequest('textDocument/full', {
+        textDocument: {
+          uri: lspDocUri,
+        },
+        reference: this.options.enableGlobalReference,
+      });
+
+      if (response && response.result.length > 0) {
+        const { symbols, references } = response.result[0];
+        for (const symbol of symbols) {
+          await this.batchIndexHelper.index(
+            SymbolIndexName(repoUri),
+            SymbolTypeName,
+            `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${symbol.symbolInformation.name}`,
+            symbol
+          );
+          symbolNames.add(symbol.symbolInformation.name);
+        }
+        stats.set(IndexStatsKey.Symbol, symbols.length);
+
+        for (const ref of references) {
+          await this.batchIndexHelper.index(
+            ReferenceIndexName(repoUri),
+            ReferenceTypeName,
+            `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}:${ref.location.uri}:${
+              ref.location.range.start.line
+            }:${ref.location.range.start.character}`,
+            ref
+          );
+        }
+        stats.set(IndexStatsKey.Reference, references.length);
+      } else {
+        this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
       }
-      stats.set(IndexStatsKey.Reference, references.length);
-    } else {
-      this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
+    } catch (error) {
+      this.log.info(`Index symbols or references error: ${error}. Skip to file indexing.`);
     }
 
     const localFilePath = `${localRepoPath}${filePath}`;

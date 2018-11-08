@@ -272,7 +272,7 @@ export class LayoutPage extends React.Component<Props, State> {
 
     const symbolOptions = symbols.map((symbol: DetailSymbolInformation) => {
       return {
-        label: symbol.symbolInformation.name,
+        label: symbol.qname,
         symbol,
       };
     });
