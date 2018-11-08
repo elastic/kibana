@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { entries } from 'lodash';
 import queryString from 'query-string';
 import { Action } from 'redux-actions';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
-import { Location, TextDocumentPositionParams } from 'vscode-languageserver';
-import { LspRestClient, TextDocumentMethods } from '../../common/lsp_client';
+import { kfetch } from 'ui/kfetch';
+import { TextDocumentPositionParams } from 'vscode-languageserver';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import { FileTree } from '../../model';
 import {
@@ -16,6 +17,7 @@ import {
   fetchFile,
   FetchFilePayload,
   fetchRepoTree,
+  fetchTreeCommits,
   findReferences,
   findReferencesFailed,
   findReferencesSuccess,
@@ -26,59 +28,28 @@ import {
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import * as ROUTES from '../components/routes';
+import { RootState } from '../reducers';
 import { fileSelector, getTree, lastRequestPathSelector, refUrlSelector } from '../selectors';
 import { history } from '../utils/url';
-import { requestFile } from './file';
 import { mainRoutePattern } from './patterns';
-
-const lspClient = new LspRestClient('../api/lsp');
-const lspMethods = new TextDocumentMethods(lspClient);
 
 function* handleReferences(action: Action<TextDocumentPositionParams>) {
   try {
-    const locations: Location[] = yield call(
-      requestReferences,
-      action.payload as TextDocumentPositionParams
-    );
-    const locationWithCodes = yield call(requestAllCodes, locations);
-    yield put(findReferencesSuccess(locationWithCodes));
+    const params: TextDocumentPositionParams = action.payload!;
+    const response = yield call(requestFindReferences, params);
+    const results = entries(response).map((v: any) => ({ repo: v[0], files: v[1] }));
+    yield put(findReferencesSuccess(results));
   } catch (error) {
     yield put(findReferencesFailed(error));
   }
 }
 
-function requestReferences(params: TextDocumentPositionParams) {
-  return lspMethods.references.send(params);
-}
-
-function requestAllCodes(locations: Location[]) {
-  const promises = locations.map(location => {
-    return requestCode(location);
+function requestFindReferences(params: TextDocumentPositionParams) {
+  return kfetch({
+    pathname: `../api/lsp/findReferences`,
+    method: 'POST',
+    body: JSON.stringify(params),
   });
-  return Promise.all(promises);
-}
-
-function requestCode(location: Location): Promise<CodeAndLocation> {
-  const { repoUri, revision, file } = parseLspUrl(location.uri)!;
-  const startLine = Math.max(location.range.start.line - 2, 0);
-  const endLine = location.range.end.line + 3;
-  const line = `${startLine},${endLine}`;
-  return requestFile(
-    {
-      revision,
-      path: file!,
-      uri: repoUri,
-    },
-    line
-  ).then(response => ({
-    location,
-    repo: repoUri,
-    path: file!,
-    code: response.content!,
-    language: response.lang,
-    startLine,
-    endLine,
-  }));
 }
 
 export function* watchLspMethods() {
@@ -143,11 +114,11 @@ function* handleFile(repoUri: string, file: string, revision: string) {
   );
 }
 
-function fetchRepo(repoUri) {
+function fetchRepo(repoUri: string) {
   return kfetch({ pathname: `../api/cs/repo/${repoUri}` });
 }
 
-function* loadRepoSaga(action) {
+function* loadRepoSaga(action: any) {
   try {
     const repo = yield call(fetchRepo, action.payload);
     yield put(loadRepoSuccess(repo));
@@ -170,14 +141,21 @@ function* handleMainRouteChange(action: Action<Match>) {
     position = parseGoto(goto);
   }
   yield put(loadRepo(repoUri));
-  if (file && pathType === ROUTES.PathTypes.blob) {
-    yield call(handleFile, repoUri, file, revision);
-    if (position) {
-      yield put(revealPosition(position));
-    }
-    const { tab, refUrl } = queryParams;
-    if (tab === 'references' && refUrl) {
-      yield call(handleReference, decodeURIComponent(refUrl));
+  if (file) {
+    if (pathType === ROUTES.PathTypes.blob) {
+      yield call(handleFile, repoUri, file, revision);
+      if (position) {
+        yield put(revealPosition(position));
+      }
+      const { tab, refUrl } = queryParams;
+      if (tab === 'references' && refUrl) {
+        yield call(handleReference, decodeURIComponent(refUrl as string));
+      }
+    } else if (pathType === ROUTES.PathTypes.tree) {
+      const commits = yield select((state: RootState) => state.file.treeCommits[file]);
+      if (commits === undefined) {
+        yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
+      }
     }
   }
   const lastRequestPath = yield select(lastRequestPathSelector);

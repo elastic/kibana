@@ -115,31 +115,46 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       }
     },
   });
+
   server.route({
     path: '/api/code/repo/{uri*3}/history/{ref}',
     method: 'GET',
-    async handler(req) {
-      const gitOperations = new GitOperations(options.repoPath);
-      const { uri, ref } = req.params;
-      const count = req.query.count ? parseInt(req.query.count, 10) : 10;
-      try {
-        const repository = await gitOperations.openRepo(uri);
-        const commit = await gitOperations.getCommit(repository, ref);
-
-        const walk = repository.createRevWalk();
-        walk.push(commit.id());
-        const commits = await walk.getCommits(count);
-        return commits.map(commitInfo);
-      } catch (e) {
-        if (e.isBoom) {
-          return e;
-        } else {
-          return Boom.internal(e.message || e.name);
-        }
-      }
-    },
+    handler: historyHandler,
   });
-
+  server.route({
+    path: '/api/code/repo/{uri*3}/history/{ref}/{path*}',
+    method: 'GET',
+    handler: historyHandler,
+  });
+  async function historyHandler(req: hapi.Request) {
+    const gitOperations = new GitOperations(options.repoPath);
+    const { uri, ref, path } = req.params;
+    const queries = req.query as RequestQuery;
+    const count = queries.count ? parseInt(queries.count as string, 10) : 10;
+    try {
+      const repository = await gitOperations.openRepo(uri);
+      const commit = await gitOperations.getCommit(repository, ref);
+      const walk = repository.createRevWalk();
+      walk.sorting(Revwalk.SORT.TIME);
+      walk.push(commit.id());
+      let commits: Commit[];
+      if (path) {
+        // magic number 1000: how many commits at the most to iterate in order to find the commits contains the path
+        const results = await walk.fileHistoryWalk(path, 1000);
+        commits = results.slice(0, count).map(result => result.commit);
+      } else {
+        walk.push(commit.id());
+        commits = await walk.getCommits(count);
+      }
+      return commits.map(commitInfo);
+    } catch (e) {
+      if (e.isBoom) {
+        return e;
+      } else {
+        return Boom.internal(e.message || e.name);
+      }
+    }
+  }
   server.route({
     path: '/api/code/repo/{uri*3}/references',
     method: 'GET',
