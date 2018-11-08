@@ -19,7 +19,9 @@ import {
   CancellableTask,
   ConcreteTaskInstance,
   RunResult,
+  SanitizedTaskDefinition,
   TaskDefinition,
+  TaskDictionary,
   validateRunResult,
 } from './task';
 import { RemoveResult } from './task_store';
@@ -41,7 +43,7 @@ interface Updatable {
 
 interface Opts {
   logger: Logger;
-  definition: TaskDefinition;
+  definitions: TaskDictionary<SanitizedTaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
   kbnServer: any;
@@ -59,7 +61,7 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definition: TaskDefinition;
+  private definitions: TaskDictionary<SanitizedTaskDefinition>;
   private logger: Logger;
   private store: Updatable;
   private kbnServer: any;
@@ -78,7 +80,7 @@ export class TaskManagerRunner implements TaskRunner {
    */
   constructor(opts: Opts) {
     this.instance = sanitizeInstance(opts.instance);
-    this.definition = opts.definition;
+    this.definitions = opts.definitions;
     this.logger = opts.logger;
     this.store = opts.store;
     this.kbnServer = opts.kbnServer;
@@ -104,6 +106,13 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get taskType() {
     return this.instance.taskType;
+  }
+
+  /**
+   * Gets the task defintion from the dictionary.
+   */
+  public get definition() {
+    return this.definitions[this.taskType];
   }
 
   /**

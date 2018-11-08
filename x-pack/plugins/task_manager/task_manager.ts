@@ -5,7 +5,7 @@
  */
 
 import { fillPool } from './lib/fill_pool';
-import { TaskManagerLogger } from './lib/logger';
+import { Logger, TaskManagerLogger } from './lib/logger';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
 import { sanitizeTaskDefinitions } from './lib/sanitize_task_definitions';
 import { ConcreteTaskInstance, RunContext, TaskInstance } from './task';
@@ -33,8 +33,9 @@ export class TaskManager {
   private maxWorkers: number;
   private overrideNumWorkers: { [taskType: string]: number };
   private definitions: TaskDictionary<SanitizedTaskDefinition>;
-  private store?: TaskStore;
-  private poller?: TaskPoller;
+  private store: TaskStore;
+  private poller: TaskPoller;
+  private logger: Logger;
   private middleware = {
     beforeSave: async (saveOpts: BeforeSaveMiddlewareParams) => saveOpts,
     beforeRun: async (runOpts: RunContext) => runOpts,
@@ -52,39 +53,53 @@ export class TaskManager {
 
     const logger = new TaskManagerLogger((...args: any[]) => server.log(...args));
 
-    kbnServer.afterPluginsInit(() => {
-      const store = new TaskStore({
-        callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
-        index: config.get('xpack.task_manager.index'),
-        maxAttempts: config.get('xpack.task_manager.max_attempts'),
-        supportedTypes: Object.keys(this.definitions),
-      });
-      const pool = new TaskPool({
+    const store = new TaskStore({
+      callCluster: server.plugins.elasticsearch.getCluster('admin').callWithInternalUser,
+      index: config.get('xpack.task_manager.index'),
+      maxAttempts: config.get('xpack.task_manager.max_attempts'),
+      supportedTypes: Object.keys(this.definitions),
+    });
+    const pool = new TaskPool({
+      logger,
+      maxWorkers: this.maxWorkers,
+    });
+    const createRunner = (instance: ConcreteTaskInstance) =>
+      new TaskManagerRunner({
         logger,
-        maxWorkers: this.maxWorkers,
+        kbnServer,
+        instance,
+        store,
+        definitions: this.definitions,
+        beforeRun: this.middleware.beforeRun,
       });
-      const createRunner = (instance: ConcreteTaskInstance) =>
-        new TaskManagerRunner({
-          logger,
-          kbnServer,
-          instance,
-          store,
-          definition: this.definitions[instance.taskType],
-          beforeRun: this.middleware.beforeRun,
-        });
-      const poller = new TaskPoller({
-        logger,
-        pollInterval: config.get('xpack.task_manager.poll_interval'),
-        work() {
-          return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
-        },
-      });
+    const poller = new TaskPoller({
+      logger,
+      pollInterval: config.get('xpack.task_manager.poll_interval'),
+      work() {
+        return fillPool(pool.run, store.fetchAvailableTasks, createRunner);
+      },
+    });
 
-      bindToElasticSearchStatus(server.plugins.elasticsearch, logger, poller, store);
+    this.logger = logger;
+    this.store = store;
+    this.poller = poller;
 
-      this.store = store;
-      this.poller = poller;
+    kbnServer.afterPluginsInit(async () => {
       this.isInitialized = true;
+      store.addSupportedTypes(Object.keys(this.definitions));
+      await store.init();
+      await poller.start();
+      // schedule all the static tasks
+      Object.keys(this.definitions).forEach((k: string) => {
+        const taskDef = this.definitions[k];
+
+        if (taskDef.static) {
+          taskDef.static.forEach(async (t: TaskInstance) => {
+            t.taskType = k;
+            await this.schedule(t);
+          });
+        }
+      });
     });
   }
 
@@ -92,19 +107,24 @@ export class TaskManager {
    * Method for allowing consumers to register task definitions into the system.
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
-  public registerTaskDefinitions(taskDefinitions: TaskDictionary<TaskDefinition>) {
+  public async registerTaskDefinitions(taskDefinitions: TaskDictionary<TaskDefinition>) {
     this.assertUninitialized('register task definitions');
     const duplicate = Object.keys(taskDefinitions).find(k => !!this.definitions[k]);
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
     }
 
-    const sanitized = sanitizeTaskDefinitions(
-      taskDefinitions,
-      this.maxWorkers,
-      this.overrideNumWorkers
-    );
-    Object.assign(this.definitions, sanitized);
+    try {
+      const sanitized = sanitizeTaskDefinitions(
+        taskDefinitions,
+        this.maxWorkers,
+        this.overrideNumWorkers
+      );
+
+      Object.assign(this.definitions, sanitized);
+    } catch (e) {
+      this.logger.error('Could not sanitize task definitions');
+    }
   }
 
   /**
@@ -124,13 +144,13 @@ export class TaskManager {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance, options?: any) {
-    this.assertInitialized();
+    this.assertInitialized('only static tasks can be scheduled before task manager is initialized');
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance,
     });
-    const result = await this.store!.schedule(modifiedTask);
-    this.poller!.attemptWork();
+    const result = await this.store.schedule(modifiedTask);
+    this.poller.attemptWork();
     return result;
   }
 
@@ -140,8 +160,8 @@ export class TaskManager {
    * @param opts - The query options used to filter tasks
    */
   public async fetch(opts: FetchOpts) {
-    this.assertInitialized();
-    return this.store!.fetch(opts);
+    this.assertInitialized('Tasks cannot be fetched before task manager is initialized!');
+    return this.store.fetch(opts);
   }
 
   /**
@@ -151,41 +171,19 @@ export class TaskManager {
    * @returns {Promise<void>}
    */
   public async remove(id: string) {
-    this.assertInitialized();
-    return this.store!.remove(id);
+    this.assertInitialized('Tasks cannot be removed before task manager is initialized!');
+    return this.store.remove(id);
   }
 
   private assertUninitialized(message: string) {
     if (this.isInitialized) {
-      throw new Error(`Cannot ${message} after the task manager is initialized.`);
+      throw new Error(`Cannot ${message} after the task manager is initialized!`);
     }
   }
 
-  private assertInitialized() {
+  private assertInitialized(message: string) {
     if (!this.isInitialized) {
-      throw new Error('The task manager is initializing.');
+      throw new Error(`NotInitialized: ${message}`);
     }
   }
-}
-
-// This is exported for test purposes. It is responsible for starting / stopping
-// the poller based on the elasticsearch plugin status.
-export function bindToElasticSearchStatus(
-  elasticsearch: any,
-  logger: { debug: (s: string) => any; info: (s: string) => any },
-  poller: { stop: () => any; start: () => Promise<any> },
-  store: { init: () => Promise<any> }
-) {
-  elasticsearch.status.on('red', () => {
-    logger.debug('Lost connection to Elasticsearch, stopping the poller.');
-    poller.stop();
-  });
-
-  elasticsearch.status.on('green', async () => {
-    logger.debug('Initializing store');
-    await store.init();
-    logger.debug('Starting poller');
-    await poller.start();
-    logger.info('Connected to Elasticsearch, and watching for tasks');
-  });
 }
