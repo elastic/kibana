@@ -46,11 +46,13 @@ export interface ControlDefinitions {
 }
 
 export interface TableType {
+  itemType: 'Beats' | 'Tags';
   columnDefinitions: ColumnDefinition[];
   controlDefinitions(items: any[]): ControlDefinitions;
 }
 
 export const BeatsTableType: TableType = {
+  itemType: 'Beats',
   columnDefinitions: [
     {
       field: 'name',
@@ -149,6 +151,7 @@ export const BeatsTableType: TableType = {
 };
 
 export const TagsTableType: TableType = {
+  itemType: 'Tags',
   columnDefinitions: [
     {
       field: 'id',
@@ -191,6 +194,7 @@ export const TagsTableType: TableType = {
 };
 
 export const BeatDetailTagsTable: TableType = {
+  itemType: 'Tags',
   columnDefinitions: [
     {
       field: 'id',

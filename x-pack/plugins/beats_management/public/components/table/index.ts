@@ -6,7 +6,6 @@
 
 export { AssignmentActionType, AssignmentOptions, KueryBarProps, Table } from './table';
 export {
-  AssignmentComponentType,
   AssignmentControlSchema,
   beatsListAssignmentOptions,
   tagConfigAssignmentOptions,

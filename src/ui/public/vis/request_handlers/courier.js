@@ -18,62 +18,30 @@
  */
 
 import { cloneDeep, has } from 'lodash';
-
+import { i18n } from '@kbn/i18n';
 import { VisRequestHandlersRegistryProvider } from '../../registry/vis_request_handlers';
 import { calculateObjectHash } from '../lib/calculate_object_hash';
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { tabifyAggResponse } from '../../agg_response/tabify/tabify';
-
-import { FormattedData } from '../../inspector/adapters';
+import { buildTabularInspectorData } from '../../inspector/build_tabular_inspector_data';
 import { getTime } from '../../timefilter/get_time';
-import { i18n } from '@kbn/i18n';
 
 const CourierRequestHandlerProvider = function () {
 
-  /**
-   * This function builds tabular data from the response and attaches it to the
-   * inspector. It will only be called when the data view in the inspector is opened.
-   */
-  async function buildTabularInspectorData(vis, searchSource, aggConfigs) {
-    const table = tabifyAggResponse(aggConfigs, searchSource.finalResponse, {
-      partialRows: true,
-      metricsAtAllLevels: vis.isHierarchical(),
-    });
-    const columns = table.columns.map((col, index) => {
-      const field = col.aggConfig.getField();
-      const isCellContentFilterable =
-        col.aggConfig.isFilterable()
-        && (!field || field.filterable);
-      return ({
-        name: col.name,
-        field: `col${index}`,
-        filter: isCellContentFilterable && ((value) => {
-          const filter = col.aggConfig.createFilter(value.raw);
-          vis.API.queryFilter.addFilters(filter);
-        }),
-        filterOut: isCellContentFilterable && ((value) => {
-          const filter = col.aggConfig.createFilter(value.raw);
-          filter.meta = filter.meta || {};
-          filter.meta.negate = true;
-          vis.API.queryFilter.addFilters(filter);
-        }),
-      });
-    });
-    const rows = table.rows.map(row => {
-      return table.columns.reduce((prev, cur, index) => {
-        const value = row[cur.id];
-        const fieldFormatter = cur.aggConfig.fieldFormatter('text');
-        prev[`col${index}`] = new FormattedData(value, fieldFormatter(value));
-        return prev;
-      }, {});
-    });
-
-    return { columns, rows };
-  }
-
   return {
     name: 'courier',
-    handler: async function (vis, { searchSource, aggs, timeRange, query, filters, forceFetch, partialRows }) {
+    handler: async function ({
+      searchSource,
+      aggs,
+      timeRange,
+      query,
+      filters,
+      forceFetch,
+      partialRows,
+      isHierarchical,
+      inspectorAdapters,
+      queryFilter
+    }) {
 
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
@@ -99,7 +67,7 @@ const CourierRequestHandlerProvider = function () {
       });
 
       requestSearchSource.setField('aggs', function () {
-        return aggs.toDsl(vis.isHierarchical());
+        return aggs.toDsl(isHierarchical);
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
@@ -123,14 +91,14 @@ const CourierRequestHandlerProvider = function () {
       const shouldQuery = forceFetch || (searchSource.lastQuery !== queryHash);
 
       if (shouldQuery) {
-        const lastAggConfig = aggs;
-        vis.API.inspectorAdapters.requests.reset();
-        const request = vis.API.inspectorAdapters.requests.start(
+        inspectorAdapters.requests.reset();
+        const request = inspectorAdapters.requests.start(
           i18n.translate('common.ui.vis.courier.inspector.dataRequest.title', { defaultMessage: 'Data' }),
           {
             description: i18n.translate('common.ui.vis.courier.inspector.dataRequest.description',
               { defaultMessage: 'This request queries Elasticsearch to fetch the data for the visualization.' }),
-          });
+          }
+        );
         request.stats(getRequestInspectorStats(requestSearchSource));
 
         const response = await requestSearchSource.fetch();
@@ -151,17 +119,12 @@ const CourierRequestHandlerProvider = function () {
               aggs,
               agg,
               requestSearchSource,
-              vis.API.inspectorAdapters
+              inspectorAdapters
             );
           }
         }
 
         searchSource.finalResponse = resp;
-
-        vis.API.inspectorAdapters.data.setTabularLoader(
-          () => buildTabularInspectorData(vis, searchSource, lastAggConfig),
-          { returnsFormattedValues: true }
-        );
 
         requestSearchSource.getSearchRequestBody().then(req => {
           request.json(req);
@@ -169,21 +132,25 @@ const CourierRequestHandlerProvider = function () {
       }
 
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
-      const tabifyAggs = vis.getAggConfig();
       const tabifyParams = {
-        metricsAtAllLevels: vis.isHierarchical(),
+        metricsAtAllLevels: isHierarchical,
         partialRows,
         timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
       };
 
-      const tabifyCacheHash = calculateObjectHash({ tabifyAggs, ...tabifyParams });
+      const tabifyCacheHash = calculateObjectHash({ tabifyAggs: aggs, ...tabifyParams });
       // We only need to reexecute tabify, if either we did a new request or some input params to tabify changed
       const shouldCalculateNewTabify = shouldQuery || (searchSource.lastTabifyHash !== tabifyCacheHash);
 
       if (shouldCalculateNewTabify) {
         searchSource.lastTabifyHash = tabifyCacheHash;
-        searchSource.tabifiedResponse = tabifyAggResponse(tabifyAggs, searchSource.finalResponse, tabifyParams);
+        searchSource.tabifiedResponse = tabifyAggResponse(aggs, searchSource.finalResponse, tabifyParams);
       }
+
+      inspectorAdapters.data.setTabularLoader(
+        () => buildTabularInspectorData(searchSource.tabifiedResponse, queryFilter),
+        { returnsFormattedValues: true }
+      );
 
       return searchSource.tabifiedResponse;
     }

@@ -6,59 +6,42 @@
 
 import { AssignmentActionType } from './table';
 
-export enum AssignmentComponentType {
-  Action,
-  Popover,
-  SelectionCount,
-  TagBadgeList,
-}
-
 export interface AssignmentControlSchema {
+  id?: number;
   name: string;
-  type: AssignmentComponentType;
   danger?: boolean;
   action?: AssignmentActionType;
   showWarning?: boolean;
   warningHeading?: string;
   warningMessage?: string;
   lazyLoad?: boolean;
-  children?: AssignmentControlSchema[];
+  panel?: AssignmentControlSchema;
   grow?: boolean;
 }
 
 export const beatsListAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.Action,
     grow: false,
-    name: 'Disenroll selected',
+    name: 'Unenroll selected',
     showWarning: true,
-    warningHeading: 'Disenroll beats',
-    warningMessage: 'This will disenroll the selected beat(s) from centralized management',
+    warningHeading: 'Unenroll selected beats?',
+    warningMessage: 'The selected Beats will no longer use central management',
     action: AssignmentActionType.Delete,
     danger: true,
   },
   {
-    type: AssignmentComponentType.Popover,
     name: 'Set tags',
     grow: false,
     lazyLoad: true,
-    children: [
-      {
-        name: 'Assign tags',
-        type: AssignmentComponentType.TagBadgeList,
-      },
-    ],
-  },
-  {
-    type: AssignmentComponentType.SelectionCount,
-    grow: true,
-    name: 'selectionCount',
+    panel: {
+      id: 1,
+      name: 'Assign tags',
+    },
   },
 ];
 
 export const tagListAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.Action,
     danger: true,
     grow: false,
     name: 'Remove tag(s)',
@@ -71,7 +54,6 @@ export const tagListAssignmentOptions: AssignmentControlSchema[] = [
 
 export const tagConfigAssignmentOptions: AssignmentControlSchema[] = [
   {
-    type: AssignmentComponentType.Action,
     danger: true,
     grow: false,
     name: 'Remove tag(s)',

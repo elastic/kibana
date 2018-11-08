@@ -14,17 +14,31 @@ import VerticalLines from './VerticalLines';
 
 class Timeline extends PureComponent {
   render() {
-    const { width, duration, agentMarks, height, margins } = this.props;
+    const {
+      width,
+      duration,
+      agentMarks,
+      traceRootDuration,
+      height,
+      margins
+    } = this.props;
     if (duration == null || !width) {
       return null;
     }
-
     const plotValues = getPlotValues({ width, duration, height, margins });
 
     return (
       <div>
-        <TimelineAxis plotValues={plotValues} agentMarks={agentMarks} />
-        <VerticalLines plotValues={plotValues} agentMarks={agentMarks} />
+        <TimelineAxis
+          plotValues={plotValues}
+          agentMarks={agentMarks}
+          traceRootDuration={traceRootDuration}
+        />
+        <VerticalLines
+          plotValues={plotValues}
+          agentMarks={agentMarks}
+          traceRootDuration={traceRootDuration}
+        />
       </div>
     );
   }
