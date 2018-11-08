@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OnColumnSorted, OnFilterChange, OnRangeSelected } from '../../events';
+import { Range } from '../column_headers/range_picker/ranges';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
 import { Header } from './header';
@@ -20,6 +21,7 @@ interface Props {
   onColumnSorted?: OnColumnSorted;
   onFilterChange?: OnFilterChange;
   onRangeSelected: OnRangeSelected;
+  range: Range;
   sort: Sort;
 }
 
@@ -31,15 +33,22 @@ const ColumnHeaderContainer = styled.div``;
 
 const Flex = styled.div`
   display: flex;
-  margin-left: 3px;
+  margin-left: 5px;
   width: 100%;
 `;
 
 /** Renders the timeline header columns */
 export const ColumnHeaders = pure<Props>(
-  ({ columnHeaders, onColumnSorted = noop, onFilterChange = noop, onRangeSelected, sort }) => (
+  ({
+    columnHeaders,
+    onColumnSorted = noop,
+    onFilterChange = noop,
+    onRangeSelected,
+    range,
+    sort,
+  }) => (
     <ColumnHeadersSpan data-test-subj="columnHeaders">
-      <RangePicker selected={'1 Day'} onRangeSelected={onRangeSelected} />
+      <RangePicker selected={range} onRangeSelected={onRangeSelected} />
       <Flex>
         {columnHeaders.map(header => (
           <ColumnHeaderContainer data-test-subj="columnHeaderContainer" key={header.id}>

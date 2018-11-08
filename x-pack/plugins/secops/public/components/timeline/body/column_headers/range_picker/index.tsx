@@ -17,7 +17,7 @@ interface Props {
   onRangeSelected: OnRangeSelected;
 }
 
-export const RangePickerWidth = 110;
+export const RangePickerWidth = 120;
 
 // TODO: Upgrade Eui library and use EuiSuperSelect
 const SelectContainer = styled.div`

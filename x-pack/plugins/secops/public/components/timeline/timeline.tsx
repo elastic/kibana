@@ -11,6 +11,7 @@ import { ECS } from './ecs';
 
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
+import { Range } from './body/column_headers/range_picker/ranges';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from './events';
@@ -25,6 +26,7 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
+  range: Range;
   sort: Sort;
   width: number;
 }
@@ -52,6 +54,7 @@ export const Timeline = pure<Props>(
     onDataProviderRemoved,
     onFilterChange,
     onRangeSelected,
+    range,
     sort,
     width,
   }) => (
@@ -69,6 +72,7 @@ export const Timeline = pure<Props>(
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={onFilterChange}
         onRangeSelected={onRangeSelected}
+        range={range}
         sort={sort}
         width={width}
       />

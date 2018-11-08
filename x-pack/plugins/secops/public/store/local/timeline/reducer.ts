@@ -7,8 +7,9 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 
 import { filter } from 'lodash/fp';
+import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
-import { createTimeline, removeProvider, updateSort } from './actions';
+import { createTimeline, removeProvider, updateRange, updateSort } from './actions';
 import { timelineDefaults, TimelineModel } from './model';
 
 /** A map of id to timeline  */
@@ -39,6 +40,27 @@ const addNewTimeline = ({ id, timelineById }: AddNewTimelineParams): TimelineByI
     ...timelineDefaults,
   },
 });
+
+interface UpdateTimelineRangeParams {
+  id: string;
+  range: Range;
+  timelineById: TimelineById;
+}
+
+const updateTimelineRange = ({
+  id,
+  range,
+  timelineById,
+}: UpdateTimelineRangeParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      range,
+    },
+  };
+};
 
 interface UpdateTimelineSortParams {
   id: string;
@@ -87,6 +109,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(removeProvider, (state, { id, providerId }) => ({
     ...state,
     timelineById: removeTimelineProvider({ id, providerId, timelineById: state.timelineById }),
+  }))
+  .case(updateRange, (state, { id, range }) => ({
+    ...state,
+    timelineById: updateTimelineRange({ id, range, timelineById: state.timelineById }),
   }))
   .case(updateSort, (state, { id, sort }) => ({
     ...state,

@@ -5,11 +5,14 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/timeline');
 
 export const createTimeline = actionCreator<{ id: string }>('CREATE_TIMELINE');
+
+export const updateRange = actionCreator<{ id: string; range: Range }>('UPDATE_RANGE');
 
 export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT');
 
