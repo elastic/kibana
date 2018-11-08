@@ -82,7 +82,7 @@ export class FileDataVisualizerView extends Component {
   };
 
   async loadFile(file) {
-    if (file.size < MAX_BYTES) {
+    if (file.size <= MAX_BYTES) {
       try {
         const fileContents = await readFile(file);
         const data = fileContents.data;

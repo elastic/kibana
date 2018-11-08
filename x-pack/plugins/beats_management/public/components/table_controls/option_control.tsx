@@ -4,51 +4,163 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  EuiButton,
+  // @ts-ignore
+  EuiCard,
+  EuiContextMenu,
+  EuiPanel,
+  EuiPopover,
+  EuiTextColor,
+  EuiToolTip,
+  EuiToolTipProps,
+} from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { isArray } from 'lodash';
 import React from 'react';
-import { AssignmentComponentType, AssignmentControlSchema } from '../table';
+import { AssignmentControlSchema } from '../table';
 import { AssignmentActionType } from '../table';
 import { ActionControl } from './action_control';
-import { PopoverControl } from './popover_control';
-import { SelectionCount } from './selection_count';
 import { TagBadgeList } from './tag_badge_list';
 
-interface OptionControlProps {
-  items: any[];
-  schema: AssignmentControlSchema;
+interface ComponentProps {
+  itemType: string;
+  items?: any[];
+  schema: AssignmentControlSchema[];
   selectionCount: number;
   actionHandler(action: AssignmentActionType, payload?: any): void;
 }
 
-export const OptionControl = (props: OptionControlProps) => {
-  const {
-    actionHandler,
-    items,
-    schema,
-    schema: { action, danger, name, showWarning, warningHeading, warningMessage },
-    selectionCount,
-  } = props;
-  switch (schema.type) {
-    case AssignmentComponentType.Action:
-      if (!action) {
-        throw Error('Action cannot be undefined');
-      }
-      return (
-        <ActionControl
-          actionHandler={actionHandler}
-          action={action}
-          danger={danger}
-          name={name}
-          showWarning={showWarning}
-          warningHeading={warningHeading}
-          warningMessage={warningMessage}
-        />
-      );
-    case AssignmentComponentType.Popover:
-      return <PopoverControl {...props} />;
-    case AssignmentComponentType.SelectionCount:
-      return <SelectionCount selectionCount={selectionCount} />;
-    case AssignmentComponentType.TagBadgeList:
-      return <TagBadgeList actionHandler={actionHandler} items={items} />;
+interface ComponentState {
+  showPopover: boolean;
+}
+
+interface FixedEuiToolTipProps extends EuiToolTipProps {
+  delay: 'regular' | 'long';
+}
+const FixedEuiToolTip = (EuiToolTip as any) as React.SFC<FixedEuiToolTipProps>;
+
+export class OptionControl extends React.PureComponent<ComponentProps, ComponentState> {
+  constructor(props: ComponentProps) {
+    super(props);
+
+    this.state = {
+      showPopover: false,
+    };
   }
-  return <div>{schema.type}</div>;
-};
+
+  public schemaToPanelTree(
+    schemaOrArray: AssignmentControlSchema | AssignmentControlSchema[],
+    panels: any = []
+  ) {
+    const { items, actionHandler } = this.props;
+
+    let schema: AssignmentControlSchema | null = null;
+    let schemaArray: AssignmentControlSchema[] | null = null;
+
+    if (isArray(schemaOrArray)) {
+      schemaArray = schemaOrArray as AssignmentControlSchema[];
+    } else {
+      schema = schemaOrArray as AssignmentControlSchema;
+    }
+
+    const panel: any = {
+      title: schema ? schema.name : undefined,
+      id: panels.length,
+    };
+
+    if (schemaArray) {
+      panel.items = schemaArray.map(def => {
+        return {
+          onClick: def.lazyLoad ? () => actionHandler(AssignmentActionType.Reload) : undefined,
+          panel: def.panel ? def.panel.id : undefined,
+          name: def.action ? (
+            <ActionControl
+              actionHandler={actionHandler}
+              action={def.action}
+              danger={def.danger}
+              name={def.name}
+              showWarning={def.showWarning}
+              warningHeading={def.warningHeading}
+              warningMessage={def.warningMessage}
+            />
+          ) : (
+            <EuiTextColor color={def.danger ? 'danger' : 'default'}>{def.name}</EuiTextColor>
+          ),
+        };
+      });
+    } else {
+      if (items === undefined) {
+        panel.content = 'Unknown Error.';
+      } else if (items.length === 0) {
+        panel.content = (
+          <EuiPanel>
+            <EuiCard
+              icon={<EuiIcon size="l" type="bolt" />}
+              title="No tags found."
+              description="Please create a new configuration tag."
+            />
+          </EuiPanel>
+        );
+      } else {
+        panel.content = <TagBadgeList items={items} actionHandler={actionHandler} />;
+      }
+    }
+
+    panels.push(panel);
+
+    if (schemaArray !== null) {
+      schemaArray.forEach((item: AssignmentControlSchema) => {
+        if (item.panel) {
+          this.schemaToPanelTree(item.panel, panels);
+        }
+      });
+    }
+
+    return panels;
+  }
+
+  public render() {
+    const { itemType, selectionCount, schema } = this.props;
+
+    return (
+      <EuiPopover
+        button={
+          <FixedEuiToolTip
+            position="top"
+            delay="long"
+            content={
+              selectionCount === 0
+                ? `Select ${itemType} to perform operations such as setting tags and unenrolling Beats.`
+                : `Manage your selected ${itemType}`
+            }
+          >
+            <EuiButton
+              color="primary"
+              iconSide="right"
+              disabled={selectionCount === 0}
+              iconType="arrowDown"
+              onClick={() => {
+                this.setState({
+                  showPopover: true,
+                });
+              }}
+            >
+              Manage {itemType}
+            </EuiButton>
+          </FixedEuiToolTip>
+        }
+        closePopover={() => {
+          this.setState({ showPopover: false });
+        }}
+        id="assignmentList"
+        isOpen={this.state.showPopover}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        withTitle
+      >
+        <EuiContextMenu initialPanelId={0} panels={this.schemaToPanelTree(schema)} />
+      </EuiPopover>
+    );
+  }
+}
