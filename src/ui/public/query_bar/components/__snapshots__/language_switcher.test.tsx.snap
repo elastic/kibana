@@ -35,6 +35,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
   >
     <EuiText
       grow={true}
+      size="m"
     >
       <p>
         Our experimental autocomplete and simple syntax features can help you create your queries. Just start typing and you’ll see matches related to your data. See docs
@@ -130,6 +131,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
   >
     <EuiText
       grow={true}
+      size="m"
     >
       <p>
         Our experimental autocomplete and simple syntax features can help you create your queries. Just start typing and you’ll see matches related to your data. See docs

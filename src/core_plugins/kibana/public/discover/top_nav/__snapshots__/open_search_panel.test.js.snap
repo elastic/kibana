@@ -13,6 +13,7 @@ exports[`render 1`] = `
   <EuiFlyoutBody>
     <EuiTitle
       size="s"
+      textTransform="none"
     >
       <h1>
         Open Search
