@@ -38,6 +38,8 @@ import { createFailError } from '../run';
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 
+const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
+
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
 export const globAsync = promisify(glob);
@@ -126,6 +128,30 @@ export function createParserErrorMessage(content, error) {
 }
 
 /**
+ * Recursively extracts all references from ICU message ast.
+ *
+ * @param {any} node
+ * @param {Set<string>} keys
+ */
+function extractValueReferencesFromIcuAst(node, keys = new Set()) {
+  if (Array.isArray(node.elements)) {
+    for (const element of node.elements.filter(element => element.type === ARGUMENT_ELEMENT_TYPE)) {
+      keys.add(element.id);
+
+      if (element.format && Array.isArray(element.format.options)) {
+        for (const option of element.format.options) {
+          extractValueReferencesFromIcuAst(option, keys);
+        }
+      }
+    }
+  } else if (node.value) {
+    extractValueReferencesFromIcuAst(node.value, keys);
+  }
+
+  return [...keys];
+}
+
+/**
  * Checks whether values from "values" and "defaultMessage" correspond to each other.
  *
  * @param {string[]} valuesKeys array of "values" property keys
@@ -161,19 +187,12 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
     throw error;
   }
 
-  const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
-
   // skip validation if intl-messageformat-parser didn't return an AST with nonempty elements array
   if (!defaultMessageAst || !defaultMessageAst.elements || !defaultMessageAst.elements.length) {
     return;
   }
 
-  const defaultMessageValueReferences = defaultMessageAst.elements.reduce((keys, element) => {
-    if (element.type === ARGUMENT_ELEMENT_TYPE) {
-      keys.push(element.id);
-    }
-    return keys;
-  }, []);
+  const defaultMessageValueReferences = extractValueReferencesFromIcuAst(defaultMessageAst);
 
   const missingValuesKeys = difference(defaultMessageValueReferences, valuesKeys);
   if (missingValuesKeys.length) {
