@@ -27,12 +27,11 @@ export default function ({ getService }) {
 
       it('should auth', async () => {
         const service = `HTTP@${os.hostname()}`;
-        const mechOID = kerberos.GSS_MECH_OID_KRB5;
+        const mechOID = kerberos.GSS_MECH_OID_SPNEGO;
         const principal = 'george@BUILD.ELASTIC.CO';
 
         const client = await kerberos.initializeClient(service, { mechOID, principal });
         const clientResponse = await client.step('');
-        console.log({ clientResponse });
 
         await supertest
           .get('/api/security/v1/me')
