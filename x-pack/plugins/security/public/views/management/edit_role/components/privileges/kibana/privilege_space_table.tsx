@@ -120,7 +120,7 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
               <EuiText color={'subdued'}>
                 <FormattedMessage
                   id="xpack.security.management.editRoles.privilegeSpaceTable.deletedSpaceDescription"
-                  defaultMessage="{valur} (deleted)"
+                  defaultMessage="{value} (deleted)"
                   values={{ value: space.id }}
                 />
               </EuiText>

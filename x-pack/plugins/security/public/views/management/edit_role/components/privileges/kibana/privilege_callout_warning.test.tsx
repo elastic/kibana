@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '../../../../../../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 
 describe('PrivilegeCalloutWarning', () => {

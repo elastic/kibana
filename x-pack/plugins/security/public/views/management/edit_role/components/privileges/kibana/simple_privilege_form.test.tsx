@@ -5,10 +5,7 @@
  */
 
 import React from 'react';
-import {
-  mountWithIntl,
-  shallowWithIntl,
-} from '../../../../../../../../../test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PrivilegeSelector } from './privilege_selector';
 import { SimplePrivilegeForm } from './simple_privilege_form';
 

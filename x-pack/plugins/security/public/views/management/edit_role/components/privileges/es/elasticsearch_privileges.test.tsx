@@ -5,10 +5,7 @@
  */
 
 import React from 'react';
-import {
-  mountWithIntl,
-  shallowWithIntl,
-} from '../../../../../../../../../test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { RoleValidator } from '../../../lib/validate_role';
 import { ClusterPrivileges } from './cluster_privileges';
 import { ElasticsearchPrivileges } from './elasticsearch_privileges';

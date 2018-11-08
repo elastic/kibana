@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '../../../../../../../../../test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { RoleValidator } from '../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
