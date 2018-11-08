@@ -18,13 +18,19 @@ import { StringMap } from '../../typings/common';
 
 // Kibana default set in: https://github.com/elastic/kibana/blob/e13e47fc4eb6112f2a5401408e9f765eae90f55d/x-pack/plugins/apm/public/utils/timepicker/index.js#L31-L35
 // TODO: store this in config or a shared constant?
-const DEFAULT_KIBANA_TIME_RANGE = '(time:(from:now-24h,mode:quick,to:now))';
+const DEFAULT_KIBANA_TIME_RANGE = {
+  time: {
+    from: 'now-24h',
+    mode: 'quick',
+    to: 'now'
+  }
+};
 
 interface ViewMlJobArgs {
   serviceName: string;
   transactionType: string;
   location: any;
-  children: any;
+  children?: any;
 }
 
 export function ViewMLJob({
@@ -33,18 +39,15 @@ export function ViewMLJob({
   location,
   children = 'View Job'
 }: ViewMlJobArgs) {
-  const { _g, _a } = decodeKibanaSearchParams(location.search);
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
   const jobId = `${serviceName}-${transactionType}-high_mean_response_time`;
   const query = {
     _g: {
-      ...(_g as object),
       ml: {
         jobIds: [jobId]
       }
-    },
-    _a
+    }
   };
 
   return (
@@ -82,28 +85,18 @@ function stringifyWithoutEncoding(query: StringMap) {
   });
 }
 
-function decodeAsObject(value: string) {
-  const decoded = rison.decode(value);
-  return isPlainObject(decoded) ? decoded : {};
+function risonSafeDecode(value: string) {
+  try {
+    const decoded = rison.decode(value);
+    return isPlainObject(decoded) ? (decoded as StringMap) : {};
+  } catch (e) {
+    return {};
+  }
 }
 
-export function decodeKibanaSearchParams(search: string) {
-  const query = toQuery(search);
-  return {
-    _g:
-      query._g && typeof query._g === 'string'
-        ? decodeAsObject(query._g)
-        : null,
-    _a:
-      query._a && typeof query._a === 'string' ? decodeAsObject(query._a) : null
-  };
-}
-
-export function encodeKibanaSearchParams(query: StringMap) {
-  return stringifyWithoutEncoding({
-    _g: rison.encode(query._g),
-    _a: rison.encode(query._a)
-  });
+function decodeAndMergeG(g: string, toBeMerged?: StringMap) {
+  const decoded = risonSafeDecode(g);
+  return { ...DEFAULT_KIBANA_TIME_RANGE, ...decoded, ...toBeMerged };
 }
 
 export interface RelativeLinkComponentArgs {
@@ -113,9 +106,9 @@ export interface RelativeLinkComponentArgs {
   };
   path: string;
   query?: StringMap;
-  disabled: boolean;
-  to: StringMap;
-  className: string;
+  disabled?: boolean;
+  to?: StringMap;
+  className?: string;
 }
 export function RelativeLinkComponent({
   location,
@@ -156,6 +149,10 @@ export function RelativeLinkComponent({
 // The two components have different APIs: `path` vs `pathname` and one uses EuiLink the other react-router's Link (which behaves differently)
 // Suggestion: Deprecate RelativeLink, and clean up KibanaLink
 
+export interface QueryWithG extends StringMap {
+  _g?: StringMap;
+}
+
 export interface KibanaLinkArgs {
   location: {
     search?: string;
@@ -163,7 +160,7 @@ export interface KibanaLinkArgs {
   };
   pathname: string;
   hash?: string;
-  query?: StringMap;
+  query?: QueryWithG;
   disabled?: boolean;
   to?: StringMap;
   className?: string;
@@ -175,7 +172,6 @@ export interface KibanaLinkArgs {
  *
  * You must remember to pass in location in that case.
  */
-
 export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   location,
   pathname,
@@ -185,10 +181,10 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
 }) => {
   // Preserve current _g and _a
   const currentQuery = toQuery(location.search);
+  const g = decodeAndMergeG(currentQuery._g, query._g);
   const nextQuery = {
     ...query,
-    // use "_g" if it's set in the url, otherwise use default
-    _g: currentQuery._g || DEFAULT_KIBANA_TIME_RANGE,
+    _g: rison.encode(g),
     _a: query._a ? rison.encode(query._a) : ''
   };
 
