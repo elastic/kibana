@@ -1,9 +1,0 @@
-{
-  "name": "kbn-krb5",
-  "version": "1.0.0",
-  "description": "You know, for Kerberos",
-  "main": "index.js",
-  "devDependencies": {
-    "node-gyp": "^3.8.0"
-  }
-}
