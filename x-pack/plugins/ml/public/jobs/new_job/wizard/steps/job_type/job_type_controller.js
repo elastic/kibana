@@ -11,7 +11,6 @@
  * the user to select the type of job they wish to create.
  */
 
-import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
 import { checkLicenseExpired } from 'plugins/ml/license/check_license';
 import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
@@ -79,5 +78,4 @@ module.controller('MlNewJobStepJobType',
       addItemToRecentlyAccessed('jobs/new_job/datavisualizer', title, url);
     };
 
-    $scope.assetsPath = `${chrome.getBasePath()}/plugins/ml/assets`;
   });
