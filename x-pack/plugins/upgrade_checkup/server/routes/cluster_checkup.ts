@@ -5,45 +5,10 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
 import Joi from 'joi';
+import { Server } from 'src/server/kbn_server';
 
-type DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
-type INDEX_ACTION = 'upgrade' | 'reindex';
-
-interface DeprecationInfo {
-  level: DEPRECATION_LEVEL;
-  message: string;
-  url: string;
-  details?: string;
-}
-
-interface DeprecationAPIResponse {
-  cluster_settings: DeprecationInfo[];
-  node_settings: {
-    [nodeName: string]: DeprecationInfo[];
-  };
-  index_settings: {
-    [indexName: string]: DeprecationInfo[];
-  };
-}
-
-interface AssistanceAPIResponse {
-  indices: {
-    [indexName: string]: {
-      action_required: INDEX_ACTION;
-    };
-  };
-}
-
-interface IndexInfo {
-  deprecations?: DeprecationInfo[];
-  actionRequired?: INDEX_ACTION;
-}
-
-interface IndexInfoMap {
-  [indexName: string]: IndexInfo;
-}
+import { getUpgradeCheckupStatus } from '../lib/es_migration_apis';
 
 export function registerClusterCheckupRoutes(server: Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
@@ -53,41 +18,7 @@ export function registerClusterCheckupRoutes(server: Server) {
     method: 'GET',
     async handler(request) {
       try {
-        const migrationAssistance = (await callWithRequest(request, 'transport.request', {
-          path: '/_xpack/migration/assistance',
-          method: 'GET',
-        })) as AssistanceAPIResponse;
-
-        const deprecations = (await callWithRequest(request, 'transport.request', {
-          path: '/_xpack/migration/deprecations',
-          method: 'GET',
-        })) as DeprecationAPIResponse;
-
-        const indexNames = new Set(
-          Object.keys(deprecations.index_settings).concat(Object.keys(migrationAssistance.indices))
-        );
-
-        const combinedIndexInfo: IndexInfoMap = {};
-        for (const indexName of indexNames) {
-          const actionRequired = migrationAssistance.indices[indexName]
-            ? migrationAssistance.indices[indexName].action_required
-            : undefined;
-
-          combinedIndexInfo[indexName] = {
-            deprecations: deprecations.index_settings[indexName],
-            actionRequired,
-          };
-        }
-
-        return {
-          cluster: {
-            deprecations: deprecations.cluster_settings,
-          },
-          nodes: {
-            deprecations: deprecations.node_settings,
-          },
-          indices: combinedIndexInfo,
-        };
+        return await getUpgradeCheckupStatus(callWithRequest, request);
       } catch (e) {
         if (e.status === 403) {
           return Boom.forbidden(e.message);

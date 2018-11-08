@@ -1,0 +1,19 @@
+{"indices":
+  {
+    "twitter": {
+      "action_required": "reindex"
+    },
+    ".triggered_watches": {
+      "action_required": "upgrade"
+    },
+    ".reindex-status": {
+      "action_required": "reindex"
+    },
+    "twitter2": {
+      "action_required": "reindex"
+    },
+    ".watches": {
+      "action_required": "upgrade"
+    }
+  }
+}
