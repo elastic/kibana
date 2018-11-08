@@ -28,6 +28,7 @@ import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
 import { rollup } from './plugins/rollup';
+import { crossClusterReplication } from './plugins/cross_cluster_replication';
 
 module.exports = function (kibana) {
   return [
@@ -55,5 +56,6 @@ module.exports = function (kibana) {
     kueryAutocomplete(kibana),
     infra(kibana),
     rollup(kibana),
+    crossClusterReplication(kibana),
   ];
 };
