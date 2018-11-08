@@ -14,7 +14,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
     component="div"
     grow={false}
   >
-    <Componentadvanced_settings_title.tsx
+    <Component
       space={
         Object {
           "id": "my-space",

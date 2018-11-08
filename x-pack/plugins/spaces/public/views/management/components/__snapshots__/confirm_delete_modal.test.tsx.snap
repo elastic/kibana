@@ -11,8 +11,15 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
       <EuiModalHeaderTitle
         data-test-subj="confirmModalTitleText"
       >
-        Delete space 
-        'My Space'
+        <FormattedMessage
+          defaultMessage="Delete space {spaceName}"
+          id="xpack.spaces.management.confirmDeleteModal.confirmDeleteSpaceButtonLabel"
+          values={
+            Object {
+              "spaceName": "'My Space'",
+            }
+          }
+        />
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
@@ -21,12 +28,21 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         grow={true}
       >
         <p>
-          Deleting a space permanently removes the space and
-           
-          <strong>
-            all of its contents
-          </strong>
-          . You can't undo this action.
+          <FormattedMessage
+            defaultMessage="Deleting a space permanently removes the space and {allContents}. You can't undo this action."
+            id="xpack.spaces.management.confirmDeleteModal.deletingSpaceWarningMessage"
+            values={
+              Object {
+                "allContents": <strong>
+                  <FormattedMessage
+                    defaultMessage="all of its contents"
+                    id="xpack.spaces.management.confirmDeleteModal.allContentsText"
+                    values={Object {}}
+                  />
+                </strong>,
+              }
+            }
+          />
         </p>
         <EuiFormRow
           describedByIds={Array []}
@@ -52,15 +68,21 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
           <EuiText
             grow={true}
           >
-            You are about to delete your current space 
-            <span>
-              (
-              <strong>
-                My Space
-              </strong>
-              )
-            </span>
-            . You will be redirected to choose a different space if you continue.
+            <FormattedMessage
+              defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."
+              id="xpack.spaces.management.confirmDeleteModal.redirectAfterDeletingCurrentSpaceWarningMessage"
+              values={
+                Object {
+                  "name": <span>
+                    (
+                    <strong>
+                      My Space
+                    </strong>
+                    )
+                  </span>,
+                }
+              }
+            />
           </EuiText>
         </EuiCallOut>
       </EuiText>
@@ -74,7 +96,11 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         onClick={[MockFunction]}
         type="button"
       >
-        Cancel
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.spaces.management.confirmDeleteModal.cancelButtonLabel"
+          values={Object {}}
+        />
       </EuiButtonEmpty>
       <EuiButton
         color="danger"
@@ -85,7 +111,11 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Delete space and all contents
+        <FormattedMessage
+          defaultMessage=" Delete space and all contents"
+          id="xpack.spaces.management.confirmDeleteModal.deleteSpaceAndAllContentsButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiModalFooter>
   </EuiModal>
