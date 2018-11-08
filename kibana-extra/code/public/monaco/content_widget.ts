@@ -39,6 +39,7 @@ export abstract class ContentWidget extends Disposable implements Editor.IConten
 
     this.visible = false;
     this.editor.onDidLayoutChange(e => this.updateMaxHeight());
+    this.editor.onDidChangeModel(() => this.hide());
     this.updateMaxHeight();
     this.showAtPosition = null;
     this.editor.addContentWidget(this);
