@@ -31,8 +31,6 @@ const ItemBar = styled<ItemBarProps, any>('div')`
   box-sizing: border-box;
   position: relative;
   height: ${px(unit)};
-  left: ${props => props.left}%;
-  width: ${props => props.width}%;
   min-width: 2px;
   background-color: ${props => props.color};
 `;
@@ -40,11 +38,9 @@ const ItemBar = styled<ItemBarProps, any>('div')`
 // Note: "direction: rtl;" is here to prevent text from running off of
 // the right edge and instead pushing it to the left. For an example of
 // how this works, see here: https://codepen.io/sqren/pen/JrXNjY
-const SpanLabel = styled<{ left: number }, any>('div')`
+const SpanLabel = styled.div`
   white-space: nowrap;
   position: relative;
-  left: ${props => `${props.left}%`};
-  width: ${props => `${Math.max(100 - props.left, 0)}%`};
   direction: rtl;
   text-align: left;
   margin: ${px(units.quarter)} 0 0;
@@ -133,8 +129,16 @@ export function WaterfallItem({
       isSelected={isSelected}
       onClick={onClick}
     >
-      <ItemBar left={left} width={width} color={color} type={item.docType} />
-      <Label left={left}>
+      <ItemBar
+        // using inline styles instead of props to avoid generating a css class for each item
+        style={{ left: `${left}%`, width: `${width}%` }}
+        color={color}
+        type={item.docType}
+      />
+      <Label
+        // using inline styles instead of props to avoid generating a css class for each item
+        style={{ left: `${left}%`, width: `${Math.max(100 - left, 0)}%` }}
+      >
         {item.name} <Prefix item={item} />
       </Label>
     </Container>
