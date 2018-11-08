@@ -157,7 +157,7 @@ export class AssetManager extends React.PureComponent {
                 cannot be determined at this time.
               </p>
             </EuiText>
-            <EuiFlexGrid responsive="false" columns={4}>
+            <EuiFlexGrid responsive={false} columns={4}>
               {this.props.assets.map(this.renderAsset)}
             </EuiFlexGrid>
           </EuiModalBody>
