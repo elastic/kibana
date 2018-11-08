@@ -36,7 +36,7 @@ import MappingSetupProvider from '../../utils/mapping_setup';
 
 import { SearchSourceProvider } from '../search_source';
 import { SavedObjectsClientProvider, findObjectByTitle } from '../../saved_objects';
-import { migrateLegacyQuery } from '../../utils/migrateLegacyQuery.js';
+import { migrateLegacyQuery } from '../../utils/migrate_legacy_query';
 import { recentlyAccessed } from '../../persisted_log';
 
 /**

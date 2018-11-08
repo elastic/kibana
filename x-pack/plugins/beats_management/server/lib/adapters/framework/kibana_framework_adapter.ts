@@ -47,7 +47,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       // to re-compute the license check results for this plugin
       xpackMainPlugin.info
         .feature(PLUGIN.ID)
-        .registerLicenseCheckResultsGenerator(this.checkLicense);
+        .registerLicenseCheckResultsGenerator((xPackInfo: any) => this.checkLicense(xPackInfo));
     });
   }
   // TODO make base path a constructor level param
@@ -62,9 +62,6 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public exposeStaticDir(urlPath: string, dir: string): void {
-    if (!this.isSecurityEnabled()) {
-      return;
-    }
     this.server.route({
       handler: {
         directory: {
@@ -80,6 +77,9 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     RouteRequest extends FrameworkWrappableRequest,
     RouteResponse extends FrameworkResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
+    const hasAny = (roles: string[], requiredRoles: string[]) =>
+      requiredRoles.some(r => roles.includes(r));
+
     const wrappedHandler = (licenseRequired: boolean, requiredRoles?: string[]) => async (
       request: any,
       h: any
@@ -101,7 +101,8 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
         if (
           wrappedRequest.user.kind === 'authenticated' &&
-          !wrappedRequest.user.roles.includes('superuser') &&
+          (!hasAny(wrappedRequest.user.roles, this.getSetting('xpack.beats.defaultUserRoles')) ||
+            !wrappedRequest.user.roles) &&
           difference(requiredRoles, wrappedRequest.user.roles).length !== 0
         ) {
           return h.response().code(403);
@@ -125,13 +126,6 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       return null;
     }
   }
-
-  private isSecurityEnabled = () => {
-    return (
-      this.server.plugins.xpack_main.info.isAvailable() &&
-      this.server.plugins.xpack_main.info.feature('security').isEnabled()
-    );
-  };
 
   // TODO make key a param
   private validateConfig() {
@@ -170,8 +164,10 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // License is not valid
     if (!isLicenseValid) {
       return {
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
         securityEnabled: true,
         licenseValid: false,
+        licenseExpired: false,
         message: `Your ${licenseType} license does not support Beats central management features. Please upgrade your license.`,
       };
     }
@@ -179,8 +175,10 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     // License is valid but not active, we go into a read-only mode.
     if (!isLicenseActive) {
       return {
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
         securityEnabled: true,
-        licenseValid: false,
+        licenseValid: true,
+        licenseExpired: true,
         message: `You cannot edit, create, or delete your Beats central management configurations because your ${licenseType} license has expired.`,
       };
     }
@@ -191,16 +189,21 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         'Security must be enabled in order to use Beats central management features.' +
         ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
       return {
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
         securityEnabled: false,
         licenseValid: true,
+        licenseExpired: false,
+
         message,
       };
     }
 
     // License is valid and active
     return {
+      defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
       securityEnabled: true,
       licenseValid: true,
+      licenseExpired: false,
     };
   }
 }

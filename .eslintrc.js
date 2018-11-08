@@ -316,6 +316,19 @@ module.exports = {
     },
 
     /**
+     * disable jsx-a11y for kbn-ui-framework
+     */
+    {
+      files: ['packages/kbn-ui-framework/**'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+        'jsx-a11y/anchor-has-content': 'off',
+        'jsx-a11y/tabindex-no-positive': 'off',
+        'jsx-a11y/aria-role': 'off',
+      },
+    },
+
+    /**
      * Monitoring overrides
      */
     {
@@ -394,19 +407,9 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack/',
-          },
-        ],
-      },
-    },
-    {
       files: [
         'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/scripts/*.js',
         'x-pack/plugins/canvas/tasks/*.js',
         'x-pack/plugins/canvas/tasks/**/*.js',
         'x-pack/plugins/canvas/__tests__/**/*',
@@ -418,7 +421,6 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
-            packageDir: './x-pack/',
           },
         ],
       },
@@ -427,18 +429,24 @@ module.exports = {
       files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*'],
       globals: { canvas: true, $: true },
       rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack/',
-          },
-        ],
         'import/no-unresolved': [
           'error',
           {
             ignore: ['!!raw-loader.+.svg$'],
           },
         ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/public/**/*'],
+      env: {
+        browser: true,
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*'],
+      env: {
+        jquery: true,
       },
     },
   ],

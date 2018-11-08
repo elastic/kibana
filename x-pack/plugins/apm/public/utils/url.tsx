@@ -6,7 +6,7 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
-import _ from 'lodash';
+import { get, isPlainObject, mapValues } from 'lodash';
 import qs from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -15,6 +15,10 @@ import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import url from 'url';
 import { StringMap } from '../../typings/common';
+
+// Kibana default set in: https://github.com/elastic/kibana/blob/e13e47fc4eb6112f2a5401408e9f765eae90f55d/x-pack/plugins/apm/public/utils/timepicker/index.js#L31-L35
+// TODO: store this in config or a shared constant?
+const DEFAULT_KIBANA_TIME_RANGE = '(time:(from:now-24h,mode:quick,to:now))';
 
 interface ViewMlJobArgs {
   serviceName: string;
@@ -54,7 +58,7 @@ export function ViewMLJob({
   );
 }
 
-export function toQuery(search?: string) {
+export function toQuery(search?: string): StringMap<any> {
   return search ? qs.parse(search.slice(1)) : {};
 }
 
@@ -64,7 +68,7 @@ export function fromQuery(query: StringMap) {
 }
 
 export function encodeQuery(query: StringMap, exclude: string[] = []) {
-  return _.mapValues(query, (value: any, key: string) => {
+  return mapValues(query, (value: any, key: string) => {
     if (exclude.includes(key)) {
       return encodeURI(value);
     }
@@ -80,7 +84,7 @@ function stringifyWithoutEncoding(query: StringMap) {
 
 function decodeAsObject(value: string) {
   const decoded = rison.decode(value);
-  return _.isPlainObject(decoded) ? decoded : {};
+  return isPlainObject(decoded) ? decoded : {};
 }
 
 export function decodeKibanaSearchParams(search: string) {
@@ -125,15 +129,15 @@ export function RelativeLinkComponent({
   }
 
   // Shorthand for pathname
-  const pathname = path || _.get(props.to, 'pathname') || location.pathname;
+  const pathname = path || get(props.to, 'pathname') || location.pathname;
 
   // Add support for querystring as object
   const search =
-    query || _.get(props.to, 'query')
+    query || get(props.to, 'query')
       ? fromQuery({
           ...toQuery(location.search),
           ...query,
-          ..._.get(props.to, 'query')
+          ...get(props.to, 'query')
         })
       : location.search;
 
@@ -171,6 +175,7 @@ export interface KibanaLinkArgs {
  *
  * You must remember to pass in location in that case.
  */
+
 export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   location,
   pathname,
@@ -182,7 +187,8 @@ export const UnconnectedKibanaLink: React.SFC<KibanaLinkArgs> = ({
   const currentQuery = toQuery(location.search);
   const nextQuery = {
     ...query,
-    _g: query._g ? rison.encode(query._g) : currentQuery._g,
+    // use "_g" if it's set in the url, otherwise use default
+    _g: currentQuery._g || DEFAULT_KIBANA_TIME_RANGE,
     _a: query._a ? rison.encode(query._a) : ''
   };
 

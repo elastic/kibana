@@ -7,7 +7,6 @@
 // TODO: Remove once typescript definitions are in EUI
 declare module '@elastic/eui' {
   export const EuiCopy: React.SFC<any>;
-  export const EuiForm: React.SFC<any>;
 }
 
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
@@ -126,6 +125,8 @@ export class ReportingPanelContent extends Component<Props, State> {
         return 'PDF';
       case 'csv':
         return 'CSV';
+      case 'png':
+        return 'PNG';
       default:
         return this.props.reportType;
     }

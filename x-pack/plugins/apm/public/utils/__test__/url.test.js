@@ -191,13 +191,13 @@ describe('UnconnectedKibanaLink', () => {
         interval: 'auto',
         query: {
           language: 'lucene',
-          query: `context.service.name:myServiceName AND error.grouping_key:myGroupId`
+          query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
         },
         sort: { '@timestamp': 'desc' }
       }
     };
 
-    wrapper = mount(
+    wrapper = shallow(
       <UnconnectedKibanaLink
         location={{ search: '' }}
         pathname={'/app/kibana'}
@@ -210,13 +210,26 @@ describe('UnconnectedKibanaLink', () => {
   });
 
   it('should have correct url', () => {
-    expect(wrapper.find('a').prop('href')).toBe(
-      "myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:'context.service.name:myServiceName AND error.grouping_key:myGroupId'),sort:('@timestamp':desc))&_g="
+    expect(wrapper.find('EuiLink').prop('href')).toBe(
+      'myBasePath/app/kibana#/discover?_a=(interval:auto,query:(language:lucene,query:\'context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"\'),sort:(\'@timestamp\':desc))&_g=(time:(from:now-24h,mode:quick,to:now))'
     );
   });
 
   it('should render correct markup', () => {
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('should include existing _g values in link href', () => {
+    wrapper.setProps({
+      location: {
+        search:
+          '?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-7d,mode:relative,to:now-1d))'
+      }
+    });
+    expect(wrapper).toMatchSnapshot();
+
+    wrapper.setProps({ location: { search: '?_g=H@whatever' } });
+    expect(wrapper).toMatchSnapshot();
   });
 });
 

@@ -21,6 +21,7 @@ exports[`LoadingState should render normally 1`] = `
     >
       <EuiTitle
         size="s"
+        textTransform="none"
       >
         <EuiTextColor
           color="subdued"

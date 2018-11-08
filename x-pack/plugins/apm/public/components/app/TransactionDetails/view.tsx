@@ -7,7 +7,6 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
-// @ts-ignore
 import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 // @ts-ignore
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
@@ -16,6 +15,7 @@ import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
 // @ts-ignore
 import TransactionCharts from '../../shared/charts/TransactionCharts';
+import EmptyMessage from '../../shared/EmptyMessage';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 // @ts-ignore
@@ -64,6 +64,15 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
       <TransactionDetailsRequest
         urlParams={urlParams}
         render={({ data: transaction }) => {
+          if (!transaction) {
+            return (
+              <EmptyMessage
+                heading="No transaction sample available."
+                subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
+              />
+            );
+          }
+
           return (
             <WaterfallRequest
               urlParams={urlParams}
