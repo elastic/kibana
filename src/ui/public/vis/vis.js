@@ -70,10 +70,8 @@ export function VisProvider(Private, indexPatterns, getAppState) {
         timeFilter: timefilter,
         queryFilter: queryFilter,
         events: {
-          // the filter method will be removed in the near feature
-          // you should rather use addFilter method below
-          filter: event => this.eventsSubject.next({ name: 'filterBucket', data: event }),
-          brush: event => this.eventsSubject.next({ name: 'brush', data: event }),
+          filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
+          brush: data => this.eventsSubject.next({ name: 'brush', data }),
         },
         getAppState,
       };
