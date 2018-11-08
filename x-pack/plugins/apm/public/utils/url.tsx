@@ -6,7 +6,7 @@
 
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import createHistory from 'history/createHashHistory';
-import { get, isEmpty, isPlainObject, mapValues } from 'lodash';
+import { get, isPlainObject, mapValues } from 'lodash';
 import qs from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
