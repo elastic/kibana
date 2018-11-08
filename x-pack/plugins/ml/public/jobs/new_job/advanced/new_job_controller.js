@@ -22,7 +22,7 @@ import {
   createSearchItems,
   createJobForSaving,
   checkCardinalitySuccess,
-  getMinimalValidJob
+  getMinimalValidJob,
 } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadIndexPatterns, loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { ML_JOB_FIELD_TYPES, ES_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
@@ -161,7 +161,15 @@ module.controller('MlNewJob',
           $scope.ui.validation.tabs[tab].valid = valid;
         }
       },
-      cardinalityValidator: { status: 0, message: '' },
+      cardinalityValidator: {
+        status: 0, message: '', STATUS: {
+          FAILED: -1,
+          NOT_RUNNING: 0,
+          RUNNING: 1,
+          FINISHED: 2,
+          WARNING: 3,
+        }
+      },
       jsonText: '',
       changeTab: changeTab,
       influencers: [],
@@ -658,16 +666,47 @@ module.controller('MlNewJob',
       }
     };
 
-    // TODO: in add detectors function - run this function again if relevant fields added/updated
+    function runValidateCardinality() {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+      $scope.ui.cardinalityValidator.status = $scope.ui.cardinalityValidator.STATUS.RUNNING;
+
+      const tempJob = mlJobService.cloneJob($scope.job);
+      _.merge(tempJob, getMinimalValidJob());
+
+      ml.validateCardinality(tempJob)
+        .then((response) => {
+          const validationResult = checkCardinalitySuccess(response);
+
+          if (validationResult.success === true) {
+            $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+            $scope.ui.cardinalityValidator.message = '';
+          } else {
+            $scope.ui.cardinalityValidator.message = `Creating model plots is resource intensive and not recommended
+                  where the cardinality of the selected fields is greater than 100. Estimated cardinality
+                  for this job is ${validationResult.highCardinality}.
+                  If you enable model plot with this configuration we recommend you use a dedicated results index.`;
+
+            $scope.ui.cardinalityValidator.status = STATUS.WARNING;
+          }
+        })
+        .catch((error) => { console.log('Cardinality check error:', error); });
+    }
+
+    $scope.onDetectorsUpdate = function () {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+
+      if ($scope.ui.enableModelPlot === true) {
+        if ($scope.job.analysis_config.detectors.length === 0) {
+          $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+          $scope.ui.cardinalityValidator.message = '';
+        } else {
+          runValidateCardinality();
+        }
+      }
+    };
+
     $scope.setModelPlotEnabled = function () {
-      // TODO: first check if job.analysis_config.detectors has fields that we can actually run cardinality on. Separate function?
-      const STATUS = {
-        FAILED: -1,
-        NOT_RUNNING: 0,
-        RUNNING: 1,
-        FINISHED: 2,
-        WARNING: 3,
-      };
+      const { STATUS } = $scope.ui.cardinalityValidator;
 
       if ($scope.ui.enableModelPlot === true) {
         $scope.job.model_plot_config = {
@@ -678,26 +717,7 @@ module.controller('MlNewJob',
           return;
         }
 
-        const tempJob = mlJobService.cloneJob($scope.job);
-        _.merge(tempJob, getMinimalValidJob());
-        console.log('temp job sent for cardinality check:', tempJob); // remove
-
-        ml.validateCardinality(tempJob)
-          .then((response) => {
-            const validationResult = checkCardinalitySuccess(response);
-
-            if (validationResult.success === true) {
-              $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
-            } else {
-              $scope.ui.cardinalityValidator.message = `Creating model plots is resource intensive and not recommended
-                  where the cardinality of the selected fields is greater than 100. Estimated cardinality
-                  for this job is ${validationResult.highCardinality}.
-                  If you enable model plot with this configuration we recommend you use a dedicated results index.`;
-
-              $scope.ui.cardinalityValidator.status = STATUS.WARNING;
-            }
-          })
-          .catch((error) => { console.log('Cardinality check error:', error); });
+        runValidateCardinality();
       } else {
         $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
         $scope.ui.cardinalityValidator.message = '';

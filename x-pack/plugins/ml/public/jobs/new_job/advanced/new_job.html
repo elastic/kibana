@@ -238,6 +238,7 @@
               ml-fields="fields"
               ml-cat-field-name-selected="(job.analysis_config.categorization_field_name?true:false)"
               ml-edit-mode="'NEW'"
+              ml-on-detectors-update="onDetectorsUpdate"
               ></div>
             <div ng-hide="ui.validation.tabs[1].checks.detectors.valid" class="validation-error">
               {{ ( ui.validation.tabs[1].checks.detectors.message || "At least one detector should be configured" ) }}
@@ -288,7 +289,9 @@
                   ng-change="setModelPlotEnabled()"
                   ng-model="ui.enableModelPlot" />
                 <span class='kuiCheckBoxLabel__text'>
-                  <span id="ml_aria_label_new_job_enable_model_plot">Enable model plot</span>
+                  <span id="ml_aria_label_new_job_enable_model_plot">
+                    {{ ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.RUNNING ? 'Validating cardinality...' : 'Enable model plot' }}
+                  </span>
                   <i ml-info-icon="new_job_enable_model_plot" />
                 </span>
               </label>
