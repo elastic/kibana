@@ -305,6 +305,6 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
   };
 }
 
-const MainPagesUI = withUrlState<MainPagesProps>(MainPagesComponent);
+const MainPagesUi = withUrlState<MainPagesProps>(MainPagesComponent);
 
-export const MainPages = injectI18n(MainPagesUI);
+export const MainPages = injectI18n(MainPagesUi);

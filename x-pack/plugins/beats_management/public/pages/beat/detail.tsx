@@ -32,7 +32,7 @@ interface PageState {
   selectedConfig: ConfigurationBlock | null;
 }
 
-class BeatDetailPageUI extends React.PureComponent<PageProps, PageState> {
+class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
   constructor(props: PageProps) {
     super(props);
 
@@ -161,4 +161,4 @@ class BeatDetailPageUI extends React.PureComponent<PageProps, PageState> {
     );
   }
 }
-export const BeatDetailPage = injectI18n(BeatDetailPageUI);
+export const BeatDetailPage = injectI18n(BeatDetailPageUi);

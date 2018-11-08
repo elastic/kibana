@@ -21,7 +21,7 @@ export const NoAccessPage = injectI18n(({ intl }) => (
         id="xpack.beatsManagement.noAccess.accessDeniedDescription"
         defaultMessage="You are not authorized to access Beats central management. To use Beats central management,
           you need the privileges granted by the {beatsAdminRole} role."
-        values={{ beatsAdminRole: `\`beats_admin\`` }}
+        values={{ beatsAdminRole: '`beats_admin`' }}
       />
     </p>
   </NoDataLayout>

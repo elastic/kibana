@@ -53,7 +53,7 @@ export class FinishWalkthrough extends React.Component<PageProps, any> {
                 <h2>
                   <FormattedMessage
                     id="xpack.beatsManagement.enrollBeat.nextStepTitle"
-                    defaultMessage="our Beat is enrolled. What's next?"
+                    defaultMessage="Your Beat is enrolled. What's next?"
                   />
                 </h2>
               }

@@ -47,7 +47,7 @@ interface TagEditState {
   selectedConfigIndex?: number;
 }
 
-class TagEditUI extends React.PureComponent<TagEditProps, TagEditState> {
+class TagEditUi extends React.PureComponent<TagEditProps, TagEditState> {
   constructor(props: TagEditProps) {
     super(props);
 
@@ -262,4 +262,4 @@ class TagEditUI extends React.PureComponent<TagEditProps, TagEditState> {
       : (e: any) => this.props.onTagChange(key, e.target ? e.target.value : e);
 }
 
-export const TagEdit = injectI18n(TagEditUI);
+export const TagEdit = injectI18n(TagEditUi);
