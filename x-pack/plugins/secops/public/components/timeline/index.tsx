@@ -28,48 +28,48 @@ export interface OwnProps {
   width: number;
 }
 
-interface StateProps {
-  dataProviders: DataProvider[];
-  data: ECS[];
-  range: Range;
-  sort: Sort;
+interface StateReduxProps {
+  dataProviders?: DataProvider[];
+  data?: ECS[];
+  range?: Range;
+  sort?: Sort;
 }
 
 interface DispatchProps {
-  createTimeline: ActionCreator<{ id: string }>;
-  addProvider: ActionCreator<{
+  createTimeline?: ActionCreator<{ id: string }>;
+  addProvider?: ActionCreator<{
     id: string;
     provider: DataProvider;
   }>;
-  updateData: ActionCreator<{
+  updateData?: ActionCreator<{
     id: string;
     data: ECS[];
   }>;
-  updateProviders: ActionCreator<{
+  updateProviders?: ActionCreator<{
     id: string;
     providers: DataProvider[];
   }>;
-  updateRange: ActionCreator<{
+  updateRange?: ActionCreator<{
     id: string;
     range: Range;
   }>;
-  updateSort: ActionCreator<{
+  updateSort?: ActionCreator<{
     id: string;
     sort: Sort;
   }>;
-  removeProvider: ActionCreator<{
+  removeProvider?: ActionCreator<{
     id: string;
     providerId: string;
   }>;
 }
 
-type Props = OwnProps & StateProps & DispatchProps;
+type Props = OwnProps & StateReduxProps & DispatchProps;
 
 class StatefulTimelineComponent extends React.PureComponent<Props> {
   public componentDidMount() {
     const { createTimeline, id } = this.props;
 
-    createTimeline({ id });
+    createTimeline!({ id });
   }
 
   public render() {
@@ -87,30 +87,30 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     } = this.props;
 
     const onColumnSorted: OnColumnSorted = sorted => {
-      updateSort({ id, sort: sorted });
+      updateSort!({ id, sort: sorted });
     };
 
     const onDataProviderRemoved: OnDataProviderRemoved = dataProvider => {
-      removeProvider({ id, providerId: dataProvider.id });
+      removeProvider!({ id, providerId: dataProvider.id });
     };
 
     const onRangeSelected: OnRangeSelected = selectedRange => {
-      updateRange({ id, range: selectedRange });
+      updateRange!({ id, range: selectedRange });
     };
 
     return (
       <Timeline
         columnHeaders={headers}
         columnRenderers={columnRenderers}
-        dataProviders={dataProviders}
-        data={data}
+        dataProviders={dataProviders!}
+        data={data!}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onRangeSelected={onRangeSelected}
-        range={range}
+        range={range!}
         rowRenderers={rowRenderers}
-        sort={sort}
+        sort={sort!}
         width={width}
       />
     );
