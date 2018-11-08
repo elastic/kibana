@@ -17,12 +17,12 @@ interface Props {
   onRangeSelected: OnRangeSelected;
 }
 
-export const RangePickerWidth = 120;
+export const rangePickerWidth = 120;
 
 // TODO: Upgrade Eui library and use EuiSuperSelect
 const SelectContainer = styled.div`
   cursor: pointer;
-  width: ${RangePickerWidth}px;
+  width: ${rangePickerWidth}px;
 `;
 
 /** Renders a time range picker for the MiniMap (e.g. 1 Day, 1 Week...) */

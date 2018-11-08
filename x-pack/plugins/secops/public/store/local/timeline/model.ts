@@ -25,7 +25,7 @@ export const timelineDefaults: Readonly<
   data: mockECSData,
   range: '1 Day',
   sort: {
-    columnId: '@timestamp',
+    columnId: 'timestamp',
     sortDirection: 'descending',
   },
 };

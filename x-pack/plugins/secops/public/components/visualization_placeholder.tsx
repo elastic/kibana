@@ -62,7 +62,7 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
               )}
             </WhoAmI>
             <ProviderContainer
-              onClick={e => {
+              onClick={() => {
                 dispatch(
                   timelineActions.addProvider({ id: timelineId, provider: mockDataProviders[i] })
                 );

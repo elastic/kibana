@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
+import { defaultTo, noop } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -106,7 +106,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         data={data}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
-        onFilterChange={noop}
+        onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onRangeSelected={onRangeSelected}
         range={range}
         rowRenderers={rowRenderers}
@@ -119,17 +119,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const timeline = timelineByIdSelector(state)[id];
-  const { dataProviders, data, range, sort } = timeline || timelineDefaults;
+  const { dataProviders, data, sort } = timeline || timelineDefaults;
 
-  return timeline != null
-    ? timeline
-    : {
-        id,
-        dataProviders,
-        data,
-        range,
-        sort,
-      };
+  return defaultTo({ id, dataProviders, data, sort }, timeline);
 };
 
 export const StatefulTimeline = connect(
