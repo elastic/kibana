@@ -14,7 +14,7 @@ describe('ML - Index Or Search Controller', () => {
     ngMock.module('kibana');
   });
 
-  it('Initialize Index Or Sesarch Controller', (done) => {
+  it('Initialize Index Or Search Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
       $controller('MlNewJobStepIndexOrSearch', {

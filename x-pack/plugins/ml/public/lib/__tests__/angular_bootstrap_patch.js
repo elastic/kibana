@@ -9,7 +9,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-describe('ML - Angular Patch - Dropdown Controller', () => {
+describe('ML - Angular Bootstrap Patch - Dropdown Controller', () => {
   beforeEach(() => {
     ngMock.module('ui.bootstrap.dropdown');
   });
