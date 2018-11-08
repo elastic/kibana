@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction, compose, createStore as createReduxStore, Store } from 'redux';
+import { AnyAction, applyMiddleware, compose, createStore as createReduxStore, Store } from 'redux';
+import thunk from 'redux-thunk';
 
 import { initialState, reducer, State } from '.';
 
@@ -17,5 +18,5 @@ declare global {
 export const createStore = (): Store<State, AnyAction> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-  return createReduxStore(reducer, initialState, composeEnhancers());
+  return createReduxStore(reducer, initialState, composeEnhancers(applyMiddleware(thunk)));
 };
