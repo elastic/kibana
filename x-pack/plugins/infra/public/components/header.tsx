@@ -15,24 +15,26 @@ import styled from 'styled-components';
 
 interface HeaderProps {
   breadcrumbs?: EuiBreadcrumbDefinition[];
+  appendSections?: React.ReactNode;
 }
 
 export class Header extends React.PureComponent<HeaderProps> {
   private staticBreadcrumbs = [
     {
       href: '#/',
-      text: 'InfraOps',
+      text: 'Infrastructure',
     },
   ];
 
   public render() {
-    const { breadcrumbs = [] } = this.props;
+    const { breadcrumbs = [], appendSections = null } = this.props;
 
     return (
       <HeaderWrapper>
         <EuiHeaderSection>
           <EuiHeaderBreadcrumbs breadcrumbs={[...this.staticBreadcrumbs, ...breadcrumbs]} />
         </EuiHeaderSection>
+        {appendSections}
       </HeaderWrapper>
     );
   }

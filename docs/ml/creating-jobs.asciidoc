@@ -36,16 +36,20 @@ image::ml/images/ml-data-recognizer.jpg[A screenshot of the Apache and NGINX job
 
 If you are not certain which type of job to create, you can use the
 *Data Visualizer* to learn more about your data and to identify possible fields
-for {ml} analysis.
+for {ml} analysis. 
 
 [role="screenshot"]
 image::ml/images/ml-data-visualizer.jpg[A screenshot of the Data Visualizer option when creating new jobs]
 
-NOTE: If your data is located outside of {es}, you cannot use {kib} to create
+[NOTE] 
+===============================
+* If your index pattern does not contain a time field, you cannot use the *Data Visualizer*. 
+* If your data is located outside of {es}, you cannot use {kib} to create
 your jobs and you cannot use {dfeeds} to retrieve your data in real time.
 Machine learning analysis is still possible, however, by using APIs to
 create and manage jobs and post data to them. For more information, see
 {ref}/ml-apis.html[Machine Learning APIs].
+===============================
 
 Ready to get some hands-on experience? See
 {xpack-ref}/ml-getting-started.html[Getting Started with Machine Learning].
