@@ -40,6 +40,8 @@ include::dashboard.asciidoc[]
 
 include::timelion.asciidoc[]
 
+include::canvas.asciidoc[]
+
 include::ml/index.asciidoc[]
 
 include::apm/index.asciidoc[]
