@@ -19,7 +19,7 @@ describe('ML - Recognize Wizard - Create Job Controller', () => {
   });
 
   it('Initialize Create Job Controller', (done) => {
-    sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
+    const stub = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
       indexPattern: {},
       savedSearch: {},
       combinedQuery: {}
@@ -36,6 +36,7 @@ describe('ML - Recognize Wizard - Create Job Controller', () => {
       });
 
       expect(scope.ui.formValid).to.eql(true);
+      stub.restore();
       done();
     });
   });

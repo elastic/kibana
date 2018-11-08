@@ -20,17 +20,19 @@ describe('ML - Data Visualizer View Fields Controller', () => {
   });
 
   it('Initialize Data Visualizer View Fields Controller', (done) => {
-    sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
+    const stub1 = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
       indexPattern: {},
       savedSearch: {},
       combinedQuery: {}
     }));
-    sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
+    const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
       $controller('MlDataVisualizerViewFields', { $scope: scope });
 
       expect(scope.metricCards).to.eql([]);
+      stub1.restore();
+      stub2.restore();
       done();
     });
   });

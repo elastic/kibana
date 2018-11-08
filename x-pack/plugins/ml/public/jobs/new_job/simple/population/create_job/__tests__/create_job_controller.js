@@ -21,18 +21,21 @@ describe('ML - Population Wizard - Create Job Controller', () => {
   });
 
   it('Initialize Create Job Controller', (done) => {
-    sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
+    const stub1 = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
       indexPattern: {},
       savedSearch: {},
       combinedQuery: {}
     }));
-    sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
-    sinon.stub(utils, 'createFields').callsFake(() => false);
+    const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
+    const stub3 = sinon.stub(utils, 'createFields').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
       $controller('MlCreatePopulationJob', { $scope: scope });
 
       expect(typeof scope.ui).to.eql('object');
+      stub1.restore();
+      stub2.restore();
+      stub3.restore();
       done();
     });
   });

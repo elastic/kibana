@@ -20,17 +20,19 @@ describe('ML - Job Type Controller', () => {
   });
 
   it('Initialize Job Type Controller', (done) => {
-    sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
+    const stub1 = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
       indexPattern: {},
       savedSearch: {},
       combinedQuery: {}
     }));
-    sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
+    const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
       $controller('MlNewJobStepJobType', { $scope: scope });
 
       expect(scope.indexWarningTitle).to.eql('Index pattern undefined is not time based');
+      stub1.restore();
+      stub2.restore();
       done();
     });
   });

@@ -20,12 +20,12 @@ describe('ML - Single Metric Wizard - Create Job Controller', () => {
   });
 
   it('Initialize Create Job Controller', (done) => {
-    sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
+    const stub1 = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
       indexPattern: {},
       savedSearch: {},
       combinedQuery: {}
     }));
-    sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
+    const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
       $controller('MlCreateSingleMetricJob', {
@@ -38,6 +38,8 @@ describe('ML - Single Metric Wizard - Create Job Controller', () => {
       });
 
       expect(scope.ui.showJobInput).to.eql(false);
+      stub1.restore();
+      stub2.restore();
       done();
     });
   });
