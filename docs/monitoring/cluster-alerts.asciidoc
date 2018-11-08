@@ -1,6 +1,6 @@
 [role="xpack"]
 [[cluster-alerts]]
-=== Cluster Alerts
+== Cluster Alerts
 
 The *Monitoring > Clusters* page in {kib} summarizes the status of your Elastic
 stack. You can drill down into the metrics to view more information about your

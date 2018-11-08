@@ -19,10 +19,14 @@ instance, and Beat is considered unique based on its persistent
 UUID, which is written to the <<settings,`path.data`>> directory when the node
 or instance starts. 
 
-* <<monitoring-kibana>>
-* <<monitoring-data>>
+NOTE: Watcher must be enabled to view cluster alerts. If you have a Basic
+license, Top Cluster Alerts are not displayed.
 
 --
 
-include::viewing-metrics.asciidoc[]
+include::beats-details.asciidoc[]
+include::cluster-alerts.asciidoc[]
+include::elasticsearch-details.asciidoc[]
+include::kibana-details.asciidoc[]
+include::logstash-details.asciidoc[]
 include::monitoring-troubleshooting.asciidoc[]

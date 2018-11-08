@@ -24,7 +24,7 @@ include::introduction.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::monitoring/monitoring-kibana.asciidoc[]
+include::monitoring/configuring-monitoring.asciidoc[]
 
 include::security/securing-kibana.asciidoc[]
 

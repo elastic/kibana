@@ -1,8 +1,8 @@
 [role="xpack"]
 [[monitoring-kibana]]
-== Configuring monitoring in {kib}
+=== Collecting {kib} monitoring data
 ++++
-<titleabbrev>Configuring monitoring</titleabbrev>
+<titleabbrev>Collecting monitoring data</titleabbrev>
 ++++
 
 If you enable the Elastic {monitor-features} in your cluster, you can 
@@ -15,20 +15,25 @@ method, see <<monitoring-metricbeat>>.
 To learn about monitoring in general, see 
 {stack-ov}/xpack-monitoring.html[Monitoring the {stack}]. 
 
+. Set the `xpack.monitoring.collection.enabled` setting to `true` on each
+node in the production cluster. By default, it is is disabled (`false`). 
++ 
+--
+NOTE: You can specify this setting in either the `elasticsearch.yml` on each 
+node or across the cluster as a dynamic cluster setting. If {es} 
+{security-features} are enabled, you must have `monitor` cluster privileges to 
+view the cluster settings and `manage` cluster privileges to change them.
 
-. Enable the collection of monitoring data. 
+--
 
-** In {kib}:
+** To update the cluster settings in {kib}:
 
 ... Open {kib} in your web browser. 
 +
 --
-If you are running {kib} locally, go to `http://localhost:5601/`. 
+By default, if you are running {kib} locally, go to `http://localhost:5601/`. 
 
-If the Elastic {security-features} are enabled, log in. 
-////
-//TBD: What permissions are required to update cluster settings?
-////
+If {es} {security-features} are enabled, log in. 
 --
 
 ... In the side navigation, click *Monitoring*. If data collection is disabled, 
@@ -114,6 +119,3 @@ For more information, see <<using-kibana-with-security>>.
 . <<start-stop,Start {kib}>>.
 
 . <<monitoring-data,View the monitoring data in {kib}>>. 
-
-include::monitoring-metricbeat.asciidoc[]
-include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
