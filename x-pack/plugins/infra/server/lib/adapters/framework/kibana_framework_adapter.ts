@@ -5,8 +5,9 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Request, ResponseToolkit, Server } from 'hapi';
+import { Request, ResponseToolkit, Server } from 'src/server/kbn_server';
 
+import { GenericParams } from 'elasticsearch';
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {
   InfraBackendFrameworkAdapter,
@@ -24,13 +25,6 @@ import {
   HapiGraphiQLPluginOptions,
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
-
-declare module 'hapi' {
-  interface PluginProperties {
-    elasticsearch: any;
-    kibana: any;
-  }
-}
 
 export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFrameworkAdapter {
   public version: string;
@@ -91,11 +85,16 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
     });
   }
 
-  public async callWithRequest(req: InfraFrameworkRequest<Request>, ...rest: any[]) {
+  public async callWithRequest(
+    req: InfraFrameworkRequest<Request>,
+    endpoint: string,
+    params: GenericParams,
+    ...rest: any[]
+  ) {
     const internalRequest = req[internalInfraFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
-    const fields = await callWithRequest(internalRequest, ...rest);
+    const fields = await callWithRequest(internalRequest, endpoint, params, ...rest);
     return fields;
   }
 
@@ -106,11 +105,11 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
       throw new Error('Failed to access indexPatternsService for the request');
     }
     return this.server.indexPatternsServiceFactory({
-      callCluster: async (method: string, args: [object], ...rest: any[]) => {
+      callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
           request,
           method,
-          { ...args, allowNoIndices: true },
+          { ...args, allowNoIndices: true } as GenericParams,
           ...rest
         );
         return fieldCaps;

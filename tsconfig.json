@@ -47,6 +47,7 @@
     "importHelpers": true
   },
   "include": [
+    "index.d.ts",
     "src/**/*",
     "typings/**/*"
   ],
