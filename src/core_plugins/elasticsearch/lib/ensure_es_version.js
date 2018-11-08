@@ -23,6 +23,7 @@
  */
 
 import { forEach, get } from 'lodash';
+import { coerce } from 'semver';
 import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
 
 /**
@@ -37,6 +38,7 @@ const lastWarnedNodesForServer = new WeakMap();
 
 export function ensureEsVersion(server, kibanaVersion) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const isProd = server.config().get('env.prod');
 
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
   return callWithInternalUser('nodes.info', {
@@ -63,9 +65,9 @@ export function ensureEsVersion(server, kibanaVersion) {
         // they are not incompatible, but we should warn about it
         // In development we ignore, this can be expected when testing against snapshots
         // or across version qualifiers
-        const isProd = server.config().get('env.prod');
-        const versionMismatch = esNode.version !== kibanaVersion;
-        if (isProd && versionMismatch) {
+        const exactMisMatch = esNode.version !== kibanaVersion;
+        const looseMismatch = coerce(esNode.version).version !== coerce(kibanaVersion).version;
+        if (isProd && exactMisMatch || looseMismatch) {
           warningNodes.push(esNode);
         }
       });
