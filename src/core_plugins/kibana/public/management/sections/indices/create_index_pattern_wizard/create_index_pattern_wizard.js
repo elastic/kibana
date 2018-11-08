@@ -72,16 +72,28 @@ export class CreateIndexPatternWizard extends Component {
       remoteClustersExist: false
     });
 
-    const [allIndices, remoteClusters] = await ensureMinimumTime([
-      getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE),
-      getRemoteClusters(services.$http)
-    ]);
+    const ignoreErrors = async (asyncFn, errorValue) => {
+      try {
+        return await asyncFn;
+      } catch (errors) {
+        return errorValue;
+      }
+    };
 
-    this.setState({
-      allIndices,
-      isInitiallyLoadingIndices: false,
-      remoteClustersExist: remoteClusters.length !== 0
-    });
+    try {
+      const [allIndices, remoteClusters] = await ensureMinimumTime([
+        ignoreErrors(getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), []),
+        ignoreErrors(getRemoteClusters(services.$http), [])
+      ]);
+
+      this.setState({
+        allIndices,
+        isInitiallyLoadingIndices: false,
+        remoteClustersExist: remoteClusters.length !== 0
+      });
+    } catch (error) {
+      this.setState({ isInitiallyLoadingIndices: false });
+    }
   }
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {

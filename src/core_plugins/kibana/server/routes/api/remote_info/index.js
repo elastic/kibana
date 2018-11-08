@@ -24,6 +24,7 @@
  */
 
 import { callWithRequestFactory } from './call_with_request_factory';
+import handleEsError from '../../../lib/handle_es_error';
 
 async function fetchRemoteClusters(callWithRequest) {
   const options = {
@@ -43,7 +44,7 @@ export function registerClustersRoute(server) {
       try {
         return await fetchRemoteClusters(callWithRequest);
       } catch (error) {
-        return error.body;
+        throw handleEsError(error);
       }
     }
   });
