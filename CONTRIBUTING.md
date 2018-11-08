@@ -22,6 +22,7 @@ A high level overview of our contributing guidelines.
     - [Setting Up SSL](#setting-up-ssl)
   - [Linting](#linting)
   - [Testing and Building](#testing-and-building)
+    - [Debugging server code](#debugging-server-code)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
   - [Cross-browser compatibility](#cross-browser-compatibility)
