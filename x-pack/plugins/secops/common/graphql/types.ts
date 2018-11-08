@@ -524,6 +524,98 @@ export namespace SayMyNameResolvers {
   >;
 }
 
+export namespace GetEventsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+    getEvents?: GetEvents | null;
+  };
+
+  export type GetEvents = {
+    __typename?: 'EventsData';
+    events: Events[];
+    kpiEventType: KpiEventType[];
+  };
+
+  export type Events = {
+    __typename?: 'EventItem';
+    timestamp?: string | null;
+    event?: Event | null;
+    host?: Host | null;
+    source?: _Source | null;
+    destination?: Destination | null;
+    geo?: Geo | null;
+    suricata?: Suricata | null;
+  };
+
+  export type Event = {
+    __typename?: 'EventEcsFields';
+    type?: string | null;
+    severity?: number | null;
+    module?: string | null;
+    category?: string | null;
+    id?: number | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+    hostname?: string | null;
+    ip?: string | null;
+  };
+
+  export type _Source = {
+    __typename?: 'SourceEcsFields';
+    ip?: string | null;
+    port?: number | null;
+  };
+
+  export type Destination = {
+    __typename?: 'DestinationEcsFields';
+    ip?: string | null;
+    port?: number | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+    region_name?: string | null;
+    country_iso_code?: string | null;
+  };
+
+  export type Suricata = {
+    __typename?: 'SuricataEcsFields';
+    eve?: Eve | null;
+  };
+
+  export type Eve = {
+    __typename?: 'SuricataEveData';
+    proto?: string | null;
+    flow_id?: number | null;
+    alert?: Alert | null;
+  };
+
+  export type Alert = {
+    __typename?: 'SuricataAlertData';
+    signature?: string | null;
+    signature_id?: number | null;
+  };
+
+  export type KpiEventType = {
+    __typename?: 'KpiItem';
+    value: string;
+    count: number;
+  };
+}
+
 export namespace WhoAmIQuery {
   export type Variables = {
     sourceId: string;
