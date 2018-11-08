@@ -32,7 +32,7 @@ export function socketApi(server) {
   server.route({
     method: 'POST',
     path: `${API_ROUTE}/ping`,
-    handler: () => 'pong',
+    handler: (req, reply) => reply('pong'),
   });
 
   const io = socket(server.listener, { path: '/socket.io' });
