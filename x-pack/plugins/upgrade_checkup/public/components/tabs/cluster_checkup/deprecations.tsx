@@ -12,17 +12,18 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   IconColor,
 } from '@elastic/eui';
 
+import { filter } from 'rxjs/operators';
 import {
   DeprecationInfo,
   MIGRATION_DEPRECATION_LEVEL as LEVEL,
 } from 'src/core_plugins/elasticsearch';
 import { UpgradeCheckupStatus } from '../../../../server/lib/es_migration_apis';
+import { LevelFilterOption } from './types';
 
 // TODO: use TS enum?
 const LEVEL_MAP = {
@@ -48,6 +49,10 @@ const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
 };
 
+const filterDeps = (level: LevelFilterOption) => (dep: DeprecationInfo) => {
+  return level === LevelFilterOption.all || dep.level === level;
+};
+
 const DeprecationAction: StatelessComponent<{ deprecation: DeprecationInfo }> = ({
   deprecation,
 }) => {
@@ -69,13 +74,17 @@ const DeprecationAction: StatelessComponent<{ deprecation: DeprecationInfo }> = 
 
 interface DeprecationsProps {
   deprecations: DeprecationInfo[];
+  currentFilter: LevelFilterOption;
   emptyMessage?: string;
 }
 
 export const Deprecations: StatelessComponent<DeprecationsProps> = ({
   deprecations,
   emptyMessage,
+  currentFilter,
 }) => {
+  deprecations = deprecations.filter(filterDeps(currentFilter));
+
   if (deprecations.length === 0) {
     return (
       <EuiText color="subdued">
@@ -119,9 +128,13 @@ export const Deprecations: StatelessComponent<DeprecationsProps> = ({
 
 interface IndexDeprecationsProps {
   indices: UpgradeCheckupStatus['indices'];
+  currentFilter: LevelFilterOption;
 }
 
-export const IndexDeprecations: StatelessComponent<IndexDeprecationsProps> = ({ indices }) => {
+export const IndexDeprecations: StatelessComponent<IndexDeprecationsProps> = ({
+  indices,
+  currentFilter,
+}) => {
   if (Object.keys(indices).length === 0) {
     return (
       <EuiText color="subdued">
@@ -138,16 +151,28 @@ export const IndexDeprecations: StatelessComponent<IndexDeprecationsProps> = ({ 
             <h3>{indexName}</h3>
           </EuiText>
           <EuiSpacer size="s" />
-          <Deprecations deprecations={indices[indexName]!.deprecations} />
+          <Deprecations
+            currentFilter={currentFilter}
+            deprecations={indices[indexName]!.deprecations}
+            emptyMessage="No deprecations for this level."
+          />
         </div>
       ))}
     </div>
   );
 };
 
-export const DeprecationSummary: StatelessComponent<{ deprecations: DeprecationInfo[] }> = ({
+interface DeprecationSummaryProps {
+  deprecations: DeprecationInfo[];
+  currentFilter: LevelFilterOption;
+}
+
+export const DeprecationSummary: StatelessComponent<DeprecationSummaryProps> = ({
   deprecations,
+  currentFilter,
 }) => {
+  deprecations = deprecations.filter(filterDeps(currentFilter));
+
   if (deprecations.length === 0) {
     return <EuiHealth color="success">No problems</EuiHealth>;
   }

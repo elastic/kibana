@@ -14,8 +14,10 @@
     border-top-right-radius: 4px;
   }
   &:last-child {
+    @include euiBottomShadowSmall;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
+    margin-bottom: 10px;
   }
 }
 

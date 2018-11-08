@@ -21,17 +21,14 @@ import {
 import chrome from 'ui/chrome';
 
 import { UpgradeCheckupStatus } from '../../../../server/lib/es_migration_apis';
+import { CheckupControls } from './controls';
 import { Deprecations, DeprecationSummary, IndexDeprecations } from './deprecations';
-
-enum LoadingState {
-  Loading,
-  Success,
-  Error,
-}
+import { LevelFilterOption, LoadingState } from './types';
 
 interface ClusterCheckupTabState {
   loadingState: LoadingState;
   checkupData?: UpgradeCheckupStatus;
+  currentFilter: LevelFilterOption;
 }
 
 export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabState> {
@@ -40,9 +37,8 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
 
     this.state = {
       loadingState: LoadingState.Loading,
+      currentFilter: LevelFilterOption.all,
     };
-
-    this.loadData = this.loadData.bind(this);
   }
 
   public componentWillMount() {
@@ -50,7 +46,7 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
   }
 
   public render() {
-    const { loadingState } = this.state;
+    const { currentFilter, loadingState } = this.state;
 
     return (
       <Fragment>
@@ -71,20 +67,19 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiButton
-          onClick={this.loadData}
-          iconType="refresh"
-          isLoading={loadingState === LoadingState.Loading}
-        >
-          {loadingState === LoadingState.Loading ? 'Loading…' : 'Rerun Checkup'}
-        </EuiButton>
+        <CheckupControls
+          loadingState={loadingState}
+          loadData={this.loadData}
+          currentFilter={currentFilter}
+          onFilterChange={this.changeFilter}
+        />
         <EuiSpacer />
         {this.renderCheckupData()}
       </Fragment>
     );
   }
 
-  private async loadData() {
+  private loadData = async () => {
     try {
       this.setState({ loadingState: LoadingState.Loading });
       const resp = await axios.get(chrome.addBasePath('/api/upgrade_checkup/status'));
@@ -93,10 +88,14 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
       // TODO: show error message?
       this.setState({ loadingState: LoadingState.Error });
     }
-  }
+  };
+
+  private changeFilter = (filter: LevelFilterOption) => {
+    this.setState({ currentFilter: filter });
+  };
 
   private renderCheckupData() {
-    const { loadingState, checkupData } = this.state;
+    const { loadingState, checkupData, currentFilter } = this.state;
     switch (loadingState) {
       case LoadingState.Loading:
         return <EuiLoadingSpinner />;
@@ -120,19 +119,24 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
         <EuiAccordion
           id="indexSettings"
           buttonContent="Indices"
-          extraAction={<DeprecationSummary deprecations={allIndexDeps} />}
+          extraAction={
+            <DeprecationSummary currentFilter={currentFilter} deprecations={allIndexDeps} />
+          }
         >
           <EuiSpacer />
-          <IndexDeprecations indices={indices} />
+          <IndexDeprecations currentFilter={currentFilter} indices={indices} />
         </EuiAccordion>
         <EuiSpacer />
         <EuiAccordion
           id="nodeSettings"
           buttonContent="Nodes"
-          extraAction={<DeprecationSummary deprecations={nodes.deprecations} />}
+          extraAction={
+            <DeprecationSummary currentFilter={currentFilter} deprecations={nodes.deprecations} />
+          }
         >
           <EuiSpacer />
           <Deprecations
+            currentFilter={currentFilter}
             deprecations={nodes.deprecations}
             emptyMessage="No node setting deprecations."
           />
@@ -141,10 +145,13 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
         <EuiAccordion
           id="clusterSettings"
           buttonContent="Cluster"
-          extraAction={<DeprecationSummary deprecations={cluster.deprecations} />}
+          extraAction={
+            <DeprecationSummary currentFilter={currentFilter} deprecations={cluster.deprecations} />
+          }
         >
           <EuiSpacer />
           <Deprecations
+            currentFilter={currentFilter}
             deprecations={cluster.deprecations}
             emptyMessage="No cluster setting deprecations."
           />
