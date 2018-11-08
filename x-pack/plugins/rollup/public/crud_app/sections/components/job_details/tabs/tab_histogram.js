@@ -21,7 +21,6 @@ const columns = [{
   field: 'name',
   name: i18n.translate('xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel', {
     defaultMessage: 'Field' }),
-  truncateText: true,
   sortable: true,
 }];
 

@@ -67,7 +67,6 @@ export class StepTermsUi extends Component {
     const columns = [{
       field: 'name',
       name: 'Field',
-      truncateText: true,
       sortable: true,
     }, {
       field: 'type',

@@ -14,7 +14,6 @@ const columns = [{
   field: 'name',
   name: i18n.translate('xpack.rollupJobs.jobDetails.tabMetrics.nameColumnLabel', {
     defaultMessage: 'Field' }),
-  truncateText: true,
   sortable: true,
 }, {
   name: i18n.translate('xpack.rollupJobs.jobDetails.tabMetrics.typesColumnLabel', {
