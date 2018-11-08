@@ -137,7 +137,9 @@ module.directive('vislibValueAxes', function () {
       };
 
       const lastCustomLabels = {};
-      let lastMatchingSeriesAggType = ''; // We track this so we can know when the agg type is changed
+      // We track these so we can know when the agg is changed
+      let lastMatchingSeriesAggType = '';
+      let lastMatchingSeriesAggField = '';
       $scope.updateAxisTitle = function () {
         $scope.editorState.params.valueAxes.forEach((axis, axisNumber) => {
           let newCustomLabel = '';
@@ -161,14 +163,17 @@ module.directive('vislibValueAxes', function () {
           }
 
           const matchingSeriesAggType = _.get(matchingSeries, '[0]type.name', '');
+          const matchingSeriesAggField = _.get(matchingSeries, '[0]params.field.name', '');
 
           if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
             const isFirstRender = Object.keys(lastCustomLabels).length === 0;
             const aggTypeIsChanged = lastMatchingSeriesAggType !== matchingSeriesAggType;
+            const aggFieldIsChanged = lastMatchingSeriesAggField !== matchingSeriesAggField;
+            const aggIsChanged = aggTypeIsChanged || aggFieldIsChanged;
             const axisTitleIsEmpty = axis.title.text === '';
             const lastCustomLabelMatchesAxisTitle = lastCustomLabels[axis.id] === axis.title.text;
 
-            if (!isFirstRender && (aggTypeIsChanged || axisTitleIsEmpty || lastCustomLabelMatchesAxisTitle)) {
+            if (!isFirstRender && (aggIsChanged || axisTitleIsEmpty || lastCustomLabelMatchesAxisTitle)) {
               axis.title.text = newCustomLabel; // Override axis title with new custom label
             }
 
@@ -176,6 +181,7 @@ module.directive('vislibValueAxes', function () {
           }
 
           lastMatchingSeriesAggType = matchingSeriesAggType;
+          lastMatchingSeriesAggField = matchingSeriesAggField;
         });
       };
 
