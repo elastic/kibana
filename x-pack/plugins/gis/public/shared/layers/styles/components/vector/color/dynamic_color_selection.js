@@ -12,7 +12,7 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { ColorGradient } from '../../../icons/color_gradient';
+import { ColorGradient } from '../../../../../icons/color_gradient';
 
 export class DynamicColorSelection extends React.Component {
 

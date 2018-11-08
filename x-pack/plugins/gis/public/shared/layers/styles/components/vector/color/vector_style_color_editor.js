@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { VectorStyle } from '../../vector_style';
+import { VectorStyle } from '../../../vector_style';
 import { DynamicColorSelection } from './dynamic_color_selection';
 import { StaticColorSelection } from './static_color_selection';
 import _ from 'lodash';
