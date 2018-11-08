@@ -7,10 +7,16 @@
 import { fork } from 'redux-saga/effects';
 
 import { watchLoadCommit } from './commit';
-import { watchDocumentSearch } from './document_search';
-import { watchCloseReference, watchLspMethods } from './editor';
-import { watchFetchBranchesAndCommits, watchFetchRepoTree } from './file';
+import { watchDocumentSearch, watchSearchRouteChange } from './document_search';
 import {
+  watchCloseReference,
+  watchLoadRepo,
+  watchLspMethods,
+  watchMainRouteChange,
+} from './editor';
+import { watchFetchBranchesAndCommits, watchFetchRepoTree, watchRepoRouteChange } from './file';
+import {
+  watchAdminRouteChange,
   watchDeleteRepo,
   watchFetchRepoConfigs,
   watchFetchRepos,
@@ -19,14 +25,12 @@ import {
   watchIndexRepo,
   watchInitRepoCmd,
 } from './repository';
-import { watchLoadRepo, watchLocationChange } from './route';
 import { watchLoadStructure } from './structure';
 import { watchSymbolSearchQueryChanged } from './symbol_search';
 import { watchLoadUserConfig } from './user';
 
 export function* rootSaga() {
   yield fork(watchFetchRepos);
-  yield fork(watchLocationChange);
   yield fork(watchDeleteRepo);
   yield fork(watchIndexRepo);
   yield fork(watchImportRepo);
@@ -43,4 +47,9 @@ export function* rootSaga() {
   yield fork(watchLoadRepo);
   yield fork(watchLoadUserConfig);
   yield fork(watchLoadCommit);
+  yield fork(watchSearchRouteChange);
+  yield fork(watchAdminRouteChange);
+  yield fork(watchMainRouteChange);
+  yield fork(watchLoadRepo);
+  yield fork(watchRepoRouteChange);
 }

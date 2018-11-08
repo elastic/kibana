@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import queryString from 'query-string';
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 
@@ -12,7 +13,9 @@ import {
   documentSearchFailed,
   DocumentSearchPayload,
   documentSearchSuccess,
+  Match,
 } from '../actions';
+import { searchRoutePattern } from './patterns';
 
 function requestDocumentSearch(payload: DocumentSearchPayload) {
   const { query, page, languages, repositories } = payload;
@@ -58,4 +61,22 @@ function* handleDocumentSearch(action: Action<DocumentSearchPayload>) {
 
 export function* watchDocumentSearch() {
   yield takeLatest(String(documentSearch), handleDocumentSearch);
+}
+
+function* handleSearchRouteChange(action: Action<Match>) {
+  const { location } = action.payload!;
+  const queryParams = queryString.parse(location.search);
+  const { q, p, langs, repos } = queryParams;
+  yield put(
+    documentSearch({
+      query: q,
+      page: p,
+      languages: langs,
+      repositories: repos,
+    })
+  );
+}
+
+export function* watchSearchRouteChange() {
+  yield takeLatest(searchRoutePattern, handleSearchRouteChange);
 }

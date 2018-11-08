@@ -6,8 +6,8 @@
 import { Action } from 'redux-actions';
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
-import { routeChange } from '../actions';
 import { loadCommit, loadCommitFailed, loadCommitSuccess } from '../actions';
+import { commitRoutePattern } from './patterns';
 
 function requestCommit(repo: string, commitId: string) {
   return kfetch({
@@ -28,5 +28,5 @@ function* handleLoadCommit(action: Action<any>) {
 }
 
 export function* watchLoadCommit() {
-  yield takeEvery(String(routeChange), handleLoadCommit);
+  yield takeEvery(String(commitRoutePattern), handleLoadCommit);
 }

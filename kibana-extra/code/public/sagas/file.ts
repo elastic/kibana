@@ -29,10 +29,13 @@ import {
   fetchRepoTreeFailed,
   FetchRepoTreePayload,
   fetchRepoTreeSuccess,
+  gotoRepo,
+  Match,
   openTreePath,
   setNotFound,
 } from '../actions';
 import { getTree } from '../selectors';
+import { repoRoutePattern } from './patterns';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
@@ -188,4 +191,13 @@ export function* watchFetchBranchesAndCommits() {
   yield takeEvery(String(fetchRepoCommits), handleFetchCommits);
   yield takeLatest(String(fetchFile), handleFetchFile);
   yield takeEvery(String(fetchDirectory), handleFetchDirs);
+}
+
+function* handleRepoRouteChange(action: Action<Match>) {
+  const { url } = action.payload!;
+  yield put(gotoRepo(url));
+}
+
+export function* watchRepoRouteChange() {
+  yield takeEvery(repoRoutePattern, handleRepoRouteChange);
 }

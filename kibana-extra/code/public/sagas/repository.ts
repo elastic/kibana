@@ -25,8 +25,10 @@ import {
   indexRepoFailed,
   indexRepoSuccess,
   initRepoCommand,
+  loadUserConfig,
 } from '../actions';
 import { history } from '../utils/url';
+import { adminRoutePattern } from './patterns';
 
 function requestRepos(): any {
   return kfetch({ pathname: '../api/code/repos' });
@@ -144,4 +146,14 @@ export function* watchInitRepoCmd() {
 
 export function* watchGotoRepo() {
   yield takeLatest(String(gotoRepo), handleGotoRepo);
+}
+
+function* handleAdminRouteChange() {
+  yield put(fetchRepos());
+  yield put(fetchRepoConfigs());
+  yield put(loadUserConfig());
+}
+
+export function* watchAdminRouteChange() {
+  yield takeLatest(adminRoutePattern, handleAdminRouteChange);
 }
