@@ -26,7 +26,7 @@ export function infra(kibana: any) {
         icon: 'plugins/infra/images/infra_mono_white.svg',
         main: 'plugins/infra/app',
         title: i18n.translate('xpack.infra.infraOpsTitle', {
-          defaultMessage: 'InfraOps',
+          defaultMessage: 'Infrastructure',
         }),
         listed: false,
         url: `/app/${APP_ID}#/home`,
@@ -42,7 +42,7 @@ export function infra(kibana: any) {
           id: 'infra:home',
           order: 8000,
           title: i18n.translate('xpack.infra.infraOpsTitle', {
-            defaultMessage: 'InfraOps',
+            defaultMessage: 'Infrastructure',
           }),
           url: `/app/${APP_ID}#/home`,
         },

@@ -107,7 +107,7 @@ class WaffleUI extends React.Component<Props, {}> {
       );
     } else if (!loading && map && map.length === 0) {
       return (
-        <EuiEmptyPrompt
+        <CenteredEmptyPrompt
           title={
             <h2>
               <FormattedMessage
@@ -236,7 +236,7 @@ class WaffleUI extends React.Component<Props, {}> {
 export const Waffle = injectI18n(WaffleUI);
 
 const WaffleMapOuterContiner = styled.div`
-  flex: 1 0 0;
+  flex: 1 0 0%;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -251,4 +251,8 @@ const WaffleMapInnerContainer = styled.div`
   justify-content: center;
   align-content: flex-start;
   padding: 10px;
+`;
+
+const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
+  align-self: center;
 `;

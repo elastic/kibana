@@ -55,13 +55,6 @@ export const ml = {
     });
   },
 
-  forceCloseJob(obj) {
-    return http({
-      url: `${basePath}/anomaly_detectors/${obj.jobId}/_close?force=true`,
-      method: 'POST'
-    });
-  },
-
   deleteJob(obj) {
     return http({
       url: `${basePath}/anomaly_detectors/${obj.jobId}`,
@@ -95,6 +88,14 @@ export const ml = {
   validateJob(obj) {
     return http({
       url: `${basePath}/validate/job`,
+      method: 'POST',
+      data: obj
+    });
+  },
+
+  validateCardinality(obj) {
+    return http({
+      url: `${basePath}/validate/cardinality`,
       method: 'POST',
       data: obj
     });

@@ -15,7 +15,7 @@ const APP_ID = 'infra';
 FeatureCatalogueRegistryProvider.register(() => ({
   id: 'infraops',
   title: i18n.translate('xpack.infra.registerFeatures.infraOpsTitle', {
-    defaultMessage: 'InfraOps',
+    defaultMessage: 'Infrastructure',
   }),
   description: i18n.translate('xpack.infra.registerFeatures.infraOpsDescription', {
     defaultMessage:
