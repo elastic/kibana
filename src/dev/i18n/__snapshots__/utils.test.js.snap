@@ -35,3 +35,8 @@ exports[`i18n utils should throw if some key is missing in "values" 1`] = `
 "some properties are missing in \\"values\\" object (\\"namespace.message.id\\"):
 [password]."
 `;
+
+exports[`i18n utils should throw on wrong nested ICU message 1`] = `
+"\\"values\\" object contains unused properties (\\"namespace.message.id\\"):
+[third]."
+`;

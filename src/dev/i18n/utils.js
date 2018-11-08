@@ -130,6 +130,8 @@ export function createParserErrorMessage(content, error) {
 /**
  * Recursively extracts all references from ICU message ast.
  *
+ * Example: `'Removed tag {tag} from {assignmentsLength, plural, one {beat {beatName}} other {# beats}}.'`
+ *
  * @param {any} node
  * @param {Set<string>} keys
  */
