@@ -5,11 +5,12 @@
  */
 
 import { ConfigurationAdapter } from './configuration';
+import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { SourceConfigurations, Sources } from './sources';
 
 export interface AppDomainLibs {
-  hello: string;
+  events: Events;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {

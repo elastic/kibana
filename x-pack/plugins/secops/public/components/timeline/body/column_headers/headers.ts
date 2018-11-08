@@ -10,13 +10,13 @@ import { ColumnHeader } from './column_header';
 export const DEFAULT_COLUMN_MIN_WIDTH = 100;
 
 /** The default minimum width of the Event column */
-export const DEFAULT_EVENT_COLUMN_WIDTH = 350;
+export const DEFAULT_EVENT_COLUMN_WIDTH = 300;
 
 /** The default column headers */
 export const headers: ColumnHeader[] = [
   {
     columnHeaderType: 'not-filtered',
-    id: 'time',
+    id: 'timestamp',
     minWidth: DEFAULT_COLUMN_MIN_WIDTH,
     text: 'Time',
   },

@@ -7,6 +7,7 @@
 import { Server } from 'hapi';
 
 import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
+import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
 import { Sources } from '../sources';
 import { ConfigurationSourcesAdapter } from '../sources/configuration_sources_adapter';
@@ -18,7 +19,7 @@ export function compose(server: Server): AppBackendLibs {
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
 
   const domainLibs: AppDomainLibs = {
-    hello: '',
+    events: new Events(new ElasticsearchEventsAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {

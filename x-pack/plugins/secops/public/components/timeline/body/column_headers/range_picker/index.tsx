@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSelect } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
 import { OnRangeSelected } from '../../../events';
 import { Range, Ranges } from './ranges';
 
@@ -14,6 +17,14 @@ interface Props {
   onRangeSelected: OnRangeSelected;
 }
 
+export const RangePickerWidth = 110;
+
+// TODO: Upgrade Eui library and use EuiSuperSelect
+const SelectContainer = styled.div`
+  cursor: pointer;
+  width: ${RangePickerWidth}px;
+`;
+
 /** Renders a time range picker for the MiniMap (e.g. 1 Day, 1 Week...) */
 export const RangePicker = pure<Props>(({ selected, onRangeSelected }) => {
   const onChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
@@ -21,19 +32,15 @@ export const RangePicker = pure<Props>(({ selected, onRangeSelected }) => {
   };
 
   return (
-    <select
-      style={{
-        cursor: 'pointer',
-      }}
-      data-test-subj="rangePicker"
-      value={selected}
-      onChange={onChange}
-    >
-      {Ranges.map(range => (
-        <option key={range} value={range}>
-          {range}
-        </option>
-      ))}
-    </select>
+    <SelectContainer>
+      <EuiSelect
+        data-test-subj="rangePicker"
+        value={selected}
+        options={Ranges.map(range => ({
+          text: range,
+        }))}
+        onChange={onChange}
+      />
+    </SelectContainer>
   );
 });

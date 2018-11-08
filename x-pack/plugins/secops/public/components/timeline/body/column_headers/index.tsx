@@ -7,6 +7,8 @@
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
 import { OnColumnSorted, OnFilterChange, OnRangeSelected } from '../../events';
 import { Sort } from '../sort';
 import { ColumnHeader } from './column_header';
@@ -21,32 +23,35 @@ interface Props {
   sort: Sort;
 }
 
+const ColumnHeadersSpan = styled.span`
+  display: flex;
+`;
+
+const ColumnHeaderContainer = styled.div``;
+
+const Flex = styled.div`
+  display: flex;
+  margin-left: 3px;
+  width: 100%;
+`;
+
 /** Renders the timeline header columns */
 export const ColumnHeaders = pure<Props>(
   ({ columnHeaders, onColumnSorted = noop, onFilterChange = noop, onRangeSelected, sort }) => (
-    <div
-      data-test-subj="columnHeaders"
-      style={{
-        display: 'flex',
-      }}
-    >
+    <ColumnHeadersSpan data-test-subj="columnHeaders">
       <RangePicker selected={'1 Day'} onRangeSelected={onRangeSelected} />
-      {columnHeaders.map(header => (
-        <div
-          data-test-subj="columnHeaderContainer"
-          key={header.id}
-          style={{
-            margin: '3px',
-          }}
-        >
-          <Header
-            header={header}
-            onColumnSorted={onColumnSorted}
-            onFilterChange={onFilterChange}
-            sort={sort}
-          />
-        </div>
-      ))}
-    </div>
+      <Flex>
+        {columnHeaders.map(header => (
+          <ColumnHeaderContainer data-test-subj="columnHeaderContainer" key={header.id}>
+            <Header
+              header={header}
+              onColumnSorted={onColumnSorted}
+              onFilterChange={onFilterChange}
+              sort={sort}
+            />
+          </ColumnHeaderContainer>
+        ))}
+      </Flex>
+    </ColumnHeadersSpan>
   )
 );

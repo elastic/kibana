@@ -7,15 +7,18 @@
 import { mount } from 'enzyme';
 import { noop, omit } from 'lodash/fp';
 import * as React from 'react';
+
 import { Timeline } from '.';
+import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
+import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 
 describe('Timeline', () => {
   const sort: Sort = {
-    columnId: 'time',
+    columnId: 'timestamp',
     sortDirection: 'descending',
   };
 
@@ -24,11 +27,14 @@ describe('Timeline', () => {
       const wrapper = mount(
         <Timeline
           columnHeaders={headers}
+          columnRenderers={columnRenderers}
+          data={mockECSData}
           dataProviders={mockDataProviders}
           onColumnSorted={noop}
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          rowRenderers={rowRenderers}
           sort={sort}
           width={1000}
         />
@@ -41,11 +47,14 @@ describe('Timeline', () => {
       const wrapper = mount(
         <Timeline
           columnHeaders={headers}
+          columnRenderers={columnRenderers}
+          data={mockECSData}
           dataProviders={mockDataProviders}
           onColumnSorted={noop}
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          rowRenderers={rowRenderers}
           sort={sort}
           width={1000}
         />
@@ -63,11 +72,14 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
+            data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={mockOnColumnSorted}
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={noop}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -92,11 +104,14 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
+            data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={mockOnDataProviderRemoved}
             onFilterChange={noop}
             onRangeSelected={noop}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -132,11 +147,14 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={allColumnsHaveTextFilters}
+            columnRenderers={columnRenderers}
+            data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={noop}
             onFilterChange={mockOnFilterChange}
             onRangeSelected={noop}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
@@ -144,7 +162,7 @@ describe('Timeline', () => {
 
         wrapper
           .find('[data-test-subj="textFilter"]')
-          .first()
+          .at(2)
           .simulate('change', { target: { value: newFilter } });
 
         expect(mockOnFilterChange).toBeCalledWith({
@@ -162,18 +180,21 @@ describe('Timeline', () => {
         const wrapper = mount(
           <Timeline
             columnHeaders={headers}
+            columnRenderers={columnRenderers}
+            data={mockECSData}
             dataProviders={mockDataProviders}
             onColumnSorted={noop}
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={mockOnRangeSelected}
+            rowRenderers={rowRenderers}
             sort={sort}
             width={1000}
           />
         );
 
         wrapper
-          .find('[data-test-subj="rangePicker"]')
+          .find('[data-test-subj="rangePicker"] select')
           .simulate('change', { target: { value: newSelection } });
 
         expect(mockOnRangeSelected).toBeCalledWith(newSelection);

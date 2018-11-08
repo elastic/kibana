@@ -34,6 +34,7 @@ export interface SourceConfigurations {
 }
 
 export interface SourceConfiguration {
+  fileAlias: string;
   fields: {
     container: string;
     host: string;

@@ -31,29 +31,45 @@ describe('Header', () => {
     test('it renders the header text', () => {
       const wrapper = mount(<Header sort={sort} header={columnHeader} />);
 
-      expect(wrapper.find('[data-test-subj="headerText"]').text()).toEqual(columnHeader.text);
+      expect(
+        wrapper
+          .find('[data-test-subj="headerText"]')
+          .first()
+          .text()
+      ).toEqual(columnHeader.text);
     });
 
     test('it renders a sort indicator', () => {
       const wrapper = mount(<Header sort={sort} header={columnHeader} />);
 
-      expect(wrapper.find('[data-test-subj="sortIndicator"]').text()).toEqual('v');
+      expect(
+        wrapper
+          .find('[data-test-subj="sortIndicator"]')
+          .first()
+          .prop('type')
+      ).toEqual('sortDown');
     });
 
     test('it renders a filter', () => {
       const wrapper = mount(<Header sort={sort} header={columnHeader} />);
 
-      expect(wrapper.find('[data-test-subj="textFilter"]').props()).toHaveProperty('placeholder');
+      expect(
+        wrapper
+          .find('[data-test-subj="textFilter"]')
+          .first()
+          .props()
+      ).toHaveProperty('placeholder');
     });
 
     describe('minWidth', () => {
-      test('it applies the value of the minWidth prop to the headerContainer', () => {
+      test('it applies the value of the minwidth prop to the headerContainer', () => {
         const wrapper = mount(<Header sort={sort} header={columnHeader} />);
-
-        expect(wrapper.find('[data-test-subj="headerContainer"]').prop('style')).toHaveProperty(
-          'minWidth',
-          `${columnHeader.minWidth}px`
-        );
+        expect(
+          wrapper
+            .find('[data-test-subj="headerContainer"]')
+            .first()
+            .props()
+        ).toHaveProperty('minwidth', `${columnHeader.minWidth}px`);
       });
     });
   });
@@ -66,7 +82,10 @@ describe('Header', () => {
         <Header onColumnSorted={mockOnColumnSorted} sort={sort} header={columnHeader} />
       );
 
-      wrapper.find('[data-test-subj="header"]').simulate('click');
+      wrapper
+        .find('[data-test-subj="header"]')
+        .first()
+        .simulate('click');
 
       expect(mockOnColumnSorted).toBeCalledWith({
         columnId: columnHeader.id,

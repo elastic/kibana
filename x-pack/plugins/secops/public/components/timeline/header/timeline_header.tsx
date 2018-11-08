@@ -6,6 +6,8 @@
 
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
 import { OnDataProviderRemoved } from '../events';
@@ -16,16 +18,15 @@ interface Props {
   width: number;
 }
 
+const Header = styled.header<{ width: string }>`
+  display: 'flex';
+  flex-direction: 'column';
+  width: ${props => props.width};
+`;
+
 /** Renders the timeline header */
 export const TimelineHeader = pure<Props>(({ dataProviders, onDataProviderRemoved, width }) => (
-  <header
-    data-test-subj="timelineHeader"
-    style={{
-      display: 'flex',
-      flexDirection: 'column',
-      width: `${width}px`,
-    }}
-  >
+  <Header data-test-subj="timelineHeader" width={`${width}px`}>
     <DataProviders dataProviders={dataProviders} onDataProviderRemoved={onDataProviderRemoved} />
-  </header>
+  </Header>
 ));

@@ -8,9 +8,11 @@
   "devDependencies": {
     "@types/boom": "^7.2.0",
     "@types/color": "^3.0.0",
+    "@types/inline-style-prefixer": "3.0.1",
     "@types/lodash": "^4.14.110"
   },
   "dependencies": {
-    "lodash": "^4.17.10"
+    "lodash": "^4.17.10",
+    "react-split-pane": "^0.1.84"
   }
 }
