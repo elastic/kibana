@@ -150,39 +150,51 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
 export async function migrationsUpToDate(
   callCluster: CallCluster,
   index: string,
-  migrationVersion: MigrationVersion
+  migrationVersion: MigrationVersion,
+  retryCount: number = 10
 ): Promise<boolean> {
-  const indexInfo = await fetchInfo(callCluster, index);
+  try {
+    const indexInfo = await fetchInfo(callCluster, index);
 
-  if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
-    return false;
-  }
+    if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
+      return false;
+    }
 
-  // If no migrations are actually defined, we're up to date!
-  if (Object.keys(migrationVersion).length <= 0) {
-    return true;
-  }
+    // If no migrations are actually defined, we're up to date!
+    if (Object.keys(migrationVersion).length <= 0) {
+      return true;
+    }
 
-  const { count } = await callCluster('count', {
-    body: {
-      query: {
-        bool: {
-          should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
-            bool: {
-              must: [
-                { exists: { field: type } },
-                { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
-              ],
-            },
-          })),
+    const { count } = await callCluster('count', {
+      body: {
+        query: {
+          bool: {
+            should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
+              bool: {
+                must: [
+                  { exists: { field: type } },
+                  { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
+                ],
+              },
+            })),
+          },
         },
       },
-    },
-    index,
-    type: ROOT_TYPE,
-  });
+      index,
+      type: ROOT_TYPE,
+    });
 
-  return count === 0;
+    return count === 0;
+  } catch (e) {
+    // retry for Service Unavailable
+    if (e.status !== 503 || retryCount === 0) {
+      throw e;
+    }
+
+    await new Promise(r => setTimeout(r, 1000));
+
+    return await migrationsUpToDate(callCluster, index, migrationVersion, retryCount - 1);
+  }
 }
 
 /**
