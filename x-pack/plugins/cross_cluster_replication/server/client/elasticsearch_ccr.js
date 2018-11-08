@@ -1,0 +1,21 @@
+/*
+* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+* or more contributor license agreements. Licensed under the Elastic License;
+* you may not use this file except in compliance with the Elastic License.
+*/
+
+export const elasticsearchJsPlugin = (Client, config, components) => {
+  const ca = components.clientAction.factory;
+
+  Client.prototype.ccr = components.clientAction.namespaceFactory();
+  const ccr = Client.prototype.ccr.prototype;
+
+  ccr.autoFollowPatterns = ca({
+    urls: [
+      {
+        fmt: '/_ccr/auto_follow',
+      }
+    ],
+    method: 'GET'
+  });
+};
