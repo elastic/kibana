@@ -19,6 +19,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
       <EuiText
         data-test-subj="confirmModalBodyText"
         grow={true}
+        size="m"
       >
         <p>
           Deleting a space permanently removes the space and
@@ -51,6 +52,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         >
           <EuiText
             grow={true}
+            size="m"
           >
             You are about to delete your current space 
             <span>

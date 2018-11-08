@@ -8,6 +8,7 @@ exports[`render 1`] = `
 >
   <EuiTitle
     size="xs"
+    textTransform="none"
   >
     <h3>
       <EuiTextColor
@@ -88,6 +89,7 @@ exports[`render 1`] = `
           >
             <EuiText
               grow={true}
+              size="m"
             >
               <EuiIcon
                 color="subdued"

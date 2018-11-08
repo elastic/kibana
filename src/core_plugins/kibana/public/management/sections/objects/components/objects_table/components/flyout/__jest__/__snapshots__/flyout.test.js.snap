@@ -14,6 +14,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   >
     <EuiTitle
       size="m"
+      textTransform="none"
     >
       <h2>
         <FormattedMessage
@@ -207,6 +208,7 @@ exports[`Flyout should render import step 1`] = `
   >
     <EuiTitle
       size="m"
+      textTransform="none"
     >
       <h2>
         <FormattedMessage

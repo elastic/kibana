@@ -117,6 +117,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
               >
                 <EuiText
                   grow={true}
+                  size="m"
                 >
                   <p>
                     Imports index pattern, visualizations and pre-defined dashboards.
@@ -191,6 +192,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           <EuiTitle
             className="euiStep__title"
             size="s"
+            textTransform="none"
           >
             <p
               className="euiTitle euiTitle--small euiStep__title"
@@ -222,9 +224,10 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   >
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p>
                           Imports index pattern, visualizations and pre-defined dashboards.
@@ -423,6 +426,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               >
                 <EuiText
                   grow={true}
+                  size="m"
                 >
                   <p>
                     Imports index pattern, visualizations and pre-defined dashboards.
@@ -537,6 +541,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           <EuiTitle
             className="euiStep__title"
             size="s"
+            textTransform="none"
           >
             <p
               className="euiTitle euiTitle--small euiStep__title"
@@ -568,9 +573,10 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   >
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p>
                           Imports index pattern, visualizations and pre-defined dashboards.
@@ -675,6 +681,7 @@ exports[`renders 1`] = `
             >
               <EuiText
                 grow={true}
+                size="m"
               >
                 <p>
                   Imports index pattern, visualizations and pre-defined dashboards.
