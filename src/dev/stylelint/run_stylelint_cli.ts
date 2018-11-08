@@ -17,9 +17,6 @@
  * under the License.
  */
 
-// import { ToolingLog } from '@kbn/dev-utils';
-// import getopts from 'getopts';
-
 export function runStylelintCli() {
   const args = process.argv.slice(2);
   let opts = '**/*.tsx';
