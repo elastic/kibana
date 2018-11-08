@@ -5,7 +5,7 @@
  */
 
 import { mount } from 'enzyme';
-import { noop, omit } from 'lodash/fp';
+import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
 
 import { mockECSData } from '../../pages/mock/mock_ecs';
@@ -32,6 +32,7 @@ describe('Timeline', () => {
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          range={'1 Day'}
           sort={sort}
           width={1000}
         />
@@ -50,6 +51,7 @@ describe('Timeline', () => {
           onDataProviderRemoved={noop}
           onFilterChange={noop}
           onRangeSelected={noop}
+          range={'1 Day'}
           sort={sort}
           width={1000}
         />
@@ -73,6 +75,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={noop}
+            range={'1 Day'}
             sort={sort}
             width={1000}
           />
@@ -103,6 +106,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={mockOnDataProviderRemoved}
             onFilterChange={noop}
             onRangeSelected={noop}
+            range={'1 Day'}
             sort={sort}
             width={1000}
           />
@@ -113,7 +117,10 @@ describe('Timeline', () => {
           .first()
           .simulate('click');
 
-        const callbackParams = omit('render', mockOnDataProviderRemoved.mock.calls[0][0]);
+        const callbackParams = pick(
+          ['enabled', 'id', 'name', 'negated'],
+          mockOnDataProviderRemoved.mock.calls[0][0]
+        );
 
         expect(callbackParams).toEqual({
           enabled: true,
@@ -144,6 +151,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={noop}
             onFilterChange={mockOnFilterChange}
             onRangeSelected={noop}
+            range={'1 Day'}
             sort={sort}
             width={1000}
           />
@@ -175,6 +183,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={mockOnRangeSelected}
+            range={'1 Day'}
             sort={sort}
             width={1000}
           />
