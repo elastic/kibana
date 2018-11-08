@@ -17,7 +17,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.dateHistogramIntervalMissing"
-        defaultMessage="You must provide an interval"
+        defaultMessage="Interval is required."
       />
     )];
   }
@@ -29,7 +29,7 @@ export function validateDateHistogramInterval(dateHistogramInterval) {
       return [(
         <FormattedMessage
           id="xpack.rollupJobs.create.errors.dateHistogramIntervalInvalidFormat"
-          defaultMessage="Invalid interval format"
+          defaultMessage="Invalid interval format."
         />
       )];
     }

@@ -39,10 +39,10 @@ import {
 
 export async function buildProductionProjects({
   kibanaRoot,
-  buildRoot,
+  buildRoots,
 }: {
   kibanaRoot: string;
-  buildRoot: string;
+  buildRoots: string[];
 }) {
   const projects = await getProductionProjects(kibanaRoot);
   const projectGraph = buildProjectGraph(projects);
@@ -55,7 +55,9 @@ export async function buildProductionProjects({
     for (const project of batch) {
       await deleteTarget(project);
       await buildProject(project);
-      await copyToBuild(project, kibanaRoot, buildRoot);
+      for (const buildRoot of buildRoots) {
+        await copyToBuild(project, kibanaRoot, buildRoot);
+      }
     }
   }
 }

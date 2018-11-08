@@ -36,7 +36,7 @@ export function registerSearchRoute(server) {
           return wrapEsError(err);
         }
 
-        wrapUnknownError(err);
+        return wrapUnknownError(err);
       }
     },
   });

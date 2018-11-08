@@ -24,6 +24,7 @@ import { CreateIndexPatternWizard } from '../create_index_pattern_wizard';
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
   getIndexPatternName: () => 'name',
+  getIsBeta: () => false,
   checkIndicesForErrors: () => false,
   getShowSystemIndices: () => false,
   renderPrompt: () => {},

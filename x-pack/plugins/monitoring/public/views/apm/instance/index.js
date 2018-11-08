@@ -11,12 +11,14 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { find, get } from 'lodash';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { ApmServerInstance } from '../../../components/apm/instance';
+import { timefilter } from 'ui/timefilter';
 
 uiRoutes.when('/apm/instances/:uuid', {
   template,
@@ -45,17 +47,26 @@ uiRoutes.when('/apm/instances/:uuid', {
         $injector
       });
 
+      function onBrush({ xaxis }) {
+        timefilter.setTime({
+          from: moment(xaxis.from),
+          to: moment(xaxis.to),
+          mode: 'absolute',
+        });
+      }
+
       $scope.$watch(() => this.data, data => {
         title($scope.cluster, `APM - ${get(data, 'apmSummary.name')}`);
-        this.renderReact(data);
+        this.renderReact(data, onBrush);
       });
     }
 
-    renderReact(data) {
+    renderReact(data, onBrush) {
       const component = (
         <ApmServerInstance
           summary={data.apmSummary || {}}
           metrics={data.metrics || {}}
+          onBrush={onBrush}
         />
       );
       super.renderReact(component);

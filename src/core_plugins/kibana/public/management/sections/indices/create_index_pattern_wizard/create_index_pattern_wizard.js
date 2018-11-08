@@ -131,6 +131,7 @@ export class CreateIndexPatternWizard extends Component {
         isIncludingSystemIndices={isIncludingSystemIndices}
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         indexPatternName={this.indexPatternCreationType.getIndexPatternName()}
+        isBeta={this.indexPatternCreationType.getIsBeta()}
       />
     );
   }

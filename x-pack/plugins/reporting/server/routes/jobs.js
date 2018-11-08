@@ -64,7 +64,7 @@ export function jobs(server) {
     handler: (request) => {
       const { docId } = request.params;
 
-      jobsQuery.get(request.pre.user, docId, { includeContent: true })
+      return jobsQuery.get(request.pre.user, docId, { includeContent: true })
         .then((doc) => {
           if (!doc) {
             return boom.notFound();

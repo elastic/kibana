@@ -46,7 +46,7 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
             expect(firstNode).to.have.property('metric');
             expect(firstNode.metric).to.eql({
               name: 'cpu',
-              value: 0.005833333333333334,
+              value: 0.011,
               __typename: 'InfraNodeMetric',
             });
           }

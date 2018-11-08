@@ -2,6 +2,88 @@
 
 exports[`UploadLicense should display a modal when license requires acknowledgement 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -21,9 +103,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
       isInvalid={false}
       messages={
         Array [
-          "Some functionality will be lost if you replace your 
-        TRIAL license with a
-        BASIC license.  Review the list of features below.",
+          "Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.",
           Array [
             "Watcher will be disabled",
           ],
@@ -40,7 +120,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
         >
-          Upload your license
+          <FormattedMessage
+            defaultMessage="Upload your license"
+            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+            values={Object {}}
+          >
+            Upload your license
+          </FormattedMessage>
         </h1>
       </EuiTitle>
       <EuiSpacer
@@ -71,11 +157,29 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                 <EuiOverlayMask>
                   <EuiConfirmModal
                     buttonColor="primary"
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Confirm"
+                    cancelButtonText={
+                      <FormattedMessage
+                        defaultMessage="Cancel"
+                        id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+                        values={Object {}}
+                      />
+                    }
+                    confirmButtonText={
+                      <FormattedMessage
+                        defaultMessage="Confirm"
+                        id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+                        values={Object {}}
+                      />
+                    }
                     onCancel={[Function]}
                     onConfirm={[Function]}
-                    title="Confirm License Upload"
+                    title={
+                      <FormattedMessage
+                        defaultMessage="Confirm License Upload"
+                        id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+                        values={Object {}}
+                      />
+                    }
                   >
                     <EuiModal
                       className="euiModal--confirmation"
@@ -176,7 +280,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                       className="euiModalHeader__title"
                                       data-test-subj="confirmModalTitleText"
                                     >
-                                      Confirm License Upload
+                                      <FormattedMessage
+                                        defaultMessage="Confirm License Upload"
+                                        id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+                                        values={Object {}}
+                                      >
+                                        Confirm License Upload
+                                      </FormattedMessage>
                                     </div>
                                   </EuiModalHeaderTitle>
                                 </div>
@@ -200,9 +310,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                           <div
                                             className="euiText"
                                           >
-                                            Some functionality will be lost if you replace your 
-        TRIAL license with a
-        BASIC license.  Review the list of features below.
+                                            Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
                                           </div>
                                         </EuiText>
                                         <EuiText
@@ -249,7 +357,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         <span
                                           className="euiButtonEmpty__text"
                                         >
-                                          Cancel
+                                          <FormattedMessage
+                                            defaultMessage="Cancel"
+                                            id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+                                            values={Object {}}
+                                          >
+                                            Cancel
+                                          </FormattedMessage>
                                         </span>
                                       </span>
                                     </button>
@@ -275,7 +389,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         <span
                                           className="euiButton__text"
                                         >
-                                          Confirm
+                                          <FormattedMessage
+                                            defaultMessage="Confirm"
+                                            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+                                            values={Object {}}
+                                          >
+                                            Confirm
+                                          </FormattedMessage>
                                         </span>
                                       </span>
                                     </button>
@@ -296,13 +416,30 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                     className="euiText"
                   >
                     <p>
-                      Your license key is a JSON file with a signature attached.
+                      <FormattedMessage
+                        defaultMessage="Your license key is a JSON file with a signature attached."
+                        id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
+                        values={Object {}}
+                      >
+                        Your license key is a JSON file with a signature attached.
+                      </FormattedMessage>
                     </p>
                     <p>
-                      Uploading a license will replace your current
-                       
-                      <strong />
-                       license.
+                      <FormattedMessage
+                        defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
+                        id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
+                        values={
+                          Object {
+                            "currentLicenseType": <strong>
+                              
+                            </strong>,
+                          }
+                        }
+                      >
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
+                      </FormattedMessage>
                     </p>
                   </div>
                 </EuiText>
@@ -329,7 +466,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         <EuiFilePicker
                           compressed={false}
                           id="licenseFile"
-                          initialPromptText="Select or drag your license file"
+                          initialPromptText={
+                            <FormattedMessage
+                              defaultMessage="Select or drag your license file"
+                              id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                              values={Object {}}
+                            />
+                          }
                           onChange={[Function]}
                         >
                           <div
@@ -393,7 +536,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                 <div
                                   className="euiFilePicker__promptText"
                                 >
-                                  Select or drag your license file
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
+                                  >
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
                               </div>
                             </div>
@@ -451,7 +600,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
-                                    Cancel
+                                    <FormattedMessage
+                                      defaultMessage="Cancel"
+                                      id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Cancel
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </a>
@@ -486,7 +641,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                   <span
                                     className="euiButton__text"
                                   >
-                                    Upload
+                                    <FormattedMessage
+                                      defaultMessage="Upload"
+                                      id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Upload
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </button>
@@ -509,6 +670,88 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
 
 exports[`UploadLicense should display an error when ES says license is expired 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -537,7 +780,13 @@ exports[`UploadLicense should display an error when ES says license is expired 1
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
         >
-          Upload your license
+          <FormattedMessage
+            defaultMessage="Upload your license"
+            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+            values={Object {}}
+          >
+            Upload your license
+          </FormattedMessage>
         </h1>
       </EuiTitle>
       <EuiSpacer
@@ -572,13 +821,30 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                     className="euiText"
                   >
                     <p>
-                      Your license key is a JSON file with a signature attached.
+                      <FormattedMessage
+                        defaultMessage="Your license key is a JSON file with a signature attached."
+                        id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
+                        values={Object {}}
+                      >
+                        Your license key is a JSON file with a signature attached.
+                      </FormattedMessage>
                     </p>
                     <p>
-                      Uploading a license will replace your current
-                       
-                      <strong />
-                       license.
+                      <FormattedMessage
+                        defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
+                        id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
+                        values={
+                          Object {
+                            "currentLicenseType": <strong>
+                              
+                            </strong>,
+                          }
+                        }
+                      >
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
+                      </FormattedMessage>
                     </p>
                   </div>
                 </EuiText>
@@ -646,11 +912,17 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         <EuiFilePicker
                           compressed={false}
                           id="licenseFile"
-                          initialPromptText="Select or drag your license file"
+                          initialPromptText={
+                            <FormattedMessage
+                              defaultMessage="Select or drag your license file"
+                              id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                              values={Object {}}
+                            />
+                          }
                           onChange={[Function]}
                         >
                           <div
-                            className="euiFilePicker"
+                            className="euiFilePicker euiFilePicker-hasFiles"
                           >
                             <div
                               className="euiFilePicker__wrap"
@@ -710,8 +982,40 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                 <div
                                   className="euiFilePicker__promptText"
                                 >
-                                  Select or drag your license file
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
+                                  >
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
+                                <EuiButtonEmpty
+                                  aria-label="Clear selected files"
+                                  className="euiFilePicker__clearButton"
+                                  color="primary"
+                                  iconSide="left"
+                                  onClick={[Function]}
+                                  size="xs"
+                                  type="button"
+                                >
+                                  <button
+                                    aria-label="Clear selected files"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                    onClick={[Function]}
+                                    type="button"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        className="euiButtonEmpty__text"
+                                      >
+                                        Remove
+                                      </span>
+                                    </span>
+                                  </button>
+                                </EuiButtonEmpty>
                               </div>
                             </div>
                           </div>
@@ -768,7 +1072,13 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
-                                    Cancel
+                                    <FormattedMessage
+                                      defaultMessage="Cancel"
+                                      id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Cancel
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </a>
@@ -803,7 +1113,13 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                   <span
                                     className="euiButton__text"
                                   >
-                                    Upload
+                                    <FormattedMessage
+                                      defaultMessage="Upload"
+                                      id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Upload
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </button>
@@ -826,6 +1142,88 @@ exports[`UploadLicense should display an error when ES says license is expired 1
 
 exports[`UploadLicense should display an error when ES says license is invalid 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -854,7 +1252,13 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
         >
-          Upload your license
+          <FormattedMessage
+            defaultMessage="Upload your license"
+            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+            values={Object {}}
+          >
+            Upload your license
+          </FormattedMessage>
         </h1>
       </EuiTitle>
       <EuiSpacer
@@ -889,13 +1293,30 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                     className="euiText"
                   >
                     <p>
-                      Your license key is a JSON file with a signature attached.
+                      <FormattedMessage
+                        defaultMessage="Your license key is a JSON file with a signature attached."
+                        id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
+                        values={Object {}}
+                      >
+                        Your license key is a JSON file with a signature attached.
+                      </FormattedMessage>
                     </p>
                     <p>
-                      Uploading a license will replace your current
-                       
-                      <strong />
-                       license.
+                      <FormattedMessage
+                        defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
+                        id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
+                        values={
+                          Object {
+                            "currentLicenseType": <strong>
+                              
+                            </strong>,
+                          }
+                        }
+                      >
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
+                      </FormattedMessage>
                     </p>
                   </div>
                 </EuiText>
@@ -963,11 +1384,17 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         <EuiFilePicker
                           compressed={false}
                           id="licenseFile"
-                          initialPromptText="Select or drag your license file"
+                          initialPromptText={
+                            <FormattedMessage
+                              defaultMessage="Select or drag your license file"
+                              id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                              values={Object {}}
+                            />
+                          }
                           onChange={[Function]}
                         >
                           <div
-                            className="euiFilePicker"
+                            className="euiFilePicker euiFilePicker-hasFiles"
                           >
                             <div
                               className="euiFilePicker__wrap"
@@ -1027,8 +1454,40 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                 <div
                                   className="euiFilePicker__promptText"
                                 >
-                                  Select or drag your license file
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
+                                  >
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
+                                <EuiButtonEmpty
+                                  aria-label="Clear selected files"
+                                  className="euiFilePicker__clearButton"
+                                  color="primary"
+                                  iconSide="left"
+                                  onClick={[Function]}
+                                  size="xs"
+                                  type="button"
+                                >
+                                  <button
+                                    aria-label="Clear selected files"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                    onClick={[Function]}
+                                    type="button"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        className="euiButtonEmpty__text"
+                                      >
+                                        Remove
+                                      </span>
+                                    </span>
+                                  </button>
+                                </EuiButtonEmpty>
                               </div>
                             </div>
                           </div>
@@ -1085,7 +1544,13 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
-                                    Cancel
+                                    <FormattedMessage
+                                      defaultMessage="Cancel"
+                                      id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Cancel
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </a>
@@ -1120,7 +1585,13 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                   <span
                                     className="euiButton__text"
                                   >
-                                    Upload
+                                    <FormattedMessage
+                                      defaultMessage="Upload"
+                                      id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Upload
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </button>
@@ -1143,6 +1614,88 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
 
 exports[`UploadLicense should display an error when submitting invalid JSON 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -1171,7 +1724,13 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
         >
-          Upload your license
+          <FormattedMessage
+            defaultMessage="Upload your license"
+            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+            values={Object {}}
+          >
+            Upload your license
+          </FormattedMessage>
         </h1>
       </EuiTitle>
       <EuiSpacer
@@ -1206,13 +1765,30 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                     className="euiText"
                   >
                     <p>
-                      Your license key is a JSON file with a signature attached.
+                      <FormattedMessage
+                        defaultMessage="Your license key is a JSON file with a signature attached."
+                        id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
+                        values={Object {}}
+                      >
+                        Your license key is a JSON file with a signature attached.
+                      </FormattedMessage>
                     </p>
                     <p>
-                      Uploading a license will replace your current
-                       
-                      <strong />
-                       license.
+                      <FormattedMessage
+                        defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
+                        id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
+                        values={
+                          Object {
+                            "currentLicenseType": <strong>
+                              
+                            </strong>,
+                          }
+                        }
+                      >
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
+                      </FormattedMessage>
                     </p>
                   </div>
                 </EuiText>
@@ -1280,11 +1856,17 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         <EuiFilePicker
                           compressed={false}
                           id="licenseFile"
-                          initialPromptText="Select or drag your license file"
+                          initialPromptText={
+                            <FormattedMessage
+                              defaultMessage="Select or drag your license file"
+                              id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                              values={Object {}}
+                            />
+                          }
                           onChange={[Function]}
                         >
                           <div
-                            className="euiFilePicker"
+                            className="euiFilePicker euiFilePicker-hasFiles"
                           >
                             <div
                               className="euiFilePicker__wrap"
@@ -1344,8 +1926,40 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                 <div
                                   className="euiFilePicker__promptText"
                                 >
-                                  Select or drag your license file
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
+                                  >
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
+                                <EuiButtonEmpty
+                                  aria-label="Clear selected files"
+                                  className="euiFilePicker__clearButton"
+                                  color="primary"
+                                  iconSide="left"
+                                  onClick={[Function]}
+                                  size="xs"
+                                  type="button"
+                                >
+                                  <button
+                                    aria-label="Clear selected files"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                    onClick={[Function]}
+                                    type="button"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        className="euiButtonEmpty__text"
+                                      >
+                                        Remove
+                                      </span>
+                                    </span>
+                                  </button>
+                                </EuiButtonEmpty>
                               </div>
                             </div>
                           </div>
@@ -1402,7 +2016,13 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
-                                    Cancel
+                                    <FormattedMessage
+                                      defaultMessage="Cancel"
+                                      id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Cancel
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </a>
@@ -1437,7 +2057,13 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                   <span
                                     className="euiButton__text"
                                   >
-                                    Upload
+                                    <FormattedMessage
+                                      defaultMessage="Upload"
+                                      id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Upload
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </button>
@@ -1460,6 +2086,88 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
 
 exports[`UploadLicense should display error when ES returns error 1`] = `
 <Provider
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   store={
     Object {
       "dispatch": [Function],
@@ -1488,7 +2196,13 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
         <h1
           className="euiTitle euiTitle--large eui-textCenter"
         >
-          Upload your license
+          <FormattedMessage
+            defaultMessage="Upload your license"
+            id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+            values={Object {}}
+          >
+            Upload your license
+          </FormattedMessage>
         </h1>
       </EuiTitle>
       <EuiSpacer
@@ -1523,13 +2237,30 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                     className="euiText"
                   >
                     <p>
-                      Your license key is a JSON file with a signature attached.
+                      <FormattedMessage
+                        defaultMessage="Your license key is a JSON file with a signature attached."
+                        id="xpack.licenseMgmt.uploadLicense.licenseKeyTypeDescription"
+                        values={Object {}}
+                      >
+                        Your license key is a JSON file with a signature attached.
+                      </FormattedMessage>
                     </p>
                     <p>
-                      Uploading a license will replace your current
-                       
-                      <strong />
-                       license.
+                      <FormattedMessage
+                        defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
+                        id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
+                        values={
+                          Object {
+                            "currentLicenseType": <strong>
+                              
+                            </strong>,
+                          }
+                        }
+                      >
+                        Uploading a license will replace your current 
+                        <strong />
+                         license.
+                      </FormattedMessage>
                     </p>
                   </div>
                 </EuiText>
@@ -1597,11 +2328,17 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         <EuiFilePicker
                           compressed={false}
                           id="licenseFile"
-                          initialPromptText="Select or drag your license file"
+                          initialPromptText={
+                            <FormattedMessage
+                              defaultMessage="Select or drag your license file"
+                              id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                              values={Object {}}
+                            />
+                          }
                           onChange={[Function]}
                         >
                           <div
-                            className="euiFilePicker"
+                            className="euiFilePicker euiFilePicker-hasFiles"
                           >
                             <div
                               className="euiFilePicker__wrap"
@@ -1661,8 +2398,40 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                 <div
                                   className="euiFilePicker__promptText"
                                 >
-                                  Select or drag your license file
+                                  <FormattedMessage
+                                    defaultMessage="Select or drag your license file"
+                                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                                    values={Object {}}
+                                  >
+                                    Select or drag your license file
+                                  </FormattedMessage>
                                 </div>
+                                <EuiButtonEmpty
+                                  aria-label="Clear selected files"
+                                  className="euiFilePicker__clearButton"
+                                  color="primary"
+                                  iconSide="left"
+                                  onClick={[Function]}
+                                  size="xs"
+                                  type="button"
+                                >
+                                  <button
+                                    aria-label="Clear selected files"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFilePicker__clearButton"
+                                    onClick={[Function]}
+                                    type="button"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        className="euiButtonEmpty__text"
+                                      >
+                                        Remove
+                                      </span>
+                                    </span>
+                                  </button>
+                                </EuiButtonEmpty>
                               </div>
                             </div>
                           </div>
@@ -1719,7 +2488,13 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                   <span
                                     className="euiButtonEmpty__text"
                                   >
-                                    Cancel
+                                    <FormattedMessage
+                                      defaultMessage="Cancel"
+                                      id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Cancel
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </a>
@@ -1754,7 +2529,13 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                   <span
                                     className="euiButton__text"
                                   >
-                                    Upload
+                                    <FormattedMessage
+                                      defaultMessage="Upload"
+                                      id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
+                                      values={Object {}}
+                                    >
+                                      Upload
+                                    </FormattedMessage>
                                   </span>
                                 </span>
                               </button>

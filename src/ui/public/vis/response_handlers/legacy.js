@@ -76,8 +76,8 @@ const LegacyResponseHandlerProvider = function () {
               const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
               aggConfigResult.rawData = {
                 table: table,
-                columnIndex: table.columns.findIndex(c => c.id === column.id),
-                rowIndex: rowIndex,
+                column: table.columns.findIndex(c => c.id === column.id),
+                row: rowIndex,
               };
               if (column.aggConfig.type.type === 'buckets') {
                 previousSplitAgg = aggConfigResult;

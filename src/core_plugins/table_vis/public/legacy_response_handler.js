@@ -52,9 +52,15 @@ export function splitTable(columns, rows, $parent) {
     return [{
       $parent,
       columns: columns.map(column => ({ title: column.name, ...column })),
-      rows: rows.map(row => {
+      rows: rows.map((row, rowIndex) => {
         return columns.map(column => {
-          return new AggConfigResult(column.aggConfig, $parent, row[column.id], row[column.id]);
+          const aggConfigResult = new AggConfigResult(column.aggConfig, $parent, row[column.id], row[column.id]);
+          aggConfigResult.rawData = {
+            table: { columns, rows },
+            column: columns.findIndex(c => c.id === column.id),
+            row: rowIndex,
+          };
+          return aggConfigResult;
         });
       })
     }];
