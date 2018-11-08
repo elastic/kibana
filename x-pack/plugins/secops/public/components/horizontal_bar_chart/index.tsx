@@ -35,14 +35,14 @@ export const HorizontalBarChart = pure<HorizontalBarChartProps>(
     return loading ? (
       <LoadingPanel height="100%" width="100%" text="Loading data" />
     ) : (
-      <div>
+      <React.Fragment>
         <EuiTitle size="s">
           <h3>{title}</h3>
         </EuiTitle>
         <EuiSeriesChart width={width} height={height} yType="ordinal" orientation="horizontal">
           <EuiBarSeries name="Tag counts" data={barChartdata} />
         </EuiSeriesChart>
-      </div>
+      </React.Fragment>
     );
   }
 );
