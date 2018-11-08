@@ -87,7 +87,7 @@ export const Deprecations: StatelessComponent<DeprecationsProps> = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       {deprecations.sort(sortByLevelDesc).map(dep => (
-        <EuiFlexItem className="upgrade-checkup__deprecation-cell">
+        <EuiFlexItem className="upgrade-checkup__deprecation-cell" key={dep.message}>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow>
               <EuiText>
@@ -133,7 +133,7 @@ export const IndexDeprecations: StatelessComponent<IndexDeprecationsProps> = ({ 
   return (
     <div>
       {Object.keys(indices).map(indexName => (
-        <div>
+        <div key={indexName}>
           <EuiText className="upgrade-checkup__index-deprecation-header">
             <h3>{indexName}</h3>
           </EuiText>

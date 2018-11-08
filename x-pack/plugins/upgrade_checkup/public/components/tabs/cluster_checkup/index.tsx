@@ -10,8 +10,11 @@ import React, { Fragment } from 'react';
 import {
   // @ts-ignore
   EuiAccordion,
+  EuiButton,
+  EuiCallOut,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -38,18 +41,17 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
     this.state = {
       loadingState: LoadingState.Loading,
     };
+
+    this.loadData = this.loadData.bind(this);
   }
 
-  public async componentWillMount() {
-    try {
-      const resp = await axios.get(chrome.addBasePath('/api/upgrade_checkup/status'));
-      this.setState({ loadingState: LoadingState.Success, checkupData: resp.data });
-    } catch (e) {
-      this.setState({ loadingState: LoadingState.Error });
-    }
+  public componentWillMount() {
+    return this.loadData();
   }
 
   public render() {
+    const { loadingState } = this.state;
+
     return (
       <Fragment>
         <EuiSpacer />
@@ -57,9 +59,40 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
           <h3>Cluster Checkup</h3>
         </EuiTitle>
         <EuiSpacer />
+        <EuiText>
+          <p>
+            This tool runs a series of checks against your Elasticsearch cluster, nodes, and indices
+            to determine whether you can upgrade directly to Elasticsearch version 7, or whether you
+            need to make changes to your data before doing so.
+          </p>
+          <p>
+            You will also see deprecated cluster settings and node settings, deprecated plugins, and
+            indices with deprecated mappings currently in use.
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiButton
+          onClick={this.loadData}
+          iconType="refresh"
+          isLoading={loadingState === LoadingState.Loading}
+        >
+          {loadingState === LoadingState.Loading ? 'Loading…' : 'Rerun Checkup'}
+        </EuiButton>
+        <EuiSpacer />
         {this.renderCheckupData()}
       </Fragment>
     );
+  }
+
+  private async loadData() {
+    try {
+      this.setState({ loadingState: LoadingState.Loading });
+      const resp = await axios.get(chrome.addBasePath('/api/upgrade_checkup/status'));
+      this.setState({ loadingState: LoadingState.Success, checkupData: resp.data });
+    } catch (e) {
+      // TODO: show error message?
+      this.setState({ loadingState: LoadingState.Error });
+    }
   }
 
   private renderCheckupData() {
@@ -68,7 +101,11 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
       case LoadingState.Loading:
         return <EuiLoadingSpinner />;
       case LoadingState.Error:
-        return <h2>Something went wrong!</h2>;
+        return (
+          <EuiCallOut title="Sorry, there was an error" color="danger" iconType="cross">
+            <p>There was a network error retrieving the checkup results.</p>
+          </EuiCallOut>
+        );
       case LoadingState.Success:
         break;
     }
