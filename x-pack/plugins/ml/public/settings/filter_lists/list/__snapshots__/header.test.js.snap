@@ -30,6 +30,7 @@ exports[`Filter Lists Header renders header 1`] = `
         >
           <EuiTitle
             size="m"
+            textTransform="none"
           >
             <h1>
               Filter Lists
@@ -88,6 +89,7 @@ exports[`Filter Lists Header renders header 1`] = `
   />
   <EuiText
     grow={true}
+    size="m"
   >
     <p>
       <EuiTextColor

@@ -7,7 +7,6 @@
 // TODO: Remove once typescript definitions are in EUI
 declare module '@elastic/eui' {
   export const EuiCopy: React.SFC<any>;
-  export const EuiForm: React.SFC<any>;
 }
 
 import { EuiButton, EuiCopy, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';

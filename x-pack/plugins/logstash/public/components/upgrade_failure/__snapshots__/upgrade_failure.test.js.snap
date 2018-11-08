@@ -75,6 +75,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                   >
                     <EuiTitle
                       size="m"
+                      textTransform="none"
                     >
                       <UpgradeFailureTitle
                         className="euiTitle euiTitle--medium"
@@ -153,6 +154,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                               >
                                 <EuiTitle
                                   size="m"
+                                  textTransform="none"
                                 >
                                   <h2
                                     className="euiTitle euiTitle--medium"
@@ -175,9 +177,10 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                     </EuiSpacer>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p
                           style={
@@ -374,6 +377,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                   >
                     <EuiTitle
                       size="m"
+                      textTransform="none"
                     >
                       <UpgradeFailureTitle
                         className="euiTitle euiTitle--medium"
@@ -452,6 +456,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                               >
                                 <EuiTitle
                                   size="m"
+                                  textTransform="none"
                                 >
                                   <h2
                                     className="euiTitle euiTitle--medium"
@@ -474,9 +479,10 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                     </EuiSpacer>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p
                           style={
@@ -673,6 +679,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                   >
                     <EuiTitle
                       size="m"
+                      textTransform="none"
                     >
                       <UpgradeFailureTitle
                         className="euiTitle euiTitle--medium"
@@ -751,6 +758,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                               >
                                 <EuiTitle
                                   size="m"
+                                  textTransform="none"
                                 >
                                   <h2
                                     className="euiTitle euiTitle--medium"
@@ -773,9 +781,10 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                     </EuiSpacer>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p
                           style={
