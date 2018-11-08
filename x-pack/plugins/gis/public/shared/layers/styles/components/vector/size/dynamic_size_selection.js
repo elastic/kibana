@@ -7,7 +7,7 @@
 import React from 'react';
 
 import {
-  EuiComboBox
+
 } from '@elastic/eui';
 
 export class DynamicSizeSelection extends React.Component {
