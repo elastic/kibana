@@ -23,4 +23,4 @@ export const EnforceSecurityPage = injectI18n(({ intl }) => (
       />
     </p>
   </NoDataLayout>
-);
+));
