@@ -23,7 +23,7 @@
  */
 
 import { forEach, get } from 'lodash';
-import isEsCompatibleWithKibana from './is_es_compatible_with_kibana';
+import { versionsMatch } from './version_match';
 
 /**
  * tracks the node descriptions that get logged in warnings so
@@ -37,6 +37,9 @@ const lastWarnedNodesForServer = new WeakMap();
 
 export function ensureEsVersion(server, kibanaVersion) {
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const config = server.config();
+  const warnPrecision = config.get('elasticsearch.version.warn');
+  const errorPrecision = config.get('elasticsearch.version.error');
 
   server.log(['plugin', 'debug'], 'Checking Elasticsearch version');
   return callWithInternalUser('nodes.info', {
@@ -54,18 +57,11 @@ export function ensureEsVersion(server, kibanaVersion) {
       const warningNodes = [];
 
       forEach(info.nodes, esNode => {
-        if (!isEsCompatibleWithKibana(esNode.version, kibanaVersion)) {
+        if (!versionsMatch(esNode.version, kibanaVersion, errorPrecision)) {
         // Exit early to avoid collecting ES nodes with newer major versions in the `warningNodes`.
           return incompatibleNodes.push(esNode);
         }
-
-        // It's acceptable if ES and Kibana versions are not the same so long as
-        // they are not incompatible, but we should warn about it
-        // In development we ignore, this can be expected when testing against snapshots
-        // or across version qualifiers
-        const isProd = server.config().get('env.prod');
-        const versionMismatch = esNode.version !== kibanaVersion;
-        if (isProd && versionMismatch) {
+        if (!versionsMatch(esNode.version, kibanaVersion, warnPrecision)) {
           warningNodes.push(esNode);
         }
       });

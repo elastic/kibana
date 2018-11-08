@@ -44,6 +44,7 @@ export default function (kibana) {
         alwaysPresentCertificate: Joi.boolean().default(false),
       }).default();
 
+      const versionSchema = Joi.string().valid('major', 'minor', 'patch', 'exact', 'off');
       return Joi.object({
         enabled: Joi.boolean().default(true),
         url: Joi.string().uri({ scheme: ['http', 'https'] }).default('http://localhost:9200'),
@@ -62,6 +63,14 @@ export default function (kibana) {
         healthCheck: Joi.object({
           delay: Joi.number().default(2500)
         }).default(),
+        version: Joi.object({
+          warn: Joi.when('$dev', {
+            is: true,
+            then: versionSchema.default('patch'),
+            otherwise: versionSchema.default('exact')
+          }),
+          error: versionSchema.default('major')
+        }).default()
       }).default();
     },
 
