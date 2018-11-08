@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import Keys from 'leadfoot/keys';
-
 export function FilterBarProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
