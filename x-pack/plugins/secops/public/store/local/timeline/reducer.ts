@@ -9,8 +9,17 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { filter } from 'lodash/fp';
 import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
+import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { ECS } from '../../../components/timeline/ecs';
-import { createTimeline, removeProvider, updateData, updateRange, updateSort } from './actions';
+import {
+  addProvider,
+  createTimeline,
+  removeProvider,
+  updateData,
+  updateProviders,
+  updateRange,
+  updateSort,
+} from './actions';
 import { timelineDefaults, TimelineModel } from './model';
 
 /** A map of id to timeline  */
@@ -42,6 +51,38 @@ const addNewTimeline = ({ id, timelineById }: AddNewTimelineParams): TimelineByI
   },
 });
 
+interface AddTimelineProviderParams {
+  id: string;
+  provider: DataProvider;
+  timelineById: TimelineById;
+}
+
+const addTimelineProvider = ({
+  id,
+  provider,
+  timelineById,
+}: AddTimelineProviderParams): TimelineById => {
+  const timeline = timelineById[id];
+  const alreadyExistsAtIndex = timeline.dataProviders.findIndex(p => p.id === provider.id);
+
+  const dataProviders =
+    alreadyExistsAtIndex > -1
+      ? [
+          ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
+          provider,
+          ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
+        ]
+      : [...timeline.dataProviders, provider];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders,
+    },
+  };
+};
+
 interface UpdateTimelineDataParams {
   id: string;
   data: ECS[];
@@ -55,6 +96,28 @@ const updateTimelineData = ({ id, data, timelineById }: UpdateTimelineDataParams
     [id]: {
       ...timeline,
       data,
+    },
+  };
+};
+
+interface UpdateTimelineProvidersParams {
+  id: string;
+  providers: DataProvider[];
+  timelineById: TimelineById;
+}
+
+const updateTimelineProviders = ({
+  id,
+  providers,
+  timelineById,
+}: UpdateTimelineProvidersParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      dataProviders: providers,
     },
   };
 };
@@ -124,6 +187,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addNewTimeline({ id, timelineById: state.timelineById }),
   }))
+  .case(addProvider, (state, { id, provider }) => ({
+    ...state,
+    timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
+  }))
   .case(removeProvider, (state, { id, providerId }) => ({
     ...state,
     timelineById: removeTimelineProvider({ id, providerId, timelineById: state.timelineById }),
@@ -131,6 +198,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(updateData, (state, { id, data }) => ({
     ...state,
     timelineById: updateTimelineData({ id, data, timelineById: state.timelineById }),
+  }))
+  .case(updateProviders, (state, { id, providers }) => ({
+    ...state,
+    timelineById: updateTimelineProviders({ id, providers, timelineById: state.timelineById }),
   }))
   .case(updateRange, (state, { id, range }) => ({
     ...state,

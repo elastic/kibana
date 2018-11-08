@@ -36,9 +36,17 @@ interface StateProps {
 
 interface DispatchProps {
   createTimeline: ActionCreator<{ id: string }>;
+  addProvider: ActionCreator<{
+    id: string;
+    provider: DataProvider;
+  }>;
   updateData: ActionCreator<{
     id: string;
     data: ECS[];
+  }>;
+  updateProviders: ActionCreator<{
+    id: string;
+    providers: DataProvider[];
   }>;
   updateRange: ActionCreator<{
     id: string;
@@ -124,8 +132,10 @@ const mapStateToProps = (state: State, { id }: OwnProps) => {
 export const StatefulTimeline = connect(
   mapStateToProps,
   {
+    addProvider: timelineActions.addProvider,
     createTimeline: timelineActions.createTimeline,
     updateData: timelineActions.updateData,
+    updateProviders: timelineActions.updateProviders,
     updateRange: timelineActions.updateRange,
     updateSort: timelineActions.updateSort,
     removeProvider: timelineActions.removeProvider,
