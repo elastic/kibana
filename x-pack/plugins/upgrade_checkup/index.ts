@@ -14,6 +14,7 @@ export function upgradeCheckup(kibana: any) {
     require: ['elasticsearch'],
     uiExports: {
       managementSections: ['plugins/upgrade_checkup'],
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
     publicDir: resolve(__dirname, 'public'),
 

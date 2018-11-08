@@ -22,7 +22,7 @@ import {
   DeprecationInfo,
   MIGRATION_DEPRECATION_LEVEL as LEVEL,
 } from 'src/core_plugins/elasticsearch';
-import { UpgradeCheckupStatus } from '../../../server/lib/es_migration_apis';
+import { UpgradeCheckupStatus } from '../../../../server/lib/es_migration_apis';
 
 // TODO: use TS enum?
 const LEVEL_MAP = {
@@ -48,16 +48,22 @@ const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
 };
 
-const renderAction = (dep: DeprecationInfo) => {
-  const action = ACTION_MAP[dep.level];
+const DeprecationAction: StatelessComponent<{ deprecation: DeprecationInfo }> = ({
+  deprecation,
+}) => {
+  const action = ACTION_MAP[deprecation.level];
   if (action) {
-    return [
-      <EuiSpacer size="m" />,
-      <EuiText>
-        <h6>Action</h6>
-        <p>{action}</p>
-      </EuiText>,
-    ];
+    return (
+      <div>
+        <EuiSpacer size="m" />
+        <EuiText>
+          <h6>Action</h6>
+          <p>{action}</p>
+        </EuiText>
+      </div>
+    );
+  } else {
+    return null;
   }
 };
 
@@ -79,36 +85,35 @@ export const Deprecations: StatelessComponent<DeprecationsProps> = ({
   }
 
   return (
-    <div>
-      {deprecations
-        .sort(sortByLevelDesc)
-        .map(dep => [
-          <EuiPanel paddingSize="s">
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow>
-                <EuiText>
-                  <h4>
-                    <EuiIcon type="dot" color={COLOR_MAP[dep.level]} /> {dep.message}
-                  </h4>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" href={dep.url} target="_blank">
-                  Read Documentation
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {renderAction(dep)}
-            <EuiSpacer size="m" />
-            <EuiText color="subdued">
-              <h6>Details</h6>
-              <p>{dep.details}</p>
-            </EuiText>
-          </EuiPanel>,
-          <EuiSpacer size="s" />,
-        ])
-        .flat()}
-    </div>
+    <EuiFlexGroup direction="column" gutterSize="none">
+      {deprecations.sort(sortByLevelDesc).map(dep => (
+        <EuiFlexItem className="upgrade-checkup__deprecation-cell">
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow>
+              <EuiText>
+                <h4>
+                  <EuiIcon type="dot" color={COLOR_MAP[dep.level]} /> {dep.message}
+                </h4>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" href={dep.url} target="_blank">
+                Read Documentation
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <DeprecationAction deprecation={dep} />
+
+          <EuiSpacer size="m" />
+
+          <EuiText color="subdued">
+            <h6>Details</h6>
+            <p>{dep.details}</p>
+          </EuiText>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };
 
@@ -129,7 +134,7 @@ export const IndexDeprecations: StatelessComponent<IndexDeprecationsProps> = ({ 
     <div>
       {Object.keys(indices).map(indexName => (
         <div>
-          <EuiText>
+          <EuiText className="upgrade-checkup__index-deprecation-header">
             <h3>{indexName}</h3>
           </EuiText>
           <EuiSpacer size="s" />
