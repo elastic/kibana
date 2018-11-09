@@ -24,7 +24,7 @@ import BaseOptimizer from '../base_optimizer';
 
 import { createBundlesRoute } from '../bundles_route';
 
-const STATUS = {
+export const STATUS = {
   RUNNING: 'optimizer running',
   SUCCESS: 'optimizer completed successfully',
   FAILURE: 'optimizer failed with stats',
