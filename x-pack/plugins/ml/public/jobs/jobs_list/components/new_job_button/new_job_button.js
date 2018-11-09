@@ -15,6 +15,7 @@ import './styles/main.less';
 import {
   EuiButton,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function newJob() {
   window.location.href = `#/jobs/new_job`;
@@ -30,7 +31,10 @@ export function NewJobButton() {
       fill
     >
       <i className="new-job-button fa fa-plus" />
-      Create new job
+      <FormattedMessage
+        id="xpack.ml.jobsList.createNewJobButtonLabel"
+        defaultMessage="Create new job"
+      />
     </EuiButton>
   );
 }

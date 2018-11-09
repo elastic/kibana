@@ -20,8 +20,9 @@ import {
 
 import '../styles/main.less';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class JobDetails extends Component {
+class JobDetailsUI extends Component {
   constructor(props) {
     super(props);
 
@@ -116,7 +117,10 @@ export class JobDetails extends Component {
         <EuiSpacer size="m" />
         <EuiForm>
           <EuiFormRow
-            label="Job description"
+            label={(<FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.jobDetails.jobDescriptionLabel"
+              defaultMessage="Job description"
+            />)}
           >
             <EuiFieldText
               value={description}
@@ -124,12 +128,18 @@ export class JobDetails extends Component {
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Job groups"
+            label={(<FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.jobDetails.jobGroupsLabel"
+              defaultMessage="Job groups"
+            />)}
             isInvalid={(groupsValidationError !== '')}
             error={groupsValidationError}
           >
             <EuiComboBox
-              placeholder="Select or create groups"
+              placeholder={this.props.intl.formatMessage({
+                id: 'xpack.ml.jobsList.editJobFlyout.jobDetails.jobGroupsPlaceholder',
+                defaultMessage: 'Select or create groups'
+              })}
               options={groups}
               selectedOptions={selectedGroups}
               onChange={this.onGroupsChange}
@@ -140,7 +150,10 @@ export class JobDetails extends Component {
             />
           </EuiFormRow>
           <EuiFormRow
-            label="Model memory limit"
+            label={(<FormattedMessage
+              id="xpack.ml.jobsList.editJobFlyout.jobDetails.modelMemoryLimitLabel"
+              defaultMessage="Model memory limit"
+            />)}
             isInvalid={(mmlValidationError !== '')}
             error={mmlValidationError}
           >
@@ -156,9 +169,11 @@ export class JobDetails extends Component {
     );
   }
 }
-JobDetails.propTypes = {
+JobDetailsUI.propTypes = {
   jobDescription: PropTypes.string.isRequired,
   jobGroups: PropTypes.array.isRequired,
   jobModelMemoryLimit: PropTypes.string.isRequired,
   setJobDetails: PropTypes.func.isRequired,
 };
+
+export const JobDetails = injectI18n(JobDetailsUI);

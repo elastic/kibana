@@ -34,8 +34,9 @@ import {
   isValidCustomUrls } from '../validate_job';
 import { mlMessageBarService } from '../../../../components/messagebar/messagebar_service';
 import { toastNotifications } from 'ui/notify';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export class EditJobFlyout extends Component {
+class EditJobFlyoutUI extends Component {
   constructor(props) {
     super(props);
 
@@ -187,13 +188,21 @@ export class EditJobFlyout extends Component {
 
     saveJob(this.state.job, newJobData)
       .then(() => {
-        toastNotifications.addSuccess(`Changes to ${this.state.job.job_id} saved`);
+        toastNotifications.addSuccess(this.props.intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.changesSavedNotificationMessage',
+          defaultMessage: 'Changes to {jobId} saved' }, {
+          jobId: this.state.job.job_id }
+        ));
         this.refreshJobs();
         this.closeFlyout();
       })
       .catch((error) => {
         console.error(error);
-        toastNotifications.addDanger(`Could not save changes to ${this.state.job.job_id}`);
+        toastNotifications.addDanger(this.props.intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.changesNotSavedNotificationMessage',
+          defaultMessage: 'Could not save changes to {jobId}' }, {
+          jobId: this.state.job.job_id }
+        ));
         mlMessageBarService.notify.error(error);
       });
   }
@@ -221,9 +230,14 @@ export class EditJobFlyout extends Component {
         isValidJobCustomUrls,
       } = this.state;
 
+      const { intl } = this.props;
+
       const tabs = [{
         id: 'job-details',
-        name: 'Job details',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.jobDetailsTitle',
+          defaultMessage: 'Job details'
+        }),
         content: <JobDetails
           jobDescription={jobDescription}
           jobGroups={jobGroups}
@@ -234,7 +248,10 @@ export class EditJobFlyout extends Component {
         />,
       }, {
         id: 'detectors',
-        name: 'Detectors',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.detectorsTitle',
+          defaultMessage: 'Detectors'
+        }),
         content: <Detectors
           jobDetectors={jobDetectors}
           jobDetectorDescriptions={jobDetectorDescriptions}
@@ -242,7 +259,10 @@ export class EditJobFlyout extends Component {
         />,
       }, {
         id: 'datafeed',
-        name: 'Datafeed',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.datafeedTitle',
+          defaultMessage: 'Datafeed'
+        }),
         content: <Datafeed
           datafeedQuery={datafeedQuery}
           datafeedQueryDelay={datafeedQueryDelay}
@@ -253,7 +273,10 @@ export class EditJobFlyout extends Component {
         />,
       }, {
         id: 'custom-urls',
-        name: 'Custom URLs',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.customUrlsTitle',
+          defaultMessage: 'Custom URLs'
+        }),
         content: <CustomUrls
           job={job}
           jobCustomUrls={jobCustomUrls}
@@ -271,7 +294,11 @@ export class EditJobFlyout extends Component {
           <EuiFlyoutHeader>
             <EuiTitle>
               <h2>
-                Edit {job.id}
+                <FormattedMessage
+                  id="xpack.ml.jobsList.editJobFlyout.pageTitle"
+                  defaultMessage="Edit {jobId}"
+                  values={{ jobId: job.id }}
+                />
               </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
@@ -292,7 +319,10 @@ export class EditJobFlyout extends Component {
                   onClick={this.closeFlyout}
                   flush="left"
                 >
-                  Close
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.editJobFlyout.closeButtonLabel"
+                    defaultMessage="Close"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -301,7 +331,10 @@ export class EditJobFlyout extends Component {
                   fill
                   isDisabled={(isValidJobDetails === false) || (isValidJobCustomUrls === false)}
                 >
-                  Save
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.editJobFlyout.saveButtonLabel"
+                    defaultMessage="Save"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -319,9 +352,11 @@ export class EditJobFlyout extends Component {
   }
 }
 
-EditJobFlyout.propTypes = {
+EditJobFlyoutUI.propTypes = {
   setShowFunction: PropTypes.func.isRequired,
   unsetShowFunction: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
   allJobIds: PropTypes.array.isRequired,
 };
+
+export const EditJobFlyout = injectI18n(EditJobFlyoutUI);
