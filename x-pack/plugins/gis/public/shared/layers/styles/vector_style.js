@@ -6,7 +6,6 @@
 
 import React, { Fragment } from 'react';
 import { VectorStyleColorEditor } from './components/vector/color/vector_style_color_editor';
-import { VectorStyleColorEditorTmp } from './components/vector/color/vector_style_color_editor_tmp';
 import { VectorStyleSizeEditor } from './components/vector/size/vector_style_size_editor';
 
 import {
@@ -17,9 +16,6 @@ import { FillableCircle, FillableVector } from '../../icons/additional_layer_ico
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import _ from 'lodash';
-
-
-
 
 const DEFAULT_COLOR = '#e6194b';
 
@@ -64,14 +60,7 @@ export class VectorStyle {
       <Fragment>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            {/*<VectorStyleColorEditor*/}
-            {/*property={'fillColor'}*/}
-            {/*name={"Fill color"}*/}
-            {/*handlePropertyChange={handlePropertyChange}*/}
-            {/*colorStyleDescriptor={properties.fillColor}*/}
-            {/*layer={layer}*/}
-            {/*/>*/}
-            <VectorStyleColorEditorTmp
+            <VectorStyleColorEditor
               styleProperty={'fillColor'}
               stylePropertyName={"Fill color"}
               handlePropertyChange={handlePropertyChange}
@@ -81,10 +70,10 @@ export class VectorStyle {
           </EuiFlexItem>
           <EuiFlexItem>
             <VectorStyleColorEditor
-              property={'lineColor'}
-              name={"Line color"}
+              styleProperty={'lineColor'}
+              stylePropertyName={"Line color"}
               handlePropertyChange={handlePropertyChange}
-              colorStyleDescriptor={properties.lineColor}
+              styleDescriptor={properties.lineColor}
               layer={layer}
             />
           </EuiFlexItem>

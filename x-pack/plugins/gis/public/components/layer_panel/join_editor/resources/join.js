@@ -149,8 +149,6 @@ export class Join extends React.Component {
 
     this._loadStringFields();
 
-    // console.log(this.state);
-
     return (
       <EuiFlexGroup className="gisJoinItem" responsive={false} wrap={true} gutterSize="s">
         <EuiFlexItem grow={false}>
