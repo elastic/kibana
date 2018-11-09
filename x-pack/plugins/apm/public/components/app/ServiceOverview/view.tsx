@@ -4,40 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { STATUS } from '../../../constants';
-import { isEmpty } from 'lodash';
-import { loadAgentStatus } from '../../../services/rest/apm';
-import { ServiceList } from './ServiceList';
 import { EuiSpacer } from '@elastic/eui';
+import React, { Component } from 'react';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { loadAgentStatus } from '../../../services/rest/apm';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
-import EmptyMessage from '../../shared/EmptyMessage';
+import { EmptyMessage } from '../../shared/EmptyMessage';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
+import { ServiceList } from './ServiceList';
 
-export class ServiceOverview extends Component {
-  state = {
-    historicalDataFound: true
-  };
+interface Props {
+  urlParams: IUrlParams;
+}
 
-  async checkForHistoricalData({ serviceList }) {
-    if (serviceList.status === STATUS.SUCCESS && isEmpty(serviceList.data)) {
-      const result = await loadAgentStatus();
-      if (!result.dataFound) {
-        this.setState({ historicalDataFound: false });
-      }
-    }
+interface State {
+  historicalDataFound: boolean;
+}
+
+export class ServiceOverview extends Component<Props, State> {
+  public state = { historicalDataFound: true };
+
+  public async checkForHistoricalData() {
+    const result = await loadAgentStatus();
+    this.setState({ historicalDataFound: result.dataFound });
   }
 
-  componentDidMount() {
-    this.checkForHistoricalData(this.props);
+  public componentDidMount() {
+    this.checkForHistoricalData();
   }
 
-  componentDidUpdate() {
-    // QUESTION: Do we want to check on ANY update, or only if serviceList status/data have changed?
-    this.checkForHistoricalData(this.props);
-  }
-
-  render() {
+  public render() {
     const { urlParams } = this.props;
     const { historicalDataFound } = this.state;
 
