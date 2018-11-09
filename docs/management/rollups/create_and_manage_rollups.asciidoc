@@ -19,7 +19,7 @@ Visualize and view it in a dashboard
 === Create and manage rollup jobs
 
 In Management, you'll find a UI for viewing, creating, starting, stopping, and 
-deleting rollup jobs. A rollup job is a periodic task that aggregates data from 
+deleting rollup jobs. A rollup job is a periodic task that summarizes data from 
 indices specified by an index pattern and rolls it into a new index. To navigate 
 to the UI, go to *Management*, and under *Elasticsearch*, click *Rollup Jobs*. 
 
@@ -32,7 +32,7 @@ image::images/management_rollup_list.png[][List of currently active rollup jobs]
 
 {kib} makes it easy for you to create a rollup job by walking you through the 
 process step by step. The first step is to define the job logistics. These include 
-the name of the rollup job, the index to summarize, and the output rollup index.  
+the name of the rollup job, the index or indices to summarize, and the output rollup index.  
 
 The index pattern cannot match the name of the output rollup index. For example,
 if your index pattern is `metricbeat-*`, you cannot name your rollup index
@@ -43,7 +43,7 @@ rollup index.
 image::images/management_create_rollup_job.png[][Wizard that walks you through creation of a rollup job]
 
 You must set a schedule for the rollup job: how often to collect the data, 
-the number of documents to roll up at a time, and the interval between data rollups. 
+the number of documents to roll up at a time, and the duration of its latency. 
 The latency buffer field is provided to protect against the late arrival of data 
 from Beats or other sources. By delaying the rollup for the specified amount of 
 time from when the job starts, you allow for the inclusion of late-arriving data 

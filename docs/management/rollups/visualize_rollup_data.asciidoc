@@ -17,7 +17,7 @@ image::images/management_create_rollup_menu.png[Create index pattern menu]
 You can match an index pattern to only rolled up data, or mix both rolled up 
 and raw data to visualize all data together.  An index 
 pattern can match only one rolled up index, not multiple. There is no restriction 
-on the number of standard indices. To match multiple indices, use a comma 
+on the number of standard indices that an index pattern can match. To match multiple indices, use a comma 
 to separate the names, with no space after the comma. 
 
 When creating an index pattern, you’re asked to set a time field for filtering.  
