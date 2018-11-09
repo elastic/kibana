@@ -29,9 +29,11 @@ export class DynamicColorSelection extends React.Component {
     this.setState({
       comboBoxOptions: selectedOptions
     });
-    const { selectedColorRamp } = this.state;
-    if (selectedOptions && selectedOptions.length && selectedColorRamp) {
-      this.props.onChange(selectedOptions[0], selectedColorRamp);
+    if (selectedOptions && selectedOptions.length) {
+      this.props.onChange({
+        field: selectedOptions[0] ? selectedOptions[0].value : undefined,
+        color: this.state.selectedColorRamp ? this.state.selectedColorRamp : null
+      });
     }
   };
 
@@ -41,7 +43,10 @@ export class DynamicColorSelection extends React.Component {
     });
     const { comboBoxOptions } = this.state;
     if (comboBoxOptions && comboBoxOptions.length && selectedColorRampString) {
-      this.props.onChange(comboBoxOptions[0], selectedColorRampString);
+      this.props.onChange({
+        field: comboBoxOptions[0] ? comboBoxOptions[0].value : undefined,
+        color: selectedColorRampString
+      });
     }
   };
 

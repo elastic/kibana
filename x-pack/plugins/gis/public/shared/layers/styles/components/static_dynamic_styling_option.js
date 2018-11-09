@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { VectorStyle } from '../vector_style';
+import _ from 'lodash';
 
 import {
   EuiFlexGroup,
@@ -21,26 +22,86 @@ export class StaticDynamicStyleSelector extends React.Component {
 
   constructor() {
     super();
+    this._isMounted = false;
     this.state = {
-      type: VectorStyle.STYLE_TYPE.STATIC
+      styleDescriptor: VectorStyle.STYLE_TYPE.STATIC,
+      ordinalFields: null
     };
   }
 
   _isDynamic() {
-    return this.state.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+    if (!this.props.styleDescriptor) {
+      return false;
+    }
+    return this.props.styleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadOrdinalFields();
+  }
+
+  async _loadOrdinalFields() {
+    const ordinalFields = await this.props.layer.getOrdinalFields();
+    if (!this._isMounted) {
+      return;
+    }
+    //check if fields are the same..
+    const eqls = _.isEqual(ordinalFields, this.state.ordinalFields);
+    if (!eqls) {
+      this.setState({
+        ordinalFields: ordinalFields
+      });
+    }
   }
 
   _renderStaticAndDynamicStyles() {
 
-    const onTypeToggle = (e) => {
-      const styleType = e.target.checked ? VectorStyle.STYLE_TYPE.DYNAMIC : VectorStyle.STYLE_TYPE.STATIC;
-      this.setState({
-        type: styleType
-      });
+    const changeStyle = (type, newOptions) => {
+      const styleDescriptor = {
+        type: type,
+        options: newOptions
+      };
+      this.props.handlePropertyChange(this.props.property, styleDescriptor);
     };
 
-    const Selector = this._isDynamic() ? this.props.DynamicSelector : this.props.StaticSelector;
-    const styleSelector = <Selector/>;
+    const changeToDynamicStyle = (newOptions) => {
+      changeStyle(VectorStyle.STYLE_TYPE.DYNAMIC, newOptions);
+    };
+
+    const changeToStaticStyle = (newOptions) => {
+      changeStyle(VectorStyle.STYLE_TYPE.STATIC, newOptions);
+    };
+
+    const onTypeToggle = (e) => {
+      const selectdStyleType = e.target.checked ? VectorStyle.STYLE_TYPE.DYNAMIC : VectorStyle.STYLE_TYPE.STATIC;
+      const lastOptions = selectdStyleType === VectorStyle.STYLE_TYPE.DYNAMIC ? this._lastDynamicOptions : this._lastStaticOptions;
+      changeStyle(selectdStyleType, lastOptions);
+    };
+
+    let styleSelector;
+    const currentOptions = (this.props.styleDescriptor && this.props.styleDescriptor.options) ? this.props.styleDescriptor.options : null;
+    if (this._isDynamic()) {
+      this._lastDynamicOptions = currentOptions;
+      if (this.state.ordinalFields !== null) {
+        const Selector = this.props.DynamicSelector;
+        styleSelector = (<Selector
+          fields={this.state.ordinalFields}
+          onChange={changeToDynamicStyle}
+          selectedOptions={currentOptions}
+        />);
+      } else {
+        styleSelector = null;
+      }
+    } else {
+      this._lastStaticOptions = currentOptions;
+      const Selector = this.props.StaticSelector;
+      styleSelector = <Selector changeOptions={changeToStaticStyle} selectedOptions={currentOptions}/>;
+    }
 
     return (
       <div>
@@ -65,9 +126,8 @@ export class StaticDynamicStyleSelector extends React.Component {
     );
   }
 
-
   render() {
-    return (this._renderStaticAndDynamicStyles());
+    return this._renderStaticAndDynamicStyles();
   }
 
 }

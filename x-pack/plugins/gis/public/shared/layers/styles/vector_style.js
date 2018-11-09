@@ -6,6 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { VectorStyleColorEditor } from './components/vector/color/vector_style_color_editor';
+import { VectorStyleSizeEditor } from './components/vector/size/vector_style_size_editor';
 
 import {
   EuiFlexGroup,
@@ -15,8 +16,6 @@ import { FillableCircle, FillableVector } from '../../icons/additional_layer_ico
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import _ from 'lodash';
-import { VectorStyleSizeEditor } from './components/vector/size/vector_style_size_editor';
-
 
 const DEFAULT_COLOR = '#e6194b';
 
@@ -62,8 +61,8 @@ export class VectorStyle {
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <VectorStyleColorEditor
-              property={'fillColor'}
-              name={"Fill color"}
+              styleProperty={'fillColor'}
+              stylePropertyName={"Fill color"}
               handlePropertyChange={handlePropertyChange}
               colorStyleDescriptor={properties.fillColor}
               layer={layer}
@@ -71,15 +70,21 @@ export class VectorStyle {
           </EuiFlexItem>
           <EuiFlexItem>
             <VectorStyleColorEditor
-              property={'lineColor'}
-              name={"Line color"}
+              styleProperty={'lineColor'}
+              stylePropertyName={"Line color"}
               handlePropertyChange={handlePropertyChange}
               colorStyleDescriptor={properties.lineColor}
               layer={layer}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <VectorStyleSizeEditor />
+            <VectorStyleSizeEditor
+              styleProperty={'lineWidth'}
+              stylePropertyName={"Line width"}
+              handlePropertyChange={handlePropertyChange}
+              styleDescriptor={properties.lineWidth}
+              layer={layer}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>
@@ -129,7 +134,7 @@ export class VectorStyle {
   })();
 
   getColorRamp() {
-    const { color } = this._descriptor.properties.fillColor.options;
+    const color = _.get(this._descriptor, 'properties.fillColor.options.color');
     return color && this._isPropertyDynamic('fillColor')
       ? <ColorGradient color={color}/>
       : null;

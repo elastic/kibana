@@ -23,9 +23,11 @@ export class VectorStyleSizeEditor extends React.Component {
 
   render() {
     return (<StaticDynamicStyleSelector
-      property={'Line width'}
-      name={"Line width"}
-      handlePropertyChange={() => {console.warn('stub - must implement property changes');}}
+      layer={this.props.layer}
+      property={this.props.styleProperty}
+      name={this.props.stylePropertyName}
+      styleDescriptor={this.props.styleDescriptor}
+      handlePropertyChange={this.props.handlePropertyChange}
       DynamicSelector={DynamicSizeSelection}
       StaticSelector={StaticSizeSelection}
     />);
