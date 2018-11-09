@@ -18,9 +18,11 @@ export interface DataProvider {
    */
   enabled: boolean;
   /**
-   * Returns a query that, when executed, returns the data for this provider
+   * Returns a Component query that, when executed, returns the data for this provider
    */
-  getQuery: () => string;
+  componentQuery: React.ReactNode;
+  componentQueryProps: {};
+  componentResultParam: string;
   /**
    * When `true`, boolean logic is applied to the data provider to negate it.
    * default: `false`
