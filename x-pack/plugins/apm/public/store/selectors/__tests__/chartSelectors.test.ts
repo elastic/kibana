@@ -5,12 +5,16 @@
  */
 
 import {
+  getAnomalyBoundaryValues,
   getAnomalyScoreValues,
   getResponseTimeSeries,
-  getTpmSeries,
-  getAnomalyBoundaryValues
+  getTpmSeries
 } from '../chartSelectors';
 
+import {
+  AvgAnomalyBuckets,
+  TimeSeriesResponse
+} from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
 import anomalyData from './mockData/anomalyData.json';
 
 describe('chartSelectors', () => {
@@ -39,7 +43,7 @@ describe('chartSelectors', () => {
         {
           anomalyScore: 0
         }
-      ];
+      ] as AvgAnomalyBuckets[];
 
       expect(getAnomalyScoreValues(dates, buckets, 1000)).toEqual([
         { x: 1000, y: 1 },
@@ -58,11 +62,10 @@ describe('chartSelectors', () => {
       responseTimes: {
         avg: [100, 200, 150, 250, 100, 50],
         p95: [200, 300, 250, 350, 200, 150],
-        p99: [300, 400, 350, 450, 100, 50],
-        avgAnomalies: {}
+        p99: [300, 400, 350, 450, 100, 50]
       },
       overallAvgDuration: 200
-    };
+    } as TimeSeriesResponse;
 
     it('should match snapshot', () => {
       expect(getResponseTimeSeries(chartsData)).toMatchSnapshot();
@@ -93,7 +96,7 @@ describe('chartSelectors', () => {
           values: [0, 1, 2, 1, 0, 2]
         }
       ]
-    };
+    } as TimeSeriesResponse;
 
     const transactionType = 'MyTransactionType';
 
@@ -129,9 +132,9 @@ describe('chartSelectors', () => {
 
       expect(secondLastBuckets.y).toBe(lastBucket.y);
       expect(secondLastBuckets.y0).toBe(lastBucket.y0);
-      expect(lastBucket.x - secondLastBuckets.x).toBeLessThanOrEqual(
-        bucketSpan
-      );
+      expect(
+        (lastBucket.x as number) - (secondLastBuckets.x as number)
+      ).toBeLessThanOrEqual(bucketSpan);
     });
   });
 });

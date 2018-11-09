@@ -5,8 +5,8 @@
  */
 
 import { getAvgResponseTimeAnomalies } from '../get_avg_response_time_anomalies';
-import mainBucketsResponse from './mockData/mainBucketsResponse';
-import firstBucketsResponse from './mockData/firstBucketsResponse';
+import firstBucketsResponse from './mockData/firstBucketsResponse.json';
+import mainBucketsResponse from './mockData/mainBucketsResponse.json';
 
 describe('get_avg_response_time_anomalies', () => {
   it('', async () => {
@@ -32,23 +32,23 @@ describe('get_avg_response_time_anomalies', () => {
       bucketSpanAsMillis: 10800000,
       buckets: [
         {
-          anomaly_score: null,
+          anomalyScore: null,
           lower: 17688.182675688193,
           upper: 50381.01051622894
         },
-        { anomaly_score: null, lower: null, upper: null },
+        { anomalyScore: null, lower: null, upper: null },
         {
-          anomaly_score: 0,
+          anomalyScore: 0,
           lower: 16034.081569306454,
           upper: 54158.77731018045
         },
-        { anomaly_score: null, lower: null, upper: null },
+        { anomalyScore: null, lower: null, upper: null },
         {
-          anomaly_score: 0,
+          anomalyScore: 0,
           lower: 16034.081569306454,
           upper: 54158.77731018045
         },
-        { anomaly_score: null, lower: null, upper: null }
+        { anomalyScore: null, lower: null, upper: null }
       ]
     });
   });

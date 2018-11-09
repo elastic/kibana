@@ -291,7 +291,7 @@ export async function loadErrorGroupDetails({
       camelcase: false
     }
   );
-  const camelizedRes = camelizeKeys(res);
+  const camelizedRes: any = camelizeKeys(res);
   if (res.error.context) {
     camelizedRes.error.context = res.error.context;
   }

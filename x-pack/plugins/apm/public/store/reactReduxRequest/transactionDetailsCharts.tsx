@@ -5,36 +5,44 @@
  */
 
 import React from 'react';
+import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import { getCharts } from '../selectors/chartSelectors';
-import { getUrlParams } from '../urlParams';
-import { Request } from 'react-redux-request';
+import { TimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
 import { loadCharts } from '../../services/rest/apm';
-import { createInitialDataSelector } from './helpers';
+import { IReduxState } from '../rootReducer';
+import { getCharts } from '../selectors/chartSelectors';
+import { getUrlParams, IUrlParams } from '../urlParams';
 
 const ID = 'transactionDetailsCharts';
 const INITIAL_DATA = {
   totalHits: 0,
   dates: [],
-  responseTimes: {},
+  responseTimes: {
+    avg: [],
+    p95: [],
+    p99: []
+  },
   tpmBuckets: [],
-  overallAvgDuration: null
+  overallAvgDuration: undefined
 };
-
-const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export const getTransactionDetailsCharts = createSelector(
   getUrlParams,
-  state => withInitialData(state.reactReduxRequest[ID]),
-  (urlParams, detailCharts) => {
+  (state: IReduxState) => state.reactReduxRequest[ID],
+  (urlParams, detailCharts = {}) => {
     return {
       ...detailCharts,
-      data: getCharts(urlParams, detailCharts.data)
+      data: getCharts(urlParams, detailCharts.data || INITIAL_DATA)
     };
   }
 );
 
-export function TransactionDetailsChartsRequest({ urlParams, render }) {
+interface Props {
+  urlParams: IUrlParams;
+  render: RRRRender<TimeSeriesResponse>;
+}
+
+export function TransactionDetailsChartsRequest({ urlParams, render }: Props) {
   const {
     serviceName,
     start,

@@ -12,7 +12,9 @@ test('getAnomalyAggs should swallow HTTP errors', () => {
   httpError.statusCode = 418;
   const failClient = jest.fn(() => Promise.reject(httpError));
 
-  return expect(getAnomalyAggs({ client: failClient })).resolves.toEqual(null);
+  return expect(getAnomalyAggs({ client: failClient } as any)).resolves.toEqual(
+    null
+  );
 });
 
 test('getAnomalyAggs should throw other errors', () => {
@@ -22,6 +24,6 @@ test('getAnomalyAggs should throw other errors', () => {
   return expect(
     getAnomalyAggs({
       client: failClient
-    })
+    } as any)
   ).rejects.toThrow(otherError);
 });

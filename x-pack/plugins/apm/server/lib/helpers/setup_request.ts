@@ -28,13 +28,16 @@ declare module 'hapi' {
   }
 }
 
-type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
+export type ESClient<T> = (
+  type: string,
+  params: SearchParams
+) => SearchResponse<T>;
 
 export interface Setup<T = any> {
   start: number;
   end: number;
-  esFilterQuery: any;
-  client: Client<T>;
+  esFilterQuery?: any;
+  client: ESClient<T>;
   config: KibanaConfig;
 }
 
