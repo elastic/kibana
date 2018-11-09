@@ -50,7 +50,6 @@ export class ESSearchSource extends VectorSource {
       showTooltip: _.get(descriptor, 'showTooltip', false),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
     });
-    window._ess = this;
   }
 
   async getNumberFields() {

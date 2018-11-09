@@ -86,6 +86,15 @@ export class VectorStyle {
               layer={layer}
             />
           </EuiFlexItem>
+          <EuiFlexItem>
+            <VectorStyleSizeEditor
+              styleProperty={'iconSize'}
+              stylePropertyName={"Icon size"}
+              handlePropertyChange={handlePropertyChange}
+              styleDescriptor={properties.iconSize}
+              layer={layer}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>
     );
@@ -252,10 +261,15 @@ export class VectorStyle {
       const color = this._getMBColor('lineColor');
       mbMap.setPaintProperty(lineLayerId, 'line-color', color);
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
-      mbMap.setPaintProperty(lineLayerId, 'line-width', temp ? 1 : 2);
+
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-color', null);
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', 0);
+    }
+
+    if (this._descriptor.properties.lineWidth) {
+      mbMap.setPaintProperty(lineLayerId, 'line-width', this._descriptor.properties.lineWidth.options.size);
+    } else {
       mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
     }
   }
