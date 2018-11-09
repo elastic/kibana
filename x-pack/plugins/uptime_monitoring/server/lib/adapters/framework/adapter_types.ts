@@ -43,7 +43,7 @@ export interface UMHapiGraphQLPluginOptions {
   graphQLOptions: GraphQLOptions | HapiOptionsFunction;
 }
 
-export interface BackendFrameworkAdapter {
+export interface UMBackendFrameworkAdapter {
   registerRoute<RouteRequest extends UMFrameworkRequest, RouteResponse extends UMFrameworkResponse>(
     route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;

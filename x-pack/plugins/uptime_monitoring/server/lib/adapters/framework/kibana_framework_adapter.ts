@@ -7,7 +7,7 @@
 import { GraphQLSchema } from 'graphql';
 import { Server } from 'hapi';
 import {
-  BackendFrameworkAdapter,
+  UMBackendFrameworkAdapter,
   UMFrameworkRequest,
   UMFrameworkResponse,
   UMFrameworkRouteOptions,
@@ -15,7 +15,7 @@ import {
 } from './adapter_types';
 import { uptimeMonitoringGraphQLHapiPlugin } from './apollo_framework_adapter';
 
-export class UMKibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
+export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
   private server: Server;
 
   constructor(hapiServer: Server) {

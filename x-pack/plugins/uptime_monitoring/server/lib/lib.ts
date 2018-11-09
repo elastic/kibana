@@ -5,7 +5,7 @@
  */
 
 import { DatabaseAdapter } from './adapters/database';
-import { BackendFrameworkAdapter } from './adapters/framework';
+import { UMBackendFrameworkAdapter } from './adapters/framework';
 import { UMPingsDomain } from './domains';
 
 export interface UMDomainLibs {
@@ -13,6 +13,6 @@ export interface UMDomainLibs {
 }
 
 export interface UMServerLibs extends UMDomainLibs {
-  framework: BackendFrameworkAdapter;
+  framework: UMBackendFrameworkAdapter;
   database?: DatabaseAdapter;
 }

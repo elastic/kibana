@@ -6,13 +6,13 @@
 
 import { GraphQLSchema } from 'graphql';
 import {
-  BackendFrameworkAdapter,
+  UMBackendFrameworkAdapter,
   UMFrameworkRequest,
   UMFrameworkResponse,
   UMFrameworkRouteOptions,
 } from './adapter_types';
 
-export class UMTestBackendFrameworkAdapter implements BackendFrameworkAdapter {
+export class UMTestBackendFrameworkAdapter implements UMBackendFrameworkAdapter {
   private server: any;
 
   constructor(server: any) {

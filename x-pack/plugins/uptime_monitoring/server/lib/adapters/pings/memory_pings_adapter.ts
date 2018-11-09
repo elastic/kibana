@@ -23,8 +23,8 @@ export class MemoryPingsAdapter implements UMPingsAdapter {
 
   public async getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]> {
     if (sort) {
-      const f = this.pingsDB.sort(sortPings(sort));
-      return take(f, size ? size : 10);
+      const sortedPings = this.pingsDB.sort(sortPings(sort));
+      return take(sortedPings, size ? size : 10);
     }
     return take(this.pingsDB, size ? size : 10);
   }
