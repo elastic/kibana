@@ -25,6 +25,7 @@ exports[`UpgradeFailureTitle component renders component as expected 1`] = `
   >
     <EuiTitle
       size="m"
+      textTransform="none"
     >
       <h2>
         the Title

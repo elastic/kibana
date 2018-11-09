@@ -41,21 +41,31 @@ export function getOrdinalValue(number) {
   //   values: { number },
   // });
 
-  let lastDigit = number.toString().substr(-1);
+  // Protects against falsey (including 0) values
+  const num = number && number.toString();
+  let lastDigit = num && num.substr(-1);
+  let ordinal;
+
   if(!lastDigit) {
-    return;
+    return number;
   }
   lastDigit = parseFloat(lastDigit);
+
   switch(lastDigit) {
     case 1:
-      return 'st';
+      ordinal = 'st';
+      break;
     case 2:
-      return 'nd';
+      ordinal = 'nd';
+      break;
     case 3:
-      return 'rd';
+      ordinal = 'rd';
+      break;
     default:
-      return 'th';
+      ordinal = 'th';
   }
+
+  return `${num}${ordinal}`;
 }
 
 export function getDayName(dayOrdinal) {

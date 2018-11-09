@@ -146,7 +146,7 @@ export const createMetricbeatInstructions = context => ({
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
-        'PS C:\\Program Files\\Metricbeat> metricbeat.exe setup',
+        'PS C:\\Program Files\\Metricbeat> .\\metricbeat.exe setup',
         'PS C:\\Program Files\\Metricbeat> Start-Service metricbeat',
       ],
     },

@@ -30,7 +30,11 @@ import {
   SERVICE_AGENT_NAME,
   SERVICE_LANGUAGE_NAME,
   USER_ID,
-  REQUEST_URL_FULL
+  REQUEST_URL_FULL,
+  REQUEST_METHOD,
+  ERROR_EXC_HANDLED,
+  ERROR_LOG_STACKTRACE,
+  ERROR_EXC_STACKTRACE
 } from '../../../../../common/constants';
 import { fromQuery, toQuery, history } from '../../../../utils/url';
 
@@ -85,63 +89,49 @@ function DetailView({ errorGroup, urlParams, location }) {
   }
 
   const { serviceName } = urlParams;
-
-  const timestamp = get(errorGroup, 'data.error.@timestamp');
-  const url = get(errorGroup.data.error, REQUEST_URL_FULL, 'N/A');
-
   const stickyProperties = [
     {
-      label: 'Timestamp',
       fieldName: '@timestamp',
-      val: timestamp,
+      label: 'Timestamp',
+      val: get(errorGroup.data.error, '@timestamp'),
       width: '50%'
     },
     {
       fieldName: REQUEST_URL_FULL,
       label: 'URL',
-      val: url,
+      val: get(errorGroup.data.error, REQUEST_URL_FULL, 'N/A'),
       truncated: true,
       width: '50%'
     },
     {
+      fieldName: REQUEST_METHOD,
       label: 'Request method',
-      fieldName: 'context.request.method',
-      val: get(errorGroup.data, 'error.context.request.method', 'N/A'),
+      val: get(errorGroup.data.error, REQUEST_METHOD, 'N/A'),
       width: '25%'
     },
     {
+      fieldName: ERROR_EXC_HANDLED,
       label: 'Handled',
-      fieldName: 'error.exception.handled',
-      val: get(errorGroup.data, 'error.error.exception.handled', 'N/A'),
+      val: get(errorGroup.data.error, ERROR_EXC_HANDLED, 'N/A'),
       width: '25%'
     },
     {
-      label: 'User ID',
       fieldName: USER_ID,
+      label: 'User ID',
       val: get(errorGroup.data.error, USER_ID, 'N/A'),
       width: '50%'
     }
   ];
 
-  const excStackframes = get(
-    errorGroup.data.error.error,
-    'exception.stacktrace'
-  );
-  const logStackframes = get(errorGroup.data.error.error, 'log.stacktrace');
-
+  const excStackframes = get(errorGroup.data.error, ERROR_EXC_STACKTRACE);
+  const logStackframes = get(errorGroup.data.error, ERROR_LOG_STACKTRACE);
   const codeLanguage = get(errorGroup.data.error, SERVICE_LANGUAGE_NAME);
-
   const context = get(errorGroup.data.error, 'context', {});
-
   const tabs = getTabs(context, logStackframes);
-
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
-
   const occurencesCount = errorGroup.data.occurrencesCount;
   const groupId = errorGroup.data.groupId;
-
   const agentName = get(errorGroup.data.error, SERVICE_AGENT_NAME);
-
   const discoverQuery = {
     _a: {
       interval: 'auto',
