@@ -36,26 +36,10 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
         >
           <img src="../plugins/infra/images/hosts.svg" className="euiIcon euiIcon--large" />
         </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem
-          label={
-            <FormattedMessage
-              id="xpack.infra.waffle.nodeTypeSwitcher.kubernetesLabel"
-              defaultMessage="Kubernetes"
-            />
-          }
-          onClick={this.handleClick(InfraNodeType.pod)}
-        >
+        <EuiKeyPadMenuItem label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
           <img src="../plugins/infra/images/k8.svg" className="euiIcon euiIcon--large" />
         </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem
-          label={
-            <FormattedMessage
-              id="xpack.infra.waffle.nodeTypeSwitcher.dockerLabel"
-              defaultMessage="Docker"
-            />
-          }
-          onClick={this.handleClick(InfraNodeType.container)}
-        >
+        <EuiKeyPadMenuItem label="Docker" onClick={this.handleClick(InfraNodeType.container)}>
           <img src="../plugins/infra/images/docker.svg" className="euiIcon euiIcon--large" />
         </EuiKeyPadMenuItem>
       </EuiKeyPadMenu>
