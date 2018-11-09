@@ -26,16 +26,12 @@ const TITLES = {
   [InfraNodeType.host]: i18n.translate('xpack.infra.homePage.toolbar.hostsTitle', {
     defaultMessage: 'Hosts',
   }),
-  [InfraNodeType.pod]:
-    'Kubernetes' +
-    i18n.translate('xpack.infra.homePage.toolbar.kubernetesPodsTitle', {
-      defaultMessage: 'Pods',
-    }),
-  [InfraNodeType.container]:
-    'Docker' +
-    i18n.translate('xpack.infra.homePage.toolbar.dockerContainersTitle', {
-      defaultMessage: 'Containers',
-    }),
+  [InfraNodeType.pod]: i18n.translate('xpack.infra.homePage.toolbar.kubernetesPodsTitle', {
+    defaultMessage: 'Kubernetes Pods',
+  }),
+  [InfraNodeType.container]: i18n.translate('xpack.infra.homePage.toolbar.dockerContainersTitle', {
+    defaultMessage: 'Docker Containers',
+  }),
 };
 
 interface Props {

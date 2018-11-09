@@ -32,11 +32,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           seriesOverrides: {
             cpu: {
-              name:
-                'CPU' +
-                i18n.translate('xpack.infra.hostMetrics.visConfig.cpuUsageName', {
-                  defaultMessage: 'Usage',
-                }),
+              name: i18n.translate('xpack.infra.hostMetrics.visConfig.cpuUsageName', {
+                defaultMessage: 'CPU Usage',
+              }),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
@@ -76,11 +74,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostCpuUsage,
-        label:
-          'CPU' +
-          i18n.translate('xpack.infra.hostMetrics.cpuUsageSectionLabel', {
-            defaultMessage: 'Usage',
-          }),
+        label: i18n.translate('xpack.infra.hostMetrics.cpuUsageSectionLabel', {
+          defaultMessage: 'CPU Usage',
+        }),
         requires: ['system.cpu'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -191,11 +187,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           seriesOverrides: {
             cpucap: {
-              name:
-                'CPU' +
-                i18n.translate('xpack.infra.kubernetesMetrics.visConfig.cpuCapacityName', {
-                  defaultMessage: 'Capacity',
-                }),
+              name: i18n.translate('xpack.infra.kubernetesMetrics.visConfig.cpuCapacityName', {
+                defaultMessage: 'CPU Capacity',
+              }),
               color: 'secondary',
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
@@ -235,14 +229,9 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostK8sCpuCap,
-        label:
-          i18n.translate('xpack.infra.kubernetesMetrics.nodeSectionLabel', {
-            defaultMessage: 'Node',
-          }) +
-          'CPU' +
-          i18n.translate('xpack.infra.kubernetesMetrics.CapacitySectionLabel', {
-            defaultMessage: 'Capacity',
-          }),
+        label: i18n.translate('xpack.infra.kubernetesMetrics.nodeCpuCapacitySectionLabel', {
+          defaultMessage: 'Node CPU Capacity',
+        }),
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
