@@ -120,7 +120,7 @@ module.controller('MlNewJob',
     msgs.clear();
     const jobDefaults = newJobDefaults();
     // For keeping a copy of the detectors for comparison
-    let currentDetectorConfig;
+    const currentConfigs = { detectors: [], model_plot_config: { enabled: false } };
 
     $scope.job = {};
     $scope.mode = MODE.NEW;
@@ -299,14 +299,36 @@ module.controller('MlNewJob',
         });
     }
 
-    function changeTab(tab) {
-      $scope.ui.currentTab = tab.index;
-      if (tab.index === 1 && $scope.ui.enableModelPlot === true) {
-        const unchanged = _.isEqual(currentDetectorConfig, $scope.job.analysis_config.detectors);
+    function checkForConfigUpdates() {
+      const { STATUS } = $scope.ui.cardinalityValidator;
+      // Check if enable model plot was set/has changed and update if it has.
+      const jobModelPlotValue = $scope.job.model_plot_config ? $scope.job.model_plot_config : { enabled: false };
+      const modelPlotSettingsEqual = _.isEqual(currentConfigs.model_plot_config, jobModelPlotValue);
+
+      if (!modelPlotSettingsEqual) {
+        // Update currentConfigs.
+        currentConfigs.model_plot_config.enabled = jobModelPlotValue.enabled;
+        // Update ui portion so checkbox is checked
+        $scope.ui.enableModelPlot = jobModelPlotValue.enabled;
+      }
+      // If model plot is enabled and detectors changed - run cardinality
+      if ($scope.ui.enableModelPlot === true) {
+        const unchanged = _.isEqual(currentConfigs.detectors, $scope.job.analysis_config.detectors);
 
         if (!unchanged) {
           runValidateCardinality();
         }
+      } else {
+        $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
+        $scope.ui.cardinalityValidator.message = '';
+      }
+    }
+
+    function changeTab(tab) {
+      $scope.ui.currentTab = tab.index;
+      // Selecting Analysis Configuration tab
+      if (tab.index === 1) {
+        checkForConfigUpdates();
       } else if (tab.index === 4) {
         createJSONText();
       } else if (tab.index === 5) {
@@ -692,7 +714,8 @@ module.controller('MlNewJob',
             $scope.ui.cardinalityValidator.message = `Creating model plots is resource intensive and not recommended
                   where the cardinality of the selected fields is greater than 100. Estimated cardinality
                   for this job is ${validationResult.highCardinality}.
-                  If you enable model plot with this configuration we recommend you use a dedicated results index.`;
+                  If you enable model plot with this configuration
+                  we recommend you select a dedicated results index on the Job Details tab.`;
 
             $scope.ui.cardinalityValidator.status = STATUS.WARNING;
           }
@@ -702,10 +725,11 @@ module.controller('MlNewJob',
 
     $scope.onDetectorsUpdate = function () {
       const { STATUS } = $scope.ui.cardinalityValidator;
-      // Update currentDetectorConfig since config changed
-      currentDetectorConfig = _.cloneDeep($scope.job.analysis_config.detectors);
 
       if ($scope.ui.enableModelPlot === true) {
+        // Update currentConfigs since config changed
+        currentConfigs.detectors = _.cloneDeep($scope.job.analysis_config.detectors);
+
         if ($scope.job.analysis_config.detectors.length === 0) {
           $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
           $scope.ui.cardinalityValidator.message = '';
@@ -717,13 +741,16 @@ module.controller('MlNewJob',
 
     $scope.setModelPlotEnabled = function () {
       const { STATUS } = $scope.ui.cardinalityValidator;
-      // Start keeping track of the config in case of changes from Edit JSON tab
-      currentDetectorConfig = _.cloneDeep($scope.job.analysis_config.detectors);
 
       if ($scope.ui.enableModelPlot === true) {
+        // Start keeping track of the config in case of changes from Edit JSON tab requiring another cardinality check
+        currentConfigs.detectors = _.cloneDeep($scope.job.analysis_config.detectors);
+
         $scope.job.model_plot_config = {
           enabled: true
         };
+
+        currentConfigs.model_plot_config.enabled = true;
         // return early if there's nothing to run a check on yet.
         if ($scope.job.analysis_config.detectors.length === 0) {
           return;
@@ -731,6 +758,7 @@ module.controller('MlNewJob',
 
         runValidateCardinality();
       } else {
+        currentConfigs.model_plot_config.enabled = false;
         $scope.ui.cardinalityValidator.status = STATUS.FINISHED;
         $scope.ui.cardinalityValidator.message = '';
         delete $scope.job.model_plot_config;
