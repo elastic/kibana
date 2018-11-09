@@ -44,6 +44,5 @@ You now have a three-page workpad, and a new element connected
 to some demo data.  Your next step is to wire your new element 
 up to some real data; you can click on the *Data* tab in the right sidebar menu 
 and click "Change your data source" to start working with your Elasticsearch data.
-We'll be adding more documentation on how to use Canvas functions with your own data. 
 
 
