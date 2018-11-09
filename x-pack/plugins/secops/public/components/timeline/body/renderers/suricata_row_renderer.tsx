@@ -12,8 +12,7 @@ import { createLinkWithSignature, RowRenderer } from '.';
 import { ECS } from '../../ecs';
 
 const SuricataSignature = styled.div`
-  margin-top: 10px;
-  margin-left: 30px;
+  margin-top 10px;
 `;
 
 const dropInEffect = keyframes`
@@ -73,11 +72,95 @@ export const suricataRowRenderer: RowRenderer = {
       <SuricataRow>
         {children}
         {signature != null ? (
-          <SuricataSignature>
-            <EuiButton fill size="s" href={createLinkWithSignature(signature)}>
-              {signature}
-            </EuiButton>
-          </SuricataSignature>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+          >
+            <SuricataSignature>
+              <EuiButton fill size="s" href={createLinkWithSignature(signature)}>
+                {signature}
+              </EuiButton>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  width: '100%',
+                  alignItems: 'center',
+                }}
+              >
+                <div
+                  style={{
+                    marginTop: '5px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Protocol
+                </div>
+                <div>TCP</div>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      margin: '10px 35px 0 0',
+                    }}
+                  >
+                    <div
+                      style={{
+                        marginTop: '5px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Source Host
+                    </div>
+                    <div>{data.source.ip}</div>
+                    <div
+                      style={{
+                        marginTop: '5px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Destination Host
+                    </div>
+                    <div>{data.destination.ip}</div>
+                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      margin: '10px 20px 0 60px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        marginTop: '5px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Source Port
+                    </div>
+                    <div>{data.source.port}</div>
+                    <div
+                      style={{
+                        marginTop: '10px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Destination Port
+                    </div>
+                    <div>{data.destination.port}</div>
+                  </div>
+                </div>
+              </div>
+            </SuricataSignature>
+          </div>
         ) : null}
       </SuricataRow>
     );
