@@ -62,10 +62,10 @@ export function discover(config: PluginsConfig, packageInfo: PackageInfo, log: L
 
   return {
     plugin$: discoveryResults$.pipe(
-      mergeMap(entry => (entry.plugin !== undefined ? [entry.plugin] : []))
+      mergeMap((entry: DiscoveryResult) => (entry.plugin !== undefined ? [entry.plugin] : []))
     ),
     error$: discoveryResults$.pipe(
-      mergeMap(entry => (entry.error !== undefined ? [entry.error] : []))
+      mergeMap((entry: DiscoveryResult) => (entry.error !== undefined ? [entry.error] : []))
     ),
   };
 }
@@ -83,7 +83,7 @@ function processScanDirs$(scanDirs: string[], log: Logger) {
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
 
       return fsReadDir$(dir).pipe(
-        mergeMap(subDirs => subDirs.map(subDir => resolve(dir, subDir))),
+        mergeMap((subDirs: string[]) => subDirs.map(subDir => resolve(dir, subDir))),
         mergeMap(path =>
           fsStat$(path).pipe(
             // Filter out non-directory entries from target directories, it's expected that
