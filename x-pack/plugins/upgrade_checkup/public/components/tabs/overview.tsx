@@ -16,6 +16,7 @@ export class OverviewTab extends React.Component {
         <EuiTitle>
           <h3>Overview</h3>
         </EuiTitle>
+        <EuiSpacer />
         <EuiText>
           <p>
             This assistant helps you prepare for your upgrade from{' '}
@@ -47,7 +48,17 @@ export class OverviewTab extends React.Component {
             </EuiLink>{' '}
             documentation online.
           </p>
-          {/* TODO: add in rest of copy */}
+          <h4>Cluster Checkup</h4>
+          <p>
+            Run a series of checks on your cluster, nodes, and indices and find out about any known
+            problems that need to be addressed before upgrading.
+          </p>
+          <h4>Deprecation Logging</h4>
+          <p>
+            Elasticsearch comes with a deprecation logger which will log a message whenever
+            deprecated functionality is used. Enable or disable deprecation logging on your cluster
+            here. This is enabled by default, beginning in Elasticsearch 5.
+          </p>
         </EuiText>
       </Fragment>
     );

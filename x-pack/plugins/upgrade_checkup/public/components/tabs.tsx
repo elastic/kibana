@@ -44,6 +44,6 @@ export class UpgradeCheckupTabs extends React.Component {
   ];
 
   public render() {
-    return <EuiTabbedContent tabs={this.tabs} initialSelectedTab={this.tabs[2]} />;
+    return <EuiTabbedContent tabs={this.tabs} initialSelectedTab={this.tabs[0]} />;
   }
 }
