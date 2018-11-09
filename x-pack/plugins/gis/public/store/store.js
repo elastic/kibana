@@ -30,10 +30,11 @@ export const getStore = async function () {
   }
 
   const storeConfig = {};
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
   store = createStore(
     rootReducer,
     storeConfig,
-    compose(...enhancers)
+    composeEnhancers(...enhancers)
   );
   await loadMetaResources(store.dispatch);
   return store;
