@@ -59,9 +59,10 @@ export function screenshotsObservableFactory(server) {
     await browser.waitForSelector(`${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`);
   };
 
-  const waitForNotFoundError = async (browser) => {
-    await browser.waitForSelector(`.toast.alert.alert-danger`);
-    throw new Error('Reporting subject could not be loaded to take a screenshot.');
+  // TODO need to include the actual toast content body in the error
+  const waitForNotFoundError = async (browser, layout) => {
+    await browser.waitForSelector(layout.selectors.errorToast);
+    throw new Error('Reporting subject could not be loaded to take a screenshot');
   };
 
   const getNumberOfItems = async (browser, layout) => {
@@ -250,7 +251,6 @@ export function screenshotsObservableFactory(server) {
           logger.debug(line, ['browserConsole']);
         });
 
-
         const screenshot$ = driver$.pipe(
           tap(() => logger.debug(`opening ${url}`)),
           mergeMap(
@@ -266,7 +266,7 @@ export function screenshotsObservableFactory(server) {
           mergeMap(
             browser => Rx.race(
               Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.from(waitForNotFoundError(browser))
+              Rx.from(waitForNotFoundError(browser, layout))
             ),
             browser => browser
           ),

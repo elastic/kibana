@@ -20,6 +20,7 @@ export class PrintLayout extends Layout {
     itemsCountAttribute: 'data-shared-items-count',
     timefilterFromAttribute: 'data-shared-timefilter-from',
     timefilterToAttribute: 'data-shared-timefilter-to',
+    errorToast: '[data-test-subj=euiToast-warning],[data-test-subj=euiToast-error]',
   };
 
   public readonly groupCount = 2;
