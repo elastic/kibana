@@ -44,7 +44,7 @@ const SpanLabel = styled<{ left: number }, any>('div')`
   white-space: nowrap;
   position: relative;
   left: ${props => `${props.left}%`};
-  width: ${props => `${100 - props.left}%`};
+  width: ${props => `${Math.max(100 - props.left, 0)}%`};
   direction: rtl;
   text-align: left;
   margin: ${px(units.quarter)} 0 0;

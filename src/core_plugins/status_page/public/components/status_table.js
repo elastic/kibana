@@ -38,7 +38,7 @@ class StatusTable extends Component {
   static columns = [{
     field: 'state',
     name: '',
-    render: state => <EuiIcon type="dot" ariaabel="" color={state.uiColor} />,
+    render: state => <EuiIcon type="dot" aria-hidden color={state.uiColor} />,
     width: '32px'
   }, {
     field: 'id',

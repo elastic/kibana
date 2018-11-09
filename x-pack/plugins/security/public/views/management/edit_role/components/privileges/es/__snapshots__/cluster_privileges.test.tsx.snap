@@ -16,6 +16,7 @@ exports[`it renders without crashing 1`] = `
     key="clusterPrivs"
   >
     <EuiComboBox
+      compressed={false}
       fullWidth={false}
       isClearable={true}
       isDisabled={false}
