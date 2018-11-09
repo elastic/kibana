@@ -4,6 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// The babel-register below uses .babelrc by default.
-require('babel-register');
+require('babel-register')({
+  ignore: [
+    // stolen from kibana/src/setup_node_env/babel_register/register.js
+    // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
+    // is `x-pack` and `b` is not `node_modules`
+    /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
+  ],
+  babelrc: false,
+  presets: [require.resolve('@kbn/babel-preset/node_preset')],
+});
+
 require('./worker');

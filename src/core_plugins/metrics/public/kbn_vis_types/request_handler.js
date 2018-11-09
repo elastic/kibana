@@ -18,20 +18,20 @@
  */
 
 import { validateInterval } from '../lib/validate_interval';
-import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
+import { BuildESQueryProvider } from 'ui/courier';
 
 const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http) {
-  const dashboardContext = Private(dashboardContextProvider);
   const notify = new Notifier({ location: 'Metrics' });
+  const buildEsQuery = Private(BuildESQueryProvider);
 
   return {
     name: 'metrics',
-    handler: function (vis, { uiState, timeRange }) {
+    handler: function ({ aggs, uiState, timeRange, filters, query, visParams }) {
       const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
-        const panel = vis.params;
+        const panel = visParams;
         const uiStateObj = uiState.get(panel.type, {});
         const parsedTimeRange = timefilter.calculateBounds(timeRange);
         const scaledDataFormat = config.get('dateFormat:scaled');
@@ -39,7 +39,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            filters: [dashboardContext()],
+            filters: [buildEsQuery(aggs.indexPattern, [query], filters)],
             panels: [panel],
             state: uiStateObj
           };
