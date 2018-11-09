@@ -42,8 +42,8 @@ export class App extends Component {
     return (
       <div>
         <Switch>
-          <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/remote_cluster_list`} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/remote_cluster_list`} component={RemoteClusterList} />
+          <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/list`} />
+          <Route exact path={`${CRUD_APP_BASE_PATH}/list`} component={RemoteClusterList} />
         </Switch>
       </div>
     );

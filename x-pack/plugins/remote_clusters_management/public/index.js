@@ -27,7 +27,7 @@ esSection.register('remote_clusters_management', {
   visible: true,
   display: 'Remote Clusters Management',
   order: 4,
-  url: `#${CRUD_APP_BASE_PATH}/remote_cluster_list`,
+  url: `#${CRUD_APP_BASE_PATH}/list`,
 });
 
 const renderReact = async (elem) => {
