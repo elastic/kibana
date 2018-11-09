@@ -17,13 +17,13 @@ import {
 export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'podOverview',
-    label: i18n.translate('xpack.infra.metricsPage.podOverviewLabel', {
+    label: i18n.translate('xpack.infra.podMetrics.podOverviewLabel', {
       defaultMessage: 'Pod Overview',
     }),
     sections: [
       {
         id: InfraMetric.podOverview,
-        label: i18n.translate('xpack.infra.metricsPage.podOverviewSectionLabel', {
+        label: i18n.translate('xpack.infra.podMetrics.podOverviewSectionLabel', {
           defaultMessage: 'Pod Overview',
         }),
         requires: ['kubernetes.pod'],
@@ -31,7 +31,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           seriesOverrides: {
             cpu: {
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.cpuUsageName', {
+              name: i18n.translate('xpack.infra.podMetrics.visConfig.cpuUsageName', {
                 defaultMessage: 'CPU Usage',
               }),
               color: theme.eui.euiColorFullShade,
@@ -39,7 +39,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
               gaugeMax: 1,
             },
             memory: {
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.memoryUsageName', {
+              name: i18n.translate('xpack.infra.podMetrics.visConfig.memoryUsageName', {
                 defaultMessage: 'Memory Usage',
               }),
               color: theme.eui.euiColorFullShade,
@@ -47,7 +47,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
               gaugeMax: 1,
             },
             rx: {
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.inboundRXName', {
+              name: i18n.translate('xpack.infra.podMetrics.visConfig.inboundRXName', {
                 defaultMessage: 'Inbound (RX)',
               }),
               color: theme.eui.euiColorFullShade,
@@ -55,7 +55,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
               formatterTemplate: '{{value}}/s',
             },
             tx: {
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.outboundTXName', {
+              name: i18n.translate('xpack.infra.podMetrics.visConfig.outboundTXName', {
                 defaultMessage: 'Outbound (TX)',
               }),
               color: theme.eui.euiColorFullShade,
@@ -67,7 +67,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.podCpuUsage,
-        label: i18n.translate('xpack.infra.metricsPage.cpuUsageSectionLabel', {
+        label: i18n.translate('xpack.infra.podMetrics.cpuUsageSectionLabel', {
           defaultMessage: 'CPU Usage',
         }),
         requires: ['kubernetes.pod'],
@@ -81,7 +81,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.podMemoryUsage,
-        label: i18n.translate('xpack.infra.metricsPage.memoryUsageSectionLabel', {
+        label: i18n.translate('xpack.infra.podMetrics.memoryUsageSectionLabel', {
           defaultMessage: 'Memory Usage',
         }),
         requires: ['kubernetes.pod'],
@@ -98,7 +98,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.podNetworkTraffic,
-        label: i18n.translate('xpack.infra.metricsPage.networkTrafficSectionLabel', {
+        label: i18n.translate('xpack.infra.podMetrics.networkTrafficSectionLabel', {
           defaultMessage: 'Network Traffic',
         }),
         requires: ['kubernetes.pod'],
@@ -110,13 +110,13 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
           seriesOverrides: {
             rx: {
               color: theme.eui.euiColorVis1,
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.inName', {
+              name: i18n.translate('xpack.infra.podMetrics.visConfig.inName', {
                 defaultMessage: 'in',
               }),
             },
             tx: {
               color: theme.eui.euiColorVis2,
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.outName', {
+              name: i18n.translate('xpack.infra.podMetrics.visConfig.outName', {
                 defaultMessage: 'out',
               }),
             },

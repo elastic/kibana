@@ -17,13 +17,13 @@ import {
 export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'containerOverview',
-    label: i18n.translate('xpack.infra.metricsPage.containerLabel', {
+    label: i18n.translate('xpack.infra.containerMetrics.containerLabel', {
       defaultMessage: 'Container',
     }),
     sections: [
       {
         id: InfraMetric.containerOverview,
-        label: i18n.translate('xpack.infra.metricsPage.overviewSectionLabel', {
+        label: i18n.translate('xpack.infra.containerMetrics.overviewSectionLabel', {
           defaultMessage: 'Overview',
         }),
         requires: ['docker.cpu', 'docker.memory', 'docker.network'],
@@ -31,7 +31,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           seriesOverrides: {
             cpu: {
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.cpuUsageName', {
+              name: i18n.translate('xpack.infra.containerMetrics.visConfig.cpuUsageName', {
                 defaultMessage: 'CPU Usage',
               }),
               color: theme.eui.euiColorFullShade,
@@ -39,7 +39,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
               gaugeMax: 1,
             },
             memory: {
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.memoryUsageName', {
+              name: i18n.translate('xpack.infra.containerMetrics.visConfig.memoryUsageName', {
                 defaultMessage: 'Memory Usage',
               }),
               color: theme.eui.euiColorFullShade,
@@ -47,7 +47,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
               gaugeMax: 1,
             },
             rx: {
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.inboundRXName', {
+              name: i18n.translate('xpack.infra.containerMetrics.visConfig.inboundRXName', {
                 defaultMessage: 'Inbound (RX)',
               }),
               color: theme.eui.euiColorFullShade,
@@ -55,7 +55,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
               formatterTemplate: '{{value}}/s',
             },
             tx: {
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.outboundTXName', {
+              name: i18n.translate('xpack.infra.containerMetrics.visConfig.outboundTXName', {
                 defaultMessage: 'Outbound (TX)',
               }),
               color: theme.eui.euiColorFullShade,
@@ -67,7 +67,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.containerCpuUsage,
-        label: i18n.translate('xpack.infra.metricsPage.cpuUsageSectionLabel', {
+        label: i18n.translate('xpack.infra.containerMetrics.cpuUsageSectionLabel', {
           defaultMessage: 'CPU Usage',
         }),
         requires: ['docker.cpu'],
@@ -83,7 +83,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.containerMemory,
-        label: i18n.translate('xpack.infra.metricsPage.memoryUsageSectionLabel', {
+        label: i18n.translate('xpack.infra.containerMetrics.memoryUsageSectionLabel', {
           defaultMessage: 'Memory Usage',
         }),
         requires: ['docker.memory'],
@@ -99,7 +99,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.containerNetworkTraffic,
-        label: i18n.translate('xpack.infra.metricsPage.networkTrafficSectionLabel', {
+        label: i18n.translate('xpack.infra.containerMetrics.networkTrafficSectionLabel', {
           defaultMessage: 'Network Traffic',
         }),
         requires: ['docker.network'],
@@ -111,13 +111,13 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
           seriesOverrides: {
             rx: {
               color: theme.eui.euiColorVis1,
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.inName', {
+              name: i18n.translate('xpack.infra.containerMetrics.visConfig.inName', {
                 defaultMessage: 'in',
               }),
             },
             tx: {
               color: theme.eui.euiColorVis2,
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.outName', {
+              name: i18n.translate('xpack.infra.containerMetrics.visConfig.outName', {
                 defaultMessage: 'out',
               }),
             },
@@ -126,7 +126,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.containerDiskIOOps,
-        label: i18n.translate('xpack.infra.metricsPage.diskIOOpsSectionLabel', {
+        label: i18n.translate('xpack.infra.containerMetrics.diskIOOpsSectionLabel', {
           defaultMessage: 'Disk IO (Ops)',
         }),
         requires: ['docker.diskio'],
@@ -138,13 +138,13 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
           seriesOverrides: {
             read: {
               color: theme.eui.euiColorVis1,
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.readsName', {
+              name: i18n.translate('xpack.infra.containerMetrics.opsVisConfig.readsName', {
                 defaultMessage: 'reads',
               }),
             },
             write: {
               color: theme.eui.euiColorVis2,
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.writesName', {
+              name: i18n.translate('xpack.infra.containerMetrics.opsVisConfig.writesName', {
                 defaultMessage: 'writes',
               }),
             },
@@ -153,7 +153,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.containerDiskIOBytes,
-        label: i18n.translate('xpack.infra.metricsPage.diskIOBytesSectionLabel', {
+        label: i18n.translate('xpack.infra.containerMetrics.diskIOBytesSectionLabel', {
           defaultMessage: 'Disk IO (Bytes)',
         }),
         requires: ['docker.diskio'],
@@ -165,13 +165,13 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
           seriesOverrides: {
             read: {
               color: theme.eui.euiColorVis1,
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.readsName', {
+              name: i18n.translate('xpack.infra.containerMetrics.bytesVisConfig.readsName', {
                 defaultMessage: 'reads',
               }),
             },
             write: {
               color: theme.eui.euiColorVis2,
-              name: i18n.translate('xpack.infra.metricsPage.visConfig.writesName', {
+              name: i18n.translate('xpack.infra.containerMetrics.bytesVisConfig.writesName', {
                 defaultMessage: 'writes',
               }),
             },

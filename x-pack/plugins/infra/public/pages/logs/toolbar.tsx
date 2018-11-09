@@ -46,7 +46,7 @@ const LogsToolbarUI: React.SFC<Props> = ({ intl }) => (
                   onChange={setFilterQueryDraftFromKueryExpression}
                   onSubmit={applyFilterQueryFromKueryExpression}
                   placeholder={intl.formatMessage({
-                    id: 'xpack.infra.homePageLogsToolbar.searchFieldPlaceholder',
+                    id: 'xpack.infra.logsToolbar.searchFieldPlaceholder',
                     defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
                   })}
                   suggestions={suggestions}
