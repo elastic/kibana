@@ -18,7 +18,6 @@ import { Range } from './body/column_headers/range_picker/ranges';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
-import { ECS } from './ecs';
 import { OnColumnSorted, OnDataProviderRemoved, OnRangeSelected } from './events';
 import { Timeline } from './timeline';
 
@@ -28,53 +27,51 @@ export interface OwnProps {
   width: number;
 }
 
-interface StateProps {
-  dataProviders: DataProvider[];
-  data: ECS[];
-  range: Range;
-  sort: Sort;
+interface StateReduxProps {
+  dataProviders?: DataProvider[];
+  range?: Range;
+  sort?: Sort;
 }
 
 interface DispatchProps {
-  createTimeline: ActionCreator<{ id: string }>;
-  addProvider: ActionCreator<{
+  createTimeline?: ActionCreator<{ id: string }>;
+  addProvider?: ActionCreator<{
     id: string;
     provider: DataProvider;
   }>;
-  updateData: ActionCreator<{
+  updateData?: ActionCreator<{
     id: string;
     data: ECS[];
   }>;
-  updateProviders: ActionCreator<{
+  updateProviders?: ActionCreator<{
     id: string;
     providers: DataProvider[];
   }>;
-  updateRange: ActionCreator<{
+  updateRange?: ActionCreator<{
     id: string;
     range: Range;
   }>;
-  updateSort: ActionCreator<{
+  updateSort?: ActionCreator<{
     id: string;
     sort: Sort;
   }>;
-  removeProvider: ActionCreator<{
+  removeProvider?: ActionCreator<{
     id: string;
     providerId: string;
   }>;
 }
 
-type Props = OwnProps & StateProps & DispatchProps;
+type Props = OwnProps & StateReduxProps & DispatchProps;
 
 class StatefulTimelineComponent extends React.PureComponent<Props> {
   public componentDidMount() {
     const { createTimeline, id } = this.props;
 
-    createTimeline({ id });
+    createTimeline!({ id });
   }
 
   public render() {
     const {
-      data,
       dataProviders,
       headers,
       id,
@@ -87,31 +84,30 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     } = this.props;
 
     const onColumnSorted: OnColumnSorted = sorted => {
-      updateSort({ id, sort: sorted });
+      updateSort!({ id, sort: sorted });
     };
 
     const onDataProviderRemoved: OnDataProviderRemoved = dataProvider => {
-      removeProvider({ id, providerId: dataProvider.id });
+      removeProvider!({ id, providerId: dataProvider.id });
     };
 
     const onRangeSelected: OnRangeSelected = selectedRange => {
-      updateRange({ id, range: selectedRange });
+      updateRange!({ id, range: selectedRange });
     };
 
     return (
       <Timeline
         columnHeaders={headers}
         columnRenderers={columnRenderers}
-        dataProviders={dataProviders}
-        data={data}
         id={id}
+        dataProviders={dataProviders!}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onRangeSelected={onRangeSelected}
-        range={range}
+        range={range!}
         rowRenderers={rowRenderers}
-        sort={sort}
+        sort={sort!}
         width={width}
       />
     );
@@ -120,9 +116,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const timeline = timelineByIdSelector(state)[id];
-  const { dataProviders, data, sort } = timeline || timelineDefaults;
+  const { dataProviders, sort } = timeline || timelineDefaults;
 
-  return defaultTo({ id, dataProviders, data, sort }, timeline);
+  return defaultTo({ id, dataProviders, sort }, timeline);
 };
 
 export const StatefulTimeline = connect(

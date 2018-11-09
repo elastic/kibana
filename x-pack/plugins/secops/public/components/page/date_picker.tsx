@@ -39,6 +39,7 @@ export const DatePicker = pure<DatePickerProps>(
             isInvalid={false}
             aria-label="Start date"
             showTimeSelect
+            popperPlacement="top-end"
           />
         }
         endDateControl={
@@ -48,6 +49,7 @@ export const DatePicker = pure<DatePickerProps>(
             isInvalid={false}
             aria-label="End date"
             showTimeSelect
+            popperPlacement="top-end"
           />
         }
       />

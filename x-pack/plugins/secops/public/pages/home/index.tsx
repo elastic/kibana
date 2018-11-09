@@ -24,7 +24,6 @@ import {
   PageContent,
   PageHeader,
   Pane1,
-  Pane1FlexContent,
   Pane1Header,
   Pane1Style,
   Pane2,
@@ -142,16 +141,14 @@ class HomePageComponent extends React.PureComponent<Props> {
                   <EuiSearchBar onChange={noop} />
                 </Pane1Header>
                 <PaneScrollContainer data-test-subj="pane1ScrollContainer">
-                  <Pane1FlexContent data-test-subj="pane1FlexContent">
-                    <Switch>
-                      <Redirect from="/" exact={true} to="/overview" />
-                      <Route path="/overview" component={Overview} />
-                      <Route path="/hosts" component={Hosts} />
-                      <Route path="/network" component={Network} />
-                      <Route path="/link-to" component={LinkToPage} />
-                      <Route component={NotFoundPage} />
-                    </Switch>
-                  </Pane1FlexContent>
+                  <Switch>
+                    <Redirect from="/" exact={true} to="/overview" />
+                    <Route path="/overview" component={Overview} />
+                    <Route path="/hosts" component={Hosts} />
+                    <Route path="/network" component={Network} />
+                    <Route path="/link-to" component={LinkToPage} />
+                    <Route component={NotFoundPage} />
+                  </Switch>
                 </PaneScrollContainer>
               </Pane1>
 

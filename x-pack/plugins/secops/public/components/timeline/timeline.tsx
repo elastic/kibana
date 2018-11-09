@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ECS } from './ecs';
 
+import { EventsProps, EventsQuery } from '../../containers/events';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Range } from './body/column_headers/range_picker/ranges';
@@ -22,7 +23,6 @@ import { TimelineHeader } from './header/timeline_header';
 interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  data: ECS[];
   dataProviders: DataProvider[];
   height?: string;
   id: string;
@@ -54,7 +54,6 @@ export const Timeline = pure<Props>(
     columnHeaders,
     columnRenderers,
     dataProviders,
-    data,
     height = defaultHeight,
     id,
     onColumnSorted,
@@ -73,20 +72,36 @@ export const Timeline = pure<Props>(
         onDataProviderRemoved={onDataProviderRemoved}
         width={width}
       />
-      <Body
-        columnHeaders={columnHeaders}
-        columnRenderers={columnRenderers}
-        dataProviders={dataProviders}
-        data={data}
-        onColumnSorted={onColumnSorted}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onFilterChange={onFilterChange}
-        onRangeSelected={onRangeSelected}
-        range={range}
-        rowRenderers={rowRenderers}
-        sort={sort}
-        width={width}
-      />
+      {dataProviders.map(provider => {
+        // const QueryComponent = provider.componentQuery as React.ComponentClass;
+        const queryProps: EventsProps = provider.componentQueryProps as EventsProps;
+        const resParm = provider.componentResultParam;
+        return (
+          <EventsQuery
+            sourceId="default"
+            startDate={queryProps.startDate}
+            endDate={queryProps.endDate}
+            filterQuery={queryProps.filterQuery}
+            key={provider.id}
+          >
+            {(resData: {}) => (
+              <Body
+                columnHeaders={columnHeaders}
+                columnRenderers={columnRenderers}
+                data={getOr([], resParm, resData) as ECS[]}
+                onColumnSorted={onColumnSorted}
+                onDataProviderRemoved={onDataProviderRemoved}
+                onFilterChange={onFilterChange}
+                onRangeSelected={onRangeSelected}
+                range={range}
+                rowRenderers={rowRenderers}
+                sort={sort}
+                width={width}
+              />
+            )}
+          </EventsQuery>
+        );
+      })}
     </TimelineDiv>
   )
 );

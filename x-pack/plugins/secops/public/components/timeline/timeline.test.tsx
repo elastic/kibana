@@ -7,8 +7,10 @@
 import { mount } from 'enzyme';
 import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
+import { MockedProvider } from 'react-apollo/test-utils';
 import { DragDropContext } from 'react-beautiful-dnd';
 
+import { eventsQuery } from '../../containers/events/events.gql_query';
 import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
@@ -23,24 +25,37 @@ describe('Timeline', () => {
     sortDirection: 'descending',
   };
 
+  const mocks = [
+    {
+      request: { query: eventsQuery },
+      result: {
+        data: {
+          events: mockECSData,
+        },
+      },
+    },
+  ];
+
   describe('rendering', () => {
     test('it renders the timeline header', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <Timeline
-            columnHeaders={headers}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={noop}
-            onDataProviderRemoved={noop}
-            onFilterChange={noop}
-            onRangeSelected={noop}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              id="foo"
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              onColumnSorted={noop}
+              onDataProviderRemoved={noop}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </MockedProvider>
         </DragDropContext>
       );
 
@@ -50,20 +65,22 @@ describe('Timeline', () => {
     test('it renders the timeline body', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <Timeline
-            columnHeaders={headers}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={noop}
-            onDataProviderRemoved={noop}
-            onFilterChange={noop}
-            onRangeSelected={noop}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              id="foo"
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              onColumnSorted={noop}
+              onDataProviderRemoved={noop}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </MockedProvider>
         </DragDropContext>
       );
 
@@ -78,20 +95,22 @@ describe('Timeline', () => {
 
         const wrapper = mount(
           <DragDropContext onDragEnd={noop}>
-            <Timeline
-              columnHeaders={headers}
-              columnRenderers={columnRenderers}
-              data={mockECSData}
-              dataProviders={mockDataProviders}
-              onColumnSorted={mockOnColumnSorted}
-              onDataProviderRemoved={noop}
-              onFilterChange={noop}
-              onRangeSelected={noop}
-              range={'1 Day'}
-              rowRenderers={rowRenderers}
-              sort={sort}
-              width={1000}
-            />
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                id="foo"
+                columnHeaders={headers}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                onColumnSorted={mockOnColumnSorted}
+                onDataProviderRemoved={noop}
+                onFilterChange={noop}
+                onRangeSelected={noop}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={sort}
+                width={1000}
+              />
+            </MockedProvider>
           </DragDropContext>
         );
 
@@ -113,20 +132,22 @@ describe('Timeline', () => {
 
         const wrapper = mount(
           <DragDropContext onDragEnd={noop}>
-            <Timeline
-              columnHeaders={headers}
-              columnRenderers={columnRenderers}
-              data={mockECSData}
-              dataProviders={mockDataProviders}
-              onColumnSorted={noop}
-              onDataProviderRemoved={mockOnDataProviderRemoved}
-              onFilterChange={noop}
-              onRangeSelected={noop}
-              range={'1 Day'}
-              rowRenderers={rowRenderers}
-              sort={sort}
-              width={1000}
-            />
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                id="foo"
+                columnHeaders={headers}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                onColumnSorted={noop}
+                onDataProviderRemoved={mockOnDataProviderRemoved}
+                onFilterChange={noop}
+                onRangeSelected={noop}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={sort}
+                width={1000}
+              />
+            </MockedProvider>
           </DragDropContext>
         );
 
@@ -162,20 +183,22 @@ describe('Timeline', () => {
 
         const wrapper = mount(
           <DragDropContext onDragEnd={noop}>
-            <Timeline
-              columnHeaders={allColumnsHaveTextFilters}
-              columnRenderers={columnRenderers}
-              data={mockECSData}
-              dataProviders={mockDataProviders}
-              onColumnSorted={noop}
-              onDataProviderRemoved={noop}
-              onFilterChange={mockOnFilterChange}
-              onRangeSelected={noop}
-              range={'1 Day'}
-              rowRenderers={rowRenderers}
-              sort={sort}
-              width={1000}
-            />
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                onColumnSorted={noop}
+                onDataProviderRemoved={noop}
+                onFilterChange={mockOnFilterChange}
+                onRangeSelected={noop}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={sort}
+                width={1000}
+              />
+            </MockedProvider>
           </DragDropContext>
         );
 
@@ -188,38 +211,6 @@ describe('Timeline', () => {
           columnId: headers[0].id,
           filter: newFilter,
         });
-      });
-    });
-
-    describe('onRangeSelected', () => {
-      test('it invokes the onRangeSelected callback when a new range is selected', () => {
-        const newSelection = '1 Day';
-        const mockOnRangeSelected = jest.fn();
-
-        const wrapper = mount(
-          <DragDropContext onDragEnd={noop}>
-            <Timeline
-              columnHeaders={headers}
-              columnRenderers={columnRenderers}
-              data={mockECSData}
-              dataProviders={mockDataProviders}
-              onColumnSorted={noop}
-              onDataProviderRemoved={noop}
-              onFilterChange={noop}
-              onRangeSelected={mockOnRangeSelected}
-              range={'1 Day'}
-              rowRenderers={rowRenderers}
-              sort={sort}
-              width={1000}
-            />
-          </DragDropContext>
-        );
-
-        wrapper
-          .find('[data-test-subj="rangePicker"] select')
-          .simulate('change', { target: { value: newSelection } });
-
-        expect(mockOnRangeSelected).toBeCalledWith(newSelection);
       });
     });
   });

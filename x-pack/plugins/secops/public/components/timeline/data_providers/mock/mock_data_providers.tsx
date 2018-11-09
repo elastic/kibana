@@ -7,6 +7,8 @@
 import { EuiBadge, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
+
+import { EventsQuery } from '../../../../containers/events';
 import { DataProvider } from '../data_provider';
 
 interface NameToEventCount<TValue> {
@@ -49,9 +51,16 @@ const Text = styled(EuiText)`
 export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEventCount).map(
   name => ({
     enabled: true,
-    getQuery: () => `query-for-provider-id-${name}`,
     id: `id-${name}`,
     name,
+    componentResultParam: 'events',
+    componentQuery: EventsQuery,
+    componentQueryProps: {
+      sourceId: 'default',
+      startDate: 1521830963132,
+      endDate: 1521862432253,
+      filterQuery: '',
+    },
     negated: false,
     render: () => (
       <div data-test-subj="mockDataProvider">

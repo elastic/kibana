@@ -43,13 +43,13 @@ export const plainColumnRenderer: ColumnRenderer = {
       case 'timestamp':
         return <React.Fragment>{moment(data.timestamp).format('YYYY-MM-DD')}</React.Fragment>;
       case 'severity':
-        return <React.Fragment>{data.event.severity}</React.Fragment>;
+        return <React.Fragment>{getOr('--', 'event.severity', data)}</React.Fragment>;
       case 'category':
-        return <React.Fragment>{data.event.category}</React.Fragment>;
+        return <React.Fragment>{getOr('--', 'event.category', data)}</React.Fragment>;
       case 'type':
-        return <React.Fragment>{data.event.type}</React.Fragment>;
+        return <React.Fragment>{getOr('--', 'event.type', data)}</React.Fragment>;
       case 'source':
-        return <React.Fragment>{data.source.ip}</React.Fragment>;
+        return <React.Fragment>{getOr('--', 'event.source.ip', data)}</React.Fragment>;
       case 'user':
         return <React.Fragment>{getOr('--', 'user.name', data)}</React.Fragment>;
       case 'event':

@@ -117,7 +117,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
             filter,
           },
         },
-        size: 500,
+        size: 100,
         sort: [
           {
             [options.sourceConfiguration.fields.timestamp]: 'desc',
@@ -140,10 +140,8 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
             count: item.doc_count,
           }))
         : [];
-
     const hits = response.hits.hits;
     const events = hits.map(formatEventsData(Fields)) as [EventItem];
-
     return {
       events,
       kpiEventType,
@@ -154,6 +152,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
 const formatEventsData = (fields: string[]) => (hit: EventData) =>
   fields.reduce(
     (flattenedFields, fieldName) => {
+      flattenedFields._id = get('_id', hit);
       if (EventFieldsMap.hasOwnProperty(fieldName)) {
         const esField = Object.getOwnPropertyDescriptor(EventFieldsMap, fieldName);
         return has(esField && esField.value, hit._source)

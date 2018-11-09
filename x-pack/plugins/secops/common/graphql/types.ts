@@ -66,6 +66,7 @@ export interface KpiItem {
 }
 
 export interface EventItem {
+  _id?: string | null;
   destination?: DestinationEcsFields | null;
   event?: EventEcsFields | null;
   geo?: GeoEcsFields | null;
@@ -304,6 +305,7 @@ export namespace KpiItemResolvers {
 
 export namespace EventItemResolvers {
   export interface Resolvers<Context = any> {
+    _id?: IdResolver<string | null, any, Context>;
     destination?: DestinationResolver<DestinationEcsFields | null, any, Context>;
     event?: EventResolver<EventEcsFields | null, any, Context>;
     geo?: GeoResolver<GeoEcsFields | null, any, Context>;
@@ -313,6 +315,11 @@ export namespace EventItemResolvers {
     timestamp?: TimestampResolver<string | null, any, Context>;
   }
 
+  export type IdResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
   export type DestinationResolver<
     R = DestinationEcsFields | null,
     Parent = any,
@@ -522,6 +529,99 @@ export namespace SayMyNameResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace GetEventsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+    getEvents?: GetEvents | null;
+  };
+
+  export type GetEvents = {
+    __typename?: 'EventsData';
+    events: Events[];
+    kpiEventType: KpiEventType[];
+  };
+
+  export type Events = {
+    __typename?: 'EventItem';
+    _id?: string | null;
+    timestamp?: string | null;
+    event?: Event | null;
+    host?: Host | null;
+    source?: _Source | null;
+    destination?: Destination | null;
+    geo?: Geo | null;
+    suricata?: Suricata | null;
+  };
+
+  export type Event = {
+    __typename?: 'EventEcsFields';
+    type?: string | null;
+    severity?: number | null;
+    module?: string | null;
+    category?: string | null;
+    id?: number | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+    hostname?: string | null;
+    ip?: string | null;
+  };
+
+  export type _Source = {
+    __typename?: 'SourceEcsFields';
+    ip?: string | null;
+    port?: number | null;
+  };
+
+  export type Destination = {
+    __typename?: 'DestinationEcsFields';
+    ip?: string | null;
+    port?: number | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+    region_name?: string | null;
+    country_iso_code?: string | null;
+  };
+
+  export type Suricata = {
+    __typename?: 'SuricataEcsFields';
+    eve?: Eve | null;
+  };
+
+  export type Eve = {
+    __typename?: 'SuricataEveData';
+    proto?: string | null;
+    flow_id?: number | null;
+    alert?: Alert | null;
+  };
+
+  export type Alert = {
+    __typename?: 'SuricataAlertData';
+    signature?: string | null;
+    signature_id?: number | null;
+  };
+
+  export type KpiEventType = {
+    __typename?: 'KpiItem';
+    value: string;
+    count: number;
+  };
 }
 
 export namespace WhoAmIQuery {

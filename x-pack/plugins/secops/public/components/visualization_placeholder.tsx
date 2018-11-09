@@ -26,7 +26,7 @@ export const VisualizationPlaceholder = styled(EuiPanel)`
     margin: 5px;
     padding: 5px 5px 5px 10px;
     width: 500px;
-    height: 309px;
+    height: 320px;
     user-select: none;
   }
 `;
@@ -72,7 +72,7 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
     const { count, myRoute } = this.props;
 
     return (
-      <PlaceholdersContainer data-test-subj="placeholdersContainer">
+      <React.Fragment>
         {range(0, count).map(i => (
           <VisualizationPlaceholder
             data-test-subj="visualizationPlaceholder"
@@ -113,7 +113,7 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
             </Droppable>
           </VisualizationPlaceholder>
         ))}
-      </PlaceholdersContainer>
+      </React.Fragment>
     );
   }
 }

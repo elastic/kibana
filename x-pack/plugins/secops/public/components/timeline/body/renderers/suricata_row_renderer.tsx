@@ -61,22 +61,25 @@ const SuricataRow = styled.div`
 `;
 
 export const suricataRowRenderer: RowRenderer = {
-  isInstance: (ecs: ECS) => (ecs.event.module.toLowerCase() === 'suricata' ? true : false),
+  isInstance: (ecs: ECS) => {
+    if (ecs && ecs.event && ecs.event.module && ecs.event.module.toLowerCase() === 'suricata') {
+      return true;
+    }
+    return false;
+  },
   renderRow: (data: ECS, children: React.ReactNode) => {
     const signature = get('suricata.eve.alert.signature', data) as string;
-    if (signature != null) {
-      return (
-        <SuricataRow>
-          {children}
+    return (
+      <SuricataRow>
+        {children}
+        {signature != null ? (
           <SuricataSignature>
             <EuiButton fill size="s" href={createLinkWithSignature(signature)}>
               {signature}
             </EuiButton>
           </SuricataSignature>
-        </SuricataRow>
-      );
-    } else {
-      return <span />;
-    }
+        ) : null}
+      </SuricataRow>
+    );
   },
 };
