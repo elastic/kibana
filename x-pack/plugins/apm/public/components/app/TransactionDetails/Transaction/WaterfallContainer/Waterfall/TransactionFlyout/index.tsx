@@ -15,7 +15,6 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiPortal,
-  EuiText,
   EuiTitle
 } from '@elastic/eui';
 import { get } from 'lodash';
@@ -84,9 +83,9 @@ function DroppedSpansWarning({
 
   return (
     <React.Fragment>
-      <EuiCallOut>
-        Note: The APM agent that reported this transaction dropped {dropped}{' '}
-        spans or more based on its configuration. {docsLink}
+      <EuiCallOut size="s">
+        The APM agent that reported this transaction dropped {dropped} spans or
+        more based on its configuration. {docsLink}
       </EuiCallOut>
       <EuiHorizontalRule />
     </React.Fragment>
