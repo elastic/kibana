@@ -15,6 +15,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     >
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
           Cluster statistics
@@ -26,6 +27,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
       >
         <EuiText
           grow={true}
+          size="m"
         >
           This is an example of the basic cluster statistics that we’ll collect. It includes the number of indices, shards, and nodes. It also includes high-level usage statistics, such as whether monitoring is turned on.
         </EuiText>

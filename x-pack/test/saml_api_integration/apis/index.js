@@ -5,9 +5,8 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe.skip('apis SAML', function () {
+  describe('apis SAML', function () {
     this.tags('ciGroup4');
-
     loadTestFile(require.resolve('./security'));
   });
 }
