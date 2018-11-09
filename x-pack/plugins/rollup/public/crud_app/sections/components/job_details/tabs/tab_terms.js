@@ -11,7 +11,6 @@ import { FieldList } from '../../field_list';
 const columns = [{
   field: 'name',
   name: 'Field',
-  truncateText: true,
   sortable: true,
 }];
 

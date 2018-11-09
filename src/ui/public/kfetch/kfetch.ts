@@ -62,10 +62,11 @@ export async function kfetch(
       });
 
       return fetch(fullUrl, restOptions).then(async res => {
+        const body = await getBodyAsJson(res);
         if (res.ok) {
-          return res.json();
+          return body;
         }
-        throw new KFetchError(res, await getBodyAsJson(res));
+        throw new KFetchError(res, body);
       });
     }
   );

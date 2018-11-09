@@ -107,6 +107,9 @@
   "new_job_dedicated_index": {
     "text": "Select to store results in a separate index for this job."
   },
+  "new_job_enable_model_plot": {
+    "text": "Select to enable model plot. Stores model information along with results. Can add considerable overhead to the performance of the system."
+  },
   "new_job_model_memory_limit": {
     "text": "An approximate limit for the amount of memory used by the analytical models."
   },

@@ -4,6 +4,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
 <React.Fragment>
   <EuiText
     grow={true}
+    size="m"
   >
     <p>
       Choose the action(s) to take when the rule matches an anomaly.
@@ -94,6 +95,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
 <React.Fragment>
   <EuiText
     grow={true}
+    size="m"
   >
     <p>
       Choose the action(s) to take when the rule matches an anomaly.
@@ -184,6 +186,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
 <React.Fragment>
   <EuiText
     grow={true}
+    size="m"
   >
     <p>
       Choose the action(s) to take when the rule matches an anomaly.

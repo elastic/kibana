@@ -19,23 +19,8 @@ import {
 } from '../../inputs';
 
 addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
-  if (values && values.length > 0 && values instanceof Array) {
-    return values.reduce((pass: boolean, value: string) => {
-      if (
-        pass &&
-        value.match(
-          new RegExp(
-            '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'
-          )
-        ) !== null
-      ) {
-        return true;
-      }
-      return false;
-    }, true);
-  } else {
-    return true;
-  }
+  // TODO add more validation
+  return true;
 });
 
 addValidationRule('isString', (values: FormData, value: FieldValue) => {
@@ -54,7 +39,6 @@ addValidationRule('isPath', (values: FormData, value: FieldValue) => {
 
 addValidationRule('isPaths', (values: FormData, value: FieldValue) => {
   // TODO add more validation
-
   return true;
 });
 
