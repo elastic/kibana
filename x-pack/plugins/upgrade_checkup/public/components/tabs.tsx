@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 
 import { ClusterCheckupTab } from './tabs/cluster_checkup';
+import { DeprecationLoggingTab } from './tabs/deprecation_logging';
 import { OverviewTab } from './tabs/overview';
 
 // TODO: replace with types added in https://github.com/elastic/eui/pull/1288
@@ -36,20 +37,13 @@ export class UpgradeCheckupTabs extends React.Component {
       content: <ClusterCheckupTab />,
     },
     {
-      id: 'toggle_logging',
-      name: 'Toggle Deprecation Logging',
-      content: (
-        <Fragment>
-          <EuiSpacer />
-          <EuiTitle>
-            <h3>Toggle Deprecation Logging</h3>
-          </EuiTitle>
-        </Fragment>
-      ),
+      id: 'deprecation_logging',
+      name: 'Deprecation Logging',
+      content: <DeprecationLoggingTab />,
     },
   ];
 
   public render() {
-    return <EuiTabbedContent tabs={this.tabs} initialSelectedTab={this.tabs[1]} />;
+    return <EuiTabbedContent tabs={this.tabs} initialSelectedTab={this.tabs[2]} />;
   }
 }

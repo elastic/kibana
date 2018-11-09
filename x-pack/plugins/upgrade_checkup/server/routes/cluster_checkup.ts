@@ -31,32 +31,32 @@ export function registerClusterCheckupRoutes(server: Server) {
     },
   });
 
-  server.route({
-    path: '/api/upgrade_checkup/index_upgrade/{indexName}',
-    method: 'POST',
-    options: {
-      validate: {
-        params: {
-          // TODO: make this more specific
-          indexName: Joi.string().required(),
-        },
-      },
-    },
-    async handler(request) {
-      try {
-        const index = request.params.indexName;
-        const response = await callWithRequest(request, 'transport.request', {
-          path: `/_xpack/migration/upgrade/${index}`,
-          method: 'POST',
-          query: {
-            wait_for_completion: false,
-          },
-        });
+  // server.route({
+  //   path: '/api/upgrade_checkup/index_upgrade/{indexName}',
+  //   method: 'POST',
+  //   options: {
+  //     validate: {
+  //       params: {
+  //         // TODO: make this more specific
+  //         indexName: Joi.string().required(),
+  //       },
+  //     },
+  //   },
+  //   async handler(request) {
+  //     try {
+  //       const index = request.params.indexName;
+  //       const response = await callWithRequest(request, 'transport.request', {
+  //         path: `/_xpack/migration/upgrade/${index}`,
+  //         method: 'POST',
+  //         query: {
+  //           wait_for_completion: false,
+  //         },
+  //       });
 
-        return response;
-      } catch (e) {
-        return Boom.boomify(e);
-      }
-    },
-  });
+  //       return response;
+  //     } catch (e) {
+  //       return Boom.boomify(e);
+  //     }
+  //   },
+  // });
 }
