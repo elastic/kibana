@@ -13,6 +13,8 @@ import { serializeProvider } from '../../../../common/lib/serialize';
 const pluginsReady = populateServerRegistries(['commonFunctions', 'types']);
 const heap = {};
 
+Object.freeze(Object.prototype);
+
 process.on('message', msg => {
   const { type, id, value } = msg;
   const threadId = id;
