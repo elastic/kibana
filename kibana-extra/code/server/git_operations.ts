@@ -128,13 +128,24 @@ export class GitOperations {
     return checkExists<Repository>(() => Repository.open(repoDir), `repo ${uri} not found`);
   }
 
+  /**
+   * Return a fileTree structure by walking the repo file tree.
+   * @param uri the repo uri
+   * @param path the start path
+   * @param revision the revision
+   * @param skip pagination parameter, skip how many nodes in each children.
+   * @param limit pagination parameter, limit the number of node's children.
+   * @param resolveParents whether the return value should always start from root
+   * @param childrenDepth how depth should the children walk.
+   */
   public async fileTree(
     uri: RepositoryUri,
     path: string,
     revision: string = HEAD,
     skip: number = 0,
     limit: number = DEFAULT_TREE_CHILDREN_LIMIT,
-    resolveParents: boolean = false
+    resolveParents: boolean = false,
+    childrenDepth: number = 1
   ): Promise<FileTree> {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
@@ -152,12 +163,13 @@ export class GitOperations {
         tree,
         [],
         skip,
-        limit
+        limit,
+        childrenDepth
       );
     };
     if (path) {
       if (resolveParents) {
-        return this.walkTree(await getRoot(), tree, path.split('/'), skip, limit);
+        return this.walkTree(await getRoot(), tree, path.split('/'), skip, limit, childrenDepth);
       } else {
         const entry = await checkExists(
           () => Promise.resolve(tree.getEntry(path)),
@@ -165,7 +177,7 @@ export class GitOperations {
         );
         if (entry.isDirectory()) {
           const tree1 = await entry.getTree();
-          return this.walkTree(entry2Tree(entry), tree1, [], skip, limit);
+          return this.walkTree(entry2Tree(entry), tree1, [], skip, limit, childrenDepth);
         } else {
           return entry2Tree(entry);
         }
@@ -274,18 +286,23 @@ export class GitOperations {
     tree: Tree,
     paths: string[],
     skip: number,
-    limit: number
+    limit: number,
+    childrenDepth: number = 1
   ): Promise<FileTree> {
     const [path, ...rest] = paths;
     if (!fileTree.children) {
       fileTree.children = [];
       for (const e of tree.entries().slice(skip, limit)) {
         if (e.path() !== path) {
-          fileTree.children.push(entry2Tree(e));
+          const child = entry2Tree(e);
+          fileTree.children.push(child);
+          if (e.isDirectory() && childrenDepth > 1) {
+            await this.walkTree(child, await e.getTree(), [], skip, limit, childrenDepth - 1);
+          }
         }
       }
     }
-    fileTree.totalChildren = tree.entryCount();
+    fileTree.childrenCount = tree.entryCount();
     if (path) {
       const entry = await checkExists(
         () => Promise.resolve(tree.getEntry(path)),
@@ -293,7 +310,7 @@ export class GitOperations {
       );
       let child = entry2Tree(entry);
       if (entry.isDirectory()) {
-        child = await this.walkTree(child, await entry.getTree(), rest, skip, limit);
+        child = await this.walkTree(child, await entry.getTree(), rest, skip, limit, childrenDepth);
       }
       const idx = fileTree.children.findIndex(c => c.name === entry.name());
       if (idx >= 0) {

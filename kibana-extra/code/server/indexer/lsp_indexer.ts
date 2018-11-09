@@ -103,7 +103,15 @@ export class LspIndexer extends AbstractIndexer {
       } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
       const workspaceDir = workspaceRepo.workdir();
       const gitOperator = new GitOperations(this.options.repoPath);
-      const fileTree = await gitOperator.fileTree(this.repoUri, '');
+      const fileTree = await gitOperator.fileTree(
+        this.repoUri,
+        '',
+        'HEAD',
+        0,
+        Number.MAX_SAFE_INTEGER,
+        false,
+        Number.MAX_SAFE_INTEGER
+      );
       return RepositoryUtils.getAllFiles(fileTree)
         .filter((filePath: string) => {
           const lang = detectLanguageByFilename(filePath);

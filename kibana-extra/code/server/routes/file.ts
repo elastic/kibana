@@ -31,9 +31,10 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
         ? parseInt(queries.limit as string, 10)
         : DEFAULT_TREE_CHILDREN_LIMIT;
       const skip = queries.skip ? parseInt(queries.skip as string, 10) : 0;
+      const depth = queries.depth ? parseInt(queries.depth as string, 10) : 0;
       const withParents = 'parents' in queries;
       try {
-        return await fileResolver.fileTree(uri, path, ref, skip, limit, withParents);
+        return await fileResolver.fileTree(uri, path, ref, skip, limit, withParents, depth);
       } catch (e) {
         if (e.isBoom) {
           return e;

@@ -32,7 +32,10 @@ export interface FileTree {
    * directory and its children haven't been evaluated.
    */
   children?: FileTree[];
-  totalChildren?: number;
+  /**
+   * count of children nodes for current node, use this for pagination
+   */
+  childrenCount?: number;
   sha1?: string;
   /**
    *  current repo uri
