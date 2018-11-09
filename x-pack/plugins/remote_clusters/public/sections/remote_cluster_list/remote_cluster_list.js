@@ -26,7 +26,8 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { extractQueryParams } from '../../services';
+import { CRUD_APP_BASE_PATH } from '../../constants';
+import { getRouterLinkProps, extractQueryParams } from '../../services';
 
 import {
   RemoteClusterTable,
@@ -85,10 +86,6 @@ export class RemoteClusterListUi extends Component {
     // Close the panel, otherwise it will default to already being open when we navigate back to
     // this page.
     this.props.closeDetailPanel();
-  }
-
-  connectRemoteCluster() {
-    // TODO: Show modal and update query string to enable deep-linking.
   }
 
   getHeaderSection() {
@@ -182,7 +179,7 @@ export class RemoteClusterListUi extends Component {
         }
         actions={
           <EuiButton
-            onClick={this.connectRemoteCluster}
+            {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
             fill
             iconType="plusInCircle"
           >
@@ -234,7 +231,10 @@ export class RemoteClusterListUi extends Component {
           {this.getHeaderSection()}
 
           <EuiPageContentHeaderSection>
-            <EuiButton fill onClick={this.connectRemoteCluster}>
+            <EuiButton
+              {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
+              fill
+            >
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterList.connectButtonLabel"
                 defaultMessage="Connect a remote cluster"
