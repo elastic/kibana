@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AvgResponseTimeBucket } from '../get_anomaly_aggs';
 import { getBucketWithInitialAnomalyBounds } from '../get_buckets_with_initial_anomaly_bounds';
-import mainBucketsResponse from './mockData/mainBucketsResponse';
-import firstBucketsResponse from './mockData/firstBucketsResponse';
+import firstBucketsResponse from './mockData/firstBucketsResponse.json';
+import mainBucketsResponse from './mockData/mainBucketsResponse.json';
 
 describe('get_buckets_with_initial_anomaly_bounds', () => {
   const mainBuckets =
     mainBucketsResponse.aggregations.ml_avg_response_times.buckets;
-  let buckets;
+  let buckets: AvgResponseTimeBucket[];
 
   beforeEach(async () => {
     buckets = await getBucketWithInitialAnomalyBounds({
       serviceName: 'myServiceName',
       transactionType: 'myTransactionType',
-      intervalString: '60s',
       start: 1530523322742,
       client: () => firstBucketsResponse,
       mainBuckets,

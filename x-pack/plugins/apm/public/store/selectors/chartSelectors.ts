@@ -5,10 +5,25 @@
  */
 
 import d3 from 'd3';
-import { last, zipObject, difference, memoize, get, isEmpty } from 'lodash';
-import { colors } from '../../style/variables';
-import { asMillis, asDecimal, tpmUnit } from '../../utils/formatters';
+import { difference, last, memoize, zipObject } from 'lodash';
 import { rgba } from 'polished';
+import {
+  AvgAnomalyBuckets,
+  TimeSeriesResponse
+} from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { colors } from '../../style/variables';
+import { asDecimal, asMillis, tpmUnit } from '../../utils/formatters';
+import { IUrlParams } from '../urlParams';
+
+interface Coordinate {
+  x: number;
+  y?: number | null;
+}
+
+interface BoundaryCoordinate extends Coordinate {
+  y0: number | null;
+}
 
 export const getEmptySerie = memoize(
   (start = Date.now() - 3600000, end = Date.now()) => {
@@ -26,10 +41,10 @@ export const getEmptySerie = memoize(
       }
     ];
   },
-  (...args) => args.join('_')
+  (start: number, end: number) => [start, end].join('_')
 );
 
-export function getCharts(urlParams, charts) {
+export function getCharts(urlParams: IUrlParams, charts: TimeSeriesResponse) {
   const { start, end, transactionType } = urlParams;
   const noHits = charts.totalHits === 0;
   const tpmSeries = noHits
@@ -47,11 +62,23 @@ export function getCharts(urlParams, charts) {
   };
 }
 
-export function getResponseTimeSeries(chartsData) {
+interface TimeSerie {
+  title: string;
+  titleShort?: string;
+  hideLegend?: boolean;
+  hideTooltipValue?: boolean;
+  data: Coordinate[];
+  legendValue?: string;
+  type: string;
+  color: string;
+  areaColor?: string;
+}
+
+export function getResponseTimeSeries(chartsData: TimeSeriesResponse) {
   const { dates, overallAvgDuration } = chartsData;
   const { avg, p95, p99, avgAnomalies } = chartsData.responseTimes;
 
-  const series = [
+  const series: TimeSerie[] = [
     {
       title: 'Avg.',
       data: getChartValues(dates, avg),
@@ -75,7 +102,7 @@ export function getResponseTimeSeries(chartsData) {
     }
   ];
 
-  if (!isEmpty(avgAnomalies.buckets)) {
+  if (avgAnomalies) {
     // insert after Avg. serie
     series.splice(1, 0, {
       title: 'Anomaly Boundaries',
@@ -109,10 +136,14 @@ export function getResponseTimeSeries(chartsData) {
   return series;
 }
 
-export function getTpmSeries(chartsData, transactionType) {
+export function getTpmSeries(
+  chartsData: TimeSeriesResponse,
+  transactionType?: string
+) {
   const { dates, tpmBuckets } = chartsData;
-  const getColor = getColorByKey(tpmBuckets.map(({ key }) => key));
-  const getTpmLegendTitle = bucketKey => {
+  const bucketKeys = tpmBuckets.map(({ key }) => key);
+  const getColor = getColorByKey(bucketKeys);
+  const getTpmLegendTitle = (bucketKey: string) => {
     // hide legend text for transactions without "result"
     if (bucketKey === 'transaction_result_missing') {
       return '';
@@ -125,15 +156,15 @@ export function getTpmSeries(chartsData, transactionType) {
     return {
       title: getTpmLegendTitle(bucket.key),
       data: getChartValues(dates, bucket.values),
-      legendValue: `${asDecimal(bucket.avg)} ${tpmUnit(transactionType)}`,
+      legendValue: `${asDecimal(bucket.avg)} ${tpmUnit(transactionType || '')}`,
       type: 'line',
       color: getColor(bucket.key)
     };
   });
 }
 
-function getColorByKey(keys) {
-  const assignedColors = {
+function getColorByKey(keys: string[]) {
+  const assignedColors: StringMap<string> = {
     'HTTP 2xx': colors.apmGreen,
     'HTTP 3xx': colors.apmYellow,
     'HTTP 4xx': colors.apmOrange,
@@ -141,7 +172,7 @@ function getColorByKey(keys) {
   };
 
   const unknownKeys = difference(keys, Object.keys(assignedColors));
-  const unassignedColors = zipObject(unknownKeys, [
+  const unassignedColors: StringMap<string> = zipObject(unknownKeys, [
     colors.apmBlue,
     colors.apmPurple,
     colors.apmPink,
@@ -150,10 +181,13 @@ function getColorByKey(keys) {
     colors.apmBrown
   ]);
 
-  return key => assignedColors[key] || unassignedColors[key];
+  return (key: string) => assignedColors[key] || unassignedColors[key];
 }
 
-function getChartValues(dates = [], buckets = []) {
+function getChartValues(
+  dates: number[] = [],
+  buckets: Array<number | null> = []
+) {
   return dates.map((x, i) => ({
     x,
     y: buckets[i]
@@ -161,27 +195,32 @@ function getChartValues(dates = [], buckets = []) {
 }
 
 export function getAnomalyScoreValues(
-  dates = [],
-  buckets = [],
-  bucketSpanAsMillis
+  dates: number[] = [],
+  buckets: AvgAnomalyBuckets[] = [],
+  bucketSpanAsMillis: number
 ) {
   const ANOMALY_THRESHOLD = 75;
-  const getX = (currentX, i) => currentX + bucketSpanAsMillis * i;
+  const getX = (currentX: number, i: number) =>
+    currentX + bucketSpanAsMillis * i;
 
   return dates
-    .map((x, i) => {
-      const { anomalyScore } = buckets[i] || {};
+    .map((date, i) => {
+      const { anomalyScore } = buckets[i];
       return {
-        x,
+        x: date,
         anomalyScore
       };
     })
-    .filter(p => p.anomalyScore > ANOMALY_THRESHOLD)
-    .reduce((acc, p, i, points) => {
-      acc.push({ x: p.x, y: 1 });
-      const { x: nextX } = points[i + 1] || {};
+    .filter(p => {
+      const res =
+        p && p.anomalyScore != null && p.anomalyScore > ANOMALY_THRESHOLD;
+      return res;
+    })
+    .reduce<Coordinate[]>((acc, p, i, points) => {
+      const nextPoint = points[i + 1] || {};
       const endX = getX(p.x, 1);
-      if (nextX == null || nextX > endX) {
+      acc.push({ x: p.x, y: 1 });
+      if (nextPoint.x == null || nextPoint.x > endX) {
         acc.push(
           {
             x: endX,
@@ -198,19 +237,22 @@ export function getAnomalyScoreValues(
 }
 
 export function getAnomalyBoundaryValues(
-  dates = [],
-  buckets = [],
-  bucketSpanAsMillis
+  dates: number[] = [],
+  buckets: AvgAnomalyBuckets[] = [],
+  bucketSpanAsMillis: number
 ) {
   const lastX = last(dates);
   return dates
-    .map((x, i) => ({
-      x,
-      y0: get(buckets[i], 'lower'),
-      y: get(buckets[i], 'upper')
-    }))
-    .filter(point => point.y != null)
-    .reduce((acc, p, i, points) => {
+    .map((date, i) => {
+      const bucket = buckets[i];
+      return {
+        x: date,
+        y0: bucket.lower,
+        y: bucket.upper
+      };
+    })
+    .filter(p => p.y != null)
+    .reduce<BoundaryCoordinate[]>((acc, p, i, points) => {
       const isLast = last(points) === p;
       acc.push(p);
 

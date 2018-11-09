@@ -4,22 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export class SessionStorageMock {
-  store = {};
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 
-  clear() {
+export class SessionStorageMock {
+  private store: StringMap = {};
+
+  public clear() {
     this.store = {};
   }
 
-  getItem(key) {
+  public getItem(key: string) {
     return this.store[key] || null;
   }
 
-  setItem(key, value) {
+  public setItem(key: string, value: any) {
     this.store[key] = value.toString();
   }
 
-  removeItem(key) {
+  public removeItem(key: string) {
     delete this.store[key];
   }
 }

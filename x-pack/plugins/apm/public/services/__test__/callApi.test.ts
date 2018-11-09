@@ -5,16 +5,17 @@
  */
 
 import * as kfetchModule from 'ui/kfetch';
-import { SessionStorageMock } from './SessionStorageMock';
 import { callApi } from '../rest/callApi';
+import { SessionStorageMock } from './SessionStorageMock';
 
 describe('callApi', () => {
-  let kfetchSpy;
+  let kfetchSpy: jest.Mock;
 
   beforeEach(() => {
     kfetchSpy = jest.spyOn(kfetchModule, 'kfetch').mockResolvedValue({
       my_key: 'hello world'
     });
+    // @ts-ignore
     global.sessionStorage = new SessionStorageMock();
   });
 

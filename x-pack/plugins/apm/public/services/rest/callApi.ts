@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'isomorphic-fetch';
 import { camelizeKeys } from 'humps';
-import { kfetch } from 'ui/kfetch';
+import 'isomorphic-fetch';
 import { startsWith } from 'lodash';
+import { kfetch, KFetchOptions } from 'ui/kfetch';
 
-function fetchOptionsWithDebug(fetchOptions) {
+function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   const debugEnabled =
     sessionStorage.getItem('apm_debug') === 'true' &&
     startsWith(fetchOptions.pathname, '/api/apm');
@@ -28,7 +28,7 @@ function fetchOptionsWithDebug(fetchOptions) {
 }
 
 export async function callApi(
-  fetchOptions,
+  fetchOptions: KFetchOptions,
   { camelcase = true, prependBasePath = true } = {}
 ) {
   const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);

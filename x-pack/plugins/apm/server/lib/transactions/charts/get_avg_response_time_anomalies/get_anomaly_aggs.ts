@@ -4,6 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SearchResponse } from 'elasticsearch';
+import { oc } from 'ts-optchain';
+import { ESClient } from '../../../helpers/setup_request';
+
+interface Props {
+  serviceName: string;
+  transactionType: string;
+  intervalString: string;
+  client: ESClient<any>;
+  start: number;
+  end: number;
+}
+
+export interface AvgResponseTimeBucket {
+  anomaly_score: {
+    value: number | null;
+  };
+  lower: {
+    value: number | null;
+  };
+  upper: {
+    value: number | null;
+  };
+}
+
+interface Aggs {
+  ml_avg_response_times: {
+    buckets: AvgResponseTimeBucket[];
+  };
+  top_hits: SearchResponse<{
+    bucket_span: number;
+  }>;
+}
+
 export async function getAnomalyAggs({
   serviceName,
   transactionType,
@@ -11,7 +45,7 @@ export async function getAnomalyAggs({
   client,
   start,
   end
-}) {
+}: Props) {
   const params = {
     index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`.toLowerCase(),
     body: {
@@ -61,11 +95,14 @@ export async function getAnomalyAggs({
 
   try {
     const resp = await client('search', params);
-    return resp.aggregations;
+    const aggs: Aggs = resp.aggregations;
+
+    return {
+      avgResponseTimes: oc(aggs).ml_avg_response_times.buckets([]),
+      bucketSpan: oc(aggs).top_hits.hits.hits[0]._source.bucket_span(0)
+    };
   } catch (err) {
     if ('statusCode' in err) {
-      // swallow HTTP errors because there are lots of reasons
-      // the ml index lookup may fail, and we're ok with that
       return null;
     }
 

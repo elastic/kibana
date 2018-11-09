@@ -4,26 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { createSelector } from 'reselect';
 import { get, isEmpty } from 'lodash';
-import { getCharts } from '../selectors/chartSelectors';
-import { getUrlParams } from '../urlParams';
-import { Request } from 'react-redux-request';
+import React from 'react';
+import { Request, RRRRender } from 'react-redux-request';
+import { createSelector } from 'reselect';
+import { TimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
 import { loadCharts } from '../../services/rest/apm';
+import { IReduxState } from '../rootReducer';
+import { getCharts } from '../selectors/chartSelectors';
+import { getUrlParams, IUrlParams } from '../urlParams';
 
 const ID = 'transactionOverviewCharts';
 const INITIAL_DATA = {
   totalHits: 0,
   dates: [],
-  responseTimes: {},
+  responseTimes: {
+    avg: [],
+    p95: [],
+    p99: []
+  },
   tpmBuckets: [],
-  overallAvgDuration: null
+  overallAvgDuration: undefined
 };
 
 export const getTransactionOverviewCharts = createSelector(
   getUrlParams,
-  state => state.reactReduxRequest[ID],
+  (state: IReduxState) => state.reactReduxRequest[ID],
   (urlParams, overviewCharts = {}) => {
     return {
       ...overviewCharts,
@@ -32,7 +38,7 @@ export const getTransactionOverviewCharts = createSelector(
   }
 );
 
-export function hasDynamicBaseline(state) {
+export function hasDynamicBaseline(state: IReduxState) {
   return !isEmpty(
     get(
       state,
@@ -41,7 +47,12 @@ export function hasDynamicBaseline(state) {
   );
 }
 
-export function TransactionOverviewChartsRequest({ urlParams, render }) {
+interface Props {
+  urlParams: IUrlParams;
+  render: RRRRender<TimeSeriesResponse>;
+}
+
+export function TransactionOverviewChartsRequest({ urlParams, render }: Props) {
   const { serviceName, start, end, transactionType, kuery } = urlParams;
 
   if (!(serviceName && start && end && transactionType)) {
