@@ -15,9 +15,10 @@ import routes from 'ui/routes';
 import { CRUD_APP_BASE_PATH } from './constants';
 import template from './main.html';
 
-import { setHttpClient } from './services/api';
+import { setHttpClient } from './services';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
 
+import { App } from './app';
 import { remoteClustersManagementStore } from './store';
 
 const esSection = management.getSection('elasticsearch');
@@ -34,7 +35,7 @@ const renderReact = async (elem) => {
     <I18nProvider>
       <Provider store={remoteClustersManagementStore}>
         <HashRouter>
-          <p>This is a placeholder.</p>
+          <App />
         </HashRouter>
       </Provider>
     </I18nProvider>,
