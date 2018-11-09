@@ -216,6 +216,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
   <React.Fragment>
     <EuiTitle
       size="xs"
+      textTransform="none"
     >
       <h3>
         <FormattedMessage

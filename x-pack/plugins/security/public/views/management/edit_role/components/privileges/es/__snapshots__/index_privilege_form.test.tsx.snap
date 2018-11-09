@@ -48,6 +48,7 @@ exports[`it renders without crashing 1`] = `
               }
             >
               <EuiComboBox
+                compressed={false}
                 data-test-subj="indicesInput0"
                 fullWidth={false}
                 isClearable={true}
@@ -77,6 +78,7 @@ exports[`it renders without crashing 1`] = `
               }
             >
               <EuiComboBox
+                compressed={false}
                 data-test-subj="privilegesInput0"
                 fullWidth={false}
                 isClearable={true}
@@ -165,6 +167,7 @@ exports[`it renders without crashing 1`] = `
             >
               <React.Fragment>
                 <EuiComboBox
+                  compressed={false}
                   data-test-subj="fieldInput0"
                   fullWidth={false}
                   isClearable={true}

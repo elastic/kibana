@@ -21,6 +21,7 @@ exports[`it renders without blowing up 1`] = `
     >
       <EuiTitle
         size="m"
+        textTransform="none"
       >
         <h2>
           <EuiIcon
