@@ -7,6 +7,7 @@
 import { mount } from 'enzyme';
 import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
 import {
   getEventCount,
   mockDataProviderNames,
@@ -18,7 +19,9 @@ describe('Providers', () => {
   describe('rendering', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <Providers dataProviders={mockDataProviders} onDataProviderRemoved={noop} />
+        <DragDropContext onDragEnd={noop}>
+          <Providers dataProviders={mockDataProviders} id="foo" onDataProviderRemoved={noop} />
+        </DragDropContext>
       );
 
       mockDataProviderNames().forEach(name =>
@@ -32,10 +35,13 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
 
       const wrapper = mount(
-        <Providers
-          dataProviders={mockDataProviders}
-          onDataProviderRemoved={mockOnDataProviderRemoved}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <Providers
+            dataProviders={mockDataProviders}
+            id="foo"
+            onDataProviderRemoved={mockOnDataProviderRemoved}
+          />
+        </DragDropContext>
       );
 
       wrapper

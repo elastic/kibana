@@ -7,12 +7,12 @@
 import { EuiPanel } from '@elastic/eui';
 import { range } from 'lodash/fp';
 import * as React from 'react';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
 
 import { WhoAmI } from '../containers/who_am_i';
-import { timelineActions } from '../store';
 import { mockDataProviders } from './timeline/data_providers/mock/mock_data_providers';
 
 export const VisualizationPlaceholder = styled(EuiPanel)`
@@ -32,47 +32,76 @@ export const VisualizationPlaceholder = styled(EuiPanel)`
 export const ProviderContainer = styled.div`
   margin: 5px;
   user-select: none;
-  cursor: grab;
 `;
 
+export const PlaceholdersContainer = styled.div``; // required by react-beautiful-dnd
+const ReactDndDropTarget = styled.div``; // required by react-beautiful-dnd
+
 interface Props {
-  timelineId: string;
   count: number;
   myRoute: string;
   dispatch: Dispatch;
 }
 
+interface GetDraggableIdParams {
+  dataProviderId: string;
+}
+const getDraggableId = ({ dataProviderId }: GetDraggableIdParams): string =>
+  `draggableId.provider.${dataProviderId}`;
+
+const getDroppableId = ({
+  visualizationPlaceholderId,
+}: {
+  visualizationPlaceholderId: string;
+}): string => `droppableId.provider.${visualizationPlaceholderId}`;
+
 /** TODO: delete this stub */
 class PlaceholdersComponent extends React.PureComponent<Props> {
   public render() {
-    const { count, dispatch, myRoute, timelineId } = this.props;
+    const { count, myRoute } = this.props;
 
     return (
-      <React.Fragment>
+      <PlaceholdersContainer data-test-subj="placeholdersContainer">
         {range(0, count).map(i => (
           <VisualizationPlaceholder
             data-test-subj="visualizationPlaceholder"
             key={`visualizationPlaceholder-${i}`}
           >
-            <WhoAmI data-test-subj="whoAmI" sourceId="default">
-              {({ appName }) => (
-                <div>
-                  {appName} {myRoute}
-                </div>
+            <Droppable droppableId={getDroppableId({ visualizationPlaceholderId: `${i}` })}>
+              {droppableProvided => (
+                <ReactDndDropTarget
+                  innerRef={droppableProvided.innerRef}
+                  {...droppableProvided.droppableProps}
+                >
+                  <WhoAmI data-test-subj="whoAmI" sourceId="default">
+                    {({ appName }) => (
+                      <div>
+                        {appName} {myRoute}
+                      </div>
+                    )}
+                  </WhoAmI>
+                  <Draggable
+                    draggableId={getDraggableId({ dataProviderId: mockDataProviders[i].id })}
+                    index={i}
+                    key={mockDataProviders[i].id}
+                  >
+                    {provided => (
+                      <ProviderContainer
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        innerRef={provided.innerRef}
+                        data-test-subj="providerContainer"
+                      >
+                        {mockDataProviders[i].render()}
+                      </ProviderContainer>
+                    )}
+                  </Draggable>
+                </ReactDndDropTarget>
               )}
-            </WhoAmI>
-            <ProviderContainer
-              onClick={() => {
-                dispatch(
-                  timelineActions.addProvider({ id: timelineId, provider: mockDataProviders[i] })
-                );
-              }}
-            >
-              {mockDataProviders[i].render()}
-            </ProviderContainer>
+            </Droppable>
           </VisualizationPlaceholder>
         ))}
-      </React.Fragment>
+      </PlaceholdersContainer>
     );
   }
 }

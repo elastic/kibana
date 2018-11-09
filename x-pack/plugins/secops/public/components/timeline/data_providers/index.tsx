@@ -31,7 +31,9 @@ const DropTargetDataProviders = styled.div`
   padding: 5px;
 `;
 
-const ReactDndDropTarget = styled.div``;
+const ReactDndDropTarget = styled.div``; // required by react-beautiful-dnd
+
+const getDroppableId = (id: string): string => `droppableId.timelineProviders.${id}`;
 
 /**
  * Renders the data providers section of the timeline.
@@ -52,11 +54,12 @@ const ReactDndDropTarget = styled.div``;
  */
 export const DataProviders = pure<Props>(({ id, dataProviders, onDataProviderRemoved }) => (
   <DropTargetDataProviders data-test-subj="dataProviders">
-    <Droppable droppableId={`timeline-${id}-providers`}>
+    <Droppable droppableId={getDroppableId(id)}>
       {provided => (
         <ReactDndDropTarget innerRef={provided.innerRef} {...provided.droppableProps}>
           {dataProviders.length ? (
             <Providers
+              id={id}
               dataProviders={dataProviders}
               onDataProviderRemoved={onDataProviderRemoved}
             />

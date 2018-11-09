@@ -35,6 +35,7 @@ const CloseButton = pure(({ onDataProviderRemoved, dataProvider }: CloseButtonPr
 });
 
 interface Props {
+  id: string;
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
 }
@@ -65,6 +66,13 @@ const Spacer = styled(EuiSpacer)`
 
 const ProviderContainer = styled.div``; // required because react-beautiful-dnd cannot wrap EuiPanel directly
 
+interface GetDraggableIdParams {
+  id: string;
+  dataProviderId: string;
+}
+const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): string =>
+  `draggableId.timeline.${id}.dataProvider.${dataProviderId}`;
+
 /**
  * Renders an interactive card representation of the data providers. It also
  * affords uniform UI controls for the following actions:
@@ -72,10 +80,14 @@ const ProviderContainer = styled.div``; // required because react-beautiful-dnd 
  * 2) temporarily disabling a data provider
  * 3) applying boolean negation to the data provider
  */
-export const Providers = pure<Props>(({ dataProviders, onDataProviderRemoved }) => (
+export const Providers = pure<Props>(({ id, dataProviders, onDataProviderRemoved }) => (
   <PanelProviders data-test-subj="providers">
     {dataProviders.map((dataProvider, i) => (
-      <Draggable draggableId={dataProvider.id} index={i} key={dataProvider.id}>
+      <Draggable
+        draggableId={getDraggableId({ id, dataProviderId: dataProvider.id })}
+        index={i}
+        key={dataProvider.id}
+      >
         {provided => (
           <ProviderContainer
             {...provided.draggableProps}
