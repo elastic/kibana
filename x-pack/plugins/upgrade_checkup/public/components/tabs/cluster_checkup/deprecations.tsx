@@ -17,7 +17,6 @@ import {
   IconColor,
 } from '@elastic/eui';
 
-import { filter } from 'rxjs/operators';
 import {
   DeprecationInfo,
   MIGRATION_DEPRECATION_LEVEL as LEVEL,

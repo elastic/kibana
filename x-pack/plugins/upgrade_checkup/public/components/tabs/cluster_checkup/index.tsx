@@ -10,7 +10,6 @@ import React, { Fragment } from 'react';
 import {
   // @ts-ignore
   EuiAccordion,
-  EuiButton,
   EuiCallOut,
   EuiLoadingSpinner,
   EuiSpacer,

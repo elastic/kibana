@@ -80,9 +80,8 @@ export interface DeprecationAPIResponse {
 }
 
 export interface CallClusterWithRequest {
-  <T = any>(request: Request, endpoint: string, clientParams?: object, options?: object): Promise<
-    T
-  >;
+  // Default types
+  <T = any>(request: Request, ...restArgs: any[]): Promise<T>;
   (
     request: Request,
     endpoint: 'transport.request',

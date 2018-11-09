@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import {
-  EuiSpacer,
   // @ts-ignore
   EuiTabbedContent,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { ClusterCheckupTab } from './tabs/cluster_checkup';

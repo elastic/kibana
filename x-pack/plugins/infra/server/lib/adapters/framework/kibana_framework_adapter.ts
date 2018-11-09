@@ -5,7 +5,7 @@
  */
 
 import { GraphQLSchema } from 'graphql';
-import { Request, ResponseToolkit, Server } from 'hapi';
+import { Request, ResponseToolkit, Server } from 'src/server/kbn_server';
 
 import { InfraMetricModel } from '../metrics/adapter_types';
 import {

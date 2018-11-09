@@ -5,7 +5,6 @@
  */
 
 import Boom from 'boom';
-import Joi from 'joi';
 import { Server } from 'src/server/kbn_server';
 
 import { getUpgradeCheckupStatus } from '../lib/es_migration_apis';

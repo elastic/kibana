@@ -36,8 +36,22 @@ declare module 'hapi' {
   }
 }
 
-export interface KbnServer {
-  server: Server;
+type KbnMixinFunc = (kibana: any, server: Server, config: any) => Promise<any> | void;
+
+export default class KbnServer {
+  public static mock: any;
+  public static mockClear: () => void;
+
+  public server: Server;
+  public inject: Server['inject'];
+
+  constructor(settings: any, core: any);
+
+  public ready(): Promise<void>;
+  public mixin(...fns: KbnMixinFunc[]): Promise<void>;
+  public listen(): Promise<Server>;
+  public close(): Promise<void>;
+  public applyLoggingConfiguration(settings: any): void;
 }
 
 export { Server, Request, ResponseToolkit } from 'hapi';

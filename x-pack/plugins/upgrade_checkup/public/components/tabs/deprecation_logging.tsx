@@ -8,7 +8,6 @@ import axios from 'axios';
 import React, { Fragment } from 'react';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,

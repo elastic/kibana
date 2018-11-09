@@ -15,20 +15,9 @@ interface LevelFilterBarProps {
 }
 
 export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
-  private allClicked = this.filterClicked.bind(this, 'all');
-  private infoClicked = this.filterClicked.bind(this, 'info');
-  private warningClicked = this.filterClicked.bind(this, 'warning');
-  private criticalClicked = this.filterClicked.bind(this, 'critical');
-
   public render() {
     const { currentFilter } = this.props;
 
-    const isCurrent = (f: LevelFilterOption) => currentFilter === f;
-
-    // const allOptions = keyof LevelFilterOption;
-
-    // const allSel = currentFilter === 'all';
-    // const infoSel = currentFilter === 'inf'</EuiFilterGroup>
     return (
       <EuiFilterGroup>
         {Object.keys(LevelFilterOption).map(option => (
@@ -40,15 +29,6 @@ export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
             {option}
           </EuiFilterButton>
         ))}
-      </EuiFilterGroup>
-    );
-
-    return (
-      <EuiFilterGroup>
-        <EuiFilterButton onClick={this.allClicked}>All</EuiFilterButton>
-        <EuiFilterButton onClick={this.infoClicked}>Info</EuiFilterButton>
-        <EuiFilterButton onClick={this.warningClicked}>Warning</EuiFilterButton>
-        <EuiFilterButton onClick={this.criticalClicked}>Critical</EuiFilterButton>
       </EuiFilterGroup>
     );
   }
