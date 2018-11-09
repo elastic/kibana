@@ -301,7 +301,7 @@ module.controller('MlNewJob',
 
     function changeTab(tab) {
       $scope.ui.currentTab = tab.index;
-      if (tab.index === 1) {
+      if (tab.index === 1 && $scope.ui.enableModelPlot === true) {
         const unchanged = _.isEqual(currentDetectorConfig, $scope.job.analysis_config.detectors);
 
         if (!unchanged) {
