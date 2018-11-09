@@ -26,6 +26,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
       <EuiText
         data-test-subj="confirmModalBodyText"
         grow={true}
+        size="m"
       >
         <p>
           <FormattedMessage
@@ -67,6 +68,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
         >
           <EuiText
             grow={true}
+            size="m"
           >
             <FormattedMessage
               defaultMessage="You are about to delete your current space {name}. You will be redirected to choose a different space if you continue."

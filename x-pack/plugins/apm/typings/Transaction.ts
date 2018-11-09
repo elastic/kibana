@@ -28,6 +28,7 @@ interface Context {
     url: {
       full: string;
     };
+    method: string;
   };
   user?: {
     id: string;

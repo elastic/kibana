@@ -26,6 +26,7 @@ exports[`it renders without crashing 1`] = `
       </span>
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -76,6 +77,7 @@ exports[`it renders without crashing 1`] = `
         <EuiText
           color="subdued"
           grow={true}
+          size="m"
           textAlign="center"
         >
           <FormattedMessage
