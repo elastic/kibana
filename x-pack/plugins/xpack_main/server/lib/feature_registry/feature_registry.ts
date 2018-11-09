@@ -20,7 +20,6 @@ export interface PrivilegeDefinition {
 export interface Feature {
   id: string;
   name: string;
-  type: 'app' | 'subFeature';
   validLicenses?: Array<'basic' | 'gold' | 'platinum'>;
   icon?: IconType;
   description?: string;

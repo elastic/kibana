@@ -10,7 +10,6 @@ const kibanaFeatures: Feature[] = [
   {
     id: 'discover',
     name: 'Discover',
-    type: 'app',
     icon: 'discoverApp',
     privileges: {
       all: {
@@ -34,7 +33,6 @@ const kibanaFeatures: Feature[] = [
   {
     id: 'visualize',
     name: 'Visualize',
-    type: 'app',
     icon: 'visualizeApp',
     privileges: {
       all: {
@@ -58,7 +56,6 @@ const kibanaFeatures: Feature[] = [
   {
     id: 'dashboard',
     name: 'Dashboard',
-    type: 'app',
     icon: 'dashboardApp',
     privileges: {
       all: {
@@ -90,7 +87,6 @@ const kibanaFeatures: Feature[] = [
   {
     id: 'dev_tools',
     name: 'Dev Tools',
-    type: 'app',
     icon: 'devToolsApp',
     privileges: {
       all: {
@@ -107,7 +103,6 @@ const kibanaFeatures: Feature[] = [
   {
     id: 'management',
     name: 'Management',
-    type: 'app',
     icon: 'managementApp',
     privileges: {
       advancedSettings_all: {
@@ -136,7 +131,6 @@ const timelionFeatures: Feature[] = [
   {
     id: 'timelion',
     name: 'Timelion',
-    type: 'app',
     icon: 'timelionApp',
     privileges: {
       all: {

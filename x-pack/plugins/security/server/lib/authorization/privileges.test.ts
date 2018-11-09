@@ -5,6 +5,7 @@
  */
 
 // @ts-ignore
+import { Feature } from '../../../../xpack_main/types';
 import { actionsFactory } from './actions';
 import { buildPrivilegeMap } from './privileges';
 
@@ -37,5 +38,54 @@ test(`snapshot test`, () => {
     'visualization',
   ];
 
-  expect(buildPrivilegeMap(savedObjectTypes, actions)).toMatchSnapshot();
+  const features: Feature[] = [
+    {
+      id: 'foo',
+      name: 'Foo',
+      icon: 'arrowDown',
+      privileges: {
+        all: {
+          app: ['foo'],
+          savedObject: {
+            all: ['search'],
+            read: ['config', 'index-pattern'],
+          },
+          ui: ['show', 'showSaveButton', 'showCreateButton'],
+        },
+        read: {
+          app: ['foo'],
+          savedObject: {
+            all: [],
+            read: ['config', 'index-pattern', 'search'],
+          },
+          ui: ['show'],
+        },
+      },
+    },
+    {
+      id: 'bar',
+      name: 'Bar',
+      icon: 'arrowUp',
+      privileges: {
+        all: {
+          app: ['bar'],
+          savedObject: {
+            all: ['visualization'],
+            read: ['config', 'index-pattern', 'search'],
+          },
+          ui: ['show', 'showSaveButton', 'showCreateButton'],
+        },
+        read: {
+          app: ['bar'],
+          savedObject: {
+            all: [],
+            read: ['config', 'index-pattern', 'search', 'visualization'],
+          },
+          ui: ['show'],
+        },
+      },
+    },
+  ];
+
+  expect(buildPrivilegeMap(savedObjectTypes, actions, features)).toMatchSnapshot();
 });
