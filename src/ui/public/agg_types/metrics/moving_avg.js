@@ -40,15 +40,15 @@ export const movingAvgMetricAgg = new MetricAggType({
   ],
   getValue(agg, bucket) {
     /**
-     * The moving_avg aggregation (that was used originally here) does not return
-     * a bucket if the child aggregation doesn't have any documents, and thus
-     * we would return 0 via the getValue function in MetricAggType.
-     * The moving_fn does return a bucket with the value `null` instead, which would
-     * not be converted to 0 by MetricAggType.getValue. To have the same behavior as
-     * moving_avg had earlier in Kibana, we will now also convert an existing bucket with
-     * the value `null` to 0.
+     * The previous implementation using `moving_avg` did not
+     * return any bucket in case there are no documents. The `moving_fn`
+     * aggregation returns buckets with the value 0. Since our
+     * generic MetricAggType.getValue implementation would return
+     * the value 0 for null buckets, we need a specific implementation
+     * here, that preserves the null value, to be closer aligned with
+     * the previous implementation.
      */
-    return bucket[agg.id] ? (bucket[agg.id].value || 0) : 0;
+    return bucket[agg.id] ? bucket[agg.id].value : 0;
   },
   getFormat: parentPipelineAggHelper.getFormat
 });
