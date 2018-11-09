@@ -13,7 +13,7 @@ interface Props {
   hideSubheading?: boolean;
 }
 
-export const EmptyMessage: React.SFC<Props> = ({
+const EmptyMessage: React.SFC<Props> = ({
   heading = 'No data found.',
   subheading = 'Try another time range or reset the search filter.',
   hideSubheading = false
@@ -26,3 +26,5 @@ export const EmptyMessage: React.SFC<Props> = ({
     />
   );
 };
+
+export { EmptyMessage };
