@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects([
     'common',
     'header',
-    'settings']);
+    'settings',
+    'gis']);
 
   describe('layer source is elasticsearch documents', () => {
     before('initialize tests', async () => {
@@ -26,13 +27,17 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.disableToastAutohide();
       remote.setWindowSize(1600, 1000);
 
-      await PageObjects.common.navigateToApp('gis');
+      await PageObjects.gis.loadSavedWorkspace('logstash events');
+    });
+
+    after('clean up', async () => {
+      await PageObjects.gis.closeInspector();
     });
 
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
-        //await PageObjects.common.sleep(100000);
-        expect(5).to.equal(5);
+        const hits = await PageObjects.gis.getInspectorRequestStat('Hits');
+        expect(hits).to.equal('0');
       });
     });
   });
