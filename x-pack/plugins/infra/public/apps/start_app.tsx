@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { createHashHistory } from 'history';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
@@ -29,14 +30,16 @@ export async function startApp(libs: InfraFrontendLibs) {
   });
 
   libs.framework.render(
-    <EuiErrorBoundary>
-      <ReduxStoreProvider store={store}>
-        <ApolloProvider client={libs.apolloClient}>
-          <ThemeProvider theme={{ eui: euiVars }}>
-            <PageRouter history={history} />
-          </ThemeProvider>
-        </ApolloProvider>
-      </ReduxStoreProvider>
-    </EuiErrorBoundary>
+    <I18nProvider>
+      <EuiErrorBoundary>
+        <ReduxStoreProvider store={store}>
+          <ApolloProvider client={libs.apolloClient}>
+            <ThemeProvider theme={{ eui: euiVars }}>
+              <PageRouter history={history} />
+            </ThemeProvider>
+          </ApolloProvider>
+        </ReduxStoreProvider>
+      </EuiErrorBoundary>
+    </I18nProvider>
   );
 }
