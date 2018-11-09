@@ -261,4 +261,6 @@ export default () => Joi.object({
     locale: Joi.string().default('en'),
   }).default(),
 
+  freezePrototype: Joi.boolean().default(true),
+
 }).default();

@@ -139,6 +139,10 @@ export default class KbnServer {
 
     const { server, config } = this;
 
+    if (config.get('freezePrototype')) {
+      Object.freeze(Object.prototype);
+    }
+
     await server.kibanaMigrator.awaitMigration();
 
     if (isWorker) {

@@ -41,6 +41,7 @@ const DEFAULTS_SETTINGS = {
   logging: { silent: true },
   plugins: {},
   optimize: { enabled: false },
+  freezePrototype: false,
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
