@@ -1,7 +1,7 @@
 [[data-rollups]]
 == Working with rollup indices
 
-The {ref}xpackrollup.html[rollup feature in {es}]
+The {ref}/xpack-rollup.html[rollup feature in {es}]
 enables you to summarize historical data and store it compactly for future analysis, 
 so you can query, aggregate, and visualize the data using a fraction of the storage. 
 This is a good way to keep costs down when you need to store months or years of 

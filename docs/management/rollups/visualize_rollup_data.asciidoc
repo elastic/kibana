@@ -33,8 +33,8 @@ numeric field values or terms. You can ask for a time aggregation that takes
 several time buckets and combines them to lower granularity. For example, 
 if the rollup job was aggregated by hours, you can ask for buckets of days.
 
-The following visualization of rolled up data shows the date histogram 
-interval multiple and the summarized metrics aggregations.
+The data represented in this visualization comes from a rollup index and 
+standard indices.
 
 [role="screenshot"]
 image::images/management_rollups_visualization.png[][Rollups in visualizations]
