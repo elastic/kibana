@@ -33,7 +33,14 @@ const endDate = 1521862432253;
 const startDate2 = 1541044800000;
 const endDate2 = 1543640399999;
 
-const ReactDndDropTarget = styled.div``; // required by react-beautiful-dnd
+const ReactDndDropTarget = styled.div`
+  :hover {
+    background-color: rgb(217, 217, 217);
+    color: rgb(0, 0, 0);
+    border-radius: 4px;
+    transition: background-color 0.5s ease;
+  }
+`; // required by react-beautiful-dnd
 
 interface Props {
   dispatch: Dispatch;

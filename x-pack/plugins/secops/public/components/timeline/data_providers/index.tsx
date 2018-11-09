@@ -31,7 +31,12 @@ const DropTargetDataProviders = styled.div`
   padding: 5px;
 `;
 
-const ReactDndDropTarget = styled.div``; // required by react-beautiful-dnd
+const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
+  transition: background-color 0.7s ease;
+  background-color: ${props =>
+    props.isDraggingOver ? '#D9D9D9' : props.theme.eui.euiColorEmptyShade};
+  min-height: 100px;
+`;
 
 const getDroppableId = (id: string): string => `droppableId.timelineProviders.${id}`;
 
@@ -55,8 +60,12 @@ const getDroppableId = (id: string): string => `droppableId.timelineProviders.${
 export const DataProviders = pure<Props>(({ id, dataProviders, onDataProviderRemoved }) => (
   <DropTargetDataProviders data-test-subj="dataProviders">
     <Droppable droppableId={getDroppableId(id)}>
-      {provided => (
-        <ReactDndDropTarget innerRef={provided.innerRef} {...provided.droppableProps}>
+      {(provided, snapshot) => (
+        <ReactDndDropTarget
+          innerRef={provided.innerRef}
+          {...provided.droppableProps}
+          isDraggingOver={snapshot.isDraggingOver}
+        >
           {dataProviders.length ? (
             <Providers
               id={id}
