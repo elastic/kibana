@@ -61,7 +61,7 @@ export function screenshotsObservableFactory(server) {
 
   // TODO need to include the actual toast content body in the error
   const waitForNotFoundError = async (browser, layout) => {
-    await browser.waitForSelector(layout.selectors.errorToast);
+    await browser.waitForSelector(layout.selectors.toastHeader);
     throw new Error('Reporting subject could not be loaded to take a screenshot');
   };
 
