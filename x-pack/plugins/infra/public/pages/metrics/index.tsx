@@ -76,7 +76,7 @@ class MetricDetailPageUI extends React.PureComponent<Props> {
               defaultMessage: '{nodeType} is not a valid node type',
             },
             {
-              nodeType: '"' + nodeType + '"',
+              nodeType: `"${nodeType}"`,
             }
           )}
         />

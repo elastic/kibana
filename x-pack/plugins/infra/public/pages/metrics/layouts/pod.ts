@@ -31,9 +31,11 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           seriesOverrides: {
             cpu: {
-              name: i18n.translate('xpack.infra.podMetrics.visConfig.cpuUsageName', {
-                defaultMessage: 'CPU Usage',
-              }),
+              name:
+                'CPU' +
+                i18n.translate('xpack.infra.podMetrics.visConfig.cpuUsageName', {
+                  defaultMessage: 'Usage',
+                }),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
@@ -67,9 +69,11 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.podCpuUsage,
-        label: i18n.translate('xpack.infra.podMetrics.cpuUsageSectionLabel', {
-          defaultMessage: 'CPU Usage',
-        }),
+        label:
+          'CPU' +
+          i18n.translate('xpack.infra.podMetrics.cpuUsageSectionLabel', {
+            defaultMessage: ' Usage',
+          }),
         requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {

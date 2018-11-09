@@ -31,9 +31,11 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           seriesOverrides: {
             cpu: {
-              name: i18n.translate('xpack.infra.containerMetrics.visConfig.cpuUsageName', {
-                defaultMessage: 'CPU Usage',
-              }),
+              name:
+                'CPU' +
+                i18n.translate('xpack.infra.containerMetrics.visConfig.cpuUsageName', {
+                  defaultMessage: 'Usage',
+                }),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
@@ -67,9 +69,11 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.containerCpuUsage,
-        label: i18n.translate('xpack.infra.containerMetrics.cpuUsageSectionLabel', {
-          defaultMessage: 'CPU Usage',
-        }),
+        label:
+          'CPU' +
+          i18n.translate('xpack.infra.containerMetrics.cpuUsageSectionLabel', {
+            defaultMessage: 'Usage',
+          }),
         requires: ['docker.cpu'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {

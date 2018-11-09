@@ -16,9 +16,7 @@ import {
 export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'nginxOverview',
-    label: i18n.translate('xpack.infra.nginxMetrics.nginxLabel', {
-      defaultMessage: 'Nginx',
-    }),
+    label: 'Nginx',
     requires: ['nginx'],
     sections: [
       {

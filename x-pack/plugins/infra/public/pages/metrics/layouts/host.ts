@@ -32,9 +32,11 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           seriesOverrides: {
             cpu: {
-              name: i18n.translate('xpack.infra.hostMetrics.visConfig.cpuUsageName', {
-                defaultMessage: 'CPU Usage',
-              }),
+              name:
+                'CPU' +
+                i18n.translate('xpack.infra.hostMetrics.visConfig.cpuUsageName', {
+                  defaultMessage: 'Usage',
+                }),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
@@ -74,9 +76,11 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostCpuUsage,
-        label: i18n.translate('xpack.infra.hostMetrics.cpuUsageSectionLabel', {
-          defaultMessage: 'CPU Usage',
-        }),
+        label:
+          'CPU' +
+          i18n.translate('xpack.infra.hostMetrics.cpuUsageSectionLabel', {
+            defaultMessage: 'Usage',
+          }),
         requires: ['system.cpu'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -174,9 +178,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
   },
   {
     id: 'k8sOverview',
-    label: i18n.translate('xpack.infra.kubernetesMetrics.kubernetesLabel', {
-      defaultMessage: 'Kubernetes',
-    }),
+    label: 'Kubernetes',
     sections: [
       {
         id: InfraMetric.hostK8sOverview,
@@ -189,9 +191,11 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
         visConfig: {
           seriesOverrides: {
             cpucap: {
-              name: i18n.translate('xpack.infra.kubernetesMetrics.visConfig.cpuCapacityName', {
-                defaultMessage: 'CPU Capacity',
-              }),
+              name:
+                'CPU' +
+                i18n.translate('xpack.infra.kubernetesMetrics.visConfig.cpuCapacityName', {
+                  defaultMessage: 'Capacity',
+                }),
               color: 'secondary',
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
@@ -231,9 +235,14 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.hostK8sCpuCap,
-        label: i18n.translate('xpack.infra.kubernetesMetrics.nodeCpuCapacitySectionLabel', {
-          defaultMessage: 'Node CPU Capacity',
-        }),
+        label:
+          i18n.translate('xpack.infra.kubernetesMetrics.nodeSectionLabel', {
+            defaultMessage: 'Node',
+          }) +
+          'CPU' +
+          i18n.translate('xpack.infra.kubernetesMetrics.CapacitySectionLabel', {
+            defaultMessage: 'Capacity',
+          }),
         requires: ['kubernetes.node'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
