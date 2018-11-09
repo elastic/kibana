@@ -18,22 +18,32 @@
  */
 
 import WatchServer from './watch_server';
-import WatchOptimizer from './watch_optimizer';
+import WatchOptimizer, { STATUS } from './watch_optimizer';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
+  const watchOptimizer = new WatchOptimizer({
+    log: (tags, data) => kibanaHapiServer.log(tags, data),
+    uiBundles: kbnServer.uiBundles,
+    profile: config.get('optimize.profile'),
+    sourceMaps: config.get('optimize.sourceMaps'),
+    prebuild: config.get('optimize.watchPrebuild'),
+    unsafeCache: config.get('optimize.unsafeCache'),
+  });
+
   const server = new WatchServer(
     config.get('optimize.watchHost'),
     config.get('optimize.watchPort'),
     config.get('server.basePath'),
-    new WatchOptimizer({
-      log: (tags, data) => kibanaHapiServer.log(tags, data),
-      uiBundles: kbnServer.uiBundles,
-      profile: config.get('optimize.profile'),
-      sourceMaps: config.get('optimize.sourceMaps'),
-      prebuild: config.get('optimize.watchPrebuild'),
-      unsafeCache: config.get('optimize.unsafeCache'),
-    })
+    watchOptimizer
   );
+
+  watchOptimizer.status$.subscribe({
+    next(status) {
+      process.send(['OPTIMIZE_STATUS', {
+        success: status.type === STATUS.SUCCESS
+      }]);
+    }
+  });
 
   let ready = false;
 

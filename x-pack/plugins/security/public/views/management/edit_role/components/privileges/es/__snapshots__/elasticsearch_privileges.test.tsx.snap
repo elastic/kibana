@@ -89,6 +89,7 @@ exports[`it renders without crashing 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiComboBox
+          compressed={false}
           fullWidth={false}
           isClearable={true}
           isDisabled={false}
@@ -105,6 +106,7 @@ exports[`it renders without crashing 1`] = `
     />
     <EuiTitle
       size="xs"
+      textTransform="none"
     >
       <h3>
         Index privileges
