@@ -19,6 +19,7 @@ import {
   SpaceSelectorPageProvider,
   AccountSettingProvider,
   InfraHomePageProvider,
+  GisPageProvider,
 } from './page_objects';
 
 import {
@@ -122,6 +123,7 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
+      gis: GisPageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
