@@ -28,6 +28,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
           >
             <EuiText
               grow={true}
+              size="m"
             >
               <h1>
                 Spaces

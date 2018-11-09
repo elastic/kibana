@@ -260,6 +260,7 @@ exports[`TimeField should render something if hiding time field 1`] = `
 <EuiForm>
   <EuiText
     grow={true}
+    size="m"
   >
     <p>
       <FormattedMessage

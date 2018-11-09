@@ -21,6 +21,7 @@ exports[`render 1`] = `
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           <FormattedMessage
