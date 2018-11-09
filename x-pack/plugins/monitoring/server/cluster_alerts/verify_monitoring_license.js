@@ -32,14 +32,14 @@ export function verifyMonitoringLicense(server) {
 
     return {
       enabled: false,
-      message: i18n.translate('xpack.monitoring.clusterAlerts.verifyMonitoringLicenseNotDeterminedDescription', {
+      message: i18n.translate('xpack.monitoring.clusterAlerts.notDeterminedLicenseDescription', {
         defaultMessage: 'Status of Cluster Alerts feature could not be determined.' })
     };
   }
 
   return {
     enabled: false,
-    message: i18n.translate('xpack.monitoring.clusterAlerts.verifyMonitoringLicenseDisabledDescription', {
+    message: i18n.translate('xpack.monitoring.clusterAlerts.disabledLicenseDescription', {
       defaultMessage: 'Cluster Alerts feature is disabled.' })
   };
 }

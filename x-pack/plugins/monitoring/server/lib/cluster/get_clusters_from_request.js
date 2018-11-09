@@ -40,7 +40,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
   // TODO: this handling logic should be two different functions
   if (clusterUuid) { // if is defined, get specific cluster (no need for license checking)
     if (!clusters || clusters.length === 0) {
-      throw notFound(i18n.translate('xpack.monitoring.cluster.clustersFromRequest.clusterUuidNotFoundErrorMessage', {
+      throw notFound(i18n.translate('xpack.monitoring.requestedClusters.uuidNotFoundErrorMessage', {
         defaultMessage: 'Unable to find the cluster in the selected time range. UUID: {clusterUuid}',
         values: {
           clusterUuid

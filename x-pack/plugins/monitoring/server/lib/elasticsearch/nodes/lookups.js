@@ -21,16 +21,16 @@ export const nodeTypeClass = {
 };
 
 export const nodeTypeLabel = {
-  invalid: i18n.translate('xpack.monitoring.es.nodes.nodeType.invalidNodeLabel', {
+  invalid: i18n.translate('xpack.monitoring.es.nodeType.invalidNodeLabel', {
     defaultMessage: 'Invalid Node' }),
-  node: i18n.translate('xpack.monitoring.es.nodes.nodeType.nodeLabel', {
+  node: i18n.translate('xpack.monitoring.es.nodeType.nodeLabel', {
     defaultMessage: 'Node' }),
-  master: i18n.translate('xpack.monitoring.es.nodes.nodeType.masterNodeLabel', {
+  master: i18n.translate('xpack.monitoring.es.nodeType.masterNodeLabel', {
     defaultMessage: 'Master Node' }),
-  master_only: i18n.translate('xpack.monitoring.es.nodes.nodeType.masterOnlyNodeLabel', {
+  master_only: i18n.translate('xpack.monitoring.es.nodeType.masterOnlyNodeLabel', {
     defaultMessage: 'Master Only Node' }),
-  data: i18n.translate('xpack.monitoring.es.nodes.nodeType.dataOnlyNodeLabel', {
+  data: i18n.translate('xpack.monitoring.es.nodeType.dataOnlyNodeLabel', {
     defaultMessage: 'Data Only Node' }),
-  client: i18n.translate('xpack.monitoring.es.nodes.nodeType.clientNodeLabel', {
+  client: i18n.translate('xpack.monitoring.es.nodeType.clientNodeLabel', {
     defaultMessage: 'Client Node' })
 };
