@@ -19,21 +19,19 @@ import {
 
 export class StaticDynamicStyleSelector extends React.Component {
 
-
   constructor() {
     super();
     this._isMounted = false;
     this.state = {
-      styleDescriptor: VectorStyle.STYLE_TYPE.STATIC,
       ordinalFields: null
     };
   }
 
   _isDynamic() {
-    if (!this.props.styleDescriptor) {
+    if (!this.props.colorStyleDescriptor) {
       return false;
     }
-    return this.props.styleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+    return this.props.colorStyleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
   componentWillUnmount() {
@@ -54,7 +52,7 @@ export class StaticDynamicStyleSelector extends React.Component {
     const eqls = _.isEqual(ordinalFields, this.state.ordinalFields);
     if (!eqls) {
       this.setState({
-        ordinalFields: ordinalFields
+        ordinalFields
       });
     }
   }
@@ -62,11 +60,11 @@ export class StaticDynamicStyleSelector extends React.Component {
   _renderStaticAndDynamicStyles() {
 
     const changeStyle = (type, newOptions) => {
-      const styleDescriptor = {
+      const newStyleDescriptor = {
         type: type,
         options: newOptions
       };
-      this.props.handlePropertyChange(this.props.property, styleDescriptor);
+      this.props.handlePropertyChange(this.props.property, newStyleDescriptor);
     };
 
     const changeToDynamicStyle = (newOptions) => {
@@ -84,7 +82,7 @@ export class StaticDynamicStyleSelector extends React.Component {
     };
 
     let styleSelector;
-    const currentOptions = (this.props.styleDescriptor && this.props.styleDescriptor.options) ? this.props.styleDescriptor.options : null;
+    const currentOptions = _.get(this.props, 'colorStyleDescriptor.options', null);
     if (this._isDynamic()) {
       this._lastDynamicOptions = currentOptions;
       if (this.state.ordinalFields !== null) {
