@@ -11,6 +11,7 @@ export const eventsQuery = gql`
     source(id: $sourceId) {
       getEvents(timerange: $timerange, filterQuery: $filterQuery) {
         events {
+          _id
           timestamp
           event {
             type

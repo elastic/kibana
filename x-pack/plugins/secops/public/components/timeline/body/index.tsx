@@ -10,7 +10,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Range } from '../body/column_headers/range_picker/ranges';
-import { DataProvider } from '../data_providers/data_provider';
 import { ECS } from '../ecs';
 import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from '../events';
 import { ColumnHeaders } from './column_headers';
@@ -22,7 +21,6 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: ECS[];
-  dataProviders: DataProvider[];
   height?: string;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;

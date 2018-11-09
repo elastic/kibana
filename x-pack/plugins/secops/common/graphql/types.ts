@@ -66,6 +66,7 @@ export interface KpiItem {
 }
 
 export interface EventItem {
+  _id?: string | null;
   destination?: DestinationEcsFields | null;
   event?: EventEcsFields | null;
   geo?: GeoEcsFields | null;
@@ -304,6 +305,7 @@ export namespace KpiItemResolvers {
 
 export namespace EventItemResolvers {
   export interface Resolvers<Context = any> {
+    _id?: IdResolver<string | null, any, Context>;
     destination?: DestinationResolver<DestinationEcsFields | null, any, Context>;
     event?: EventResolver<EventEcsFields | null, any, Context>;
     geo?: GeoResolver<GeoEcsFields | null, any, Context>;
@@ -313,6 +315,11 @@ export namespace EventItemResolvers {
     timestamp?: TimestampResolver<string | null, any, Context>;
   }
 
+  export type IdResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
   export type DestinationResolver<
     R = DestinationEcsFields | null,
     Parent = any,
@@ -549,6 +556,7 @@ export namespace GetEventsQuery {
 
   export type Events = {
     __typename?: 'EventItem';
+    _id?: string | null;
     timestamp?: string | null;
     event?: Event | null;
     host?: Host | null;

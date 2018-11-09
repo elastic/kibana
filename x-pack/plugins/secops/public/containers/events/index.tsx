@@ -19,8 +19,8 @@ interface EventsArgs {
   loading: boolean;
 }
 
-interface EventsProps {
-  children: (args: EventsArgs) => React.ReactNode;
+export interface EventsProps {
+  children?: (args: EventsArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
   endDate: number;
@@ -44,7 +44,7 @@ export const EventsQuery = pure<EventsProps>(
       }}
     >
       {({ data, loading }) =>
-        children({
+        children!({
           loading,
           events: getOr([], 'source.getEvents.events', data),
           kpiEventType: getOr([], 'source.getEvents.kpiEventType', data),

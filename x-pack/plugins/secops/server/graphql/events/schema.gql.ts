@@ -65,6 +65,7 @@ export const eventsSchema = gql`
   }
 
   type EventItem {
+    _id: String
     destination: DestinationEcsFields
     event: EventEcsFields
     geo: GeoEcsFields
