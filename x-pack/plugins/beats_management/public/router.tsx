@@ -6,11 +6,12 @@
 
 import React from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
-
 import { Header } from './components/layouts/header';
 import { BreadcrumbConsumer, RouteWithBreadcrumb } from './components/route_with_breadcrumb';
 import { FrontendLibs } from './lib/lib';
 import { BeatDetailsPage } from './pages/beat';
+import { EnforceSecurityPage } from './pages/enforce_security';
+import { InvalidLicensePage } from './pages/invalid_license';
 import { MainPages } from './pages/main';
 import { NoAccessPage } from './pages/no_access';
 import { TagPage } from './pages/tag';
@@ -37,10 +38,15 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           )}
         </BreadcrumbConsumer>
         <Switch>
-          {!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
-            !libs.framework.getCurrentUser().roles.includes('superuser') && (
-              <Route render={() => <NoAccessPage />} />
-            )}
+          {libs.framework.licenseExpired() && <Route render={() => <InvalidLicensePage />} />}
+          {!libs.framework.securityEnabled() && <Route render={() => <EnforceSecurityPage />} />}
+          {!libs.framework.getCurrentUser() ||
+            (!libs.framework.getCurrentUser().roles.includes('beats_admin') &&
+              !libs.framework
+                .getDefaultUserRoles()
+                .some(r => libs.framework.getCurrentUser().roles.includes(r)) && (
+                <Route render={() => <NoAccessPage />} />
+              ))}
           <Route
             path="/"
             exact={true}

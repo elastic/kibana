@@ -19,6 +19,9 @@
 
 import { EventEmitter } from 'events';
 import { debounce } from 'lodash';
+import * as Rx from 'rxjs';
+import { share } from 'rxjs/operators';
+import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { IPrivate } from '../../private';
@@ -29,7 +32,6 @@ import { RequestHandlerParams, Vis } from '../../vis';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';
 
-import { Inspector } from '../../inspector';
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
 import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './types';
@@ -47,6 +49,14 @@ const LOADING_ATTRIBUTE = 'data-loading';
  * with the visualization.
  */
 export class EmbeddedVisualizeHandler {
+  /**
+   * This observable will emit every time new data is loaded for the
+   * visualization. The emitted value is the loaded data after it has
+   * been transformed by the visualization's response handler.
+   * This should not be used by any plugin.
+   * @ignore
+   */
+  public readonly data$: Rx.Observable<any>;
   private vis: Vis;
   private loaded: boolean = false;
   private destroyed: boolean = false;
@@ -69,6 +79,7 @@ export class EmbeddedVisualizeHandler {
   private readonly appState?: AppState;
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
+  private dataSubject: Rx.Subject<any>;
   private inspectorAdapters: Adapters = {};
 
   constructor(
@@ -116,6 +127,9 @@ export class EmbeddedVisualizeHandler {
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
     this.vis.hasInspector = this.hasInspector;
+
+    this.dataSubject = new Rx.Subject();
+    this.data$ = this.dataSubject.asObservable().pipe(share());
 
     this.render();
   }
@@ -313,7 +327,10 @@ export class EmbeddedVisualizeHandler {
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
-    return this.dataLoader.fetch(this.dataLoaderParams);
+    return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
+      this.dataSubject.next(data);
+      return data;
+    });
   };
 
   private render = (visData: any = null) => {

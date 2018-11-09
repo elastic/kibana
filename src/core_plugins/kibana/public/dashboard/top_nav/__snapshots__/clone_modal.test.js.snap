@@ -20,6 +20,7 @@ exports[`renders DashboardCloneModal 1`] = `
     <EuiModalBody>
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           <FormattedMessage
