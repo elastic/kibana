@@ -448,9 +448,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async setFieldFormat(format) {
       log.debug('set scripted field format = ' + format);
-      await find.clickByCssSelector(
-        'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
-      );
+      const option = await remote.findElement(By.css(`select[data-test-subj="editorSelectedFormatId"] > option[value="${format}"]`));
+      await option.click();
     }
 
     async setScriptedFieldUrlType(type) {

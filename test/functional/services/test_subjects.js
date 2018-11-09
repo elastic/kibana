@@ -202,8 +202,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async waitForDeleted(selector) {
-      // Its not implemented in remote
-      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
+      await remote.waitForElementNotPresent(By.css(testSubjSelector(selector)));
     }
   }
 

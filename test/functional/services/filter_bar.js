@@ -17,8 +17,7 @@
  * under the License.
  */
 
-//import Keys from 'selenium-webdriver/lib/input';
-import { By } from 'selenium-webdriver';
+import { By, Key } from 'selenium-webdriver';
 
 export function FilterBarProvider({ getService }) {
   const remote = getService('remote');
@@ -93,10 +92,7 @@ export function FilterBarProvider({ getService }) {
         for (let j = 0; j < fieldValues.length; j++) {
           // await paramFields[i].type(fieldValues[j]);
           await find.setValueElement(paramFields[i], fieldValues[j]);
-          const highlight = await remote.findElement(By.css('.ui-select-highlight'));
-          await highlight.click();
-          // pressKey does not work on Mac/Chrome
-          // await remote.pressKeys(Keys.RETURN);
+          await paramFields[i].sendKeys(Key.RETURN);
         }
       }
       await testSubjects.click('saveFilter');

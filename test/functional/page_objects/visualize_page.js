@@ -61,70 +61,70 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickAreaChart() {
-      await remote.click(By.partialLinkText('Area'));
+      await remote.waitAndClick(By.partialLinkText('Area'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickDataTable() {
-      await remote.click(By.partialLinkText('Data Table'));
+      await remote.waitAndClick(By.partialLinkText('Data Table'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickLineChart() {
-      await remote.click(By.partialLinkText('Line'));
+      await remote.waitAndClick(By.partialLinkText('Line'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickRegionMap() {
-      await remote.click(By.partialLinkText('Region Map'));
+      await remote.waitAndClick(By.partialLinkText('Region Map'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMarkdownWidget() {
-      await remote.click(By.partialLinkText('Markdown'));
+      await remote.waitAndClick(By.partialLinkText('Markdown'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickAddMetric() {
-      await remote.click(By.css('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]'));
+      await remote.waitAndClick(By.css('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]'));
     }
 
     async clickAddBucket() {
-      await remote.click(By.css('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]'));
+      await remote.waitAndClick(By.css('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]'));
     }
 
     async clickMetric() {
-      await remote.click(By.partialLinkText('Metric'));
+      await remote.waitAndClick(By.partialLinkText('Metric'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickGauge() {
-      await remote.click(By.partialLinkText('Gauge'));
+      await remote.waitAndClick(By.partialLinkText('Gauge'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickPieChart() {
-      await remote.click(By.partialLinkText('Pie'));
+      await remote.waitAndClick(By.partialLinkText('Pie'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTileMap() {
-      await remote.click(By.partialLinkText('Coordinate Map'));
+      await remote.waitAndClick(By.partialLinkText('Coordinate Map'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTagCloud() {
-      await remote.click(By.partialLinkText('Tag Cloud'));
+      await remote.waitAndClick(By.partialLinkText('Tag Cloud'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVega() {
-      await remote.click(By.partialLinkText('Vega'));
+      await remote.waitAndClick(By.partialLinkText('Vega'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualBuilder() {
-      await remote.click(By.partialLinkText('Visual Builder'));
+      await remote.waitAndClick(By.partialLinkText('Visual Builder'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -213,9 +213,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setMarkdownTxt(markdownTxt) {
-      const input = await testSubjects.find('markdownTextarea');
-      await input.clearValue();
-      await input.sendKeys(markdownTxt);
+      await testSubjects.setValue('markdownTextarea', markdownTxt);
     }
 
     async getMarkdownText() {
@@ -247,13 +245,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setFromTime(timeString) {
       const input = await remote.findElement(By.css('input[ng-model="absolute.from"]', defaultFindTimeout * 2));
-      await input.clearValue();
+      await input.clear();
       await input.sendKeys(timeString);
     }
 
     async setToTime(timeString) {
       const input = await remote.findElement(By.css('input[ng-model="absolute.to"]', defaultFindTimeout * 2));
-      await input.clearValue();
+      await input.clear();
       await input.sendKeys(timeString);
     }
 
@@ -381,7 +379,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setValue(newValue) {
       await remote.click(By.css('button[ng-click="numberListCntr.add()"]'), defaultFindTimeout * 2);
       const input = await remote.findElement(By.css('input[ng-model="numberListCntr.getList())[$index]"]'));
-      await input.clearValue();
+      await input.clear();
       await input.sendKeys(newValue);
     }
 
@@ -527,10 +525,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getInterval() {
       const select = await remote.findElement(By.css('select[ng-model="agg.params.interval"]'));
-      const selectedIndex = await select.getProperty('selectedIndex');
-      const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option:nth-child(${(selectedIndex + 1)})`);
-      return await intervalElement.getProperty('label');
+      const option = await select.findElement(By.css('option[selected="selected"]'));
+      return await option.getAttribute('label');
     }
 
     async setInterval(newValue) {
@@ -541,7 +537,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setNumericInterval(newValue, { append } = {}) {
       const input = await remote.findElement(By.css('input[name="interval"]'));
       if (!append) {
-        await input.clearValue();
+        await input.clear();
       }
       // await input.type(newValue + '');
       // await remote.type(input, newValue + '');
@@ -551,7 +547,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setSize(newValue) {
       const input = await remote.findElement(By.css('input[name="size"]'));
-      await input.clearValue();
+      await input.clear();
       await input.sendKeys(newValue);
     }
 
@@ -602,7 +598,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async changeHeatmapColorNumbers(value = 6) {
       const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
-      await input.clearValue();
+      await input.clear();
       await input.sendKeys(`${value}`);
     }
 
@@ -727,10 +723,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
 
-      return retry.try(function tryingForTime() {
-        return remote
-          .findElement(By.partialLinkText(vizName), defaultFindTimeout)
-          .click();
+      return retry.try(async function tryingForTime() {
+        const link = await remote.findElement(By.partialLinkText(vizName), defaultFindTimeout);
+        await link.click();
       });
     }
 
@@ -909,7 +904,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const dataTableHeader = await retry.try(async () => {
         const inspectorPanel = await testSubjects.find('inspectorPanel');
-        return await inspectorPanel.findElements(By.tagName('thead'));
+        return await inspectorPanel.findElement(By.tagName('thead'));
       });
       const cells = await dataTableHeader.findElements(By.tagName('th'));
       return await Promise.all(cells.map(async (cell) => {
@@ -936,7 +931,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualizationSavedToastGone() {
-      return await testSubjects.waitForDeleted('saveVisualizationSuccess');
+      return await remote.waitForElementNotPresent(By.css('[data-test-subj="saveVisualizationSuccess"]'));
     }
 
     async getZoomSelectors(zoomSelector) {

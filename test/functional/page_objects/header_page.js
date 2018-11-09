@@ -92,11 +92,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickTimepicker() {
-      const timePicker = await testSubjects.find('globalTimepickerButton');
-      timePicker.click();
+      const timePicker = await remote.waitForElementPresent(By.css('[data-test-subj="globalTimepickerButton"]'));
+      await remote.waitForElementEnabled(timePicker);
+      await testSubjects.click('globalTimepickerButton');
       await wait.forElementPresent(quickButtonSelector);
       const quickButton = await remote.findElement(quickButtonSelector);
-      await wait.forElementVisible(quickButton);
+      await remote.waitForElementEnabled(quickButton);
     }
 
     async clickQuickButton() {

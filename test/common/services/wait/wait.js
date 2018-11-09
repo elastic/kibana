@@ -26,11 +26,11 @@ export function WaitProvider({ getService }) {
     }
 
     async forElementPresent(selector) {
-      await remote.waitForElementPresent(selector);
+      return await remote.waitForElementPresent(selector);
     }
 
     async forElementEnabled(selector) {
-      await remote.waitForElementEnabled(selector);
+      return await remote.waitForElementEnabled(selector);
     }
 
     async forElementToContainText(selector, substring) {
