@@ -96,7 +96,7 @@ export const Providers = pure<Props>(({ id, dataProviders, onDataProviderRemoved
             data-test-subj="providerContainer"
           >
             <PanelProvider data-test-subj="provider">
-              {dataProvider.render()}
+              {dataProvider.name}
               <Spacer />
               <CloseButton
                 onDataProviderRemoved={onDataProviderRemoved}

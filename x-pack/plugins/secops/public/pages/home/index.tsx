@@ -17,6 +17,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import SplitPane from 'react-split-pane';
 import { Dispatch } from 'redux';
 
+import { IdToDataProvider } from '../../components/data_provider_context';
 import { LinkToPage } from '../../components/link_to';
 import {
   PageContainer,
@@ -87,9 +88,17 @@ interface AddProviderToTimelineParams {
 
 const addProviderToTimeline = ({ result, dispatch }: AddProviderToTimelineParams): void => {
   const timeline = getTimelineIdFromDestination(result);
-  const provider = getProviderIdFromDraggable(result);
+  const providerId = getProviderIdFromDraggable(result);
 
-  dispatch(timelineActions.addProvider({ id: timeline, provider }));
+  const providers: IdToDataProvider = JSON.parse(
+    sessionStorage.getItem('dataProviders') || '{}'
+  ) as IdToDataProvider;
+
+  const provider = providers[providerId];
+
+  if (provider) {
+    dispatch(timelineActions.addProvider({ id: timeline, provider }));
+  }
 };
 
 class HomePageComponent extends React.PureComponent<Props> {

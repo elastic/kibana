@@ -13,6 +13,8 @@ import { Dispatch } from 'redux';
 import styled from 'styled-components';
 
 import { WhoAmI } from '../containers/who_am_i';
+import { IdToDataProvider } from './data_provider_context';
+import { DataProvider } from './timeline/data_providers/data_provider';
 import { mockDataProviders } from './timeline/data_providers/mock/mock_data_providers';
 
 export const VisualizationPlaceholder = styled(EuiPanel)`
@@ -55,6 +57,15 @@ const getDroppableId = ({
   visualizationPlaceholderId: string;
 }): string => `droppableId.provider.${visualizationPlaceholderId}`;
 
+const updateSessionStorage = (dataProvider: DataProvider): void => {
+  const oldProviders: IdToDataProvider = JSON.parse(
+    sessionStorage.getItem('dataProviders') || '{}'
+  ) as IdToDataProvider;
+
+  const newProviders = { ...oldProviders, [dataProvider.id]: dataProvider };
+  sessionStorage.setItem('dataProviders', JSON.stringify(newProviders));
+};
+
 /** TODO: delete this stub */
 class PlaceholdersComponent extends React.PureComponent<Props> {
   public render() {
@@ -92,7 +103,8 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
                         innerRef={provided.innerRef}
                         data-test-subj="providerContainer"
                       >
-                        {mockDataProviders[i].render()}
+                        {updateSessionStorage(mockDataProviders[i])}
+                        {mockDataProviders[i].name}
                       </ProviderContainer>
                     )}
                   </Draggable>
