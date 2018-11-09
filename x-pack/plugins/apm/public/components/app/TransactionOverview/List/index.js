@@ -8,11 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
 import { RelativeLink, legacyEncodeURIComponent } from '../../../../utils/url';
-import {
-  asMillisWithDefault,
-  asDecimal,
-  tpmUnit
-} from '../../../../utils/formatters';
+import { asMillis, asDecimal, tpmUnit } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 
 import { fontFamilyCode, truncate } from '../../../../style/variables';
@@ -63,14 +59,14 @@ export default function TransactionList({
       name: avgLabel(agentName),
       sortable: true,
       dataType: 'number',
-      render: value => asMillisWithDefault(value)
+      render: value => asMillis(value)
     },
     {
       field: 'p95',
       name: '95th percentile',
       sortable: true,
       dataType: 'number',
-      render: value => asMillisWithDefault(value)
+      render: value => asMillis(value)
     },
     {
       field: 'transactionsPerMinute',

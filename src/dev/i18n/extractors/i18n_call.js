@@ -25,10 +25,10 @@ import {
   checkValuesProperty,
   extractMessageIdFromNode,
   extractMessageValueFromNode,
-  extractContextValueFromNode,
+  extractDescriptionValueFromNode,
   extractValuesKeysFromNode,
 } from '../utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from '../constants';
+import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
 import { createFailError } from '../../run';
 
 /**
@@ -48,9 +48,9 @@ export function extractI18nCallMessages(node) {
     );
   }
 
-  const [messageProperty, contextProperty, valuesProperty] = [
+  const [messageProperty, descriptionProperty, valuesProperty] = [
     DEFAULT_MESSAGE_KEY,
-    CONTEXT_KEY,
+    DESCRIPTION_KEY,
     VALUES_KEY,
   ].map(key => optionsSubTree.properties.find(property => isPropertyWithKey(property, key)));
 
@@ -58,8 +58,8 @@ export function extractI18nCallMessages(node) {
     ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
     : undefined;
 
-  const context = contextProperty
-    ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
+  const description = descriptionProperty
+    ? formatJSString(extractDescriptionValueFromNode(descriptionProperty.value, messageId))
     : undefined;
 
   if (!message) {
@@ -74,5 +74,5 @@ export function extractI18nCallMessages(node) {
 
   checkValuesProperty(valuesKeys, message, messageId);
 
-  return [messageId, { message, context }];
+  return [messageId, { message, description }];
 }

@@ -53,6 +53,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
               >
                 <EuiTitle
                   size="m"
+                  textTransform="none"
                 >
                   <h2
                     className="euiTitle euiTitle--medium"
@@ -69,9 +70,10 @@ exports[`Inspector Data View component should render empty state 1`] = `
                 </EuiSpacer>
                 <EuiText
                   grow={true}
+                  size="m"
                 >
                   <div
-                    className="euiText"
+                    className="euiText euiText--medium"
                   >
                     <p>
                       The element did not provide any data.
@@ -170,9 +172,10 @@ exports[`Inspector Data View component should render loading state 1`] = `
                     </EuiSpacer>
                     <EuiText
                       grow={true}
+                      size="m"
                     >
                       <div
-                        className="euiText"
+                        className="euiText euiText--medium"
                       >
                         <p>
                           Gathering data
