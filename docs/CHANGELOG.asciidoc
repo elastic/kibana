@@ -171,6 +171,8 @@ Management::
 * Adds a home page section for rollups that links to the rollup jobs CRUD UI {pull}24421[#24421]
 * Polishes the Index Management UI {pull}21979[#21979]
 * Makes the width of the import saved objects dialog narrower so it doesn't obscure the UI {pull}22011[#22011]
+* Adds ingest node updates for auto-complete in console {pull}24100[#24100]
+* Adds autocomplete rules for CCR to Kibana console. Also fixes an issue with the documentation link URL manipulation {pull}24739[#24739]
 
 Monitoring::
 * Adds a monitoring UI for APM {pull}22975[#22975]
@@ -195,11 +197,6 @@ Visualizations::
 [float]
 [[bug-6.5.0]]
 === Bug fixes
-
-APM::
-* Bumps `react-redux-request` to fix issue with identical requests firing multiple times {pull}21271[#21271]
-* Fixes how elements are positioned and adjusted on the timeline {pull}25097[#25097]
-* Fixes Rison issues {pull}25377[#25377]
 
 Dashboard::
 * Uses EuiPanel for dashboard panels {pull}22078[#22078]
@@ -267,16 +264,15 @@ Machine Learning::
 * Removes an obsolete sentence from info tooltip in the datafeed tab of the advanced job creation wizard {pull}24716[#24716]
 * Fixes a call stack size exception triggered by a negative `tickInterval` {pull}24742[#24742]
 * Fixes check for enabled X-Pack features {pull}24742[#24742]
+* Adds alt prop with empty string to fix jsx-a11y errors  {pull}24922[#24922]
 
 Management::
 * Fixes license endpoint paths for proxy {pull}22133[#22133]
-* Adds ingest node updates for auto-complete in console {pull}24100[#24100]
 * Adds tag and updates pipeline processor parameter to ingest node in console {pull}24400[#24400]
 * Fixes problem with color and static lookup field formatters not loading {pull}22044[#22044]
 * Fixes console fatal errors {pull}21996[#21996]
 * Adds aria-label attributes to form inputs for advanced settings {pull}22969[#22969]
 * Updates documentation links in the console for ingest node {pull}24535[#24535]
-* Adds autocomplete rules for CCR to Kibana console. Also fixes an issue with the documentation link URL manipulation {pull}24739[#24739]
 * Makes the Watcher table width 100% of the view {pull}21803[#21803]
 * Updates index pattern creation loading state to not have confusing "Reticulating splines" message {pull}21977[#21977]
 * Reconciles Index Management selection state with index deletion {pull}22242[#22242]
@@ -395,7 +391,7 @@ Reporting::
 
 Security::
 * Fixes missing email address on account management screen {pull}22652[#22652]
-* Removes ability to implicitly find across all types {pull}23198[#23198]
+* Updates user management so that email and name are optional {pull}24842[#24842]
 
 Sharing::
 * Removes the LESS files inside `/src/core_plugins/kibana/public/home` and replaces them with Sass {pull}22160[#22160]
@@ -442,8 +438,10 @@ Visualizations::
 * Fixes “other” bucket so that it works on multiple aggregations.  Also fixes filtering on “other” bucket {pull}24217[#24217]
 * Generates the correct bucket keys regardless of query type {pull}25002[#25002]
 * Fixes Time Series Visual Builder state updates when changing index patterns {pull}24832[#24832]
-
-
+* Fixes filters on other bucket for table visualization and vislib legend {pull}24473[#24473]
+* Ensures baselayers display in region maps {pull}22609[#22609]
+* Fixes Time Series Visual Builder state updates when changing index patterns {pull}24832[#24832]
+* Fixes missing Markdown variables in Time Series Visual Builder {pull}25132[#25132]
 
 
 
