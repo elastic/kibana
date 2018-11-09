@@ -125,117 +125,146 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
         randomBytes(6).toString('base64'),
       ].join('-');
 
-      return _injectPromise(page)
-        .then(() => {
-          return fromCallback(cb => {
-            page.evaluate(transformFn(evaluateWrapper), transformFn(fn).toString(), uniqId, args, cb);
+      function checkForIntl() {
+        return fromCallback(cb => {
+          page.evaluate(function hasIntl() {
+            return (window.Intl !== undefined);
+          }, cb);
+        });
+      }
 
-            // The original function is passed here as a string, and eval'd in phantom's context.
-            // It's then executed in phantom's context and the result is attached to a __reporting
-            // property on window. Promises can be used, and the result will be handled in the next
-            // block. If the original function does not return a promise, its result is passed on.
-            function evaluateWrapper(userFnStr, cbIndex, origArgs) {
-            // you can't pass a function to phantom, so we pass the string and eval back into a function
-              let userFn;
-              eval('userFn = ' + userFnStr); // eslint-disable-line no-eval
+      return checkForIntl()
+        .then(hasIntl => {
+          if (hasIntl) return;
 
-              // keep a record of the resulting execution for future calls (used when async)
-              window.__reporting = window.__reporting || {};
-              window.__reporting[cbIndex] = undefined;
+          const nodeModules = path.resolve(__dirname, '..', '..', '..', '..', '..', '..', 'node_modules');
+          const intlPath = path.join(nodeModules, 'intl', 'dist', 'Intl.js');
 
-              // used to format the response consistently
-              function done(err, res) {
-                if (window.__reporting[cbIndex]) {
-                  return;
-                }
-
-                const isErr = err instanceof Error;
-                if (isErr) {
-                  const keys = Object.getOwnPropertyNames(err);
-                  err = keys.reduce(function copyErr(obj, key) {
-                    obj[key] = err[key];
-                    return obj;
-                  }, {});
-                }
-
-                return window.__reporting[cbIndex] = {
-                  err: err,
-                  res: res,
-                };
+          return fromCallback(cb => page.injectJs(intlPath, cb))
+            .then(status => {
+              if (status !== true) {
+                return Promise.reject('Failed to load Intl library');
               }
-
-              try {
-              // execute the original function
-                const res = userFn.apply(this, origArgs);
-
-                if (res && typeof res.then === 'function') {
-                // handle async resolution via Promises
-                  res.then((val) => {
-                    done(null, val);
-                  }, (err) => {
-                    if (!(err instanceof Error)) {
-                      err = new Error(err || 'Unspecified error');
-                    }
-                    done(err);
-                  });
-                  return '__promise__';
-                } else {
-                // if not given a promise, execute as sync
-                  return done(null, res);
-                }
-              } catch (err) {
-              // any error during execution should be dealt with
-                return done(err);
-              }
-            }
-          })
-            .then((res) => {
-              // if the response is not a promise, pass it along
-              if (res !== '__promise__') {
-                return res;
-              }
-
-              // promise response means async, so wait for its resolution
-              return this.waitFor({
-                fn: function (cbIndex) {
-                  // resolves when the result object is no longer undefined
-                  return !!window.__reporting[cbIndex];
-                },
-                args: [uniqId],
-                toEqual: true,
-              })
-                .then(() => {
-                  // once the original promise is resolved, pass along its value
-                  return fromCallback(cb => {
-                    page.evaluate(function (cbIndex) {
-                      return window.__reporting[cbIndex];
-                    }, uniqId, cb);
-                  });
-                });
             })
-            .then((res) => {
-              if (res.err) {
-                // Make long/normal stack traces work
-                res.err.name = res.err.name || 'Error';
+            .then(checkForIntl)
+            .then(hasIntlLoaded => {
+              if (hasIntlLoaded !== true) {
+                return Promise.reject('Failed to inject Intl');
+              }
+            });
+        })
+        .then(() => _injectPromise(page)
+          .then(() => {
+            return fromCallback(cb => {
+              page.evaluate(transformFn(evaluateWrapper), transformFn(fn).toString(), uniqId, args, cb);
 
-                if (!res.err.stack) {
-                  res.err.stack = res.err.toString();
-                }
+              // The original function is passed here as a string, and eval'd in phantom's context.
+              // It's then executed in phantom's context and the result is attached to a __reporting
+              // property on window. Promises can be used, and the result will be handled in the next
+              // block. If the original function does not return a promise, its result is passed on.
+              function evaluateWrapper(userFnStr, cbIndex, origArgs) {
+              // you can't pass a function to phantom, so we pass the string and eval back into a function
+                let userFn;
+                eval('userFn = ' + userFnStr); // eslint-disable-line no-eval
 
-                res.err.stack.replace(/\n*$/g, '\n');
+                // keep a record of the resulting execution for future calls (used when async)
+                window.__reporting = window.__reporting || {};
+                window.__reporting[cbIndex] = undefined;
 
-                if (res.err.stack) {
-                  res.err.toString = function () {
-                    return this.name + ': ' + this.message;
+                // used to format the response consistently
+                function done(err, res) {
+                  if (window.__reporting[cbIndex]) {
+                    return;
+                  }
+
+                  const isErr = err instanceof Error;
+                  if (isErr) {
+                    const keys = Object.getOwnPropertyNames(err);
+                    err = keys.reduce(function copyErr(obj, key) {
+                      obj[key] = err[key];
+                      return obj;
+                    }, {});
+                  }
+
+                  return window.__reporting[cbIndex] = {
+                    err: err,
+                    res: res,
                   };
                 }
 
-                return Promise.reject(res.err);
-              }
+                try {
+                // execute the original function
+                  const res = userFn.apply(this, origArgs);
 
-              return res.res;
-            });
-        });
+                  if (res && typeof res.then === 'function') {
+                  // handle async resolution via Promises
+                    res.then((val) => {
+                      done(null, val);
+                    }, (err) => {
+                      if (!(err instanceof Error)) {
+                        err = new Error(err || 'Unspecified error');
+                      }
+                      done(err);
+                    });
+                    return '__promise__';
+                  } else {
+                  // if not given a promise, execute as sync
+                    return done(null, res);
+                  }
+                } catch (err) {
+                // any error during execution should be dealt with
+                  return done(err);
+                }
+              }
+            })
+              .then((res) => {
+                // if the response is not a promise, pass it along
+                if (res !== '__promise__') {
+                  return res;
+                }
+
+                // promise response means async, so wait for its resolution
+                return this.waitFor({
+                  fn: function (cbIndex) {
+                    // resolves when the result object is no longer undefined
+                    return !!window.__reporting[cbIndex];
+                  },
+                  args: [uniqId],
+                  toEqual: true,
+                })
+                  .then(() => {
+                    // once the original promise is resolved, pass along its value
+                    return fromCallback(cb => {
+                      page.evaluate(function (cbIndex) {
+                        return window.__reporting[cbIndex];
+                      }, uniqId, cb);
+                    });
+                  });
+              })
+              .then((res) => {
+                if (res.err) {
+                  // Make long/normal stack traces work
+                  res.err.name = res.err.name || 'Error';
+
+                  if (!res.err.stack) {
+                    res.err.stack = res.err.toString();
+                  }
+
+                  res.err.stack.replace(/\n*$/g, '\n');
+
+                  if (res.err.stack) {
+                    res.err.toString = function () {
+                      return this.name + ': ' + this.message;
+                    };
+                  }
+
+                  return Promise.reject(res.err);
+                }
+
+                return res.res;
+              });
+          })
+        );
     },
 
     wait(timeout) {
@@ -345,5 +374,3 @@ function _injectPromise(page) {
         });
     });
 }
-
-
