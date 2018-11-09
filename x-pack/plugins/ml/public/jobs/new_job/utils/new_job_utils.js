@@ -142,6 +142,7 @@ export function checkCardinalitySuccess(data) {
   return response;
 }
 
+// Ensure validation endpoints are given job with expected minimum fields
 export function getMinimalValidJob() {
   return {
     analysis_config: {

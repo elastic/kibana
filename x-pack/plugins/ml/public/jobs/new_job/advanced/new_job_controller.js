@@ -311,11 +311,11 @@ module.controller('MlNewJob',
         // Update ui portion so checkbox is checked
         $scope.ui.enableModelPlot = jobModelPlotValue.enabled;
       }
-      // If model plot is enabled and detectors changed - run cardinality
+
       if ($scope.ui.enableModelPlot === true) {
         const unchanged = _.isEqual(currentConfigs.detectors, $scope.job.analysis_config.detectors);
-
-        if (!unchanged) {
+        // if detectors changed OR model plot was just toggled on run cardinality
+        if (!unchanged || !modelPlotSettingsEqual) {
           runValidateCardinality();
         }
       } else {
@@ -720,7 +720,15 @@ module.controller('MlNewJob',
             $scope.ui.cardinalityValidator.status = STATUS.WARNING;
           }
         })
-        .catch((error) => { console.log('Cardinality check error:', error); });
+        .catch((error) => {
+          console.log('Cardinality check error:', error);
+          $scope.ui.cardinalityValidator.message = `An error occurred validating the configuration
+            for running the job with model plot enabled.
+            Creating model plots can be resource intensive and not recommended where the cardinality of the selected fields is high.
+            You may want to select a dedicated results index on the Job Details tab.`;
+
+          $scope.ui.cardinalityValidator.status = STATUS.FAILED;
+        });
     }
 
     $scope.onDetectorsUpdate = function () {

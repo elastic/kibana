@@ -298,7 +298,8 @@
               <label class='kuiCheckBoxLabel kuiVerticalRhythm'>
                 <ml-enable-model-plot-callout
                   message='ui.cardinalityValidator.message'
-                  ng-show="ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.WARNING">
+                  ng-show="ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.WARNING ||
+                    ui.cardinalityValidator.status === ui.cardinalityValidator.STATUS.FAILED">
                 </ml-enable-model-plot-callout>
               </label>
             </div>
