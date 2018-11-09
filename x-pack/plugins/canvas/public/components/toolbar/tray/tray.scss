@@ -3,3 +3,7 @@
   flex-direction: column;
   @include euiBottomShadowFlat;
 }
+
+.canvasTray__panel {
+  border-radius: 0;
+}
