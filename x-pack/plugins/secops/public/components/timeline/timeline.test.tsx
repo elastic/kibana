@@ -29,7 +29,7 @@ describe('Timeline', () => {
       request: { query: eventsQuery },
       result: {
         data: {
-          evenst: mockECSData,
+          events: mockECSData,
         },
       },
     },
