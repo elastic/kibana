@@ -55,6 +55,18 @@
   position: relative;
 }
 
+.alphaRange {
+  .euiFieldNumber {
+    max-width: 5.5em !important;
+  }
+}
+
+.colorPicker {
+  .euiColorPickerPopUp {
+    z-index: 3000;
+  }
+}
+
 .colorGradient {
   width: 100%;
   height: 20px;

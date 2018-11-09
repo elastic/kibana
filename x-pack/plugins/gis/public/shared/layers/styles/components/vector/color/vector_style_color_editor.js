@@ -15,7 +15,8 @@ import {
   EuiFlexItem,
   EuiSwitch,
   EuiFormLabel,
-  EuiSpacer
+  EuiSpacer,
+  EuiRange
 } from '@elastic/eui';
 
 
@@ -35,7 +36,8 @@ export class VectorStyleColorEditor extends React.Component {
     super();
     this.state = {
       colorStyleDesciptor: null,
-      ordinalFields: null
+      ordinalFields: null,
+      alphaValue: 0 // TODO: init w/ store value
     };
     this._lastStaticOptions = null;
   }
@@ -136,6 +138,27 @@ export class VectorStyleColorEditor extends React.Component {
         <EuiSpacer size="m" />
 
         {colorSelector}
+
+        <EuiSpacer size="m" />
+
+        <div className="alphaRange">
+          <EuiRange
+            id={`${this.props.name} alpha range`}
+            min={.00}
+            max={1.00}
+            step={.01}
+            value={this.state.alphaValue}
+            onChange={({ target }) => {
+              this.setState({ alphaValue: target.value });
+              console.log(target.value);
+            }}
+            aria-label="Use aria labels when no actual label is in use"
+            name={`${this.props.name} alpha range`}
+            showLabels
+            showInput
+            showRange
+          />
+        </div>
       </div>
     );
   }
