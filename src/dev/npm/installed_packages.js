@@ -78,7 +78,7 @@ export async function getInstalledPackages(options = {}) {
   return Object
     .keys(licenseInfo)
     .map(key => {
-      const { realPath, repository } = licenseInfo[key];
+      const { realPath, repository, isDevOnly } = licenseInfo[key];
       if (realPath === directory) return;
 
       const keyParts = key.split('@');
@@ -93,7 +93,8 @@ export async function getInstalledPackages(options = {}) {
         repository,
         licenses,
         directory: realPath,
-        relative: relative(directory, realPath)
+        relative: relative(directory, realPath),
+        isDevOnly
       };
     })
     .filter(Boolean);

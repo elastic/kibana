@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 import { fontSizes, truncate } from '../../../style/variables';
-import { asMillisWithDefault } from '../../../utils/formatters';
+import { asMillis } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
@@ -50,7 +50,7 @@ const traceListColumns: ITableColumn[] = [
     name: 'Avg. response time',
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillisWithDefault(value)
+    render: (value: number) => asMillis(value)
   },
   {
     field: 'transactionsPerMinute',
