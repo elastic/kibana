@@ -31,7 +31,7 @@ export const columnRenderers: ColumnRenderer[] = [
 
 export const getSuricataCVEFromSignature = (signature: string): string | null => {
   const regex = /CVE-[0-9]*-[0-9]*/;
-  const found = signature.match(regex);
+  const found = (signature && signature.match(regex)) || null;
   if (found) {
     return found[0];
   } else {

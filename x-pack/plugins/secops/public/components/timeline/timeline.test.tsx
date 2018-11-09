@@ -7,7 +7,9 @@
 import { mount } from 'enzyme';
 import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
+import { MockedProvider } from 'react-apollo/test-utils';
 
+import { eventsQuery } from '../../containers/events/events.gql_query';
 import { mockECSData } from '../../pages/mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
@@ -22,23 +24,35 @@ describe('Timeline', () => {
     sortDirection: 'descending',
   };
 
+  const mocks = [
+    {
+      request: { query: eventsQuery },
+      result: {
+        data: {
+          evenst: mockECSData,
+        },
+      },
+    },
+  ];
+
   describe('rendering', () => {
     test('it renders the timeline header', () => {
       const wrapper = mount(
-        <Timeline
-          columnHeaders={headers}
-          columnRenderers={columnRenderers}
-          data={mockECSData}
-          dataProviders={mockDataProviders}
-          onColumnSorted={noop}
-          onDataProviderRemoved={noop}
-          onFilterChange={noop}
-          onRangeSelected={noop}
-          range={'1 Day'}
-          rowRenderers={rowRenderers}
-          sort={sort}
-          width={1000}
-        />
+        <MockedProvider mocks={mocks}>
+          <Timeline
+            columnHeaders={headers}
+            columnRenderers={columnRenderers}
+            dataProviders={mockDataProviders}
+            onColumnSorted={noop}
+            onDataProviderRemoved={noop}
+            onFilterChange={noop}
+            onRangeSelected={noop}
+            range={'1 Day'}
+            rowRenderers={rowRenderers}
+            sort={sort}
+            width={1000}
+          />
+        </MockedProvider>
       );
 
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
@@ -46,20 +60,21 @@ describe('Timeline', () => {
 
     test('it renders the timeline body', () => {
       const wrapper = mount(
-        <Timeline
-          columnHeaders={headers}
-          columnRenderers={columnRenderers}
-          data={mockECSData}
-          dataProviders={mockDataProviders}
-          onColumnSorted={noop}
-          onDataProviderRemoved={noop}
-          onFilterChange={noop}
-          onRangeSelected={noop}
-          range={'1 Day'}
-          rowRenderers={rowRenderers}
-          sort={sort}
-          width={1000}
-        />
+        <MockedProvider mocks={mocks}>
+          <Timeline
+            columnHeaders={headers}
+            columnRenderers={columnRenderers}
+            dataProviders={mockDataProviders}
+            onColumnSorted={noop}
+            onDataProviderRemoved={noop}
+            onFilterChange={noop}
+            onRangeSelected={noop}
+            range={'1 Day'}
+            rowRenderers={rowRenderers}
+            sort={sort}
+            width={1000}
+          />
+        </MockedProvider>
       );
 
       expect(wrapper.find('[data-test-subj="body"]').exists()).toEqual(true);
@@ -72,20 +87,21 @@ describe('Timeline', () => {
         const mockOnColumnSorted = jest.fn();
 
         const wrapper = mount(
-          <Timeline
-            columnHeaders={headers}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={mockOnColumnSorted}
-            onDataProviderRemoved={noop}
-            onFilterChange={noop}
-            onRangeSelected={noop}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              onColumnSorted={mockOnColumnSorted}
+              onDataProviderRemoved={noop}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </MockedProvider>
         );
 
         wrapper
@@ -105,20 +121,21 @@ describe('Timeline', () => {
         const mockOnDataProviderRemoved = jest.fn();
 
         const wrapper = mount(
-          <Timeline
-            columnHeaders={headers}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={noop}
-            onDataProviderRemoved={mockOnDataProviderRemoved}
-            onFilterChange={noop}
-            onRangeSelected={noop}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              onColumnSorted={noop}
+              onDataProviderRemoved={mockOnDataProviderRemoved}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </MockedProvider>
         );
 
         wrapper
@@ -152,20 +169,21 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <Timeline
-            columnHeaders={allColumnsHaveTextFilters}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={noop}
-            onDataProviderRemoved={noop}
-            onFilterChange={mockOnFilterChange}
-            onRangeSelected={noop}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              columnHeaders={allColumnsHaveTextFilters}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              onColumnSorted={noop}
+              onDataProviderRemoved={noop}
+              onFilterChange={mockOnFilterChange}
+              onRangeSelected={noop}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </MockedProvider>
         );
 
         wrapper
@@ -177,36 +195,6 @@ describe('Timeline', () => {
           columnId: headers[0].id,
           filter: newFilter,
         });
-      });
-    });
-
-    describe('onRangeSelected', () => {
-      test('it invokes the onRangeSelected callback when a new range is selected', () => {
-        const newSelection = '1 Day';
-        const mockOnRangeSelected = jest.fn();
-
-        const wrapper = mount(
-          <Timeline
-            columnHeaders={headers}
-            columnRenderers={columnRenderers}
-            data={mockECSData}
-            dataProviders={mockDataProviders}
-            onColumnSorted={noop}
-            onDataProviderRemoved={noop}
-            onFilterChange={noop}
-            onRangeSelected={mockOnRangeSelected}
-            range={'1 Day'}
-            rowRenderers={rowRenderers}
-            sort={sort}
-            width={1000}
-          />
-        );
-
-        wrapper
-          .find('[data-test-subj="rangePicker"] select')
-          .simulate('change', { target: { value: newSelection } });
-
-        expect(mockOnRangeSelected).toBeCalledWith(newSelection);
       });
     });
   });
