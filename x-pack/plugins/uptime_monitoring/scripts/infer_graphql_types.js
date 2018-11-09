@@ -8,18 +8,15 @@ const { resolve } = require('path');
 // eslint-disable-next-line import/no-extraneous-dependencies, import/no-unresolved
 const { generate } = require('graphql-code-generator');
 
-const GRAPHQL_GLOBS = [
-  // join('common', 'graphql', '**', '*.gql_query.ts{,x}'),
-];
 const CONFIG_PATH = resolve(__dirname, 'gql_gen.json');
 const OUTPUT_INTROSPECTION_PATH = resolve('common', 'graphql', 'introspection.json');
 const OUTPUT_TYPES_PATH = resolve('common', 'graphql', 'types.ts');
 const SCHEMA_PATH = resolve(__dirname, 'graphql_schemas.ts');
-console.log(SCHEMA_PATH);
+
 async function main() {
   await generate(
     {
-      args: GRAPHQL_GLOBS,
+      args: [],
       config: CONFIG_PATH,
       out: OUTPUT_INTROSPECTION_PATH,
       overwrite: true,
@@ -31,7 +28,7 @@ async function main() {
   );
   await generate(
     {
-      args: GRAPHQL_GLOBS,
+      args: [],
       config: CONFIG_PATH,
       out: OUTPUT_TYPES_PATH,
       overwrite: true,
