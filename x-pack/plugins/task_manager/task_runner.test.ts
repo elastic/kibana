@@ -25,21 +25,37 @@ describe('TaskManagerRunner', () => {
   });
 
   test('warns if the task returns an unexpected result', async () => {
-    await allowsReturnType(undefined);
-    await allowsReturnType({});
-    await allowsReturnType({
-      runAt: new Date(),
-    });
-    await allowsReturnType({
-      error: new Error('Dang it!'),
-    });
-    await allowsReturnType({
-      state: { shazm: true },
-    });
-    await disallowsReturnType('hm....');
-    await disallowsReturnType({
-      whatIsThis: '?!!?',
-    });
+    await allowsReturnType(undefined, __filename, 28);
+    await allowsReturnType({}, __filename, 29);
+    await allowsReturnType(
+      {
+        runAt: new Date(),
+      },
+      __filename,
+      35
+    );
+    await allowsReturnType(
+      {
+        error: new Error('Dang it!'),
+      },
+      __filename,
+      42
+    );
+    await allowsReturnType(
+      {
+        state: { shazm: true },
+      },
+      __filename,
+      49
+    );
+    await disallowsReturnType('hm....', __filename, 51);
+    await disallowsReturnType(
+      {
+        whatIsThis: '?!!?',
+      },
+      __filename,
+      57
+    );
   });
 
   test('queues a reattempt if the task fails', async () => {
@@ -95,7 +111,7 @@ describe('TaskManagerRunner', () => {
     const runAt = minutesFromNow(_.random(1, 10));
     const { runner, store } = testOpts({
       definitions: {
-        testType: {
+        bar: {
           createTaskRunner: () => ({
             async run() {
               return { runAt };
@@ -118,7 +134,7 @@ describe('TaskManagerRunner', () => {
         interval: '20m',
       },
       definitions: {
-        testType: {
+        bar: {
           createTaskRunner: () => ({
             async run() {
               return { runAt };
@@ -142,7 +158,7 @@ describe('TaskManagerRunner', () => {
         interval: undefined,
       },
       definitions: {
-        testType: {
+        bar: {
           createTaskRunner: () => ({
             async run() {
               return undefined;
@@ -162,7 +178,7 @@ describe('TaskManagerRunner', () => {
     let wasCancelled = false;
     const { runner, logger } = testOpts({
       definitions: {
-        testType: {
+        bar: {
           createTaskRunner: () => ({
             async run() {
               await new Promise(r => setTimeout(r, 1000));
@@ -241,16 +257,13 @@ describe('TaskManagerRunner', () => {
         },
         opts.instance || {}
       ),
-      definitions: Object.assign(
-        {
-          bar: {
-            type: 'bar',
-            title: 'Bar!',
-            createTaskRunner,
-          },
+      definitions: Object.assign(opts.definitions || {}, {
+        testbar: {
+          type: 'bar',
+          title: 'Bar!',
+          createTaskRunner,
         },
-        opts.definitions || {}
-      ),
+      }),
     });
 
     return {
@@ -262,10 +275,10 @@ describe('TaskManagerRunner', () => {
     };
   }
 
-  async function testReturn(result: any, shouldBeValid: boolean) {
+  async function testReturn(result: any, shouldBeValid: boolean, file: string, line: number) {
     const { runner, logger } = testOpts({
       definitions: {
-        testType: {
+        bar: {
           createTaskRunner: () => ({
             run: async () => result,
           }),
@@ -275,24 +288,18 @@ describe('TaskManagerRunner', () => {
 
     await runner.run();
 
-    try {
-      if (shouldBeValid) {
-        sinon.assert.notCalled(logger.warning);
-      } else {
-        sinon.assert.calledWith(logger.warning, sinon.match(/invalid task result/i));
-      }
-    } catch (err) {
-      sinon.assert.fail(
-        `Expected result ${JSON.stringify(result)} to be ${shouldBeValid ? 'valid' : 'invalid'}`
-      );
+    if (shouldBeValid) {
+      sinon.assert.notCalled(logger.warning);
+    } else {
+      sinon.assert.calledWith(logger.warning, sinon.match(/invalid task result/i));
     }
   }
 
-  function allowsReturnType(result: any) {
-    return testReturn(result, true);
+  function allowsReturnType(result: any, file: string, line: number) {
+    return testReturn(result, true, file, line);
   }
 
-  function disallowsReturnType(result: any) {
-    return testReturn(result, false);
+  function disallowsReturnType(result: any, file: string, line: number) {
+    return testReturn(result, false, file, line);
   }
 });
