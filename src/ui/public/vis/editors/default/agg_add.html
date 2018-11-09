@@ -1,5 +1,10 @@
 <div ng-show="add.form">
-  <label>Select {{ groupName }} type</label>
+  <label
+    i18n-id="common.ui.vis.editors.aggAdd.selectGroupTypeLabel"
+    i18n-default-message="Select {groupNameLabel} type"
+    i18n-values="{ groupNameLabel }"
+  >
+  </label>
   <ul class="form-group list-group list-group-menu">
     <li
       tabindex="0"
@@ -28,23 +33,28 @@
       data-test-subj="visualizeEditorAddAggregationButton"
       class="kuiButton kuiButton--secondary kuiButton--small"
       ng-if="groupName !== 'buckets' || !stats.count && !stats.deprecate"
+      i18n-id="common.ui.vis.editors.aggAdd.addGroupButtonLabel"
+      i18n-default-message="Add {groupNameLabel}"
+      i18n-values="{ groupNameLabel }"
     >
-      Add {{ groupName }}
     </button>
 
     <button
       data-test-subj="visualizeEditorAddAggregationButton"
       class="kuiButton kuiButton--secondary kuiButton--small"
       ng-if="groupName === 'buckets' && stats.count > 0 && !stats.deprecate"
+      i18n-id="common.ui.vis.editors.aggAdd.addSubGroupButtonLabel"
+      i18n-default-message="Add sub-{groupNameLabel}"
+      i18n-values="{ groupNameLabel }"
     >
-      Add sub-{{ groupName }}
     </button>
   </div>
 
   <button
     class="kuiButton kuiButton--danger kuiButton--small"
     ng-if="add.form"
+    i18n-id="common.ui.vis.editors.aggAdd.cancelButtonLabel"
+    i18n-default-message="Cancel"
   >
-    Cancel
   </button>
 </div>

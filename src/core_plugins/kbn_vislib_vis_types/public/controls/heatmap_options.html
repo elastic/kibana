@@ -11,7 +11,7 @@
         id="colorSchema"
         class="kuiSelect kuiSideBarSelect"
         ng-model="editorState.params.colorSchema"
-        ng-options="mode for mode in collections.colorSchemas"
+        ng-options="mode.id as mode.label for mode in collections.colorSchemas"
       ></select>
     </div>
     <div
