@@ -277,14 +277,32 @@ export class VectorStyle {
   setMBPaintPropertiesForPoints(mbMap, sourceId, pointLayerId, temp) {
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor('fillColor');
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 10);
       mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', temp ? 0.4 : 0.5);
     } else {
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
       mbMap.setPaintProperty(pointLayerId, 'circle-color', null);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
     }
+    if (this._descriptor.properties.lineColor) {
+      const color = this._getMBColor('lineColor');
+      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
+      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', temp ? 0.4 : 0.5);
+
+    } else {
+      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', null);
+      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
+    }
+    if (this._descriptor.properties.lineWidth) {
+      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', this._descriptor.properties.lineWidth.options.size);
+    } else {
+      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', 0);
+    }
+    if (this._descriptor.properties.iconSize) {
+      mbMap.setPaintProperty(pointLayerId, 'circle-radius', this._descriptor.properties.iconSize.options.size);
+    } else {
+      mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
+    }
+
   }
 
 }
