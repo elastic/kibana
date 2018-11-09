@@ -20,8 +20,11 @@ import { Placeholders, VisualizationPlaceholder } from '../../components/visuali
 import { EventsQuery } from '../../containers/events';
 import { timelineActions } from '../../store';
 
+// start/end date to show good alert in the timeline
 const startDate = 1521830963132;
 const endDate = 1521862432253;
+
+// start/end date to show good data in the KPI event type
 // const startDate = 1541044800000;
 // const endDate = 1543640399999;
 
