@@ -4,46 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize } from 'lodash';
 // @ts-ignore
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { decryptJobHeaders } from './index';
+import { createMockServer, decryptJobHeaders } from './index';
 
-let config: any;
 let mockServer: any;
 beforeEach(() => {
-  config = {
-    'xpack.reporting.encryptionKey': 'testencryptionkey',
-    'server.basePath': '/sbp',
-    'server.host': 'localhost',
-    'server.port': 5601,
-  };
-  mockServer = {
-    expose: () => {
-      ' ';
-    },
-    config: memoize(() => ({ get: jest.fn() })),
-    info: {
-      protocol: 'http',
-    },
-    plugins: {
-      elasticsearch: {
-        getCluster: memoize(() => {
-          return {
-            callWithRequest: jest.fn(),
-          };
-        }),
-      },
-    },
-    savedObjects: {
-      getScopedSavedObjectsClient: jest.fn(),
-    },
-    uiSettingsServiceFactory: jest.fn().mockReturnValue({ get: jest.fn() }),
-  };
-
-  mockServer.config().get.mockImplementation((key: any) => {
-    return config[key];
-  });
+  mockServer = createMockServer('');
 });
 
 const encryptHeaders = async (headers: Record<string, string>) => {

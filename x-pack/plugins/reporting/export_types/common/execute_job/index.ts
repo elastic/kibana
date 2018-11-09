@@ -10,3 +10,4 @@ export { getConditionalHeaders } from './get_conditional_headers';
 export { getCustomLogo } from './get_custom_logo';
 export { omitBlacklistedHeaders } from './omit_blacklisted_headers';
 export { getAbsoluteUrlFactory } from './get_absolute_url';
+export { createMockServer } from '../../../test_helpers/create_mock_server';
