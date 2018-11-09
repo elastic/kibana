@@ -24,13 +24,13 @@ export function apm(kibana) {
         description: 'APM for the Elastic Stack',
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
-        euiIconType: 'apmApp'
+        euiIconType: 'apmApp',
+        order: 8100
       },
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          mlEnabled: config.get('xpack.ml.enabled'),
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
           apmIndexPattern: config.get('apm_oss.indexPattern')
         };

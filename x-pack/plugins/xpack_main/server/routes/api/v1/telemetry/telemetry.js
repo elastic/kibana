@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { wrap } from 'boom';
+import { boomify } from 'boom';
 import { getAllStats, getLocalStats } from '../../../../lib/telemetry';
 
 /**
@@ -46,7 +46,7 @@ export function telemetryRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req, h) => {
       const savedObjectsClient = req.getSavedObjectsClient();
       try {
         await savedObjectsClient.create('telemetry', {
@@ -56,9 +56,9 @@ export function telemetryRoute(server) {
           overwrite: true,
         });
       } catch (err) {
-        return reply(wrap(err));
+        return boomify(err);
       }
-      reply({}).code(200);
+      return h.response({}).code(200);
     }
   });
 
@@ -82,20 +82,20 @@ export function telemetryRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req, h) => {
       const config = req.server.config();
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
 
       try {
-        reply(await getTelemetry(req, config, start, end));
+        return await getTelemetry(req, config, start, end);
       } catch (err) {
         if (config.get('env.dev')) {
-          // don't ignore errors when running in dev mode
-          reply(wrap(err));
+        // don't ignore errors when running in dev mode
+          return boomify(err);
         } else {
-          // ignore errors, return empty set and a 200
-          reply([]).code(200);
+        // ignore errors, return empty set and a 200
+          return h.response([]).code(200);
         }
       }
     }

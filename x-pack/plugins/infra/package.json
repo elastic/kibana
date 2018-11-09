@@ -1,12 +1,12 @@
 {
   "author": "Elastic",
   "name": "infra",
-  "version": "7.0.0-alpha1",
+  "version": "7.0.0",
   "scripts": {
     "build-graphql-types": "node scripts/generate_types_from_graphql.js"
   },
   "devDependencies": {
-    "@types/boom": "3.2.2",
+    "@types/boom": "7.2.0",
     "@types/lodash": "^4.14.110"
   },
   "dependencies": {

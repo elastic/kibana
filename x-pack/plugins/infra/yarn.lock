@@ -2,12 +2,10 @@
 # yarn lockfile v1
 
 
-"@types/boom@3.2.2":
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/@types/boom/-/boom-3.2.2.tgz#6773bb1bbfec111f5ea683874b8d932157d58885"
-  integrity sha512-Wbgg2JXCnlEMWB2faZgT8x1MPPgzqqLBWx1zXXWGPDQDo9CcvQkIW89QqY+yekoXIKI+qW/eZsg/gv6+WNFwEg==
-  dependencies:
-    "@types/node" "*"
+"@types/boom@7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@types/boom/-/boom-7.2.0.tgz#19c36cbb5811a7493f0f2e37f31d42b28df1abc1"
+  integrity sha512-HonbGsHFbskh9zRAzA6tabcw18mCOsSEOL2ibGAuVqk6e7nElcRmWO5L4UfIHpDbWBWw+eZYFdsQ1+MEGgpcVA==
 
 "@types/color-convert@*":
   version "1.9.0"
@@ -32,11 +30,6 @@
   version "4.14.116"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.116.tgz#5ccf215653e3e8c786a58390751033a9adca0eb9"
   integrity sha512-lRnAtKnxMXcYYXqOiotTmJd74uawNWuPnsnPrrO7HiFuE3npE2iQhfABatbYDyxTNqZNuXzcKGhw37R7RjBFLg==
-
-"@types/node@*":
-  version "10.11.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.11.4.tgz#e8bd933c3f78795d580ae41d86590bfc1f4f389d"
-  integrity sha512-ojnbBiKkZFYRfQpmtnnWTMw+rzGp/JiystjluW9jgN3VzRwilXddJ6aGQ9V/7iuDG06SBgn7ozW9k3zcAnYjYQ==
 
 boom@3.1.1:
   version "3.1.1"

@@ -23,7 +23,7 @@ export function scrollSearchApi(server) {
   server.route({
     path: '/api/kibana/legacy_scroll_start',
     method: ['POST'],
-    handler: (req, reply) => {
+    handler: async (req) => {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const { index, size, body } = req.payload;
       const params = {
@@ -33,21 +33,26 @@ export function scrollSearchApi(server) {
         scroll: '1m',
         sort: '_doc',
       };
-      return callWithRequest(req, 'search', params)
-        .then(reply)
-        .catch(error => reply(handleESError(error)));
+
+      try {
+        return await callWithRequest(req, 'search', params);
+      } catch (err) {
+        throw handleESError(err);
+      }
     }
   });
 
   server.route({
     path: '/api/kibana/legacy_scroll_continue',
     method: ['POST'],
-    handler: (req, reply) => {
+    handler: async (req) => {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const { scrollId } = req.payload;
-      return callWithRequest(req, 'scroll', { scrollId, scroll: '1m' })
-        .then(reply)
-        .catch(error => reply(handleESError(error)));
+      try {
+        return await callWithRequest(req, 'scroll', { scrollId, scroll: '1m' });
+      } catch (err) {
+        throw handleESError(err);
+      }
     }
   });
 }

@@ -23,6 +23,15 @@ import { shallow } from 'enzyme';
 import { Home } from './home';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+jest.mock(
+  'ui/chrome',
+  () => ({
+    getBasePath: jest.fn(() => 'path'),
+    getInjected: jest.fn(() => ''),
+  }),
+  { virtual: true }
+);
+
 describe('home', () => {
   let defaultProps;
 
@@ -31,6 +40,7 @@ describe('home', () => {
       recentlyAccessed: [],
       directories: [],
       apmUiEnabled: true,
+      mlEnabled: true,
       kibanaVersion: '99.2.1',
       addBasePath(url) {
         return `base_path/${url}`;

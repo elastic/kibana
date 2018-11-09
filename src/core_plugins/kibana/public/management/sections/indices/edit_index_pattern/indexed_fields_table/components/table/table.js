@@ -39,13 +39,19 @@ export class TableComponent extends PureComponent {
     return value ? <EuiIcon type="dot" color="secondary" aria-label={label}/> : <span/>;
   }
 
-  renderFieldName(name, isTimeField) {
+  renderFieldName(name, field) {
+    const { indexPattern } = this.props;
     const { intl } = this.props;
-    const label = intl.formatMessage({
-      id: 'kbn.management.editIndexPattern.fields.table.primaryTimeAria',
+
+    const infoLabel = intl.formatMessage({
+      id: 'kbn.management.editIndexPattern.fields.table.additionalInfoAriaLabel',
+      defaultMessage: 'Additional field information'
+    });
+    const timeLabel = intl.formatMessage({
+      id: 'kbn.management.editIndexPattern.fields.table.primaryTimeAriaLabel',
       defaultMessage: 'Primary time field'
     });
-    const content = intl.formatMessage({
+    const timeContent = intl.formatMessage({
       id: 'kbn.management.editIndexPattern.fields.table.primaryTimeTooltip',
       defaultMessage: 'This field represents the time that events occurred.'
     });
@@ -53,17 +59,28 @@ export class TableComponent extends PureComponent {
     return (
       <span>
         {name}
-        {isTimeField ? (
+        {field.info && field.info.length ? (
+          <span>
+            &nbsp;
+            <EuiIconTip
+              type="questionInCircle"
+              color="primary"
+              aria-label={infoLabel}
+              content={field.info.map((info, i) => <div key={i}>{info}</div>)}
+            />
+          </span>
+        ) : null}
+        {indexPattern.timeFieldName === name ? (
           <span>
             &nbsp;
             <EuiIconTip
               type="clock"
               color="primary"
-              aria-label={label}
-              content={content}
+              aria-label={timeLabel}
+              content={timeContent}
             />
           </span>
-        ) : ''}
+        ) : null}
       </span>
     );
   }
@@ -98,7 +115,7 @@ export class TableComponent extends PureComponent {
   }
 
   render() {
-    const { indexPattern, items, editField, intl } = this.props;
+    const { items, editField, intl } = this.props;
 
     const pagination = {
       initialPageSize: 10,
@@ -111,8 +128,8 @@ export class TableComponent extends PureComponent {
         name: intl.formatMessage({ id: 'kbn.management.editIndexPattern.fields.table.nameHeader', defaultMessage: 'Name' }),
         dataType: 'string',
         sortable: true,
-        render: (value) => {
-          return this.renderFieldName(value, indexPattern.timeFieldName === value);
+        render: (value, field) => {
+          return this.renderFieldName(value, field);
         },
         width: '38%',
         'data-test-subj': 'indexedFieldName',

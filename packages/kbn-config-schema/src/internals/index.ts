@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as Joi from 'joi';
+import Joi from 'joi';
 import {
   AnySchema,
   JoiRoot,

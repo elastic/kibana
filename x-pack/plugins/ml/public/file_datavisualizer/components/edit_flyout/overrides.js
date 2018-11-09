@@ -281,7 +281,7 @@ export class Overrides extends Component {
           />
         </EuiFormRow> */}
         {
-          (this.state.format === 'delimited') &&
+          (this.state.format === 'delimited' && originalColumnNames.length > 0) &&
 
           <React.Fragment>
             <EuiSpacer />

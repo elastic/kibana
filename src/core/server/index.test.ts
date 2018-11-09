@@ -22,6 +22,11 @@ jest.mock('./http/http_service', () => ({
   HttpService: jest.fn(() => mockHttpService),
 }));
 
+const mockPluginsService = { start: jest.fn(), stop: jest.fn() };
+jest.mock('./plugins/plugins_service', () => ({
+  PluginsService: jest.fn(() => mockPluginsService),
+}));
+
 const mockLegacyService = { start: jest.fn(), stop: jest.fn() };
 jest.mock('./legacy_compat/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
@@ -45,6 +50,8 @@ afterEach(() => {
   mockConfigService.atPath.mockReset();
   mockHttpService.start.mockReset();
   mockHttpService.stop.mockReset();
+  mockPluginsService.start.mockReset();
+  mockPluginsService.stop.mockReset();
   mockLegacyService.start.mockReset();
   mockLegacyService.stop.mockReset();
 });
@@ -56,11 +63,13 @@ test('starts services on "start"', async () => {
   const server = new Server(mockConfigService as any, logger, env);
 
   expect(mockHttpService.start).not.toHaveBeenCalled();
+  expect(mockPluginsService.start).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
 
   await server.start();
 
   expect(mockHttpService.start).toHaveBeenCalledTimes(1);
+  expect(mockPluginsService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledWith(mockHttpServiceStartContract);
 });
@@ -112,10 +121,12 @@ test('stops services on "stop"', async () => {
   await server.start();
 
   expect(mockHttpService.stop).not.toHaveBeenCalled();
+  expect(mockPluginsService.stop).not.toHaveBeenCalled();
   expect(mockLegacyService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
   expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
+  expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
 });

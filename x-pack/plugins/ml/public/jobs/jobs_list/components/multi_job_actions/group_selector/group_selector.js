@@ -5,6 +5,7 @@
  */
 
 
+import { checkPermission } from 'plugins/ml/privilege/check_privilege';
 import PropTypes from 'prop-types';
 import React, {
   Component,
@@ -66,6 +67,7 @@ export class GroupSelector extends Component {
     };
 
     this.refreshJobs = this.props.refreshJobs;
+    this.canUpdateJob = checkPermission('canUpdateJob');
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -204,6 +206,7 @@ export class GroupSelector extends Component {
           iconType="indexEdit"
           aria-label="Edit job groups"
           onClick={() => this.togglePopover()}
+          disabled={this.canUpdateJob === false}
         />
       </EuiToolTip>
     );

@@ -18,6 +18,7 @@ const APM_AGENT_FEATURE_DOCS: {
   };
 } = {
   user: {
+    java: `${AGENT_URL_ROOT}/java/0.7/public-api.html#api-transaction-set-user`,
     nodejs: `${AGENT_URL_ROOT}/nodejs/1.x/agent-api.html#apm-set-user-context`,
     python: `${AGENT_URL_ROOT}/python/2.x/api.html#api-set-user-context`,
     ruby: `${AGENT_URL_ROOT}/ruby/1.x/advanced.html#_providing_info_about_the_user`,
@@ -25,6 +26,7 @@ const APM_AGENT_FEATURE_DOCS: {
     'js-base': `${AGENT_URL_ROOT}/js-base/0.x/api.html#apm-set-user-context`
   },
   tags: {
+    java: `${AGENT_URL_ROOT}/java/0.7/public-api.html#api-transaction-add-tag`,
     nodejs: `${AGENT_URL_ROOT}/nodejs/1.x/agent-api.html#apm-set-tag`,
     python: `${AGENT_URL_ROOT}/python/2.x/api.html#api-tag`,
     ruby: `${AGENT_URL_ROOT}/ruby/1.x/advanced.html#_adding_tags`,

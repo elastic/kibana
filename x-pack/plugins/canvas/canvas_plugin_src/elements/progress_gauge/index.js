@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { openSans } from '../../../common/lib/fonts';
 import header from './header.png';
 
 export const progressGauge = () => ({
   name: 'progressGauge',
-  displayName: 'Progress gauge',
-  help: 'Displays progress as a portion of a gauge',
+  displayName: i18n.translate('xpack.canvas.elements.progressGaugeDisplayName', {
+    defaultMessage: 'Progress Gauge',
+  }),
+  help: i18n.translate('xpack.canvas.elements.progressGaugeHelpText', {
+    defaultMessage: 'Displays progress as a portion of a gauge',
+  }),
   width: 200,
   height: 200,
   image: header,

@@ -41,6 +41,7 @@ export function HomeApp({
 
   const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
   const apmUiEnabled = chrome.getInjected('apmUiEnabled', true);
+  const mlEnabled = chrome.getInjected('mlEnabled', false);
   const savedObjectsClient = chrome.getSavedObjectsClient();
 
   const renderTutorialDirectory = (props) => {
@@ -93,6 +94,7 @@ export function HomeApp({
               addBasePath={chrome.addBasePath}
               directories={directories}
               apmUiEnabled={apmUiEnabled}
+              mlEnabled={mlEnabled}
               recentlyAccessed={recentlyAccessed}
               find={savedObjectsClient.find}
               localStorage={localStorage}

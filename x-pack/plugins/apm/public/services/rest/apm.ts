@@ -6,7 +6,6 @@
 
 // @ts-ignore
 import { camelizeKeys } from 'humps';
-import { isEmpty } from 'lodash';
 import { ServiceResponse } from 'x-pack/plugins/apm/server/lib/services/get_service';
 import { ServiceListItemResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
@@ -147,8 +146,10 @@ export async function loadTransactionDistribution({
   });
 }
 
-function addVersion<T extends Span | Transaction>(item: T): T {
-  if (!isEmpty(item)) {
+function addVersion<T extends Span | Transaction | null | undefined>(
+  item: T
+): T {
+  if (item != null) {
     item.version = item.hasOwnProperty('trace') ? 'v2' : 'v1';
   }
 
@@ -180,7 +181,7 @@ export async function loadSpans({
 }
 
 export async function loadTrace({ traceId, start, end }: IUrlParams) {
-  const result: WaterfallResponse = await callApi(
+  const hits: WaterfallResponse = await callApi(
     {
       pathname: `/api/apm/traces/${traceId}`,
       query: {
@@ -193,8 +194,7 @@ export async function loadTrace({ traceId, start, end }: IUrlParams) {
     }
   );
 
-  result.hits = result.hits.map(addVersion);
-  return result;
+  return hits.map(addVersion);
 }
 
 export async function loadTransaction({
@@ -205,7 +205,7 @@ export async function loadTransaction({
   traceId,
   kuery
 }: IUrlParams) {
-  const result: Transaction = await callApi(
+  const result: Transaction | null = await callApi(
     {
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
       query: {

@@ -65,7 +65,7 @@ export function dataVisualizerRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/data_visualizer/get_field_stats/{indexPatternTitle}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const indexPatternTitle = request.params.indexPatternTitle;
       const payload = request.payload;
@@ -80,8 +80,7 @@ export function dataVisualizerRoutes(server, commonRouteConfig) {
         payload.latest,
         payload.interval,
         payload.maxExamples)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -91,7 +90,7 @@ export function dataVisualizerRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/data_visualizer/get_overall_stats/{indexPatternTitle}',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const indexPatternTitle = request.params.indexPatternTitle;
       const payload = request.payload;
@@ -105,8 +104,7 @@ export function dataVisualizerRoutes(server, commonRouteConfig) {
         payload.timeFieldName,
         payload.earliest,
         payload.latest)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig

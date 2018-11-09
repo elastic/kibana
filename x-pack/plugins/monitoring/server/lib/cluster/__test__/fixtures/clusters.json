@@ -304,6 +304,13 @@
         }
       }
     },
+    "cluster_settings": {
+      "cluster": {
+        "metadata": {
+          "display_name": "Custom name"
+        }
+      }
+    },
     "isSupported": true,
     "alerts": {
       "alertsMeta": {

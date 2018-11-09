@@ -10,8 +10,8 @@ export function initLogoutView(server) {
   server.route({
     method: 'GET',
     path: '/logout',
-    handler(request, reply) {
-      return reply.renderAppWithDefaultConfig(logout);
+    handler(request, h) {
+      return h.renderAppWithDefaultConfig(logout);
     },
     config: {
       auth: false

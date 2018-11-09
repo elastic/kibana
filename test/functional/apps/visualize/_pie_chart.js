@@ -126,6 +126,17 @@ export default function ({ getService, getPageObjects }) {
         await filterBar.removeFilter('machine.os.raw');
       });
 
+      it('should apply correct filter on other bucket by clicking on a legend', async () => {
+        const expectedTableData = [ 'Missing', 'osx' ];
+
+        await PageObjects.visualize.filterLegend('Other');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const pieData = await PageObjects.visualize.getPieChartLabels();
+        log.debug(`pieData.length = ${pieData.length}`);
+        expect(pieData).to.eql(expectedTableData);
+        await filterBar.removeFilter('machine.os.raw');
+      });
+
       it('should show two levels of other buckets', async () => {
         const expectedTableData = [ 'win 8', 'CN', 'IN', 'US', 'ID', 'BR', 'Other', 'win xp',
           'CN', 'IN', 'US', 'ID', 'BR', 'Other', 'win 7', 'CN', 'IN', 'US', 'ID', 'BR', 'Other',

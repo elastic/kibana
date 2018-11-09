@@ -39,7 +39,7 @@ describe('src/dev/build/tasks/nodejs/download_node_builds_task', () => {
 
     const log = {};
     const config = {
-      getTargetPlatforms: () => platforms,
+      getNodePlatforms: () => platforms,
       getNodeVersion: () => 'nodeVersion',
     };
 

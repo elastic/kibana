@@ -6,13 +6,26 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFormRow, EuiFlexItem, EuiFieldNumber, EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiFlexItem,
+  EuiFieldNumber,
+  EuiSuperSelect,
+} from '@elastic/eui';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 
-const styles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset'];
-
-const options = [{ value: '', text: '--' }];
-styles.forEach(val => options.push({ value: val, text: val }));
+const styles = [
+  'none',
+  'solid',
+  'dotted',
+  'dashed',
+  'double',
+  'groove',
+  'ridge',
+  'inset',
+  'outset',
+];
 
 export const BorderForm = ({ value, radius, onChange, colors }) => {
   const border = value || '';
@@ -20,9 +33,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
   const borderWidthVal = borderWidth ? borderWidth.replace('px', '') : '';
   const radiusVal = radius ? radius.replace('px', '') : '';
 
-  const namedChange = name => ev => {
-    const val = ev.target.value;
-
+  const namedChange = name => val => {
     if (name === 'borderWidth') return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
     if (name === 'borderStyle') {
       if (val === '') return onChange('border', `0px`);
@@ -30,7 +41,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
     }
     if (name === 'borderRadius') return onChange('borderRadius', `${val}px`);
 
-    onChange(name, ev.target.value);
+    onChange(name, val);
   };
 
   const borderColorChange = color => onChange('border', `${borderWidth} ${borderStyle} ${color}`);
@@ -38,16 +49,22 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={2}>
-        <EuiFormRow label="Width" compressed>
-          <EuiFieldNumber value={Number(borderWidthVal)} onChange={namedChange('borderWidth')} />
+        <EuiFormRow label="Thickness" compressed>
+          <EuiFieldNumber
+            value={Number(borderWidthVal)}
+            onChange={e => namedChange('borderWidth')(e.target.value)}
+          />
         </EuiFormRow>
       </EuiFlexItem>
 
       <EuiFlexItem grow={3}>
         <EuiFormRow label="Style" compressed>
-          <EuiSelect
-            defaultValue={borderStyle}
-            options={options}
+          <EuiSuperSelect
+            valueOfSelected={borderStyle || 'none'}
+            options={styles.map(style => ({
+              value: style,
+              inputDisplay: <div style={{ height: 16, border: `4px ${style}` }} />,
+            }))}
             onChange={namedChange('borderStyle')}
           />
         </EuiFormRow>
@@ -55,7 +72,10 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
 
       <EuiFlexItem grow={2}>
         <EuiFormRow label="Radius" compressed>
-          <EuiFieldNumber value={Number(radiusVal)} onChange={namedChange('borderRadius')} />
+          <EuiFieldNumber
+            value={Number(radiusVal)}
+            onChange={e => namedChange('borderRadius')(e.target.value)}
+          />
         </EuiFormRow>
       </EuiFlexItem>
 
