@@ -66,15 +66,15 @@ export interface OS {
 
 export interface HTTP {
   response?: StatusCode | null;
-  rtt?: RTT | null;
+  rtt?: HttpRTT | null;
   url?: string | null;
 }
 
 export interface StatusCode {
-  status_code: number;
+  status_code?: number | null;
 }
 
-export interface RTT {
+export interface HttpRTT {
   content?: Duration | null;
   response_header?: Duration | null;
   total?: Duration | null;
@@ -145,10 +145,10 @@ export interface Resolve {
 }
 
 export interface Socks5 {
-  rtt?: Socks5RTT | null;
+  rtt?: RTT | null;
 }
 
-export interface Socks5RTT {
+export interface RTT {
   connect?: Duration | null;
   handshake?: Duration | null;
   validate?: Duration | null;
@@ -158,12 +158,12 @@ export interface TLS {
   certificate_not_valid_after?: string | null;
   certificate_not_valid_before?: string | null;
   certificates?: string | null;
-  rtt?: Socks5RTT | null;
+  rtt?: RTT | null;
 }
 
 export interface TCP {
   port?: number | null;
-  rtt?: Socks5RTT | null;
+  rtt?: RTT | null;
 }
 
 export namespace QueryResolvers {
@@ -290,7 +290,7 @@ export namespace HTTPResolvers {
   }
 
   export type ResponseResolver = Resolver<StatusCode | null>;
-  export type RttResolver = Resolver<RTT | null>;
+  export type RttResolver = Resolver<HttpRTT | null>;
   export type UrlResolver = Resolver<string | null>;
 }
 
@@ -299,10 +299,10 @@ export namespace StatusCodeResolvers {
     status_code?: Status_codeResolver;
   }
 
-  export type Status_codeResolver = Resolver<number>;
+  export type Status_codeResolver = Resolver<number | null>;
 }
 
-export namespace RTTResolvers {
+export namespace HttpRTTResolvers {
   export interface Resolvers {
     content?: ContentResolver;
     response_header?: Response_headerResolver;
@@ -447,10 +447,10 @@ export namespace Socks5Resolvers {
     rtt?: RttResolver;
   }
 
-  export type RttResolver = Resolver<Socks5RTT | null>;
+  export type RttResolver = Resolver<RTT | null>;
 }
 
-export namespace Socks5RTTResolvers {
+export namespace RTTResolvers {
   export interface Resolvers {
     connect?: ConnectResolver;
     handshake?: HandshakeResolver;
@@ -473,7 +473,7 @@ export namespace TLSResolvers {
   export type Certificate_not_valid_afterResolver = Resolver<string | null>;
   export type Certificate_not_valid_beforeResolver = Resolver<string | null>;
   export type CertificatesResolver = Resolver<string | null>;
-  export type RttResolver = Resolver<Socks5RTT | null>;
+  export type RttResolver = Resolver<RTT | null>;
 }
 
 export namespace TCPResolvers {
@@ -483,7 +483,7 @@ export namespace TCPResolvers {
   }
 
   export type PortResolver = Resolver<number | null>;
-  export type RttResolver = Resolver<Socks5RTT | null>;
+  export type RttResolver = Resolver<RTT | null>;
 }
 export interface AllPingsQueryArgs {
   sort?: string | null;

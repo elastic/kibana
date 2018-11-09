@@ -429,7 +429,7 @@
             "name": "rtt",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "HttpRTT", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -456,11 +456,7 @@
             "name": "status_code",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -472,7 +468,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "RTT",
+        "name": "HttpRTT",
         "description": "",
         "fields": [
           {
@@ -896,7 +892,7 @@
             "name": "rtt",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "Socks5RTT", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -908,7 +904,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "Socks5RTT",
+        "name": "RTT",
         "description": "",
         "fields": [
           {
@@ -974,7 +970,7 @@
             "name": "rtt",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "Socks5RTT", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1714,7 +1710,7 @@
             "name": "rtt",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "Socks5RTT", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "RTT", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

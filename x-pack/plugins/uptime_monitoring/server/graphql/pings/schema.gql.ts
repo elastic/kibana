@@ -22,7 +22,7 @@ export const pingsSchema = gql`
   }
 
   type StatusCode {
-    status_code: Int!
+    status_code: Int
   }
 
   "An agent for recording a beat"
@@ -61,7 +61,7 @@ export const pingsSchema = gql`
     os: OS
   }
 
-  type RTT {
+  type HttpRTT {
     content: Duration
     response_header: Duration
     total: Duration
@@ -72,7 +72,7 @@ export const pingsSchema = gql`
 
   type HTTP {
     response: StatusCode
-    rtt: RTT
+    rtt: HttpRTT
     url: String
   }
 
@@ -139,26 +139,26 @@ export const pingsSchema = gql`
     rtt: Duration
   }
 
-  type Socks5RTT {
+  type RTT {
     connect: Duration
     handshake: Duration
     validate: Duration
   }
 
   type Socks5 {
-    rtt: Socks5RTT
+    rtt: RTT
   }
 
   type TCP {
     port: Int
-    rtt: Socks5RTT
+    rtt: RTT
   }
 
   type TLS {
     certificate_not_valid_after: String
     certificate_not_valid_before: String
     certificates: String
-    rtt: Socks5RTT
+    rtt: RTT
   }
 
   "A request sent from a monitor to a host"
