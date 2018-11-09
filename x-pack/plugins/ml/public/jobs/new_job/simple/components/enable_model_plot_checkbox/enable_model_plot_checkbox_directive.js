@@ -35,7 +35,12 @@ module.directive('mlEnableModelPlotCheckbox', function () {
       function errorHandler(error) {
         console.log('Cardinality could not be validated', error);
         $scope.ui.cardinalityValidator.status = STATUS.FAILED;
-        $scope.ui.cardinalityValidator.message = 'Cardinality could not be validated';
+        $scope.ui.cardinalityValidator.message = `An error occurred validating the configuration
+            for running the job with model plot enabled.
+            Creating model plots can be resource intensive and not recommended where the cardinality of the selected fields is high.
+            You may want to select a dedicated results index on the Job Details tab.`;
+        // Go ahead and check the dedicated index box for them
+        $scope.formConfig.useDedicatedIndex = true;
       }
 
       function validateCardinality() {
@@ -106,7 +111,10 @@ module.directive('mlEnableModelPlotCheckbox', function () {
           $scope.formConfig.enableModelPlot === false)
         );
         const validatorRunning = ($scope.ui.cardinalityValidator.status === STATUS.RUNNING);
-        const warningStatus = ($scope.ui.cardinalityValidator.status === STATUS.WARNING && $scope.ui.formValid === true);
+        const warningStatus = (
+          ($scope.ui.cardinalityValidator.status === STATUS.WARNING ||
+            $scope.ui.cardinalityValidator.status === STATUS.FAILED) &&
+            $scope.ui.formValid === true);
         const checkboxText = (validatorRunning) ? 'Validating cardinality...' : 'Enable model plot';
 
         const props = {
