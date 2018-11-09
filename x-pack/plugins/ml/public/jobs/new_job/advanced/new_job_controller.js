@@ -119,6 +119,8 @@ module.controller('MlNewJob',
     const mlConfirm = mlConfirmModalService;
     msgs.clear();
     const jobDefaults = newJobDefaults();
+    // For keeping a copy of the detectors for comparison
+    let currentDetectorConfig;
 
     $scope.job = {};
     $scope.mode = MODE.NEW;
@@ -299,7 +301,13 @@ module.controller('MlNewJob',
 
     function changeTab(tab) {
       $scope.ui.currentTab = tab.index;
-      if (tab.index === 4) {
+      if (tab.index === 1) {
+        const unchanged = _.isEqual(currentDetectorConfig, $scope.job.analysis_config.detectors);
+
+        if (!unchanged) {
+          runValidateCardinality();
+        }
+      } else if (tab.index === 4) {
         createJSONText();
       } else if (tab.index === 5) {
         if ($scope.ui.dataLocation === 'ES') {
@@ -694,6 +702,8 @@ module.controller('MlNewJob',
 
     $scope.onDetectorsUpdate = function () {
       const { STATUS } = $scope.ui.cardinalityValidator;
+      // Update currentDetectorConfig since config changed
+      currentDetectorConfig = _.cloneDeep($scope.job.analysis_config.detectors);
 
       if ($scope.ui.enableModelPlot === true) {
         if ($scope.job.analysis_config.detectors.length === 0) {
@@ -707,6 +717,8 @@ module.controller('MlNewJob',
 
     $scope.setModelPlotEnabled = function () {
       const { STATUS } = $scope.ui.cardinalityValidator;
+      // Start keeping track of the config in case of changes from Edit JSON tab
+      currentDetectorConfig = _.cloneDeep($scope.job.analysis_config.detectors);
 
       if ($scope.ui.enableModelPlot === true) {
         $scope.job.model_plot_config = {
