@@ -8,23 +8,23 @@ import { GraphQLSchema } from 'graphql';
 import { Server } from 'hapi';
 import {
   BackendFrameworkAdapter,
-  FrameworkResponse,
   UMFrameworkRequest,
+  UMFrameworkResponse,
   UMFrameworkRouteOptions,
   UMHapiGraphQLPluginOptions,
 } from './adapter_types';
 import { uptimeMonitoringGraphQLHapiPlugin } from './apollo_framework_adapter';
 
-export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
+export class UMKibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   private server: Server;
 
-  constructor(hapiServer: any) {
+  constructor(hapiServer: Server) {
     this.server = hapiServer;
   }
 
   public registerRoute<
     RouteRequest extends UMFrameworkRequest,
-    RouteResponse extends FrameworkResponse
+    RouteResponse extends UMFrameworkResponse
   >(route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>) {
     this.server.route(route);
   }

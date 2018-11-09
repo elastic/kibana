@@ -17,11 +17,11 @@ export interface UMFrameworkRequest {
   query: Record<string, any>;
 }
 
-export type FrameworkResponse = Lifecycle.ReturnValue;
+export type UMFrameworkResponse = Lifecycle.ReturnValue;
 
 export interface UMFrameworkRouteOptions<
   RouteRequest extends UMFrameworkRequest,
-  RouteResponse extends FrameworkResponse
+  RouteResponse extends UMFrameworkResponse
 > {
   path: string;
   method: string;
@@ -44,7 +44,7 @@ export interface UMHapiGraphQLPluginOptions {
 }
 
 export interface BackendFrameworkAdapter {
-  registerRoute<RouteRequest extends UMFrameworkRequest, RouteResponse extends FrameworkResponse>(
+  registerRoute<RouteRequest extends UMFrameworkRequest, RouteResponse extends UMFrameworkResponse>(
     route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;

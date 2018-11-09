@@ -7,12 +7,12 @@
 import { GraphQLSchema } from 'graphql';
 import {
   BackendFrameworkAdapter,
-  FrameworkResponse,
   UMFrameworkRequest,
+  UMFrameworkResponse,
   UMFrameworkRouteOptions,
 } from './adapter_types';
 
-export class TestBackendFrameworkAdapter implements BackendFrameworkAdapter {
+export class UMTestBackendFrameworkAdapter implements BackendFrameworkAdapter {
   private server: any;
 
   constructor(server: any) {
@@ -20,9 +20,9 @@ export class TestBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public registerRoute<
-    RouteRequest extends UMFrameworkRequest,
-    RouteResponse extends FrameworkResponse
-  >(route: UMFrameworkRouteOptions<UMFrameworkRequest, FrameworkResponse>): void {
+    UMRouteRequest extends UMFrameworkRequest,
+    UMRouteResponse extends UMFrameworkResponse
+  >(route: UMFrameworkRouteOptions<UMFrameworkRequest, UMFrameworkResponse>): void {
     const { config, method, path, handler } = route;
     this.server.route({
       config,

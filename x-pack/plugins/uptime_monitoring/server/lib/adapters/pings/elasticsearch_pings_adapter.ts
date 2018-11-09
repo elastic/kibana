@@ -34,7 +34,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       hits: { hits },
     } = await this.database.search(request, params);
 
-    return hits.map(({ _source, _source: { monitor } }: any) => {
+    return hits.map(({ _source }: any) => {
       const timestamp = _source['@timestamp'];
       return { timestamp, ..._source };
     });

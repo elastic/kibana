@@ -5,15 +5,15 @@
  */
 
 import { Server } from 'hapi';
-import { KibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
-import { KibanaBackendFrameworkAdapter } from '../adapters/framework';
+import { UMKibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
+import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
 import { ElasticsearchPingsAdapter } from '../adapters/pings/elasticsearch_pings_adapter';
 import { UMPingsDomain } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 
 export function compose(hapiServer: Server): UMServerLibs {
-  const framework = new KibanaBackendFrameworkAdapter(hapiServer);
-  const database = new KibanaDatabaseAdapter(hapiServer.plugins.elasticsearch);
+  const framework = new UMKibanaBackendFrameworkAdapter(hapiServer);
+  const database = new UMKibanaDatabaseAdapter(hapiServer.plugins.elasticsearch);
 
   const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
 

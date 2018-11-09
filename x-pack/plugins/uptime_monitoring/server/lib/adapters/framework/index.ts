@@ -5,4 +5,4 @@
  */
 
 export * from './adapter_types';
-export { KibanaBackendFrameworkAdapter } from './kibana_framework_adapter';
+export { UMKibanaBackendFrameworkAdapter } from './kibana_framework_adapter';

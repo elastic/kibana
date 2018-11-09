@@ -11,7 +11,7 @@ interface KibanaElasticsearchPlugin {
   callWithRequest: (request: any, action: string, params: any) => any;
 }
 
-export class KibanaDatabaseAdapter implements DatabaseAdapter {
+export class UMKibanaDatabaseAdapter implements DatabaseAdapter {
   private elasticsearch: KibanaElasticsearchPlugin;
 
   constructor(kbnElasticsearch: KibanaElasticsearchPlugin) {
