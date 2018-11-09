@@ -20,7 +20,6 @@ export interface DataProvider {
   /**
    * Returns a Component query that, when executed, returns the data for this provider
    */
-  // tslint:disable-next-line:no-any
   componentQuery: React.ReactNode;
   componentQueryProps: {};
   componentResultParam: string;
