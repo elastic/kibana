@@ -14,6 +14,7 @@ import { EmptyPage } from '../../components/empty_page';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
+import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptionsUrlState } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time';
@@ -36,7 +37,7 @@ class HomePageUI extends React.PureComponent<HomePageProps, {}> {
                 <WithWaffleTimeUrlState />
                 <WithWaffleFilterUrlState />
                 <WithWaffleOptionsUrlState />
-                <Header />
+                <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
                 <HomeToolbar />
                 <HomePageContent />
               </>

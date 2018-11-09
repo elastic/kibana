@@ -18,24 +18,24 @@
  */
 
 import { uniq } from 'lodash';
-export function extractIndexPatterns(vis) {
+export function extractIndexPatterns(params, fetchedFields) {
   const patternsToFetch = [];
 
-  if (!vis.fields[vis.params.index_pattern]) {
-    patternsToFetch.push(vis.params.index_pattern);
+  if (!fetchedFields[params.index_pattern]) {
+    patternsToFetch.push(params.index_pattern);
   }
 
-  vis.params.series.forEach(series => {
+  params.series.forEach(series => {
     const indexPattern = series.series_index_pattern;
-    if (series.override_index_pattern && !vis.fields[indexPattern]) {
+    if (series.override_index_pattern && !fetchedFields[indexPattern]) {
       patternsToFetch.push(indexPattern);
     }
   });
 
-  if (vis.params.annotations) {
-    vis.params.annotations.forEach(item => {
+  if (params.annotations) {
+    params.annotations.forEach(item => {
       const indexPattern = item.index_pattern;
-      if (indexPattern && !vis.fields[indexPattern]) {
+      if (indexPattern && !fetchedFields[indexPattern]) {
         patternsToFetch.push(indexPattern);
       }
     });

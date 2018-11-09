@@ -21,6 +21,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import styled, { withTheme } from 'styled-components';
 import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
 import { AutoSizer } from '../../components/auto_sizer';
+import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
@@ -86,7 +87,10 @@ class MetricDetailPageUI extends React.PureComponent<Props> {
 
     return (
       <ColumnarPage>
-        <Header breadcrumbs={breadcrumbs} />
+        <Header
+          appendSections={<InfrastructureBetaBadgeHeaderSection />}
+          breadcrumbs={breadcrumbs}
+        />
         <WithMetricsTimeUrlState />
         <DetailPageContent>
           <WithOptions>
@@ -233,7 +237,7 @@ const EuiSideNavContainer = styled.div`
 `;
 
 const MetricsDetailsPageColumn = styled.div`
-  flex: 1 0 0;
+  flex: 1 0 0%;
   display: flex;
   flex-direction: column;
 `;

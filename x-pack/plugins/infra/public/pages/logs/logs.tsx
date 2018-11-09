@@ -14,6 +14,7 @@ import { EmptyPage } from '../../components/empty_page';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
 
+import { LogsBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
 import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
 import { WithLogPositionUrlState } from '../../containers/logs/with_log_position';
@@ -39,6 +40,7 @@ class LogsPageUI extends React.Component<Props> {
                 <WithLogMinimapUrlState />
                 <WithLogTextviewUrlState />
                 <Header
+                  appendSections={<LogsBetaBadgeHeaderSection />}
                   breadcrumbs={[
                     {
                       text: intl.formatMessage({

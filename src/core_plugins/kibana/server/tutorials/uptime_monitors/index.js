@@ -33,7 +33,7 @@ export function uptimeMonitorsSpecProvider(server, context) {
     }),
     longDescription: i18n.translate('kbn.server.tutorials.uptimeMonitors.longDescription', {
       defaultMessage: 'Monitor services for their availability with active probing. \
-        Given a list of URLs, Heartbeat asks the simple question: Are you alive?. \
+        Given a list of URLs, Heartbeat asks the simple question: Are you alive? \
         [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.heartbeat}/heartbeat-getting-started.html',
