@@ -93,7 +93,7 @@ export const metrics = {
       defaultMessage: 'Events Received Rate'
     }),
     description: i18n.translate('xpack.monitoring.metrics.logstashInstance.eventsReceivedRateDescription', {
-      defaultMessage: 'Number of events received per second by all Logstash nodes at the inputs stage.'
+      defaultMessage: 'Number of events received per second by the Logstash node at the inputs stage.'
     })
   }),
   logstash_events_output_rate: new LogstashEventsRateMetric({
@@ -102,7 +102,7 @@ export const metrics = {
       defaultMessage: 'Events Emitted Rate'
     }),
     description: i18n.translate('xpack.monitoring.metrics.logstashInstance.eventsEmittedRateDescription', {
-      defaultMessage: 'Number of events emitted per second by all Logstash nodes at the outputs stage.'
+      defaultMessage: 'Number of events emitted per second by the Logstash node at the outputs stage.'
     })
   }),
   logstash_events_latency: new LogstashEventsLatencyMetric({
@@ -297,10 +297,10 @@ export const metrics = {
   logstash_pipeline_queue_size: new LogstashPipelineQueueSizeMetric({
     field: 'logstash_stats.pipelines.queue.queue_size_in_bytes',
     label: i18n.translate('xpack.monitoring.metrics.logstashInstance.queueSizeLabel', {
-      defaultMessage: 'Current size of all persistent queues in the Logstash pipelines on this node.'
+      defaultMessage: 'Queue Size'
     }),
     description: i18n.translate('xpack.monitoring.metrics.logstashInstance.queueSizeDescription', {
-      defaultMessage: 'Queue Size'
+      defaultMessage: 'Current size of all persistent queues in the Logstash pipelines on this node.'
     }),
     title: i18n.translate('xpack.monitoring.metrics.logstashInstance.persistentQueueSizeTitle', {
       defaultMessage: 'Persistent Queue Size'

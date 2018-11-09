@@ -75,7 +75,7 @@ const nodeUsedHeapLabel = i18n.translate('xpack.monitoring.metrics.esNode.jvmHea
   defaultMessage: 'Used Heap'
 });
 const nodeUsedHeapDescription = i18n.translate('xpack.monitoring.metrics.esNode.jvmHeap.usedHeapDescription', {
-  defaultMessage: 'Used Heap'
+  defaultMessage: 'Total heap used by Elasticsearch running in the JVM.'
 });
 const nodeReadThreads = i18n.translate('xpack.monitoring.metrics.esNode.readThreadsTitle', {
   defaultMessage: 'Read Threads'
@@ -90,7 +90,7 @@ const nsTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.es.nsTimeUnitLa
   defaultMessage: 'ns'
 });
 const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.es.nsTimeUnitLabel', {
-  defaultMessage: 'ns'
+  defaultMessage: '/s'
 });
 
 export const metrics = {
@@ -457,7 +457,7 @@ export const metrics = {
       defaultMessage: 'Request Time'
     }),
     label: i18n.translate('xpack.monitoring.metrics.esIndex.requestTime.searchLabel', {
-      defaultMessage: 'Request Time'
+      defaultMessage: 'Search'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.requestTime.searchDescription', {
       defaultMessage: 'Amount of time spent performing search operations (per shard).'
