@@ -5,14 +5,14 @@
  */
 
 import { Request } from 'hapi';
-import { HBServerLibs } from '../lib/lib';
+import { UMServerLibs } from '../lib/lib';
 
-export interface IHBContext {
+export interface UMContext {
   req: Request;
 }
 
-export interface IHBGraphQLResolver {
+export interface UMGraphQLResolver {
   Query?: any;
 }
 
-export type ICreateHeartbeatGraphQLResolvers = (libs: HBServerLibs) => any;
+export type CreateUMGraphQLResolvers = (libs: UMServerLibs) => any;

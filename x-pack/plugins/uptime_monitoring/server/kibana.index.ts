@@ -5,8 +5,8 @@
  */
 
 import { Request, Server } from 'hapi';
-import { initHeartbeatServer } from './heartbeat_server';
 import { compose } from './lib/compose/kibana';
+import { initUptimeMonitoringServer } from './uptime_monitoring_server';
 
 export interface KibanaRouteOptions {
   path: string;
@@ -22,5 +22,5 @@ export interface KibanaServer {
 
 export const initServerWithKibana = (server: Server) => {
   const libs = compose(server);
-  initHeartbeatServer(libs);
+  initUptimeMonitoringServer(libs);
 };

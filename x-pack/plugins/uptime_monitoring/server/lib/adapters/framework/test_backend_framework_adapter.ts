@@ -8,8 +8,8 @@ import { GraphQLSchema } from 'graphql';
 import {
   BackendFrameworkAdapter,
   FrameworkResponse,
-  HBFrameworkRequest,
-  HBFrameworkRouteOptions,
+  UMFrameworkRequest,
+  UMFrameworkRouteOptions,
 } from './adapter_types';
 
 export class TestBackendFrameworkAdapter implements BackendFrameworkAdapter {
@@ -20,9 +20,9 @@ export class TestBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public registerRoute<
-    RouteRequest extends HBFrameworkRequest,
+    RouteRequest extends UMFrameworkRequest,
     RouteResponse extends FrameworkResponse
-  >(route: HBFrameworkRouteOptions<HBFrameworkRequest, FrameworkResponse>): void {
+  >(route: UMFrameworkRouteOptions<UMFrameworkRequest, FrameworkResponse>): void {
     const { config, method, path, handler } = route;
     this.server.route({
       config,

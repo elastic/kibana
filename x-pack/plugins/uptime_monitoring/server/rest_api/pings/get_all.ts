@@ -6,11 +6,11 @@
 
 import Joi from 'joi';
 import { Ping } from '../../../common/graphql/types';
-import { HBServerLibs } from '../../lib/lib';
+import { UMServerLibs } from '../../lib/lib';
 
-export const createGetAllRoute = (libs: HBServerLibs) => ({
+export const createGetAllRoute = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/monitors',
+  path: '/api/uptime_monitoring/pings',
   options: {
     validate: {
       query: Joi.object({

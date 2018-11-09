@@ -9,11 +9,11 @@ import { Server } from 'hapi';
 import {
   BackendFrameworkAdapter,
   FrameworkResponse,
-  HBFrameworkRequest,
-  HBFrameworkRouteOptions,
-  HBHapiGraphQLPluginOptions,
+  UMFrameworkRequest,
+  UMFrameworkRouteOptions,
+  UMHapiGraphQLPluginOptions,
 } from './adapter_types';
-import { hbGraphQLHapiPlugin } from './apollo_framework_adapter';
+import { uptimeMonitoringGraphQLHapiPlugin } from './apollo_framework_adapter';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   private server: Server;
@@ -23,14 +23,14 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public registerRoute<
-    RouteRequest extends HBFrameworkRequest,
+    RouteRequest extends UMFrameworkRequest,
     RouteResponse extends FrameworkResponse
-  >(route: HBFrameworkRouteOptions<RouteRequest, RouteResponse>) {
+  >(route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>) {
     this.server.route(route);
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.register<HBHapiGraphQLPluginOptions>({
+    this.server.register<UMHapiGraphQLPluginOptions>({
       options: {
         graphQLOptions: (req: any) => ({
           context: { req },
@@ -38,7 +38,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         }),
         path: routePath,
       },
-      plugin: hbGraphQLHapiPlugin,
+      plugin: uptimeMonitoringGraphQLHapiPlugin,
     });
   }
 }

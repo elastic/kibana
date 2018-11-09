@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HBPingSortDirectionArg } from '../../../../common/domain_types';
+import { UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
 
-export interface HBPingsAdapter {
-  getAll(request: any, sort?: HBPingSortDirectionArg, size?: number): Promise<Ping[]>;
+export interface UMPingsAdapter {
+  getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]>;
 }

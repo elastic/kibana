@@ -4,34 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HBPingSortDirectionArg } from '../../../common/domain_types';
-import { HBResolver } from '../../../common/graphql/resolver_types';
+import { UMPingSortDirectionArg } from '../../../common/domain_types';
+import { UMResolver } from '../../../common/graphql/resolver_types';
 import { Ping } from '../../../common/graphql/types';
-import { HBServerLibs } from '../../lib/lib';
-import { IHBContext } from '../types';
-import { ICreateHeartbeatGraphQLResolvers } from '../types';
+import { UMServerLibs } from '../../lib/lib';
+import { UMContext } from '../types';
+import { CreateUMGraphQLResolvers } from '../types';
 
-interface AllPingsArgs {
-  sort: HBPingSortDirectionArg;
+interface UMAllPingsArgs {
+  sort: UMPingSortDirectionArg;
   size: number;
 }
 
-export type HBAllPingsResolver = HBResolver<
+export type UMAllPingsResolver = UMResolver<
   Ping[] | Promise<Ping[]>,
   any,
-  AllPingsArgs,
-  IHBContext
+  UMAllPingsArgs,
+  UMContext
 >;
 
-export interface HBPingResolver {
+export interface UMPingResolver {
   allPings: () => Ping[];
 }
 
-export const createPingsResolvers: ICreateHeartbeatGraphQLResolvers = (
-  libs: HBServerLibs
+export const createPingsResolvers: CreateUMGraphQLResolvers = (
+  libs: UMServerLibs
 ): {
   Query: {
-    allPings: HBAllPingsResolver;
+    allPings: UMAllPingsResolver;
   };
 } => ({
   Query: {

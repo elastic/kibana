@@ -13,9 +13,9 @@ import 'ui/autoload/styles';
 import 'ui/courier';
 import 'ui/persisted_log';
 import 'uiExports/autocompleteProviders';
-import { HeartbeatFrontendLibs } from '../lib/lib';
+import { UMFrontendLibs } from '../lib/lib';
 
-export async function startApp(libs: HeartbeatFrontendLibs) {
+export async function startApp(libs: UMFrontendLibs) {
   libs.framework.render(
     <EuiPage>
       <EuiPageContent>

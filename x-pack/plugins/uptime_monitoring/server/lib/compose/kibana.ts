@@ -8,20 +8,20 @@ import { Server } from 'hapi';
 import { KibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
 import { KibanaBackendFrameworkAdapter } from '../adapters/framework';
 import { ElasticsearchPingsAdapter } from '../adapters/pings/elasticsearch_pings_adapter';
-import { HBPingsDomain } from '../domains';
-import { HBDomainLibs, HBServerLibs } from '../lib';
+import { UMPingsDomain } from '../domains';
+import { UMDomainLibs, UMServerLibs } from '../lib';
 
-export function compose(hapiServer: Server): HBServerLibs {
+export function compose(hapiServer: Server): UMServerLibs {
   const framework = new KibanaBackendFrameworkAdapter(hapiServer);
   const database = new KibanaDatabaseAdapter(hapiServer.plugins.elasticsearch);
 
-  const pingsDomain = new HBPingsDomain(new ElasticsearchPingsAdapter(database), {});
+  const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
 
-  const domainLibs: HBDomainLibs = {
+  const domainLibs: UMDomainLibs = {
     pings: pingsDomain,
   };
 
-  const libs: HBServerLibs = {
+  const libs: UMServerLibs = {
     framework,
     database,
     ...domainLibs,

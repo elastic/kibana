@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-export interface HeartbeatFrontendLibs {
-  framework: HeartbeatFrameworkAdapter;
+export interface UMFrontendLibs {
+  framework: UMFrameworkAdapter;
 }
 
-export interface HeartbeatFrameworkAdapter {
+export interface UMFrameworkAdapter {
   render(component: React.ReactElement<any>): void;
 }

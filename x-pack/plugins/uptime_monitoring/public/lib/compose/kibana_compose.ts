@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
-import { HeartbeatKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
-import { HeartbeatFrontendLibs } from '../lib';
+import { UMKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { UMFrontendLibs } from '../lib';
 
-export function compose(): HeartbeatFrontendLibs {
-  const libs: HeartbeatFrontendLibs = {
-    framework: new HeartbeatKibanaFrameworkAdapter(uiRoutes),
+export function compose(): UMFrontendLibs {
+  const libs: UMFrontendLibs = {
+    framework: new UMKibanaFrameworkAdapter(uiRoutes),
   };
 
   return libs;

@@ -6,13 +6,13 @@
 
 import { DatabaseAdapter } from './adapters/database';
 import { BackendFrameworkAdapter } from './adapters/framework';
-import { HBPingsDomain } from './domains';
+import { UMPingsDomain } from './domains';
 
-export interface HBDomainLibs {
-  pings: HBPingsDomain;
+export interface UMDomainLibs {
+  pings: UMPingsDomain;
 }
 
-export interface HBServerLibs extends HBDomainLibs {
+export interface UMServerLibs extends UMDomainLibs {
   framework: BackendFrameworkAdapter;
   database?: DatabaseAdapter;
 }

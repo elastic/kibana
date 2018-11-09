@@ -6,15 +6,15 @@
 
 import { TestBackendFrameworkAdapter } from '../adapters/framework/test_backend_framework_adapter';
 import { MemoryPingsAdapter } from '../adapters/pings/memory_pings_adapter';
-import { HBPingsDomain } from '../domains';
-import { HBServerLibs } from '../lib';
+import { UMPingsDomain } from '../domains';
+import { UMServerLibs } from '../lib';
 
-export function compose(server: any): HBServerLibs {
+export function compose(server: any): UMServerLibs {
   const framework = new TestBackendFrameworkAdapter(server);
 
-  const pingsDomain = new HBPingsDomain(new MemoryPingsAdapter(server.pingsDB || []), framework);
+  const pingsDomain = new UMPingsDomain(new MemoryPingsAdapter(server.pingsDB || []), framework);
 
-  const libs: HBServerLibs = {
+  const libs: UMServerLibs = {
     framework,
     pings: pingsDomain,
   };

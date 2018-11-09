@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { HBPingsDomain } from './pings';
+export { UMPingsDomain } from './pings';

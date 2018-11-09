@@ -7,11 +7,12 @@
 import { runHttpQuery } from 'apollo-server-core';
 import { Plugin, ResponseToolkit } from 'hapi';
 import { Request, Server } from 'hapi';
-import { HBHapiGraphQLPluginOptions } from './adapter_types';
+import { DEFAULT_GRAPHQL_PATH } from '../../../graphql';
+import { UMHapiGraphQLPluginOptions } from './adapter_types';
 
-export const hbGraphQLHapiPlugin: Plugin<HBHapiGraphQLPluginOptions> = {
-  name: 'heartbeatGraphQL',
-  register: (server: Server, options: HBHapiGraphQLPluginOptions) => {
+export const uptimeMonitoringGraphQLHapiPlugin: Plugin<UMHapiGraphQLPluginOptions> = {
+  name: 'uptimeMonitoringGraphQL',
+  register: (server: Server, options: UMHapiGraphQLPluginOptions) => {
     server.route({
       options: options.route,
       handler: async (request: Request, h: ResponseToolkit) => {
@@ -40,7 +41,7 @@ export const hbGraphQLHapiPlugin: Plugin<HBHapiGraphQLPluginOptions> = {
         }
       },
       method: ['get', 'post'],
-      path: options.path || '/api/uptime/graphql',
+      path: options.path || DEFAULT_GRAPHQL_PATH,
       vhost: options.vhost || undefined,
     });
   },

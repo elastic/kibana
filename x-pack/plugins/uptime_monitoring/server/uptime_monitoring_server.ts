@@ -5,16 +5,16 @@
  */
 
 import { makeExecutableSchema } from 'graphql-tools';
-import { resolvers, typeDefs } from './graphql';
-import { HBServerLibs } from './lib/lib';
+import { DEFAULT_GRAPHQL_PATH, resolvers, typeDefs } from './graphql';
+import { UMServerLibs } from './lib/lib';
 import { createGetAllRoute } from './rest_api';
 
-export const initHeartbeatServer = (libs: HBServerLibs) => {
+export const initUptimeMonitoringServer = (libs: UMServerLibs) => {
   libs.framework.registerRoute(createGetAllRoute(libs));
 
   const graphQLSchema = makeExecutableSchema({
     resolvers: resolvers.map(createResolversFn => createResolversFn(libs)),
     typeDefs,
   });
-  libs.framework.registerGraphQLEndpoint('/api/uptime/graphql', graphQLSchema);
+  libs.framework.registerGraphQLEndpoint(DEFAULT_GRAPHQL_PATH, graphQLSchema);
 };

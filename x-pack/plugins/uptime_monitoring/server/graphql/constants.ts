@@ -4,10 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-type UMResolverResult<T> = Promise<T> | T;
-
-export type UMResolver<Result, Parent, Args, Context> = (
-  parent: Parent,
-  args: Args,
-  context: Context
-) => UMResolverResult<Result>;
+export const DEFAULT_GRAPHQL_PATH = '/api/uptime_monitoring/graphql';

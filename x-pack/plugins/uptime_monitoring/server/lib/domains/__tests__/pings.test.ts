@@ -6,11 +6,11 @@
 
 import { Monitor, Ping } from '../../../../common/graphql/types';
 import { compose } from '../../compose/test_compose';
-import { HBServerLibs } from '../../lib';
+import { UMServerLibs } from '../../lib';
 
 describe('Pings domain lib', () => {
   describe('getAll', () => {
-    let libs: HBServerLibs;
+    let libs: UMServerLibs;
     let pingsDB: Ping[];
     beforeEach(async () => {
       pingsDB = [

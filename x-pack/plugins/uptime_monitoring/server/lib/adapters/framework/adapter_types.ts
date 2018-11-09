@@ -9,7 +9,7 @@ import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import { RouteOptions } from 'hapi';
 
-export interface HBFrameworkRequest {
+export interface UMFrameworkRequest {
   user: string;
   headers: Record<string, any>;
   payload: Record<string, any>;
@@ -19,8 +19,8 @@ export interface HBFrameworkRequest {
 
 export type FrameworkResponse = Lifecycle.ReturnValue;
 
-export interface HBFrameworkRouteOptions<
-  RouteRequest extends HBFrameworkRequest,
+export interface UMFrameworkRouteOptions<
+  RouteRequest extends UMFrameworkRequest,
   RouteResponse extends FrameworkResponse
 > {
   path: string;
@@ -29,14 +29,14 @@ export interface HBFrameworkRouteOptions<
   config?: any;
 }
 
-export type HBFrameworkRouteHandler<RouteRequest extends HBFrameworkRequest> = (
-  request: HBFrameworkRequest,
+export type UMFrameworkRouteHandler<RouteRequest extends UMFrameworkRequest> = (
+  request: UMFrameworkRequest,
   h: ResponseToolkit
 ) => void;
 
 export type HapiOptionsFunction = (req: Request) => GraphQLOptions | Promise<GraphQLOptions>;
 
-export interface HBHapiGraphQLPluginOptions {
+export interface UMHapiGraphQLPluginOptions {
   path: string;
   vhost?: string;
   route?: RouteOptions;
@@ -44,8 +44,8 @@ export interface HBHapiGraphQLPluginOptions {
 }
 
 export interface BackendFrameworkAdapter {
-  registerRoute<RouteRequest extends HBFrameworkRequest, RouteResponse extends FrameworkResponse>(
-    route: HBFrameworkRouteOptions<RouteRequest, RouteResponse>
+  registerRoute<RouteRequest extends UMFrameworkRequest, RouteResponse extends FrameworkResponse>(
+    route: UMFrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
   registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void;
 }

@@ -5,19 +5,19 @@
  */
 
 import { INDEX_NAMES } from '../../../../common/constants/index_names';
-import { HBPingSortDirectionArg } from '../../../../common/domain_types';
+import { UMPingSortDirectionArg } from '../../../../common/domain_types';
 import { Ping } from '../../../../common/graphql/types';
 import { DatabaseAdapter } from '../database';
-import { HBPingsAdapter } from './adapter_types';
+import { UMPingsAdapter } from './adapter_types';
 
-export class ElasticsearchPingsAdapter implements HBPingsAdapter {
+export class ElasticsearchPingsAdapter implements UMPingsAdapter {
   private database: DatabaseAdapter;
 
   constructor(database: DatabaseAdapter) {
     this.database = database;
   }
 
-  public async getAll(request: any, sort?: HBPingSortDirectionArg, size?: number): Promise<Ping[]> {
+  public async getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]> {
     const sortParam = sort ? { sort: [{ '@timestamp': { order: sort } }] } : undefined;
     const sizeParam = size ? { size } : undefined;
     const params = {

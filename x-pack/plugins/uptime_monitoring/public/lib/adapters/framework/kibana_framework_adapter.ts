@@ -5,9 +5,9 @@
  */
 
 import ReactDOM from 'react-dom';
-import { HeartbeatFrameworkAdapter } from '../../lib';
+import { UMFrameworkAdapter } from '../../lib';
 
-export class HeartbeatKibanaFrameworkAdapter implements HeartbeatFrameworkAdapter {
+export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
 
   constructor(uiRoutes: any) {
@@ -15,12 +15,12 @@ export class HeartbeatKibanaFrameworkAdapter implements HeartbeatFrameworkAdapte
   }
 
   public render = (component: React.ReactElement<any>) => {
-    this.register(this.uiRoutes, component);
+    this.register(component);
   };
 
-  private register = (uiRoutes: any, rootComponent: React.ReactElement<any>) => {
-    uiRoutes.enable();
-    uiRoutes.when('/home', {
+  private register = (rootComponent: React.ReactElement<any>) => {
+    this.uiRoutes.enable();
+    this.uiRoutes.when('/home', {
       controllerAs: 'uptime',
       controller: () => {
         const elem = document.getElementById('uptimeMonitoringReactRoot');
