@@ -43,7 +43,7 @@ export class LogCustomizationMenu extends React.Component<{}, LogCustomizationMe
     const menuButton = (
       <EuiButtonEmpty color="text" iconType="gear" onClick={this.toggleVisibility} size="xs">
         <FormattedMessage
-          id="xpack.infra.logCustomizationMenu.customizeButtonLabel"
+          id="xpack.infra.logs.customizeLogs.customizeButtonLabel"
           defaultMessage="Customize"
         />
       </EuiButtonEmpty>

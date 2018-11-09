@@ -42,7 +42,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
           <ProgressMessage>
             <EuiText color="subdued">
               <FormattedMessage
-                id="xpack.infra.logTextStreamLoadingItemView.streamingNewEntriesText"
+                id="xpack.infra.logs.streamingNewEntriesText"
                 defaultMessage="Streaming new entries"
               />
             </EuiText>
@@ -52,7 +52,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
               <EuiText color="subdued">
                 <EuiIcon type="clock" />
                 <FormattedMessage
-                  id="xpack.infra.logTextStreamLoadingItemView.lastUpdateText"
+                  id="xpack.infra.logs.lastUpdateText"
                   defaultMessage="last updated "
                 />
                 <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} /> ago
@@ -66,7 +66,7 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
         <ProgressEntry alignment={alignment} className={className} color="subdued" isLoading={true}>
           <ProgressMessage>
             <FormattedMessage
-              id="xpack.infra.logTextStreamLoadingItemView.loadingAdditionalEntriesText"
+              id="xpack.infra.logs.loadingAdditionalEntriesText"
               defaultMessage="Loading additional entries"
             />
           </ProgressMessage>
@@ -82,14 +82,14 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
         >
           <ProgressMessage>
             <FormattedMessage
-              id="xpack.infra.logTextStreamLoadingItemView.noAdditionalEntriesFoundText"
+              id="xpack.infra.logs.noAdditionalEntriesFoundText"
               defaultMessage="No additional entries found"
             />
           </ProgressMessage>
           {onLoadMore ? (
             <EuiButtonEmpty size="xs" onClick={onLoadMore} iconType="refresh">
               <FormattedMessage
-                id="xpack.infra.logTextStreamLoadingItemView.loadAgainButtonLabel"
+                id="xpack.infra.logs.loadAgainButtonLabel"
                 defaultMessage="Load again"
               />
             </EuiButtonEmpty>

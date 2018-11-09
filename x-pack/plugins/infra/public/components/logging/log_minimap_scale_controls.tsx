@@ -39,7 +39,7 @@ class LogMinimapScaleControlsUI extends React.PureComponent<LogMinimapScaleContr
     return (
       <EuiFormRow
         label={intl.formatMessage({
-          id: 'xpack.infra.logMinimapScaleControls.minimapScaleFormRowLabel',
+          id: 'xpack.infra.logs.customizeLogs.minimapScaleFormRowLabel',
           defaultMessage: 'Minimap Scale',
         })}
       >

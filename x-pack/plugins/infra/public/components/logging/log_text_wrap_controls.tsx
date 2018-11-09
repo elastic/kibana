@@ -25,13 +25,13 @@ class LogTextWrapControlsUI extends React.PureComponent<LogTextWrapControlsProps
     return (
       <EuiFormRow
         label={intl.formatMessage({
-          id: 'xpack.infra.logTextWrapControls.lineWrappingFormRowLabel',
+          id: 'xpack.infra.logs.customizeLogs.lineWrappingFormRowLabel',
           defaultMessage: 'Line Wrapping',
         })}
       >
         <EuiSwitch
           label={intl.formatMessage({
-            id: 'xpack.infra.logTextWrapControls.wrapLongLinesFormRowLabel',
+            id: 'xpack.infra.logs.customizeLogs.wrapLongLinesFormRowLabel',
             defaultMessage: 'Wrap long lines',
           })}
           checked={wrap}

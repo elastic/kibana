@@ -30,7 +30,7 @@ class LogTextScaleControlsUI extends React.PureComponent<LogTextScaleControlsPro
     return (
       <EuiFormRow
         label={intl.formatMessage({
-          id: 'xpack.infra.logTextScaleControls.textSizeFormRowLabel',
+          id: 'xpack.infra.logs.customizeLogs.textSizeFormRowLabel',
           defaultMessage: 'Text Size',
         })}
       >

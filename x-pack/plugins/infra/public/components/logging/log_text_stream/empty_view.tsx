@@ -21,7 +21,7 @@ export class LogTextStreamEmptyView extends React.PureComponent<LogTextStreamEmp
         title={
           <h2>
             <FormattedMessage
-              id="xpack.infra.logTextStreamEmptyView.noLogMessageToDisplayTitle"
+              id="xpack.infra.logs.emptyView.noLogMessageTitle"
               defaultMessage="There are no log messages to display."
             />
           </h2>
@@ -30,7 +30,7 @@ export class LogTextStreamEmptyView extends React.PureComponent<LogTextStreamEmp
         body={
           <p>
             <FormattedMessage
-              id="xpack.infra.logTextStreamEmptyView.adjustingFilterTryDescription"
+              id="xpack.infra.logs.emptyView.noLogMessageDescription"
               defaultMessage="Try adjusting your filter."
             />
           </p>
@@ -38,7 +38,7 @@ export class LogTextStreamEmptyView extends React.PureComponent<LogTextStreamEmp
         actions={
           <EuiButton iconType="refresh" color="primary" fill onClick={reload}>
             <FormattedMessage
-              id="xpack.infra.logTextStreamEmptyView.checkForNewDataButtonLabel"
+              id="xpack.infra.logs.emptyView.noLogMessageButtonLabel"
               defaultMessage="Check for new data"
             />
           </EuiButton>

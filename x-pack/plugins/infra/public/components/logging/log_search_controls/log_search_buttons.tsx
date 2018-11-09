@@ -53,7 +53,7 @@ export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps,
             size="s"
           >
             <FormattedMessage
-              id="xpack.infra.logSearchButtons.previousButtonLabel"
+              id="xpack.infra.logs.search.previousButtonLabel"
               defaultMessage="Previous"
             />
           </EuiButtonEmpty>
@@ -66,10 +66,7 @@ export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps,
             isDisabled={!hasNextSearchResult}
             size="s"
           >
-            <FormattedMessage
-              id="xpack.infra.logSearchButtons.nextButtonLabel"
-              defaultMessage="Next"
-            />
+            <FormattedMessage id="xpack.infra.logs.search.nextButtonLabel" defaultMessage="Next" />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>

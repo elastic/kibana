@@ -74,12 +74,12 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
             {bucket.count}
             {bucket.count === 1 ? (
               <FormattedMessage
-                id="xpack.infra.searchMarker.searchResultTitle"
+                id="xpack.infra.logs.searchResultTitle"
                 defaultMessage="search result"
               />
             ) : (
               <FormattedMessage
-                id="xpack.infra.searchMarker.searchResultsTitle"
+                id="xpack.infra.logs.searchResultsTitle"
                 defaultMessage="search results"
               />
             )}

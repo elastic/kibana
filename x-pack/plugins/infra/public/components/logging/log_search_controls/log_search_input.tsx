@@ -55,7 +55,7 @@ class LogSearchInputUI extends React.PureComponent<LogSearchInputProps, LogSearc
       <form onSubmit={this.handleSubmit}>
         <PlainSearchField
           aria-label={intl.formatMessage({
-            id: 'xpack.infra.logSearchInput.searchInLogsAriaLabel',
+            id: 'xpack.infra.logs.search.searchInLogsAriaLabel',
             defaultMessage: 'search',
           })}
           className={classes}
@@ -63,7 +63,7 @@ class LogSearchInputUI extends React.PureComponent<LogSearchInputProps, LogSearc
           isLoading={isLoading}
           onChange={this.handleChangeQuery}
           placeholder={intl.formatMessage({
-            id: 'xpack.infra.logSearchInput.searchInLogsPlaceholder',
+            id: 'xpack.infra.logs.search.searchInLogsPlaceholder',
             defaultMessage: 'Search',
           })}
           value={query}
