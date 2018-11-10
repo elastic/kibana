@@ -10,15 +10,7 @@ import cloneDeep from 'lodash/lang/cloneDeep';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiBreadcrumbs,
-  EuiCallOut,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiLoadingKibana,
-  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -30,9 +22,11 @@ import {
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { getRouterLinkProps } from '../../services';
 
+import { RemoteClusterForm } from './remote_cluster_form';
+
 const defaultFields = {
   remoteClusterName: '',
-  seeds: [],
+  seeds: [''],
 };
 
 export class RemoteClusterAddUi extends Component {
@@ -60,8 +54,30 @@ export class RemoteClusterAddUi extends Component {
     this.props.clearAddRemoteClusterErrors();
   }
 
-  getFieldsErrors(/*fields*/) {
-    return {};
+  getFieldsErrors(fields) {
+    const { remoteClusterName, seeds } = fields;
+
+    const errors = {};
+
+    if (!remoteClusterName || !remoteClusterName.trim()) {
+      errors.remoteClusterName = (
+        <FormattedMessage
+          id="xpack.remoteClusters.add.errors.nameMissing"
+          defaultMessage="Name is required."
+        />
+      );
+    }
+
+    if (!seeds.some(seed => Boolean(seed.trim()))) {
+      errors.seeds = (
+        <FormattedMessage
+          id="xpack.remoteClusters.add.errors.seedMissing"
+          defaultMessage="At least one seed is required."
+        />
+      );
+    }
+
+    return errors;
   }
 
   onFieldsChange = (changedFields) => {
@@ -94,50 +110,23 @@ export class RemoteClusterAddUi extends Component {
 
   save = () => {
     const { addRemoteCluster } = this.props;
+    const { fieldsErrors } = this.state;
+
+    if (Object.keys(fieldsErrors).length > 0) {
+      this.setState({
+        areErrorsVisible: true,
+      });
+      return;
+    }
+
     const remoteClusterConfig = this.getAllFields();
 
     addRemoteCluster(remoteClusterConfig);
   };
 
-  renderActions() {
-    const { isSaving } = this.props;
-
-    if (isSaving) {
-      return (
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l"/>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.remoteClusters.add.actions.savingText"
-                defaultMessage="Saving"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
-    return (
-      <EuiButton
-        color="secondary"
-        iconType="check"
-        onClick={this.save}
-        fill
-      >
-        <FormattedMessage
-          id="xpack.remoteClusters.add.saveButtonLabel"
-          defaultMessage="Save"
-        />
-      </EuiButton>
-    );
-  }
-
   render() {
     const { isAddingRemoteCluster, addRemoteClusterError } = this.props;
+    const { fields, fieldsErrors, areErrorsVisible } = this.state;
 
     const breadcrumbs = [{
       text: (
@@ -155,52 +144,6 @@ export class RemoteClusterAddUi extends Component {
         />
       ),
     }];
-
-    let savingFeedback;
-
-    if (isAddingRemoteCluster) {
-      savingFeedback = (
-        <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
-        </EuiOverlayMask>
-      );
-    }
-
-    let saveErrorFeedback;
-
-    if (addRemoteClusterError) {
-      const { message, cause } = addRemoteClusterError;
-
-      let errorBody;
-
-      if (cause) {
-        if (cause.length === 1) {
-          errorBody = (
-            <p>{cause[0]}</p>
-          );
-        } else {
-          errorBody = (
-            <ul>
-              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
-            </ul>
-          );
-        }
-      }
-
-      saveErrorFeedback = (
-        <Fragment>
-          <EuiCallOut
-            title={message}
-            icon="cross"
-            color="danger"
-          >
-            {errorBody}
-          </EuiCallOut>
-
-          <EuiSpacer />
-        </Fragment>
-      );
-    }
 
     return (
       <Fragment>
@@ -224,18 +167,18 @@ export class RemoteClusterAddUi extends Component {
                 </EuiTitle>
               </EuiPageContentHeader>
 
-              {saveErrorFeedback}
-
-              Form stuff goes here
-
-              <EuiSpacer size="l" />
-
-              {this.renderActions()}
+              <RemoteClusterForm
+                isSaving={isAddingRemoteCluster}
+                fields={fields}
+                fieldsErrors={fieldsErrors}
+                onFieldsChange={this.onFieldsChange}
+                areErrorsVisible={areErrorsVisible}
+                saveError={addRemoteClusterError}
+                save={this.save}
+              />
             </EuiPageContent>
           </EuiPageBody>
         </EuiPage>
-
-        {savingFeedback}
       </Fragment>
     );
   }
