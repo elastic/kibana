@@ -14,6 +14,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   <Component>
     <EuiTitle
       size="l"
+      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -30,9 +31,10 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       >
         <EuiText
           grow={true}
+          size="m"
         >
           <div
-            className="euiText"
+            className="euiText euiText--medium"
           >
             <p>
               Monitoring provides insight to your hardware performance and load.
@@ -52,9 +54,10 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   </EuiHorizontalRule>
   <EuiText
     grow={true}
+    size="m"
   >
     <div
-      className="euiText"
+      className="euiText euiText--medium"
     >
       <p>
         We checked the 
