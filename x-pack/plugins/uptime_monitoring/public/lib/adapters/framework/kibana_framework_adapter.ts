@@ -6,6 +6,7 @@
 
 import ReactDOM from 'react-dom';
 import { UMFrameworkAdapter } from '../../lib';
+import { manageAngularLifecycle } from '../../manage_angular_lifecycle';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
@@ -22,9 +23,13 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     this.uiRoutes.enable();
     this.uiRoutes.when('/home', {
       controllerAs: 'uptime',
-      controller: () => {
-        const elem = document.getElementById('uptimeMonitoringReactRoot');
-        ReactDOM.render(rootComponent, elem);
+      // @ts-ignore angular
+      controller: ($scope, $route, $http) => {
+        $scope.$$postDigest(() => {
+          const elem = document.getElementById('uptimeMonitoringReactRoot');
+          ReactDOM.render(rootComponent, elem);
+          manageAngularLifecycle($scope, $route, elem);
+        });
       },
       template:
         '<uptime-monitoring-app section="kibana" class="ng-scope"><div id="uptimeMonitoringReactRoot"></div></uptime-monitoring-app>',
