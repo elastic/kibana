@@ -6,6 +6,11 @@
 
 import Boom from 'boom';
 import { Server } from 'hapi';
+import {
+  AgentName,
+  createApmTelementry,
+  storeApmTelemetry
+} from '../lib/apm_telemetry';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getService } from '../lib/services/get_service';
@@ -30,9 +35,25 @@ export function initServicesApi(server: Server) {
         query: withDefaultValidators()
       }
     },
-    handler: req => {
+    handler: async req => {
       const { setup } = req.pre;
-      return getServices(setup).catch(defaultErrorHandler);
+
+      let serviceBucketList;
+      try {
+        serviceBucketList = await getServices(setup);
+      } catch (error) {
+        return error;
+      }
+
+      // Store telemetry data derived from serviceBucketList
+      storeApmTelemetry(
+        server,
+        createApmTelementry(
+          serviceBucketList.map(({ agent_name }) => agent_name as AgentName)
+        )
+      );
+
+      return serviceBucketList;
     }
   });
 

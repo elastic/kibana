@@ -1,0 +1,31 @@
+{
+  "apm-telemetry": {
+    "properties": {
+      "has_any_services": {
+        "type": "boolean"
+      },
+      "services_per_agent": {
+        "properties": {
+          "python": {
+            "type": "long"
+          },
+          "java": {
+            "type": "long"
+          },
+          "nodejs": {
+            "type": "long"
+          },
+          "js-base": {
+            "type": "long"
+          },
+          "ruby": {
+            "type": "long"
+          },
+          "go": {
+            "type": "long"
+          }
+        }
+      }
+    }
+  }
+}
