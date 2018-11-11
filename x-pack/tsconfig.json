@@ -10,6 +10,7 @@
     "test/**/*"
   ],
   "compilerOptions": {
+    "resolveJsonModule": true,
     "paths": {
       "ui/*": [
         "src/ui/public/*"
