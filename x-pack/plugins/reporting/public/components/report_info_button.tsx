@@ -20,6 +20,8 @@ interface State {
   info: JobInfo | null;
 }
 
+const NA = 'n/a';
+
 export class ReportInfoButton extends Component<Props, State> {
   private mounted?: boolean;
 
@@ -40,35 +42,33 @@ export class ReportInfoButton extends Component<Props, State> {
       return null;
     }
 
-    const iGet = (path: string) => get(info, path, 'n/a');
-
     // TODO browser type
     return (
       <Fragment>
         <ul>
-          <li>Created By: {iGet('created_by')}</li>
-          <li>Created At: {iGet('created_at')}</li>
-          <li>Started At: {iGet('started_at')}</li>
-          <li>Completed At: {iGet('completed_at')}</li>
-          <li>Browser Timezone: {iGet('payload.browserTimezone')}</li>
+          <li>Created By: {get(info, 'created_by', NA)}</li>
+          <li>Created At: {get(info, 'created_at', NA)}</li>
+          <li>Started At: {get(info, 'started_at', NA)}</li>
+          <li>Completed At: {get(info, 'completed_at', NA)}</li>
+          <li>Browser Timezone: {get(info, 'payload.browserTimezone', NA)}</li>
         </ul>
         <ul>
-          <li>Title: {iGet('payload.title')}</li>
-          <li>Type: {iGet('payload.type')}</li>
-          <li>Layout: {iGet('meta.layout')}</li>
+          <li>Title: {get(info, 'payload.title', NA)}</li>
+          <li>Type: {get(info, 'payload.type', NA)}</li>
+          <li>Layout: {get(info, 'meta.layout', NA)}</li>
           <li>
-            Width: {iGet('payload.layout.dimensions.width')} Height:{' '}
-            {iGet('payload.layout.dimensions.height')}
+            Width: {get(info, 'payload.layout.dimensions.width', NA)} Height:{' '}
+            {get(info, 'payload.layout.dimensions.height', NA)}
           </li>
-          <li>Job Type: {iGet('jobtype')}</li>
-          <li>Content Type: {iGet('output.content_type')}</li>
+          <li>Job Type: {get(info, 'jobtype', NA)}</li>
+          <li>Content Type: {get(info, 'output.content_type') || NA}</li>
         </ul>
         <ul>
-          <li>Attempts: {iGet('attempts')}</li>
-          <li>Max Attempts: {iGet('max_attempts')}</li>
-          <li>Priority: {iGet('priority')}</li>
-          <li>Timeout: {iGet('timeout')}</li>
-          <li>Status: {iGet('status')}</li>
+          <li>Attempts: {get(info, 'attempts', NA)}</li>
+          <li>Max Attempts: {get(info, 'max_attempts', NA)}</li>
+          <li>Priority: {get(info, 'priority', NA)}</li>
+          <li>Timeout: {get(info, 'timeout', NA)}</li>
+          <li>Status: {get(info, 'status', NA)}</li>
         </ul>
       </Fragment>
     );
