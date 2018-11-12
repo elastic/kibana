@@ -17,9 +17,9 @@ export const licensePreRoutingFactory = once((server) => {
     if (!licenseCheckResults.isAvailable) {
       const error = new Error(licenseCheckResults.message);
       const statusCode = 403;
-      const wrappedError = wrapCustomError(error, statusCode);
-      return wrappedError;
+      throw wrapCustomError(error, statusCode);
     }
+
     return null;
   }
 
