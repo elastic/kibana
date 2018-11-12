@@ -5,21 +5,20 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 import {
+  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiSpacer,
-  EuiText,
-  EuiTextColor,
   EuiFormRow,
   EuiFieldNumber,
   EuiSelect,
   EuiSwitch,
   EuiButtonEmpty,
   EuiDescribedFormGroup,
-  EuiBadge,
   EuiButton,
 } from '@elastic/eui';
 import {
@@ -37,9 +36,9 @@ import {
   PHASE_SHRINK_ENABLED,
 } from '../../../../store/constants';
 import { ErrableFormRow } from '../../form_errors';
-import { LearnMoreLink } from '../../../../components/learn_more_link';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../../components';
 
-export class WarmPhase extends PureComponent {
+class WarmPhaseUi extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
     showNodeDetailsFlyout: PropTypes.func.isRequired,
@@ -76,15 +75,21 @@ export class WarmPhase extends PureComponent {
       errors,
       isShowingErrors,
       hotPhaseRolloverEnabled,
+      intl
     } = this.props;
 
     return (
       <EuiDescribedFormGroup
         title={
           <div>
-            <span className="eui-displayInlineBlock eui-alignMiddle">Warm phase</span>{' '}
+            <span className="eui-displayInlineBlock eui-alignMiddle">
+              <FormattedMessage
+                id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.warmPhaseLabel"
+                defaultMessage="Warm phase"
+              />
+            </span>{' '}
             {phaseData[PHASE_ENABLED] ? (
-              <EuiBadge className="eui-alignMiddle">Active</EuiBadge>
+              <ActiveBadge />
             ) : null}
           </div>
         }
@@ -92,16 +97,12 @@ export class WarmPhase extends PureComponent {
         description={
           <Fragment>
             <p>
-              Your index becomes read-only when it enters the warm phase. You can optimize this
-              phase for search.
+              <FormattedMessage
+                id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.warmPhaseDescriptionMessage"
+                defaultMessage="Your index becomes read-only when it enters the warm phase. You can optimize this phase for search."
+              />
             </p>
-            {isShowingErrors ? (
-              <EuiTextColor color="danger">
-                <EuiText>
-                  <p>This phase contains errors</p>
-                </EuiText>
-              </EuiTextColor>
-            ) : null}
+            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
           </Fragment>
         }
         fullWidth
@@ -117,14 +118,25 @@ export class WarmPhase extends PureComponent {
                       await setPhaseData(PHASE_ENABLED, false);
                     }}
                   >
-                    Deactivate warm phase
+                    <FormattedMessage
+                      id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.deactivateWarmPhaseButton"
+                      defaultMessage="Deactivate warm phase"
+                    />
                   </EuiButton>
                 </div>
               </EuiFormRow>
               {hotPhaseRolloverEnabled ? (
-                <EuiFormRow label="Rollover configuration">
+                <EuiFormRow
+                  label={intl.formatMessage({
+                    id: 'xpack.idxLifecycleMgmt.warmPhase.rolloverConfigurationLabel',
+                    defaultMessage: 'Rollover configuration'
+                  })}
+                >
                   <EuiSwitch
-                    label="Move to warm phase on rollover"
+                    label={intl.formatMessage({
+                      id: 'xpack.idxLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
+                      defaultMessage: 'Move to warm phase on rollover'
+                    })}
                     checked={phaseData[WARM_PHASE_ON_ROLLOVER]}
                     onChange={async e => {
                       await setPhaseData(WARM_PHASE_ON_ROLLOVER, e.target.checked);
@@ -137,7 +149,10 @@ export class WarmPhase extends PureComponent {
                   <EuiFlexItem style={{ maxWidth: 188 }}>
                     <ErrableFormRow
                       id={`${PHASE_WARM}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
-                      label="Move to warm phase after"
+                      label={intl.formatMessage({
+                        id: 'xpack.idxLifecycleMgmt.warmPhase.moveToWarmPhaseAfterLabel',
+                        defaultMessage: 'Move to warm phase after'
+                      })}
                       errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
                       isShowingErrors={isShowingErrors}
                       errors={errors}
@@ -159,8 +174,14 @@ export class WarmPhase extends PureComponent {
                           await setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value);
                         }}
                         options={[
-                          { value: 'd', text: 'days' },
-                          { value: 'h', text: 'hours' },
+                          { value: 'd', text: intl.formatMessage({
+                            id: 'xpack.idxLifecycleMgmt.warmPhase.daysLabel',
+                            defaultMessage: 'days'
+                          }) },
+                          { value: 'h', text: intl.formatMessage({
+                            id: 'xpack.idxLifecycleMgmt.warmPhase.hoursLabel',
+                            defaultMessage: 'hours'
+                          }) },
                         ]}
                       />
                     </EuiFormRow>
@@ -172,7 +193,10 @@ export class WarmPhase extends PureComponent {
 
               <ErrableFormRow
                 id={`${PHASE_WARM}.${PHASE_NODE_ATTRS}`}
-                label="Choose where to allocate indices by node attribute"
+                label={intl.formatMessage({
+                  id: 'xpack.idxLifecycleMgmt.warmPhase.allocationChoiceLabel',
+                  defaultMessage: 'Choose where to allocate indices by node attribute'
+                })}
                 errorKey={PHASE_NODE_ATTRS}
                 isShowingErrors={isShowingErrors}
                 errors={errors}
@@ -182,7 +206,10 @@ export class WarmPhase extends PureComponent {
                       flush="left"
                       onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
                     >
-                      View node details
+                      <FormattedMessage
+                        id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.viewNodeDetailsButton"
+                        defaultMessage="View node details"
+                      />
                     </EuiButtonEmpty>
                   ) : null
                 }
@@ -200,7 +227,10 @@ export class WarmPhase extends PureComponent {
                 <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                   <ErrableFormRow
                     id={`${PHASE_WARM}.${PHASE_REPLICA_COUNT}`}
-                    label="Number of replicas"
+                    label={intl.formatMessage({
+                      id: 'xpack.idxLifecycleMgmt.warmPhase.numberOfReplicasLabel',
+                      defaultMessage: 'Number of replicas'
+                    })}
                     errorKey={PHASE_REPLICA_COUNT}
                     isShowingErrors={isShowingErrors}
                     errors={errors}
@@ -220,11 +250,19 @@ export class WarmPhase extends PureComponent {
               <Fragment>
                 <EuiSpacer />
                 <EuiTitle size="s">
-                  <p>Shrink</p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.shrinkText"
+                      defaultMessage="Shrink"
+                    />
+                  </p>
                 </EuiTitle>
                 <EuiTitle size="xs">
                   <EuiTextColor color="subdued">
-                      Shrink the index into a new index with fewer primary shards.{' '}
+                    <FormattedMessage
+                      id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.shrinkIndexExplanationText"
+                      defaultMessage="Shrink the index into a new index with fewer primary shards."
+                    />{' '}
                     <LearnMoreLink docPath="indices-shrink-index.html#indices-shrink-index" />
                   </EuiTextColor>
                 </EuiTitle>
@@ -236,7 +274,10 @@ export class WarmPhase extends PureComponent {
                   onChange={async e => {
                     await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
                   }}
-                  label="Shrink index"
+                  label={intl.formatMessage({
+                    id: 'xpack.idxLifecycleMgmt.warmPhase.shrinkIndexLabel',
+                    defaultMessage: 'Shrink index'
+                  })}
                 />
                 {phaseData[PHASE_SHRINK_ENABLED] ? (
                   <Fragment>
@@ -245,7 +286,10 @@ export class WarmPhase extends PureComponent {
                       <EuiFlexItem grow={false}>
                         <ErrableFormRow
                           id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
-                          label="Number of primary shards"
+                          label={intl.formatMessage({
+                            id: 'xpack.idxLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
+                            defaultMessage: 'Number of primary shards'
+                          })}
                           errorKey={PHASE_PRIMARY_SHARD_COUNT}
                           isShowingErrors={isShowingErrors}
                           errors={errors}
@@ -266,19 +310,30 @@ export class WarmPhase extends PureComponent {
               </Fragment>
               <EuiSpacer size="m" />
               <EuiTitle size="s">
-                <p>Force merge</p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.forceMergeDataText"
+                    defaultMessage="Force merge"
+                  />
+                </p>
               </EuiTitle>
               <EuiTitle size="xs">
                 <EuiTextColor color="subdued">
-                  Reduce the number of segments in your shard by merging smaller files and clearing
-                  deleted ones. <LearnMoreLink docPath="indices-forcemerge.html" />
+                  <FormattedMessage
+                    id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.forceMergeDataExplanationText"
+                    defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
+                  />
+                  {' '}<LearnMoreLink docPath="indices-forcemerge.html" />
                 </EuiTextColor>
               </EuiTitle>
 
               <EuiSpacer size="m" />
 
               <EuiSwitch
-                label="Force merge data"
+                label={intl.formatMessage({
+                  id: 'xpack.idxLifecycleMgmt.warmPhase.forceMergeDataLabel',
+                  defaultMessage: 'Force merge data'
+                })}
                 checked={phaseData[PHASE_FORCE_MERGE_ENABLED]}
                 onChange={async e => {
                   await setPhaseData(PHASE_FORCE_MERGE_ENABLED, e.target.checked);
@@ -290,7 +345,10 @@ export class WarmPhase extends PureComponent {
               {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
                 <ErrableFormRow
                   id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
-                  label="Number of segments"
+                  label={intl.formatMessage({
+                    id: 'xpack.idxLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
+                    defaultMessage: 'Number of segments'
+                  })}
                   errorKey={PHASE_FORCE_MERGE_SEGMENTS}
                   isShowingErrors={isShowingErrors}
                   errors={errors}
@@ -313,7 +371,10 @@ export class WarmPhase extends PureComponent {
                     await setPhaseData(PHASE_ENABLED, true);
                   }}
                 >
-                  Activate warm phase
+                  <FormattedMessage
+                    id="xpack.idxLifecycleMgmt.editPolicy.warmPhase.activateWarmPhaseButton"
+                    defaultMessage="Activate warm phase"
+                  />
                 </EuiButton>
               </div>
             </EuiFormRow>
@@ -323,3 +384,4 @@ export class WarmPhase extends PureComponent {
     );
   }
 }
+export const WarmPhase = injectI18n(WarmPhaseUi);

@@ -8,7 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 import { goToPolicyList } from '../../services/navigation';
-
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import {
   EuiPage,
   EuiPageBody,
@@ -38,7 +38,7 @@ import { findFirstError } from '../../lib/find_errors';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { ErrableFormRow } from './form_errors';
 
-export class EditPolicy extends Component {
+class EditPolicyUi extends Component {
   static propTypes = {
     selectedPolicy: PropTypes.object.isRequired,
     errors: PropTypes.object.isRequired,
@@ -85,6 +85,7 @@ export class EditPolicy extends Component {
     goToPolicyList();
   }
   submit = async () => {
+    const { intl } = this.props;
     this.setState({ isShowingErrors: true });
     const {
       saveLifecyclePolicy,
@@ -93,7 +94,10 @@ export class EditPolicy extends Component {
       firstError
     } = this.props;
     if (firstError) {
-      toastNotifications.addDanger('Please the fix errors on the page');
+      toastNotifications.addDanger(intl.formatMessage({
+        id: 'xpack.idxLifecycleMgmt.editPolicy.formErrorsMessage',
+        defaultMessage: 'Please the fix errors on the page'
+      }));
       const element = document.getElementById(`${firstError}-row`);
       if (element) {
         element.scrollIntoView();
@@ -111,6 +115,7 @@ export class EditPolicy extends Component {
   };
   render() {
     const {
+      intl,
       selectedPolicy,
       errors,
       match: {
@@ -135,8 +140,14 @@ export class EditPolicy extends Component {
             <EuiTitle>
               <h4>
                 {isNewPolicy
-                  ? 'Create an index lifecycle policy'
-                  : `Edit index lifecycle policy ${selectedPolicyName}`}
+                  ? intl.formatMessage({
+                    id: 'xpack.idxLifecycleMgmt.editPolicy.createPolicyMessage',
+                    defaultMessage: 'Create an index lifecycle policy'
+                  })
+                  : intl.formatMessage({
+                    id: 'xpack.idxLifecycleMgmt.editPolicy.editPolicyMessage',
+                    defaultMessage: 'Edit index lifecycle policy {selectedPolicyName}',
+                  }, { selectedPolicyName }) }
               </h4>
             </EuiTitle>
             <div className="euiAnimateContentLoad">
@@ -151,10 +162,17 @@ export class EditPolicy extends Component {
                     <Fragment>
                       <EuiText>
                         <p>
-                          <strong>You are editing an existing policy</strong>. Any changes you make
-                          will also change index templates that this policy is attached to.
-                          Alternately, you can save these changes in a new policy and only change
-                          the index template you selected.
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.idxLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
+                              defaultMessage="You are editing an existing policy"
+                            />
+                          </strong>.{' '}
+                          <FormattedMessage
+                            id="xpack.idxLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
+                            defaultMessage={`Any changes you make will affect indices that this policy is attached to.
+                              Alternatively, you can save these changes in a new policy.`}
+                          />
                         </p>
                       </EuiText>
                       <EuiSpacer />
@@ -169,7 +187,10 @@ export class EditPolicy extends Component {
                           }}
                           label={
                             <span>
-                              Save this <strong>as a new policy</strong>
+                              <FormattedMessage
+                                id="xpack.idxLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
+                                defaultMessage="Save this as a new policy"
+                              />
                             </span>
                           }
                         />
@@ -181,7 +202,10 @@ export class EditPolicy extends Component {
                   <Fragment>
                     <ErrableFormRow
                       id={STRUCTURE_POLICY_NAME}
-                      label="Policy name"
+                      label={intl.formatMessage({
+                        id: 'xpack.idxLifecycleMgmt.editPolicy.policyNameLabel',
+                        defaultMessage: 'Policy name'
+                      })}
                       errorKey={STRUCTURE_POLICY_NAME}
                       isShowingErrors={isShowingErrors}
                       errors={errors}
@@ -221,11 +245,17 @@ export class EditPolicy extends Component {
               />
               <EuiHorizontalRule className="ilmHrule" />
               <EuiButtonEmpty onClick={this.backToPolicyList}>
-                Cancel
+                <FormattedMessage
+                  id="xpack.idxLifecycleMgmt.editPolicy.cancelButton"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
               &nbsp;&nbsp;
               <EuiButton fill onClick={this.submit}>
-                Save your policy
+                <FormattedMessage
+                  id="xpack.idxLifecycleMgmt.editPolicy.saveButton"
+                  defaultMessage="Save your policy"
+                />
               </EuiButton>
               {this.state.isShowingNodeDetailsFlyout ? (
                 <NodeAttrsDetails
@@ -240,3 +270,4 @@ export class EditPolicy extends Component {
     );
   }
 }
+export const EditPolicy = injectI18n(EditPolicyUi);

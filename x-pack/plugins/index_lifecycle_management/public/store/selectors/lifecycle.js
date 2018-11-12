@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import {
   PHASE_HOT,
   PHASE_WARM,
@@ -27,12 +27,16 @@ import {
   phaseToES,
   getSelectedPolicyName,
   isNumber,
-  getSelectedPrimaryShardCount,
   getSaveAsNewPolicy,
   getSelectedOriginalPolicyName,
   getPolicies
 } from '.';
-
+const numberRequiredMessage = i18n.translate('xpack.idxLifecycleMgmt.editPolicy.numberRequiredError', {
+  defaultMessage: 'A number is required'
+});
+const positiveNumberRequiredMessage = i18n.translate('xpack.idxLifecycleMgmt.editPolicy.positiveNumberRequiredError', {
+  defaultMessage: 'Only positive numbers are allowed'
+});
 export const validatePhase = (type, phase, errors) => {
   const phaseErrors = {};
 
@@ -46,10 +50,14 @@ export const validatePhase = (type, phase, errors) => {
       !isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])
     ) {
       phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
-        'A maximum age is required'
+        i18n.translate('xpack.idxLifecycleMgmt.editPolicy.maximumAgeMissingError', {
+          defaultMessage: 'A maximum age is required'
+        })
       ];
       phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
-        'A maximum index size is required'
+        i18n.translate('xpack.idxLifecycleMgmt.editPolicy.maximumIndexSizeMissingError', {
+          defaultMessage: 'A maximum index size is required'
+        })
       ];
     }
   }
@@ -61,32 +69,36 @@ export const validatePhase = (type, phase, errors) => {
         continue;
       }
       if (!isNumber(phase[numberedAttribute])) {
-        phaseErrors[numberedAttribute] = ['A number is required'];
+        phaseErrors[numberedAttribute] = [numberRequiredMessage];
       }
       else if (phase[numberedAttribute] < 0) {
-        phaseErrors[numberedAttribute] = ['Only positive numbers are allowed'];
+        phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
       }
       else if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && phase[numberedAttribute] < 1) {
-        phaseErrors[numberedAttribute] = ['Only positive numbers are allowed'];
+        phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
       }
     }
   }
 
   if (phase[PHASE_SHRINK_ENABLED]) {
     if (!isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
-      phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = ['A number is required.'];
+      phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = [numberRequiredMessage];
     }
     else if (phase[PHASE_PRIMARY_SHARD_COUNT] < 1) {
-      phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = ['Only positive numbers are allowed.'];
+      phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = [positiveNumberRequiredMessage];
     }
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {
     if (!isNumber(phase[PHASE_FORCE_MERGE_SEGMENTS])) {
-      phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = ['A number is required.'];
+      phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = [numberRequiredMessage];
     }
     else if (phase[PHASE_FORCE_MERGE_SEGMENTS] < 1) {
-      phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = ['Only positive numbers above 0 are allowed.'];
+      phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = [
+        i18n.translate('xpack.idxLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
+          defaultMessage: 'Only positive numbers above 0 are allowed'
+        })
+      ];
     }
   }
   errors[type] = {
@@ -100,17 +112,23 @@ export const validateLifecycle = state => {
   const errors = JSON.parse(JSON.stringify(ERROR_STRUCTURE));
 
   if (!getSelectedPolicyName(state)) {
-    errors[STRUCTURE_POLICY_NAME].push('A policy name is required');
+    errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.idxLifecycleMgmt.editPolicy.policyNameRequiredError', {
+      defaultMessage: 'A policy name is required'
+    }));
   }
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
-    errors[STRUCTURE_POLICY_NAME].push('The policy name must be different');
+    errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.idxLifecycleMgmt.editPolicy.differentPolicyNameRequiredError', {
+      defaultMessage: 'The policy name must be different'
+    }));
   }
 
   if (getSaveAsNewPolicy(state)) {
     const policyNames = getPolicies(state).map(policy => policy.name);
     if (policyNames.includes(getSelectedPolicyName(state))) {
-      errors[STRUCTURE_POLICY_NAME].push('That policy name is already used.');
+      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.idxLifecycleMgmt.editPolicy.policyNameAlreadyUsedError', {
+        defaultMessage: 'That policy name is already used'
+      }));
     }
   }
 
@@ -123,15 +141,6 @@ export const validateLifecycle = state => {
   validatePhase(PHASE_WARM, warmPhase, errors);
   validatePhase(PHASE_COLD, coldPhase, errors);
   validatePhase(PHASE_DELETE, deletePhase, errors);
-  if (warmPhase[PHASE_SHRINK_ENABLED]) {
-    if (isNumber(warmPhase[PHASE_PRIMARY_SHARD_COUNT]) && warmPhase[PHASE_PRIMARY_SHARD_COUNT] > 0) {
-      if (getSelectedPrimaryShardCount(state) % warmPhase[PHASE_PRIMARY_SHARD_COUNT] !== 0) {
-        errors[PHASE_WARM][PHASE_PRIMARY_SHARD_COUNT].push(
-          'The shard count needs to be a divisor of the hot phase shard count.'
-        );
-      }
-    }
-  }
   return errors;
 };
 

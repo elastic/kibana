@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
-import { i18n }  from '@kbn/i18n';
+import { i18n, FormattedMessage }  from '@kbn/i18n';
 const HEADERS = {
   policy: i18n.translate('xpack.indexLifecycleMgmt.summary.headers.lifecyclePolicyHeader', {
     defaultMessage: 'Lifecycle policy',
@@ -82,7 +82,14 @@ export class IndexLifecycleSummary extends Component {
     const { left, right } = this.buildRows();
     return (
       <Fragment>
-        <EuiTitle size="s"><h3>Index lifecycle management</h3></EuiTitle>
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              defaultMessage="Index lifecycle management"
+              id="xpack.idxLifecycleMgmt.indexManagementTable.summaryTitle"
+            />
+          </h3>
+        </EuiTitle>
         <EuiSpacer size="s"/>
         <EuiFlexGroup>
           <EuiFlexItem>

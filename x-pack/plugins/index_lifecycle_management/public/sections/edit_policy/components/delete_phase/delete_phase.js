@@ -8,6 +8,7 @@
 
 
 import React, { PureComponent, Fragment } from 'react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 
 import {
@@ -15,13 +16,10 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiSpacer,
-  EuiText,
-  EuiTextColor,
   EuiFormRow,
   EuiFieldNumber,
   EuiSelect,
   EuiDescribedFormGroup,
-  EuiBadge,
   EuiButton,
 } from '@elastic/eui';
 import {
@@ -31,8 +29,9 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
 } from '../../../../store/constants';
 import { ErrableFormRow } from '../../form_errors';
+import { ActiveBadge, PhaseErrorMessage } from '../../../../components';
 
-export class DeletePhase extends PureComponent {
+class DeletePhaseUi extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
     isShowingErrors: PropTypes.bool.isRequired,
@@ -52,16 +51,22 @@ export class DeletePhase extends PureComponent {
       setPhaseData,
       phaseData,
       errors,
-      isShowingErrors
+      isShowingErrors,
+      intl
     } = this.props;
 
     return (
       <EuiDescribedFormGroup
         title={
           <div>
-            <span className="eui-displayInlineBlock eui-alignMiddle">Delete phase</span>{' '}
+            <span className="eui-displayInlineBlock eui-alignMiddle">
+              <FormattedMessage
+                id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.deletePhaseLabel"
+                defaultMessage="Delete phase"
+              />
+            </span>{' '}
             {phaseData[PHASE_ENABLED] ? (
-              <EuiBadge className="eui-alignMiddle">Active</EuiBadge>
+              <ActiveBadge />
             ) : null}
           </div>
         }
@@ -69,15 +74,13 @@ export class DeletePhase extends PureComponent {
         description={
           <Fragment>
             <p>
-              Use this phase to define how long to retain your data.
+              <FormattedMessage
+                id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
+                defaultMessage="Use this phase to define how long to retain your data."
+              />
+
             </p>
-            {isShowingErrors ? (
-              <EuiTextColor color="danger">
-                <EuiText>
-                  <p>This phase contains errors</p>
-                </EuiText>
-              </EuiTextColor>
-            ) : null}
+            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
           </Fragment>
         }
         fullWidth
@@ -93,20 +96,31 @@ export class DeletePhase extends PureComponent {
                   await setPhaseData(PHASE_ENABLED, false);
                 }}
               >
-                Deactive delete phase
+                <FormattedMessage
+                  id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.deactivateDeletePhaseButton"
+                  defaultMessage="Deactivate delete phase"
+                />
               </EuiButton>
             </div>
 
             <EuiSpacer size="m" />
             <EuiTitle size="s">
-              <p>Configuration</p>
+              <p>
+                <FormattedMessage
+                  id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.configurationTitle"
+                  defaultMessage="Configuration"
+                />
+              </p>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFlexGroup>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
                   id={`${PHASE_DELETE}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
-                  label="Delete indices after"
+                  label={intl.formatMessage({
+                    id: 'xpack.idxLifecycleMgmt.coldPhase.moveToDeletePhaseAfterLabel',
+                    defaultMessage: 'Delete indices after'
+                  })}
                   errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
                   isShowingErrors={isShowingErrors}
                   errors={errors}
@@ -128,8 +142,14 @@ export class DeletePhase extends PureComponent {
                       setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)
                     }
                     options={[
-                      { value: 'd', text: 'days' },
-                      { value: 'h', text: 'hours' },
+                      { value: 'd', text: intl.formatMessage({
+                        id: 'xpack.idxLifecycleMgmt.deletePhase.daysLabel',
+                        defaultMessage: 'days'
+                      }) },
+                      { value: 'h', text: intl.formatMessage({
+                        id: 'xpack.idxLifecycleMgmt.deletePhase.hoursLabel',
+                        defaultMessage: 'hours'
+                      }) },
                     ]}
                   />
                 </EuiFormRow>
@@ -144,7 +164,10 @@ export class DeletePhase extends PureComponent {
                 await setPhaseData(PHASE_ENABLED, true);
               }}
             >
-              Activate delete phase
+              <FormattedMessage
+                id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.activateDeletePhaseButton"
+                defaultMessage="Activate delete phase"
+              />
             </EuiButton>
           </div>
         )}
@@ -152,3 +175,4 @@ export class DeletePhase extends PureComponent {
     );
   }
 }
+export const DeletePhase = injectI18n(DeletePhaseUi);

@@ -5,22 +5,20 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
-  EuiTextColor,
   EuiFieldNumber,
   EuiSelect,
   EuiSwitch,
   EuiFormRow,
   EuiDescribedFormGroup,
-  EuiBadge,
 } from '@elastic/eui';
-import { LearnMoreLink } from '../../../../components/learn_more_link';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../../components';
 import {
   PHASE_HOT,
   PHASE_ROLLOVER_ALIAS,
@@ -34,7 +32,7 @@ import {
 
 import { ErrableFormRow } from '../../form_errors';
 
-export class HotPhase extends PureComponent {
+class HotPhaseUi extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
 
@@ -61,30 +59,33 @@ export class HotPhase extends PureComponent {
       phaseData,
       isShowingErrors,
       errors,
+      intl
     } = this.props;
 
     return (
       <EuiDescribedFormGroup
         title={
           <div>
-            <span className="eui-displayInlineBlock eui-alignMiddle">Hot phase</span>{' '}
-            <EuiBadge className="eui-alignMiddle">Active</EuiBadge>
+            <span className="eui-displayInlineBlock eui-alignMiddle">
+              <FormattedMessage
+                id="xpack.idxLifecycleMgmt.editPolicy.hotPhase.hotPhaseLabel"
+                defaultMessage="Hot phase"
+              />
+            </span>{' '}
+            <ActiveBadge />
           </div>
         }
         titleSize="s"
         description={
           <Fragment>
             <p>
-              This phase is required. A hot index is being queried and actively written to.
-              You can optimize this phase for write throughput.
+              <FormattedMessage
+                id="xpack.idxLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescriptionMessage"
+                defaultMessage={`This phase is required. A hot index is being queried and actively written to.
+                  You can optimize this phase for write throughput.`}
+              />
             </p>
-            {isShowingErrors ? (
-              <EuiTextColor color="danger">
-                <EuiText>
-                  <p>This phase contains errors</p>
-                </EuiText>
-              </EuiTextColor>
-            ) : null}
+            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
           </Fragment>
         }
         fullWidth
@@ -93,9 +94,13 @@ export class HotPhase extends PureComponent {
           hasEmptyLabelSpace
           helpText={
             <p>
-              If true, rollover the index when it gets too big or too old. The alias switches to the new index.{' '}
+              <FormattedMessage
+                id="xpack.idxLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
+                defaultMessage="If true, rollover the index when it gets too big or too old. The alias switches to the new index."
+              />
+              {' '}
               <LearnMoreLink
-                docPath="ndices-rollover-index.html"
+                docPath="indices-rollover-index.html"
               />
             </p>
           }
@@ -105,7 +110,10 @@ export class HotPhase extends PureComponent {
             onChange={async e => {
               await setPhaseData(PHASE_ROLLOVER_ENABLED, e.target.checked);
             }}
-            label="Enable rollover"
+            label={intl.formatMessage({
+              id: 'xpack.idxLifecycleMgmt.hotPhase.enableRolloverLabel',
+              defaultMessage: 'Enable rollover'
+            })}
           />
         </EuiFormRow>
         {phaseData[PHASE_ROLLOVER_ENABLED] ? (
@@ -115,7 +123,10 @@ export class HotPhase extends PureComponent {
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
                   id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
-                  label="Maximum index size"
+                  label={intl.formatMessage({
+                    id: 'xpack.idxLifecycleMgmt.hotPhase.maximumIndexSizeLabel',
+                    defaultMessage: 'Maximum index size'
+                  })}
                   errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED}
                   isShowingErrors={isShowingErrors}
                   errors={errors}
@@ -149,8 +160,14 @@ export class HotPhase extends PureComponent {
                       );
                     }}
                     options={[
-                      { value: 'gb', text: 'gigabytes' },
-                      { value: MAX_SIZE_TYPE_DOCUMENT, text: 'documents' }
+                      { value: 'gb', text: intl.formatMessage({
+                        id: 'xpack.idxLifecycleMgmt.hotPhase.gigabytesLabel',
+                        defaultMessage: 'gigabytes'
+                      }) },
+                      { value: MAX_SIZE_TYPE_DOCUMENT, text: intl.formatMessage({
+                        id: 'xpack.idxLifecycleMgmt.hotPhase.documentsLabel',
+                        defaultMessage: 'documents'
+                      }) }
                     ]}
                   />
                 </ErrableFormRow>
@@ -161,7 +178,10 @@ export class HotPhase extends PureComponent {
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
                   id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_AGE}`}
-                  label="Maximum age"
+                  label={intl.formatMessage({
+                    id: 'xpack.idxLifecycleMgmt.hotPhase.maximumAgeLabel',
+                    defaultMessage: 'Maximum age'
+                  })}
                   errorKey={`${PHASE_ROLLOVER_MAX_AGE}`}
                   isShowingErrors={isShowingErrors}
                   errors={errors}
@@ -192,8 +212,14 @@ export class HotPhase extends PureComponent {
                       );
                     }}
                     options={[
-                      { value: 'd', text: 'days' },
-                      { value: 'h', text: 'hours' },
+                      { value: 'd', text: intl.formatMessage({
+                        id: 'xpack.idxLifecycleMgmt.hotPhase.daysLabel',
+                        defaultMessage: 'days'
+                      }) },
+                      { value: 'h', text: intl.formatMessage({
+                        id: 'xpack.idxLifecycleMgmt.hotPhase.hoursLabel',
+                        defaultMessage: 'hours'
+                      }) },
                     ]}
                   />
                 </ErrableFormRow>
@@ -205,3 +231,4 @@ export class HotPhase extends PureComponent {
     );
   }
 }
+export const HotPhase = injectI18n(HotPhaseUi);
