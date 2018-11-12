@@ -89,17 +89,10 @@ export class DeleteJobModal extends Component {
       const title = (
         <FormattedMessage
           id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
-          defaultMessage="Delete {jobs}"
+          defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}"
           values={{
-            jobs: (this.state.jobs.length > 1) ?
-              (<FormattedMessage
-                id="xpack.ml.jobsList.deleteJobModal.deleteJobs.jobsCountDescription"
-                defaultMessage="{jobCount} jobs"
-                values={{
-                  jobCount: this.state.jobs.length
-                }}
-              />)
-              : this.state.jobs[0].id
+            jobCount: this.state.jobs.length,
+            jobId: this.state.jobs[0].id
           }}
         />);
       modal = (

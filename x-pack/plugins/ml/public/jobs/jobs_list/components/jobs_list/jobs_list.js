@@ -116,21 +116,17 @@ class JobsListUI extends Component {
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
-            aria-label={intl.formatMessage({
-              id: 'xpack.ml.jobsList.expandJobDetailAriaLabel',
-              defaultMessage: '{hideShowText} details for {itemId}' },
-            {
-              itemId: item.id,
-              hideShowText: this.state.itemIdToExpandedRowMap[item.id] ?
-                intl.formatMessage({
-                  id: 'xpack.ml.jobsList.expandJobDetail.hideText',
-                  defaultMessage: 'Hide'
-                })
-                : intl.formatMessage({
-                  id: 'xpack.ml.jobsList.expandJobDetail.showText',
-                  defaultMessage: 'Show'
-                })
-            })}
+            aria-label={this.state.itemIdToExpandedRowMap[item.id]
+              ? intl.formatMessage({
+                id: 'xpack.ml.jobsList.collapseJobDetailAriaLabel',
+                defaultMessage: 'Hide details for {itemId}' },
+              { itemId: item.id }
+              )
+              : intl.formatMessage({
+                id: 'xpack.ml.jobsList.expandJobDetailAriaLabel',
+                defaultMessage: 'Show details for {itemId}' },
+              { itemId: item.id }
+              )}
             data-row-id={item.id}
           />
         )

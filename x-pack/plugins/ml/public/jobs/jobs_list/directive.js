@@ -36,7 +36,6 @@ uiRoutes
 import { JobsPage } from './jobs';
 import { I18nProvider } from '@kbn/i18n/react';
 
-
 module.directive('jobsPage', function () {
   return {
     scope: {},

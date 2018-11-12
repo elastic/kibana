@@ -27,10 +27,10 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
 
   return [
     {
-      name: i18n.translate('xpack.ml.jobsList.actions.management.startDatafeedLabel', {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.startDatafeedLabel', {
         defaultMessage: 'Start datafeed'
       }),
-      description: i18n.translate('xpack.ml.jobsList.actions.management.startDatafeedDescription', {
+      description: i18n.translate('xpack.ml.jobsList.managementActions.startDatafeedDescription', {
         defaultMessage: 'Start datafeed'
       }),
       icon: 'play',
@@ -41,10 +41,10 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu();
       }
     }, {
-      name: i18n.translate('xpack.ml.jobsList.actions.management.stopDatafeedLabel', {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.stopDatafeedLabel', {
         defaultMessage: 'Stop datafeed'
       }),
-      description: i18n.translate('xpack.ml.jobsList.actions.management.stopDatafeedDescription', {
+      description: i18n.translate('xpack.ml.jobsList.managementActions.stopDatafeedDescription', {
         defaultMessage: 'Stop datafeed'
       }),
       icon: 'stop',
@@ -55,10 +55,10 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu(true);
       }
     }, {
-      name: i18n.translate('xpack.ml.jobsList.actions.management.closeJobLabel', {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.closeJobLabel', {
         defaultMessage: 'Close job'
       }),
-      description: i18n.translate('xpack.ml.jobsList.actions.management.closeJobDescription', {
+      description: i18n.translate('xpack.ml.jobsList.managementActions.closeJobDescription', {
         defaultMessage: 'Close job'
       }),
       icon: 'cross',
@@ -69,10 +69,10 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu(true);
       }
     }, {
-      name: i18n.translate('xpack.ml.jobsList.actions.management.cloneJobLabel', {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.cloneJobLabel', {
         defaultMessage: 'Clone job'
       }),
-      description: i18n.translate('xpack.ml.jobsList.actions.management.cloneJobDescription', {
+      description: i18n.translate('xpack.ml.jobsList.managementActions.cloneJobDescription', {
         defaultMessage: 'Clone job'
       }),
       icon: 'copy',
@@ -82,10 +82,10 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu(true);
       }
     }, {
-      name: i18n.translate('xpack.ml.jobsList.actions.management.editJobLabel', {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.editJobLabel', {
         defaultMessage: 'Edit job'
       }),
-      description: i18n.translate('xpack.ml.jobsList.actions.management.editJobDescription', {
+      description: i18n.translate('xpack.ml.jobsList.managementActions.editJobDescription', {
         defaultMessage: 'Edit job'
       }),
       icon: 'pencil',
@@ -95,10 +95,10 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         closeMenu();
       }
     }, {
-      name: i18n.translate('xpack.ml.jobsList.actions.management.deleteJobLabel', {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.deleteJobLabel', {
         defaultMessage: 'Delete job'
       }),
-      description: i18n.translate('xpack.ml.jobsList.actions.management.deleteJobDescription', {
+      description: i18n.translate('xpack.ml.jobsList.managementActions.deleteJobDescription', {
         defaultMessage: 'Delete job'
       }),
       icon: 'trash',

@@ -40,10 +40,17 @@ function getLink(location, jobs) {
 }
 
 function ResultLinksUI({ jobs, intl }) {
-  const tooltipJobs = (jobs.length === 1) ? jobs[0].id : intl.formatMessage({
-    id: 'xpack.ml.jobsList.actions.results.jobsCountLabel',
-    defaultMessage: '{jobsCount} jobs' }, {
-    jobsCount: jobs.length
+  const openJobsInSingleMetricViewerText = intl.formatMessage({
+    id: 'xpack.ml.jobsList.resultActions.openJobsInSingleMetricViewerText',
+    defaultMessage: 'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Single Metric Viewer' }, {
+    jobsCount: jobs.length,
+    jobId: jobs[0].id
+  });
+  const openJobsInAnomalyExplorerText = intl.formatMessage({
+    id: 'xpack.ml.jobsList.resultActions.openJobsInAnomalyExplorerText',
+    defaultMessage: 'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Anomaly Explorer' }, {
+    jobsCount: jobs.length,
+    jobId: jobs[0].id
   });
   const singleMetricVisible = (jobs.length < 2);
   const singleMetricEnabled = (jobs.length === 1 && jobs[0].isSingleMetricViewerJob);
@@ -52,20 +59,12 @@ function ResultLinksUI({ jobs, intl }) {
       {(singleMetricVisible) &&
         <EuiToolTip
           position="bottom"
-          content={intl.formatMessage({
-            id: 'xpack.ml.jobsList.actions.results.openJobsInSingleMetricViewerTooltip',
-            defaultMessage: 'Open {tooltipJobs} in Single Metric Viewer' }, {
-            tooltipJobs
-          })}
+          content={openJobsInSingleMetricViewerText}
         >
           <EuiButtonIcon
             href={getLink('timeseriesexplorer', jobs)}
             iconType="stats"
-            aria-label={intl.formatMessage({
-              id: 'xpack.ml.jobsList.actions.results.openJobsInSingleMetricViewerAriaLabel',
-              defaultMessage: 'Open {tooltipJobs} in Single Metric Viewer' }, {
-              tooltipJobs
-            })}
+            aria-label={openJobsInSingleMetricViewerText}
             className="results-button"
             isDisabled={(singleMetricEnabled === false)}
           />
@@ -73,20 +72,12 @@ function ResultLinksUI({ jobs, intl }) {
       }
       <EuiToolTip
         position="bottom"
-        content={intl.formatMessage({
-          id: 'xpack.ml.jobsList.actions.results.openJobsInAnomalyExplorerTooltip',
-          defaultMessage: 'Open {tooltipJobs} in Anomaly Explorer' }, {
-          tooltipJobs
-        })}
+        content={openJobsInAnomalyExplorerText}
       >
         <EuiButtonIcon
           href={getLink('explorer', jobs)}
           iconType="tableOfContents"
-          aria-label={intl.formatMessage({
-            id: 'xpack.ml.jobsList.actions.results.openJobsInAnomalyExplorerAriaLabel',
-            defaultMessage: 'Open {tooltipJobs} in Anomaly Explorer' }, {
-            tooltipJobs
-          })}
+          aria-label={openJobsInAnomalyExplorerText}
           className="results-button"
         />
       </EuiToolTip>

@@ -38,27 +38,26 @@ export function NodeAvailableWarning() {
             /><br />
             <FormattedMessage
               id="xpack.ml.jobsList.nodeAvailableWarning.unavailableCreateOrRunJobsDescription"
-              defaultMessage="You will not be able to create or run jobs."
+              defaultMessage="You will not be able to create or run jobs. {cloudConfigLink}"
+              values={{
+                cloudConfigLink: isCloud
+                  ? <FormattedMessage
+                    id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
+                    defaultMessage="This can be configured in Cloud {hereCloudLink}."
+                    values={{
+                      hereCloudLink: (
+                        <EuiLink href="#">
+                          <FormattedMessage
+                            id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText"
+                            defaultMessage="here"
+                          />
+                        </EuiLink>
+                      )
+                    }}
+                  />
+                  : '',
+              }}
             />
-            {!isCloud &&
-              <span ng-if="isCloud">
-                &nbsp;
-                <FormattedMessage
-                  id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloudDescription"
-                  defaultMessage="This can be configured in Cloud {here}."
-                  values={{
-                    here: (
-                      <EuiLink href="#">
-                        <FormattedMessage
-                          id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText"
-                          defaultMessage="here"
-                        />
-                      </EuiLink>
-                    )
-                  }}
-                />
-              </span>
-            }
           </p>
         </EuiCallOut>
         <EuiSpacer size="m" />

@@ -140,17 +140,10 @@ export class StartDatafeedModal extends Component {
               <EuiModalHeaderTitle>
                 <FormattedMessage
                   id="xpack.ml.jobsList.startDatafeedModal.startJobsTitle"
-                  defaultMessage="Start {jobs}"
+                  defaultMessage="Start {jobsCount, plural, one {{jobId}} other {# jobs}}"
                   values={{
-                    jobs: (startableJobs.length > 1) ?
-                      (<FormattedMessage
-                        id="xpack.ml.jobsList.startDatafeedModal.startJobs.jobsCountDescription"
-                        defaultMessage="{jobCount} jobs"
-                        values={{
-                          jobCount: startableJobs.length
-                        }}
-                      />)
-                      : startableJobs[0].id
+                    jobCount: startableJobs.length,
+                    jobId: startableJobs[0].id
                   }}
                 />
               </EuiModalHeaderTitle>

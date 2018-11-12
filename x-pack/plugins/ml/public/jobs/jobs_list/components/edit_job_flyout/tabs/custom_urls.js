@@ -123,7 +123,7 @@ class CustomUrlsUI extends Component {
       .catch((resp) => {
         console.log('Error building custom URL from settings:', resp);
         toastNotifications.addDanger(this.props.intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.addNewCustomUrlErrorNotificationMessage',
+          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.addNewUrlErrorNotificationMessage',
           defaultMessage: 'An error occurred building the new custom URL from the supplied settings'
         }));
       });
@@ -149,7 +149,7 @@ class CustomUrlsUI extends Component {
       .catch((resp) => {
         console.log('Error building custom URL from settings:', resp);
         toastNotifications.addWarning(intl.formatMessage({
-          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.buildCustomUrlErrorNotificationMessage',
+          id: 'xpack.ml.jobsList.editJobFlyout.customUrls.buildUrlErrorNotificationMessage',
           defaultMessage: 'An error occurred building the custom URL for testing from the supplied settings'
         }));
       });
@@ -182,7 +182,7 @@ class CustomUrlsUI extends Component {
               onClick={() => this.editNewCustomUrl()}
             >
               <FormattedMessage
-                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlLabel"
+                id="xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlButtonLabel"
                 defaultMessage="Add custom URL"
               />
             </EuiButton>
