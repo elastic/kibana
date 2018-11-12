@@ -10,6 +10,7 @@ import { FrameworkAdapter } from './adapters/framework/adapter_types';
 import { CMTokensAdapter } from './adapters/tokens/adapter_types';
 import { BeatsLib } from './beats';
 import { ElasticsearchLib } from './elasticsearch';
+import { FrameworkLib } from './framework';
 import { TagsLib } from './tags';
 
 export interface FrontendDomainLibs {
@@ -20,7 +21,7 @@ export interface FrontendDomainLibs {
 
 export interface FrontendLibs extends FrontendDomainLibs {
   elasticsearch: ElasticsearchLib;
-  framework: FrameworkAdapter;
+  framework: FrameworkLib;
 }
 
 export interface YamlConfigSchema {

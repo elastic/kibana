@@ -7,15 +7,16 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { BeatTag } from '../../../common/domain_types';
-import { AppURLState } from '../../app';
 import { AssignmentActionType, Table, TagsTableType } from '../../components/table';
 import { tagListAssignmentOptions } from '../../components/table/assignment_schema';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { URLStateProps } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { AppURLState } from '../../frontend_types';
+import { FrontendLibs } from '../../lib/types';
 
 interface TagsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;
+  renderAction: (area: JSX.Element) => void;
 }
 
 interface TagsPageState {
@@ -24,18 +25,6 @@ interface TagsPageState {
 }
 
 export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {
-  public static ActionArea = ({ goTo }: TagsPageProps) => (
-    <EuiButton
-      size="s"
-      color="primary"
-      onClick={async () => {
-        goTo('/tag/create');
-      }}
-    >
-      Add Tag
-    </EuiButton>
-  );
-
   constructor(props: TagsPageProps) {
     super(props);
 
@@ -45,7 +34,20 @@ export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> 
     };
 
     this.loadTags();
+    props.renderAction(this.renderActionArea());
   }
+
+  public renderActionArea = () => (
+    <EuiButton
+      size="s"
+      color="primary"
+      onClick={async () => {
+        // goTo('/tag/create');
+      }}
+    >
+      Add Tag
+    </EuiButton>
+  );
 
   public render() {
     return (

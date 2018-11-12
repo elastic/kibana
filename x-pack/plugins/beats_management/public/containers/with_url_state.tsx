@@ -7,7 +7,7 @@
 import { parse, stringify } from 'querystring';
 import React from 'react';
 import { withRouter } from 'react-router-dom';
-import { FlatObject } from '../app';
+import { FlatObject } from '../frontend_types';
 import { RendererFunction } from '../utils/typed_react';
 
 type StateCallback<T> = (previousState: T) => T;

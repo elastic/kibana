@@ -10,9 +10,9 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
 import { BeatTag } from '../../../common/domain_types';
-import { AppURLState } from '../../app';
 import { TagEdit } from '../../components/tag';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
+import { AppURLState } from '../../frontend_types';
 import { FrontendLibs } from '../../lib/lib';
 
 interface TagPageProps extends URLStateProps<AppURLState> {

@@ -11,75 +11,49 @@ interface PathTree {
 }
 interface RouteConfig {
   path: string;
-  component: React.ComponentType;
-  base: string;
+  component: React.ComponentType<any>;
   routes?: RouteConfig[];
 }
 
 export class RouteTreeBuilder {
-  public pathsToRouteTree(
-    paths: string[],
-    requirePages: any,
-    pageComponentPattern: RegExp = /Page$/
-  ) {
+  constructor(
+    private readonly requireWithContext: any,
+    private readonly pageComponentPattern: RegExp = /Page$/
+  ) {}
+  public routeTreeFromPaths(paths: string[]): RouteConfig[] {
     const pathTree = this.buildTree('./', paths);
-
     return Object.keys(pathTree).reduce((routes: any[], filePath) => {
       if (pathTree[filePath].includes('index.tsx')) {
-        routes.push(
-          this.buildRouteWithChildren(
-            filePath,
-            pathTree[filePath],
-            pageComponentPattern,
-            requirePages
-          )
-        );
+        routes.push(this.buildRouteWithChildren(filePath, pathTree[filePath]));
       } else {
-        routes.concat(
-          pathTree[filePath].map(file =>
-            routes.push(this.buildRoute(filePath, file, pageComponentPattern, requirePages))
-          )
-        );
+        routes.concat(pathTree[filePath].map(file => routes.push(this.buildRoute(filePath, file))));
       }
 
       return routes;
     }, []);
   }
 
-  private buildRouteWithChildren(
-    dir: string,
-    files: string[],
-    pageComponentPattern: RegExp,
-    requirePages: any
-  ) {
+  private buildRouteWithChildren(dir: string, files: string[]) {
     const childFiles = files.filter(f => f !== 'index.tsx');
-    const parentConfig = this.buildRoute(dir, 'index.tsx', pageComponentPattern, requirePages);
-    parentConfig.routes = childFiles.map(cf =>
-      this.buildRoute(dir, cf, pageComponentPattern, requirePages)
-    );
+    const parentConfig = this.buildRoute(dir, 'index.tsx');
+    parentConfig.routes = childFiles.map(cf => this.buildRoute(dir, cf));
     return parentConfig;
   }
 
-  private buildRoute(
-    dir: string,
-    file: string,
-    pageComponentPattern: RegExp,
-    requirePages: any
-  ): RouteConfig {
+  private buildRoute(dir: string, file: string): RouteConfig {
     const filePath = `${dir}${file.replace('.tsx', '').replace('index', '')}`;
-    const page = requirePages(`.${dir}${file}`);
+    const page = this.requireWithContext(`.${dir}${file}`);
 
     // Make sure the expored variable name matches a pattern. By default it will choose the first
     // exported variable that matches *Page
     const componentExportName = Object.keys(page).find(varName =>
-      pageComponentPattern.test(varName)
+      this.pageComponentPattern.test(varName)
     );
 
     if (componentExportName) {
       return {
         path: filePath,
         component: page[componentExportName],
-        base: dir,
       };
     } else {
       throw new Error(

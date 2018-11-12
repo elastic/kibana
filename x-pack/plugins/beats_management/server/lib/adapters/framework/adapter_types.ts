@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Lifecycle, ResponseToolkit } from 'hapi';
-import { internalAuthData } from '../../../utils/wrap_request';
 
+export const internalAuthData = Symbol('internalAuthData');
+export const internalUser: FrameworkInternalUser = {
+  kind: 'internal',
+};
 export interface BackendFrameworkAdapter {
   internalUser: FrameworkInternalUser;
   version: string;

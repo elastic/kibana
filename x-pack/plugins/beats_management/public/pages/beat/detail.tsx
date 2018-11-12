@@ -17,7 +17,7 @@ import { flatten, get } from 'lodash';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { ConnectedLink } from '../../components/connected_link';
+import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
 import { supportedConfigs } from '../../config_schemas';

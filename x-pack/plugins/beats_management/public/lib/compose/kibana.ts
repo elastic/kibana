@@ -27,8 +27,9 @@ import { RestTagsAdapter } from '../adapters/tags/rest_tags_adapter';
 import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
 import { BeatsLib } from '../beats';
 import { ElasticsearchLib } from '../elasticsearch';
-import { FrontendDomainLibs, FrontendLibs } from '../lib';
 import { TagsLib } from '../tags';
+import { FrontendLibs } from '../types';
+import { FrameworkLib } from './../framework';
 
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
@@ -40,25 +41,16 @@ export function compose(): FrontendLibs {
     tags,
   });
 
-  const domainLibs: FrontendDomainLibs = {
-    tags,
-    tokens,
-    beats,
-  };
-  const pluginUIModule = uiModules.get('app/beats_management');
-
-  const framework = new KibanaFrameworkAdapter(
-    pluginUIModule,
-    management,
-    routes,
-    chrome,
-    XPackInfoProvider
+  const framework = new FrameworkLib(
+    new KibanaFrameworkAdapter(PLUGIN.ID, management, routes, chrome, XPackInfoProvider)
   );
 
   const libs: FrontendLibs = {
     framework,
     elasticsearch: new ElasticsearchLib(esAdapter),
-    ...domainLibs,
+    tags,
+    tokens,
+    beats,
   };
   return libs;
 }

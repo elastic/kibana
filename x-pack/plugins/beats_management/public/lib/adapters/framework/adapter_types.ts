@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
+import { LICENSES } from './../../../../common/constants/security';
 
 export interface FrameworkAdapter {
   // Instance vars
-  info?: FrameworkInfo | null;
+  info: FrameworkInfo;
   currentUser: FrameworkUser;
   // Methods
   renderUIAtPath(path: string, component: React.ReactElement<any>): Promise<void>;
@@ -30,7 +31,7 @@ export interface FrameworkAdapter {
 export const RuntimeFrameworkInfo = t.type({
   basePath: t.string,
   license: t.type({
-    type: t.union(['oss', 'trial', 'standard', 'basic', 'gold', 'platinum'].map(s => t.literal(s))),
+    type: t.union(LICENSES.map(s => t.literal(s))),
     expired: t.boolean,
     expiry_date_in_millis: t.number,
   }),

@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { withRouter } from 'react-router-dom';
+import React, { Component } from 'react';
 
 import {
   EuiModal,
@@ -26,31 +25,44 @@ interface PrimaryLayoutProps {
   modalClosePath?: string;
 }
 
-export const PrimaryLayout: React.SFC<PrimaryLayoutProps> = withRouter<any>(
-  ({ actionSection, title, modalRender, modalClosePath, children, history }) => {
-    const modalContent = modalRender && modalRender();
+export class PrimaryLayout extends Component<PrimaryLayoutProps> {
+  private actionSection: JSX.Element | null = null;
+  constructor(props: PrimaryLayoutProps) {
+    super(props);
+  }
+
+  public render() {
+    const modalContent = this.props.modalRender && this.props.modalRender();
     return (
       <EuiPage>
         <EuiPageBody>
           <EuiPageHeader>
             <EuiPageHeaderSection>
               <EuiTitle>
-                <h1>{title}</h1>
+                <h1>{this.props.title}</h1>
               </EuiTitle>
             </EuiPageHeaderSection>
-            <EuiPageHeaderSection> {actionSection}</EuiPageHeaderSection>
+            <EuiPageHeaderSection>
+              {this.actionSection || <span>Nothing</span>}
+            </EuiPageHeaderSection>
           </EuiPageHeader>
           <EuiPageContent>
-            <EuiPageContentBody>{children}</EuiPageContentBody>
+            <EuiPageContentBody>
+              {typeof this.props.children === 'function'
+                ? this.props.children(this.renderAction)
+                : this.props.children}
+            </EuiPageContentBody>
           </EuiPageContent>
         </EuiPageBody>
         {modalContent && (
           <EuiOverlayMask>
             <EuiModal
               onClose={() => {
-                history.push(modalClosePath);
+                // this.props.history.push(this.props.modalClosePath);
               }}
-              style={{ width: '640px' }}
+              style={{
+                width: '640px',
+              }}
             >
               {modalContent}
             </EuiModal>
@@ -59,4 +71,9 @@ export const PrimaryLayout: React.SFC<PrimaryLayoutProps> = withRouter<any>(
       </EuiPage>
     );
   }
-) as any;
+
+  private renderAction = (component: JSX.Element) => {
+    this.actionSection = component;
+    this.forceUpdate();
+  };
+}

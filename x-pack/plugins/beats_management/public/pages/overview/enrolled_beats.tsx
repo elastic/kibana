@@ -17,17 +17,18 @@ import {
 import { flatten, intersection, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
+import { Subscribe } from 'unstated';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
-import { AppURLState } from '../../app';
 import { BeatsTableType, Table } from '../../components/table';
 import { beatsListAssignmentOptions } from '../../components/table/assignment_schema';
 import { AssignmentActionType } from '../../components/table/table';
+import { BeatsContainer } from '../../containers/beats';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { URLStateProps } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { AppURLState } from '../../frontend_types';
+import { FrontendLibs } from '../../lib/types';
 import { EnrollBeatPage } from './enroll_fragment';
 
 interface BeatsPageProps extends URLStateProps<AppURLState> {
@@ -35,20 +36,29 @@ interface BeatsPageProps extends URLStateProps<AppURLState> {
   location: any;
   beats: CMPopulatedBeat[];
   loadBeats: () => any;
+  renderAction: (area: JSX.Element) => void;
 }
 
 interface BeatsPageState {
   notifications: any[];
   tableRef: any;
-  tags: any[] | null;
-}
-
-interface ActionAreaProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
-  libs: FrontendLibs;
+  tags: BeatTag[] | null;
 }
 
 export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
-  public static ActionArea = (props: ActionAreaProps) => (
+  constructor(props: BeatsPageProps) {
+    super(props);
+
+    this.state = {
+      notifications: [],
+      tableRef: React.createRef(),
+      tags: null,
+    };
+
+    props.renderAction(this.renderActionArea());
+  }
+
+  public renderActionArea = () => (
     <React.Fragment>
       <EuiButtonEmpty
         onClick={() => {
@@ -66,17 +76,17 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         size="s"
         color="primary"
         onClick={async () => {
-          props.goTo(`/overview/beats/enroll`);
+          this.props.goTo(`/overview/beats/enroll`);
         }}
       >
         Enroll Beats
       </EuiButton>
 
-      {props.location.pathname === '/overview/beats/enroll' && (
+      {this.props.location.pathname === '/overview/beats/enroll' && (
         <EuiOverlayMask>
           <EuiModal
             onClose={() => {
-              props.goTo(`/overview/beats`);
+              this.props.goTo(`/overview/beats`);
             }}
             style={{ width: '640px' }}
           >
@@ -84,22 +94,13 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
               <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>
-              <EnrollBeatPage {...props} />
+              <EnrollBeatPage {...this.props} />
             </EuiModalBody>
           </EuiModal>
         </EuiOverlayMask>
       )}
     </React.Fragment>
   );
-  constructor(props: BeatsPageProps) {
-    super(props);
-
-    this.state = {
-      notifications: [],
-      tableRef: React.createRef(),
-      tags: null,
-    };
-  }
 
   public componentDidUpdate(prevProps: any) {
     if (this.props.location !== prevProps.location) {
@@ -108,112 +109,77 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   }
   public render() {
     return (
-      <div>
-        <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
-          {autocompleteProps => (
-            <Table
-              kueryBarProps={{
-                ...autocompleteProps,
-                filterQueryDraft: 'false', // todo
-                isValid: this.props.libs.elasticsearch.isKueryValid(
-                  this.props.urlState.beatsKBar || ''
-                ), // todo check if query converts to es query correctly
-                onChange: (value: any) => this.props.setUrlState({ beatsKBar: value }), // todo
-                onSubmit: () => null, // todo
-                value: this.props.urlState.beatsKBar || '',
-              }}
-              assignmentOptions={{
-                items: this.filterSelectedBeatTags(),
-                schema: beatsListAssignmentOptions,
-                type: 'assignment',
-                actionHandler: this.handleBeatsActions,
-              }}
-              items={sortBy(this.props.beats, 'id') || []}
-              ref={this.state.tableRef}
-              type={BeatsTableType}
+      <Subscribe to={[BeatsContainer]}>
+        {(beats: BeatsContainer) => (
+          <React.Fragment>
+            <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
+              {autocompleteProps => (
+                <Table
+                  kueryBarProps={{
+                    ...autocompleteProps,
+                    filterQueryDraft: 'false', // todo
+                    isValid: this.props.libs.elasticsearch.isKueryValid(
+                      this.props.urlState.beatsKBar || ''
+                    ), // todo check if query converts to es query correctly
+                    onChange: (value: any) => this.props.setUrlState({ beatsKBar: value }), // todo
+                    onSubmit: () => null, // todo
+                    value: this.props.urlState.beatsKBar || '',
+                  }}
+                  assignmentOptions={{
+                    items: this.filterTags(this.state.tags || []),
+                    schema: beatsListAssignmentOptions,
+                    type: 'assignment',
+                    actionHandler: (action: AssignmentActionType, payload: any) => {
+                      switch (action) {
+                        case AssignmentActionType.Assign:
+                          beats.toggleTagAssignment(payload, this.getSelectedBeats());
+                          break;
+                        case AssignmentActionType.Delete:
+                          beats.deactivate(this.getSelectedBeats());
+                          break;
+                        case AssignmentActionType.Reload:
+                          this.loadTags();
+                          break;
+                      }
+                    },
+                  }}
+                  items={sortBy(beats.state.list, 'id') || []}
+                  ref={this.state.tableRef}
+                  type={BeatsTableType}
+                />
+              )}
+            </WithKueryAutocompletion>
+            <EuiGlobalToastList
+              toasts={this.state.notifications}
+              dismissToast={() => this.setState({ notifications: [] })}
+              toastLifeTimeMs={5000}
             />
-          )}
-        </WithKueryAutocompletion>
-        <EuiGlobalToastList
-          toasts={this.state.notifications}
-          dismissToast={() => this.setState({ notifications: [] })}
-          toastLifeTimeMs={5000}
-        />
-      </div>
+          </React.Fragment>
+        )}
+      </Subscribe>
     );
   }
 
-  private handleBeatsActions = (action: AssignmentActionType, payload: any) => {
-    switch (action) {
-      case AssignmentActionType.Assign:
-        this.handleBeatTagAssignment(payload);
-        break;
-      case AssignmentActionType.Edit:
-        // TODO: navigate to edit page
-        break;
-      case AssignmentActionType.Delete:
-        this.deleteSelected();
-        break;
-      case AssignmentActionType.Reload:
-        this.loadTags();
-        break;
-    }
+  // private deleteSelected = async () => {
+  //   const selected = this.getSelectedBeats();
+  //   for (const beat of selected) {
+  //     await this.props.libs.beats.update(beat.id, { active: false });
+  //   }
 
-    this.props.loadBeats();
-  };
+  //   this.notifyBeatDisenrolled(selected);
 
-  private handleBeatTagAssignment = async (tagId: string) => {
-    const selected = this.getSelectedBeats();
-    if (selected.some(beat => beat.full_tags.some(({ id }) => id === tagId))) {
-      await this.removeTagsFromBeats(selected, tagId);
-    } else {
-      await this.assignTagsToBeats(selected, tagId);
-    }
-  };
-
-  private deleteSelected = async () => {
-    const selected = this.getSelectedBeats();
-    for (const beat of selected) {
-      await this.props.libs.beats.update(beat.id, { active: false });
-    }
-
-    this.notifyBeatDisenrolled(selected);
-
-    // because the compile code above has a very minor race condition, we wait,
-    // the max race condition time is really 10ms but doing 100 to be safe
-    setTimeout(async () => {
-      await this.props.loadBeats();
-    }, 100);
-  };
+  //   // because the compile code above has a very minor race condition, we wait,
+  //   // the max race condition time is really 10ms but doing 100 to be safe
+  //   setTimeout(async () => {
+  //     await this.props.loadBeats();
+  //   }, 100);
+  // };
 
   private loadTags = async () => {
     const tags = await this.props.libs.tags.getAll();
     this.setState({
       tags,
     });
-  };
-
-  private createBeatTagAssignments = (
-    beats: CMPopulatedBeat[],
-    tagId: string
-  ): BeatsTagAssignment[] => beats.map(({ id }) => ({ beatId: id, tag: tagId }));
-
-  private removeTagsFromBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
-    if (beats.length) {
-      const assignments = this.createBeatTagAssignments(beats, tagId);
-      await this.props.libs.beats.removeTagsFromBeats(assignments);
-      await this.refreshData();
-      this.notifyUpdatedTagAssociation('remove', assignments, tagId);
-    }
-  };
-
-  private assignTagsToBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
-    if (beats.length) {
-      const assignments = this.createBeatTagAssignments(beats, tagId);
-      await this.props.libs.beats.assignTagsToBeats(assignments);
-      await this.refreshData();
-      this.notifyUpdatedTagAssociation('add', assignments, tagId);
-    }
   };
 
   private notifyBeatDisenrolled = async (beats: CMPopulatedBeat[]) => {
@@ -265,12 +231,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     return null;
   };
 
-  private refreshData = async () => {
-    await this.loadTags();
-    await this.props.loadBeats();
-    this.state.tableRef.current.setSelection(this.getSelectedBeats());
-  };
-
   private getSelectedBeats = (): CMPopulatedBeat[] => {
     const selectedIds = this.state.tableRef.current.state.selection.map((beat: any) => beat.id);
     const beats: CMPopulatedBeat[] = [];
@@ -283,13 +243,10 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     return beats;
   };
 
-  private filterSelectedBeatTags = () => {
-    if (!this.state.tags) {
-      return [];
-    }
+  private filterTags = (tags: BeatTag[]) => {
     return this.selectedBeatConfigsRequireUniqueness()
-      ? this.state.tags.map(this.disableTagForUniquenessEnforcement)
-      : this.state.tags;
+      ? tags.map(this.disableTagForUniquenessEnforcement)
+      : tags;
   };
 
   private configBlocksRequireUniqueness = (configurationBlocks: ConfigurationBlock[]) =>

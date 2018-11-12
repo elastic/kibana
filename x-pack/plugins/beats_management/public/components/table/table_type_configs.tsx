@@ -9,7 +9,7 @@ import { first, sortBy, sortByOrder, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { ConnectedLink } from '../connected_link';
+import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
 export interface ColumnDefinition {

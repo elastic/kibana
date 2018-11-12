@@ -14,10 +14,10 @@ import {
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
-import { AppURLState } from '../../app';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { FrontendLibs } from '../../lib/lib';
+import { AppURLState } from '../../frontend_types';
+import { FrontendLibs } from '../../lib/types';
 import { BeatDetailsActionSection } from './action_section';
 import { BeatActivityPage } from './activity';
 import { BeatDetailPage } from './detail';

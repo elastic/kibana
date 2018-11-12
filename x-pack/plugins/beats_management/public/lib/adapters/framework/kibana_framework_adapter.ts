@@ -12,15 +12,12 @@ import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } f
 import { FrameworkAdapter, FrameworkInfo, FrameworkUser } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
-  public appState: object;
-
-  private management: any;
+  private xpackInfo: FrameworkInfo | null = null;
   private adapterService: KibanaAdapterServiceProvider;
   private rootComponent: React.ReactElement<any> | null = null;
   private uiModule: IModule;
   private routes: any;
   private XPackInfoProvider: any;
-  private xpackInfo: null | any;
   private chrome: any;
   private shieldUser: any;
 
@@ -42,6 +39,14 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   public get baseURLPath(): string {
     return this.chrome.getBasePath();
+  }
+
+  public get info() {
+    if (this.xpackInfo) {
+      return this.xpackInfo;
+    } else {
+      throw new Error('framework adapter must have renderUIAtPath called before anything else');
+    }
   }
 
   public setUISettings = (key: string, value: any) => {
@@ -138,7 +143,22 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       this.xpackInfo = xpackInfo;
       if (this.securityEnabled()) {
         try {
+<<<<<<< HEAD
           this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+=======
+          this.xpackInfo = {
+            basePath: this.chrome.getBasePath(),
+            license: {
+              type: xpackInfo.getLicense().type,
+              expired: !xpackInfo.getLicense().isActive,
+              expiry_date_in_millis: xpackInfo.getLicense().expiryDateInMillis,
+            },
+            security: {
+              enabled: xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false),
+              available: xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false),
+            },
+          };
+>>>>>>> d4729fb684... wip
         } catch (e) {
           // errors when security disabled, even though we check first because angular
         }
@@ -150,24 +170,34 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   private register = (adapterModule: IModule) => {
     const adapter = this;
-    this.routes.when(`/management/beats_management/:view?/:id?/:other?/:other2?`, {
-      template:
-        '<beats-cm><div id="beatsReactRoot" style="flex-grow: 1; height: 100vh; background: #f5f5f5"></div></beats-cm>',
-      controllerAs: 'beatsManagement',
-      // tslint:disable-next-line: max-classes-per-file
-      controller: class BeatsManagementController {
-        constructor($scope: any, $route: any) {
-          $scope.$$postDigest(() => {
-            const elem = document.getElementById('beatsReactRoot');
-            ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
-            adapter.manageAngularLifecycle($scope, $route, elem);
-          });
-          $scope.$onInit = () => {
-            $scope.topNavMenu = [];
-          };
-        }
-      },
-    });
+    this.routes.when(
+      `${path}${[...Array(50)].map(n => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
+      {
+        template: `<${this.PLUGIN_ID.replace('_', '-')}><div id="${this.PLUGIN_ID.replace(
+          '_',
+          ''
+        )}ReactRoot" style="flex-grow: 1; height: 100vh; background: #f5f5f5"></div></${this.PLUGIN_ID.replace(
+          '_',
+          '-'
+        )}>`,
+        controllerAs: this.PLUGIN_ID.replace('_', ''),
+        // tslint:disable-next-line: max-classes-per-file
+        controller: class KibanaFrameworkAdapterController {
+          constructor($scope: any, $route: any) {
+            $scope.$$postDigest(() => {
+              const elem = document.getElementById(
+                adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot'
+              );
+              ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
+              adapter.manageAngularLifecycle($scope, $route, elem);
+            });
+            $scope.$onInit = () => {
+              $scope.topNavMenu = [];
+            };
+          }
+        },
+      }
+    );
   };
 }
 

@@ -7,20 +7,18 @@
 import { get } from 'lodash';
 import React from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
-import { REQUIRED_LICENSES } from '../common/constants';
 import { Header } from './components/layouts/header';
-
+import { ChildRoutes } from './components/navigation/child_routes';
 import { BreadcrumbConsumer } from './components/route_with_breadcrumb';
 import { FrontendLibs } from './lib/types';
 import { RouteTreeBuilder } from './utils/page_loader';
 
 // @ts-ignore
 const requirePages = require.context('./pages', true, /\.tsx$/);
-const routeTreeBuilder = new RouteTreeBuilder();
+const routeTreeBuilder = new RouteTreeBuilder(requirePages);
 
 export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
-  const routesFromFilesystem = routeTreeBuilder.pathsToRouteTree(requirePages.keys(), requirePages);
-
+  const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys());
   return (
     <HashRouter basename="/management/beats_management">
       <div>
@@ -41,6 +39,16 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
             />
           )}
         </BreadcrumbConsumer>
+        {/* Redirects for errors/security */}
+        {get(libs.framework.info, 'license.expired', true) && (
+          <Route render={() => <Redirect to="/error/invalid_license" />} />
+        )}
+        {!get(libs.framework.info, 'security.enabled', false) && (
+          <Route render={() => <Redirect to="/error/enforce_security" />} />
+        )}
+        {!libs.framework.currentUserHasOneOfRoles(['beats_admin', 'superuser']) && (
+          <Route render={() => <Redirect to="/error/no_access" />} />
+        )}
         <Switch>
           {/* Redirects for errors/security */}
           {!REQUIRED_LICENSES.includes(get(libs, 'framework.info.license.type', 'oss')) && (
@@ -59,14 +67,7 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           <Route path="/" exact={true} render={() => <Redirect to="/overview/beats" />} />
 
           {/* Render routes from the FS */}
-          {routesFromFilesystem.length > 0 &&
-            routesFromFilesystem.map(route => (
-              <Route
-                key={route.path}
-                path={route.path}
-                render={props => <route.component {...props} routes={route.routes} libs={libs} />}
-              />
-            ))}
+          <ChildRoutes routes={routesFromFilesystem} {...{ libs }} useSwitch={false} />
         </Switch>
       </div>
     </HashRouter>

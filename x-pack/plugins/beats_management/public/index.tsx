@@ -7,21 +7,37 @@
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { Provider } from 'unstated';
 import { BASE_PATH } from '../common/constants';
 import { BreadcrumbProvider } from './components/route_with_breadcrumb';
+import { BeatsContainer } from './containers/beats';
 import { compose } from './lib/compose/kibana';
 import { FrontendLibs } from './lib/types';
 import { AppRouter } from './router';
-import './utils/page_loader';
+
 async function startApp(libs: FrontendLibs) {
   await libs.framework.renderUIAtPath(
     '/management/beats_management',
     <ThemeProvider theme={{ eui: euiVars }}>
-      <BreadcrumbProvider>
-        <AppRouter libs={libs} />
-      </BreadcrumbProvider>
+      <Provider inject={[new BeatsContainer(libs)]}>
+        <BreadcrumbProvider>
+          <AppRouter libs={libs} />
+        </BreadcrumbProvider>
+      </Provider>
     </ThemeProvider>
   );
+
+  if (libs.framework.licenseIsAtLeast('standard')) {
+    libs.framework.registerManagementSection({
+      name: 'Beats',
+      iconName: 'logoBeats',
+    });
+
+    libs.framework.registerManagementUI({
+      name: 'Central Management',
+      basePath: BASE_PATH,
+    });
+  }
 }
 
 startApp(compose());
