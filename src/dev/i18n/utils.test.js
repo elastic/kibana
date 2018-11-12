@@ -18,7 +18,7 @@
  */
 
 import { parse } from '@babel/parser';
-import { isExpressionStatement, isObjectExpression } from '@babel/types';
+import { isExpressionStatement, isObjectExpression, isObjectProperty } from '@babel/types';
 
 import {
   isI18nTranslateFunction,
@@ -28,6 +28,7 @@ import {
   checkValuesProperty,
   createParserErrorMessage,
   normalizePath,
+  extractMessageValueFromNode,
 } from './utils';
 
 const i18nTranslateSources = ['i18n', 'i18n.translate'].map(
@@ -157,5 +158,17 @@ describe('i18n utils', () => {
     expect(() =>
       checkValuesProperty(valuesKeys, defaultMessage, messageId)
     ).toThrowErrorMatchingSnapshot();
+  });
+
+  test(`should parse string concatenation`, () => {
+    const source = `
+i18n('namespace.id', {
+  defaultMessage: 'Very ' + 'long ' + 'concatenated ' + 'string',
+});`;
+    const objectProperty = [...traverseNodes(parse(source).program.body)].find(node =>
+      isObjectProperty(node)
+    );
+
+    expect(extractMessageValueFromNode(objectProperty.value)).toMatchSnapshot();
   });
 });

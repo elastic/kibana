@@ -15,6 +15,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
 >
   <EuiTitle
     size="l"
+    textTransform="none"
   >
     <h2
       className="euiTitle euiTitle--large"
@@ -32,9 +33,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   </EuiHorizontalRule>
   <EuiText
     grow={true}
+    size="m"
   >
     <div
-      className="euiText"
+      className="euiText euiText--medium"
     >
       <p>
         As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
@@ -74,6 +76,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   <Component>
     <EuiTitle
       size="l"
+      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -90,9 +93,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       >
         <EuiText
           grow={true}
+          size="m"
         >
           <div
-            className="euiText"
+            className="euiText euiText--medium"
           >
             <p>
               Monitoring provides insight to your hardware performance and load.
@@ -112,9 +116,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   </EuiHorizontalRule>
   <EuiText
     grow={true}
+    size="m"
   >
     <div
-      className="euiText"
+      className="euiText euiText--medium"
     >
       <p>
         We checked the 
@@ -253,6 +258,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   <Component>
     <EuiTitle
       size="l"
+      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -269,9 +275,10 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       >
         <EuiText
           grow={true}
+          size="m"
         >
           <div
-            className="euiText"
+            className="euiText euiText--medium"
           >
             <p>
               Monitoring provides insight to your hardware performance and load.
@@ -291,9 +298,10 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   </EuiHorizontalRule>
   <EuiText
     grow={true}
+    size="m"
   >
     <div
-      className="euiText"
+      className="euiText euiText--medium"
     >
       <p>
         We checked the 

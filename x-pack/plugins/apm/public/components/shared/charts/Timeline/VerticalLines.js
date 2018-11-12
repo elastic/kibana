@@ -43,9 +43,16 @@ class VerticalLines extends PureComponent {
           />
 
           <VerticalGridLines
-            tickValues={[...agentMarkTimes, traceRootDuration]}
+            tickValues={agentMarkTimes}
             style={{ stroke: colors.gray3 }}
           />
+
+          {traceRootDuration && (
+            <VerticalGridLines
+              tickValues={[traceRootDuration]}
+              style={{ stroke: colors.gray3 }}
+            />
+          )}
         </XYPlot>
       </div>
     );

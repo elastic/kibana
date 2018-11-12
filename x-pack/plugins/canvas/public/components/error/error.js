@@ -29,8 +29,5 @@ export const Error = ({ payload }) => {
 };
 
 Error.propTypes = {
-  payload: PropTypes.shape({
-    info: PropTypes.object.isRequired,
-    error: PropTypes.object.isRequired,
-  }).isRequired,
+  payload: PropTypes.object.isRequired,
 };
