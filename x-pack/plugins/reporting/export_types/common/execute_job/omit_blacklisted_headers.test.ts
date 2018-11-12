@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMockServer, omitBlacklistedHeaders } from './index';
+import { createMockServer } from '../../../test_helpers/create_mock_server';
+import { omitBlacklistedHeaders } from './index';
 
 let mockServer: any;
 beforeEach(() => {

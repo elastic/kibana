@@ -11,12 +11,8 @@ import { getAbsoluteUrlFactory } from './get_absolute_url';
 function getSavedObjectAbsoluteUrl(job: ReportingJob, relativeUrl: string, server: KbnServer) {
   const getAbsoluteUrl: any = getAbsoluteUrlFactory(server);
 
-  if (relativeUrl) {
-    const { pathname: path, hash, search } = url.parse(relativeUrl);
-    return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
-  }
-
-  throw new Error(`Unable to generate report. Url is not defined.`);
+  const { pathname: path, hash, search } = url.parse(relativeUrl);
+  return getAbsoluteUrl({ basePath: job.basePath, path, hash, search });
 }
 
 export const addForceNowQuerystring = async ({

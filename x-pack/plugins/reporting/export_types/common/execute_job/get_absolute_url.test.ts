@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createMockServer } from '../../../test_helpers/create_mock_server';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
-import { createMockServer } from './index';
 
 test(`by default it builds url using information from server.info.protocol and the server.config`, () => {
   const mockServer = createMockServer('');

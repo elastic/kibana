@@ -6,7 +6,8 @@
 
 // @ts-ignore
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { createMockServer, decryptJobHeaders } from './index';
+import { createMockServer } from '../../../test_helpers/create_mock_server';
+import { decryptJobHeaders } from './index';
 
 let mockServer: any;
 beforeEach(() => {

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { addForceNowQuerystring, createMockServer } from './index';
+import { createMockServer } from '../../../test_helpers/create_mock_server';
+import { addForceNowQuerystring } from './index';
 
 let mockServer: any;
 beforeEach(() => {
