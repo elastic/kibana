@@ -23,7 +23,8 @@ export class StaticDynamicStyleSelector extends React.Component {
     super();
     this._isMounted = false;
     this.state = {
-      ordinalFields: null
+      ordinalFields: null,
+      dynamic: false
     };
   }
 
@@ -41,6 +42,21 @@ export class StaticDynamicStyleSelector extends React.Component {
   componentDidMount() {
     this._isMounted = true;
     this._loadOrdinalFields();
+    this.setState({
+      dynamic: this._isDynamic()
+    });
+  }
+
+  componentDidUpdate() {
+    const dynamic = this._isDynamic();
+    if (this.state.dynamic !== dynamic) {
+      this.setState({
+        dynamic
+      });
+    }
+    if (dynamic) {
+      this._loadOrdinalFields();
+    }
   }
 
   async _loadOrdinalFields() {
@@ -83,9 +99,9 @@ export class StaticDynamicStyleSelector extends React.Component {
 
     let styleSelector;
     const currentOptions = _.get(this.props, 'colorStyleDescriptor.options', null);
-    if (this._isDynamic()) {
+    if (this.state.dynamic) {
       this._lastDynamicOptions = currentOptions;
-      if (this.state.ordinalFields !== null) {
+      if (this.state.ordinalFields && this.state.ordinalFields.length) {
         const Selector = this.props.DynamicSelector;
         styleSelector = (<Selector
           fields={this.state.ordinalFields}
@@ -112,7 +128,7 @@ export class StaticDynamicStyleSelector extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={'Dynamic?'}
-              checked={this._isDynamic()}
+              checked={this.state.dynamic}
               onChange={onTypeToggle}
             />
           </EuiFlexItem>
