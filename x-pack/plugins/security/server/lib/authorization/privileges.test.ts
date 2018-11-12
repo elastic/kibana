@@ -43,6 +43,7 @@ test(`snapshot test`, () => {
       id: 'foo',
       name: 'Foo',
       icon: 'arrowDown',
+      navlinkId: 'kibana:foo',
       privileges: {
         all: {
           app: ['foo'],

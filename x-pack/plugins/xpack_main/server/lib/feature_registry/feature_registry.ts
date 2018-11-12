@@ -23,6 +23,7 @@ export interface Feature {
   validLicenses?: Array<'basic' | 'gold' | 'platinum'>;
   icon?: IconType;
   description?: string;
+  navlinkId?: string;
   privileges: {
     [key: string]: PrivilegeDefinition;
   };

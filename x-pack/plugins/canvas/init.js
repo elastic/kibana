@@ -31,6 +31,7 @@ export default async function(server /*options*/) {
     id: 'canvas',
     name: 'Canvas',
     icon: 'canvasApp',
+    navLinkId: 'canvas',
     privileges: {
       all: {
         app: ['canvas'],
@@ -38,7 +39,7 @@ export default async function(server /*options*/) {
           all: ['canvas'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['canvas'],
+        ui: [],
       },
       read: {
         app: ['canvas'],
@@ -46,7 +47,7 @@ export default async function(server /*options*/) {
           all: [],
           read: ['config', 'index-pattern', 'canvas'],
         },
-        ui: ['canvas'],
+        ui: [],
       },
     },
   });

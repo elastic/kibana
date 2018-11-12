@@ -54,6 +54,7 @@ export function graph(kibana) {
         id: 'graph',
         name: 'Graph',
         icon: 'graphApp',
+        navLinkId: 'graph',
         privileges: {
           all: {
             api: [],
@@ -62,7 +63,7 @@ export function graph(kibana) {
               all: [],
               read: ['config', 'index-pattern'],
             },
-            ui: ['graph'],
+            ui: [],
           },
           read: {
             api: [],

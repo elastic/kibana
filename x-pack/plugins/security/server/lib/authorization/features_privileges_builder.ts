@@ -41,6 +41,7 @@ export class FeaturesPrivilegesBuilder {
           ? privilegeDefinition.api.map(api => this.actions.api.get(api))
           : []),
         ...privilegeDefinition.app.map(appId => this.actions.app.get(appId)),
+        ...(feature.navlinkId ? [this.actions.navlink.get(feature.navlinkId)] : []),
         ...flatten(
           privilegeDefinition.savedObject.all.map(types =>
             this.actions.savedObject.allOperations(types)

@@ -58,6 +58,7 @@ export const init = (monitoringPlugin, server) => {
     id: 'monitoring',
     name: 'Monitoring',
     icon: 'monitoringApp',
+    navLinkId: 'monitoring',
     privileges: {
       all: {
         api: [],
@@ -66,7 +67,7 @@ export const init = (monitoringPlugin, server) => {
           all: [],
           read: ['config'],
         },
-        ui: ['monitoring'],
+        ui: [],
       },
     }
   });

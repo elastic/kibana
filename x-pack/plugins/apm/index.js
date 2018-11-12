@@ -58,6 +58,7 @@ export function apm(kibana) {
         id: 'apm',
         name: 'APM',
         icon: 'apmApp',
+        navLinkId: 'apm',
         privileges: {
           all: {
             app: ['apm'],
@@ -65,7 +66,7 @@ export function apm(kibana) {
               all: [],
               read: []
             },
-            ui: ['apm']
+            ui: []
           }
         }
       });

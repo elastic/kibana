@@ -11,6 +11,7 @@ const kibanaFeatures: Feature[] = [
     id: 'discover',
     name: 'Discover',
     icon: 'discoverApp',
+    navlinkId: 'kibana:discover',
     privileges: {
       all: {
         app: ['kibana'],
@@ -26,7 +27,7 @@ const kibanaFeatures: Feature[] = [
           all: [],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: ['kibana:discover'],
+        ui: [],
       },
     },
   },
@@ -34,6 +35,7 @@ const kibanaFeatures: Feature[] = [
     id: 'visualize',
     name: 'Visualize',
     icon: 'visualizeApp',
+    navlinkId: 'kibana:visualize',
     privileges: {
       all: {
         app: ['kibana'],
@@ -49,7 +51,7 @@ const kibanaFeatures: Feature[] = [
           all: [],
           read: ['config', 'index-pattern', 'search', 'visualization'],
         },
-        ui: ['kibana:visualize'],
+        ui: [],
       },
     },
   },
@@ -57,6 +59,7 @@ const kibanaFeatures: Feature[] = [
     id: 'dashboard',
     name: 'Dashboard',
     icon: 'dashboardApp',
+    navlinkId: 'kibana:dashboard',
     privileges: {
       all: {
         app: ['kibana'],
@@ -80,7 +83,7 @@ const kibanaFeatures: Feature[] = [
             'dashboard',
           ],
         },
-        ui: ['kibana:dashboard'],
+        ui: [],
       },
     },
   },
@@ -88,6 +91,7 @@ const kibanaFeatures: Feature[] = [
     id: 'dev_tools',
     name: 'Dev Tools',
     icon: 'devToolsApp',
+    navlinkId: 'kibana:dev_tools',
     privileges: {
       all: {
         api: ['console/execute'],
@@ -96,32 +100,24 @@ const kibanaFeatures: Feature[] = [
           all: [],
           read: ['config'],
         },
-        ui: ['kibana:dev_tools'],
+        ui: [],
       },
     },
   },
   {
-    id: 'management',
-    name: 'Management',
+    id: 'advancedSettings',
+    name: 'Advanced Settings',
     icon: 'managementApp',
+    navlinkId: 'kibana:management:advancedSettings',
     privileges: {
       advancedSettings_all: {
-        api: [],
-        app: ['kibana'],
-        savedObject: {
-          all: [],
-          read: ['config'],
-        },
-        ui: ['kibana:management:advancedSettings'],
-      },
-      advancedSettings_read: {
         api: [],
         app: ['kibana'],
         savedObject: {
           all: ['config'],
           read: [],
         },
-        ui: ['kibana:management:advancedSettings'],
+        ui: [],
       },
     },
   },
@@ -132,6 +128,7 @@ const timelionFeatures: Feature[] = [
     id: 'timelion',
     name: 'Timelion',
     icon: 'timelionApp',
+    navlinkId: 'timelion',
     privileges: {
       all: {
         app: ['timelion'],
@@ -139,7 +136,7 @@ const timelionFeatures: Feature[] = [
           all: ['timelion'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['timelion'],
+        ui: [],
       },
       read: {
         app: ['timelion'],
@@ -147,7 +144,7 @@ const timelionFeatures: Feature[] = [
           all: [],
           read: ['config', 'index-pattern', 'timelion'],
         },
-        ui: ['timelion'],
+        ui: [],
       },
     },
   },

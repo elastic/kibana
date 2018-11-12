@@ -67,6 +67,7 @@ export const ml = (kibana) => {
         id: 'ml',
         name: 'Machine Learning',
         icon: 'mlApp',
+        navLinkId: 'ml',
         privileges: {
           all: {
             api: [],
@@ -75,7 +76,7 @@ export const ml = (kibana) => {
               all: [],
               read: [],
             },
-            ui: ['ml'],
+            ui: [],
           },
         }
       });
