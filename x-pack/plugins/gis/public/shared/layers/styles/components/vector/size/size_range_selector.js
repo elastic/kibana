@@ -4,70 +4,70 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import {
-  EuiComboBox,
-  EuiSuperSelect,
-  EuiSpacer
+// EuiFormRow,
+// EuiFlexGroup,
+// EuiFlexItem,
+// EuiRange
 } from '@elastic/eui';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { ColorGradient } from '../../../../../icons/color_gradient';
-
-
-const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorKey => ({
-  value: colorKey,
-  text: colorKey,
-  inputDisplay: <ColorGradient color={colorKey}/>
-}));
 
 
 export class SizeRangeSelector extends React.Component {
 
   constructor() {
     super();
-    this.state = {
-      selectedColorRamp: null
-    };
   }
 
-  _onColorRampSelected = (selectedColorRampString = null) => {
-    this.setState({
-      selectedColorRamp: selectedColorRampString
-    });
-    this.props.onChange({
-      color: selectedColorRampString
-    });
-    // const { comboBoxOptions } = this.state;
-    // if (comboBoxOptions && comboBoxOptions.length && selectedColorRampString) {
-    //   this.props.onChange({
-    //     field: comboBoxOptions[0] ? comboBoxOptions[0].value : undefined,
-    //     color: selectedColorRampString
-    //   });
-    // }
+  _onMinSizeChange = () => {
+    console.warn('must implement');
   };
 
-  _getColorRampFromPropsAndState() {
-    if (this.state.selectedColorRamp) {
-      return this.state.selectedColorRamp;
-    }
-    if (this.props.selectedOptions && this.props.selectedOptions.color) {
-      return this.props.selectedOptions.color;
-    } else {
-      return null;
-    }
-  }
-
+  _onMaxSizeChange = () => {
+    console.warn('must implement');
+  };
 
   render() {
-    const selectedColorRamp = this._getColorRampFromPropsAndState();
-    return (
-      <EuiSuperSelect
-        options={COLOR_GRADIENTS}
-        onChange={this._onColorRampSelected}
-        valueOfSelected={selectedColorRamp}
-        hasDividers={true}
-      />);
+
+
+    return (<div>todo</div>);
+    //
+    // const minSize = (this.props.selectedOptions && typeof this.props.selectedOptions.minSize === 'number') ? this.props.selectedOptions.minSize : 0;
+    // const maxSize = (this.props.selectedOptions && typeof this.props.selectedOptions.maxSize === 'number') ? this.props.selectedOptions.maxSize : 100;
+    //
+    // return (<EuiFormRow>
+    //   <EuiFlexGroup>
+    //     <EuiFlexItem>
+    //       <EuiFormRow
+    //         label="Min size"
+    //         compressed
+    //       >
+    //         <EuiRange
+    //           min={0}
+    //           max={100}
+    //           value={minSize.toString()}
+    //           onChange={this._onMinZoomChange}
+    //           showInput
+    //         />
+    //       </EuiFormRow>
+    //     </EuiFlexItem>
+    //     <EuiFlexItem>
+    //       <EuiFormRow
+    //         label="Max size"
+    //         compressed
+    //       >
+    //         <EuiRange
+    //           min={0}
+    //           max={100}
+    //           value={maxSize.toString()}
+    //           onChange={this._onMaxZoomChange}
+    //           showInput
+    //         />
+    //       </EuiFormRow>
+    //     </EuiFlexItem>
+    //   </EuiFlexGroup>
+    // </EuiFormRow>);
   }
 
 }

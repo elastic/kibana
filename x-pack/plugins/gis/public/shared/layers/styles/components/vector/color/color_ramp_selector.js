@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import {
-  EuiComboBox,
-  EuiSuperSelect,
-  EuiSpacer
+  EuiSuperSelect
 } from '@elastic/eui';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { ColorGradient } from '../../../../../icons/color_gradient';
@@ -38,13 +36,6 @@ export class ColorRampSelector extends React.Component {
     this.props.onChange({
       color: selectedColorRampString
     });
-    // const { comboBoxOptions } = this.state;
-    // if (comboBoxOptions && comboBoxOptions.length && selectedColorRampString) {
-    //   this.props.onChange({
-    //     field: comboBoxOptions[0] ? comboBoxOptions[0].value : undefined,
-    //     color: selectedColorRampString
-    //   });
-    // }
   };
 
   _getColorRampFromPropsAndState() {
@@ -67,7 +58,7 @@ export class ColorRampSelector extends React.Component {
         onChange={this._onColorRampSelected}
         valueOfSelected={selectedColorRamp}
         hasDividers={true}
-    />);
+      />);
   }
 
 }

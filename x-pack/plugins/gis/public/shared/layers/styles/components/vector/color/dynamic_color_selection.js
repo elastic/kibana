@@ -5,15 +5,10 @@
  */
 
 import React from 'react';
-
 import { DynamicOrdinalStyleOption } from '../../dynamic_ordinal_styling_option';
 import { ColorRampSelector } from './color_ramp_selector';
 
 export class DynamicColorSelection extends React.Component {
-
-  constructor() {
-    super();
-  }
 
   render() {
     return (
