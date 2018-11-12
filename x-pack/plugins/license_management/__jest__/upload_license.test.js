@@ -86,7 +86,6 @@ describe('UploadLicense', () => {
       services
     );
     const rendered = mountWithIntl(component);
-    console.log(rendered.debug());
     expect(rendered).toMatchSnapshot();
   });
   it('should refresh xpack info and navigate to BASE_PATH when ES accepts new license', async () => {
