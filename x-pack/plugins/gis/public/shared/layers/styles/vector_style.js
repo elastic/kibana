@@ -143,7 +143,7 @@ export class VectorStyle {
   })();
 
   getColorRamp() {
-    const { color } = this._descriptor.properties.fillColor.options;
+    const color = _.get(this._descriptor, 'properties.fillColor.options.color');
     return color && this._isPropertyDynamic('fillColor')
       ? <ColorGradient color={color}/>
       : null;

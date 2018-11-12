@@ -50,12 +50,12 @@ export function StickyTransactionProperties({
     {
       label: 'Duration',
       fieldName: TRANSACTION_DURATION,
-      val: duration ? asTime(duration) : 'N/A',
+      val: asTime(duration),
       width: '25%'
     },
     {
       label: '% of trace',
-      val: asPercent(duration, totalDuration),
+      val: asPercent(duration, totalDuration, 'N/A'),
       width: '25%'
     },
     {

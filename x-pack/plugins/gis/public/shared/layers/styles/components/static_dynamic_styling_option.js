@@ -19,13 +19,13 @@ import {
 
 export class StaticDynamicStyleSelector extends React.Component {
 
-
   constructor() {
     super();
     this._isMounted = false;
     this.state = {
-      styleDescriptor: VectorStyle.STYLE_TYPE.STATIC,
-      ordinalFields: null
+      ordinalFields: null,
+      dynamic: false,
+      styleDescriptor: VectorStyle.STYLE_TYPE.STATIC
     };
   }
 
@@ -43,6 +43,21 @@ export class StaticDynamicStyleSelector extends React.Component {
   componentDidMount() {
     this._isMounted = true;
     this._loadOrdinalFields();
+    this.setState({
+      dynamic: this._isDynamic()
+    });
+  }
+
+  componentDidUpdate() {
+    const dynamic = this._isDynamic();
+    if (this.state.dynamic !== dynamic) {
+      this.setState({
+        dynamic
+      });
+    }
+    if (dynamic) {
+      this._loadOrdinalFields();
+    }
   }
 
   async _loadOrdinalFields() {
@@ -54,7 +69,7 @@ export class StaticDynamicStyleSelector extends React.Component {
     const eqls = _.isEqual(ordinalFields, this.state.ordinalFields);
     if (!eqls) {
       this.setState({
-        ordinalFields: ordinalFields
+        ordinalFields
       });
     }
   }
@@ -84,10 +99,10 @@ export class StaticDynamicStyleSelector extends React.Component {
     };
 
     let styleSelector;
-    const currentOptions = (this.props.styleDescriptor && this.props.styleDescriptor.options) ? this.props.styleDescriptor.options : null;
-    if (this._isDynamic()) {
+    const currentOptions = _.get(this.props, 'styleDescriptor.options', null);
+    if (this.state.dynamic) {
       this._lastDynamicOptions = currentOptions;
-      if (this.state.ordinalFields !== null) {
+      if (this.state.ordinalFields && this.state.ordinalFields.length) {
         const Selector = this.props.DynamicSelector;
         styleSelector = (<Selector
           fields={this.state.ordinalFields}
@@ -114,7 +129,7 @@ export class StaticDynamicStyleSelector extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={'Dynamic?'}
-              checked={this._isDynamic()}
+              checked={this.state.dynamic}
               onChange={onTypeToggle}
             />
           </EuiFlexItem>
