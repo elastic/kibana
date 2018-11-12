@@ -14,11 +14,7 @@ export async function logConfiguration(config, log) {
   log(`Browser type: ${browserType}`);
 
   if (browserType === 'chromium') {
-    log(
-      `Chromium sandbox disabled: ${config.get(
-        'xpack.reporting.capture.browser.chromium.disableSandbox'
-      )}`
-    );
+    log(`Chromium sandbox disabled: ${config.get('xpack.reporting.capture.browser.chromium.disableSandbox')}`);
   }
 
   const os = await getos();
