@@ -71,18 +71,13 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
       <>
         {hoveredPosition ? (
           <SearchMarkerTooltip markerPosition={hoveredPosition}>
-            {bucket.count}
-            {bucket.count === 1 ? (
-              <FormattedMessage
-                id="xpack.infra.logs.searchResultTitle"
-                defaultMessage="search result"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.infra.logs.searchResultsTitle"
-                defaultMessage="search results"
-              />
-            )}
+            <FormattedMessage
+              id="xpack.infra.logs.searchResultTooltip"
+              defaultMessage="{bucketCount, plural, one {# search result} other {# search results}}"
+              values={{
+                bucketCount: bucket.count,
+              }}
+            />
           </SearchMarkerTooltip>
         ) : null}
         <SearchMarkerGroup

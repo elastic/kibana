@@ -38,7 +38,7 @@ export class LogTextStreamEmptyView extends React.PureComponent<LogTextStreamEmp
         actions={
           <EuiButton iconType="refresh" color="primary" fill onClick={reload}>
             <FormattedMessage
-              id="xpack.infra.logs.emptyView.noLogMessageButtonLabel"
+              id="xpack.infra.logs.emptyView.checkForNewDataButtonLabel"
               defaultMessage="Check for new data"
             />
           </EuiButton>

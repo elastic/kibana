@@ -50,12 +50,16 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
           {lastStreamingUpdate ? (
             <ProgressMessage>
               <EuiText color="subdued">
-                <EuiIcon type="clock" />
                 <FormattedMessage
-                  id="xpack.infra.logs.lastUpdateText"
-                  defaultMessage="last updated "
+                  id="xpack.infra.logs.lastStreamingUpdateText"
+                  defaultMessage="{clockIcon} last updated {lastUpdateTime} ago"
+                  values={{
+                    clockIcon: <EuiIcon type="clock" />,
+                    lastUpdateTime: (
+                      <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} />
+                    ),
+                  }}
                 />
-                <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} /> ago
               </EuiText>
             </ProgressMessage>
           ) : null}
