@@ -267,7 +267,7 @@ export class VectorStyle {
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', 0);
     }
 
-    if (this._descriptor.properties.lineWidth) {
+    if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options) {
       mbMap.setPaintProperty(lineLayerId, 'line-width', this._descriptor.properties.lineWidth.options.size);
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
@@ -292,12 +292,12 @@ export class VectorStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', null);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
     }
-    if (this._descriptor.properties.lineWidth) {
+    if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options) {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', this._descriptor.properties.lineWidth.options.size);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', 0);
     }
-    if (this._descriptor.properties.iconSize) {
+    if (this._descriptor.properties.iconSize && this._descriptor.properties.iconSize.options) {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', this._descriptor.properties.iconSize.options.size);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
