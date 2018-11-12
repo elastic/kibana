@@ -1,0 +1,6 @@
+JOB:
+  - selenium
+  - intake
+
+# `~` is yaml for `null`
+exclude: ~
