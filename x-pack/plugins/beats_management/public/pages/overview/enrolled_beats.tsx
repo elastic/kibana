@@ -25,6 +25,7 @@ import { BeatsTableType, Table } from '../../components/table';
 import { beatsListAssignmentOptions } from '../../components/table/assignment_schema';
 import { AssignmentActionType } from '../../components/table/table';
 import { BeatsContainer } from '../../containers/beats';
+import { TagsContainer } from '../../containers/tags';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { URLStateProps } from '../../containers/with_url_state';
 import { AppURLState } from '../../frontend_types';
@@ -109,8 +110,8 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   }
   public render() {
     return (
-      <Subscribe to={[BeatsContainer]}>
-        {(beats: BeatsContainer) => (
+      <Subscribe to={[BeatsContainer, TagsContainer]}>
+        {(beats: BeatsContainer, tags: TagsContainer) => (
           <React.Fragment>
             <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
               {autocompleteProps => (
@@ -126,7 +127,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
                     value: this.props.urlState.beatsKBar || '',
                   }}
                   assignmentOptions={{
-                    items: this.filterTags(this.state.tags || []),
+                    items: this.filterTags(tags.state.list),
                     schema: beatsListAssignmentOptions,
                     type: 'assignment',
                     actionHandler: (action: AssignmentActionType, payload: any) => {
@@ -138,7 +139,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
                           beats.deactivate(this.getSelectedBeats());
                           break;
                         case AssignmentActionType.Reload:
-                          this.loadTags();
+                          tags.reload();
                           break;
                       }
                     },
@@ -174,13 +175,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
   //     await this.props.loadBeats();
   //   }, 100);
   // };
-
-  private loadTags = async () => {
-    const tags = await this.props.libs.tags.getAll();
-    this.setState({
-      tags,
-    });
-  };
 
   private notifyBeatDisenrolled = async (beats: CMPopulatedBeat[]) => {
     let title;

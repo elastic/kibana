@@ -11,6 +11,7 @@ import { Provider } from 'unstated';
 import { BASE_PATH } from '../common/constants';
 import { BreadcrumbProvider } from './components/route_with_breadcrumb';
 import { BeatsContainer } from './containers/beats';
+import { TagsContainer } from './containers/tags';
 import { compose } from './lib/compose/kibana';
 import { FrontendLibs } from './lib/types';
 import { AppRouter } from './router';
@@ -19,7 +20,7 @@ async function startApp(libs: FrontendLibs) {
   await libs.framework.renderUIAtPath(
     '/management/beats_management',
     <ThemeProvider theme={{ eui: euiVars }}>
-      <Provider inject={[new BeatsContainer(libs)]}>
+      <Provider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
         <BreadcrumbProvider>
           <AppRouter libs={libs} />
         </BreadcrumbProvider>
