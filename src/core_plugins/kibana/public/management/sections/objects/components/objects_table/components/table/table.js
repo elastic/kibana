@@ -27,7 +27,8 @@ import {
   EuiIcon,
   EuiLink,
   EuiSpacer,
-  EuiToolTip
+  EuiToolTip,
+  EuiFormErrorText
 } from '@elastic/eui';
 import { getSavedObjectLabel, getSavedObjectIcon } from '../../../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -63,6 +64,7 @@ class TableUI extends PureComponent {
 
   state = {
     isSearchTextValid: true,
+    parseErrorMessage: null,
   }
 
   onChange = ({ query, error }) => {
@@ -204,20 +206,20 @@ class TableUI extends PureComponent {
     let queryParseError;
     if (!this.state.isSearchTextValid) {
       const parseErrorMsg = intl.formatMessage({
-        id: 'kbn.management.objects.objectsTable.table.searchBarUnableToParseQuery',
+        id: 'kbn.management.objects.objectsTable.searchBar.unableToParseQueryErrorMessage',
         defaultMessage: 'Unable to parse query',
       });
       queryParseError = (
-        <div className="euiFormErrorText euiFormRow__text">
+        <EuiFormErrorText>
           {`${parseErrorMsg}. ${this.state.parseErrorMessage}`}
-        </div>
+        </EuiFormErrorText>
       );
     }
 
     return (
       <Fragment>
         <EuiSearchBar
-          box={{ ['data-test-subj']: 'savedObjectSearchBar' }}
+          box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters}
           onChange={this.onChange}
           toolsRight={[

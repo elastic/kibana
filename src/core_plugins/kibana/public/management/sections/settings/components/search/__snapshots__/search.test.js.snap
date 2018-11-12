@@ -6,6 +6,7 @@ exports[`Search should render normally 1`] = `
     box={
       Object {
         "aria-label": "Search advanced settings",
+        "data-test-subj": "settingsSearchBar",
         "incremental": true,
       }
     }

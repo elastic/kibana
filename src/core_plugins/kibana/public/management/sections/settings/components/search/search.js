@@ -23,6 +23,7 @@ import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiSearchBar,
+  EuiFormErrorText,
 } from '@elastic/eui';
 
 import { getCategoryName } from '../../lib';
@@ -48,6 +49,7 @@ class SearchUI extends PureComponent {
 
   state = {
     isSearchTextValid: true,
+    parseErrorMessage: null,
   }
 
   onChange = ({ query, error }) => {
@@ -71,6 +73,7 @@ class SearchUI extends PureComponent {
 
     const box = {
       incremental: true,
+      'data-test-subj': 'settingsSearchBar',
       'aria-label': intl.formatMessage({
         id: 'kbn.management.settings.searchBarAriaLabel',
         defaultMessage: 'Search advanced settings',
@@ -94,13 +97,13 @@ class SearchUI extends PureComponent {
     let queryParseError;
     if (!this.state.isSearchTextValid) {
       const parseErrorMsg = intl.formatMessage({
-        id: 'kbn.management.settings.searchBarUnableToParseQuery',
+        id: 'kbn.management.settings.searchBar.unableToParseQueryErrorMessage',
         defaultMessage: 'Unable to parse query',
       });
       queryParseError = (
-        <div className="euiFormErrorText euiFormRow__text">
+        <EuiFormErrorText>
           {`${parseErrorMsg}. ${this.state.parseErrorMessage}`}
-        </div>
+        </EuiFormErrorText>
       );
     }
 
