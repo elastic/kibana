@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import { INDEX_OPEN } from '../../../../../common/constants';
+import { getActionExtensions } from '../../../../index_management_extensions';
 
 class IndexActionsContextMenuUi extends Component {
   constructor(props) {
@@ -46,6 +47,8 @@ class IndexActionsContextMenuUi extends Component {
       detailPanel,
       indexNames,
       indexStatusByName,
+      performExtensionAction,
+      indices,
       intl
     } = this.props;
     const allOpen = all(indexNames, indexName => {
@@ -173,6 +176,22 @@ class IndexActionsContextMenuUi extends Component {
         this.closePopover();
         this.openDeleteConfirmationModal();
       }
+    });
+    getActionExtensions().forEach((actionExtension) => {
+      const actionExtensionDefinition = actionExtension(indices);
+      if (actionExtensionDefinition) {
+        const { buttonLabel, requestMethod, successMessage } = actionExtensionDefinition;
+        items.push({
+          name: buttonLabel,
+          icon: <EuiIcon type="indexFlush" />,
+          onClick: () => {
+            this.closePopoverAndExecute(() => performExtensionAction(requestMethod, successMessage));
+          }
+        }
+
+        );
+      }
+      performExtensionAction;
     });
     items.forEach(item => {
       item['data-test-subj'] = 'indexTableContextMenuButton';

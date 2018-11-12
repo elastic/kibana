@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Pager } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
@@ -16,6 +15,10 @@ export const getDetailPanelType = (state) => state.detailPanel.panelType;
 export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
 export const getDetailPanelIndexName = (state) => state.detailPanel.indexName;
 export const getIndices = (state) => state.indices.byId;
+export const getIndicesByName = (state, indexNames) => {
+  const indices = getIndices(state);
+  return indexNames.map((indexName) => indices[indexName]);
+};
 export const getIndexByIndexName = (state, name) => getIndices(state)[name];
 export const getFilteredIds = (state) => state.indices.filteredIds;
 export const getRowStatuses = (state) => state.rowStatus;
@@ -27,6 +30,7 @@ export const getIndexStatusByIndexName = (state, indexName) => {
   const { status } = indices[indexName] || {};
   return status;
 };
+const defaultFilterFields = ['name', 'uuid'];
 const getFilteredIndices = createSelector(
   getIndices,
   getRowStatuses,
@@ -36,7 +40,14 @@ const getFilteredIndices = createSelector(
     const systemFilteredIndexes = tableState.showSystemIndices
       ? indexArray
       : indexArray.filter(index => !(index.name + '').startsWith('.'));
-    return filterItems(['name', 'uuid'], tableState.filter, systemFilteredIndexes);
+    let filter = tableState.filter;
+    let fields = defaultFilterFields;
+    if (filter.includes(':')) {
+      const splitFilter = filter.split(':');
+      fields = [ splitFilter[0]];
+      filter = splitFilter[1];
+    }
+    return filterItems(fields, filter, systemFilteredIndexes);
   }
 );
 export const getTotalItems = createSelector(

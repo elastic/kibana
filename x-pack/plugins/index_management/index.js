@@ -11,7 +11,7 @@ import { registerSettingsRoutes } from './server/routes/api/settings';
 import { registerStatsRoute } from './server/routes/api/stats';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN } from './common/constants';
-
+import { addIndexManagementDataEnricher } from "./index_management_data";
 export function indexManagement(kibana)  {
   return new kibana.Plugin({
     id: PLUGIN.ID,
@@ -21,9 +21,16 @@ export function indexManagement(kibana)  {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: [
         'plugins/index_management',
-      ]
+      ],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          indexManagementUiEnabled: config.get(`${PLUGIN.ID}.enabled`)
+        };
+      },
     },
     init: function (server) {
+      server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
       registerLicenseChecker(server);
       registerIndicesRoutes(server);
       registerSettingsRoutes(server);

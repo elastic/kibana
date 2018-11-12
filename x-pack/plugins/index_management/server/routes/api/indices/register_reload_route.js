@@ -8,6 +8,7 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { getIndexManagementDataEnrichers } from '../../../../index_management_data';
 import { fetchAliases } from './fetch_aliases';
 
 function getIndexNamesFromPayload(payload) {
@@ -55,7 +56,12 @@ export function registerReloadRoute(server) {
       try {
         const indices = await fetchIndices(callWithRequest, indexNames);
         const aliases = await fetchAliases(callWithRequest);
-        const response = formatHits(indices, aliases);
+        let response = formatHits(indices, aliases);
+        const dataEnrichers = getIndexManagementDataEnrichers();
+        for (let i = 0; i < dataEnrichers.length; i++) {
+          const dataEnricher = dataEnrichers[i];
+          response = await dataEnricher(response, callWithRequest);
+        }
         return response;
       } catch (err) {
         if (isEsError(err)) {

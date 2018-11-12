@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { i18n }  from '@kbn/i18n';
+import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { NoMatch } from '../../../no_match';
@@ -14,6 +14,8 @@ import { healthToColor } from '../../../../services';
 import '../../../../styles/table.less';
 
 import {
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiHealth,
   EuiLink,
   EuiCheckbox,
@@ -35,10 +37,11 @@ import {
   EuiTitle,
   EuiText,
   EuiPageBody,
-  EuiPageContent
+  EuiPageContent,
 } from '@elastic/eui';
 
 import { IndexActionsContextMenu } from '../../components';
+import { getBannerExtensions } from '../../../../index_management_extensions';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -62,9 +65,6 @@ const HEADERS = {
   size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
     defaultMessage: 'Storage size',
   }),
-  primary_size: i18n.translate('xpack.idxMgmt.indexTable.headers.primaryStorageSizeHeader', {
-    defaultMessage: 'Primary storage size',
-  })
 };
 
 export class IndexTableUi extends Component {
@@ -90,7 +90,7 @@ export class IndexTableUi extends Component {
     super(props);
 
     this.state = {
-      selectedIndicesMap: {}
+      selectedIndicesMap: {},
     };
   }
 
@@ -112,7 +112,7 @@ export class IndexTableUi extends Component {
       selectedIndicesMap[name] = true;
     });
     this.setState({
-      selectedIndicesMap
+      selectedIndicesMap,
     });
   };
 
@@ -125,7 +125,7 @@ export class IndexTableUi extends Component {
         newMap[name] = true;
       }
       return {
-        selectedIndicesMap: newMap
+        selectedIndicesMap: newMap,
       };
     });
   };
@@ -136,9 +136,7 @@ export class IndexTableUi extends Component {
 
   areAllItemsSelected = () => {
     const { indices } = this.props;
-    const indexOfUnselectedItem = indices.findIndex(
-      index => !this.isItemSelected(index.name)
-    );
+    const indexOfUnselectedItem = indices.findIndex(index => !this.isItemSelected(index.name));
     return indexOfUnselectedItem === -1;
   };
 
@@ -196,16 +194,43 @@ export class IndexTableUi extends Component {
       );
     });
   }
-
+  renderBanners() {
+    const { indices = [], filterChanged } = this.props;
+    return getBannerExtensions().map(bannerExtension => {
+      const bannerData = bannerExtension(indices);
+      console.log(bannerData);
+      if (!bannerData) {
+        return null;
+      }
+      return (
+        <Fragment>
+          <EuiCallOut color={bannerData.type} size="m">
+            <EuiText grow={true}>{bannerData.message} {bannerData.filter ? (
+              <EuiButtonEmpty
+                onClick={() => {
+                  filterChanged(bannerData.filter);
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexTable.banner.showButtonText"
+                  defaultMessage="Show"
+                />
+              </EuiButtonEmpty>
+            ) : null}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
+    });
+  }
   buildRows() {
     const { indices = [], detailPanelIndexName } = this.props;
     return indices.map(index => {
       const { name } = index;
       return (
         <EuiTableRow
-          isSelected={
-            this.isItemSelected(name) || name === detailPanelIndexName
-          }
+          isSelected={this.isItemSelected(name) || name === detailPanelIndexName}
           key={`${name}-row`}
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
@@ -284,14 +309,17 @@ export class IndexTableUi extends Component {
                   id="checkboxShowSystemIndices"
                   checked={showSystemIndices}
                   onChange={event => showSystemIndicesChanged(event.target.checked)}
-                  label={<FormattedMessage
-                    id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                    defaultMessage="Include system indices"
-                  />}
+                  label={
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                      defaultMessage="Include system indices"
+                    />
+                  }
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer />
+            {this.renderBanners()}
             <EuiFlexGroup gutterSize="l" alignItems="center">
               {atLeastOneItemSelected ? (
                 <EuiFlexItem grow={false}>
@@ -316,18 +344,14 @@ export class IndexTableUi extends Component {
                     filterChanged(event.target.value);
                   }}
                   data-test-subj="indexTableFilterInput"
-                  placeholder={
-                    intl.formatMessage({
-                      id: 'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
-                      defaultMessage: 'Search',
-                    })
-                  }
-                  aria-label={
-                    intl.formatMessage({
-                      id: 'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
-                      defaultMessage: 'Search indices',
-                    })
-                  }
+                  placeholder={intl.formatMessage({
+                    id: 'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
+                    defaultMessage: 'Search',
+                  })}
+                  aria-label={intl.formatMessage({
+                    id: 'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
+                    defaultMessage: 'Search indices',
+                  })}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

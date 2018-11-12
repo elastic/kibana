@@ -15,11 +15,13 @@ import {
   openIndices,
   editIndexSettings,
   refreshIndices,
-  openDetailPanel
+  openDetailPanel,
+  performExtensionAction
 } from '../../../../store/actions';
 
 import {
-  getIndexStatusByIndexName
+  getIndexStatusByIndexName,
+  getIndicesByName
 } from '../../../../store/selectors';
 
 const mapStateToProps = (state, ownProps) => {
@@ -29,7 +31,8 @@ const mapStateToProps = (state, ownProps) => {
     indexStatusByName[indexName] = getIndexStatusByIndexName(state, indexName);
   });
   return {
-    indexStatusByName
+    indexStatusByName,
+    indices: getIndicesByName(state, indexNames)
   };
 };
 
@@ -73,6 +76,9 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     },
     deleteIndices: () => {
       dispatch(deleteIndices({ indexNames }));
+    },
+    performExtensionAction: (requestMethod, successMessage) => {
+      dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));
     }
   };
 };
