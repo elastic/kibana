@@ -5,19 +5,31 @@
  */
 
 import React from 'react';
+import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
+import { IApmService } from 'x-pack/plugins/apm/public/components/app/ServiceOverview/ServiceList';
 import { loadServiceList } from '../../services/rest/apm';
-import { Request } from 'react-redux-request';
+import { IReduxState } from '../rootReducer';
+import { IUrlParams } from '../urlParams';
+// @ts-ignore
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'serviceList';
-const INITIAL_DATA = [];
+const INITIAL_DATA: [] = [];
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
-export function getServiceList(state) {
+export function getServiceList(
+  state: IReduxState
+): RRRRenderResponse<IApmService[]> {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
-export function ServiceListRequest({ urlParams, render }) {
+export function ServiceListRequest({
+  urlParams,
+  render
+}: {
+  urlParams: IUrlParams;
+  render: RRRRender<IApmService[]>;
+}) {
   const { start, end, kuery } = urlParams;
 
   if (!(start && end)) {

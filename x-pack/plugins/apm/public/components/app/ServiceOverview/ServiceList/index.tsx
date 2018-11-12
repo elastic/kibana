@@ -4,16 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { RelativeLink } from '../../../../utils/url';
+import { IServiceListItemResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
-import TooltipOverlay from '../../../shared/TooltipOverlay';
-import { asMillis, asDecimal } from '../../../../utils/formatters';
+import { asDecimal, asMillis } from '../../../../utils/formatters';
+import { RelativeLink } from '../../../../utils/url';
 import { ManagedTable } from '../../../shared/ManagedTable';
 
-function formatNumber(value) {
+// TODO: Can we just use camelCase in the server to avoid this mismatch, and avoid
+// having to magically transform keys?
+export interface IApmService {
+  serviceName: IServiceListItemResponse['service_name'];
+  agentName: IServiceListItemResponse['agent_name'];
+  avgResponseTime: IServiceListItemResponse['avg_response_time'];
+  transactionsPerMinute: IServiceListItemResponse['transactions_per_minute'];
+  errorsPerMinute: IServiceListItemResponse['errors_per_minute'];
+}
+
+interface Props {
+  items: IApmService[];
+  noItemsMessage?: React.ReactNode;
+}
+
+function formatNumber(value: number) {
   if (value === 0) {
     return '0';
   } else if (value <= 0.1) {
@@ -23,7 +38,7 @@ function formatNumber(value) {
   }
 }
 
-function formatString(value) {
+function formatString(value?: string | null) {
   return value || 'N/A';
 }
 
@@ -38,44 +53,44 @@ const SERVICE_COLUMNS = [
     name: 'Name',
     width: '50%',
     sortable: true,
-    render: serviceName => (
-      <TooltipOverlay content={formatString(serviceName)}>
+    render: (serviceName: string) => (
+      <EuiToolTip content={formatString(serviceName)}>
         <AppLink path={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
-      </TooltipOverlay>
+      </EuiToolTip>
     )
   },
   {
     field: 'agentName',
     name: 'Agent',
     sortable: true,
-    render: agentName => formatString(agentName)
+    render: (agentName: string) => formatString(agentName)
   },
   {
     field: 'avgResponseTime',
     name: 'Avg. response time',
     sortable: true,
     dataType: 'number',
-    render: value => asMillis(value)
+    render: (value: number) => asMillis(value)
   },
   {
     field: 'transactionsPerMinute',
     name: 'Trans. per minute',
     sortable: true,
     dataType: 'number',
-    render: value => `${formatNumber(value)} tpm`
+    render: (value: number) => `${formatNumber(value)} tpm`
   },
   {
     field: 'errorsPerMinute',
     name: 'Errors per minute',
     sortable: true,
     dataType: 'number',
-    render: value => `${formatNumber(value)} err.`
+    render: (value: number) => `${formatNumber(value)} err.`
   }
 ];
 
-export function ServiceList({ items, noItemsMessage }) {
+export function ServiceList({ items = [], noItemsMessage }: Props) {
   return (
     <ManagedTable
       columns={SERVICE_COLUMNS}
@@ -85,12 +100,3 @@ export function ServiceList({ items, noItemsMessage }) {
     />
   );
 }
-
-ServiceList.propTypes = {
-  noItemsMessage: PropTypes.node,
-  items: PropTypes.array
-};
-
-ServiceList.defaultProps = {
-  items: []
-};

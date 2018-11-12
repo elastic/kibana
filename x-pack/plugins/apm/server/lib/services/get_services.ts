@@ -14,7 +14,7 @@ import {
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
-export interface ServiceListItemResponse {
+export interface IServiceListItemResponse {
   service_name: string;
   agent_name: string | undefined;
   transactions_per_minute: number;
@@ -24,7 +24,7 @@ export interface ServiceListItemResponse {
 
 export async function getServices(
   setup: Setup
-): Promise<ServiceListItemResponse[]> {
+): Promise<IServiceListItemResponse[]> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
