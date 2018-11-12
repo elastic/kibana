@@ -107,7 +107,17 @@ export default function (kibana) {
         sslVerify(),
         rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'),
         rename('tribe.ssl.cert', 'tribe.ssl.certificate'),
-        sslVerify('tribe')
+        sslVerify('tribe'),
+        function tribe(settings, log) {
+          const { tribe: tribeSettings = {} } = settings;
+
+          const tribeKeys = Object.keys(tribeSettings);
+          if (tribeKeys.length > 0) {
+            const keyList = tribeKeys.map(k => `"elasticsearch.tribe.${k}"`).join(',');
+            log(`Config keys [${keyList}] are deprecated. Tribe nodes will be removed in 7.0 and should be replaced ` +
+                `with Cross-Cluster-Search.`);
+          }
+        }
       ];
     },
 
