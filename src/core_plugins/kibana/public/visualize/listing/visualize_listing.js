@@ -23,12 +23,13 @@ import 'ui/pager';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { i18n } from '@kbn/i18n';
+import { injectI18nProvider } from '@kbn/i18n/react';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
 app.directive('visualizeListingTable', function (reactDirective) {
-  return reactDirective(VisualizeListingTable);
+  return reactDirective(injectI18nProvider(VisualizeListingTable));
 });
 
 export function VisualizeListingController($injector) {

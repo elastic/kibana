@@ -19,7 +19,7 @@
         class="fullWidth"
       >
         <div ng-if="vis.type.requiresSearch && state.linked">
-          Linked to Saved Search
+          {{ ::'kbn.visualize.linkedToSearchInfoText' | i18n: { defaultMessage: 'Linked to Saved Search' } }}
           <a
             href="#/discover/{{savedVis.savedSearch.id}}"
           >
@@ -30,7 +30,7 @@
             data-test-subj="unlinkSavedSearch"
             href=""
             ng-dblclick="unlink()"
-            tooltip="Double click to unlink from Saved Search"
+            tooltip="{{ ::'kbn.visualize.linkedToSearch.unlinkButtonTooltip' | i18n: { defaultMessage: 'Double click to unlink from Saved Search' } }}"
           >
             <span aria-hidden="true" class="kuiIcon fa-chain-broken"></span>
           </a>

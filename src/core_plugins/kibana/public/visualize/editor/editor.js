@@ -52,13 +52,17 @@ uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
     template: editorTemplate,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private) {
+      savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private, i18n) {
         const visTypes = Private(VisTypesRegistryProvider);
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
         const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
         if (shouldHaveIndex && !hasIndex) {
-          throw new Error('You must provide either an indexPattern or a savedSearchId');
+          throw new Error(
+            i18n('kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage', {
+              defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
+            })
+          );
         }
 
         return savedVisualizations.get($route.current.params)
@@ -115,7 +119,8 @@ function VisEditor(
   Promise,
   config,
   kbnBaseUrl,
-  localStorage
+  localStorage,
+  i18n
 ) {
   const docTitle = Private(DocTitleProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -148,14 +153,18 @@ function VisEditor(
 
   $scope.topNavMenu = [{
     key: 'save',
-    description: 'Save Visualization',
+    description: i18n('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
+      defaultMessage: 'Save Visualization',
+    }),
     testId: 'visualizeSaveButton',
     disableButton() {
       return Boolean(vis.dirty);
     },
     tooltip() {
       if (vis.dirty) {
-        return 'Apply or Discard your changes before saving';
+        return i18n('kbn.visualize.topNavMenu.saveVisualizationDisabledButtonTooltip', {
+          defaultMessage: 'Apply or Discard your changes before saving'
+        });
       }
     },
     run: async () => {
@@ -189,7 +198,9 @@ function VisEditor(
     }
   }, {
     key: 'share',
-    description: 'Share Visualization',
+    description: i18n('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
+      defaultMessage: 'Share Visualization',
+    }),
     testId: 'shareTopNavButton',
     run: (menuItem, navController, anchorElement) => {
       const hasUnappliedChanges = vis.dirty;
@@ -209,7 +220,9 @@ function VisEditor(
     }
   }, {
     key: 'inspect',
-    description: 'Open Inspector for visualization',
+    description: i18n('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
+      defaultMessage: 'Open Inspector for visualization',
+    }),
     testId: 'openInspectorButton',
     disableButton() {
       return !vis.hasInspector || !vis.hasInspector();
@@ -219,12 +232,16 @@ function VisEditor(
     },
     tooltip() {
       if (!vis.hasInspector || !vis.hasInspector()) {
-        return 'This visualization doesn\'t support any inspectors.';
+        return i18n('kbn.visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
+          defaultMessage: `This visualization doesn't support any inspectors.`,
+        });
       }
     }
   }, {
     key: 'refresh',
-    description: 'Refresh',
+    description: i18n('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
+      defaultMessage: 'Refresh',
+    }),
     run: function () {
       vis.forceReload();
     },
@@ -300,7 +317,12 @@ function VisEditor(
     $state.replace();
 
     $scope.getVisualizationTitle = function getVisualizationTitle() {
-      return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
+      return savedVis.lastSavedTitle || i18n('kbn.visualize.topNavMenu.unsavedVisualizationTitle', {
+        defaultMessage: '{visTitle} (unsaved)',
+        values: {
+          visTitle: savedVis.title,
+        },
+      });
     };
 
     $scope.$watchMulti([
@@ -387,7 +409,12 @@ function VisEditor(
 
           if (id) {
             toastNotifications.addSuccess({
-              title: `Saved '${savedVis.title}'`,
+              title: i18n('kbn.visualize.topNavMenu.saveVisualization.successNotificationText', {
+                defaultMessage: `Saved '{visTitle}'`,
+                values: {
+                  visTitle: savedVis.title,
+                },
+              }),
               'data-test-subj': 'saveVisualizationSuccess',
             });
 
@@ -420,7 +447,12 @@ function VisEditor(
         // eslint-disable-next-line
         console.error(error);
         toastNotifications.addDanger({
-          title: `Error on saving '${savedVis.title}'`,
+          title: i18n('kbn.visualize.topNavMenu.saveVisualization.failureNotificationText', {
+            defaultMessage: `Error on saving '{visTitle}'`,
+            values: {
+              visTitle: savedVis.title,
+            },
+          }),
           text: error.message,
           'data-test-subj': 'saveVisualizationError',
         });
@@ -443,14 +475,26 @@ function VisEditor(
     searchSource.setField('index', searchSourceParent.getField('index'));
     searchSource.setParent(searchSourceGrandparent);
 
-    toastNotifications.addSuccess(`Unlinked from saved search '${savedVis.savedSearch.title}'`);
+    toastNotifications.addSuccess(
+      i18n('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
+        defaultMessage: `Unlinked from saved search '{searchTitle}'`,
+        values: {
+          searchTitle: savedVis.savedSearch.title
+        }
+      })
+    );
 
     $scope.fetch();
   };
 
 
   $scope.getAdditionalMessage = () => {
-    return `<i class="kuiIcon fa-flask"></i> This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
+    return (
+      '<i class="kuiIcon fa-flask"></i>' +
+      i18n('kbn.visualize.experimentalVisInfoText', { defaultMessage: 'This visualization is marked as experimental.' }) +
+      ' ' +
+      vis.type.feedbackMessage
+    );
   };
 
   init();

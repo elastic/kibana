@@ -42,11 +42,16 @@ uiRoutes
     controllerAs: 'listingController',
   });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'visualize',
     title: 'Visualize',
-    description: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+    description: i18n(
+      'kbn.visualize.visualizeDescription',
+      {
+        defaultMessage: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+      }
+    ),
     icon: 'visualizeApp',
     path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,

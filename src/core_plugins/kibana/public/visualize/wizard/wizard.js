@@ -50,7 +50,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   controller: 'VisualizeWizardStep1',
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, Private, config) {
+module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, Private, config, i18n) {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
@@ -159,9 +159,13 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, Priv
     //labs is more important in this regard.
     let prefix = '';
     if (type.stage === 'lab') {
-      prefix = '(Lab)';
+      prefix = i18n('kbn.visualize.visualizationWizard.labTooltipPrefixText', {
+        defaultMessage: '(Lab)'
+      });
     } else if (type.stage === 'experimental') {
-      prefix = '(Experimental)';
+      prefix = i18n('kbn.visualize.visualizationWizard.experimentalTooltipPrefixText', {
+        defaultMessage: '(Experimental)'
+      });
     }
     return `${prefix} ${type.description}`;
   };
