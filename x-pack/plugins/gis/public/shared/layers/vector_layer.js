@@ -46,10 +46,16 @@ export class VectorLayer extends ALayer {
     layerDescriptor.type = VectorLayer.type;
     if (!options.style) {
       layerDescriptor.style = VectorStyle.createDescriptor({
-        'fillColor': {
+        fillColor: {
           type: VectorStyle.STYLE_TYPE.STATIC,
           options: {
             color: nextColor
+          }
+        },
+        iconSize: {
+          type: VectorStyle.STYLE_TYPE.STATIC,
+          options: {
+            size: 10
           }
         }
       });

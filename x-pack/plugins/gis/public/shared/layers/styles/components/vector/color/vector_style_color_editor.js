@@ -27,7 +27,7 @@ export class VectorStyleColorEditor extends React.Component {
           layer={this.props.layer}
           property={this.props.styleProperty}
           name={this.props.stylePropertyName}
-          colorStyleDescriptor={this.props.colorStyleDescriptor}
+          styleDescriptor={this.props.styleDescriptor}
           handlePropertyChange={this.props.handlePropertyChange}
           DynamicSelector={DynamicColorSelection}
           StaticSelector={StaticColorSelection}

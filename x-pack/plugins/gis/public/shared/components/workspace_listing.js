@@ -372,7 +372,7 @@ export class WorkspaceListing extends React.Component {
 
   render() {
     return (
-      <EuiPage data-test-subj="gisLandingPage" restrictWidth>
+      <EuiPage data-test-subj="gisListingPage" restrictWidth>
         <EuiPageBody>
           {this.renderPageContent()}
         </EuiPageBody>

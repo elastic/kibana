@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('gis', function () {
+  describe('gis app', function () {
     loadTestFile(require.resolve('./es_search_source'));
   });
 }

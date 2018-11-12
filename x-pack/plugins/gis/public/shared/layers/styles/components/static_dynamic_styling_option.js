@@ -24,15 +24,16 @@ export class StaticDynamicStyleSelector extends React.Component {
     this._isMounted = false;
     this.state = {
       ordinalFields: null,
-      dynamic: false
+      dynamic: false,
+      styleDescriptor: VectorStyle.STYLE_TYPE.STATIC
     };
   }
 
   _isDynamic() {
-    if (!this.props.colorStyleDescriptor) {
+    if (!this.props.styleDescriptor) {
       return false;
     }
-    return this.props.colorStyleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+    return this.props.styleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
   componentWillUnmount() {
@@ -76,11 +77,11 @@ export class StaticDynamicStyleSelector extends React.Component {
   _renderStaticAndDynamicStyles() {
 
     const changeStyle = (type, newOptions) => {
-      const newStyleDescriptor = {
+      const styleDescriptor = {
         type: type,
         options: newOptions
       };
-      this.props.handlePropertyChange(this.props.property, newStyleDescriptor);
+      this.props.handlePropertyChange(this.props.property, styleDescriptor);
     };
 
     const changeToDynamicStyle = (newOptions) => {
@@ -98,7 +99,7 @@ export class StaticDynamicStyleSelector extends React.Component {
     };
 
     let styleSelector;
-    const currentOptions = _.get(this.props, 'colorStyleDescriptor.options', null);
+    const currentOptions = _.get(this.props, 'styleDescriptor.options', null);
     if (this.state.dynamic) {
       this._lastDynamicOptions = currentOptions;
       if (this.state.ordinalFields && this.state.ordinalFields.length) {
