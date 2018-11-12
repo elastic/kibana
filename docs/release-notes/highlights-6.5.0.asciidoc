@@ -16,7 +16,7 @@ other changes.
 [float]
 === Organize your work in spaces
 
-Spaces is one of our most highly requested features. Spaces allow you to organize 
+<<xpack-spaces, Spaces>> is one of our most highly requested features. Spaces allow you to organize 
 your saved objects into meaningful categories.  For example, you might place all 
 sales visuals in a sales space and all logging objects in a logging space. 
 
@@ -25,7 +25,7 @@ image::images/highlights_6_5_select-space.png[Select your space dashboard]
 
 You can create as many spaces as you need, change spaces at any time, and move 
 saved objects between spaces. With security enabled, you can control which roles 
-and users have access to which spaces using RBAC.
+and users have access to which spaces using role-based access control (RBAC).
 
 To create, edit, and delete spaces, use *Management > Spaces*.  
 Or, if you prefer to create your spaces programmatically, you can use the <<spaces-api, {kib} Spaces API>>.
@@ -46,7 +46,7 @@ image::images/highlights_6_5_cross-cluster.png[Monitoring for cross-cluster dash
 [float]
 === Showcase your data in Canvas (beta)
 
-Canvas is {kib}’s new place for showcasing your data live in a pixel-perfect design. 
+<<canvas, Canvas>> is {kib}’s new place for showcasing your data live in a pixel-perfect design. 
 Starting with a blank workpad, you can create a story about your data by combining 
 static content (text, images, and shapes) with data-driven elements (charts, tables, 
 images, and many others).  Each dynamic element is connected to a sample data 
@@ -57,7 +57,7 @@ Canvas tools have rich styling capabilities, allowing users to change colors and
 styles of both static and dynamic elements. Canvas is designed so you can tweak 
 an element’s content and style using the UI, or go deeper and edit the expressions 
 that create the element or the css styling. In short, Canvas gives you everything 
-you need to showcase your live data, your way.  
+you need to showcase your live data, your way.
 
 [role="screenshot"]
 image::images/highlights_6_5_canvas.png[Canvas workpad with sample flight data set]
@@ -65,7 +65,7 @@ image::images/highlights_6_5_canvas.png[Canvas workpad with sample flight data s
 [float]
 === Create and manage rollup jobs
 
-{kib} has a new Management UI for creating, starting, stopping, and deleting rollup
+{kib} has a new <<data-rollups, Rollup UI>> for creating, starting, stopping, and deleting rollup
 jobs. Rollups is a recent addition to Elasticsearch and {ref}/rollup-apis.html[APIs for creating and 
 managing rollups] have been available since 6.4.  A rollup index summarizes historical 
 data and stores it compactly for future analysis, so you can query, aggregate, 
@@ -79,7 +79,8 @@ image::images/highlights_6_5_rollup.png[Create a rollup job dashboard]
 [float]
 === View rolled up data in visualizations (beta)
 
-{kib} now has beta features for visualizing rolled up data. You can create index 
+{kib} now has <<visualize-rollup-data, beta features for visualizing rolled up data>>. 
+You can create index 
 patterns that use rollup indices or mix rollup and raw indices to visualize all 
 data together. Most visualizations support rolled up data, with the exception of 
 Timelion, Visual Builder, and Vega visualizations. You can also create dashboards 
@@ -140,8 +141,9 @@ has visualizations for product-related information, such as cost, revenue, and p
 If you’re looking to analyze website traffic, check out the web logs sample data set. 
 To access the sample data, go to the {kib} home page and click *Load a data set and a {kib} dashboard*.
 
-In addition to a traditional dashboard, each data set includes a ready-to-go
-Canvas workpad for you to play with.
+In addition to a traditional dashboard, each sample is prepackaged with a Canvas 
+workpad. The workpad for the eCommerce sample includes two different styles for 
+the same data. The workpads are nice, hands-on way for new users to learn Canvas.
 
 [role="screenshot"]
 image::images/highlights_6_5_sample-canvas.png[Canvas workpad included with new sample data sets]
