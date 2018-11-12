@@ -20,13 +20,17 @@ export function ImportSummary({
   ingestPipelineId,
   docCount,
   importFailures,
+  createIndexPattern,
+  createPipeline,
 }) {
   const items = createDisplayItems(
     index,
     indexPattern,
     ingestPipelineId,
     docCount,
-    importFailures
+    importFailures,
+    createIndexPattern,
+    createPipeline
   );
 
   return (
@@ -90,7 +94,9 @@ function createDisplayItems(
   indexPattern,
   ingestPipelineId,
   docCount,
-  importFailures
+  importFailures,
+  createIndexPattern,
+  createPipeline
 ) {
   const items = [
     {
@@ -98,18 +104,24 @@ function createDisplayItems(
       description: index,
     },
     {
-      title: 'Index pattern',
-      description: indexPattern,
-    },
-    {
-      title: 'Ingest pipeline',
-      description: ingestPipelineId,
-    },
-    {
       title: 'Documents ingested',
       description: docCount - ((importFailures && importFailures.length) || 0),
     }
   ];
+
+  if (createPipeline) {
+    items.splice(1, 0, {
+      title: 'Ingest pipeline',
+      description: ingestPipelineId,
+    });
+  }
+
+  if (createIndexPattern) {
+    items.splice(1, 0, {
+      title: 'Index pattern',
+      description: indexPattern,
+    });
+  }
 
   if (importFailures && importFailures.length > 0) {
     items.push({

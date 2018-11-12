@@ -50,6 +50,8 @@ jest.mock('../../../../../lib/resolve_saved_objects', () => ({
   saveObjects: jest.fn(),
 }));
 
+jest.mock('ui/notify', () => ({}));
+
 const defaultProps = {
   close: jest.fn(),
   done: jest.fn(),

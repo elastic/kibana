@@ -25,11 +25,12 @@ exports[`LoginPage disabled form states renders as expected when a connection to
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.login.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -43,7 +44,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.login.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -73,14 +74,14 @@ exports[`LoginPage disabled form states renders as expected when a connection to
             message={
               <FormattedMessage
                 defaultMessage="See the Kibana logs for details and try reloading the page."
-                id="kbn.login.esUnavailableMessage"
+                id="xpack.security.loginPage.esUnavailableMessage"
                 values={Object {}}
               />
             }
             title={
               <FormattedMessage
                 defaultMessage="Cannot connect to the Elastiscearch cluster"
-                id="kbn.login.esUnavailableTitle"
+                id="xpack.security.loginPage.esUnavailableTitle"
                 values={Object {}}
               />
             }
@@ -117,11 +118,12 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.login.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -135,7 +137,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.login.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -165,14 +167,14 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
             message={
               <FormattedMessage
                 defaultMessage="Refer to the Kibana logs for more details and refresh to try again."
-                id="kbn.login.unknownLayoutMessage"
+                id="xpack.security.loginPage.unknownLayoutMessage"
                 values={Object {}}
               />
             }
             title={
               <FormattedMessage
                 defaultMessage="Unsupported login form layout."
-                id="kbn.login.unknownLayoutTitle"
+                id="xpack.security.loginPage.unknownLayoutTitle"
                 values={Object {}}
               />
             }
@@ -209,11 +211,12 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.login.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -227,7 +230,7 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.login.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -257,14 +260,14 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
             message={
               <FormattedMessage
                 defaultMessage="Contact your system administrator."
-                id="kbn.login.requiresSecureConnectionMessage"
+                id="xpack.security.loginPage.requiresSecureConnectionMessage"
                 values={Object {}}
               />
             }
             title={
               <FormattedMessage
                 defaultMessage="A secure connection is required for log in"
-                id="kbn.login.requiresSecureConnectionTitle"
+                id="xpack.security.loginPage.requiresSecureConnectionTitle"
                 values={Object {}}
               />
             }
@@ -301,11 +304,12 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.login.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -319,7 +323,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.login.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>
@@ -349,14 +353,14 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
             message={
               <FormattedMessage
                 defaultMessage="To use the full set of free features in this distribution of Kibana, please update Elasticsearch to the default distribution."
-                id="kbn.login.xpackUnavailableMessage"
+                id="xpack.security.loginPage.xpackUnavailableMessage"
                 values={Object {}}
               />
             }
             title={
               <FormattedMessage
                 defaultMessage="Cannot connect to the Elasticsearch cluster currently configured for Kibana."
-                id="kbn.login.xpackUnavailableTitle"
+                id="xpack.security.loginPage.xpackUnavailableTitle"
                 values={Object {}}
               />
             }
@@ -393,11 +397,12 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
               defaultMessage="Welcome to Kibana"
-              id="kbn.login.welcomeTitle"
+              id="xpack.security.loginPage.welcomeTitle"
               values={Object {}}
             />
           </h1>
@@ -411,7 +416,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
           <p>
             <FormattedMessage
               defaultMessage="Your window into the Elastic Stack"
-              id="kbn.login.welcomeDescription"
+              id="xpack.security.loginPage.welcomeDescription"
               values={Object {}}
             />
           </p>

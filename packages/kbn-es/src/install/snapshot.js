@@ -46,7 +46,8 @@ exports.installSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
 }) {
-  const fileName = getFilename(license, version);
+  // TODO: remove -alpha1 once elastic/elasticsearch#35172 has been merged
+  const fileName = getFilename(license, version + '-alpha1');
   const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
   const dest = path.resolve(basePath, 'cache', fileName);
 
@@ -89,7 +90,7 @@ function downloadFile(url, dest, log) {
         }
 
         if (!res.ok) {
-          return reject(new Error(res.statusText));
+          return reject(new Error(`Unable to download elasticsearch snapshot: ${res.statusText}`));
         }
 
         const stream = fs.createWriteStream(downloadPath);

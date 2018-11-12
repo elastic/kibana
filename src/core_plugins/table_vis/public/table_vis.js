@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import './table_vis_controller';
 import './table_vis_params';
 import 'ui/agg_table';
@@ -51,9 +52,13 @@ function TableVisTypeProvider(Private) {
   return VisFactory.createAngularVisualization({
     type: 'table',
     name: 'table',
-    title: 'Data Table',
+    title: i18n.translate('tableVis.tableVisTitle', {
+      defaultMessage: 'Data Table',
+    }),
     icon: 'visTable',
-    description: 'Display values in a table',
+    description: i18n.translate('tableVis.tableVisDescription', {
+      defaultMessage: 'Display values in a table',
+    }),
     category: CATEGORY.DATA,
     visConfig: {
       defaults: {
@@ -75,7 +80,9 @@ function TableVisTypeProvider(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Metric',
+          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.metricTitle', {
+            defaultMessage: 'Metric',
+          }),
           aggFilter: ['!geo_centroid', '!geo_bounds'],
           min: 1,
           defaults: [
@@ -85,13 +92,17 @@ function TableVisTypeProvider(Private) {
         {
           group: 'buckets',
           name: 'bucket',
-          title: 'Split Rows',
+          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.bucketTitle', {
+            defaultMessage: 'Split Rows',
+          }),
           aggFilter: ['!filter']
         },
         {
           group: 'buckets',
           name: 'split',
-          title: 'Split Table',
+          title: i18n.translate('tableVis.tableVisEditorConfig.schemas.splitTitle', {
+            defaultMessage: 'Split Table',
+          }),
           aggFilter: ['!filter']
         }
       ])

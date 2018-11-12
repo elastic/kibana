@@ -108,7 +108,6 @@ describe('dev/build/lib/config', () => {
       const { config } = await setup({ targetAllPlatforms: false });
       const platforms = config.getNodePlatforms();
       expect(platforms).to.be.an('array');
-      expect(platforms).to.have.length(process.platform === 'linux');
       if (process.platform !== 'linux') {
         expect(platforms).to.have.length(2);
         expect(platforms[0]).to.be(config.getPlatformForThisOs());
