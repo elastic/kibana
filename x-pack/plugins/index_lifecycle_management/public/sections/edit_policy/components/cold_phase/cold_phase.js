@@ -78,7 +78,7 @@ class ColdPhaseUi extends PureComponent {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.coldPhase.coldPhaseLabel"
+                id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseLabel"
                 defaultMessage="Cold phase"
               />
             </span>{' '}
@@ -92,7 +92,7 @@ class ColdPhaseUi extends PureComponent {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
+                id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
                 defaultMessage="A cold index is queried less frequently and thus no longer needs to be on the most performant hardware."
               />
             </p>
@@ -113,7 +113,7 @@ class ColdPhaseUi extends PureComponent {
                 }}
               >
                 <FormattedMessage
-                  id="xpack.idxLifecycleMgmt.editPolicy.coldPhase.deactivateColdPhaseButton"
+                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.deactivateColdPhaseButton"
                   defaultMessage="Deactivate cold phase"
                 />
               </EuiButton>
@@ -125,7 +125,7 @@ class ColdPhaseUi extends PureComponent {
                 <ErrableFormRow
                   id={`${PHASE_COLD}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
                   label={intl.formatMessage({
-                    id: 'xpack.idxLifecycleMgmt.coldPhase.moveToColdPhaseAfterLabel',
+                    id: 'xpack.indexLifecycleMgmt.coldPhase.moveToColdPhaseAfterLabel',
                     defaultMessage: 'Cold phase after'
                   })}
                   errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
@@ -150,11 +150,11 @@ class ColdPhaseUi extends PureComponent {
                     }
                     options={[
                       { value: 'd', text: intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.coldPhase.daysLabel',
+                        id: 'xpack.indexLifecycleMgmt.coldPhase.daysLabel',
                         defaultMessage: 'days'
                       }) },
                       { value: 'h', text: intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.coldPhase.hoursLabel',
+                        id: 'xpack.indexLifecycleMgmt.coldPhase.hoursLabel',
                         defaultMessage: 'hours'
                       }) },
                     ]}
@@ -168,7 +168,7 @@ class ColdPhaseUi extends PureComponent {
             <ErrableFormRow
               id={`${PHASE_COLD}.${PHASE_NODE_ATTRS}`}
               label={intl.formatMessage({
-                id: 'xpack.idxLifecycleMgmt.coldPhase.nodeAllocationLabel',
+                id: 'xpack.indexLifecycleMgmt.coldPhase.nodeAllocationLabel',
                 defaultMessage: 'Choose where to allocate indices by node attribute'
               })}
               errorKey={PHASE_NODE_ATTRS}
@@ -181,7 +181,7 @@ class ColdPhaseUi extends PureComponent {
                   onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
                 >
                   <FormattedMessage
-                    id="xpack.idxLifecycleMgmt.editPolicy.coldPhase.viewNodeDetailsButton"
+                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.viewNodeDetailsButton"
                     defaultMessage="View a list of nodes attached to this configuration"
                   />
                 </EuiButtonEmpty>
@@ -201,7 +201,7 @@ class ColdPhaseUi extends PureComponent {
                 <ErrableFormRow
                   id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
                   label={intl.formatMessage({
-                    id: 'xpack.idxLifecycleMgmt.coldPhase.numberOfReplicasLabel',
+                    id: 'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel',
                     defaultMessage: 'Number of replicas'
                   })}
                   errorKey={PHASE_REPLICA_COUNT}
@@ -241,7 +241,7 @@ class ColdPhaseUi extends PureComponent {
               }}
             >
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
+                id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
                 defaultMessage="Activate cold phase"
               />
             </EuiButton>

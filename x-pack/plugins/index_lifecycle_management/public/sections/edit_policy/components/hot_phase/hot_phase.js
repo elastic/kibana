@@ -68,7 +68,7 @@ class HotPhaseUi extends PureComponent {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.hotPhase.hotPhaseLabel"
+                id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseLabel"
                 defaultMessage="Hot phase"
               />
             </span>{' '}
@@ -80,7 +80,7 @@ class HotPhaseUi extends PureComponent {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescriptionMessage"
+                id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescriptionMessage"
                 defaultMessage={`This phase is required. A hot index is being queried and actively written to.
                   You can optimize this phase for write throughput.`}
               />
@@ -95,7 +95,7 @@ class HotPhaseUi extends PureComponent {
           helpText={
             <p>
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
+                id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
                 defaultMessage="If true, rollover the index when it gets too big or too old. The alias switches to the new index."
               />
               {' '}
@@ -111,7 +111,7 @@ class HotPhaseUi extends PureComponent {
               await setPhaseData(PHASE_ROLLOVER_ENABLED, e.target.checked);
             }}
             label={intl.formatMessage({
-              id: 'xpack.idxLifecycleMgmt.hotPhase.enableRolloverLabel',
+              id: 'xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel',
               defaultMessage: 'Enable rollover'
             })}
           />
@@ -124,7 +124,7 @@ class HotPhaseUi extends PureComponent {
                 <ErrableFormRow
                   id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                   label={intl.formatMessage({
-                    id: 'xpack.idxLifecycleMgmt.hotPhase.maximumIndexSizeLabel',
+                    id: 'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel',
                     defaultMessage: 'Maximum index size'
                   })}
                   errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED}
@@ -161,11 +161,11 @@ class HotPhaseUi extends PureComponent {
                     }}
                     options={[
                       { value: 'gb', text: intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.hotPhase.gigabytesLabel',
+                        id: 'xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel',
                         defaultMessage: 'gigabytes'
                       }) },
                       { value: MAX_SIZE_TYPE_DOCUMENT, text: intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.hotPhase.documentsLabel',
+                        id: 'xpack.indexLifecycleMgmt.hotPhase.documentsLabel',
                         defaultMessage: 'documents'
                       }) }
                     ]}
@@ -179,7 +179,7 @@ class HotPhaseUi extends PureComponent {
                 <ErrableFormRow
                   id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_AGE}`}
                   label={intl.formatMessage({
-                    id: 'xpack.idxLifecycleMgmt.hotPhase.maximumAgeLabel',
+                    id: 'xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel',
                     defaultMessage: 'Maximum age'
                   })}
                   errorKey={`${PHASE_ROLLOVER_MAX_AGE}`}
@@ -213,11 +213,11 @@ class HotPhaseUi extends PureComponent {
                     }}
                     options={[
                       { value: 'd', text: intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.hotPhase.daysLabel',
+                        id: 'xpack.indexLifecycleMgmt.hotPhase.daysLabel',
                         defaultMessage: 'days'
                       }) },
                       { value: 'h', text: intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.hotPhase.hoursLabel',
+                        id: 'xpack.indexLifecycleMgmt.hotPhase.hoursLabel',
                         defaultMessage: 'hours'
                       }) },
                     ]}

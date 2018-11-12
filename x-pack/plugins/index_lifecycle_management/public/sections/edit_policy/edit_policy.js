@@ -36,6 +36,7 @@ import {
 } from '../../store/constants';
 import { findFirstError } from '../../lib/find_errors';
 import { NodeAttrsDetails } from './components/node_attrs_details';
+import { PolicyJsonFlyout } from './components/policy_json_flyout';
 import { ErrableFormRow } from './form_errors';
 
 class EditPolicyUi extends Component {
@@ -50,6 +51,7 @@ class EditPolicyUi extends Component {
       isShowingErrors: false,
       isShowingNodeDetailsFlyout: false,
       selectedNodeAttrsForDetails: undefined,
+      isShowingPolicyJsonFlyout: false
     };
   }
   selectPolicy = policyName => {
@@ -95,7 +97,7 @@ class EditPolicyUi extends Component {
     } = this.props;
     if (firstError) {
       toastNotifications.addDanger(intl.formatMessage({
-        id: 'xpack.idxLifecycleMgmt.editPolicy.formErrorsMessage',
+        id: 'xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage',
         defaultMessage: 'Please the fix errors on the page'
       }));
       const element = document.getElementById(`${firstError}-row`);
@@ -113,6 +115,9 @@ class EditPolicyUi extends Component {
   showNodeDetailsFlyout = selectedNodeAttrsForDetails => {
     this.setState({ isShowingNodeDetailsFlyout: true, selectedNodeAttrsForDetails });
   };
+  showPolicyJsonFlyout = () => {
+    this.setState({ isShowingPolicyJsonFlyout: true });
+  };
   render() {
     const {
       intl,
@@ -125,6 +130,7 @@ class EditPolicyUi extends Component {
       saveAsNewPolicy,
       setSelectedPolicyName,
       isNewPolicy,
+      lifecycle
     } = this.props;
     const selectedPolicyName = selectedPolicy.name;
     const { isShowingErrors } = this.state;
@@ -141,11 +147,11 @@ class EditPolicyUi extends Component {
               <h4>
                 {isNewPolicy
                   ? intl.formatMessage({
-                    id: 'xpack.idxLifecycleMgmt.editPolicy.createPolicyMessage',
+                    id: 'xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage',
                     defaultMessage: 'Create an index lifecycle policy'
                   })
                   : intl.formatMessage({
-                    id: 'xpack.idxLifecycleMgmt.editPolicy.editPolicyMessage',
+                    id: 'xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage',
                     defaultMessage: 'Edit index lifecycle policy {selectedPolicyName}',
                   }, { selectedPolicyName }) }
               </h4>
@@ -164,12 +170,12 @@ class EditPolicyUi extends Component {
                         <p>
                           <strong>
                             <FormattedMessage
-                              id="xpack.idxLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
+                              id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
                               defaultMessage="You are editing an existing policy"
                             />
                           </strong>.{' '}
                           <FormattedMessage
-                            id="xpack.idxLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
+                            id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
                             defaultMessage={`Any changes you make will affect indices that this policy is attached to.
                               Alternatively, you can save these changes in a new policy.`}
                           />
@@ -188,7 +194,7 @@ class EditPolicyUi extends Component {
                           label={
                             <span>
                               <FormattedMessage
-                                id="xpack.idxLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
+                                id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
                                 defaultMessage="Save this as a new policy"
                               />
                             </span>
@@ -203,7 +209,7 @@ class EditPolicyUi extends Component {
                     <ErrableFormRow
                       id={STRUCTURE_POLICY_NAME}
                       label={intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.editPolicy.policyNameLabel',
+                        id: 'xpack.indexLifecycleMgmt.editPolicy.policyNameLabel',
                         defaultMessage: 'Policy name'
                       })}
                       errorKey={STRUCTURE_POLICY_NAME}
@@ -246,21 +252,34 @@ class EditPolicyUi extends Component {
               <EuiHorizontalRule className="ilmHrule" />
               <EuiButtonEmpty onClick={this.backToPolicyList}>
                 <FormattedMessage
-                  id="xpack.idxLifecycleMgmt.editPolicy.cancelButton"
+                  id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
               &nbsp;&nbsp;
               <EuiButton fill onClick={this.submit}>
                 <FormattedMessage
-                  id="xpack.idxLifecycleMgmt.editPolicy.saveButton"
+                  id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
                   defaultMessage="Save your policy"
                 />
               </EuiButton>
+              <EuiButtonEmpty onClick={this.showPolicyJsonFlyout}>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton"
+                  defaultMessage="Show JSON"
+                />
+              </EuiButtonEmpty>
               {this.state.isShowingNodeDetailsFlyout ? (
                 <NodeAttrsDetails
                   selectedNodeAttrs={this.state.selectedNodeAttrsForDetails}
                   close={() => this.setState({ isShowingNodeDetailsFlyout: false })}
+                />
+              ) : null}
+              {this.state.isShowingPolicyJsonFlyout ? (
+                <PolicyJsonFlyout
+                  policyName={policyName || ''}
+                  lifecycle={JSON.stringify(lifecycle, null, 4)}
+                  close={() => this.setState({ isShowingPolicyJsonFlyout: false })}
                 />
               ) : null}
             </div>

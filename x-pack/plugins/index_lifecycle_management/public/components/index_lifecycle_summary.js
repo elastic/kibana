@@ -86,7 +86,7 @@ export class IndexLifecycleSummary extends Component {
           <h3>
             <FormattedMessage
               defaultMessage="Index lifecycle management"
-              id="xpack.idxLifecycleMgmt.indexManagementTable.summaryTitle"
+              id="xpack.indexLifecycleMgmt.indexManagementTable.summaryTitle"
             />
           </h3>
         </EuiTitle>

@@ -10,7 +10,7 @@ export const ActiveBadge = () => {
   return (
     <EuiBadge className="eui-alignMiddle">
       <FormattedMessage
-        id="xpack.idxLifecycleMgmt.activePhaseMessage"
+        id="xpack.indexLifecycleMgmt.activePhaseMessage"
         defaultMessage="Active"
       />
     </EuiBadge>

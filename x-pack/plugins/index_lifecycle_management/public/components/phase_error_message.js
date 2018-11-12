@@ -12,7 +12,7 @@ export const PhaseErrorMessage = ({ isShowingErrors }) => {
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.idxLifecycleMgmt.editPolicy.phaseErrorMessage"
+            id="xpack.indexLifecycleMgmt.editPolicy.phaseErrorMessage"
             defaultMessage="This phase contains errors"
           />
         </p>

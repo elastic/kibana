@@ -31,10 +31,10 @@ import {
   getSelectedOriginalPolicyName,
   getPolicies
 } from '.';
-const numberRequiredMessage = i18n.translate('xpack.idxLifecycleMgmt.editPolicy.numberRequiredError', {
+const numberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberRequiredError', {
   defaultMessage: 'A number is required'
 });
-const positiveNumberRequiredMessage = i18n.translate('xpack.idxLifecycleMgmt.editPolicy.positiveNumberRequiredError', {
+const positiveNumberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberRequiredError', {
   defaultMessage: 'Only positive numbers are allowed'
 });
 export const validatePhase = (type, phase, errors) => {
@@ -50,12 +50,12 @@ export const validatePhase = (type, phase, errors) => {
       !isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])
     ) {
       phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
-        i18n.translate('xpack.idxLifecycleMgmt.editPolicy.maximumAgeMissingError', {
+        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError', {
           defaultMessage: 'A maximum age is required'
         })
       ];
       phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
-        i18n.translate('xpack.idxLifecycleMgmt.editPolicy.maximumIndexSizeMissingError', {
+        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError', {
           defaultMessage: 'A maximum index size is required'
         })
       ];
@@ -95,7 +95,7 @@ export const validatePhase = (type, phase, errors) => {
     }
     else if (phase[PHASE_FORCE_MERGE_SEGMENTS] < 1) {
       phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = [
-        i18n.translate('xpack.idxLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
+        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
           defaultMessage: 'Only positive numbers above 0 are allowed'
         })
       ];
@@ -112,13 +112,13 @@ export const validateLifecycle = state => {
   const errors = JSON.parse(JSON.stringify(ERROR_STRUCTURE));
 
   if (!getSelectedPolicyName(state)) {
-    errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.idxLifecycleMgmt.editPolicy.policyNameRequiredError', {
+    errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameRequiredError', {
       defaultMessage: 'A policy name is required'
     }));
   }
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
-    errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.idxLifecycleMgmt.editPolicy.differentPolicyNameRequiredError', {
+    errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError', {
       defaultMessage: 'The policy name must be different'
     }));
   }
@@ -126,7 +126,7 @@ export const validateLifecycle = state => {
   if (getSaveAsNewPolicy(state)) {
     const policyNames = getPolicies(state).map(policy => policy.name);
     if (policyNames.includes(getSelectedPolicyName(state))) {
-      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.idxLifecycleMgmt.editPolicy.policyNameAlreadyUsedError', {
+      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameAlreadyUsedError', {
         defaultMessage: 'That policy name is already used'
       }));
     }

@@ -61,7 +61,7 @@ class DeletePhaseUi extends PureComponent {
           <div>
             <span className="eui-displayInlineBlock eui-alignMiddle">
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.deletePhaseLabel"
+                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseLabel"
                 defaultMessage="Delete phase"
               />
             </span>{' '}
@@ -75,7 +75,7 @@ class DeletePhaseUi extends PureComponent {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
+                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
                 defaultMessage="Use this phase to define how long to retain your data."
               />
 
@@ -97,7 +97,7 @@ class DeletePhaseUi extends PureComponent {
                 }}
               >
                 <FormattedMessage
-                  id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.deactivateDeletePhaseButton"
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deactivateDeletePhaseButton"
                   defaultMessage="Deactivate delete phase"
                 />
               </EuiButton>
@@ -107,7 +107,7 @@ class DeletePhaseUi extends PureComponent {
             <EuiTitle size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.configurationTitle"
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.configurationTitle"
                   defaultMessage="Configuration"
                 />
               </p>
@@ -118,7 +118,7 @@ class DeletePhaseUi extends PureComponent {
                 <ErrableFormRow
                   id={`${PHASE_DELETE}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
                   label={intl.formatMessage({
-                    id: 'xpack.idxLifecycleMgmt.coldPhase.moveToDeletePhaseAfterLabel',
+                    id: 'xpack.indexLifecycleMgmt.coldPhase.moveToDeletePhaseAfterLabel',
                     defaultMessage: 'Delete indices after'
                   })}
                   errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
@@ -143,11 +143,11 @@ class DeletePhaseUi extends PureComponent {
                     }
                     options={[
                       { value: 'd', text: intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.deletePhase.daysLabel',
+                        id: 'xpack.indexLifecycleMgmt.deletePhase.daysLabel',
                         defaultMessage: 'days'
                       }) },
                       { value: 'h', text: intl.formatMessage({
-                        id: 'xpack.idxLifecycleMgmt.deletePhase.hoursLabel',
+                        id: 'xpack.indexLifecycleMgmt.deletePhase.hoursLabel',
                         defaultMessage: 'hours'
                       }) },
                     ]}
@@ -165,7 +165,7 @@ class DeletePhaseUi extends PureComponent {
               }}
             >
               <FormattedMessage
-                id="xpack.idxLifecycleMgmt.editPolicy.deletePhase.activateDeletePhaseButton"
+                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.activateDeletePhaseButton"
                 defaultMessage="Activate delete phase"
               />
             </EuiButton>
