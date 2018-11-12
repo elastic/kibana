@@ -7,9 +7,14 @@
 import fs from 'fs';
 import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
-import { DidChangeWorkspaceFoldersParams } from 'vscode-languageserver-protocol';
+import {
+  DidChangeWorkspaceFoldersParams,
+  ErrorCodes,
+  InitializeResult,
+} from 'vscode-languageserver-protocol';
 import { LspRequest } from '../../model';
 import { ServerOptions } from '../server_options';
+import { promiseTimeout } from '../utils/timeout';
 import { ILanguageServerHandler, LanguageServerProxy } from './proxy';
 
 interface Job {
@@ -18,12 +23,31 @@ interface Job {
   reject: (error: any) => void;
 }
 
+enum WorkspaceStatus {
+  Uninitialized,
+  Initializing,
+  Initialized,
+}
+
+interface Workspace {
+  lastAccess: number;
+  status: WorkspaceStatus;
+  initPromise?: Promise<any>;
+}
+
+const InitializingError = {
+  id: -1,
+  error: {
+    code: ErrorCodes.ServerNotInitialized,
+    message: 'Server is initializing',
+  },
+};
+
 export class RequestExpander implements ILanguageServerHandler {
   private proxy: LanguageServerProxy;
   private jobQueue: Job[] = [];
-  // a map for workspacePath -> lastAccess
-  private workspaces: Map<string, number> = new Map();
-  private initialized: boolean = false;
+  // a map for workspacePath -> Workspace
+  private workspaces: Map<string, Workspace> = new Map();
   private workspaceRoot: string;
 
   constructor(
@@ -35,7 +59,6 @@ export class RequestExpander implements ILanguageServerHandler {
     this.proxy = proxy;
     this.handle = this.handle.bind(this);
     proxy.onDisconnected(() => {
-      this.initialized = false;
       this.workspaces.clear();
     });
     this.workspaceRoot = fs.realpathSync(this.serverOptions.workspacePath);
@@ -59,7 +82,7 @@ export class RequestExpander implements ILanguageServerHandler {
   public async unloadWorkspace(workspacePath: string) {
     if (this.hasWorkspacePath(workspacePath)) {
       if (this.builtinWorkspace) {
-        this.removePath(workspacePath);
+        this.removeWorkspace(workspacePath);
         let params: DidChangeWorkspaceFoldersParams;
         params = {
           event: {
@@ -83,16 +106,45 @@ export class RequestExpander implements ILanguageServerHandler {
     }
   }
 
-  public async initialize(workspacePath: string) {
-    this.updatePath(workspacePath);
-    const response = await this.proxy.initialize({}, [
+  public async initialize(workspacePath: string): Promise<void | InitializeResult> {
+    this.updateWorkspace(workspacePath);
+    const ws = this.getWorkspace(workspacePath);
+    ws.status = WorkspaceStatus.Initializing;
+
+    try {
+      if (this.builtinWorkspace) {
+        if (this.proxy.initialized) {
+          await this.changeWorkspaceFolders(workspacePath, this.maxWorkspace);
+        } else {
+          // this is the first workspace, init the lsp server first
+          await this.sendInitRequest(workspacePath);
+        }
+        ws.status = WorkspaceStatus.Initialized;
+      } else {
+        for (const w of this.workspaces.values()) {
+          if (w.status === WorkspaceStatus.Initialized) {
+            await this.proxy.shutdown();
+            this.workspaces.clear();
+            break;
+          }
+        }
+        const response = await this.sendInitRequest(workspacePath);
+        ws.status = WorkspaceStatus.Initialized;
+        return response;
+      }
+    } catch (e) {
+      ws.status = WorkspaceStatus.Uninitialized;
+      throw e;
+    }
+  }
+
+  private async sendInitRequest(workspacePath: string) {
+    return await this.proxy.initialize({}, [
       {
         name: workspacePath,
         uri: `file://${workspacePath}`,
       },
     ]);
-    this.initialized = true;
-    return response;
   }
 
   private handle() {
@@ -124,37 +176,43 @@ export class RequestExpander implements ILanguageServerHandler {
 
   private async expand(request: LspRequest): Promise<ResponseMessage> {
     if (request.workspacePath) {
-      if (this.initialized) {
-        // already opened this workspace
-        if (this.hasWorkspacePath(request.workspacePath)) {
-          // update last access timestamp
-          this.updatePath(request.workspacePath);
-        } else {
-          if (this.builtinWorkspace) {
-            await this.changeWorkspaceFolders(request.workspacePath, this.maxWorkspace);
-          } else {
-            await this.proxy.shutdown();
-            this.workspaces.clear();
-            await this.initialize(request.workspacePath);
+      const ws = this.getWorkspace(request.workspacePath);
+      if (ws.status === WorkspaceStatus.Uninitialized) {
+        ws.initPromise = this.initialize(request.workspacePath);
+      }
+      // Uninitialized or initializing
+      if (ws.status !== WorkspaceStatus.Initialized) {
+        const timeout = request.timeoutForInitializeMs || 0;
+
+        if (timeout > 0 && ws.initPromise) {
+          try {
+            await promiseTimeout(timeout, ws.initPromise);
+          } catch (e) {
+            if (e.isTimeout) {
+              throw InitializingError;
+            }
+            throw e;
           }
+        } else if (ws.initPromise) {
+          await ws.initPromise;
+        } else {
+          throw InitializingError;
         }
-      } else {
-        await this.initialize(request.workspacePath);
       }
     }
     return await this.proxy.handleRequest(request);
   }
 
   /**
-   * use DidChangeWorkspaceFolders notification add a new workspace fold
+   * use DidChangeWorkspaceFolders notification add a new workspace folder
    * replace the oldest one if count > maxWorkspace
    * builtinWorkspace = false is equal to maxWorkspace =1
    * @param workspacePath
    * @param maxWorkspace
    */
-  private async changeWorkspaceFolders(workspacePath: string, maxWorkspace: number) {
+  private async changeWorkspaceFolders(workspacePath: string, maxWorkspace: number): Promise<void> {
     let params: DidChangeWorkspaceFoldersParams;
-    this.updatePath(workspacePath);
+    this.updateWorkspace(workspacePath);
     params = {
       event: {
         added: [
@@ -170,9 +228,9 @@ export class RequestExpander implements ILanguageServerHandler {
     if (this.workspaces.size >= this.maxWorkspace) {
       let oldestWorkspace;
       let oldestAccess = Number.MAX_VALUE;
-      for (const [workspace, lastAccess] of this.workspaces) {
-        if (lastAccess < oldestAccess) {
-          oldestAccess = lastAccess;
+      for (const [workspace, ws] of this.workspaces) {
+        if (ws.lastAccess < oldestAccess) {
+          oldestAccess = ws.lastAccess;
           oldestWorkspace = workspace;
         }
       }
@@ -181,22 +239,23 @@ export class RequestExpander implements ILanguageServerHandler {
           name: oldestWorkspace,
           uri: `file://${oldestWorkspace}`,
         });
-        this.removePath(oldestWorkspace);
+        this.removeWorkspace(oldestWorkspace);
       }
     }
-    return await this.proxy.handleRequest({
+    // adding a workspace folder may also need initialize
+    await this.proxy.handleRequest({
       method: 'workspace/didChangeWorkspaceFolders',
       params,
       isNotification: true,
     });
   }
 
-  private removePath(workspacePath: string) {
+  private removeWorkspace(workspacePath: string) {
     this.workspaces.delete(this.relativePath(workspacePath));
   }
 
-  private updatePath(workspacePath: string) {
-    this.workspaces.set(this.relativePath(workspacePath), Date.now());
+  private updateWorkspace(workspacePath: string) {
+    this.getWorkspace(workspacePath).status = Date.now();
   }
 
   private hasWorkspacePath(workspacePath: string) {
@@ -210,5 +269,18 @@ export class RequestExpander implements ILanguageServerHandler {
   private relativePath(workspacePath: string) {
     const realPath = fs.realpathSync(workspacePath);
     return path.relative(this.workspaceRoot, realPath);
+  }
+
+  private getWorkspace(workspacePath: string): Workspace {
+    const p = this.relativePath(workspacePath);
+    let ws = this.workspaces.get(p);
+    if (!ws) {
+      ws = {
+        status: WorkspaceStatus.Uninitialized,
+        lastAccess: Date.now(),
+      };
+      this.workspaces.set(p, ws);
+    }
+    return ws;
   }
 }

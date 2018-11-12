@@ -39,7 +39,11 @@ export function lspRoute(
           try {
             const result = await promiseTimeout(
               serverOptions.lspRequestTimeoutMs,
-              lspService.sendRequest(`textDocument/${method}`, req.payload)
+              lspService.sendRequest(
+                `textDocument/${method}`,
+                req.payload,
+                serverOptions.lspRequestTimeoutMs / 2
+              )
             );
             return result;
           } catch (error) {
@@ -76,7 +80,11 @@ export function lspRoute(
       try {
         const response: ResponseMessage = await promiseTimeout(
           serverOptions.lspRequestTimeoutMs,
-          lspService.sendRequest(`textDocument/references`, req.payload)
+          lspService.sendRequest(
+            `textDocument/references`,
+            req.payload,
+            serverOptions.lspRequestTimeoutMs / 2
+          )
         );
         const gitOperations = new GitOperations(serverOptions.repoPath);
         const files = [];

@@ -10,7 +10,10 @@ export const promiseTimeout = <T>(ms: number, promise: Promise<T>) => {
   const timeout = new Promise((resolve, reject) => {
     const id = setTimeout(() => {
       clearTimeout(id);
-      reject(Boom.gatewayTimeout('Timed out in ' + ms + 'ms.'));
+      const boom = Boom.gatewayTimeout('Timed out in ' + ms + 'ms.');
+      // @ts-ignore
+      boom.isTimeout = true;
+      reject(boom);
     }, ms);
   });
 

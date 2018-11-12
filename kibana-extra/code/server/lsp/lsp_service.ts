@@ -30,8 +30,18 @@ export class LspService {
     this.controller = new LanguageServerController(serverOptions, targetHost, loggerFactory);
   }
 
-  public async sendRequest(method: string, params: any): Promise<ResponseMessage> {
-    const request = { method, params };
+  /**
+   * send a lsp request to language server, will initiate the language server if needed
+   * @param method the method name
+   * @param params the request params
+   * @param timeoutForInitializeMs When this request triggered an initializing, for how many milliseconds the response will wait for it.
+   */
+  public async sendRequest(
+    method: string,
+    params: any,
+    timeoutForInitializeMs?: number
+  ): Promise<ResponseMessage> {
+    const request = { method, params, timeoutForInitializeMs };
     await this.workspaceHandler.handleRequest(request);
     const response = await this.controller.handleRequest(request);
     return this.workspaceHandler.handleResponse(request, response);
