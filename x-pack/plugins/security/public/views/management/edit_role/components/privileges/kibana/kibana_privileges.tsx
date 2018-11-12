@@ -5,8 +5,8 @@
  */
 
 import React, { Component } from 'react';
+import { UICapabilities } from 'ui/capabilities';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { UserProfile } from '../../../../../../../../xpack_main/common/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { RoleValidator } from '../../../lib/validate_role';
@@ -18,7 +18,7 @@ interface Props {
   role: Role;
   spacesEnabled: boolean;
   spaces?: Space[];
-  userProfile: UserProfile;
+  uiCapabilities: UICapabilities;
   editable: boolean;
   kibanaAppPrivileges: KibanaPrivilege[];
   onChange: (role: Role) => void;
@@ -40,7 +40,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
       role,
       spacesEnabled,
       spaces = [],
-      userProfile,
+      uiCapabilities,
       onChange,
       editable,
       validator,
@@ -52,7 +52,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
           kibanaAppPrivileges={kibanaAppPrivileges}
           role={role}
           spaces={spaces}
-          userProfile={userProfile}
+          uiCapabilities={uiCapabilities}
           onChange={onChange}
           editable={editable}
           validator={validator}

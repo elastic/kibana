@@ -17,7 +17,6 @@ import { PrivilegeSpaceTable } from './privilege_space_table';
 
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { ManageSpacesButton } from '../../../../../../../../spaces/public/components';
-import { UserProfile } from '../../../../../../../../xpack_main/common/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
@@ -25,7 +24,6 @@ import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 interface Props {
   role: Role;
   spaces: Space[];
-  userProfile: UserProfile;
 }
 
 interface State {
@@ -119,7 +117,7 @@ export class ImpactedSpacesFlyout extends Component<Props, State> {
         </EuiFlyoutBody>
         <EuiFlyoutFooter className="showImpactedSpaces--flyout--footer">
           {/* TODO: Hide footer if button is not available */}
-          <ManageSpacesButton userProfile={this.props.userProfile} />
+          <ManageSpacesButton />
         </EuiFlyoutFooter>
       </EuiFlyout>
     );

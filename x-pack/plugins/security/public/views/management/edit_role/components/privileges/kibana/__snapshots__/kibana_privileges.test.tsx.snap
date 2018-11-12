@@ -40,9 +40,12 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
         },
       ]
     }
-    userProfile={
+    uiCapabilities={
       Object {
-        "hasCapability": [Function],
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
       }
     }
     validator={
