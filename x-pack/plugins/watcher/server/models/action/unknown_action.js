@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
 import { BaseAction } from './base_action';
-import { ACTION_TYPES } from '../../../common/constants';
+import { ACTION_TYPES, ERROR_CODES } from '../../../common/constants';
 import { i18n } from '@kbn/i18n';
 
 export class UnknownAction extends BaseAction {
-  constructor(props) {
+  constructor(props, errors) {
     props.type = ACTION_TYPES.UNKNOWN;
-    super(props);
+    super(props, errors);
 
     this.actionJson = props.actionJson;
   }
@@ -51,23 +50,33 @@ export class UnknownAction extends BaseAction {
   // From Elasticsearch
   static fromUpstreamJson(json) {
     const props = super.getPropsFromUpstreamJson(json);
-
-    if (!json.actionJson) {
-      throw badRequest(
-        i18n.translate('xpack.watcher.models.unknownAction.absenceOfActionJsonPropertyBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJson} property',
-          values: {
-            actionJson: 'actionJson'
-          }
-        }),
-      );
-    }
+    const { errors } = this.validateJson(json);
 
     Object.assign(props, {
       actionJson: json.actionJson
     });
 
-    return new UnknownAction(props);
+    const action = new UnknownAction(props, errors);
+
+    return { action, errors };
+  }
+
+  static validateJson(json) {
+    const errors = [];
+
+    if (!json.actionJson) {
+      errors.push({
+        code: ERROR_CODES.ERR_PROP_MISSING,
+        message: i18n.translate('xpack.watcher.models.unknownAction.actionJsonPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJson} property',
+          values: {
+            actionJson: 'actionJson'
+          }
+        }),
+      });
+    }
+
+    return { errors: errors.length ? errors : null };
   }
 
   /*

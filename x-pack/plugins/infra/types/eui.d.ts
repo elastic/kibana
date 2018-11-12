@@ -164,4 +164,13 @@ declare module '@elastic/eui' {
   };
 
   export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
+
+  export type EuiBetaBadgeProps = CommonProps & {
+    iconType?: IconType;
+    label: React.ReactNode;
+    title?: string;
+    tooltipContent?: React.ReactNode;
+    tooltipPosition?: EuiToolTipPosition;
+  };
+  export const EuiBetaBadge: React.SFC<EuiBetaBadgeProps>;
 }

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { i18n } from '@kbn/i18n';
 
 const indexPatternTypeName = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultTypeName',
@@ -25,7 +26,7 @@ const indexPatternButtonText = i18n.translate('common.ui.management.editIndexPat
   { defaultMessage: 'Standard index pattern' });
 
 const indexPatternButtonDescription = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultButtonDescription',
-  { defaultMessage: 'Can perform full aggregations against any data' });
+  { defaultMessage: 'Perform full aggregations against any data' });
 
 export class IndexPatternCreationConfig {
   static key = 'default';
@@ -35,11 +36,13 @@ export class IndexPatternCreationConfig {
     name = indexPatternTypeName,
     showSystemIndices = true,
     httpClient = null,
+    isBeta = false,
   }) {
     this.type = type;
     this.name = name;
     this.showSystemIndices = showSystemIndices;
     this.httpClient = httpClient;
+    this.isBeta = isBeta;
   }
 
   async getIndexPatternCreationOption(urlHandler) {
@@ -59,6 +62,10 @@ export class IndexPatternCreationConfig {
 
   getIndexPatternName = () => {
     return this.name;
+  }
+
+  getIsBeta = () => {
+    return this.isBeta;
   }
 
   getShowSystemIndices = () => {

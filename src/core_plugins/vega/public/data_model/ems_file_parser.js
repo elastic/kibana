@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { bypassExternalUrlCheck } from '../vega_view/vega_base_view';
 
 /**
@@ -35,7 +36,14 @@ export class EmsFileParser {
    */
   parseUrl(obj, url) {
     if (typeof url.name !== 'string') {
-      throw new Error(`data.url with {"%type%": "emsfile"} is missing the "name" of the file`);
+      throw new Error(i18n.translate('vega.emsFileParser.missingNameOfFileErrorMessage', {
+        defaultMessage: '{dataUrlParam} with {dataUrlParamValue} requires {nameParam} parameter (name of the file)',
+        values: {
+          dataUrlParam: '"data.url"',
+          dataUrlParamValue: '{"%type%": "emsfile"}',
+          nameParam: '"name"',
+        },
+      }));
     }
     // Optimization: so initiate remote request as early as we know that we will need it
     if (!this._fileLayersP) {
@@ -57,7 +65,10 @@ export class EmsFileParser {
     for (const { obj, name } of requests) {
       const foundLayer = layers.find(v => v.name === name);
       if (!foundLayer) {
-        throw new Error(`emsfile ${JSON.stringify(name)} does not exist`);
+        throw new Error(i18n.translate('vega.emsFileParser.emsFileNameDoesNotExistErrorMessage', {
+          defaultMessage: '{emsfile} {emsfileName} does not exist',
+          values: { emsfileName: JSON.stringify(name), emsfile: 'emsfile' },
+        }));
       }
 
       // This URL can bypass loader sanitization at the later stage

@@ -27,7 +27,7 @@ export function registerJobsRoute(server) {
           return wrapEsError(err);
         }
 
-        wrapUnknownError(err);
+        return wrapUnknownError(err);
       }
     },
   });

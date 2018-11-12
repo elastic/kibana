@@ -27,7 +27,7 @@ import { toastNotifications } from 'ui/notify';
 const MINZOOM = 0;
 const MAXZOOM = 22;//increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(serviceSettings) {
+export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
@@ -195,7 +195,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     async _updateData() {
-      throw new Error('Child should implement this method to respond to data-update');
+      throw new Error(i18n('tileMap.baseMapsVisualization.childShouldImplementMethodErrorMessage', {
+        defaultMessage: 'Child should implement this method to respond to data-update',
+      }));
     }
 
     _hasESResponseChanged(data) {

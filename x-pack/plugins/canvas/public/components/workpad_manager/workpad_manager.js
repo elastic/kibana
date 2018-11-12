@@ -12,6 +12,10 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBetaBadge,
+  EuiLink,
 } from '@elastic/eui';
 import { WorkpadLoader } from '../workpad_loader';
 import { WorkpadTemplates } from '../workpad_templates';
@@ -42,7 +46,22 @@ export const WorkpadManager = ({ onClose }) => {
   return (
     <Fragment>
       <EuiModalHeader className="canvasHomeApp__modalHeader">
-        <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label="Beta"
+              tooltipContent="Canvas is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLink href="https://canvas.elastic.co" target="_blank">
+              Docs
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />

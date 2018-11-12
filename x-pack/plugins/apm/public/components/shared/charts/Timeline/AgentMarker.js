@@ -29,7 +29,7 @@ export default function AgentMarker({ agentMark, x }) {
       style={{
         position: 'absolute',
         left: px(x - legendWidth / 2),
-        bottom: '-6px'
+        bottom: 0
       }}
     >
       <EuiToolTip

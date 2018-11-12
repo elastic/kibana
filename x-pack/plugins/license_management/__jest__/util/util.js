@@ -7,7 +7,7 @@
 import { Provider } from 'react-redux';
 import { licenseManagementStore } from '../../public/store/store';
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 
@@ -23,7 +23,7 @@ export const createMockLicense = (
 };
 export const getComponent = (initialState, Component) => {
   const store = licenseManagementStore(initialState);
-  return mount(
+  return mountWithIntl(
     <Provider store={store}>
       <Component />
     </Provider>
