@@ -18,6 +18,7 @@ addActionExtension((indices) => {
   const indexNames = indices.map(({ name }) => name);
   return {
     requestMethod: retryLifecycleForIndex,
+    icon: 'play',
     indexNames: [indexNames],
     buttonLabel: i18n.translate('xpack.idxMgmt.retryIndexLifecycleActionButtonLabel', {
       defaultMessage: 'Retry lifecycle',

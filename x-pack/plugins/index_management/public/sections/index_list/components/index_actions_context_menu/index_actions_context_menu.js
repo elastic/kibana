@@ -180,10 +180,10 @@ class IndexActionsContextMenuUi extends Component {
     getActionExtensions().forEach((actionExtension) => {
       const actionExtensionDefinition = actionExtension(indices);
       if (actionExtensionDefinition) {
-        const { buttonLabel, requestMethod, successMessage } = actionExtensionDefinition;
+        const { buttonLabel, requestMethod, successMessage, icon } = actionExtensionDefinition;
         items.push({
           name: buttonLabel,
-          icon: <EuiIcon type="indexFlush" />,
+          icon: <EuiIcon type={icon} />,
           onClick: () => {
             this.closePopoverAndExecute(() => performExtensionAction(requestMethod, successMessage));
           }
@@ -191,7 +191,6 @@ class IndexActionsContextMenuUi extends Component {
 
         );
       }
-      performExtensionAction;
     });
     items.forEach(item => {
       item['data-test-subj'] = 'indexTableContextMenuButton';
