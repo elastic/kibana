@@ -16,8 +16,6 @@ import {
 } from '@elastic/eui';
 
 
-console.log('cb', EuiComboBox);
-
 export class DynamicSizeSelection extends React.Component {
 
   constructor() {
@@ -32,11 +30,11 @@ export class DynamicSizeSelection extends React.Component {
   };
 
   _onMaxSizeChange = (e) => {
-    console.log('must implement');
+    console.warn('must implement');
   };
 
   _onFieldSelected = (e) => {
-    console.log('musgit dt implement');
+    console.warn('musgit dt implement');
   };
 
   render() {
@@ -45,8 +43,6 @@ export class DynamicSizeSelection extends React.Component {
     const options = this.props.fields.map(field => {
       return { label: field.label, value: field };
     });
-
-    console.log('op', options);
 
     if (this.props.selectedOptions) {
       const { color, field } = this.props.selectedOptions;

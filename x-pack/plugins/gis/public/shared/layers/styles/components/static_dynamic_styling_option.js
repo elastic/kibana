@@ -103,8 +103,8 @@ export class StaticDynamicStyleSelector extends React.Component {
     if (this.state.dynamic) {
       this._lastDynamicOptions = currentOptions;
       if (this.state.ordinalFields && this.state.ordinalFields.length) {
-        const Selector = this.props.DynamicSelector;
-        styleSelector = (<Selector
+        const DynamicSelector = this.props.DynamicSelector;
+        styleSelector = (<DynamicSelector
           fields={this.state.ordinalFields}
           onChange={changeToDynamicStyle}
           selectedOptions={currentOptions}
@@ -114,8 +114,8 @@ export class StaticDynamicStyleSelector extends React.Component {
       }
     } else {
       this._lastStaticOptions = currentOptions;
-      const Selector = this.props.StaticSelector;
-      styleSelector = <Selector changeOptions={changeToStaticStyle} selectedOptions={currentOptions}/>;
+      const StaticSelector = this.props.StaticSelector;
+      styleSelector = <StaticSelector changeOptions={changeToStaticStyle} selectedOptions={currentOptions}/>;
     }
 
     return (

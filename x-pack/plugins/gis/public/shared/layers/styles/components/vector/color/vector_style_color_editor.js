@@ -41,7 +41,6 @@ export class VectorStyleColorEditor extends React.Component {
             value={this.state.alphaValue}
             onChange={({ target }) => {
               this.setState({ alphaValue: target.value });
-              console.log(target.value);
             }}
             aria-label="Use aria labels when no actual label is in use"
             name={`${this.props.name} alpha range`}

@@ -4,55 +4,100 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { VectorStyle } from '../vector_style';
-import _ from 'lodash';
+import React, { Fragment } from 'react';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiFormLabel,
+  EuiComboBox,
   EuiSpacer
 } from '@elastic/eui';
 
-
-export class StaticDynamicStyleSelector extends React.Component {
-
+export class DynamicOrdinalStyleOption extends React.Component {
 
   constructor() {
     super();
-    this._isMounted = false;
     this.state = {
-      ordinalFields: null
+      fieldSelection: null
     };
   }
 
-  componentWillUnmount() {
-    this._isMounted = false;
+
+  _onFieldSelected = (fieldSelection) => {
+    this.setState({
+      fieldSelection: fieldSelection
+    });
+    this._fireChange(fieldSelection, {});
+  };
+
+
+  _fireChange(newField, dynamicOptions) {
+    let newOptions = { ...this.props.selectedOptions };
+    newOptions.field = newField && newField.length ? newField[0].value : this.props.selectedOptions.field;
+    newOptions = { ...newOptions, ...dynamicOptions };
+    this.props.onChange(newOptions);
   }
 
-  componentDidMount() {
-    this._isMounted = true;
-    this._loadOrdinalFields();
+  _getComboBoxOptionsFromFields() {
+    return this.props.fields.map(field => {
+      return { label: field.label, value: field };
+    });
+    // if (this.props.selectedOptions) {
+    //   const { color, field } = this.props.selectedOptions;
+    //   if (!this.state.comboBoxOptions && field) {
+    //     const selectedValue = options.find(({ value }) => {
+    //       return value.name === field.name;
+    //     });
+    //     this.state.comboBoxOptions = selectedValue ? [selectedValue] : [];
+    //   }
+    //   if (!this.state.selectedColorRamp && color) {
+    //     this.state.selectedColorRamp = color;
+    //   }
+    //   if (!this.state.comboBoxOptions) this.state.comboBoxOptions = [];
+    // } else {
+    //   this.state.comboBoxOptions = [];
+    // }
+
   }
 
-  async _loadOrdinalFields() {
-    const ordinalFields = await this.props.layer.getOrdinalFields();
-    if (!this._isMounted) {
-      return;
+  _getFieldSelectionFromPropsAndState(options) {
+
+    if (this.state.fieldSelection) {
+      return this.state.fieldSelection;
     }
-    //check if fields are the same..
-    const eqls = _.isEqual(ordinalFields, this.state.ordinalFields);
-    if (!eqls) {
-      this.setState({
-        ordinalFields: ordinalFields
-      });
+
+    if (this.props.selectedOptions) {
+      if (this.props.selectedOptions.field) {
+        const selectedValue = options.find(({ value }) => {
+          return value.name === this.props.selectedOptions.field.name;
+        });
+        return (selectedValue) ? [selectedValue] : [];
+      }
+    } else {
+      return [];
     }
   }
 
   render() {
-    return (<div>todo</div>);
+    const DynamicStylingOption = this.props.DynamicStylingOption;
+    const onChange = (additionalOptions) => {
+      this._fireChange(this.state.fieldSelection, additionalOptions);
+    };
+
+    const ordinalFieldComboboxOptions = this._getComboBoxOptionsFromFields();
+    const fieldSelection = this._getFieldSelectionFromPropsAndState(ordinalFieldComboboxOptions);
+
+    return (
+      <Fragment>
+        <EuiComboBox
+          selectedOptions={fieldSelection}
+          options={ordinalFieldComboboxOptions}
+          onChange={this._onFieldSelected}
+          singleSelection={{}}
+          fullWidth
+        />
+        <EuiSpacer size="m" />
+        <DynamicStylingOption onChange={onChange} selectedOptions={this.props.selectedOptions}/>
+      </Fragment>
+    );
   }
 
 }
