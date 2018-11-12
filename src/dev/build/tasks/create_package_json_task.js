@@ -32,6 +32,7 @@ export const CreatePackageJsonTask = {
       private: true,
       description: pkg.description,
       keywords: pkg.keywords,
+      license: pkg.license,
       version: config.getBuildVersion(),
       branch: pkg.branch,
       build: {
