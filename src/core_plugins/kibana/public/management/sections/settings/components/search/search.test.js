@@ -67,15 +67,17 @@ describe('Search', () => {
       />
     );
 
+    const searchBar = findTestSubject(component, 'settingsSearchBar');
+
     // Send invalid query
-    component.find('input').simulate('keyup', { target: { value: '?' } });
+    searchBar.simulate('keyup', { target: { value: '?' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
     expect(component.state().isSearchTextValid).toBe(false);
 
     onQueryChangeMock.mockReset();
 
     // Send valid query to ensure component can recover from invalid query
-    findTestSubject(component, 'settingsSearchBar').simulate('keyup', { target: { value: 'dateFormat' } });
+    searchBar.simulate('keyup', { target: { value: 'dateFormat' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
     expect(component.state().isSearchTextValid).toBe(true);
   });
