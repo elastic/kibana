@@ -118,12 +118,12 @@ class JobsListUI extends Component {
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
             aria-label={this.state.itemIdToExpandedRowMap[item.id]
               ? intl.formatMessage({
-                id: 'xpack.ml.jobsList.collapseJobDetailAriaLabel',
+                id: 'xpack.ml.jobsList.collapseJobDetailsAriaLabel',
                 defaultMessage: 'Hide details for {itemId}' },
               { itemId: item.id }
               )
               : intl.formatMessage({
-                id: 'xpack.ml.jobsList.expandJobDetailAriaLabel',
+                id: 'xpack.ml.jobsList.expandJobDetailsAriaLabel',
                 defaultMessage: 'Show details for {itemId}' },
               { itemId: item.id }
               )}
