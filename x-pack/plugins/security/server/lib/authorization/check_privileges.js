@@ -6,7 +6,7 @@
 
 import { pick, transform, uniq } from 'lodash';
 import { GLOBAL_RESOURCE } from '../../../common/constants';
-import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
+import { ResourceSerializer } from './resource_serializer';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 
 export function checkPrivilegesWithRequestFactory(actions, application, shieldClient) {
@@ -61,18 +61,18 @@ export function checkPrivilegesWithRequestFactory(actions, application, shieldCl
 
     return {
       async atSpace(spaceId, privilegeOrPrivileges) {
-        const spaceResource = spaceApplicationPrivilegesSerializer.resource.serialize(spaceId);
+        const spaceResource = ResourceSerializer.serializeSpaceResource(spaceId);
         return await checkPrivilegesAtResource(spaceResource, privilegeOrPrivileges);
       },
       async atSpaces(spaceIds, privilegeOrPrivileges) {
-        const spaceResources = spaceIds.map(spaceId => spaceApplicationPrivilegesSerializer.resource.serialize(spaceId));
+        const spaceResources = spaceIds.map(spaceId => ResourceSerializer.serializeSpaceResource(spaceId));
         const { hasAllRequested, username, resourcePrivileges } = await checkPrivilegesAtResources(spaceResources, privilegeOrPrivileges);
         return {
           hasAllRequested,
           username,
           // we need to turn the resource responses back into the space ids
           spacePrivileges: transform(resourcePrivileges, (result, value, key) => {
-            result[spaceApplicationPrivilegesSerializer.resource.deserialize(key)] = value;
+            result[ResourceSerializer.deserializeSpaceResource(key)] = value;
           }),
         };
 

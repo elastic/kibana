@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PrivilegeSerializer } from './privilege_serializer';
 import { PrivilegeMap } from './privileges';
-import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
 
 interface SerializedPrivilege {
   application: string;
@@ -30,7 +30,8 @@ export const serializePrivileges = (
     [application]: {
       ...Object.entries(privilegeMap.global).reduce(
         (acc, [privilegeName, privilegeActions]) => {
-          acc[privilegeName] = {
+          const name = PrivilegeSerializer.serializeGlobalPrivilege(privilegeName);
+          acc[name] = {
             application,
             name: privilegeName,
             actions: privilegeActions,
@@ -42,7 +43,7 @@ export const serializePrivileges = (
       ),
       ...Object.entries(privilegeMap.space).reduce(
         (acc, [privilegeName, privilegeActions]) => {
-          const name = spaceApplicationPrivilegesSerializer.privilege.serialize(privilegeName);
+          const name = PrivilegeSerializer.serializeSpacePrivilege(privilegeName);
           acc[name] = {
             application,
             name,
@@ -56,7 +57,7 @@ export const serializePrivileges = (
       ...Object.entries(privilegeMap.features).reduce(
         (acc, [featureName, featurePrivileges]) => {
           Object.entries(featurePrivileges).forEach(([privilegeName, privilegeActions]) => {
-            const name = `feature_${featureName}_${privilegeName}`;
+            const name = PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilegeName);
             acc[name] = {
               application,
               name,

@@ -8,7 +8,7 @@ import { pick, identity } from 'lodash';
 import Joi from 'joi';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
-import { spaceApplicationPrivilegesSerializer } from '../../../../lib/authorization';
+import { PrivilegeSerializer, ResourceSerializer } from '../../../../lib/authorization';
 
 export function initPutRolesApi(
   server,
@@ -22,7 +22,7 @@ export function initPutRolesApi(
     const kibanaApplicationPrivileges = [];
     if (kibanaPrivileges.global && kibanaPrivileges.global.length) {
       kibanaApplicationPrivileges.push({
-        privileges: kibanaPrivileges.global,
+        privileges: kibanaPrivileges.global.map(privilege => PrivilegeSerializer.serializePrivilegeAssignedGlobally(privilege)),
         application,
         resources: [GLOBAL_RESOURCE],
       });
@@ -31,9 +31,9 @@ export function initPutRolesApi(
     if (kibanaPrivileges.space) {
       for(const [spaceId, privileges] of Object.entries(kibanaPrivileges.space)) {
         kibanaApplicationPrivileges.push({
-          privileges: privileges.map(privilege => spaceApplicationPrivilegesSerializer.privilege.serialize(privilege)),
+          privileges: privileges.map(privilege => PrivilegeSerializer.serializePrivilegeAssignedAtSpace(privilege)),
           application,
-          resources: [spaceApplicationPrivilegesSerializer.resource.serialize(spaceId)]
+          resources: [ResourceSerializer.serializeSpaceResource(spaceId)]
         });
       }
     }
