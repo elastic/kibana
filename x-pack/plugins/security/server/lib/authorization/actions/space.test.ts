@@ -3,14 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { isString } from 'lodash';
 
-export class AppActions {
-  public get(appId: string) {
-    if (!appId || !isString(appId)) {
-      throw new Error('appId is required and must be a string');
-    }
+import { SpaceActions } from './space';
 
-    return `app:${appId}`;
-  }
-}
+describe(`#manage`, () => {
+  test(`returns space:manage`, () => {
+    const spaceActions = new SpaceActions();
+    expect(spaceActions.manage).toBe('space:manage');
+  });
+});

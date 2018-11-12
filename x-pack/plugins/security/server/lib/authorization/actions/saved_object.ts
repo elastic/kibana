@@ -26,7 +26,7 @@ export class SavedObjectActions {
     }
 
     if (!operation || !isString(operation)) {
-      throw new Error('action is required and must be a string');
+      throw new Error('operation is required and must be a string');
     }
 
     return `saved_object:${type}/${operation}`;
