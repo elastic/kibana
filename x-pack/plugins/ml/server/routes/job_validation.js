@@ -12,7 +12,7 @@ import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
-import { validateJob } from '../models/job_validation';
+import { validateJob, validateCardinality } from '../models/job_validation';
 
 export function jobValidationRoutes(server, commonRouteConfig) {
 
@@ -72,6 +72,22 @@ export function jobValidationRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       return calculateModelMemoryLimit(callWithRequest, request.payload)
         .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
+    method: 'POST',
+    path: '/api/ml/validate/cardinality',
+    handler(request, reply) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      return validateCardinality(callWithRequest, request.payload)
+        .then(reply)
+        .catch((resp) => {
+          reply(wrapError(resp));
+        });
     },
     config: {
       ...commonRouteConfig
