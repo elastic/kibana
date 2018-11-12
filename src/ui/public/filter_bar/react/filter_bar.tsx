@@ -20,6 +20,7 @@
 import React, { Component } from 'react';
 import { Filter } from 'ui/filter_bar/filters';
 import { createFilterBarFilter, FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filters';
+import { createMetaFilter } from 'ui/filter_bar/filters/meta_filter';
 import { FilterItem } from 'ui/filter_bar/react/filter_item';
 
 interface Props {
@@ -49,7 +50,7 @@ export class FilterBar extends Component<Props> {
 
   public render() {
     const filterItems = this.props.filters.map(filter => {
-      const filterBarFilter = createFilterBarFilter(filter);
+      const filterBarFilter = createFilterBarFilter(createMetaFilter(filter));
       return (
         <FilterItem
           filter={filterBarFilter}

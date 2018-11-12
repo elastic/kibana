@@ -17,13 +17,38 @@
  * under the License.
  */
 
-import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
+import { Filter } from 'ui/filter_bar/filters/index';
 
-export function createFilterBarPhraseFilter(filter: PhraseFilter) {
+export interface MetaFilter {
+  filter: Filter;
+  disabled: boolean;
+  negate: boolean;
+  pinned: boolean;
+  index?: string;
+  toElasticsearchQuery: () => void;
+}
+
+interface CreateMetaFilterOptions {
+  disabled?: boolean;
+  negate?: boolean;
+  pinned?: boolean;
+  index?: string;
+}
+
+export function createMetaFilter(
+  filter: Filter,
+  { disabled = false, negate = false, pinned = false, index }: CreateMetaFilterOptions = {}
+): MetaFilter {
   return {
     filter,
-    getDisplayText: () => {
-      return `${filter.field} : ${filter.value}`;
+    disabled,
+    negate,
+    pinned,
+    index,
+    toElasticsearchQuery: () => {
+      // TODO implement me
+      // if negate === true then wrap filter in a `not` filter
+      // call underlying filter's toElasticsearchQuery
     },
   };
 }

@@ -17,19 +17,25 @@
  * under the License.
  */
 
-import { Filter } from 'ui/filter_bar/filters';
-import { createFilterBarPhraseFilter } from 'ui/filter_bar/filters/filter_bar_filters/filter_bar_phrase_filter';
+import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
 import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 
-export interface FilterBarFilter {
-  filter: Filter;
+export type FilterBarFilter = MetaFilter & {
   getDisplayText: () => string;
-}
+};
 
-export function createFilterBarFilter(filter: Filter): FilterBarFilter {
+export function createFilterBarFilter(metaFilter: MetaFilter): FilterBarFilter {
+  const filter = metaFilter.filter;
+
   switch (filter.type) {
     case 'PhraseFilter':
-      return createFilterBarPhraseFilter(filter as PhraseFilter);
+      return {
+        ...metaFilter,
+        getDisplayText() {
+          const { field, value } = this.filter as PhraseFilter;
+          return `${field} : ${value}`;
+        },
+      };
     default:
       throw new Error(`Unknown filter type: ${filter.type}`);
   }

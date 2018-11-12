@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createFilter, CreateFilterOptions, Filter } from 'ui/filter_bar/filters/index';
+import { Filter } from 'ui/filter_bar/filters/index';
 
 export type PhraseFilter = Filter & {
   field: string;
@@ -29,15 +29,15 @@ interface CreatePhraseFilterOptions {
   value: string | number;
 }
 
-export function createPhraseFilter(
-  options: CreatePhraseFilterOptions & CreateFilterOptions
-): PhraseFilter {
-  const baseFilter = createFilter(options);
+export function createPhraseFilter(options: CreatePhraseFilterOptions): PhraseFilter {
   const { field, value } = options;
   return {
-    ...baseFilter,
     type: 'PhraseFilter',
     field,
     value,
+    toElasticsearchQuery() {
+      // TODO implement me
+      return {};
+    },
   };
 }
