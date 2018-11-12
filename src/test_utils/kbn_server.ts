@@ -65,6 +65,7 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
     configs: [],
     cliArgs: {
       dev: false,
+      open: false,
       quiet: false,
       silent: false,
       watch: false,

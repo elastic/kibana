@@ -23,7 +23,7 @@ declare module '@elastic/eui' {
   export const EuiOutsideClickDetector: SFC<any>;
 }
 
-import { debounce } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import React, { Component, SFC } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
@@ -84,16 +84,22 @@ interface State {
   index: number | null;
   suggestions: AutocompleteSuggestion[];
   suggestionLimit: number;
+  currentProps?: Props;
 }
 
 export class QueryBar extends Component<Props, State> {
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+    if (isEqual(prevState.currentProps, nextProps)) {
+      return null;
+    }
+
     if (nextProps.query.query !== prevState.query.query) {
       return {
         query: {
           query: toUser(nextProps.query.query),
           language: nextProps.query.language,
         },
+        currentProps: nextProps,
       };
     } else if (nextProps.query.language !== prevState.query.language) {
       return {
@@ -101,6 +107,7 @@ export class QueryBar extends Component<Props, State> {
           query: '',
           language: nextProps.query.language,
         },
+        currentProps: nextProps,
       };
     }
 

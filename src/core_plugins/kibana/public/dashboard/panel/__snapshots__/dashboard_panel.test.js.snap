@@ -22,6 +22,7 @@ exports[`DashboardPanel matches snapshot 1`] = `
     >
       <div
         class="euiPopover euiPopover--anchorDownRight euiPopover--withTitle dshPanel_optionsMenuPopover"
+        data-test-subj="dashboardPanelContextMenuClosed"
         id="dashboardPanelContextMenu"
       >
         <div
