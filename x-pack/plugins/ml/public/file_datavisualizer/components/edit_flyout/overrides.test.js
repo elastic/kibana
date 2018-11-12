@@ -16,6 +16,7 @@ describe('Overrides', () => {
     const props = {
       setOverrides: () => {},
       overrides: {},
+      originalSettings: {},
       defaultSettings: {},
       setApplyOverrides: () => {},
       fields: [],

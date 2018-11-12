@@ -54,10 +54,7 @@ const INITIAL_STATE = {
       lat: 32.82
     },
     extent: null,
-    timeFilters: { // TODO: Init vals during app hydration
-      from: 'now-24h',
-      to: 'now'
-    },
+    timeFilters: null,
   },
   selectedLayerId: null,
   layerList: []
