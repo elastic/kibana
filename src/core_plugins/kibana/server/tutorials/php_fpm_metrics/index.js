@@ -40,7 +40,7 @@ export function phpfpmMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-php_fpm.html',
       },
     }),
-    //euiIconType: 'logoPHPFPM',
+    euiIconType: 'logoPhp',
     artifacts: {
       dashboards: [
         /*{

@@ -91,6 +91,9 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       const exit$ = Rx.fromEvent(childProcess, 'exit').pipe(
         take(1),
         map(([code]) => {
+          if (this._stopCalled) {
+            return null;
+          }
           // JVM exits with 143 on SIGTERM and 130 on SIGINT, dont' treat then as errors
           if (code > 0 && !(code === 143 || code === 130)) {
             throw createCliError(`[${name}] exited with code ${code}`);
@@ -115,9 +118,16 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       return this._outcomePromise;
     }
 
+    _stopCalled = false;
+
     async stop(signal) {
+      if (this._stopCalled) {
+        return;
+      }
+      this._stopCalled = true;
       await withTimeout(
         async () => {
+          log.debug(`Sending "${signal}" to proc "${name}"`);
           await treeKillAsync(childProcess.pid, signal);
           await this.getOutcomePromise();
         },

@@ -8,16 +8,13 @@ import React, { Component } from 'react';
 import { STATUS } from '../../../constants';
 import { isEmpty } from 'lodash';
 import { loadAgentStatus } from '../../../services/rest/apm';
-import { KibanaLink } from '../../../utils/url';
-import { EuiButton } from '@elastic/eui';
-import List from './List';
-import { HeaderContainer } from '../../shared/UIComponents';
-import { KueryBar } from '../../shared/KueryBar';
-
+import { ServiceList } from './ServiceList';
+import { EuiSpacer } from '@elastic/eui';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 import EmptyMessage from '../../shared/EmptyMessage';
+import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
 
-class ServiceOverview extends Component {
+export class ServiceOverview extends Component {
   state = {
     historicalDataFound: true
   };
@@ -59,32 +56,14 @@ class ServiceOverview extends Component {
 
     return (
       <div>
-        <HeaderContainer>
-          <h1>Services</h1>
-          <SetupInstructionsLink />
-        </HeaderContainer>
-
-        <KueryBar />
-
+        <EuiSpacer />
         <ServiceListRequest
           urlParams={urlParams}
           render={({ data }) => (
-            <List items={data} noItemsMessage={noItemsMessage} />
+            <ServiceList items={data} noItemsMessage={noItemsMessage} />
           )}
         />
       </div>
     );
   }
 }
-
-function SetupInstructionsLink({ buttonFill = false }) {
-  return (
-    <KibanaLink pathname={'/app/kibana'} hash={'/home/tutorial/apm'}>
-      <EuiButton size="s" color="primary" fill={buttonFill}>
-        Setup Instructions
-      </EuiButton>
-    </KibanaLink>
-  );
-}
-
-export default ServiceOverview;

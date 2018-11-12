@@ -55,6 +55,16 @@ const createAgent = (server) => {
     agentOptions.ca = config.get('elasticsearch.ssl.certificateAuthorities').map(readFile);
   }
 
+  if (
+    config.get('elasticsearch.ssl.alwaysPresentCertificate') &&
+    config.get('elasticsearch.ssl.certificate') &&
+    config.get('elasticsearch.ssl.key')
+  ) {
+    agentOptions.cert = readFile(config.get('elasticsearch.ssl.certificate'));
+    agentOptions.key = readFile(config.get('elasticsearch.ssl.key'));
+    agentOptions.passphrase = config.get('elasticsearch.ssl.keyPassphrase');
+  }
+
   return new https.Agent(agentOptions);
 };
 

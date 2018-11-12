@@ -156,6 +156,8 @@ export class SpacesClient {
     }
 
     await repository.delete('space', id);
+
+    await repository.deleteByNamespace(id);
   }
 
   private useRbac(): boolean {

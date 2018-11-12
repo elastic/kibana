@@ -40,6 +40,7 @@ export function windowsMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-windows.html',
       },
     }),
+    euiIconType: 'logoWindows',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.windowsMetrics.artifacts.application.label', {

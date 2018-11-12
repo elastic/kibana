@@ -67,12 +67,12 @@ import { buildProductionProjects } from '@kbn/pm';
  */
 
 export const BuildPackagesTask = {
+  global: true,
   description: 'Building distributable versions of packages',
-  async run(config, log, build) {
+  async run(config, log, builds) {
     await buildProductionProjects({
       kibanaRoot: config.resolveFromRepo(),
-      buildRoot: build.resolvePath(),
-      oss: build.isOss(),
+      buildRoots: builds.map(build => build.resolvePath()),
     });
   },
 };

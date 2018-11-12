@@ -1,8 +1,10 @@
 <div class="kuiSideBarSection kuiSideBarSection__main">
   <div class="kuiSideBarSectionTitle">
-    <div class="kuiSideBarSectionTitle__text">
-      Y-Axes
-    </div>
+    <div
+      class="kuiSideBarSectionTitle__text"
+      i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.yAxisTitle"
+      i18n-default-message="Y-Axes"
+    ></div>
 
     <button
       data-test-subj="visualizeAddYAxisButton"
@@ -56,18 +58,24 @@
       <!-- General -->
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="{ 'valueAxisShow' + $index }">
-            Show
-          </label>
+          <label
+            class="kuiSideBarFormRow__label"
+            for="{ 'valueAxisShow' + $index }"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabel"
+            i18n-default-message="Show"
+          ></label>
           <div class="kuiSideBarFormRow__control">
             <input class="kuiCheckBox" id="{ 'valueAxisShow' + $index }" type="checkbox" ng-model="axis.show">
           </div>
         </div>
 
         <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="{{ 'valueAxisTitle' + $index }}">
-            Title
-          </label>
+          <label
+            class="kuiSideBarFormRow__label"
+            for="{{ 'valueAxisTitle' + $index }}"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.titleLabel"
+            i18n-default-message="Title"
+          ></label>
           <div class="kuiSideBarFormRow__control">
             <input
               id="{{ 'valueAxisTitle' + $index }}"
@@ -79,9 +87,12 @@
         </div>
 
         <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="{{ 'valueAxisPosition' + $index }}">
-            Position
-          </label>
+          <label
+            class="kuiSideBarFormRow__label"
+            for="{{ 'valueAxisPosition' + $index }}"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.positionLabel"
+            i18n-default-message="Position"
+          ></label>
           <div class="kuiSideBarFormRow__control">
             <select
               id="{{ 'valueAxisPosition' + $index }}"
@@ -94,9 +105,12 @@
         </div>
 
         <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="{{ 'valueAxisMode' + $index }}">
-            Mode
-          </label>
+          <label
+            class="kuiSideBarFormRow__label"
+            for="{{ 'valueAxisMode' + $index }}"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.modeLabel"
+            i18n-default-message="Mode"
+          ></label>
           <div class="kuiSideBarFormRow__control">
             <select
               id="{{ 'valueAxisMode' + $index }}"
@@ -108,9 +122,12 @@
         </div>
 
         <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="{{ 'valueAxisScaleType' + $index }}">
-            Scale Type
-          </label>
+          <label
+            class="kuiSideBarFormRow__label"
+            for="{{ 'valueAxisScaleType' + $index }}"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleTypeLabel"
+            i18n-default-message="Scale Type"
+          ></label>
           <div class="kuiSideBarFormRow__control">
             <select
               data-test-subj="scaleSelectYAxis-{{axis.id}}"
@@ -136,38 +153,49 @@
             ng-class="{ 'fa-caret-down': isValueAxisAdvancedOptionsOpen, 'fa-caret-right': !isValueAxisAdvancedOptionsOpen }"
             class="kuiIcon fa-caret-right kuiSideBarOptionsLink__caret"
           ></span>
-          <span class="kuiSideBarOptionsLink__text">
-            <span ng-show="!isValueAxisAdvancedOptionsOpen">
-              Show
-            </span>
-            <span ng-show="isValueAxisAdvancedOptionsOpen">
-              Hide
-            </span>
-            Advanced Options
-          </span>
+          <span
+            class="kuiSideBarOptionsLink__text"
+            ng-show="!isValueAxisAdvancedOptionsOpen"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.showAdvancedOptionsLabel"
+            i18n-default-message="Show Advanced Options"
+          ></span>
+          <span
+            class="kuiSideBarOptionsLink__text"
+            ng-show="isValueAxisAdvancedOptionsOpen"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.hideAdvancedOptionsLabel"
+            i18n-default-message="Hide Advanced Options"
+          ></span>
         </a>
 
         <div ng-show="isValueAxisAdvancedOptionsOpen">
 
           <!-- Labels -->
           <div class="kuiSideBarSection">
-            <h6 class="kuiSideBarFormSectionTitle">
-              Labels
-            </h6>
+            <h6
+              class="kuiSideBarFormSectionTitle"
+              i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.labelsTitle"
+              i18n-default-message="Labels"
+            ></h6>
 
             <div class="kuiSideBarFormRow">
-              <label class="kuiSideBarFormRow__label" for="{{ 'valueAxisShowLabels' + $index }}">
-                Show Labels
-              </label>
+              <label
+                class="kuiSideBarFormRow__label"
+                for="{{ 'valueAxisShowLabels' + $index }}"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.showLabelsLabel"
+                i18n-default-message="Show Labels"
+              ></label>
               <div class="kuiSideBarFormRow__control">
                 <input class="kuiCheckBox" id="{{ 'valueAxisShowLabels' + $index }}" type="checkbox" ng-model="axis.labels.show">
               </div>
             </div>
 
             <div class="kuiSideBarFormRow">
-              <label class="kuiSideBarFormRow__label" for="{{ 'valueAxisFilterLabels' + $index }}">
-                Filter Labels
-              </label>
+              <label
+                class="kuiSideBarFormRow__label"
+                for="{{ 'valueAxisFilterLabels' + $index }}"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.filterLabelsLabel"
+                i18n-default-message="Filter Labels"
+              ></label>
               <div class="kuiSideBarFormRow__control">
                 <input
                   data-test-subj="yAxisFilterLabelsCheckbox-{{axis.id}}"
@@ -180,9 +208,12 @@
             </div>
 
             <div class="kuiSideBarFormRow">
-              <label class="kuiSideBarFormRow__label" for="{{ 'valueAxisRotateLabels' + $index }}">
-                Rotate
-              </label>
+              <label
+                class="kuiSideBarFormRow__label"
+                for="{{ 'valueAxisRotateLabels' + $index }}"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.rotateLabel"
+                i18n-default-message="Rotate"
+              ></label>
               <div class="kuiSideBarFormRow__control">
                 <select
                   id="{{ 'valueAxisRotateLabels' + $index }}"
@@ -194,9 +225,12 @@
             </div>
 
             <div class="kuiSideBarFormRow">
-              <label class="kuiSideBarFormRow__label" for="{{ 'valueAxisTruncateLabels' + $index }}">
-                Truncate
-              </label>
+              <label
+                class="kuiSideBarFormRow__label"
+                for="{{ 'valueAxisTruncateLabels' + $index }}"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.truncateLabel"
+                i18n-default-message="Truncate"
+              ></label>
               <div class="kuiSideBarFormRow__control">
                 <input
                   id="{{ 'valueAxisTruncateLabels' + $index }}"
@@ -210,23 +244,31 @@
 
           <!-- Custom Extents -->
           <div class="kuiSideBarSection">
-            <h6 class="kuiSideBarFormSectionTitle">
-              Custom Extents
-            </h6>
+            <h6
+              class="kuiSideBarFormSectionTitle"
+              i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.customExtentsTitle"
+              i18n-default-message="Custom Extents"
+            ></h6>
 
             <div class="kuiSideBarFormRow">
-              <label class="kuiSideBarFormRow__label" for="{ 'defaultYExtents' + $index }">
-                Scale to Data Bounds
-              </label>
+              <label
+                class="kuiSideBarFormRow__label"
+                for="{ 'defaultYExtents' + $index }"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.scaleToDataBoundsLabel"
+                i18n-default-message="Scale to Data Bounds"
+              ></label>
               <div class="kuiSideBarFormRow__control">
                 <input class="kuiCheckBox" id="{ 'defaultYExtents' + $index }" type="checkbox" ng-model="axis.scale.defaultYExtents">
               </div>
             </div>
 
             <div class="kuiSideBarFormRow">
-              <label class="kuiSideBarFormRow__label" for="{ 'setYExtents' + $index }">
-                Set Axis Extents
-              </label>
+              <label
+                class="kuiSideBarFormRow__label"
+                for="{ 'setYExtents' + $index }"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.setAxisExtentsLabel"
+                i18n-default-message="Set Axis Extents"
+              ></label>
               <div class="kuiSideBarFormRow__control">
                 <input class="kuiCheckBox" id="{ 'setYExtents' + $index }" type="checkbox" ng-model="axis.scale.setYExtents" ng-change="updateExtents(axis)">
               </div>
@@ -234,9 +276,11 @@
 
             <div ng-if="axis.scale.setYExtents">
               <div class="kuiSideBarFormRow">
-                <label class="kuiSideBarFormRow__label">
-                  Max
-                </label>
+                <label
+                  class="kuiSideBarFormRow__label"
+                  i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.maxLabel"
+                  i18n-default-message="Max"
+                ></label>
                 <div class="kuiSideBarFormRow__control">
                   <input
                     name="yMax"
@@ -249,9 +293,11 @@
               </div>
 
               <div class="kuiSideBarFormRow">
-                <label class="kuiSideBarFormRow__label">
-                  Min
-                </label>
+                <label
+                  class="kuiSideBarFormRow__label"
+                  i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.minLabel"
+                  i18n-default-message="Min"
+                ></label>
                 <div class="kuiSideBarFormRow__control">
                   <input
                     name="yMin"
@@ -264,7 +310,11 @@
                 </div>
               </div>
               <div ng-show="axis.scale.type === 'log' && axis.scale.min <= 0">
-                <span class="text-danger">Min must exceed 0 when a log scale is selected</span>
+                <span
+                  class="text-danger"
+                  i18n-id="kbnVislibVisTypes.controls.pointSeries.valueAxes.minNeededScaleText"
+                  i18n-default-message="Min must exceed 0 when a log scale is selected"
+                ></span>
               </div>
             </div>
           </div>

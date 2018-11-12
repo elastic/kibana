@@ -9,6 +9,7 @@
     ></icon-tip>
   </label>
   <select
+    ng-if="!editorConfig.customInterval.timeBase"
     id="visEditorInterval{{agg.id}}"
     ng-model="agg.params.interval"
     ng-change="agg.write()"
@@ -23,9 +24,16 @@
     type="text"
     name="customInterval"
     ng-model="agg.params.customInterval"
-    validate-date-interval
+    validate-date-interval="{{editorConfig.customInterval.timeBase}}"
     ng-change="aggForm.customInterval.$valid && agg.write()"
     ng-if="agg.params.interval.val == 'custom'"
     class="form-control"
     required />
+  <div
+    ng-if="editorConfig.customInterval.help"
+    class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall"
+    style="margin-top: 5px"
+  >
+    <span>{{editorConfig.customInterval.help}}</span>
+  </div>
 </div>

@@ -7,6 +7,7 @@
 
 
 import _ from 'lodash';
+import $ from 'jquery';
 import { migrateFilter } from 'ui/courier';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
@@ -104,4 +105,13 @@ export function moveToAdvancedJobCreationProvider($location) {
     mlJobService.currentJob = job;
     $location.path('jobs/new_job/advanced');
   };
+}
+
+export function focusOnResultsLink(linkId, $timeout) {
+  // Set focus to the View Results button, which also provides
+  // accessibility feedback that the job has finished.
+  // Run inside $timeout to ensure model has been updated with job state
+  $timeout(() => {
+    $(`#${linkId}`).focus();
+  }, 0);
 }

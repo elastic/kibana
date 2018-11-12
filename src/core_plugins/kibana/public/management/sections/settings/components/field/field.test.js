@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Field } from './field';
@@ -155,8 +155,8 @@ describe('Field', () => {
 
     describe(`for ${type} setting`, () => {
       it('should render default value if there is no user value set', async () => {
-        const component = shallow(
-          <Field
+        const component = shallowWithIntl(
+          <Field.WrappedComponent
             setting={setting}
             save={save}
             clear={clear}
@@ -167,8 +167,8 @@ describe('Field', () => {
       });
 
       it('should render as read only with help text if overridden', async () => {
-        const component = shallow(
-          <Field
+        const component = shallowWithIntl(
+          <Field.WrappedComponent
             setting={{
               ...setting,
               value: userValues[type],
@@ -183,8 +183,8 @@ describe('Field', () => {
       });
 
       it('should render user value if there is user value is set', async () => {
-        const component = shallow(
-          <Field
+        const component = shallowWithIntl(
+          <Field.WrappedComponent
             setting={{
               ...setting,
               value: userValues[type],
@@ -198,8 +198,8 @@ describe('Field', () => {
       });
 
       it('should render custom setting icon if it is custom', async () => {
-        const component = shallow(
-          <Field
+        const component = shallowWithIntl(
+          <Field.WrappedComponent
             setting={{
               ...setting,
               isCustom: true,
@@ -215,8 +215,8 @@ describe('Field', () => {
 
     if(type === 'image') {
       describe(`for changing ${type} setting`, () => {
-        const component = mount(
-          <Field
+        const component = mountWithIntl(
+          <Field.WrappedComponent
             setting={setting}
             save={save}
             clear={clear}
@@ -268,8 +268,8 @@ describe('Field', () => {
       });
     } else if(type === 'markdown' || type === 'json') {
       describe(`for changing ${type} setting`, () => {
-        const component = mount(
-          <Field
+        const component = mountWithIntl(
+          <Field.WrappedComponent
             setting={setting}
             save={save}
             clear={clear}
@@ -314,8 +314,8 @@ describe('Field', () => {
       });
     } else {
       describe(`for changing ${type} setting`, () => {
-        const component = mount(
-          <Field
+        const component = mountWithIntl(
+          <Field.WrappedComponent
             setting={setting}
             save={save}
             clear={clear}

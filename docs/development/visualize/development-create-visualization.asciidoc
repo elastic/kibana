@@ -422,7 +422,6 @@ The `vis` object holds the visualization state and is the window into kibana:
 - *vis.isEditorMode()*: returns true if in editor mode
 - *vis.API.timeFilter*: allows you to access time picker
 - *vis.API.queryFilter*: gives you access to queryFilter
-- *vis.API.queryManager*: gives you access to add filters to the filter bar
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
 

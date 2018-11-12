@@ -29,13 +29,14 @@ import { homeApi } from './server/routes/api/home';
 import { managementApi } from './server/routes/api/management';
 import { scriptsApi } from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
+import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
-
+import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
 import { injectVars } from './inject_vars';
 
 const mkdirp = Promise.promisify(mkdirpNode);
@@ -119,6 +120,12 @@ export default function (kibana) {
         },
       ],
 
+      savedObjectSchemas: {
+        'kql-telemetry': {
+          isNamespaceAgnostic: true,
+        },
+      },
+
       injectDefaultVars(server, options) {
         return {
           kbnIndex: options.index,
@@ -156,8 +163,10 @@ export default function (kibana) {
       homeApi(server);
       managementApi(server);
       registerSuggestionsApi(server);
+      registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
+      makeKQLUsageCollector(server);
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));

@@ -10,7 +10,7 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 
 export const pie = () => ({
   name: 'pie',
-  displayName: 'Chart Style',
+  displayName: 'Chart style',
   modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
   args: [
     {
@@ -19,7 +19,7 @@ export const pie = () => ({
     },
     {
       name: 'hole',
-      displayName: 'Inner Radius',
+      displayName: 'Inner radius',
       help: 'Radius of the hole',
       argType: 'range',
       default: 50,
@@ -37,7 +37,7 @@ export const pie = () => ({
     },
     {
       name: 'labelRadius',
-      displayName: 'Label Radius',
+      displayName: 'Label radius',
       help: 'Distance of the labels from the center of the pie',
       argType: 'range',
       default: 100,
@@ -48,7 +48,7 @@ export const pie = () => ({
     },
     {
       name: 'legend',
-      displayName: 'Legend Position',
+      displayName: 'Legend position',
       help: 'Disable or position the legend',
       argType: 'select',
       default: 'ne',
@@ -74,7 +74,7 @@ export const pie = () => ({
     },
     {
       name: 'tilt',
-      displayName: 'Tilt Angle',
+      displayName: 'Tilt angle',
       help: 'Percentage of tilt where 1 is fully vertical and 0 is completely flat',
       argType: 'percentage',
       default: 1,

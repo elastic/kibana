@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import header from './header.png';
 
 export const bubbleChart = () => ({
   name: 'bubbleChart',
-  displayName: 'Bubble chart',
-  help: 'A customizable bubble chart',
+  displayName: i18n.translate('xpack.canvas.elements.bubbleChartDisplayName', {
+    defaultMessage: 'Bubble chart',
+  }),
+  help: i18n.translate('xpack.canvas.elements.bubbleChartHelpText', {
+    defaultMessage: 'A customizable bubble chart',
+  }),
   width: 700,
   height: 300,
   image: header,

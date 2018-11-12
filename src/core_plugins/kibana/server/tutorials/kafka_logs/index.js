@@ -42,7 +42,7 @@ export function kafkaLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-kafka.html',
       },
     }),
-    //euiIconType: 'logoKafka',
+    euiIconType: 'logoKafka',
     artifacts: {
       dashboards: [
         {

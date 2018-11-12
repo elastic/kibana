@@ -6,6 +6,6 @@
     "patterns": [
       "_ingest/processor/grok"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/plugins/master/ingest.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html#grok-processor-rest-get"
   }
 }

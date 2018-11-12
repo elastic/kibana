@@ -4,7 +4,6 @@ exports[`ManageSpacesButton doesn't render if user profile forbids managing spac
 
 exports[`ManageSpacesButton renders as expected 1`] = `
 <EuiButton
-  className="manage-spaces-button"
   color="primary"
   fill={false}
   iconSide="left"

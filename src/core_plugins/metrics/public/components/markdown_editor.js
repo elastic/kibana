@@ -37,17 +37,30 @@ import {
 } from '@elastic/eui';
 
 class MarkdownEditor extends Component {
-  constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleOnLoad = this.handleOnLoad.bind(this);
+  state = {
+    visData: null,
+  };
+  subscription = null;
+
+  componentDidMount() {
+    if(this.props.visData$) {
+      this.subscription = this.props.visData$.subscribe((data) => {
+        this.setState({ visData: data });
+      });
+    }
   }
 
-  handleChange(value) {
+  componentWillUnmount() {
+    if(this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  handleChange = (value) => {
     this.props.onChange({ markdown: value });
   }
 
-  handleOnLoad(ace) {
+  handleOnLoad = (ace) => {
     this.ace = ace;
   }
 
@@ -58,7 +71,11 @@ class MarkdownEditor extends Component {
   }
 
   render() {
-    const { model, visData, dateFormat } = this.props;
+    const { visData } = this.state;
+    if (!visData) {
+      return null;
+    }
+    const { model, dateFormat } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
     const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
     const rows = [];
@@ -174,8 +191,8 @@ class MarkdownEditor extends Component {
 MarkdownEditor.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
-  visData: PropTypes.object,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  visData$: PropTypes.object,
 };
 
 export default MarkdownEditor;

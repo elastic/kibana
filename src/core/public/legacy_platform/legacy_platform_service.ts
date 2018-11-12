@@ -19,6 +19,7 @@
 
 import angular from 'angular';
 import { BasePathStartContract } from '../base_path';
+import { ChromeStartContract } from '../chrome';
 import { FatalErrorsStartContract } from '../fatal_errors';
 import { InjectedMetadataStartContract } from '../injected_metadata';
 import { LoadingCountStartContract } from '../loading_count';
@@ -32,6 +33,7 @@ interface Deps {
   loadingCount: LoadingCountStartContract;
   basePath: BasePathStartContract;
   uiSettings: UiSettingsClient;
+  chrome: ChromeStartContract;
 }
 
 export interface LegacyPlatformParams {
@@ -57,6 +59,7 @@ export class LegacyPlatformService {
     loadingCount,
     basePath,
     uiSettings,
+    chrome,
   }: Deps) {
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
@@ -67,6 +70,9 @@ export class LegacyPlatformService {
     require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);
     require('ui/chrome/api/injected_vars').__newPlatformInit__(injectedMetadata);
+    require('ui/chrome/api/controls').__newPlatformInit__(chrome);
+    require('ui/chrome/api/theme').__newPlatformInit__(chrome);
+    require('ui/chrome/services/global_nav_state').__newPlatformInit__(chrome);
 
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first

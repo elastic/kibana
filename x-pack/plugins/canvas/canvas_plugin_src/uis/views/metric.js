@@ -21,14 +21,14 @@ export const metric = () => ({
     },
     {
       name: 'metricFont',
-      displayName: 'Metric Text Settings',
+      displayName: 'Metric text settings',
       help: 'Fonts, alignment and color',
       argType: 'font',
       default: `{font size=48 family="${openSans.value}" color="#000000" align=center lHeight=48}`,
     },
     {
       name: 'labelFont',
-      displayName: 'Label Text Settings',
+      displayName: 'Label text settings',
       help: 'Fonts, alignment and color',
       argType: 'font',
       default: `{font size=18 family="${openSans.value}" color="#000000" align=center}`,

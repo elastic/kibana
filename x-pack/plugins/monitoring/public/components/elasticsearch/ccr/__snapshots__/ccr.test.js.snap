@@ -27,8 +27,8 @@ exports[`Ccr that it renders normally 1`] = `
                 "sortable": true,
               },
               Object {
-                "field": "opsSynced",
-                "name": "Ops synced",
+                "field": "syncLagOps",
+                "name": "Sync Lag (ops)",
                 "sortable": true,
               },
               Object {
@@ -38,8 +38,8 @@ exports[`Ccr that it renders normally 1`] = `
                 "sortable": true,
               },
               Object {
-                "field": "syncLagOps",
-                "name": "Sync Lag (ops)",
+                "field": "opsSynced",
+                "name": "Ops synced",
                 "sortable": true,
               },
               Object {

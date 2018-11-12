@@ -99,7 +99,7 @@ export function jobsProvider(callWithRequest) {
       const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length);
       const {
         earliest: earliestTimestampMs,
-        latest: latestTimestampMs } = earliestAndLatestTimeStamps(job.data_counts);
+        latest: latestTimestampMs } = earliestAndLatestTimestamps(job.data_counts);
 
       const tempJob = {
         id: job.job_id,
@@ -241,7 +241,7 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
-  function earliestAndLatestTimeStamps(dataCounts) {
+  function earliestAndLatestTimestamps(dataCounts) {
     const obj = {
       earliest: undefined,
       latest: undefined,

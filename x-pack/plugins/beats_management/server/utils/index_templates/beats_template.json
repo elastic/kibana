@@ -1,0 +1,109 @@
+{
+  "index_patterns": [".management-beats"],
+  "version": 65000,
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "auto_expand_replicas": "0-1",
+      "codec": "best_compression"
+    }
+  },
+  "mappings": {
+    "_doc": {
+      "dynamic": "strict",
+      "properties": {
+        "type": {
+          "type": "keyword"
+        },
+        "enrollment_token": {
+          "properties": {
+            "token": {
+              "type": "keyword"
+            },
+            "expires_on": {
+              "type": "date"
+            }
+          }
+        },
+        "tag": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "color": {
+              "type": "keyword"
+            },
+            "last_updated": {
+              "type": "date"
+            },
+            "configuration_blocks": {
+              "type": "nested",
+              "properties": {
+                "type": {
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "text"
+                },
+                "configs": {
+                  "type": "nested",
+                  "dynamic": true
+                }
+              }
+            }
+          }
+        },
+        "beat": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "config_status": {
+              "type": "keyword"
+            },
+            "active": {
+              "type": "boolean"
+            },
+            "last_checkin": {
+              "type": "date"
+            },
+            "enrollment_token": {
+              "type": "keyword"
+            },
+            "access_token": {
+              "type": "keyword"
+            },
+            "verified_on": {
+              "type": "date"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "keyword"
+            },
+            "host_ip": {
+              "type": "ip"
+            },
+            "host_name": {
+              "type": "keyword"
+            },
+            "ephemeral_id": {
+              "type": "keyword"
+            },
+            "tags": {
+              "type": "keyword"
+            },
+            "metadata": {
+              "dynamic": "true",
+              "type": "object"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -11,34 +11,40 @@
  */
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 
 import {
-  EuiComboBox,
-  EuiHighlight,
   EuiHealth,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 
 import './styles/main.less';
 
-import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
+import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
 const OPTIONS = [
-  { value: 0, label: 'warning', color: getSeverityColor(0) },
-  { value: 25, label: 'minor', color: getSeverityColor(25) },
-  { value: 50, label: 'major', color: getSeverityColor(50) },
-  { value: 75, label: 'critical', color: getSeverityColor(75) }
+  { val: 0, display: 'warning', color: getSeverityColor(0) },
+  { val: 25, display: 'minor', color: getSeverityColor(25) },
+  { val: 50, display: 'major', color: getSeverityColor(50) },
+  { val: 75, display: 'critical', color: getSeverityColor(75) },
 ];
 
+const optionsMap = {
+  'warning': 0,
+  'minor': 25,
+  'major': 50,
+  'critical': 75,
+};
+
 function optionValueToThreshold(value) {
-  // Builds the corresponding threshold object with the required display and val properties
-  // from the specified value.
-  const option = OPTIONS.find(opt => (opt.value === value));
+  // Get corresponding threshold object with required display and val properties from the specified value.
+  let threshold = OPTIONS.find(opt => (opt.val === value));
 
   // Default to warning if supplied value doesn't map to one of the options.
-  let threshold = OPTIONS[0];
-  if (option !== undefined) {
-    threshold = { display: option.label, val: option.value };
+  if (threshold === undefined) {
+    threshold = OPTIONS[0];
   }
 
   return threshold;
@@ -53,59 +59,61 @@ class SelectSeverity extends Component {
     const thresholdState = this.mlSelectSeverityService.state.get('threshold');
     const thresholdValue = _.get(thresholdState, 'val', 0);
     const threshold = optionValueToThreshold(thresholdValue);
-    const selectedOption = OPTIONS.find(opt => (opt.value === threshold.val));
-
+    // set initial selected option equal to threshold value
+    const selectedOption = OPTIONS.find(opt => (opt.val === threshold.val));
     this.mlSelectSeverityService.state.set('threshold', threshold);
 
     this.state = {
-      selectedOptions: [selectedOption]
+      valueDisplay: selectedOption.display,
     };
   }
 
-  onChange = (selectedOptions) => {
-    if (selectedOptions.length === 0) {
-      // Don't allow no options to be selected.
-      return;
-    }
-
+  onChange = (valueDisplay) => {
     this.setState({
-      selectedOptions,
+      valueDisplay: valueDisplay,
     });
-
-    const threshold = optionValueToThreshold(selectedOptions[0].value);
+    const threshold = optionValueToThreshold(optionsMap[valueDisplay]);
     this.mlSelectSeverityService.state.set('threshold', threshold).changed();
-  };
+  }
 
-  renderOption = (option, searchValue, contentClassName) => {
-    const { color, label, value } = option;
-    return (
-      <EuiHealth color={color}>
-        <span className={contentClassName}>
-          <EuiHighlight search={searchValue}>
-            {label}
-          </EuiHighlight>
-          &nbsp;
-          <span>({value})</span>
-        </span>
-      </EuiHealth>
-    );
-  };
+  getOptions = () =>
+    OPTIONS.map(({ color, display, val }) => ({
+      value: display,
+      inputDisplay: (
+        <Fragment>
+          <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
+            {display}
+          </EuiHealth>
+        </Fragment>
+      ),
+      dropdownDisplay: (
+        <Fragment>
+          <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
+            {display}
+          </EuiHealth>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            <p className="euiTextColor--subdued">{`score ${val} and above`}</p>
+          </EuiText>
+        </Fragment>
+      ),
+    }));
 
   render() {
-    const { selectedOptions } = this.state;
+    const { valueDisplay } = this.state;
+    const options = this.getOptions();
+
     return (
-      <EuiComboBox
-        placeholder="Select severity"
-        className="ml-select-severity"
-        singleSelection={true}
-        options={OPTIONS}
-        selectedOptions={selectedOptions}
+      <EuiSuperSelect
+        hasDividers
+        options={options}
+        valueOfSelected={valueDisplay}
         onChange={this.onChange}
-        renderOption={this.renderOption}
       />
     );
   }
 }
+
 SelectSeverity.propTypes = {
   mlSelectSeverityService: PropTypes.object.isRequired,
 };

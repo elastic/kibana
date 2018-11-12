@@ -22,7 +22,7 @@ import { createGetRoute } from './get';
 import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/{type}/{id}', () => {
-  const savedObjectsClient = { get: sinon.stub() };
+  const savedObjectsClient = { get: sinon.stub().returns('') };
   let server;
 
   beforeEach(() => {
@@ -31,8 +31,8 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
-        method(request, reply) {
-          reply(savedObjectsClient);
+        method() {
+          return savedObjectsClient;
         }
       },
     };

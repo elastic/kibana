@@ -17,6 +17,7 @@
   "dependencies": {
     "chalk": "^2.4.1",
     "dedent": "^0.7.0",
+    "del": "^3.0.0",
     "getopts": "^2.0.6",
     "glob": "^7.1.2",
     "rxjs": "^6.2.1",

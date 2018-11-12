@@ -6,7 +6,7 @@
 
 jest.mock('../../../lib/route_pre_check_license', () => {
   return {
-    routePreCheckLicense: () => (request: any, reply: any) => reply.continue(),
+    routePreCheckLicense: () => (request: any, h: any) => h.continue,
   };
 });
 
@@ -54,8 +54,7 @@ describe('Spaces API', () => {
 
   test(`returns result of routePreCheckLicense`, async () => {
     const { response } = await request('POST', '/api/spaces/v1/space/a-space/select', {
-      preCheckLicenseImpl: (req: any, reply: any) =>
-        reply(Boom.forbidden('test forbidden message')),
+      preCheckLicenseImpl: () => Boom.forbidden('test forbidden message'),
       expectSpacesClientCall: false,
     });
 

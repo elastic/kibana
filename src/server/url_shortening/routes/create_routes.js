@@ -34,16 +34,16 @@ export function createRoutes(server, config) {
   server.route({
     method: 'POST',
     path: '/shorten',
-    handler: async function (request, reply) {
+    handler: async function (request) {
       server.log(
         ['warning', 'deprecation'],
         `'/shorten' API has been deprecated and will be removed in 7.0, use the '/api/shorten_url' API instead`);
       try {
         shortUrlAssertValid(request.payload.url);
         const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-        reply(urlId);
+        return urlId;
       } catch (err) {
-        reply(handleShortUrlError(err));
+        return handleShortUrlError(err);
       }
     }
   });

@@ -40,6 +40,7 @@ export function cephMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-ceph.html',
       },
     }),
+    euiIconType: 'logoCeph',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.cephMetrics.artifacts.application.label', {

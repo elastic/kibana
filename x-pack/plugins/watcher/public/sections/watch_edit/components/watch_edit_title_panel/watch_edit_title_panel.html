@@ -12,8 +12,11 @@
       <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
         <label
           for="{{watchEditTitlePanel.makeId('watchName')}}"
-          class="kuiLabel kuiVerticalRhythmSmall">
-          Name
+          class="kuiLabel kuiVerticalRhythmSmall"
+          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchNameLabel"
+          i18n-default-message="Name"
+          >
+
         </label>
         <div class="kuiVerticalRhythmSmall">
           <input
@@ -24,7 +27,7 @@
             input-focus
             required
             ng-model="watchEditTitlePanel.watch.name"
-            placeholder="My Threshold Watch"
+            placeholder="{{'xpack.watcher.sections.watchEdit.titlePanel.watchNamePlaceholder' | i18n: { defaultMessage: 'My Threshold Watch' } }}"
           >
         </div>
         <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
@@ -33,9 +36,9 @@
             xpack-aria-describes="{{watchEditTitlePanel.makeId('watchName')}}"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('watchName', 'required')"
-          >
-            Name is required
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchNameIsRequiredValidationMessage"
+            i18n-default-message="Name is required"
+          ></div>
           &nbsp;
         </div>
       </div>
@@ -44,8 +47,10 @@
       <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
         <label
           for="indexSelectSearchBox"
-          class="kuiLabel kuiVerticalRhythmSmall">
-          Indices to query
+          class="kuiLabel kuiVerticalRhythmSmall"
+          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.indicesToQueryLabel"
+          i18n-default-message="Indices to query"
+          >
         </label>
         <div
           class="kuiVerticalRhythmSmall watchEditTitleIndexSelectContainer"
@@ -66,35 +71,39 @@
             xpack-aria-describes="{{watchEditTitlePanel.makeId('indexSelectSearchBox')}}"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.showRequiredIndexSelectionValidationMessage()"
-          >
-            Enter one or more indices
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.enterOneOrMoreIndicesValidationMessage"
+            i18n-default-message="Enter one or more indices"
+          ></div>
           <div
             id="{{watchEditTitlePanel.makeId(['indexSelectSearchBox', 'invalid'])}}"
             xpack-aria-describes="{{watchEditTitlePanel.makeId('indexSelectSearchBox')}}"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.showInvalidIndexValidationMessage()"
-          >
-            Your index query does not match any valid indices
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.queryDoesNotMatchAnyValidIndicesValidationMessage"
+            i18n-default-message="Your index query does not match any valid indices"
+          ></div>
           <div
             id="{{watchEditTitlePanel.makeId(['indexSelectSearchBox', 'notimefield'])}}"
             xpack-aria-describes="{{watchEditTitlePanel.makeId('indexSelectSearchBox')}}"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.showNoTimeFieldsValidationMessage()"
-          >
-            Your index query does not have an associated time field
-          </div>
-          <span>Use * to broaden your search query</span>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.associatedTimeFieldIsMissedInIndexQueryValidationMessage"
+            i18n-default-message="Your index query does not have an associated time field"
+          ></div>
+          <span
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.howToBroadenSearchQueryDescription"
+            i18n-default-message="Use * to broaden your search query"
+          ></span>
         </div>
       </div>
 
       <div class="kuiFieldGroupSection">
         <label
           for="{{watchEditTitlePanel.makeId('timeField')}}"
-          class="kuiLabel kuiVerticalRhythmSmall">
-          Time field
-        </label>
+          class="kuiLabel kuiVerticalRhythmSmall"
+          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldLabel"
+          i18n-default-message="Time field"
+          ></label>
         <div class="kuiVerticalRhythmSmall">
           <select
             class="kuiSelect"
@@ -104,7 +113,11 @@
             ng-model="watchEditTitlePanel.watch.timeField"
             ng-options="timeField.name as timeField.name group by timeField.normalizedType for timeField in watchEditTitlePanel.timeFields"
           >
-            <option value="">Select a field</option>
+            <option
+              value=""
+              i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel"
+              i18n-default-message="Select a field"
+            ></option>
           </select>
         </div>
         <div class="kuiSubText kuiSubduedText kuiVerticalRhythmSmall">
@@ -113,9 +126,9 @@
             xpack-aria-describes="{{watchEditTitlePanel.makeId('timeField')}}"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('timeField', 'required')"
-          >
-            A time field is required
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.timeFieldIsRequiredValidationText"
+            i18n-default-message="A time field is required"
+          ></div>
           &nbsp;
         </div>
       </div>
@@ -125,9 +138,9 @@
           id="durationSelectTriggerIntervalSizeLabel"
           for="durationSelectTriggerIntervalSize"
           class="kuiLabel kuiVerticalRhythmSmall"
-        >
-          Run watch every
-        </label>
+          i18n-id="xpack.watcher.sections.watchEdit.titlePanel.watchIntervalLabel"
+          i18n-default-message="Run watch every"
+        ></label>
 
         <div class="kuiVerticalRhythmSmall" id="durationSelectTriggerIntervalSize" role="group">
           <duration-select
@@ -145,41 +158,42 @@
             xpack-aria-describes="durationSelectTriggerIntervalSize"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'required')"
-          >
-            Interval size is required
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeIsRequiredValidationMessage"
+            i18n-default-message="Interval size is required"
+          ></div>
           <div
             id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'min'])}}"
             xpack-aria-describes="durationSelectTriggerIntervalSize"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'min')"
-          >
-            Interval size cannot be a negative number
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeNegativeNumberValidationMessage"
+            i18n-default-message="Interval size cannot be a negative number"
+          ></div>
           <div
             id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'number'])}}"
             xpack-aria-describes="durationSelectTriggerIntervalSize"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'number')"
-          >
-            Interval size must be a valid number
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeValidNumberValidationMessage"
+            i18n-default-message="Interval size must be a valid number"
+          ></div>
           <div
             id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalUnit', 'required'])}}"
             xpack-aria-describes="durationSelectTriggerIntervalUnit"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalUnit', 'required')"
-          >
-            An interval size is required
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeUnitIsRequiredValidationMessage"
+            i18n-default-message="An interval size is required"
+          ></div>
           <div
             id="{{watchEditTitlePanel.makeId(['durationSelectTriggerIntervalSize', 'minimumDuration'])}}"
             xpack-aria-describes="durationSelectTriggerIntervalSize durationSelectTriggerIntervalUnit"
             class="kuiInputNote kuiInputNote--danger"
             ng-if="watchEditTitlePanel.isValidationMessageVisible('durationSelectTriggerIntervalSize', 'minimumDuration', false)"
-          >
-            The minimum duration is {{watchEditTitlePanel.triggerIntervalMinimumSize}}{{watchEditTitlePanel.triggerIntervalMinimumUnit}}
-          </div>
+            i18n-id="xpack.watcher.sections.watchEdit.titlePanel.intervalSizeMinimumDurationValidationMessage"
+            i18n-default-message=" The minimum duration is {minSize}{minUnit}"
+            i18n-values="{ minSize: watchEditTitlePanel.triggerIntervalMinimumSize, minUnit: watchEditTitlePanel.triggerIntervalMinimumUnit }"
+          ></div>
         </div>
       </div>
     </div>

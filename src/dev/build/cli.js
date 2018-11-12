@@ -43,6 +43,7 @@ const flags = getopts(process.argv.slice(0), {
     'skip-node-download',
     'verbose',
     'debug',
+    'all-platforms'
   ],
   alias: {
     v: 'verbose',
@@ -74,6 +75,7 @@ if (flags.help) {
         --no-oss                {dim Only produce the default distributable of Kibana}
         --skip-archives         {dim Don't produce tar/zip archives}
         --skip-os-packages      {dim Don't produce rpm/deb packages}
+        --all-platforms         {dim Produce archives for all platforms, not just this one}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
         --release               {dim Produce a release-ready distributable}
@@ -93,7 +95,7 @@ const log = new ToolingLog({
 });
 
 function isOsPackageDesired(name) {
-  if (flags['skip-os-packages']) {
+  if (flags['skip-os-packages'] || !flags['all-platforms']) {
     return false;
   }
 
@@ -114,6 +116,7 @@ buildDistributables({
   createArchives: !Boolean(flags['skip-archives']),
   createRpmPackage: isOsPackageDesired('rpm'),
   createDebPackage: isOsPackageDesired('deb'),
+  targetAllPlatforms: Boolean(flags['all-platforms']),
 }).catch(error => {
   if (!isErrorLogged(error)) {
     log.error('Uncaught error');

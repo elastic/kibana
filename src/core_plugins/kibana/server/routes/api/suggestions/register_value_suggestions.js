@@ -24,7 +24,7 @@ export function registerValueSuggestions(server) {
   server.route({
     path: '/api/kibana/suggestions/values/{index}',
     method: ['POST'],
-    handler: async function (req, reply) {
+    handler: async function (req) {
       const { index } = req.params;
       const { field, query, boolFilter } = req.payload;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
@@ -33,9 +33,9 @@ export function registerValueSuggestions(server) {
         const response = await callWithRequest(req, 'search', { index, body });
         const buckets = get(response, 'aggregations.suggestions.buckets') || [];
         const suggestions = map(buckets, 'key');
-        reply(suggestions);
+        return suggestions;
       } catch (error) {
-        reply(handleESError(error));
+        throw handleESError(error);
       }
     }
   });

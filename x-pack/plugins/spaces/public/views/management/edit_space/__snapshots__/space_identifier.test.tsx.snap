@@ -4,7 +4,7 @@ exports[`renders without crashing 1`] = `
 <React.Fragment>
   <EuiFormRow
     describedByIds={Array []}
-    fullWidth={false}
+    fullWidth={true}
     hasEmptyLabelSpace={false}
     helpText={
       <p>
@@ -37,7 +37,7 @@ exports[`renders without crashing 1`] = `
   >
     <EuiFieldText
       compressed={false}
-      fullWidth={false}
+      fullWidth={true}
       inputRef={[Function]}
       isLoading={false}
       onChange={[Function]}

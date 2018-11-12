@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import * as React from 'react';
+
+import { getLabelOfTextScale, isTextScale, TextScale } from '../../../common/log_text_scale';
+
+interface LogTextScaleControlsProps {
+  availableTextScales: TextScale[];
+  textScale: TextScale;
+  setTextScale: (scale: TextScale) => any;
+}
+
+export class LogTextScaleControls extends React.PureComponent<LogTextScaleControlsProps> {
+  public setTextScale = (textScale: string) => {
+    if (isTextScale(textScale)) {
+      this.props.setTextScale(textScale);
+    }
+  };
+
+  public render() {
+    const { availableTextScales, textScale } = this.props;
+
+    return (
+      <EuiFormRow label="Text Size">
+        <EuiRadioGroup
+          options={availableTextScales.map((availableTextScale: TextScale) => ({
+            id: availableTextScale.toString(),
+            label: getLabelOfTextScale(availableTextScale),
+          }))}
+          idSelected={textScale}
+          onChange={this.setTextScale}
+        />
+      </EuiFormRow>
+    );
+  }
+}

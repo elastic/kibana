@@ -28,7 +28,7 @@ import { initPromise } from 'plugins/ml/util/promise';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
-import { checkLicense } from 'plugins/ml/license/check_license';
+import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
@@ -51,7 +51,7 @@ uiRoutes
   .when('/explorer/?', {
     template,
     resolve: {
-      CheckLicense: checkLicense,
+      CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       initPromise: initPromise(true)
@@ -81,6 +81,7 @@ module.controller('MlExplorerController', function (
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
+  $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';
   $scope.loading = true;
   timefilter.enableTimeRangeSelector();

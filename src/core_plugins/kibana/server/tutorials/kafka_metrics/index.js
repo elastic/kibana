@@ -40,6 +40,7 @@ export function kafkaMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kafka.html',
       },
     }),
+    euiIconType: 'logoKafka',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.kafkaMetrics.artifacts.application.label', {

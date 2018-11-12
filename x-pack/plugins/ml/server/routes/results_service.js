@@ -59,11 +59,10 @@ export function resultsServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/results/anomalies_table_data',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getAnomaliesTableData(callWithRequest, request.payload)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -73,11 +72,10 @@ export function resultsServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/results/category_definition',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getCategoryDefinition(callWithRequest, request.payload)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
@@ -87,11 +85,10 @@ export function resultsServiceRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/results/category_examples',
-    handler(request, reply) {
+    handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       return getCategoryExamples(callWithRequest, request.payload)
-        .then(resp => reply(resp))
-        .catch(resp => reply(wrapError(resp)));
+        .catch(resp => wrapError(resp));
     },
     config: {
       ...commonRouteConfig
