@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { ColumnRenderer, getSuricataCVEFromSignature } from '.';
 import { ECS } from '../../ecs';
@@ -12,8 +12,18 @@ import { ECS } from '../../ecs';
 const columnsOverriden = ['event'];
 
 export const suricataColumnRenderer: ColumnRenderer = {
-  isInstance: (columnName: string, ecs: ECS) =>
-    columnsOverriden.includes(columnName) && ecs.event.module.toLowerCase() === 'suricata',
+  isInstance: (columnName: string, ecs: ECS) => {
+    if (
+      columnsOverriden.includes(columnName) &&
+      ecs &&
+      ecs.event &&
+      ecs.event.module &&
+      ecs.event.module.toLowerCase() === 'suricata'
+    ) {
+      return true;
+    }
+    return false;
+  },
 
   renderColumn: (columnName: string, data: ECS) => {
     switch (columnName) {
@@ -23,7 +33,7 @@ export const suricataColumnRenderer: ColumnRenderer = {
         if (cve != null) {
           return <React.Fragment>{cve}</React.Fragment>;
         } else {
-          return <React.Fragment>{data.event.id}</React.Fragment>;
+          return <React.Fragment>{getOr('--', 'event.id', data)}</React.Fragment>;
         }
       default:
         // unknown column name

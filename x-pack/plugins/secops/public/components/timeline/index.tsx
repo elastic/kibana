@@ -30,7 +30,6 @@ export interface OwnProps {
 
 interface StateReduxProps {
   dataProviders?: DataProvider[];
-  data?: ECS[];
   range?: Range;
   sort?: Sort;
 }
@@ -74,7 +73,6 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
   public render() {
     const {
-      data,
       dataProviders,
       headers,
       id,
@@ -103,7 +101,6 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         columnHeaders={headers}
         columnRenderers={columnRenderers}
         dataProviders={dataProviders!}
-        data={data!}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
@@ -119,9 +116,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const timeline = timelineByIdSelector(state)[id];
-  const { dataProviders, data, sort } = timeline || timelineDefaults;
+  const { dataProviders, sort } = timeline || timelineDefaults;
 
-  return defaultTo({ id, dataProviders, data, sort }, timeline);
+  return defaultTo({ id, dataProviders, sort }, timeline);
 };
 
 export const StatefulTimeline = connect(
