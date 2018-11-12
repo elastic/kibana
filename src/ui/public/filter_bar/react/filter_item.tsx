@@ -66,9 +66,7 @@ export class FilterItem extends Component<Props, State> {
         id={'foo'}
         className={classes}
         title={'foo'}
-        iconOnClick={() => {
-          return;
-        }}
+        iconOnClick={() => this.props.onDelete(filter)}
         iconOnClickAriaLabel={`Delete filter`}
         iconType="cross"
         // @ts-ignore
