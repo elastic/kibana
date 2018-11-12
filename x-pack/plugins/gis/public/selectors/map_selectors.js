@@ -18,6 +18,7 @@ import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_sou
 import { ESSearchSource } from '../shared/layers/sources/es_search_source';
 import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
+import { timefilter } from 'ui/timefilter';
 
 function createLayerInstance(layerDescriptor, dataSources) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, dataSources);
@@ -109,7 +110,8 @@ export const getMapColors = ({ map }) => {
   }, []);
 };
 
-export const getTimeFilters = ({ map }) => map.mapState.timeFilters;
+export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
+  map.mapState.timeFilters : timefilter.getTime();
 
 export const getMetadata = ({ config }) => config && config.meta;
 
