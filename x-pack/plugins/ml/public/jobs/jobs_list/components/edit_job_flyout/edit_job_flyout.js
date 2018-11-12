@@ -137,7 +137,10 @@ class EditJobFlyoutUI extends Component {
 
     if (jobDetails.jobGroups !== undefined) {
       if (jobDetails.jobGroups.some(j => this.props.allJobIds.includes(j))) {
-        jobGroupsValidationError = 'A job with this ID already exists. Groups and jobs cannot use the same ID.';
+        jobGroupsValidationError = this.props.intl.formatMessage({
+          id: 'xpack.ml.jobsList.editJobFlyout.groupsAndJobsHasSameIdErrorMessage',
+          defaultMessage: 'A job with this ID already exists. Groups and jobs cannot use the same ID.'
+        });
       } else {
         jobGroupsValidationError = validateGroupNames(jobDetails.jobGroups).message;
       }
