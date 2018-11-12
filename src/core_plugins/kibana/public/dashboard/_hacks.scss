@@ -25,7 +25,7 @@ dashboard-listing {
 // Can't reliably remove all/any of these because of embeddables
 
 .theme-dark {
-  @import 'node_modules/@elastic/eui/src/themes/k6/k6_colors_dark';
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
 
   // /src/ui/public/styles/bootstrap/scaffolding.less
   a {
