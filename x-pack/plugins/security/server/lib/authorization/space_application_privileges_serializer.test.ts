@@ -16,8 +16,8 @@ describe('#privilege', () => {
 
   describe('#deserialize', () => {
     test(`throws error if privilege doesn't start with space_`, () => {
-      expect(
-        () => spaceApplicationPrivilegesSerializer.privilege.deserialize('foo_space_all')
+      expect(() =>
+        spaceApplicationPrivilegesSerializer.privilege.deserialize('foo_space_all')
       ).toThrowErrorMatchingSnapshot();
     });
 
@@ -38,8 +38,8 @@ describe('#resource', () => {
 
   describe('#deserialize', () => {
     test(`throws error if resource doesn't start with space:`, () => {
-      expect(
-        () => spaceApplicationPrivilegesSerializer.resource.deserialize('foo:space:something')
+      expect(() =>
+        spaceApplicationPrivilegesSerializer.resource.deserialize('foo:space:something')
       ).toThrowErrorMatchingSnapshot();
     });
 

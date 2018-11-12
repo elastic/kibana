@@ -9,10 +9,10 @@ const resourcePrefix = `space:`;
 
 export const spaceApplicationPrivilegesSerializer = {
   privilege: {
-    serialize(privilege) {
+    serialize(privilege: string) {
       return `${privilegePrefix}${privilege}`;
     },
-    deserialize(privilege) {
+    deserialize(privilege: string) {
       if (!privilege.startsWith(privilegePrefix)) {
         throw new Error(`Space privilege should have started with ${privilegePrefix}`);
       }
@@ -21,15 +21,15 @@ export const spaceApplicationPrivilegesSerializer = {
     },
   },
   resource: {
-    serialize(spaceId) {
+    serialize(spaceId: string) {
       return `${resourcePrefix}${spaceId}`;
     },
-    deserialize(resource) {
+    deserialize(resource: string) {
       if (!resource.startsWith(resourcePrefix)) {
         throw new Error(`Resource should have started with ${resourcePrefix}`);
       }
 
       return resource.slice(resourcePrefix.length);
-    }
+    },
   },
 };

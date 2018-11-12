@@ -9,7 +9,7 @@ import { IGNORED_TYPES } from '../../../common/constants';
 import { Actions } from './actions';
 import { FeaturesPrivileges, FeaturesPrivilegesBuilder } from './features_privileges_builder';
 
-interface PrivilegeMap {
+export interface PrivilegeMap {
   global: Record<string, string[]>;
   features: FeaturesPrivileges;
   space: Record<string, string[]>;

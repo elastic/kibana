@@ -110,7 +110,7 @@ const kibanaFeatures: Feature[] = [
     icon: 'managementApp',
     navlinkId: 'kibana:management:advancedSettings',
     privileges: {
-      advancedSettings_all: {
+      all: {
         api: [],
         app: ['kibana'],
         savedObject: {

@@ -7,47 +7,7 @@
 import { difference, isEmpty, isEqual } from 'lodash';
 import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
-
-const serializePrivileges = (application, privilegeMap) => {
-  return {
-    [application]: {
-      ...Object.entries(privilegeMap.global).reduce((acc, [privilegeName, privilegeActions]) => {
-        acc[privilegeName] = {
-          application,
-          name: privilegeName,
-          actions: privilegeActions,
-          metadata: {},
-        };
-        return acc;
-      }, {}),
-      ...Object.entries(privilegeMap.space).reduce((acc, [privilegeName, privilegeActions]) => {
-        const name = spaceApplicationPrivilegesSerializer.privilege.serialize(privilegeName);
-        acc[name] = {
-          application,
-          name,
-          actions: privilegeActions,
-          metadata: {},
-        };
-        return acc;
-      }, {}),
-      ...Object.entries(privilegeMap.features).reduce((acc, [featureName, featurePrivileges]) => {
-
-        Object.entries(featurePrivileges).forEach(([privilegeName, privilegeActions]) => {
-          const name = `feature_${featureName}_${privilegeName}`;
-          acc[name] = {
-            application,
-            name,
-            actions: privilegeActions,
-            metadata: {},
-          };
-        });
-
-        return acc;
-      }, {})
-    }
-  };
-};
+import { serializePrivileges } from './privileges_serializer';
 
 export async function registerPrivilegesWithCluster(server, features) {
 
