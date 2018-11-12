@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildPrivilegeMap } from '../../../../lib/authorization';
 import { getClient } from '../../../../../../../server/lib/get_client_shield';
 import { routePreCheckLicense } from '../../../../lib/route_pre_check_license';
 import { initGetRolesApi } from './get';
@@ -15,12 +14,9 @@ export function initPublicRolesApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
   const routePreCheckLicenseFn = routePreCheckLicense(server);
 
-  const { application, actions } = server.plugins.security.authorization;
-  const savedObjectTypes = server.savedObjects.types;
-  const features = server.plugins.xpack_main.getFeatures();
-  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions, features);
+  const { application, privileges } = server.plugins.security.authorization;
 
   initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
-  initPutRolesApi(server, callWithRequest, routePreCheckLicenseFn, privilegeMap, application);
+  initPutRolesApi(server, callWithRequest, routePreCheckLicenseFn, privileges, application);
   initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn);
 }

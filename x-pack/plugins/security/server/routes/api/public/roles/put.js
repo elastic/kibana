@@ -14,7 +14,7 @@ export function initPutRolesApi(
   server,
   callWithRequest,
   routePreCheckLicenseFn,
-  privilegeMap,
+  privileges,
   application
 ) {
 
@@ -78,8 +78,8 @@ export function initPutRolesApi(
       run_as: Joi.array().items(Joi.string()),
     }),
     kibana: Joi.object().keys({
-      global: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.global))),
-      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.space))))
+      global: Joi.array().items(Joi.string().valid(Object.keys(privileges.global))),
+      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.string().valid(Object.keys(privileges.space))))
     })
   });
 

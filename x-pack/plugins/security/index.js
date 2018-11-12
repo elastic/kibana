@@ -117,13 +117,15 @@ export const security = (kibana) => new kibana.Plugin({
     // automatically assigned to all routes that don't contain an auth config.
     server.auth.default('session');
 
+    const { savedObjects } = server;
+
     // exposes server.plugins.security.authorization
-    const authorization = createAuthorizationService(server, xpackInfoFeature);
+    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin.getFeatures());
     server.expose('authorization', deepFreeze(authorization));
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
       if (license.allowRbac) {
-        await registerPrivilegesWithCluster(server, xpackMainPlugin.getFeatures());
+        await registerPrivilegesWithCluster(server);
       }
     });
 
@@ -131,7 +133,6 @@ export const security = (kibana) => new kibana.Plugin({
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
-    const { savedObjects } = server;
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
     }) => {

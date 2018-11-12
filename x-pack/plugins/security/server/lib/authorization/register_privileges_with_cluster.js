@@ -5,22 +5,23 @@
  */
 
 import { difference, isEmpty, isEqual } from 'lodash';
-import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { serializePrivileges } from './privileges_serializer';
 
-export async function registerPrivilegesWithCluster(server, features) {
+export async function registerPrivilegesWithCluster(server) {
 
   const { authorization } = server.plugins.security;
-  const { types: savedObjectTypes } = server.savedObjects;
-  const { actions, application } = authorization;
+  const { application, privileges } = authorization;
 
   const arePrivilegesEqual = (existingPrivileges, expectedPrivileges) => {
     // when comparing privileges, the order of the actions doesn't matter, lodash's isEqual
     // doesn't know how to compare Sets
     return isEqual(existingPrivileges, expectedPrivileges, (value, other, key) => {
       if (key === 'actions' && Array.isArray(value) && Array.isArray(other)) {
-        return isEqual(value.sort(), other.sort());
+        // Array.sort() is in-place, and we don't want to be modifying the actual order
+        // of the arrays permanently, and there's potential they're frozen, so we're copying
+        // before comparing.
+        return isEqual([...value].sort(), [...other].sort());
       }
     });
   };
@@ -33,8 +34,7 @@ export async function registerPrivilegesWithCluster(server, features) {
     return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application])).length > 0;
   };
 
-  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions, features);
-  const expectedPrivileges = serializePrivileges(application, privilegeMap);
+  const expectedPrivileges = serializePrivileges(application, privileges);
 
   server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);
 
