@@ -108,10 +108,13 @@ export default function (kibana) {
         rename('tribe.ssl.ca', 'tribe.ssl.certificateAuthorities'),
         rename('tribe.ssl.cert', 'tribe.ssl.certificate'),
         sslVerify('tribe'),
-        function tribe(settings, log) {
-          const { tribe: tribeSettings = {} } = settings;
+        (settings = {}, log) => {
+          const tribe = get(settings, 'tribe');
+          if (!tribe) {
+            return;
+          }
 
-          const tribeKeys = Object.keys(tribeSettings);
+          const tribeKeys = Object.keys(tribe);
           if (tribeKeys.length > 0) {
             const keyList = tribeKeys.map(k => `"elasticsearch.tribe.${k}"`).join(',');
             log(`Config keys [${keyList}] are deprecated. Tribe nodes will be removed in 7.0 and should be replaced ` +

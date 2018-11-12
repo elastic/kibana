@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import { Deprecations } from '../../../deprecation';
-import expect from 'expect.js';
-import index from '../index';
+import { Deprecations } from '../../deprecation';
+import index from './index';
 import { compact, noop, set } from 'lodash';
-import sinon from 'sinon';
 
 describe('plugins/elasticsearch', function () {
   describe('#deprecations()', function () {
     let transformDeprecations;
 
-    before(function () {
+    beforeAll(function () {
       const Plugin = function (options) {
         this.deprecations = options.deprecations;
       };
@@ -40,6 +38,32 @@ describe('plugins/elasticsearch', function () {
       };
     });
 
+    describe('tribe.*', () => {
+      let log;
+
+      beforeEach(() => log = jest.fn());
+
+      it(`doesn't log when there are no settings`, () => {
+        transformDeprecations(null, log);
+        expect(log).not.toHaveBeenCalled();
+      });
+
+      it(`doesn't log when there are no tribe settings`, () => {
+        transformDeprecations({}, log);
+        expect(log).not.toHaveBeenCalled();
+      });
+
+      it(`doesn't log when there are empty tribe settings`, () => {
+        transformDeprecations({ tribe: {} }, log);
+        expect(log).not.toHaveBeenCalled();
+      });
+
+      it(`logs when there are any tribe settings`, () => {
+        transformDeprecations({ tribe: { url: '' } }, log);
+        expect(log).toHaveBeenCalled();
+      });
+    });
+
     [null, 'tribe'].forEach((basePath) => {
       const getKey = (path) => {
         return compact([basePath, path]).join('.');
@@ -50,7 +74,7 @@ describe('plugins/elasticsearch', function () {
         let sslSettings;
 
         beforeEach(function () {
-          settings = {};
+          settings = { tribe: { username: '' } };
           sslSettings = {};
           set(settings, getKey('ssl'), sslSettings);
         });
@@ -59,43 +83,49 @@ describe('plugins/elasticsearch', function () {
           sslSettings.verify = false;
 
           transformDeprecations(settings);
-          expect(sslSettings.verificationMode).to.be('none');
-          expect(sslSettings.verify).to.be(undefined);
+          expect(sslSettings.verificationMode).toBe('none');
+          expect(sslSettings.verify).toBe(undefined);
         });
 
         it('should log when deprecating verify from false', function () {
           sslSettings.verify = false;
 
-          const log = sinon.spy();
+          const log = jest.fn();
           transformDeprecations(settings, log);
-          expect(log.calledOnce).to.be(true);
+          const expLogMsg = `Config key "${getKey('ssl.verify')}" is deprecated. It has been replaced with ` +
+            `"${getKey('ssl.verificationMode')}"`;
+          expect(log).toHaveBeenCalledWith(expLogMsg);
         });
 
         it('sets verificationMode to full when verify is true', function () {
           sslSettings.verify = true;
 
           transformDeprecations(settings);
-          expect(sslSettings.verificationMode).to.be('full');
-          expect(sslSettings.verify).to.be(undefined);
+          expect(sslSettings.verificationMode).toBe('full');
+          expect(sslSettings.verify).toBe(undefined);
         });
 
         it('should log when deprecating verify from true', function () {
           sslSettings.verify = true;
 
-          const log = sinon.spy();
+          const log = jest.fn();
           transformDeprecations(settings, log);
-          expect(log.calledOnce).to.be(true);
+          const expLogMsg = `Config key "${getKey('ssl.verify')}" is deprecated. It has been replaced with ` +
+            `"${getKey('ssl.verificationMode')}"`;
+          expect(log).toHaveBeenCalledWith(expLogMsg);
         });
 
         it(`shouldn't set verificationMode when verify isn't present`, function () {
           transformDeprecations(settings);
-          expect(sslSettings.verificationMode).to.be(undefined);
+          expect(sslSettings.verificationMode).toBe(undefined);
         });
 
         it(`shouldn't log when verify isn't present`, function () {
-          const log = sinon.spy();
+          const log = jest.fn();
           transformDeprecations(settings, log);
-          expect(log.called).to.be(false);
+          const expLogMsg = `Config key "${getKey('ssl.verify')}" is deprecated. It has been replaced with ` +
+            `"${getKey('ssl.verificationMode')}"`;
+          expect(log).not.toHaveBeenCalledWith(expLogMsg);
         });
       });
     });
