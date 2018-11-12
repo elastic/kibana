@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import { i18n }  from '@kbn/i18n';
 import { healthToColor } from '../../../../../services';
+import { getUrlService } from '../../../../../services/navigation';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -57,7 +58,7 @@ export class Summary extends React.PureComponent {
       return (
         <Fragment>
           <EuiHorizontalRule />
-          { summaryExtension(index) }
+          { summaryExtension(index, getUrlService()) }
         </Fragment>
       );
     });
