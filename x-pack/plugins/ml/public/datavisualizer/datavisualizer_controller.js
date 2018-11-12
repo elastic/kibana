@@ -11,6 +11,7 @@
   * to explore the data in the fields in an index pattern prior to creating a job.
   */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import rison from 'rison-node';
 
@@ -491,14 +492,34 @@ module
         })
         .catch((err) => {
           // TODO - display error in cards saying data could not be loaded.
-          console.log('DataVisualizer - error getting stats for metric cards from elasticsearch:', err);
+          console.log(
+            i18n.translate('xpack.machineLearning.datavisualizer.gettingStatsForMetricCardsErrorTitle', {
+              defaultMessage: 'DataVisualizer - error getting stats for metric cards from elasticsearch:',
+            }),
+            err);
           if (err.statusCode === 500) {
-            notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}. ` +
-          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-            { lifetime: 30000 });
+            notify.error(
+              i18n.translate('xpack.machineLearning.datavisualizer.metricInternalServerErrorTitle', {
+                // eslint-disable-next-line max-len
+                defaultMessage: 'Error loading data for metrics in index {index}. {message}. The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           } else {
-            notify.error(`Error loading data for metrics in index ${indexPattern.title}. ${err.message}`,
-              { lifetime: 30000 });
+            notify.error(
+              i18n.translate('xpack.machineLearning.datavisualizer.metricOtherErrorTitle', {
+                defaultMessage: 'Error loading data for metrics in index {index}. {message}',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           }
         });
 
@@ -542,14 +563,34 @@ module
           })
           .catch((err) => {
             // TODO - display error in cards saying data could not be loaded.
-            console.log('DataVisualizer - error getting non metric field stats from elasticsearch:', err);
+            console.log(
+              i18n.translate('xpack.machineLearning.datavisualizer.gettingNonMetricFieldStatsErrorTitle', {
+                defaultMessage: 'DataVisualizer - error getting non metric field stats from elasticsearch:',
+              }),
+              err);
             if (err.statusCode === 500) {
-              notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
-            'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-              { lifetime: 30000 });
+              notify.error(
+                i18n.translate('xpack.machineLearning.datavisualizer.fieldsInternalServerErrorTitle', {
+                  // eslint-disable-next-line max-len
+                  defaultMessage: 'Error loading data for fields in index {index}. {message}. The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                  values: {
+                    index: indexPattern.title,
+                    message: err.message,
+                  }
+                }),
+                { lifetime: 30000 }
+              );
             } else {
-              notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}`,
-                { lifetime: 30000 });
+              notify.error(
+                i18n.translate('xpack.machineLearning.datavisualizer.fieldsOtherErrorTitle', {
+                  defaultMessage: 'Error loading data for fields in index {index}. {message}',
+                  values: {
+                    index: indexPattern.title,
+                    message: err.message,
+                  }
+                }),
+                { lifetime: 30000 }
+              );
             }
           });
       } else {
@@ -592,14 +633,35 @@ module
         })
         .catch((err) => {
           // TODO - display error in cards saying data could not be loaded.
-          console.log('DataVisualizer - error getting overall stats from elasticsearch:', err);
+          console.log(
+            i18n.translate('xpack.machineLearning.datavisualizer.gettingOverallStatsErrorTitle', {
+              defaultMessage: 'DataVisualizer - error getting overall stats from elasticsearch:',
+            }),
+            err
+          );
           if (err.statusCode === 500) {
-            notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}. ` +
-          'The request may have timed out. Try using a smaller sample size or narrowing the time range.',
-            { lifetime: 30000 });
+            notify.error(
+              i18n.translate('xpack.machineLearning.datavisualizer.fieldsInternalServerErrorTitle', {
+                // eslint-disable-next-line max-len
+                defaultMessage: 'Error loading data for fields in index {index}. {message}. The request may have timed out. Try using a smaller sample size or narrowing the time range.',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           } else {
-            notify.error(`Error loading data for fields in index ${indexPattern.title}. ${err.message}`,
-              { lifetime: 30000 });
+            notify.error(
+              i18n.translate('xpack.machineLearning.datavisualizer.fieldsOtherErrorTitle', {
+                defaultMessage: 'Error loading data for fields in index {index}. {message}',
+                values: {
+                  index: indexPattern.title,
+                  message: err.message,
+                }
+              }),
+              { lifetime: 30000 }
+            );
           }
         });
 

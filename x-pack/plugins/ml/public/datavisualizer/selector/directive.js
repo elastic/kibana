@@ -6,6 +6,8 @@
 
 import 'ngreact';
 
+import { injectI18nProvider } from '@kbn/i18n/react';
+
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
@@ -33,5 +35,5 @@ import { DatavisualizerSelector } from './datavisualizer_selector';
 module.directive('datavisualizerSelector', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
 
-  return reactDirective(DatavisualizerSelector, undefined, { restrict: 'E' }, { });
+  return reactDirective(injectI18nProvider(DatavisualizerSelector), undefined, { restrict: 'E' }, { });
 });
