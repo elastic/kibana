@@ -45,9 +45,7 @@ export default function (kibana) {
         return {
           uiCapabilities: {
             navLinks: {
-              timelion: {
-                showLink: true,
-              }
+              timelion: true
             },
             timelion: {
               showWriteControls: true,
