@@ -577,6 +577,4 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
   };
 }
 
-const singularize = (str: string, qty: number) => (qty === 1 ? str.slice(0, -1) : str);
-
 export const RangeDatePicker = injectI18n(RangeDatePickerUI);
