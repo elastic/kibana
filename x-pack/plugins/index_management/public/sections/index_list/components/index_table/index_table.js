@@ -196,13 +196,13 @@ export class IndexTableUi extends Component {
   }
   renderBanners() {
     const { indices = [], filterChanged } = this.props;
-    return getBannerExtensions().map(bannerExtension => {
+    return getBannerExtensions().map((bannerExtension, i) => {
       const bannerData = bannerExtension(indices);
       if (!bannerData) {
         return null;
       }
       return (
-        <Fragment>
+        <Fragment key={`bannerExtension${i}`}>
           <EuiCallOut color={bannerData.type} size="m">
             <EuiText grow={true}>{bannerData.message} {bannerData.filter ? (
               <EuiButtonEmpty
