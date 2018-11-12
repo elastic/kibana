@@ -22,6 +22,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function loadGroups() {
   return ml.jobs.groups()
@@ -30,7 +31,14 @@ function loadGroups() {
         value: g.id,
         view: (
           <div className="group-item">
-            <JobGroup name={g.id} /> <span>({g.jobIds.length} job{(g.jobIds.length === 1) ? '' : 's'})</span>
+            <JobGroup name={g.id} />
+            <span>
+              <FormattedMessage
+                id="xpack.ml.jobsList.jobFilterBar.jobGroupTitle"
+                defaultMessage="{jobsCount, plural, one {# job} other {# jobs}}"
+                values={{ jobsCount: g.jobIds.length }}
+              />
+            </span>
           </div>
         )
       }));
@@ -41,7 +49,7 @@ function loadGroups() {
     });
 }
 
-export class JobFilterBar extends Component {
+class JobFilterBarUI extends Component {
   constructor(props) {
     super(props);
 
@@ -71,7 +79,12 @@ export class JobFilterBar extends Component {
       <EuiFlexItem grow={false}>
         <EuiCallOut
           color="danger"
-          title={`Invalid search: ${error.message}`}
+          title={(<FormattedMessage
+            id="xpack.ml.jobsList.jobFilterBar.invalidSearchErrorMessage"
+            defaultMessage="Invalid search: {errorMessage}"
+            values={{ errorMessage: error.message }}
+          />
+          )}
         />
         <EuiSpacer size="l" />
       </EuiFlexItem>
@@ -79,6 +92,7 @@ export class JobFilterBar extends Component {
   }
 
   render() {
+    const { intl } = this.props;
     const filters = [
       {
         type: 'field_value_toggle_group',
@@ -86,15 +100,24 @@ export class JobFilterBar extends Component {
         items: [
           {
             value: 'opened',
-            name: 'Opened'
+            name: intl.formatMessage({
+              id: 'xpack.ml.jobsList.jobFilterBar.openedLabel',
+              defaultMessage: 'Opened'
+            })
           },
           {
             value: 'closed',
-            name: 'Closed'
+            name: intl.formatMessage({
+              id: 'xpack.ml.jobsList.jobFilterBar.closedLabel',
+              defaultMessage: 'Closed'
+            })
           },
           {
             value: 'failed',
-            name: 'Failed'
+            name: intl.formatMessage({
+              id: 'xpack.ml.jobsList.jobFilterBar.failedLabel',
+              defaultMessage: 'Failed'
+            })
           }
         ]
       },
@@ -104,18 +127,27 @@ export class JobFilterBar extends Component {
         items: [
           {
             value: 'started',
-            name: 'Started'
+            name: intl.formatMessage({
+              id: 'xpack.ml.jobsList.jobFilterBar.startedLabel',
+              defaultMessage: 'Started'
+            })
           },
           {
             value: 'stopped',
-            name: 'Stopped'
+            name: intl.formatMessage({
+              id: 'xpack.ml.jobsList.jobFilterBar.stoppedLabel',
+              defaultMessage: 'Stopped'
+            })
           }
         ]
       },
       {
         type: 'field_value_selection',
         field: 'groups',
-        name: 'Group',
+        name: intl.formatMessage({
+          id: 'xpack.ml.jobsList.jobFilterBar.groupLabel',
+          defaultMessage: 'Group'
+        }),
         multiSelect: 'or',
         cache: 10000,
         options: () => loadGroups()
@@ -139,7 +171,8 @@ export class JobFilterBar extends Component {
     );
   }
 }
-JobFilterBar.propTypes = {
+JobFilterBarUI.propTypes = {
   setFilters: PropTypes.func.isRequired,
 };
 
+export const JobFilterBar = injectI18n(JobFilterBarUI);
