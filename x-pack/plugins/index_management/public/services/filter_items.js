@@ -10,10 +10,9 @@ export const filterItems = (fields, filter = '', items = []) => {
   return items.filter(item => {
     const actualFields = fields || Object.keys(item);
     const indexOfMatch = actualFields.findIndex(field => {
-      console.log('GETTING', item, field, filter);
       const normalizedField = String(get(item, field)).toLowerCase();
       console.log('N', normalizedField);
-      console.log("MATCH?", normalizedField.includes(lowerFilter));
+      console.log('N', normalizedField);
       return normalizedField.includes(lowerFilter);
     });
     return indexOfMatch !== -1;
