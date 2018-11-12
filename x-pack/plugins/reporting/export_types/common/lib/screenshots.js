@@ -59,7 +59,7 @@ export function screenshotsObservableFactory(server) {
     await browser.waitForSelector(`${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`);
   };
 
-  const waitForToastMessage = async (browser, layout) => {
+  const checkForToastMessage = async (browser, layout) => {
     await browser.waitForSelector(layout.selectors.toastHeader);
     const toastHeaderText = await browser.evaluate({
       fn: function (selector) {
@@ -272,7 +272,7 @@ export function screenshotsObservableFactory(server) {
           mergeMap(
             browser => Rx.race(
               Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.from(waitForToastMessage(browser, layout))
+              Rx.from(checkForToastMessage(browser, layout))
             ),
             browser => browser
           ),
