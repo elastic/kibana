@@ -50,5 +50,14 @@ export default function ({ getService, getPageObjects }) {
       const bodyExists = await testSubjects.exists('samplePanelActionBody');
       expect(bodyExists).to.be(true);
     });
+
+    it('allows to register links into the context menu', async () => {
+      await dashboardPanelActions.openContextMenu();
+      const actionElement = await testSubjects.find('dashboardPanelAction-samplePanelLink');
+      const actionElementTag = await actionElement.getTagName();
+      expect(actionElementTag).to.be('a');
+      const actionElementLink = await actionElement.getProperty('href');
+      expect(actionElementLink).to.be('https://example.com/kibana/test');
+    });
   });
 }

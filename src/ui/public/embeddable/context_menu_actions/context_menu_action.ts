@@ -22,17 +22,6 @@ import { PanelActionAPI } from './types';
 
 interface ContextMenuActionOptions {
   /**
-   * An optional action to take when the action is clicked on. Either this or childContextMenuPanel should be
-   * given.
-   */
-  onClick?: (actionAPI: PanelActionAPI) => void;
-
-  /**
-   * An optional href to use as navigation when the action is clicked on.
-   */
-  getHref?: (actionAPI: PanelActionAPI) => string | undefined;
-
-  /**
    * An optional child context menu to display when the action is clicked.
    */
   childContextMenuPanel?: ContextMenuPanel;
@@ -60,6 +49,21 @@ interface ContextMenuActionOptions {
    * Optional icon to display to the left of the action.
    */
   icon?: EuiContextMenuItemIcon;
+}
+
+interface ContextMenuButtonOptions extends ContextMenuActionOptions {
+  /**
+   * An optional action to take when the action is clicked on. Either this or childContextMenuPanel should be
+   * given.
+   */
+  onClick?: (actionAPI: PanelActionAPI) => void;
+}
+
+interface ContextMenuLinkOptions extends ContextMenuActionOptions {
+  /**
+   * An optional href to use as navigation when the action is clicked on.
+   */
+  getHref?: (actionAPI: PanelActionAPI) => string;
 }
 
 interface ContextMenuActionsConfig {
@@ -107,7 +111,7 @@ export class ContextMenuAction {
   /**
    * @param {PanelActionAPI} panelActionAPI
    */
-  public readonly getHref?: (panelActionAPI: PanelActionAPI) => string | undefined;
+  public readonly getHref?: (panelActionAPI: PanelActionAPI) => string;
 
   /**
    *
@@ -118,10 +122,13 @@ export class ContextMenuAction {
    * @param {ContextMenuPanel} options.childContextMenuPanel - optional child panel to open when clicked.
    * @param {function} options.isDisabled - optionally set a custom disabled function
    * @param {function} options.isVisible - optionally set a custom isVisible function
-   * @param {string} options.href
+   * @param {function} options.getHref
    * @param {Element} options.icon
    */
-  public constructor(config: ContextMenuActionsConfig, options: ContextMenuActionOptions = {}) {
+  public constructor(
+    config: ContextMenuActionsConfig,
+    options: ContextMenuButtonOptions | ContextMenuLinkOptions = {}
+  ) {
     this.id = config.id;
     this.displayName = config.displayName;
     this.parentPanelId = config.parentPanelId;
@@ -129,7 +136,7 @@ export class ContextMenuAction {
     this.icon = options.icon;
     this.childContextMenuPanel = options.childContextMenuPanel;
 
-    if (options.onClick) {
+    if ('onClick' in options) {
       this.onClick = options.onClick;
     }
 
@@ -141,7 +148,7 @@ export class ContextMenuAction {
       this.isVisible = options.isVisible;
     }
 
-    if (options.getHref) {
+    if ('getHref' in options) {
       this.getHref = options.getHref;
     }
   }

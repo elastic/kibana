@@ -146,12 +146,15 @@ function convertPanelActionToContextMenuItem({
     panel: _.get(action, 'childContextMenuPanel.id'),
     disabled: action.isDisabled({ embeddable, containerState }),
     'data-test-subj': `dashboardPanelAction-${action.id}`,
-    onClick: () => {
+  };
+
+  if (action.onClick) {
+    menuPanelItem.onClick = () => {
       if (action.onClick) {
         action.onClick({ embeddable, containerState });
       }
-    },
-  };
+    };
+  }
 
   if (action.getHref) {
     menuPanelItem.href = action.getHref({ embeddable, containerState });
