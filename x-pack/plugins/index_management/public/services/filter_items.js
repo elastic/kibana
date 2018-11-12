@@ -11,8 +11,6 @@ export const filterItems = (fields, filter = '', items = []) => {
     const actualFields = fields || Object.keys(item);
     const indexOfMatch = actualFields.findIndex(field => {
       const normalizedField = String(get(item, field)).toLowerCase();
-      console.log('N', normalizedField);
-      console.log('N', normalizedField);
       return normalizedField.includes(lowerFilter);
     });
     return indexOfMatch !== -1;

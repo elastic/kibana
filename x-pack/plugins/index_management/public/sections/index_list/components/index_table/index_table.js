@@ -198,7 +198,6 @@ export class IndexTableUi extends Component {
     const { indices = [], filterChanged } = this.props;
     return getBannerExtensions().map(bannerExtension => {
       const bannerData = bannerExtension(indices);
-      console.log(bannerData);
       if (!bannerData) {
         return null;
       }
