@@ -296,5 +296,24 @@ export default function ({ getService, getPageObjects }) {
       });
 
     });
+
+    it('should have `drop partial buckets` option', async () => {
+      await PageObjects.visualize.clickDropPartialBuckets();
+      await PageObjects.visualize.clickGo();
+
+      const expectedChartValues = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202, 683,
+        1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
+      ];
+
+      // Most recent failure on Jenkins usually indicates the bar chart is still being drawn?
+      // return arguments[0].getAttribute(arguments[1]);","args":[{"ELEMENT":"592"},"fill"]}] arguments[0].getAttribute is not a function
+      // try sleeping a bit before getting that data
+      await retry.try(async () => {
+        const data = await PageObjects.visualize.getBarChartData();
+        log.debug('data=' + data);
+        log.debug('data.length=' + data.length);
+        expect(data).to.eql(expectedChartValues);
+      });
+    });
   });
 }
