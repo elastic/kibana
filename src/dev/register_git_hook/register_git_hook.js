@@ -18,16 +18,14 @@
  */
 
 import chalk from 'chalk';
-import { chmod, lstat, stat, symlink, unlink, writeFile } from 'fs';
-import { trim } from 'lodash';
+import { chmod, stat, unlink, writeFile } from 'fs';
+import dedent from 'dedent';
 import { resolve } from 'path';
 import { promisify } from 'util';
 import { REPO_ROOT } from '../constants';
 
 const chmodAsync = promisify(chmod);
-const lstatAsync = promisify(lstat);
 const statAsync = promisify(stat);
-const symlinkAsync = promisify(symlink);
 const unlinkAsync = promisify(unlink);
 const writeFileAsync = promisify(writeFile);
 
@@ -35,7 +33,7 @@ const KBN_PRECOMMIT_GIT_HOOK_SCRIPT_PATH = resolve(REPO_ROOT, '.git/hooks/kbn_pr
 const PRECOMMIT_GIT_HOOK_SCRIPT_PATH = resolve(REPO_ROOT, '.git/hooks/pre-commit');
 
 function getKbnPrecommitGitHookScript(rootPath, kbnPrecommitGitHookScriptPath) {
-  return trim(`
+  return dedent(`
   #!/usr/bin/env bash
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
@@ -56,27 +54,19 @@ function getKbnPrecommitGitHookScript(rootPath, kbnPrecommitGitHookScriptPath) {
     command -v node >/dev/null 2>&1
   }
   
-  has_precommit_script () {
-    [ -f package.json ] && cat package.json | grep -q "\\"precommit\\"[[:space:]]*:"
-  }
-  
-  cd "${rootPath}"
-  
-  # Check if precommit script is defined into the package.json
-  has_precommit_script || { echo "Can't found precommit script into package.json"; exit 1; }
-  
   # Check if we have node js bin in path
   has_node || { echo "Can't found node bin in the PATH. Please update the PATH to proceed"; exit 1; }
   
-  npm run --silent precommit
+  npm run --silent precommit || { echo "Pre-commit hook failed (add --no-verify to bypass)"; exit 1; }
   
-  exit 0`, '\n');
+  exit 0
+  `);
 }
 
 async function isKbnGitHookRegistered(kbnGitHookScriptPath, gitHookScriptPath) {
   try {
     await statAsync(kbnGitHookScriptPath);
-    await lstatAsync(gitHookScriptPath);
+    await statAsync(gitHookScriptPath);
     return true;
   } catch (e) {
     return false;
@@ -86,7 +76,7 @@ async function isKbnGitHookRegistered(kbnGitHookScriptPath, gitHookScriptPath) {
 export async function registerPrecommitGitHook(log) {
   log.write(
     chalk.bold(
-      `Registering Kibana pre-commit git hook:\n`
+      `Registering Kibana pre-commit git hook...\n`
     )
   );
 
@@ -105,26 +95,15 @@ export async function registerPrecommitGitHook(log) {
 }
 
 async function writeGitHook(kbnGitHookScriptPath, gitHookScriptPath, kbnHookScript) {
-  try {
-    await unlinkAsync(kbnGitHookScriptPath);
-  } catch (e) { /* no-op */ }
-
-  await writeExecutableKbnGitHookScript(kbnGitHookScriptPath, kbnHookScript);
-  await writeGitHookSymlink(kbnGitHookScriptPath, gitHookScriptPath);
+  await writeExecutableScript(kbnGitHookScriptPath, kbnHookScript);
+  await writeExecutableScript(gitHookScriptPath, kbnHookScript);
 }
 
-async function writeExecutableKbnGitHookScript(kbnGitHookScriptPath, kbnHookScript) {
-  await writeFileAsync(kbnGitHookScriptPath, kbnHookScript);
-  await chmodAsync(kbnGitHookScriptPath, 0o755);
-}
-
-async function writeGitHookSymlink(kbnGitHookScriptPath, gitHookScriptPath) {
+async function writeExecutableScript(scriptPath, scriptSource) {
   try {
-    await unlinkAsync(gitHookScriptPath);
+    await unlinkAsync(scriptPath);
   } catch (e) { /* no-op */ }
 
-  await symlinkAsync(
-    kbnGitHookScriptPath,
-    gitHookScriptPath
-  );
+  await writeFileAsync(scriptPath, scriptSource);
+  await chmodAsync(scriptPath, 0o755);
 }
