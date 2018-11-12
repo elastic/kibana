@@ -63,9 +63,6 @@ const HEADERS = {
   size: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
     defaultMessage: 'Storage size',
   }),
-  primary_size: i18n.translate('xpack.idxMgmt.indexTable.headers.primaryStorageSizeHeader', {
-    defaultMessage: 'Primary storage size',
-  })
 };
 
 export class IndexTableUi extends Component {

@@ -30,6 +30,7 @@ export const getIndexStatusByIndexName = (state, indexName) => {
   const { status } = indices[indexName] || {};
   return status;
 };
+const defaultFilterFields = ['name', 'uuid'];
 const getFilteredIndices = createSelector(
   getIndices,
   getRowStatuses,
@@ -39,7 +40,14 @@ const getFilteredIndices = createSelector(
     const systemFilteredIndexes = tableState.showSystemIndices
       ? indexArray
       : indexArray.filter(index => !(index.name + '').startsWith('.'));
-    return filterItems(['name', 'uuid'], tableState.filter, systemFilteredIndexes);
+    let filter = tableState.filter;
+    let fields = defaultFilterFields;
+    if (filter.includes(':')) {
+      const splitFilter = filter.split(':');
+      fields = [ splitFilter[0]];
+      filter = splitFilter[1];
+    }
+    return filterItems(fields, filter, systemFilteredIndexes);
   }
 );
 export const getTotalItems = createSelector(
