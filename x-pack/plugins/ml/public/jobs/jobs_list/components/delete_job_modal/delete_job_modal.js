@@ -91,7 +91,7 @@ export class DeleteJobModal extends Component {
           id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
           defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}"
           values={{
-            jobCount: this.state.jobs.length,
+            jobsCount: this.state.jobs.length,
             jobId: this.state.jobs[0].id
           }}
         />);

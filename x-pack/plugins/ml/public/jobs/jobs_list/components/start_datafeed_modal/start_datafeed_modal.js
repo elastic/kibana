@@ -142,7 +142,7 @@ export class StartDatafeedModal extends Component {
                   id="xpack.ml.jobsList.startDatafeedModal.startJobsTitle"
                   defaultMessage="Start {jobsCount, plural, one {{jobId}} other {# jobs}}"
                   values={{
-                    jobCount: startableJobs.length,
+                    jobsCount: startableJobs.length,
                     jobId: startableJobs[0].id
                   }}
                 />
