@@ -206,7 +206,6 @@
     "node-fetch": "^2.1.2",
     "object-path-immutable": "^0.5.3",
     "oppsy": "^2.0.0",
-    "path-match": "1.2.4",
     "papaparse": "^4.6.0",
     "pdfmake": "0.1.33",
     "pivotal-ui": "13.0.1",
