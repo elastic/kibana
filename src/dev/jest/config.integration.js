@@ -21,9 +21,12 @@ import config from './config';
 
 export default {
   ...config,
-  testMatch: ['**/integration_tests/**/*.test.js', '**/integration_tests/**/*.test.ts'],
+  testMatch: [
+    '**/integration_tests/**/*.test.js',
+    '**/integration_tests/**/*.test.ts',
+  ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
-    pattern => !pattern.includes('integration_tests')
+    (pattern) => !pattern.includes('integration_tests')
   ),
   reporters: [
     'default',

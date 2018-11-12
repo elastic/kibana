@@ -65,6 +65,29 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
   throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
 }
 
+export async function setupUsers(log, esPort, updates) {
+  // track the current credentials for the `elastic` user as
+  // they will likely change as we apply updates
+  let auth = `elastic:${DEFAULT_SUPERUSER_PASS}`;
+
+  for (const { username, password, roles } of updates) {
+    // If working with a built-in user, just change the password
+    if (['logstash_system', 'elastic', 'kibana'].includes(username)) {
+      log.info('setting %j user password to %j', username, password);
+      await updateCredentials(esPort, auth, username, password);
+
+      // If not a builtin user, add them
+    } else {
+      log.info('Adding %j user with password to %j', username, password);
+      await insertUser(esPort, auth, username, password, roles);
+    }
+
+    if (username === 'elastic') {
+      auth = `elastic:${password}`;
+    }
+  }
+}
+
 async function insertUser(port, auth, username, password, roles = [], retries = 10) {
   const result = await fcb(cb =>
     request(
@@ -98,27 +121,4 @@ async function insertUser(port, auth, username, password, roles = [], retries = 
   }
 
   throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
-}
-
-export async function setupUsers(log, esPort, updates) {
-  // track the current credentials for the `elastic` user as
-  // they will likely change as we apply updates
-  let auth = `elastic:${DEFAULT_SUPERUSER_PASS}`;
-
-  for (const { username, password, roles } of updates) {
-    // If working with a built-in user, just change the password
-    if (['logstash_system', 'elastic', 'kibana'].includes(username)) {
-      log.info('setting %j user password to %j', username, password);
-      await updateCredentials(esPort, auth, username, password);
-
-      // If not a builtin user, add them
-    } else {
-      log.info('Adding %j user with password to %j', username, password);
-      await insertUser(esPort, auth, username, password, roles);
-    }
-
-    if (username === 'elastic') {
-      auth = `elastic:${password}`;
-    }
-  }
 }

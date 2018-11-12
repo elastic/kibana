@@ -19,6 +19,7 @@ const distroSupportsChromium = (distro, release) => {
   return releaseNumber >= 7;
 };
 
+
 export async function getDefaultBrowser() {
   const os = await getos();
 
