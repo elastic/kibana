@@ -37,7 +37,6 @@ if (chrome.getInjected('indexLifecycleManagementUiEnabled')) {
     controllerAs: 'indexLifecycleManagement',
     controller: class IndexLifecycleManagementController {
       constructor($scope, $route, $http, kbnUrl, $rootScope) {
-        console.log("ILM");
         setHttpClient($http);
         setUrlService({
           change(url) {
