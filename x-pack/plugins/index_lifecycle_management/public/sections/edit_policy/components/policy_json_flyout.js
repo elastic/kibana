@@ -52,7 +52,7 @@ export class PolicyJsonFlyoutUi extends PureComponent {
           <EuiFlyoutFooter>
             <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
               <FormattedMessage
-                id="xpack.indexLifecycleMgmt.nodeAttrDetails.closeLabel"
+                id="xpack.indexLifecycleMgmt.policyJsonFlyout.closeLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
