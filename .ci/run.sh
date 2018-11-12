@@ -12,9 +12,6 @@ case "$JOB" in
 "intake")
   ./test/scripts/jenkins_unit.sh
   ;;
-"x-pack")
-  ./test/scripts/jenkins_xpack.sh
-  ;;
 *)
   echo "JOB '$JOB' is not implemented."
   exit 1
