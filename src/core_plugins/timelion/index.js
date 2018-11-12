@@ -41,21 +41,20 @@ export default function (kibana) {
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
-      // FIXME: awaiting https://github.com/elastic/kibana/pull/25318
-      // injectDefaultVars() {
-      //   return {
-      //     uiCapabilities: {
-      //       navLinks: {
-      //         timelion: {
-      //           showLink: true,
-      //         }
-      //       },
-      //       timelion: {
-      //         showWriteControls: true,
-      //       }
-      //     }
-      //   };
-      // },
+      injectDefaultVars() {
+        return {
+          uiCapabilities: {
+            navLinks: {
+              timelion: {
+                showLink: true,
+              }
+            },
+            timelion: {
+              showWriteControls: true,
+            }
+          }
+        };
+      },
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: 'Show tutorial',

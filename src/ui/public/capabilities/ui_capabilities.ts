@@ -21,22 +21,19 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { deepFreeze } from '../../../core/public/utils/deep_freeze';
 
-type Capability = boolean & NestedCapability;
-
-interface NestedCapability {
-  [key: string]: Capability;
-}
+type Capability = boolean | Record<string, boolean>;
 
 export interface UICapabilities {
-  [key: string]: Capability;
+  navLinks: Record<string, boolean>;
+  [key: string]: Record<string, boolean>;
 }
 
 const injectedUiCapabilities = chrome.getInjected('uiCapabilities');
 
-const createAccessProxy: (
-  target: NestedCapability,
-  path?: string[]
-) => boolean | NestedCapability = (target: NestedCapability, path: string[] = []) =>
+const createAccessProxy: (target: Record<string, boolean>, path?: string[]) => Capability = (
+  target: Record<string, boolean>,
+  path: string[] = []
+) =>
   new Proxy(target, {
     get: (object, property) => {
       const currentPath = [...path, String(property)];
