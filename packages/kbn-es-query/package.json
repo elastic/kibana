@@ -12,7 +12,7 @@
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "@kbn/babel-preset": "1.0.0",
     "babel-cli": "^6.26.0",
     "expect.js": "0.3.1"
   }

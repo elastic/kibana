@@ -29,6 +29,6 @@ bower_components
 /x-pack/plugins/**/__tests__/fixtures/**
 /x-pack/plugins/canvas/common/lib/grammar.js
 /x-pack/plugins/canvas/canvas_plugin
-/x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/*
+/x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts
 **/*.js.snap
 !/.eslintrc.js

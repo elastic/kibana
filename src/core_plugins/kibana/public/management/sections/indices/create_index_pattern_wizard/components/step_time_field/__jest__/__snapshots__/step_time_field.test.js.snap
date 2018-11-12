@@ -43,6 +43,7 @@ exports[`StepTimeField should render a loading state when creating the index pat
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Creating index pattern..."

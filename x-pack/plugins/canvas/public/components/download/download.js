@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import fileSaver from 'file-saver';
 import { toByteArray } from 'base64-js';
-import { parse } from '../../../common/lib/dataurl';
+import { parseDataUrl } from '../../../common/lib/dataurl';
 
 export class Download extends React.PureComponent {
   static propTypes = {
@@ -20,7 +20,7 @@ export class Download extends React.PureComponent {
 
   onClick = () => {
     const { fileName, content } = this.props;
-    const asset = parse(content, true);
+    const asset = parseDataUrl(content, true);
     const assetBlob = new Blob([toByteArray(asset.data)], { type: asset.mimetype });
     const ext = asset.extension ? `.${asset.extension}` : '';
     fileSaver.saveAs(assetBlob, `canvas-${fileName}${ext}`);
