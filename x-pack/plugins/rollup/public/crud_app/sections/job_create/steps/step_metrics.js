@@ -46,7 +46,6 @@ export class StepMetricsUi extends Component {
     this.chooserColumns = [{
       field: 'name',
       name: 'Field',
-      truncateText: true,
       sortable: true,
     }];
 
