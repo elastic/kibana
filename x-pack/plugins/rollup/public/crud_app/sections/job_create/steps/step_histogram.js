@@ -74,7 +74,6 @@ export class StepHistogramUi extends Component {
     const columns = [{
       field: 'name',
       name: 'Field',
-      truncateText: true,
       sortable: true,
     }];
 
