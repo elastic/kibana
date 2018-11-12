@@ -66,9 +66,8 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
 
   _.assign(aggCursor, createDateAgg(config, tlConfig, scriptedFields));
 
-  return {
+  const request = {
     index: config.index,
-    timeout: tlConfig.server.config().get('elasticsearch.shardTimeout') + 'ms',
     body: {
       query: {
         bool: bool
@@ -77,4 +76,11 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
       size: 0
     }
   };
+
+  const timeout = tlConfig.server.config().get('elasticsearch.shardTimeout');
+  if (timeout) {
+    request.timeout = `${timeout}ms`;
+  }
+
+  return request;
 }
