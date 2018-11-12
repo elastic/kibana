@@ -13,7 +13,7 @@ export function validateRollupCron(rollupCron) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupCronMissing"
-        defaultMessage="You must provide an interval"
+        defaultMessage="Cron pattern or basic interval is required."
       />
     )];
   }

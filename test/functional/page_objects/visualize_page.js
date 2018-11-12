@@ -1154,6 +1154,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await filterBtn.click();
     }
 
+    async toggleLegend(show = true) {
+      const isVisible = remote.findByCssSelector('vislib-legend .legend-ul');
+      if ((show && !isVisible) || (!show && isVisible)) {
+        await testSubjects.click('vislibToggleLegend');
+      }
+    }
+
+    async filterLegend(name) {
+      await this.toggleLegend();
+      await testSubjects.click(`legend-${name}`);
+      await testSubjects.click(`legend-${name}-filterIn`);
+    }
+
     async doesLegendColorChoiceExist(color) {
       return await testSubjects.exists(`legendSelectColor-${color}`);
     }

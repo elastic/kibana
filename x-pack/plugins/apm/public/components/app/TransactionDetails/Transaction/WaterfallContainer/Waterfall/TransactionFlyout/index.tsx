@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -17,7 +18,7 @@ import {
 import React from 'react';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { ActionMenu } from '../../../ActionMenu';
+import { DiscoverTransactionLink } from '../../../ActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
@@ -54,14 +55,21 @@ export function TransactionFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <ActionMenu transaction={transactionDoc} />
+              <DiscoverTransactionLink transaction={transactionDoc}>
+                <EuiButtonEmpty iconType="discoverApp">
+                  View transaction in Discover
+                </EuiButtonEmpty>
+              </DiscoverTransactionLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <FlyoutTopLevelProperties transaction={transactionDoc} />
           <EuiHorizontalRule />
-          <StickyTransactionProperties transaction={transactionDoc} />
+          <StickyTransactionProperties
+            transaction={transactionDoc}
+            totalDuration={waterfall.traceRootDuration}
+          />
           <EuiHorizontalRule />
           <TransactionPropertiesTableForFlyout
             transaction={transactionDoc}

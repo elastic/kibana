@@ -50,7 +50,8 @@ const flags = getopts(process.argv.slice(0), {
     d: 'debug',
   },
   default: {
-    debug: true
+    debug: true,
+    'version-qualifier': ''
   },
   unknown: (flag) => {
     unknownFlags.push(flag);
@@ -79,6 +80,7 @@ if (flags.help) {
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
         --release               {dim Produce a release-ready distributable}
+        --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}
         --verbose,-v            {dim Turn on verbose logging}
         --no-debug              {dim Turn off debug logging}
@@ -110,6 +112,7 @@ function isOsPackageDesired(name) {
 buildDistributables({
   log,
   isRelease: Boolean(flags.release),
+  versionQualifier: flags['version-qualifier'],
   buildOssDist: flags.oss !== false,
   buildDefaultDist: !flags.oss,
   downloadFreshNode: !Boolean(flags['skip-node-download']),

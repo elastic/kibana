@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, omit } from 'lodash';
+import { pick, omit, get } from 'lodash';
 import { calculateOverallStatus } from '../calculate_overall_status';
 
 export function getClustersSummary(clusters, kibanaUuid) {
@@ -12,7 +12,6 @@ export function getClustersSummary(clusters, kibanaUuid) {
     const {
       isSupported,
       cluster_uuid: clusterUuid,
-      cluster_name: clusterName,
       version,
       license,
       cluster_stats: clusterStats,
@@ -22,8 +21,11 @@ export function getClustersSummary(clusters, kibanaUuid) {
       beats,
       apm,
       alerts,
-      ccs
+      ccs,
+      cluster_settings: clusterSettings
     } = cluster;
+
+    const clusterName = get(clusterSettings, 'cluster.metadata.display_name', cluster.cluster_name);
 
     const {
       status: licenseStatus,

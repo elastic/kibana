@@ -24,6 +24,7 @@ exports[`renders ListControl 1`] = `
   label="list control"
 >
   <EuiComboBox
+    compressed={false}
     data-test-subj="listControlSelect0"
     fullWidth={false}
     isClearable={true}

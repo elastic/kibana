@@ -14,7 +14,7 @@ export function validateIndexPattern(indexPattern, rollupIndex) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternMissing"
-        defaultMessage="You must provide an index pattern"
+        defaultMessage="Index pattern is required."
       />
     )];
   }
@@ -23,7 +23,7 @@ export function validateIndexPattern(indexPattern, rollupIndex) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternSameAsRollupIndex"
-        defaultMessage="Index pattern must not be the same as the rollup index"
+        defaultMessage="Index pattern cannot have the same as the rollup index."
       />
     )];
   }
@@ -40,7 +40,7 @@ export function validateIndexPattern(indexPattern, rollupIndex) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternIllegalCharacters"
-        defaultMessage="You must remove these characters from your index pattern: {characterList}"
+        defaultMessage="Remove the characters {characterList} from your index pattern."
         values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong> }}
       />
     )];
@@ -50,7 +50,7 @@ export function validateIndexPattern(indexPattern, rollupIndex) {
     return [(
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.indexPatternSpaces"
-        defaultMessage="You must remove spaces from your index pattern"
+        defaultMessage="Remove the spaces from your index pattern."
       />
     )];
   }

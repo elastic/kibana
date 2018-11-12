@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
@@ -19,6 +19,7 @@ import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
 import {
+  IServiceColors,
   IWaterfall,
   IWaterfallItem
 } from './waterfall_helpers/waterfall_helpers';
@@ -42,9 +43,7 @@ interface Props {
   urlParams: IUrlParams;
   waterfall: IWaterfall;
   location: any;
-  serviceColors: {
-    [key: string]: string;
-  };
+  serviceColors: IServiceColors;
 }
 
 export class Waterfall extends Component<Props> {
@@ -62,26 +61,19 @@ export class Waterfall extends Component<Props> {
     });
   };
 
-  public renderWaterfall = (item?: IWaterfallItem) => {
-    if (!item) {
-      return null;
-    }
-
+  public getWaterfallItem = (item: IWaterfallItem) => {
     const { serviceColors, waterfall, urlParams }: Props = this.props;
 
     return (
-      <Fragment key={item.id}>
-        <WaterfallItem
-          timelineMargins={TIMELINE_MARGINS}
-          color={serviceColors[item.serviceName]}
-          item={item}
-          totalDuration={waterfall.duration}
-          isSelected={item.id === urlParams.waterfallItemId}
-          onClick={() => this.onOpenFlyout(item)}
-        />
-
-        {item.children && item.children.map(this.renderWaterfall)}
-      </Fragment>
+      <WaterfallItem
+        key={item.id}
+        timelineMargins={TIMELINE_MARGINS}
+        color={serviceColors[item.serviceName]}
+        item={item}
+        totalDuration={waterfall.duration}
+        isSelected={item.id === urlParams.waterfallItemId}
+        onClick={() => this.onOpenFlyout(item)}
+      />
     );
   };
 
@@ -98,11 +90,15 @@ export class Waterfall extends Component<Props> {
 
     switch (currentItem.docType) {
       case 'span':
+        const parentTransaction = waterfall.getTransactionById(
+          currentItem.parentId
+        );
+
         return (
           <SpanFlyout
             totalDuration={waterfall.duration}
             span={currentItem.span}
-            parentTransaction={currentItem.parentTransaction}
+            parentTransaction={parentTransaction}
             onClose={this.onCloseFlyout}
           />
         );
@@ -124,7 +120,7 @@ export class Waterfall extends Component<Props> {
   public render() {
     const { waterfall } = this.props;
     const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
-    const waterfallHeight = itemContainerHeight * waterfall.childrenCount;
+    const waterfallHeight = itemContainerHeight * waterfall.items.length;
 
     return (
       <Container>
@@ -132,6 +128,7 @@ export class Waterfall extends Component<Props> {
           <Timeline
             agentMarks={this.props.agentMarks}
             duration={waterfall.duration}
+            traceRootDuration={waterfall.traceRootDuration}
             height={waterfallHeight}
             margins={TIMELINE_MARGINS}
           />
@@ -140,7 +137,7 @@ export class Waterfall extends Component<Props> {
               paddingTop: TIMELINE_MARGINS.top
             }}
           >
-            {this.renderWaterfall(waterfall.root)}
+            {waterfall.items.map(this.getWaterfallItem)}
           </div>
         </StickyContainer>
 
@@ -160,8 +157,3 @@ export class Waterfall extends Component<Props> {
     });
   }
 }
-
-// TODO: the agent marks and note about dropped spans were removed. Need to be re-added
-//   agentMarks: PropTypes.array,
-//   agentName: PropTypes.string.isRequired,
-//   droppedSpans: PropTypes.number.isRequired,
