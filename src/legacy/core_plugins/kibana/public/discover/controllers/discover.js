@@ -66,6 +66,11 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { createPhraseFilter } from '../../../../../ui/public/filter_bar/filters/phrase_filter';
+import {
+  createMetaFilter,
+  toggleDisabled,
+  toggleNegation, togglePinned,
+} from '../../../../../ui/public/filter_bar/filters/meta_filter';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -185,33 +190,24 @@ function discoverController(
 
 
   $scope.reactFilters = [
-    createPhraseFilter({ field: 'response', value: 200, index: 'foo' }),
-    createPhraseFilter({ field: 'extension', value: 'jpg', index: 'foo' }),
-    createPhraseFilter({ field: 'bytes', value: 2000, index: 'foo' }),
+    createMetaFilter(createPhraseFilter({ field: 'response', value: 200, index: 'foo' })),
+    createMetaFilter(createPhraseFilter({ field: 'extension', value: 'jpg', index: 'foo' })),
+    createMetaFilter(createPhraseFilter({ field: 'bytes', value: 2000, index: 'foo' })),
   ];
 
   $scope.onToggleNegate = (filter) => {
     const index = $scope.reactFilters.indexOf(filter);
-    $scope.reactFilters[index] = {
-      ...filter,
-      negate: !filter.negate
-    };
+    $scope.reactFilters[index] = toggleNegation(filter);
   };
 
   $scope.onTogglePin = (filter) => {
     const index = $scope.reactFilters.indexOf(filter);
-    $scope.reactFilters[index] = {
-      ...filter,
-      pinned: !filter.pinned
-    };
+    $scope.reactFilters[index] = togglePinned(filter);
   };
 
   $scope.onToggleDisabled = (filter) => {
     const index = $scope.reactFilters.indexOf(filter);
-    $scope.reactFilters[index] = {
-      ...filter,
-      disabled: !filter.disabled
-    };
+    $scope.reactFilters[index] = toggleDisabled(filter);
   };
 
   $scope.onDelete = (filterToDelete) => {

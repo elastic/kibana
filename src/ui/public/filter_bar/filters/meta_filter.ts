@@ -19,14 +19,13 @@
 
 import { Filter } from 'ui/filter_bar/filters/index';
 
-export interface MetaFilter {
-  filter: Filter;
+export type MetaFilter = Filter & {
   disabled: boolean;
   negate: boolean;
   pinned: boolean;
   index?: string;
   toElasticsearchQuery: () => void;
-}
+};
 
 interface CreateMetaFilterOptions {
   disabled?: boolean;
@@ -39,16 +38,41 @@ export function createMetaFilter(
   filter: Filter,
   { disabled = false, negate = false, pinned = false, index }: CreateMetaFilterOptions = {}
 ): MetaFilter {
-  return {
-    filter,
-    disabled,
-    negate,
-    pinned,
-    index,
-    toElasticsearchQuery: () => {
-      // TODO implement me
-      // if negate === true then wrap filter in a `not` filter
-      // call underlying filter's toElasticsearchQuery
-    },
+  const metaFilter = Object.create(filter);
+  metaFilter.disabled = disabled;
+  metaFilter.negate = negate;
+  metaFilter.pinned = pinned;
+  metaFilter.index = index;
+  metaFilter.toElasticsearchQuery = function() {
+    return this;
+    // TODO implement me
+    // if negate === true then wrap filter in a `not` filter
+    // call underlying filter's toElasticsearchQuery
+    // e.g. Object.getPrototypeOf(this).toElasticsearchQuery();
   };
+  return metaFilter;
+}
+
+export function toggleNegation(filter: MetaFilter) {
+  const meta = {
+    ...filter,
+    negate: !filter.negate,
+  };
+  return createMetaFilter(Object.getPrototypeOf(filter), meta);
+}
+
+export function togglePinned(filter: MetaFilter) {
+  const meta = {
+    ...filter,
+    pinned: !filter.pinned,
+  };
+  return createMetaFilter(Object.getPrototypeOf(filter), meta);
+}
+
+export function toggleDisabled(filter: MetaFilter) {
+  const meta = {
+    ...filter,
+    disabled: !filter.disabled,
+  };
+  return createMetaFilter(Object.getPrototypeOf(filter), meta);
 }

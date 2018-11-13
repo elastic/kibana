@@ -42,15 +42,13 @@ export class FilterItem extends Component<Props, State> {
 
   public render() {
     const filter = this.props.filter;
-    const {
-      filter: { negate, disabled, pinned },
-    } = filter;
+    const { negate, disabled, pinned } = filter;
 
     const classes = classNames(
       'globalFilterItem',
       {
         'globalFilterItem-isDisabled': disabled,
-        'globalFilterItem-isPinned': false,
+        'globalFilterItem-isPinned': pinned,
         'globalFilterItem-isExcluded': negate,
       },
       this.props.className

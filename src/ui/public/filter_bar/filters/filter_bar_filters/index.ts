@@ -18,24 +18,19 @@
  */
 
 import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
-import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 
 export type FilterBarFilter = MetaFilter & {
   getDisplayText: () => string;
 };
 
-export function createFilterBarFilter(metaFilter: MetaFilter): FilterBarFilter {
-  const filter = metaFilter.filter;
-
+export function createFilterBarFilter(filter: MetaFilter): FilterBarFilter {
   switch (filter.type) {
     case 'PhraseFilter':
-      return {
-        ...metaFilter,
-        getDisplayText() {
-          const { field, value } = this.filter as PhraseFilter;
-          return `${field} : ${value}`;
-        },
+      const filterBarFilter = Object.create(filter);
+      filterBarFilter.getDisplayText = function() {
+        return `${this.field} : ${this.value}`;
       };
+      return filterBarFilter;
     default:
       throw new Error(`Unknown filter type: ${filter.type}`);
   }
