@@ -87,6 +87,7 @@ export class JobListUi extends Component {
     // this page.
     this.props.closeDetailPanel();
   }
+
   getHeaderSection() {
     return (
       <EuiPageContentHeaderSection>
@@ -101,6 +102,7 @@ export class JobListUi extends Component {
       </EuiPageContentHeaderSection>
     );
   }
+
   renderNoPermission() {
     const { intl } = this.props;
     const title = intl.formatMessage({
@@ -124,10 +126,39 @@ export class JobListUi extends Component {
       </Fragment>
     );
   }
+
+  renderError(error) {
+    // We can safely depend upon the shape of this error coming from Angular $http, because we
+    // handle unexpected error shapes in the API action.
+    const {
+      statusCode,
+      error: errorString,
+    } = error.data;
+
+    const { intl } = this.props;
+    const title = intl.formatMessage({
+      id: 'xpack.rollupJobs.jobList.loadingErrorTitle',
+      defaultMessage: 'Error loading rollup jobs',
+    });
+    return (
+      <Fragment>
+        {this.getHeaderSection()}
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={title}
+          color="danger"
+          iconType="alert"
+        >
+          {statusCode} {errorString}
+        </EuiCallOut>
+      </Fragment>
+    );
+  }
+
   renderEmpty() {
     return (
       <EuiEmptyPrompt
-        iconType="managementApp"
+        iconType="indexRollupApp"
         title={(
           <h1>
             <FormattedMessage
@@ -221,8 +252,13 @@ export class JobListUi extends Component {
     const { isLoading, jobs, jobLoadError } = this.props;
 
     let content;
-    if (jobLoadError && jobLoadError.status === 403) {
-      content = this.renderNoPermission();
+
+    if (jobLoadError) {
+      if (jobLoadError.status === 403) {
+        content = this.renderNoPermission();
+      } else {
+        content = this.renderError(jobLoadError);
+      }
     } else if (!isLoading && !jobs.length) {
       content = this.renderEmpty();
     } else {

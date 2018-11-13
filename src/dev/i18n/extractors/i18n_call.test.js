@@ -24,17 +24,17 @@ import { extractI18nCallMessages } from './i18n_call';
 import { traverseNodes } from '../utils';
 
 const i18nCallMessageSource = `
-i18n('message-id-1', { defaultMessage: 'Default message 1', context: 'Message context 1' });
+i18n('message-id-1', { defaultMessage: 'Default message 1', description: 'Message description 1' });
 `;
 
 const translateCallMessageSource = `
-i18n.translate('message-id-2', { defaultMessage: 'Default message 2', context: 'Message context 2' });
+i18n.translate('message-id-2', { defaultMessage: 'Default message 2', description: 'Message description 2' });
 `;
 
 const i18nCallMessageWithTemplateLiteralSource = `
 i18n('message-id-3', { defaultMessage: \`Default
-message 3\`, context: \`Message
-context 3\` });
+message 3\`, description: \`Message
+description 3\` });
 `;
 
 describe('dev/i18n/extractors/i18n_call', () => {
@@ -60,7 +60,7 @@ describe('dev/i18n/extractors/i18n_call', () => {
 
   test('throws if message id value is not a string literal', () => {
     const source = `
-i18n(messageIdIdentifier, { defaultMessage: 'Default message', context: 'Message context' });
+i18n(messageIdIdentifier, { defaultMessage: 'Default message', description: 'Message description' });
 `;
     const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
       isCallExpression(node)

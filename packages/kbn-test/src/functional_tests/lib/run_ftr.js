@@ -20,7 +20,10 @@
 import { createFunctionalTestRunner } from '../../../../../src/functional_test_runner';
 import { CliError } from './run_cli';
 
-export async function runFtr({ configPath, options: { log, bail, grep, updateBaselines } }) {
+export async function runFtr({
+  configPath,
+  options: { log, bail, grep, updateBaselines, suiteTags },
+}) {
   const ftr = createFunctionalTestRunner({
     log,
     configFile: configPath,
@@ -30,6 +33,7 @@ export async function runFtr({ configPath, options: { log, bail, grep, updateBas
         grep,
       },
       updateBaselines,
+      suiteTags,
     },
   });
 

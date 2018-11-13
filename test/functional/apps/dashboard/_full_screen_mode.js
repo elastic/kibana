@@ -60,7 +60,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('displays exit full screen logo button when panel is expanded', async () => {
-      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
 
       const exists = await PageObjects.dashboard.exitFullScreenTextButtonExists();
       expect(exists).to.be(true);

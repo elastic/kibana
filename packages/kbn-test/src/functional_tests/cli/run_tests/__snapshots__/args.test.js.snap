@@ -16,6 +16,8 @@ Options:
   --bail                         Stop the test run at the first failure. 
   --grep <pattern>               Pattern to select which tests to run. 
   --updateBaselines              Replace baseline screenshots with whatever is generated from the test. 
+  --include-tag <tag>            Tags that suites must include to be run, can be included multiple times. 
+  --exclude-tag <tag>            Tags that suites must NOT include to be run, can be included multiple times. 
   --verbose                      Log everything. 
   --debug                        Run in debug mode. 
   --quiet                        Only log errors. 
@@ -29,6 +31,10 @@ Object {
   ],
   "createLogger": [Function],
   "extraKbnOpts": undefined,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
   "updateBaselines": true,
 }
 `;
@@ -41,6 +47,10 @@ Object {
   "createLogger": [Function],
   "debug": true,
   "extraKbnOpts": undefined,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
 
@@ -52,6 +62,10 @@ Object {
   ],
   "createLogger": [Function],
   "extraKbnOpts": undefined,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
 
@@ -67,6 +81,10 @@ Object {
   "extraKbnOpts": Object {
     "server.foo": "bar",
   },
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
 
@@ -78,6 +96,10 @@ Object {
   "createLogger": [Function],
   "extraKbnOpts": undefined,
   "quiet": true,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
 
@@ -89,6 +111,10 @@ Object {
   "createLogger": [Function],
   "extraKbnOpts": undefined,
   "silent": true,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
 
@@ -100,6 +126,10 @@ Object {
   "createLogger": [Function],
   "esFrom": "source",
   "extraKbnOpts": undefined,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
 
@@ -111,6 +141,10 @@ Object {
   "createLogger": [Function],
   "extraKbnOpts": undefined,
   "installDir": "foo",
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
 
@@ -122,6 +156,10 @@ Object {
   "createLogger": [Function],
   "extraKbnOpts": undefined,
   "grep": "management",
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
 
@@ -132,6 +170,10 @@ Object {
   ],
   "createLogger": [Function],
   "extraKbnOpts": undefined,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
   "verbose": true,
 }
 `;
