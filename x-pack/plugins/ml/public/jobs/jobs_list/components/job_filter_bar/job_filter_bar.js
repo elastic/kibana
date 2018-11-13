@@ -70,7 +70,6 @@ export class JobFilterBar extends Component {
     return (
       <EuiFlexItem grow={false}>
         <EuiCallOut
-          iconType="faceSad"
           color="danger"
           title={`Invalid search: ${error.message}`}
         />
