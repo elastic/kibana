@@ -14,6 +14,14 @@ export interface EsClient {
     create(params: AnyObject): Promise<any>;
     refresh(params: AnyObject): Promise<any>;
     delete(params: AnyObject): Promise<any>;
+
+    existsAlias(params: AnyObject): Promise<any>;
+    getAlias(params: AnyObject): Promise<any>;
+    putAlias(params: AnyObject): Promise<any>;
+    deleteAlias(params: AnyObject): Promise<any>;
+    updateAliases(params: AnyObject): Promise<any>;
+
+    getMapping(params: AnyObject): Promise<any>;
   };
 
   ping(): Promise<void>;
@@ -21,6 +29,7 @@ export interface EsClient {
   index(params: AnyObject): Promise<any>;
   get(params: AnyObject): Promise<any>;
   update(params: AnyObject): Promise<any>;
+  reindex(params: AnyObject): Promise<any>;
   search(params: AnyObject): Promise<any>;
   delete(params: AnyObject): Promise<any>;
   deleteByQuery(params: AnyObject): Promise<any>;

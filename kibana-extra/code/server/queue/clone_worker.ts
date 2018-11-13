@@ -10,7 +10,6 @@ import { RepositoryUtils } from '../../common/repository_utils';
 import { CloneProgress, CloneWorkerProgress, CloneWorkerResult } from '../../model';
 import { Log } from '../log';
 import { RepositoryService } from '../repository_service';
-import { RepositoryObjectClient } from '../search';
 import { SocketService } from '../socket_service';
 import { AbstractGitWorker } from './abstract_git_worker';
 import { IndexWorker } from './index_worker';

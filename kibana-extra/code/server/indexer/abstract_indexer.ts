@@ -11,17 +11,21 @@ import { IndexRequest, IndexStats, RepositoryUri } from '../../model';
 import { Log } from '../log';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { IndexCreationRequest } from './index_creation_request';
+import { IndexCreator } from './index_creator';
 
 export abstract class AbstractIndexer implements Indexer {
   protected type: string = 'abstract';
   protected cancelled: boolean = false;
+  protected indexCreator: IndexCreator;
 
   constructor(
     protected readonly repoUri: RepositoryUri,
     protected readonly revision: string,
     protected readonly client: EsClient,
     protected readonly log: Log
-  ) {}
+  ) {
+    this.indexCreator = new IndexCreator(client);
+  }
 
   public async start(progressReporter?: ProgressReporter) {
     this.log.info(
@@ -129,7 +133,7 @@ export abstract class AbstractIndexer implements Indexer {
     const creationReqs = await this.prepareIndexCreationRequests();
     for (const req of creationReqs) {
       try {
-        const res = await this.createIndex(req);
+        const res = await this.indexCreator.createIndex(req);
         if (!res) {
           this.log.info(`Index creation failed for ${req.index}.`);
           return false;
@@ -140,38 +144,5 @@ export abstract class AbstractIndexer implements Indexer {
       }
     }
     return true;
-  }
-
-  private async createIndex(creationReq: IndexCreationRequest): Promise<boolean> {
-    const body = {
-      settings: creationReq.settings,
-      mappings: {
-        [creationReq.type]: {
-          dynamic_templates: [
-            {
-              fieldDefaultNotAnalyzed: {
-                match: '*',
-                mapping: {
-                  index: false,
-                  norms: false,
-                },
-              },
-            },
-          ],
-          properties: creationReq.schema,
-        },
-      },
-    };
-    const exists = await this.client.indices.exists({
-      index: creationReq.index,
-    });
-    if (!exists) {
-      await this.client.indices.create({
-        index: creationReq.index,
-        body,
-      });
-      return true;
-    }
-    return exists;
   }
 }

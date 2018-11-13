@@ -1,6 +1,7 @@
 {
   "extends": "../../kibana/tsconfig.json",
   "compilerOptions": {
+    "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
       "*": [

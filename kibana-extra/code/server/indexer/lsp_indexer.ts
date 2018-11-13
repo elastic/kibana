@@ -19,22 +19,21 @@ import { ServerOptions } from '../server_options';
 import { detectLanguage, detectLanguageByFilename } from '../utils/detect_language';
 import { AbstractIndexer } from './abstract_indexer';
 import { BatchIndexHelper } from './batch_index_helper';
-import { IndexCreationRequest } from './index_creation_request';
 import {
-  DocumentAnalysisSettings,
+  getDocumentIndexCreationRequest,
+  getReferenceIndexCreationRequest,
+  getSymbolIndexCreationRequest,
+} from './index_creation_request';
+import {
   DocumentIndexName,
-  DocumentSchema,
   DocumentTypeName,
   ReferenceIndexName,
-  ReferenceSchema,
   ReferenceTypeName,
   RepositoryDeleteStatusReservedField,
   RepositoryGitStatusReservedField,
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
-  SymbolAnalysisSettings,
   SymbolIndexName,
-  SymbolSchema,
   SymbolTypeName,
 } from './schema';
 
@@ -75,36 +74,11 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   protected async prepareIndexCreationRequests() {
-    const contentIndexCreationReq: IndexCreationRequest = {
-      index: DocumentIndexName(this.repoUri),
-      type: DocumentTypeName,
-      settings: {
-        ...DocumentAnalysisSettings,
-        number_of_shards: 1,
-        auto_expand_replicas: '0-1',
-      },
-      schema: DocumentSchema,
-    };
-    const symbolIndexCreationReq: IndexCreationRequest = {
-      index: SymbolIndexName(this.repoUri),
-      type: SymbolTypeName,
-      settings: {
-        ...SymbolAnalysisSettings,
-        number_of_shards: 1,
-        auto_expand_replicas: '0-1',
-      },
-      schema: SymbolSchema,
-    };
-    const referenceIndexCreationReq: IndexCreationRequest = {
-      index: ReferenceIndexName(this.repoUri),
-      type: ReferenceTypeName,
-      settings: {
-        number_of_shards: 1,
-        auto_expand_replicas: '0-1',
-      },
-      schema: ReferenceSchema,
-    };
-    return [contentIndexCreationReq, symbolIndexCreationReq, referenceIndexCreationReq];
+    return [
+      getDocumentIndexCreationRequest(this.repoUri),
+      getReferenceIndexCreationRequest(this.repoUri),
+      getSymbolIndexCreationRequest(this.repoUri),
+    ];
   }
 
   protected async prepareRequests() {

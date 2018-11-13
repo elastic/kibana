@@ -9,6 +9,7 @@
     "version": "kibana",
     "templateVersion": "1.0.0"
   },
+  "codeIndexVersion": "1",
   "scripts": {
     "_preinstall": "node ../../kibana/preinstall_check",
     "kbn": "node ../../kibana/scripts/kbn",

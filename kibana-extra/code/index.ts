@@ -8,7 +8,11 @@ import { EsClient, Esqueue } from '@code/esqueue';
 import moment from 'moment';
 import { resolve } from 'path';
 
-import { LspIndexerFactory, RepositoryIndexInitializerFactory } from './server/indexer';
+import {
+  LspIndexerFactory,
+  RepositoryIndexInitializerFactory,
+  tryMigrateIndices,
+} from './server/indexer';
 import { Server } from './server/kibana_types';
 import { Log } from './server/log';
 import { LspService } from './server/lsp/lsp_service';
@@ -76,7 +80,7 @@ export default (kibana: any) =>
       }).default();
     },
 
-    init(server: Server, options: any) {
+    init: async (server: Server, options: any) => {
       const queueIndex = server.config().get('code.queueIndex');
       const queueTimeout = server.config().get('code.queueTimeout');
       const adminCluster = server.plugins.elasticsearch.getCluster('admin');
@@ -106,6 +110,9 @@ export default (kibana: any) =>
 
       // Initialize queue worker cancellation service.
       const cancellationService = new CancellationSerivce();
+
+      // Execute index version checking and try to migrate index data if necessary.
+      await tryMigrateIndices(esClient, log);
 
       // Initialize queue.
       const queue = new Esqueue(queueIndex, {

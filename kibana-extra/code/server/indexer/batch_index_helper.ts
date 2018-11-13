@@ -8,6 +8,10 @@ import { EsClient } from '@code/esqueue';
 
 import { Log } from '../log';
 
+/*
+ * This BatchIndexHelper acts as the index request cache for elasticsearch
+ * bulk index API.
+ */
 export class BatchIndexHelper {
   public static DEFAULT_BATCH_SIZE = 1000;
   private batch: any[];

@@ -10,10 +10,12 @@ import { CloneWorkerProgress, Repository, RepositoryUri, WorkerProgress } from '
 import {
   RepositoryDeleteStatusReservedField,
   RepositoryGitStatusReservedField,
+  RepositoryIndexNamePrefix,
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
   RepositoryStatusIndexName,
   RepositoryStatusTypeName,
+  RepositoryTypeName,
 } from '../indexer/schema';
 
 /*
@@ -37,6 +39,28 @@ export class RepositoryObjectClient {
 
   public async getRepository(repoUri: RepositoryUri): Promise<Repository> {
     return await this.getRepositoryObject(repoUri, RepositoryReservedField);
+  }
+
+  public async getAllRepository(): Promise<Repository[]> {
+    const res = await this.esClient.search({
+      index: `${RepositoryIndexNamePrefix}*`,
+      type: RepositoryTypeName,
+      body: {
+        query: {
+          exists: {
+            field: RepositoryReservedField,
+          },
+        },
+      },
+      from: 0,
+      size: 10000,
+    });
+    const hits: any[] = res.hits.hits;
+    const repos: Repository[] = hits.map(hit => {
+      const repo: Repository = hit._source[RepositoryReservedField];
+      return repo;
+    });
+    return repos;
   }
 
   public async setRepositoryGitStatus(repoUri: RepositoryUri, gitStatus: CloneWorkerProgress) {

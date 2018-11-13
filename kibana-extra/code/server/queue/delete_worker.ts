@@ -49,15 +49,15 @@ export class DeleteWorker extends AbstractWorker {
     const repoService = new RepositoryService(dataPath, this.log);
     const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 
-    // 4. Delete ES indices.
+    // 4. Delete ES indices and aliases
     const deleteSymbolESIndexPromise = this.deletePromiseWrapper(
-      this.client.indices.delete({ index: SymbolIndexName(uri) }),
+      this.client.indices.delete({ index: `${SymbolIndexName(uri)}*` }),
       'symbol ES index',
       uri
     );
 
     const deleteReferenceESIndexPromise = this.deletePromiseWrapper(
-      this.client.indices.delete({ index: ReferenceIndexName(uri) }),
+      this.client.indices.delete({ index: `${ReferenceIndexName(uri)}*` }),
       'reference ES index',
       uri
     );
@@ -75,11 +75,11 @@ export class DeleteWorker extends AbstractWorker {
       // 5. Notify repo delete end through websocket.
       this.socketService.boardcastDeleteProgress(uri, 100);
 
-      // 6. Delete the document index where the repository document and all status reside,
+      // 6. Delete the document index and alias where the repository document and all status reside,
       // so that you won't be able to import the same repositories until they are
       // fully removed.
       await this.deletePromiseWrapper(
-        this.client.indices.delete({ index: DocumentIndexName(uri) }),
+        this.client.indices.delete({ index: `${DocumentIndexName(uri)}*` }),
         'document ES index',
         uri
       );
