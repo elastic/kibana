@@ -38,8 +38,8 @@ export function checkLicense(type, active, clusterSource, watcher = true) {
   if (!includes([ 'trial', 'standard', 'gold', 'platinum' ], type)) {
     return  Object.assign(licenseInfo, {
       message: i18n.translate('xpack.monitoring.clusterAlerts.checkLicense.licenseIsBasicDescription', {
-        //eslint-disable-next-line max-len
-        defaultMessage: `Cluster Alerts are not displayed if Watcher is disabled or the [{clusterSource}] cluster's current license is basic.`,
+        defaultMessage:
+          `Cluster Alerts are not displayed if Watcher is disabled or the [{clusterSource}] cluster's current license is basic.`,
         values: {
           clusterSource
         }
