@@ -5,27 +5,19 @@
  */
 
 import axios from 'axios';
-import React, { Fragment } from 'react';
+import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHealth,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSwitch, EuiText } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { LoadingState } from './cluster_checkup/types';
+import { LoadingState } from '../cluster_checkup/types';
 
 interface DeprecationLoggingTabState {
   loadingState: LoadingState;
   loggingEnabled?: boolean;
 }
 
-export class DeprecationLoggingTab extends React.Component<{}, DeprecationLoggingTabState> {
+export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLoggingTabState> {
   constructor(props: {}) {
     super(props);
 
@@ -42,31 +34,19 @@ export class DeprecationLoggingTab extends React.Component<{}, DeprecationLoggin
     const { loggingEnabled, loadingState } = this.state;
 
     return (
-      <Fragment>
-        <EuiSpacer />
-        <EuiTitle>
-          <h3>Deprecation Logging</h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiText>
-          {/* TODO: add copy about what this even is??? */}
-          <p>Deprecation Logging is enabled by default in Elasticsearch 5.0+.</p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiFlexGroup>
-          <EuiFlexItem grow>
-            <div>
-              <EuiSwitch
-                label="Toggle Deprecation Logging"
-                checked={loggingEnabled}
-                onChange={this.toggleLogging}
-                disabled={loadingState === LoadingState.Loading}
-              />
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{this.renderLoggingState()}</EuiFlexItem>
-        </EuiFlexGroup>
-      </Fragment>
+      <EuiFlexGroup>
+        <EuiFlexItem grow>
+          <div>
+            <EuiSwitch
+              label="Deprecation Logging"
+              checked={loggingEnabled}
+              onChange={this.toggleLogging}
+              disabled={loadingState === LoadingState.Loading}
+            />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.renderLoggingState()}</EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -78,9 +58,9 @@ export class DeprecationLoggingTab extends React.Component<{}, DeprecationLoggin
     } else if (loggingEnabled === undefined) {
       return null;
     } else if (loggingEnabled) {
-      return <EuiHealth color="success">Deprecation Logging is enabled</EuiHealth>;
+      return <EuiHealth color="success">Enabled</EuiHealth>;
     } else {
-      return <EuiHealth color="danger">Deprecation Logging is disabled</EuiHealth>;
+      return <EuiHealth color="danger">Disabled</EuiHealth>;
     }
   }
 

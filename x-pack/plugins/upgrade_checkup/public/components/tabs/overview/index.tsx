@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
 export class OverviewTab extends React.Component {
   public render() {
@@ -46,20 +47,19 @@ export class OverviewTab extends React.Component {
             >
               Breaking Changes
             </EuiLink>{' '}
-            documentation online.
-          </p>
-          <h4>Cluster Checkup</h4>
-          <p>
-            Run a series of checks on your cluster, nodes, and indices and find out about any known
-            problems that need to be addressed before upgrading.
+            documentation online. Use this tool to run a series of checks on your cluster, nodes,
+            and indices and find out about any known problems that need to be addressed before
+            upgrading.
           </p>
           <h4>Deprecation Logging</h4>
           <p>
             Elasticsearch comes with a deprecation logger which will log a message whenever
             deprecated functionality is used. Enable or disable deprecation logging on your cluster
-            here. This is enabled by default, beginning in Elasticsearch 5.
+            here. This is enabled by default, beginning in Elasticsearch 5.0.
           </p>
         </EuiText>
+        <EuiSpacer />
+        <DeprecationLoggingToggle />
       </Fragment>
     );
   }
