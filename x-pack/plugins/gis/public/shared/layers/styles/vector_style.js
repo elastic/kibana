@@ -177,7 +177,12 @@ export class VectorStyle {
 
   addScaledPropertiesBasedOnStyle(featureCollection) {
 
-    if (!this._isPropertyDynamic('fillColor') && !this._isPropertyDynamic('lineColor')) {
+    if (
+      !this._isPropertyDynamic('fillColor') &&
+      !this._isPropertyDynamic('lineColor') &&
+      !this._isPropertyDynamic('iconSize') &&
+      !this._isPropertyDynamic('lineWidth')
+    ) {
       return false;
     }
 
@@ -191,6 +196,8 @@ export class VectorStyle {
 
     const dynamicFields = [];
     //todo: should always be intialized really
+    //todo: don't hardcode styling properties. can be discovered automatically
+    //todo: this is adding duplicate fields..
     if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options
       && this._descriptor.properties.fillColor.options.field) {
       dynamicFields.push(this._descriptor.properties.fillColor.options.field);
@@ -198,6 +205,14 @@ export class VectorStyle {
     if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options
       && this._descriptor.properties.lineColor.options.field) {
       dynamicFields.push(this._descriptor.properties.lineColor.options.field);
+    }
+    if (this._descriptor.properties.iconSize && this._descriptor.properties.iconSize.options
+      && this._descriptor.properties.iconSize.options.field) {
+      dynamicFields.push(this._descriptor.properties.iconSize.options.field);
+    }
+    if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options
+      && this._descriptor.properties.lineWidth.options.field) {
+      dynamicFields.push(this._descriptor.properties.lineWidth.options.field);
     }
 
     const updateStatuses = dynamicFields.map((field) => {
@@ -232,6 +247,30 @@ export class VectorStyle {
     }
   }
 
+
+  _getMbDataDrivenSize(property) {
+
+    if (!this._descriptor.properties[property] || !this._descriptor.properties[property].options) {
+      return null;
+    }
+
+    const { minSize, maxSize } = this._descriptor.properties[property].options;
+    if (typeof minSize === 'number' && typeof maxSize === 'number') {
+      const originalFieldName = this._descriptor.properties[property].options.field.name;
+      const targetName = VectorStyle.getComputedFieldName(originalFieldName);
+      return   ['interpolate',
+        ['linear'],
+        ['get', targetName],
+        0, minSize,
+        1, maxSize
+      ];
+    } else {
+      return null;
+    }
+  }
+
+
+
   _getMBColor(property) {
     let color;
     if (
@@ -244,6 +283,14 @@ export class VectorStyle {
       throw new Error(`Style type not recognized: ${this._descriptor.properties[property].type}`);
     }
     return color;
+  }
+
+  _getMbSize(property) {
+    if (this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.STATIC) {
+      return this._descriptor.properties[property].options.size;
+    } else {
+      return this._getMbDataDrivenSize(property);
+    }
   }
 
 
@@ -268,7 +315,8 @@ export class VectorStyle {
     }
 
     if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options) {
-      mbMap.setPaintProperty(lineLayerId, 'line-width', this._descriptor.properties.lineWidth.options.size);
+      const lineWidth = this._getMbSize('lineWidth');
+      mbMap.setPaintProperty(lineLayerId, 'line-width', lineWidth);
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
     }
@@ -293,12 +341,14 @@ export class VectorStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
     }
     if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options) {
-      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', this._descriptor.properties.lineWidth.options.size);
+      const lineWidth = this._getMbSize('lineWidth');
+      mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', lineWidth);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', 0);
     }
     if (this._descriptor.properties.iconSize && this._descriptor.properties.iconSize.options) {
-      mbMap.setPaintProperty(pointLayerId, 'circle-radius', this._descriptor.properties.iconSize.options.size);
+      const iconSize = this._getMbSize('iconSize');
+      mbMap.setPaintProperty(pointLayerId, 'circle-radius', iconSize);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
     }
