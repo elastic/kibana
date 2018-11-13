@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#deserializePrivilegeAssignedAtSpace throws Error if not prefixed with space_ 1`] = `"Unable to deserialize all, should have started with space_ or feature_"`;
+
+exports[`#deserializePrivilegeAssignedAtSpace throws Error if prefixed with space_ but not a reserved privilege 1`] = `"Unrecognized privilege assigned at space"`;
+
+exports[`#deserializePrivilegeAssignedGlobally throws Error if not prefixed with feature_ and isn't a reserved privilege 1`] = `"Unrecognized privilege assigned globally"`;
+
+exports[`#serializeGlobalPrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized global reserved privilege"`;
+
+exports[`#serializeSpaceReservedPrivilege throws Error if unrecognized privilege used 1`] = `"Unrecognized space reserved privilege"`;
