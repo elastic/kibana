@@ -44,8 +44,11 @@ export default function ({ getService }) {
       // Might not be great test practice to lump all these jobs together but reporting takes awhile and it'll be
       // more efficient to post them all up front, then sequentially.
       it('multiple jobs posted', async () => {
+        // testing: run fist one job alone, let it create the new reporting index
+        const path = await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3);
+        await reportingAPI.waitForJobToFinish(path);
+        // now we can run all the other jobs
         const reportPaths = [];
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3));
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3));
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3));
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3));
