@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import { Filter } from 'ui/filter_bar/filters';
-import { FilterViews } from 'ui/filter_bar/filters/filter_views/index';
 import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 
-function getDisplayText(filter: Filter) {
-  if (filter.type === 'PhraseFilter') {
-    const { field, value } = filter as PhraseFilter;
-    return `${field} : ${value}`;
-  } else {
-    throw new Error(`${filter.type} is not a PhraseFilter`);
-  }
+export function getPhraseFilterViews(filter: PhraseFilter) {
+  return {
+    getDisplayText() {
+      const { field, value } = filter;
+      return `${field} : ${value}`;
+    },
+  };
 }
-
-export const PhraseFilterViews: FilterViews = {
-  getDisplayText,
-};

@@ -19,11 +19,8 @@
 
 import { MetaFilter } from 'src/ui/public/filter_bar/filters/meta_filter';
 import { Filter } from 'ui/filter_bar/filters';
-import { PhraseFilterViews } from './phrase_filter_views';
-
-const filterViews: { [index: string]: FilterViews } = {
-  PhraseFilter: PhraseFilterViews,
-};
+import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
+import { getPhraseFilterViews } from './phrase_filter_views';
 
 export interface FilterViews {
   getDisplayText: (filter: Filter) => string;
@@ -31,6 +28,15 @@ export interface FilterViews {
 
 export function getFilterDisplayText(metaFilter: MetaFilter): string {
   const prefix = metaFilter.negate ? 'NOT ' : '';
-  const filterText = filterViews[metaFilter.filter.type].getDisplayText(metaFilter.filter);
+  const filterText = getViewsForType(metaFilter.filter).getDisplayText();
   return `${prefix}${filterText}`;
+}
+
+function getViewsForType(filter: Filter) {
+  switch (filter.type) {
+    case 'PhraseFilter':
+      return getPhraseFilterViews(filter as PhraseFilter);
+    default:
+      throw new Error(`Unknown type: ${filter.type}`);
+  }
 }
