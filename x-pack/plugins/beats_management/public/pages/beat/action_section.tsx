@@ -36,20 +36,17 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
             Uptime: <strong>12min.</strong>
           </EuiText>
         </EuiFlexItem> */}
-        {beat.full_tags &&
-          beat.full_tags.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                Last Config Update:{' '}
-                <strong>
-                  {moment(
-                    first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
-                  ).fromNow()}
-                </strong>
-                .
-              </EuiText>
-            </EuiFlexItem>
-          )}
+        {beat.full_tags && beat.full_tags.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              Last Config Update:{' '}
+              <strong>
+                {moment(first(sortByOrder(beat.full_tags, 'last_updated')).last_updated).fromNow()}
+              </strong>
+              .
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     ) : (
       <div>Beat not found</div>
