@@ -17,16 +17,21 @@
  * under the License.
  */
 
-export { canAppendWildcard } from './can_append_wildcard';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-export { ensureMinimumTime } from './ensure_minimum_time';
+import { once } from 'lodash';
 
-export { getIndices } from './get_indices';
+const callWithRequest = once(server => {
+  const cluster = server.plugins.elasticsearch.getCluster('data');
+  return cluster.callWithRequest;
+});
 
-export { getMatchedIndices } from './get_matched_indices';
-
-export { containsIllegalCharacters } from './contains_illegal_characters';
-
-export { extractTimeFields } from './extract_time_fields';
-
-export { getRemoteClusters } from './get_remote_clusters';
+export const callWithRequestFactory = (server, request) => {
+  return (...args) => {
+    return callWithRequest(server)(request, ...args);
+  };
+};
