@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { FilterViews } from 'ui/filter_bar/filters/filter_views/index';
 import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 
-export function getPhraseFilterViews(filter: PhraseFilter) {
+export function getPhraseFilterViews(filter: PhraseFilter): FilterViews {
   return {
     getDisplayText() {
-      const { field, value } = filter;
-      return `${field} : ${value}`;
+      return `${filter.field} : ${filter.value}`;
     },
   };
 }

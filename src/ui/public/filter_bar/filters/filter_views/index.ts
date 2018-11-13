@@ -23,7 +23,7 @@ import { PhraseFilter } from 'ui/filter_bar/filters/phrase_filter';
 import { getPhraseFilterViews } from './phrase_filter_views';
 
 export interface FilterViews {
-  getDisplayText: (filter: Filter) => string;
+  getDisplayText: () => string;
 }
 
 export function getFilterDisplayText(metaFilter: MetaFilter): string {
