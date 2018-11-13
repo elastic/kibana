@@ -90,6 +90,19 @@ coming[6.5.0]
 See <<breaking-changes>>.
 
 [float]
+[[known-issues-6.5.0]]
+=== Known issues
+
+* {kib} ignores the timezone setting `dateFormat:tz` {pull}25596[#25596]
++
+If you use the default `browser` setting for `dateFormat:tz`, 
+you're fine. If you use any other setting for `dateFormat:tz`, and you use 
+Absolute time ranges, you might see issues where {kib} initially 
+shows data in your local `browser` timezone instead of the configured timezone. 
+Refreshing the browser usually corrects the issue.
+This will be fixed in a future bug fix release.
+
+[float]
 [[deprecation-6.5.0]]
 === Deprecations
 
