@@ -50,7 +50,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
       const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
@@ -70,7 +71,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.closeToast();
 
       await PageObjects.dashboard.clickFullScreenMode();
-      await dashboardPanelActions.toggleExpandPanel();
+      await dashboardPanelActions.openContextMenu();
+      await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
