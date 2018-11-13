@@ -98,8 +98,7 @@ export const spaces = (kibana: any) =>
         if (vars.activeSpace.space) {
           vars.uiCapabilities = await toggleUiCapabilities(
             vars.uiCapabilities,
-            vars.activeSpace.space,
-            spacesClient
+            vars.activeSpace.space
           );
         }
 

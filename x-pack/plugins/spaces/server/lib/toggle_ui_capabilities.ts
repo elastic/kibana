@@ -6,39 +6,11 @@
 
 import { UICapabilities } from 'ui/capabilities';
 import { Space } from '../../common/model/space';
-import { SpacesClient } from './spaces_client';
 
-export async function toggleUiCapabilities(
-  uiCapabilities: UICapabilities,
-  activeSpace: Space,
-  spacesClient: SpacesClient
-) {
-  // 1) Determine if user can manage spaces
-  await toggleManageSpacesCapability(uiCapabilities, spacesClient);
-
-  // 2) Turn off capabilities that are disabled within this space
+export async function toggleUiCapabilities(uiCapabilities: UICapabilities, activeSpace: Space) {
   toggleDisabledFeatures(uiCapabilities, activeSpace);
 
   return uiCapabilities;
-}
-
-async function toggleManageSpacesCapability(
-  uiCapabilities: UICapabilities,
-  spacesClient: SpacesClient
-) {
-  // Spaces special case
-  // Security is normally responsible for toggling such features, but since Spaces themselves are part of a security construct,
-  // the Spaces plugin is responsible for determining this specific capability.
-  try {
-    const canManageSpaces = await spacesClient.canEnumerateSpaces();
-    if (!canManageSpaces) {
-      uiCapabilities.spaces.manage = false;
-    }
-  } catch (error) {
-    // TODO: Log
-    // Fail closed.
-    uiCapabilities.spaces.manage = false;
-  }
 }
 
 function toggleDisabledFeatures(uiCapabilities: UICapabilities, activeSpace: Space) {

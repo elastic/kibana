@@ -22,7 +22,7 @@ jest.mock(
   () => ({
     getInjected: (key: string) => {
       if (key !== 'uiCapabilities') {
-        throw new Error(`Unxpected key for test: ${key}`);
+        throw new Error(`Unexpected key for test: ${key}`);
       }
 
       return {
