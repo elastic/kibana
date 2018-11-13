@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import expect from 'expect.js';
+
 export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
