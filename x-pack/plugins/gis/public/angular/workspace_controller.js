@@ -139,9 +139,7 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
     description: 'Open Inspector',
     testId: 'openInspectorButton',
     run() {
-      Inspector.open(inspectorAdapters, {
-        title: 'Layer requests'
-      });
+      Inspector.open(inspectorAdapters, {});
     }
   }, {
     key: 'options',

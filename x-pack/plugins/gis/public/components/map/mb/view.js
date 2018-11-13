@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
+import { inspectorAdapters } from '../../../kibana_services';
 
 export class MBMapContainer extends React.Component {
 
@@ -171,9 +172,26 @@ export class MBMapContainer extends React.Component {
     syncLayerOrder(this._mbMap, layerList);
   }
 
+  _syncMbMapWithInspector = () => {
+    if (!this.props.isMapReady) {
+      return;
+    }
+
+    const stats = {
+      center: this._mbMap.getCenter().toArray(),
+      zoom: this._mbMap.getZoom(),
+
+    };
+    inspectorAdapters.map.setMapState({
+      stats,
+      style: this._mbMap.getStyle(),
+    });
+  }
+
   render() {
     this._syncMbMapWithMapState();
     this._syncMbMapWithLayerList();
+    this._syncMbMapWithInspector();
 
     return (
       <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
