@@ -6,6 +6,7 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
 <React.Fragment>
   <EuiTitle
     size="m"
+    textTransform="none"
   >
     <h2>
       Scope
@@ -39,6 +40,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
 <React.Fragment>
   <EuiTitle
     size="m"
+    textTransform="none"
   >
     <h2>
       Scope
@@ -86,6 +88,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
 <React.Fragment>
   <EuiTitle
     size="m"
+    textTransform="none"
   >
     <h2>
       Scope
@@ -133,6 +136,7 @@ exports[`ScopeSection renders when not enabled 1`] = `
 <React.Fragment>
   <EuiTitle
     size="m"
+    textTransform="none"
   >
     <h2>
       Scope
@@ -163,6 +167,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
 <React.Fragment>
   <EuiTitle
     size="m"
+    textTransform="none"
   >
     <h2>
       Scope
