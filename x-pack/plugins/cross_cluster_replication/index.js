@@ -12,6 +12,7 @@ import { registerRoutes } from './server/routes/register_routes';
 export function crossClusterReplication(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
+    configPrefix: 'xpack.cross_cluster_replication',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {

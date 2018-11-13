@@ -12,6 +12,7 @@ import { registerListRoute } from './server/routes/api/remote_clusters';
 export function remoteClustersManagement(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
+    configPrefix: 'xpack.remote_clusters',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {

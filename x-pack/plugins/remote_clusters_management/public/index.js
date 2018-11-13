@@ -25,7 +25,7 @@ const esSection = management.getSection('elasticsearch');
 
 esSection.register('remote_clusters_management', {
   visible: true,
-  display: 'Remote Clusters Management',
+  display: 'Remote Clusters',
   order: 4,
   url: `#${CRUD_APP_BASE_PATH}/list`,
 });
