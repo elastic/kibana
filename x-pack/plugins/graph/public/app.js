@@ -821,7 +821,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
 
           toastNotifications.addSuccess(
             i18n('xpack.graph.topNavMenu.deleteWorkspaceNotification', {
-              defaultMessage: 'Deleted \'{workspaceTitle}\'',
+              defaultMessage: `Deleted '{workspaceTitle}'`,
               values: { workspaceTitle: title },
             })
           );
@@ -899,7 +899,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     if(!savedObjectIndexPattern) {
       toastNotifications.addDanger(
         i18n('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
-          defaultMessage: '\'Missing index pattern {indexPattern}',
+          defaultMessage: `'Missing index pattern {indexPattern}`,
           values: { indexPattern: wsObj.indexPattern },
         })
       );
