@@ -23,7 +23,7 @@ import { DllCompiler } from '../dynamic_dll_plugin';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
 
-const STATUS = {
+export const STATUS = {
   RUNNING: 'optimizer running',
   SUCCESS: 'optimizer completed successfully',
   FAILURE: 'optimizer failed with stats',

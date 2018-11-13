@@ -3,6 +3,7 @@
 exports[`PageTitle should render normally 1`] = `
 <EuiText
   grow={true}
+  size="m"
 >
   <h1
     data-test-subj="managementSettingsTitle"

@@ -12,3 +12,4 @@ import './detectors_list_directive';
 import './save_status_modal';
 import './field_select_directive';
 import 'plugins/ml/components/job_group_select';
+import 'plugins/ml/jobs/components/job_timepicker_modal';

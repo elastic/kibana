@@ -1,5 +1,6 @@
 # GitHub CODEOWNERS definition
 # See: https://help.github.com/articles/about-codeowners/
 
+/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/plugins/security/  @elastic/kibana-security
 **/*.scss  @elastic/kibana-design

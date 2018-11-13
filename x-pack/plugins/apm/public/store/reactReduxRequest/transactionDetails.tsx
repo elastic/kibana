@@ -14,11 +14,8 @@ import { IUrlParams } from '../urlParams';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionDetails';
-const INITIAL_DATA = {};
-const withInitialData = createInitialDataSelector(INITIAL_DATA);
-
 export function getTransactionDetails(state: IReduxState) {
-  return withInitialData(state.reactReduxRequest[ID]);
+  return state.reactReduxRequest[ID];
 }
 
 export function TransactionDetailsRequest({
