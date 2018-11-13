@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import { isEmpty, omit, pick } from 'lodash';
 import { Filter } from 'ui/filter_bar/filters/index';
 
-export type MetaFilter = Filter & {
+export interface MetaFilter {
+  filter: Filter;
   disabled: boolean;
   negate: boolean;
   pinned: boolean;
   index?: string;
   toElasticsearchQuery: () => void;
-  applyChanges: (updateObject: Partial<MetaFilter>) => MetaFilter;
-};
+}
 
 interface CreateMetaFilterOptions {
   disabled?: boolean;
@@ -40,49 +39,53 @@ export function createMetaFilter(
   filter: Filter,
   { disabled = false, negate = false, pinned = false, index }: CreateMetaFilterOptions = {}
 ): MetaFilter {
-  const metaFilter = Object.create(filter);
-  metaFilter.disabled = disabled;
-  metaFilter.negate = negate;
-  metaFilter.pinned = pinned;
-  metaFilter.index = index;
-  metaFilter.toElasticsearchQuery = function() {
-    return this;
-    // TODO implement me
-    // if negate === true then wrap filter in a `not` filter
-    // call underlying filter's toElasticsearchQuery
-    // e.g. Object.getPrototypeOf(this).toElasticsearchQuery();
+  return {
+    filter,
+    disabled,
+    negate,
+    pinned,
+    index,
+    toElasticsearchQuery: () => {
+      // TODO implement me
+      // if negate === true then wrap filter in a `not` filter
+      // call underlying filter's toElasticsearchQuery
+      // e.g. Object.getPrototypeOf(this).toElasticsearchQuery();
+    },
   };
-  metaFilter.applyChanges = function(updateObject: Partial<MetaFilter>) {
-    if (isEmpty(updateObject)) {
-      return this;
-    }
+}
 
-    const metaProps = ['disabled', 'negate', 'pinned', 'index'];
-    const currentProps = pick(this, metaProps);
-    const metaChanges = pick(updateObject, metaProps);
-    const otherChanges = omit(updateObject, metaProps);
-    const updatedFilter = Object.getPrototypeOf(this).applyChanges(otherChanges);
-    const mergedProps = {
-      ...currentProps,
-      ...metaChanges,
-    };
-
-    return createMetaFilter(updatedFilter, mergedProps);
+export function toggleNegation(metaFilter: MetaFilter) {
+  const negate = !metaFilter.negate;
+  return {
+    ...metaFilter,
+    negate,
   };
-  return metaFilter;
 }
 
-export function toggleNegation(filter: MetaFilter) {
-  const negate = !filter.negate;
-  return filter.applyChanges({ negate });
+export function togglePinned(metaFilter: MetaFilter) {
+  const pinned = !metaFilter.pinned;
+  return {
+    ...metaFilter,
+    pinned,
+  };
 }
 
-export function togglePinned(filter: MetaFilter) {
-  const pinned = !filter.pinned;
-  return filter.applyChanges({ pinned });
+export function toggleDisabled(metaFilter: MetaFilter) {
+  const disabled = !metaFilter.disabled;
+  return {
+    ...metaFilter,
+    disabled,
+  };
 }
 
-export function toggleDisabled(filter: MetaFilter) {
-  const disabled = !filter.disabled;
-  return filter.applyChanges({ disabled });
+export function updateFilter(metaFilter: MetaFilter, updateObject: Partial<Filter>) {
+  const updatedFilter = {
+    ...metaFilter.filter,
+    ...updateObject,
+  };
+
+  return {
+    ...metaFilter,
+    filter: updatedFilter,
+  };
 }

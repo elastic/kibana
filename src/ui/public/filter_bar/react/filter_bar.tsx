@@ -18,7 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import { createFilterBarFilter, FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filter';
 import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
 import { FilterItem } from 'ui/filter_bar/react/filter_item';
 
@@ -31,28 +30,27 @@ interface Props {
 }
 
 export class FilterBar extends Component<Props> {
-  public onToggleNegate = (filter: FilterBarFilter) => {
-    this.props.onToggleNegate(Object.getPrototypeOf(filter));
+  public onToggleNegate = (filter: MetaFilter) => {
+    this.props.onToggleNegate(filter);
   };
 
-  public onTogglePin = (filter: FilterBarFilter) => {
-    this.props.onTogglePin(Object.getPrototypeOf(filter));
+  public onTogglePin = (filter: MetaFilter) => {
+    this.props.onTogglePin(filter);
   };
 
-  public onToggleDisabled = (filter: FilterBarFilter) => {
-    this.props.onToggleDisabled(Object.getPrototypeOf(filter));
+  public onToggleDisabled = (filter: MetaFilter) => {
+    this.props.onToggleDisabled(filter);
   };
 
-  public onDelete = (filter: FilterBarFilter) => {
-    this.props.onDelete(Object.getPrototypeOf(filter));
+  public onDelete = (filter: MetaFilter) => {
+    this.props.onDelete(filter);
   };
 
   public render() {
     const filterItems = this.props.filters.map(filter => {
-      const filterBarFilter = createFilterBarFilter(filter);
       return (
         <FilterItem
-          filter={filterBarFilter}
+          filter={filter}
           onToggleNegate={this.onToggleNegate}
           onToggleDisabled={this.onToggleDisabled}
           onTogglePin={this.onTogglePin}

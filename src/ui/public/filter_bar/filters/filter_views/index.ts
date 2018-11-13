@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
+import { MetaFilter } from 'src/ui/public/filter_bar/filters/meta_filter';
+import { Filter } from 'ui/filter_bar/filters';
+import { PhraseFilterViews } from './phrase_filter_views';
 
-export type FilterBarFilter = MetaFilter & {
-  getDisplayText: () => string;
+const filterViews: { [index: string]: FilterViews } = {
+  PhraseFilter: PhraseFilterViews,
 };
 
-export function createFilterBarFilter(filter: MetaFilter): FilterBarFilter {
-  switch (filter.type) {
-    case 'PhraseFilter':
-      const filterBarFilter = Object.create(filter);
-      filterBarFilter.getDisplayText = function() {
-        return `${this.field} : ${this.value}`;
-      };
-      return filterBarFilter;
-    default:
-      throw new Error(`Unknown filter type: ${filter.type}`);
-  }
+export interface FilterViews {
+  getDisplayText: (filter: Filter) => string;
+}
+
+export function getFilterDisplayText(metaFilter: MetaFilter): string {
+  const prefix = metaFilter.negate ? 'NOT ' : '';
+  const filterText = filterViews[metaFilter.filter.type].getDisplayText(metaFilter.filter);
+  return `${prefix}${filterText}`;
 }

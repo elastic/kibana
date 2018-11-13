@@ -20,15 +20,16 @@
 import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filter';
+import { getFilterDisplayText } from 'ui/filter_bar/filters/filter_views';
+import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
 
 interface Props {
-  filter: FilterBarFilter;
+  filter: MetaFilter;
   className?: string;
-  onTogglePin: (filter: FilterBarFilter) => void;
-  onToggleNegate: (filter: FilterBarFilter) => void;
-  onToggleDisabled: (filter: FilterBarFilter) => void;
-  onDelete: (filter: FilterBarFilter) => void;
+  onTogglePin: (filter: MetaFilter) => void;
+  onToggleNegate: (filter: MetaFilter) => void;
+  onToggleDisabled: (filter: MetaFilter) => void;
+  onDelete: (filter: MetaFilter) => void;
 }
 
 interface State {
@@ -54,11 +55,6 @@ export class FilterItem extends Component<Props, State> {
       this.props.className
     );
 
-    let prefix = null;
-    if (negate) {
-      prefix = <span>NOT </span>;
-    }
-
     const badge = (
       <EuiBadge
         id={'foo'}
@@ -77,8 +73,7 @@ export class FilterItem extends Component<Props, State> {
           tabIndex: '-1',
         }}
       >
-        {prefix}
-        <span>{filter.getDisplayText()}</span>
+        <span>{getFilterDisplayText(filter)}</span>
       </EuiBadge>
     );
 
@@ -122,7 +117,7 @@ export class FilterItem extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id={`popoverFor_${filter.getDisplayText()}`}
+        id={`popoverFor_${getFilterDisplayText(filter)}`}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={badge}
