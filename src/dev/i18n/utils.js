@@ -26,6 +26,7 @@ import {
   isObjectProperty,
   isStringLiteral,
   isTemplateLiteral,
+  isBinaryExpression,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
@@ -212,7 +213,7 @@ function parseTemplateLiteral(node, messageId) {
   return node.quasis[0].value.cooked;
 }
 
-export function extractMessageValueFromNode(node, messageId) {
+function extractStringFromNode(node, messageId, errorMessage) {
   if (isStringLiteral(node)) {
     return node.value;
   }
@@ -221,21 +222,28 @@ export function extractMessageValueFromNode(node, messageId) {
     return parseTemplateLiteral(node, messageId);
   }
 
-  throw createFailError(
+  if (isBinaryExpression(node, { operator: '+' })) {
+    return (
+      extractStringFromNode(node.left, messageId, errorMessage) +
+      extractStringFromNode(node.right, messageId, errorMessage)
+    );
+  }
+
+  throw createFailError(errorMessage);
+}
+
+export function extractMessageValueFromNode(node, messageId) {
+  return extractStringFromNode(
+    node,
+    messageId,
     `defaultMessage value should be a string or template literal ("${messageId}").`
   );
 }
 
 export function extractDescriptionValueFromNode(node, messageId) {
-  if (isStringLiteral(node)) {
-    return node.value;
-  }
-
-  if (isTemplateLiteral(node)) {
-    return parseTemplateLiteral(node, messageId);
-  }
-
-  throw createFailError(
+  return extractStringFromNode(
+    node,
+    messageId,
     `description value should be a string or template literal ("${messageId}").`
   );
 }
