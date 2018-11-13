@@ -6,6 +6,7 @@
 
 import { createAuthorizationService } from './service';
 import { actionsFactory } from './actions';
+import { buildPrivilegeMap } from './privileges';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { authorizationModeFactory } from './mode';
@@ -20,6 +21,10 @@ jest.mock('../../../../../server/lib/get_client_shield', () => ({
 
 jest.mock('./actions', () => ({
   actionsFactory: jest.fn(),
+}));
+
+jest.mock('./privileges', () => ({
+  buildPrivilegeMap: jest.fn()
 }));
 
 jest.mock('./mode', () => ({
@@ -56,12 +61,15 @@ test(`calls server.expose with exposed services`, () => {
   actionsFactory.mockReturnValue(mockActions);
   mockConfig.get.mock;
   const mockXpackInfoFeature = Symbol();
+  const mockSavedObjectTypes = Symbol();
+  const mockFeatures = Symbol();
 
-  createAuthorizationService(mockServer, mockXpackInfoFeature);
+  createAuthorizationService(mockServer, mockXpackInfoFeature, mockSavedObjectTypes, mockFeatures);
 
   const application = `kibana-${kibanaIndex}`;
   expect(getClient).toHaveBeenCalledWith(mockServer);
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
+  expect(buildPrivilegeMap).toHaveBeenCalledWith(mockSavedObjectTypes, mockActions, mockFeatures);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockActions, application, mockShieldClient);
   expect(authorizationModeFactory).toHaveBeenCalledWith(
     application,
