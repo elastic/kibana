@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'babel-polyfill';
 import { datasourceSpecs } from './index';
 
 datasourceSpecs.forEach(canvas.register);
