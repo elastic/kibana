@@ -6,81 +6,58 @@
 
 // @ts-ignore
 import { Feature } from '../../../../xpack_main/types';
-import { actionsFactory } from './actions';
+import { IGNORED_TYPES } from '../../../common/constants';
+import { Actions } from './actions';
 import { buildPrivilegeMap } from './privileges';
 
-const createMockConfig = (settings: Record<string, any> = {}) => {
-  return {
-    get: (key: string) => settings[key],
-  };
-};
-
 test(`snapshot test`, () => {
-  const actions = actionsFactory(
-    createMockConfig({
-      'pkg.version': '1.0.0',
-    })
-  );
-  // this isn't a definitive list, and we could be using entirely made up savedObjectTypes
-  // here, but it makes more sense to use at least the types that we're associating with the
-  // feature specific privileges
-  const savedObjectTypes = [
-    'canvas-workpad',
-    'config',
-    'dashboard',
-    'graph-workspace',
-    'index-pattern',
-    'search',
-    'space',
-    'telemetry',
-    'timelion-sheet',
-    'url',
-    'visualization',
-  ];
+  const actions = new Actions('1.0.0-zeta1');
+
+  const savedObjectTypes = ['foo-saved-object-type', 'bar-saved-object-type', ...IGNORED_TYPES];
 
   const features: Feature[] = [
     {
-      id: 'foo',
-      name: 'Foo',
+      id: 'foo-feature',
+      name: 'Foo Feature',
       icon: 'arrowDown',
-      navlinkId: 'kibana:foo',
+      navlinkId: 'kibana:foo-feature',
       privileges: {
         all: {
-          app: ['foo'],
+          app: ['foo-app'],
           savedObject: {
-            all: ['search'],
-            read: ['config', 'index-pattern'],
+            all: ['foo-saved-object-type'],
+            read: ['bad-saved-object-type'],
           },
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
-          app: ['foo'],
+          app: ['foo-app'],
           savedObject: {
             all: [],
-            read: ['config', 'index-pattern', 'search'],
+            read: ['foo-saved-object-type', 'bar-saved-object-type'],
           },
           ui: ['show'],
         },
       },
     },
     {
-      id: 'bar',
-      name: 'Bar',
+      id: 'bar-feature',
+      name: 'Bar Feature',
       icon: 'arrowUp',
       privileges: {
         all: {
-          app: ['bar'],
+          app: ['bar-app'],
           savedObject: {
-            all: ['visualization'],
-            read: ['config', 'index-pattern', 'search'],
+            all: ['bar-saved-object-type'],
+            read: ['foo-saved-object-type'],
           },
           ui: ['show', 'showSaveButton', 'showCreateButton'],
         },
         read: {
-          app: ['bar'],
+          app: ['bar-app'],
           savedObject: {
             all: [],
-            read: ['config', 'index-pattern', 'search', 'visualization'],
+            read: ['foo-saved-object-type', 'bar-saved-object-type'],
           },
           ui: ['show'],
         },
@@ -88,5 +65,124 @@ test(`snapshot test`, () => {
     },
   ];
 
-  expect(buildPrivilegeMap(savedObjectTypes, actions, features)).toMatchSnapshot();
+  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions, features);
+  expect(privilegeMap).toEqual({
+    features: {
+      'bar-feature': {
+        all: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'app:bar-app',
+          'saved_object:bar-saved-object-type/bulk_get',
+          'saved_object:bar-saved-object-type/get',
+          'saved_object:bar-saved-object-type/find',
+          'saved_object:bar-saved-object-type/create',
+          'saved_object:bar-saved-object-type/bulk_create',
+          'saved_object:bar-saved-object-type/update',
+          'saved_object:bar-saved-object-type/delete',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'ui:show',
+          'ui:showSaveButton',
+          'ui:showCreateButton',
+        ],
+        read: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'app:bar-app',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'saved_object:bar-saved-object-type/bulk_get',
+          'saved_object:bar-saved-object-type/get',
+          'saved_object:bar-saved-object-type/find',
+          'ui:show',
+        ],
+      },
+      'foo-feature': {
+        all: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'app:foo-app',
+          'navlink:kibana:foo-feature',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'saved_object:foo-saved-object-type/create',
+          'saved_object:foo-saved-object-type/bulk_create',
+          'saved_object:foo-saved-object-type/update',
+          'saved_object:foo-saved-object-type/delete',
+          'saved_object:bad-saved-object-type/bulk_get',
+          'saved_object:bad-saved-object-type/get',
+          'saved_object:bad-saved-object-type/find',
+          'ui:show',
+          'ui:showSaveButton',
+          'ui:showCreateButton',
+        ],
+        read: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'app:foo-app',
+          'navlink:kibana:foo-feature',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'saved_object:bar-saved-object-type/bulk_get',
+          'saved_object:bar-saved-object-type/get',
+          'saved_object:bar-saved-object-type/find',
+          'ui:show',
+        ],
+      },
+      global: {
+        all: ['login:', 'version:1.0.0-zeta1', 'api:*', 'saved_object:*', 'space:manage', 'ui:*'],
+        read: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'api:console/execute',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'saved_object:bar-saved-object-type/bulk_get',
+          'saved_object:bar-saved-object-type/get',
+          'saved_object:bar-saved-object-type/find',
+          'ui:*',
+        ],
+      },
+      space: {
+        all: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'api:*',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'saved_object:foo-saved-object-type/create',
+          'saved_object:foo-saved-object-type/bulk_create',
+          'saved_object:foo-saved-object-type/update',
+          'saved_object:foo-saved-object-type/delete',
+          'saved_object:bar-saved-object-type/bulk_get',
+          'saved_object:bar-saved-object-type/get',
+          'saved_object:bar-saved-object-type/find',
+          'saved_object:bar-saved-object-type/create',
+          'saved_object:bar-saved-object-type/bulk_create',
+          'saved_object:bar-saved-object-type/update',
+          'saved_object:bar-saved-object-type/delete',
+          'ui:*',
+        ],
+        read: [
+          'login:',
+          'version:1.0.0-zeta1',
+          'api:console/execute',
+          'saved_object:foo-saved-object-type/bulk_get',
+          'saved_object:foo-saved-object-type/get',
+          'saved_object:foo-saved-object-type/find',
+          'saved_object:bar-saved-object-type/bulk_get',
+          'saved_object:bar-saved-object-type/get',
+          'saved_object:bar-saved-object-type/find',
+          'ui:*',
+        ],
+      },
+    },
+  });
 });

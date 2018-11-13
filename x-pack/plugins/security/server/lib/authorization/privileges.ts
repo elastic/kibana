@@ -55,7 +55,7 @@ export function buildPrivilegeMap(
         actions.version,
         actions.api.get('console/execute'),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
-        actions.ui.get('*'),
+        actions.ui.all,
       ],
     },
   };
