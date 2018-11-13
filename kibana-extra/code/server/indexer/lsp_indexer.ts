@@ -62,9 +62,16 @@ export class LspIndexer extends AbstractIndexer {
     try {
       return await super.start(progressReporter);
     } finally {
-      // Flush all the index request still in the cache for bulk index.
-      this.batchIndexHelper.flush();
+      if (!this.isCancelled()) {
+        // Flush all the index request still in the cache for bulk index.
+        this.batchIndexHelper.flush();
+      }
     }
+  }
+
+  public cancel() {
+    this.batchIndexHelper.cancel();
+    super.cancel();
   }
 
   protected async prepareIndexCreationRequests() {
@@ -175,33 +182,25 @@ export class LspIndexer extends AbstractIndexer {
         body: {
           query: {
             bool: {
-              should: [
+              must_not: [
                 {
-                  must_not: {
-                    exists: {
-                      field: RepositoryReservedField,
-                    },
+                  exists: {
+                    field: RepositoryReservedField,
                   },
                 },
                 {
-                  must_not: {
-                    exists: {
-                      field: RepositoryGitStatusReservedField,
-                    },
+                  exists: {
+                    field: RepositoryGitStatusReservedField,
                   },
                 },
                 {
-                  must_not: {
-                    exists: {
-                      field: RepositoryLspIndexStatusReservedField,
-                    },
+                  exists: {
+                    field: RepositoryLspIndexStatusReservedField,
                   },
                 },
                 {
-                  must_not: {
-                    exists: {
-                      field: RepositoryDeleteStatusReservedField,
-                    },
+                  exists: {
+                    field: RepositoryDeleteStatusReservedField,
                   },
                 },
               ],

@@ -11,6 +11,7 @@ import { Log } from '../log';
 export class BatchIndexHelper {
   public static DEFAULT_BATCH_SIZE = 1000;
   private batch: any[];
+  private cancelled: boolean = false;
 
   constructor(
     protected readonly client: EsClient,
@@ -21,6 +22,10 @@ export class BatchIndexHelper {
   }
 
   public async index(index: string, type: string, id: string, body: any) {
+    if (this.isCancelled()) {
+      this.log.debug(`Batch index helper is cancelled. Skip.`);
+      return;
+    }
     this.batch.push({
       index: {
         _index: index,
@@ -36,12 +41,24 @@ export class BatchIndexHelper {
 
   public async flush() {
     if (this.batch.length === 0) {
-      this.log.info(`0 index requests found. Skip.`);
+      this.log.debug(`0 index requests found. Skip.`);
       return;
     }
-    this.log.info(`Batch index ${this.batch.length / 2} documents.`);
+    if (this.isCancelled()) {
+      this.log.debug(`Batch index helper is cancelled. Skip.`);
+      return;
+    }
+    this.log.info(`Batch indexed ${this.batch.length / 2} documents.`);
     const res = await this.client.bulk({ body: this.batch });
     this.batch = [];
     return res;
+  }
+
+  public isCancelled() {
+    return this.cancelled;
+  }
+
+  public cancel() {
+    this.cancelled = true;
   }
 }
