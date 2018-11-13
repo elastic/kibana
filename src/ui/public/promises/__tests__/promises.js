@@ -5,10 +5,10 @@ import sinon from 'sinon';
 describe('Promise service',  () => {
   let Promise;
   let $rootScope;
+  let clock;
 
-  const sandbox = sinon.createSandbox();
   function tick(ms = 0) {
-    sandbox.clock.tick(ms);
+    clock.tick(ms);
 
     // Ugly, but necessary for promises to resolve: https://github.com/angular/angular.js/issues/12555
     $rootScope.$apply();
@@ -16,13 +16,13 @@ describe('Promise service',  () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(($injector) => {
-    sandbox.useFakeTimers();
+    clock = sinon.useFakeTimers();
 
     Promise = $injector.get('Promise');
     $rootScope = $injector.get('$rootScope');
   }));
 
-  afterEach(() => sandbox.restore());
+  afterEach(() => clock.restore());
 
   describe('Constructor',  () => {
     it('provides resolve and reject function', () => {
