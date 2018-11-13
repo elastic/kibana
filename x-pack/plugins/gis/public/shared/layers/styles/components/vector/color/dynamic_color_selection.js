@@ -4,98 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-
-import {
-  EuiComboBox,
-  EuiSuperSelect,
-  EuiSpacer
-} from '@elastic/eui';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { ColorGradient } from '../../../../../icons/color_gradient';
+import React from 'react';
+import { DynamicOrdinalStyleOption } from '../../dynamic_ordinal_styling_option';
+import { ColorRampSelector } from './color_ramp_selector';
 
 export class DynamicColorSelection extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      comboBoxOptions: null,
-      selectedColorRamp: null,
-      colorGradients: this._getColorGradients()
-    };
-  }
-
-  _onFieldSelected = (selectedOptions) => {
-    this.setState({
-      comboBoxOptions: selectedOptions
-    });
-    if (selectedOptions && selectedOptions.length) {
-      this.props.onChange({
-        field: selectedOptions[0] ? selectedOptions[0].value : undefined,
-        color: this.state.selectedColorRamp ? this.state.selectedColorRamp : null
-      });
-    }
-  };
-
-  _onColorRampSelected = (selectedColorRampString = null) => {
-    this.setState({
-      selectedColorRamp: selectedColorRampString
-    });
-    const { comboBoxOptions } = this.state;
-    if (comboBoxOptions && comboBoxOptions.length && selectedColorRampString) {
-      this.props.onChange({
-        field: comboBoxOptions[0] ? comboBoxOptions[0].value : undefined,
-        color: selectedColorRampString
-      });
-    }
-  };
-
-  _getColorGradients() {
-    return Object.keys(vislibColorMaps).map(colorKey => ({
-      value: colorKey,
-      text: colorKey,
-      inputDisplay: <ColorGradient color={colorKey}/>
-    }));
-  }
-
   render() {
-    const options = this.props.fields.map(field => {
-      return { label: field.label, value: field };
-    });
-
-    if (this.props.selectedOptions) {
-      const { color, field } = this.props.selectedOptions;
-      if (!this.state.comboBoxOptions && field) {
-        const selectedValue = options.find(({ value }) => {
-          return value.name === field.name;
-        });
-        this.state.comboBoxOptions = selectedValue ? [selectedValue] : [];
-      }
-      if (!this.state.selectedColorRamp && color) {
-        this.state.selectedColorRamp = color;
-      }
-      if (!this.state.comboBoxOptions) this.state.comboBoxOptions = [];
-    } else {
-      this.state.comboBoxOptions = [];
-    }
-
     return (
-      <Fragment>
-        <EuiComboBox
-          selectedOptions={this.state.comboBoxOptions}
-          options={options}
-          onChange={this._onFieldSelected}
-          singleSelection={{}}
-          fullWidth
-        />
-        <EuiSpacer size="m" />
-        <EuiSuperSelect
-          options={this.state.colorGradients}
-          onChange={this._onColorRampSelected}
-          valueOfSelected={this.state.selectedColorRamp}
-          hasDividers={true}
-        />
-      </Fragment>
+      <DynamicOrdinalStyleOption
+        fields={this.props.fields}
+        selectedOptions={this.props.selectedOptions}
+        DynamicStylingOption={ColorRampSelector}
+        onChange={this.props.onChange}
+      />
     );
   }
+
 }

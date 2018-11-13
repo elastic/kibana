@@ -6,7 +6,6 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
-import _ from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { applyTheme } from 'ui/theme';
@@ -45,13 +44,12 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
     // layerList is synced after map has initialized and extent is known.
     if (savedWorkspace.mapStateJSON) {
       const mapState = JSON.parse(savedWorkspace.mapStateJSON);
+      const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
+      store.dispatch(setTimeFilters(timeFilters));
       store.dispatch(mapExtentChanged({
         zoom: mapState.zoom,
         center: mapState.center,
       }));
-      if (mapState.timeFilters) {
-        store.dispatch(setTimeFilters(mapState.timeFilters));
-      }
     }
 
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
@@ -68,9 +66,10 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
       updateTheme();
     }
 
-    const timeFilters = getTimeFilters(store.getState());
-    if (!_.isEqual(timeFilters, timefilter.getTime())) {
-      timefilter.setTime(timeFilters);
+    const storeTime = getTimeFilters(store.getState());
+    const kbnTime = timefilter.getTime();
+    if (storeTime && (storeTime.to !== kbnTime.to || storeTime.from !== kbnTime.from)) {
+      timefilter.setTime(storeTime);
     }
 
     // Part of initial syncing of store from saved object

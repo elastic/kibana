@@ -6,38 +6,22 @@
 
 import expect from 'expect.js';
 
-export default function ({ getService, getPageObjects }) {
-  const kibanaServer = getService('kibanaServer');
-  const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
-  const PageObjects = getPageObjects([
-    'common',
-    'header',
-    'settings',
-    'gis']);
+export default function ({ getPageObjects }) {
+  const PageObjects = getPageObjects(['gis']);
 
   describe('layer source is elasticsearch documents', () => {
-    before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('gis');
-      await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
-        'defaultIndex': 'logstash-*'
-      });
-      await kibanaServer.uiSettings.disableToastAutohide();
-      remote.setWindowSize(1600, 1000);
-
+    before(async () => {
       await PageObjects.gis.loadSavedWorkspace('logstash events');
     });
 
-    after('clean up', async () => {
+    after(async () => {
       await PageObjects.gis.closeInspector();
     });
 
     describe('inspector', () => {
       it('should register elasticsearch request in inspector', async () => {
         const hits = await PageObjects.gis.getInspectorRequestStat('Hits');
-        expect(hits).to.equal('0');
+        expect(hits).to.equal('2048');
       });
     });
   });

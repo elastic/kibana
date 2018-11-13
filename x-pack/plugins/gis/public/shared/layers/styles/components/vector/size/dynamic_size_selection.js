@@ -6,18 +6,20 @@
 
 import React from 'react';
 
-import {
+import { DynamicOrdinalStyleOption } from '../../dynamic_ordinal_styling_option';
+import { SizeRangeSelector } from './size_range_selector';
 
-} from '@elastic/eui';
 
 export class DynamicSizeSelection extends React.Component {
 
-  constructor() {
-    super();
-    this.state = {};
-  }
-
   render() {
-    return (<div>todo must implement dynamic sizing</div>);
+    return (
+      <DynamicOrdinalStyleOption
+        fields={this.props.fields}
+        selectedOptions={this.props.selectedOptions}
+        DynamicStylingOption={SizeRangeSelector}
+        onChange={this.props.onChange}
+      />
+    );
   }
 }
