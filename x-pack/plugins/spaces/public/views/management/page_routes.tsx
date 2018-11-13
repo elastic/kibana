@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { I18nProvider } from '@kbn/i18n/react';
-import 'plugins/spaces/views/management/manage_spaces.less';
 
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
