@@ -16,6 +16,7 @@ import { IApmService, ServiceList } from './ServiceList';
 
 interface Props {
   urlParams: IUrlParams;
+  serviceList: IApmService[];
 }
 
 interface State {
@@ -51,13 +52,19 @@ export class ServiceOverview extends Component<Props, State> {
       />
     );
 
+    // Render method here uses this.props.serviceList instead of received "data" from RRR
+    // to make it easier to test -- mapStateToProps uses the RRR selector so the data
+    // is the same either way
     return (
       <div>
         <EuiSpacer />
         <ServiceListRequest
           urlParams={urlParams}
-          render={({ data }: RRRRenderResponse<IApmService[]>) => (
-            <ServiceList items={data} noItemsMessage={noItemsMessage} />
+          render={() => (
+            <ServiceList
+              items={this.props.serviceList}
+              noItemsMessage={noItemsMessage}
+            />
           )}
         />
       </div>

@@ -13,11 +13,21 @@ import * as apmRestServices from '../../../../services/rest/apm';
 jest.mock('../../../../services/rest/apm');
 
 describe('Service Overview -> View', () => {
+  let mockAgentStatus;
   let wrapper;
   let instance;
 
   beforeEach(() => {
-    wrapper = shallow(<ServiceOverview serviceList={{}} />);
+    mockAgentStatus = {
+      dataFound: true
+    };
+
+    // eslint-disable-next-line import/namespace
+    apmRestServices.loadAgentStatus = jest.fn(() =>
+      Promise.resolve(mockAgentStatus)
+    );
+
+    wrapper = shallow(<ServiceOverview serviceList={[]} />);
     instance = wrapper.instance();
   });
 
@@ -43,18 +53,6 @@ describe('Service Overview -> View', () => {
   it('should check for historical data once', () => {});
 
   describe('checking for historical data', () => {
-    let mockAgentStatus;
-
-    beforeEach(() => {
-      mockAgentStatus = {
-        dataFound: true
-      };
-      // eslint-disable-next-line import/namespace
-      apmRestServices.loadAgentStatus = jest.fn(() =>
-        Promise.resolve(mockAgentStatus)
-      );
-    });
-
     it('should set historical data to true if data is found', async () => {
       const props = {
         serviceList: {

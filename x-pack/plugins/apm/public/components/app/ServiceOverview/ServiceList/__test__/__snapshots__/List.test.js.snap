@@ -508,16 +508,22 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
-              <a
-                aria-describedby="overlay1"
-                className="euiLink euiLink--primary c0"
-                href="#/opbeans-node/transactions"
-                onClick={[Function]}
+              <span
+                className="euiToolTipAnchor"
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
-                opbeans-node
-              </a>
+                <a
+                  aria-describedby="dha2t0zf"
+                  className="euiLink euiLink--primary c0"
+                  href="#/opbeans-node/transactions"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                >
+                  opbeans-node
+                </a>
+              </span>
             </div>
           </td>
           <td
@@ -572,16 +578,22 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
-              <a
-                aria-describedby="overlay2"
-                className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/transactions"
-                onClick={[Function]}
+              <span
+                className="euiToolTipAnchor"
                 onMouseOut={[Function]}
                 onMouseOver={[Function]}
               >
-                opbeans-python
-              </a>
+                <a
+                  aria-describedby="t11tjnvj"
+                  className="euiLink euiLink--primary c0"
+                  href="#/opbeans-python/transactions"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                >
+                  opbeans-python
+                </a>
+              </span>
             </div>
           </td>
           <td
