@@ -34,6 +34,7 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
           title={displayName}
           description={help}
           onClick={whenClicked}
+          className="canvasCard"
         />
       </EuiFlexItem>
     );
@@ -51,6 +52,7 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFieldSearch
+              className="canvasElements__filter"
               placeholder="Filter elements"
               onChange={e => setSearch(e.target.value)}
               value={search}

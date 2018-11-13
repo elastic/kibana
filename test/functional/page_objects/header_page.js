@@ -263,6 +263,11 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async awaitKibanaChrome() {
+      log.debug('awaitKibanaChrome');
+      await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
+    }
+
     async getGlobalNavigationLink(linkText) {
       const nav = await testSubjects.find('globalNav');
       return await nav.findByPartialLinkText(linkText);

@@ -72,6 +72,14 @@ export const KBN_FIELD_TYPES = [
     esTypes: ['geo_point'],
   }),
   new KbnFieldType({
+    name: 'object',
+    esTypes: ['object'],
+  }),
+  new KbnFieldType({
+    name: 'nested',
+    esTypes: ['nested'],
+  }),
+  new KbnFieldType({
     name: 'geo_shape',
     esTypes: ['geo_shape'],
   }),

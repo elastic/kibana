@@ -65,11 +65,7 @@ export class ExtendedTemplate extends React.PureComponent {
     return (
       <Fragment>
         <EuiFormRow label="Position" compressed>
-          <EuiSelect
-            defaultValue={position}
-            options={options}
-            onChange={this.setArgValue('position')}
-          />
+          <EuiSelect value={position} options={options} onChange={this.setArgValue('position')} />
         </EuiFormRow>
       </Fragment>
     );

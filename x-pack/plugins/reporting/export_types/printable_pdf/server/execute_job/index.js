@@ -5,13 +5,13 @@
  */
 
 import url from 'url';
+import { cryptoFactory } from '../../../../server/lib/crypto';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { omit } from 'lodash';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../../../common/constants';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { cryptoFactory } from '../../../../server/lib/crypto';
 import { compatibilityShimFactory } from './compatibility_shim';
 
 const KBN_SCREENSHOT_HEADER_BLACKLIST = [
@@ -30,6 +30,9 @@ function executeJobFn(server) {
   const generatePdfObservable = generatePdfObservableFactory(server);
   const crypto = cryptoFactory(server);
   const compatibilityShim = compatibilityShimFactory(server);
+  const config = server.config();
+
+  const serverBasePath = server.config().get('server.basePath');
 
   const decryptJobHeaders = async (job) => {
     const decryptedHeaders = await crypto.decrypt(job.headers);
@@ -41,9 +44,27 @@ function executeJobFn(server) {
     return { job, filteredHeaders };
   };
 
-  const getCustomLogo = async ({ job, filteredHeaders }) => {
-    const fakeRequest = {
+  const getConditionalHeaders = ({ job, filteredHeaders }) => {
+    const conditionalHeaders = {
       headers: filteredHeaders,
+      conditions: {
+        hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
+        port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
+        basePath: config.get('server.basePath'),
+        protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+      }
+    };
+
+    return { job, conditionalHeaders };
+  };
+
+  const getCustomLogo = async ({ job, conditionalHeaders }) => {
+    const fakeRequest = {
+      headers: conditionalHeaders.headers,
+      // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
+      // We use the basePath from the saved job, which we'll have post spaces being implemented;
+      // or we use the server base path, which uses the default space
+      getBasePath: () => job.basePath || serverBasePath
     };
 
     const savedObjects = server.savedObjects;
@@ -54,10 +75,10 @@ function executeJobFn(server) {
 
     const logo = await uiSettings.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
 
-    return { job, filteredHeaders, logo };
+    return { job, conditionalHeaders, logo };
   };
 
-  const addForceNowQuerystring = async ({ job, filteredHeaders, logo }) => {
+  const addForceNowQuerystring = async ({ job, conditionalHeaders, logo }) => {
     const urls = job.urls.map(jobUrl => {
       if (!job.forceNow) {
         return jobUrl;
@@ -79,7 +100,7 @@ function executeJobFn(server) {
         hash: transformedHash
       });
     });
-    return { job, filteredHeaders, logo, urls };
+    return { job, conditionalHeaders, logo, urls };
   };
 
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
@@ -87,10 +108,11 @@ function executeJobFn(server) {
       mergeMap(decryptJobHeaders),
       catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
       map(omitBlacklistedHeaders),
+      map(getConditionalHeaders),
       mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
-      mergeMap(({ job, filteredHeaders, logo, urls }) => {
-        return generatePdfObservable(job.title, urls, job.browserTimezone, filteredHeaders, job.layout, logo);
+      mergeMap(({ job, conditionalHeaders, logo, urls }) => {
+        return generatePdfObservable(job.title, urls, job.browserTimezone, conditionalHeaders, job.layout, logo);
       }),
       map(buffer => ({
         content_type: 'application/pdf',

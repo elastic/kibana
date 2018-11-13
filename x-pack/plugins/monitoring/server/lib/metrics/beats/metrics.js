@@ -12,7 +12,7 @@ import {
   BeatsCpuUtilizationMetric,
   BeatsMetric
 } from './classes';
-import { LARGE_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
+import { LARGE_FLOAT, LARGE_BYTES, SMALL_FLOAT } from '../../../../common/formatting';
 
 export const metrics = {
   beat_cluster_pipeline_events_total_rate: new BeatsEventsRateClusterMetric({
@@ -248,5 +248,15 @@ export const metrics = {
     format: LARGE_FLOAT,
     metricAgg: 'max',
     units: ''
+  }),
+
+  beat_handles_open: new BeatsMetric({
+    field: 'beats_stats.metrics.beat.handles.open',
+    label: 'Open Handles',
+    title: 'Open Handles',
+    description: 'Count of open file handlers',
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
   })
 };

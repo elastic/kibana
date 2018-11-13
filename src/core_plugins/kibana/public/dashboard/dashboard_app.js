@@ -46,7 +46,7 @@ import { DashboardSaveModal } from './top_nav/save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
@@ -56,6 +56,7 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -63,7 +64,6 @@ const app = uiModules.get('app/dashboard', [
   'react',
   'kibana/courier',
   'kibana/config',
-  'kibana/typeahead',
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
@@ -81,7 +81,17 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, dashboardConfig, localStorage) {
+    controller: function (
+      $scope,
+      $rootScope,
+      $route,
+      $routeParams,
+      $location,
+      getAppState,
+      dashboardConfig,
+      localStorage,
+      breadcrumbState
+    ) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
@@ -169,6 +179,23 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.getTitle(),
         dashboardStateManager.getViewMode(),
         dashboardStateManager.getIsDirty(timefilter));
+
+      // Push breadcrumbs to new header navigation
+      const updateBreadcrumbs = () => {
+        breadcrumbState.set([
+          {
+            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+              defaultMessage: 'Dashboard',
+            }),
+            href: $scope.landingPageUrl()
+          },
+          { text: $scope.getDashTitle() }
+        ]);
+      };
+      updateBreadcrumbs();
+      dashboardStateManager.registerChangeListener(updateBreadcrumbs);
+      config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
+
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
       $scope.saveState = () => dashboardStateManager.saveState();
       $scope.getShouldShowEditHelp = () => (

@@ -22,24 +22,23 @@ import { wrapAuthConfig } from '../../wrap_auth_config';
 export function registerStatusPage(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
 
-  server.decorate('reply', 'renderStatusPage', async function () {
+  server.decorate('toolkit', 'renderStatusPage', async function () {
     const app = server.getHiddenUiAppById('status_page');
-    const reply = this;
+    const h = this;
     const response = app
-      ? await reply.renderApp(app)
-      : reply(kbnServer.status.toString());
+      ? await h.renderApp(app)
+      : h.response(kbnServer.status.toString());
 
     if (response) {
-      response.code(kbnServer.status.isGreen() ? 200 : 503);
-      return response;
+      return response.code(kbnServer.status.isGreen() ? 200 : 503);
     }
   });
 
   server.route(wrapAuth({
     method: 'GET',
     path: '/status',
-    handler(request, reply) {
-      reply.renderStatusPage();
+    handler(request, h) {
+      return h.renderStatusPage();
     }
   }));
 }

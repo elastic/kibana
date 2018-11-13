@@ -18,16 +18,13 @@
  */
 
 export function ShieldPageProvider({ getService }) {
-  const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   class ShieldPage {
     async login(user, pwd) {
-      const userNameBox = await find.byCssSelector('#username');
-      await userNameBox.sendKeys(user);
-      const passwordBox = await find.byCssSelector('#password');
-      await passwordBox.sendKeys(pwd);
-      const button = await find.byCssSelector('button');
-      await button.click();
+      await testSubjects.setValue('loginUsername', user);
+      await testSubjects.setValue('loginPassword', pwd);
+      await testSubjects.click('loginSubmit');
     }
   }
 

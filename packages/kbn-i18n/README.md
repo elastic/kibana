@@ -107,8 +107,8 @@ when missing translations
 For the detailed explanation, see the section below
 - `getFormats()` - returns current formats
 - `getRegisteredLocales()` - returns array of locales having translations
-- `translate(id: string, [{values: object, defaultMessage: string, context: string}])` –
-translate message by id. `context` is optional context comment that will be extracted
+- `translate(id: string, [{values: object, defaultMessage: string, description: string}])` –
+translate message by id. `description` is optional context comment that will be extracted
 by i18n tools and added as a comment next to translation message at `defaultMessages.json`.
 - `init(messages: Map<string, string>)` - initializes the engine
 
@@ -170,6 +170,37 @@ import memoizeIntlConstructor from 'intl-format-cache';
 
 const getMessageFormat = memoizeIntlConstructor(IntlMessageFormat);
 ```
+
+## Vanilla JS
+
+`Intl-messageformat` package assumes that the
+[Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
+global object exists in the runtime. `Intl` is present in all modern
+browsers and Node.js 0.10+. In order to load i18n engine
+in Node.js we should simply `import` this module (in Node.js, the
+[data](https://github.com/yahoo/intl-messageformat/tree/master/dist/locale-data)
+for all 200+ languages is loaded along with the library) and pass the translation
+messages into `init` method:
+
+```js
+import { i18n } from '@kbn/i18n';
+
+i18n.init(messages);
+```
+
+One common use-case is that of internationalizing a string constant. Here's an
+example of how we'd do that:
+
+```js
+import { i18n } from '@kbn/i18n';
+
+export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
+  defaultMessage: 'Greetings, planet Earth!',
+}),
+```
+
+We're also able to use all methods exposed by the i18n engine
+(see [I18n engine](#i18n-engine) section above for more details).
 
 ## React
 
@@ -238,7 +269,7 @@ class RootComponent extends Component {
 }
 ```
 
-Optionally we can pass `context` prop into `FormattedMessage` component.
+Optionally we can pass `description` prop into `FormattedMessage` component.
 This prop is optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
@@ -256,10 +287,15 @@ import { injectI18n, intlShape } from '@kbn/i18n/react';
 const MyComponentContent = ({ intl }) => (
   <input
     type="text"
-    placeholder={intl.formatMessage({
-      id: 'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER',
-      defaultMessage: 'Search',
-    })}
+    placeholder={intl.formatMessage(
+      {
+        id: 'welcome',
+        defaultMessage: 'Hello {name}, you have {unreadCount, number}\
+{unreadCount, plural, one {message} other {messages}}',
+        description: 'Message description',
+      },
+      { name, unreadCount }
+    )}
   />
 );
 
@@ -321,13 +357,13 @@ when missing translations
 - `init(messages: Map<string, string>)` - initializes the engine
 
 The translation `service` provides only one method:
-- `i18n(id: string, [{values: object, defaultMessage: string, context: string }])`–
+- `i18n(id: string, [{values: object, defaultMessage: string, description: string }])`–
 translate message by id
 
 The translation `filter` is used for attributes translation and has
 the following syntax:
 ```
-{{'translationId' | i18n[:{ values: object, defaultMessage: string, context: string }]}}
+{{'translationId' | i18n[:{ values: object, defaultMessage: string, description: string }]}}
 ```
 
 Where:
@@ -335,7 +371,7 @@ Where:
 - `values` - values to pass into translation
 - `defaultMessage` - will be used unless translation was successful (the final
   fallback in english, will be used for generating `en.json`)
-- `context` - optional context comment that will be extracted by i18n tools
+- `description` - optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
 The translation `directive` has the following syntax:
@@ -344,7 +380,7 @@ The translation `directive` has the following syntax:
   i18n-id="{string}"
   [i18n-values="{object}"]
   [i18n-default-message="{string}"]
-  [i18n-context="{string}"]
+  [i18n-description="{string}"]
 ></ANY>
 ```
 
@@ -352,7 +388,7 @@ Where:
 - `i18n-id` - translation id to be translated
 - `i18n-values` - values to pass into translation
 - `i18n-default-message` - will be used unless translation was successful
-- `i18n-context` - optional context comment that will be extracted by i18n tools
+- `i18n-description` - optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
 Angular `I18n` module is placed into `autoload` module, so it will be
@@ -368,31 +404,11 @@ In order to translate attributes in Angular we should use `i18nFilter`:
 ```html
 <input
   type="text"
-  placeholder="{{'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER' | i18n: {
+  placeholder="{{ ::'KIBANA-MANAGEMENT-OBJECTS-SEARCH_PLACEHOLDER' | i18n: {
     defaultMessage: 'Search'
   } }}"
 >
 ```
-
-## Node.JS
-
-`Intl-messageformat` package assumes that the
-[Intl](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl)
-global object exists in the runtime. `Intl` is present in all modern
-browsers and Node.js 0.10+. In order to load i18n engine
-in Node.js we should simply `import` this module (in Node.js, the
-[data](https://github.com/yahoo/intl-messageformat/tree/master/dist/locale-data)
-for all 200+ languages is loaded along with the library) and pass the translation
-messages into `init` method:
-
-```js
-import { i18n } from '@kbn/i18n';
-
-i18n.init(messages);
-```
-
-After that we are able to use all methods exposed by the i18n engine
-(see [I18n engine](#i18n-engine) section above for more details).
 
 ## Build tools
 

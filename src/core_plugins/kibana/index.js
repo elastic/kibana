@@ -29,13 +29,14 @@ import { homeApi } from './server/routes/api/home';
 import { managementApi } from './server/routes/api/management';
 import { scriptsApi } from './server/routes/api/scripts';
 import { registerSuggestionsApi } from './server/routes/api/suggestions';
+import { registerKqlTelemetryApi } from './server/routes/api/kql_telemetry';
 import { registerFieldFormats } from './server/field_formats/register';
 import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
 import handleEsError from './server/lib/handle_es_error';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
-
+import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
 import { injectVars } from './inject_vars';
 
 const mkdirp = Promise.promisify(mkdirpNode);
@@ -76,6 +77,7 @@ export default function (kibana) {
           url: `${kbnBaseUrl}#/discover`,
           description: 'interactively explore your data',
           icon: 'plugins/kibana/assets/discover.svg',
+          euiIconType: 'discoverApp',
         }, {
           id: 'kibana:visualize',
           title: 'Visualize',
@@ -83,6 +85,7 @@ export default function (kibana) {
           url: `${kbnBaseUrl}#/visualize`,
           description: 'design data visualizations',
           icon: 'plugins/kibana/assets/visualize.svg',
+          euiIconType: 'visualizeApp',
         }, {
           id: 'kibana:dashboard',
           title: 'Dashboard',
@@ -96,13 +99,15 @@ export default function (kibana) {
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
           description: 'compose visualizations for much win',
           icon: 'plugins/kibana/assets/dashboard.svg',
+          euiIconType: 'dashboardApp',
         }, {
           id: 'kibana:dev_tools',
           title: 'Dev Tools',
           order: 9001,
           url: '/app/kibana#/dev_tools',
           description: 'development tools',
-          icon: 'plugins/kibana/assets/wrench.svg'
+          icon: 'plugins/kibana/assets/wrench.svg',
+          euiIconType: 'devToolsApp',
         }, {
           id: 'kibana:management',
           title: 'Management',
@@ -110,9 +115,16 @@ export default function (kibana) {
           url: `${kbnBaseUrl}#/management`,
           description: 'define index patterns, change config, and more',
           icon: 'plugins/kibana/assets/settings.svg',
+          euiIconType: 'managementApp',
           linkToLastSubUrl: false
         },
       ],
+
+      savedObjectSchemas: {
+        'kql-telemetry': {
+          isNamespaceAgnostic: true,
+        },
+      },
 
       injectDefaultVars(server, options) {
         return {
@@ -151,8 +163,10 @@ export default function (kibana) {
       homeApi(server);
       managementApi(server);
       registerSuggestionsApi(server);
+      registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
+      makeKQLUsageCollector(server);
       server.expose('systemApi', systemApi);
       server.expose('handleEsError', handleEsError);
       server.injectUiAppVars('kibana', () => injectVars(server));

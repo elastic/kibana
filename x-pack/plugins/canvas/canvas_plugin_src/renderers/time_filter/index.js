@@ -12,7 +12,7 @@ import { TimeFilter } from './components/time_filter';
 
 export const timeFilter = () => ({
   name: 'time_filter',
-  displayName: 'Time Filter',
+  displayName: 'Time filter',
   help: 'Set a time window',
   reuseDomNode: true,
   render(domNode, config, handlers) {

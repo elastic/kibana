@@ -20,17 +20,15 @@ export function canvas(kibana) {
         title: 'Canvas',
         description: 'Data driven workpads',
         icon: 'plugins/canvas/icon.svg',
+        euiIconType: 'canvasApp',
         main: 'plugins/canvas/app',
       },
       styleSheetPaths: `${__dirname}/public/style/index.scss`,
       hacks: [
         // window.onerror override
         'plugins/canvas/lib/window_error_handler.js',
-
-        // Client side plugins go here
-        'plugins/canvas/lib/load_expression_types.js',
-        'plugins/canvas/lib/load_transitions.js',
       ],
+      home: ['plugins/canvas/register_feature'],
       mappings,
     },
 

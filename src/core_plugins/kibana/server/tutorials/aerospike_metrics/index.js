@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function aerospikeMetricsSpecProvider() {
+export function aerospikeMetricsSpecProvider(server, context) {
   const moduleName = 'aerospike';
   return {
     id: 'aerospikeMetrics',
@@ -40,6 +40,7 @@ export function aerospikeMetricsSpecProvider() {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-aerospike.html',
       },
     }),
+    euiIconType: 'logoAerospike',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.aerospikeMetrics.artifacts.application.label', {
@@ -53,7 +54,7 @@ export function aerospikeMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

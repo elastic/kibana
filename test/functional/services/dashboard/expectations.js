@@ -173,7 +173,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
 
     async metricValuesExist(values) {
       log.debug(`DashboardExpect.metricValuesExist(${values})`);
-      await this.textWithinCssElementExists(values, '.metric-value');
+      await this.textWithinCssElementExists(values, '.mtrVis__value');
     }
 
     async tsvbMetricValuesExist(values) {
@@ -188,12 +188,12 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
 
     async vegaTextsExist(values) {
       log.debug(`DashboardExpect.vegaTextsExist(${values})`);
-      await this.textWithinCssElementExists(values, '.vega-view-container text');
+      await this.textWithinCssElementExists(values, '.vgaVis__view text');
     }
 
     async vegaTextsDoNotExist(values) {
       log.debug(`DashboardExpect.vegaTextsDoNotExist(${values})`);
-      await this.textWithinCssElementDoNotExist(values, '.vega-view-container text');
+      await this.textWithinCssElementDoNotExist(values, '.vgaVis__view text');
     }
 
     async tsvbMarkdownWithValuesExists(values) {

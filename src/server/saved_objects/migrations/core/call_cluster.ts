@@ -41,6 +41,7 @@ export interface CallCluster {
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;
+  (path: 'tasks.get', opts: { taskId: string }): Promise<{ completed: boolean }>;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -86,10 +87,8 @@ export interface IndexCreationOpts {
   body?: {
     mappings?: IndexMapping;
     settings?: {
-      index: {
-        number_of_shards: string;
-        number_of_replicas: string;
-      };
+      number_of_shards: number;
+      auto_expand_replicas: string;
     };
   };
 }
@@ -97,7 +96,7 @@ export interface IndexCreationOpts {
 export interface ReindexOpts {
   body: {
     dest: IndexOpts;
-    source: IndexOpts;
+    source: IndexOpts & { size: number };
   };
   refresh: boolean;
   waitForCompletion: boolean;

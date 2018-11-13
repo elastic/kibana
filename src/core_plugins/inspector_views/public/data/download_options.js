@@ -106,6 +106,7 @@ class DataDownloadOptions extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"
+        repositionOnScroll
       >
         <EuiContextMenuPanel
           className="eui-textNoWrap"

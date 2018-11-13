@@ -24,6 +24,7 @@ exports[`LoadingIndices should render normally 1`] = `
   >
     <EuiText
       grow={true}
+      size="m"
     >
       <EuiTextColor
         color="subdued"

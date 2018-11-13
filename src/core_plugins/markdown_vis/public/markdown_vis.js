@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './markdown_vis.less';
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';

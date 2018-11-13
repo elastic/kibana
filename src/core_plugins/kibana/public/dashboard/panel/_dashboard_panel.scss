@@ -12,7 +12,7 @@
     flex: 1 1 100%;
     height: auto;
     z-index: 1;
-    background-color: inherit;
+    min-height: 0; // Absolute must for Firefox to scroll contents
   }
 
   // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
@@ -24,10 +24,15 @@
   /**
    * 1. We want the doc-table-container to scroll only when embedded in a dashboard panel
    * 2. Fix overflow of vis's specifically for inside dashboard panels, lets the panel decide the overflow
+   * 3. Force a better looking scrollbar
    */
   .doc-table-container {
     flex: 1 1 0; /* 1 */
     overflow: auto; /* 1 */
+  }
+
+  .visualization {
+    @include euiScrollBar; /* 3 */
   }
 
   .visualization .vis-container {
@@ -35,52 +40,31 @@
   }
 }
 
-// CONTENT
+.dshPanel--editing {
+  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
 
-.dshPanel__panel {
-  background-color: $euiColorEmptyShade;
-  border: 1px solid $euiColorEmptyShade;
-  overflow: hidden;
-
-  // maintain the 100% height of the panel
-  height: 100%;
-  flex: 1;
-
-  // flex layout allows us to define the visualize element as "fill available space"
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.dshPanel__panel--editing {
-  // SASSTOD: Change this back $euiBorderColor, when EUI adds !default to borders
-  border-color: $euiColorLightShade;
-
-  &:hover {
+  &:hover,
+  &:focus {
     border-color: $euiColorPrimary;
+    @include euiSlightShadowHover;
   }
 }
 
-// Adjust borders/margin/etc... for spaced out panels
-.dshLayout-withMargins {
-  .dshPanel__panel {
-    @include euiBottomShadowSmall;
-    // SASSTOD: Change this back $euiBorderColor, when EUI adds !default to borders
-    border-color: $euiColorLightShade;
-    border-radius: $euiBorderRadius;
+// LAYOUT MODES
+
+// Adjust borders/etc... for non-spaced out and expanded panels
+.dshLayout-withoutMargins,
+.dshDashboardGrid__item--expanded {
+  // Remove border color unless in editing mode
+  .dshPanel:not(.dshPanel--editing) {
+    border-color: transparent;
   }
 
-  .dshPanel__panel--editing {
-    transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
-
-    &:hover,
-    &:focus {
-      border-color: $euiColorPrimary;
-      @include euiSlightShadowHover;
-    }
+  .dshPanel {
+    box-shadow: none;
+    border-radius: 0;
   }
 }
-
 
 // HEADER
 
@@ -91,12 +75,6 @@
   display: flex;
   border: none;
   transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
-
-  // Add a rounded corner to stay within the bordered panel
-  .dshLayout-withMargins & {
-    border-top-left-radius: $euiBorderRadius - 1px;
-    border-top-right-radius: $euiBorderRadius - 1px;
-  }
 }
 
 .dshPanel__title {
@@ -111,7 +89,7 @@
   display: inline-block;
 }
 
-.dshPanel__panel--editing:hover {
+.dshPanel--editing:hover {
   .dshPanel__header {
     background-color: rgba($euiColorFullShade,.05) !important;
     cursor: move;

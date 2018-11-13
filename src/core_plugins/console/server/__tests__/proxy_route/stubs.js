@@ -20,7 +20,7 @@
 import { Readable } from 'stream';
 
 export function createWreckResponseStub(response) {
-  return (...args) => {
+  return async () => {
     const resp = new Readable({
       read() {
         if (response) {
@@ -37,6 +37,6 @@ export function createWreckResponseStub(response) {
       'content-length': String(response ? response.length : 0)
     };
 
-    args.pop()(null, resp);
+    return resp;
   };
 }

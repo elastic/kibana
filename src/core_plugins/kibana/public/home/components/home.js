@@ -129,7 +129,7 @@ export class Home extends Component {
   };
 
   renderNormal() {
-    const { apmUiEnabled, recentlyAccessed } = this.props;
+    const { apmUiEnabled, recentlyAccessed, mlEnabled } = this.props;
 
     let recentlyAccessedPanel;
     if (recentlyAccessed.length > 0) {
@@ -148,6 +148,7 @@ export class Home extends Component {
 
           <AddData
             apmUiEnabled={apmUiEnabled}
+            mlEnabled={mlEnabled}
             isNewKibanaInstance={this.state.isNewKibanaInstance}
           />
 
@@ -263,4 +264,5 @@ Home.propTypes = {
   find: PropTypes.func.isRequired,
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
+  mlEnabled: PropTypes.bool.isRequired,
 };

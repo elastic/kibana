@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Home component should render 1`] = `
+<div>
+  <styled.div>
+    <h1>
+      APM
+    </h1>
+    <SetupInstructionsLink />
+  </styled.div>
+  <Connect(KueryBarView) />
+  <EuiTabbedContent
+    className="k6Tab--large"
+    tabs={
+      Array [
+        Object {
+          "content": <Connect(ServiceOverview) />,
+          "id": "services_overview",
+          "name": "Services",
+        },
+        Object {
+          "content": <Connect(TraceOverview) />,
+          "id": "traces_overview",
+          "name": "Traces",
+        },
+      ]
+    }
+  />
+</div>
+`;

@@ -19,10 +19,11 @@
 
 jest.mock('ui/chrome',
   () => ({
+    getBasePath: () => `/some/base/path`,
     getUiSettingsClient: () => {
       return {
         get: (key) => {
-          switch(key) {
+          switch (key) {
             case 'timepicker:timeDefaults':
               return { from: 'now-15m', to: 'now', mode: 'quick' };
             case 'timepicker:refreshIntervalDefaults':

@@ -82,12 +82,20 @@ export const xpackMain = (kibana) => {
           value: null
         }
       },
+      savedObjectSchemas: {
+        telemetry: {
+          isNamespaceAgnostic: true,
+        },
+      },
       injectDefaultVars(server) {
         const config = server.config();
         return {
           telemetryUrl: config.get('xpack.xpack_main.telemetry.url'),
           telemetryEnabled: isTelemetryEnabled(config),
           telemetryOptedIn: null,
+          activeSpace: null,
+          spacesEnabled: config.get('xpack.spaces.enabled'),
+          userProfile: {},
         };
       },
       hacks: [

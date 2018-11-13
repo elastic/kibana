@@ -11,19 +11,7 @@ import { fromExpression } from '../lib/ast';
 import { getByAlias } from '../lib/get_by_alias';
 import { typesRegistry } from '../lib/types_registry';
 import { castProvider } from './cast';
-
-const createError = (err, { name, context, args }) => ({
-  type: 'error',
-  error: {
-    stack: err.stack,
-    message: typeof err === 'string' ? err : err.message,
-  },
-  info: {
-    context,
-    args,
-    functionName: name,
-  },
-});
+import { createError } from './create_error';
 
 export function interpretProvider(config) {
   const { functions, onFunctionNotFound, types } = config;
@@ -32,7 +20,7 @@ export function interpretProvider(config) {
 
   return interpret;
 
-  function interpret(node, context = null) {
+  async function interpret(node, context = null) {
     switch (getType(node)) {
       case 'expression':
         return invokeChain(node.chain, context);
@@ -58,7 +46,11 @@ export function interpretProvider(config) {
     // in this case, it will try to execute the function in another context
     if (!fnDef) {
       chain.unshift(link);
-      return onFunctionNotFound({ type: 'expression', chain: chain }, context);
+      try {
+        return await onFunctionNotFound({ type: 'expression', chain: chain }, context);
+      } catch (e) {
+        return createError(e);
+      }
     }
 
     try {
@@ -69,16 +61,15 @@ export function interpretProvider(config) {
       const newContext = await invokeFunction(fnDef, context, resolvedArgs);
 
       // if something failed, just return the failure
-      if (getType(newContext) === 'error') {
-        console.log('newContext error', newContext);
-        return newContext;
-      }
+      if (getType(newContext) === 'error') return newContext;
 
       // Continue re-invoking chain until it's empty
       return await invokeChain(chain, newContext);
-    } catch (err) {
-      console.error(`common/interpret ${fnName}: invokeChain rejected`, err);
-      return createError(err, { name: fnName, context, args: fnArgs });
+    } catch (e) {
+      // Everything that throws from a function will hit this
+      // The interpreter should *never* fail. It should always return a `{type: error}` on failure
+      e.message = `[${fnName}] > ${e.message}`;
+      return createError(e);
     }
   }
 
@@ -165,6 +156,7 @@ export function interpretProvider(config) {
       return argAsts.map(argAst => {
         return async (ctx = context) => {
           const newContext = await interpret(argAst, ctx);
+          // This is why when any sub-expression errors, the entire thing errors
           if (getType(newContext) === 'error') throw newContext.error;
           return cast(newContext, argDefs[argName].types);
         };

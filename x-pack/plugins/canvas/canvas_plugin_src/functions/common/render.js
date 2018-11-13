@@ -17,6 +17,7 @@ export const render = () => ({
       types: ['string', 'null'],
       help:
         'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
+      options: ['debug', 'error', 'image', 'pie', 'plot', 'shape', 'table', 'text'],
     },
     css: {
       types: ['string', 'null'],

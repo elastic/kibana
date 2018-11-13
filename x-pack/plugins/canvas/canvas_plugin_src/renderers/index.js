@@ -15,6 +15,7 @@ import { markdown } from './markdown';
 import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
+import { progress } from './progress';
 import { shape } from './shape';
 import { table } from './table';
 import { timeFilter } from './time_filter';
@@ -32,6 +33,7 @@ export const renderFunctions = [
   metric,
   pie,
   plot,
+  progress,
   shape,
   table,
   timeFilter,

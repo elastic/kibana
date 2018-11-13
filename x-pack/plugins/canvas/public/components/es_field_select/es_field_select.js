@@ -24,7 +24,7 @@ export const ESFieldSelect = ({ value, fields = [], onChange, onFocus, onBlur })
       }}
       onFocus={onFocus}
       onBlur={onBlur}
-      singleSelection
+      singleSelection={{ asPlainText: true }}
       isClearable={false}
     />
   );

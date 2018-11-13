@@ -26,4 +26,8 @@ At the end of the trial period, the Platinum features operate in a
 license, extend the trial, or purchase a subscription. 
 
 For a comparison of the Elastic license levels,
-see https://www.elastic.co/subscriptions[the subscription page].
+see https://www.elastic.co/subscriptions[the subscription page]. 
+
+TIP: If {security} is enabled, before you can install a gold or platinum 
+license, you must configure Transport Layer Security (TLS) in {es}. See 
+{stack-ov}/encrypting-communications.html[Encrypting communications].

@@ -28,7 +28,7 @@ export class TimeRangeSelector extends Component {
       startTab: 0,
       endTab: 1,
     };
-    this.latestTimeStamp = this.props.startTime;
+    this.latestTimestamp = this.props.startTime;
     this.now = this.props.now;
   }
 
@@ -69,15 +69,24 @@ export class TimeRangeSelector extends Component {
   }
 
   getTabItems() {
+
     const datePickerTimes = {
-      start: (moment.isMoment(this.props.startTime)) ? this.props.startTime : this.latestTimeStamp,
+      start: (moment.isMoment(this.props.startTime)) ? this.props.startTime : this.latestTimestamp,
       end: (moment.isMoment(this.props.endTime)) ? this.props.endTime : this.now,
     };
-    const formattedStartTime = this.latestTimeStamp.format(TIME_FORMAT);
+    const formattedStartTime = this.latestTimestamp.format(TIME_FORMAT);
+
+    // Show different labels for the start time depending on whether
+    // the job has seen any data yet
+    const showContinueLabels = (this.latestTimestamp.valueOf() > 0);
+    const startLabels = (showContinueLabels === true) ?
+      [`Continue from ${formattedStartTime}`, 'Continue from now', 'Continue from specified time'] :
+      ['Start at beginning of data', 'Start from now', 'Specify start time'];
+
     const startItems = [
-      { index: 0, label: `Continue from ${formattedStartTime}` },
-      { index: 1, label: 'Continue from now' },
-      { index: 2, label: 'Continue from specified time',
+      { index: 0, label: startLabels[0] },
+      { index: 1, label: startLabels[1] },
+      { index: 2, label: startLabels[2],
         body: (
           <EuiDatePicker
             selected={datePickerTimes.start}

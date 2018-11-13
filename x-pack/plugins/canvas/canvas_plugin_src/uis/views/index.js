@@ -5,12 +5,13 @@
  */
 
 import { dropdownControl } from './dropdownControl';
+import { getCell } from './getCell';
 import { image } from './image';
 import { markdown } from './markdown';
 import { metric } from './metric';
 import { pie } from './pie';
 import { plot } from './plot';
-import { getCell } from './getCell';
+import { progress } from './progress';
 import { repeatImage } from './repeatImage';
 import { revealImage } from './revealImage';
 import { render } from './render';
@@ -20,12 +21,13 @@ import { timefilterControl } from './timefilterControl';
 
 export const viewSpecs = [
   dropdownControl,
+  getCell,
   image,
   markdown,
   metric,
   pie,
   plot,
-  getCell,
+  progress,
   repeatImage,
   revealImage,
   render,

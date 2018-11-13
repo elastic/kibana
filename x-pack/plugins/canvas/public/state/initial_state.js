@@ -10,8 +10,9 @@ import { getDefaultWorkpad } from './defaults';
 export const getInitialState = path => {
   const state = {
     app: {}, // Kibana stuff in here
+    assets: {}, // assets end up here
     transient: {
-      editing: true,
+      canUserWrite: true,
       fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},

@@ -7,6 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiCallOut,
   EuiPanel,
   EuiForm,
   EuiFlexGroup,
@@ -17,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { CONFIG_TELEMETRY_DESC, PRIVACY_STATEMENT_URL } from '../../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
-import './telemetry_form.less';
 import { Field } from 'ui/management';
 
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
@@ -27,6 +27,8 @@ export class TelemetryForm extends Component {
     telemetryOptInProvider: PropTypes.object.isRequired,
     query: PropTypes.object,
     onQueryMatchChange: PropTypes.func.isRequired,
+    spacesEnabled: PropTypes.bool.isRequired,
+    activeSpace: PropTypes.object,
   };
 
   state = {
@@ -80,6 +82,8 @@ export class TelemetryForm extends Component {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiText>
+
+            {this.maybeGetSpacesWarning()}
             <EuiSpacer size="s" />
             <Field
               setting={{
@@ -94,6 +98,21 @@ export class TelemetryForm extends Component {
           </EuiForm>
         </EuiPanel>
       </Fragment>
+    );
+  }
+
+  maybeGetSpacesWarning = () => {
+    if (!this.props.spacesEnabled) {
+      return null;
+    }
+    return (
+      <EuiCallOut
+        color="primary"
+        iconType="spacesApp"
+        title={
+          <p>This setting applies to <strong>all of Kibana.</strong></p>
+        }
+      />
     );
   }
 

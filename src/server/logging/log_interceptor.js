@@ -35,7 +35,7 @@ function doesMessageMatch(errorMessage, match) {
 // converts the given event into a debug log if it's an error of the given type
 function downgradeIfErrorType(errorType, event, field = 'errno') {
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-  const matchesErrorType = isClientError && get(event, `data.${field}`) === errorType;
+  const matchesErrorType = isClientError && get(event, `error.${field}`) === errorType;
 
   if (!matchesErrorType) return null;
 
@@ -52,7 +52,7 @@ function downgradeIfErrorType(errorType, event, field = 'errno') {
 
 function downgradeIfErrorMessage(match, event) {
   const isClientError = doTagsMatch(event, ['connection', 'client', 'error']);
-  const errorMessage = get(event, 'data.message');
+  const errorMessage = get(event, 'error.message');
   const matchesErrorMessage = isClientError &&  doesMessageMatch(errorMessage, match);
 
   if (!matchesErrorMessage) return null;

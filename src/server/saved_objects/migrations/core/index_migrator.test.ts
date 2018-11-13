@@ -86,6 +86,7 @@ describe('IndexMigrator', () => {
             },
           },
         },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
       index: '.kibana_1',
     });
@@ -197,6 +198,7 @@ describe('IndexMigrator', () => {
             },
           },
         },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
       index: '.kibana_2',
     });
@@ -339,7 +341,8 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
     });
   callCluster.withArgs('indices.get').returns(Promise.resolve(index));
   callCluster.withArgs('indices.getAlias').returns(Promise.resolve(alias));
-
+  callCluster.withArgs('reindex').returns(Promise.resolve({ task: 'zeid' }));
+  callCluster.withArgs('tasks.get').returns(Promise.resolve({ completed: true }));
   callCluster.withArgs('search').returns(searchResult(0));
 
   _.range(1, docs.length).forEach(i => {

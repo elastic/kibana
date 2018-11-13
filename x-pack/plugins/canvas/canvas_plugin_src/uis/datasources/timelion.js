@@ -99,7 +99,7 @@ TimelionDatasource.propTypes = {
 export const timelion = () => ({
   name: 'timelion',
   displayName: 'Timelion',
-  help: 'Use timelion syntax to retrieve a timeseries',
+  help: 'Use Timelion syntax to retrieve a timeseries',
   image: 'timelionApp',
   template: templateFromReactComponent(TimelionDatasource),
 });

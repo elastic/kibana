@@ -1,8 +1,11 @@
 <div class="watchActions">
   <div class="watchActionsHeader">
-    <div class="watchActionsHeaderTitle">
-      Will perform {{watchActions.items.length}} action{{ watchActions.items.length === 1 ? '' : 's' }} once met
-    </div>
+    <div
+      class="watchActionsHeaderTitle"
+      i18n-id="xpack.watcher.watchActionsTitle"
+      i18n-default-message="Will perform {watchActionsCount, plural, one{# action} other {# actions}} once met"
+      i18n-values="{ watchActionsCount: watchActions.items.length }"
+    ></div>
     <action-type-select
       class="watchActionsActionType"
       on-change="watchActions.onActionTypeChange"

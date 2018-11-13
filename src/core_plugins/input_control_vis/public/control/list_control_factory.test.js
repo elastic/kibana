@@ -34,6 +34,31 @@ const mockIndexPattern = {
   }
 };
 
+function MockSearchSource() {
+  return {
+    setParent: () => {},
+    setField: () => {},
+    fetch: async () => {
+      return {
+        aggregations: {
+          termsAgg: {
+            buckets: [
+              {
+                key: 'Zurich Airport',
+                doc_count: 691,
+              },
+              {
+                key: 'Xi an Xianyang International Airport',
+                doc_count: 526,
+              },
+            ]
+          }
+        }
+      };
+    }
+  };
+}
+
 const mockKbnApi = {
   indexPatterns: {
     get: async () => {
@@ -47,7 +72,8 @@ const mockKbnApi = {
     getGlobalFilters: () => {
       return [];
     }
-  }
+  },
+  SearchSource: MockSearchSource,
 };
 
 describe('hasValue', () => {
@@ -75,5 +101,72 @@ describe('hasValue', () => {
   test('should be true when control has value that is the string "false"', () => {
     listControl.set([{ value: 'false', label: 'selection option' }]);
     expect(listControl.hasValue()).toBe(true);
+  });
+});
+
+describe('fetch', () => {
+  const controlParams = {
+    id: '1',
+    fieldName: 'myField',
+    options: {}
+  };
+  const useTimeFilter = false;
+
+  let listControl;
+  beforeEach(async () => {
+    listControl = await listControlFactory(controlParams, mockKbnApi, useTimeFilter);
+  });
+
+  test('should set selectOptions to results of terms aggregation', async () => {
+    await listControl.fetch();
+    expect(listControl.selectOptions).toEqual([
+      {
+        'label': 'Xi an Xianyang International Airport',
+        'value': 'Xi an Xianyang International Airport',
+      },
+      {
+        'label': 'Zurich Airport',
+        'value': 'Zurich Airport',
+      }
+    ]);
+  });
+});
+
+describe('fetch with ancestors', () => {
+  const controlParams = {
+    id: '1',
+    fieldName: 'myField',
+    options: {},
+  };
+  const useTimeFilter = false;
+
+
+  let listControl;
+  let parentControl;
+  beforeEach(async () => {
+    listControl = await listControlFactory(controlParams, mockKbnApi, useTimeFilter);
+
+    const parentControlParams = {
+      id: 'parent',
+      fieldName: 'myField',
+      options: {},
+    };
+    parentControl = await listControlFactory(parentControlParams, mockKbnApi, useTimeFilter);
+    parentControl.clear();
+    listControl.setAncestors([parentControl]);
+  });
+
+  describe('ancestor does not have value', () => {
+
+    test('should disable control', async () => {
+      await listControl.fetch();
+      expect(listControl.isEnabled()).toBe(false);
+    });
+
+    test('should reset lastAncestorValues', async () => {
+      listControl.lastAncestorValues = 'last ancestor value';
+      await listControl.fetch();
+      expect(listControl.lastAncestorValues).toBeUndefined();
+    });
   });
 });

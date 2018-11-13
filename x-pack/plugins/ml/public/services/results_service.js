@@ -9,6 +9,7 @@
 // Service for carrying out Elasticsearch queries to obtain data for the
 // Ml Results dashboards.
 import _ from 'lodash';
+// import d3 from 'd3';
 
 import { ML_MEDIAN_PERCENTS } from '../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../util/string_utils';
@@ -1391,6 +1392,178 @@ function getEventRateData(
   });
 }
 
+// Queries Elasticsearch to obtain event distribution i.e. the count
+// of entities over time.
+// index can be a String, or String[], of index names to search.
+// Extra query object can be supplied, or pass null if no additional query.
+// Returned response contains a results property, which is an object
+// of document counts against time (epoch millis).
+const SAMPLER_TOP_TERMS_SHARD_SIZE = 50000;
+const ENTITY_AGGREGATION_SIZE = 10;
+const AGGREGATION_MIN_DOC_COUNT = 1;
+function getEventDistributionData(
+  index,
+  types,
+  splitField,
+  filterField = null,
+  query,
+  metricFunction,
+  metricFieldName,
+  timeFieldName,
+  earliestMs,
+  latestMs,
+  interval) {
+  return new Promise((resolve, reject) => {
+    if (splitField === undefined) {
+      return resolve([]);
+    }
+
+    // Build the criteria to use in the bool filter part of the request.
+    // Add criteria for the types, time range, entity fields,
+    // plus any additional supplied query.
+    const mustCriteria = [];
+
+    if (types && types.length) {
+      mustCriteria.push({ terms: { _type: types } });
+    }
+
+    mustCriteria.push({
+      range: {
+        [timeFieldName]: {
+          gte: earliestMs,
+          lte: latestMs,
+          format: 'epoch_millis'
+        }
+      }
+    });
+
+    if (query) {
+      mustCriteria.push(query);
+    }
+
+    if (filterField !== null) {
+      mustCriteria.push({
+        term: {
+          [filterField.fieldName]: filterField.fieldValue
+        }
+      });
+    }
+
+    const body = {
+      query: {
+        // using function_score and random_score to get a random sample of documents.
+        // otherwise all documents would have the same score and the sampler aggregation
+        // would pick the first N documents instead of a random set.
+        function_score: {
+          query: {
+            bool: {
+              must: mustCriteria
+            }
+          },
+          functions: [
+            {
+              random_score: {
+                // static seed to get same randomized results on every request
+                seed: 10,
+                field: '_seq_no'
+              }
+            }
+          ]
+        }
+      },
+      size: 0,
+      _source: {
+        excludes: []
+      },
+      aggs: {
+        sample: {
+          sampler: {
+            shard_size: SAMPLER_TOP_TERMS_SHARD_SIZE
+          },
+          aggs: {
+            byTime: {
+              date_histogram: {
+                field: timeFieldName,
+                interval: interval,
+                min_doc_count: AGGREGATION_MIN_DOC_COUNT
+              },
+              aggs: {
+                entities: {
+                  terms: {
+                    field: splitField.fieldName,
+                    size: ENTITY_AGGREGATION_SIZE,
+                    min_doc_count: AGGREGATION_MIN_DOC_COUNT
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    if (metricFieldName !== undefined && metricFieldName !== '') {
+      body.aggs.sample.aggs.byTime.aggs.entities.aggs = {};
+
+      const metricAgg = {
+        [metricFunction]: {
+          field: metricFieldName
+        }
+      };
+
+      if (metricFunction === 'percentiles') {
+        metricAgg[metricFunction].percents = [ML_MEDIAN_PERCENTS];
+      }
+      body.aggs.sample.aggs.byTime.aggs.entities.aggs.metric = metricAgg;
+    }
+
+    ml.esSearch({
+      index,
+      body
+    })
+      .then((resp) => {
+        // Because of the sampling, results of metricFunctions which use sum or count
+        // can be significantly skewed. Taking into account totalHits we calculate a
+        // a factor to normalize results for these metricFunctions.
+        const totalHits = _.get(resp, ['hits', 'total'], 0);
+        const successfulShards = _.get(resp, ['_shards', 'successful'], 0);
+
+        let normalizeFactor = 1;
+        if (totalHits > (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE)) {
+          normalizeFactor = totalHits / (successfulShards * SAMPLER_TOP_TERMS_SHARD_SIZE);
+        }
+
+        const dataByTime = _.get(resp, ['aggregations', 'sample', 'byTime', 'buckets'], []);
+        const data = dataByTime.reduce((d, dataForTime) => {
+          const date = +dataForTime.key;
+          const entities = _.get(dataForTime, ['entities', 'buckets'], []);
+          entities.forEach((entity) => {
+            let value = (metricFunction === 'count') ? entity.doc_count : entity.metric.value;
+
+            if (
+              metricFunction === 'count'
+              || metricFunction === 'distinct_count'
+              || metricFunction === 'sum'
+            ) {
+              value = value * normalizeFactor;
+            }
+
+            d.push({
+              date,
+              entity: entity.key,
+              value
+            });
+          });
+          return d;
+        }, []);
+        resolve(data);
+      })
+      .catch((resp) => {
+        reject(resp);
+      });
+  });
+}
+
 function getModelPlotOutput(
   jobId,
   detectorIndex,
@@ -1663,6 +1836,7 @@ export const mlResultsService = {
   getRecordsForCriteria,
   getMetricData,
   getEventRateData,
+  getEventDistributionData,
   getModelPlotOutput,
   getRecordMaxScoreByTime
 };

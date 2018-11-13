@@ -19,6 +19,8 @@
 
 import { map as mapAsync } from 'bluebird';
 import { By } from 'selenium-webdriver';
+import expect from 'expect.js';
+
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
@@ -273,15 +275,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndices();
-        await PageObjects.common.sleep(2001);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
-        await PageObjects.common.sleep(2002);
-        await this.setIndexPatternField(indexPatternName);
-        await PageObjects.common.sleep(2003);
-        const step2Button = await this.getCreateIndexPatternGoToStep2Button();
-        step2Button.click();
-        await PageObjects.common.sleep(2004);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async () => {
+          await this.setIndexPatternField(indexPatternName);
+        });
+        await PageObjects.common.sleep(2000);
+        await (await this.getCreateIndexPatternGoToStep2Button()).click();
+        await PageObjects.common.sleep(2000);
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
@@ -304,16 +308,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await this.getIndexPatternIdFromUrl();
     }
 
-    //adding a method to check if the create index pattern button is visible(while adding more than 1 index pattern)
-
+    // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
     async clickOptionalAddNewButton() {
-      const buttonParent = await testSubjects.find('createIndexPatternParent');
-      await PageObjects.common.sleep(2005);
-      const buttonVisible = (await buttonParent.getAttribute('innerHTML')).includes(
-        'createIndexPatternButton'
-      );
-      log.debug('found the button ' + buttonVisible);
-      if (buttonVisible) {
+      if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
       }
     }
@@ -331,7 +328,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clear();
-      await remote.type(field, indexPatternName);
+      await field.sendKeys(indexPatternName);
+      const currentName = await field.getAttribute('value');
+      log.debug(`setIndexPatternField set to ${currentName}`);
+      expect(currentName).to.eql(`${indexPatternName}*`);
     }
 
     async getCreateIndexPatternGoToStep2Button() {

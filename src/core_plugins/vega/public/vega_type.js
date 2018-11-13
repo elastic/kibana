@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
@@ -27,12 +28,9 @@ import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import { VegaRequestHandlerProvider } from './vega_request_handler';
 import { VegaVisualizationProvider } from './vega_visualization';
 
-import './vega.less';
-
 // Editor-specific code
 import 'brace/mode/hjson';
 import 'brace/ext/searchbox';
-import './vega_editor.less';
 import './vega_editor_controller';
 import vegaEditorTemplate from './vega_editor_template.html';
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
@@ -44,8 +42,12 @@ VisTypesRegistryProvider.register((Private) => {
 
   return VisFactory.createBaseVisualization({
     name: 'vega',
-    title: 'Vega',
-    description: 'Create custom visualizations using Vega and VegaLite',
+    title: i18n.translate('vega.type.vegaTitle', {
+      defaultMessage: 'Vega',
+    }),
+    description: i18n.translate('vega.type.vegaВescription', {
+      defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
+    }),
     icon: 'visVega',
     category: CATEGORY.OTHER,
     visConfig: { defaults: { spec: defaultSpec } },

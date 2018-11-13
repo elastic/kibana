@@ -147,10 +147,11 @@ class VisController {
     this.vis.API.queryFilter.addFilters(newFilters, this.vis.params.pinFilters);
   }
 
-  clearControls = () => {
+  clearControls = async () => {
     this.controls.forEach((control) => {
       control.clear();
     });
+    await this.updateNestedControls();
     this.drawVis();
   }
 

@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
+<React.Fragment>
+  <EuiDescribedFormGroup
+    description={
+      <p>
+        Specifies the Kibana privilege for this role.
+      </p>
+    }
+    fullWidth={false}
+    gutterSize="l"
+    title={
+      <h3>
+        Kibana privileges
+      </h3>
+    }
+    titleSize="xs"
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={true}
+    >
+      <PrivilegeSelector
+        allowNone={true}
+        availablePrivileges={
+          Array [
+            "all",
+            "read",
+          ]
+        }
+        data-test-subj="kibanaPrivilege"
+        disabled={false}
+        onChange={[Function]}
+        value="none"
+      />
+    </EuiFormRow>
+  </EuiDescribedFormGroup>
+</React.Fragment>
+`;

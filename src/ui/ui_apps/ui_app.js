@@ -29,6 +29,7 @@ export class UiApp {
       order = 0,
       description,
       icon,
+      euiIconType,
       hidden,
       linkToLastSubUrl,
       listed,
@@ -45,6 +46,7 @@ export class UiApp {
     this._order = order;
     this._description = description;
     this._icon = icon;
+    this._euiIconType = euiIconType;
     this._linkToLastSubUrl = linkToLastSubUrl;
     this._hidden = hidden;
     this._listed = listed;
@@ -60,12 +62,13 @@ export class UiApp {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`
       // if the app is also listed. This means that all apps in the kibanaPayload will
       // have a navLink property since that list includes all normally accessible apps
-      this._navLink = new UiNavLink(kbnServer.config.get('server.basePath'), {
+      this._navLink = new UiNavLink({
         id: this._id,
         title: this._title,
         order: this._order,
         description: this._description,
         icon: this._icon,
+        euiIconType: this._euiIconType,
         url: this._url,
         linkToLastSubUrl: this._linkToLastSubUrl
       });
@@ -117,6 +120,7 @@ export class UiApp {
       title: this._title,
       description: this._description,
       icon: this._icon,
+      euiIconType: this._euiIconType,
       main: this._main,
       navLink: this._navLink,
       linkToLastSubUrl: this._linkToLastSubUrl,

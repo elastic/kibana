@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import moment from 'moment';
@@ -24,9 +25,7 @@ fetch.Promise = require('bluebird');
 
 //var parseDateMath = require('../utils/date_math.js');
 
-
 import Datasource from '../lib/classes/datasource';
-
 
 export default new Datasource ('quandl', {
   dataSource: true,
@@ -34,18 +33,29 @@ export default new Datasource ('quandl', {
     {
       name: 'code',
       types: ['string', 'null'],
-      help: 'The quandl code to plot. You can find these on quandl.com.'
+      help: i18n.translate('timelion.help.functions.quandl.args.codeHelpText', {
+        defaultMessage: 'The quandl code to plot. You can find these on quandl.com.',
+      }),
     },
     {
       name: 'position',
       types: ['number', 'null'],
-      help: 'Some quandl sources return multiple series, which one should I use? 1 based index.'
+      help: i18n.translate('timelion.help.functions.quandl.args.positionHelpText', {
+        defaultMessage:
+          'Some quandl sources return multiple series, which one should I use? 1 based index.',
+      }),
     }
   ],
-  help: `
+  help: i18n.translate('timelion.help.functions.quandlHelpText', {
+    defaultMessage:
+      `
     [experimental]
-    Pull data from quandl.com using the quandl code. Set "timelion:quandl.key" to your free API key in Kibana's
+    Pull data from quandl.com using the quandl code. Set {quandlKeyField} to your free API key in Kibana's
     Advanced Settings. The API has a really low rate limit without a key.`,
+    values: {
+      quandlKeyField: '"timelion:quandl.key"',
+    },
+  }),
   fn: function quandlFn(args, tlConfig) {
     const intervalMap = {
       '1d': 'daily',
@@ -62,8 +72,15 @@ export default new Datasource ('quandl', {
     });
 
     if (!config.interval) {
-      throw new Error('quandl() unsupported interval: ' + tlConfig.time.interval +
-      '. quandl() supports: ' + _.keys(intervalMap).join(', '));
+      throw new Error(
+        i18n.translate('timelion.serverSideErrors.quandlFunction.unsupportedIntervalErrorMessage', {
+          defaultMessage: 'quandl() unsupported interval: {interval}. quandl() supports: {intervals}',
+          values: {
+            interval: tlConfig.time.interval,
+            intervals: _.keys(intervalMap).join(', '),
+          },
+        })
+      );
     }
 
     const time = {

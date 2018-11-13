@@ -20,19 +20,19 @@ export const date = () => ({
   context: {
     types: ['null'],
   },
-  help: 'Returns the current time, or a time parsed from a string, as milliseconds since epoch.',
+  help: 'Returns the current time, or a time parsed from a string, as milliseconds since epoch',
   args: {
     value: {
       aliases: ['_'],
       types: ['string', 'null'],
       help:
-        'An optional date string to parse into milliseconds since epoch. ' +
-        'Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format.',
+        'An optional date string to parse into milliseconds since epoch ' +
+        'Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format',
     },
     format: {
       types: ['string'],
       help:
-        'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/).',
+        'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/)',
     },
   },
   fn: (context, args) => {

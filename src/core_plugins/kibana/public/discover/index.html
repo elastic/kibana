@@ -26,11 +26,10 @@
       <div data-transclude-slot="bottomRow" class="fullWidth">
         <query-bar
           query="state.query"
+          on-submit="updateQueryAndFetch"
           app-name="'discover'"
-          on-submit="updateQueryAndFetch($query)"
           index-patterns="[indexPattern]"
-        >
-        </query-bar>
+        ></query-bar>
       </div>
     </div>
   </kbn-top-nav>

@@ -37,7 +37,7 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
     >
       <FormattedMessage
         defaultMessage="Add"
-        id="kbn.management.editIndexPattern.source.addButton"
+        id="kbn.management.editIndexPattern.source.addButtonLabel"
         values={Object {}}
       />
     </EuiButton>
@@ -82,7 +82,7 @@ exports[`AddFilter should render normally 1`] = `
     >
       <FormattedMessage
         defaultMessage="Add"
-        id="kbn.management.editIndexPattern.source.addButton"
+        id="kbn.management.editIndexPattern.source.addButtonLabel"
         values={Object {}}
       />
     </EuiButton>

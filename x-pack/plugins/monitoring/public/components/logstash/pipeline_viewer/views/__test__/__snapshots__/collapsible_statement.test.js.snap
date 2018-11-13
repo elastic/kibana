@@ -17,7 +17,7 @@ exports[`CollapsibleStatement component renders child components 1`] = `
     key="statementId"
   >
     <EuiButtonIcon
-      aria-label={true}
+      aria-label="collapse"
       color="text"
       iconSize="m"
       iconType="arrowDown"

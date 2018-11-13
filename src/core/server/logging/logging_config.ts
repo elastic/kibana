@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '../config/schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { AppenderConfigType, Appenders } from './appenders/appenders';
 
 // We need this helper for the types to be correct

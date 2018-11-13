@@ -217,7 +217,8 @@ export function VisHandlerProvider(Private) {
         .append('div')
         // class name needs `chart` in it for the polling checkSize function
         // to continuously call render on resize
-        .attr('class', 'visualize-error chart error');
+        .attr('class', 'visualize-error chart error')
+        .attr('data-test-subj', 'visLibVisualizeError');
 
       div.append('h4').text(markdownIt.renderInline(message));
 

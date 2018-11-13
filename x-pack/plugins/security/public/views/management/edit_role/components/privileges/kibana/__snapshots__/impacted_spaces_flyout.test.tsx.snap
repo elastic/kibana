@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ImpactedSpacesFlyout> renders without crashing 1`] = `
+<React.Fragment>
+  <div
+    className="showImpactedSpaces"
+  >
+    <EuiLink
+      color="primary"
+      onClick={[Function]}
+      type="button"
+    >
+      View summary of spaces privileges
+    </EuiLink>
+  </div>
+</React.Fragment>
+`;

@@ -23,7 +23,7 @@ import logSymbols from 'log-symbols';
 import logTransformer from 'strong-log-transformer';
 
 function generateColors() {
-  const colorWheel = [chalk.cyan, chalk.magenta, chalk.blue, chalk.yellow, chalk.green, chalk.red];
+  const colorWheel = [chalk.cyan, chalk.magenta, chalk.blue, chalk.yellow, chalk.green];
 
   const count = colorWheel.length;
   let children = 0;

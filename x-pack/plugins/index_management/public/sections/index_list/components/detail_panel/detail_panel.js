@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { ShowJson } from './show_json';
 import { Summary } from './summary';
@@ -30,7 +30,7 @@ function capitalizeFirstLetter(string) {
 }
 
 const tabs = ['Summary', 'Settings', 'Mapping', 'Stats', 'Edit settings'];
-export class DetailPanelUi extends Component {
+export class DetailPanel extends Component {
   renderTabs() {
     const { panelType, indexName, indexStatus, openDetailPanel } = this.props;
 
@@ -51,7 +51,7 @@ export class DetailPanelUi extends Component {
   }
 
   render() {
-    const { panelType, indexName, closeDetailPanel, intl } = this.props;
+    const { panelType, indexName, closeDetailPanel } = this.props;
     if (!panelType) {
       return null;
     }
@@ -95,10 +95,7 @@ export class DetailPanelUi extends Component {
                     anchorPosition="upRight"
                     detailPanel={true}
                     iconType="arrowUp"
-                    label={intl.formatMessage({
-                      id: 'xpack.idxMgmt.detailPanel.manageContextMenuLabel',
-                      defaultMessage: 'Manage',
-                    })}
+                    label={<FormattedMessage id="xpack.idxMgmt.detailPanel.manageContextMenuLabel" defaultMessage="Manage" />}
                   />
                 )}
               />
@@ -109,5 +106,3 @@ export class DetailPanelUi extends Component {
     );
   }
 }
-
-export const DetailPanel = injectI18n(DetailPanelUi);

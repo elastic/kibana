@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { Env } from '../config';
-import { ByteSizeValue, schema, TypeOf } from '../config/schema';
 import { SslConfig } from './ssl_config';
 
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;

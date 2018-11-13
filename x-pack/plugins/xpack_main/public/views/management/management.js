@@ -12,9 +12,25 @@ import { TelemetryForm } from '../../components';
 
 routes.defaults(/\/management/, {
   resolve: {
-    telemetryManagementSection: function (Private) {
+    telemetryManagementSection: function (Private, spacesEnabled, activeSpace) {
       const telemetryOptInProvider = Private(TelemetryOptInProvider);
-      const Component = (props) => <TelemetryForm telemetryOptInProvider={telemetryOptInProvider} {...props} />;
+
+      const spaceProps = {
+        spacesEnabled,
+      };
+
+      if (spacesEnabled) {
+        spaceProps.activeSpace = activeSpace ? activeSpace.space : null;
+      }
+
+      const Component = (props) => (
+        <TelemetryForm
+          spacesEnabled={spacesEnabled}
+          telemetryOptInProvider={telemetryOptInProvider}
+          {...spaceProps}
+          {...props}
+        />
+      );
 
       registerSettingsComponent(PAGE_FOOTER_COMPONENT, Component, true);
     }

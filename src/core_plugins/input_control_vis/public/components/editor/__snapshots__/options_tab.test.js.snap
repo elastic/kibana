@@ -33,7 +33,7 @@ exports[`renders OptionsTab 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Use time filter"
-          id="inputControl.editor.optionsTab.useTimeFielterLabel"
+          id="inputControl.editor.optionsTab.useTimeFilterLabel"
           values={Object {}}
         />
       }
@@ -51,7 +51,7 @@ exports[`renders OptionsTab 1`] = `
       label={
         <FormattedMessage
           defaultMessage="Pin filters to global state"
-          id="inputControl.editor.optionsTab.pinFieltersLabel"
+          id="inputControl.editor.optionsTab.pinFiltersLabel"
           values={Object {}}
         />
       }

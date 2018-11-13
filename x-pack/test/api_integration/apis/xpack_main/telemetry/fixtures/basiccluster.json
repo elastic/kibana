@@ -180,6 +180,12 @@
         "index_pattern": {
           "total": 1
         },
+        "os": {
+          "distros": [],
+          "distroReleases": [],
+          "platforms": [],
+          "platformReleases": []
+        },
         "indices": 1,
         "search": {
           "total": 0
@@ -195,6 +201,37 @@
         ],
         "visualization": {
           "total": 0
+        },
+        "plugins": {
+          "reporting": {
+            "available": true,
+            "enabled": false,
+            "csv": {
+              "available": true
+            },
+            "printable_pdf": {
+              "available": false
+            },
+            "status": {},
+            "lastDay": {
+              "csv": {
+                "available": true
+              },
+              "printable_pdf": {
+                "available": false
+              },
+              "status": {}
+            },
+            "last7Days": {
+              "csv": {
+                "available": true
+              },
+              "printable_pdf": {
+                "available": false
+              },
+              "status": {}
+            }
+          }
         }
       },
       "xpack": {
@@ -242,35 +279,6 @@
           "enabled_exporters": {
             "local": 1
           }
-        },
-        "reporting": {
-          "available": true,
-          "csv": {
-            "available": true
-          },
-          "enabled": false,
-          "last7Days": {
-            "csv": {
-              "available": true
-            },
-            "printable_pdf": {
-              "available": false
-            },
-            "status": {}
-          },
-          "lastDay": {
-            "csv": {
-              "available": true
-            },
-            "printable_pdf": {
-              "available": false
-            },
-            "status": {}
-          },
-          "printable_pdf": {
-            "available": false
-          },
-          "status": {}
         },
         "rollup": {
           "available": true,
