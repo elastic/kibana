@@ -17,11 +17,13 @@
  * under the License.
  */
 
+import { isEmpty, pick } from 'lodash';
 import { Filter } from 'ui/filter_bar/filters/index';
 
 export type PhraseFilter = Filter & {
   field: string;
   value: string | number;
+  applyChanges: (updateObject: Partial<PhraseFilter>) => PhraseFilter;
 };
 
 interface CreatePhraseFilterOptions {
@@ -38,6 +40,21 @@ export function createPhraseFilter(options: CreatePhraseFilterOptions): PhraseFi
     toElasticsearchQuery() {
       // TODO implement me
       return {};
+    },
+    applyChanges(updateObject: Partial<PhraseFilter>) {
+      if (isEmpty(updateObject)) {
+        return this;
+      }
+
+      const props = ['field', 'value'];
+      const updatedProps = pick(updateObject, props);
+      const currentProps = pick(this, props);
+      const mergedProps = {
+        ...currentProps,
+        ...updatedProps,
+      } as CreatePhraseFilterOptions;
+
+      return createPhraseFilter(mergedProps);
     },
   };
 }

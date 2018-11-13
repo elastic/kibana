@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { isEmpty, omit, pick } from 'lodash';
 import { Filter } from 'ui/filter_bar/filters/index';
 
 export type MetaFilter = Filter & {
@@ -25,6 +26,7 @@ export type MetaFilter = Filter & {
   pinned: boolean;
   index?: string;
   toElasticsearchQuery: () => void;
+  applyChanges: (updateObject: Partial<MetaFilter>) => MetaFilter;
 };
 
 interface CreateMetaFilterOptions {
@@ -50,29 +52,37 @@ export function createMetaFilter(
     // call underlying filter's toElasticsearchQuery
     // e.g. Object.getPrototypeOf(this).toElasticsearchQuery();
   };
+  metaFilter.applyChanges = function(updateObject: Partial<MetaFilter>) {
+    if (isEmpty(updateObject)) {
+      return this;
+    }
+
+    const metaProps = ['disabled', 'negate', 'pinned', 'index'];
+    const currentProps = pick(this, metaProps);
+    const metaChanges = pick(updateObject, metaProps);
+    const otherChanges = omit(updateObject, metaProps);
+    const updatedFilter = Object.getPrototypeOf(this).applyChanges(otherChanges);
+    const mergedProps = {
+      ...currentProps,
+      ...metaChanges,
+    };
+
+    return createMetaFilter(updatedFilter, mergedProps);
+  };
   return metaFilter;
 }
 
 export function toggleNegation(filter: MetaFilter) {
-  const meta = {
-    ...filter,
-    negate: !filter.negate,
-  };
-  return createMetaFilter(Object.getPrototypeOf(filter), meta);
+  const negate = !filter.negate;
+  return filter.applyChanges({ negate });
 }
 
 export function togglePinned(filter: MetaFilter) {
-  const meta = {
-    ...filter,
-    pinned: !filter.pinned,
-  };
-  return createMetaFilter(Object.getPrototypeOf(filter), meta);
+  const pinned = !filter.pinned;
+  return filter.applyChanges({ pinned });
 }
 
 export function toggleDisabled(filter: MetaFilter) {
-  const meta = {
-    ...filter,
-    disabled: !filter.disabled,
-  };
-  return createMetaFilter(Object.getPrototypeOf(filter), meta);
+  const disabled = !filter.disabled;
+  return filter.applyChanges({ disabled });
 }
