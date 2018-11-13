@@ -1,8 +1,5 @@
-// SASSTODO: This file has a lot of very specific colors and sizing that should be calculated
-ml-explorer-chart,
 .ml-explorer-chart-container {
-  display: block;
-  padding-bottom: $euiSize;
+  overflow: hidden;
 
   .ml-explorer-chart-svg {
     font-size: $euiSizeXS;
@@ -55,9 +52,14 @@ ml-explorer-chart,
     stroke-width: 2;
   }
 
-  .values-dots circle {
+  .values-dots circle,
+  .values-dots-circle {
     fill: #32a7c2;
     stroke-width: 0;
+  }
+
+  .values-dots circle.values-dots-circle-blur {
+    fill: #aaa;
   }
 
   .metric-value {
@@ -65,49 +67,58 @@ ml-explorer-chart,
     fill: #32a7c2;
   }
 
-  circle.metric-value {
+  .metric-value {
     opacity: 1;
     fill: transparent;
     stroke: #32a7c2;
     stroke-width: 0px;
   }
 
-  circle.anomaly-marker {
+  .anomaly-marker {
     stroke-width: 1px;
     stroke: #aaaaaa;
   }
 
-  circle.anomaly-marker:hover {
+  .anomaly-marker:hover {
     stroke-width: 6px;
     stroke: #32a7c2;
   }
 
-  circle.metric-value.critical {
+  .anomaly-marker.critical {
     fill: $mchColorCritical;
   }
 
-  circle.metric-value.major {
+  .anomaly-marker.major {
     fill: $mchColorMajor;
   }
 
-  circle.metric-value.minor {
+  .anomaly-marker.minor {
     fill: $mchColorMinor;
   }
 
-  circle.metric-value.warning {
+  .anomaly-marker.warning {
     fill: $mchColorWarning;
   }
 
-  circle.metric-value.low {
-    fill: #d2e9f7; // SASSTODO: Variablize
+  .anomaly-marker.low {
+    fill: #d2e9f7;
   }
 
-  circle.metric-value:hover {
+  .metric-value:hover,
+  .anomaly-marker:hover {
     stroke-width: 6px;
     stroke-opacity: 0.65;
   }
 }
 
+.ml-explorer-chart {
+  overflow: hidden;
+}
+
 .ml-explorer-chart-content-wrapper {
   height: 215px;
+}
+
+.ml-explorer-chart-axis-emphasis {
+  font-weight: bold;
 }

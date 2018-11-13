@@ -3,7 +3,7 @@
 }
 
 .ml-explorer-chart-description {
-  font-size: 12px;
+  font-size: $euiFontSizeXS;
   font-style: italic;
 }
 
@@ -16,18 +16,18 @@
   grid-template-columns: max-content auto;
 
   .mlDescriptionList__title {
-    color: #fff;
-    font-size: 12px;
+    color: $euiColorGhost;
+    font-size: $euiFontSizeXS;
     font-weight: normal;
     white-space: nowrap;
     grid-column-start: 1;
   }
 
   .mlDescriptionList__description {
-    color: #fff;
-    font-size: 12px;
+    color: $euiColorGhost;
+    font-size: $euiFontSizeXS;
     font-weight: bold;
-    padding-left: 8px;
+    padding-left: $euiSizeS;
     max-width: 256px;
     grid-column-start: 2;
   }

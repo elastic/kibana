@@ -18,7 +18,7 @@
 
     // SASSTODO: Proper selector
     & > div {
-      border: 1px solid $euiColorLightestShade;
+      border: 1px solid $euiBorderColor;
       border-top: 0px;
     }
 
@@ -56,7 +56,7 @@
 
   .form-section {
     margin: 0px 0px 0px 0px;
-    border-bottom: 1px solid $euiColorLightestShade;
+    border-bottom: 1px solid $euiBorderColor;
     padding: $euiSizeS;
     overflow: hidden;
 
@@ -80,7 +80,7 @@
     }
 
     .help-text {
-      border: 1px solid $euiColorLightestShade;
+      border: 1px solid $euiBorderColor;
       padding: $euiSizeXS;
       background-color: $euiColorEmptyShade;
       border-radius: $euiBorderRadius;
@@ -90,7 +90,7 @@
 
   .form-section:last-of-type {
       margin: 0px;
-      border-bottom: 0px solid $euiColorLightestShade;
+      border-bottom: 0px solid $euiBorderColor;
     }
 
   // SASSTODO: Proper calcs
@@ -107,7 +107,7 @@
 .chart-container {
   // SASSTODO: Proper calcs
   .chart-loader {
-    border: 1px solid $euiColorLightestShade;
+    border: 1px solid $euiBorderColor;
     margin-left: 49px;
     display: flex;
     margin-bottom: 25px;

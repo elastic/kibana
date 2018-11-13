@@ -47,7 +47,7 @@
 
   .form-section {
     margin: 0px 0px 0px 0px;
-    border-bottom: 1px solid $euiColorLightestShade;
+    border-bottom: $euiBorderThin;
     padding: 10px;
     overflow: hidden;
 
@@ -70,7 +70,7 @@
     }
 
     .help-text {
-      border: 1px solid $euiColorLightestShade;
+      border: $euiBorderThin;
       padding: $euiSizeXS;
       background-color: $euiColorEmptyShade;
       border-radius: $euiBorderRadius;
@@ -80,7 +80,7 @@
 
   .form-section:last-of-type {
       margin: 0px;
-      border-bottom: 0px solid $euiColorLightestShade;
+      border-bottom: 0px solid $euiBorderColor;
     }
 
   // SASSTODO: Proper calc
@@ -143,7 +143,7 @@
 
 .chart-container {
   .chart-loader {
-    border: 1px solid $euiColorLightestShade;
+    border: $euiBorderThin;
     margin-left: 49px;
     display: flex;
     margin-bottom: 25px;

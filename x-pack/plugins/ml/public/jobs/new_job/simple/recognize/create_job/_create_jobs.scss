@@ -18,7 +18,7 @@
 
     // SASSTODO: Proper selector
     & > div {
-      border: 1px solid $euiColorLightestShade;
+      border: 1px solid $euiBorderColor;
       border-top: 0px;
     }
 
@@ -70,7 +70,7 @@
       padding: $euiSizeXS;
 
       .job-container {
-        border: 1px solid $euiColorLightestShade;
+        border: 1px solid $euiBorderColor;
         // padding: 5px;
         margin: $euiSizeXS;
         border-radius: $euiBorderRadius;
@@ -102,7 +102,7 @@
         .results {
           flex-grow: 0;
           flex-shrink: 0;
-          border-left: 1px solid $euiColorLightShade;
+          border-left: 1px solid $euiBorderColor;
           background-color: $euiColorLightestShade;
           padding-top: $euiSizeXS;
 
@@ -146,7 +146,7 @@
 
   .form-section {
     margin: 0px 0px 0px 0px;
-    border-bottom: 1px solid $euiColorLightestShade;
+    border-bottom: 1px solid $euiBorderColor;
     padding: $euiSizeS;
     overflow: hidden;
 
@@ -161,7 +161,7 @@
 
     // SASSTODO: Proper selector
     .help-text {
-      border: 1px solid $euiColorLightestShade;
+      border: 1px solid $euiBorderColor;
       padding: 5px;
       background-color: $euiColorEmptyShade;
       border-radius: $euiSizeXS;
@@ -171,7 +171,7 @@
 
   .form-section:last-of-type {
     margin: 0px;
-    border-bottom: 0px solid $euiColorLightestShade;
+    border-bottom: 0px solid $euiBorderColor;
   }
 
   .form-section-collapsed {
