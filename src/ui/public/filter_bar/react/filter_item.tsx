@@ -20,7 +20,7 @@
 import { EuiBadge, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import { FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filters';
+import { FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filter';
 
 interface Props {
   filter: FilterBarFilter;

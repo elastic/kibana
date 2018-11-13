@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { createFilterBarFilter, FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filters';
+import { createFilterBarFilter, FilterBarFilter } from 'ui/filter_bar/filters/filter_bar_filter';
 import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
 import { FilterItem } from 'ui/filter_bar/react/filter_item';
 
