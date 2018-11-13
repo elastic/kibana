@@ -4,5 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UMAuthDomain } from './auth';
-export { UMPingsDomain } from './pings';
+export interface UMAuthContainer {
+  info: {
+    license: {
+      type: string;
+      isActive: boolean;
+    };
+  };
+}
+
+export interface UMAuthAdapter {
+  getLicenseType(): string | null;
+  licenseIsActive(): boolean;
+}
