@@ -16,7 +16,7 @@ export class Actions {
 
   public app = new AppActions();
 
-  public login = `login:`;
+  public login = 'login:';
 
   public navlink = new NavlinkActions();
 
