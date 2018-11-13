@@ -23,6 +23,10 @@ module.exports = {
     'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
     'types/all': path.join(sourceDir, 'types/register.js'),
   },
+
+  // there were problems with the node and web targets since this code is actually
+  // targetting both the browser and node.js. If there was a hybrid target we'd use
+  // it, but this seems to work either way.
   target: 'webworker',
 
   output: {
@@ -33,6 +37,7 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.json'],
+    mainFields: ['browser', 'main'],
   },
 
   plugins: [
@@ -47,8 +52,10 @@ module.exports = {
       });
 
       this.plugin('done', function(stats) {
-        if (stats.compilation.errors && stats.compilation.errors.length && !isWatch)
-          throw stats.compilation.errors[0];
+        if (!stats.hasErrors()) return;
+        const errorMessage = stats.toString('errors-only');
+        if (isWatch) console.error(errorMessage);
+        else throw new Error(errorMessage);
       });
     },
     new CopyWebpackPlugin([
@@ -62,63 +69,14 @@ module.exports = {
 
   module: {
     rules: [
-      // There's some React 15 propTypes funny business in EUI, this strips out propTypes and fixes it
       {
-        test: /(@elastic[\/\\]eui|moment)[\/\\].*\.js$/,
+        test: /\.js$/,
+        exclude: [/node_modules/],
         loaders: 'babel-loader',
         options: {
           babelrc: false,
-          presets: [
-            'react',
-            [
-              'env',
-              {
-                targets: {
-                  node: 'current',
-                },
-              },
-            ],
-          ],
-          plugins: [
-            'transform-react-remove-prop-types', // specifically this, strips out propTypes
-            'pegjs-inline-precompile',
-            'transform-object-rest-spread',
-            'transform-async-to-generator',
-            'transform-class-properties',
-            [
-              'inline-react-svg',
-              {
-                ignorePattern: 'images/*',
-                svgo: {
-                  plugins: [{ cleanupIDs: false }, { removeViewBox: false }],
-                },
-              },
-            ],
-          ],
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
-      },
-      {
-        test: /\.js$/,
-        loaders: 'babel-loader',
-        options: {
-          plugins: [
-            'transform-object-rest-spread',
-            'transform-async-to-generator',
-            'transform-class-properties',
-          ],
-          presets: [
-            'react',
-            [
-              'env',
-              {
-                targets: {
-                  node: 'current',
-                },
-              },
-            ],
-          ],
-        },
-        exclude: [/node_modules/],
       },
       {
         test: /\.(png|jpg|gif|jpeg|svg)$/,
