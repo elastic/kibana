@@ -65,12 +65,11 @@ export const WorkpadPage = compose(
   withProps(({ updateCount, setUpdateCount, page, elements: pageElements, removeElements }) => {
     const { shapes, selectedLeafShapes = [], cursor } = aeroelastic.getStore(page.id).currentScene;
     const elementLookup = new Map(pageElements.map(element => [element.id, element]));
-    const elements = shapes.map(
-      shape =>
-        elementLookup.has(shape.id)
-          ? // instead of just combining `element` with `shape`, we make property transfer explicit
-            { ...shape, filter: elementLookup.get(shape.id).filter }
-          : shape
+    const elements = shapes.map(shape =>
+      elementLookup.has(shape.id)
+        ? // instead of just combining `element` with `shape`, we make property transfer explicit
+          { ...shape, filter: elementLookup.get(shape.id).filter }
+        : shape
     );
     const selectedElements = selectedLeafShapes;
     return {

@@ -19,8 +19,8 @@ const primaryUpdate = state => state.primaryUpdate;
  */
 
 // dispatch the various types of actions
-const rawCursorPosition = select(
-  action => (action.type === 'cursorPosition' ? action.payload : null)
+const rawCursorPosition = select(action =>
+  action.type === 'cursorPosition' ? action.payload : null
 )(primaryUpdate);
 
 const mouseButtonEvent = select(action => (action.type === 'mouseEvent' ? action.payload : null))(
@@ -31,9 +31,8 @@ const keyboardEvent = select(action => (action.type === 'keyboardEvent' ? action
   primaryUpdate
 );
 
-const keyInfoFromMouseEvents = select(
-  ({ type, payload: { altKey, metaKey, shiftKey } }) =>
-    type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey } : null
+const keyInfoFromMouseEvents = select(({ type, payload: { altKey, metaKey, shiftKey } }) =>
+  type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey } : null
 )(primaryUpdate);
 
 const altTest = key => key.slice(0, 3).toLowerCase() === 'alt' || key === 'KeyALT';
