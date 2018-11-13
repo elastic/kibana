@@ -37,7 +37,7 @@ import {
 } from '../../../../store/constants';
 import { ErrableFormRow } from '../../form_errors';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../../components';
-
+import { MinAgeInput } from '../min_age_input';
 class WarmPhaseUi extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
@@ -145,48 +145,13 @@ class WarmPhaseUi extends PureComponent {
                 </EuiFormRow>
               ) : null}
               {!phaseData[WARM_PHASE_ON_ROLLOVER] ? (
-                <EuiFlexGroup>
-                  <EuiFlexItem style={{ maxWidth: 188 }}>
-                    <ErrableFormRow
-                      id={`${PHASE_WARM}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
-                      label={intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseAfterLabel',
-                        defaultMessage: 'Move to warm phase after'
-                      })}
-                      errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
-                      isShowingErrors={isShowingErrors}
-                      errors={errors}
-                    >
-                      <EuiFieldNumber
-                        value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
-                        onChange={async e => {
-                          setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
-                        }}
-                        min={1}
-                      />
-                    </ErrableFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem style={{ maxWidth: 188 }}>
-                    <EuiFormRow hasEmptyLabelSpace>
-                      <EuiSelect
-                        value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
-                        onChange={async e => {
-                          await setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value);
-                        }}
-                        options={[
-                          { value: 'd', text: intl.formatMessage({
-                            id: 'xpack.indexLifecycleMgmt.warmPhase.daysLabel',
-                            defaultMessage: 'days'
-                          }) },
-                          { value: 'h', text: intl.formatMessage({
-                            id: 'xpack.indexLifecycleMgmt.warmPhase.hoursLabel',
-                            defaultMessage: 'hours'
-                          }) },
-                        ]}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <MinAgeInput
+                  errors={errors}
+                  phaseData={phaseData}
+                  phase={PHASE_WARM}
+                  isShowingErrors={isShowingErrors}
+                  setPhaseData={setPhaseData}
+                />
               ) : null}
 
               <EuiSpacer />

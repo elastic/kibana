@@ -26,9 +26,10 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_NODE_ATTRS,
-  PHASE_REPLICA_COUNT
+  PHASE_REPLICA_COUNT,
 } from '../../../../store/constants';
 import { ErrableFormRow } from '../../form_errors';
+import { MinAgeInput } from '../min_age_input';
 import { ActiveBadge, PhaseErrorMessage } from '../../../../components';
 
 class ColdPhaseUi extends PureComponent {
@@ -41,19 +42,14 @@ class ColdPhaseUi extends PureComponent {
     phaseData: PropTypes.shape({
       [PHASE_ENABLED]: PropTypes.bool.isRequired,
       [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string
-      ]).isRequired,
+      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string])
+        .isRequired,
       [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
       [PHASE_NODE_ATTRS]: PropTypes.string.isRequired,
-      [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string
-      ]).isRequired
+      [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     }).isRequired,
     warmPhaseReplicaCount: PropTypes.number.isRequired,
-    nodeOptions: PropTypes.array.isRequired
+    nodeOptions: PropTypes.array.isRequired,
   };
 
   componentWillMount() {
@@ -69,7 +65,7 @@ class ColdPhaseUi extends PureComponent {
       warmPhaseReplicaCount,
       errors,
       isShowingErrors,
-      intl
+      intl,
     } = this.props;
 
     return (
@@ -82,9 +78,7 @@ class ColdPhaseUi extends PureComponent {
                 defaultMessage="Cold phase"
               />
             </span>{' '}
-            {phaseData[PHASE_ENABLED] ? (
-              <ActiveBadge />
-            ) : null}
+            {phaseData[PHASE_ENABLED] ? <ActiveBadge /> : null}
           </div>
         }
         titleSize="s"
@@ -103,7 +97,6 @@ class ColdPhaseUi extends PureComponent {
       >
         {phaseData[PHASE_ENABLED] ? (
           <Fragment>
-
             <div>
               <EuiSpacer />
               <EuiButton
@@ -120,72 +113,38 @@ class ColdPhaseUi extends PureComponent {
             </div>
 
             <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem style={{ maxWidth: 188 }}>
-                <ErrableFormRow
-                  id={`${PHASE_COLD}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
-                  label={intl.formatMessage({
-                    id: 'xpack.indexLifecycleMgmt.coldPhase.moveToColdPhaseAfterLabel',
-                    defaultMessage: 'Cold phase after'
-                  })}
-                  errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
-                  isShowingErrors={isShowingErrors}
-                  errors={errors}
-                >
-                  <EuiFieldNumber
-                    value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
-                    onChange={async e => {
-                      setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
-                    }}
-                    min={1}
-                  />
-                </ErrableFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ maxWidth: 188 }}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiSelect
-                    value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
-                    onChange={e =>
-                      setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)
-                    }
-                    options={[
-                      { value: 'd', text: intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.coldPhase.daysLabel',
-                        defaultMessage: 'days'
-                      }) },
-                      { value: 'h', text: intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.coldPhase.hoursLabel',
-                        defaultMessage: 'hours'
-                      }) },
-                    ]}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
+            <MinAgeInput
+              errors={errors}
+              phaseData={phaseData}
+              phase={PHASE_COLD}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
+            />
             <EuiSpacer />
 
             <ErrableFormRow
               id={`${PHASE_COLD}.${PHASE_NODE_ATTRS}`}
               label={intl.formatMessage({
                 id: 'xpack.indexLifecycleMgmt.coldPhase.nodeAllocationLabel',
-                defaultMessage: 'Choose where to allocate indices by node attribute'
+                defaultMessage: 'Choose where to allocate indices by node attribute',
               })}
               errorKey={PHASE_NODE_ATTRS}
               isShowingErrors={isShowingErrors}
               errors={errors}
-              helpText={phaseData[PHASE_NODE_ATTRS] ? (
-                <EuiButtonEmpty
-                  flush="left"
-                  iconType="eye"
-                  onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.viewNodeDetailsButton"
-                    defaultMessage="View a list of nodes attached to this configuration"
-                  />
-                </EuiButtonEmpty>
-              ) : null}
+              helpText={
+                phaseData[PHASE_NODE_ATTRS] ? (
+                  <EuiButtonEmpty
+                    flush="left"
+                    iconType="eye"
+                    onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
+                  >
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.viewNodeDetailsButton"
+                      defaultMessage="View a list of nodes attached to this configuration"
+                    />
+                  </EuiButtonEmpty>
+                ) : null
+              }
             >
               <EuiSelect
                 value={phaseData[PHASE_NODE_ATTRS] || ' '}
@@ -202,7 +161,7 @@ class ColdPhaseUi extends PureComponent {
                   id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
                   label={intl.formatMessage({
                     id: 'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel',
-                    defaultMessage: 'Number of replicas'
+                    defaultMessage: 'Number of replicas',
                   })}
                   errorKey={PHASE_REPLICA_COUNT}
                   isShowingErrors={isShowingErrors}
@@ -221,9 +180,7 @@ class ColdPhaseUi extends PureComponent {
                 <EuiFormRow hasEmptyLabelSpace>
                   <EuiButtonEmpty
                     flush="left"
-                    onClick={() =>
-                      setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)
-                    }
+                    onClick={() => setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)}
                   >
                     Set to same as warm phase
                   </EuiButtonEmpty>
@@ -237,7 +194,6 @@ class ColdPhaseUi extends PureComponent {
             <EuiButton
               onClick={async () => {
                 await setPhaseData(PHASE_ENABLED, true);
-
               }}
             >
               <FormattedMessage

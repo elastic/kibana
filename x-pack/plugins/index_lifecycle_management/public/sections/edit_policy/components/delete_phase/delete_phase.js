@@ -8,17 +8,13 @@
 
 
 import React, { PureComponent, Fragment } from 'react';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import PropTypes from 'prop-types';
+import { MinAgeInput } from '../min_age_input';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiTitle,
   EuiSpacer,
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiSelect,
   EuiDescribedFormGroup,
   EuiButton,
 } from '@elastic/eui';
@@ -28,10 +24,9 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
 } from '../../../../store/constants';
-import { ErrableFormRow } from '../../form_errors';
 import { ActiveBadge, PhaseErrorMessage } from '../../../../components';
 
-class DeletePhaseUi extends PureComponent {
+export class DeletePhase extends PureComponent {
   static propTypes = {
     setPhaseData: PropTypes.func.isRequired,
     isShowingErrors: PropTypes.bool.isRequired,
@@ -52,7 +47,6 @@ class DeletePhaseUi extends PureComponent {
       phaseData,
       errors,
       isShowingErrors,
-      intl
     } = this.props;
 
     return (
@@ -113,48 +107,13 @@ class DeletePhaseUi extends PureComponent {
               </p>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem style={{ maxWidth: 188 }}>
-                <ErrableFormRow
-                  id={`${PHASE_DELETE}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
-                  label={intl.formatMessage({
-                    id: 'xpack.indexLifecycleMgmt.coldPhase.moveToDeletePhaseAfterLabel',
-                    defaultMessage: 'Delete indices after'
-                  })}
-                  errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
-                  isShowingErrors={isShowingErrors}
-                  errors={errors}
-                >
-                  <EuiFieldNumber
-                    value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
-                    onChange={async e => {
-                      setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
-                    }}
-                    min={1}
-                  />
-                </ErrableFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem style={{ maxWidth: 188 }}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiSelect
-                    value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
-                    onChange={e =>
-                      setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)
-                    }
-                    options={[
-                      { value: 'd', text: intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.deletePhase.daysLabel',
-                        defaultMessage: 'days'
-                      }) },
-                      { value: 'h', text: intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.deletePhase.hoursLabel',
-                        defaultMessage: 'hours'
-                      }) },
-                    ]}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <MinAgeInput
+              errors={errors}
+              phaseData={phaseData}
+              phase={PHASE_DELETE}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
+            />
           </Fragment>
         ) : (
           <div>
@@ -175,4 +134,3 @@ class DeletePhaseUi extends PureComponent {
     );
   }
 }
-export const DeletePhase = injectI18n(DeletePhaseUi);
