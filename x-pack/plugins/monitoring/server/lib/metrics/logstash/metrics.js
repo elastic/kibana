@@ -83,8 +83,8 @@ export const metrics = {
       defaultMessage: 'Event Latency'
     }),
     description: i18n.translate('xpack.monitoring.metrics.logstash.eventLatencyDescription', {
-      defaultMessage: `Average time spent by events in the filter and output stages, which is the total
-      time it takes to process events divided by number of events emitted.`
+      defaultMessage: 'Average time spent by events in the filter and output stages, which is the total ' +
+        'time it takes to process events divided by number of events emitted.'
     })
   }),
   logstash_events_input_rate: new LogstashEventsRateMetric({
@@ -111,8 +111,8 @@ export const metrics = {
       defaultMessage: 'Event Latency'
     }),
     description: i18n.translate('xpack.monitoring.metrics.logstashInstance.eventLatencyDescription', {
-      defaultMessage: `Average time spent by events in the filter and output stages, which is the total
-      time it takes to process events divided by number of events emitted.`
+      defaultMessage: 'Average time spent by events in the filter and output stages, which is the total ' +
+        'time it takes to process events divided by number of events emitted.'
     })
   }),
   logstash_os_load_1m: new LogstashMetric({
@@ -197,8 +197,8 @@ export const metrics = {
       defaultMessage: 'Cgroup Elapsed Periods'
     }),
     description: i18n.translate('xpack.monitoring.metrics.logstashInstance.cgroupCfsStats.cgroupElapsedPeriodsDescription', {
-      defaultMessage: `The number of sampling periods from the Completely Fair Scheduler (CFS).
-      Compare against the number of times throttled.`
+      defaultMessage:
+        'The number of sampling periods from the Completely Fair Scheduler (CFS). Compare against the number of times throttled.'
     }),
     format: LARGE_FLOAT,
     metricAgg: 'max',
@@ -262,8 +262,8 @@ export const metrics = {
         defaultMessage: 'Cgroup CPU Utilization'
       }),
       description: i18n.translate('xpack.monitoring.metrics.logstashInstance.cgroupCpuUtilizationDescription', {
-        defaultMessage: `CPU Usage time compared to the CPU quota shown in percentage. If CPU
-        quotas are not set, then no data will be shown.`
+        defaultMessage:
+          'CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.'
       })
     };
     return {

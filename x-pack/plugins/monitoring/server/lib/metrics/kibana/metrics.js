@@ -135,8 +135,8 @@ export const metrics = {
       defaultMessage: 'Event Loop Delay'
     }),
     description: i18n.translate('xpack.monitoring.metrics.kibanaInstance.eventLoopDelayDescription', {
-      defaultMessage: `Delay in Kibana server event loops. Longer delays may indicate blocking events in server thread,
-      such as synchronous functions taking large amount of CPU time.`
+      defaultMessage: 'Delay in Kibana server event loops. Longer delays may indicate blocking events in server thread, ' +
+        'such as synchronous functions taking large amount of CPU time.'
     }),
     format: SMALL_FLOAT,
     metricAgg: 'max',

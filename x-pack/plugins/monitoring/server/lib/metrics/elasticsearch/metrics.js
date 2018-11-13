@@ -89,13 +89,13 @@ const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.es.msTimeUnitLa
 const nsTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.es.nsTimeUnitLabel', {
   defaultMessage: 'ns'
 });
-const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.es.nsTimeUnitLabel', {
+const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.es.perSecondTimeUnitLabel', {
   defaultMessage: '/s'
 });
 
 export const metrics = {
   cluster_index_request_rate_primary: new RequestRateMetric({
-    title: indexingRateTitle,
+    title: indexingRateTitle, // title to use for the chart
     label: i18n.translate('xpack.monitoring.metrics.es.indexingRate.primaryShardsLabel', {
       defaultMessage: 'Primary Shards' // label to use for this line in the chart
     }),
@@ -125,8 +125,8 @@ export const metrics = {
       defaultMessage: 'Total Shards'
     }),
     description: i18n.translate('xpack.monitoring.metrics.es.searchRate.totalShardsDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Number of search requests being executed across primary and replica shards. A single search can run against multiple shards!'
+      defaultMessage:
+        'Number of search requests being executed across primary and replica shards. A single search can run against multiple shards!'
     }),
     type: 'cluster'
   }),
@@ -138,8 +138,8 @@ export const metrics = {
       defaultMessage: 'Indexing Latency'
     }),
     description: i18n.translate('xpack.monitoring.metrics.es.indexingLatencyDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This only considers primary shards.'
+      defaultMessage: 'Average latency for indexing documents, which is time it takes to index documents divided by number ' +
+        'that were indexed. This only considers primary shards.'
     }),
     type: 'cluster'
   }),
@@ -152,8 +152,8 @@ export const metrics = {
       defaultMessage: 'Indexing'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.latency.indexingDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This considers any shard located on this node, including replicas.'
+      defaultMessage: 'Average latency for indexing documents, which is time it takes to index documents divided by number ' +
+        'that were indexed. This considers any shard located on this node, including replicas.'
     }),
     type: 'node'
   }),
@@ -168,8 +168,8 @@ export const metrics = {
       defaultMessage: 'Indexing Latency'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.latency.indexingLatencyDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This only considers primary shards.'
+      defaultMessage: 'Average latency for indexing documents, which is time it takes to index documents divided by number ' +
+        'that were indexed. This only considers primary shards.'
     }),
     type: 'cluster'
   }),
@@ -181,8 +181,8 @@ export const metrics = {
       defaultMessage: 'Search Latency'
     }),
     description: i18n.translate('xpack.monitoring.metrics.es.searchLatencyDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.'
+      defaultMessage: 'Average latency for searching, which is time it takes to execute searches divided by number of ' +
+       'searches submitted. This considers primary and replica shards.'
     }),
     type: 'cluster'
   }),
@@ -195,8 +195,8 @@ export const metrics = {
       defaultMessage: 'Search'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.latency.searchDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.'
+      defaultMessage: 'Average latency for searching, which is time it takes to execute searches divided by number of searches ' +
+        'submitted. This considers primary and replica shards.'
     }),
     type: 'node'
   }),
@@ -208,8 +208,8 @@ export const metrics = {
       defaultMessage: 'Search Latency'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.latency.searchLatencyDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.'
+      defaultMessage: 'Average latency for searching, which is time it takes to execute searches divided by number of searches ' +
+        'submitted. This considers primary and replica shards.'
     }),
     type: 'cluster'
   }),
@@ -321,8 +321,8 @@ export const metrics = {
       defaultMessage: 'Fielddata'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.fielddataDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Heap memory used by Fielddata (e.g., global ordinals or explicitly enabled fielddata on text fields). This is for the same shards, but not a part of Lucene Total.'
+      defaultMessage: 'Heap memory used by Fielddata (e.g., global ordinals or explicitly enabled fielddata on text fields). ' +
+        'This is for the same shards, but not a part of Lucene Total.'
     }),
     type: 'index'
   }),
@@ -375,8 +375,8 @@ export const metrics = {
       defaultMessage: 'Request Cache'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.requestCacheDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.'
+      defaultMessage:
+        'Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.'
     }),
     type: 'index'
   }),
@@ -642,8 +642,8 @@ export const metrics = {
       defaultMessage: 'Total Shards'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esIndex.searchRate.totalShardsDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Number of search requests being executed across primary and replica shards. A single search can run against multiple shards!'
+      defaultMessage:
+        'Number of search requests being executed across primary and replica shards. A single search can run against multiple shards!'
     }),
     type: 'cluster'
   }),
@@ -654,8 +654,8 @@ export const metrics = {
       defaultMessage: 'Cgroup Elapsed Periods'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.cgroupCfsStats.cgroupElapsedPeriodsDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'The number of sampling periods from the Completely Fair Scheduler (CFS). Compare against the number of times throttled.'
+      defaultMessage:
+        'The number of sampling periods from the Completely Fair Scheduler (CFS). Compare against the number of times throttled.'
     }),
     type: 'node',
     format: LARGE_FLOAT,
@@ -723,8 +723,8 @@ export const metrics = {
         defaultMessage: 'Cgroup CPU Utilization'
       }),
       description: i18n.translate('xpack.monitoring.metrics.esNode.cpuUtilization.cgroupCpuUtilizationDescription', {
-        // eslint-disable-next-line max-len
-        defaultMessage: 'CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.'
+        defaultMessage:
+          'CPU Usage time compared to the CPU quota shown in percentage. If CPU quotas are not set, then no data will be shown.'
       }),
       type: 'node'
     };
@@ -737,7 +737,7 @@ export const metrics = {
       }),
       node_cgroup_quota_as_cpu_utilization: new QuotaMetric({
         ...quotaMetricConfig,
-        label: nodeCpuUtilizationLabel
+        label: nodeCpuUtilizationLabel //  override the "Cgroup CPU..." label
       })
     };
   })(),
@@ -881,8 +881,8 @@ export const metrics = {
       defaultMessage: 'Lucene Total'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.luceneTotalDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.'
+      defaultMessage:
+        'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.'
     })
   }),
   node_index_mem_overall_1: new NodeIndexMemoryMetric({
@@ -894,8 +894,8 @@ export const metrics = {
       defaultMessage: 'Index Memory - Lucene 1'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene1.lucenceTotalDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.'
+      defaultMessage:
+        'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.'
     })
   }),
   node_index_mem_overall_2: new NodeIndexMemoryMetric({
@@ -907,8 +907,8 @@ export const metrics = {
       defaultMessage: 'Index Memory - Lucene 2'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene2.lucenceTotalDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.'
+      defaultMessage:
+        'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.'
     })
   }),
   node_index_mem_overall_3: new NodeIndexMemoryMetric({
@@ -920,8 +920,8 @@ export const metrics = {
       defaultMessage: 'Index Memory - Lucene 3'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.indexMemoryLucene3.lucenceTotalDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.'
+      defaultMessage:
+        'Total heap memory used by Lucene for current index. This is the sum of other fields for primary and replica shards on this node.'
     })
   }),
   node_index_mem_doc_values: new NodeIndexMemoryMetric({
@@ -940,8 +940,8 @@ export const metrics = {
       defaultMessage: 'Fielddata'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.fielddataDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Heap memory used by Fielddata (e.g., global ordinals or explicitly enabled fielddata on text fields). This is for the same shards, but not a part of Lucene Total.'
+      defaultMessage: 'Heap memory used by Fielddata (e.g., global ordinals or explicitly enabled fielddata on text fields). ' +
+        'This is for the same shards, but not a part of Lucene Total.'
     }),
     type: 'node'
   }),
@@ -994,8 +994,8 @@ export const metrics = {
       defaultMessage: 'Request Cache'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.requestCacheDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.'
+      defaultMessage:
+        'Heap memory used by Request Cache (e.g., instant aggregations). This is for the same shards, but not a part of Lucene Total.'
     }),
     type: 'node'
   }),
@@ -1082,8 +1082,8 @@ export const metrics = {
       defaultMessage: 'Write Queue'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.indexingThreads.writeQueueDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Number of index, bulk, and write operations in the queue. The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.'
+      defaultMessage: 'Number of index, bulk, and write operations in the queue. ' +
+        'The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.'
     })
   }),
   node_index_threads_write_rejected: new WriteThreadPoolRejectedMetric({
@@ -1093,8 +1093,8 @@ export const metrics = {
       defaultMessage: 'Write Rejections'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.indexingThreads.writeRejectionsDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Number of index, bulk, and write operations that have been rejected, which occurs when the queue is full. The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.'
+      defaultMessage: 'Number of index, bulk, and write operations that have been rejected, which occurs when the queue is full. ' +
+        'The bulk threadpool was renamed to write in 6.3, and the index threadpool is deprecated.'
     })
   }),
   node_index_threads_search_queue: new ElasticsearchMetric({
@@ -1199,8 +1199,8 @@ export const metrics = {
       defaultMessage: 'Bulk'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.threadsQueued.bulkDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Number of bulk indexing operations waiting to be processed on this node. A single bulk request can create multiple bulk operations.'
+      defaultMessage:
+      'Number of bulk indexing operations waiting to be processed on this node. A single bulk request can create multiple bulk operations.'
     })
   }),
   node_threads_queued_generic: new ThreadPoolQueueMetric({
@@ -1248,8 +1248,8 @@ export const metrics = {
       defaultMessage: 'Search'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.threadsQueued.searchDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Number of search operations waiting to be processed on this node. A single search request can create multiple search operations.'
+      defaultMessage:
+        'Number of search operations waiting to be processed on this node. A single search request can create multiple search operations.'
     })
   }),
   node_threads_queued_watcher: new ThreadPoolQueueMetric({
@@ -1378,8 +1378,8 @@ export const metrics = {
       defaultMessage: 'Total Shards'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.searchRate.totalShardsDescription', {
-      // eslint-disable-next-line max-len
-      defaultMessage: 'Number of search requests being executed across primary and replica shards. A single search can run against multiple shards!'
+      defaultMessage:
+        'Number of search requests being executed across primary and replica shards. A single search can run against multiple shards!'
     }),
     type: 'index'
   }),

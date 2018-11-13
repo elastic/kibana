@@ -116,8 +116,8 @@ export const metrics = {
       defaultMessage: 'Failed in Pipeline'
     }),
     description: i18n.translate('xpack.monitoring.metrics.beats.failRates.failedInPipelineDescription', {
-      //eslint-disable-next-line max-len
-      defaultMessage: 'Failures that happened before event was added to the publishing pipeline (output was disabled or publisher client closed)'
+      defaultMessage:
+        'Failures that happened before event was added to the publishing pipeline (output was disabled or publisher client closed)'
     })
   }),
   beat_cluster_pipeline_events_dropped_rate: new BeatsEventsRateClusterMetric({
@@ -137,8 +137,8 @@ export const metrics = {
       defaultMessage: 'Dropped in Output'
     }),
     description: i18n.translate('xpack.monitoring.metrics.beats.failRates.droppedInOutputDescription', {
-      //eslint-disable-next-line max-len
-      defaultMessage: '(Fatal drop) Events dropped by the output as being "invalid." The output still acknowledges the event for the Beat to remove it from the queue.'
+      defaultMessage: '(Fatal drop) Events dropped by the output as being "invalid." The output still acknowledges the event ' +
+        'for the Beat to remove it from the queue.'
     })
   }),
   beat_cluster_pipeline_events_retry_rate: new BeatsEventsRateClusterMetric({
@@ -225,8 +225,8 @@ export const metrics = {
       defaultMessage: 'Failed in Pipeline'
     }),
     description: i18n.translate('xpack.monitoring.metrics.beatsInstance.failRates.failedInPipelineDescription', {
-      //eslint-disable-next-line max-len
-      defaultMessage: 'Failures that happened before event was added to the publishing pipeline (output was disabled or publisher client closed)'
+      defaultMessage:
+        'Failures that happened before event was added to the publishing pipeline (output was disabled or publisher client closed)'
     })
   }),
   beat_pipeline_events_dropped_rate: new BeatsEventsRateMetric({
@@ -246,8 +246,8 @@ export const metrics = {
       defaultMessage: 'Dropped in Output'
     }),
     description: i18n.translate('xpack.monitoring.metrics.beatsInstance.failRates.droppedInOutputDescription', {
-      //eslint-disable-next-line max-len
-      defaultMessage: '(Fatal drop) Events dropped by the output as being "invalid." The output still acknowledges the event for the Beat to remove it from the queue.'
+      defaultMessage: '(Fatal drop) Events dropped by the output as being "invalid." The output ' +
+        'still acknowledges the event for the Beat to remove it from the queue.'
     })
   }),
   beat_pipeline_events_retry_rate: new BeatsEventsRateMetric({
