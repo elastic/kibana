@@ -141,9 +141,10 @@ has visualizations for product-related information, such as cost, revenue, and p
 If you’re looking to analyze website traffic, check out the web logs sample data set. 
 To access the sample data, go to the {kib} home page and click *Load a data set and a {kib} dashboard*.
 
-In addition to a traditional dashboard, each sample is prepackaged with a Canvas 
+Each sample is prepackaged with a dashboard and a Canvas 
 workpad. The workpad for the eCommerce sample includes two different styles for 
-the same data. The workpads are nice, hands-on way for new users to learn Canvas.
+the same data. The workpads are a hands-on way for new users to 
+learn Canvas.
 
 [role="screenshot"]
 image::images/highlights_6_5_sample-canvas.png[Canvas workpad included with new sample data sets]
