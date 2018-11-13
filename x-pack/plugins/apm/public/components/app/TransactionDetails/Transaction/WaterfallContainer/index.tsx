@@ -17,7 +17,6 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { getAgentMarks } from './get_agent_marks';
-import { getServiceColors } from './getServiceColors';
 import { ServiceLegends } from './ServiceLegends';
 import { Waterfall } from './Waterfall';
 import { IWaterfall } from './Waterfall/waterfall_helpers/waterfall_helpers';
@@ -39,13 +38,12 @@ export function WaterfallContainer({
   if (!waterfall) {
     return null;
   }
-  const serviceColors = getServiceColors(waterfall.services);
 
   return (
     <div>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <ServiceLegends serviceColors={serviceColors} />
+          <ServiceLegends serviceColors={waterfall.serviceColors} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
@@ -59,7 +57,7 @@ export function WaterfallContainer({
       <Waterfall
         agentMarks={agentMarks}
         location={location}
-        serviceColors={serviceColors}
+        serviceColors={waterfall.serviceColors}
         urlParams={urlParams}
         waterfall={waterfall}
       />

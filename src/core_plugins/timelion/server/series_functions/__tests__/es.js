@@ -173,19 +173,11 @@ describe(filename, () => {
       };
     });
 
-
     it('sets the index on the request', () => {
       config.index = 'beer';
       const request = fn(config, tlConfig, emptyScriptedFields);
 
       expect(request.index).to.equal('beer');
-    });
-
-    it('sets the timeout on the request', () => {
-      config.index = 'beer';
-      const request = fn(config, tlConfig, emptyScriptedFields);
-
-      expect(request.timeout).to.equal('30000ms');
     });
 
     it('always sets body.size to 0', () => {
@@ -203,6 +195,34 @@ describe(filename, () => {
       const filters = request.body.aggs.q.filters.filters;
       expect(filters.foo.query_string.query).to.eql('foo');
       expect(filters.bar.query_string.query).to.eql('bar');
+    });
+
+    describe('timeouts', () => {
+
+      let sandbox;
+
+      beforeEach(() => {
+        sandbox = sinon.createSandbox();
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('sets the timeout on the request', () => {
+        config.index = 'beer';
+        const request = fn(config, tlConfig, emptyScriptedFields);
+
+        expect(request.timeout).to.equal('30000ms');
+      });
+
+      it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
+        sandbox.stub(tlConfig.server.config(), 'get').withArgs('elasticsearch.shardTimeout').returns(0);
+        config.index = 'beer';
+        const request = fn(config, tlConfig, emptyScriptedFields);
+
+        expect(request).to.not.have.property('timeout');
+      });
     });
 
     describe('query body', () => {
