@@ -27,7 +27,7 @@ import { LevelFilterOption, LoadingState } from './types';
 interface ClusterCheckupTabState {
   loadingState: LoadingState;
   checkupData?: UpgradeCheckupStatus;
-  currentFilter: LevelFilterOption;
+  currentFilter: Set<LevelFilterOption>;
 }
 
 export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabState> {
@@ -36,7 +36,8 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
 
     this.state = {
       loadingState: LoadingState.Loading,
-      currentFilter: LevelFilterOption.all,
+      // initialize to all filters
+      currentFilter: new Set(Object.keys(LevelFilterOption)) as Set<LevelFilterOption>,
     };
   }
 
@@ -90,7 +91,16 @@ export class ClusterCheckupTab extends React.Component<{}, ClusterCheckupTabStat
   };
 
   private changeFilter = (filter: LevelFilterOption) => {
-    this.setState({ currentFilter: filter });
+    // Make a copy so we don't modify the current one being rendered.
+    const newFilters = new Set(this.state.currentFilter);
+
+    if (newFilters.has(filter)) {
+      newFilters.delete(filter);
+    } else {
+      newFilters.add(filter);
+    }
+
+    this.setState({ currentFilter: newFilters });
   };
 
   private renderCheckupData() {

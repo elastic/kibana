@@ -10,9 +10,11 @@ import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import { LevelFilterOption } from './types';
 
 interface LevelFilterBarProps {
-  currentFilter: LevelFilterOption;
+  currentFilter: Set<LevelFilterOption>;
   onFilterChange(level: LevelFilterOption): void;
 }
+
+const allFilterOptions = Object.keys(LevelFilterOption) as LevelFilterOption[];
 
 export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
   public render() {
@@ -20,11 +22,11 @@ export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
 
     return (
       <EuiFilterGroup>
-        {Object.keys(LevelFilterOption).map(option => (
+        {allFilterOptions.map(option => (
           <EuiFilterButton
             key={option}
             onClick={this.filterClicked.bind(this, option)}
-            hasActiveFilters={currentFilter === option}
+            hasActiveFilters={currentFilter.has(option)}
           >
             {option}
           </EuiFilterButton>

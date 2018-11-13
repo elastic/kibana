@@ -48,8 +48,8 @@ const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
 };
 
-const filterDeps = (level: LevelFilterOption) => (dep: DeprecationInfo) => {
-  return level === LevelFilterOption.all || dep.level === level;
+const filterDeps = (levels: Set<LevelFilterOption>) => (dep: DeprecationInfo) => {
+  return levels.has(dep.level as LevelFilterOption);
 };
 
 const DeprecationAction: StatelessComponent<{ deprecation: DeprecationInfo }> = ({
@@ -73,7 +73,7 @@ const DeprecationAction: StatelessComponent<{ deprecation: DeprecationInfo }> = 
 
 interface DeprecationsProps {
   deprecations: DeprecationInfo[];
-  currentFilter: LevelFilterOption;
+  currentFilter: Set<LevelFilterOption>;
   emptyMessage?: string;
 }
 
@@ -127,7 +127,7 @@ export const Deprecations: StatelessComponent<DeprecationsProps> = ({
 
 interface IndexDeprecationsProps {
   indices: UpgradeCheckupStatus['indices'];
-  currentFilter: LevelFilterOption;
+  currentFilter: Set<LevelFilterOption>;
 }
 
 export const IndexDeprecations: StatelessComponent<IndexDeprecationsProps> = ({
@@ -163,7 +163,7 @@ export const IndexDeprecations: StatelessComponent<IndexDeprecationsProps> = ({
 
 interface DeprecationSummaryProps {
   deprecations: DeprecationInfo[];
-  currentFilter: LevelFilterOption;
+  currentFilter: Set<LevelFilterOption>;
 }
 
 export const DeprecationSummary: StatelessComponent<DeprecationSummaryProps> = ({

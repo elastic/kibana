@@ -12,7 +12,7 @@ import { LevelFilterOption, LoadingState } from './types';
 interface CheckupControlsProps {
   loadingState: LoadingState;
   loadData: () => void;
-  currentFilter: LevelFilterOption;
+  currentFilter: Set<LevelFilterOption>;
   onFilterChange: (filter: LevelFilterOption) => void;
 }
 
