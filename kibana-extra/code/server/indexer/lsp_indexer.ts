@@ -59,10 +59,12 @@ export class LspIndexer extends AbstractIndexer {
   }
 
   public async start(progressReporter?: ProgressReporter) {
-    const res = await super.start(progressReporter);
-    // Flush all the index request still in the cache for bulk index.
-    this.batchIndexHelper.flush();
-    return res;
+    try {
+      return await super.start(progressReporter);
+    } finally {
+      // Flush all the index request still in the cache for bulk index.
+      this.batchIndexHelper.flush();
+    }
   }
 
   protected async prepareIndexCreationRequests() {
@@ -272,12 +274,12 @@ export class LspIndexer extends AbstractIndexer {
       language,
       qnames: Array.from(symbolNames),
     };
-    await this.client.index({
-      index: DocumentIndexName(repoUri),
-      type: DocumentTypeName,
-      id: `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}`,
-      body,
-    });
+    await this.batchIndexHelper.index(
+      DocumentIndexName(repoUri),
+      DocumentTypeName,
+      `${repoUri}:${this.PLACEHOLDER_REVISION}:${filePath}`,
+      body
+    );
     stats.set(IndexStatsKey.File, 1);
     return stats;
   }
