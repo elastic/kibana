@@ -17,7 +17,8 @@ import {
   // updateLayerShowAtAllZoomLevels,
   updateLayerMinZoom,
   updateLayerMaxZoom,
-  setSelectedLayer
+  setSelectedLayer,
+  updateLayerAlphaValue
 } from "../../actions/store_actions";
 import _ from 'lodash';
 
@@ -53,6 +54,7 @@ function mapDispatchToProps(dispatch) {
     updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
+    updateAlphaValue: (id, alphaValue) => dispatch(updateLayerAlphaValue(id, alphaValue))
   };
 }
 

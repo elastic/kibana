@@ -24,6 +24,7 @@ import {
   UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER,
   PROMOTE_TEMPORARY_STYLES,
   CLEAR_TEMPORARY_STYLES, SET_JOINS, TOUCH_LAYER,
+  UPDATE_LAYER_ALPHA_VALUE
 } from "../actions/store_actions";
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -103,6 +104,13 @@ export function map(state = INITIAL_STATE, action) {
       return { ...state, selectedLayerId: match ? action.selectedLayerId : null };
     case UPDATE_LAYER_ORDER:
       return { ...state, layerList: action.newLayerOrder.map(layerNumber => state.layerList[layerNumber]) };
+    case UPDATE_LAYER_ALPHA_VALUE:
+      const alphaLayer = state.layerList.find(layer => layer.id === action.id);
+      const preAlphaStyle = alphaLayer.style;
+      return updateLayerInList(state, action.id, 'style',
+        { ...preAlphaStyle, properties: { ...preAlphaStyle.properties,
+          alphaValue: action.newAlphaValue }
+        });
     case UPDATE_LAYER_PROP:
       return updateLayerInList(state, action.id, action.propName, action.newValue);
     case SET_JOINS:

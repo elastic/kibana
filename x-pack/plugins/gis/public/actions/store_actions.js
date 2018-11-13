@@ -32,6 +32,7 @@ export const UPDATE_LAYER_STYLE_FOR_SELECTED_LAYER = 'UPDATE_LAYER_STYLE';
 export const PROMOTE_TEMPORARY_STYLES = 'PROMOTE_TEMPORARY_STYLES';
 export const CLEAR_TEMPORARY_STYLES = 'CLEAR_TEMPORARY_STYLES';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
+export const UPDATE_LAYER_ALPHA_VALUE = 'UPDATE_LAYER_ALPHA_VALUE';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
 
@@ -244,6 +245,14 @@ export function updateLayerMaxZoom(id, maxZoom) {
     id,
     propName: 'maxZoom',
     newValue: maxZoom,
+  };
+}
+
+export function updateLayerAlphaValue(id, newAlphaValue) {
+  return {
+    type: UPDATE_LAYER_ALPHA_VALUE,
+    id,
+    newAlphaValue
   };
 }
 

@@ -26,8 +26,8 @@ export class AlphaSelection extends React.Component {
   }
 
   _changeAlphaValue({ value }) {
-    this.setState({ alphaValue: value });
-    this.props.changeAlphaValue({ alphaValue: value });
+    this.setState({ alphaValue: +value });
+    this.props.changeAlphaValue(+value);
   }
 
   render() {

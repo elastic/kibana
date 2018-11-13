@@ -13,7 +13,8 @@ import {
   clearTemporaryLayers,
   updateLayerLabel,
   updateLayerMaxZoom,
-  updateLayerMinZoom
+  updateLayerMinZoom,
+  updateLayerAlphaValue
 } from '../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
@@ -33,7 +34,8 @@ function mapDispatchToProps(dispatch) {
     },
     updateLabel: (id, label) => dispatch(updateLayerLabel(id, label)),
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
-    updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom))
+    updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
+    updateAlphaValue: (id, alphaValue) => dispatch(updateLayerAlphaValue(id, alphaValue))
   };
 }
 

@@ -246,12 +246,18 @@ export class VectorStyle {
     return color;
   }
 
+  _getMBOpacity() {
+    const DEFAULT_OPACITY = 0.5;
+    return this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
+  }
 
-  setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId, temp) {
+
+  setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId) {
+    const opacity = this._getMBOpacity();
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor('fillColor');
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
-      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', temp ? 0.4 : 0.5);
+      mbMap.setPaintProperty(fillLayerId, 'fill-opacity', opacity);
     } else {
       mbMap.setPaintProperty(fillLayerId, 'fill-color', null);
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', 0);
@@ -260,7 +266,7 @@ export class VectorStyle {
     if (this._descriptor.properties.lineColor) {
       const color = this._getMBColor('lineColor');
       mbMap.setPaintProperty(lineLayerId, 'line-color', color);
-      mbMap.setPaintProperty(lineLayerId, 'line-opacity', temp ? 0.4 : 0.5);
+      mbMap.setPaintProperty(lineLayerId, 'line-opacity', opacity);
 
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-color', null);

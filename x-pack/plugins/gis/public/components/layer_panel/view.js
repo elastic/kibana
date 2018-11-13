@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { ALayer } from '../../shared/layers/layer';
+import _ from 'lodash';
 
 export class LayerPanel  extends React.Component {
 
@@ -55,12 +56,18 @@ export class LayerPanel  extends React.Component {
       },
       minZoom: this.props.selectedLayer.getMinZoom(),
       maxZoom: this.props.selectedLayer.getMaxZoom(),
+      alphaValue: _.get(this.props.selectedLayer.getCurrentStyle(),
+        'properties.alphaValue', null),
       onMinZoomChange: (zoom) => {
         this.props.updateMinZoom(this.props.selectedLayer.getId(), zoom);
       },
       onMaxZoomChange: (zoom) => {
         this.props.updateMaxZoom(this.props.selectedLayer.getId(), zoom);
-      }
+      },
+      onAlphaValueChange:
+        alphaValue => this.props.updateAlphaValue(
+          this.props.selectedLayer.getId(), alphaValue
+        )
     });
 
     const frags = (

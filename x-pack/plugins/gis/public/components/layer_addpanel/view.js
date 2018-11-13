@@ -39,6 +39,7 @@ export class AddLayerPanel extends React.Component {
       sourceType: '',
       minZoom: 0,
       maxZoom: 24,
+      alphaValue: 1.0
     };
   }
 
@@ -96,6 +97,14 @@ export class AddLayerPanel extends React.Component {
       return { maxZoom };
     }, this._onZoomRangeChange);
   };
+
+  _onAlphaValueChange(alphaValue) {
+    this.setState({ alphaValue }, () => {
+      if (this.layer) {
+        this.props.updateAlphaValue(this.layer.getId(), this.state.alphaValue);
+      }
+    });
+  }
 
   _onSourceTypeChange = (sourceType) => {
     this.setState({
@@ -299,8 +308,10 @@ export class AddLayerPanel extends React.Component {
       onLabelChange: this._onLabelChange,
       minZoom: this.state.minZoom,
       maxZoom: this.state.maxZoom,
+      alphaValue: this.state.alphaValue,
       onMinZoomChange: this._onMinZoomChange,
       onMaxZoomChange: this._onMaxZoomChange,
+      onAlphaValueChange: this._onAlphaValueChange
     });
 
     return (

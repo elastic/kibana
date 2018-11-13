@@ -16,6 +16,8 @@ import {
   EuiFlexItem,
   EuiFormHelpText,
 } from '@elastic/eui';
+import { AlphaSelection } from
+  '../../shared/layers/styles/components/vector/color/alpha_selection';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -94,12 +96,24 @@ export class ALayer {
     );
   }
 
+  static _renderAlpha(alphaValue, onAlphaValueChange) {
+    return (
+      <EuiFormRow label="Adust layer opacity">
+        <AlphaSelection
+          alphaValue={alphaValue}
+          changeAlphaValue={alphaValue => onAlphaValueChange(alphaValue)}
+        />
+      </EuiFormRow>
+    );
+  }
 
-  static renderGlobalSettings({ label, onLabelChange, minZoom, maxZoom, onMinZoomChange, onMaxZoomChange }) {
+  static renderGlobalSettings({ label, onLabelChange, minZoom, maxZoom,
+    alphaValue, onMinZoomChange, onMaxZoomChange, onAlphaValueChange }) {
     return (
       <Fragment>
         {ALayer._renderLabel(label, onLabelChange)}
         {ALayer._renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange)}
+        {ALayer._renderAlpha(alphaValue, onAlphaValueChange)}
       </Fragment>
     );
   }
