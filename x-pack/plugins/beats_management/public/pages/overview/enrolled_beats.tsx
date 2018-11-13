@@ -130,13 +130,22 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
                     items: this.filterTags(tags.state.list),
                     schema: beatsListAssignmentOptions,
                     type: 'assignment',
-                    actionHandler: (action: AssignmentActionType, payload: any) => {
+                    actionHandler: async (action: AssignmentActionType, payload: any) => {
                       switch (action) {
                         case AssignmentActionType.Assign:
-                          beats.toggleTagAssignment(payload, this.getSelectedBeats());
+                          const status = await beats.toggleTagAssignment(
+                            payload,
+                            this.getSelectedBeats()
+                          );
+                          this.notifyUpdatedTagAssociation(
+                            status,
+                            this.getSelectedBeats(),
+                            payload
+                          );
                           break;
                         case AssignmentActionType.Delete:
                           beats.deactivate(this.getSelectedBeats());
+                          this.notifyBeatDisenrolled(this.getSelectedBeats());
                           break;
                         case AssignmentActionType.Reload:
                           tags.reload();
@@ -161,52 +170,24 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     );
   }
 
-  // private deleteSelected = async () => {
-  //   const selected = this.getSelectedBeats();
-  //   for (const beat of selected) {
-  //     await this.props.libs.beats.update(beat.id, { active: false });
-  //   }
-
-  //   this.notifyBeatDisenrolled(selected);
-
-  //   // because the compile code above has a very minor race condition, we wait,
-  //   // the max race condition time is really 10ms but doing 100 to be safe
-  //   setTimeout(async () => {
-  //     await this.props.loadBeats();
-  //   }, 100);
-  // };
-
   private notifyBeatDisenrolled = async (beats: CMPopulatedBeat[]) => {
-    let title;
-    let text;
-    if (beats.length === 1) {
-      title = `"${beats[0].name || beats[0].id}" disenrolled`;
-      text = `Beat with ID "${beats[0].id}" was disenrolled.`;
-    } else {
-      title = `${beats.length} beats disenrolled`;
-    }
-
     this.setState({
       notifications: this.state.notifications.concat({
         color: 'warning',
         id: `disenroll_${new Date()}`,
-        title,
-        text,
+        title: `${beats.length} Beat${beats.length === 1 ? null : 's'} disenrolled`,
       }),
     });
   };
 
   private notifyUpdatedTagAssociation = (
-    action: 'add' | 'remove',
-    assignments: BeatsTagAssignment[],
+    action: 'added' | 'removed',
+    beats: CMPopulatedBeat[],
     tag: string
   ) => {
-    const actionName = action === 'remove' ? 'Removed' : 'Added';
-    const preposition = action === 'remove' ? 'from' : 'to';
-    const beatMessage =
-      assignments.length && assignments.length === 1
-        ? `beat "${this.getNameForBeatId(assignments[0].beatId)}"`
-        : `${assignments.length} beats`;
+    const actionName = action === 'removed' ? 'Removed' : 'Added';
+    const preposition = action === 'removed' ? 'from' : 'to';
+    const beatMessage = `${beats.length} Beat${beats.length === 1 ? null : 's'}`;
     this.setState({
       notifications: this.state.notifications.concat({
         color: 'success',
@@ -215,14 +196,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
         title: `Tag ${actionName}`,
       }),
     });
-  };
-
-  private getNameForBeatId = (beatId: string) => {
-    const beat = this.props.beats.find(b => b.id === beatId);
-    if (beat) {
-      return beat.name;
-    }
-    return null;
   };
 
   private getSelectedBeats = (): CMPopulatedBeat[] => {

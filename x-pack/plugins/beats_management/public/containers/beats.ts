@@ -47,25 +47,28 @@ export class BeatsContainer extends Container<ContainerState> {
   public toggleTagAssignment = async (tagId: string, beats: CMPopulatedBeat[]) => {
     if (beats.some(beat => beat.full_tags.some(({ id }) => id === tagId))) {
       await this.removeTagsFromBeats(beats, tagId);
-    } else {
-      await this.assignTagsToBeats(beats, tagId);
+      return 'removed';
     }
+    await this.assignTagsToBeats(beats, tagId);
+    return 'added';
   };
 
   public removeTagsFromBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
-    if (beats.length) {
-      const assignments = createBeatTagAssignments(beats, tagId);
-      await this.libs.beats.removeTagsFromBeats(assignments);
-      await this.reload();
+    if (!beats.length) {
+      return false;
     }
+    const assignments = createBeatTagAssignments(beats, tagId);
+    await this.libs.beats.removeTagsFromBeats(assignments);
+    await this.reload();
   };
 
   public assignTagsToBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
-    if (beats.length) {
-      const assignments = createBeatTagAssignments(beats, tagId);
-      await this.libs.beats.assignTagsToBeats(assignments);
-      await this.reload();
+    if (!beats.length) {
+      return false;
     }
+    const assignments = createBeatTagAssignments(beats, tagId);
+    await this.libs.beats.assignTagsToBeats(assignments);
+    await this.reload();
   };
 }
 
