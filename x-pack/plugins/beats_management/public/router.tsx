@@ -8,9 +8,7 @@ import { get } from 'lodash';
 import React from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { Subscribe } from 'unstated';
-import { Header } from './components/layouts/header';
 import { ChildRoutes } from './components/navigation/child_routes';
-import { BreadcrumbConsumer } from './components/route_with_breadcrumb';
 import { BeatsContainer } from './containers/beats';
 import { TagsContainer } from './containers/tags';
 import { FrontendLibs } from './lib/types';
@@ -28,47 +26,35 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
       <Subscribe to={[BeatsContainer, TagsContainer]}>
         {(beats: BeatsContainer, tags: TagsContainer) => (
           <React.Fragment>
-            <BreadcrumbConsumer>
-              {({ breadcrumbs }) => (
-                <Header
-                  breadcrumbs={[
-                    {
-                      href: '#/management',
-                      text: 'Management',
-                    },
-                    {
-                      href: '#/management/beats_management',
-                      text: 'Beats',
-                    },
-                    ...breadcrumbs,
-                  ]}
-                />
-              )}
-            </BreadcrumbConsumer>
-            {/* If no beats OR tags, redirect to walkthrough */}
-            {/* {this.state.loadedBeatsAtLeastOnce &&
-              this.state.unfilteredBeats.length === 0 &&
-              !this.props.location.pathname.includes('/overview/initial') && (
-                <Redirect to="/overview/initial/help" />
-              )} */}
-
-            {/* Redirects for errors/security */}
-            {get(libs.framework.info, 'license.expired', true) && (
-              <Route render={() => <Redirect to="/error/invalid_license" />} />
-            )}
-            {!get(libs.framework.info, 'security.enabled', false) && (
-              <Route render={() => <Redirect to="/error/enforce_security" />} />
-            )}
-            {!libs.framework.currentUserHasOneOfRoles(['beats_admin', 'superuser']) && (
-              <Route render={() => <Redirect to="/error/no_access" />} />
-            )}
+            {/* Redirects mapping */}
             <Switch>
+              {/* License check (UI displays when license exists but is expired) */}
+              {get(libs.framework.info, 'license.expired', true) && (
+                <Route render={() => <Redirect to="/error/invalid_license" />} />
+              )}
+              {/* Ensure security is eanabled for elastic and kibana */}
+              {!get(libs.framework.info, 'security.enabled', false) && (
+                <Route render={() => <Redirect to="/error/enforce_security" />} />
+              )}
+              {/* Make sure the user has correct permissions */}
+              {!libs.framework.currentUserHasOneOfRoles(['beats_admin', 'superuser']) && (
+                <Route render={() => <Redirect to="/error/no_access" />} />
+              )}
+              {/* If there are no beats or tags yet, redirect to the walkthrough */}
+              <Route
+                render={props =>
+                  beats.state.list.length + tags.state.list.length === 0 &&
+                  !props.location.pathname.includes('/overview/initial') ? (
+                    <Redirect to="/walkthrough/initial/help" />
+                  ) : null
+                }
+              />
               {/* This app does not make use of a homepage. The mainpage is beats/overivew */}
               <Route path="/" exact={true} render={() => <Redirect to="/overview/beats" />} />
-
-              {/* Render routes from the FS */}
-              <ChildRoutes routes={routesFromFilesystem} {...{ libs }} useSwitch={false} />
             </Switch>
+
+            {/* Render routes from the FS */}
+            <ChildRoutes routes={routesFromFilesystem} {...{ libs }} />
           </React.Fragment>
         )}
       </Subscribe>

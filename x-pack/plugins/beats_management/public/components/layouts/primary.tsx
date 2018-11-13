@@ -7,6 +7,9 @@
 import React, { Component } from 'react';
 
 import {
+  EuiHeader,
+  EuiHeaderBreadcrumbs,
+  EuiHeaderSection,
   EuiModal,
   EuiOverlayMask,
   EuiPage,
@@ -17,6 +20,8 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
+import styled from 'styled-components';
+import { BreadcrumbConsumer } from '../route_with_breadcrumb';
 
 interface PrimaryLayoutProps {
   title: string;
@@ -34,41 +39,64 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
   public render() {
     const modalContent = this.props.modalRender && this.props.modalRender();
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle>
-                <h1>{this.props.title}</h1>
-              </EuiTitle>
-            </EuiPageHeaderSection>
-            <EuiPageHeaderSection>
-              {this.actionSection || <span>Nothing</span>}
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              {typeof this.props.children === 'function'
-                ? this.props.children(this.renderAction)
-                : this.props.children}
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-        {modalContent && (
-          <EuiOverlayMask>
-            <EuiModal
-              onClose={() => {
-                // this.props.history.push(this.props.modalClosePath);
-              }}
-              style={{
-                width: '640px',
-              }}
-            >
-              {modalContent}
-            </EuiModal>
-          </EuiOverlayMask>
-        )}
-      </EuiPage>
+      <React.Fragment>
+        <BreadcrumbConsumer>
+          {({ breadcrumbs }) => (
+            <HeaderWrapper>
+              <EuiHeaderSection>
+                <EuiHeaderBreadcrumbs
+                  breadcrumbs={[
+                    {
+                      href: '#/management',
+                      text: 'Management',
+                    },
+                    {
+                      href: '#/management/beats_management',
+                      text: 'Beats',
+                    },
+                    ...breadcrumbs,
+                  ]}
+                />
+              </EuiHeaderSection>
+            </HeaderWrapper>
+          )}
+        </BreadcrumbConsumer>
+        <EuiPage>
+          <EuiPageBody>
+            <EuiPageHeader>
+              <EuiPageHeaderSection>
+                <EuiTitle>
+                  <h1>{this.props.title}</h1>
+                </EuiTitle>
+              </EuiPageHeaderSection>
+              <EuiPageHeaderSection>
+                {this.actionSection || <span>Nothing</span>}
+              </EuiPageHeaderSection>
+            </EuiPageHeader>
+            <EuiPageContent>
+              <EuiPageContentBody>
+                {typeof this.props.children === 'function'
+                  ? this.props.children(this.renderAction)
+                  : this.props.children}
+              </EuiPageContentBody>
+            </EuiPageContent>
+          </EuiPageBody>
+          {modalContent && (
+            <EuiOverlayMask>
+              <EuiModal
+                onClose={() => {
+                  // this.props.history.push(this.props.modalClosePath);
+                }}
+                style={{
+                  width: '640px',
+                }}
+              >
+                {modalContent}
+              </EuiModal>
+            </EuiOverlayMask>
+          )}
+        </EuiPage>
+      </React.Fragment>
     );
   }
 
@@ -77,3 +105,7 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
     this.forceUpdate();
   };
 }
+
+const HeaderWrapper = styled(EuiHeader)`
+  height: 29px;
+`;
