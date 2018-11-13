@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import Joi from 'joi';
 
 import { InfraConfigurationAdapter } from './adapter_types';
@@ -15,15 +14,7 @@ export class InfraKibanaConfigurationAdapter<Configuration>
 
   constructor(server: any) {
     if (!isServerWithConfig(server)) {
-      throw new Error(
-        i18n.translate(
-          'xpack.infra.infraKibanaConfigurationAdapter.failedToFindConfigurationErrorTitle',
-          {
-            defaultMessage: 'Failed to find configuration on server.',
-          }
-        )
-      );
-      throw new Error('');
+      throw new Error('Failed to find configuration on server.');
     }
 
     this.server = server;
@@ -33,11 +24,7 @@ export class InfraKibanaConfigurationAdapter<Configuration>
     const config = this.server.config();
 
     if (!isKibanaConfiguration(config)) {
-      throw new Error(
-        i18n.translate('xpack.infra.infraKibanaConfigurationAdapter.failedToAccessErrorTitle', {
-          defaultMessage: 'Failed to access configuration of server.',
-        })
-      );
+      throw new Error('Failed to access configuration of server.');
     }
 
     const configuration = config.get('xpack.infra') || {};

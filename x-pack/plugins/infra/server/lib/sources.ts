@@ -17,7 +17,7 @@ export class InfraSources {
         i18n.translate('xpack.infra.infraSources.failedToFindSourceErrorTitle', {
           defaultMessage: 'Failed to find source {sourceId}',
           values: {
-            sourceId: "'" + sourceId + "'",
+            sourceId: `'${sourceId}'`,
           },
         })
       );
