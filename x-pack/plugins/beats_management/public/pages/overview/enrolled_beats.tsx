@@ -20,7 +20,6 @@ import React from 'react';
 import { Subscribe } from 'unstated';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { BeatsTagAssignment } from '../../../server/lib/adapters/beats/adapter_types';
 import { BeatsTableType, Table } from '../../components/table';
 import { beatsListAssignmentOptions } from '../../components/table/assignment_schema';
 import { AssignmentActionType } from '../../components/table/table';

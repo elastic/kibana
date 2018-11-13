@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { AssignmentActionType } from '../table/table';
+import { AssignmentActionType } from '../index';
 import { TagAssignment } from './tag_assignment';
 
 interface TagBadgeListProps {

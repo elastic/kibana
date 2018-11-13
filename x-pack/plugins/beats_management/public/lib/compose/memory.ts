@@ -25,6 +25,7 @@ import { supportedConfigs } from '../../config_schemas';
 import { TagsLib } from '../tags';
 import { MemoryElasticsearchAdapter } from './../adapters/elasticsearch/memory';
 import { ElasticsearchLib } from './../elasticsearch';
+import { FrameworkLib } from './../framework';
 
 export function compose(
   mockIsKueryValid: (kuery: string) => boolean,
@@ -47,7 +48,9 @@ export function compose(
   };
   const pluginUIModule = uiModules.get('app/beats_management');
 
-  const framework = new KibanaFrameworkAdapter(pluginUIModule, management, routes, null, null);
+  const framework = new FrameworkLib(
+    new KibanaFrameworkAdapter(pluginUIModule, management, routes, null, null)
+  );
   const libs: FrontendLibs = {
     ...domainLibs,
     elasticsearch: new ElasticsearchLib(esAdapter),

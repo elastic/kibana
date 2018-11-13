@@ -6,8 +6,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { TABLE_CONFIG } from '../../../common/constants';
-import { TagBadge } from '../tag/tag_badge';
+import { TABLE_CONFIG } from '../../../../common/constants';
+import { TagBadge } from '../../tag/tag_badge';
 
 interface TagAssignmentProps {
   tag: any;

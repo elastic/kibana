@@ -9,7 +9,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Provider as UnstatedProvider } from 'unstated';
 import { BASE_PATH } from '../common/constants';
-import { BreadcrumbProvider } from './components/route_with_breadcrumb';
+import { BreadcrumbProvider } from './components/navigation/route_with_breadcrumb';
 import { BeatsContainer } from './containers/beats';
 import { TagsContainer } from './containers/tags';
 import { compose } from './lib/compose/kibana';

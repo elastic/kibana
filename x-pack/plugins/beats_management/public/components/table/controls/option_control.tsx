@@ -18,7 +18,7 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { isArray } from 'lodash';
 import React from 'react';
-import { AssignmentControlSchema } from '../table';
+import { AssignmentControlSchema } from '../index';
 import { AssignmentActionType } from '../table';
 import { ActionControl } from './action_control';
 import { TagBadgeList } from './tag_badge_list';

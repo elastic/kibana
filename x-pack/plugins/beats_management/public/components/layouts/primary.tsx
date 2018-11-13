@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 
 import {
   EuiHeader,
@@ -21,15 +21,15 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { BreadcrumbConsumer } from '../route_with_breadcrumb';
+import { BreadcrumbConsumer } from '../navigation/route_with_breadcrumb';
 
+type RenderCallback = ((component: JSX.Element) => void);
 interface PrimaryLayoutProps {
   title: string;
   actionSection?: React.ReactNode;
   modalRender?: () => React.ReactNode;
   modalClosePath?: string;
 }
-
 export class PrimaryLayout extends Component<PrimaryLayoutProps> {
   private actionSection: JSX.Element | null = null;
   constructor(props: PrimaryLayoutProps) {
@@ -37,6 +37,7 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
   }
 
   public render() {
+    const children: (callback: RenderCallback) => void | ReactNode = this.props.children as any;
     const modalContent = this.props.modalRender && this.props.modalRender();
     return (
       <React.Fragment>
@@ -75,9 +76,9 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
             </EuiPageHeader>
             <EuiPageContent>
               <EuiPageContentBody>
-                {typeof this.props.children === 'function'
-                  ? this.props.children(this.renderAction)
-                  : this.props.children}
+                {(children && typeof children === 'function'
+                  ? children(this.renderAction)
+                  : children) || <span />}
               </EuiPageContentBody>
             </EuiPageContent>
           </EuiPageBody>
