@@ -27,21 +27,21 @@ function startTrialDescription() {
   return (
     <span>
       <FormattedMessage
-        id="xpack.machineLearning.datavisualizer.startTrial.fullMachineLearningFeaturesDescription"
-        defaultMessage="To experience the full Machine Learning features that a "
-      />
-      <EuiLink
-        href="https://www.elastic.co/subscriptions"
-        target="_blank"
-      >
-        <FormattedMessage
-          id="xpack.machineLearning.datavisualizer.startTrial.platinumSubscriptionTitle"
-          defaultMessage="Platinum subscription"
-        />
-      </EuiLink>
-      <FormattedMessage
-        id="xpack.machineLearning.datavisualizer.startTrial.platinumSubscriptionDescription"
-        defaultMessage=" offers, start a 30-day trial."
+        id="xpack.ml.datavisualizer.startTrial.fullMLFeaturesDescription"
+        defaultMessage="To experience the full Machine Learning features that a {platinumSubscriptionLink} offers, start a 30-day trial."
+        values={{
+          platinumSubscriptionLink: (
+            <EuiLink
+              href="https://www.elastic.co/subscriptions"
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.startTrial.platinumSubscriptionTitle"
+                defaultMessage="Platinum subscription"
+              />
+            </EuiLink>
+          )
+        }}
       />
     </span>
   );
@@ -60,7 +60,7 @@ export function DatavisualizerSelector() {
             <EuiTitle size="l">
               <h2>
                 <FormattedMessage
-                  id="xpack.machineLearning.datavisualizer.datavisualizerSelector.dataVisualizerTitle"
+                  id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
                   defaultMessage="Data Visualizer"
                 />
               </h2>
@@ -72,7 +72,7 @@ export function DatavisualizerSelector() {
           <EuiFlexItem grow={false}>
             <EuiText color="subdued">
               <FormattedMessage
-                id="xpack.machineLearning.datavisualizer.datavisualizerSelector.dataVisualizerDescription"
+                id="xpack.ml.datavisualizer.selector.dataVisualizerDescription"
                 // eslint-disable-next-line max-len
                 defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data, by analyzing the metrics and fields in a log file or an existing Elasticsearch index."
               />
@@ -86,25 +86,25 @@ export function DatavisualizerSelector() {
               icon={<EuiIcon size="xxl" type="addDataApp" />}
               title={
                 <FormattedMessage
-                  id="xpack.machineLearning.datavisualizer.datavisualizerSelector.importDataTitle"
+                  id="xpack.ml.datavisualizer.selector.importDataTitle"
                   defaultMessage="Import data"
                 />
               }
               description={
                 <FormattedMessage
-                  id="xpack.machineLearning.datavisualizer.datavisualizerSelector.importDataDescription"
+                  id="xpack.ml.datavisualizer.selector.importDataDescription"
                   defaultMessage="Import data from a log file. You can upload files up to 100 MB."
                 />
               }
               betaBadgeLabel={
                 <FormattedMessage
-                  id="xpack.machineLearning.datavisualizer.datavisualizerSelector.experimentalBadgeLabel"
+                  id="xpack.ml.datavisualizer.selector.experimentalBadgeLabel"
                   defaultMessage="Experimental"
                 />
               }
               betaBadgeTooltipContent={
                 <FormattedMessage
-                  id="xpack.machineLearning.datavisualizer.datavisualizerSelector.experimentalBadgeTooltipLabel"
+                  id="xpack.ml.datavisualizer.selector.experimentalBadgeTooltipLabel"
                   defaultMessage="Experimental feature. We'd love to hear your feedback."
                 />
               }
@@ -114,7 +114,7 @@ export function DatavisualizerSelector() {
                   href="#/filedatavisualizer"
                 >
                   <FormattedMessage
-                    id="xpack.machineLearning.datavisualizer.datavisualizerSelector.uploadFileButtonLabel"
+                    id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
                     defaultMessage="Upload file"
                   />
                 </EuiButton>
@@ -126,13 +126,13 @@ export function DatavisualizerSelector() {
               icon={<EuiIcon size="xxl" type="dataVisualizer" />}
               title={
                 <FormattedMessage
-                  id="xpack.machineLearning.datavisualizer.datavisualizerSelector.selectIndexPatternTitle"
+                  id="xpack.ml.datavisualizer.selector.selectIndexPatternTitle"
                   defaultMessage="Select an index pattern"
                 />
               }
               description={
                 <FormattedMessage
-                  id="xpack.machineLearning.datavisualizer.datavisualizerSelector.selectIndexPatternDescription"
+                  id="xpack.ml.datavisualizer.selector.selectIndexPatternDescription"
                   defaultMessage="Visualize the data in an existing Elasticsearch index."
                 />
               }
@@ -142,7 +142,7 @@ export function DatavisualizerSelector() {
                   href="#datavisualizer_index_select"
                 >
                   <FormattedMessage
-                    id="xpack.machineLearning.datavisualizer.datavisualizerSelector.selectIndexButtonLabel"
+                    id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
                     defaultMessage="Select index"
                   />
                 </EuiButton>
@@ -159,7 +159,7 @@ export function DatavisualizerSelector() {
                 <EuiCard
                   title={
                     <FormattedMessage
-                      id="xpack.machineLearning.datavisualizer.datavisualizerSelector.startTrialTitle"
+                      id="xpack.ml.datavisualizer.selector.startTrialTitle"
                       defaultMessage="Start trial"
                     />
                   }
@@ -170,7 +170,7 @@ export function DatavisualizerSelector() {
                       href="kibana#/management/elasticsearch/license_management/home"
                     >
                       <FormattedMessage
-                        id="xpack.machineLearning.datavisualizer.datavisualizerSelector.startTrialButtonLabel"
+                        id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
                         defaultMessage="Start trial"
                       />
                     </EuiButton>

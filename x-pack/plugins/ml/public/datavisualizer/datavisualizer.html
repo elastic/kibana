@@ -29,10 +29,10 @@
               type="text"
               class="kuiLocalSearchInput"
               ng-model="searchQueryText"
-              placeholder="{{ ::'xpack.machineLearning.datavisualizer.searchFieldPlaceholder' | i18n: {
+              placeholder="{{ ::'xpack.ml.datavisualizer.searchFieldPlaceholder' | i18n: {
                 defaultMessage: 'Search… (e.g. status:200 AND extension:PHP)'
               } }}"
-              aria-label="{{ ::'xpack.machineLearning.datavisualizer.searchFieldAriaLabel' | i18n: {
+              aria-label="{{ ::'xpack.ml.datavisualizer.searchFieldAriaLabel' | i18n: {
                 defaultMessage: 'Search input'
               } }}"
               autocomplete="off"
@@ -40,7 +40,7 @@
             <button
               class="kuiLocalSearchButton"
               type="submit"
-              aria-label="{{ ::'xpack.machineLearning.datavisualizer.searchButtonAriaLabel' | i18n: {
+              aria-label="{{ ::'xpack.ml.datavisualizer.searchButtonAriaLabel' | i18n: {
                 defaultMessage: 'Search'
               } }}"
             >
@@ -52,7 +52,7 @@
         <div class="document-count-container">
           <label
             for="sampleShardSize"
-            i18n-id="xpack.machineLearning.datavisualizer.sampleLabel"
+            i18n-id="xpack.ml.datavisualizer.sampleLabel"
             i18n-default-message="Sample"
           ></label>
           <select id="sampleShardSize" class="kuiSelect type-input" ng-model="samplerShardSize" ng-change="samplerShardSizeChanged(samplerShardSize)">
@@ -62,12 +62,12 @@
             <option ng-value="100000">100000</option>
             <option
               ng-value="-1"
-              i18n-id="xpack.machineLearning.datavisualizer.allOptionLabel"
+              i18n-id="xpack.ml.datavisualizer.allOptionLabel"
               i18n-default-message="all"
             ></option>
           </select>
           <span
-            i18n-id="xpack.machineLearning.datavisualizer.documentsPerShardDescription"
+            i18n-id="xpack.ml.datavisualizer.documentsPerShardDescription"
             i18n-default-message="documents per shard from a total of {wrappedTotalCount} {totalCount, plural, one {document} other {documents}}"
             i18n-values="{
               wrappedTotalCount: '<span class=\'field-emphasis\'>' + overallStats.totalCount + '</span>',
@@ -78,7 +78,7 @@
             aria-hidden="true"
             class="fa fa-info-circle"
             tooltip-placement="right"
-            tooltip="{{ ::'xpack.machineLearning.datavisualizer.documentsPerShardTooltip' | i18n: {
+            tooltip="{{ ::'xpack.ml.datavisualizer.documentsPerShardTooltip' | i18n: {
               defaultMessage: 'Selecting a smaller sample size will reduce query run times and the load on the cluster.'
             } }}"
           ></i>
@@ -90,7 +90,7 @@
       	<div class="euiText">
           <h2
             class="kuiSubTitle kuiVerticalRhythm"
-            i18n-id="xpack.machineLearning.datavisualizer.metricsTitle"
+            i18n-id="xpack.ml.datavisualizer.metricsTitle"
             i18n-default-message="Metrics"
           ></h2>
         </div>
@@ -99,28 +99,25 @@
           <div class="field-sort-controls euiFlexItem euiFlexItem--flexGrowZero">
             <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
               <div ng-if="showAllMetrics === false" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
-                <span class="field-emphasis">{{ metricCards.length }}</span>
                 <span
-                  i18n-id="xpack.machineLearning.datavisualizer.dontShowAllMetricsDescription"
-                  i18n-default-message="{metricCardsCount, plural, one {field exists} other {fields exist}} in documents"
-                  i18n-values="{ metricCardsCount: metricCards.length }"
+                  i18n-id="xpack.ml.datavisualizer.showMetricsDescription"
+                  i18n-default-message="{wrappedMetricCardsCount} {metricCardsCount, plural, one {field exists} other {fields exist}} in documents ({totalMetricFieldCount} in total)"
+                  i18n-values="{
+                      wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + metricCards.length + '</span>',
+                      metricCardsCount: metricCards.length,
+                      totalMetricFieldCount: '<span class=\'field-emphasis\'>' + totalMetricFieldCount + '</span>'
+                  }"
                 ></span>
-                (<span
-                  class="field-emphasis"
-                  i18n-id="xpack.machineLearning.datavisualizer.inTotalMetricsDescription"
-                  i18n-default-message="{totalMetricFieldCount} in total"
-                  i18n-values="{ totalMetricFieldCount: totalMetricFieldCount }"
-                ></span>)
               </div>
 
               <div ng-if="showAllMetrics === true" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
-                <span class="field-emphasis">{{ metricCards.length }}</span>
                 <span
-                  i18n-id="xpack.machineLearning.datavisualizer.showAllMetricsDescription"
-                  i18n-default-message="{metricCardsCount, plural, one {field} other {fields}} ({wrappedMetricCardsCount} {populatedMetricFieldCount, plural, one {exists} other {exist}} in documents)"
+                  i18n-id="xpack.ml.datavisualizer.showAllMetricsDescription"
+                  i18n-default-message="{wrappedMetricCardsCount} {metricCardsCount, plural, one {field} other {fields}} ({wrappedPopulatedMetricFieldCount} {populatedMetricFieldCount, plural, one {exists} other {exist}} in documents)"
                   i18n-values="{
+                    wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + metricCards.length + '</span>',
                     metricCardsCount: metricCards.length,
-                    wrappedMetricCardsCount: '<span class=\'field-emphasis\'>' + populatedMetricFieldCount + '</span>',
+                    wrappedPopulatedMetricFieldCount: '<span class=\'field-emphasis\'>' + populatedMetricFieldCount + '</span>',
                     populatedMetricFieldCount: populatedMetricFieldCount
                   }"
                 ></span>
@@ -130,7 +127,7 @@
                 <input id="toggleAllMetricsCheckbox" type="checkbox" class="kuiCheckBox" ng-click="toggleAllMetrics()" ng-checked="showAllMetrics === true">
                 <label
                   for="toggleAllMetricsCheckbox"
-                  i18n-id="xpack.machineLearning.datavisualizer.showEmptyFieldsLabel"
+                  i18n-id="xpack.ml.datavisualizer.showEmptyFieldsLabel"
                   i18n-default-message="show empty fields"
                 ></label>
               </div>
@@ -161,7 +158,7 @@
         <div class="euiText">
           <h2
             class="kuiSubTitle kuiVerticalRhythm"
-            i18n-id="xpack.machineLearning.datavisualizer.fieldsTitle"
+            i18n-id="xpack.ml.datavisualizer.fieldsTitle"
             i18n-default-message="Fields"
           ></h2>
         </div>
@@ -170,28 +167,26 @@
           <div class="field-sort-controls euiFlexItem euiFlexItem--flexGrowZero">
             <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--responsive">
               <div ng-if="showAllFields === false" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
-                <span class="field-emphasis">{{ fieldCards.length }}</span>
                 <span
-                  i18n-id="xpack.machineLearning.datavisualizer.dontShowAllFieldsDescription"
-                  i18n-default-message="{fieldCardsCount, plural, one {field exists} other {fields exist}} in documents "
-                  i18n-values="{ fieldCardsCount: fieldCards.length }"
+                  i18n-id="xpack.ml.datavisualizer.showMFieldDescription"  
+                  i18n-default-message="{wrappedFieldCardsCount} {fieldCardsCount, plural, one {field exists} other {fields exist}} in documents ({totalNonMetricFieldCount} in total)"
+                  i18n-values="{
+                      wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + fieldCards.length + '</span>',
+                      fieldCardsCount: fieldCards.length,
+                      totalNonMetricFieldCount: '<span class=\'field-emphasis\'>' + totalNonMetricFieldCount + '</span>'
+                  }"
                 ></span>
-                (<span
-                  class="field-emphasis"
-                  i18n-id="xpack.machineLearning.datavisualizer.inTotalFieldsDescription"
-                  i18n-default-message="{totalNonMetricFieldCount} in total"
-                  i18n-values="{ totalNonMetricFieldCount: totalNonMetricFieldCount }"
-                ></span>)
               </div>
 
+
               <div ng-if="showAllFields === true" class="field-count-label euiFlexItem euiFlexItem--flexGrowZero">
-                <span class="field-emphasis">{{ fieldCards.length }}</span>
                 <span
-                  i18n-id="xpack.machineLearning.datavisualizer.showAllFieldsDescription"
-                  i18n-default-message="{fieldCardsCount, plural, one {field} other {fields}} ({wrappedFieldCardsCount} {populatedNonMetricFieldCount, plural, one {exists} other {exist}} in documents)"
+                  i18n-id="xpack.ml.datavisualizer.showAllFieldsDescription"
+                  i18n-default-message="{wrappedFieldCardsCount} {fieldCardsCount, plural, one {field} other {fields}} ({wrappedPopulatedNonMetricFieldCount} {populatedNonMetricFieldCount, plural, one {exists} other {exist}} in documents)"
                   i18n-values="{
+                    wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + fieldCards.length + '</span>',
                     fieldCardsCount: fieldCards.length,
-                    wrappedFieldCardsCount: '<span class=\'field-emphasis\'>' + populatedNonMetricFieldCount +'</span>',
+                    wrappedPopulatedNonMetricFieldCount: '<span class=\'field-emphasis\'>' + populatedNonMetricFieldCount +'</span>',
                     populatedNonMetricFieldCount: populatedNonMetricFieldCount
                   }"
                 ></span>
@@ -201,7 +196,7 @@
                 <input id="toggleAllFieldsCheckbox" type="checkbox" class="kuiCheckBox" ng-click="toggleAllFields()" ng-checked="showAllFields === true">
                 <label
                   for="toggleAllFieldsCheckbox"
-                  i18n-id="xpack.machineLearning.datavisualizer.showEmptyFieldsLabel"
+                  i18n-id="xpack.ml.datavisualizer.showEmptyFieldsLabel"
                   i18n-default-message="show empty fields"
                 ></label>
               </div>
@@ -213,19 +208,19 @@
                 <select class="kuiSelect type-input"
                   ng-model="filterFieldType"
                   ng-change="filterFieldTypeChanged(filterFieldType)"
-                  aria-label="{{ ::'xpack.machineLearning.datavisualizer.selectFieldTypesAriaLabel' | i18n: {
+                  aria-label="{{ ::'xpack.ml.datavisualizer.selectFieldTypesAriaLabel' | i18n: {
                     defaultMessage: 'Select field types'
                   } }}"
                 >
                   <option
                     value="*"
-                    i18n-id="xpack.machineLearning.datavisualizer.allFieldsTypeOptionLabel"
+                    i18n-id="xpack.ml.datavisualizer.allFieldsTypeOptionLabel"
                     i18n-default-message="All field types"
                   ></option>
                   <option
                     ng-repeat="type in indexedFieldTypes"
                     value="{{type}}"
-                    i18n-id="xpack.machineLearning.datavisualizer.typesOptionLabel"
+                    i18n-id="xpack.ml.datavisualizer.typesOptionLabel"
                     i18n-default-message="{type} types"
                     i18n-values="{ type: type }"
                   ></option>
