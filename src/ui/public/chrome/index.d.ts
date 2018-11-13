@@ -30,6 +30,7 @@ declare class Chrome {
   public getUiSettingsClient(): any;
   public setVisible(visible: boolean): any;
   public getInjected(key: string, defaultValue?: any): any;
+  public setRootController(name: string, Controller: any): any;
 }
 
 declare const chrome: Chrome;
