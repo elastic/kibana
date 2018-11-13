@@ -103,7 +103,8 @@ export const getMapColors = ({ map }) => {
   return map.layerList.reduce((accu, layer) => {
     // This will evolve as color options are expanded
     if (!layer.temporary) {
-      const color = _.get(layer, 'style.properties.fillColor.options.color', null);
+      const { color, alpha } = _.get(layer, 'style.properties.fillColor.options',
+        { color: null, alpha: null });
       if (color) accu.push(color);
     }
     return accu;

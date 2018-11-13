@@ -9,16 +9,25 @@ import { EuiRange } from '@elastic/eui';
 
 export class AlphaSelection extends React.Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
-      alphaValue: 0.1 //TODO: Init from store
+      alphaValue: props.alphaValue || 1.0
     };
   }
 
+  componentDidUpdate() {
+    const { alphaValue } = this.props;
+    if (alphaValue !== this.state.alphaValue) {
+      this.setState({
+        alphaValue
+      });
+    }
+  }
+
   _changeAlphaValue({ value }) {
-    const { handlePropertyChange, styleProperty } = this.props;
     this.setState({ alphaValue: value });
+    this.props.changeAlphaValue({ alphaValue: value });
   }
 
   render() {

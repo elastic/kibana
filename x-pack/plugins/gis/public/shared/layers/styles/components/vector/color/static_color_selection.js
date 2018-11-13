@@ -12,9 +12,9 @@ import {
 export class StaticColorSelection extends React.Component {
   render() {
 
-    const onOptionChange = (color) => {
+    const onOptionChange = color => {
       this.props.changeOptions({
-        color: color
+        color
       });
     };
 

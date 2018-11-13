@@ -36,7 +36,8 @@ export class VectorLayer extends ALayer {
   }
 
   static createDescriptor(options) {
-    // Colors must be state aware to reduce unnecessary incrementation
+    // Colors must be state-aware to reduce unnecessary incrementation
+    const DEFAULT_ALPHA = 1.0;
     const mapColors = getMapColors(store.getState());
     const lastColor = mapColors.pop();
     const nextColor = DEFAULT_COLORS[
@@ -49,7 +50,8 @@ export class VectorLayer extends ALayer {
         fillColor: {
           type: VectorStyle.STYLE_TYPE.STATIC,
           options: {
-            color: nextColor
+            color: nextColor,
+            alpha: DEFAULT_ALPHA
           }
         },
         iconSize: {
