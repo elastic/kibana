@@ -254,7 +254,7 @@ registerPrivilegesWithClusterTest(`throws error when we should be removing privi
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when actions don't match`, {
+registerPrivilegesWithClusterTest(`updates privileges when global actions don't match`, {
   privilegeMap: {
     features: {},
     global: {
@@ -277,7 +277,83 @@ registerPrivilegesWithClusterTest(`updates privileges when actions don't match`,
       all: {
         application,
         name: 'all',
-        actions: ['action:not-foo'],
+        actions: ['action:foo'],
+        metadata: {},
+      },
+      space_read: {
+        application,
+        name: 'space_read',
+        actions: ['action:bar'],
+        metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:baz'],
+      },
+      feature_bar_read: {
+        application,
+        name: 'feature_bar_read',
+        actions: ['action:not-quz'],
+      }
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges({
+      [application]: {
+        all: {
+          application,
+          name: 'all',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_read: {
+          application,
+          name: 'space_read',
+          actions: ['action:bar'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:baz'],
+          metadata: {},
+        },
+        feature_bar_read: {
+          application,
+          name: 'feature_bar_read',
+          actions: ['action:quz'],
+          metadata: {},
+        }
+      }
+    });
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when space actions don't match`, {
+  privilegeMap: {
+    features: {},
+    global: {
+      all: ['action:foo']
+    },
+    space: {
+      read: ['action:bar']
+    },
+    features: {
+      foo: {
+        all: ['action:baz']
+      },
+      bar: {
+        read: ['action:quz']
+      }
+    }
+  },
+  existingPrivileges: {
+    [application]: {
+      all: {
+        application,
+        name: 'all',
+        actions: ['action:foo'],
         metadata: {},
       },
       space_read: {
@@ -289,7 +365,83 @@ registerPrivilegesWithClusterTest(`updates privileges when actions don't match`,
       feature_foo_all: {
         application,
         name: 'feature_foo_all',
-        actions: ['action:not-baz'],
+        actions: ['action:baz'],
+      },
+      feature_bar_read: {
+        application,
+        name: 'feature_bar_read',
+        actions: ['action:quz'],
+      }
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges({
+      [application]: {
+        all: {
+          application,
+          name: 'all',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_read: {
+          application,
+          name: 'space_read',
+          actions: ['action:bar'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:baz'],
+          metadata: {},
+        },
+        feature_bar_read: {
+          application,
+          name: 'feature_bar_read',
+          actions: ['action:quz'],
+          metadata: {},
+        }
+      }
+    });
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when feature actions don't match`, {
+  privilegeMap: {
+    features: {},
+    global: {
+      all: ['action:foo']
+    },
+    space: {
+      read: ['action:bar']
+    },
+    features: {
+      foo: {
+        all: ['action:baz']
+      },
+      bar: {
+        read: ['action:quz']
+      }
+    }
+  },
+  existingPrivileges: {
+    [application]: {
+      all: {
+        application,
+        name: 'all',
+        actions: ['action:foo'],
+        metadata: {},
+      },
+      space_read: {
+        application,
+        name: 'space_read',
+        actions: ['action:bar'],
+        metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:baz'],
       },
       feature_bar_read: {
         application,
