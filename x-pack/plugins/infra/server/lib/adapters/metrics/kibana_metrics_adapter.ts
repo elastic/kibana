@@ -68,7 +68,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
             const infraMetricId: InfraMetric = (InfraMetric as any)[id];
             if (!infraMetricId) {
               throw new Error(
-                i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
+                i18n.translate('xpack.infra.kibanaMetrics.notValidInfraMetricErrorMessage', {
                   defaultMessage: '{id} is not a valid InfraMetric',
                   values: {
                     id,
