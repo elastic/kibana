@@ -604,9 +604,8 @@ export function SearchSourceProvider(Promise, Private, config) {
             flatData.body.docvalue_fields = _.intersection(flatData.body.docvalue_fields, fields);
             flatData.body.script_fields = _.pick(flatData.body.script_fields, fields);
 
-            // request the remaining fields from both stored_fields and _source
+            // request the remaining fields from _source
             const remainingFields = _.difference(fields, _.keys(flatData.body.script_fields));
-            flatData.body.stored_fields = remainingFields;
             _.set(flatData.body, '_source.includes', remainingFields);
           }
 
