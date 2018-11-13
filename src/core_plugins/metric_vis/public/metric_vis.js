@@ -86,7 +86,7 @@ function MetricVisProvider(Private, i18n) {
             label: i18n('metricVis.colorModes.backgroundOptionLabel', { defaultMessage: 'Background' })
           }
         ],
-        colorSchemas: Object.keys(vislibColorMaps),
+        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
       },
       optionsTemplate: '<metric-vis-params></metric-vis-params>',
       schemas: new Schemas([

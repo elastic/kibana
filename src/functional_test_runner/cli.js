@@ -28,13 +28,17 @@ const cmd = new Command('node scripts/functional_test_runner');
 const resolveConfigPath = v => resolve(process.cwd(), v);
 const defaultConfigPath = resolveConfigPath('test/functional/config.js');
 
-const collectExcludePaths = () => {
+const createMultiArgCollector = (map) => () => {
   const paths = [];
   return (arg) => {
-    paths.push(resolve(arg));
+    paths.push(map ? map(arg) : arg);
     return paths;
   };
 };
+
+const collectExcludePaths = createMultiArgCollector(a => resolve(a));
+const collectIncludeTags = createMultiArgCollector();
+const collectExcludeTags = createMultiArgCollector();
 
 cmd
   .option('--config [path]', 'Path to a config file', resolveConfigPath, defaultConfigPath)
@@ -42,6 +46,8 @@ cmd
   .option('--grep <pattern>', 'pattern used to select which tests to run')
   .option('--invert', 'invert grep to exclude tests', false)
   .option('--exclude [file]', 'Path to a test file that should not be loaded', collectExcludePaths(), [])
+  .option('--include-tag [tag]', 'A tag to be included, pass multiple times for multiple tags', collectIncludeTags(), [])
+  .option('--exclude-tag [tag]', 'A tag to be excluded, pass multiple times for multiple tags', collectExcludeTags(), [])
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
@@ -68,6 +74,10 @@ const functionalTestRunner = createFunctionalTestRunner({
       bail: cmd.bail,
       grep: cmd.grep,
       invert: cmd.invert,
+    },
+    suiteTags: {
+      include: cmd.includeTag,
+      exclude: cmd.excludeTag,
     },
     updateBaselines: cmd.updateBaselines,
     excludeTestFiles: cmd.exclude
