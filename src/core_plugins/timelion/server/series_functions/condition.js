@@ -34,8 +34,8 @@ export default new Chainable('condition', {
       types: ['string'],
       help: i18n.translate('timelion.help.functions.condition.args.operatorHelpText', {
         defaultMessage:
-          'comparison operator to use for comparison, valid operators are eq (equal), \
-ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (greater than equal)',
+          'comparison operator to use for comparison, valid operators are eq (equal), ' +
+          'ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (greater than equal)',
       }),
       suggestions: [
         {
@@ -103,8 +103,8 @@ ne (not equal), lt (less than), lte (less than equal), gt (greater than), gte (g
   ],
   help: i18n.translate('timelion.help.functions.conditionHelpText', {
     defaultMessage:
-      'Compares each point to a number, or the same point in another series using an operator, \
-then sets its value to the result if the condition proves true, with an optional else.',
+      'Compares each point to a number, or the same point in another series using an operator, ' +
+      'then sets its value to the result if the condition proves true, with an optional else.',
   }),
   aliases: ['if'],
   fn: function conditionFn(args) {

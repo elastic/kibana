@@ -31,8 +31,8 @@ export default function validateTime(time, tlConfig) {
     throw new Error(
       i18n.translate('timelion.serverSideErrors.bucketsOverflowErrorMessage', {
         defaultMessage:
-          'Max buckets exceeded: {bucketCount} of {maxBuckets} allowed. \
-Choose a larger interval or a shorter time span',
+          'Max buckets exceeded: {bucketCount} of {maxBuckets} allowed. ' +
+          'Choose a larger interval or a shorter time span',
         values: {
           bucketCount: Math.round(bucketCount),
           maxBuckets,

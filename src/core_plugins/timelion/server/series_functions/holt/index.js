@@ -70,7 +70,9 @@ export default new Chainable('holt', {
       types: ['string'],
       help: i18n.translate('timelion.help.functions.holt.args.seasonHelpText', {
         defaultMessage:
-          'How long is the season, e.g., 1w if you pattern repeats weekly. (Only useful with gamma)',
+          'How long is the season, e.g., 1w if your pattern repeats weekly. (Only useful with gamma)',
+        description:
+          '"1w" is an expression value and should not be translated. "gamma" is a parameter name and should not be translated.',
       }),
     },
     {
@@ -81,6 +83,7 @@ export default new Chainable('holt', {
           `
       The number of seasons to sample before starting to "predict" in a seasonal series.
       (Only useful with gamma, Default: all)`,
+        description: '"gamma" and "all" are parameter names and values and must not be translated.',
       }),
     }
   ],
@@ -88,9 +91,10 @@ export default new Chainable('holt', {
     defaultMessage:
       `
     Sample the beginning of a series and use it to forecast what should happen
-    via several optional parameters. In general, like everything, this is crappy at predicting the
-    future. You're much better off using it to predict what should be happening right now, for the
-    purpose of anomaly detection. Note that nulls will be filled with forecasted values. Deal with it.`,
+    via several optional parameters. In general, this doesn't really predict the
+    future, but predicts what should be happening right now according to past data,
+    which can be useful for anomaly detection. Note that nulls will be filled with forecasted values.`,
+    description: '"null" is a data value here and must not be translated.',
   }),
   fn: function expsmoothFn(args, tlConfig) {
 

@@ -52,8 +52,8 @@ export default new Chainable('trend', {
       types: ['number', 'null'],
       help: i18n.translate('timelion.help.functions.trend.args.startHelpText', {
         defaultMessage:
-          'Where to start calculating from the beginning or end. For example -10 would start \
-calculating 10 points from the end, +15 would start 15 points from the beginning. Default: 0',
+          'Where to start calculating from the beginning or end. For example -10 would start ' +
+          'calculating 10 points from the end, +15 would start 15 points from the beginning. Default: 0',
       }),
     },
     {
@@ -61,8 +61,8 @@ calculating 10 points from the end, +15 would start 15 points from the beginning
       types: ['number', 'null'],
       help: i18n.translate('timelion.help.functions.trend.args.endHelpText', {
         defaultMessage:
-          'Where to stop calculating from the beginning or end. For example -10 would stop \
-calculating 10 points from the end, +15 would stop 15 points from the beginning. Default: 0',
+          'Where to stop calculating from the beginning or end. For example -10 would stop ' +
+          'calculating 10 points from the end, +15 would stop 15 points from the beginning. Default: 0',
       }),
     },
   ],

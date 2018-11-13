@@ -37,8 +37,8 @@ export default new Datasource ('worldbank_indicators', {
       types: ['string', 'null'],
       help: i18n.translate('timelion.help.functions.worldbankIndicators.args.indicatorHelpText', {
         defaultMessage:
-          `The indicator code to use. You'll have to look this up on {worldbankUrl}. \
-Often pretty obtuse. E.g., {indicatorExample} is population`,
+          `The indicator code to use. You'll have to look this up on {worldbankUrl}. ` +
+          'Often pretty obtuse. E.g., {indicatorExample} is population',
         values: {
           worldbankUrl: 'data.worldbank.org',
           indicatorExample: 'SP.POP.TOTL',

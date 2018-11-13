@@ -39,8 +39,11 @@ export default new Datasource('es', {
       multi: true,
       help: i18n.translate('timelion.help.functions.es.args.metricHelpText', {
         defaultMessage:
-          'An elasticsearch metric agg: avg, sum, min, max, percentiles or cardinality, followed by a field. \
-E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"',
+          'An elasticsearch metric agg: avg, sum, min, max, percentiles or cardinality, followed by a field. ' +
+          'E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"',
+        description:
+          `avg, sum, min, max, percentiles and cardinality are keywords in the expression ` +
+          `and must not be translated. Also don't translate the examples.`,
       }),
     },
     {
@@ -49,7 +52,10 @@ E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"',
       multi: true,
       help: i18n.translate('timelion.help.functions.es.args.splitHelpText', {
         defaultMessage:
-          'An elasticsearch field to split the series on and a limit. E.g., "hostname:10" to get the top 10 hostnames',
+          'An elasticsearch field to split the series on and a limit. E.g., "{hostnameSplitArg}" to get the top 10 hostnames',
+        values: {
+          hostnameSplitArg: 'hostname:10',
+        },
       }),
     },
     {
@@ -57,8 +63,9 @@ E.g., "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"',
       types: ['string', 'null'],
       help: i18n.translate('timelion.help.functions.es.args.indexHelpText', {
         defaultMessage:
-          'Index to query, wildcards accepted. Provide Index Pattern name for scripted fields and \
-field name type ahead suggestions for metrics, split, and timefield arguments.',
+          'Index to query, wildcards accepted. Provide Index Pattern name for scripted fields and ' +
+          'field name type ahead suggestions for metrics, split, and timefield arguments.',
+        description: '"metrics", "split" and "timefield" are referring to parameter names and should not be translated.',
       }),
     },
     {
@@ -66,6 +73,7 @@ field name type ahead suggestions for metrics, split, and timefield arguments.',
       types: ['string', 'null'],
       help: i18n.translate('timelion.help.functions.es.args.timefieldHelpText', {
         defaultMessage: 'Field of type "date" to use for x-axis',
+        description: '"date" is a field type and should not be translated.',
       }),
     },
     {
@@ -81,7 +89,7 @@ field name type ahead suggestions for metrics, split, and timefield arguments.',
       types: ['string', 'null'],
       help: i18n.translate('timelion.help.functions.es.args.intervalHelpText', {
         defaultMessage:
-          '**DO NOT USE THIS**. Its fun for debugging fit functions, but you really should use the interval picker',
+          `**DO NOT USE THIS**. It's fun for debugging fit functions, but you really should use the interval picker`,
       }),
     }
   ],

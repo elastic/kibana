@@ -37,9 +37,9 @@ export default new Chainable('movingaverage', {
       types: ['number', 'string'],
       help: i18n.translate('timelion.help.functions.movingaverage.args.windowHelpText', {
         defaultMessage:
-          'Number of points, or a date math expression (eg 1d, 1M) to average over. If a date math expression \
-is specified, the function will get as close as possible given the currently select interval. \
-If the date math expression is not evenly divisible by the interval the results may appear abnormal.',
+          'Number of points, or a date math expression (eg 1d, 1M) to average over. If a date math expression ' +
+          'is specified, the function will get as close as possible given the currently select interval. ' +
+          'If the date math expression is not evenly divisible by the interval the results may appear abnormal.',
       }),
     },
     {

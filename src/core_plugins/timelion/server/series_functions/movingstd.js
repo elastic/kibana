@@ -54,8 +54,8 @@ export default new Chainable('movingstd', {
   aliases: ['mvstd'],
   help: i18n.translate('timelion.help.functions.movingstdHelpText', {
     defaultMessage:
-      'Calculate the moving standard deviation over a given window. Uses naive two-pass algorithm. \
-Rounding errors may become more noticeable with very long series, or series with very large numbers.',
+      'Calculate the moving standard deviation over a given window. Uses naive two-pass algorithm. ' +
+      'Rounding errors may become more noticeable with very long series, or series with very large numbers.',
   }),
   fn: function movingstdFn(args) {
     return alter(args, function (eachSeries, _window, _position) {

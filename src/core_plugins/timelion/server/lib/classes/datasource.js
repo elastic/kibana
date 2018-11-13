@@ -43,11 +43,11 @@ export default class Datasource extends TimelionFunction {
       types: ['string', 'null'],
       help: i18n.translate('timelion.help.functions.common.args.offsetHelpText', {
         defaultMessage:
-          'Offset the series retrieval by a date expression, e.g., -1M to make events from \
-one month ago appear as if they are happening now. Offset the series relative to the charts \
-overall time range, by using the value "timerange", e.g. "timerange:-2" will specify an offset \
-that is twice the overall chart time range to the past.',
-      })
+          'Offset the series retrieval by a date expression, e.g., -1M to make events from ' +
+          'one month ago appear as if they are happening now. Offset the series relative to the charts ' +
+          'overall time range, by using the value "timerange", e.g. "timerange:-2" will specify an offset ' +
+          'that is twice the overall chart time range to the past.',
+      }),
     });
 
     config.args.push({

@@ -34,6 +34,7 @@ export default new Chainable('legend', {
       help: i18n.translate('timelion.help.functions.legend.args.positionHelpText', {
         defaultMessage:
           'Corner to place the legend in: nw, ne, se, or sw. You can also pass false to disable the legend',
+        description: '"nw", "ne", "se", "sw" and "false" are keywords and must not be translated.',
       }),
       suggestions: [
         {
