@@ -98,8 +98,8 @@ See <<breaking-changes>>.
 If you use the default `browser` setting for `dateFormat:tz`, 
 you're fine. If you use any other setting for `dateFormat:tz`, and you use 
 Absolute time ranges, you might see issues where {kib} initially 
-shows data in your local `browser` timezone instead of the configured timezone. 
-Refreshing the browser usually corrects the issue.
+shows data in your browser's local timezone instead of the configured timezone. 
+Refreshing the page usually corrects the issue.
 This will be fixed in a future bug fix release.
 
 [float]
