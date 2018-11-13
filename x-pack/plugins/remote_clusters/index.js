@@ -9,7 +9,7 @@ import { PLUGIN } from './common';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { registerListRoute } from './server/routes/api/remote_clusters';
 
-export function remoteClustersManagement(kibana) {
+export function remoteClusters(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     configPrefix: 'xpack.remote_clusters',
@@ -18,7 +18,7 @@ export function remoteClustersManagement(kibana) {
     uiExports: {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: [
-        'plugins/remote_clusters_management',
+        'plugins/remote_clusters',
       ]
     },
     init: function (server) {

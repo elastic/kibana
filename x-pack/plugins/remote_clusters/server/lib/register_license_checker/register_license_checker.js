@@ -10,9 +10,9 @@ import { PLUGIN } from '../../../common';
 
 export function registerLicenseChecker(server) {
   const xpackMainPlugin = server.plugins.xpack_main;
-  const remoteClustersManagementPlugin = server.plugins[PLUGIN.ID];
+  const remoteClustersPlugin = server.plugins[PLUGIN.ID];
 
-  mirrorPluginStatus(xpackMainPlugin, remoteClustersManagementPlugin);
+  mirrorPluginStatus(xpackMainPlugin, remoteClustersPlugin);
   xpackMainPlugin.status.once('green', () => {
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
