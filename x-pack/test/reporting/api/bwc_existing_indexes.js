@@ -44,18 +44,20 @@ export default function ({ getService }) {
       // Might not be great test practice to lump all these jobs together but reporting takes awhile and it'll be
       // more efficient to post them all up front, then sequentially.
       it('multiple jobs posted', async () => {
-        // testing: run fist one job alone, let it create the new reporting index
-        const path = await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3);
-        await reportingAPI.waitForJobToFinish(path);
-        // now we can run all the other jobs
-        const reportPaths = [];
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3));
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3));
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3));
-        reportPaths.push(await reportingAPI.postJob(
-          GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3));
+        const path1 = await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3);
+        await reportingAPI.waitForJobToFinish(path1);
 
-        await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
+        const path2 = await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3);
+        await reportingAPI.waitForJobToFinish(path2);
+
+        const path3 = await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3);
+        await reportingAPI.waitForJobToFinish(path3);
+
+        const path4 = await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3);
+        await reportingAPI.waitForJobToFinish(path4);
+
+        const path5 = await reportingAPI.postJob(GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3);
+        await reportingAPI.waitForJobToFinish(path5);
       }).timeout(1540000);
 
       it('jobs completed successfully', async () => {
