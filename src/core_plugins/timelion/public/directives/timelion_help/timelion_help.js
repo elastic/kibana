@@ -24,7 +24,7 @@ import moment from 'moment';
 
 const app = uiModules.get('apps/timelion', []);
 
-app.directive('timelionHelp', function ($http) {
+app.directive('timelionHelp', function ($http, i18n) {
   return {
     restrict: 'E',
     template,
@@ -38,6 +38,52 @@ app.directive('timelionHelp', function ($http) {
         $scope.es = {
           invalidCount: 0
         };
+
+        $scope.translations = {
+          nextButtonLabel: i18n('timelion.help.nextPageButtonLabel', {
+            defaultMessage: 'Next',
+          }),
+          previousButtonLabel: i18n('timelion.help.previousPageButtonLabel', {
+            defaultMessage: 'Previous',
+          }),
+          dontShowHelpButtonLabel: i18n('timelion.help.dontShowHelpButtonLabel', {
+            defaultMessage: `Don't show this again`,
+          }),
+          strongNextText: i18n('timelion.help.welcome.content.strongNextText', {
+            defaultMessage: 'Next',
+          }),
+          emphasizedEverythingText: i18n('timelion.help.welcome.content.emphasizedEverythingText', {
+            defaultMessage: 'everything',
+          }),
+          notValidAdvancedSettingsPath: i18n('timelion.help.configuration.notValid.advancedSettingsPathText', {
+            defaultMessage: 'Management / Kibana / Advanced Settings'
+          }),
+          validAdvancedSettingsPath: i18n('timelion.help.configuration.valid.advancedSettingsPathText', {
+            defaultMessage: 'Management/Kibana/Advanced Settings',
+          }),
+          esAsteriskQueryDescription: i18n('timelion.help.querying.esAsteriskQueryDescriptionText', {
+            defaultMessage: 'hey Elasticsearch, find everything in my default index',
+          }),
+          esIndexQueryDescription: i18n('timelion.help.querying.esIndexQueryDescriptionText', {
+            defaultMessage: 'use * as the q (query) for the logstash-* index',
+          }),
+          strongAddText: i18n('timelion.help.expressions.strongAddText', {
+            defaultMessage: 'Add',
+          }),
+          twoExpressionsDescriptionTitle: i18n('timelion.help.expressions.examples.twoExpressionsDescriptionTitle', {
+            defaultMessage: 'Double the fun.',
+          }),
+          customStylingDescriptionTitle: i18n('timelion.help.expressions.examples.customStylingDescriptionTitle', {
+            defaultMessage: 'Custom styling.',
+          }),
+          namedArgumentsDescriptionTitle: i18n('timelion.help.expressions.examples.namedArgumentsDescriptionTitle', {
+            defaultMessage: 'Named arguments.',
+          }),
+          groupedExpressionsDescriptionTitle: i18n('timelion.help.expressions.examples.groupedExpressionsDescriptionTitle', {
+            defaultMessage: 'Grouped expressions.',
+          }),
+        };
+
         getFunctions();
         checkElasticsearch();
       }
@@ -73,7 +119,7 @@ app.directive('timelionHelp', function ($http) {
               } catch (e) {
                 if (_.get(resp, 'data.resp.message')) return _.get(resp, 'data.resp.message');
                 if (_.get(resp, 'data.resp.output.payload.message')) return _.get(resp, 'data.resp.output.payload.message');
-                return 'Unknown error';
+                return i18n('timelion.help.unknownErrorMessage', { defaultMessage: 'Unknown error' });
               }
             }());
           }

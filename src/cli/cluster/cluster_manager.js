@@ -18,9 +18,12 @@
  */
 
 import { resolve } from 'path';
+import { format as formatUrl } from 'url';
+import opn from 'opn';
+
 import { debounce, invoke, bindAll, once, uniq } from 'lodash';
-import { fromEvent, race } from 'rxjs';
-import { first } from 'rxjs/operators';
+import * as Rx from 'rxjs';
+import { first, mapTo, filter, map, take } from 'rxjs/operators';
 
 import Log from '../log';
 import Worker from './worker';
@@ -88,6 +91,15 @@ export default class ClusterManager {
 
     bindAll(this, 'onWatcherAdd', 'onWatcherError', 'onWatcherChange');
 
+    if (opts.open) {
+      this.setupOpen(formatUrl({
+        protocol: config.get('server.ssl.enabled') ? 'https' : 'http',
+        hostname: config.get('server.host'),
+        port: config.get('server.port'),
+        pathname: (this.basePathProxy ? this.basePathProxy.basePath : ''),
+      }));
+    }
+
     if (opts.watch) {
       const pluginPaths = config.get('plugins.paths');
       const scanDirs = config.get('plugins.scanDirs');
@@ -122,6 +134,28 @@ export default class ClusterManager {
         shouldRedirectFromOldBasePath: this.shouldRedirectFromOldBasePath.bind(this),
       });
     }
+  }
+
+  setupOpen(openUrl) {
+    const serverListening$ = Rx.merge(
+      Rx.fromEvent(this.server, 'listening')
+        .pipe(mapTo(true)),
+      Rx.fromEvent(this.server, 'fork:exit')
+        .pipe(mapTo(false)),
+      Rx.fromEvent(this.server, 'crashed')
+        .pipe(mapTo(false))
+    );
+
+    const optimizeSuccess$ = Rx.fromEvent(this.optimizer, 'optimizeStatus')
+      .pipe(map(msg => !!msg.success));
+
+    Rx.combineLatest(serverListening$, optimizeSuccess$)
+      .pipe(
+        filter(([serverListening, optimizeSuccess]) => serverListening && optimizeSuccess),
+        take(1),
+      )
+      .toPromise()
+      .then(() => opn(openUrl));
   }
 
   setupWatching(extraPaths, extraIgnores) {
@@ -229,7 +263,10 @@ export default class ClusterManager {
       return Promise.resolve();
     }
 
-    return race(fromEvent(this.server, 'listening'), fromEvent(this.server, 'crashed'))
+    return Rx.race(
+      Rx.fromEvent(this.server, 'listening'),
+      Rx.fromEvent(this.server, 'crashed')
+    )
       .pipe(first())
       .toPromise();
   }
