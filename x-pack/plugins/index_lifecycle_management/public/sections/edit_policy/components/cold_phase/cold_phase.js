@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiFieldNumber,
-  EuiSelect,
   EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiButton,
@@ -31,6 +30,7 @@ import {
 import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
 import { ActiveBadge, PhaseErrorMessage } from '../../../../components';
+import { NodeAllocation } from '../node_allocation';
 
 class ColdPhaseUi extends PureComponent {
   static propTypes = {
@@ -49,19 +49,12 @@ class ColdPhaseUi extends PureComponent {
       [PHASE_REPLICA_COUNT]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     }).isRequired,
     warmPhaseReplicaCount: PropTypes.number.isRequired,
-    nodeOptions: PropTypes.array.isRequired,
   };
-
-  componentWillMount() {
-    this.props.fetchNodes();
-  }
-
   render() {
     const {
       setPhaseData,
       showNodeDetailsFlyout,
       phaseData,
-      nodeOptions,
       warmPhaseReplicaCount,
       errors,
       isShowingErrors,
@@ -122,38 +115,13 @@ class ColdPhaseUi extends PureComponent {
             />
             <EuiSpacer />
 
-            <ErrableFormRow
-              id={`${PHASE_COLD}.${PHASE_NODE_ATTRS}`}
-              label={intl.formatMessage({
-                id: 'xpack.indexLifecycleMgmt.coldPhase.nodeAllocationLabel',
-                defaultMessage: 'Choose where to allocate indices by node attribute',
-              })}
-              errorKey={PHASE_NODE_ATTRS}
-              isShowingErrors={isShowingErrors}
+            <NodeAllocation
+              setPhaseData={setPhaseData}
+              showNodeDetailsFlyout={showNodeDetailsFlyout}
               errors={errors}
-              helpText={
-                phaseData[PHASE_NODE_ATTRS] ? (
-                  <EuiButtonEmpty
-                    flush="left"
-                    iconType="eye"
-                    onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
-                  >
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.viewNodeDetailsButton"
-                      defaultMessage="View a list of nodes attached to this configuration"
-                    />
-                  </EuiButtonEmpty>
-                ) : null
-              }
-            >
-              <EuiSelect
-                value={phaseData[PHASE_NODE_ATTRS] || ' '}
-                options={nodeOptions}
-                onChange={async e => {
-                  await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
-                }}
-              />
-            </ErrableFormRow>
+              phaseData={phaseData}
+              isShowingErrors={isShowingErrors}
+            />
 
             <EuiFlexGroup>
               <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>

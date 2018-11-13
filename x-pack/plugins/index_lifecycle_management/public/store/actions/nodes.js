@@ -17,15 +17,19 @@ export const setSelectedReplicaCount = createAction(
   'SET_SELECTED_REPLICA_COUNT'
 );
 export const fetchedNodes = createAction('FETCHED_NODES');
+let fetchingNodes = false;
 export const fetchNodes = () => async dispatch => {
-  let nodes;
   try {
-    nodes = await loadNodes();
+    if (!fetchingNodes) {
+      fetchingNodes = true;
+      const nodes = await loadNodes();
+      dispatch(fetchedNodes(nodes));
+    }
   } catch (err) {
     return toastNotifications.addDanger(err.data.message);
+  } finally {
+    fetchingNodes = false;
   }
-
-  dispatch(fetchedNodes(nodes));
 };
 
 export const fetchedNodeDetails = createAction(

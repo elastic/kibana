@@ -10,11 +10,10 @@
 import { connect } from 'react-redux';
 import { ColdPhase as PresentationComponent } from './cold_phase';
 import {
-  getNodeOptions,
   getPhase,
   getPhaseData
 } from '../../../../store/selectors';
-import { setPhaseData, fetchNodes } from '../../../../store/actions';
+import { setPhaseData } from '../../../../store/actions';
 import {
   PHASE_COLD,
   PHASE_WARM,
@@ -24,11 +23,9 @@ import {
 export const ColdPhase = connect(
   (state) => ({
     phaseData: getPhase(state, PHASE_COLD),
-    nodeOptions: getNodeOptions(state),
     warmPhaseReplicaCount: getPhaseData(state, PHASE_WARM, PHASE_REPLICA_COUNT)
   }),
   {
     setPhaseData: (key, value) => setPhaseData(PHASE_COLD, key, value),
-    fetchNodes
   }
 )(PresentationComponent);

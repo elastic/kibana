@@ -15,9 +15,7 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiFieldNumber,
-  EuiSelect,
   EuiSwitch,
-  EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiButton,
 } from '@elastic/eui';
@@ -35,6 +33,7 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
   PHASE_SHRINK_ENABLED,
 } from '../../../../store/constants';
+import { NodeAllocation } from '../node_allocation';
 import { ErrableFormRow } from '../../form_errors';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../../components';
 import { MinAgeInput } from '../min_age_input';
@@ -59,19 +58,12 @@ class WarmPhaseUi extends PureComponent {
       [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
       [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired,
     }).isRequired,
-    nodeOptions: PropTypes.array.isRequired,
   };
-
-  componentWillMount() {
-    this.props.fetchNodes();
-  }
-
   render() {
     const {
       setPhaseData,
       showNodeDetailsFlyout,
       phaseData,
-      nodeOptions,
       errors,
       isShowingErrors,
       hotPhaseRolloverEnabled,
@@ -156,37 +148,14 @@ class WarmPhaseUi extends PureComponent {
 
               <EuiSpacer />
 
-              <ErrableFormRow
-                id={`${PHASE_WARM}.${PHASE_NODE_ATTRS}`}
-                label={intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.warmPhase.allocationChoiceLabel',
-                  defaultMessage: 'Choose where to allocate indices by node attribute'
-                })}
-                errorKey={PHASE_NODE_ATTRS}
-                isShowingErrors={isShowingErrors}
+
+              <NodeAllocation
+                setPhaseData={setPhaseData}
+                showNodeDetailsFlyout={showNodeDetailsFlyout}
                 errors={errors}
-                helpText={
-                  phaseData[PHASE_NODE_ATTRS] ? (
-                    <EuiButtonEmpty
-                      flush="left"
-                      onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
-                    >
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.viewNodeDetailsButton"
-                        defaultMessage="View node details"
-                      />
-                    </EuiButtonEmpty>
-                  ) : null
-                }
-              >
-                <EuiSelect
-                  value={phaseData[PHASE_NODE_ATTRS] || ' '}
-                  options={nodeOptions}
-                  onChange={async e => {
-                    await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
-                  }}
-                />
-              </ErrableFormRow>
+                phaseData={phaseData}
+                isShowingErrors={isShowingErrors}
+              />
 
               <EuiFlexGroup>
                 <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
