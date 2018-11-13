@@ -22,27 +22,21 @@ interface Props {
   intl: InjectedIntl;
 }
 
-const CPUUsage = i18n.translate('xpack.infra.waffle.metricOptions.optionsCPUUsageText', {
+const CPUUsage = i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
   defaultMessage: 'CPU Usage',
 });
 
-const MemoryUsage = i18n.translate('xpack.infra.waffle.metricOptions.optionsMemoryUsageText', {
+const MemoryUsage = i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
   defaultMessage: 'Memory Usage',
 });
 
-const InboundTraffic = i18n.translate(
-  'xpack.infra.waffle.metricOptions.optionsInboundTrafficText',
-  {
-    defaultMessage: 'Inbound Traffic',
-  }
-);
+const InboundTraffic = i18n.translate('xpack.infra.waffle.metricOptions.inboundTrafficText', {
+  defaultMessage: 'Inbound Traffic',
+});
 
-const OutboundTraffic = i18n.translate(
-  'xpack.infra.waffle.metricOptions.optionsOutboundTrafficText',
-  {
-    defaultMessage: 'Outbound Traffic',
-  }
-);
+const OutboundTraffic = i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficText', {
+  defaultMessage: 'Outbound Traffic',
+});
 
 const OPTIONS = {
   [InfraNodeType.pod]: [
@@ -91,7 +85,7 @@ const OPTIONS = {
       value: InfraMetricType.memory,
     },
     {
-      text: i18n.translate('xpack.infra.waffle.metricOptions.optionsLoadText', {
+      text: i18n.translate('xpack.infra.waffle.metricOptions.loadText', {
         defaultMessage: 'Load',
       }),
       value: InfraMetricType.load,
@@ -105,7 +99,7 @@ const OPTIONS = {
       value: InfraMetricType.tx,
     },
     {
-      text: i18n.translate('xpack.infra.waffle.metricOptions.optionsHostLogRateText', {
+      text: i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateText', {
         defaultMessage: 'Log Rate',
       }),
       value: InfraMetricType.logRate,
@@ -149,8 +143,11 @@ class WaffleMetricControlsUI extends React.PureComponent<Props, State> {
     ];
     const button = (
       <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        <FormattedMessage id="xpack.infra.waffle.metricButtonLabel" defaultMessage="Metric: " />
-        {currentLabel.text}
+        <FormattedMessage
+          id="xpack.infra.waffle.metricButtonLabel"
+          defaultMessage="Metric: {selectedMetric}"
+          values={{ selectedMetric: currentLabel.text }}
+        />
       </EuiFilterButton>
     );
 

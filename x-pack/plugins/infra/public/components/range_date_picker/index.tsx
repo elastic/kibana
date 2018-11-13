@@ -30,142 +30,142 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-const commonDates = [
+const commonDates: Array<{ id: string; label: any }> = [
   {
-    id: 'Today',
+    id: 'today',
     label: i18n.translate('xpack.infra.rangeDatePicker.todayText', {
-      defaultMessage: 'Today111',
+      defaultMessage: 'Today',
     }),
   },
   {
-    id: 'Yesterday',
+    id: 'yesterday',
     label: i18n.translate('xpack.infra.rangeDatePicker.yesterdayText', {
       defaultMessage: 'Yesterday',
     }),
   },
   {
-    id: 'This week',
+    id: 'this_week',
     label: i18n.translate('xpack.infra.rangeDatePicker.thisWeekText', {
       defaultMessage: 'This week',
     }),
   },
   {
-    id: 'Week to date',
+    id: 'week_to_date',
     label: i18n.translate('xpack.infra.rangeDatePicker.weekToDateText', {
       defaultMessage: 'Week to date',
     }),
   },
   {
-    id: 'This month',
+    id: 'this_month',
     label: i18n.translate('xpack.infra.rangeDatePicker.thisMonthText', {
       defaultMessage: 'This month',
     }),
   },
   {
-    id: 'Month to date',
+    id: 'month_to_date',
     label: i18n.translate('xpack.infra.rangeDatePicker.monthToDateText', {
       defaultMessage: 'Month to date',
     }),
   },
   {
-    id: 'This year',
+    id: 'this_year',
     label: i18n.translate('xpack.infra.rangeDatePicker.thisYearText', {
       defaultMessage: 'This year',
     }),
   },
   {
-    id: 'Year to date',
+    id: 'year_to_date',
     label: i18n.translate('xpack.infra.rangeDatePicker.yearToDateText', {
       defaultMessage: 'Year to date',
     }),
   },
 ];
 
-const singleLastOptions = [
+const singleLastOptions: Array<{ value: string; text: any }> = [
   {
     value: 'seconds',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.secondLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.singleUnitOptions.secondLabel', {
       defaultMessage: 'second',
     }),
   },
   {
     value: 'minutes',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.minuteLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.singleUnitOptions.minuteLabel', {
       defaultMessage: 'minute',
     }),
   },
   {
     value: 'hours',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.hourLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.singleUnitOptions.hourLabel', {
       defaultMessage: 'hour',
     }),
   },
   {
     value: 'days',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.dayLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.singleUnitOptions.dayLabel', {
       defaultMessage: 'day',
     }),
   },
   {
     value: 'weeks',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.weekLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.singleUnitOptions.weekLabel', {
       defaultMessage: 'week',
     }),
   },
   {
     value: 'months',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.monthLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.singleUnitOptions.monthLabel', {
       defaultMessage: 'month',
     }),
   },
   {
     value: 'years',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.yearLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.singleUnitOptions.yearLabel', {
       defaultMessage: 'year',
     }),
   },
 ];
 
-const pluralLastOptions = [
+const pluralLastOptions: Array<{ value: string; text: any }> = [
   {
     value: 'seconds',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.secondsLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.pluralUnitOptions.secondsLabel', {
       defaultMessage: 'seconds',
     }),
   },
   {
     value: 'minutes',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.minutesLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.pluralUnitOptions.minutesLabel', {
       defaultMessage: 'minutes',
     }),
   },
   {
     value: 'hours',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.hoursLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.pluralUnitOptions.hoursLabel', {
       defaultMessage: 'hours',
     }),
   },
   {
     value: 'days',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.daysLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.pluralUnitOptions.daysLabel', {
       defaultMessage: 'days',
     }),
   },
   {
     value: 'weeks',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.weeksLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.pluralUnitOptions.weeksLabel', {
       defaultMessage: 'weeks',
     }),
   },
   {
     value: 'months',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.monthsLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.pluralUnitOptions.monthsLabel', {
       defaultMessage: 'months',
     }),
   },
   {
     value: 'years',
-    text: i18n.translate('xpack.infra.rangeDatePicker.unitOptions.yearsLabel', {
+    text: i18n.translate('xpack.infra.rangeDatePicker.pluralUnitOptions.yearsLabel', {
       defaultMessage: 'years',
     }),
   },
@@ -366,18 +366,21 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         },
         {
           quickSelectTime: this.state.quickSelectTime,
-          quickSelectUnit: this.state.quickSelectUnit,
+          quickSelectUnit:
+            this.state.quickSelectTime === 1
+              ? find(singleLastOptions, { value: this.state.quickSelectUnit })!.text
+              : find(pluralLastOptions, { value: this.state.quickSelectUnit })!.text,
         }
       );
       startDate = moment().subtract(this.state.quickSelectTime, this.state
         .quickSelectUnit as moment.unitOfTime.DurationConstructor);
       endDate = moment();
-    } else if (type === 'Today') {
+    } else if (type === 'today') {
       startDate = moment().startOf('day');
       endDate = moment()
         .startOf('day')
         .add(24, 'hour');
-    } else if (type === 'Yesterday') {
+    } else if (type === 'yesterday') {
       startDate = moment()
         .subtract(1, 'day')
         .startOf('day');
@@ -385,28 +388,28 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
         .subtract(1, 'day')
         .startOf('day')
         .add(24, 'hour');
-    } else if (type === 'This week') {
+    } else if (type === 'this_week') {
       startDate = moment().startOf('week');
       endDate = moment()
         .startOf('week')
         .add(1, 'week');
-    } else if (type === 'Week to date') {
+    } else if (type === 'week_to_date') {
       startDate = moment().subtract(1, 'week');
       endDate = moment();
-    } else if (type === 'This month') {
+    } else if (type === 'this_month') {
       startDate = moment().startOf('month');
       endDate = moment()
         .startOf('month')
         .add(1, 'month');
-    } else if (type === 'Month to date') {
+    } else if (type === 'month_to_date') {
       startDate = moment().subtract(1, 'month');
       endDate = moment();
-    } else if (type === 'This year') {
+    } else if (type === 'this_year') {
       startDate = moment().startOf('year');
       endDate = moment()
         .startOf('year')
         .add(1, 'year');
-    } else if (type === 'Year to date') {
+    } else if (type === 'year_to_date') {
       startDate = moment().subtract(1, 'year');
       endDate = moment();
     } else if (type === 'date-range' && to && from) {
@@ -414,6 +417,10 @@ class RangeDatePickerUI extends React.PureComponent<RangeDatePickerProps, RangeD
       endDate = moment(to);
     }
 
+    textJustUsed =
+      textJustUsed && !textJustUsed.includes('Last')
+        ? find(commonDates, { id: type })!.label
+        : textJustUsed;
     if (textJustUsed !== undefined && !find(recentlyUsed, ['text', textJustUsed])) {
       recentlyUsed.unshift({ type, text: textJustUsed });
       recentlyUsed = recentlyUsed.slice(0, 5);

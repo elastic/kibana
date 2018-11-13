@@ -27,14 +27,14 @@ interface Props {
 const OPTIONS = {
   [InfraNodeType.pod]: [
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.namespaceLabel', {
+      text: i18n.translate('xpack.infra.waffle.podGroupByOptions.namespaceLabel', {
         defaultMessage: 'Namespace',
       }),
       type: InfraPathType.terms,
       field: 'kubernetes.namespace',
     },
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.nodeLabel', {
+      text: i18n.translate('xpack.infra.waffle.podGroupByOptions.nodeLabel', {
         defaultMessage: 'Node',
       }),
       type: InfraPathType.terms,
@@ -43,35 +43,35 @@ const OPTIONS = {
   ],
   [InfraNodeType.container]: [
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.hostLabel', {
+      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.hostLabel', {
         defaultMessage: 'Host',
       }),
       type: InfraPathType.terms,
       field: 'host.name',
     },
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.availabilityZoneLabel', {
+      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.availabilityZoneLabel', {
         defaultMessage: 'Availability Zone',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.availability_zone',
     },
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.machineTypeLabel', {
+      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.machineTypeLabel', {
         defaultMessage: 'Machine Type',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.machine_type',
     },
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.projectIDLabel', {
+      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.projectIDLabel', {
         defaultMessage: 'Project ID',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.project_id',
     },
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.providerLabel', {
+      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.providerLabel', {
         defaultMessage: 'Provider',
       }),
       type: InfraPathType.terms,
@@ -80,28 +80,28 @@ const OPTIONS = {
   ],
   [InfraNodeType.host]: [
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.availabilityZoneLabel', {
+      text: i18n.translate('xpack.infra.waffle.hostGroupByOptions.availabilityZoneLabel', {
         defaultMessage: 'Availability Zone',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.availability_zone',
     },
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.machineTypeLabel', {
+      text: i18n.translate('xpack.infra.waffle.hostGroupByOptions.machineTypeLabel', {
         defaultMessage: 'Machine Type',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.machine_type',
     },
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.projectIDLabel', {
+      text: i18n.translate('xpack.infra.waffle.hostGroupByOptions.projectIDLabel', {
         defaultMessage: 'Project ID',
       }),
       type: InfraPathType.terms,
       field: 'meta.cloud.project_id',
     },
     {
-      text: i18n.translate('xpack.infra.waffle.groupByOptions.cloudProviderLabel', {
+      text: i18n.translate('xpack.infra.waffle.hostGroupByOptions.cloudProviderLabel', {
         defaultMessage: 'Cloud Provider',
       }),
       type: InfraPathType.terms,
