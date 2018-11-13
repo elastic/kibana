@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { deleteAll } from '../lib';
+import minimatch from 'minimatch';
+
+import { deleteAll, scanDelete } from '../lib';
 
 export const CleanTask = {
   global: true,
@@ -49,10 +51,13 @@ export const CleanTypescriptTask = {
     'Cleaning typescript source files that have been transpiled to JS',
 
   async run(config, log, build) {
-    await deleteAll(log, [
-      build.resolvePath('**/*.{ts,tsx,d.ts}'),
-      build.resolvePath('**/tsconfig*.json'),
-    ]);
+    log.info('Deleted %d files', await scanDelete({
+      directory: build.resolvePath(),
+      regularExpressions: [
+        /\.(ts|tsx|d\.ts)$/,
+        /tsconfig.*\.json$/
+      ]
+    }));
   },
 };
 
@@ -60,94 +65,108 @@ export const CleanExtraFilesFromModulesTask = {
   description: 'Cleaning tests, examples, docs, etc. from node_modules',
 
   async run(config, log, build) {
-    const deleteFromNodeModules = globs => {
-      return deleteAll(
-        log,
-        globs.map(p => build.resolvePath(`node_modules/**/${p}`))
+    const makeRegexps = patterns =>
+      patterns.map(pattern =>
+        minimatch.makeRe(pattern, { nocase: true })
       );
-    };
 
-    const tests = [
-      'test',
-      'tests',
-      '__tests__',
-      'mocha.opts',
-      '*.test.js',
-      '*.snap',
-      'coverage',
-    ];
-    const docs = [
-      'doc',
-      'docs',
-      'CONTRIBUTING.md',
-      'Contributing.md',
-      'contributing.md',
-      'History.md',
-      'HISTORY.md',
-      'history.md',
-      'CHANGELOG.md',
-      'Changelog.md',
-      'changelog.md',
-    ];
-    const examples = ['example', 'examples', 'demo', 'samples'];
-    const bins = ['.bin'];
-    const linters = [
-      '.eslintrc',
-      '.eslintrc.js',
-      '.eslintrc.yml',
-      '.prettierrc',
-      '.jshintrc',
-      '.babelrc',
-      '.jscs.json',
-      '.lint',
-    ];
-    const hints = ['*.flow', '*.webidl', '*.map', '@types'];
-    const scripts = [
-      '*.sh',
-      '*.bat',
-      '*.exe',
-      'Gruntfile.js',
-      'gulpfile.js',
-      'Makefile',
-    ];
-    const untranspiledSources = ['*.coffee', '*.scss', '*.sass', '.ts', '.tsx'];
-    const editors = ['.editorconfig', '.vscode'];
-    const git = [
-      '.gitattributes',
-      '.gitkeep',
-      '.gitempty',
-      '.gitmodules',
-      '.keep',
-      '.empty',
-    ];
-    const ci = [
-      '.travis.yml',
-      '.coveralls.yml',
-      '.instanbul.yml',
-      'appveyor.yml',
-      '.zuul.yml',
-    ];
-    const meta = [
-      'package-lock.json',
-      'component.json',
-      'bower.json',
-      'yarn.lock',
-    ];
-    const misc = ['.*ignore', '.DS_Store', 'Dockerfile', 'docker-compose.yml'];
+    log.info('Deleted %d files', await scanDelete({
+      directory: build.resolvePath('node_modules'),
+      regularExpressions: makeRegexps([
+        // tests
+        '**/test',
+        '**/tests',
+        '**/__tests__',
+        '**/mocha.opts',
+        '**/*.test.js',
+        '**/*.snap',
+        '**/coverage',
 
-    await deleteFromNodeModules(tests);
-    await deleteFromNodeModules(docs);
-    await deleteFromNodeModules(examples);
-    await deleteFromNodeModules(bins);
-    await deleteFromNodeModules(linters);
-    await deleteFromNodeModules(hints);
-    await deleteFromNodeModules(scripts);
-    await deleteFromNodeModules(untranspiledSources);
-    await deleteFromNodeModules(editors);
-    await deleteFromNodeModules(git);
-    await deleteFromNodeModules(ci);
-    await deleteFromNodeModules(meta);
-    await deleteFromNodeModules(misc);
+        // docs
+        '**/doc',
+        '**/docs',
+        '**/CONTRIBUTING.md',
+        '**/Contributing.md',
+        '**/contributing.md',
+        '**/History.md',
+        '**/HISTORY.md',
+        '**/history.md',
+        '**/CHANGELOG.md',
+        '**/Changelog.md',
+        '**/changelog.md',
+
+        // examples
+        '**/example',
+        '**/examples',
+        '**/demo',
+        '**/samples',
+
+        // bins
+        '**/.bin',
+
+        // linters
+        '**/.eslintrc',
+        '**/.eslintrc.js',
+        '**/.eslintrc.yml',
+        '**/.prettierrc',
+        '**/.jshintrc',
+        '**/.babelrc',
+        '**/.jscs.json',
+        '**/.lint',
+
+        // hints
+        '**/*.flow',
+        '**/*.webidl',
+        '**/*.map',
+        '**/@types',
+
+        // scripts
+        '**/*.sh',
+        '**/*.bat',
+        '**/*.exe',
+        '**/Gruntfile.js',
+        '**/gulpfile.js',
+        '**/Makefile',
+
+        // untranspiled sources
+        '**/*.coffee',
+        '**/*.scss',
+        '**/*.sass',
+        '**/.ts',
+        '**/.tsx',
+
+        // editors
+        '**/.editorconfig',
+        '**/.vscode',
+
+        // git
+        '**/.gitattributes',
+        '**/.gitkeep',
+        '**/.gitempty',
+        '**/.gitmodules',
+        '**/.keep',
+        '**/.empty',
+
+        // ci
+        '**/.travis.yml',
+        '**/.coveralls.yml',
+        '**/.instanbul.yml',
+        '**/appveyor.yml',
+        '**/.zuul.yml',
+
+        // metadata
+        '**/package-lock.json',
+        '**/component.json',
+        '**/bower.json',
+        '**/yarn.lock',
+
+        // misc
+        '**/.*ignore',
+        '**/.DS_Store',
+        '**/Dockerfile',
+        '**/docker-compose.yml'
+      ])
+    }));
   },
 };
 

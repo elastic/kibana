@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { StickyProperties } from './index';
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import { USER_ID, REQUEST_URL_FULL } from '../../../../common/constants';
-import { toJson, mockMoment } from '../../../utils/testHelpers';
+import { mockMoment } from '../../../utils/testHelpers';
 
 describe('StickyProperties', () => {
   beforeEach(mockMoment);
@@ -43,10 +43,10 @@ describe('StickyProperties', () => {
       }
     ];
 
-    const wrapper = mount(
+    const wrapper = shallow(
       <StickyProperties stickyProperties={stickyProperties} />
     );
 
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(wrapper).toMatchSnapshot();
   });
 });

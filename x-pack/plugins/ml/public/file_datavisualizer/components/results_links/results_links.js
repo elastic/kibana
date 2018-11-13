@@ -19,6 +19,7 @@ import {
 import moment from 'moment';
 import uiChrome from 'ui/chrome';
 import { ml } from '../../../services/ml_api_service';
+import { isFullLicense } from '../../../license/check_license';
 
 const RECHECK_DELAY_MS = 3000;
 
@@ -35,7 +36,11 @@ export class ResultsLinks extends Component {
   }
 
   componentDidMount() {
-    this.updateTimeValues();
+    // if this data has a time field,
+    // find the start and end times
+    if (this.props.timeFieldName !== undefined) {
+      this.updateTimeValues();
+    }
   }
 
   componentWillUnmount() {
@@ -70,6 +75,7 @@ export class ResultsLinks extends Component {
   render() {
     const {
       indexPatternId,
+      timeFieldName,
     } = this.props;
 
     const {
@@ -77,7 +83,7 @@ export class ResultsLinks extends Component {
       to,
     } = this.state;
 
-    const _g = `&_g=(time:(from:'${from}',mode:quick,to:'${to}'))`;
+    const _g = (this.props.timeFieldName !== undefined) ? `&_g=(time:(from:'${from}',mode:quick,to:'${to}'))` : '';
 
     return (
       <EuiFlexGroup gutterSize="l">
@@ -90,14 +96,16 @@ export class ResultsLinks extends Component {
           />
         </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
-            title="Create new ML job"
-            description=""
-            href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
-          />
-        </EuiFlexItem>
+        {(isFullLicense() === true && timeFieldName !== undefined) &&
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type={`machineLearningApp`} />}
+              title="Create new ML job"
+              description=""
+              href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
+            />
+          </EuiFlexItem>
+        }
 
         <EuiFlexItem>
           <EuiCard

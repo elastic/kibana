@@ -13,7 +13,7 @@ export const createGetTagsWithIdsRoute = (libs: CMServerLibs) => ({
   path: '/api/beats/tags/{tagIds}',
   requiredRoles: ['beats_admin'],
   licenseRequired: true,
-  handler: async (request: any, reply: any) => {
+  handler: async (request: any) => {
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
@@ -21,9 +21,9 @@ export const createGetTagsWithIdsRoute = (libs: CMServerLibs) => ({
     try {
       tags = await libs.tags.getTagsWithIds(request.user, tagIds);
     } catch (err) {
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
 
-    reply(tags);
+    return tags;
   },
 });

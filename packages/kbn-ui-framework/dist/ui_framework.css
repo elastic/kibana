@@ -2722,7 +2722,7 @@ main {
   display: -ms-flexbox;
   display: flex;
   width: 100%;
-  margin-bottom: 10px; }
+  margin-bottom: 8px; }
 
 .kuiLocalSearchInput {
   -webkit-appearance: none;

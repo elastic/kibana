@@ -12,7 +12,7 @@ export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
   path: '/api/beats/tags/{tagIds}',
   requiredRoles: ['beats_admin'],
   licenseRequired: true,
-  handler: async (request: any, reply: any) => {
+  handler: async (request: any) => {
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
@@ -20,9 +20,9 @@ export const createDeleteTagsWithIdsRoute = (libs: CMServerLibs) => ({
     try {
       success = await libs.tags.delete(request.user, tagIds);
     } catch (err) {
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
 
-    reply({ success });
+    return { success };
   },
 });

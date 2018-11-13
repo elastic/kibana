@@ -63,6 +63,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
     return (
       <EuiPopover
         id="popover"
+        className="eui-displayBlock"
         ownFocus
         anchorPosition="downRight"
         button={button}

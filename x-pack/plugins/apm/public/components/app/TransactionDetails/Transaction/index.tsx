@@ -6,6 +6,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -13,92 +14,107 @@ import {
   EuiTitle,
   EuiToolTip
 } from '@elastic/eui';
-import { isEmpty } from 'lodash';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import EmptyMessage from '../../../shared/EmptyMessage';
 import { TransactionLink } from '../../../shared/TransactionLink';
-import { ActionMenu } from './ActionMenu';
+import { DiscoverTransactionLink } from './ActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
-// @ts-ignore
 import { TransactionPropertiesTable } from './TransactionPropertiesTable';
+import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 function MaybeViewTraceLink({
-  root,
-  transaction
+  transaction,
+  waterfall
 }: {
-  root: ITransaction;
   transaction: ITransaction;
+  waterfall: IWaterfall;
 }) {
-  const isRoot = transaction.transaction.id === root.transaction.id;
-  let button;
-
-  if (isRoot || !root) {
-    button = (
-      <EuiToolTip content="Currently viewing the full trace">
-        <EuiButton iconType="apmApp" disabled={true}>
-          View full trace
-        </EuiButton>
-      </EuiToolTip>
+  // the traceroot cannot be found, so we cannot link to it
+  if (!waterfall.traceRoot) {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="The trace parent cannot be found">
+          <EuiButton iconType="apmApp" disabled={true}>
+            View full trace
+          </EuiButton>
+        </EuiToolTip>
+      </EuiFlexItem>
     );
-  } else {
-    button = <EuiButton iconType="apmApp">View full trace</EuiButton>;
   }
 
-  return (
-    <EuiFlexItem grow={false}>
-      <TransactionLink transaction={root}>{button}</TransactionLink>
-    </EuiFlexItem>
-  );
+  const isRoot =
+    transaction.transaction.id === waterfall.traceRoot.transaction.id;
+
+  // the user is already viewing the full trace, so don't link to it
+  if (isRoot) {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Currently viewing the full trace">
+          <EuiButton iconType="apmApp" disabled={true}>
+            View full trace
+          </EuiButton>
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
+
+    // the user is viewing a zoomed in version of the trace. Link to the full trace
+  } else {
+    return (
+      <EuiFlexItem grow={false}>
+        <TransactionLink transaction={waterfall.traceRoot}>
+          <EuiButton iconType="apmApp">View full trace</EuiButton>
+        </TransactionLink>
+      </EuiFlexItem>
+    );
+  }
 }
 
 interface Props {
   transaction: ITransaction;
   urlParams: IUrlParams;
   location: Location;
-  waterfallRoot?: ITransaction;
+  waterfall: IWaterfall;
 }
 
 export const Transaction: React.SFC<Props> = ({
   transaction,
   urlParams,
   location,
-  waterfallRoot
+  waterfall
 }) => {
-  if (isEmpty(transaction)) {
-    return (
-      <EmptyMessage
-        heading="No transaction sample available."
-        subheading="Try another time range, reset the search filter or select another bucket from the distribution histogram."
-      />
-    );
-  }
-
-  const root = waterfallRoot || transaction;
-
   return (
-    <EuiPanel paddingSize="m" hasShadow={true}>
+    <EuiPanel paddingSize="m">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <span>Transaction sample</span>
+            <h5>Transaction sample</h5>
           </EuiTitle>
         </EuiFlexItem>
 
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <ActionMenu transaction={transaction} />
+              <DiscoverTransactionLink transaction={transaction}>
+                <EuiButtonEmpty iconType="discoverApp">
+                  View transaction in Discover
+                </EuiButtonEmpty>
+              </DiscoverTransactionLink>
             </EuiFlexItem>
-            <MaybeViewTraceLink transaction={transaction} root={root} />
+            <MaybeViewTraceLink
+              transaction={transaction}
+              waterfall={waterfall}
+            />
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer />
 
-      <StickyTransactionProperties transaction={transaction} root={root} />
+      <StickyTransactionProperties
+        transaction={transaction}
+        totalDuration={waterfall.traceRootDuration}
+      />
 
       <EuiSpacer />
 
@@ -106,6 +122,7 @@ export const Transaction: React.SFC<Props> = ({
         transaction={transaction}
         location={location}
         urlParams={urlParams}
+        waterfall={waterfall}
       />
     </EuiPanel>
   );

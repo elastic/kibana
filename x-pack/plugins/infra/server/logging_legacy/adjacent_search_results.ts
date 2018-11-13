@@ -32,9 +32,9 @@ export const initAdjacentSearchResultsRoutes = (framework: InfraBackendFramework
 
   framework.registerRoute<
     InfraWrappableRequest<AdjacentSearchResultsApiPostPayload>,
-    AdjacentSearchResultsApiPostResponse
+    Promise<AdjacentSearchResultsApiPostResponse>
   >({
-    config: {
+    options: {
       validate: {
         payload: Joi.object().keys({
           after: Joi.number()
@@ -50,7 +50,7 @@ export const initAdjacentSearchResultsRoutes = (framework: InfraBackendFramework
         }),
       },
     },
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const timings = {
         esRequestSent: Date.now(),
         esResponseProcessed: 0,
@@ -92,15 +92,15 @@ export const initAdjacentSearchResultsRoutes = (framework: InfraBackendFramework
 
         timings.esResponseProcessed = Date.now();
 
-        return reply({
+        return {
           results: {
             after: searchResultsAfterTarget,
             before: searchResultsBeforeTarget,
           },
           timings,
-        });
+        };
       } catch (requestError) {
-        return reply(Boom.wrap(requestError));
+        throw Boom.boomify(requestError);
       }
     },
     method: 'POST',

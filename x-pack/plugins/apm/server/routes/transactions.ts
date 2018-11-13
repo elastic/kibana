@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { IReply, Request, Server } from 'hapi';
+import { Server } from 'hapi';
 import Joi from 'joi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -18,18 +18,18 @@ import { getSpans } from '../lib/transactions/spans/get_spans';
 
 const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/transactions';
-const defaultErrorHandler = (reply: IReply) => (err: Error) => {
+const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
   // @ts-ignore
-  reply(Boom.wrap(err, err.statusCode || 400));
+  Boom.boomify(err, { statusCode: err.statusCode || 400 });
 };
 
 export function initTransactionsApi(server: Server) {
   server.route({
     method: 'GET',
     path: ROOT,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators({
@@ -38,25 +38,25 @@ export function initTransactionsApi(server: Server) {
         })
       }
     },
-    handler: (req: Request, reply: IReply) => {
+    handler: req => {
       const { serviceName } = req.params;
-      const { transaction_type: transactionType } = req.query;
+      const { transaction_type: transactionType } = req.query as {
+        transaction_type: string;
+      };
       const { setup } = req.pre;
 
       return getTopTransactions({
         serviceName,
         transactionType,
         setup
-      })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      }).catch(defaultErrorHandler);
     }
   });
 
   server.route({
     method: 'GET',
     path: `${ROOT}/{transactionId}`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators({
@@ -64,38 +64,36 @@ export function initTransactionsApi(server: Server) {
         })
       }
     },
-    handler: (req: Request, reply: IReply) => {
+    handler: req => {
       const { transactionId } = req.params;
-      const { traceId } = req.query;
+      const { traceId } = req.query as { traceId: string };
       const { setup } = req.pre;
-      return getTransaction(transactionId, traceId, setup)
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      return getTransaction(transactionId, traceId, setup).catch(
+        defaultErrorHandler
+      );
     }
   });
 
   server.route({
     method: 'GET',
     path: `${ROOT}/{transactionId}/spans`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators()
       }
     },
-    handler: (req: Request, reply: IReply) => {
+    handler: req => {
       const { transactionId } = req.params;
       const { setup } = req.pre;
-      return getSpans(transactionId, setup)
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      return getSpans(transactionId, setup).catch(defaultErrorHandler);
     }
   });
 
   server.route({
     method: 'GET',
     path: `${ROOT}/charts`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators({
@@ -105,27 +103,29 @@ export function initTransactionsApi(server: Server) {
         })
       }
     },
-    handler: (req: Request, reply: IReply) => {
+    handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
-      const transactionType = req.query.transaction_type;
-      const transactionName = req.query.transaction_name;
+      const { transaction_type: transactionType } = req.query as {
+        transaction_type: string;
+      };
+      const { transaction_name: transactionName } = req.query as {
+        transaction_name: string;
+      };
 
       return getTimeseriesData({
         serviceName,
         transactionType,
         transactionName,
         setup
-      })
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      }).catch(defaultErrorHandler);
     }
   });
 
   server.route({
     method: 'GET',
     path: `${ROOT}/distribution`,
-    config: {
+    options: {
       pre,
       validate: {
         query: withDefaultValidators({
@@ -133,13 +133,15 @@ export function initTransactionsApi(server: Server) {
         })
       }
     },
-    handler: (req: Request, reply: IReply) => {
+    handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
-      const { transaction_name: transactionName } = req.query;
-      return getDistribution(serviceName, transactionName, setup)
-        .then(reply)
-        .catch(defaultErrorHandler(reply));
+      const { transaction_name: transactionName } = req.query as {
+        transaction_name: string;
+      };
+      return getDistribution(serviceName, transactionName, setup).catch(
+        defaultErrorHandler
+      );
     }
   });
 }

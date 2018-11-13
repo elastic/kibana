@@ -95,13 +95,13 @@ export class WatchCache {
     // successfully read it once we decide to delete it
     await del(this.statePath);
 
-    // first delete some empty folder that left
-    // from any previous cache reset action
-    await deleteEmpty(`${this.cachePath}`);
-
     // delete everything in optimize/.cache directory
     // except ts-node
-    await del(await globby([`${this.cachePath}`, `!${this.cachePath}/ts-node/**`], { dot: true }));
+    await del(await globby([this.cachePath, `!${this.cachePath}/ts-node/**`], { dot: true }));
+
+    // delete some empty folder that could be left
+    // from the previous cache path reset action
+    await deleteEmpty(this.cachePath);
 
     // delete dlls
     await del(this.dllsPath);
@@ -129,9 +129,8 @@ export class WatchCache {
 
   private async buildYarnLockSha() {
     const kibanaYarnLock = resolve(__dirname, '../../../yarn.lock');
-    const xpackYarnLock = resolve(__dirname, '../../../x-pack/yarn.lock');
 
-    return await this.buildShaWithMultipleFiles([kibanaYarnLock, xpackYarnLock]);
+    return await this.buildShaWithMultipleFiles([kibanaYarnLock]);
   }
 
   private async buildOptimizerConfigSha() {

@@ -21,6 +21,15 @@ import { getIndices } from '../get_indices';
 import successfulResponse from './api/get_indices.success.json';
 import errorResponse from './api/get_indices.error.json';
 import exceptionResponse from './api/get_indices.exception.json';
+const mockIndexPatternCreationType = {
+  getIndexPatternType: () => 'default',
+  getIndexPatternName: () => 'name',
+  checkIndicesForErrors: () => false,
+  getShowSystemIndices: () => false,
+  renderPrompt: () => {},
+  getIndexPatternMappings: () => { return {}; },
+  getIndexTags: () => { return []; }
+};
 
 describe('getIndices', () => {
   it('should work in a basic case', async () => {
@@ -28,20 +37,20 @@ describe('getIndices', () => {
       search: () => new Promise((resolve) => resolve(successfulResponse))
     };
 
-    const result = await getIndices(es, 'kibana', 1);
+    const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
     expect(result.length).toBe(2);
     expect(result[0].name).toBe('1');
     expect(result[1].name).toBe('2');
   });
 
   it('should ignore ccs query-all', async () => {
-    expect((await getIndices(null, '*:')).length).toBe(0);
+    expect((await getIndices(null, mockIndexPatternCreationType, '*:')).length).toBe(0);
   });
 
   it('should ignore a single comma', async () => {
-    expect((await getIndices(null, ',')).length).toBe(0);
-    expect((await getIndices(null, ',*')).length).toBe(0);
-    expect((await getIndices(null, ',foobar')).length).toBe(0);
+    expect((await getIndices(null, mockIndexPatternCreationType, ',')).length).toBe(0);
+    expect((await getIndices(null, mockIndexPatternCreationType, ',*')).length).toBe(0);
+    expect((await getIndices(null, mockIndexPatternCreationType, ',foobar')).length).toBe(0);
   });
 
   it('should trim the input', async () => {
@@ -52,7 +61,7 @@ describe('getIndices', () => {
       }),
     };
 
-    await getIndices(es, 'kibana          ', 1);
+    await getIndices(es, mockIndexPatternCreationType, 'kibana          ', 1);
     expect(index).toBe('kibana');
   });
 
@@ -64,7 +73,7 @@ describe('getIndices', () => {
       }),
     };
 
-    await getIndices(es, 'kibana', 10);
+    await getIndices(es, mockIndexPatternCreationType, 'kibana', 10);
     expect(limit).toBe(10);
   });
 
@@ -74,7 +83,7 @@ describe('getIndices', () => {
         search: () => new Promise((resolve) => resolve(errorResponse))
       };
 
-      const result = await getIndices(es, 'kibana', 1);
+      const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
       expect(result.length).toBe(0);
     });
 
@@ -83,7 +92,7 @@ describe('getIndices', () => {
         search: () => { throw new Error('Fail'); }
       };
 
-      await expect(getIndices(es, 'kibana', 1)).rejects.toThrow();
+      await expect(getIndices(es, mockIndexPatternCreationType, 'kibana', 1)).rejects.toThrow();
     });
 
     it('should handle index_not_found_exception errors gracefully', async () => {
@@ -91,12 +100,12 @@ describe('getIndices', () => {
         search: () => new Promise((resolve, reject) => reject(exceptionResponse))
       };
 
-      const result = await getIndices(es, 'kibana', 1);
+      const result = await getIndices(es, mockIndexPatternCreationType, 'kibana', 1);
       expect(result.length).toBe(0);
     });
 
     it('should throw an exception if no limit is provided', async () => {
-      await expect(getIndices({}, 'kibana')).rejects.toThrow();
+      await expect(getIndices({}, mockIndexPatternCreationType, 'kibana')).rejects.toThrow();
     });
   });
 });

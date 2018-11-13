@@ -7,5 +7,6 @@
 import ecommerceSavedObjects from './ecommerce_saved_objects.json';
 import flightsSavedObjects from './flights_saved_objects.json';
 import webLogsSavedObjects from './web_logs_saved_objects.json';
+import { loadSampleData } from './load_sample_data';
 
-export { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects };
+export { loadSampleData, ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects };

@@ -31,9 +31,9 @@ export const initSearchSummaryRoutes = (framework: InfraBackendFrameworkAdapter)
 
   framework.registerRoute<
     InfraWrappableRequest<SearchSummaryApiPostPayload, {}, {}>,
-    SearchSummaryApiPostResponse
+    Promise<SearchSummaryApiPostResponse>
   >({
-    config: {
+    options: {
       validate: {
         payload: Joi.object().keys({
           bucketSize: summaryBucketSizeSchema.required(),
@@ -45,7 +45,7 @@ export const initSearchSummaryRoutes = (framework: InfraBackendFrameworkAdapter)
         }),
       },
     },
-    handler: async (request, reply) => {
+    handler: async request => {
       const timings = {
         esRequestSent: Date.now(),
         esResponseProcessed: 0,
@@ -66,12 +66,12 @@ export const initSearchSummaryRoutes = (framework: InfraBackendFrameworkAdapter)
 
         timings.esResponseProcessed = Date.now();
 
-        return reply({
+        return {
           buckets: summaryBuckets,
           timings,
-        });
+        };
       } catch (requestError) {
-        return reply(Boom.wrap(requestError));
+        throw Boom.boomify(requestError);
       }
     },
     method: 'POST',

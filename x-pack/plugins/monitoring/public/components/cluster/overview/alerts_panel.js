@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'plugins/monitoring/components/alerts/formatted_message';
+import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../../common/format_timestamp_to_duration';
 import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
@@ -50,7 +50,7 @@ export function AlertsPanel({ alerts, changeUrl }) {
         color={severityIcon.color}
         title={severityIcon.title}
       >
-        <FormattedMessage
+        <FormattedAlert
           prefix={item.prefix}
           suffix={item.suffix}
           message={item.message}

@@ -14,15 +14,15 @@ exports[`Overrides render overrides 1`] = `
         Array [
           Object {
             "inputDisplay": <span>
-              json
-            </span>,
-            "value": "json",
-          },
-          Object {
-            "inputDisplay": <span>
               delimited
             </span>,
             "value": "delimited",
+          },
+          Object {
+            "inputDisplay": <span>
+              ndjson
+            </span>,
+            "value": "ndjson",
           },
           Object {
             "inputDisplay": <span>

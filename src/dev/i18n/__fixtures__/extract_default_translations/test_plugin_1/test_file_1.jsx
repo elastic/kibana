@@ -6,7 +6,7 @@ i18n('plugin_1.id_1', { defaultMessage: 'Message 1' });
 // @kbn/i18n
 i18n.translate('plugin_1.id_2', {
   defaultMessage: 'Message 2',
-  context: 'Message context',
+  description: 'Message description',
 });
 
 // React component. FormattedMessage, Intl.formatMessage()

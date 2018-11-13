@@ -16,7 +16,7 @@ import Boom from 'boom';
 export function wrapEsError(err) {
   const statusCode = err.statusCode;
   if (statusCode === 403) {
-    return Boom.forbidden('Insufficient user permissions for adding a license.');
+    throw Boom.forbidden('Insufficient user permissions for adding a license.');
   }
-  return Boom.boomify(err, err.statusCode);
+  throw Boom.boomify(err, err.statusCode);
 }

@@ -47,6 +47,10 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
       ariaLabel = 'IP type';
       iconClass = 'fa-laptop';
       break;
+    case ML_JOB_FIELD_TYPES.UNKNOWN:
+      ariaLabel = 'Unknown type';
+      iconChar = '?';
+      break;
     default:
       // if type doesn't match one of ML_JOB_FIELD_TYPES
       // don't render the component at all
