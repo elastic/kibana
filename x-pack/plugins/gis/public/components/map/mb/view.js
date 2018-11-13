@@ -9,6 +9,7 @@ import React from 'react';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
 import { inspectorAdapters } from '../../../kibana_services';
+import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 
 export class MBMapContainer extends React.Component {
 
@@ -23,16 +24,16 @@ export class MBMapContainer extends React.Component {
     const mbCenter = this._mbMap.getCenter();
     const mbBounds = this._mbMap.getBounds();
     return {
-      zoom: zoom,
+      zoom: _.round(zoom, ZOOM_PRECISION),
       center: {
-        lon: mbCenter.lng,
-        lat: mbCenter.lat
+        lon: _.round(mbCenter.lng, DECIMAL_DEGREES_PRECISION),
+        lat: _.round(mbCenter.lat, DECIMAL_DEGREES_PRECISION)
       },
       extent: {
-        min_lon: mbBounds.getWest(),
-        min_lat: mbBounds.getSouth(),
-        max_lon: mbBounds.getEast(),
-        max_lat: mbBounds.getNorth()
+        min_lon: _.round(mbBounds.getWest(), DECIMAL_DEGREES_PRECISION),
+        min_lat: _.round(mbBounds.getSouth(), DECIMAL_DEGREES_PRECISION),
+        max_lon: _.round(mbBounds.getEast(), DECIMAL_DEGREES_PRECISION),
+        max_lat: _.round(mbBounds.getNorth(), DECIMAL_DEGREES_PRECISION)
       }
     };
   }
@@ -142,13 +143,15 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
-    const zoom = this._mbMap.getZoom();
+    const zoom = _.round(this._mbMap.getZoom(), ZOOM_PRECISION);
     if (typeof mapState.zoom === 'number' && mapState.zoom !== zoom) {
       this._mbMap.setZoom(mapState.zoom);
     }
 
     const center = this._mbMap.getCenter();
-    if (mapState.center && !_.isEqual(mapState.center, { lon: center.lng, lat: center.lat })) {
+    if (mapState.center &&
+      (mapState.center.lat !== _.round(center.lat, DECIMAL_DEGREES_PRECISION)
+      || mapState.center.lon !== _.round(center.lng, DECIMAL_DEGREES_PRECISION))) {
       this._mbMap.setCenter({
         lng: mapState.center.lon,
         lat: mapState.center.lat

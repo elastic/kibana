@@ -6,15 +6,33 @@
 
 import { connect } from 'react-redux';
 import { LayerControl } from './view';
-import { updateFlyout, FLYOUT_STATE } from '../../store/ui';
+import {
+  getIsSetViewOpen,
+  closeSetView,
+  openSetView,
+  updateFlyout,
+  FLYOUT_STATE
+} from '../../store/ui';
+
+function mapStateToProps(state = {}) {
+  return {
+    isSetViewOpen: getIsSetViewOpen(state),
+  };
+}
 
 function mapDispatchToProps(dispatch) {
   return {
     showAddLayerWizard: () => {
       dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
+    },
+    closeSetView: () => {
+      dispatch(closeSetView());
+    },
+    openSetView: () => {
+      dispatch(openSetView());
     }
   };
 }
 
-const connectedLayerControl = connect(null, mapDispatchToProps)(LayerControl);
+const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps)(LayerControl);
 export { connectedLayerControl as LayerControl };
