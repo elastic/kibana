@@ -125,9 +125,9 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
         randomBytes(6).toString('base64'),
       ].join('-');
 
-      const nodeModules = path.resolve(__dirname, '..', '..', '..', '..', '..', '..', 'node_modules');
-      const intlPath = path.join(nodeModules, 'intl', 'dist', 'Intl.js');
-      const promisePath = path.join(nodeModules, 'bluebird', 'js', 'browser', 'bluebird.js');
+      const xpackRoot = path.resolve(__dirname, '..', '..', '..', '..', '..', '..');
+      const intlPath = path.join(xpackRoot, '..', 'node_modules', 'intl', 'dist', 'Intl.js');
+      const promisePath = path.join(xpackRoot, 'node_modules', 'bluebird', 'js', 'browser', 'bluebird.js');
 
       return injectPolyfill(
         page,
