@@ -119,7 +119,6 @@ export class GitOperations {
         },
       });
     }
-    blame.free();
     return results;
   }
 
