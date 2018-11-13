@@ -6,8 +6,10 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import copy from 'copy-to-clipboard';
 
 import {
+  EuiButton,
   EuiCodeEditor,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -48,6 +50,13 @@ export class PolicyJsonFlyoutUi extends PureComponent {
               theme="github"
               isReadOnly
             />
+            <EuiSpacer size="s" />
+            <EuiButton onClick={() => copy(lifecycle)}>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyJsonFlyout.copyToClipboardButton"
+                defaultMessage="Copy to clipboard"
+              />
+            </EuiButton>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
