@@ -148,12 +148,14 @@ describe('mergeVariables', () => {
       canFoo: true,
       uiCapabilities: {
         firstCapability: 'ok',
+        navLinks: {},
       },
     };
 
     const otherVariables = {
       uiCapabilities: {
         secondCapability: 'ok',
+        navLinks: {},
       },
     };
 
@@ -165,16 +167,20 @@ describe('mergeVariables', () => {
       uiCapabilities: {
         firstCapability: 'ok',
         secondCapability: 'ok',
+        navLinks: {},
       },
     });
   });
 
-  it('does not deeply combine entries within "uiCapabilities"', () => {
+  it('Deeply combines "navLink" entries, but no others within "uiCapabilities"', () => {
     const someVariables = {
       name: 'value',
       canFoo: true,
       uiCapabilities: {
         firstCapability: 'ok',
+        navLinks: {
+          link1: true,
+        },
         nestedCapability: {
           nestedProp: 'nestedValue',
         },
@@ -184,6 +190,9 @@ describe('mergeVariables', () => {
     const otherVariables = {
       uiCapabilities: {
         secondCapability: 'ok',
+        navLinks: {
+          link2: false,
+        },
         nestedCapability: {
           otherNestedProp: 'otherNestedValue',
         },
@@ -197,6 +206,10 @@ describe('mergeVariables', () => {
       uiCapabilities: {
         firstCapability: 'ok',
         secondCapability: 'ok',
+        navLinks: {
+          link1: true,
+          link2: false,
+        },
         nestedCapability: {
           nestedProp: 'nestedValue',
         },
