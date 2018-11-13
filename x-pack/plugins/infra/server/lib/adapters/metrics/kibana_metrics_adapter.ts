@@ -46,7 +46,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
     if (!validNode) {
       throw new Error(
-        i18n.translate('xpack.infra.kibanaMetricsAdapter.idDoesNotExistErrorTitle', {
+        i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {
             nodeId: options.nodeId,
@@ -68,7 +68,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
             const infraMetricId: InfraMetric = (InfraMetric as any)[id];
             if (!infraMetricId) {
               throw new Error(
-                i18n.translate('xpack.infra.kibanaMetricsAdapter.noValidInfraMetricIdErrorTitle', {
+                i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
                   defaultMessage: '{id} is not a valid InfraMetric',
                   values: {
                     id,
