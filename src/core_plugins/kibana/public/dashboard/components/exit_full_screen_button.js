@@ -78,8 +78,9 @@ class ExitFullScreenButtonUi extends PureComponent {
             <span className="dshExitFullScreenButton__text" data-test-subj="exitFullScreenModeText">
               <FormattedMessage
                 id="kbn.dashboard.exitFullScreenButton.exitFullScreenModeButtonLabel"
-                defaultMessage="Exit full screen."
-              /> <span className="kuiIcon fa fa-angle-left"/>
+                defaultMessage="Exit full screen"
+              />
+              <span className="kuiIcon fa fa-angle-left"/>
             </span>
           </KuiButton>
         </div>

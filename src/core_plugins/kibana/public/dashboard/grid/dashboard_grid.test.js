@@ -74,7 +74,7 @@ afterAll(() => {
 test('renders DashboardGrid', () => {
   const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...getProps()} />);
   expect(component).toMatchSnapshot();
-  const panelElements = component.find('Connect(DashboardPanel)');
+  const panelElements = component.find('Connect(InjectIntl(DashboardPanelUi))');
   expect(panelElements.length).toBe(2);
 });
 
@@ -85,7 +85,7 @@ test('renders DashboardGrid with no visualizations', () => {
 
 test('adjusts z-index of focused panel to be higher than siblings', () => {
   const component = shallowWithIntl(<DashboardGrid.WrappedComponent {...getProps()} />);
-  const panelElements = component.find('Connect(DashboardPanel)');
+  const panelElements = component.find('Connect(InjectIntl(DashboardPanelUi))');
   panelElements.first().prop('onPanelFocused')('1');
   const [gridItem1, gridItem2] = component.update().findWhere(el => el.key() === '1' || el.key() === '2');
   expect(gridItem1.props.style.zIndex).toEqual('2');

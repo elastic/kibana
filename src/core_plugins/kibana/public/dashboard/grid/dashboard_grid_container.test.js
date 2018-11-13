@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Provider } from 'react-redux';
 import _ from 'lodash';
 import sizeMe from 'react-sizeme';
@@ -94,7 +94,7 @@ test('loads old panel data in the right order', () => {
   store.dispatch(updatePanels(panelData));
   store.dispatch(updateUseMargins(false));
 
-  const grid = mount(<Provider store={store}><DashboardGridContainer {...getProps()} /></Provider>);
+  const grid = mountWithIntl(<Provider store={store}><DashboardGridContainer {...getProps()} /></Provider>);
 
   const panels = store.getState().dashboard.panels;
   expect(Object.keys(panels).length).toBe(16);
@@ -130,7 +130,7 @@ test('loads old panel data in the right order with margins', () => {
   store.dispatch(updatePanels(panelData));
   store.dispatch(updateUseMargins(true));
 
-  const grid = mount(<Provider store={store}><DashboardGridContainer {...getProps()} /></Provider>);
+  const grid = mountWithIntl(<Provider store={store}><DashboardGridContainer {...getProps()} /></Provider>);
 
   const panels = store.getState().dashboard.panels;
   expect(Object.keys(panels).length).toBe(16);
