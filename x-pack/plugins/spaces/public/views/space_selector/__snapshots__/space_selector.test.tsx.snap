@@ -26,6 +26,7 @@ exports[`it renders without crashing 1`] = `
       </span>
       <EuiTitle
         size="l"
+        textTransform="none"
       >
         <h1>
           Select your space
@@ -68,6 +69,7 @@ exports[`it renders without crashing 1`] = `
         <EuiText
           color="subdued"
           grow={true}
+          size="m"
           textAlign="center"
         >
           No spaces match search criteria

@@ -77,7 +77,8 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
           text: i18n('regionMap.mapVis.regionMapEditorConfig.topRightText', { defaultMessage: 'top right' }),
         }],
         colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),
-        vectorLayers: vectorLayers
+        vectorLayers: vectorLayers,
+        tmsLayers: []
       },
       schemas: new Schemas([
         {
