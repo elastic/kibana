@@ -138,9 +138,14 @@ export function createParserErrorMessage(content, error) {
  */
 function extractValueReferencesFromIcuAst(node, keys = new Set()) {
   if (Array.isArray(node.elements)) {
-    for (const element of node.elements.filter(element => element.type === ARGUMENT_ELEMENT_TYPE)) {
+    for (const element of node.elements) {
+      if (element.type !== ARGUMENT_ELEMENT_TYPE) {
+        continue;
+      }
+
       keys.add(element.id);
 
+      // format contains all specific parameters for complex argumentElements
       if (element.format && Array.isArray(element.format.options)) {
         for (const option of element.format.options) {
           extractValueReferencesFromIcuAst(option, keys);
