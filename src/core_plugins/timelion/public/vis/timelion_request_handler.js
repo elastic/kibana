@@ -31,21 +31,21 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
 
   return {
     name: 'timelion',
-    handler: function (vis, { timeRange, filters, query }) {
+    handler: function ({ aggs, timeRange, filters, query, visParams }) {
 
       return new Promise((resolve, reject) => {
-        const expression = vis.params.expression;
+        const expression = visParams.expression;
         if (!expression) return;
 
         const httpResult = $http.post('../api/timelion/run', {
           sheet: [expression],
           extended: {
             es: {
-              filter: buildEsQuery(vis.indexPattern, [query], filters)
+              filter: buildEsQuery(aggs.indexPattern, [query], filters)
             }
           },
           time: _.extend(timeRange, {
-            interval: vis.params.interval,
+            interval: visParams.interval,
             timezone: timezone
           }),
         })

@@ -22,5 +22,5 @@ set -e
 
 source "$(dirname $0)/../../src/dev/ci_setup/setup.sh"
 
-TEST_BROWSER_HEADLESS=1
+export TEST_BROWSER_HEADLESS=1
 node scripts/functional_test_runner --debug --exclude-tag skipCloud $@
