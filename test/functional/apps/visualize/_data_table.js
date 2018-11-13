@@ -193,6 +193,42 @@ export default function ({ getService, getPageObjects }) {
       expect(data.length).to.be.greaterThan(0);
     });
 
+    describe('otherBucket', () => {
+      before(async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickDataTable();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.clickBucket('Split Rows');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('extension.raw');
+        await PageObjects.visualize.setSize(2);
+        await PageObjects.visualize.toggleOtherBucket();
+        await PageObjects.visualize.toggleMissingBucket();
+        await PageObjects.visualize.clickGo();
+      });
+
+      it('should show correct data', async () => {
+        const data = await PageObjects.visualize.getTableVisContent();
+        expect(data).to.be.eql([
+          [ 'jpg', '9,109' ],
+          [ 'css', '2,159' ],
+          [ 'Other', '2,736' ]
+        ]);
+      });
+
+      it('should apply correct filter', async () => {
+        await PageObjects.visualize.filterOnTableCell(1, 3);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const data = await PageObjects.visualize.getTableVisContent();
+        expect(data).to.be.eql([
+          [ 'png', '1,373' ],
+          [ 'gif', '918' ],
+          [ 'Other', '445' ]
+        ]);
+      });
+    });
+
     describe('metricsOnAllLevels', () => {
       before(async () => {
         await PageObjects.visualize.navigateToNewVisualization();

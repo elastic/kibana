@@ -34,38 +34,18 @@ import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
 import { onBrushEvent } from '../utils/brush_event';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
-import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 import { timefilter } from 'ui/timefilter';
-
-const getTerms = (table, columnIndex, rowIndex) => {
-  if (rowIndex === -1) {
-    return [];
-  }
-
-  // get only rows where cell value matches current row for all the fields before columnIndex
-  const rows = table.rows.filter(row => {
-    return table.columns.every((column, i) => {
-      return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
-    });
-  });
-  const terms = rows.map(row => row[table.columns[columnIndex].id]);
-
-  return [...new Set(terms.filter(term => {
-    const notOther = term !== '__other__';
-    const notMissing = term !== '__missing__';
-    return notOther && notMissing;
-  }))];
-};
+import { VisFiltersProvider } from './vis_filters';
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
+  const visFilter = Private(VisFiltersProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -95,37 +75,10 @@ export function VisProvider(Private, indexPatterns, getAppState) {
         events: {
           // the filter method will be removed in the near feature
           // you should rather use addFilter method below
-          filter: (event) => {
-            let data = event.datum.aggConfigResult;
-            const filters = [];
-            while (data.$parent) {
-              const { key, rawData } = data.$parent;
-              const { table, column, row } = rawData;
-              filters.push(this.API.events.createFilter(table, column, row, key));
-              data = data.$parent;
-            }
-            const appState = getAppState();
-            filterBarPushFilters(appState)(_.flatten(filters));
-          },
-          createFilter: (data, columnIndex, rowIndex, cellValue) => {
-            const { aggConfig, id: columnId } = data.columns[columnIndex];
-            let filter = [];
-            const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
-            if (value === null || value === undefined) {
-              return;
-            }
-            if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
-              const terms = getTerms(data, columnIndex, rowIndex);
-              filter = aggConfig.createFilter(value, { terms });
-            } else {
-              filter = aggConfig.createFilter(value);
-            }
-            return filter;
-          },
-          addFilter: (data, columnIndex, rowIndex, cellValue) => {
-            const filter = this.API.events.createFilter(data, columnIndex, rowIndex, cellValue);
-            queryFilter.addFilters(filter);
-          }, brush: (event) => {
+          filter: visFilter.filter,
+          createFilter: visFilter.createFilter,
+          addFilter: visFilter.addFilter,
+          brush: (event) => {
             onBrushEvent(event, getAppState());
           }
         },

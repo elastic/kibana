@@ -19,6 +19,8 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import * as Rx from 'rxjs';
+import { share } from 'rxjs/operators';
 import VisEditorVisualization from './vis_editor_visualization';
 import Visualization from './visualization';
 import VisPicker from './vis_picker';
@@ -46,6 +48,8 @@ class VisEditor extends Component {
     this.handleUiState = this.handleUiState.bind(this, props.vis);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
     this.getConfig = (...args) => props.config.get(...args);
+    this.visDataSubject = new Rx.Subject();
+    this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
   handleUiState(vis, ...args) {
@@ -116,9 +120,15 @@ class VisEditor extends Component {
     this.setState({ autoApply: event.target.checked });
   }
 
+  onDataChange = (data) => {
+    this.visDataSubject.next(data);
+  }
+
   render() {
     if (!this.props.isEditorMode) {
-      if (!this.props.vis.params || !this.props.visData) return null;
+      if (!this.props.vis.params || !this.props.visData) {
+        return null;
+      }
       const reversed = this.state.reversed;
       return (
         <Visualization
@@ -137,7 +147,7 @@ class VisEditor extends Component {
 
     const { model } = this.state;
 
-    if (model && this.props.visData) {
+    if (model) {
       return (
         <div className="vis_editor">
           <div className="vis-editor-hide-for-reporting">
@@ -159,12 +169,13 @@ class VisEditor extends Component {
             title={this.props.vis.title}
             description={this.props.vis.description}
             dateFormat={this.props.config.get('dateFormat')}
+            onDataChange={this.onDataChange}
           />
           <div className="vis-editor-hide-for-reporting">
             <PanelConfig
               fields={this.state.visFields}
               model={model}
-              visData={this.props.visData}
+              visData$={this.visData$}
               dateFormat={this.props.config.get('dateFormat')}
               onChange={this.handleChange}
               getConfig={this.getConfig}

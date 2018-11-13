@@ -53,6 +53,8 @@ export class Project {
   public readonly productionDependencies: IPackageDependencies;
   public readonly devDependencies: IPackageDependencies;
   public readonly scripts: IPackageScripts;
+  public isWorkspaceRoot = false;
+  public isWorkspaceProject = false;
 
   constructor(packageJson: IPackageJson, projectPath: string) {
     this.json = Object.freeze(packageJson);
@@ -69,6 +71,7 @@ export class Project {
       ...this.devDependencies,
       ...this.productionDependencies,
     };
+    this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
 
     this.scripts = this.json.scripts || {};
   }
@@ -77,37 +80,40 @@ export class Project {
     return this.json.name;
   }
 
-  public ensureValidProjectDependency(project: Project) {
-    const relativePathToProject = normalizePath(relative(this.path, project.path));
-
+  public ensureValidProjectDependency(project: Project, dependentProjectIsInWorkspace: boolean) {
     const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
 
+    let expectedVersionInPackageJson;
+    if (dependentProjectIsInWorkspace) {
+      expectedVersionInPackageJson = project.json.version;
+    } else {
+      const relativePathToProject = normalizePath(relative(this.path, project.path));
+      expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    }
+
+    // No issues!
     if (versionInPackageJson === expectedVersionInPackageJson) {
       return;
     }
 
-    const updateMsg = 'Update its package.json to the expected value below.';
-    const meta = {
-      actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-      package: `${this.name} (${this.packageJsonLocation})`,
-    };
-
-    if (isLinkDependency(versionInPackageJson)) {
-      throw new CliError(
-        `[${this.name}] depends on [${
-          project.name
-        }] using 'link:', but the path is wrong. ${updateMsg}`,
-        meta
-      );
+    let problemMsg;
+    if (isLinkDependency(versionInPackageJson) && dependentProjectIsInWorkspace) {
+      problemMsg = `but should be using a workspace`;
+    } else if (isLinkDependency(versionInPackageJson)) {
+      problemMsg = `using 'link:', but the path is wrong`;
+    } else {
+      problemMsg = `but it's not using the local package`;
     }
 
     throw new CliError(
       `[${this.name}] depends on [${
         project.name
-      }], but it's not using the local package. ${updateMsg}`,
-      meta
+      }] ${problemMsg}. Update its package.json to the expected value below.`,
+      {
+        actual: `"${project.name}": "${versionInPackageJson}"`,
+        expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+        package: `${this.name} (${this.packageJsonLocation})`,
+      }
     );
   }
 
