@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-
 export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -31,24 +29,19 @@ export default function ({ getService, getPageObjects }) {
 
     it('Sample action appears in context menu in view mode', async () => {
       await dashboardPanelActions.openContextMenu();
-      const newPanelActionExists = await testSubjects.exists(
+      await testSubjects.existOrFail(
         'dashboardPanelAction-samplePanelAction'
       );
-      expect(newPanelActionExists).to.be(true);
     });
 
     it('Clicking sample action shows a flyout', async () => {
-      await dashboardPanelActions.openContextMenu();
       await testSubjects.click('dashboardPanelAction-samplePanelAction');
-      const flyoutExists = await testSubjects.exists('samplePanelActionFlyout');
-      expect(flyoutExists).to.be(true);
+      await testSubjects.existOrFail('samplePanelActionFlyout');
     });
 
     it('flyout shows the correct contents', async () => {
-      const titleExists = await testSubjects.exists('samplePanelActionTitle');
-      expect(titleExists).to.be(true);
-      const bodyExists = await testSubjects.exists('samplePanelActionBody');
-      expect(bodyExists).to.be(true);
+      await testSubjects.existOrFail('samplePanelActionTitle');
+      await testSubjects.existOrFail('samplePanelActionBody');
     });
 
     it('allows to register links into the context menu', async () => {
