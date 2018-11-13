@@ -60,7 +60,7 @@ export function getHeatmapColors(value, colorSchemaName) {
     throw new Error('heatmap_color expects a number from 0 to 1 as first parameter');
   }
 
-  const colorSchema = vislibColorMaps[colorSchemaName];
+  const colorSchema = vislibColorMaps[colorSchemaName].value;
   if (!colorSchema) {
     throw new Error('invalid colorSchemaName provided');
   }

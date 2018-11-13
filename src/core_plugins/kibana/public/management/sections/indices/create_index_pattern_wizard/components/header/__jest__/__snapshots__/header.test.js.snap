@@ -4,6 +4,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
 <div>
   <EuiTitle
     size="m"
+    textTransform="none"
   >
     <h1>
       <FormattedMessage
@@ -39,6 +40,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           <EuiTextColor
@@ -73,6 +75,7 @@ exports[`Header should render normally 1`] = `
 <div>
   <EuiTitle
     size="m"
+    textTransform="none"
   >
     <h1>
       <FormattedMessage
@@ -101,6 +104,7 @@ exports[`Header should render normally 1`] = `
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           <EuiTextColor
@@ -127,6 +131,7 @@ exports[`Header should render without including system indices 1`] = `
 <div>
   <EuiTitle
     size="m"
+    textTransform="none"
   >
     <h1>
       <FormattedMessage
@@ -155,6 +160,7 @@ exports[`Header should render without including system indices 1`] = `
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           <EuiTextColor
