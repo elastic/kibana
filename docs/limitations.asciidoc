@@ -6,7 +6,10 @@
 Kibana currently has the following limitations.
 
 * <<nested-objects>>
+* <<export-data>>
 
 --
 
 include::limitations/nested-objects.asciidoc[]
+
+include::limitations/export-data.asciidoc[]
