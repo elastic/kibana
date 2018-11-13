@@ -73,8 +73,8 @@ export function DatavisualizerSelector() {
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ml.datavisualizer.selector.dataVisualizerDescription"
-                // eslint-disable-next-line max-len
-                defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data, by analyzing the metrics and fields in a log file or an existing Elasticsearch index."
+                defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data,
+                  by analyzing the metrics and fields in a log file or an existing Elasticsearch index."
               />
             </EuiText>
           </EuiFlexItem>
