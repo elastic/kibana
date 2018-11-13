@@ -71,7 +71,7 @@ class JobDetailsUI extends Component {
       const tabs = [{
         id: 'job-settings',
         name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.jobSettingsLabel',
+          id: 'xpack.ml.jobsList.jobDetails.tabs.jobSettingsLabel',
           defaultMessage: 'Job settings'
         }),
         content: <JobDetailsPane sections={[general, customUrl, node]} />,
@@ -79,49 +79,49 @@ class JobDetailsUI extends Component {
       }, {
         id: 'job-config',
         name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.jobConfigLabel',
+          id: 'xpack.ml.jobsList.jobDetails.tabs.jobConfigLabel',
           defaultMessage: 'Job config'
         }),
         content: <JobDetailsPane sections={[detectors, influencers, analysisConfig, analysisLimits, dataDescription]} />,
       }, {
         id: 'datafeed',
         name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.datafeedLabel',
+          id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedLabel',
           defaultMessage: 'Datafeed'
         }),
         content: <JobDetailsPane sections={[datafeed]} />,
       }, {
         id: 'counts',
         name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.countsLabel',
+          id: 'xpack.ml.jobsList.jobDetails.tabs.countsLabel',
           defaultMessage: 'Counts'
         }),
         content: <JobDetailsPane sections={[counts, modelSizeStats]} />,
       }, {
         id: 'json',
         name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.jsonLabel',
+          id: 'xpack.ml.jobsList.jobDetails.tabs.jsonLabel',
           defaultMessage: 'JSON'
         }),
         content: <JsonPane job={job} />,
       }, {
         id: 'job-messages',
         name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.jobMessagesLabel',
+          id: 'xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel',
           defaultMessage: 'Job messages'
         }),
         content: <JobMessagesPane job={job} />,
       }, {
         id: 'datafeed-preview',
         name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.datafeedPreviewLabel',
+          id: 'xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel',
           defaultMessage: 'Datafeed preview'
         }),
         content: <DatafeedPreviewPane job={job} />,
       }, {
         id: 'forecasts',
         name: intl.formatMessage({
-          id: 'xpack.ml.jobsList.jobDetails.forecastsLabel',
+          id: 'xpack.ml.jobsList.jobDetails.tabs.forecastsLabel',
           defaultMessage: 'Forecasts'
         }),
         content: <ForecastsTable job={job} />,

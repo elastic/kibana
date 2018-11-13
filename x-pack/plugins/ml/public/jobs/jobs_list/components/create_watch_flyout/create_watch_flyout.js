@@ -48,7 +48,7 @@ function getSuccessToast(id, url, intl) {
             >
               {intl.formatMessage({
                 id: 'xpack.ml.jobsList.createWatchFlyout.editWatchButtonLabel',
-                defaultMessage: 'Edit Watch' }
+                defaultMessage: 'Edit watch' }
               )}
             </EuiButton>
           </EuiFlexItem>
@@ -197,4 +197,3 @@ CreateWatchFlyoutUI.propTypes = {
 };
 
 export const CreateWatchFlyout = injectI18n(CreateWatchFlyoutUI);
-

@@ -16,7 +16,7 @@ export function extractJobDetails(job) {
   }
 
   const general = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.generalTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.generalTitle', {
       defaultMessage: 'General'
     }),
     position: 'left',
@@ -25,7 +25,7 @@ export function extractJobDetails(job) {
 
 
   const customUrl = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.customUrlsTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.customUrlsTitle', {
       defaultMessage: 'Custom URLs'
     }),
     position: 'right',
@@ -36,7 +36,7 @@ export function extractJobDetails(job) {
   }
 
   const node = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.nodeTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.nodeTitle', {
       defaultMessage: 'Node'
     }),
     position: 'right',
@@ -47,7 +47,7 @@ export function extractJobDetails(job) {
   }
 
   const detectors = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.detectorsTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.detectorsTitle', {
       defaultMessage: 'Detectors'
     }),
     position: 'left',
@@ -64,7 +64,7 @@ export function extractJobDetails(job) {
   }
 
   const influencers = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.influencersTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.influencersTitle', {
       defaultMessage: 'Influencers'
     }),
     position: 'left',
@@ -72,7 +72,7 @@ export function extractJobDetails(job) {
   };
 
   const analysisConfig = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.analysisConfigTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.analysisConfigTitle', {
       defaultMessage: 'Analysis config'
     }),
     position: 'left',
@@ -80,7 +80,7 @@ export function extractJobDetails(job) {
   };
 
   const analysisLimits = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.analysisLimitsTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.analysisLimitsTitle', {
       defaultMessage: 'Analysis limits'
     }),
     position: 'left',
@@ -88,7 +88,7 @@ export function extractJobDetails(job) {
   };
 
   const dataDescription = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.dataDescriptionTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.dataDescriptionTitle', {
       defaultMessage: 'Data description'
     }),
     position: 'right',
@@ -96,7 +96,7 @@ export function extractJobDetails(job) {
   };
 
   const datafeed = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.datafeedTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTitle', {
       defaultMessage: 'Datafeed'
     }),
     position: 'left',
@@ -107,7 +107,7 @@ export function extractJobDetails(job) {
   }
 
   const counts = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.countsTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.countsTitle', {
       defaultMessage: 'Counts'
     }),
     position: 'left',
@@ -115,7 +115,7 @@ export function extractJobDetails(job) {
   };
 
   const modelSizeStats = {
-    title: i18n.translate('xpack.ml.jobsList.jobDetail.modelSizeStatsTitle', {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.modelSizeStatsTitle', {
       defaultMessage: 'Model size stats'
     }),
     position: 'right',
