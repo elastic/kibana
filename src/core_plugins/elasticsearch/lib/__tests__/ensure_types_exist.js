@@ -7,10 +7,22 @@ import { ensureTypesExist } from '../ensure_types_exist';
 
 const chance = new Chance();
 
+const previousWords = new Set();
+const uniqueWord = () => {
+  const word = chance.word();
+
+  if (previousWords.has(word)) {
+    return uniqueWord();
+  }
+
+  previousWords.add(word);
+  return word;
+};
+
 function createRandomTypes(n = chance.integer({ min: 10, max: 20 })) {
   return chance.n(
     () => ({
-      name: chance.word(),
+      name: uniqueWord(),
       mapping: {
         type: chance.pickone(['keyword', 'text', 'integer', 'boolean'])
       }
