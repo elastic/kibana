@@ -20,6 +20,7 @@ import { wrapError } from './server/lib/errors';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
+import { migrateToKibana660 } from './server/lib/migrations';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { SpacesClient } from './server/lib/spaces_client';
@@ -59,10 +60,7 @@ export const spaces = (kibana: any) =>
       mappings,
       migrations: {
         space: {
-          '6.6.0': (doc: Record<string, any>) => {
-            doc.attributes.disabledFeatures = [];
-            return doc;
-          },
+          '6.6.0': migrateToKibana660,
         },
       },
       savedObjectSchemas: {
