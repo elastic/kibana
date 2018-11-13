@@ -6,15 +6,15 @@
 
 import gql from 'graphql-tag';
 
-export const capabilitiesSchema = gql`
-  "One specific capability available on a node. A capability corresponds to a fileset or metricset"
-  type InfraNodeCapability {
+export const metadataSchema = gql`
+  "One specific metadata information for a node."
+  type InfraNodeMetadata {
     name: String!
     source: String!
   }
 
   extend type InfraSource {
-    "A hierarchy of capabilities available on nodes"
-    capabilitiesByNode(nodeName: String!, nodeType: InfraNodeType!): [InfraNodeCapability]!
+    "A hierarchy of metadata information by node"
+    metadataByNode(nodeName: String!, nodeType: InfraNodeType!): [InfraNodeMetadata]!
   }
 `;

@@ -4,54 +4,49 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraCapabilitiesAdapter } from '../../adapters/capabilities';
-import { InfraCapabilityAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
+import { InfraFrameworkRequest, InfraMetadataAggregationBucket } from '../../adapters/framework';
+import { InfraMetadataAdapter } from '../../adapters/metadata';
 import { InfraSources } from '../../sources';
 
-export class InfraCapabilitiesDomain {
+export class InfraMetadataDomain {
   constructor(
-    private readonly adapter: InfraCapabilitiesAdapter,
+    private readonly adapter: InfraMetadataAdapter,
     private readonly libs: { sources: InfraSources }
   ) {}
 
-  public async getCapabilities(
+  public async getMetadata(
     req: InfraFrameworkRequest,
     sourceId: string,
     nodeName: string,
     nodeType: string
   ) {
     const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
-    const metricsPromise = this.adapter.getMetricCapabilities(
+    const metricsPromise = this.adapter.getMetricMetadata(
       req,
       sourceConfiguration,
       nodeName,
       nodeType
     );
-    const logsPromise = this.adapter.getLogCapabilities(
-      req,
-      sourceConfiguration,
-      nodeName,
-      nodeType
-    );
+    const logsPromise = this.adapter.getLogMetadata(req, sourceConfiguration, nodeName, nodeType);
 
     const metrics = await metricsPromise;
     const logs = await logsPromise;
 
-    const metricCapabilities = pickCapabilities(metrics).map(metricCapability => {
-      return { name: metricCapability, source: 'metrics' };
+    const metricMetadata = pickMetadata(metrics).map(entry => {
+      return { name: entry, source: 'metrics' };
     });
 
-    const logCapabilities = pickCapabilities(logs).map(logCapability => {
-      return { name: logCapability, source: 'logs' };
+    const logMetadata = pickMetadata(logs).map(entry => {
+      return { name: entry, source: 'logs' };
     });
 
-    return metricCapabilities.concat(logCapabilities);
+    return metricMetadata.concat(logMetadata);
   }
 }
 
-const pickCapabilities = (buckets: InfraCapabilityAggregationBucket[]): string[] => {
+const pickMetadata = (buckets: InfraMetadataAggregationBucket[]): string[] => {
   if (buckets) {
-    const capabilities = buckets
+    const metadata = buckets
       .map(module => {
         if (module.names) {
           return module.names.buckets.map(name => {
@@ -62,7 +57,7 @@ const pickCapabilities = (buckets: InfraCapabilityAggregationBucket[]): string[]
         }
       })
       .reduce((a: string[], b: string[]) => a.concat(b), []);
-    return capabilities;
+    return metadata;
   } else {
     return [];
   }

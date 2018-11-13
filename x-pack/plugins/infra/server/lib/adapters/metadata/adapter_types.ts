@@ -5,19 +5,19 @@
  */
 
 import { InfraSourceConfiguration } from '../../sources';
-import { InfraCapabilityAggregationBucket, InfraFrameworkRequest } from '../framework';
+import { InfraFrameworkRequest, InfraMetadataAggregationBucket } from '../framework';
 
-export interface InfraCapabilitiesAdapter {
-  getMetricCapabilities(
+export interface InfraMetadataAdapter {
+  getMetricMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string,
     nodeType: string
-  ): Promise<InfraCapabilityAggregationBucket[]>;
-  getLogCapabilities(
+  ): Promise<InfraMetadataAggregationBucket[]>;
+  getLogMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string,
     nodeType: string
-  ): Promise<InfraCapabilityAggregationBucket[]>;
+  ): Promise<InfraMetadataAggregationBucket[]>;
 }

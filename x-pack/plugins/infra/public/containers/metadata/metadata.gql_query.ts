@@ -6,11 +6,11 @@
 
 import gql from 'graphql-tag';
 
-export const capabilitiesQuery = gql`
-  query CapabilitiesQuery($sourceId: ID!, $nodeId: String!, $nodeType: InfraNodeType!) {
+export const metadataQuery = gql`
+  query MetadataQuery($sourceId: ID!, $nodeId: String!, $nodeType: InfraNodeType!) {
     source(id: $sourceId) {
       id
-      capabilitiesByNode(nodeName: $nodeId, nodeType: $nodeType) {
+      metadataByNode(nodeName: $nodeId, nodeType: $nodeType) {
         name
         source
       }

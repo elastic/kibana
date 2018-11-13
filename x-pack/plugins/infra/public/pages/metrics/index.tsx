@@ -25,7 +25,7 @@ import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
-import { WithCapabilities } from '../../containers/capabilities/with_capabilites';
+import { WithMetadata } from '../../containers/metadata/with_metadata';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
   WithMetricsTime,
@@ -88,7 +88,7 @@ class MetricDetailPage extends React.PureComponent<Props> {
                   startMetricsAutoReload,
                   stopMetricsAutoReload,
                 }) => (
-                  <WithCapabilities
+                  <WithMetadata
                     layouts={layouts}
                     sourceId={sourceId}
                     nodeType={nodeType}
@@ -183,7 +183,7 @@ class MetricDetailPage extends React.PureComponent<Props> {
                         </WithMetrics>
                       );
                     }}
-                  </WithCapabilities>
+                  </WithMetadata>
                 )}
               </WithMetricsTime>
             )}

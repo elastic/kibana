@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createCapabilitiesResolvers } from './resolvers';
-export { capabilitiesSchema } from './schema.gql';
+export * from './metadata_domain';
