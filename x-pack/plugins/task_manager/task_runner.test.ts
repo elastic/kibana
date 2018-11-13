@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { minutesFromNow } from './lib/intervals';
-import { ConcreteTaskInstance, TaskDefinition, TaskDictionary } from './task';
+import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 
 describe('TaskManagerRunner', () => {
@@ -25,37 +25,21 @@ describe('TaskManagerRunner', () => {
   });
 
   test('warns if the task returns an unexpected result', async () => {
-    await allowsReturnType(undefined, __filename, 28);
-    await allowsReturnType({}, __filename, 29);
-    await allowsReturnType(
-      {
-        runAt: new Date(),
-      },
-      __filename,
-      35
-    );
-    await allowsReturnType(
-      {
-        error: new Error('Dang it!'),
-      },
-      __filename,
-      42
-    );
-    await allowsReturnType(
-      {
-        state: { shazm: true },
-      },
-      __filename,
-      49
-    );
-    await disallowsReturnType('hm....', __filename, 51);
-    await disallowsReturnType(
-      {
-        whatIsThis: '?!!?',
-      },
-      __filename,
-      57
-    );
+    await allowsReturnType(undefined);
+    await allowsReturnType({});
+    await allowsReturnType({
+      runAt: new Date(),
+    });
+    await allowsReturnType({
+      error: new Error('Dang it!'),
+    });
+    await allowsReturnType({
+      state: { shazm: true },
+    });
+    await disallowsReturnType('hm....');
+    await disallowsReturnType({
+      whatIsThis: '?!!?',
+    });
   });
 
   test('queues a reattempt if the task fails', async () => {
@@ -275,7 +259,7 @@ describe('TaskManagerRunner', () => {
     };
   }
 
-  async function testReturn(result: any, shouldBeValid: boolean, file: string, line: number) {
+  async function testReturn(result: any, shouldBeValid: boolean) {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
@@ -295,11 +279,11 @@ describe('TaskManagerRunner', () => {
     }
   }
 
-  function allowsReturnType(result: any, file: string, line: number) {
-    return testReturn(result, true, file, line);
+  function allowsReturnType(result: any) {
+    return testReturn(result, true);
   }
 
-  function disallowsReturnType(result: any, file: string, line: number) {
-    return testReturn(result, false, file, line);
+  function disallowsReturnType(result: any) {
+    return testReturn(result, false);
   }
 });
