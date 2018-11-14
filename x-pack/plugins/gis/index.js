@@ -28,6 +28,9 @@ export function gis(kibana) {
         icon: 'plugins/gis/icon.svg',
         euiIconType: 'gisApp',
       },
+      inspectorViews: [
+        'plugins/gis/inspector/views/register_views',
+      ],
       home: ['plugins/gis/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       mappings

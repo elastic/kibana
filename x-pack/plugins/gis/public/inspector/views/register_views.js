@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const GIS_API_PATH = 'api/gis';
+import { MapView } from './map_view';
 
-export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
+import { viewRegistry } from 'ui/inspector';
 
-export const ZOOM_PRECISION = 2;
+viewRegistry.register(MapView);
