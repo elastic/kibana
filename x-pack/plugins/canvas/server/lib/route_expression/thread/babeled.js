@@ -15,4 +15,5 @@ require('babel-register')({
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
 });
 
+require('./polyfill');
 require('./worker');
