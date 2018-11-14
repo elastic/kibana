@@ -21,7 +21,6 @@ import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
-import uiChrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
 import dashboardTemplate from './dashboard_app.html';
@@ -46,15 +45,9 @@ app.directive('dashboardListing', function (reactDirective) {
   return reactDirective(DashboardListing);
 });
 
-const redirect = (dashboardConfig, $window) => {
-  if (dashboardConfig.getHide()) {
-    $window.location.href = uiChrome.getBasePath();
-  }
-};
-
 uiRoutes
   .defaults(/dashboard/, {
-    requireDefaultIndex: true,
+    requireDefaultIndex: true
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
@@ -100,8 +93,7 @@ uiRoutes
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
         }
-      },
-      redirect,
+      }
     }
   })
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
@@ -112,8 +104,7 @@ uiRoutes
           .catch(redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
-      },
-      redirect,
+      }
     }
   })
   .when(createDashboardEditUrl(':id'), {
@@ -148,8 +139,7 @@ uiRoutes
           .catch(redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
-      },
-      redirect,
+      }
     }
   });
 
