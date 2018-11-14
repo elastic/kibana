@@ -17,8 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
+import { UICapabilities } from 'ui/capabilities';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { UserProfile } from '../../../../../../../../xpack_main/common/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { isReservedRole } from '../../../../../../lib/role';
@@ -39,7 +39,7 @@ interface Props {
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;
-  userProfile: UserProfile;
+  uiCapabilities: UICapabilities;
 }
 
 interface PrivilegeForm {
@@ -73,9 +73,9 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
   }
 
   public render() {
-    const { kibanaAppPrivileges, role, userProfile } = this.props;
+    const { kibanaAppPrivileges, role, uiCapabilities } = this.props;
 
-    if (!userProfile.hasCapability('manageSpaces')) {
+    if (!uiCapabilities.spaces.manage) {
       return (
         <EuiCallOut title={<p>Insufficient Privileges</p>} iconType="alert" color="danger">
           <p>You are not authorized to view all available spaces.</p>
@@ -205,11 +205,7 @@ export class SpaceAwarePrivilegeForm extends Component<Props, State> {
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <ImpactedSpacesFlyout
-              role={role}
-              spaces={spaces}
-              userProfile={this.props.userProfile}
-            />
+            <ImpactedSpacesFlyout role={role} spaces={spaces} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

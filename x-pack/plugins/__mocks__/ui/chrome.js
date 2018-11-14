@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { uiCapabilities } from './capabilities';
+
 function getUiSettingsClient() {
   return {
     get: key => {
@@ -29,6 +31,8 @@ function getInjected(key) {
       return 'apm*';
     case 'mlEnabled':
       return true;
+    case 'uiCapabilities':
+      return uiCapabilities;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }

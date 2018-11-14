@@ -9,8 +9,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { uiCapabilities } from 'ui/capabilities';
 
-export const SecureSpaceMessage = (props: {}) => {
-  if (uiCapabilities.security.manage) {
+export const SecureSpaceMessage = ({}) => {
+  if (uiCapabilities.spaces.manage) {
     return (
       <Fragment>
         <EuiSpacer />

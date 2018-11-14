@@ -86,7 +86,6 @@ describe('ManageSpacePage', () => {
       getActiveSpace: () => space,
       refreshSpacesList: jest.fn(),
     };
-
     const wrapper = mountWithIntl(
       <ManageSpacePage.WrappedComponent
         spaceId={'existing-space'}

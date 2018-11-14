@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Capabilities, UserProfile } from './user_profile';
+describe('toggleUiCapabilities', () => {
+  // TODO: implement tests once spaces have the concept of disabled features
+  it('should be tested', () => null);
+});

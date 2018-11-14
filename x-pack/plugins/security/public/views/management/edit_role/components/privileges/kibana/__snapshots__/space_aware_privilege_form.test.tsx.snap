@@ -218,11 +218,6 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
               },
             ]
           }
-          userProfile={
-            Object {
-              "hasCapability": [Function],
-            }
-          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

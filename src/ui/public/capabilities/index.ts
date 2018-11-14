@@ -16,19 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uiModules } from '../../modules';
 
-export function initConfig() {
-  uiModules.get('kibana')
-    .provider('chromeConfig', () => {
-      return {
-        $get() {
-          return {
-            shouldHideNavLink() {
-              return false;
-            }
-          };
-        }
-      };
-    });
-}
+export { uiCapabilities, UICapabilities } from './ui_capabilities';
