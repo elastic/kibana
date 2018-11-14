@@ -32,7 +32,7 @@ export class PolicyJsonFlyoutUi extends PureComponent {
 
     return (
       <EuiPortal>
-        <EuiFlyout ownFocus onClose={close}>
+        <EuiFlyout maxWidth={400} ownFocus onClose={close}>
           <EuiFlyoutBody>
             <EuiTitle>
               <h2>

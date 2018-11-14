@@ -23,6 +23,8 @@ import {
   EuiHorizontalRule,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { HotPhase } from './components/hot_phase';
 import { WarmPhase } from './components/warm_phase';
@@ -261,25 +263,36 @@ class EditPolicyUi extends Component {
                 isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_DELETE], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
-              <EuiButtonEmpty onClick={this.backToPolicyList}>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-              &nbsp;&nbsp;
-              <EuiButton fill onClick={this.submit}>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
-                  defaultMessage="Save your policy"
-                />
-              </EuiButton>
-              <EuiButtonEmpty onClick={this.showPolicyJsonFlyout}>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton"
-                  defaultMessage="Show JSON"
-                />
-              </EuiButtonEmpty>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={this.backToPolicyList}>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
+                          defaultMessage="Cancel"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton fill onClick={this.submit}>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
+                          defaultMessage="Save your policy"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={this.showPolicyJsonFlyout}>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButton"
+                      defaultMessage="Show JSON"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               {this.state.isShowingNodeDetailsFlyout ? (
                 <NodeAttrsDetails
                   selectedNodeAttrs={this.state.selectedNodeAttrsForDetails}
