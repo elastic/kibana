@@ -25,10 +25,7 @@ import { FormattedData } from './adapters/data';
  */
 export async function buildTabularInspectorData(table, queryFilter) {
   const columns = table.columns.map((col, index) => {
-    const field = col.aggConfig.getField();
-    const isCellContentFilterable =
-      col.aggConfig.isFilterable()
-      && (!field || field.filterable);
+    const isCellContentFilterable = col.aggConfig.isFilterable();
     return ({
       name: col.name,
       field: `col${index}`,

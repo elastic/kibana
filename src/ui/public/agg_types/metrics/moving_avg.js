@@ -33,6 +33,8 @@ export const movingAvgMetricAgg = new MetricAggType({
   }),
   subtype: parentPipelineAggHelper.subtype,
   makeLabel: agg => makeNestedLabel(agg, movingAvgLabel),
+  createFilter: parentPipelineAggHelper.createFilter,
+  isFilterable: parentPipelineAggHelper.isFilterable,
   params: [
     ...parentPipelineAggHelper.params()
   ],

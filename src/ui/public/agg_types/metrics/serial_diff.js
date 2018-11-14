@@ -33,6 +33,8 @@ export const serialDiffMetricAgg = new MetricAggType({
   }),
   subtype: parentPipelineAggHelper.subtype,
   makeLabel: agg => makeNestedLabel(agg, serialDiffLabel),
+  createFilter: parentPipelineAggHelper.createFilter,
+  isFilterable: parentPipelineAggHelper.isFilterable,
   params: [
     ...parentPipelineAggHelper.params()
   ],

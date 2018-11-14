@@ -100,6 +100,15 @@ function AggType(config) {
   this.createFilter = config.createFilter;
 
   /**
+   * The method to determine if this agg config can filter
+   * @param {object} aggConfig The instance of the aggConfig
+   * @returns {boolean}
+   */
+  if (config.isFilterable) {
+    this.isFilterable = config.isFilterable;
+  }
+
+  /**
    * An instance of {{#crossLink "AggParams"}}{{/crossLink}}.
    *
    * @property params

@@ -17,27 +17,10 @@
  * under the License.
  */
 
-import { MetricAggType } from './metric_agg_type';
-import { i18n } from '@kbn/i18n';
-import { createFilterExists } from './create_filter/exists';
+import { buildExistsFilter } from '@kbn/es-query';
 
-export const avgMetricAgg = new MetricAggType({
-  name: 'avg',
-  title: i18n.translate('common.ui.aggTypes.metrics.averageTitle', {
-    defaultMessage: 'Average'
-  }),
-  makeLabel: function (aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.averageLabel', {
-      defaultMessage: 'Average {field}',
-      values: { field: aggConfig.getFieldDisplayName() }
-    });
-  },
-  createFilter: createFilterExists,
-  params: [
-    {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: 'number'
-    }
-  ]
-});
+export function createFilterExists(aggConfig) {
+  const field = aggConfig.params.field;
+  const indexPattern = field.indexPattern;
+  return buildExistsFilter(field, indexPattern);
+}

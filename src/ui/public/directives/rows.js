@@ -59,10 +59,7 @@ module.directive('kbnRows', function ($compile, Private) {
         let $cellContent;
 
         if (contents instanceof AggConfigResult) {
-          const field = contents.aggConfig.getField();
-          const isCellContentFilterable =
-            contents.aggConfig.isFilterable()
-            && (!field || field.filterable);
+          const isCellContentFilterable = contents.aggConfig.isFilterable();
 
           if (isCellContentFilterable) {
             $cell = createFilterableCell(contents);

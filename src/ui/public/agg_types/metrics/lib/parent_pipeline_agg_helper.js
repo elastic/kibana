@@ -87,6 +87,26 @@ const parentPipelineAggHelper = {
       subAgg = agg.aggConfigs.byId[agg.params.metricAgg];
     }
     return subAgg.type.getFormat(subAgg);
+  },
+  createFilter: function (agg) {
+    let subAgg;
+    if (agg.params.customMetric) {
+      subAgg = agg.params.customMetric;
+    } else {
+      subAgg = agg.aggConfigs.byId[agg.params.metricAgg];
+    }
+    if (subAgg.isFilterable()) {
+      return subAgg.createFilter();
+    }
+  },
+  isFilterable: function (agg) {
+    let subAgg;
+    if (agg.params.customMetric) {
+      subAgg = agg.params.customMetric;
+    } else {
+      subAgg = agg.aggConfigs.byId[agg.params.metricAgg];
+    }
+    return subAgg.isFilterable();
   }
 };
 export { parentPipelineAggHelper };

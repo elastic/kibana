@@ -19,6 +19,7 @@
 
 import { MetricAggType } from './metric_agg_type';
 import { i18n } from '@kbn/i18n';
+import { createFilterExists } from './create_filter/exists';
 
 export const sumMetricAgg = new MetricAggType({
   name: 'sum',
@@ -31,6 +32,7 @@ export const sumMetricAgg = new MetricAggType({
       values: { field: aggConfig.getFieldDisplayName() }
     });
   },
+  createFilter: createFilterExists,
   params: [
     {
       name: 'field',

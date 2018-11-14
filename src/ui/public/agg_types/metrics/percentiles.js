@@ -24,6 +24,7 @@ import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
 import { i18n } from '@kbn/i18n';
+import { createFilterExists } from './create_filter/exists';
 
 const valueProps = {
   makeLabel: function () {
@@ -46,6 +47,7 @@ export const percentilesMetricAgg = new MetricAggType({
       values: { field: agg.getFieldDisplayName() }
     });
   },
+  createFilter: createFilterExists,
   params: [
     {
       name: 'field',

@@ -33,6 +33,8 @@ export const cumulativeSumMetricAgg = new MetricAggType({
   }),
   subtype: parentPipelineAggHelper.subtype,
   makeLabel: agg => makeNestedLabel(agg, cumulativeSumLabel),
+  createFilter: parentPipelineAggHelper.createFilter,
+  isFilterable: parentPipelineAggHelper.isFilterable,
   params: [
     ...parentPipelineAggHelper.params()
   ],

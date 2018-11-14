@@ -33,6 +33,8 @@ export const derivativeMetricAgg = new MetricAggType({
   }),
   subtype: parentPipelineAggHelper.subtype,
   makeLabel: agg => makeNestedLabel(agg, derivativeLabel),
+  createFilter: parentPipelineAggHelper.createFilter,
+  isFilterable: parentPipelineAggHelper.isFilterable,
   params: [
     ...parentPipelineAggHelper.params()
   ],

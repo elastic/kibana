@@ -66,7 +66,7 @@ const VisFiltersProvider = (Private, getAppState) => {
     let data = event.datum.aggConfigResult;
     const filters = [];
     while (data) {
-      if (data.type === 'bucket') {
+      if (data.aggConfig.isFilterable()) {
         const { key, rawData } = data;
         const { table, column, row } = rawData;
         const filter = createFilter(table, column, row, key);

@@ -20,6 +20,7 @@
 import { MetricAggType } from './metric_agg_type';
 import { fieldFormats } from '../../registry/field_formats';
 import { i18n } from '@kbn/i18n';
+import { createFilterExists } from './create_filter/exists';
 
 export const cardinalityMetricAgg = new MetricAggType({
   name: 'cardinality',
@@ -35,6 +36,7 @@ export const cardinalityMetricAgg = new MetricAggType({
   getFormat: function () {
     return fieldFormats.getDefaultInstance('number');
   },
+  createFilter: createFilterExists,
   params: [
     {
       name: 'field',

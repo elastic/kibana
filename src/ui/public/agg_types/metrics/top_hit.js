@@ -23,6 +23,7 @@ import topSortEditor from '../controls/top_sort.html';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { i18n } from '@kbn/i18n';
+import { createFilterTopHit } from './create_filter/top_hit';
 
 const isNumber = function (type) {
   return type === 'number';
@@ -61,6 +62,7 @@ export const topHitMetricAgg = new MetricAggType({
     const field = aggConfig.params.field;
     return `${prefix} ${field ? field.displayName : ''}`;
   },
+  createFilter: createFilterTopHit,
   params: [
     {
       name: 'field',

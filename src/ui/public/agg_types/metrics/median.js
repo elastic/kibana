@@ -20,6 +20,7 @@
 import { MetricAggType } from './metric_agg_type';
 import { percentilesMetricAgg } from './percentiles';
 import { i18n } from '@kbn/i18n';
+import { createFilterExists } from './create_filter/exists';
 
 export const medianMetricAgg = new MetricAggType({
   name: 'median',
@@ -33,6 +34,7 @@ export const medianMetricAgg = new MetricAggType({
       values: { field: aggConfig.getFieldDisplayName() }
     });
   },
+  createFilter: createFilterExists,
   params: [
     {
       name: 'field',

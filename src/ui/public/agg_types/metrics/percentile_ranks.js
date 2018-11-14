@@ -24,6 +24,7 @@ import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { fieldFormats } from '../../registry/field_formats';
 import { getPercentileValue } from './percentiles_get_value';
 import { i18n } from '@kbn/i18n';
+import { createFilterExists } from './create_filter/exists';
 
 
 // required by the values editor
@@ -52,6 +53,7 @@ export const percentileRanksMetricAgg = new MetricAggType({
       values: { field: agg.getFieldDisplayName() }
     });
   },
+  createFilter: createFilterExists,
   params: [
     {
       name: 'field',

@@ -137,16 +137,21 @@ export class MetricVisComponent extends Component {
 
         const shouldColor = config.colorsRange.length > 1;
 
+        const isFilterable = (bucketAgg && bucketAgg.isFilterable())
+          || (aggConfig && aggConfig.isFilterable());
+
         metrics.push({
           label: title,
           value: value,
           color: shouldColor && config.style.labelColor ? color : null,
           bgColor: shouldColor && config.style.bgColor ? color : null,
           lightText: shouldColor && config.style.bgColor && this._needsLightText(color),
-          filterKey: bucketColumnId !== undefined ? row[bucketColumnId] : null,
           rowIndex: rowIndex,
-          columnIndex: rowHeaderIndex,
+          columnIndex: columnIndex,
+          bucketColumnIndex: rowHeaderIndex,
           bucketAgg: bucketAgg,
+          aggConfig: aggConfig,
+          isFilterable: isFilterable,
         });
       });
     });
@@ -155,11 +160,19 @@ export class MetricVisComponent extends Component {
   }
 
   _filterBucket = (metric) => {
-    if (!metric.filterKey || !metric.bucketAgg) {
+    if (!metric.isFilterable) {
       return;
     }
     const table = this.props.visData;
-    this.props.vis.API.events.filter({ table, column: metric.columnIndex, row: metric.rowIndex });
+
+    const bucketAgg = metric.bucketAgg;
+    if (bucketAgg && bucketAgg.isFilterable()) {
+      this.props.vis.API.events.filter({ table, column: metric.bucketColumnIndex, row: metric.rowIndex });
+    }
+    const aggConfig = metric.aggConfig;
+    if (aggConfig && aggConfig.isFilterable()) {
+      this.props.vis.API.events.filter({ table, column: metric.columnIndex, row: metric.rowIndex });
+    }
   };
 
   _renderMetric = (metric, index) => {
@@ -168,7 +181,7 @@ export class MetricVisComponent extends Component {
         key={index}
         metric={metric}
         fontSize={this.props.vis.params.metric.style.fontSize}
-        onFilter={metric.filterKey && metric.bucketAgg ? this._filterBucket : null}
+        onFilter={metric.isFilterable ? this._filterBucket : null}
         showLabel={this.props.vis.params.metric.labels.show}
       />
     );

@@ -130,22 +130,15 @@ class AggConfig {
   }
 
   isFilterable() {
-    return _.isFunction(this.type.createFilter);
+    if (_.isFunction(this.type.isFilterable)) {
+      return this.type.isFilterable(this);
+    }
+    return _.isFunction(this.type.createFilter) && (!this.getField() || this.getField().filterable);
   }
 
   createFilter(key, params = {}) {
     if (!this.isFilterable()) {
       throw new TypeError(`The "${this.type.title}" aggregation does not support filtering.`);
-    }
-
-    const field = this.getField();
-    const label = this.getFieldDisplayName();
-    if (field && !field.filterable) {
-      let message = `The "${label}" field can not be used for filtering.`;
-      if (field.scripted) {
-        message = `The "${label}" field is scripted and can not be used for filtering.`;
-      }
-      throw new TypeError(message);
     }
 
     return this.type.createFilter(this, key, params);

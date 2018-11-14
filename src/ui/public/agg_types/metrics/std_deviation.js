@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { i18n } from '@kbn/i18n';
+import { createFilterExists } from './create_filter/exists';
 
 const responseAggConfigProps = {
   valProp: function () {
@@ -68,6 +69,7 @@ export const stdDeviationMetricAgg = new MetricAggType({
       values: { field: agg.getFieldDisplayName() }
     });
   },
+  createFilter: createFilterExists,
   params: [
     {
       name: 'field',
