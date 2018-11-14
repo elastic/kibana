@@ -38,7 +38,6 @@ export default function MetricsVisProvider(Private) {
     description: 'Build time-series using a visual pipeline interface',
     category: CATEGORY.TIME,
     icon: 'visVisualBuilder',
-    stage: 'experimental',
     feedbackMessage: defaultFeedbackMessage,
     visConfig: {
       defaults: {
