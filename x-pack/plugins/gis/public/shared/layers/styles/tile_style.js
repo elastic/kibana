@@ -16,12 +16,10 @@ export class TileStyle {
     return styleInstance.constructor === TileStyle;
   }
 
-  static createDescriptor() {
+  static createDescriptor(properties) {
     return {
       type: TileStyle.type,
-      properties: {
-        alphaValue: 0.5
-      }
+      properties
     };
   }
 

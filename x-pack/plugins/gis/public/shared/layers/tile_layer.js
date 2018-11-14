@@ -13,10 +13,19 @@ export class TileLayer extends ALayer {
 
   static type = "TILE";
 
+  constructor({ layerDescriptor, source, style }) {
+    super({ layerDescriptor, source, style });
+    if (!style) {
+      const defaultStyle = TileStyle.createDescriptor(style.properties);
+      this._style = new TileStyle(defaultStyle);
+    }
+  }
+
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = TileLayer.type;
-    tileLayerDescriptor.style = TileStyle.createDescriptor();
+    tileLayerDescriptor.style =
+      TileStyle.createDescriptor(tileLayerDescriptor.style.properties);
     return tileLayerDescriptor;
   }
 

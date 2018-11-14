@@ -15,6 +15,7 @@ import {
   getMapExtent,
 } from '../../selectors/map_selectors';
 import { getIsDarkTheme } from '../../store/ui';
+import { TileStyle } from '../../shared/layers/styles/tile_style';
 
 const module = uiModules.get('app/gis');
 
@@ -41,7 +42,12 @@ module.factory('SavedGisWorkspace', function (Private) {
             sourceDescriptor: { "type": "EMS_TMS", "id": "road_map" },
             visible: true,
             temporary: false,
-            style: {},
+            style: {
+              type: TileStyle.type,
+              properties: {
+                alphaValue: 1.0
+              }
+            },
             type: "TILE",
             minZoom: 0,
             maxZoom: 24,
