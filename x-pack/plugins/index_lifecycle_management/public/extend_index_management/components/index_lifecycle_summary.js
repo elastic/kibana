@@ -64,7 +64,7 @@ export class IndexLifecycleSummary extends Component {
       content = content || '-';
       const cell = [
         <EuiDescriptionListTitle key={fieldName}>
-          <strong>{HEADERS[fieldName]}:</strong>
+          <strong>{HEADERS[fieldName]}</strong>
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key={fieldName + "_desc"}>
           {content}
