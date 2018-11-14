@@ -37,14 +37,6 @@ export class RemoteClusterFormUi extends Component {
     onFieldsChange: PropTypes.func,
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      localSeedErrors: [],
-    };
-  }
-
   renderActions() {
     const { isSaving, save } = this.props;
 
@@ -134,31 +126,6 @@ export class RemoteClusterFormUi extends Component {
     return null;
   }
 
-  getLocalSeedErrors = (value) => {
-    const { intl } = this.props;
-    const errors = [];
-
-    const ipParts = value.split('.');
-    const isRangeInvalid = ipParts.some(part => isNaN(part) || Number(part) < 0 || Number(part) > 255);
-
-    if (ipParts.length !== 4 || isRangeInvalid) {
-      errors.push(intl.formatMessage({
-        id: "xpack.remoteClusters.remoteClusterForm.localSeedError.invalidIpMessage",
-        defaultMessage: "IP adresses must consist of four numbers between 0 and 255, separated by periods.",
-      }));
-    }
-
-    // Check for non-digits and non-periods.
-    if (value.match(/[^\d\.]*/)[0].length !== 0) {
-      errors.push(intl.formatMessage({
-        id: "xpack.remoteClusters.remoteClusterForm.localSeedError.invalidCharactersMessage",
-        defaultMessage: "Only numbers and periods are allowed in the IP address.",
-      }));
-    }
-
-    return errors;
-  };
-
   onCreateOption = (searchValue) => {
     const {
       onFieldsChange,
@@ -167,29 +134,9 @@ export class RemoteClusterFormUi extends Component {
       },
     } = this.props;
 
-    const localSeedErrors = this.getLocalSeedErrors(searchValue);
-
-    if (localSeedErrors.length !== 0) {
-      this.setState({
-        localSeedErrors,
-      });
-
-      // Return false to explicitly reject the user's input.
-      return false;
-    }
-
     const newSeeds = seeds.slice(0);
     newSeeds.push(searchValue);
     onFieldsChange({ seeds: newSeeds });
-  };
-
-  onSearchChange = (searchValue) => {
-    // Allow typing to clear the errors, but not to add new ones.
-    if (!searchValue || this.getLocalSeedErrors(searchValue).length === 0) {
-      this.setState({
-        localSeedErrors: [],
-      });
-    }
   };
 
   onChange = (selectedOptions) => {
@@ -209,13 +156,7 @@ export class RemoteClusterFormUi extends Component {
       intl,
     } = this.props;
 
-    const { localSeedErrors } = this.state;
-
-    // Show errors if there is a general form error or local errors.
-    const areFormErrorsVisible = Boolean(areErrorsVisible && errorsSeeds);
-    const showErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
-    const errors = areFormErrorsVisible ? localSeedErrors.concat(errorsSeeds) : localSeedErrors;
-
+    const showErrors = Boolean(areErrorsVisible && errorsSeeds);
     const formattedSeeds = seeds.map(seed => ({ label: seed }));
 
     return (
@@ -246,7 +187,7 @@ export class RemoteClusterFormUi extends Component {
             />
           )}
           isInvalid={showErrors}
-          error={errors}
+          error={errorsSeeds}
           fullWidth
         >
           <EuiComboBox
@@ -258,7 +199,6 @@ export class RemoteClusterFormUi extends Component {
             selectedOptions={formattedSeeds}
             onCreateOption={this.onCreateOption}
             onChange={this.onChange}
-            onSearchChange={this.onSearchChange}
             isInvalid={showErrors}
           />
         </EuiFormRow>
