@@ -23,6 +23,6 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir"
+node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --grep="index multiple jobs posted"
 echo ""
 echo ""
