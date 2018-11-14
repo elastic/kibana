@@ -97,6 +97,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
 >
   <EuiTitle
     size="l"
+    textTransform="none"
   >
     <h2
       className="euiTitle euiTitle--large"
@@ -120,9 +121,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   </EuiHorizontalRule>
   <EuiText
     grow={true}
+    size="m"
   >
     <div
-      className="euiText"
+      className="euiText euiText--medium"
     >
       <p>
         <FormattedMessage
@@ -250,6 +252,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   <Component>
     <EuiTitle
       size="l"
+      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -272,9 +275,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
       >
         <EuiText
           grow={true}
+          size="m"
         >
           <div
-            className="euiText"
+            className="euiText euiText--medium"
           >
             <p>
               <FormattedMessage
@@ -300,9 +304,10 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   </EuiHorizontalRule>
   <EuiText
     grow={true}
+    size="m"
   >
     <div
-      className="euiText"
+      className="euiText euiText--medium"
     >
       <p>
         <FormattedMessage
@@ -555,6 +560,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   <Component>
     <EuiTitle
       size="l"
+      textTransform="none"
     >
       <h2
         className="euiTitle euiTitle--large"
@@ -577,9 +583,10 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
       >
         <EuiText
           grow={true}
+          size="m"
         >
           <div
-            className="euiText"
+            className="euiText euiText--medium"
           >
             <p>
               <FormattedMessage
@@ -605,9 +612,10 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   </EuiHorizontalRule>
   <EuiText
     grow={true}
+    size="m"
   >
     <div
-      className="euiText"
+      className="euiText euiText--medium"
     >
       <p>
         <FormattedMessage
