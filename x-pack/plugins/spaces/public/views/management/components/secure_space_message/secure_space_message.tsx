@@ -6,14 +6,10 @@
 
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { UserProfile } from '../../../../../../xpack_main/common/user_profile';
+import { uiCapabilities } from 'ui/capabilities';
 
-interface Props {
-  userProfile: UserProfile;
-}
-
-export const SecureSpaceMessage = (props: Props) => {
-  if (props.userProfile.hasCapability('manageSecurity')) {
+export const SecureSpaceMessage = ({}) => {
+  if (uiCapabilities.spaces.manage) {
     return (
       <Fragment>
         <EuiSpacer />

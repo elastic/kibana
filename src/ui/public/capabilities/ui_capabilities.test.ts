@@ -16,17 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uiModules } from 'ui/modules';
 
-uiModules.get('kibana')
-  .provider('discoverConfig', () => {
-    return {
-      $get() {
-        return {
-          getHideWriteControls() {
-            return false;
-          }
-        };
+jest.mock(
+  'ui/chrome',
+  () => ({
+    getInjected: (key: string) => {
+      if (key !== 'uiCapabilities') {
+        throw new Error(`Unexpected key for test: ${key}`);
       }
-    };
+
+      return {
+        navLinks: {},
+        app1: {
+          feature1: true,
+          feature2: false,
+        },
+        app2: {
+          feature1: true,
+          feature3: true,
+        },
+      };
+    },
+  }),
+  { virtual: true }
+);
+
+import { uiCapabilities } from './ui_capabilities';
+
+describe('uiCapabilities', () => {
+  it('allows a nested property to be accessed', () => {
+    expect(uiCapabilities.app1.feature2).toEqual(false);
   });
+});

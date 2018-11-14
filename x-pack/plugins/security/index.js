@@ -24,8 +24,6 @@ import { createAuthorizationService, registerPrivilegesWithCluster } from './ser
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
-import { capabilityDecorator } from './server/lib/capability_decorator';
-import { registerUserProfileCapabilityDecorator } from '../xpack_main/server/lib/user_profile';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -127,8 +125,6 @@ export const security = (kibana) => new kibana.Plugin({
       }
     });
 
-    registerUserProfileCapabilityDecorator(Number.MIN_SAFE_INTEGER, capabilityDecorator);
-
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
     const { savedObjects } = server;
@@ -198,11 +194,8 @@ export const security = (kibana) => new kibana.Plugin({
 
       // Enforce app restrictions
       if (path.startsWith('/app/')) {
-        const appId = path.split('/', 3)[2];
-        const userProfile = await req.getUserProfile();
-        if (!userProfile.canAccessFeature(appId)) {
-          return Boom.notFound();
-        }
+        // const appId = path.split('/', 3)[2];
+        // TODO: feature access check
       }
 
       // Enforce API restrictions for associated applications
