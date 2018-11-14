@@ -8,7 +8,12 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(($injector) => {
+  const licenseService = $injector.get('xpackWatcherLicenseService');
+  if (!licenseService.showLinks || !licenseService.enableLinks) {
+    return null;
+  }
+
   return {
     id: 'watcher',
     title: 'Watcher',

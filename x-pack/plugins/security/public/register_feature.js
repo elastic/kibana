@@ -7,8 +7,14 @@
 
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register((Private) => {
+  const xpackInfo = Private(XPackInfoProvider);
+  if (!xpackInfo.get('features.security.showLinks')) {
+    return null;
+  }
+
   return {
     id: 'security',
     title: 'Security Settings',
