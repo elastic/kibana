@@ -42,6 +42,11 @@ import { mlEscape } from '../util/string_utils';
 import { mlFieldFormatService } from '../services/field_format_service';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 
+// annotations
+import mockAnnotations from './__mocks__/cp_daylight_annotations.json';
+const validations = mockAnnotations.tests[0].validations.result_range.expected;
+console.warn('mockAnnotations', validations);
+
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
 const focusHeight = focusZoomPanelHeight + focusChartHeight;
@@ -388,6 +393,9 @@ export class TimeseriesChart extends React.Component {
     axes.append('g')
       .attr('class', 'y axis');
 
+    // Create the elements for annotations
+    fcsGroup.append('g').classed('ml-annotations', true);
+
     // Create the elements for the metric value line and model bounds area.
     fcsGroup.append('path')
       .attr('class', 'area bounds');
@@ -528,6 +536,35 @@ export class TimeseriesChart extends React.Component {
         .attr('d', this.focusBoundedArea(data))
         .classed('hidden', !showModelBounds);
     }
+
+    // render annotations
+    const annotationRects = focusChart.select('.ml-annotations').selectAll('rect').data(validations);
+
+    annotationRects.enter()
+      .append('rect')
+      .classed('ml-annotation-rect', true);
+
+    const focusXScale = this.focusXScale;
+
+    annotationRects
+      .attr('x', (d) => {
+        const date = moment(d.start);
+        console.warn('x', focusXScale(date));
+        return focusXScale(date);
+      })
+      .attr('y', focusZoomPanelHeight + 1)
+      .attr('height', focusChartHeight - 2)
+      .attr('width', (d) => {
+        const s = focusXScale(moment(d.start)) + 1;
+        const e = (typeof d.end !== 'undefined') ? (focusXScale(moment(d.end)) - 1) : (s + 2);
+        const width = Math.max(2, (e - s));
+        console.warn('width', width);
+        return width;
+      })
+      .on('mouseover', function (d) {
+        showFocusChartTooltip(d, this);
+      })
+      .on('mouseout', () => mlChartTooltipService.hide());
 
     focusChart.select('.values-line')
       .attr('d', this.focusValuesLine(data));

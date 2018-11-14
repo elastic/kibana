@@ -1,0 +1,367 @@
+{
+  "tests": [
+    {
+      "description": "Add cp_daylight data set",
+      "dataset_name": "cp_daylight",
+      "data_snapshot_id": "changepoints",
+      "anomaly_detector_config": {
+        "description": "Verify that we adapt to clocks going forward by one hour and don't subsequently degrade anomaly detection whilst learning the new seasonal pattern",
+        "groups": [
+          "change-points",
+          "synthetic",
+          "f-mean",
+          "periodic"
+        ],
+        "analysis_config": {
+          "bucket_span": "10m",
+          "detectors": [
+            {
+              "function": "mean",
+              "field_name": "value"
+            }
+          ]
+        },
+        "data_description": {
+          "time_field": "time"
+        },
+        "analysis_limits": {
+          "model_memory_limit": "10mb"
+        },
+        "model_plot_config": {
+          "enabled": true
+        }
+      },
+      "datafeed_config": {
+        "indices": [
+          "cp_daylight"
+        ]
+      },
+      "datafeed_settings": {
+        "end": "now"
+      },
+      "file_config": {
+        "skipTest": true,
+        "skipReason": "File not available"
+      },
+      "validations": {
+        "result_range": {
+          "expected": [
+            {
+              "comment": "TP daylight savings event",
+              "start": "2018-03-25T00:00:00Z",
+              "end": "2018-03-25T22:00:00Z",
+              "statements": [
+                "max(anomaly_score) gt 75"
+              ]
+            },
+            {
+              "comment": "TN daylight savings learned",
+              "start": "2018-03-25T22:00:00Z",
+              "end": "2018-03-26T13:00:00Z",
+              "statements": [
+                "max(anomaly_score) lt 5"
+              ]
+            },
+            {
+              "comment": "TP blip after - fixed in 6.5 (higher on mac)",
+              "start": "2018-03-26T13:00:00Z",
+              "end": "2018-03-26T14:00:00Z",
+              "statements": [
+                "max(anomaly_score) gt 70"
+              ]
+            },
+            {
+              "comment": "TN home straight",
+              "start": "2018-03-26T14:00:00Z",
+              "statements": [
+                "max(anomaly_score) lt 1"
+              ]
+            }
+          ]
+        },
+        "job_duration": {
+          "expected": 60
+        },
+        "data_counts": {
+          "expected": {
+            "empty_bucket_count": 0,
+            "sparse_bucket_count": 0,
+            "latest_record_timestamp": 1522540200000,
+            "bucket_count": 12959,
+            "earliest_record_timestamp": 1514764800000,
+            "processed_record_count": 12960,
+            "processed_field_count": 12960
+          }
+        },
+        "model_size_stats": {
+          "expected": {
+            "total_partition_field_count": 2,
+            "total_over_field_count": 0,
+            "total_by_field_count": 3
+          }
+        },
+        "record_count_above_score": {}
+      }
+    },
+    {
+      "description": "Add cp_scale data set",
+      "dataset_name": "cp_scale",
+      "data_snapshot_id": "changepoints",
+      "anomaly_detector_config": {
+        "description": "Verify that we adapt the trend model to the case that the periodic pattern is scaled up then down and that do so without unduly increasing prediction uncertainty",
+        "groups": [
+          "change-points",
+          "synthetic",
+          "f-mean",
+          "periodic"
+        ],
+        "analysis_config": {
+          "bucket_span": "10m",
+          "detectors": [
+            {
+              "function": "mean",
+              "field_name": "value"
+            }
+          ]
+        },
+        "data_description": {
+          "time_field": "time"
+        },
+        "analysis_limits": {
+          "model_memory_limit": "10mb"
+        },
+        "model_plot_config": {
+          "enabled": true
+        }
+      },
+      "datafeed_config": {
+        "indices": [
+          "cp_scale"
+        ]
+      },
+      "datafeed_settings": {
+        "end": "now"
+      },
+      "file_config": {
+        "skipTest": true,
+        "skipReason": "File not available"
+      },
+      "validations": {
+        "result_range": {
+          "expected": [
+            {
+              "comment": "FN scale up event A - could score higher",
+              "start": "2018-01-13T00:00:00Z",
+              "end": "2018-01-13T17:00:00Z",
+              "statements": [
+                "max(anomaly_score) gt 20"
+              ]
+            },
+            {
+              "comment": "TN scale up A learned",
+              "start": "2018-01-13T17:00:00Z",
+              "end": "2018-01-18T00:00:00Z",
+              "statements": [
+                "max(anomaly_score) lt 5"
+              ]
+            },
+            {
+              "comment": "TP scale down B event",
+              "start": "2018-01-18T00:00:00Z",
+              "end": "2018-01-18T17:00:00Z",
+              "statements": [
+                "max(anomaly_score) gte 75"
+              ]
+            },
+            {
+              "comment": "TN scale down B learned",
+              "start": "2018-01-18T17:30:00Z",
+              "end": "2018-01-21T21:00:00Z",
+              "statements": [
+                "max(anomaly_score) lt 2"
+              ]
+            },
+            {
+              "comment": "TN tiny scale up C event",
+              "start": "2018-01-21T21:00:00Z",
+              "end": "2018-01-22T06:00:00Z",
+              "statements": [
+                "max(anomaly_score) lt 5"
+              ]
+            },
+            {
+              "comment": "TN scale up C learned",
+              "start": "2018-01-22T06:00:00Z",
+              "end": "2018-01-21T21:00:00Z",
+              "statements": [
+                "max(anomaly_score) lt 2"
+              ]
+            },
+            {
+              "comment": "FN final drop - should score higher",
+              "start": "2018-01-28T05:00:00Z",
+              "end": "2018-01-29T11:50:00Z",
+              "statements": [
+                "max(anomaly_score) gt 15"
+              ]
+            },
+            {
+              "comment": "TN home straight",
+              "start": "2018-01-29T11:50:00Z",
+              "statements": [
+                "max(anomaly_score) lt 1"
+              ]
+            }
+          ]
+        },
+        "job_duration": {
+          "expected": 60
+        },
+        "data_counts": {
+          "expected": {
+            "empty_bucket_count": 0,
+            "sparse_bucket_count": 0,
+            "latest_record_timestamp": 1517269800000,
+            "bucket_count": 4175,
+            "earliest_record_timestamp": 1514764800000,
+            "processed_record_count": 4176,
+            "processed_field_count": 4176
+          }
+        },
+        "model_size_stats": {
+          "expected": {
+            "total_partition_field_count": 2,
+            "total_over_field_count": 0,
+            "total_by_field_count": 3
+          }
+        },
+        "record_count_above_score": {}
+      }
+    },
+    {
+      "description": "Add cp_step data set",
+      "dataset_name": "cp_step",
+      "data_snapshot_id": "changepoints",
+      "anomaly_detector_config": {
+        "description": "Verify that we adapt the trend to step changes (up and down) and that do so without unduly increasing prediction uncertainty",
+        "groups": [
+          "change-points",
+          "synthetic",
+          "f-mean"
+        ],
+        "analysis_config": {
+          "bucket_span": "10m",
+          "detectors": [
+            {
+              "function": "mean",
+              "field_name": "value"
+            }
+          ]
+        },
+        "data_description": {
+          "time_field": "time"
+        },
+        "analysis_limits": {
+          "model_memory_limit": "10mb"
+        },
+        "model_plot_config": {
+          "enabled": true
+        }
+      },
+      "datafeed_config": {
+        "indices": [
+          "cp_step"
+        ]
+      },
+      "datafeed_settings": {
+        "end": "now"
+      },
+      "file_config": {
+        "skipTest": true,
+        "skipReason": "File not available"
+      },
+      "validations": {
+        "result_range": {
+          "expected": [
+            {
+              "comment": "TN learning the model, flat data",
+              "end": "2018-01-13T00:00:00Z",
+              "statements": [
+                "max(anomaly_score) lt 5"
+              ]
+            },
+            {
+              "comment": "TP step up seen within 10 buckets - could be higher (see #237)",
+              "start": "2018-01-13T00:00:00Z",
+              "end": "2018-01-13T01:40:00Z",
+              "statements": [
+                "max(anomaly_score) gt 20"
+              ]
+            },
+            {
+              "comment": "TN step up learned",
+              "start": "2018-01-13T07:00:00Z",
+              "end": "2018-01-21T00:00:00Z",
+              "statements": [
+                "max(anomaly_score) lt 15"
+              ]
+            },
+            {
+              "comment": "FN step down seen within 10 buckets - should score higher",
+              "start": "2018-01-21T00:00:00Z",
+              "end": "2018-01-21T01:40:00Z",
+              "statements": [
+                "max(anomaly_score) gt 20"
+              ]
+            },
+            {
+              "comment": "TN step down learned",
+              "start": "2018-01-21T07:00:00Z",
+              "end": "2018-01-25T23:40:00Z",
+              "statements": [
+                "max(anomaly_score) lt 16"
+              ]
+            },
+            {
+              "comment": "FN final bump - should score higher",
+              "start": "2018-01-25T23:40:00Z",
+              "end": "2018-01-26T03:20:00Z",
+              "statements": [
+                "max(anomaly_score) gte 0"
+              ]
+            },
+            {
+              "comment": "TN flat home straight",
+              "start": "2018-01-26T23:20:00Z",
+              "statements": [
+                "max(anomaly_score) lt 1"
+              ]
+            }
+          ]
+        },
+        "job_duration": {
+          "expected": 60
+        },
+        "data_counts": {
+          "expected": {
+            "empty_bucket_count": 0,
+            "sparse_bucket_count": 0,
+            "latest_record_timestamp": 1517097000000,
+            "bucket_count": 3887,
+            "earliest_record_timestamp": 1514764800000,
+            "processed_record_count": 3888,
+            "processed_field_count": 3888
+          }
+        },
+        "model_size_stats": {
+          "expected": {
+            "total_partition_field_count": 2,
+            "total_over_field_count": 0,
+            "total_by_field_count": 3
+          }
+        },
+        "record_count_above_score": {}
+      }
+    }
+  ]
+}
