@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { FrontendLibs } from '../../lib/lib';
+import { FrontendLibs } from '../../lib/types';
 
 interface BeatActivityPageProps {
   libs: FrontendLibs;

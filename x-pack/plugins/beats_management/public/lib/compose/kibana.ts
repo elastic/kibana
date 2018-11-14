@@ -29,6 +29,7 @@ import { BeatsLib } from '../beats';
 import { ElasticsearchLib } from '../elasticsearch';
 import { TagsLib } from '../tags';
 import { FrontendLibs } from '../types';
+import { PLUGIN } from './../../../common/constants/plugin';
 import { FrameworkLib } from './../framework';
 
 export function compose(): FrontendLibs {

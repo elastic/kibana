@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IModule, IScope } from 'angular';
+import { IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import { FrameworkAdapter, FrameworkInfo, FrameworkUser } from './adapter_types';
 
@@ -15,30 +14,16 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private xpackInfo: FrameworkInfo | null = null;
   private adapterService: KibanaAdapterServiceProvider;
   private rootComponent: React.ReactElement<any> | null = null;
-  private uiModule: IModule;
-  private routes: any;
-  private XPackInfoProvider: any;
-  private chrome: any;
-  private shieldUser: any;
-
+  private shieldUser: FrameworkUser | null = null;
+  private hasInit: boolean = false;
   constructor(
-    uiModule: IModule,
-    management: any,
-    routes: any,
-    chrome: any,
-    XPackInfoProvider: any
+    private readonly PLUGIN_ID: string,
+    private readonly management: any,
+    private readonly routes: any,
+    private readonly chrome: any,
+    private readonly XPackInfoProvider: any
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
-    this.management = management;
-    this.uiModule = uiModule;
-    this.routes = routes;
-    this.chrome = chrome;
-    this.XPackInfoProvider = XPackInfoProvider;
-    this.appState = {};
-  }
-
-  public get baseURLPath(): string {
-    return this.chrome.getBasePath();
   }
 
   public get info() {
@@ -59,58 +44,54 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     return this.shieldUser!;
   }
 
-  public licenseExpired() {
-    if (!this.xpackInfo) {
-      return false;
-    }
-    return this.xpackInfo.get('features.beats_management.licenseExpired', false);
+  public async renderUIAtPath(path: string, component: React.ReactElement<any>) {
+    this.rootComponent = component;
+    this.registerPath(path);
+    await this.hookAngular();
+    this.hasInit = true;
   }
 
-  public securityEnabled() {
-    if (!this.xpackInfo) {
-      return false;
-    }
+  public registerManagementSection(settings: {
+    id?: string;
+    name: string;
+    iconName: string;
+    order?: number;
+  }) {
+    this.runFrameworkReadyCheck();
+    const sectionId = settings.id || this.PLUGIN_ID;
 
-    return this.xpackInfo.get('features.beats_management.securityEnabled', false);
-  }
-
-  public getDefaultUserRoles() {
-    if (!this.xpackInfo) {
-      return [];
-    }
-
-    return this.xpackInfo.get('features.beats_management.defaultUserRoles');
-  }
-
-  public getCurrentUser() {
-    try {
-      return this.shieldUser;
-    } catch (e) {
-      return null;
+    if (!this.management.hasItem(sectionId)) {
+      this.management.register(sectionId, {
+        display: settings.name,
+        icon: settings.iconName,
+        order: settings.order || 30,
+      });
     }
   }
 
-  public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
-    this.register(this.uiModule);
+  public registerManagementUI(settings: {
+    id?: string;
+    name: string;
+    basePath: string;
+    visable?: boolean;
+    order?: number;
+  }) {
+    this.runFrameworkReadyCheck();
+    const sectionId = settings.id || this.PLUGIN_ID;
 
-    this.hookAngular(() => {
-      if (this.hasValidLicense()) {
-        const registerSection = () =>
-          this.management.register(pluginId, {
-            display: 'Beats', // TODO these need to be config options not hard coded in the adapter
-            icon: 'logoBeats',
-            order: 30,
-          });
-        const getSection = () => this.management.getSection(pluginId);
-        const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
+    if (!this.management.hasItem(sectionId)) {
+      throw new Error(
+        `registerManagementUI was called with a sectionId of ${sectionId}, and that is is not yet regestered as a section`
+      );
+    }
 
-        section.register(pluginId, {
-          visible: true,
-          display: displayName,
-          order: 30,
-          url: `#${basePath}`,
-        });
-      }
+    const section = this.management.getSection(sectionId);
+
+    section.register(sectionId, {
+      visible: settings.visable || true,
+      display: settings.name,
+      order: settings.order || 30,
+      url: `#${settings.basePath}`,
     });
   }
 
@@ -135,17 +116,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   }
 
-  private hookAngular(done: () => any) {
-    this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
-      const Private = $injector.get('Private');
-      const xpackInfo = Private(this.XPackInfoProvider);
+  private async hookAngular() {
+    return new Promise(resolve => {
+      this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
+        const Private = $injector.get('Private');
+        const xpackInfo = Private(this.XPackInfoProvider);
 
-      this.xpackInfo = xpackInfo;
-      if (this.securityEnabled()) {
         try {
-<<<<<<< HEAD
-          this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
-=======
           this.xpackInfo = {
             basePath: this.chrome.getBasePath(),
             license: {
@@ -158,17 +135,18 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
               available: xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false),
             },
           };
->>>>>>> d4729fb684... wip
         } catch (e) {
-          // errors when security disabled, even though we check first because angular
+          throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
         }
-      }
 
-      done();
+        this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+
+        resolve();
+      });
     });
   }
 
-  private register = (adapterModule: IModule) => {
+  private registerPath = (path: string) => {
     const adapter = this;
     this.routes.when(
       `${path}${[...Array(50)].map(n => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
@@ -199,6 +177,11 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       }
     );
   };
+  private runFrameworkReadyCheck() {
+    if (!this.hasInit) {
+      throw new Error('framework must have renderUIAtPath called before anything else');
+    }
+  }
 }
 
 // tslint:disable-next-line: max-classes-per-file

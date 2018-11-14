@@ -18,7 +18,7 @@ import { MemoryTagsAdapter } from '../adapters/tags/memory_tags_adapter';
 import { MemoryTokensAdapter } from '../adapters/tokens/memory_tokens_adapter';
 
 import { BeatsLib } from '../beats';
-import { FrontendDomainLibs, FrontendLibs } from '../lib';
+import { FrontendDomainLibs, FrontendLibs } from '../types';
 
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 import { supportedConfigs } from '../../config_schemas';

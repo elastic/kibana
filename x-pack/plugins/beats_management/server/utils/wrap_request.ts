@@ -7,9 +7,8 @@
 import {
   FrameworkRequest,
   FrameworkWrappableRequest,
+  internalAuthData,
 } from '../lib/adapters/framework/adapter_types';
-
-export const internalAuthData = Symbol('internalAuthData');
 
 export function wrapRequest<InternalRequest extends FrameworkWrappableRequest>(
   req: InternalRequest

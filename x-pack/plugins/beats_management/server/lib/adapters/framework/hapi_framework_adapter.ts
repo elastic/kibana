@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LicenseType } from './../../../../common/constants/security';
+import { wrapRequest } from '../../../utils/wrap_request';
 import {
   BackendFrameworkAdapter,
+  FrameworkInternalUser,
   FrameworkResponse,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
-  internalAuthData,
-  internalUser,
 } from './adapter_types';
 
 interface TestSettings {
