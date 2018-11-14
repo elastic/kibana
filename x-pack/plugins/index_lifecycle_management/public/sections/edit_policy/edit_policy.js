@@ -66,9 +66,6 @@ class EditPolicyUi extends Component {
     }
   };
   getPolicyNameFromUri() {
-    // This method is necessary because react-router mangles path params that are encoded
-    // for example: http://localhost:5601/zpf/app/kibana#/management/elasticsearch/index_lifecycle_management/policies/edit/asdfasdFW%23@@$%25%23%5E%25%3F%23%25%5E&%3F%23%25%5E&%3F%23%25%5E&%3F%23%25%5E&%23%25%5E*%3F
-    // policyName winds up getting URI encoded twice to prevent an issue where the back button does not work
     const { hash } = window.location;
     if (!hash.includes('?')) {
       return null;
