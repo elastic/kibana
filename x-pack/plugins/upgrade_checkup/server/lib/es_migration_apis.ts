@@ -23,6 +23,11 @@ interface IndexInfoMap {
   };
 }
 
+export interface EnrichedDeprecationInfo extends DeprecationInfo {
+  index?: string;
+  node?: string;
+}
+
 export interface UpgradeCheckupStatus {
   cluster: {
     deprecations: DeprecationAPIResponse['cluster_settings'];
@@ -31,21 +36,31 @@ export interface UpgradeCheckupStatus {
     deprecations: DeprecationAPIResponse['node_settings'];
   };
   indices: IndexInfoMap;
+  new_data: {
+    cluster: EnrichedDeprecationInfo[];
+    nodes: EnrichedDeprecationInfo[];
+    indices: EnrichedDeprecationInfo[];
+  };
 }
 
 export async function getUpgradeCheckupStatus(
   callWithRequest: CallClusterWithRequest,
   req: Request
 ): Promise<UpgradeCheckupStatus> {
-  // let migrationAssistance = await callWithRequest(req, 'transport.request', {
+  // const migrationAssistanceReq = callWithRequest(req, 'transport.request', {
   //   path: '/_xpack/migration/assistance',
   //   method: 'GET',
   // });
 
-  // const deprecations = await callWithRequest(req, 'transport.request', {
+  // const deprecationsReq = callWithRequest(req, 'transport.request', {
   //   path: '/_xpack/migration/deprecations',
   //   method: 'GET',
   // });
+
+  // const [migrationAssistance, deprecations] = await Promise.all([
+  //   migrationAssistanceReq,
+  //   deprecationsReq,
+  // ]);
 
   // Fake data for now. TODO: Uncomment above and remove fake data
   const migrationAssistance = _.cloneDeep(fakeAssistance) as AssistanceAPIResponse;
@@ -89,6 +104,41 @@ export async function getUpgradeCheckupStatus(
     };
   }
 
+  const combinedIndexInfo2: EnrichedDeprecationInfo[] = [];
+  // for (const indexName in migrationAssistance.indices) {
+  //   for (const dep of )
+  // }
+  Object.keys(deprecations.index_settings).forEach(indexName => {
+    deprecations.index_settings[indexName]
+      .map(d => ({ ...d, index: indexName }))
+      .forEach(d => combinedIndexInfo2.push(d));
+  });
+
+  // Object.keys(migrationAssistance.indices).forEach(indexName => {
+  //   const actionRequired = migrationAssistance.indices[indexName].action_required;
+
+  //   if (actionRequired === 'reindex') {
+  //     combinedIndexInfo2.push({
+  //       index: indexName,
+  //       level: 'critical',
+  //       message: 'This index must be reindexed in order to upgrade the Elastic Stack.',
+  //       details: 'Reindexing is irreversible, so always back up your index before proceeding.',
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
+  //     });
+  //   } else if (actionRequired === 'upgrade') {
+  //     combinedIndexInfo2.push({
+  //       index: indexName,
+  //       level: 'critical',
+  //       message: 'This index must be upgraded in order to upgrade the Elastic Stack.',
+  //       details: 'Upgrading is irreversible, so always back up your index before proceeding.',
+  //       // TODO: not sure what URL to put here?
+  //       url:
+  //         'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
+  //     });
+  //   }
+  // });
+
   return {
     cluster: {
       deprecations: deprecations.cluster_settings,
@@ -97,5 +147,10 @@ export async function getUpgradeCheckupStatus(
       deprecations: deprecations.node_settings,
     },
     indices: combinedIndexInfo,
+    new_data: {
+      cluster: deprecations.cluster_settings,
+      nodes: deprecations.node_settings,
+      indices: combinedIndexInfo2,
+    },
   };
 }

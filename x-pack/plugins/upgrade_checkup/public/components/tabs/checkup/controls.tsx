@@ -7,13 +7,17 @@ import React, { StatelessComponent } from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LevelFilterBar } from './filter_bar';
-import { LevelFilterOption, LoadingState } from './types';
+import { GroupByBar } from './group_by_bar';
+import { GroupByOption, LevelFilterOption, LoadingState } from './types';
 
 interface CheckupControlsProps {
   loadingState: LoadingState;
   loadData: () => void;
   currentFilter: Set<LevelFilterOption>;
   onFilterChange: (filter: LevelFilterOption) => void;
+  availableGroupByOptions: GroupByOption[];
+  currentGroupBy: GroupByOption;
+  onGroupByChange: (groupBy: GroupByOption) => void;
 }
 
 export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
@@ -21,6 +25,9 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
   loadData,
   currentFilter,
   onFilterChange,
+  availableGroupByOptions,
+  currentGroupBy,
+  onGroupByChange,
 }) => (
   <EuiFlexGroup>
     <EuiFlexItem grow>
@@ -33,6 +40,9 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
           {loadingState === LoadingState.Loading ? 'Loading…' : 'Rerun Checkup'}
         </EuiButton>
       </div>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <LevelFilterBar {...{ currentFilter, onFilterChange }} />

@@ -16,3 +16,9 @@ export enum LevelFilterOption {
   warning = 'warning',
   critical = 'critical',
 }
+
+export enum GroupByOption {
+  message = 'message',
+  index = 'index',
+  node = 'node',
+}

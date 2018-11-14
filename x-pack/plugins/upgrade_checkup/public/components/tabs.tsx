@@ -11,6 +11,7 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 
+import { CheckupTab } from './tabs/checkup';
 import { ClusterCheckupTab } from './tabs/cluster_checkup';
 import { OverviewTab } from './tabs/overview';
 
@@ -28,10 +29,25 @@ export class UpgradeCheckupTabs extends React.Component {
       name: 'Overview',
       content: <OverviewTab />,
     },
+    // {
+    //   id: 'cluster_checkup',
+    //   name: 'Cluster Checkup',
+    //   content: <ClusterCheckupTab />,
+    // },
     {
-      id: 'cluster_checkup',
-      name: 'Cluster Checkup',
-      content: <ClusterCheckupTab />,
+      id: 'cluster',
+      name: 'Cluster',
+      content: <CheckupTab key="cluster" checkupType="cluster" />,
+    },
+    {
+      id: 'nodes',
+      name: 'Nodes',
+      content: <CheckupTab key="nodes" checkupType="nodes" />,
+    },
+    {
+      id: 'indices',
+      name: 'Indices',
+      content: <CheckupTab key="indices" checkupType="indices" />,
     },
   ];
 
