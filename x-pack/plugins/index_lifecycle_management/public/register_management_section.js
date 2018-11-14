@@ -6,14 +6,11 @@
 
 import { management } from 'ui/management';
 import { BASE_PATH } from '../common/constants';
-import chrome from 'ui/chrome';
-if (chrome.getInjected('indexLifecycleManagementUiEnabled')) {
-  const esSection = management.getSection('elasticsearch');
-  esSection.register('index_lifecycle_management', {
-    visible: true,
-    display: 'Index Lifecycle Management',
-    order: 1,
-    url: `#${BASE_PATH}policies`
-  });
-}
+const esSection = management.getSection('elasticsearch');
+esSection.register('index_lifecycle_management', {
+  visible: true,
+  display: 'Index Lifecycle Management',
+  order: 1,
+  url: `#${BASE_PATH}policies`
+});
 

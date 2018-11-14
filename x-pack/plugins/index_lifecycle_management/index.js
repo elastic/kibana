@@ -20,12 +20,6 @@ export function indexLifecycleManagement(kibana) {
     require: ['kibana', 'elasticsearch', 'xpack_main', 'index_management'],
     uiExports: {
       managementSections: ['plugins/index_lifecycle_management'],
-      injectDefaultVars(server) {
-        const config = server.config();
-        return {
-          indexLifecycleManagementUiEnabled: config.get(`${PLUGIN_ID}.enabled`)
-        };
-      },
     },
     init: function (server) {
       registerLicenseChecker(server);

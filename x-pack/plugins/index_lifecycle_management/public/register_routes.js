@@ -19,7 +19,6 @@ import routes from 'ui/routes';
 
 import template from './main.html';
 import { manageAngularLifecycle } from './services/manage_angular_lifecycle';
-import chrome from 'ui/chrome';
 
 const renderReact = async (elem) => {
   render(
@@ -31,25 +30,24 @@ const renderReact = async (elem) => {
     elem
   );
 };
-if (chrome.getInjected('indexLifecycleManagementUiEnabled')) {
-  routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
-    template: template,
-    controllerAs: 'indexLifecycleManagement',
-    controller: class IndexLifecycleManagementController {
-      constructor($scope, $route, $http, kbnUrl, $rootScope) {
-        setHttpClient($http);
-        setUrlService({
-          change(url) {
-            kbnUrl.change(url);
-            $rootScope.$digest();
-          }
-        });
-        $scope.$$postDigest(() => {
-          const elem = document.getElementById('indexLifecycleManagementReactRoot');
-          renderReact(elem);
-          manageAngularLifecycle($scope, $route, elem);
-        });
-      }
+routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
+  template: template,
+  controllerAs: 'indexLifecycleManagement',
+  controller: class IndexLifecycleManagementController {
+    constructor($scope, $route, $http, kbnUrl, $rootScope) {
+      setHttpClient($http);
+      setUrlService({
+        change(url) {
+          kbnUrl.change(url);
+          $rootScope.$digest();
+        }
+      });
+      $scope.$$postDigest(() => {
+        const elem = document.getElementById('indexLifecycleManagementReactRoot');
+        renderReact(elem);
+        manageAngularLifecycle($scope, $route, elem);
+      });
     }
-  });
-}
+  }
+});
+
