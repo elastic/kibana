@@ -10,7 +10,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 
 import { CRUD_APP_BASE_PATH } from './constants';
 import { registerRouter, setUserHasLeftApp } from './services';
-import { RemoteClusterList } from './sections';
+import { RemoteClusterList, RemoteClusterAdd } from './sections';
 
 export class App extends Component {
   static contextTypes = {
@@ -44,6 +44,7 @@ export class App extends Component {
         <Switch>
           <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/list`} />
           <Route exact path={`${CRUD_APP_BASE_PATH}/list`} component={RemoteClusterList} />
+          <Route exact path={`${CRUD_APP_BASE_PATH}/add`} component={RemoteClusterAdd} />
         </Switch>
       </div>
     );

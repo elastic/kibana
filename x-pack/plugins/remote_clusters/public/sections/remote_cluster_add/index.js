@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RemoteClusterList } from './remote_cluster_list';
-export { RemoteClusterAdd } from './remote_cluster_add';
+export { RemoteClusterAdd } from './remote_cluster_add.container';

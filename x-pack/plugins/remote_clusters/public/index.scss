@@ -1,0 +1,19 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'ui/public/styles/_styling_constants';
+
+// Index management plugin styles
+
+// Prefix all styles with "remoteClusters" to avoid conflicts.
+// Examples
+//   remoteClustersChart
+//   remoteClustersChart__legend
+//   remoteClustersChart__legend--small
+//   remoteClustersChart__legend-isLoading
+
+/**
+ * 1. Override EUI styles.
+ */
+.remoteClusterAddPage {
+  max-width: 1000px !important; /* 1 */
+  width: 100% !important; /* 1 */
+}
