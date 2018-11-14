@@ -37,7 +37,7 @@ function create(min, max, dashboardCtx) {
       getTimeBounds: () => ({ min, max })
     },
     () => {},
-    () => _.cloneDeep(dashboardCtx),
+    _.cloneDeep(dashboardCtx),
     () => (inst.$$$warnCount = (inst.$$$warnCount || 0) + 1)
   );
   return inst;

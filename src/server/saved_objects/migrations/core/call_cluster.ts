@@ -87,10 +87,8 @@ export interface IndexCreationOpts {
   body?: {
     mappings?: IndexMapping;
     settings?: {
-      index: {
-        number_of_shards: string;
-        number_of_replicas: string;
-      };
+      number_of_shards: number;
+      auto_expand_replicas: string;
     };
   };
 }

@@ -152,6 +152,13 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async isDisplayed(selector) {
+      return await retry.try(async () => {
+        const element = await this.find(selector);
+        return await element.isDisplayed();
+      });
+    }
+
     async isSelected(selector) {
       return await retry.try(async () => {
         const element = await this.find(selector);

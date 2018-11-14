@@ -25,7 +25,7 @@ const htmlSourceBuffer = Buffer.from(`
     <p
       i18n-id="kbn.dashboard.id-1"
       i18n-default-message="Message text 1 {value}"
-      i18n-context="Message context 1"
+      i18n-description="Message description 1"
       i18n-values="{
         value: 'Multiline
                 string',
@@ -36,7 +36,7 @@ const htmlSourceBuffer = Buffer.from(`
     {{ 'kbn.dashboard.id-2' | i18n: { defaultMessage: 'Message text 2' } }}
   </div>
   <div>
-    {{ 'kbn.dashboard.id-3' | i18n: { defaultMessage: 'Message text 3', context: 'Message context 3' } }}
+    {{ 'kbn.dashboard.id-3' | i18n: { defaultMessage: 'Message text 3', description: 'Message description 3' } }}
   </div>
 </div>
 `);
@@ -63,7 +63,7 @@ describe('dev/i18n/extractors/html', () => {
 <p
   i18n-id=""
   i18n-default-message="Message text"
-  i18n-context="Message context"
+  i18n-description="Message description"
 ></p>
 `);
 
