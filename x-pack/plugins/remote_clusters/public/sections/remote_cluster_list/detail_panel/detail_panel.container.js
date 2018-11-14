@@ -7,35 +7,30 @@
 import { connect } from 'react-redux';
 import { DetailPanel as DetailPanelView } from './detail_panel';
 
-// import {
-//   isDetailPanelOpen,
-//   getDetailPanelType,
-//   getDetailPanelRemoteCluster,
-//   getDetailPanelRemoteClusterId,
-//   isLoading,
-// } from '../../../store/selectors';
+import {
+  isDetailPanelOpen,
+  // getDetailPanelRemoteCluster,
+  // getDetailPanelRemoteClusterId,
+  // isLoading,
+} from '../../../store/selectors';
 
-// import {
-//   closeDetailPanel,
-//   openDetailPanel,
-// } from '../../../store/actions';
+import {
+  closeDetailPanel,
+} from '../../../store/actions';
 
-const mapStateToProps = (/*state*/) => {
+const mapStateToProps = (state) => {
   return {
-    // isOpen: isDetailPanelOpen(state),
+    isOpen: isDetailPanelOpen(state),
     // isLoading: isLoading(state),
     // remoteCluster: getDetailPanelRemoteCluster(state),
-    // remoteClusterId: getDetailPanelRemoteClusterId(state),
+    // remoteClusterName: getDetailPanelRemoteClusterName(state),
   };
 };
 
-const mapDispatchToProps = (/*dispatch*/) => {
+const mapDispatchToProps = (dispatch) => {
   return {
     closeDetailPanel: () => {
-      // dispatch(closeDetailPanel());
-    },
-    openDetailPanel: (/*{ remoteClusterId }*/) => {
-      // dispatch(openDetailPanel({ remoteClusterId }));
+      dispatch(closeDetailPanel());
     },
   };
 };
