@@ -50,14 +50,18 @@ export class Server {
     // 1. If `server.autoListen` is explicitly set to `false`.
     // 2. When the process is run as dev cluster master in which case cluster manager
     // will fork a dedicated process where http service will be started instead.
-    let httpServerInfo: HttpServerInfo | undefined;
+    let httpStartContract: HttpServerInfo | undefined;
     const httpConfig = await this.http.config$.pipe(first()).toPromise();
     if (!this.env.isDevClusterMaster && httpConfig.autoListen) {
-      httpServerInfo = await this.http.service.start();
+      httpStartContract = await this.http.service.start();
     }
 
-    await this.plugins.service.start();
-    await this.legacy.service.start(httpServerInfo);
+    const pluginsStartContract = await this.plugins.service.start();
+
+    await this.legacy.service.start({
+      http: httpStartContract,
+      plugins: pluginsStartContract,
+    });
   }
 
   public async stop() {

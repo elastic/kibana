@@ -22,7 +22,7 @@ export { ConfigService } from './config_service';
 /** @internal */
 export { RawConfigService } from './raw_config_service';
 /** @internal */
-export { Config, ConfigPath } from './config';
+export { Config, ConfigPath, isConfigPath } from './config';
 /** @internal */
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
 /** @internal */

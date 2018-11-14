@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { PluginsCore } from '../../../';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const plugin = (core: PluginsCore) => ({
-  start() {
-    core.logger.get().info(`Hello from TestBed Dependency plugin!`);
-    return { secret: 'my-secret-value' };
-  },
+/** @internal */
+export class TestBedConfig {
+  public static schema = schema.object({
+    secret: schema.string({ defaultValue: 'Not really a secret :/' }),
+  });
 
-  stop() {
-    core.logger.get().info(`Bye from TestBed Dependency plugin!`);
-  },
-});
+  public readonly secret: string;
+
+  constructor(config: TypeOf<typeof TestBedConfig['schema']>) {
+    this.secret = config.secret;
+  }
+}

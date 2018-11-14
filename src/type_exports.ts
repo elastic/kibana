@@ -27,15 +27,21 @@
  * in one of the known plugin locations (kibana/plugins/* or kibana-extra/*):
  *
  * ```ts
- * import { PluginsCore } from '../../kibana';
+ * import { Logger, PluginInitializerCore, PluginStartCore } from '../../kibana';
  *
  * export interface SomePluginContract {
  *   setValue: (val: string) => void;
  * }
  *
- * export plugin = (core: PluginsCore) => ({
- *  start() {
- *    core.logger.get().info('Hello from plugin!');
+ * class Plugin {
+ *   private readonly log: Logger;
+ *
+ *   constructor(private readonly core: PluginInitializerCore) {
+ *     this.log = core.logger.get();
+ *   }
+ *
+ *   start(core: PluginStartCore, deps: Record<string, any>) {
+ *    this.log.info('Hello from plugin!');
  *
  *    let value = 'Hello World!';
  *
@@ -44,7 +50,9 @@
  *
  *    return { setValue: (val: string) => { value = val; } };
  *   }
- * });
+ * }
+ *
+ * export plugin = (core: PluginInitializerCore) => new Plugin(core));
  * ```
  *
  * **NOTE:** If the code is not needed in plugins, we can add a `at_internal` JSDoc
@@ -53,4 +61,4 @@
  */
 
 export { Logger, LoggerFactory } from './core/server/logging';
-export { PluginsCore } from './core/server/plugins';
+export { PluginInitializerCore, PluginName, PluginStartCore } from './core/server/plugins';

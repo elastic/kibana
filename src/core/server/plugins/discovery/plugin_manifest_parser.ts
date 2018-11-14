@@ -19,8 +19,9 @@
 
 import { readFile, stat } from 'fs';
 import { resolve } from 'path';
+import { coerce } from 'semver';
 import { promisify } from 'util';
-import { PackageInfo } from '../../config';
+import { isConfigPath, PackageInfo } from '../../config';
 import { PluginManifest } from '../plugin';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
@@ -36,12 +37,6 @@ const MANIFEST_FILE_NAME = 'kibana.json';
  * The special "kibana" version can be used by the plugins to be always compatible.
  */
 const ALWAYS_COMPATIBLE_VERSION = 'kibana';
-
-/**
- * Regular expression used to extract semantic version part from the plugin or
- * kibana version, e.g. `1.2.3` ---> `1.2.3` and `7.0.0-alpha1` ---> `7.0.0`.
- */
-const SEM_VER_REGEX = /\d+\.\d+\.\d+/;
 
 /**
  * Tries to load and parse the plugin manifest file located at the provided plugin
@@ -89,11 +84,7 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
-  if (
-    manifest.configPath &&
-    typeof manifest.configPath !== 'string' &&
-    manifest.configPath.some(segment => typeof segment !== 'string')
-  ) {
+  if (manifest.configPath !== undefined && !isConfigPath(manifest.configPath)) {
     throw PluginDiscoveryError.invalidManifest(
       manifestPath,
       new Error(
@@ -133,13 +124,13 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
 }
 
 /**
- * Checks whether specified folder contains Kibana plugin manifest file. It's only
+ * Checks whether specified folder contains Kibana new platform plugin. It's only
  * intended to be used by the legacy systems when they need to check whether specific
  * plugin path is handled by the core plugin system or not.
  * @param pluginPath Path to the plugin.
  * @internal
  */
-export async function hasPluginManifest(pluginPath: string) {
+export async function isNewPlatformPlugin(pluginPath: string) {
   try {
     return (await fsStatAsync(resolve(pluginPath, MANIFEST_FILE_NAME))).isFile();
   } catch (err) {
@@ -157,14 +148,16 @@ function isVersionCompatible(expectedKibanaVersion: string, actualKibanaVersion:
     return true;
   }
 
-  return extractSemVer(actualKibanaVersion) === extractSemVer(expectedKibanaVersion);
-}
+  const coercedActualKibanaVersion = coerce(actualKibanaVersion);
+  if (coercedActualKibanaVersion == null) {
+    return false;
+  }
 
-/**
- * Tries to extract semantic version part from the full version string.
- * @param version
- */
-function extractSemVer(version: string) {
-  const semVerMatch = version.match(SEM_VER_REGEX);
-  return semVerMatch === null ? version : semVerMatch[0];
+  const coercedExpectedKibanaVersion = coerce(expectedKibanaVersion);
+  if (coercedExpectedKibanaVersion == null) {
+    return false;
+  }
+
+  // Compare coerced versions, e.g. `1.2.3` ---> `1.2.3` and `7.0.0-alpha1` ---> `7.0.0`.
+  return coercedActualKibanaVersion.compare(coercedExpectedKibanaVersion) === 0;
 }

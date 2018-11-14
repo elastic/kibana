@@ -24,7 +24,7 @@ import { ConfigWithSchema, EnvironmentMode } from '../config';
 import { LoggerFactory } from '../logging';
 import { Plugin } from './plugin';
 
-export interface PluginsCore {
+export interface PluginInitializerCore {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
@@ -37,8 +37,12 @@ export interface PluginsCore {
   };
 }
 
+// tslint:disable no-empty-interface
+export interface PluginStartCore {}
+
 /**
- * This returns a facade for `KibanaCore` that will be exposed to the plugins.
+ * This returns a facade for `KibanaCore` that will be exposed to the plugin initializer.
+ * This facade should be safe to use across entire plugin lifespan.
  *
  * This is called for each plugin when it's created, so each plugin gets its own
  * version of these values.
@@ -49,7 +53,10 @@ export interface PluginsCore {
  * @param core The core Kibana features
  * @internal
  */
-export function createPluginsCore(plugin: Plugin, core: KibanaCore): PluginsCore {
+export function createPluginInitializerCore<TPluginContract, TPluginDependencies>(
+  plugin: Plugin<TPluginContract, TPluginDependencies>,
+  core: KibanaCore
+): PluginInitializerCore {
   return {
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
@@ -84,4 +91,24 @@ export function createPluginsCore(plugin: Plugin, core: KibanaCore): PluginsCore
       },
     },
   };
+}
+
+/**
+ * This returns a facade for `KibanaCore` that will be exposed to the plugin `start` method.
+ * This facade should be safe to use only within `start` itself.
+ *
+ * This is called for each plugin when it's started, so each plugin gets its own
+ * version of these values.
+ *
+ * We should aim to be restrictive and specific in the APIs that we expose.
+ *
+ * @param plugin The plugin we're building these values for.
+ * @param core The core Kibana features
+ * @internal
+ */
+export function createPluginStartCore<TPluginContract, TPluginDependencies>(
+  plugin: Plugin<TPluginContract, TPluginDependencies>,
+  core: KibanaCore
+): PluginStartCore {
+  return {};
 }

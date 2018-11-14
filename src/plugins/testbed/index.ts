@@ -17,39 +17,35 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
 import { first } from 'rxjs/operators';
-import { PluginsCore } from '../../../';
+import { Logger, PluginInitializerCore, PluginName, PluginStartCore } from '../../../';
+import { TestBedConfig } from './config';
 
-/** @internal */
-class TestBedConfig {
-  public static schema = schema.object({
-    secret: schema.string({ defaultValue: 'Not really a secret :/' }),
-  });
+class Plugin {
+  private readonly log: Logger;
 
-  public readonly secret: string;
+  constructor(private readonly core: PluginInitializerCore) {
+    this.log = this.core.logger.get();
+  }
 
-  constructor(config: TypeOf<typeof TestBedConfig['schema']>) {
-    this.secret = config.secret;
+  public async start(core: PluginStartCore, deps: Record<PluginName, unknown>) {
+    this.log.debug(
+      `Starting TestBed with core contract [${Object.keys(core)}] and deps [${Object.keys(deps)}]`
+    );
+
+    const config = await this.core.config
+      .create(TestBedConfig)
+      .pipe(first())
+      .toPromise();
+
+    this.log.debug(`I've got value from my config: ${config.secret}`);
+
+    return { secret: config.secret };
+  }
+
+  public stop() {
+    this.log.debug(`Stopping TestBed`);
   }
 }
 
-export const plugin = (core: PluginsCore, dependencies: any) => ({
-  start() {
-    const log = core.logger.get();
-    log.info(`Hello from TestBed plugin!`);
-
-    log.warn(
-      `I've got value from my dependency: ${JSON.stringify(dependencies.testbed_dependency)}`
-    );
-
-    core.config
-      .create(TestBedConfig)
-      .pipe(first())
-      .subscribe(config => log.warn(`I've got value from my config: ${config.secret}`));
-  },
-
-  stop() {
-    core.logger.get().info(`Bye from TestBed plugin!`);
-  },
-});
+export const plugin = (core: PluginInitializerCore) => new Plugin(core);

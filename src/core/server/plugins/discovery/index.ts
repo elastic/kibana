@@ -20,6 +20,6 @@
 /** @internal */
 export { PluginDiscoveryError, PluginDiscoveryErrorType } from './plugin_discovery_error';
 /** @internal */
-export { hasPluginManifest } from './plugin_manifest_parser';
+export { isNewPlatformPlugin } from './plugin_manifest_parser';
 /** @internal */
 export { discover } from './plugins_discovery';

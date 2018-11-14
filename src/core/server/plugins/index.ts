@@ -21,8 +21,9 @@ import { KibanaCore } from '../../types';
 import { PluginsService } from './plugins_service';
 
 /** @internal */
-export { hasPluginManifest } from './discovery';
-export { PluginsCore } from './plugins_core';
+export { isNewPlatformPlugin } from './discovery';
+export { PluginInitializerCore, PluginStartCore } from './plugins_core';
+export { PluginName } from './plugin';
 
 /** @internal */
 export class PluginsModule {

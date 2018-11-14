@@ -20,10 +20,9 @@
 /** @internal */
 export enum PluginDiscoveryErrorType {
   IncompatibleVersion = 'incompatible-version',
-  InvalidScanDirectory = 'invalid-scan-dir',
-  InvalidPluginDirectory = 'invalid-plugin-dir',
+  InvalidSearchPath = 'invalid-search-path',
+  InvalidPluginPath = 'invalid-plugin-path',
   InvalidManifest = 'invalid-manifest',
-  InvalidDefinition = 'invalid-definition',
   MissingManifest = 'missing-manifest',
 }
 
@@ -33,20 +32,16 @@ export class PluginDiscoveryError extends Error {
     return new PluginDiscoveryError(PluginDiscoveryErrorType.IncompatibleVersion, path, cause);
   }
 
-  public static invalidScanDirectory(path: string, cause: Error) {
-    return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidScanDirectory, path, cause);
+  public static invalidSearchPath(path: string, cause: Error) {
+    return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidSearchPath, path, cause);
   }
 
-  public static invalidPluginDirectory(path: string, cause: Error) {
-    return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidPluginDirectory, path, cause);
+  public static invalidPluginPath(path: string, cause: Error) {
+    return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidPluginPath, path, cause);
   }
 
   public static invalidManifest(path: string, cause: Error) {
     return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidManifest, path, cause);
-  }
-
-  public static invalidDefinition(path: string, cause: Error) {
-    return new PluginDiscoveryError(PluginDiscoveryErrorType.InvalidDefinition, path, cause);
   }
 
   public static missingManifest(path: string, cause: Error) {

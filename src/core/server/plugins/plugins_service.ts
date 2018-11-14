@@ -27,7 +27,10 @@ import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
-export class PluginsService implements CoreService {
+export type PluginsServiceStartContract = Map<PluginName, unknown>;
+
+/** @internal */
+export class PluginsService implements CoreService<PluginsServiceStartContract> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
@@ -37,7 +40,7 @@ export class PluginsService implements CoreService {
   }
 
   public async start() {
-    this.log.debug('starting plugins service');
+    this.log.debug('Starting plugins service');
 
     const config = await this.core.configService
       .atPath('plugins', PluginsConfig)
@@ -48,16 +51,16 @@ export class PluginsService implements CoreService {
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
-    if (!config.initialize) {
+    if (!config.initialize || this.core.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
-      return;
+      return new Map();
     }
 
-    await this.pluginsSystem.startPlugins();
+    return await this.pluginsSystem.startPlugins();
   }
 
   public async stop() {
-    this.log.debug('stopping plugins service');
+    this.log.debug('Stopping plugins service');
     await this.pluginsSystem.stopPlugins();
   }
 
@@ -67,7 +70,6 @@ export class PluginsService implements CoreService {
     // platform and let legacy platform to handle it.
     const errorTypesToReport = [
       PluginDiscoveryErrorType.IncompatibleVersion,
-      PluginDiscoveryErrorType.InvalidDefinition,
       PluginDiscoveryErrorType.InvalidManifest,
     ];
 

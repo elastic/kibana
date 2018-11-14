@@ -20,7 +20,7 @@
 import { KibanaCore } from '../../types';
 import { Logger } from '../logging';
 import { Plugin, PluginName } from './plugin';
-import { createPluginsCore } from './plugins_core';
+import { createPluginInitializerCore, createPluginStartCore } from './plugins_core';
 
 /** @internal */
 export class PluginsSystem {
@@ -37,19 +37,18 @@ export class PluginsSystem {
   }
 
   public async startPlugins() {
+    const exposedValues = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
-      return;
+      return exposedValues;
     }
 
     const sortedPlugins = this.getTopologicallySortedPluginNames();
     this.log.info(`Starting [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
 
-    const exposedValues = new Map<PluginName, any>();
     for (const pluginName of sortedPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
 
       const plugin = this.plugins.get(pluginName)!;
-
       const exposedDependencyValues = [
         ...plugin.requiredDependencies,
         ...plugin.optionalDependencies,
@@ -58,16 +57,20 @@ export class PluginsSystem {
           dependencies[dependencyName] = exposedValues.get(dependencyName);
           return dependencies;
         },
-        {} as Record<PluginName, any>
+        {} as Record<PluginName, unknown>
       );
+
+      plugin.init(createPluginInitializerCore(plugin, this.core));
 
       exposedValues.set(
         pluginName,
-        await plugin.start(createPluginsCore(plugin, this.core), exposedDependencyValues)
+        await plugin.start(createPluginStartCore(plugin, this.core), exposedDependencyValues)
       );
 
       this.startedPlugins.push(pluginName);
     }
+
+    return exposedValues;
   }
 
   public async stopPlugins() {

@@ -19,7 +19,7 @@
 
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from, merge, throwError } from 'rxjs';
+import { bindNodeCallback, from } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
 import { KibanaCore } from '../../../types';
 import { Logger } from '../../logging';
@@ -45,10 +45,7 @@ export function discover(config: PluginsConfig, core: KibanaCore) {
   const log = core.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  const discoveryResults$ = merge(
-    processScanDirs$(config.scanDirs, log),
-    processPaths$(config.paths, log)
-  ).pipe(
+  const discoveryResults$ = processPluginSearchPaths$(config.pluginSearchPaths, log).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, core)
@@ -66,14 +63,14 @@ export function discover(config: PluginsConfig, core: KibanaCore) {
 }
 
 /**
- * Iterates over every entry in `scanDirs` and returns a merged stream of all
+ * Iterates over every plugin search path and returns a merged stream of all
  * sub-directories. If directory cannot be read or it's impossible to get stat
  * for any of the nested entries then error is added into the stream instead.
- * @param scanDirs List of the top-level directories to process.
+ * @param pluginDirs List of the top-level directories to process.
  * @param log Plugin discovery logger instance.
  */
-function processScanDirs$(scanDirs: string[], log: Logger) {
-  return from(scanDirs).pipe(
+function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logger) {
+  return from(pluginDirs).pipe(
     mergeMap(dir => {
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
 
@@ -85,36 +82,10 @@ function processScanDirs$(scanDirs: string[], log: Logger) {
             // these directories may contain files (e.g. `README.md` or `package.json`).
             // We shouldn't silently ignore the entries we couldn't get stat for though.
             mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
-            catchError(err => [PluginDiscoveryError.invalidPluginDirectory(path, err)])
+            catchError(err => [PluginDiscoveryError.invalidPluginPath(path, err)])
           )
         ),
-        catchError(err => [PluginDiscoveryError.invalidScanDirectory(dir, err)])
-      );
-    })
-  );
-}
-
-/**
- * Iterates over every entry in `paths` and returns a stream of all paths that
- * are directories. If path is not a directory or it's impossible to get stat
- * for this path then error is added into the stream instead.
- * @param paths List of paths to process.
- * @param log Plugin discovery logger instance.
- */
-function processPaths$(paths: string[], log: Logger) {
-  return from(paths).pipe(
-    mergeMap(path => {
-      log.debug(`Including "${path}" into the plugin path list.`);
-
-      return fsStat$(path).pipe(
-        // Since every path is specifically provided we should treat non-directory
-        // entries as mistakes we should report of.
-        mergeMap(pathStat => {
-          return pathStat.isDirectory()
-            ? [path]
-            : throwError(new Error(`${path} is not a directory.`));
-        }),
-        catchError(err => [PluginDiscoveryError.invalidPluginDirectory(path, err)])
+        catchError(err => [PluginDiscoveryError.invalidSearchPath(dir, err)])
       );
     })
   );
@@ -131,24 +102,8 @@ function processPaths$(paths: string[], log: Logger) {
 function createPlugin$(path: string, log: Logger, core: KibanaCore) {
   return from(parseManifest(path, core.env.packageInfo)).pipe(
     map(manifest => {
-      const pluginDefinition = require(path);
-      if (!('plugin' in pluginDefinition)) {
-        throw PluginDiscoveryError.invalidDefinition(
-          path,
-          new Error(`Plugin does not export "plugin" definition.`)
-        );
-      }
-
-      const { plugin: initializer } = pluginDefinition as { plugin: () => any };
-      if (!initializer || typeof initializer !== 'function') {
-        throw PluginDiscoveryError.invalidDefinition(
-          path,
-          new Error(`Plugin definition should be a function.`)
-        );
-      }
-
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new Plugin({ path, manifest, initializer }, core.logger.get('plugins', manifest.id));
+      return new Plugin(path, manifest, core.logger.get('plugins', manifest.id));
     }),
     catchError(err => [err])
   );

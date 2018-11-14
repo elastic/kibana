@@ -20,12 +20,11 @@
 import typeDetect from 'type-detect';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginsCore } from './plugins_core';
+import { PluginInitializerCore, PluginStartCore } from './plugins_core';
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
  * that use it as a key or value more obvious.
- * @internal
  */
 export type PluginName = string;
 
@@ -75,64 +74,75 @@ export interface PluginManifest {
   readonly ui: boolean;
 }
 
-/**
- * Definition of the plugin assembled from its path, manifest and initializer function.
- */
-interface PluginDefinition<TExposedContract, TDependencies extends Record<PluginName, any>> {
-  path: string;
-  manifest: PluginManifest;
-  initializer: (
-    core: PluginsCore,
-    dependencies: TDependencies
-  ) => {
-    start: () => TExposedContract;
-    stop?: () => void;
-  };
-}
+type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName, unknown>> = (
+  core: PluginInitializerCore
+) => {
+  start: (core: PluginStartCore, dependencies: TDependencies) => TExposedContract;
+  stop?: () => void;
+};
 
 /** @internal */
 export class Plugin<
-  TExposedContract = any,
-  TDependencies extends Record<PluginName, any> = Record<PluginName, any>
+  TStartContract = unknown,
+  TDependencies extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];
   public readonly requiredDependencies: PluginManifest['requiredPlugins'];
   public readonly optionalDependencies: PluginManifest['optionalPlugins'];
 
-  private instance?: ReturnType<PluginDefinition<TExposedContract, TDependencies>['initializer']>;
+  private instance?: ReturnType<PluginInitializer<TStartContract, TDependencies>>;
 
   constructor(
-    private readonly definition: PluginDefinition<TExposedContract, TDependencies>,
+    public readonly path: string,
+    private readonly manifest: PluginManifest,
     private readonly log: Logger
   ) {
-    this.name = definition.manifest.id;
-    this.configPath = definition.manifest.configPath;
-    this.requiredDependencies = definition.manifest.requiredPlugins;
-    this.optionalDependencies = definition.manifest.optionalPlugins;
+    this.name = manifest.id;
+    this.configPath = manifest.configPath;
+    this.requiredDependencies = manifest.requiredPlugins;
+    this.optionalDependencies = manifest.optionalPlugins;
   }
 
-  public async start(core: PluginsCore, dependencies: TDependencies) {
-    this.log.info('starting plugin');
+  public init(core: PluginInitializerCore) {
+    this.log.info('Initializing plugin');
 
-    const instance = this.definition.initializer(core, dependencies);
+    const pluginDefinition = require(this.path);
+    if (!('plugin' in pluginDefinition)) {
+      throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
+    }
+
+    const { plugin: initializer } = pluginDefinition as {
+      plugin: PluginInitializer<TStartContract, TDependencies>;
+    };
+    if (!initializer || typeof initializer !== 'function') {
+      throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
+    }
+
+    const instance = initializer(core);
     if (!instance || typeof instance !== 'object') {
       throw new Error(
         `Initializer for plugin "${
-          this.definition.manifest.id
+          this.manifest.id
         }" is expected to return plugin instance, but returned "${typeDetect(instance)}".`
       );
     }
 
     if (typeof instance.start !== 'function') {
-      throw new Error(
-        `Instance of plugin "${this.definition.manifest.id}" does not define "start" function.`
-      );
+      throw new Error(`Instance of plugin "${this.name}" does not define "start" function.`);
     }
 
     this.instance = instance;
+  }
 
-    return await this.instance.start();
+  public async start(core: PluginStartCore, dependencies: TDependencies) {
+    if (this.instance === undefined) {
+      throw new Error(`Plugin "${this.name}" is not initialized.`);
+    }
+
+    this.log.info('Starting plugin');
+
+    return await this.instance.start(core, dependencies);
   }
 
   public async stop() {
@@ -140,7 +150,7 @@ export class Plugin<
       return;
     }
 
-    this.log.info('stopping plugin');
+    this.log.info('Stopping plugin');
 
     if (typeof this.instance.stop === 'function') {
       await this.instance.stop();

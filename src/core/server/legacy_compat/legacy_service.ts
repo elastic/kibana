@@ -23,8 +23,9 @@ import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService, KibanaCore } from '../../types';
 import { Config } from '../config';
 import { DevConfig } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpServerInfo } from '../http';
+import { BasePathProxyServer, HttpConfig, HttpServiceStartContract } from '../http';
 import { Logger } from '../logging';
+import { PluginsServiceStartContract } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 interface LegacyKbnServer {
@@ -32,6 +33,11 @@ interface LegacyKbnServer {
   listen: () => Promise<void>;
   ready: () => Promise<void>;
   close: () => Promise<void>;
+}
+
+interface Deps {
+  http?: HttpServiceStartContract;
+  plugins: PluginsServiceStartContract;
 }
 
 /** @internal */
@@ -44,7 +50,7 @@ export class LegacyService implements CoreService {
     this.log = core.logger.get('legacy-service');
   }
 
-  public async start(httpServerInfo?: HttpServerInfo) {
+  public async start(deps: Deps) {
     this.log.debug('starting legacy service');
 
     const update$ = this.core.configService.getConfig$().pipe(
@@ -69,7 +75,7 @@ export class LegacyService implements CoreService {
             return;
           }
 
-          return await this.createKbnServer(config, httpServerInfo);
+          return await this.createKbnServer(config, deps);
         })
       )
       .toPromise();
@@ -110,7 +116,7 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(config: Config, httpServerInfo?: HttpServerInfo) {
+  private async createKbnServer(config: Config, deps: Deps) {
     const KbnServer = require('../../../server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(config.toRaw(), {
       // If core HTTP service is run we'll receive internal server reference and
@@ -119,13 +125,14 @@ export class LegacyService implements CoreService {
       // managed by ClusterManager or optimizer) then we won't have that info,
       // so we can't start "legacy" server either.
       serverOptions:
-        httpServerInfo !== undefined
+        deps.http !== undefined
           ? {
-              ...httpServerInfo.options,
-              listener: this.setupProxyListener(httpServerInfo.server),
+              ...deps.http.options,
+              listener: this.setupProxyListener(deps.http.server),
             }
           : { autoListen: false },
       handledConfigPaths: await this.core.configService.getUsedPaths(),
+      plugins: deps.plugins,
     });
 
     // The kbnWorkerType check is necessary to prevent the repl
