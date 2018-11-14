@@ -12,7 +12,6 @@ import {
 } from '@elastic/eui';
 
 import { CheckupTab } from './tabs/checkup';
-import { ClusterCheckupTab } from './tabs/cluster_checkup';
 import { OverviewTab } from './tabs/overview';
 
 // TODO: replace with types added in https://github.com/elastic/eui/pull/1288
@@ -29,21 +28,16 @@ export class UpgradeCheckupTabs extends React.Component {
       name: 'Overview',
       content: <OverviewTab />,
     },
-    // {
-    //   id: 'cluster_checkup',
-    //   name: 'Cluster Checkup',
-    //   content: <ClusterCheckupTab />,
-    // },
     {
       id: 'cluster',
       name: 'Cluster',
       content: <CheckupTab key="cluster" checkupType="cluster" />,
     },
-    {
-      id: 'nodes',
-      name: 'Nodes',
-      content: <CheckupTab key="nodes" checkupType="nodes" />,
-    },
+    // {
+    //   id: 'nodes',
+    //   name: 'Nodes',
+    //   content: <CheckupTab key="nodes" checkupType="nodes" />,
+    // },
     {
       id: 'indices',
       name: 'Indices',

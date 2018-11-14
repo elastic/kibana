@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSwitch, EuiText } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { LoadingState } from '../cluster_checkup/types';
+import { LoadingState } from '../checkup/types';
 
 interface DeprecationLoggingTabState {
   loadingState: LoadingState;
@@ -41,7 +41,9 @@ export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLog
               label="Deprecation Logging"
               checked={loggingEnabled}
               onChange={this.toggleLogging}
-              disabled={loadingState === LoadingState.Loading}
+              disabled={
+                loadingState === LoadingState.Loading || loadingState === LoadingState.Error
+              }
             />
           </div>
         </EuiFlexItem>

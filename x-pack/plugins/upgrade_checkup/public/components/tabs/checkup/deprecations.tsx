@@ -22,10 +22,7 @@ import {
   DeprecationInfo,
   MIGRATION_DEPRECATION_LEVEL as LEVEL,
 } from 'src/core_plugins/elasticsearch';
-import {
-  EnrichedDeprecationInfo,
-  UpgradeCheckupStatus,
-} from '../../../../server/lib/es_migration_apis';
+import { EnrichedDeprecationInfo } from '../../../../server/lib/es_migration_apis';
 import { GroupByOption, LevelFilterOption } from './types';
 
 // TODO: use TS enum?
@@ -119,33 +116,32 @@ export const Deprecations: StatelessComponent<DeprecationsProps> = ({ deprecatio
   </EuiFlexGroup>
 );
 
-const EmptyMessage: StatelessComponent<{ emptyMessage?: string }> = ({ emptyMessage }) => {
+const EmptyMessage: StatelessComponent = () => {
   return (
     <EuiText color="subdued">
-      <p>{emptyMessage}</p>
+      <p>No deprecations.</p>
     </EuiText>
   );
 };
 
-interface GroupedDeprecationsProps extends DeprecationsProps {
+interface GroupedDeprecationsProps {
   currentFilter: Set<LevelFilterOption>;
   currentGroupBy: GroupByOption;
-  emptyMessage?: string;
+  deprecations?: EnrichedDeprecationInfo[];
 }
 
 export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> = ({
   currentGroupBy,
   deprecations,
-  emptyMessage,
   currentFilter,
 }) => {
   if (!deprecations) {
-    return <EmptyMessage emptyMessage={emptyMessage} />;
+    return <EmptyMessage />;
   }
 
   deprecations = deprecations.filter(filterDeps(currentFilter));
   if (deprecations.length === 0) {
-    return <EmptyMessage emptyMessage={emptyMessage} />;
+    return <EmptyMessage />;
   }
 
   const groups = _.groupBy(deprecations, currentGroupBy);

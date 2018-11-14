@@ -29,7 +29,7 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
   currentGroupBy,
   onGroupByChange,
 }) => (
-  <EuiFlexGroup>
+  <EuiFlexGroup alignItems="center">
     <EuiFlexItem grow>
       <div>
         <EuiButton

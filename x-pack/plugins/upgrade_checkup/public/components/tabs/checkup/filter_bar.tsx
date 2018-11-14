@@ -6,7 +6,15 @@
 
 import React from 'react';
 
-import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import {
+  // @ts-ignore
+  EuiFilterButton,
+  // @ts-ignore
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { LevelFilterOption } from './types';
 
 interface LevelFilterBarProps {
@@ -21,17 +29,24 @@ export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
     const { currentFilter } = this.props;
 
     return (
-      <EuiFilterGroup>
-        {allFilterOptions.map(option => (
-          <EuiFilterButton
-            key={option}
-            onClick={this.filterClicked.bind(this, option)}
-            hasActiveFilters={currentFilter.has(option)}
-          >
-            {option}
-          </EuiFilterButton>
-        ))}
-      </EuiFilterGroup>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiText color="subdued">Level</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFilterGroup>
+            {allFilterOptions.map(option => (
+              <EuiFilterButton
+                key={option}
+                onClick={this.filterClicked.bind(this, option)}
+                hasActiveFilters={currentFilter.has(option)}
+              >
+                {option}
+              </EuiFilterButton>
+            ))}
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

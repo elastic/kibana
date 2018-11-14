@@ -43,7 +43,7 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
     this.state = {
       loadingState: LoadingState.Loading,
       // initialize to all filters
-      currentFilter: new Set(Object.keys(LevelFilterOption)) as Set<LevelFilterOption>,
+      currentFilter: new Set([LevelFilterOption.warning, LevelFilterOption.critical]),
       currentGroupBy: GroupByOption.message,
     };
   }
@@ -66,7 +66,7 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
         <EuiText>
           <p>
             This tool runs a series of checks against your Elasticsearch {checkupType} to determine
-            whether you can upgrade directly to Elasticsearch version 7, or whether you need to make
+            whether you can upgrade directly to Elasticsearch 7.0, or whether you need to make
             changes to your data before doing so.
           </p>
         </EuiText>
@@ -144,7 +144,6 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
           currentGroupBy={currentGroupBy}
           currentFilter={currentFilter}
           deprecations={deprecations}
-          emptyMessage="No deprecations."
         />
       </div>
     );

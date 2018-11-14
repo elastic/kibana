@@ -11,7 +11,6 @@ export enum LoadingState {
 }
 
 export enum LevelFilterOption {
-  none = 'none',
   info = 'info',
   warning = 'warning',
   critical = 'critical',
