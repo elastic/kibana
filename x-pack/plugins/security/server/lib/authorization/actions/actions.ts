@@ -8,7 +8,7 @@ import { ApiActions } from './api';
 import { AppActions } from './app';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
-import { UiActions } from './ui';
+import { UIActions } from './ui';
 
 export class Actions {
   public api = new ApiActions();
@@ -21,7 +21,7 @@ export class Actions {
 
   public space = new SpaceActions();
 
-  public ui = new UiActions();
+  public ui = new UIActions();
 
   public version = `version:${this.versionNumber}`;
   constructor(private versionNumber: string) {}

@@ -37,7 +37,7 @@ export class FeaturesPrivilegesBuilder {
     );
   }
 
-  public getUiReadActions(features: Feature[]): string[] {
+  public getUIReadActions(features: Feature[]): string[] {
     return flatten(
       features.map(feature => {
         const { privileges } = feature;

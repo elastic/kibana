@@ -299,7 +299,7 @@ describe('#getApiReadActions', () => {
   });
 });
 
-describe('#getUiReadActions', () => {
+describe('#getUIReadActions', () => {
   test(`includes ui actions from the read privileges`, () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
@@ -344,7 +344,7 @@ describe('#getUiReadActions', () => {
         },
       },
     ];
-    const result = builder.getUiReadActions(features);
+    const result = builder.getUIReadActions(features);
     expect(result).toEqual([actions.ui.get('bar', 'bar-ui-capability')]);
   });
 });

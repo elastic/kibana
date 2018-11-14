@@ -6,9 +6,9 @@
 import { isString } from 'lodash';
 const prefix = 'ui:';
 
-export class UiActions {
+export class UIActions {
   public all = `${prefix}*`;
-  public allNavlinks = `${prefix}navLinks/*`;
+  public allNavLinks = `${prefix}navLinks/*`;
 
   public get(featureId: string, uiCapability: string) {
     if (!featureId || !isString(featureId)) {

@@ -39,8 +39,8 @@ export function buildPrivilegeMap(
         actions.version,
         ...featuresPrivilegesBuilder.getApiReadActions(features),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
-        ...featuresPrivilegesBuilder.getUiReadActions(features),
-        actions.ui.allNavlinks,
+        ...featuresPrivilegesBuilder.getUIReadActions(features),
+        actions.ui.allNavLinks,
       ],
     },
     space: {
@@ -56,8 +56,8 @@ export function buildPrivilegeMap(
         actions.version,
         ...featuresPrivilegesBuilder.getApiReadActions(features),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
-        ...featuresPrivilegesBuilder.getUiReadActions(features),
-        actions.ui.allNavlinks,
+        ...featuresPrivilegesBuilder.getUIReadActions(features),
+        actions.ui.allNavLinks,
       ],
     },
   };
