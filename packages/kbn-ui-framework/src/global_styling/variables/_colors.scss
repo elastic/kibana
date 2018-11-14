@@ -1,26 +1,26 @@
 // True colors
 
-$kuiColorBlue: #0079a5;
-$kuiColorTeal: #00A69B;
-$kuiColorRed: #A30000;
-$kuiColorLightestGray: #F5F5F5;
-$kuiColorLightGray: #D9D9D9;
-$kuiColorMediumGray: #999;
-$kuiColorDarkGray: #666;
-$kuiColorDarkestGray: #3F3F3F;
-$kuiColorBlack: #000;
-$kuiColorWhite: #FFF;
-$kuiColorEmptyShade: $kuiColorWhite;
-$kuiColorLightestShade: lighten($kuiColorLightGray, 5%);
+$kuiColorBlue: $euiColorPrimary;
+$kuiColorTeal: $euiColorSecondary;
+$kuiColorRed: $euiColorDanger;
+$kuiColorLightestGray: $euiColorLightestShade;
+$kuiColorLightGray: $euiColorLightShade;
+$kuiColorMediumGray: $euiColorMediumShade;
+$kuiColorDarkGray: $euiColorDarkShade;
+$kuiColorDarkestGray: $euiColorDarkestShade;
+$kuiColorBlack: $euiColorFullShade;
+$kuiColorWhite: $euiColorGhost;
+$kuiColorEmptyShade: $euiColorEmptyShade;
+$kuiColorLightestShade: $euiColorLightestShade;
 
 // Normal colors
 
-$kuiTextColor: #2d2d2d;
-$kuiLinkColor: $kuiColorBlue;
+$kuiTextColor: $euiTextColor;
+$kuiLinkColor: $euiColorPrimary;
 $kuiLinkColor-isHover: darken($kuiLinkColor, 10%);
 $kuiInputTextColor: $kuiTextColor;
 $kuiInputBackgroundColor: $kuiColorWhite;
-$kuiInputBorderColor: $kuiColorLightGray;
+$kuiInputBorderColor: $euiBorderColor;
 
 // Dark theme colors
 

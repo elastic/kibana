@@ -1,9 +1,9 @@
 // Animations
 
-$kuiAnimSlightBounce: cubic-bezier(0.34,1.61,0.7,1);
-$kuiAnimSlightResistance: cubic-bezier(0.694, 0.0482, 0.335, 1);
-$kuiAnimSpeedVeryFast: 90ms;
-$kuiAnimSpeedFast: 150ms;
-$kuiAnimSpeedNormal: 250ms;
-$kuiAnimSpeedSlow: 350ms;
-$kuiAnimSpeedVerySlow: 500ms;
+$kuiAnimSlightBounce: $euiAnimSlightBounce;
+$kuiAnimSlightResistance: $euiAnimSlightResistance;
+$kuiAnimSpeedVeryFast: $euiAnimSpeedExtraFast;
+$kuiAnimSpeedFast: $euiAnimSpeedFast;
+$kuiAnimSpeedNormal: $euiAnimSpeedNormal;
+$kuiAnimSpeedSlow: $euiAnimSpeedSlow;
+$kuiAnimSpeedVerySlow: $euiAnimSpeedExtraSlow;
