@@ -10,7 +10,6 @@ import { GIS_API_PATH } from '../common/constants';
 import fetch from 'node-fetch';
 import _ from 'lodash';
 import ZIPCODES from './junk/usa_zip_codes_v2';
-// import WORLD_COUNTRIES from './junk/world_countries';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -60,7 +59,7 @@ export function initRoutes(server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/meta`,
-    handler: async (request) => {
+    handler: async () => {
 
       let ems;
       try {
@@ -74,23 +73,11 @@ export function initRoutes(server) {
         };
       }
 
-      let indexPatterns;
-      try {
-        indexPatterns = await getIndexPatterns(request);
-      } catch (e) {
-        console.error('Cannot connect to ES');
-        console.error(e);
-        indexPatterns = [];
-      }
-
       return ({
         data_sources: {
           ems: {
             file: ems.fileLayers,
             tms: ems.tmsServices
-          },
-          elasticsearch: {
-            indexPatterns: indexPatterns
           },
           kibana: {
             regionmap: _.get(mapConfig, 'regionmap.layers', []),
@@ -100,30 +87,6 @@ export function initRoutes(server) {
       });
     }
   });
-
-  async function getIndexPatterns(req) {
-
-    const savedObjectsClient = req.getSavedObjectsClient();
-    const things = await savedObjectsClient.find({ type: 'index-pattern' });
-
-    const indexPatterns = things.saved_objects.map((indexPattern) => {
-      return {
-        id: indexPattern.id,
-        title: indexPattern.attributes.title,
-        timeFieldName: indexPattern.attributes.timeFieldName,
-        fields: JSON.parse(indexPattern.attributes.fields)
-      };
-    });
-
-    return indexPatterns.map(indexPattern => {
-      const geoPointField = indexPattern.fields.find(field => {
-        return field.type === 'geo_point';
-      });
-      indexPattern.isGeohashable = !!geoPointField;
-      return indexPattern;
-    });
-  }
-
 
   async function getEMSResources() {
     const fileLayers = await emsV2.getFileLayers();

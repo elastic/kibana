@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n } from '@kbn/i18n/react';
 
 import {
   EuiSearchBar,
+  EuiFormErrorText,
 } from '@elastic/eui';
 
 import { getCategoryName } from '../../lib';
@@ -46,11 +47,33 @@ class SearchUI extends PureComponent {
     });
   }
 
+  state = {
+    isSearchTextValid: true,
+    parseErrorMessage: null,
+  }
+
+  onChange = ({ query, error }) => {
+    if (error) {
+      this.setState({
+        isSearchTextValid: false,
+        parseErrorMessage: error.message,
+      });
+      return;
+    }
+
+    this.setState({
+      isSearchTextValid: true,
+      parseErrorMessage: null,
+    });
+    this.props.onQueryChange({ query });
+  }
+
   render() {
-    const { query, onQueryChange, intl } = this.props;
+    const { query, intl } = this.props;
 
     const box = {
       incremental: true,
+      'data-test-subj': 'settingsSearchBar',
       'aria-label': intl.formatMessage({
         id: 'kbn.management.settings.searchBarAriaLabel',
         defaultMessage: 'Search advanced settings',
@@ -71,14 +94,29 @@ class SearchUI extends PureComponent {
       }
     ];
 
-    return (
-      <EuiSearchBar
-        box={box}
-        filters={filters}
-        onChange={onQueryChange}
-        query={query}
-      />
+    let queryParseError;
+    if (!this.state.isSearchTextValid) {
+      const parseErrorMsg = intl.formatMessage({
+        id: 'kbn.management.settings.searchBar.unableToParseQueryErrorMessage',
+        defaultMessage: 'Unable to parse query',
+      });
+      queryParseError = (
+        <EuiFormErrorText>
+          {`${parseErrorMsg}. ${this.state.parseErrorMessage}`}
+        </EuiFormErrorText>
+      );
+    }
 
+    return (
+      <Fragment>
+        <EuiSearchBar
+          box={box}
+          filters={filters}
+          onChange={this.onChange}
+          query={query}
+        />
+        {queryParseError}
+      </Fragment>
     );
   }
 }

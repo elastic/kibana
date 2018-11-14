@@ -79,10 +79,6 @@ function Visualization(props) {
   return <div className={props.className} />;
 }
 
-Visualization.defaultProps = {
-  className: 'thor__visualization'
-};
-
 Visualization.propTypes = {
   backgroundColor: PropTypes.string,
   className: PropTypes.string,
@@ -95,6 +91,10 @@ Visualization.propTypes = {
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func
+};
+
+Visualization.defaultProps = {
+  className: 'tvbVis'
 };
 
 export default Visualization;
