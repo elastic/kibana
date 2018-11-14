@@ -132,7 +132,8 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
           attribution,
           this.vis.params.selectedLayer.format,
           showAllData,
-          this.vis.params.selectedLayer.meta
+          this.vis.params.selectedLayer.meta,
+          this.vis.params.selectedLayer
         );
       } else {
         this._choroplethLayer = new ChoroplethLayer(
@@ -140,7 +141,8 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
           attribution,
           this.vis.params.selectedLayer.format,
           showAllData,
-          this.vis.params.selectedLayer.meta
+          this.vis.params.selectedLayer.meta,
+          this.vis.params.selectedLayer
         );
       }
 

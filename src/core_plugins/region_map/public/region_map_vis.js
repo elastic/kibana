@@ -27,10 +27,13 @@ import { RegionMapsVisualizationProvider } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config, i18n) {
+
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted', false));
+
+  console.log('must refactor our selectedLayer thing...');
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
@@ -46,6 +49,8 @@ provided base maps, or add your own. Darker colors represent higher values.' }),
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         selectedLayer: selectedLayer,
+        selectedLayerName: '',
+        selectedLayerOrigin: '',
         emsHotLink: '',
         selectedJoinField: selectedJoinField,
         isDisplayWarning: true,

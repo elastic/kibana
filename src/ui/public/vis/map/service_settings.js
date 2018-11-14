@@ -184,9 +184,35 @@ uiModules.get('kibana')
         }
       }
 
-      getEMSHotLink(fileLayer) {
+      async getEMSHotLink(fileLayer) {
         const id = `file/${fileLayer.name}`;
         return `${mapConfig.emsLandingPageUrl}#${id}`;
+      }
+
+
+      async getGeoJsonForRegionLayer(filename) {
+
+        //the id is the filename
+        const fileLayers = await this._loadFileLayers();
+
+        console.log('fi', fileLayers);
+        const layerConfig = fileLayers.find(fileLayer => {
+          return fileLayer.name === filename
+        });
+
+        if (layerConfig) {
+          const geojson = await $http({
+            url: layerConfig.url,
+            method: 'GET'
+          });
+          return geojson.data;
+        } else {
+          throw new Error('File - ' + filename + ' not recognized');
+        }
+
+      }
+
+      async getMetadataForRegionLayer() {
       }
     }
 

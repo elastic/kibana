@@ -24,6 +24,7 @@ import d3 from 'd3';
 import { i18n }  from '@kbn/i18n';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { uiModules } from 'ui/modules';
 import * as topojson from 'topojson-client';
 import { toastNotifications } from 'ui/notify';
 import * as colorUtil from 'ui/vis/map/color_util';
@@ -34,6 +35,28 @@ const EMPTY_STYLE = {
   color: 'rgb(200,200,200)',
   fillOpacity: 0
 };
+
+
+
+let emsServiceSettings = new Promise((resolve, reject) => {
+  uiModules.get('kibana').run(($injector) => {
+    console.log('got da service settings');
+    // indexPatternService = $injector.get('indexPatterns');
+    const Private = $injector.get('Private');
+    console.log('pr', Private);
+
+    const serviceSttings = $injector.get('serviceSettings');
+    console.log('ss', serviceSttings);
+
+    resolve(serviceSttings);
+
+    // SearchSource = Private(SearchSourceProvider);
+    // emsServiceSettings = $injector.get('serviceSettings');
+  });
+});
+
+
+
 
 
 export default class ChoroplethLayer extends KibanaMapLayer {
@@ -69,7 +92,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  constructor(geojsonUrl, attribution, format, showAllShapes, meta) {
+  constructor(geojsonUrl, attribution, format, showAllShapes, meta, layerConfig) {
     super();
 
     this._metrics = null;
@@ -80,8 +103,11 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._attribution = attribution;
     this._boundsOfData = null;
 
+
+    console.log('lc', layerConfig);
     this._showAllShapes = showAllShapes;
     this._geojsonUrl = geojsonUrl;
+    this._layerConfig = layerConfig;
 
     this._leafletLayer = L.geoJson(null, {
       onEachFeature: (feature, layer) => {
@@ -114,6 +140,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._isJoinValid = false;
     this._whenDataLoaded = new Promise(async (resolve) => {
       try {
+        console.log('going to load', geojsonUrl);
         const data = await this._makeJsonAjaxCall(geojsonUrl);
         let featureCollection;
         const formatType = typeof format === 'string' ? format : format.type;
@@ -175,10 +202,20 @@ CORS configuration of the server permits requests from the Kibana application on
 
   //This method is stubbed in the tests to avoid network request during unit tests.
   async _makeJsonAjaxCall(url) {
-    return await $.ajax({
-      dataType: 'json',
-      url: url
-    });
+    console.log('_makeJsonAjaxCall', url, this._layerConfig);
+    const serviceSettings = await emsServiceSettings;
+    const geojson = serviceSettings.getGeoJsonForRegionLayer(this._layerConfig.name);
+
+
+    console.log(geojson);
+
+    return geojson;
+
+
+    // return await $.ajax({
+    //   dataType: 'json',
+    //   url: url
+    // });
   }
 
   _invalidateJoin() {
@@ -246,8 +283,8 @@ CORS configuration of the server permits requests from the Kibana application on
     this._setStyle();
   }
 
-  cloneChoroplethLayerForNewData(url, attribution, format, showAllData, meta) {
-    const clonedLayer = new ChoroplethLayer(url, attribution, format, showAllData, meta);
+  cloneChoroplethLayerForNewData(url, attribution, format, showAllData, meta, layerConfig) {
+    const clonedLayer = new ChoroplethLayer(url, attribution, format, showAllData, meta, layerConfig);
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
     clonedLayer.setLineWeight(this._lineWeight);
