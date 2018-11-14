@@ -243,24 +243,24 @@ class EditPolicyUi extends Component {
               <HotPhase
                 selectedPolicy={selectedPolicy}
                 errors={errors[PHASE_HOT]}
-                isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_HOT], false)}
+                isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_HOT], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
               <WarmPhase
                 errors={errors[PHASE_WARM]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
-                isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_WARM], false)}
+                isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_WARM], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
               <ColdPhase
                 errors={errors[PHASE_COLD]}
                 showNodeDetailsFlyout={this.showNodeDetailsFlyout}
-                isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_COLD], false)}
+                isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_COLD], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
               <DeletePhase
                 errors={errors[PHASE_DELETE]}
-                isShowingErrors={isShowingErrors && findFirstError(errors[PHASE_DELETE], false)}
+                isShowingErrors={isShowingErrors && !!findFirstError(errors[PHASE_DELETE], false)}
               />
               <EuiHorizontalRule className="ilmHrule" />
               <EuiFlexGroup justifyContent="spaceBetween">
