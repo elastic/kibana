@@ -57,7 +57,7 @@ export class LayerPanel  extends React.Component {
       minZoom: this.props.selectedLayer.getMinZoom(),
       maxZoom: this.props.selectedLayer.getMaxZoom(),
       alphaValue: _.get(this.props.selectedLayer.getCurrentStyle(),
-        'properties.alphaValue', null),
+        '_descriptor.properties.alphaValue', null),
       onMinZoomChange: (zoom) => {
         this.props.updateMinZoom(this.props.selectedLayer.getId(), zoom);
       },

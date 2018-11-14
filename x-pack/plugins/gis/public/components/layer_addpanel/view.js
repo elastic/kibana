@@ -39,7 +39,7 @@ export class AddLayerPanel extends React.Component {
       sourceType: '',
       minZoom: 0,
       maxZoom: 24,
-      alphaValue: 1.0
+      alphaValue: 0.5
     };
   }
 

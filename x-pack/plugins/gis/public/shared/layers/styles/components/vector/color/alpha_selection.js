@@ -12,8 +12,14 @@ export class AlphaSelection extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      alphaValue: props.alphaValue || 1.0
+      alphaValue: props.alphaValue
     };
+  }
+
+  componentDidMount() {
+    this.setState({
+      alphaValue: this.props.alphaValue
+    });
   }
 
   componentDidUpdate() {
