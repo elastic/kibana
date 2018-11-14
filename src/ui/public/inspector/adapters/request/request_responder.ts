@@ -43,6 +43,13 @@ export class RequestResponder {
       ...(this.request.stats || {}),
       ...stats,
     };
+    if (this.request.startTime) {
+      const startDate = new Date(this.request.startTime);
+      this.request.stats['Request timestamp'] = {
+        value: startDate.toISOString(),
+        description: 'Request start timestamp',
+      };
+    }
     this.onChange();
     return this;
   }
