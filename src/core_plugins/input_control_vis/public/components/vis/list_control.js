@@ -88,7 +88,7 @@ class ListControlUi extends Component {
         })}
         options={this.props.options.map(option => {
           return {
-            label: this.props.formatOptionLabel(option),
+            label: this.props.formatOptionLabel(option).toString(),
             value: option,
             ['data-test-subj']: `option_${option.toString().replace(' ', '_')}`
           };
@@ -102,7 +102,7 @@ class ListControlUi extends Component {
         onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
         selectedOptions={this.props.selectedOptions.map(selectedOption => {
           return {
-            label: this.props.formatOptionLabel(selectedOption),
+            label: this.props.formatOptionLabel(selectedOption).toString(),
             value: selectedOption,
           };
         })}
