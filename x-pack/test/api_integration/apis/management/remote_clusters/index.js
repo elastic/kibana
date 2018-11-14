@@ -5,8 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('management', () => {
-    loadTestFile(require.resolve('./cross_cluster_replication'));
+  describe('remote clusters', () => {
     loadTestFile(require.resolve('./remote_clusters'));
   });
 }

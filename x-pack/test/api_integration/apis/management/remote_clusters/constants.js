@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('management', () => {
-    loadTestFile(require.resolve('./cross_cluster_replication'));
-    loadTestFile(require.resolve('./remote_clusters'));
-  });
-}
+export const API_BASE_PATH = '/api/remote_clusters';

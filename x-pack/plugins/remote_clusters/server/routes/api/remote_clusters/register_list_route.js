@@ -20,7 +20,14 @@ export function registerListRoute(server) {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        return await callWithRequest('cluster.remoteInfo');
+        const clusterInfoByName = await callWithRequest('cluster.remoteInfo');
+        const clusterNames = (clusterInfoByName && Object.keys(clusterInfoByName)) || [];
+        return clusterNames.map(name => {
+          return {
+            name,
+            ...clusterInfoByName[name],
+          };
+        });
       } catch (err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
