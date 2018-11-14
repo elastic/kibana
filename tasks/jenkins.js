@@ -18,7 +18,6 @@
  */
 
 import { reportFailedTests } from '../src/dev/failed_tests/report';
-import { getFunctionalTestGroupRunConfigs } from './function_test_groups';
 
 module.exports = function (grunt) {
   grunt.registerTask('jenkins:docs', [
@@ -40,12 +39,6 @@ module.exports = function (grunt) {
     'test:projects',
     'test:browser-ci',
     'run:apiIntegrationTests',
-  ]);
-
-  grunt.registerTask('jenkins:selenium', [
-    'checkPlugins',
-    ...Object.keys(getFunctionalTestGroupRunConfigs()).map(subTask => `run:${subTask}`),
-    'run:pluginFunctionalTestsRelease',
   ]);
 
   grunt.registerTask(

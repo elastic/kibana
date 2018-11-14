@@ -6,14 +6,19 @@ set -e
 cd "$(dirname "$0")/.."
 
 case "$JOB" in
-"selenium")
-  ./test/scripts/jenkins_selenium.sh
-  ;;
 "intake")
   ./test/scripts/jenkins_unit.sh
   ;;
-"x-pack")
+ciGroup*)
+  export CI_GROUP="${JOB##ciGroup}"
+  ./test/scripts/jenkins_ci_group.sh
+  ;;
+x-pack)
   ./test/scripts/jenkins_xpack.sh
+  ;;
+x-pack-ciGroup*)
+  export CI_GROUP="${JOB##x-pack-ciGroup}"
+  ./test/scripts/jenkins_xpack_ci_group.sh
   ;;
 *)
   echo "JOB '$JOB' is not implemented."
