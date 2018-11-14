@@ -24,7 +24,7 @@ import {
   saveLifecyclePolicy,
   fetchPolicies,
 } from '../../store/actions';
-import { findFirstError } from '../../lib/find_errors';
+import { findFirstError } from '../../services/find_errors';
 
 export const EditPolicy = connect(
   state => {

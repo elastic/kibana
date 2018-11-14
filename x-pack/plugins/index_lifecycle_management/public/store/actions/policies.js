@@ -9,7 +9,7 @@
 
 import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
-import { loadPolicies } from '../../api';
+import { loadPolicies } from '../../services/api';
 import { SET_PHASE_DATA } from '../constants';
 export const fetchedPolicies = createAction('FETCHED_POLICIES');
 export const setSelectedPolicy = createAction('SET_SELECTED_POLICY');

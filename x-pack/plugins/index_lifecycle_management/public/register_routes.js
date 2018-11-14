@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import { setHttpClient } from './api';
+import { setHttpClient } from './services/api';
 
 import { App } from './app';
 import { BASE_PATH } from '../common/constants';
@@ -18,7 +18,7 @@ import { setUrlService } from './services/navigation';
 import routes from 'ui/routes';
 
 import template from './main.html';
-import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
+import { manageAngularLifecycle } from './services/manage_angular_lifecycle';
 import chrome from 'ui/chrome';
 
 const renderReact = async (elem) => {

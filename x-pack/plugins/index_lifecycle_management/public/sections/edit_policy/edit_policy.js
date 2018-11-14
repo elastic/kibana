@@ -37,7 +37,7 @@ import {
   PHASE_WARM,
   STRUCTURE_POLICY_NAME,
 } from '../../store/constants';
-import { findFirstError } from '../../lib/find_errors';
+import { findFirstError } from '../../services/find_errors';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { PolicyJsonFlyout } from './components/policy_json_flyout';
 import { ErrableFormRow } from './form_errors';

@@ -5,7 +5,7 @@
  */
 
 import { toastNotifications } from 'ui/notify';
-import { saveLifecycle as saveLifecycleApi } from '../../api';
+import { saveLifecycle as saveLifecycleApi } from '../../services/api';
 
 
 export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {

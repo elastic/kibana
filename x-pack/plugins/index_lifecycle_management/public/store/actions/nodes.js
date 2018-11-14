@@ -6,7 +6,7 @@
 
 import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
-import { loadNodes, loadNodeDetails } from '../../api';
+import { loadNodes, loadNodeDetails } from '../../services/api';
 import { SET_SELECTED_NODE_ATTRS } from '../constants';
 
 export const setSelectedNodeAttrs = createAction(SET_SELECTED_NODE_ATTRS);

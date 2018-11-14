@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
-import { deletePolicy } from '../../../../api';
+import { deletePolicy } from '../../../../services/api';
 export class ConfirmDeleteUi extends Component {
   deletePolicy = async () => {
     const { intl, policyToDelete, callback } = this.props;

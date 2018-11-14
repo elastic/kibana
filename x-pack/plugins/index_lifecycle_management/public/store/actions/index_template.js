@@ -9,7 +9,7 @@
 
 import { createAction } from 'redux-actions';
 import { toastNotifications } from 'ui/notify';
-import { loadIndexTemplates, loadIndexTemplate } from '../../api';
+import { loadIndexTemplates, loadIndexTemplate } from '../../services/api';
 import { getAlias } from '../selectors';
 import {
   setPhaseData,
