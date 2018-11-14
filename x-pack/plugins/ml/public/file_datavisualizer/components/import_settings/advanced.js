@@ -5,6 +5,8 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -40,12 +42,19 @@ export function AdvancedSettings({
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Index name"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameLabel"
+            defaultMessage="Index name"
+          />
+        }
         isInvalid={indexNameError !== ''}
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder="index name"
+          placeholder={i18n.translate('xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder', {
+            defaultMessage: 'index name'
+          })}
           value={index}
           disabled={(initialized === true)}
           onChange={onIndexChange}
@@ -55,7 +64,12 @@ export function AdvancedSettings({
 
       <EuiCheckbox
         id="createIndexPattern"
-        label="Create index pattern"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.createIndexPatternLabel"
+            defaultMessage="Create index pattern"
+          />
+        }
         checked={(createIndexPattern === true)}
         disabled={(initialized === true)}
         onChange={onCreateIndexPatternChange}
@@ -64,7 +78,12 @@ export function AdvancedSettings({
       <EuiSpacer size="s" />
 
       <EuiFormRow
-        label="Index pattern name"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexPatternNameLabel"
+            defaultMessage="Index pattern name"
+          />
+        }
         disabled={(createIndexPattern === false || initialized === true)}
         isInvalid={indexPatternNameError !== ''}
         error={[indexPatternNameError]}
@@ -113,7 +132,12 @@ function IndexSettings({ initialized, data, onChange }) {
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Index settings"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexSettingsLabel"
+            defaultMessage="Index settings"
+          />
+        }
         disabled={(initialized === true)}
         fullWidth
       >
@@ -134,7 +158,12 @@ function Mappings({ initialized, data, onChange }) {
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Mappings"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.mappingsLabel"
+            defaultMessage="Mappings"
+          />
+        }
         disabled={(initialized === true)}
         fullWidth
       >
@@ -155,7 +184,12 @@ function IngestPipeline({ initialized, data, onChange }) {
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Ingest pipeline"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.ingestPipelineLabel"
+            defaultMessage="Ingest pipeline"
+          />
+        }
         disabled={(initialized === true)}
         fullWidth
       >

@@ -5,6 +5,8 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -24,12 +26,19 @@ export function SimpleSettings({
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Index name"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.simpleImportSettings.indexNameFormRowLabel"
+            defaultMessage="Index name"
+          />
+        }
         isInvalid={indexNameError !== ''}
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder="index name"
+          placeholder={i18n.translate('xpack.ml.fileDatavisualizer.simpleImportSettings.indexNamePlaceholder', {
+            defaultMessage: 'index name'
+          })}
           value={index}
           disabled={(initialized === true)}
           onChange={onIndexChange}
@@ -39,7 +48,12 @@ export function SimpleSettings({
 
       <EuiCheckbox
         id="createIndexPattern"
-        label="Create index pattern"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.simpleImportSettings.createIndexPatternFormRowLabel"
+            defaultMessage="Create index pattern"
+          />
+        }
         checked={(createIndexPattern === true)}
         disabled={(initialized === true)}
         onChange={onCreateIndexPatternChange}

@@ -5,6 +5,7 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import {
@@ -35,7 +36,9 @@ export function ImportSettings({
 
   const tabs = [{
     id: 'simple-settings',
-    name: 'Simple',
+    name: i18n.translate('xpack.ml.fileDatavisualizer.importSettings.simpleTabName', {
+      defaultMessage: 'Simple'
+    }),
     content: (
       <React.Fragment>
 
@@ -54,7 +57,9 @@ export function ImportSettings({
   },
   {
     id: 'advanced-settings',
-    name: 'Advanced',
+    name: i18n.translate('xpack.ml.fileDatavisualizer.importSettings.advancedTabName', {
+      defaultMessage: 'Advanced'
+    }),
     content: (
       <React.Fragment>
 

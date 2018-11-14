@@ -5,6 +5,8 @@
  */
 
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -25,7 +27,9 @@ export function ResultsView({ data, results, showEditFlyout }) {
   const tabs = [
     {
       id: 'file-stats',
-      name: 'File stats',
+      name: i18n.translate('xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName', {
+        defaultMessage: 'File stats'
+      }),
       content: <FieldsStats results={results} />,
     }
   ];
@@ -50,7 +54,10 @@ export function ResultsView({ data, results, showEditFlyout }) {
         <EuiSpacer size="m" />
 
         <EuiButton onClick={() => showEditFlyout()}>
-          Override settings
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.resultsView.overrideSettingsButtonLabel"
+            defaultMessage="Override settings"
+          />
         </EuiButton>
       </EuiPanel>
 
