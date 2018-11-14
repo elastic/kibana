@@ -222,17 +222,27 @@ export class PolicyTableUi extends Component {
                     />
                   </h1>
                 </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-                      defaultMessage="Create, update, or delete your index lifecycle policies."
-                    />
-                  </p>
-                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  data-test-subj="createUserButton"
+                  href={`#${BASE_PATH}policies/edit`}
+                >
+                  Create new policy
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
+                  defaultMessage="Create, update, or delete your index lifecycle policies."
+                />
+              </p>
+            </EuiText>
+
             <EuiSpacer />
             <EuiFlexGroup gutterSize="l" alignItems="center">
               {numSelected > 0 ? (
@@ -262,14 +272,6 @@ export class PolicyTableUi extends Component {
                   }
                   aria-label="Search policies"
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="createUserButton"
-                  href={`#${BASE_PATH}policies/edit`}
-                >
-                  Create new policy
-                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
 
