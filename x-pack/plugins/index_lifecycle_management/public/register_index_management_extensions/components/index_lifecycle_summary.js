@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n }  from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { goToPolicy } from '../services/navigation';
+import { goToPolicy } from '../../services/navigation';
 const HEADERS = {
   policy: i18n.translate('xpack.indexLifecycleMgmt.summary.headers.lifecyclePolicyHeader', {
     defaultMessage: 'Lifecycle policy',

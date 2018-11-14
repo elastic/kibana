@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { setHttpClient } from './api';
 
 import { App } from './app';
-import { BASE_PATH } from '../common/constants/base_path';
+import { BASE_PATH } from '../common/constants';
 import { indexLifecycleManagementStore } from './store';
 import { I18nProvider } from '@kbn/i18n/react';
 import { setUrlService } from './services/navigation';

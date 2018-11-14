@@ -24,7 +24,7 @@ import {
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
 } from '../../../../store/constants';
-import { ActiveBadge, PhaseErrorMessage } from '../../../../components';
+import { ActiveBadge, PhaseErrorMessage } from '../../../components';
 
 export class DeletePhase extends PureComponent {
   static propTypes = {

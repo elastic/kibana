@@ -29,7 +29,7 @@ import {
 } from '../../../../store/constants';
 import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
-import { ActiveBadge, PhaseErrorMessage } from '../../../../components';
+import { ActiveBadge, PhaseErrorMessage } from '../../../components';
 import { NodeAllocation } from '../node_allocation';
 
 class ColdPhaseUi extends PureComponent {

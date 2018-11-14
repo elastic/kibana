@@ -34,7 +34,7 @@ import {
 } from '../../../../store/constants';
 import { NodeAllocation } from '../node_allocation';
 import { ErrableFormRow } from '../../form_errors';
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../../components';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../components';
 import { MinAgeInput } from '../min_age_input';
 class WarmPhaseUi extends PureComponent {
   static propTypes = {

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { addSummaryExtension } from '../../../index_management/public/index_management_extensions';
-import { IndexLifecycleSummary } from '../components/index_lifecycle_summary';
+import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
 addSummaryExtension((index, urlService) => {
   return <IndexLifecycleSummary index={index} urlService={urlService} />;
 });

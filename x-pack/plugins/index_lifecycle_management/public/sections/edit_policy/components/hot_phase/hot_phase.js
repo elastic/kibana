@@ -18,7 +18,7 @@ import {
   EuiFormRow,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../../components';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../components';
 import {
   PHASE_HOT,
   PHASE_ROLLOVER_ALIAS,
