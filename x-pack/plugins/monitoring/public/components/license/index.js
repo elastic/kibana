@@ -13,6 +13,7 @@ import {
   EuiPanel
 } from '@elastic/eui';
 import { LicenseStatus, AddLicense } from 'plugins/xpack_main/components';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const LicenseUpdateInfoForPrimary = ({ isPrimaryCluster, uploadLicensePath }) => {
   if (!isPrimaryCluster) {
@@ -32,8 +33,14 @@ const LicenseUpdateInfoForRemote = ({ isPrimaryCluster }) => {
   return (
     <EuiPanel>
       <p>
-        To update the license for this cluster, provide the license file through
-        the Elasticsearch API:
+        <FormattedMessage
+          id="xpack.monitoring.license.howToUpdateLicenseDescription"
+          defaultMessage="To update the license for this cluster, provide the license file through
+          the Elasticsearch {apiText}:"
+          values={{
+            apiText: 'API'
+          }}
+        />
       </p>
       <EuiSpacer />
       <EuiCodeBlock>
