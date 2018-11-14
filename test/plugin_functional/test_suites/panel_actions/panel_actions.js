@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Sample action appears in context menu in view mode', async () => {
-      await dashboardPanelActions.openContextMenu();
       await testSubjects.existOrFail(
         'dashboardPanelAction-samplePanelAction'
       );
