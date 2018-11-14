@@ -5,6 +5,7 @@
  */
 
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { FileDataVisualizerView } from './components/file_datavisualizer_view';
 
 import React from 'react';
@@ -12,7 +13,9 @@ import React from 'react';
 export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
   return (
     <div className="file-datavisualizer-container">
-      <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
+      <I18nProvider>
+        <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
+      </I18nProvider>
     </div>
   );
 }
