@@ -6,14 +6,11 @@ set -e
 cd "$(dirname "$0")/.."
 
 case "$JOB" in
-"selenium")
-  ./test/scripts/jenkins_selenium.sh
-  ;;
-"intake")
-  ./test/scripts/jenkins_unit.sh
-  ;;
-"x-pack")
-  ./test/scripts/jenkins_xpack.sh
+"test")
+  source "src/dev/ci_setup/setup.sh"
+  source "src/dev/ci_setup/git_setup.sh"
+
+  node "scripts/jest_integration" --no-cache --ci packages/kbn-pm/src/production/integration_tests/build_production_projects.test.ts
   ;;
 *)
   echo "JOB '$JOB' is not implemented."

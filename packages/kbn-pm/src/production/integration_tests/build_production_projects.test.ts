@@ -47,7 +47,7 @@ describe('kbn-pm production', () => {
       for (const project of projects.values()) {
         // This will both install dependencies and generate `yarn.lock` files
         await project.installDependencies({
-          extraArgs: ['--silent', '--no-progress'],
+          extraArgs: ['--no-progress'],
         });
       }
 
