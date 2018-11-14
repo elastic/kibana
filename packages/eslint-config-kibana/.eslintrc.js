@@ -1,4 +1,6 @@
-const { dependencies: { react: REACT_VERSION_RANGE } } = require('../../package.json');
+const semver = require('semver')
+
+const PKG = require('../../package.json');
 const RESTRICTED_GLOBALS = require('./restricted_globals')
 
 module.exports = {
@@ -16,7 +18,7 @@ module.exports = {
 
   settings: {
     react: {
-      version: REACT_VERSION_RANGE.replace(/[\D\.]/g, '').split('.').slice(0, 2).join('.'),
+      version: semver.coerce(PKG.dependencies.react),
     },
   },
 
