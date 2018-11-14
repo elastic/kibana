@@ -26,7 +26,7 @@ import { RemoteClusterForm } from './remote_cluster_form';
 
 const defaultFields = {
   remoteClusterName: '',
-  seeds: [''],
+  seeds: [],
 };
 
 export class RemoteClusterAddUi extends Component {

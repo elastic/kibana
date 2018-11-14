@@ -10,17 +10,14 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
+  EuiComboBox,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormLabel,
   EuiFormRow,
-  EuiFormErrorText,
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
@@ -38,6 +35,14 @@ export class RemoteClusterFormUi extends Component {
     fields: PropTypes.object,
     fieldsErrors: PropTypes.object,
     onFieldsChange: PropTypes.func,
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      localSeedErrors: [],
+    };
   }
 
   renderActions() {
@@ -129,7 +134,32 @@ export class RemoteClusterFormUi extends Component {
     return null;
   }
 
-  addSeed = () => {
+  getLocalSeedErrors = (value) => {
+    const { intl } = this.props;
+    const errors = [];
+
+    const ipParts = value.split('.');
+    const isRangeInvalid = ipParts.some(part => isNaN(part) || Number(part) < 0 || Number(part) > 255);
+
+    if (ipParts.length !== 4 || isRangeInvalid) {
+      errors.push(intl.formatMessage({
+        id: "xpack.remoteClusters.remoteClusterForm.localSeedError.invalidIpMessage",
+        defaultMessage: "IP adresses must consist of four numbers between 0 and 255, separated by periods.",
+      }));
+    }
+
+    // Check for non-digits and non-periods.
+    if (value.match(/[^\d\.]*/)[0].length !== 0) {
+      errors.push(intl.formatMessage({
+        id: "xpack.remoteClusters.remoteClusterForm.localSeedError.invalidCharactersMessage",
+        defaultMessage: "Only numbers and periods are allowed in the IP address.",
+      }));
+    }
+
+    return errors;
+  };
+
+  onCreateOption = (searchValue) => {
     const {
       onFieldsChange,
       fields: {
@@ -137,35 +167,34 @@ export class RemoteClusterFormUi extends Component {
       },
     } = this.props;
 
+    const localSeedErrors = this.getLocalSeedErrors(searchValue);
+
+    if (localSeedErrors.length !== 0) {
+      this.setState({
+        localSeedErrors,
+      });
+
+      // Return false to explicitly reject the user's input.
+      return false;
+    }
+
     const newSeeds = seeds.slice(0);
-    newSeeds.push('');
+    newSeeds.push(searchValue);
     onFieldsChange({ seeds: newSeeds });
   };
 
-  removeSeedAtIndex = index => {
-    const {
-      onFieldsChange,
-      fields: {
-        seeds,
-      },
-    } = this.props;
-
-    const newSeeds = seeds.slice(0);
-    newSeeds.splice(index, 1);
-    onFieldsChange({ seeds: newSeeds });
+  onSearchChange = (searchValue) => {
+    // Allow typing to clear the errors, but not to add new ones.
+    if (!searchValue || this.getLocalSeedErrors(searchValue).length === 0) {
+      this.setState({
+        localSeedErrors: [],
+      });
+    }
   };
 
-  updateSeedAtIndex = (index, value) => {
-    const {
-      onFieldsChange,
-      fields: {
-        seeds,
-      },
-    } = this.props;
-
-    const newSeeds = seeds.slice(0);
-    newSeeds[index] = value;
-    onFieldsChange({ seeds: newSeeds });
+  onChange = (selectedOptions) => {
+    const { onFieldsChange } = this.props;
+    onFieldsChange({ seeds: selectedOptions.map(({ label }) => label) });
   };
 
   renderSeeds() {
@@ -180,59 +209,14 @@ export class RemoteClusterFormUi extends Component {
       intl,
     } = this.props;
 
-    const seedInputs = seeds.map((seed, index) => {
-      const field = (
-        <EuiFieldText
-          value={seed}
-          onChange={e => this.updateSeedAtIndex(index, e.target.value)}
-          fullWidth
-          aria-labelledby="remoteClusterFormSeeds"
-        />
-      );
+    const { localSeedErrors } = this.state;
 
-      let wrappedField;
+    // Show errors if there is a general form error or local errors.
+    const areFormErrorsVisible = Boolean(areErrorsVisible && errorsSeeds);
+    const showErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
+    const errors = areFormErrorsVisible ? localSeedErrors.concat(errorsSeeds) : localSeedErrors;
 
-      if (index === 0) {
-        wrappedField = field;
-      } else {
-        wrappedField = (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem>
-              {field}
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="danger"
-                onClick={() => this.removeSeedAtIndex(index)}
-                iconType="trash"
-                aria-label={intl.formatMessage({
-                  id: 'xpack.remoteClusters.add.form.remoteSeedAriaLabel',
-                  defaultMessage: 'Remove {ipAddress}',
-                }, { ipAddress: seed })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      }
-
-      return (
-        <Fragment key={index}>
-          {wrappedField}
-          <EuiSpacer size="s" />
-        </Fragment>
-      );
-    });
-
-    let error;
-
-    if (areErrorsVisible && errorsSeeds) {
-      error = (
-        <EuiFormErrorText>
-          {errorsSeeds}
-        </EuiFormErrorText>
-      );
-    }
+    const formattedSeeds = seeds.map(seed => ({ label: seed }));
 
     return (
       <EuiDescribedFormGroup
@@ -240,7 +224,7 @@ export class RemoteClusterFormUi extends Component {
           <EuiTitle size="s">
             <h4>
               <FormattedMessage
-                id="xpack.remoteClusters.add.form.sectionSeedsTitle"
+                id="xpack.remoteClusters.remoteClusterForm.sectionSeedsTitle"
                 defaultMessage="Seed nodes"
               />
             </h4>
@@ -248,32 +232,36 @@ export class RemoteClusterFormUi extends Component {
         )}
         description={(
           <FormattedMessage
-            id="xpack.remoteClusters.add.form.sectionSeedsDescription"
+            id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription"
             defaultMessage="COPY NEEDED"
           />
         )}
         fullWidth
       >
-        <EuiFormLabel id="remoteClusterFormSeeds">
-          <FormattedMessage
-            id="xpack.remoteClusters.add.form.fieldSeedsLabel"
-            defaultMessage="IP addresses"
-          />
-        </EuiFormLabel>
-
-        {seedInputs}
-
-        {/* This div lets the button break out of the flexbox layout created by EuiFormRow. */}
-        <div>
-          <EuiButtonEmpty flush="left" iconType="plusInCircle" onClick={this.addSeed}>
+        <EuiFormRow
+          label={(
             <FormattedMessage
-              id="xpack.remoteClusters.add.form.addSeedButtonLabel"
-              defaultMessage="Add seed"
+              id="xpack.remoteClusters.remoteClusterForm.fieldSeedsLabel"
+              defaultMessage="IP addresses"
             />
-          </EuiButtonEmpty>
-        </div>
-
-        {error}
+          )}
+          isInvalid={showErrors}
+          error={errors}
+          fullWidth
+        >
+          <EuiComboBox
+            noSuggestions
+            placeholder={intl.formatMessage({
+              id: 'xpack.remoteClusters.remoteClusterForm.fieldSeedsPlaceholder',
+              defaultMessage: 'Type an IP address and hit ENTER',
+            })}
+            selectedOptions={formattedSeeds}
+            onCreateOption={this.onCreateOption}
+            onChange={this.onChange}
+            onSearchChange={this.onSearchChange}
+            isInvalid={showErrors}
+          />
+        </EuiFormRow>
       </EuiDescribedFormGroup>
     );
   }
@@ -300,7 +288,7 @@ export class RemoteClusterFormUi extends Component {
               <EuiTitle size="s">
                 <h4>
                   <FormattedMessage
-                    id="xpack.remoteClusters.add.form.sectionNameTitle"
+                    id="xpack.remoteClusters.remoteClusterForm.sectionNameTitle"
                     defaultMessage="Remote cluster name"
                   />
                 </h4>
@@ -308,7 +296,7 @@ export class RemoteClusterFormUi extends Component {
             )}
             description={(
               <FormattedMessage
-                id="xpack.remoteClusters.add.form.sectionNameDescription"
+                id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
                 defaultMessage="This is the name of the remote cluster you want to connect to."
               />
             )}
@@ -317,7 +305,7 @@ export class RemoteClusterFormUi extends Component {
             <EuiFormRow
               label={(
                 <FormattedMessage
-                  id="xpack.remoteClusters.add.form.fieldNameLabel"
+                  id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
                   defaultMessage="Remote cluster name"
                 />
               )}
