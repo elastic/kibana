@@ -32,14 +32,17 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
               {get(libs.framework.info, 'license.expired', true) && (
                 <Route render={() => <Redirect to="/error/invalid_license" />} />
               )}
+
               {/* Ensure security is eanabled for elastic and kibana */}
               {!get(libs.framework.info, 'security.enabled', false) && (
                 <Route render={() => <Redirect to="/error/enforce_security" />} />
               )}
+
               {/* Make sure the user has correct permissions */}
-              {!libs.framework.currentUserHasOneOfRoles(['beats_admin', 'superuser']) && (
-                <Route render={() => <Redirect to="/error/no_access" />} />
-              )}
+              {!libs.framework.currentUserHasOneOfRoles(
+                ['beats_admin'].concat(libs.framework.info.settings.defaultUserRoles)
+              ) && <Route render={() => <Redirect to="/error/no_access" />} />}
+
               {/* If there are no beats or tags yet, redirect to the walkthrough */}
               <Route
                 render={props =>
@@ -49,6 +52,7 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
                   ) : null
                 }
               />
+
               {/* This app does not make use of a homepage. The mainpage is beats/overivew */}
               <Route path="/" exact={true} render={() => <Redirect to="/overview/beats" />} />
             </Switch>

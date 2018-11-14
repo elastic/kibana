@@ -163,6 +163,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
     return {
       security: xpackInfoUnpacked.security,
+      settings: this.getSetting(`xpack.${this.PLUGIN_ID}`),
     };
   };
 }

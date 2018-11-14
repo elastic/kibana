@@ -39,6 +39,11 @@ export const RuntimeFrameworkInfo = t.type({
     enabled: t.boolean,
     available: t.boolean,
   }),
+  settings: t.type({
+    encryptionKey: t.string,
+    enrollmentTokensTtlInSeconds: t.number,
+    defaultUserRoles: t.array(t.string),
+  }),
 });
 export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
 

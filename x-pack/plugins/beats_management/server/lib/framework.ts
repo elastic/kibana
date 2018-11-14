@@ -36,7 +36,12 @@ export class BackendFrameworkLib {
     });
   }
 
-  public getSetting(setting: 'encryptionKey' | 'enrollmentTokensTtlInSeconds') {
+  public getSetting(setting: 'encryptionKey'): string;
+  public getSetting(setting: 'enrollmentTokensTtlInSeconds'): number;
+  public getSetting(setting: 'defaultUserRoles'): string[];
+  public getSetting(
+    setting: 'encryptionKey' | 'enrollmentTokensTtlInSeconds' | 'defaultUserRoles'
+  ) {
     return this.adapter.getSetting(`xpack.beats.${setting}`);
   }
 

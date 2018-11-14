@@ -134,6 +134,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
               enabled: xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false),
               available: xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false),
             },
+            settings: xpackInfo.get(`features.${this.PLUGIN_ID}.settings`),
           };
         } catch (e) {
           throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
