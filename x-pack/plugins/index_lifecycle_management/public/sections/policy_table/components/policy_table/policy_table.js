@@ -4,19 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import moment from 'moment-timezone';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { NoMatch } from '../no_match';
 import { BASE_PATH } from '../../../../../common/constants';
+import { NoMatch } from '../no_match';
 import {
   EuiButton,
   EuiLink,
   EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPage,
   EuiSpacer,
   EuiTable,
@@ -29,7 +31,7 @@ import {
   EuiTitle,
   EuiText,
   EuiPageBody,
-  EuiPageContent
+  EuiPageContent,
 } from '@elastic/eui';
 
 import { ConfirmDelete } from './confirm_delete';
@@ -37,9 +39,12 @@ const HEADERS = {
   name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
     defaultMessage: 'Name',
   }),
-  coveredIndices: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.coveredIndicesHeader', {
-    defaultMessage: 'Covered Indices',
-  }),
+  coveredIndices: i18n.translate(
+    'xpack.indexLifecycleMgmt.policyTable.headers.coveredIndicesHeader',
+    {
+      defaultMessage: 'Covered Indices',
+    }
+  ),
   version: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.versionHeader', {
     defaultMessage: 'Version',
   }),
@@ -54,11 +59,48 @@ export class PolicyTableUi extends Component {
 
     this.state = {
       selectedPoliciesMap: {},
-      showDeleteConfirmation: false
+      showDeleteConfirmation: false,
     };
   }
   componentDidMount() {
     this.props.fetchPolicies(true);
+  }
+  renderEmpty() {
+    return (
+      <EuiEmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.emptyPromptTitle"
+              defaultMessage="Create your first index lifecycle policy"
+            />
+          </h1>
+        }
+        body={
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.policyTable.emptyPromptDescription"
+                defaultMessage="Index lifecycle policies help you control your index lifecycle"
+              />
+            </p>
+          </Fragment>
+        }
+        actions={
+          <EuiButton
+            href={`#${BASE_PATH}policies/edit`}
+            fill
+            iconType="plusInCircle"
+          >
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel"
+              defaultMessage="Create new policy"
+            />
+          </EuiButton>
+        }
+      />
+    );
   }
   deleteConfirmation() {
     const { policyToDelete } = this.state;
@@ -76,7 +118,7 @@ export class PolicyTableUi extends Component {
   handleDelete = () => {
     this.props.fetchPolicies(true);
     this.setState({ policyToDelete: null });
-  }
+  };
   onSort = column => {
     const { sortField, isSortAscending, policySortChanged } = this.props;
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
@@ -85,7 +127,7 @@ export class PolicyTableUi extends Component {
 
   buildHeader() {
     const { sortField, isSortAscending } = this.props;
-    const headers =  Object.entries(HEADERS).map(([fieldName, label]) => {
+    const headers = Object.entries(HEADERS).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
       return (
         <EuiTableHeaderCell
@@ -169,13 +211,7 @@ export class PolicyTableUi extends Component {
     const { policies = [] } = this.props;
     return policies.map(policy => {
       const { name } = policy;
-      return (
-        <EuiTableRow
-          key={`${name}-row`}
-        >
-          {this.buildRowCells(policy)}
-        </EuiTableRow>
-      );
+      return <EuiTableRow key={`${name}-row`}>{this.buildRowCells(policy)}</EuiTableRow>;
     });
   }
 
@@ -198,14 +234,63 @@ export class PolicyTableUi extends Component {
   };
 
   render() {
-    const {
-      policyFilterChanged,
-      filter,
-      policies,
-      intl,
-    } = this.props;
+    const { totalNumberOfPolicies, policyFilterChanged, filter, policies, intl, policyListLoaded } = this.props;
     const { selectedPoliciesMap } = this.state;
     const numSelected = Object.keys(selectedPoliciesMap).length;
+    let content;
+
+    if (totalNumberOfPolicies) {
+      let tableContent;
+      if (!policyListLoaded) {
+        tableContent = (<EuiLoadingSpinner size="m" />);
+      } else if (policies.length > 0) {
+        tableContent = (
+          <EuiTable>
+            <EuiTableHeader>{this.buildHeader()}</EuiTableHeader>
+            <EuiTableBody>{this.buildRows()}</EuiTableBody>
+          </EuiTable>
+        );
+      } else {
+        tableContent = (<NoMatch />);
+      }
+      content = (
+        <Fragment>
+          <EuiFlexGroup gutterSize="l" alignItems="center">
+            {numSelected > 0 ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="deletePolicyButton"
+                  color="danger"
+                  onClick={() => this.setState({ showDeleteConfirmation: true })}
+                >
+                Delete {numSelected} polic
+                  {numSelected > 1 ? 'ies' : 'y'}
+                </EuiButton>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                value={filter}
+                onChange={event => {
+                  policyFilterChanged(event.target.value);
+                }}
+                data-test-subj="policyTableFilterInput"
+                placeholder={intl.formatMessage({
+                  id: 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
+                  defaultMessage: 'Search',
+                })}
+                aria-label="Search policies"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          { tableContent }
+        </Fragment>
+      );
+    } else {
+      content = this.renderEmpty();
+    }
 
     return (
       <EuiPage>
@@ -228,6 +313,7 @@ export class PolicyTableUi extends Component {
                   fill
                   data-test-subj="createUserButton"
                   href={`#${BASE_PATH}policies/edit`}
+                  iconType="plusInCircle"
                 >
                   Create new policy
                 </EuiButton>
@@ -244,49 +330,7 @@ export class PolicyTableUi extends Component {
             </EuiText>
 
             <EuiSpacer />
-            <EuiFlexGroup gutterSize="l" alignItems="center">
-              {numSelected > 0 ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="deletePolicyButton"
-                    color="danger"
-                    onClick={() => this.setState({ showDeleteConfirmation: true })}
-                  >
-                    Delete {numSelected} polic{numSelected > 1 ? 'ies' : 'y'}
-                  </EuiButton>
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  fullWidth
-                  value={filter}
-                  onChange={event => {
-                    policyFilterChanged(event.target.value);
-                  }}
-                  data-test-subj="policyTableFilterInput"
-                  placeholder={
-                    intl.formatMessage({
-                      id: 'xpack.indexLifecycleMgmt.policyTable.systempoliciesSearchInputPlaceholder',
-                      defaultMessage: 'Search',
-                    })
-                  }
-                  aria-label="Search policies"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            {policies.length > 0 ? (
-              <EuiTable>
-                <EuiTableHeader>
-                  {this.buildHeader()}
-                </EuiTableHeader>
-                <EuiTableBody>{this.buildRows()}</EuiTableBody>
-              </EuiTable>
-            ) : (
-              <NoMatch />
-            )}
+            {content}
             <EuiSpacer size="m" />
             {policies.length > 0 ? this.renderPager() : null}
           </EuiPageContent>

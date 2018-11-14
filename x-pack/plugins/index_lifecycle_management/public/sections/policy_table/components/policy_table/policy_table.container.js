@@ -4,42 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import { connect } from 'react-redux';
 import { PolicyTable as PresentationComponent } from './policy_table';
-import { fetchPolicies, policyFilterChanged, policyPageChanged, policyPageSizeChanged, policySortChanged } from '../../../../store/actions';
-import { getPageOfPolicies, getPolicyPager, getPolicyFilter, getPolicySort } from '../../../../store/selectors';
+import {
+  fetchPolicies,
+  policyFilterChanged,
+  policyPageChanged,
+  policyPageSizeChanged,
+  policySortChanged,
+} from '../../../../store/actions';
+import {
+  getPolicies,
+  getPageOfPolicies,
+  getPolicyPager,
+  getPolicyFilter,
+  getPolicySort,
+  isPolicyListLoaded,
+} from '../../../../store/selectors';
 
-
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
-    policyFilterChanged: (filter) => {
+    policyFilterChanged: filter => {
       dispatch(policyFilterChanged({ filter }));
     },
-    policyPageChanged: (pageNumber) => {
+    policyPageChanged: pageNumber => {
       dispatch(policyPageChanged({ pageNumber }));
     },
-    policyPageSizeChanged: (pageSize) => {
+    policyPageSizeChanged: pageSize => {
       dispatch(policyPageSizeChanged({ pageSize }));
     },
     policySortChanged: (sortField, isSortAscending) => {
       dispatch(policySortChanged({ sortField, isSortAscending }));
     },
-    fetchPolicies: (withIndices) => {
+    fetchPolicies: withIndices => {
       dispatch(fetchPolicies(withIndices));
-    }
+    },
   };
 };
 
 export const PolicyTable = connect(
   state => ({
+    totalNumberOfPolicies: getPolicies(state).length,
     policies: getPageOfPolicies(state),
     pager: getPolicyPager(state),
     filter: getPolicyFilter(state),
     sortField: getPolicySort(state).sortField,
     isSortAscending: getPolicySort(state).isSortAscending,
+    policyListLoaded: isPolicyListLoaded(state),
   }),
   mapDispatchToProps
 )(PresentationComponent);
