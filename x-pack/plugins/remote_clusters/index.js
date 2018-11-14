@@ -7,7 +7,12 @@
 import { resolve } from 'path';
 import { PLUGIN } from './common';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
-import { registerListRoute } from './server/routes/api/remote_clusters';
+import {
+  registerListRoute,
+  registerAddRoute,
+  registerUpdateRoute,
+  registerDeleteRoute,
+} from './server/routes/api/remote_clusters';
 
 export function remoteClusters(kibana) {
   return new kibana.Plugin({
@@ -24,6 +29,9 @@ export function remoteClusters(kibana) {
     init: function (server) {
       registerLicenseChecker(server);
       registerListRoute(server);
+      registerAddRoute(server);
+      registerUpdateRoute(server);
+      registerDeleteRoute(server);
     }
   });
 }
