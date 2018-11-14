@@ -44,11 +44,11 @@ export default function ({ getService }) {
       // Might not be great test practice to lump all these jobs together but reporting takes awhile and it'll be
       // more efficient to post them all up front, then sequentially.
       it('multiple jobs posted', async () => {
-        const path1 = await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3);
-        await reportingAPI.waitForJobToFinish(path1);
-        // skipping to see if this can be the failure cause
-        // const path2 = await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3);
-        // await reportingAPI.waitForJobToFinish(path2);
+        // skipping this to check every first test works
+        // const path1 = await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3);
+        // await reportingAPI.waitForJobToFinish(path1);
+        const path2 = await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3);
+        await reportingAPI.waitForJobToFinish(path2);
 
         const path3 = await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3);
         await reportingAPI.waitForJobToFinish(path3);
