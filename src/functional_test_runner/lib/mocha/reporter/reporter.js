@@ -52,58 +52,8 @@ export function MochaReporterProvider({ getService }) {
       runner.on('end', this.onEnd);
 
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
-        const extraNameParts = [];
-
-        if (config.get('suiteTags.include').includes('ciGroup1')) {
-          extraNameParts.push(`a`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup2')) {
-          extraNameParts.push(`b`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup3')) {
-          extraNameParts.push(`c`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup4')) {
-          extraNameParts.push(`d`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup5')) {
-          extraNameParts.push(`e`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup6')) {
-          extraNameParts.push(`f`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup7')) {
-          extraNameParts.push(`g`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup8')) {
-          extraNameParts.push(`h`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup9')) {
-          extraNameParts.push(`i`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup10')) {
-          extraNameParts.push(`j`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup11')) {
-          extraNameParts.push(`k`);
-        }
-
-        if (config.get('suiteTags.include').includes('ciGroup12')) {
-          extraNameParts.push(`l`);
-        }
-
         setupJUnitReportGeneration(runner, {
-          reportName: [config.get('junit.reportName'), ...extraNameParts].join(''),
+          reportName: config.get('junit.reportName'),
           rootDirectory: config.get('junit.rootDirectory')
         });
       }
