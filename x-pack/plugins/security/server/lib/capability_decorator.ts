@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { Capabilities } from 'x-pack/plugins/xpack_main/common';
+import { UICapabilities } from 'ui/capabilities';
 
 export async function capabilityDecorator(
   server: Record<string, any>,
   request: Record<string, any>,
-  capabilities: Capabilities
+  capabilities: UICapabilities
 ) {
   if (!isAuthenticatedRoute(request)) {
     return capabilities;

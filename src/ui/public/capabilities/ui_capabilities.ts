@@ -16,28 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import chrome from 'ui/chrome';
+import { deepFreeze } from '../../../core/public/utils/deep_freeze';
 
-import { uiModules } from 'ui/modules';
-import { uiCapabilities } from 'ui/capabilities';
+export interface UICapabilities {
+  navLinks: Record<string, boolean>;
+  [key: string]: Record<string, boolean>;
+}
 
-uiModules.get('kibana')
-  .provider('dashboardConfig', () => {
-    let hideWriteControls = !uiCapabilities.dashboard.showWriteControls;
-
-    return {
-      /**
-       * Part of the exposed plugin API - do not remove without careful consideration.
-       * @type {boolean}
-       */
-      turnHideWriteControlsOn() {
-        hideWriteControls = true;
-      },
-      $get() {
-        return {
-          getHideWriteControls() {
-            return hideWriteControls;
-          }
-        };
-      }
-    };
-  });
+export const uiCapabilities: UICapabilities = deepFreeze(chrome.getInjected('uiCapabilities'));

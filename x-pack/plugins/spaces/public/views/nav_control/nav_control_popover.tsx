@@ -7,7 +7,6 @@
 import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import React, { Component, ComponentClass } from 'react';
-import { UserProfile } from '../../../../xpack_main/common/user_profile';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -22,7 +21,6 @@ interface Props {
     error?: string;
     space: Space;
   };
-  userProfile: UserProfile;
   anchorPosition: PopoverAnchorPosition;
   buttonClass: ComponentClass<ButtonProps>;
 }
@@ -63,19 +61,13 @@ export class NavControlPopover extends Component<Props, State> {
 
     let element: React.ReactNode;
     if (this.state.spaces.length < 2) {
-      element = (
-        <SpacesDescription
-          userProfile={this.props.userProfile}
-          onManageSpacesClick={this.toggleSpaceSelector}
-        />
-      );
+      element = <SpacesDescription onManageSpacesClick={this.toggleSpaceSelector} />;
     } else {
       element = (
         <I18nProvider>
           <SpacesMenu
             spaces={this.state.spaces}
             onSelectSpace={this.onSelectSpace}
-            userProfile={this.props.userProfile}
             onManageSpacesClick={this.toggleSpaceSelector}
           />
         </I18nProvider>

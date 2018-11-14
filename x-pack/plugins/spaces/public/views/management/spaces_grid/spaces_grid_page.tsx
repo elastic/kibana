@@ -24,7 +24,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
-import { UserProfile } from '../../../../../xpack_main/common/user_profile';
+import { uiCapabilities } from 'ui/capabilities';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
@@ -36,7 +36,6 @@ import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
-  userProfile: UserProfile;
   intl: InjectedIntl;
 }
 
@@ -69,7 +68,7 @@ class SpacesGridPageUI extends Component<Props, State> {
       <EuiPage restrictWidth className="spcGridPage">
         <EuiPageBody>
           <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-          <SecureSpaceMessage userProfile={this.props.userProfile} />
+          <SecureSpaceMessage />
         </EuiPageBody>
         {this.getConfirmDeleteModal()}
       </EuiPage>
@@ -78,7 +77,8 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public getPageContent() {
     const { intl } = this.props;
-    if (!this.props.userProfile.hasCapability('manageSpaces')) {
+
+    if (!uiCapabilities.spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './discover_config';
 import './saved_searches/saved_searches';
 import './directives';
 import 'ui/collapsible_sidebar';

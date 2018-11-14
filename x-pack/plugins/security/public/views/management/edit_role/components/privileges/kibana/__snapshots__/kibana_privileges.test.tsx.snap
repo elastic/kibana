@@ -43,8 +43,17 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
       }
       userProfile={
         Object {
-          "hasCapability": [Function],
-        }
+          "id": "marketing",
+          "name": "Marketing",
+        },
+      ]
+    }
+    uiCapabilities={
+      Object {
+        "navLinks": Object {},
+        "spaces": Object {
+          "manage": true,
+        },
       }
       validator={
         RoleValidator {

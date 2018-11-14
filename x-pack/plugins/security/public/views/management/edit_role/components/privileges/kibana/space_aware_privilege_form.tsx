@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
+import { UICapabilities } from 'ui/capabilities';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { UserProfile } from '../../../../../../../../xpack_main/common/user_profile';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { isReservedRole } from '../../../../../../lib/role';
@@ -40,8 +40,8 @@ interface Props {
   onChange: (role: Role) => void;
   editable: boolean;
   validator: RoleValidator;
-  userProfile: UserProfile;
   intl: InjectedIntl;
+  uiCapabilities: UICapabilities;
 }
 
 interface PrivilegeForm {
@@ -75,9 +75,9 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
   }
 
   public render() {
-    const { kibanaAppPrivileges, role, userProfile, intl } = this.props;
+    const { kibanaAppPrivileges, role, uiCapabilities, intl } = this.props;
 
-    if (!userProfile.hasCapability('manageSpaces')) {
+    if (!uiCapabilities.spaces.manage) {
       return (
         <EuiCallOut
           title={
@@ -290,11 +290,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <ImpactedSpacesFlyout
-              role={role}
-              spaces={spaces}
-              userProfile={this.props.userProfile}
-            />
+            <ImpactedSpacesFlyout role={role} spaces={spaces} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </Fragment>

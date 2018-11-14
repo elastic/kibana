@@ -157,6 +157,7 @@ function discoverController(
   kbnUrl,
   localStorage,
   i18n,
+  uiCapabilities,
 ) {
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -298,12 +299,12 @@ function discoverController(
       }
     };
 
-    const hideSave = false;
+    const { showWriteControls } = uiCapabilities.discover;
 
-    if (hideSave) {
-      return [newSearch, openSearch, shareSearch, inspectSearch];
+    if (showWriteControls) {
+      return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
     }
-    return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
+    return [newSearch, openSearch, shareSearch, inspectSearch];
   };
 
   $scope.topNavMenu = getTopNavLinks();

@@ -28,11 +28,6 @@ exports[`SpacesDescription renders without crashing 1`] = `
           "width": "100%",
         }
       }
-      userProfile={
-        Object {
-          "hasCapability": [Function],
-        }
-      }
     />
   </div>
 </EuiContextMenuPanel>

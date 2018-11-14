@@ -25,9 +25,9 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
+import { uiCapabilities } from 'ui/capabilities';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
@@ -44,7 +44,6 @@ import { SpaceIdentifier } from './space_identifier';
 interface Props {
   spacesManager: SpacesManager;
   spaceId?: string;
-  userProfile: UserProfile;
   spacesNavState: SpacesNavState;
   intl: InjectedIntl;
 }
@@ -137,9 +136,9 @@ class ManageSpacePageUI extends Component<Props, State> {
   };
 
   public getForm = () => {
-    const { userProfile, intl } = this.props;
+    const { intl } = this.props;
 
-    if (!userProfile.hasCapability('manageSpaces')) {
+    if (!uiCapabilities.spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 
@@ -251,7 +250,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   public maybeGetSecureSpacesMessage = () => {
     if (this.editingExistingSpace()) {
-      return <SecureSpaceMessage userProfile={this.props.userProfile} />;
+      return <SecureSpaceMessage />;
     }
     return null;
   };

@@ -35,7 +35,6 @@ const buildProps = (customProps = {}) => {
         name: 'Marketing',
       },
     ],
-    userProfile: new UserProfile(),
     kibanaAppPrivileges: [
       {
         name: 'all',

@@ -22,6 +22,7 @@ import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objec
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { SpacesClient } from './server/lib/spaces_client';
 import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
+import { toggleUiCapabilities } from './server/lib/toggle_ui_capabilities';
 import { initPublicSpacesApi } from './server/routes/api/public';
 import { initPrivateApis } from './server/routes/api/v1';
 
@@ -65,9 +66,18 @@ export const spaces = (kibana: any) =>
           spaces: [],
           activeSpace: null,
           spaceSelectorURL: getSpaceSelectorUrl(server.config()),
+          uiCapabilities: {
+            spaces: {
+              manage: true,
+            },
+          },
         };
       },
-      async replaceInjectedVars(vars: any, request: any, server: any) {
+      async replaceInjectedVars(
+        vars: Record<string, any>,
+        request: Record<string, any>,
+        server: Record<string, any>
+      ) {
         const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
         try {
           vars.activeSpace = {
@@ -84,6 +94,14 @@ export const spaces = (kibana: any) =>
             error: wrapError(e).output.payload,
           };
         }
+
+        if (vars.activeSpace.space) {
+          vars.uiCapabilities = await toggleUiCapabilities(
+            vars.uiCapabilities,
+            vars.activeSpace.space
+          );
+        }
+
         return vars;
       },
     },
