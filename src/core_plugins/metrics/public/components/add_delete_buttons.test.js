@@ -29,7 +29,7 @@ describe('AddDeleteButtons', () => {
     const wrapper = shallow(
       <AddDeleteButtons onAdd={handleAdd} />
     );
-    wrapper.find('button').at(0).simulate('click');
+    wrapper.find('EuiButtonIcon').at(0).simulate('click');
     expect(handleAdd.calledOnce).to.equal(true);
   });
 
@@ -38,7 +38,7 @@ describe('AddDeleteButtons', () => {
     const wrapper = shallow(
       <AddDeleteButtons onDelete={handleDelete} />
     );
-    wrapper.find('button').at(1).simulate('click');
+    wrapper.find('EuiButtonIcon').at(1).simulate('click');
     expect(handleDelete.calledOnce).to.equal(true);
   });
 
@@ -47,7 +47,7 @@ describe('AddDeleteButtons', () => {
     const wrapper = shallow(
       <AddDeleteButtons onClone={handleClone} />
     );
-    wrapper.find('button').at(0).simulate('click');
+    wrapper.find('EuiButtonIcon').at(0).simulate('click');
     expect(handleClone.calledOnce).to.equal(true);
   });
 
