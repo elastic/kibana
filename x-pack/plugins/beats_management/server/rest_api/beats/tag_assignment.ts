@@ -8,14 +8,15 @@ import Joi from 'joi';
 import { BeatsTagAssignment } from '../../../public/lib/adapters/beats/adapter_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 
-import { CMServerLibs } from '../../lib/lib';
+import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
+import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file
 export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agents_tags/assignments',
-  licenseRequired: true,
+  licenseRequired: REQUIRED_LICENSES,
   requiredRoles: ['beats_admin'],
   config: {
     validate: {

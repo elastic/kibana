@@ -6,26 +6,26 @@
 
 import { uniq } from 'lodash';
 import moment from 'moment';
-import { findNonExistentItems } from '../../utils/find_non_existent_items';
+import { findNonExistentItems } from '../utils/find_non_existent_items';
 
-import { CMBeat } from '../../../common/domain_types';
-import { BeatsTagAssignment, CMBeatsAdapter } from '../adapters/beats/adapter_types';
-import { FrameworkUser } from '../adapters/framework/adapter_types';
+import { CMBeat } from '../../common/domain_types';
+import { BeatsTagAssignment, CMBeatsAdapter } from './adapters/beats/adapter_types';
+import { FrameworkUser } from './adapters/framework/adapter_types';
 
-import { CMAssignmentReturn } from '../adapters/beats/adapter_types';
-import { BeatsRemovalReturn } from '../adapters/beats/adapter_types';
-import { BeatEnrollmentStatus, CMDomainLibs, CMServerLibs, UserOrToken } from '../lib';
+import { CMAssignmentReturn } from './adapters/beats/adapter_types';
+import { BeatsRemovalReturn } from './adapters/beats/adapter_types';
+import { BeatEnrollmentStatus, CMServerLibs, UserOrToken } from './types';
 
 export class CMBeatsDomain {
-  private tags: CMDomainLibs['tags'];
-  private tokens: CMDomainLibs['tokens'];
+  private tags: CMServerLibs['tags'];
+  private tokens: CMServerLibs['tokens'];
   private framework: CMServerLibs['framework'];
 
   constructor(
     private readonly adapter: CMBeatsAdapter,
     libs: {
-      tags: CMDomainLibs['tags'];
-      tokens: CMDomainLibs['tokens'];
+      tags: CMServerLibs['tags'];
+      tokens: CMServerLibs['tokens'];
       framework: CMServerLibs['framework'];
     }
   ) {

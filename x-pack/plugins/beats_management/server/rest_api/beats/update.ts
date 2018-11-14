@@ -5,15 +5,16 @@
  */
 
 import Joi from 'joi';
+import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/constants';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file (include who did the verification as well)
 export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
   method: 'PUT',
   path: '/api/beats/agent/{beatId}',
-  licenseRequired: true,
+  licenseRequired: REQUIRED_LICENSES,
   requiredRoles: ['beats_admin'],
   config: {
     validate: {

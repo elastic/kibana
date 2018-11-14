@@ -11,6 +11,7 @@ import { config as beatsPluginConfig, configPrefix } from '../../../../..';
 // @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 import { KibanaBackendFrameworkAdapter } from '../kibana_framework_adapter';
+import { PLUGIN } from './../../../../../common/constants/plugin';
 import { contractTests } from './test_contract';
 
 const kbnServer = kbnTestServer.createRootWithCorePlugins({ server: { maxPayloadBytes: 100 } });
@@ -29,6 +30,6 @@ contractTests('Kibana  Framework Adapter', {
     await kbnServer.shutdown();
   },
   adapterSetup: () => {
-    return new KibanaBackendFrameworkAdapter(legacyServer.server);
+    return new KibanaBackendFrameworkAdapter(PLUGIN.ID, legacyServer.server);
   },
 });
