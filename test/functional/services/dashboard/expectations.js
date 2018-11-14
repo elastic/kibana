@@ -250,7 +250,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async tsvbTableCellCount(expectedCount) {
       log.debug(`DashboardExpect.tsvbTableCellCount(${expectedCount})`);
       await retry.try(async () => {
-        const tableCells = await find.allByCssSelector('.tsvb-table__value');
+        const tableCells = await testSubjects.findAll('tvbTableVis__value');
         expect(tableCells.length).to.be(expectedCount);
       });
     }
