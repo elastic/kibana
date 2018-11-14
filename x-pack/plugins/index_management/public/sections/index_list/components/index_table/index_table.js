@@ -14,7 +14,6 @@ import { healthToColor } from '../../../../services';
 import '../../../../styles/table.less';
 
 import {
-  EuiButtonEmpty,
   EuiCallOut,
   EuiHealth,
   EuiLink,
@@ -201,21 +200,29 @@ export class IndexTableUi extends Component {
       if (!bannerData) {
         return null;
       }
+
+      const {
+        type,
+        title,
+        message,
+        filter,
+        filterLabel,
+      } = bannerData;
+
       return (
         <Fragment key={`bannerExtension${i}`}>
-          <EuiCallOut color={bannerData.type} size="m">
-            <EuiText grow={true}>{bannerData.message} {bannerData.filter ? (
-              <EuiButtonEmpty
-                onClick={() => {
-                  filterChanged(bannerData.filter);
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.idxMgmt.indexTable.banner.showButtonText"
-                  defaultMessage="Show"
-                />
-              </EuiButtonEmpty>
-            ) : null}
+          <EuiCallOut
+            color={type}
+            size="m"
+            title={title}
+          >
+            <EuiText>
+              {message}
+              {filter ? (
+                <EuiLink onClick={() => filterChanged(filter)}>
+                  {filterLabel}
+                </EuiLink>
+              ) : null}
             </EuiText>
           </EuiCallOut>
           <EuiSpacer size="m" />

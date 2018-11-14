@@ -49,9 +49,12 @@ if (chrome.getInjected('indexLifecycleManagementUiEnabled')) {
     return {
       type: 'warning',
       filter: `${stepPath}:ERROR`,
-      message: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtBanner.errorMessage', {
-        defaultMessage: `{ numIndicesWithLifecycleErrors, number} 
-          {numIndicesWithLifecycleErrors, plural, one {index has} other {indices have} } 
+      filterLabel: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtBanner.filterLabel', {
+        defaultMessage: 'Show errors',
+      }),
+      title: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtBanner.errorMessage', {
+        defaultMessage: `{ numIndicesWithLifecycleErrors, number}
+          {numIndicesWithLifecycleErrors, plural, one {index has} other {indices have} }
           lifecycle errors`,
         values: { numIndicesWithLifecycleErrors }
       }),
