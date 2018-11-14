@@ -63,13 +63,15 @@ test(`calls server.expose with exposed services`, () => {
   const mockXpackInfoFeature = Symbol();
   const mockSavedObjectTypes = Symbol();
   const mockFeatures = Symbol();
+  const mockXpackMainPlugin = {
+    getFeatures: () => mockFeatures
+  };
 
-  createAuthorizationService(mockServer, mockXpackInfoFeature, mockSavedObjectTypes, mockFeatures);
+  const authorization = createAuthorizationService(mockServer, mockXpackInfoFeature, mockSavedObjectTypes, mockXpackMainPlugin);
 
   const application = `kibana-${kibanaIndex}`;
   expect(getClient).toHaveBeenCalledWith(mockServer);
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
-  expect(buildPrivilegeMap).toHaveBeenCalledWith(mockSavedObjectTypes, mockActions, mockFeatures);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockActions, application, mockShieldClient);
   expect(authorizationModeFactory).toHaveBeenCalledWith(
     application,
@@ -78,4 +80,11 @@ test(`calls server.expose with exposed services`, () => {
     mockShieldClient,
     mockXpackInfoFeature,
   );
+
+  const mockPrivilegeMap = Symbol();
+  buildPrivilegeMap.mockReturnValue(mockPrivilegeMap);
+  expect(buildPrivilegeMap).not.toHaveBeenCalled();
+  const returnedPrivilegeMap = authorization.getPrivileges();
+  expect(returnedPrivilegeMap).toBe(mockPrivilegeMap);
+  expect(buildPrivilegeMap).toHaveBeenCalledWith(mockSavedObjectTypes, mockActions, mockFeatures);
 });

@@ -61,11 +61,14 @@ const putRoleTest = (
     for (const impl of callWithRequestImpls) {
       mockCallWithRequest.mockImplementationOnce(impl);
     }
+    const mockAuthorization = {
+      getPrivileges: () => privilegeMap
+    };
     initPutRolesApi(
       mockServer,
       mockCallWithRequest,
       mockPreCheckLicense,
-      privilegeMap,
+      mockAuthorization,
       application,
     );
     const headers = {

@@ -14,9 +14,10 @@ export function initPublicRolesApi(server) {
   const callWithRequest = getClient(server).callWithRequest;
   const routePreCheckLicenseFn = routePreCheckLicense(server);
 
-  const { application, privileges } = server.plugins.security.authorization;
+  const { authorization } = server.plugins.security;
+  const { application } = authorization;
 
   initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application);
-  initPutRolesApi(server, callWithRequest, routePreCheckLicenseFn, privileges, application);
+  initPutRolesApi(server, callWithRequest, routePreCheckLicenseFn, authorization, application);
   initDeleteRolesApi(server, callWithRequest, routePreCheckLicenseFn);
 }

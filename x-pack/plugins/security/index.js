@@ -118,7 +118,7 @@ export const security = (kibana) => new kibana.Plugin({
     const { savedObjects } = server;
 
     // exposes server.plugins.security.authorization
-    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin.getFeatures());
+    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin);
     server.expose('authorization', deepFreeze(authorization));
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {

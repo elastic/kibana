@@ -14,7 +14,7 @@ export function initPutRolesApi(
   server,
   callWithRequest,
   routePreCheckLicenseFn,
-  privileges,
+  authorization,
   application
 ) {
 
@@ -62,18 +62,30 @@ export function initPutRolesApi(
     }, identity);
   };
 
-  const featurePrivileges = flatten(
-    Object.entries(privileges.features).map(
+  // this should be short-lived once we refactor the way that these APIs work, hence the ugly string concatenation
+  // if you see this code in master, please yell at Brandon
+  const getFeaturePrivileges = (features) => {
+    return flatten(Object.entries(features).map(
       ([featureName, featurePrivileges]) => {
         return Object.keys(featurePrivileges).map(
           (privilegeName) => {
             return `${featureName}_${privilegeName}`;
           });
-      }
-    )
-  );
-  const privilegesAssignedGlobally = [...Object.keys(privileges.global), ...featurePrivileges];
-  const privilegesAssignedAtSpace = [...Object.keys(privileges.space), ...featurePrivileges];
+      })
+    );
+  };
+
+  const getGlobalItemsSchema = () => {
+    const privileges = authorization.getPrivileges();
+    const validPrivileges = [...Object.keys(privileges.global), ...getFeaturePrivileges(privileges.features)];
+    return Joi.string().valid(validPrivileges);
+  };
+
+  const getSpaceItemsSchema = () => {
+    const privileges = authorization.getPrivileges();
+    const validPrivileges = [...Object.keys(privileges.space), ...getFeaturePrivileges(privileges.features)];
+    return Joi.string().valid(validPrivileges);
+  };
 
   const schema = Joi.object().keys({
     metadata: Joi.object().optional(),
@@ -91,8 +103,8 @@ export function initPutRolesApi(
       run_as: Joi.array().items(Joi.string()),
     }),
     kibana: Joi.object().keys({
-      global: Joi.array().items(Joi.string().valid(privilegesAssignedGlobally)),
-      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.string().valid(privilegesAssignedAtSpace)))
+      global: Joi.array().items(Joi.lazy(() => getGlobalItemsSchema())),
+      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.lazy(() => getSpaceItemsSchema())))
     })
   });
 
