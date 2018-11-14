@@ -26,12 +26,12 @@
 import { format as formatUrl } from 'url';
 
 import request from 'request';
-import { delay, fromNode as fcb } from 'bluebird';
+import { delay } from 'bluebird';
 
 export const DEFAULT_SUPERUSER_PASS = 'iamsuperuser';
 
 async function updateCredentials(port, auth, username, password, retries = 10) {
-  const result = await fcb(cb =>
+  const result = await new Promise((resolve, reject) =>
     request(
       {
         method: 'PUT',
@@ -46,13 +46,15 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
         body: { password },
       },
       (err, httpResponse, body) => {
-        cb(err, { httpResponse, body });
+        if (err) return reject(err);
+        resolve({ httpResponse, body });
       }
     )
   );
 
   const { body, httpResponse } = result;
   const { statusCode } = httpResponse;
+
   if (statusCode === 200) {
     return;
   }
@@ -73,13 +75,13 @@ export async function setupUsers(log, esPort, updates) {
   for (const { username, password, roles } of updates) {
     // If working with a built-in user, just change the password
     if (['logstash_system', 'elastic', 'kibana'].includes(username)) {
-      log.info('setting %j user password to %j', username, password);
       await updateCredentials(esPort, auth, username, password);
+      log.info('setting %j user password to %j', username, password);
 
       // If not a builtin user, add them
     } else {
-      log.info('Adding %j user with password to %j', username, password);
       await insertUser(esPort, auth, username, password, roles);
+      log.info('Added %j user with password to %j', username, password);
     }
 
     if (username === 'elastic') {
@@ -89,7 +91,7 @@ export async function setupUsers(log, esPort, updates) {
 }
 
 async function insertUser(port, auth, username, password, roles = [], retries = 10) {
-  const result = await fcb(cb =>
+  const result = await new Promise((resolve, reject) =>
     request(
       {
         method: 'POST',
@@ -104,7 +106,8 @@ async function insertUser(port, auth, username, password, roles = [], retries = 
         body: { password, roles },
       },
       (err, httpResponse, body) => {
-        cb(err, { httpResponse, body });
+        if (err) return reject(err);
+        resolve({ httpResponse, body });
       }
     )
   );
@@ -117,7 +120,7 @@ async function insertUser(port, auth, username, password, roles = [], retries = 
 
   if (retries > 0) {
     await delay(2500);
-    return await updateCredentials(port, auth, username, password, retries - 1);
+    return await insertUser(port, auth, username, password, retries - 1);
   }
 
   throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
