@@ -44,7 +44,6 @@
   @import 'components/loading_indicator/index'; // SASSTODO: This component should be replaced with EuiLoadingSpinner
   @import 'components/messagebar/index';
   @import 'components/nav_menu/index';
-  @import 'components/paginated_table/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
 
   // Hacks are last so they can ovwerite anything above if needed
