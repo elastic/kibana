@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import Keys from 'leadfoot/keys';
-import { By } from 'selenium-webdriver';
+import { By, Key } from 'selenium-webdriver';
 
 export function FilterBarProvider({ getService, getPageObjects }) {
+  const wait = getService('wait');
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -86,7 +86,6 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await typeIntoReactSelect('filterfieldSuggestionList', field);
       await typeIntoReactSelect('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
-      // const paramFields = await params.findAllByTagName('input');
       const paramFields = await params.findElements(By.css('input'));
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
@@ -94,9 +93,8 @@ export function FilterBarProvider({ getService, getPageObjects }) {
           fieldValues = [fieldValues];
         }
         for (let j = 0; j < fieldValues.length; j++) {
-          // await paramFields[i].type(fieldValues[j]);
           await find.setValueElement(paramFields[i], fieldValues[j]);
-          await remote.pressKeys(Keys.RETURN);
+          await paramFields[i].sendKeys(Key.RETURN);
         }
       }
       await testSubjects.click('saveFilter');

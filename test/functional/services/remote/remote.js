@@ -158,12 +158,8 @@ export async function RemoteProvider({ getService }) {
         return currentWithoutTime;
       },
 
-      async pressKeys(keys) {
-        switch (keys) {
-          case '\ue006':
-            await actions.keyDown(Key.ENTER).pause().pause().keyUp(Key.ENTER);
-            break;
-        }
+      async pressKeys(key) {
+        await driver.sendKeys(key);
       },
 
       //TODO: Implement Slow Type For Firefox to use (50ms)
