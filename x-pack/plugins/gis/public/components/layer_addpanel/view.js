@@ -98,7 +98,7 @@ export class AddLayerPanel extends React.Component {
     }, this._onZoomRangeChange);
   };
 
-  _onAlphaValueChange(alphaValue) {
+  _onAlphaValueChange = alphaValue => {
     this.setState({ alphaValue }, () => {
       if (this.layer) {
         this.props.updateAlphaValue(this.layer.getId(), this.state.alphaValue);
