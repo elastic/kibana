@@ -24,7 +24,7 @@ export function buildPrivilegeMap(
   const featuresPrivilegesBuilder = new FeaturesPrivilegesBuilder(actions);
 
   return {
-    features: featuresPrivilegesBuilder.build(features),
+    features: featuresPrivilegesBuilder.buildFeaturesPrivileges(features),
     global: {
       all: [
         actions.login,
@@ -37,9 +37,9 @@ export function buildPrivilegeMap(
       read: [
         actions.login,
         actions.version,
-        actions.api.get('console/execute'),
+        ...featuresPrivilegesBuilder.getApiReadActions(features),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
-        actions.ui.all,
+        ...featuresPrivilegesBuilder.getUiReadActions(features),
       ],
     },
     space: {
@@ -53,9 +53,9 @@ export function buildPrivilegeMap(
       read: [
         actions.login,
         actions.version,
-        actions.api.get('console/execute'),
+        ...featuresPrivilegesBuilder.getApiReadActions(features),
         ...actions.savedObject.readOperations(validSavedObjectTypes),
-        actions.ui.all,
+        ...featuresPrivilegesBuilder.getUiReadActions(features),
       ],
     },
   };

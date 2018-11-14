@@ -14,15 +14,22 @@ describe('#all', () => {
 });
 
 describe('#get', () => {
-  [null, undefined, '', 1, true, {}].forEach((uiCapability: any) => {
-    test(`uiCapability of ${JSON.stringify(uiCapability)} throws error`, () => {
+  [null, undefined, '', 1, true, {}].forEach((featureId: any) => {
+    test(`featureId of ${JSON.stringify(featureId)} throws error`, () => {
       const uiActions = new UiActions();
-      expect(() => uiActions.get(uiCapability)).toThrowErrorMatchingSnapshot();
+      expect(() => uiActions.get(featureId, 'foo-capability')).toThrowErrorMatchingSnapshot();
     });
   });
 
-  test('returns `ui:${uiCapaility}`', () => {
+  [null, undefined, '', 1, true, {}].forEach((uiCapability: any) => {
+    test(`uiCapability of ${JSON.stringify(uiCapability)} throws error`, () => {
+      const uiActions = new UiActions();
+      expect(() => uiActions.get('foo', uiCapability)).toThrowErrorMatchingSnapshot();
+    });
+  });
+
+  test('returns `ui:${featureId}/${uiCapaility}`', () => {
     const uiActions = new UiActions();
-    expect(uiActions.get('foo-capability')).toBe('ui:foo-capability');
+    expect(uiActions.get('foo', 'foo-capability')).toBe('ui:foo/foo-capability');
   });
 });

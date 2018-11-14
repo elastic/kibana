@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten, mapValues } from 'lodash';
+import { Dictionary, flatten, mapValues } from 'lodash';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
-
-interface FeaturePrivileges {
-  featureId: string;
-  privileges: Record<string, string[]>;
-}
 
 export type FeaturesPrivileges = Record<string, Record<string, string[]>>;
 
@@ -22,38 +17,61 @@ export class FeaturesPrivilegesBuilder {
     this.actions = actions;
   }
 
-  public build(features: Feature[]): FeaturesPrivileges {
-    return features
-      .map(feature => this.buildFeaturePrivileges(feature))
-      .reduce((acc: FeaturesPrivileges, featurePrivileges) => {
-        acc[featurePrivileges.featureId] = featurePrivileges.privileges;
-        return acc;
-      }, {});
+  public buildFeaturesPrivileges(features: Feature[]): FeaturesPrivileges {
+    return features.reduce((acc: FeaturesPrivileges, feature: Feature) => {
+      acc[feature.id] = this.buildFeaturePrivileges(feature);
+      return acc;
+    }, {});
   }
 
-  private buildFeaturePrivileges(feature: Feature): FeaturePrivileges {
-    return {
-      featureId: feature.id,
-      privileges: mapValues(feature.privileges, privilegeDefinition => [
-        this.actions.login,
-        this.actions.version,
-        ...(privilegeDefinition.api
-          ? privilegeDefinition.api.map(api => this.actions.api.get(api))
-          : []),
-        ...privilegeDefinition.app.map(appId => this.actions.app.get(appId)),
-        ...(feature.navlinkId ? [this.actions.navlink.get(feature.navlinkId)] : []),
-        ...flatten(
-          privilegeDefinition.savedObject.all.map(types =>
-            this.actions.savedObject.allOperations(types)
-          )
-        ),
-        ...flatten(
-          privilegeDefinition.savedObject.read.map(types =>
-            this.actions.savedObject.readOperations(types)
-          )
-        ),
-        ...privilegeDefinition.ui.map(ui => this.actions.ui.get(ui)),
-      ]),
-    };
+  public getApiReadActions(features: Feature[]): string[] {
+    return flatten(
+      features.map(feature => {
+        const { privileges } = feature;
+        if (!privileges || !privileges.read || !privileges.read.api) {
+          return [];
+        }
+
+        return feature.privileges.read.api!.map(api => this.actions.api.get(api));
+      })
+    );
+  }
+
+  public getUiReadActions(features: Feature[]): string[] {
+    return flatten(
+      features.map(feature => {
+        const { privileges } = feature;
+        if (!privileges || !privileges.read || !privileges.read.ui) {
+          return [];
+        }
+
+        return feature.privileges.read.ui!.map(uiCapability =>
+          this.actions.ui.get(feature.id, uiCapability)
+        );
+      })
+    );
+  }
+
+  private buildFeaturePrivileges(feature: Feature): Dictionary<string[]> {
+    return mapValues(feature.privileges, privilegeDefinition => [
+      this.actions.login,
+      this.actions.version,
+      ...(privilegeDefinition.api
+        ? privilegeDefinition.api.map(api => this.actions.api.get(api))
+        : []),
+      ...privilegeDefinition.app.map(appId => this.actions.app.get(appId)),
+      ...(feature.navlinkId ? [this.actions.navlink.get(feature.navlinkId)] : []),
+      ...flatten(
+        privilegeDefinition.savedObject.all.map(types =>
+          this.actions.savedObject.allOperations(types)
+        )
+      ),
+      ...flatten(
+        privilegeDefinition.savedObject.read.map(types =>
+          this.actions.savedObject.readOperations(types)
+        )
+      ),
+      ...privilegeDefinition.ui.map(ui => this.actions.ui.get(feature.id, ui)),
+    ]);
   }
 }

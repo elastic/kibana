@@ -7,7 +7,7 @@
 import { IconType } from '@elastic/eui';
 import _ from 'lodash';
 
-export interface PrivilegeDefinition {
+export interface FeaturePrivilegeDefinition {
   api?: string[];
   app: string[];
   savedObject: {
@@ -25,7 +25,7 @@ export interface Feature {
   description?: string;
   navlinkId?: string;
   privileges: {
-    [key: string]: PrivilegeDefinition;
+    [key: string]: FeaturePrivilegeDefinition;
   };
 }
 

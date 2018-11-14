@@ -9,11 +9,15 @@ const prefix = 'ui:';
 export class UiActions {
   public all = `${prefix}*`;
 
-  public get(uiCapability: string) {
+  public get(featureId: string, uiCapability: string) {
+    if (!featureId || !isString(featureId)) {
+      throw new Error('featureId is required and must be a string');
+    }
+
     if (!uiCapability || !isString(uiCapability)) {
       throw new Error('uiCapability is required and must be a string');
     }
 
-    return `${prefix}${uiCapability}`;
+    return `${prefix}${featureId}/${uiCapability}`;
   }
 }
