@@ -5,16 +5,16 @@
  */
 import { isString } from 'lodash';
 
-const prefix = `navlink:`;
+const prefix = `nav_link:`;
 
-export class NavlinkActions {
+export class NavLinkActions {
   public all = `${prefix}*`;
 
-  public get(navlinkId: string) {
-    if (!navlinkId || !isString(navlinkId)) {
-      throw new Error('navlinkId is required and must be a string');
+  public get(navLinkId: string) {
+    if (!navLinkId || !isString(navLinkId)) {
+      throw new Error('navLinkId is required and must be a string');
     }
 
-    return `${prefix}${navlinkId}`;
+    return `${prefix}${navLinkId}`;
   }
 }

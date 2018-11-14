@@ -11,7 +11,7 @@ const kibanaFeatures: Feature[] = [
     id: 'discover',
     name: 'Discover',
     icon: 'discoverApp',
-    navlinkId: 'kibana:discover',
+    navLinkId: 'kibana:discover',
     privileges: {
       all: {
         app: ['kibana'],
@@ -35,7 +35,7 @@ const kibanaFeatures: Feature[] = [
     id: 'visualize',
     name: 'Visualize',
     icon: 'visualizeApp',
-    navlinkId: 'kibana:visualize',
+    navLinkId: 'kibana:visualize',
     privileges: {
       all: {
         app: ['kibana'],
@@ -59,7 +59,7 @@ const kibanaFeatures: Feature[] = [
     id: 'dashboard',
     name: 'Dashboard',
     icon: 'dashboardApp',
-    navlinkId: 'kibana:dashboard',
+    navLinkId: 'kibana:dashboard',
     privileges: {
       all: {
         app: ['kibana'],
@@ -91,7 +91,7 @@ const kibanaFeatures: Feature[] = [
     id: 'dev_tools',
     name: 'Dev Tools',
     icon: 'devToolsApp',
-    navlinkId: 'kibana:dev_tools',
+    navLinkId: 'kibana:dev_tools',
     privileges: {
       all: {
         api: ['console/execute'],
@@ -108,7 +108,7 @@ const kibanaFeatures: Feature[] = [
     id: 'advancedSettings',
     name: 'Advanced Settings',
     icon: 'managementApp',
-    navlinkId: 'kibana:management:advancedSettings',
+    navLinkId: 'kibana:management:advancedSettings',
     privileges: {
       all: {
         api: [],
@@ -128,7 +128,7 @@ const timelionFeatures: Feature[] = [
     id: 'timelion',
     name: 'Timelion',
     icon: 'timelionApp',
-    navlinkId: 'timelion',
+    navLinkId: 'timelion',
     privileges: {
       all: {
         app: ['timelion'],

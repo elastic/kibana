@@ -6,7 +6,7 @@
 
 import { ApiActions } from './api';
 import { AppActions } from './app';
-import { NavlinkActions } from './navlink';
+import { NavLinkActions } from './nav_link';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UiActions } from './ui';
@@ -18,7 +18,7 @@ export class Actions {
 
   public login = 'login:';
 
-  public navlink = new NavlinkActions();
+  public navLink = new NavLinkActions();
 
   public savedObject = new SavedObjectActions();
 
