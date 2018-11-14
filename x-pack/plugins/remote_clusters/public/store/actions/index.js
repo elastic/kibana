@@ -16,10 +16,3 @@ export {
 export {
   refreshClusters
 } from './refresh_clusters';
-
-export {
-  filterChanged,
-  pageChanged,
-  pageSizeChanged,
-  sortChanged,
-} from './table_state';

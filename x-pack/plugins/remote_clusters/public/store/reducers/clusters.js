@@ -13,6 +13,8 @@ import {
 
 const initialState = {
   isLoading: false,
+  clusterLoadError: null,
+  asList: [],
   byName: {},
   allNames: [],
 };
@@ -41,6 +43,7 @@ export function clusters(state = initialState, action) {
 
     case LOAD_CLUSTERS_SUCCESS:
       return {
+        asList: [...payload.clusters],
         byName: mapClustersToNames(payload.clusters),
         allNames: getClustersNames(payload.clusters),
         isLoading: false,
@@ -48,6 +51,7 @@ export function clusters(state = initialState, action) {
 
     case REFRESH_CLUSTERS_SUCCESS:
       return {
+        asList: [...payload.clusters],
         byName: mapClustersToNames(payload.clusters),
         allNames: getClustersNames(payload.clusters),
       };

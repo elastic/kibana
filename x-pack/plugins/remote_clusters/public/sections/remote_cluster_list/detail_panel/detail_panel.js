@@ -25,9 +25,9 @@ export class DetailPanelUi extends Component {
   static propTypes = {
     isOpen: PropTypes.bool.isRequired,
     isLoading: PropTypes.bool,
-    remoteCluster: PropTypes.object,
+    cluster: PropTypes.object,
     closeDetailPanel: PropTypes.func.isRequired,
-    clusterName: PropTypes.string.isRequired,
+    clusterName: PropTypes.string,
   }
 
   constructor(props) {
@@ -35,9 +35,9 @@ export class DetailPanelUi extends Component {
   }
 
   renderTabs() {
-    const { remoteCluster } = this.props;
+    const { cluster } = this.props;
 
-    if (!remoteCluster) {
+    if (!cluster) {
       return;
     }
 
@@ -46,8 +46,8 @@ export class DetailPanelUi extends Component {
     );
   }
 
-  renderRemoteCluster() {
-    // const { remoteCluster, intl } = this.props;
+  renderCluster() {
+    // const { cluster, intl } = this.props;
 
     return (
       <Fragment>
@@ -63,7 +63,7 @@ export class DetailPanelUi extends Component {
       isOpen,
       isLoading,
       closeDetailPanel,
-      remoteCluster,
+      cluster,
       clusterName,
     } = this.props;
 
@@ -100,8 +100,8 @@ export class DetailPanelUi extends Component {
       );
     }
 
-    if (remoteCluster) {
-      content = this.renderRemoteCluster();
+    if (cluster) {
+      content = this.renderCluster();
     } else {
       content = (
         <EuiFlyoutBody>

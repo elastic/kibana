@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 
 import {
-  getPageOfClusters,
+  getClustersList,
   isLoading,
   clusterLoadError
 } from '../../store/selectors';
@@ -23,7 +23,7 @@ import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_lis
 
 const mapStateToProps = (state) => {
   return {
-    clusters: getPageOfClusters(state),
+    clusters: getClustersList(state),
     isLoading: isLoading(state),
     clusterLoadError: clusterLoadError(state),
   };

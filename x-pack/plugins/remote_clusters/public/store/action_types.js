@@ -16,8 +16,3 @@ export const LOAD_CLUSTERS_FAILURE = 'LOAD_CLUSTERS_FAILURE';
 // Refresh clusters
 export const REFRESH_CLUSTERS_SUCCESS = 'REFRESH_CLUSTERS_SUCCESS';
 
-// Table state
-export const FILTER_CHANGED = 'FILTER_CHANGED';
-export const PAGE_CHANGED = 'PAGE_CHANGED';
-export const PAGE_SIZE_CHANGED = 'PAGE_SIZE_CHANGED';
-export const SORT_CHANGED = 'SORT_CHANGED';
