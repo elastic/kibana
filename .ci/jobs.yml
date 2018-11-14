@@ -1,0 +1,7 @@
+JOB:
+  - selenium
+  - intake
+  - x-pack
+
+# `~` is yaml for `null`
+exclude: ~
