@@ -52,9 +52,10 @@ coming[7.0.0-alpha1]
 
 [float]
 [[breaking-7.0.0]]
-=== Breaking Changes
+=== Breaking changes
 
-Also see <<breaking-changes-7.0>>.
+For more details about breaking changes in this release, see 
+<<breaking-changes-7.0, Breaking changes in 7.0>>.
 
 Discover::
 * Does not apply `query:queryString:options` to `query_string` filters {pull}15640[#15640]
@@ -69,9 +70,6 @@ Operations::
 * Sets default port based on protocol  {pull}21564[#21564]
 * Removes deprecated `/shorten` API {pull}21861[#21861]
 
-Platform::
-* Upgrades Hapi in legacy platform to v17 {pull}21707[#21707]
-
 [float]
 [[deprecation-7.0.0]]
 === Deprecations
@@ -79,81 +77,39 @@ Platform::
 Geo::
 * Fixes legacy tilemap loading {pull}22095[#22095]
 
-Monitoring::
-* Deprecates `xpack:defaultAdminEmail` for monitoring alerts {pull}22195[#22195]
+[float]
+[[K7-design-7.0.0]]
+=== K7 UI Design
+
+For 7.0.0-alpha1, {kib} gives users the ability to switch between the old 6.x 
+style headers and the new K7 design. To turn on the new design, go to 
+*Management > Advanced Settings* and search for *K7 design*. In future versions, 
+we'll remove the old setting and use the K7 design instead.
 
 [float]
 [[enhancement-7.0.0]]
 === Enhancements
 
-Kibana Home &amp; Add Data::
-* Allows sample data set to install multiple indices {pull}23230[#23230]
-* Adds "Upload data from file" link to Kibana home page {pull}24226[#24226]
-
-
 Machine Learning::
-* Adds new page for choosing file or index based data visualizer {pull}23763[#23763]
-* Adds context to job picker for accessibility {pull}23483[#23483]
-* Adds button for refreshing job list without full page refresh {pull}24084[#24084]
-* Ensures applying and removing groups menu is keyboard accessible {pull}24212[#24212]
-* Disables auto focus on job wizard select index or search page {pull}21913[#21913]
-* Adds aria-label to calendar and jobs list buttons {pull}21922[#21922]
-* Add validations of label and time range when editing custom URLs {pull}21960[#21960]
-* Adds links to rule editor for quick edit of value or filter {pull}22990[#22990]
-* Removes job ID from detector description for duplicates {pull}23192[#23192]
-* Moves custom URL editor Add button and form to top of flyout {pull}23326[#23326]
-* Indicates multi-bucket anomalies in results dashboards {pull}23746[#23746]
-* Focuses View Results link on Job wizards when job finishes {pull}24190[#24190]
 * Updates job type and APM module icon to new designs {pull}25380[#25380]
-* Introduces custom charts for detectors that use a `rare` function (Event Distribution Chart) as well as detectors that use an over field (Population Distribution Chart) {pull}23423[#23423]
-* Adds validation for the model memory limit value that checks that the unit is 
-an {es} support unit {pull}21270[#21270]
-* Adds group selector to jobs management {pull}21780[#21780]
-* Adds group selector duplicate validation {pull}21988[#21988]
-* Adds ability to override various settings when importing data {pull}24346[#24346]
 * Allows model plot enablement via checkbox in  MultiMetric/Population Job creation {pull}24914[#24914]
 * Adds support for the rare detector for charts in Anomaly Explorer and Singe Metric viewer {pull}21524[#21524]
 
-
-Management::
-* Adds opt in for telemetry to start trial and upload license {pull}22925[#22925]
-* Updates ingest nodes for auto-complete in console {pull}24100[#24100]
-* Adds tag and updates pipeline processor parameter for console ingest node {pull}24400[#24400]
-
-Monitoring::
-* Adds APM Monitoring UI {pull}22975[#22975]
-
-Querying &amp; Filtering::
-* Adds `SearchError` to courier {pull}23382[#23382]
-
 Reporting::
 * Adds png output to reports {pull}24759[#24759]
-* Adds ability to disable polling for idle jobs {pull}24295[#24295]
-+
-A new `kibana.yml` config setting, `xpack.reporting.queue.pollEnabled`, 
-can be set to `false` (default is `true`) to stop the Kibana instance from r
-unning polling workers to claim and execute reporting jobs. This makes it 
-possible to configure a Kibana instance to only act as a Reporting worker, and 
-other instances to do everything for Reporting (queuing, listing, provide 
-downloads, and so on) except for executing reporting jobs.
 * Sorts ascending on sort order first then ascending on name. Any menu item 
 without a sort order gets set to zero. {pull}25058[#25058]
 
-Security::
-* Adds option to always present the certificate when connecting to {es} 
-using `elasticsearch.ssl.alwaysPresentCertificate: true` {pull}24304[#24304]
-
-Sharing::
-* Implements inspector for saved searches {pull}22376[#22376]
-
 Visualizations::
-* Adds support for `format:number:defaultLocale` and `format:number/bytes/percent:defaultPattern` 
-settings in Time Series Visual Builder {pull}21444[#21444]
 * Adds a console.error for visualize errors {pull}24581[#24581]
 
 [float]
 [[bug-7.0.0]]
 === Bug fixes
+
+APM::
+* Overrides EUI chart default styles for gridlines {pull}21723[#21723]
+* Adds section titles to span detail modal {pull}20717[#20717]
 
 Canvas::
 * Fixes duplicate `Value` options in math select value {pull}25556[#25556]
@@ -163,265 +119,96 @@ Canvas::
 * Improves the plugin pre-build {pull}25267[#25267]
 
 Dashboard::
-* Always starts dashboard with closed context menu {pull}24252[#24252]
 * Removes `dashboardContext` function and makes Timelion, Vega, and Time Series 
 Visual Builder use `buildEsQuery` {pull}23227[#23227]
-* Fixes Add button in empty dashboard {pull}21816[#21816]
-* Migrates panel_state to panel_state.ts {pull}22515[#22515]
-* Fixes problem where refreshed dashboard losing time range {pull}20858[#20858]
-* Migrates dashboard panel actions to TypeScript {pull}21740[#21740]
-* Generalizes dashboard panel actions  {pull}22775[#22775]
 
 Design::
-* Replaces theme CSS instead of appending it {pull}21709[#21709]
 * Converts Security UI from LESS to Sass {pull}25079[#25079]
 * Adds boilerplate Sass for Kibana core {pull}21185[#21185]
 
 Discover::
 * Adds debug code to flaky field_data test {pull}15535[#15535]
 * Gets even more debug info for flaky field_data test {pull}17627[#17627]
-* Makes query bar autocomplete screen reader accessible {pull}20740[#20740]
-* Fixes query input lag {pull}21753[#21753]
-* Forces date format in context query {pull}22684[#22684]
-* Exposes `max_concurrent_shard_requests` for `_msearch` requests {pull}22379[#22379]
-* Renames the filter bar collapser tooltip {pull}22942[#22942]
 
 Geo::
 * Fixes feature/align map config settings {pull}19450[#19450]
-* Ensures baselayers display in region maps {pull}22609[#22609]
 
 Kibana App::
 
 * Adds warning to the `documentation_links` file about link validation gotcha {pull}24786[#24786]
 * Adds workaround for `getDerivedStateFromProps` change in react 16.4 {pull}25142[#25142]
-* Displays hits and total hits for courier inspector requests {pull}23434[#23434]
 
 Kibana Home &amp; Add Data::
-* Adds `now` query parameter to sample data install endpoint {pull}20678[#20678]
-* Avoids $$phase errors by not passing functions from ngReact {pull}24460[#24460]
 * Fixes "Set up index patterns" link on home page {pull}16128[#16128]
-* Fixes sample data install error in toast when user navigates away from home app while installing {pull}23574[#23574]
-* Fixes sample data error in console when user navigates away from home app while installing sample data {pull}23711[#23711]
 
 Machine Learning::
-* Ensures Calendar creation navigation tabs are keyboard and screen reader accessible {pull}23832[#23832]
-* Ensures Job list search bar is aligned and prevents job actions from wrapping {pull}24334[#24334]
 * Shows useful error on invalid query in JobList search bar {pull}25153[#25153]
-* Fixes position of Single Metric markers for long aggregation intervals {pull}22055[#22055]
-* Makes field type icon component keyboard accessible {pull}22708[#22708]
-* Fixes labels in datafeed time range selector modal {pull}24489[#24489]
 * Adds user privilege check to Jobs List group selector control {pull}25225[#25225]
 * Fixes file data viz file size check and formats as bytes {pull}25295[#25295]
 * Fixes the layout of the cards in the Data Visualizer on IE {pull}25383[#25383]
-* Fixes check for lower memory limit {pull}24323[#24323]
 * Adds better error reporting for reading and importing data {pull}24269[#24269]
-* Adds alt prop with empty string to fix jsx-a11y errors  {pull}24922[#24922]
-* Updates invalid model memory limit message {pull}21329[#21329]
-* Fixes issue with historical job audit messages {pull}21718[#21718]
-* Fixes IOException in `java.time.LocalDateTime` for painless script in ML Watch {pull}21998[#21998]
-* Edits job group duplicate validation {pull}21987[#21987]
-* Adds string type check to jobs list search {pull}22627[#22627]
-* Fixes various issues when cloning a job using a wizard {pull}23368[#23368]
-* Fixes missing field when cloning a distinct count job {pull}23439[#23439]
-* Fixes issue when editing script fields in advanced job creator {pull}23475[#23475]
-* Fixes duplicate influencers when cloning a job via a wizard {pull}23484[#23484]
-* Fixes regression with breadcrumbs {pull}23756[#23756]
-* Fixes font size of headings in anomalies table expanded row {pull}24390[#24390]
-* Migrates Explorer Charts to React {pull}22622[#22622]
-* Migrates Anomaly Explorer Swimlanes to React {pull}22641[#22641]
-* Fixes Anomaly Explorer Swimlane race condition and adds tests {pull}22814[#22814]
-* Tweaks Explorer Chart {pull}22955[#22955]
-* Fixes loading the influencers for Anomaly Explorer {pull}22963[#22963]
-* Fixes reloading Anomaly Explorer Charts on resize {pull}22967[#22967]
-* Deprecates the use of jQuery for rendering Anomaly Explorer Swimlanes {pull}23000[#23000]
-* Fixes Anomaly Explorer resize listener {pull}23427[#23427]
-* Fixes limit dropdown and simplifies state management of Anomaly Explorer {pull}23388[#23388]
-* Improves Explorer Chart labels {pull}23494[#23494]
-* Makes `mlExplorerDashboardService` independent of angularjs {pull}23874[#23874]
-* Makes sure `anomalyChartRecords` gets initialized as an array {pull}24021[#24021]
-* Enables display of contextual data for population charts using other metrics than count {pull}24083[#24083]
-* Fixes job validation for nested time fields {pull}24137[#24137]
-* Removes obsolete sentence from info tooltip {pull}24716[#24716]
-* Fixes a call stack size exception triggered by a negative tickInterval {pull}24742[#24742]
 * Displays an ordinal y axis for low cardinality rare charts {pull}24852[#24852]
-* Fixes job validation message typo {pull}25130[#25130]
+* Fixes typo in job validation message {pull}25130[#25130]
 * Removes deprecated `angularjs` based jobs list and related code {pull}25216[#25216]
 
 Management::
-* Fixes license endpoint paths for proxy {pull}22133[#22133]
 * Adds boilerplate for remote clusters management app {pull}25369[#25369]
-* Fixes console fatal errors {pull}21996[#21996]
-* Adds labels for form elements advanced settings {pull}22969[#22969]
-* Updates documentation links for ingest node in console {pull}24535[#24535]
-* Adds APIs for cross cluster replication to console autocomplete {pull}24739[#24739]
 * Adds `ignore_failure` to ingest common auto complete in console {pull}24915[#24915]
-* Makes Watcher table width 100% of the view {pull}21803[#21803]
-* Updates index pattern creation loading state to not have confusing "Reticulating splines" message {pull}21977[#21977]
-* Makes width of import saved objects dialog narrower so it doesn't obscure UI {pull}22011[#22011]
-* Reconciles Index Management selection state with index deletion {pull}22242[#22242]
-* Extracts index pattern validation rules into ui/public {pull}22606[#22606]
-* Adds `repositionOnScroll` to popovers within the Inspector and the Index Management detail panel {pull}23856[#23856]
 * Removes support for expression-based scripted fields {pull}14310[#14310]
-* Supports overriding uiSettings from the config file {pull}21628[#21628]
 * Adds WatchErrors to capture invalid watches {pull}23887[#23887]
-* Fixes color and static lookup field formatters not loading {pull}22044[#22044]
-* Fixes issues with filtering saved objects by single type {pull}24950[#24950]
 * Rewords the translation id for error with missing property in Watcher {pull}24753[#24753]
 
 Monitoring::
-* Supports legacy use cases for passthrough {pull}21211[#21211]
-* Exposes Kibana settings API {pull}21100[#21100]
-* Addresses multiple accessibility issues {pull}20619[#20619]
-* Ensures the settings API always returns the `xpack/default_admin_email` {pull}22220[#22220]
-* Adds Beats architecture stats to telemetry {pull}21227[#21227]
-* Ensures the telemetry banner is accessible with keyboard {pull}22664[#22664]
 * Renames Monitoring `FormattedMessage` to `FormattedAlert` {pull}24197[#24197]
 * Uses the cluster name from metadata if it exists {pull}24495[#24495]
-* Manages telemetry opt-in via a dedicated document {pull}22268[#22268]
-* Adds telemetry for KQL {pull}23547[#23547]
-* Relaxes the check to account for metricbeat-indexed doc format {pull}23730[#23730]
-* Retrofits the Bulk Uploader types combiner {pull}22030[#22030]
-* Has telemetry automatically get all the Kibana usage stats {pull}22336[#22336]
 
 Operations::
 * Removes node fallback from kibana-keystore {pull}15066[#15066]
 * Adds debug script to set inspect flags {pull}15967[#15967]
 * Uses snake case for scripts/kibana-keystore.js and scripts/kibana-plugin.js {pull}15331[#15331]
-* Removes window title of Kibana Server {pull}21567[#21567]
 * Updates license info in package.json {pull}20353[#20353]
-* Adds optimize and --no-optimize flags {pull}16302[#16302]
-* Filters nested and object fields {pull}23658[#23658]
-* Fixes plugin generator when using hacks and SCSS {pull}23579[#23579]
-* Removes conflicting package for kbn bootstrap {pull}23662[#23662]
-* Adds server OS information to telemetry stats {pull}23793[#23793]
 * Fixes error log formatting {pull}24788[#24788]
-* Implements more efficient method for cleaning node_modules {pull}24692[#24692]
-* Ignores node_modules anywhere in the `x-pack` directory {pull}24797[#24797]
 * Matches chalk dependency version on Kibana with the one used on X-Pack {pull}20621[#20621]
-* Removes red color from the kbn-pm logs {pull}24362[#24362]
 * Fixes non-conforming licenses on devDependencies and adds the ability to whitelist devOnly licenses {pull}23859[#23859]
-* Enables security for Trial license only {pull}20803[#20803]
-* Adds autoprefixer support and improves Watcher {pull}21656[#21656]
-* Moves styleSheetPath to uiExports {pull}23007[#23007]
-* Normalizes path for comparison on Windows {pull}23404[#23404]
-* Resolves a race condition where Elasticsearch is technically up, but the Kibana index is not {pull}25255[#25255]
-* Disables replicas {pull}25274[#25274]
 * Adds jsxa11y into eslint rules {pull}23932[#23932]
-* Upgrades prettier to version 1.14.0 {pull}21466[#21466]
 * Reverts Bump react-grid-layout to 0.16.0 {pull}14912[#14912]
 * Reverts breaking change for Status API {pull}21927[#21927]
 * Converts `utils/collection` to TypeScript {pull}23992[#23992]
 * Removes usage of update_all_types {pull}16406[#16406]
 * Improves the `yarn kbn bootstrap` speed by using yarn workspaces for packages inside `packages/*` and `x-pack` {pull}24095[#24095]
-* Run jenkins:unit task with dev flag in order to run license check {pull}19832[#19832]
+* Runs jenkins:unit task with dev flag in order to run license check {pull}19832[#19832]
+* Does not break on startup in debug mode {pull}19219[#19219]
+
 
 Platform::
-* Uses `modifyUrl` helper {pull}22435[#22435]
-* Upgrades to TypeScript 3 {pull}22792[#22792]
-* Removes Notifier's directive and banner methods {pull}20870[#20870]
-* Converts usage of notify.error to `toastNotifications.addDanger` for string messages {pull}22243[#22243]
-* Fixes a bug in which more than one search request error would result in a fatal error {pull}24952[#24952]
-* Adds temporary hotfix for flyouts not in portals {pull}24515[#24515]
 * Transforms plugin deprecations before checking for unused settings {pull}21294[#21294]
-* Adds K7 header navigation {pull}23300[#23300]
-* Prevents K7 header popovers from scrolling with page content {pull}23850[#23850]
 * Expands list of restricted globals in `eslint-config-kibana` {pull}15798[#15798]
-* Migrates `ui/notify/fatal_error` to new platform {pull}20752[#20752]
-* Renders legacy platform into a container in new platform {pull}21248[#21248]
-* Adds type-check script, which runs the TypeScript compiler in `checking` mode and reports results {pull}19325[#19325]
-* Migrates `toastNotifications` to the new platform {pull}21772[#21772]
-* Migrates `ui/chrome/loading_count` API to new platform {pull}21967[#21967]
-* Implements no animation mode {pull}21629[#21629]
-* Gives tooling log configurable writers {pull}22110[#22110]
-* Fixes error thrown for undefined provider instances {pull}22689[#22689]
-* Migrates base path APIs and UiSettings client to new platform {pull}22694[#22694]
-* Migrates ui/url to TypeScript {pull}22849[#22849]
-* Fixes recursive type for better array support in `core/public/deepFreeze` {pull}22904[#22904]
-* Migrates chrome injected vars API to new platform {pull}22911[#22911]
-* Adds `shareWeakReplay()` operator in `core/public/utils` {pull}23333[#23333]
-* Shares sync subscribe logic in `ui/utils` {pull}23341[#23341]
-* Migrates controls, theme, and visibility APIs to `core/public/chrome` {pull}22987[#22987]
-* Tries to autoCreateOrUpgrade only once {pull}24605[#24605]
-* Improve types in `kbn/datemath` {pull}24671[#24671]
-* Allows filtering suites by tag {pull}25021[#25021]
-* Adds support for interceptors in kfetch {pull}22128[#22128]
-* Updates how Saved Objects Client handles `RequestEntityTooLarge` error from Elasticsearch {pull}22430[#22430]
-* Turns off `no-multi-str` rule in eslint config {pull}22525[#22525]
 * Makes logs easier to read on Windows with chalk colors {pull}15557[#15557]
-* Auto opens browser on server startup {pull}24843[#24843]
 
 Querying &amp; Filtering::
 * Fixes wildcard queries against the default field {pull}24778[#24778]
-* Changes suggestion text to a string {pull}24526[#24526]
-* Introduces query bar update button with dirty checking {pull}24529[#24529]
-* Fixes other bucket filters {pull}24217[#24217]
 
 Reporting::
 * Returns promise in Reporting jobs API {pull}24769[#24769]
-* Improves text of pending status in Repots job listing {pull}24300[#24300]
-* Fixes problem that caused Chromium to wait until `domcontentloaded`, not `networkidle0`, and Report job failed {pull}23586[#23586]
-* Fixes `let _claimPendingJobs` so it has a valid job when updating leads to version conflict {pull}21980[#21980]
-* Changes Chromium reports to use an upgraded, custom build of Chromium. It changes the driver to use Puppeteer. {pull}21788[#21788]
-* Adds the new Chromium windows path to the CI `CleanExtraBrowsersTask` {pull}22534[#22534]
-* Fixes problem where Kibana fails to use the latest Chromium build {pull}22580[#22580]
-* Migrates reporting top navigation to sharing context menu {pull}22596[#22596]
-* Fixes #22581 by introducing an artificial delay {pull}22601[#22601]
-* Changes the reporting layout code to TypeScript format and creates a new set of layout classes {pull}22454[#22454]
 
 Security::
-* Fixes missing email address on account screen {pull}22652[#22652]
-* Removes ability to implicitly find across all types {pull}23198[#23198]
 * Implements the K7 login screen {pull}23512[#23512]
-* Allows email and name to be optional instead of required {pull}24842[#24842]
 
 Sharing::
 
-* Updates redux, react-redux, and corresponding types {pull}22442[#22442]
-* Moves `/shorten` to `/api/shorten_url` {pull}21808[#21808]
-* Passes scoped context to tutorial providers when building tutorials {pull}22260[#22260]
 * Fixes issue with debounce function running after component was unmounted {pull}15045[#15045]
-* Adds pluggable panel action tests {pull}20163[#20163]
 
 Visualizations::
 * Defaults the scroll wheel zoom to false on Vega maps {pull}21169[#21169]
-* Fixes issue with heat map showing black tiles {pull}20753[#20753]
-* Removes extraneous whitespace characters between attributions in attribution 
-string in map visualization {pull}22003[#22003]
-* Fixes child controls so they work after parent reset {pull}23616[#23616]
-* Fixes filters on other bucket for table vis and vislib legend  {pull}24473[#24473]
-* Preserves nested tables in table visualization {pull}24377[#24377]
 * Fixes problem within the input_vis_control plugin that prevents it from updating correctly 
 if the field is switched, and then switched back to the previous field {pull}25164[#25164]
 * Uses `vega-nocanvas` instead of vega lib {pull}16137[#16137]
-* Removes the LESS files inside `/src/core_plugins/kibana/public/visualize` and replaces them with Sass {pull}22679[#22679]
-* Removes the LESS files for the Timelion plugin and replaces them with Sass {pull}23339[#23339]
-* Removes the LESS files for vis types in core_plugins `input_control_vis`, `markdown_vis`, `metric_vis`, 
-`region_map`, `table_vis`, `tag cloud`, `tile_map`, and `vega` and replaces them with Sass {pull}23513[#23513]
-* Upgrades Tinymath to v1.1.0 {pull}24457[#24457]
-* Removes deprecation notice, which was no longer needed, from ascending sort for terms {pull}23421[#23421]
-* Fixes limited custom ranges in heat map {pull}21958[#21958]
-* Moves the logic of fetching index fields inside the vis editor component, and
-triggers it on component mount, whenever the editor index pattern input field changes {pull}24832[#24832]
-* Fixes missing markdown variables in Time Series Visual Builder {pull}25132[#25132]
-* Generates the correct bucket keys regardless of query type {pull}25002[#25002]
-* Creates re-usable IndexPatternSelect component {pull}23335[#23335]
 * Migrates visualization from Angular to React {pull}16425[#16425]
-* Fixes date_histogram to work correctly inside plugins without global time picker {pull}21955[#21955]
-* Simplifies tabify {pull}19061[#19061]
-* Decouples agg configs from vis {pull}21827[#21827]
-* Fixes sorting of terms bucket {pull}22919[#22919]
-* Rewrites hierarchical response handler {pull}22578[#22578]
-* Removes vis dependency from response handlers {pull}22583[#22583]
 * Fixes maps for reporting (#15272) {pull}15358[#15358]
 * Stops creation of nested search source per postflightrequest {pull}20373[#20373]
-* Adds proper aria-label for Close button in Inspect panel {pull}21719[#21719]
-* Introduces EditorConfigProvider to customize vis editor {pull}20519[#20519]
-* Prevents IE11 from focusing parts of vislib charts {pull}22135[#22135]
-* Adds option to drop partial buckets from date_histogram visuals {pull}19979[#19979]
-* Moves timezone settings into autoload file {pull}22623[#22623]
-* Fixes broken visualize CSS {pull}22707[#22707]
-* Removes nesting-indicator directive {pull}23180[#23180]
-* Ensures Vega options dropdown menu is visible {pull}24409[#24409]
-* Fixes courier issues causing `showMetricsOnAllLevels` to break {pull}24488[#24488]
-* Fixes Timelion issue when `elasticsearch.shardTimeout` is 0 {pull}25461[#25461]
+* Moves inspector code from Vis to embeddable visualize handler {pull}24112[#24112]
+* Removes inspector from Vis {pull}24112[#24112]
+
+
+
 
