@@ -8,8 +8,8 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
-import { getIndexManagementDataEnrichers } from '../../../../index_management_data';
 import { fetchAliases } from './fetch_aliases';
+import { enrichResponse } from '../../../lib/enrich_response';
 
 function formatHits(hits, aliases) {
   return hits.map(hit => {
@@ -51,11 +51,7 @@ export function registerListRoute(server) {
         const aliases = await fetchAliases(callWithRequest);
         const hits = await fetchIndices(callWithRequest);
         let response = formatHits(hits, aliases);
-        const dataEnrichers = getIndexManagementDataEnrichers();
-        for (let i = 0; i < dataEnrichers.length; i++) {
-          const dataEnricher = dataEnrichers[i];
-          response = await dataEnricher(response, callWithRequest);
-        }
+        response = await enrichResponse(response, callWithRequest);
         return response;
       } catch (err) {
         if (isEsError(err)) {
