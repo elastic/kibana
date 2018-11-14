@@ -17,11 +17,21 @@
  * under the License.
  */
 
-import Panel from '../panel';
-import panelRegistry from '../../lib/panel_registry';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
-panelRegistry.register(function timeChartProvider(Private, i18n) {
-  // Schema is broken out so that it may be extended for use in other plugins
-  // Its also easier to test.
-  return new Panel('timechart', Private(require('./schema'))(), i18n);
+import { once } from 'lodash';
+
+const callWithRequest = once(server => {
+  const cluster = server.plugins.elasticsearch.getCluster('data');
+  return cluster.callWithRequest;
 });
+
+export const callWithRequestFactory = (server, request) => {
+  return (...args) => {
+    return callWithRequest(server)(request, ...args);
+  };
+};

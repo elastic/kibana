@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import Panel from '../panel';
-import panelRegistry from '../../lib/panel_registry';
+import chrome from 'ui/chrome';
+const apiPrefix = chrome.addBasePath('/api/kibana');
 
-panelRegistry.register(function timeChartProvider(Private, i18n) {
-  // Schema is broken out so that it may be extended for use in other plugins
-  // Its also easier to test.
-  return new Panel('timechart', Private(require('./schema'))(), i18n);
-});
+export async function getRemoteClusters($http) {
+  const response = await $http.get(`${apiPrefix}/clusters`);
+  return response.data;
+}
