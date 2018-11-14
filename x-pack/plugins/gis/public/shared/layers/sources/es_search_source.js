@@ -79,7 +79,7 @@ export class ESSearchSource extends VectorSource {
     return indexPattern;
   }
 
-  async getGeoJson({ layerId, layerName }, searchFilters) {
+  async getGeoJson({ layerId, layerName, styleFieldNames }, searchFilters) {
     const indexPattern = await this._getIndexPattern();
 
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];
@@ -94,6 +94,13 @@ export class ESSearchSource extends VectorSource {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
+      searchSource.setField('source', {
+        includes: [
+          this._descriptor.geoField,
+          ...this._descriptor.tooltipProperties,
+          ...styleFieldNames,
+        ],
+      });
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];
