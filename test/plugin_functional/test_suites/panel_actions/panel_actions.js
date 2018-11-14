@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import expect from 'expect.js';
+
 export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -27,8 +29,16 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 
-    it('Sample action appears in context menu in view mode', async () => {
+    it('allows to register links into the context menu', async () => {
       await dashboardPanelActions.openContextMenu();
+      const actionElement = await testSubjects.find('dashboardPanelAction-samplePanelLink');
+      const actionElementTag = await actionElement.getTagName();
+      expect(actionElementTag).to.be('a');
+      const actionElementLink = await actionElement.getProperty('href');
+      expect(actionElementLink).to.be('https://example.com/kibana/test');
+    });
+
+    it('Sample action appears in context menu in view mode', async () => {
       await testSubjects.existOrFail(
         'dashboardPanelAction-samplePanelAction'
       );
