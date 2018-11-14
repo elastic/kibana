@@ -87,7 +87,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, $http, enableSpaceAwarePrivileges, userProfile) {
+  controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
 

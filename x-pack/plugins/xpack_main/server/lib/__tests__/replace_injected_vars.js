@@ -19,9 +19,6 @@ const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
 
   return {
     path,
-    getUserProfile: async () => ({
-      toJSON: () => ({})
-    }),
     getSavedObjectsClient: () => {
       return {
         get,
