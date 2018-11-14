@@ -45,7 +45,7 @@ describe('ManageSpacePage', () => {
       />
     );
     const nameInput = wrapper.find('input[name="name"]');
-    const descriptionInput = wrapper.find('input[name="description"]');
+    const descriptionInput = wrapper.find('textarea[name="description"]');
 
     nameInput.simulate('change', { target: { value: 'New Space Name' } });
     descriptionInput.simulate('change', { target: { value: 'some description' } });
@@ -109,7 +109,7 @@ describe('ManageSpacePage', () => {
     wrapper.update();
 
     const nameInput = wrapper.find('input[name="name"]');
-    const descriptionInput = wrapper.find('input[name="description"]');
+    const descriptionInput = wrapper.find('textarea[name="description"]');
 
     nameInput.simulate('change', { target: { value: 'New Space Name' } });
     descriptionInput.simulate('change', { target: { value: 'some description' } });

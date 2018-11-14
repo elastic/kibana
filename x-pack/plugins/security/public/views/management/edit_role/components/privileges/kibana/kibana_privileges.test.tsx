@@ -6,7 +6,6 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { UserProfile } from 'x-pack/common/user_profile';
 import { KibanaPrivilege } from '../../../../../../../../security/common/model/kibana_privilege';
 import { RoleValidator } from '../../../lib/validate_role';
 import { KibanaPrivileges } from './kibana_privileges';

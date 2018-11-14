@@ -232,7 +232,7 @@ class ManageSpacePageUI extends Component<Props, State> {
           onChange={this.onSpaceChange}
         />
 
-        <EuiHorizontalRule />
+        <EuiSpacer />
 
         {this.getFormButtons()}
       </Fragment>

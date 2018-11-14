@@ -62,7 +62,7 @@ exports[`renders without crashing 1`] = `
       inputRef={[Function]}
       isLoading={false}
       onChange={[Function]}
-      placeholder="The URL identifier is generated from the space name."
+      placeholder="awesome-space"
       readOnly={true}
       value=""
     />

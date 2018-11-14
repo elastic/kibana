@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
-import { EuiDescribedFormGroup, EuiFormRow, EuiIconTip, EuiText } from '@elastic/eui';
-import React, { Component, ReactNode } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import React, { Component, Fragment, ReactNode } from 'react';
 import { Feature } from 'x-pack/common/feature';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { CollapsiblePanel } from 'x-pack/public/components';
@@ -21,18 +21,22 @@ export class EnabledFeatures extends Component<Props, {}> {
   public render() {
     return (
       <CollapsiblePanel initiallyCollapsed title={this.getPanelTitle()}>
-        <EuiDescribedFormGroup
-          title={<h3>Enable features within this space</h3>}
-          description={this.getDescription()}
-        >
-          <EuiFormRow hasEmptyLabelSpace>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>Enable features within this space</h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            {this.getDescription()}
+          </EuiFlexItem>
+          <EuiFlexItem>
             <FeatureTable
               features={this.props.features}
               space={this.props.space}
               onChange={this.props.onChange}
             />
-          </EuiFormRow>
-        </EuiDescribedFormGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </CollapsiblePanel>
     );
   }
@@ -53,15 +57,8 @@ export class EnabledFeatures extends Component<Props, {}> {
       );
     } else if (enabledCount === 0) {
       details = (
-        <EuiText color={'danger'} size={'s'} style={{ display: 'inline-block' }}>
-          <em>
-            <EuiIconTip
-              type={'alert'}
-              color={'danger'}
-              content={`At least one feature must be enabled`}
-            />{' '}
-            (no features enabled)
-          </em>
+        <EuiText color="danger" size={'s'} style={{ display: 'inline-block' }}>
+          <em>(no features enabled)</em>
         </EuiText>
       );
     } else {
@@ -84,13 +81,30 @@ export class EnabledFeatures extends Component<Props, {}> {
   };
 
   private getDescription = () => {
+    const featureCount = this.props.features.length;
+    const disabledCount = this.getKnownDisabledFeatures().length;
+    const enabledCount = featureCount - disabledCount;
+
     return (
-      <EuiText>
-        <p>Choose which features are enabled within this space.</p>
-        <p>
-          <strong>Note: </strong> this is not a security mechanism.
-        </p>
-      </EuiText>
+      <Fragment>
+        <EuiText size="s" color="subdued">
+          <p>Choose which features are enabled within this space.</p>
+          <p>
+            <strong>Note: </strong> this is not a security mechanism.
+          </p>
+        </EuiText>
+        {enabledCount === 0 && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiCallOut
+              color="danger"
+              title="At least one feature must be enabled"
+              iconType="alert"
+              size="s"
+            />
+          </Fragment>
+        )}
+      </Fragment>
     );
   };
 }

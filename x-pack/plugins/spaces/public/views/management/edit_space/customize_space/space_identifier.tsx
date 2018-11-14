@@ -8,14 +8,14 @@ import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { Space } from '../../../../../common/model/space';
-import { SpaceValidator } from '../../lib';
+import { SpaceValidator, toSpaceIdentifier } from '../../lib';
 
 interface Props {
   space: Partial<Space>;
   editable: boolean;
   validator: SpaceValidator;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   intl: InjectedIntl;
+  onChange: (updatedIdentifier: string) => void;
 }
 
 interface State {
@@ -40,7 +40,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
       <Fragment>
         <EuiFormRow
           label={this.getLabel()}
-          helpText={this.getHelpText()}
+          helpText={this.getHelpText(id)}
           {...this.props.validator.validateURLIdentifier(this.props.space)}
           fullWidth
         >
@@ -52,7 +52,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
                 : intl.formatMessage({
                     id:
                       'xpack.spaces.management.spaceIdentifier.urlIdentifierGeneratedFromSpaceNameTooltip',
-                    defaultMessage: 'The URL identifier is generated from the space name.',
+                    defaultMessage: 'awesome-space',
                   })
             }
             value={id}
@@ -79,13 +79,13 @@ class SpaceIdentifierUI extends Component<Props, State> {
 
     const editLinkText = this.state.editing ? (
       <FormattedMessage
-        id="xpack.spaces.management.spaceIdentifier.stopEditingSpaceNameLinkText"
-        defaultMessage="[stop editing]"
+        id="xpack.spaces.management.spaceIdentifier.resetSpaceNameLinkText"
+        defaultMessage="[reset]"
       />
     ) : (
       <FormattedMessage
-        id="xpack.spaces.management.spaceIdentifier.editSpaceLinkText"
-        defaultMessage="[edit]"
+        id="xpack.spaces.management.spaceIdentifier.customizeSpaceLinkText"
+        defaultMessage="[customize]"
       />
     );
     return (
@@ -99,29 +99,20 @@ class SpaceIdentifierUI extends Component<Props, State> {
     );
   };
 
-  public getHelpText = () => {
+  public getHelpText = (identifier: string) => {
     return (
       <p>
         <FormattedMessage
           id="xpack.spaces.management.spaceIdentifier.kibanaURLForEngineeringIdentifierDescription"
-          defaultMessage="If the identifier is {engineeringIdentifier}, the Kibana URL is{nextLine}
-          {engineeringKibanaUrl}."
+          defaultMessage="Example: https://my-kibana.example{spaceIdentifier}/app/kibana."
           values={{
-            engineeringIdentifier: (
+            spaceIdentifier: (
               <strong>
                 <FormattedMessage
-                  id="xpack.spaces.management.spaceIdentifier.engineeringText"
-                  defaultMessage="engineering"
+                  id="xpack.spaces.management.spaceIdentifier.spaceIdentifierText"
+                  defaultMessage={identifier || 'awesome-space'}
                 />
               </strong>
-            ),
-            nextLine: <br />,
-            engineeringKibanaUrl: (
-              <React.Fragment>
-                {`https://my-kibana.example`}
-                <strong>/s/engineering/</strong>
-                app/kibana
-              </React.Fragment>
             ),
           }}
         />
@@ -130,23 +121,34 @@ class SpaceIdentifierUI extends Component<Props, State> {
   };
 
   public onEditClick = () => {
-    this.setState(
-      {
-        editing: !this.state.editing,
-      },
-      () => {
-        if (this.textFieldRef && this.state.editing) {
-          this.textFieldRef.focus();
+    const currentlyEditing = this.state.editing;
+    if (currentlyEditing) {
+      // "Reset" clicked. Create space identifier based on the space name.
+      const resetIdentifier = toSpaceIdentifier(this.props.space.name);
+
+      this.setState({
+        editing: false,
+      });
+      this.props.onChange(resetIdentifier);
+    } else {
+      this.setState(
+        {
+          editing: true,
+        },
+        () => {
+          if (this.textFieldRef) {
+            this.textFieldRef.focus();
+          }
         }
-      }
-    );
+      );
+    }
   };
 
   public onChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!this.state.editing) {
       return;
     }
-    this.props.onChange(e);
+    this.props.onChange(e.target.value);
   };
 }
 

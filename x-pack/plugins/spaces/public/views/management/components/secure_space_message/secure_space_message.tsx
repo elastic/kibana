@@ -13,7 +13,6 @@ export const SecureSpaceMessage = ({}) => {
   if (uiCapabilities.spaces.manage) {
     return (
       <Fragment>
-        <EuiSpacer />
         <EuiText className="eui-textCenter">
           <p>
             <FormattedMessage

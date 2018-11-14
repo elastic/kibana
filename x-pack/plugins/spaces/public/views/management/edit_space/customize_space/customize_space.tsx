@@ -12,8 +12,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
 } from '@elastic/eui';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { isReservedSpace } from 'x-pack/plugins/spaces/common';
@@ -30,7 +32,17 @@ interface Props {
   onChange: (space: Partial<Space>) => void;
 }
 
-export class CustomizeSpace extends Component<Props, {}> {
+interface State {
+  customizingAvatar: boolean;
+  usingCustomIdentifier: boolean;
+}
+
+export class CustomizeSpace extends Component<Props, State> {
+  public state = {
+    customizingAvatar: false,
+    usingCustomIdentifier: false,
+  };
+
   public render() {
     const { validator, editingExistingSpace } = this.props;
     const { name = '', description = '' } = this.props.space;
@@ -39,30 +51,41 @@ export class CustomizeSpace extends Component<Props, {}> {
         <EuiDescribedFormGroup
           title={<h3>Customize your space</h3>}
           description={this.getPanelDescription()}
+          fullWidth
         >
-          <EuiFormRow label="Name" {...validator.validateSpaceName(this.props.space)} fullWidth>
-            <EuiFieldText
-              name="name"
-              placeholder={'Awesome space'}
-              value={name}
-              onChange={this.onNameChange}
-              fullWidth
-            />
-          </EuiFormRow>
+          <EuiFlexGroup responsive={false}>
+            <EuiFlexItem>
+              <EuiFormRow label="Name" {...validator.validateSpaceName(this.props.space)} fullWidth>
+                <EuiFieldText
+                  name="name"
+                  placeholder={'Awesome space'}
+                  value={name}
+                  onChange={this.onNameChange}
+                  fullWidth
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow label="Avatar">
+                <EuiPopover
+                  id="customizeAvatarPopover"
+                  button={
+                    <button title="Click to customize" onClick={this.togglePopover}>
+                      <SpaceAvatar space={this.props.space} size="l" />
+                    </button>
+                  }
+                  closePopover={this.closePopover}
+                  isOpen={this.state.customizingAvatar}
+                >
+                  <div style={{ maxWidth: 240 }}>
+                    <CustomizeSpaceAvatar space={this.props.space} onChange={this.onAvatarChange} />
+                  </div>
+                </EuiPopover>
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-          {name && (
-            <Fragment>
-              <EuiFlexGroup responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Avatar">
-                    <SpaceAvatar space={this.props.space} size="l" />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <CustomizeSpaceAvatar space={this.props.space} onChange={this.onAvatarChange} />
-              </EuiFlexGroup>
-              <EuiSpacer />
-            </Fragment>
-          )}
+          <EuiSpacer />
 
           {this.props.space && isReservedSpace(this.props.space) ? null : (
             <Fragment>
@@ -77,21 +100,34 @@ export class CustomizeSpace extends Component<Props, {}> {
 
           <EuiFormRow
             label="Description (optional)"
+            helpText="Displayed alongside the space avatar on the space selection screen"
             {...validator.validateSpaceDescription(this.props.space)}
             fullWidth
           >
-            <EuiFieldText
+            <EuiTextArea
               name="description"
-              placeholder={'This is where the magic happens'}
               value={description}
               onChange={this.onDescriptionChange}
               fullWidth
+              rows={2}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
       </EuiPanel>
     );
   }
+
+  public togglePopover = () => {
+    this.setState({
+      customizingAvatar: !this.state.customizingAvatar,
+    });
+  };
+
+  public closePopover = () => {
+    this.setState({
+      customizingAvatar: false,
+    });
+  };
 
   public getPanelDescription = () => {
     return (
@@ -111,7 +147,7 @@ export class CustomizeSpace extends Component<Props, {}> {
       return;
     }
 
-    const canUpdateId = !this.props.editingExistingSpace;
+    const canUpdateId = !this.props.editingExistingSpace && !this.state.usingCustomIdentifier;
 
     let { id } = this.props.space;
 
@@ -126,17 +162,22 @@ export class CustomizeSpace extends Component<Props, {}> {
     });
   };
 
-  public onDescriptionChange = (e: ChangeEvent<HTMLInputElement>) => {
+  public onDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     this.props.onChange({
       ...this.props.space,
       description: e.target.value,
     });
   };
 
-  public onSpaceIdentifierChange = (e: ChangeEvent<HTMLInputElement>) => {
+  public onSpaceIdentifierChange = (updatedIdentifier: string) => {
+    const usingCustomIdentifier = updatedIdentifier !== toSpaceIdentifier(this.props.space.name);
+
+    this.setState({
+      usingCustomIdentifier,
+    });
     this.props.onChange({
       ...this.props.space,
-      id: toSpaceIdentifier(e.target.value),
+      id: toSpaceIdentifier(updatedIdentifier),
     });
   };
 

@@ -25,7 +25,6 @@ import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
-import { UserProfile } from 'x-pack/common/user_profile';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';

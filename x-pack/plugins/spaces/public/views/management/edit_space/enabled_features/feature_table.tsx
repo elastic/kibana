@@ -53,14 +53,16 @@ export class FeatureTable extends Component<Props, {}> {
       render: (feature: Feature) => {
         return (
           <EuiText>
-            <EuiIcon type={feature.icon as IconType} style={{ marginRight: '10px' }} />
-            {feature.name}
+            <EuiIcon type={feature.icon as IconType} />
+            &ensp; {feature.name}
           </EuiText>
         );
       },
     },
     {
       field: 'space',
+      width: '80',
+      align: 'right',
       name: 'Enabled?',
       render: (spaceEntry: Space, record: Record<string, any>) => {
         const checked = !(
