@@ -38,9 +38,9 @@ export function Stats({ stats }) {
         <EuiFlexItem grow={false}>
           <FormattedMessage
             id="xpack.monitoring.beats.overview.totalBeatsLabel"
-            defaultMessage="Total Beats:"
+            defaultMessage="Total Beats"
           />
-          &nbsp;
+          :&nbsp;
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <strong data-test-subj="totalBeats">
@@ -53,9 +53,9 @@ export function Stats({ stats }) {
         <EuiFlexItem grow={false}>
           <FormattedMessage
             id="xpack.monitoring.beats.overview.totalEventsLabel"
-            defaultMessage="Total Events:"
+            defaultMessage="Total Events"
           />
-          &nbsp;
+          :&nbsp;
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -67,9 +67,9 @@ export function Stats({ stats }) {
         <EuiFlexItem grow={false}>
           <FormattedMessage
             id="xpack.monitoring.beats.overview.bytesSentLabel"
-            defaultMessage="Bytes Sent:"
+            defaultMessage="Bytes Sent"
           />
-          &nbsp;
+          :&nbsp;
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <strong data-test-subj="bytesSent">
