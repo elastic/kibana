@@ -26,7 +26,12 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiSpacer,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const TopHitAgg = props => {
@@ -72,23 +77,20 @@ export const TopHitAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-            />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('field')}>
-              Field
-            </label>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('field')} label="Field">
             <FieldSelect
-              id={htmlId('field')}
               fields={fields}
               type={model.type}
               restrict="numeric"
@@ -96,63 +98,62 @@ export const TopHitAgg = props => {
               value={model.field}
               onChange={handleSelectChange('field')}
             />
-          </div>
-        </div>
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('size')}>
-              Size
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow id={htmlId('size')} label="Size">
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
             <input
-              id={htmlId('size')}
-              className="vis_editor__input-grows-100"
+              className="tvbAgg__input"
               value={model.size}
               onChange={handleTextChange('size')}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('agg_with')}>
-              Aggregate with
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('agg_with')} label="Aggregate with">
             <EuiComboBox
               isClearable={false}
-              id={htmlId('agg_with')}
-              placeholder="Select..."
+              placeholder="Select"
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
               onChange={handleSelectChange('agg_with')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('order_by')}>
-              Order by
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('order_by')} label="Order by">
             <FieldSelect
-              id={htmlId('order_by')}
               restrict="date"
               value={model.order_by}
               onChange={handleSelectChange('order_by')}
               indexPattern={indexPattern}
               fields={fields}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('order')}>
-              Order
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('order')} label="Order">
             <EuiComboBox
               isClearable={false}
-              id={htmlId('order')}
               placeholder="Select..."
               options={orderOptions}
               selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
               onChange={handleSelectChange('order')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-        </div>
-      </div>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

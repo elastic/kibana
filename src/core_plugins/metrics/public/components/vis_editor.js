@@ -149,8 +149,8 @@ class VisEditor extends Component {
 
     if (model) {
       return (
-        <div className="vis_editor">
-          <div className="vis-editor-hide-for-reporting">
+        <div className="tvbEditor">
+          <div className="tvbEditor--hideForReporting">
             <VisPicker model={model} onChange={this.handleChange} />
           </div>
           <VisEditorVisualization
@@ -171,7 +171,7 @@ class VisEditor extends Component {
             dateFormat={this.props.config.get('dateFormat')}
             onDataChange={this.onDataChange}
           />
-          <div className="vis-editor-hide-for-reporting">
+          <div className="tvbEditor--hideForReporting">
             <PanelConfig
               fields={this.state.visFields}
               model={model}
