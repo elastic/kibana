@@ -84,7 +84,6 @@ class EditPolicyUi extends Component {
       isPolicyListLoaded,
       fetchPolicies,
     } = this.props;
-    // thi
     const policyName = this.getPolicyNameFromUri();
     if (policyName) {
       if (isPolicyListLoaded) {
