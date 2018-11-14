@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CRUD_APP_BASE_PATH = '/management/elasticsearch/remote_clusters_management';
+export const PLUGIN = {
+  ID: 'remote_clusters'
+};

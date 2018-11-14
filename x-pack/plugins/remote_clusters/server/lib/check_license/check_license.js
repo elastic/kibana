@@ -5,7 +5,7 @@
 */
 
 export function checkLicense(xpackLicenseInfo) {
-  const pluginName = 'Remote Clusters Management';
+  const pluginName = 'Remote Clusters';
 
   // If, for some reason, we cannot get the license information
   // from Elasticsearch, assume worst case and disable

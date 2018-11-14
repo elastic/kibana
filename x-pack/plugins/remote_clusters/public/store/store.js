@@ -4,4 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { remoteClustersManagementStore } from './store';
+import { createStore } from 'redux';
+
+function createRemoteClustersStore(initialState = {}) {
+  return createStore(
+    (state) => state,
+    initialState,
+  );
+}
+
+export const remoteClustersStore = createRemoteClustersStore();

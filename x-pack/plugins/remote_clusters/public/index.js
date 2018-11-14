@@ -19,13 +19,13 @@ import { setHttpClient } from './services';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
 
 import { App } from './app';
-import { remoteClustersManagementStore } from './store';
+import { remoteClustersStore } from './store';
 
 const esSection = management.getSection('elasticsearch');
 
-esSection.register('remote_clusters_management', {
+esSection.register('remote_clusters', {
   visible: true,
-  display: 'Remote Clusters Management',
+  display: 'Remote Clusters',
   order: 4,
   url: `#${CRUD_APP_BASE_PATH}/list`,
 });
@@ -33,7 +33,7 @@ esSection.register('remote_clusters_management', {
 const renderReact = async (elem) => {
   render(
     <I18nProvider>
-      <Provider store={remoteClustersManagementStore}>
+      <Provider store={remoteClustersStore}>
         <HashRouter>
           <App />
         </HashRouter>
@@ -45,15 +45,15 @@ const renderReact = async (elem) => {
 
 routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
   template: template,
-  controllerAs: 'remoteClustersManagement',
-  controller: class RemoteClustersManagementController {
+  controllerAs: 'remoteClusters',
+  controller: class RemoteClustersController {
     constructor($scope, $route, $http) {
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
       setHttpClient($http);
 
       $scope.$$postDigest(() => {
-        const elem = document.getElementById('remoteClustersManagementReactRoot');
+        const elem = document.getElementById('remoteClustersReactRoot');
         renderReact(elem);
         manageAngularLifecycle($scope, $route, elem);
       });
