@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import classNames from 'classnames';
 import React, { Component } from 'react';
 import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
 import { FilterItem } from 'ui/filter_bar/react/filter_item';
@@ -49,16 +51,55 @@ export class FilterBar extends Component<Props> {
   public render() {
     const filterItems = this.props.filters.map(filter => {
       return (
-        <FilterItem
-          filter={filter}
-          onToggleNegate={this.onToggleNegate}
-          onToggleDisabled={this.onToggleDisabled}
-          onTogglePin={this.onTogglePin}
-          onDelete={this.onDelete}
-        />
+        <EuiFlexItem grow={false}>
+          <FilterItem
+            filter={filter}
+            onToggleNegate={this.onToggleNegate}
+            onToggleDisabled={this.onToggleDisabled}
+            onTogglePin={this.onTogglePin}
+            onDelete={this.onDelete}
+          />
+        </EuiFlexItem>
       );
     });
 
-    return filterItems;
+    const classes = classNames('globalFilterGroup__wrapper', {
+      'globalFilterGroup__wrapper-isVisible': true,
+    });
+
+    return (
+      <div
+        id="GlobalFilterGroup"
+        // ref={node => {
+        //   this.filterBarWrapper = node;
+        // }}
+        className={classes}
+      >
+        <div>
+          <EuiFlexGroup
+            className="globalFilterGroup"
+            gutterSize="none"
+            alignItems="flexStart"
+            responsive={false}
+          >
+            {/*<EuiFlexItem className="globalFilterGroup__branch" grow={false}>*/}
+            {/*<GlobalFilterOptions />*/}
+            {/*</EuiFlexItem>*/}
+
+            <EuiFlexItem>
+              <EuiFlexGroup
+                className="globalFilterGroup__filterBar globalFilterBar"
+                wrap={true}
+                responsive={false}
+                gutterSize="xs"
+                alignItems="center"
+              >
+                {filterItems}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      </div>
+    );
   }
 }

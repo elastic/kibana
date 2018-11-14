@@ -190,9 +190,10 @@ function discoverController(
 
 
   $scope.reactFilters = [
-    createMetaFilter(createPhraseFilter({ field: 'response', value: 200, index: 'foo' })),
-    createMetaFilter(createPhraseFilter({ field: 'extension', value: 'jpg', index: 'foo' })),
-    createMetaFilter(createPhraseFilter({ field: 'bytes', value: 2000, index: 'foo' })),
+    createMetaFilter(createPhraseFilter({ field: '@tags.keyword', value: 'security', index: 'foo' })),
+    createMetaFilter(createPhraseFilter({ field: '@tags.keyword', value: 'error', index: 'foo' })),
+    createMetaFilter(createPhraseFilter({ field: '@tags.keyword', value: 'info', index: 'foo' })),
+    createMetaFilter(createPhraseFilter({ field: '@tags.keyword', value: 'foo', index: 'foo' })),
   ];
 
   $scope.onToggleNegate = (filter) => {
