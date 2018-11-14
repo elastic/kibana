@@ -106,20 +106,21 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           await PageObjects.reporting.closeTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
           const reportFileName = 'dashboard_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const diffCount = await checkIfPdfsMatch(
+          const percentSimilar = await checkIfPdfsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName),
             config.get('screenshots.directory'),
             log
           );
           // After expected OS differences, the diff count came to be around 128k
-          expect(diffCount).to.be.lessThan(128000);
+          expect(percentSimilar).to.be.lessThan(0.05);
         });
 
         it('matches same baseline report with margins turned on', async function () {
@@ -135,6 +136,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.checkUsePrintLayout();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
@@ -142,14 +144,15 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.closeTab(1);
           const reportFileName = 'dashboard_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const diffCount = await checkIfPdfsMatch(
+          const percentSimilar = await checkIfPdfsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName),
             config.get('screenshots.directory'),
             log
           );
           // After expected OS differences, the diff count came to be around 128k
-          expect(diffCount).to.be.lessThan(128000);
+          expect(percentSimilar).to.be.lessThan(0.05);
+
         });
       });
 
@@ -167,13 +170,16 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
+
           const url = await PageObjects.reporting.getUrlOfTab(1);
           await PageObjects.reporting.closeTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
 
           const reportFileName = 'dashboard_preserve_layout';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const diffCount = await checkIfPdfsMatch(
+
+          const percentSimilar = await checkIfPdfsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName),
             config.get('screenshots.directory'),
@@ -182,7 +188,7 @@ export default function ({ getService, getPageObjects }) {
           // After expected OS differences, the diff count came to be around 350k. Due to
           // https://github.com/elastic/kibana/issues/21485 this jumped up to something like 368 when
           // comparing the same baseline for chromium and phantom.
-          expect(diffCount).to.be.lessThan(400000);
+          expect(percentSimilar).to.be.lessThan(0.05);
 
         });
       });
@@ -229,13 +235,15 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
+
           const url = await PageObjects.reporting.getUrlOfTab(1);
           await PageObjects.reporting.closeTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
 
           const reportFileName = 'dashboard_preserve_layout';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-          const diffCount = await checkIfPngsMatch(
+          const percentSimilar = await checkIfPngsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName, 'png'),
             config.get('screenshots.directory'),
@@ -244,7 +252,7 @@ export default function ({ getService, getPageObjects }) {
           // After expected OS differences, the diff count came to be around 350k. Due to
           // https://github.com/elastic/kibana/issues/21485 this jumped up to something like 368 when
           // comparing the same baseline for chromium and phantom.
-          expect(diffCount).to.be.lessThan(400000);
+          expect(percentSimilar).to.be.lessThan(0.05);
 
         });
       });
@@ -307,6 +315,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.openPdfReportingPanel();
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.clickDownloadReportButton(60000);
+          PageObjects.reporting.clearToastNotifications();
 
           const url = await PageObjects.reporting.getUrlOfTab(1);
           const reportData = await PageObjects.reporting.getRawPdfReportData(url);
@@ -314,7 +323,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.reporting.closeTab(1);
           const reportFileName = 'visualize_print';
           const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-          const diffCount = await checkIfPdfsMatch(
+          const percentSimilar = await checkIfPdfsMatch(
             sessionReportPath,
             getBaselineReportPath(reportFileName),
             config.get('screenshots.directory'),
@@ -325,7 +334,7 @@ export default function ({ getService, getPageObjects }) {
           // which will be much easier when we only support one browser type (chromium instead of phantom).
           // The reason this is so high currently is because of a phantom bug:
           // https://github.com/elastic/kibana/issues/21485
-          expect(diffCount).to.be.lessThan(810000);
+          expect(percentSimilar).to.be.lessThan(0.05);
         });
       });
     });
