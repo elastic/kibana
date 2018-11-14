@@ -49,7 +49,7 @@ class MainPageComponent extends React.PureComponent<MainPagesProps, MainPagesSta
       <PrimaryLayout title="Beats">
         {(renderAction: any) => (
           <React.Fragment>
-            <ConnectedTabs routes={this.props.routes} tabs={[{ path: '', name: '' }]} />
+            <ConnectedTabs routes={this.props.routes} />
             <ChildRoutes routes={this.props.routes} renderAction={renderAction} {...this.props} />
           </React.Fragment>
         )}

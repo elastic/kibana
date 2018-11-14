@@ -18,10 +18,10 @@ import {
 import { capitalize } from 'lodash';
 import React from 'react';
 import { RouteComponentProps } from 'react-router';
-import { CMBeat } from '../../../common/domain_types';
-import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { AppURLState } from '../../frontend_types';
-import { FrontendLibs } from '../../lib/types';
+import { CMBeat } from '../../common/domain_types';
+import { URLStateProps, withUrlState } from '../containers/with_url_state';
+import { AppURLState } from '../frontend_types';
+import { FrontendLibs } from '../lib/types';
 
 interface BeatsProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
   match: any;

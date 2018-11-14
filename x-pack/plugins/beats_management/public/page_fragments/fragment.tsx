@@ -9,11 +9,11 @@ import 'brace/mode/yaml';
 
 import 'brace/theme/github';
 import React from 'react';
-import { BeatTag } from '../../../common/domain_types';
-import { TagEdit } from '../../components/tag';
-import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { AppURLState } from '../../frontend_types';
-import { FrontendLibs } from '../../lib/types';
+import { BeatTag } from '../../common/domain_types';
+import { TagEdit } from '../components/tag';
+import { URLStateProps, withUrlState } from '../containers/with_url_state';
+import { AppURLState } from '../frontend_types';
+import { FrontendLibs } from '../lib/types';
 
 interface TagPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;

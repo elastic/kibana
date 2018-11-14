@@ -29,7 +29,7 @@ import { WithKueryAutocompletion } from '../../containers/with_kuery_autocomplet
 import { URLStateProps } from '../../containers/with_url_state';
 import { AppURLState } from '../../frontend_types';
 import { FrontendLibs } from '../../lib/types';
-import { EnrollBeatPage } from './enroll_fragment';
+import { EnrollBeatPage } from '../../page_fragments/enroll';
 
 interface BeatsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;

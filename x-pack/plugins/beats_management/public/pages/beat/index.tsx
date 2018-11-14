@@ -5,24 +5,30 @@
  */
 
 import {
-  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
   // @ts-ignore types for EuiTab not currently available
   EuiTab,
   // @ts-ignore types for EuiTabs not currently available
   EuiTabs,
+  EuiText,
 } from '@elastic/eui';
+import { first, sortByOrder } from 'lodash';
+import moment from 'moment';
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
+import { ChildRoutes } from '../../components/navigation/child_routes';
+import { ConnectedTabs } from '../../components/navigation/connected_tabs';
 import { URLStateProps, withUrlState } from '../../containers/with_url_state';
 import { AppURLState } from '../../frontend_types';
 import { FrontendLibs } from '../../lib/types';
-import { BeatDetailsActionSection } from './action_section';
-import { BeatActivityPage } from './activity';
-import { BeatDetailPage } from './detail';
-import { BeatTagsPage } from './tags';
 
+interface RouteConfig {
+  path: string;
+  component: React.ComponentType<any>;
+  routes?: RouteConfig[];
+}
 interface Match {
   params: any;
 }
@@ -32,6 +38,7 @@ interface BeatDetailsPageProps extends URLStateProps<AppURLState> {
   history: any;
   libs: FrontendLibs;
   match: Match;
+  routes: RouteConfig[];
 }
 
 interface BeatDetailsPageState {
@@ -62,6 +69,41 @@ class BeatDetailsPageComponent extends React.PureComponent<
     });
   };
 
+  public renderActionSection(beat?: CMPopulatedBeat) {
+    return beat ? (
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            Type:&nbsp;
+            <strong>{beat.type}</strong>.
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            Version:&nbsp;
+            <strong>{beat.version}</strong>.
+          </EuiText>
+        </EuiFlexItem>
+        {beat.full_tags &&
+          beat.full_tags.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                Last Config Update:{' '}
+                <strong>
+                  {moment(
+                    first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
+                  ).fromNow()}
+                </strong>
+                .
+              </EuiText>
+            </EuiFlexItem>
+          )}
+      </EuiFlexGroup>
+    ) : (
+      <div>Beat not found</div>
+    );
+  }
+
   public render() {
     const { beat } = this.state;
     let id;
@@ -75,67 +117,12 @@ class BeatDetailsPageComponent extends React.PureComponent<
       ? 'Loading'
       : `Beat: ${name || 'No name receved from beat'} (id: ${id})`;
 
-    const tabs = [
-      {
-        id: `/beat/${id}`,
-        name: 'Config',
-        disabled: false,
-      },
-      // {
-      //   id: `/beat/${id}/activity`,
-      //   name: 'Beat Activity',
-      //   disabled: false,
-      // },
-      {
-        id: `/beat/${id}/tags`,
-        name: 'Configuration Tags',
-        disabled: false,
-      },
-    ];
-
     return (
-      <PrimaryLayout title={title} actionSection={<BeatDetailsActionSection beat={beat} />}>
-        <EuiTabs>
-          {tabs.map((tab, index) => (
-            <EuiTab
-              disabled={tab.disabled}
-              key={index}
-              isSelected={tab.id === this.props.history.location.pathname}
-              onClick={() => {
-                this.props.history.push({
-                  pathname: tab.id,
-                  search: this.props.location.search,
-                });
-              }}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-        <EuiSpacer size="l" />
-        <Switch>
-          <Route
-            path="/beat/:beatId/activity"
-            render={(props: any) => <BeatActivityPage libs={this.props.libs} {...props} />}
-          />
-          <Route
-            path="/beat/:beatId/tags"
-            render={(props: any) => (
-              <BeatTagsPage
-                beatId={this.state.beatId}
-                libs={this.props.libs}
-                refreshBeat={() => this.loadBeat()}
-                {...props}
-              />
-            )}
-          />
-          <Route
-            path="/beat/:beatId"
-            render={(props: any) => (
-              <BeatDetailPage beat={this.state.beat} libs={this.props.libs} {...props} />
-            )}
-          />
-        </Switch>
+      <PrimaryLayout title={title} actionSection={this.renderActionSection(beat)}>
+        <React.Fragment>
+          <ConnectedTabs routes={this.props.routes} />
+          <ChildRoutes routes={this.props.routes} {...this.props} />
+        </React.Fragment>
       </PrimaryLayout>
     );
   }
