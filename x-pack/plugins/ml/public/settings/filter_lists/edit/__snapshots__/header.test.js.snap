@@ -30,6 +30,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         >
           <EuiTitle
             size="m"
+            textTransform="none"
           >
             <h1>
               Create new filter list
@@ -91,6 +92,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           A test filter list
@@ -143,6 +145,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         >
           <EuiTitle
             size="m"
+            textTransform="none"
           >
             <h1>
               Create new filter list
@@ -208,6 +211,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <EuiTextColor
           color="subdued"
@@ -262,6 +266,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
         >
           <EuiTitle
             size="m"
+            textTransform="none"
           >
             <h1>
               Filter list test_filter_list
@@ -305,6 +310,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <EuiTextColor
           color="subdued"
@@ -329,6 +335,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
   <React.Fragment>
     <EuiText
       grow={true}
+      size="m"
     >
       <p>
         This filter list is not used by any jobs.
@@ -371,6 +378,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
         >
           <EuiTitle
             size="m"
+            textTransform="none"
           >
             <h1>
               Filter list test_filter_list
@@ -414,6 +422,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
     >
       <EuiText
         grow={true}
+        size="m"
       >
         <p>
           A test filter list
@@ -439,6 +448,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
     >
       <EuiText
         grow={true}
+        size="m"
       >
         This filter list is used in
       </EuiText>
@@ -452,6 +462,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
       />
       <EuiText
         grow={true}
+        size="m"
       >
         across
       </EuiText>

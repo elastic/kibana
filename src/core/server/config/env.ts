@@ -52,6 +52,7 @@ export interface CliArgs {
   repl: boolean;
   basePath: boolean;
   optimize: boolean;
+  open: boolean;
 }
 
 export class Env {

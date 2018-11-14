@@ -7,11 +7,7 @@
 import d3 from 'd3';
 import { last, zipObject, difference, memoize, get, isEmpty } from 'lodash';
 import { colors } from '../../style/variables';
-import {
-  asMillisWithDefault,
-  asDecimal,
-  tpmUnit
-} from '../../utils/formatters';
+import { asMillis, asDecimal, tpmUnit } from '../../utils/formatters';
 import { rgba } from 'polished';
 
 export const getEmptySerie = memoize(
@@ -59,7 +55,7 @@ export function getResponseTimeSeries(chartsData) {
     {
       title: 'Avg.',
       data: getChartValues(dates, avg),
-      legendValue: `${asMillisWithDefault(overallAvgDuration)}`,
+      legendValue: asMillis(overallAvgDuration),
       type: 'line',
       color: colors.apmBlue
     },
