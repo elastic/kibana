@@ -17,6 +17,7 @@ export function indexLifecycleManagement(kibana) {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     publicDir: resolve(__dirname, 'public'),
+    configPrefix: 'xpack.index_lifecycle_management',
     require: ['kibana', 'elasticsearch', 'xpack_main', 'index_management'],
     uiExports: {
       managementSections: ['plugins/index_lifecycle_management'],
