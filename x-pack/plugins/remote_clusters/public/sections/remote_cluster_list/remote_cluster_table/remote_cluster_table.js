@@ -49,6 +49,12 @@ export class RemoteClusterTableUi extends Component {
       name: 'Seeds',
       truncateText: true,
       render: ({ seeds }) => seeds.join(', '),
+    }, {
+      field: 'connected',
+      name: 'Connected',
+    }, {
+      field: 'num_nodes_connected',
+      name: 'Connected nodes',
     }];
 
     const getRowProps = (item) => {
