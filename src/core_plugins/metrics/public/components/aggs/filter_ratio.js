@@ -25,7 +25,15 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFieldText,
+  EuiSpacer,
+  EuiFormRow,
+} from '@elastic/eui';
 
 export const FilterRatioAgg = props => {
   const {
@@ -58,59 +66,58 @@ export const FilterRatioAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div style={{ flex: '1 0 auto' }}>
-        <div style={{ flex: '1 0 auto', display: 'flex' }}>
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-            />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('numerator')}>
-              Numerator
-            </label>
-            <input
-              id={htmlId('numerator')}
-              className="vis_editor__input-grows-100"
+      <EuiFlexGroup gutterSize="s">
+
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('numerator')} label="Numerator">
+            <EuiFieldText
               onChange={handleTextChange('numerator')}
               value={model.numerator}
-              type="text"
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('denominator')}>
-              Denominator
-            </label>
-            <input
-              id={htmlId('denominator')}
-              className="vis_editor__input-grows-100"
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('denominator')} label="Denominator">
+            <EuiFieldText
               onChange={handleTextChange('denominator')}
               value={model.denominator}
-              type="text"
             />
-          </div>
-        </div>
-        <div style={{ flex: '1 0 auto', display: 'flex', marginTop: '10px' }}>
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Metric Aggregation</div>
-            <AggSelect
-              siblings={props.siblings}
-              panelType="metrics"
-              value={model.metric_agg}
-              onChange={handleSelectChange('metric_agg')}
-            />
-          </div>
-          { model.metric_agg !== 'count' ? (
-            <div className="vis_editor__row_item">
-              <label className="vis_editor__label" htmlFor={htmlId('aggField')}>
-                Field
-              </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s">
+
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('metric')}>Metric Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('metric')}
+            siblings={props.siblings}
+            panelType="metrics"
+            value={model.metric_agg}
+            onChange={handleSelectChange('metric_agg')}
+          />
+        </EuiFlexItem>
+
+        { model.metric_agg !== 'count' ? (
+          <EuiFlexItem>
+            <EuiFormRow id={htmlId('aggField')} label="Field">
               <FieldSelect
-                id={htmlId('aggField')}
                 fields={fields}
                 type={model.metric_agg}
                 restrict={restrictMode}
@@ -118,9 +125,10 @@ export const FilterRatioAgg = props => {
                 value={model.field}
                 onChange={handleSelectChange('field')}
               />
-            </div>) : null }
-        </div>
-      </div>
+            </EuiFormRow>
+          </EuiFlexItem>) : null }
+
+      </EuiFlexGroup>
     </AggRow>
   );
 };
