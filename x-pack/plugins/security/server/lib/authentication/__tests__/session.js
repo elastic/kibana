@@ -78,6 +78,15 @@ describe('Session', () => {
       sinon.assert.calledWithExactly(server.log, ['debug', 'security', 'auth', 'session'], failureReason);
     });
 
+    it('returns session if single session cookie is in an array.', async () => {
+      const request = {};
+      const sessionValue = { token: 'token' };
+      const sessions = [{ value: sessionValue }];
+      server.auth.test.withArgs('security-cookie', request).resolves(sessions);
+
+      expect(await session.get(request)).to.be(sessionValue);
+    });
+
     it('returns null if multiple session cookies are detected.', async () => {
       const request = {};
       const sessions = [{ value: { token: 'token' } }, { value: { token: 'token' } }];

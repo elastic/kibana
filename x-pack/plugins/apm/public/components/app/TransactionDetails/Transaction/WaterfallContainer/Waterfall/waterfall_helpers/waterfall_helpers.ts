@@ -11,8 +11,10 @@ import {
   indexBy,
   isEmpty,
   sortBy,
-  uniq
+  uniq,
+  zipObject
 } from 'lodash';
+import { colors } from 'x-pack/plugins/apm/public/style/variables';
 import { Span } from '../../../../../../../../typings/Span';
 import { Transaction } from '../../../../../../../../typings/Transaction';
 
@@ -27,11 +29,16 @@ export interface IWaterfallGroup {
 export interface IWaterfall {
   traceRoot?: Transaction;
   traceRootDuration?: number;
-  duration?: number;
+
+  /**
+   * Duration in us
+   */
+  duration: number;
   services: string[];
   items: IWaterfallItem[];
   itemsById: IWaterfallIndex;
   getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
+  serviceColors: IServiceColors;
 }
 
 interface IWaterfallItemBase {
@@ -39,9 +46,25 @@ interface IWaterfallItemBase {
   parentId?: string;
   serviceName: string;
   name: string;
+
+  /**
+   * Duration in us
+   */
   duration: number;
+
+  /**
+   * start timestamp in us
+   */
   timestamp: number;
+
+  /**
+   * offset from first item in us
+   */
   offset: number;
+
+  /**
+   * skew from timestamp in us
+   */
   skew: number;
   childIds?: Array<IWaterfallItemBase['id']>;
 }
@@ -120,60 +143,65 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
   };
 }
 
-function getClockSkew(
+export function getClockSkew(
   item: IWaterfallItem,
-  itemsById: IWaterfallIndex,
-  parentTransactionSkew: number
+  parentItem?: IWaterfallItem
 ) {
+  if (!parentItem) {
+    return 0;
+  }
+
   switch (item.docType) {
+    // don't calculate skew for spans. Just use parent's skew
     case 'span':
-      return parentTransactionSkew;
+      return parentItem.skew;
+
+    // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
     case 'transaction': {
-      if (!item.parentId) {
+      const parentStart = parentItem.timestamp + parentItem.skew;
+      const parentEnd = parentStart + parentItem.duration;
+
+      // determine if child starts before the parent
+      const offsetStart = parentStart - item.timestamp;
+
+      // determine if child starts after the parent has ended
+      const offsetEnd = item.timestamp - parentEnd;
+
+      // child transaction starts before parent OR
+      // child transaction starts after parent has ended
+      if (offsetStart > 0 || offsetEnd > 0) {
+        const latency = Math.max(parentItem.duration - item.duration, 0) / 2;
+        return offsetStart + latency;
+
+        // child transaction starts withing parent duration and no adjustment is needed
+      } else {
         return 0;
       }
-
-      const parentItem = itemsById[item.parentId];
-
-      // determine if child starts before the parent, and in that case how much
-      const diff = parentItem.timestamp + parentItem.skew - item.timestamp;
-
-      // If child transaction starts after parent span there is no clock skew
-      if (diff < 0) {
-        return 0;
-      }
-
-      // latency can only be calculated if parent duration is larger than child duration
-      const latency = Math.max(parentItem.duration - item.duration, 0);
-      const skew = diff + latency / 2;
-      return skew;
     }
   }
 }
 
 export function getWaterfallItems(
   childrenByParentId: IWaterfallGroup,
-  itemsById: IWaterfallIndex,
   entryTransactionItem: IWaterfallItem
 ) {
   function getSortedChildren(
     item: IWaterfallItem,
-    parentTransactionSkew: number
+    parentItem?: IWaterfallItem
   ): IWaterfallItem[] {
-    const skew = getClockSkew(item, itemsById, parentTransactionSkew);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
     item.offset = item.timestamp - entryTransactionItem.timestamp;
-    item.skew = skew;
+    item.skew = getClockSkew(item, parentItem);
 
     const deepChildren = flatten(
-      children.map(child => getSortedChildren(child, skew))
+      children.map(child => getSortedChildren(child, item))
     );
     return [item, ...deepChildren];
   }
 
-  return getSortedChildren(entryTransactionItem, 0);
+  return getSortedChildren(entryTransactionItem);
 }
 
 function getTraceRoot(childrenByParentId: IWaterfallGroup) {
@@ -188,6 +216,45 @@ function getServices(items: IWaterfallItem[]) {
   return uniq(serviceNames);
 }
 
+export interface IServiceColors {
+  [key: string]: string;
+}
+
+function getServiceColors(services: string[]) {
+  const assignedColors = [
+    colors.apmBlue,
+    colors.apmGreen,
+    colors.apmPurple,
+    colors.apmRed2,
+    colors.apmTan,
+    colors.apmOrange,
+    colors.apmYellow
+  ];
+
+  return zipObject(services, assignedColors) as IServiceColors;
+}
+
+function getDuration(items: IWaterfallItem[]) {
+  const timestampStart = items[0].timestamp;
+  const timestampEnd = Math.max(
+    ...items.map(item => item.timestamp + item.duration + item.skew)
+  );
+  return timestampEnd - timestampStart;
+}
+
+function createGetTransactionById(itemsById: IWaterfallIndex) {
+  return (id?: IWaterfallItem['id']) => {
+    if (!id) {
+      return;
+    }
+
+    const item = itemsById[id];
+    if (item.docType === 'transaction') {
+      return item.transaction;
+    }
+  };
+}
+
 export function getWaterfall(
   hits: Array<Span | Transaction>,
   entryTransaction: Transaction
@@ -195,9 +262,11 @@ export function getWaterfall(
   if (isEmpty(hits)) {
     return {
       services: [],
+      duration: 0,
       items: [],
       itemsById: {},
-      getTransactionById: () => undefined
+      getTransactionById: () => undefined,
+      serviceColors: {}
     };
   }
 
@@ -224,31 +293,22 @@ export function getWaterfall(
   );
   const entryTransactionItem = getTransactionItem(entryTransaction);
   const itemsById: IWaterfallIndex = indexBy(filteredHits, 'id');
-  const items = getWaterfallItems(
-    childrenByParentId,
-    itemsById,
-    entryTransactionItem
-  );
+  const items = getWaterfallItems(childrenByParentId, entryTransactionItem);
   const traceRoot = getTraceRoot(childrenByParentId);
-
-  const getTransactionById = (id?: IWaterfallItem['id']) => {
-    if (!id) {
-      return;
-    }
-
-    const item = itemsById[id];
-    if (item.docType === 'transaction') {
-      return item.transaction;
-    }
-  };
+  const duration = getDuration(items);
+  const traceRootDuration = traceRoot && traceRoot.transaction.duration.us;
+  const services = getServices(items);
+  const getTransactionById = createGetTransactionById(itemsById);
+  const serviceColors = getServiceColors(services);
 
   return {
     traceRoot,
-    traceRootDuration: traceRoot && traceRoot.transaction.duration.us,
-    duration: entryTransaction.transaction.duration.us,
-    services: getServices(items),
+    traceRootDuration,
+    duration,
+    services,
     items,
     itemsById,
-    getTransactionById
+    getTransactionById,
+    serviceColors
   };
 }
