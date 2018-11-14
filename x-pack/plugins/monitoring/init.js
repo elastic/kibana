@@ -61,7 +61,6 @@ export const init = (monitoringPlugin, server) => {
     navLinkId: 'monitoring',
     privileges: {
       all: {
-        api: [],
         app: ['monitoring'],
         savedObject: {
           all: [],

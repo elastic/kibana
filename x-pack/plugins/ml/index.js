@@ -70,7 +70,6 @@ export const ml = (kibana) => {
         navLinkId: 'ml',
         privileges: {
           all: {
-            api: [],
             app: ['ml'],
             savedObject: {
               all: [],

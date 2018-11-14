@@ -111,7 +111,6 @@ const kibanaFeatures: Feature[] = [
     navLinkId: 'kibana:management:advancedSettings',
     privileges: {
       all: {
-        api: [],
         app: ['kibana'],
         savedObject: {
           all: ['config'],

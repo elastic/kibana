@@ -57,7 +57,6 @@ export function graph(kibana) {
         navLinkId: 'graph',
         privileges: {
           all: {
-            api: [],
             app: ['graph'],
             savedObject: {
               all: [],
@@ -66,7 +65,6 @@ export function graph(kibana) {
             ui: [],
           },
           read: {
-            api: [],
             app: ['graph'],
             savedObject: {
               all: [],
