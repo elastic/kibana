@@ -81,10 +81,11 @@ Geo::
 [[K7-design-7.0.0]]
 === K7 UI Design
 
-For 7.0.0-alpha1, {kib} gives users the ability to switch between the old 6.x 
-style headers and the new K7 design. To turn on the new design, go to 
-*Management > Advanced Settings* and search for *K7 design*. In future versions, 
-we'll remove the old setting and use the K7 design instead.
+{kib} 7.0.0-alpha1 includes a new design for {kib} called K7. In this early stage, 
+K7 is still a little rough around the edges. If you'd like to switch back to the 
+existing K6 design, go to *Management > Advanced Settings* and turn 
+off the *k7design* setting. The option to switch to the old design 
+will be removed before 7.0.0 GA.
 
 [float]
 [[enhancement-7.0.0]]
