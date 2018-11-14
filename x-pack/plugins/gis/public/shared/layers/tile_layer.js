@@ -7,6 +7,7 @@
 import { ALayer } from './layer';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
+import { TileStyle } from '../layers/styles/tile_style';
 
 export class TileLayer extends ALayer {
 
@@ -15,6 +16,7 @@ export class TileLayer extends ALayer {
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = TileLayer.type;
+    tileLayerDescriptor.style = TileStyle.createDescriptor();
     return tileLayerDescriptor;
   }
 
@@ -43,7 +45,7 @@ export class TileLayer extends ALayer {
 
     mbMap.setLayoutProperty(layerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(layerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-
+    this._style && this._style.setMBPaintProperties(mbMap, layerId);
   }
 
   getIcon() {

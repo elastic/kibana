@@ -18,6 +18,7 @@ import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_sou
 import { ESSearchSource } from '../shared/layers/sources/es_search_source';
 import { VectorStyle } from '../shared/layers/styles/vector_style';
 import { HeatmapStyle } from '../shared/layers/styles/heatmap_style';
+import { TileStyle } from '../shared/layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
 
 function createLayerInstance(layerDescriptor, dataSources) {
@@ -69,6 +70,8 @@ function createStyleInstance(styleDescriptor) {
   switch (styleDescriptor.type) {
     case VectorStyle.type:
       return new VectorStyle(styleDescriptor);
+    case TileStyle.type:
+      return new TileStyle(styleDescriptor);
     case HeatmapStyle.type:
       return new HeatmapStyle(styleDescriptor);
     default:
