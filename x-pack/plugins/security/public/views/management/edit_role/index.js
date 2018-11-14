@@ -7,9 +7,9 @@
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
+import { uiCapabilities } from 'ui/capabilities';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'plugins/security/views/management/edit_role/edit_role.less';
 import 'angular-ui-select';
 import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
@@ -86,7 +86,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     }
   },
   controllerAs: 'editRole',
-  controller($injector, $scope, $http, enableSpaceAwarePrivileges, userProfile) {
+  controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
     const $route = $injector.get('$route');
     const Private = $injector.get('Private');
 
@@ -137,7 +137,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         allowFieldLevelSecurity={allowFieldLevelSecurity}
         spaces={spaces}
         spacesEnabled={enableSpaceAwarePrivileges}
-        userProfile={userProfile}
+        uiCapabilities={uiCapabilities}
       />, domNode);
 
       // unmount react on controller destroy

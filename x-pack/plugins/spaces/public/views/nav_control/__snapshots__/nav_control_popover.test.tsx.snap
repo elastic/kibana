@@ -34,11 +34,6 @@ exports[`NavControlPopover renders without crashing 1`] = `
 >
   <Component
     onManageSpacesClick={[Function]}
-    userProfile={
-      Object {
-        "hasCapability": [Function],
-      }
-    }
   />
 </EuiPopover>
 `;

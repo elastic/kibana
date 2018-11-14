@@ -5,23 +5,23 @@
  */
 import { shallow } from 'enzyme';
 import React from 'react';
-import { UserProfile } from '../../../../../../xpack_main/common/user_profile';
+import { setMockCapabilities } from 'x-pack/plugins/__mocks__/ui/capabilities';
 import { SecureSpaceMessage } from './secure_space_message';
 
 describe('SecureSpaceMessage', () => {
-  it(`doesn't render if user profile does not allow security to be managed`, () => {
-    const userProfile = new UserProfile({
-      manageSecurity: false,
+  it(`doesn't render if UI Capabilities does not allow security to be managed`, () => {
+    setMockCapabilities({
+      navLinks: {},
+      spaces: { manage: false },
     });
-
-    expect(shallow(<SecureSpaceMessage userProfile={userProfile} />)).toMatchSnapshot();
+    expect(shallow(<SecureSpaceMessage />)).toMatchSnapshot();
   });
 
   it(`renders if user profile allows security to be managed`, () => {
-    const userProfile = new UserProfile({
-      manageSecurity: true,
+    setMockCapabilities({
+      navLinks: {},
+      spaces: { manage: true },
     });
-
-    expect(shallow(<SecureSpaceMessage userProfile={userProfile} />)).toMatchSnapshot();
+    expect(shallow(<SecureSpaceMessage />)).toMatchSnapshot();
   });
 });

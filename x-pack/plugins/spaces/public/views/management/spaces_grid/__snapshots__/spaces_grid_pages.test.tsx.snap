@@ -28,6 +28,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
           >
             <EuiText
               grow={true}
+              size="m"
             >
               <h1>
                 Spaces
@@ -120,15 +121,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
         />
       </React.Fragment>
     </EuiPageContent>
-    <Component
-      userProfile={
-        UserProfileClass {
-          "capabilities": Object {
-            "manageSpaces": true,
-          },
-        }
-      }
-    />
+    <Component />
   </EuiPageBody>
 </EuiPage>
 `;

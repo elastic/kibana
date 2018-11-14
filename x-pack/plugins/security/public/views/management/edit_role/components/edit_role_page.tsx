@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
+import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
-import { UserProfile } from '../../../../../../xpack_main/common/user_profile';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
@@ -46,7 +46,7 @@ interface Props {
   kibanaAppPrivileges: KibanaPrivilege[];
   spaces?: Space[];
   spacesEnabled: boolean;
-  userProfile: UserProfile;
+  uiCapabilities: UICapabilities;
 }
 
 interface State {
@@ -213,7 +213,7 @@ export class EditRolePage extends Component<Props, State> {
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
-          userProfile={this.props.userProfile}
+          uiCapabilities={this.props.uiCapabilities}
           editable={!isReservedRole(this.state.role)}
           role={this.state.role}
           onChange={this.onRoleChange}

@@ -36,11 +36,7 @@ routes.when('/management/spaces/list', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <SpacesGridPage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
+        <SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />,
         domNode
       );
 
@@ -70,11 +66,7 @@ routes.when('/management/spaces/create', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-        <ManageSpacePage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
+        <ManageSpacePage spacesManager={spacesManager} spacesNavState={spacesNavState} />,
         domNode
       );
 
@@ -116,7 +108,6 @@ routes.when('/management/spaces/edit/:spaceId', {
           spaceId={spaceId}
           spacesManager={spacesManager}
           spacesNavState={spacesNavState}
-          userProfile={userProfile}
         />,
         domNode
       );

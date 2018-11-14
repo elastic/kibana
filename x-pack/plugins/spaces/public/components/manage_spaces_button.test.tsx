@@ -5,21 +5,31 @@
  */
 import { shallow } from 'enzyme';
 import React from 'react';
-import { UserProfile } from '../../../xpack_main/common/user_profile';
+import { setMockCapabilities } from 'x-pack/plugins/__mocks__/ui/capabilities';
 import { ManageSpacesButton } from './manage_spaces_button';
-
-const buildUserProfile = (canManageSpaces: boolean) => {
-  return new UserProfile({ manageSpaces: canManageSpaces });
-};
 
 describe('ManageSpacesButton', () => {
   it('renders as expected', () => {
-    const component = <ManageSpacesButton userProfile={buildUserProfile(true)} />;
+    setMockCapabilities({
+      navLinks: {},
+      spaces: {
+        manage: true,
+      },
+    });
+
+    const component = <ManageSpacesButton />;
     expect(shallow(component)).toMatchSnapshot();
   });
 
   it(`doesn't render if user profile forbids managing spaces`, () => {
-    const component = <ManageSpacesButton userProfile={buildUserProfile(false)} />;
+    setMockCapabilities({
+      navLinks: {},
+      spaces: {
+        manage: false,
+      },
+    });
+
+    const component = <ManageSpacesButton />;
     expect(shallow(component)).toMatchSnapshot();
   });
 });

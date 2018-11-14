@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import _ from 'lodash';
-import { Capabilities } from 'x-pack/plugins/xpack_main/common';
+import { UICapabilities } from 'ui/capabilities';
 
 export async function capabilityDecorator(
   server: Record<string, any>,
   request: Record<string, any>,
-  capabilities: Capabilities
+  capabilities: UICapabilities
 ) {
   if (!isAuthenticatedRoute(request)) {
     return capabilities;
@@ -42,16 +42,19 @@ function isAuthenticatedRoute(request: Record<string, any>) {
 }
 
 function getPrivilegedActions(server: Record<string, any>, actions: Record<string, any>) {
+  const uiApps = server.getAllUiApps();
+
   const navLinkSpecs = server.getUiNavLinks();
 
-  const uiCapabilityActions = navLinkSpecs.map((navLink: any) =>
-    actions.ui.get(navLink.toJSON().id)
-  );
+  const uiCapabilityActions = [...uiApps, ...navLinkSpecs].map(entry => `ui:${entry._id}/read`);
 
   const { types } = server.savedObjects;
 
   const savedObjectsActions = _.flatten(
-    types.map((type: string) => actions.savedObject.allOperations(type))
+    types.map((type: string) => [
+      actions.getSavedObjectAction(type, 'read'),
+      actions.getSavedObjectAction(type, 'create'),
+    ])
   );
 
   return [...uiCapabilityActions, ...savedObjectsActions];

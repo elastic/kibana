@@ -5,15 +5,10 @@
  */
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { SpacesGridPage } from './spaces_grid_page';
-
-const buildUserProfile = (canManageSpaces: boolean) => {
-  return new UserProfile({ manageSpaces: canManageSpaces });
-};
 
 const spaces = [
   {
@@ -54,23 +49,13 @@ const spacesManager = new SpacesManager(mockHttp, mockChrome, '');
 describe('SpacesGridPage', () => {
   it('renders as expected', () => {
     expect(
-      shallow(
-        <SpacesGridPage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={buildUserProfile(true)}
-        />
-      )
+      shallow(<SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />)
     ).toMatchSnapshot();
   });
 
   it('renders the list of spaces', async () => {
     const wrapper = mount(
-      <SpacesGridPage
-        spacesManager={spacesManager}
-        spacesNavState={spacesNavState}
-        userProfile={buildUserProfile(true)}
-      />
+      <SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />
     );
 
     // allow spacesManager to load spaces

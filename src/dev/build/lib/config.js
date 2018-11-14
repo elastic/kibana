@@ -46,6 +46,10 @@ export async function getConfig({ isRelease, targetAllPlatforms, versionQualifie
       return pkg;
     }
 
+    isRelease() {
+      return isRelease;
+    }
+
     /**
      * Get the node version required by Kibana
      * @return {String}

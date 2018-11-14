@@ -43,14 +43,7 @@ let spacesManager: SpacesManager;
 
 module.controller(
   'spacesNavController',
-  (
-    $scope: any,
-    $http: any,
-    chrome: any,
-    Private: any,
-    activeSpace: any,
-    userProfile: UserProfile
-  ) => {
+  ($scope: any, $http: any, chrome: any, Private: any, activeSpace: any) => {
     const domNode = document.getElementById(`spacesNavReactRoot`);
     const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 
@@ -64,7 +57,6 @@ module.controller(
           <NavControlPopover
             spacesManager={spacesManager}
             activeSpace={activeSpace}
-            userProfile={userProfile}
             anchorPosition={'rightCenter'}
             buttonClass={SpacesGlobalNavButton}
           />,
@@ -111,7 +103,6 @@ chromeHeaderNavControlsRegistry.register(
         <NavControlPopover
           spacesManager={spacesManager}
           activeSpace={activeSpace}
-          userProfile={userProfile}
           anchorPosition="downLeft"
           buttonClass={SpacesHeaderNavButton}
         />,

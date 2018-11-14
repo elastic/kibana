@@ -6,7 +6,6 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { UserProfile } from '../../../../../xpack_main/common/user_profile';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { ManageSpacePage } from './manage_space_page';
@@ -19,10 +18,6 @@ const buildMockChrome = () => {
   return {
     addBasePath: (path: string) => path,
   };
-};
-
-const buildUserProfile = (canManageSpaces: boolean) => {
-  return new UserProfile({ manageSpaces: canManageSpaces });
 };
 
 describe('ManageSpacePage', () => {
@@ -40,14 +35,8 @@ describe('ManageSpacePage', () => {
       refreshSpacesList: jest.fn(),
     };
 
-    const userProfile = buildUserProfile(true);
-
     const wrapper = mount(
-      <ManageSpacePage
-        spacesManager={spacesManager}
-        userProfile={userProfile}
-        spacesNavState={spacesNavState}
-      />
+      <ManageSpacePage spacesManager={spacesManager} spacesNavState={spacesNavState} />
     );
     const nameInput = wrapper.find('input[name="name"]');
     const descriptionInput = wrapper.find('input[name="description"]');
@@ -93,14 +82,10 @@ describe('ManageSpacePage', () => {
       getActiveSpace: () => space,
       refreshSpacesList: jest.fn(),
     };
-
-    const userProfile = buildUserProfile(true);
-
     const wrapper = mount(
       <ManageSpacePage
         spaceId={'existing-space'}
         spacesManager={spacesManager}
-        userProfile={userProfile}
         spacesNavState={spacesNavState}
       />
     );

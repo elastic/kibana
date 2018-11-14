@@ -46,7 +46,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
-import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
@@ -165,7 +165,7 @@ function discoverController(
   kbnUrl,
   localStorage,
   breadcrumbState,
-  discoverConfig,
+  uiCapabilities,
 ) {
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -287,12 +287,12 @@ function discoverController(
       }
     };
 
-    const hideSave = discoverConfig.getHideWriteControls();
+    const { showWriteControls } = uiCapabilities.discover;
 
-    if (hideSave) {
-      return [newSearch, openSearch, shareSearch, inspectSearch];
+    if (showWriteControls) {
+      return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
     }
-    return [newSearch, saveSearch, openSearch, shareSearch, inspectSearch];
+    return [newSearch, openSearch, shareSearch, inspectSearch];
   };
 
   $scope.topNavMenu = getTopNavLinks();
