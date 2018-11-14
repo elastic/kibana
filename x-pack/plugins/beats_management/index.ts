@@ -6,6 +6,7 @@
 import Joi from 'joi';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
+import { CONFIG_PREFIX } from './common/constants/plugin';
 import { initServerWithKibana } from './server/kibana.index';
 
 const DEFAULT_ENROLLMENT_TOKENS_TTL_S = 10 * 60; // 10 minutes
@@ -22,7 +23,6 @@ export const config = Joi.object({
     .max(10 * 60 * 14) // No more then 2 weeks for security reasons
     .default(DEFAULT_ENROLLMENT_TOKENS_TTL_S),
 }).default();
-export const configPrefix = 'xpack.beats';
 
 export function beats(kibana: any) {
   return new kibana.Plugin({
@@ -33,7 +33,7 @@ export function beats(kibana: any) {
       managementSections: ['plugins/beats_management'],
     },
     config: () => config,
-    configPrefix,
+    configPrefix: CONFIG_PREFIX,
     init(server: any) {
       initServerWithKibana(server);
     },

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
@@ -27,7 +28,11 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
   private server: any;
 
-  constructor(private readonly PLUGIN_ID: string, hapiServer: any) {
+  constructor(
+    private readonly PLUGIN_ID: string,
+    hapiServer: any,
+    private readonly CONFIG_PREFIX?: string
+  ) {
     this.server = hapiServer;
 
     const xpackMainPlugin = hapiServer.plugins.xpack_main;
@@ -155,7 +160,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
     if (assertData.isLeft()) {
       throw new Error(
-        `Error parsing xpack info in ${this.PLUGIN_ID},   ${JSON.stringify(assertData)}`
+        `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
       );
     }
 
@@ -163,7 +168,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
 
     return {
       security: xpackInfoUnpacked.security,
-      settings: this.getSetting(`xpack.${this.PLUGIN_ID}`),
+      settings: this.getSetting(this.CONFIG_PREFIX || this.PLUGIN_ID),
     };
   };
 }

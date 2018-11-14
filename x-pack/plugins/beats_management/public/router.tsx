@@ -19,7 +19,9 @@ const requirePages = require.context('./pages', true, /\.tsx$/);
 const routeTreeBuilder = new RouteTreeBuilder(requirePages);
 
 export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
-  const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys());
+  const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys(), {
+    '/beat/': '/beat/:beatId/',
+  });
 
   return (
     <HashRouter basename="/management/beats_management">

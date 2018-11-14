@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last } from 'lodash';
+import { difference, last } from 'lodash';
 
 interface PathTree {
   [path: string]: string[];
@@ -15,33 +15,69 @@ interface RouteConfig {
   routes?: RouteConfig[];
 }
 
+interface RouteConfigOverideMap {
+  [path: string]: string;
+}
+
 export class RouteTreeBuilder {
   constructor(
     private readonly requireWithContext: any,
     private readonly pageComponentPattern: RegExp = /Page$/
   ) {}
-  public routeTreeFromPaths(paths: string[]): RouteConfig[] {
+
+  public routeTreeFromPaths(
+    paths: string[],
+    overideMap: RouteConfigOverideMap = {}
+  ): RouteConfig[] {
     const pathTree = this.buildTree('./', paths);
-    return Object.keys(pathTree).reduce((routes: any[], filePath) => {
+    const allRoutes = Object.keys(pathTree).reduce((routes: any[], filePath) => {
       if (pathTree[filePath].includes('index.tsx')) {
-        routes.push(this.buildRouteWithChildren(filePath, pathTree[filePath]));
+        routes.push(this.buildRouteWithChildren(filePath, pathTree[filePath], overideMap));
       } else {
-        routes.concat(pathTree[filePath].map(file => routes.push(this.buildRoute(filePath, file))));
+        routes.concat(
+          pathTree[filePath].map(file => routes.push(this.buildRoute(filePath, file, overideMap)))
+        );
       }
 
       return routes;
     }, []);
+    // TODO check for errors better...
+    // const flatRoutes = this.flatpackRoutes(allRoutes);
+    // const invalidOverides = difference(Object.keys(overideMap), flatRoutes);
+    // if (invalidOverides.length > 0) {
+    //   throw new Error(
+    //     `Invalid overideMap provided to 'routeTreeFromPaths', ${
+    //       invalidOverides[0]
+    //     } is not a valid route. Only the following are: ${flatRoutes.join(', ')}`
+    //   );
+    // }
+    return allRoutes;
   }
 
-  private buildRouteWithChildren(dir: string, files: string[]) {
+  private flatpackRoutes(arr: RouteConfig[], pre: string = ''): string[] {
+    return [].concat.apply(
+      [],
+      arr.map(item => {
+        const path = (pre + item.path).trim();
+
+        return item.routes ? this.flatpackRoutes(item.routes, path) : path;
+      })
+    );
+  }
+
+  private buildRouteWithChildren(
+    dir: string,
+    files: string[],
+    routeOverides: RouteConfigOverideMap
+  ) {
     const childFiles = files.filter(f => f !== 'index.tsx');
-    const parentConfig = this.buildRoute(dir, 'index.tsx');
-    parentConfig.routes = childFiles.map(cf => this.buildRoute(dir, cf));
+    const parentConfig = this.buildRoute(dir, 'index.tsx', routeOverides);
+    parentConfig.routes = childFiles.map(cf => this.buildRoute(dir, cf, routeOverides));
     return parentConfig;
   }
 
-  private buildRoute(dir: string, file: string): RouteConfig {
-    const filePath = `${dir}${file.replace('.tsx', '').replace('index', '')}`;
+  private buildRoute(dir: string, file: string, routeOverides: RouteConfigOverideMap): RouteConfig {
+    const filePath = `${routeOverides[dir] || dir}${file.replace('.tsx', '').replace('index', '')}`;
     const page = this.requireWithContext(`.${dir}${file}`);
 
     // Make sure the expored variable name matches a pattern. By default it will choose the first
@@ -52,7 +88,7 @@ export class RouteTreeBuilder {
 
     if (componentExportName) {
       return {
-        path: filePath,
+        path: routeOverides[filePath] || filePath,
         component: page[componentExportName],
       };
     } else {

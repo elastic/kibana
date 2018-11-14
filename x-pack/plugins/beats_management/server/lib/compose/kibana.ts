@@ -17,11 +17,14 @@ import { CMTagsDomain } from '../tags';
 import { CMTokensDomain } from '../tokens';
 
 import { PLUGIN } from 'x-pack/plugins/beats_management/common/constants';
+import { CONFIG_PREFIX } from 'x-pack/plugins/beats_management/common/constants/plugin';
 import { CMServerLibs } from '../types';
 
 export function compose(server: any): CMServerLibs {
   const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch);
-  const framework = new BackendFrameworkLib(new KibanaBackendFrameworkAdapter(PLUGIN.ID, server));
+  const framework = new BackendFrameworkLib(
+    new KibanaBackendFrameworkAdapter(PLUGIN.ID, server, CONFIG_PREFIX)
+  );
 
   const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
   const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database), {

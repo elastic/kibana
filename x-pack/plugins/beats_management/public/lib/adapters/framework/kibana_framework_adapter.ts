@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RuntimeFrameworkInfo } from './adapter_types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { IScope } from 'angular';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
@@ -121,9 +129,10 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
         const Private = $injector.get('Private');
         const xpackInfo = Private(this.XPackInfoProvider);
+        let xpackInfoUnpacked: FrameworkInfo;
 
         try {
-          this.xpackInfo = {
+          xpackInfoUnpacked = {
             basePath: this.chrome.getBasePath(),
             license: {
               type: xpackInfo.getLicense().type,
@@ -139,6 +148,17 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         } catch (e) {
           throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
         }
+
+        const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
+        if (assertData.isLeft()) {
+          throw new Error(
+            `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
+          );
+        }
+
+        this.xpackInfo = xpackInfoUnpacked;
+
+        RuntimeFrameworkInfo.decode(this.xpackInfo);
 
         this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
 
