@@ -5,3 +5,6 @@
  */
 
 export { registerListRoute } from './register_list_route';
+export { registerAddRoute } from './register_add_route';
+export { registerUpdateRoute } from './register_update_route';
+export { registerDeleteRoute } from './register_delete_route';

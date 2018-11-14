@@ -6,7 +6,7 @@
 
 
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { registerListRoute } from './register_list_route';
+import { registerAddRoute } from './register_add_route';
 
 jest.mock('../../../lib/call_with_request_factory', () => ({ callWithRequestFactory: jest.fn() }));
 jest.mock('../../../lib/is_es_error_factory', () => ({ isEsErrorFactory: () => () => true }));
@@ -22,7 +22,7 @@ const setHttpRequestResponse = (err, response) => {
   callWithRequestFactory.mockReturnValueOnce(() => response);
 };
 
-describe('[API Routes] Remote Clusters List', () => {
+describe('[API Routes] Remote Clusters Add', () => {
   let server;
   let routeHandler;
 
@@ -34,29 +34,22 @@ describe('[API Routes] Remote Clusters List', () => {
     };
   });
 
-  it('should convert Elasticsearch response object to array', async () => {
+  it('should forward the response from Elasticsearch', async () => {
     const mock = {
-      abc: { test: 'xyz' },
-      foo: { test: 'bar' },
+      "acknowledged": true,
+      "persistent": {},
+      "transient": {}
     };
     setHttpRequestResponse(null, mock);
 
-    registerListRoute(server);
-    const response = await routeHandler();
+    registerAddRoute(server);
+    const response = await routeHandler({
+      payload: {
+        name: 'test_cluster',
+        seeds: [],
+      }
+    });
 
-    expect(response).toEqual([
-      { name: 'abc', test: 'xyz' },
-      { name: 'foo', test: 'bar' }
-    ]);
-  });
-
-  it('should return empty array for empty Elasticsearch response', async () => {
-    const mock = { };
-    setHttpRequestResponse(null, mock);
-
-    registerListRoute(server);
-    const response = await routeHandler();
-
-    expect(response).toEqual([]);
+    expect(response).toBe(mock);
   });
 });
