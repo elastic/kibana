@@ -17,9 +17,17 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export class InvalidEsIntervalFormatError extends Error {
   constructor(public readonly interval: string) {
-    super(`Invalid interval format: ${interval}`);
+    super(
+      i18n.translate('common.ui.parseEsInterval.invalidEsIntervalFormatErrorMessage', {
+        defaultMessage: 'Invalid interval format: {interval}',
+        values: { interval },
+      })
+    );
+
     this.name = 'InvalidEsIntervalFormatError';
 
     // captureStackTrace is only available in the V8 engine, so any browser using

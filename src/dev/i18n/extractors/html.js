@@ -19,7 +19,7 @@
 
 import cheerio from 'cheerio';
 import { parse } from '@babel/parser';
-import { isDirectiveLiteral, isObjectExpression } from '@babel/types';
+import { isObjectExpression, isStringLiteral } from '@babel/types';
 
 import {
   isPropertyWithKey,
@@ -30,9 +30,9 @@ import {
   createParserErrorMessage,
   extractMessageValueFromNode,
   extractValuesKeysFromNode,
-  extractContextValueFromNode,
+  extractDescriptionValueFromNode,
 } from '../utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from '../constants';
+import { DEFAULT_MESSAGE_KEY, DESCRIPTION_KEY, VALUES_KEY } from '../constants';
 import { createFailError } from '../../run';
 
 /**
@@ -42,31 +42,32 @@ import { createFailError } from '../../run';
  */
 const ANGULAR_EXPRESSION_REGEX = /{{([^{}]|({([^']|('([^']|(\\'))*'))*?}))*}}+/g;
 
+const LINEBREAK_REGEX = /\n/g;
 const I18N_FILTER_MARKER = '| i18n: ';
+
+function parseExpression(expression) {
+  let ast;
+
+  try {
+    ast = parse(`+${expression}`.replace(LINEBREAK_REGEX, ' '));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      const errorWithContext = createParserErrorMessage(` ${expression}`, error);
+      throw createFailError(`Couldn't parse angular i18n expression:\n${errorWithContext}`);
+    }
+  }
+
+  return ast;
+}
 
 /**
  * Extract default message from an angular filter expression argument
  * @param {string} expression JavaScript code containing a filter object
  * @param {string} messageId id of the message
- * @returns {{ message?: string, context?: string, valuesKeys: string[]] }}
+ * @returns {{ message?: string, description?: string, valuesKeys: string[]] }}
  */
 function parseFilterObjectExpression(expression, messageId) {
-  let ast;
-
-  try {
-    // parse an object expression instead of block statement
-    ast = parse(`+${expression}`);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      const errorWithContext = createParserErrorMessage(` ${expression}`, error);
-      throw createFailError(
-        `Couldn't parse angular expression with i18n filter:\n${errorWithContext}`
-      );
-    }
-
-    throw error;
-  }
-
+  const ast = parseExpression(expression);
   const objectExpressionNode = [...traverseNodes(ast.program.body)].find(node =>
     isObjectExpression(node)
   );
@@ -75,9 +76,9 @@ function parseFilterObjectExpression(expression, messageId) {
     return {};
   }
 
-  const [messageProperty, contextProperty, valuesProperty] = [
+  const [messageProperty, descriptionProperty, valuesProperty] = [
     DEFAULT_MESSAGE_KEY,
-    CONTEXT_KEY,
+    DESCRIPTION_KEY,
     VALUES_KEY,
   ].map(key => objectExpressionNode.properties.find(property => isPropertyWithKey(property, key)));
 
@@ -85,42 +86,26 @@ function parseFilterObjectExpression(expression, messageId) {
     ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
     : undefined;
 
-  const context = contextProperty
-    ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
+  const description = descriptionProperty
+    ? formatJSString(extractDescriptionValueFromNode(descriptionProperty.value, messageId))
     : undefined;
 
   const valuesKeys = valuesProperty
     ? extractValuesKeysFromNode(valuesProperty.value, messageId)
     : [];
 
-  return { message, context, valuesKeys };
+  return { message, description, valuesKeys };
 }
 
 function parseIdExpression(expression) {
-  let ast;
-
-  try {
-    ast = parse(expression);
-  } catch (error) {
-    if (error instanceof SyntaxError) {
-      const errorWithContext = createParserErrorMessage(expression, error);
-      throw createFailError(
-        `Couldn't parse angular expression with i18n filter:\n${errorWithContext}`
-      );
-    }
-
-    throw error;
-  }
-
-  const stringNode = [...traverseNodes(ast.program.directives)].find(node =>
-    isDirectiveLiteral(node)
-  );
+  const ast = parseExpression(expression);
+  const stringNode = [...traverseNodes(ast.program.body)].find(node => isStringLiteral(node));
 
   if (!stringNode) {
     throw createFailError(`Message id should be a string literal, but got: \n${expression}`);
   }
 
-  return formatJSString(stringNode.value);
+  return stringNode ? formatJSString(stringNode.value) : null;
 }
 
 function trimCurlyBraces(string) {
@@ -211,7 +196,7 @@ function* getFilterMessages(htmlContent) {
       throw createFailError(`Empty "id" value in angular filter expression is not allowed.`);
     }
 
-    const { message, context, valuesKeys } = parseFilterObjectExpression(
+    const { message, description, valuesKeys } = parseFilterObjectExpression(
       filterObjectExpression,
       messageId
     );
@@ -224,7 +209,7 @@ function* getFilterMessages(htmlContent) {
 
     checkValuesProperty(valuesKeys, message, messageId);
 
-    yield [messageId, { message, context }];
+    yield [messageId, { message, description }];
   }
 }
 
@@ -237,7 +222,7 @@ function* getDirectiveMessages(htmlContent) {
       return {
         id: $el.attr('i18n-id'),
         defaultMessage: $el.attr('i18n-default-message'),
-        context: $el.attr('i18n-context'),
+        description: $el.attr('i18n-description'),
         values: $el.attr('i18n-values'),
       };
     })
@@ -257,8 +242,10 @@ function* getDirectiveMessages(htmlContent) {
     }
 
     if (element.values) {
-      const nodes = parse(`+${element.values}`).program.body;
-      const valuesObjectNode = [...traverseNodes(nodes)].find(node => isObjectExpression(node));
+      const ast = parseExpression(element.values);
+      const valuesObjectNode = [...traverseNodes(ast.program.body)].find(node =>
+        isObjectExpression(node)
+      );
       const valuesKeys = extractValuesKeysFromNode(valuesObjectNode);
 
       checkValuesProperty(valuesKeys, message, messageId);
@@ -266,7 +253,7 @@ function* getDirectiveMessages(htmlContent) {
       checkValuesProperty([], message, messageId);
     }
 
-    yield [messageId, { message, context: formatHTMLString(element.context) || undefined }];
+    yield [messageId, { message, description: formatHTMLString(element.description) || undefined }];
   }
 }
 

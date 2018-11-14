@@ -61,6 +61,9 @@ export function PanelOptionsMenu({
       closePopover={closeContextMenu}
       panelPaddingSize="none"
       anchorPosition="downRight"
+      data-test-subj={
+        isPopoverOpen ? 'dashboardPanelContextMenuOpen' : 'dashboardPanelContextMenuClosed'
+      }
       withTitle
     >
       <EuiContextMenu initialPanelId="mainMenu" panels={panels} />

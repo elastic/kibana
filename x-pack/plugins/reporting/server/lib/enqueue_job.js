@@ -13,10 +13,10 @@ function enqueueJobFn(server) {
   const queueConfig = server.config().get('xpack.reporting.queue');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
-  return async function enqueueJob(exportTypeId, jobParams, user, headers, serializedSession, request) {
+  return async function enqueueJob(exportTypeId, jobParams, user, headers, request) {
     const exportType = exportTypesRegistry.getById(exportTypeId);
     const createJob = exportType.createJobFactory(server);
-    const payload = await createJob(jobParams, headers, serializedSession, request);
+    const payload = await createJob(jobParams, headers, request);
 
     const options = {
       timeout: queueConfig.timeout,

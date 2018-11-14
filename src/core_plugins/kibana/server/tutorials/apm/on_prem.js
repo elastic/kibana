@@ -104,6 +104,14 @@ export function onPremInstructions(apmIndexPattern) {
         }),
         instructionVariants: [
           {
+            id: INSTRUCTION_VARIANT.JAVA,
+            instructions: createJavaClientInstructions(),
+          },
+          {
+            id: INSTRUCTION_VARIANT.JS,
+            instructions: createJsClientInstructions(),
+          },
+          {
             id: INSTRUCTION_VARIANT.NODE,
             instructions: createNodeClientInstructions(),
           },
@@ -124,16 +132,8 @@ export function onPremInstructions(apmIndexPattern) {
             instructions: createRackClientInstructions(),
           },
           {
-            id: INSTRUCTION_VARIANT.JS,
-            instructions: createJsClientInstructions(),
-          },
-          {
             id: INSTRUCTION_VARIANT.GO,
             instructions: createGoClientInstructions(),
-          },
-          {
-            id: INSTRUCTION_VARIANT.JAVA,
-            instructions: createJavaClientInstructions(),
           },
         ],
         statusCheck: {

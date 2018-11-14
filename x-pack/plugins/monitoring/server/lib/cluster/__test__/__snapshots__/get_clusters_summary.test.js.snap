@@ -18,7 +18,7 @@ Array [
       "totalEvents": null,
     },
     "ccs": "proddy1",
-    "cluster_name": "proddy1",
+    "cluster_name": "Custom name",
     "cluster_uuid": "fOt6KT9KTICAMm2ncRhsMg",
     "elasticsearch": Object {
       "cluster_stats": Object {
@@ -227,7 +227,7 @@ Array [
       "totalEvents": null,
     },
     "ccs": "proddy1",
-    "cluster_name": "proddy1",
+    "cluster_name": "Custom name",
     "cluster_uuid": "fOt6KT9KTICAMm2ncRhsMg",
     "elasticsearch": Object {
       "cluster_stats": Object {

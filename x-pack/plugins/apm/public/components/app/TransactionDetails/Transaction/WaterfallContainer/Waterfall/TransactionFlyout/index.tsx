@@ -5,19 +5,25 @@
  */
 
 import {
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLink,
   EuiPortal,
   EuiTitle
 } from '@elastic/eui';
+import { get } from 'lodash';
 import React from 'react';
+import styled from 'styled-components';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { APM_AGENT_DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/agents';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { ActionMenu } from '../../../ActionMenu';
+import { DiscoverTransactionLink } from '../../../ActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
@@ -29,6 +35,61 @@ interface Props {
   location: any; // TODO: import location type from react router or history types?
   urlParams: IUrlParams;
   waterfall: IWaterfall;
+}
+
+const ResponsiveFlyout = styled(EuiFlyout)`
+  width: 100%;
+
+  @media (min-width: 800px) {
+    width: 90%;
+  }
+
+  @media (min-width: 1000px) {
+    width: 70%;
+  }
+
+  @media (min-width: 1400px) {
+    width: 50%;
+  }
+
+  @media (min-width: 2000px) {
+    width: 35%;
+  }
+`;
+
+function DroppedSpansWarning({
+  transactionDoc
+}: {
+  transactionDoc: Transaction;
+}) {
+  const dropped: number = get(
+    transactionDoc,
+    'transaction.span_count.dropped.total',
+    0
+  );
+
+  if (dropped === 0) {
+    return null;
+  }
+
+  const url =
+    APM_AGENT_DROPPED_SPANS_DOCS[transactionDoc.context.service.agent.name];
+
+  const docsLink = url ? (
+    <EuiLink href={url} target="_blank">
+      Learn more.
+    </EuiLink>
+  ) : null;
+
+  return (
+    <React.Fragment>
+      <EuiCallOut size="s">
+        The APM agent that reported this transaction dropped {dropped} spans or
+        more based on its configuration. {docsLink}
+      </EuiCallOut>
+      <EuiHorizontalRule />
+    </React.Fragment>
+  );
 }
 
 export function TransactionFlyout({
@@ -44,7 +105,7 @@ export function TransactionFlyout({
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} ownFocus={true} maxWidth={false}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -54,22 +115,30 @@ export function TransactionFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <ActionMenu transaction={transactionDoc} />
+              <DiscoverTransactionLink transaction={transactionDoc}>
+                <EuiButtonEmpty iconType="discoverApp">
+                  View transaction in Discover
+                </EuiButtonEmpty>
+              </DiscoverTransactionLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <FlyoutTopLevelProperties transaction={transactionDoc} />
           <EuiHorizontalRule />
-          <StickyTransactionProperties transaction={transactionDoc} />
+          <StickyTransactionProperties
+            transaction={transactionDoc}
+            totalDuration={waterfall.traceRootDuration}
+          />
           <EuiHorizontalRule />
+          <DroppedSpansWarning transactionDoc={transactionDoc} />
           <TransactionPropertiesTableForFlyout
             transaction={transactionDoc}
             location={location}
             urlParams={urlParams}
           />
         </EuiFlyoutBody>
-      </EuiFlyout>
+      </ResponsiveFlyout>
     </EuiPortal>
   );
 }
