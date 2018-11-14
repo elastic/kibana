@@ -41,10 +41,10 @@ const REFRESH_RATE_MS = 30000;
 
 export class RemoteClusterListUi extends Component {
   static propTypes = {
-    loadRemoteClusters: PropTypes.func,
-    refreshRemoteClusters: PropTypes.func,
+    loadClusters: PropTypes.func,
+    refreshClusters: PropTypes.func,
     openDetailPanel: PropTypes.func,
-    remoteClusters: PropTypes.array,
+    clusters: PropTypes.array,
     isLoading: PropTypes.bool,
   }
 
@@ -58,11 +58,11 @@ export class RemoteClusterListUi extends Component {
       },
     } = props;
 
-    const { remoteCluster: remoteClusterId } = extractQueryParams(search);
+    const { cluster: clusterName } = extractQueryParams(search);
 
     // Show deeplinked remoteCluster whenever remoteClusters get loaded or the URL changes.
-    if (remoteClusterId != null) {
-      openDetailPanel(remoteClusterId);
+    if (clusterName != null) {
+      openDetailPanel(clusterName);
     }
 
     return null;
@@ -73,11 +73,11 @@ export class RemoteClusterListUi extends Component {
 
     this.state = {};
 
-    props.loadRemoteClusters();
+    props.loadClusters();
   }
 
   componentDidMount() {
-    this.interval = setInterval(this.props.refreshRemoteClusters, REFRESH_RATE_MS);
+    this.interval = setInterval(this.props.refreshClusters, REFRESH_RATE_MS);
   }
 
   componentWillUnmount() {
@@ -194,7 +194,7 @@ export class RemoteClusterListUi extends Component {
   }
 
   renderList() {
-    const { isLoading, remoteClusters } = this.props;
+    const { isLoading, clusters } = this.props;
 
     let table;
 
@@ -222,7 +222,7 @@ export class RemoteClusterListUi extends Component {
         </EuiFlexGroup>
       );
     } else {
-      table = <RemoteClusterTable remoteClusters={remoteClusters} />;
+      table = <RemoteClusterTable clusters={clusters} />;
     }
 
     return (
@@ -251,17 +251,17 @@ export class RemoteClusterListUi extends Component {
   }
 
   render() {
-    const { isLoading, remoteClusters, remoteClusterLoadError } = this.props;
+    const { isLoading, clusters, clusterLoadError } = this.props;
 
     let content;
 
-    if (remoteClusterLoadError) {
-      if (remoteClusterLoadError.status === 403) {
+    if (clusterLoadError) {
+      if (clusterLoadError.status === 403) {
         content = this.renderNoPermission();
       } else {
-        content = this.renderError(remoteClusterLoadError);
+        content = this.renderError(clusterLoadError);
       }
-    } else if (!isLoading && !remoteClusters.length) {
+    } else if (!isLoading && !clusters.length) {
       content = this.renderEmpty();
     } else {
       content = this.renderList();

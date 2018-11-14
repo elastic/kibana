@@ -5,8 +5,12 @@
  */
 
 import { combineReducers } from 'redux';
+import { clusters } from './clusters';
+import { tableState } from './table_state';
 import { detailPanel } from './detail_panel';
 
 export const remoteClusters = combineReducers({
+  clusters,
+  tableState,
   detailPanel,
 });

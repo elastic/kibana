@@ -15,12 +15,12 @@ import {
 
 export class RemoteClusterTableUi extends Component {
   static propTypes = {
-    remoteClusters: PropTypes.array,
+    clusters: PropTypes.array,
     closeDetailPanel: PropTypes.func.isRequired,
   }
 
   static defaultProps = {
-    remoteClusters: [],
+    clusters: [],
   }
 
   constructor(props) {
@@ -33,7 +33,7 @@ export class RemoteClusterTableUi extends Component {
 
   render() {
     const {
-      remoteClusters,
+      clusters,
       openDetailPanel,
     } = this.props;
 
@@ -87,7 +87,7 @@ export class RemoteClusterTableUi extends Component {
 
     return (
       <EuiInMemoryTable
-        items={remoteClusters}
+        items={clusters}
         itemId="name"
         columns={columns}
         rowProps={getRowProps}

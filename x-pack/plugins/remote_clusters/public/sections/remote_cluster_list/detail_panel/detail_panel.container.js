@@ -23,7 +23,7 @@ const mapStateToProps = (state) => {
     isOpen: isDetailPanelOpen(state),
     // isLoading: isLoading(state),
     // remoteCluster: getDetailPanelRemoteCluster(state),
-    // remoteClusterName: getDetailPanelRemoteClusterName(state),
+    // clusterName: getDetailPanelclusterName(state),
   };
 };
 

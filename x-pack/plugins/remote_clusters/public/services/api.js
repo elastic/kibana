@@ -12,6 +12,6 @@ export const setHttpClient = (client) => {
 const apiPrefix = chrome.addBasePath('/api/remote_clusters');
 
 export async function loadClusters() {
-  const response = await httpClient.get(`${apiPrefix}/clusters`);
+  const response = await httpClient.get(`${apiPrefix}`);
   return response.data;
 }

@@ -6,52 +6,36 @@
 
 import { connect } from 'react-redux';
 
-// import {
-//   getRemoteClusters,
-//   isLoading
-// } from '../../store/selectors';
+import {
+  getPageOfClusters,
+  isLoading,
+  clusterLoadError
+} from '../../store/selectors';
 
-// import {
-//   loadRemoteClusters,
-//   refreshRemoteClusters,
-//   openDetailPanel,
-//   closeDetailPanel,
-// } from '../../store/actions';
+import {
+  loadClusters,
+  refreshClusters,
+  // openDetailPanel,
+  // closeDetailPanel,
+} from '../../store/actions';
 
 import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_list';
 
-const mapStateToProps = (/*state*/) => {
+const mapStateToProps = (state) => {
   return {
-    remoteClusters: [{
-      name: 'Remote cluster 1',
-      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
-    }, {
-      name: 'Remote cluster 2',
-      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
-    }, {
-      name: 'Remote cluster 3',
-      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
-    }, {
-      name: 'Remote cluster 4',
-      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
-    }, {
-      name: 'Remote cluster 5',
-      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
-    }, {
-      name: 'Remote cluster 6',
-      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
-    }], //getRemoteClusters(state),
-    // isLoading: isLoading(state),
+    clusters: getPageOfClusters(state),
+    isLoading: isLoading(state),
+    clusterLoadError: clusterLoadError(state),
   };
 };
 
-const mapDispatchToProps = (/*dispatch*/) => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    loadRemoteClusters: () => {
-      // dispatch(loadRemoteClusters());
+    loadClusters: () => {
+      dispatch(loadClusters());
     },
-    refreshRemoteClusters: () => {
-      // dispatch(refreshRemoteClusters());
+    refreshClusters: () => {
+      dispatch(refreshClusters());
     },
     openDetailPanel: (/*remoteClusterId*/) => {
       // dispatch(openDetailPanel({ remoteClusterId }));

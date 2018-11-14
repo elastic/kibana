@@ -27,7 +27,7 @@ export class DetailPanelUi extends Component {
     isLoading: PropTypes.bool,
     remoteCluster: PropTypes.object,
     closeDetailPanel: PropTypes.func.isRequired,
-    remoteClusterName: PropTypes.string.isRequired,
+    clusterName: PropTypes.string.isRequired,
   }
 
   constructor(props) {
@@ -64,7 +64,7 @@ export class DetailPanelUi extends Component {
       isLoading,
       closeDetailPanel,
       remoteCluster,
-      remoteClusterName,
+      clusterName,
     } = this.props;
 
     if (!isOpen) {
@@ -139,7 +139,7 @@ export class DetailPanelUi extends Component {
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m" id="remoteClusterDetailsFlyoutTitle">
-            <h2>{remoteClusterName}</h2>
+            <h2>{clusterName}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
 
