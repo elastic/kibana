@@ -39,8 +39,19 @@ export class AddLayerPanel extends React.Component {
       sourceType: '',
       minZoom: 0,
       maxZoom: 24,
-      alphaValue: 0.5
+      alphaValue: null
     };
+  }
+
+  componentDidUpdate() {
+    if (this.layer && this.state.alphaValue === null) {
+      const defaultAlphaValue = this.layer._descriptor.type === 'TILE' ? 1.0 : 0.5;
+      if (this.state.alphaValue !== defaultAlphaValue) {
+        this.setState({
+          alphaValue: defaultAlphaValue
+        });
+      }
+    }
   }
 
   _previewLayer = (source) => {
