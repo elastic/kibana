@@ -20,7 +20,6 @@ import routes from 'ui/routes';
 import template from './main.html';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
 import { indexManagementStore } from './store';
-import chrome from 'ui/chrome';
 
 const renderReact = async (elem) => {
   render(
@@ -34,27 +33,26 @@ const renderReact = async (elem) => {
     elem
   );
 };
-if (chrome.getInjected('indexManagementUiEnabled')) {
-  routes.when(`${BASE_PATH}:view?/:id?`, {
-    template: template,
-    controllerAs: 'indexManagement',
-    controller: class IndexManagementController {
-      constructor($scope, $route, $http, kbnUrl, $rootScope) {
+
+routes.when(`${BASE_PATH}:view?/:id?`, {
+  template: template,
+  controllerAs: 'indexManagement',
+  controller: class IndexManagementController {
+    constructor($scope, $route, $http, kbnUrl, $rootScope) {
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
-        setHttpClient($http);
-        setUrlService({
-          change(url) {
-            kbnUrl.change(url);
-            $rootScope.$digest();
-          }
-        });
-        $scope.$$postDigest(() => {
-          const elem = document.getElementById('indexManagementReactRoot');
-          renderReact(elem);
-          manageAngularLifecycle($scope, $route, elem);
-        });
-      }
+      setHttpClient($http);
+      setUrlService({
+        change(url) {
+          kbnUrl.change(url);
+          $rootScope.$digest();
+        }
+      });
+      $scope.$$postDigest(() => {
+        const elem = document.getElementById('indexManagementReactRoot');
+        renderReact(elem);
+        manageAngularLifecycle($scope, $route, elem);
+      });
     }
-  });
-}
+  }
+});

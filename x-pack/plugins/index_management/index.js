@@ -21,13 +21,7 @@ export function indexManagement(kibana)  {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: [
         'plugins/index_management',
-      ],
-      injectDefaultVars(server) {
-        const config = server.config();
-        return {
-          indexManagementUiEnabled: config.get(`${PLUGIN.ID}.enabled`)
-        };
-      },
+      ]
     },
     init: function (server) {
       server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
