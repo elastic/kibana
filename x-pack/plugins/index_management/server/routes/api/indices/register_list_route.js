@@ -57,7 +57,7 @@ export function registerListRoute(server) {
       }
     },
     config: {
-      pre: [ licensePreRouting ]
+      pre: [licensePreRouting]
     }
   });
 }
