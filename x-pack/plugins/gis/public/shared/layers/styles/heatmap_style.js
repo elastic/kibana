@@ -25,7 +25,10 @@ export class HeatmapStyle {
   static createDescriptor(refinement) {
     return {
       type: HeatmapStyle.type,
-      refinement: refinement || 'coarse'
+      refinement: refinement || 'coarse',
+      properties: {
+        alphaValue: 0.5
+      }
     };
   }
 
@@ -44,9 +47,15 @@ export class HeatmapStyle {
 
   }
 
+  _getMBOpacity() {
+    const DEFAULT_OPACITY = 0.5;
+    return this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
+  }
+
   setMBPaintProperties(mbMap, pointLayerID, property) {
 
     let radius;
+    const opacity = this._getMBOpacity();
     if (this._descriptor.refinement === 'coarse') {
       radius = 64;
     } else if (this._descriptor.refinement === 'fine') {
@@ -61,6 +70,7 @@ export class HeatmapStyle {
       "type": 'identity',
       "property": property
     });
+    mbMap.setPaintProperty(pointLayerID, 'heatmap-opacity', opacity);
   }
 
   getRefinement() {
