@@ -47,14 +47,14 @@ const AppLink = styled(RelativeLink)`
   ${truncate('100%')};
 `;
 
-const SERVICE_COLUMNS = [
+export const SERVICE_COLUMNS = [
   {
     field: 'serviceName',
     name: 'Name',
     width: '50%',
     sortable: true,
     render: (serviceName: string) => (
-      <EuiToolTip content={formatString(serviceName)}>
+      <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
         <AppLink path={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
