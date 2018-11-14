@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormHelpText,
+  EuiSpacer
 } from '@elastic/eui';
 import { AlphaSelection } from
   '../../shared/layers/styles/components/vector/color/alpha_selection';
@@ -98,7 +99,7 @@ export class ALayer {
 
   static _renderAlpha(alphaValue, onAlphaValueChange) {
     return (
-      <EuiFormRow label="Adust layer opacity">
+      <EuiFormRow label="Layer opacity">
         <AlphaSelection
           alphaValue={alphaValue}
           changeAlphaValue={alphaValue => onAlphaValueChange(alphaValue)}
@@ -113,6 +114,7 @@ export class ALayer {
       <Fragment>
         {ALayer._renderLabel(label, onLabelChange)}
         {ALayer._renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange)}
+        <EuiSpacer size="m"/>
         {ALayer._renderAlpha(alphaValue, onAlphaValueChange)}
       </Fragment>
     );
