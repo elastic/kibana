@@ -109,6 +109,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       log.debug('toggleExpandActionExists');
       return await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ, 2000);
     }
+    
     async expectExistsEditPanelAction() {
       log.debug('expectExistsEditPanelAction');
       await testSubjects.existOrFail(EDIT_PANEL_DATA_TEST_SUBJ);

@@ -86,6 +86,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await typeIntoReactSelect('filterfieldSuggestionList', field);
       await typeIntoReactSelect('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
+      
       const paramFields = await params.findElements(By.css('input'));
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
