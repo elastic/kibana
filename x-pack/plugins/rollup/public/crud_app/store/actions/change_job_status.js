@@ -4,29 +4,67 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
+
 import {
   startJobs as sendStartJobsRequest,
   stopJobs as sendStopJobsRequest,
+  createNoticeableDelay,
+  showApiError,
 } from '../../services';
+
+import {
+  UPDATE_JOB_START,
+  UPDATE_JOB_SUCCESS,
+  UPDATE_JOB_FAILURE,
+} from '../action_types';
+
 import { refreshJobs } from './refresh_jobs';
 
 export const startJobs = (jobIds) => async (dispatch) => {
+  dispatch({
+    type: UPDATE_JOB_START,
+  });
+
   try {
-    await sendStartJobsRequest(jobIds);
+    await createNoticeableDelay(sendStartJobsRequest(jobIds));
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    dispatch({
+      type: UPDATE_JOB_FAILURE,
+    });
+
+    return showApiError(error, i18n.translate('xpack.rollupJobs.startJobsAction.errorTitle', {
+      defaultMessage: 'Error starting rollup jobs',
+    }));
   }
+
+  dispatch({
+    type: UPDATE_JOB_SUCCESS,
+  });
 
   dispatch(refreshJobs());
 };
 
 export const stopJobs = (jobIds) => async (dispatch) => {
+  dispatch({
+    type: UPDATE_JOB_START,
+  });
+
   try {
-    await sendStopJobsRequest(jobIds);
+    await createNoticeableDelay(sendStopJobsRequest(jobIds));
   } catch (error) {
-    return toastNotifications.addDanger(error.data.message);
+    dispatch({
+      type: UPDATE_JOB_FAILURE,
+    });
+
+    return showApiError(error, i18n.translate('xpack.rollupJobs.stopJobsAction.errorTitle', {
+      defaultMessage: 'Error stopping rollup jobs',
+    }));
   }
+
+  dispatch({
+    type: UPDATE_JOB_SUCCESS,
+  });
 
   dispatch(refreshJobs());
 };

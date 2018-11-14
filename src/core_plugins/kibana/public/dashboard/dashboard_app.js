@@ -46,7 +46,7 @@ import { DashboardSaveModal } from './top_nav/save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
@@ -56,6 +56,7 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -182,7 +183,12 @@ app.directive('dashboardApp', function ($injector) {
       // Push breadcrumbs to new header navigation
       const updateBreadcrumbs = () => {
         breadcrumbState.set([
-          { text: 'Dashboard', href: $scope.landingPageUrl() },
+          {
+            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+              defaultMessage: 'Dashboard',
+            }),
+            href: $scope.landingPageUrl()
+          },
           { text: $scope.getDashTitle() }
         ]);
       };

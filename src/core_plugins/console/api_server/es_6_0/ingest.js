@@ -19,6 +19,9 @@
 
 const commonPipelineParams = {
   on_failure: [],
+  ignore_failure: {
+    __one_of: [ false, true ]
+  },
   if: '',
   tag: ''
 };

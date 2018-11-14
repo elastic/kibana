@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import header from './header.png';
 
 export const timeFilter = () => ({
   name: 'time_filter',
-  displayName: 'Time filter',
-  help: 'Set a time window',
+  displayName: i18n.translate('xpack.canvas.elements.timeFilterDisplayName', {
+    defaultMessage: 'Time filter',
+  }),
+  help: i18n.translate('xpack.canvas.elements.timeFilterHelpText', {
+    defaultMessage: 'Set a time window',
+  }),
   image: header,
   height: 50,
   expression: `timefilterControl compact=true column=@timestamp

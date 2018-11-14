@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
@@ -64,22 +63,22 @@ const replaceTemplateStrings = (text) => {
 };
 
 describe('isCloudEnabled is false', () => {
-  test('should render ON_PREM instructions with instruction toggle', () => {
+  test('should render ON_PREM instructions with instruction toggle', async () => {
     const component = shallowWithIntl(<Tutorial.WrappedComponent
       addBasePath={addBasePath}
       isCloudEnabled={false}
       getTutorial={getTutorial}
       replaceTemplateStrings={replaceTemplateStrings}
       tutorialId={'my_testing_tutorial'}
-      bulkCreate={() => {}}
+      bulkCreate={() => { }}
     />);
-    loadTutorialPromise.then(() => {
-      component.update();
-      expect(component).toMatchSnapshot(); // eslint-disable-line
-    });
+    await loadTutorialPromise;
+
+    component.update();
+    expect(component).toMatchSnapshot();
   });
 
-  test('should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided', () => {
+  test('should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided', async () => {
     const loadBasicTutorialPromise = Promise.resolve({
       name: 'jest test tutorial',
       longDescription: 'tutorial used to drive jest tests',
@@ -95,43 +94,41 @@ describe('isCloudEnabled is false', () => {
       getTutorial={getBasicTutorial}
       replaceTemplateStrings={replaceTemplateStrings}
       tutorialId={'my_testing_tutorial'}
-      bulkCreate={() => {}}
+      bulkCreate={() => { }}
     />);
-    loadBasicTutorialPromise.then(() => {
-      component.update();
-      expect(component).toMatchSnapshot(); // eslint-disable-line
-    });
+    await loadBasicTutorialPromise;
+    component.update();
+    expect(component).toMatchSnapshot();
   });
 
-  test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', () => {
+  test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
     const component = mountWithIntl(<Tutorial.WrappedComponent
       addBasePath={addBasePath}
       isCloudEnabled={false}
       getTutorial={getTutorial}
       replaceTemplateStrings={replaceTemplateStrings}
       tutorialId={'my_testing_tutorial'}
-      bulkCreate={() => {}}
+      bulkCreate={() => { }}
     />);
-    loadTutorialPromise.then(() => {
-      component.update();
-      findTestSubject(component, 'onPremElasticCloudBtn').simulate('click');
-      expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
-    });
+    await loadTutorialPromise;
+    component.update();
+    component.find('button#onPremElasticCloud').closest('div').find('input').simulate('change');
+    component.update();
+    expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });
 
 });
 
-test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', () => {
+test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', async () => {
   const component = shallowWithIntl(<Tutorial.WrappedComponent
     addBasePath={addBasePath}
     isCloudEnabled={true}
     getTutorial={getTutorial}
     replaceTemplateStrings={replaceTemplateStrings}
     tutorialId={'my_testing_tutorial'}
-    bulkCreate={() => {}}
+    bulkCreate={() => { }}
   />);
-  loadTutorialPromise.then(() => {
-    component.update();
-    expect(component).toMatchSnapshot(); // eslint-disable-line
-  });
+  await loadTutorialPromise;
+  component.update();
+  expect(component).toMatchSnapshot(); // eslint-disable-line
 });

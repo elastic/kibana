@@ -44,6 +44,14 @@ const options = {
   updateBaselines: {
     desc: 'Replace baseline screenshots with whatever is generated from the test.',
   },
+  'include-tag': {
+    arg: '<tag>',
+    desc: 'Tags that suites must include to be run, can be included multiple times.',
+  },
+  'exclude-tag': {
+    arg: '<tag>',
+    desc: 'Tags that suites must NOT include to be run, can be included multiple times.',
+  },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
   quiet: { desc: 'Only log errors.' },
@@ -98,6 +106,13 @@ export function processOptions(userOptions, defaultConfigPaths) {
     delete userOptions['kibana-install-dir'];
   }
 
+  userOptions.suiteTags = {
+    include: [].concat(userOptions['include-tag'] || []),
+    exclude: [].concat(userOptions['exclude-tag'] || []),
+  };
+  delete userOptions['include-tag'];
+  delete userOptions['exclude-tag'];
+
   function createLogger() {
     return new ToolingLog({
       level: pickLevelFromFlags(userOptions),
@@ -115,7 +130,9 @@ export function processOptions(userOptions, defaultConfigPaths) {
 
 function validateOptions(userOptions) {
   Object.entries(userOptions).forEach(([key, val]) => {
-    if (key === '_') return;
+    if (key === '_' || key === 'suiteTags') {
+      return;
+    }
 
     // Validate flags passed
     if (options[key] === undefined) {

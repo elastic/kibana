@@ -62,10 +62,10 @@ describe('Authentication routes', () => {
       expect(loginRoute.config).to.eql({
         auth: false,
         validate: {
-          payload: {
+          payload: Joi.object({
             username: Joi.string().required(),
             password: Joi.string().required()
-          }
+          })
         },
         response: {
           emptyStatusCode: 204,
@@ -304,10 +304,10 @@ describe('Authentication routes', () => {
       expect(samlAcsRoute.config).to.eql({
         auth: false,
         validate: {
-          payload: {
+          payload: Joi.object({
             SAMLResponse: Joi.string().required(),
             RelayState: Joi.string().allow('')
-          }
+          })
         }
       });
     });

@@ -5,18 +5,19 @@
  */
 import React from 'react';
 import { TelemetryOptIn } from '../public/components/telemetry_opt_in';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
+
 describe('TelemetryOptIn', () => {
   test('should display when telemetry not opted in', () => {
     const telemetry = require('../public/lib/telemetry');
     telemetry.showTelemetryOptIn = () => { return true; };
-    const rendered = mount(<TelemetryOptIn />);
+    const rendered = mountWithIntl(<TelemetryOptIn />);
     expect(rendered).toMatchSnapshot();
   });
   test('should not display when telemetry is opted in', () => {
     const telemetry = require('../public/lib/telemetry');
     telemetry.showTelemetryOptIn = () => { return false; };
-    const rendered = mount(<TelemetryOptIn />);
+    const rendered = mountWithIntl(<TelemetryOptIn />);
     expect(rendered).toMatchSnapshot();
   });
 });

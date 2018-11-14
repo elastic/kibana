@@ -45,15 +45,6 @@ jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
 }));
 
-jest.mock('../../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time', () => ({
-  ensureMinimumTime: async promises => {
-    if (Array.isArray(promises)) {
-      return await Promise.all(promises);
-    }
-    return await promises;
-  },
-}));
-
 jest.mock('../../../lib/retrieve_and_export_docs', () => ({
   retrieveAndExportDocs: jest.fn(),
 }));
@@ -80,6 +71,8 @@ jest.mock('../../../lib/save_to_file', () => ({
 jest.mock('../../../lib/get_relationships', () => ({
   getRelationships: jest.fn(),
 }));
+
+jest.mock('ui/notify', () => ({}));
 
 const allSavedObjects = [
   {
@@ -153,9 +146,22 @@ const defaultProps = {
   goInApp: () => {},
 };
 
+let addDangerMock;
+
 describe('ObjectsTable', () => {
   beforeEach(() => {
     defaultProps.savedObjectsClient.find.mockClear();
+    // mock _.debounce to fire immediately with no internal timer
+    require('lodash').debounce = function (func) {
+      function debounced(...args) {
+        return func.apply(this, args);
+      }
+      return debounced;
+    };
+    addDangerMock = jest.fn();
+    require('ui/notify').toastNotifications = {
+      addDanger: addDangerMock,
+    };
   });
 
   it('should render normally', async () => {
@@ -172,6 +178,28 @@ describe('ObjectsTable', () => {
     component.update();
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should add danger toast when find fails', async () => {
+    const savedObjectsClientWithFindError = {
+      find: () => {
+        throw new Error('Simulated find error');
+      }
+    };
+    const customizedProps = { ...defaultProps, savedObjectsClient: savedObjectsClientWithFindError };
+    const component = shallowWithIntl(
+      <ObjectsTable.WrappedComponent
+        {...customizedProps}
+        perPageConfig={15}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(addDangerMock).toHaveBeenCalled();
   });
 
   describe('export', () => {

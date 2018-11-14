@@ -24,6 +24,7 @@ import { CreateIndexPatternWizard } from '../create_index_pattern_wizard';
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
   getIndexPatternName: () => 'name',
+  getIsBeta: () => false,
   checkIndicesForErrors: () => false,
   getShowSystemIndices: () => false,
   renderPrompt: () => {},
@@ -40,6 +41,9 @@ jest.mock('../lib/get_indices', () => ({
       { name: 'kibana' },
     ];
   },
+}));
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => { },
 }));
 
 const loadingDataDocUrl = '';
@@ -79,6 +83,26 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       allIndices: [],
+      remoteClustersExist: false
+    });
+
+    await component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders when there are no indices but there are remote clusters', async () => {
+    const component = shallow(
+      <CreateIndexPatternWizard
+        loadingDataDocUrl={loadingDataDocUrl}
+        initialQuery={initialQuery}
+        services={services}
+      />
+    );
+
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      allIndices: [],
+      remoteClustersExist: true
     });
 
     await component.update();

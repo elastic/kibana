@@ -1,0 +1,11 @@
+{
+  "ccr.pause_follow": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_ccr/pause_follow"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-post-pause-follow.html"
+  }
+}

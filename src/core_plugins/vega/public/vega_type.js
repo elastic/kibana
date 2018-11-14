@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
@@ -41,8 +42,12 @@ VisTypesRegistryProvider.register((Private) => {
 
   return VisFactory.createBaseVisualization({
     name: 'vega',
-    title: 'Vega',
-    description: 'Create custom visualizations using Vega and VegaLite',
+    title: i18n.translate('vega.type.vegaTitle', {
+      defaultMessage: 'Vega',
+    }),
+    description: i18n.translate('vega.type.vegaВescription', {
+      defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
+    }),
     icon: 'visVega',
     category: CATEGORY.OTHER,
     visConfig: { defaults: { spec: defaultSpec } },

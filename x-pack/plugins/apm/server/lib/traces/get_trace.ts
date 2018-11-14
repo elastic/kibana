@@ -6,8 +6,7 @@
 
 import { SearchParams, SearchResponse } from 'elasticsearch';
 import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
-import { SERVICE_NAME, TRACE_ID } from '../../../common/constants';
-import { TermsAggsBucket } from '../../../typings/elasticsearch';
+import { TRACE_ID } from '../../../common/constants';
 import { Span } from '../../../typings/Span';
 import { Transaction } from '../../../typings/Transaction';
 import { Setup } from '../helpers/setup_request';
@@ -37,14 +36,6 @@ export async function getTrace(
             }
           ]
         }
-      },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: 500
-          }
-        }
       }
     }
   };
@@ -54,10 +45,5 @@ export async function getTrace(
     params
   );
 
-  return {
-    services: (resp.aggregations.services.buckets as TermsAggsBucket[]).map(
-      bucket => bucket.key
-    ),
-    hits: resp.hits.hits.map(hit => hit._source)
-  };
+  return resp.hits.hits.map(hit => hit._source);
 }
