@@ -30,8 +30,10 @@ const getKibanaPluginsPath = () => {
 
   // find the kibana path in the build, which lives in node_modules and requires going 1 path up
   const buildPluginPath = path.join(basePluginPath, '..');
-  if (isDirname(basePluginPath, 'node_modules') && isDirname(buildPluginPath, 'kibana'))
-    return path.join(buildPluginPath, 'plugins');
+  if (isDirname(basePluginPath, 'node_modules')) {
+    const pluginPath = path.join(buildPluginPath, 'plugins');
+    return isDirectory(pluginPath) && pluginPath;
+  }
 
   return false;
 };
