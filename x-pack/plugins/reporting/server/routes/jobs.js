@@ -93,12 +93,17 @@ export function jobs(server) {
     handler: async (request, h) => {
       const { docId } = request.params;
 
-      let response = await jobResponseHandler(request.pre.management.jobTypes, request.pre.user, h, { docId });
-      if (!response.isBoom) {
-        response = response.header('accept-ranges', 'none');
-      }
+      try {
+        let response = await jobResponseHandler(request.pre.management.jobTypes, request.pre.user, h, { docId });
+        if (!response.isBoom) {
+          response = response.header('accept-ranges', 'none');
+        }
 
-      return response;
+        return response;
+      } catch (err) {
+        server.log(['error', 'reporting', 'download'], err);
+        return boom.boomify(err);
+      }
     },
     config: {
       ...getRouteConfig(),
