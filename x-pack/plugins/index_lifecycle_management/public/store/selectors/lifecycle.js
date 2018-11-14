@@ -110,11 +110,32 @@ export const validatePhase = (type, phase, errors) => {
 export const validateLifecycle = state => {
   // This method of deep copy does not always work but it should be fine here
   const errors = JSON.parse(JSON.stringify(ERROR_STRUCTURE));
-
-  if (!getSelectedPolicyName(state)) {
+  const policyName = getSelectedPolicyName(state);
+  if (!policyName) {
     errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameRequiredError', {
       defaultMessage: 'A policy name is required'
     }));
+  } else {
+    if (policyName.startsWith('_')) {
+      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameStartsWithUnderscoreError', {
+        defaultMessage: 'A policy name cannot start with an underscore'
+      }));
+    }
+    if (policyName.includes(',')) {
+      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameContainsCommaError', {
+        defaultMessage: 'A policy name cannot include a comma'
+      }));
+    }
+    if (policyName.includes(' ')) {
+      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameContainsSpaceError', {
+        defaultMessage: 'A policy name cannot include a space'
+      }));
+    }
+    if (TextEncoder && new TextEncoder('utf-8').encode(policyName).length > 255) {
+      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameTooLongError', {
+        defaultMessage: 'A policy name cannot be longer than 255 bytes'
+      }));
+    }
   }
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
