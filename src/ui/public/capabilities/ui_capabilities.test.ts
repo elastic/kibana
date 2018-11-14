@@ -47,10 +47,4 @@ describe('uiCapabilities', () => {
   it('allows a nested property to be accessed', () => {
     expect(uiCapabilities.app1.feature2).toEqual(false);
   });
-
-  it('throws an error when the requested property does not exist', () => {
-    expect(() => uiCapabilities.app1.feature3).toThrowErrorMatchingInlineSnapshot(
-      `"Unknown UI Capability: app1.feature3"`
-    );
-  });
 });

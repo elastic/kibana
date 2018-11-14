@@ -16,40 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { deepFreeze } from '../../../core/public/utils/deep_freeze';
-
-type Capability = boolean | Record<string, boolean>;
 
 export interface UICapabilities {
   navLinks: Record<string, boolean>;
   [key: string]: Record<string, boolean>;
 }
 
-const injectedUiCapabilities = chrome.getInjected('uiCapabilities');
-
-const createAccessProxy: (target: Record<string, boolean>, path?: string[]) => Capability = (
-  target: Record<string, boolean>,
-  path: string[] = []
-) =>
-  new Proxy(target, {
-    get: (object, property) => {
-      const currentPath = [...path, String(property)];
-
-      const capability: Capability = _.get(object, property);
-      if (capability === undefined || capability === null) {
-        throw new Error(`Unknown UI Capability: ${currentPath.join('.')}`);
-      }
-      if (typeof capability === 'boolean') {
-        return capability;
-      }
-      return createAccessProxy(capability, [...path, String(property)]);
-    },
-  });
-
-export const uiCapabilities: UICapabilities =
-  process.env.NODE_ENV === 'production'
-    ? deepFreeze(injectedUiCapabilities)
-    : createAccessProxy(injectedUiCapabilities);
+export const uiCapabilities: UICapabilities = deepFreeze(chrome.getInjected('uiCapabilities'));
