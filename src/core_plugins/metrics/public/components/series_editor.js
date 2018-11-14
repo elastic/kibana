@@ -61,6 +61,7 @@ class SeriesEditor extends Component {
     const { fields, model, name, limit, colorPicker } = props;
     return (
       <Series
+        className="tvbSeriesEditor"
         colorPicker={colorPicker}
         disableAdd={model[name].length >= limit}
         disableDelete={model[name].length < 2}
@@ -88,12 +89,12 @@ class SeriesEditor extends Component {
       this.props.onChange({ series });
     };
     return (
-      <div className="vis_editor__series_editor-container">
+      <div className="tvbSeriesEditor__container">
         <Sortable
           dynamic={true}
           direction="vertical"
           onSort={handleSort}
-          sortHandle="vis_editor__sort"
+          sortHandle="tvbSeries__sortHandle"
         >
           { series }
         </Sortable>

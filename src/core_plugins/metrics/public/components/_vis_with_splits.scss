@@ -1,16 +1,11 @@
-.splitVis {
+.tvbSplitVis {
   display: flex;
   flex: 1 0 auto;
 }
 
-.splitVis_split {
+.tvbSplitVis__split {
   display: flex;
   flex: 1 0 0;
   flex-direction: column;
   overflow: hidden;
-}
-
-.splitVis_visualization {
-  position: relative;
-  flex: 1 0 auto;
 }
