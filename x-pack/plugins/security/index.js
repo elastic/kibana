@@ -201,6 +201,7 @@ export const security = (kibana) => new kibana.Plugin({
         const appId = path.split('/', 3)[2];
         const appAction = actions.app.get(appId);
 
+        // TODO: Check this at the specific space
         const checkPrivilegesResponse = await checkPrivileges.globally(appAction);
         if (!checkPrivilegesResponse.hasAllRequested) {
           return Boom.notFound();
@@ -217,6 +218,7 @@ export const security = (kibana) => new kibana.Plugin({
           const feature = path.split('/', 3)[2];
           const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
 
+          // TODO: Check this at the specific space
           const checkPrivilegesResponse = await checkPrivileges.globally(apiActions);
           if (!checkPrivilegesResponse.hasAllRequested) {
             return Boom.notFound();
