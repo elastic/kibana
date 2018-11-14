@@ -7,6 +7,7 @@
 
 // @ts-ignore
 import { esTestConfig, kbnTestConfig, OPTIMIZE_BUNDLE_DIR } from '@kbn/test';
+// @ts-ignore
 import * as kbnTestServer from '../../../../../../../../src/test_utils/kbn_server';
 // @ts-ignore
 import { xpackKbnServerConfig } from '../../../../../../../test_utils/kbn_server_config';
@@ -16,7 +17,7 @@ let servers: any;
 contractTests('Kibana  Framework Adapter', {
   async before() {
     servers = await kbnTestServer.startTestServers({
-      adjustTimeout: t => jest.setTimeout(t),
+      adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: xpackKbnServerConfig,
     });
 
