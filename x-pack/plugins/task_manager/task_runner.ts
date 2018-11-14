@@ -20,7 +20,6 @@ import {
   ConcreteTaskInstance,
   RunResult,
   SanitizedTaskDefinition,
-  TaskDefinition,
   TaskDictionary,
   validateRunResult,
 } from './task';
