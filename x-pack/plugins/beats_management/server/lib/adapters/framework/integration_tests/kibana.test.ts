@@ -16,10 +16,16 @@ import { contractTests } from './test_contract';
 let servers: any;
 contractTests('Kibana  Framework Adapter', {
   async before() {
-    servers = await kbnTestServer.startTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: xpackKbnServerConfig,
-    });
+    try {
+      servers = await kbnTestServer.startTestServers({
+        adjustTimeout: (t: number) => jest.setTimeout(t),
+        settings: xpackKbnServerConfig,
+      });
+    } catch (e) {
+      // tslint:disable-next-line
+      console.log('kbnTestServer.startTestServers failed to start because', e);
+      return process.exit(1);
+    }
 
     // const config = legacyServer.server.config();
     // config.extendSchema(beatsPluginConfig, {}, configPrefix);
