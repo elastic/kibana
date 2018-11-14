@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, identity } from 'lodash';
+import { flatten, pick, identity } from 'lodash';
 import Joi from 'joi';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
@@ -62,6 +62,19 @@ export function initPutRolesApi(
     }, identity);
   };
 
+  const featurePrivileges = flatten(
+    Object.entries(privileges.features).map(
+      ([featureName, featurePrivileges]) => {
+        return Object.keys(featurePrivileges).map(
+          (privilegeName) => {
+            return `${featureName}_${privilegeName}`;
+          });
+      }
+    )
+  );
+  const privilegesAssignedGlobally = [...Object.keys(privileges.global), ...featurePrivileges];
+  const privilegesAssignedAtSpace = [...Object.keys(privileges.space), ...featurePrivileges];
+
   const schema = Joi.object().keys({
     metadata: Joi.object().optional(),
     elasticsearch: Joi.object().keys({
@@ -78,8 +91,8 @@ export function initPutRolesApi(
       run_as: Joi.array().items(Joi.string()),
     }),
     kibana: Joi.object().keys({
-      global: Joi.array().items(Joi.string().valid(Object.keys(privileges.global))),
-      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.string().valid(Object.keys(privileges.space))))
+      global: Joi.array().items(Joi.string().valid(privilegesAssignedGlobally)),
+      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.string().valid(privilegesAssignedAtSpace)))
     })
   });
 
