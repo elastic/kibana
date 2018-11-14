@@ -37,7 +37,7 @@ export function TestSubjectsProvider({ getService }) {
 
   class TestSubjects {
     async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
-      log.debug(`TestSubjects.exists(${selector})`);
+      log.debug(`TestSubjects.exists(${selector}) with timeout ${timeout}`);
       return await find.existsByCssSelector(testSubjSelector(selector), timeout);
     }
 
