@@ -20,6 +20,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+import {
+  EuiGlobalToastList
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -30,6 +35,7 @@ import { MAX_SEARCH_SIZE } from './constants';
 import {
   ensureMinimumTime,
   getIndices,
+  getRemoteClusters
 } from './lib';
 
 export class CreateIndexPatternWizard extends Component {
@@ -52,20 +58,62 @@ export class CreateIndexPatternWizard extends Component {
       step: 1,
       indexPattern: '',
       allIndices: [],
+      remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
       isIncludingSystemIndices: false,
+      toasts: []
     };
   }
 
   async componentWillMount() {
-    this.fetchIndices();
+    this.fetchData();
   }
 
-  fetchIndices = async () => {
-    this.setState({ allIndices: [], isInitiallyLoadingIndices: true });
+  catchAndWarn = async (asyncFn, errorValue, errorMsg) => {
+    try {
+      return await asyncFn;
+    } catch (errors) {
+      this.setState(prevState => ({
+        toasts: prevState.toasts.concat([{
+          title: errorMsg,
+          id: errorMsg,
+          color: 'warning',
+          iconType: 'alert',
+        }])
+      }));
+      return errorValue;
+    }
+  };
+
+  fetchData = async () => {
     const { services } = this.props;
-    const allIndices = await ensureMinimumTime(getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE)); //
-    this.setState({ allIndices, isInitiallyLoadingIndices: false });
+
+    this.setState({
+      allIndices: [],
+      isInitiallyLoadingIndices: true,
+      remoteClustersExist: false
+    });
+
+    const indicesFailMsg = (<FormattedMessage
+      id="kbn.management.createIndexPattern.loadIndicesFailMsg"
+      defaultMessage="Failed to load indices"
+    />);
+
+    const clustersFailMsg = (<FormattedMessage
+      id="kbn.management.createIndexPattern.loadClustersFailMsg"
+      defaultMessage="Failed to load remote clusters"
+    />);
+
+    const [allIndices, remoteClusters] = await ensureMinimumTime([
+      this.catchAndWarn(getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), [], indicesFailMsg),
+      this.catchAndWarn(getRemoteClusters(services.$http), [], clustersFailMsg)
+    ]);
+
+    this.setState({
+      allIndices,
+      isInitiallyLoadingIndices: false,
+      remoteClustersExist: remoteClusters.length !== 0
+    });
   }
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
@@ -127,6 +175,7 @@ export class CreateIndexPatternWizard extends Component {
       isIncludingSystemIndices,
       step,
       indexPattern,
+      remoteClustersExist
     } = this.state;
 
     if (isInitiallyLoadingIndices) {
@@ -134,8 +183,10 @@ export class CreateIndexPatternWizard extends Component {
     }
 
     const hasDataIndices = allIndices.some(({ name }) => !name.startsWith('.'));
-    if (!hasDataIndices && !isIncludingSystemIndices) {
-      return <EmptyState onRefresh={this.fetchIndices} />;
+    if (!hasDataIndices &&
+      !isIncludingSystemIndices &&
+      !remoteClustersExist) {
+      return <EmptyState onRefresh={this.fetchData} />;
     }
 
     if (step === 1) {
@@ -169,15 +220,28 @@ export class CreateIndexPatternWizard extends Component {
     return null;
   }
 
+  removeToast = (removedToast) => {
+    this.setState(prevState => ({
+      toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
+    }));
+  };
+
   render() {
     const header = this.renderHeader();
     const content = this.renderContent();
 
     return (
-      <div>
-        {header}
-        {content}
-      </div>
+      <React.Fragment>
+        <div>
+          {header}
+          {content}
+        </div>
+        <EuiGlobalToastList
+          toasts={this.state.toasts}
+          dismissToast={this.removeToast}
+          toastLifeTimeMs={6000}
+        />
+      </React.Fragment>
     );
   }
 }
