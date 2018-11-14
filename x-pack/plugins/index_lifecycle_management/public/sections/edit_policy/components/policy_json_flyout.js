@@ -25,7 +25,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 export class PolicyJsonFlyoutUi extends PureComponent {
   static propTypes = {
     close: PropTypes.func.isRequired,
-    lifecycle: PropTypes.object.isRequired,
+    lifecycle: PropTypes.string.isRequired,
   };
   render() {
     const { lifecycle, close, policyName } = this.props;
