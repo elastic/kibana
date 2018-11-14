@@ -21,6 +21,7 @@ import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
+import {mapToLayerWithId} from '../../../../core_plugins/region_map/public/util';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -97,7 +98,7 @@ uiModules.get('kibana')
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
           layers.forEach((layer) => {
-            layer.url = this._extendUrlWithParams(layer.url);
+            // layer.url = ;
             layer.attribution = $sanitize(markdownIt.render(layer.attribution));
           });
           return layers;
@@ -143,7 +144,16 @@ uiModules.get('kibana')
 
 
       async getFileLayers() {
-        return await this._loadFileLayers();
+        const fileLayers = await this._loadFileLayers();
+
+        const strippedFileLayers = fileLayers.map(fileLayer => {
+          const strippedFileLayer = {...fileLayer};
+          //remove the properties that should not propagate and be used by clients.
+          delete strippedFileLayer.url;
+          return strippedFileLayer;
+        });
+
+        return strippedFileLayers;
       }
 
 
@@ -200,9 +210,10 @@ uiModules.get('kibana')
           return fileLayer.name === filename
         });
 
+        const extendedUrl = this._extendUrlWithParams(layerConfig.url);
         if (layerConfig) {
           const geojson = await $http({
-            url: layerConfig.url,
+            url: extendedUrl,
             method: 'GET'
           });
           return geojson.data;
