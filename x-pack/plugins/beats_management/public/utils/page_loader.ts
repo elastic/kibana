@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { difference, last } from 'lodash';
+import { last } from 'lodash';
 
 interface PathTree {
   [path: string]: string[];

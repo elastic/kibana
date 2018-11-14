@@ -20,6 +20,7 @@ import React from 'react';
 import { Subscribe } from 'unstated';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { EnrollBeatPage } from '../../components/page_fragments/enroll';
 import { BeatsTableType, Table } from '../../components/table';
 import { beatsListAssignmentOptions } from '../../components/table/assignment_schema';
 import { AssignmentActionType } from '../../components/table/table';
@@ -29,7 +30,6 @@ import { WithKueryAutocompletion } from '../../containers/with_kuery_autocomplet
 import { URLStateProps } from '../../containers/with_url_state';
 import { AppURLState } from '../../frontend_types';
 import { FrontendLibs } from '../../lib/types';
-import { EnrollBeatPage } from '../../page_fragments/enroll';
 
 interface BeatsPageProps extends URLStateProps<AppURLState> {
   libs: FrontendLibs;

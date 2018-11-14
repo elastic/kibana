@@ -32,6 +32,6 @@ export class InitialWalkthroughPage extends Component {
     //   </Switch>
     // </WalkthroughLayout>;
 
-    return <div />;
+    return <div>Walkthrough not fully implamented</div>;
   }
 }

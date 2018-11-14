@@ -31,19 +31,35 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
             {/* Redirects mapping */}
             <Switch>
               {/* License check (UI displays when license exists but is expired) */}
-              {get(libs.framework.info, 'license.expired', true) && (
-                <Route render={() => <Redirect to="/error/invalid_license" />} />
-              )}
+              <Route
+                render={props =>
+                  get(libs.framework.info, 'license.expired', true) &&
+                  !props.location.pathname.includes('/error/invalid_license') ? (
+                    <Redirect to="/error/invalid_license" />
+                  ) : null
+                }
+              />
 
               {/* Ensure security is eanabled for elastic and kibana */}
-              {!get(libs.framework.info, 'security.enabled', false) && (
-                <Route render={() => <Redirect to="/error/enforce_security" />} />
-              )}
+              <Route
+                render={props =>
+                  get(libs.framework.info, 'security.enabled', true) &&
+                  !props.location.pathname.includes('/error/enforce_security') ? (
+                    <Redirect to="/error/enforce_security" />
+                  ) : null
+                }
+              />
 
               {/* Make sure the user has correct permissions */}
-              {!libs.framework.currentUserHasOneOfRoles(
-                ['beats_admin'].concat(libs.framework.info.settings.defaultUserRoles)
-              ) && <Route render={() => <Redirect to="/error/no_access" />} />}
+              <Route
+                render={props =>
+                  !libs.framework.currentUserHasOneOfRoles(
+                    ['beats_admin'].concat(libs.framework.info.settings.defaultUserRoles)
+                  ) && !props.location.pathname.includes('/error/no_access') ? (
+                    <Redirect to="/error/no_access" />
+                  ) : null
+                }
+              />
 
               {/* If there are no beats or tags yet, redirect to the walkthrough */}
               <Route

@@ -11,7 +11,8 @@ export interface FrameworkAdapter {
   info: FrameworkInfo;
   currentUser: FrameworkUser;
   // Methods
-  renderUIAtPath(path: string, component: React.ReactElement<any>): Promise<void>;
+  init(): Promise<void>;
+  renderUIAtPath(path: string, component: React.ReactElement<any>): void;
   registerManagementSection(settings: {
     id?: string;
     name: string;

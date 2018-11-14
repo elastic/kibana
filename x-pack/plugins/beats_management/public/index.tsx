@@ -17,16 +17,7 @@ import { FrontendLibs } from './lib/types';
 import { AppRouter } from './router';
 
 async function startApp(libs: FrontendLibs) {
-  await libs.framework.renderUIAtPath(
-    '/management/beats_management',
-    <ThemeProvider theme={{ eui: euiVars }}>
-      <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
-        <BreadcrumbProvider>
-          <AppRouter libs={libs} />
-        </BreadcrumbProvider>
-      </UnstatedProvider>
-    </ThemeProvider>
-  );
+  await libs.framework.init();
 
   if (libs.framework.licenseIsAtLeast('standard')) {
     libs.framework.registerManagementSection({
@@ -39,6 +30,17 @@ async function startApp(libs: FrontendLibs) {
       basePath: BASE_PATH,
     });
   }
+
+  libs.framework.renderUIAtPath(
+    BASE_PATH,
+    <ThemeProvider theme={{ eui: euiVars }}>
+      <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
+        <BreadcrumbProvider>
+          <AppRouter libs={libs} />
+        </BreadcrumbProvider>
+      </UnstatedProvider>
+    </ThemeProvider>
+  );
 }
 
 startApp(compose());

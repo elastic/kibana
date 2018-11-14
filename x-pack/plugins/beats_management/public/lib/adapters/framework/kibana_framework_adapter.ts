@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuntimeFrameworkInfo } from './adapter_types';
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import { IScope } from 'angular';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import { FrameworkAdapter, FrameworkInfo, FrameworkUser } from './adapter_types';
+import { RuntimeFrameworkInfo } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private xpackInfo: FrameworkInfo | null = null;
@@ -52,11 +46,14 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     return this.shieldUser!;
   }
 
-  public async renderUIAtPath(path: string, component: React.ReactElement<any>) {
-    this.rootComponent = component;
-    this.registerPath(path);
+  public async init() {
     await this.hookAngular();
     this.hasInit = true;
+  }
+
+  public renderUIAtPath(path: string, component: React.ReactElement<any>) {
+    this.rootComponent = component;
+    this.registerPath(path);
   }
 
   public registerManagementSection(settings: {
@@ -125,12 +122,12 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   private async hookAngular() {
+    const module = require('ui/modules').get('app/sense');
+
     return new Promise(resolve => {
-      this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
-        const Private = $injector.get('Private');
+      module.run((Private: any) => {
         const xpackInfo = Private(this.XPackInfoProvider);
         let xpackInfoUnpacked: FrameworkInfo;
-
         try {
           xpackInfoUnpacked = {
             basePath: this.chrome.getBasePath(),
@@ -155,12 +152,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
             `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
           );
         }
-
         this.xpackInfo = xpackInfoUnpacked;
 
-        RuntimeFrameworkInfo.decode(this.xpackInfo);
-
-        this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+        // this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
 
         resolve();
       });
@@ -182,14 +176,18 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         controllerAs: this.PLUGIN_ID.replace('_', ''),
         // tslint:disable-next-line: max-classes-per-file
         controller: class KibanaFrameworkAdapterController {
-          constructor($scope: any, $route: any) {
-            $scope.$$postDigest(() => {
-              const elem = document.getElementById(
-                adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot'
-              );
-              ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
-              adapter.manageAngularLifecycle($scope, $route, elem);
-            });
+          constructor($scope: any, $route: any, $timeout: any) {
+            $timeout(
+              () => {
+                const elem = document.getElementById(
+                  adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot'
+                );
+                ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
+                adapter.manageAngularLifecycle($scope, $route, elem);
+              },
+              0,
+              false
+            );
             $scope.$onInit = () => {
               $scope.topNavMenu = [];
             };
@@ -200,7 +198,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   };
   private runFrameworkReadyCheck() {
     if (!this.hasInit) {
-      throw new Error('framework must have renderUIAtPath called before anything else');
+      throw new Error('framework must have init called before anything else');
     }
   }
 }
