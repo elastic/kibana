@@ -7,6 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import moment from 'moment-timezone';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
@@ -35,9 +36,6 @@ const HEADERS = {
   failed_step: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader', {
     defaultMessage: 'Failed step',
   }),
-  step_info: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.errorInfoHeader', {
-    defaultMessage: 'Error info',
-  }),
 };
 export class IndexLifecycleSummary extends Component {
 
@@ -50,11 +48,7 @@ export class IndexLifecycleSummary extends Component {
     Object.keys(HEADERS).forEach((fieldName, arrayIndex) => {
       const value = ilm[fieldName];
       let content;
-      if (fieldName === 'step_info') {
-        if (value) {
-          content = `${value.type}: ${value.reason}`;
-        }
-      } else if (fieldName === 'action_time') {
+      if (fieldName === 'action_time') {
         content = moment(value).format('YYYY-MM-DD HH:mm:ss');
       } else if (fieldName === 'policy') {
         content = (<EuiLink onClick={() => goToPolicy(value, urlService)}>{value}</EuiLink>);
@@ -95,6 +89,23 @@ export class IndexLifecycleSummary extends Component {
             />
           </h3>
         </EuiTitle>
+        { ilm.step_info && ilm.step_info.type ? (
+          <Fragment>
+            <EuiSpacer size="s"/>
+            <EuiCallOut
+              color="danger"
+              title={
+                <FormattedMessage
+                  defaultMessage="Index lifecycle error"
+                  id="xpack.indexLifecycleMgmt.indexManagementTable.summaryErrorMessage"
+                />
+              }
+              iconType="cross"
+            >
+              {ilm.step_info.type}: {ilm.step_info.reason}
+            </EuiCallOut>
+          </Fragment>
+        ) : null}
         <EuiSpacer size="s"/>
         <EuiFlexGroup>
           <EuiFlexItem>
