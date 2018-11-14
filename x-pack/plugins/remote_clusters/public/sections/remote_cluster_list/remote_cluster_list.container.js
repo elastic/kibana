@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 
 // import {
-//   getPageOfRemoteClusters,
+//   getRemoteClusters,
 //   isLoading
 // } from '../../store/selectors';
 
@@ -22,7 +22,25 @@ import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_lis
 
 const mapStateToProps = (/*state*/) => {
   return {
-    remoteClusters: [], //getPageOfRemoteClusters(state),
+    remoteClusters: [{
+      name: 'Remote cluster 1',
+      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
+    }, {
+      name: 'Remote cluster 2',
+      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
+    }, {
+      name: 'Remote cluster 3',
+      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
+    }, {
+      name: 'Remote cluster 4',
+      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
+    }, {
+      name: 'Remote cluster 5',
+      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
+    }, {
+      name: 'Remote cluster 6',
+      seeds: ['100.100.100.100', '100.100.100.100', '100.100.100.100', '100.100.100.100']
+    }], //getRemoteClusters(state),
     // isLoading: isLoading(state),
   };
 };

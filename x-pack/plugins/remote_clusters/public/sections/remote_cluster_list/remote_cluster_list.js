@@ -197,7 +197,7 @@ export class RemoteClusterListUi extends Component {
   }
 
   renderList() {
-    const { isLoading } = this.props;
+    const { isLoading, remoteClusters } = this.props;
 
     let table;
 
@@ -225,7 +225,7 @@ export class RemoteClusterListUi extends Component {
         </EuiFlexGroup>
       );
     } else {
-      table = <RemoteClusterTable />;
+      table = <RemoteClusterTable remoteClusters={remoteClusters} />;
     }
 
     return (

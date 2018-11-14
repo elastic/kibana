@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStore } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
+import thunk from 'redux-thunk';
+
+import { remoteClusters } from './reducers';
 
 function createRemoteClustersStore(initialState = {}) {
+  const enhancers = [ applyMiddleware(thunk) ];
   return createStore(
-    (state) => state,
+    remoteClusters,
     initialState,
+    compose(...enhancers)
   );
 }
 
