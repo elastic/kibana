@@ -217,6 +217,34 @@ describe('#buildFeaturesPrivileges', () => {
       },
     });
   });
+
+  test('includes navlink ui capability action when specified', () => {
+    const actions = new Actions(versionNumber);
+    const builder = new FeaturesPrivilegesBuilder(actions);
+    const features = [
+      {
+        id: 'foo',
+        name: '',
+        navLinkId: 'foo-navlink',
+        privileges: {
+          bar: {
+            app: [],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      },
+    ];
+    const result = builder.buildFeaturesPrivileges(features);
+    expect(result).toEqual({
+      foo: {
+        bar: [actions.login, actions.version, actions.ui.get('navLinks', 'foo-navlink')],
+      },
+    });
+  });
 });
 
 describe('#getApiReadActions', () => {
@@ -272,7 +300,7 @@ describe('#getApiReadActions', () => {
 });
 
 describe('#getUiReadActions', () => {
-  test(`includes api actions from the read privileges`, () => {
+  test(`includes ui actions from the read privileges`, () => {
     const actions = new Actions(versionNumber);
     const builder = new FeaturesPrivilegesBuilder(actions);
     const features: Feature[] = [
@@ -304,7 +332,7 @@ describe('#getUiReadActions', () => {
         id: 'bar',
         name: '',
         privileges: {
-          // this one should show up in the results
+          // this ui capability should show up in the results
           read: {
             app: [],
             savedObject: {

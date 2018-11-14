@@ -60,7 +60,6 @@ export class FeaturesPrivilegesBuilder {
         ? privilegeDefinition.api.map(api => this.actions.api.get(api))
         : []),
       ...privilegeDefinition.app.map(appId => this.actions.app.get(appId)),
-      ...(feature.navLinkId ? [this.actions.navLink.get(feature.navLinkId)] : []),
       ...flatten(
         privilegeDefinition.savedObject.all.map(types =>
           this.actions.savedObject.allOperations(types)
@@ -72,6 +71,7 @@ export class FeaturesPrivilegesBuilder {
         )
       ),
       ...privilegeDefinition.ui.map(ui => this.actions.ui.get(feature.id, ui)),
+      ...(feature.navLinkId ? [this.actions.ui.get('navLinks', feature.navLinkId)] : []),
     ]);
   }
 }

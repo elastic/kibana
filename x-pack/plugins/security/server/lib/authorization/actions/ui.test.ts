@@ -13,6 +13,13 @@ describe('#all', () => {
   });
 });
 
+describe('#allNavlinks', () => {
+  test('returns ui:navLinks/*', () => {
+    const uiActions = new UiActions();
+    expect(uiActions.all).toBe('ui:navLinks/*');
+  });
+});
+
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((featureId: any) => {
     test(`featureId of ${JSON.stringify(featureId)} throws error`, () => {
