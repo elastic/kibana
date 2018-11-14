@@ -7,8 +7,9 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function ClusterStatus({ stats }) {
+function ClusterStatusUi({ stats, intl }) {
   const {
     node_count: nodeCount,
     avg_memory_used: avgMemoryUsed,
@@ -19,22 +20,30 @@ export function ClusterStatus({ stats }) {
 
   const metrics = [
     {
-      label: 'Nodes',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.clusterStatus.nodesLabel', defaultMessage: 'Nodes'
+      }),
       value: nodeCount,
       dataTestSubj: 'node_count'
     },
     {
-      label: 'Memory',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.clusterStatus.memoryLabel', defaultMessage: 'Memory'
+      }),
       value: formatMetric(avgMemoryUsed, 'byte') + ' / ' + formatMetric(avgMemory, 'byte'),
       dataTestSubj: 'memory_used'
     },
     {
-      label: 'Events Received',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.clusterStatus.eventsReceivedLabel', defaultMessage: 'Events Received'
+      }),
       value: formatMetric(eventsInTotal, '0.[0]a'),
       dataTestSubj: 'events_in_total'
     },
     {
-      label: 'Events Emitted',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.logstash.clusterStatus.eventsEmittedLabel', defaultMessage: 'Events Emitted'
+      }),
       value: formatMetric(eventsOutTotal, '0.[0]a'),
       dataTestSubj: 'events_out_total'
     }
@@ -47,3 +56,5 @@ export function ClusterStatus({ stats }) {
     />
   );
 }
+
+export const ClusterStatus = injectI18n(ClusterStatusUi);
