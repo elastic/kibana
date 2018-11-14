@@ -16,35 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import {
+  ContextMenuAction,
+  ContextMenuActionsRegistryProvider,
+} from 'ui/embeddable';
 
-import React from 'react';
-
-import { EuiIcon } from '@elastic/eui';
-
-import { ContextMenuAction } from 'ui/embeddable';
-import { DashboardViewMode } from '../../../dashboard_view_mode';
-
-/**
- *
- * @return {ContextMenuAction}
- */
-export function getEditPanelAction() {
-  return new ContextMenuAction(
-    {
-      displayName: 'Edit visualization',
-      id: 'editPanel',
+class SamplePanelLink extends ContextMenuAction {
+  constructor() {
+    super({
+      displayName: 'Sample Panel Link',
+      id: 'samplePanelLink',
       parentPanelId: 'mainMenu',
-    },
-    {
-      icon: <EuiIcon type="pencil" />,
-      isDisabled: ({ embeddable }) =>
-        !embeddable || !embeddable.metadata || !embeddable.metadata.editUrl,
-      isVisible: ({ containerState }) => containerState.viewMode === DashboardViewMode.EDIT,
-      getHref: ({ embeddable }) => {
-        if (embeddable && embeddable.metadata.editUrl) {
-          return embeddable.metadata.editUrl;
-        }
-      },
-    }
-  );
+    });
+  }
+  getHref() {
+    return 'https://example.com/kibana/test';
+  }
 }
+
+ContextMenuActionsRegistryProvider.register(() => new SamplePanelLink());
