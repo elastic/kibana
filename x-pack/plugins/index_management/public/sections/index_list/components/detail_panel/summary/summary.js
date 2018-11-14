@@ -80,7 +80,7 @@ export class Summary extends React.PureComponent {
       }
       const cell = [
         <EuiDescriptionListTitle key={fieldName}>
-          <strong>services/</strong>
+          <strong>{HEADERS[fieldName]}:</strong>
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key={fieldName + "_desc"}>
           {content}
