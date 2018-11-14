@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { PLUGIN } from './plugin';
-export { BASE_PATH } from './base_path';
+export const BASE_PATH = '/management/elasticsearch/index_lifecycle_management/';
+export const PLUGIN_ID = 'index_lifecycle_management';

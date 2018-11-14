@@ -6,7 +6,7 @@
 
 import { mirrorPluginStatus } from '../../../../../server/lib/mirror_plugin_status';
 import { checkLicense } from '../check_license';
-import { PLUGIN } from '../../../common/constants';
+import { PLUGIN_ID } from '../../../common/constants';
 
 export function registerLicenseChecker(server) {
   const xpackMainPlugin = server.plugins.xpack_main;
@@ -16,6 +16,6 @@ export function registerLicenseChecker(server) {
   xpackMainPlugin.status.once('green', () => {
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
-    xpackMainPlugin.info.feature(PLUGIN.ID).registerLicenseCheckResultsGenerator(checkLicense);
+    xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
   });
 }

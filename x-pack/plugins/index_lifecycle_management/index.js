@@ -11,11 +11,11 @@ import { registerPoliciesRoutes } from './server/routes/api/policies';
 import { registerLifecycleRoutes } from './server/routes/api/lifecycle';
 import { registerIndexRoutes } from './server/routes/api/index';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
-import { PLUGIN } from './common/constants';
+import { PLUGIN_ID } from './common/constants';
 import { indexLifecycleDataEnricher } from './index_lifecycle_data';
 export function indexLifecycleManagement(kibana) {
   return new kibana.Plugin({
-    id: PLUGIN.ID,
+    id: PLUGIN_ID,
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main', 'index_management'],
     uiExports: {
@@ -23,7 +23,7 @@ export function indexLifecycleManagement(kibana) {
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          indexLifecycleManagementUiEnabled: config.get(`${PLUGIN.ID}.enabled`)
+          indexLifecycleManagementUiEnabled: config.get(`${PLUGIN_ID}.enabled`)
         };
       },
     },
