@@ -25,18 +25,31 @@ import { tabifyGetColumns } from './_get_columns';
  * produces a table, or a series of tables.
  *
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
- * @param {boolean} metricsAtAllLevels - setting to true will produce metrics for every bucket
- * @param {boolean} partialRows - setting to true will not remove rows with missing values
+ * @param {boolean} isHierarchical - reflects the value of vis.isHierarchical()
+ * @param {boolean} metricsAtAllLevels - reflects the value of vis.params.showMetricsAtAllLevels
+ * @param {boolean} partialRows - reflects the value of vis.params.showPartialRows
+ * @param {Object} timeRange - time range object, if provided
  */
-function TabbedAggResponseWriter(aggs, { metricsAtAllLevels = false, partialRows = false, timeRange } = {}) {
+function TabbedAggResponseWriter(aggs, {
+  isHierarchical = false,
+  metricsAtAllLevels = false,
+  partialRows = false,
+  timeRange
+} = {}) {
   this.rowBuffer = {};
   this.bucketBuffer = [];
   this.metricBuffer = [];
 
-  this.metricsForAllBuckets = metricsAtAllLevels;
-  this.partialRows = partialRows;
   this.aggs = aggs;
-  this.columns = tabifyGetColumns(aggs.getResponseAggs(), !metricsAtAllLevels);
+
+  // `this.isHierarchical` is unused in the current implementation. It is only included to prevent
+  // confusion with the existing `metricsAtAllLevels`, which merely indicates the value of
+  // `vis.params.showMetricsAtAllLevels`, but doesn't necessarily reflect the value of `vis.isHierarchical()`.
+  this.isHierarchical = isHierarchical;
+  this.showMetricsAtAllLevels = metricsAtAllLevels;
+  this.showPartialRows = partialRows;
+
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), !this.showMetricsAtAllLevels);
   this.aggStack = [...this.columns];
 
   this.rows = [];
@@ -67,7 +80,7 @@ TabbedAggResponseWriter.prototype.row = function () {
     this.rowBuffer[metric.id] = metric.value;
   });
 
-  if (!toArray(this.rowBuffer).length || (!this.partialRows && this.isPartialRow(this.rowBuffer))) {
+  if (!toArray(this.rowBuffer).length || (!this.showPartialRows && this.isPartialRow(this.rowBuffer))) {
     return;
   }
 

@@ -37,6 +37,7 @@ export interface RequestHandlerParams {
   partialRows?: boolean;
   inspectorAdapters?: Adapters;
   isHierarchical?: boolean;
+  metricsAtAllLevels?: boolean;
   visParams?: any;
 }
 

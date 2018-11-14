@@ -40,6 +40,7 @@ const CourierRequestHandlerProvider = function () {
       partialRows,
       isHierarchical,
       inspectorAdapters,
+      metricsAtAllLevels,
       queryFilter
     }) {
 
@@ -133,7 +134,8 @@ const CourierRequestHandlerProvider = function () {
 
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
       const tabifyParams = {
-        metricsAtAllLevels: isHierarchical,
+        isHierarchical,
+        metricsAtAllLevels,
         partialRows,
         timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
       };

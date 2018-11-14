@@ -75,7 +75,8 @@ export class VisualizeDataLoader {
     try {
       // searchSource is only there for courier request handler
       const requestHandlerResponse = await this.requestHandler({
-        partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
+        partialRows: this.vis.type.requiresPartialRows || this.vis.params.showPartialRows,
+        metricsAtAllLevels: this.vis.params.showMetricsAtAllLevels,
         isHierarchical: this.vis.isHierarchical(),
         visParams: this.vis.params,
         ...params,
