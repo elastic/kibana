@@ -43,7 +43,7 @@ export async function loadPolicies(withIndices, httpClient = getHttpClient()) {
 }
 
 export async function deletePolicy(policyName, httpClient = getHttpClient()) {
-  const response = await httpClient.delete(`${apiPrefix}/policies/${policyName}`);
+  const response = await httpClient.delete(`${apiPrefix}/policies/${encodeURIComponent(policyName)}`);
   return response.data;
 }
 

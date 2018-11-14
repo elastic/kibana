@@ -12,7 +12,7 @@ import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factor
 async function deletePolicies(policyNames, callWithRequest) {
   const params = {
     method: 'DELETE',
-    path: `/_ilm/policy/${policyNames}`,
+    path: `/_ilm/policy/${encodeURIComponent(policyNames)}`,
     // we allow 404 since they may have no policies
     ignore: [ 404 ]
   };
@@ -32,7 +32,7 @@ export function registerDeleteRoute(server) {
       const { policyNames } = request.params;
       try {
         await deletePolicies(policyNames, callWithRequest);
-        return;
+        return {};
       } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);

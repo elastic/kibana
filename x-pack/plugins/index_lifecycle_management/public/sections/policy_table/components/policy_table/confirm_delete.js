@@ -24,8 +24,8 @@ export class ConfirmDeleteUi extends Component {
     } catch (e) {
       const message = intl.formatMessage({
         id: 'xpack.indexLifecycleMgmt.confirmDelete.errorMessage',
-        defaultMessage: 'Error deleting policy}{policyName}',
-      }, { policyName });
+        defaultMessage: 'Error deleting policy {policyName} {message}',
+      }, { policyName, message: e.message });
       toastNotifications.addDanger(message);
     }
     if (callback) {

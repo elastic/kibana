@@ -15,7 +15,7 @@ async function retryLifecycle(callWithRequest, indexNames) {
     const indexName = indexNames[i];
     const params = {
       method: 'POST',
-      path: `/${indexName}/_ilm/retry`,
+      path: `/${encodeURIComponent(indexName)}/_ilm/retry`,
       ignore: [ 404 ],
     };
 

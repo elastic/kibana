@@ -116,7 +116,7 @@ export class PolicyTableUi extends Component {
         <EuiLink
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
-          href={`#${BASE_PATH}policies/edit/${value}`}
+          href={encodeURI(`#${BASE_PATH}policies/edit/?policyName=${encodeURIComponent(value)}`)}
         >
           {value}
         </EuiLink>

@@ -14,7 +14,8 @@ import {
   getLifecycle,
   getPolicies,
   isPolicyListLoaded,
-  getIsNewPolicy
+  getIsNewPolicy,
+  getSelectedOriginalPolicyName
 } from '../../store/selectors';
 import {
   setSelectedPolicy,
@@ -39,6 +40,7 @@ export const EditPolicy = connect(
       policies: getPolicies(state),
       isPolicyListLoaded: isPolicyListLoaded(state),
       isNewPolicy: getIsNewPolicy(state),
+      originalPolicyName: getSelectedOriginalPolicyName(state),
     };
   },
   {

@@ -5,6 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import queryString from 'query-string';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 import { goToPolicyList } from '../../services/navigation';
@@ -38,7 +39,6 @@ import { findFirstError } from '../../lib/find_errors';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { PolicyJsonFlyout } from './components/policy_json_flyout';
 import { ErrableFormRow } from './form_errors';
-
 class EditPolicyUi extends Component {
   static propTypes = {
     selectedPolicy: PropTypes.object.isRequired,
@@ -63,15 +63,30 @@ class EditPolicyUi extends Component {
       setSelectedPolicy(selectedPolicy);
     }
   };
+  getPolicyNameFromUri() {
+    // This method is necessary because react-router mangles path params that are encoded
+    // for example: http://localhost:5601/zpf/app/kibana#/management/elasticsearch/index_lifecycle_management/policies/edit/asdfasdFW%23@@$%25%23%5E%25%3F%23%25%5E&%3F%23%25%5E&%3F%23%25%5E&%3F%23%25%5E&%23%25%5E*%3F
+    // policyName winds up getting URI encoded twice to prevent an issue where the back button does not work
+    const { hash } = window.location;
+    if (!hash.includes('?')) {
+      return null;
+    }
+    const query = hash.split('?').pop();
+    const { policyName } = queryString.parse(query);
+    if (policyName) {
+      return decodeURIComponent(policyName);
+    } else {
+      return null;
+    }
+  }
   componentDidMount() {
     window.scrollTo(0, 0);
     const {
-      match: {
-        params: { policyName },
-      },
       isPolicyListLoaded,
       fetchPolicies,
     } = this.props;
+    // thi
+    const policyName = this.getPolicyNameFromUri();
     if (policyName) {
       if (isPolicyListLoaded) {
         this.selectPolicy(policyName);
@@ -123,14 +138,12 @@ class EditPolicyUi extends Component {
       intl,
       selectedPolicy,
       errors,
-      match: {
-        params: { policyName },
-      },
       setSaveAsNewPolicy,
       saveAsNewPolicy,
       setSelectedPolicyName,
       isNewPolicy,
-      lifecycle
+      lifecycle,
+      originalPolicyName
     } = this.props;
     const selectedPolicyName = selectedPolicy.name;
     const { isShowingErrors } = this.state;
@@ -152,8 +165,8 @@ class EditPolicyUi extends Component {
                   })
                   : intl.formatMessage({
                     id: 'xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage',
-                    defaultMessage: 'Edit index lifecycle policy {selectedPolicyName}',
-                  }, { selectedPolicyName }) }
+                    defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
+                  }, { originalPolicyName }) }
               </h4>
             </EuiTitle>
             <div className="euiAnimateContentLoad">
@@ -163,7 +176,7 @@ class EditPolicyUi extends Component {
               </EuiText>
               <EuiSpacer />
               <Fragment>
-                {policyName ? (
+                {isNewPolicy ? null : (
                   <Fragment>
                     <Fragment>
                       <EuiText>
@@ -183,28 +196,26 @@ class EditPolicyUi extends Component {
                       </EuiText>
                       <EuiSpacer />
                     </Fragment>
-                    {policyName ? (
-                      <EuiFormRow>
-                        <EuiSwitch
-                          style={{ maxWidth: '100%' }}
-                          checked={saveAsNewPolicy}
-                          onChange={async e => {
-                            await setSaveAsNewPolicy(e.target.checked);
-                          }}
-                          label={
-                            <span>
-                              <FormattedMessage
-                                id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
-                                defaultMessage="Save this as a new policy"
-                              />
-                            </span>
-                          }
-                        />
-                      </EuiFormRow>
-                    ) : null}
+                    <EuiFormRow>
+                      <EuiSwitch
+                        style={{ maxWidth: '100%' }}
+                        checked={saveAsNewPolicy}
+                        onChange={async e => {
+                          await setSaveAsNewPolicy(e.target.checked);
+                        }}
+                        label={
+                          <span>
+                            <FormattedMessage
+                              id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
+                              defaultMessage="Save this as a new policy"
+                            />
+                          </span>
+                        }
+                      />
+                    </EuiFormRow>
                   </Fragment>
-                ) : null}
-                {saveAsNewPolicy || !policyName ? (
+                )}
+                {saveAsNewPolicy || isNewPolicy ? (
                   <Fragment>
                     <ErrableFormRow
                       id={STRUCTURE_POLICY_NAME}
@@ -277,7 +288,7 @@ class EditPolicyUi extends Component {
               ) : null}
               {this.state.isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout
-                  policyName={policyName || ''}
+                  policyName={selectedPolicyName || ''}
                   lifecycle={JSON.stringify(lifecycle, null, 4)}
                   close={() => this.setState({ isShowingPolicyJsonFlyout: false })}
                 />

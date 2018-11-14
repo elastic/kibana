@@ -20,7 +20,7 @@ async function createLifecycle(callWithRequest, lifecycle) {
   };
   const params = {
     method: 'PUT',
-    path: `/_ilm/policy/${lifecycle.name}`,
+    path: `/_ilm/policy/${encodeURIComponent(lifecycle.name)}`,
     ignore: [ 404 ],
     body,
   };
