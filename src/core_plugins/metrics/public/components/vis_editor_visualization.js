@@ -39,6 +39,7 @@ class VisEditorVisualization extends Component {
     this.onSizeHandleKeyDown = this.onSizeHandleKeyDown.bind(this);
 
     this._visEl = React.createRef();
+    this._subscription = null;
   }
 
   handleMouseDown() {
@@ -67,6 +68,9 @@ class VisEditorVisualization extends Component {
     if (this._handler) {
       this._handler.destroy();
     }
+    if(this._subscription) {
+      this._subscription.unsubscribe();
+    }
   }
 
   onUpdate = () => {
@@ -88,6 +92,10 @@ class VisEditorVisualization extends Component {
         listenOnChange: false,
         timeRange: this.props.timeRange,
         appState: this.props.appState,
+      });
+
+      this._subscription = this._handler.data$.subscribe((data) => {
+        this.props.onDataChange(data);
       });
 
       if (this._handlerUpdateHasAlreadyBeenTriggered) {

@@ -13,7 +13,7 @@ const APP_ID = 'infra';
 
 FeatureCatalogueRegistryProvider.register(() => ({
   id: 'infraops',
-  title: 'InfraOps',
+  title: 'Infrastructure',
   description:
     'Explore infrastructure metrics and logs for common servers, containers, and services.',
   icon: 'infraApp',

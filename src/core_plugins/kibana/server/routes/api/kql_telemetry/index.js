@@ -26,9 +26,9 @@ export function registerKqlTelemetryApi(server) {
     method: 'POST',
     config: {
       validate: {
-        payload: {
+        payload: Joi.object({
           opt_in: Joi.bool().required(),
-        },
+        }),
       },
       tags: ['api'],
     },

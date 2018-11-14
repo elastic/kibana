@@ -44,7 +44,7 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
               formatterTemplate: '{{value}}/s',
             },
             tx: {
-              name: 'Outbound (RX)',
+              name: 'Outbound (TX)',
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.bits,
               formatterTemplate: '{{value}}/s',

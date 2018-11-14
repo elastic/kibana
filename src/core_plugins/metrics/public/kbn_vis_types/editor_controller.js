@@ -18,48 +18,27 @@
  */
 
 import React from 'react';
-import chrome from 'ui/chrome';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { FetchFieldsProvider } from '../lib/fetch_fields';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
 
 function ReactEditorControllerProvider(Private, config) {
-  const fetchFields = Private(FetchFieldsProvider);
-  const savedObjectsClient = chrome.getSavedObjectsClient();
-
   class ReactEditorController {
     constructor(el, savedObj) {
       this.el = el;
       this.savedObj = savedObj;
       this.vis = savedObj.vis;
-      this.vis.fields = {};
     }
 
-    render(params) {
-      return new Promise((resolve) => {
-        Promise.resolve().then(() => {
-          if (this.vis.params.index_pattern === '') {
-            return savedObjectsClient.get('index-pattern', config.get('defaultIndex')).then((indexPattern) => {
-              this.vis.params.index_pattern = indexPattern.attributes.title;
-            });
-          }
-        }).then(() => {
-          const indexPatterns = extractIndexPatterns(this.vis);
-          fetchFields(indexPatterns).then(fields => {
-            this.vis.fields = { ...fields, ...this.vis.fields };
-            const Component = this.vis.type.editorConfig.component;
-            render(<Component
-              config={config}
-              vis={this.vis}
-              savedObj={this.savedObj}
-              timeRange={params.timeRange}
-              renderComplete={resolve}
-              isEditorMode={true}
-              appState={params.appState}
-            />, this.el);
-          });
-        });
-      });
+    async render(params) {
+      const Component = this.vis.type.editorConfig.component;
+      render(<Component
+        config={config}
+        vis={this.vis}
+        savedObj={this.savedObj}
+        timeRange={params.timeRange}
+        renderComplete={() => {}}
+        isEditorMode={true}
+        appState={params.appState}
+      />, this.el);
     }
 
     resize() {
