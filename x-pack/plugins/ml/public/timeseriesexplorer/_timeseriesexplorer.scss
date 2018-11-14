@@ -162,23 +162,23 @@
       stroke: #aaaaaa; // Needs variable
     }
 
-    .metric-value.critical {
+    .anomaly-marker.critical {
       fill: $mchColorCritical;
     }
 
-    .metric-value.major {
+    .anomaly-marker.major {
       fill: $mchColorMajor;
     }
 
-    .metric-value.minor {
+    .anomaly-marker-value.minor {
       fill: $mchColorMinor;
     }
 
-    .metric-value.warning {
+    .anomaly-marker.warning {
       fill: $mchColorWarning;
     }
 
-    .metric-value.low {
+    .anomaly-marker.low {
       fill: #d2e9f7; // Needs variable
     }
 
