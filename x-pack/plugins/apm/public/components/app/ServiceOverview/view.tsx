@@ -6,7 +6,6 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { Component } from 'react';
-import { RRRRenderResponse } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { loadAgentStatus } from '../../../services/rest/apm';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
