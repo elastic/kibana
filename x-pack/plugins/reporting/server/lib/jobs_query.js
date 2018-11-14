@@ -136,6 +136,10 @@ function jobsQueryFn(server) {
         .then((hits) => {
           if (hits.length !== 1) return;
           return hits[0];
+        })
+        .catch((reject) => {
+          console.error(`rejecting getHits on get job query for: ${id}`, JSON.stringify(body));
+          console.error(reject);
         });
     }
   };

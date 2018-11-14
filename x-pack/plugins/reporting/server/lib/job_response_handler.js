@@ -42,6 +42,10 @@ function jobResponseHandlerFn(server) {
         }
 
         return response;
+      })
+      .catch((reject) => {
+        console.error(`rejecting job query for docId: ${docId}`);
+        console.error(reject);
       });
   };
 }
