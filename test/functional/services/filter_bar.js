@@ -20,7 +20,6 @@
 import { By, Key } from 'selenium-webdriver';
 
 export function FilterBarProvider({ getService, getPageObjects }) {
-  const wait = getService('wait');
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
   const find = getService('find');

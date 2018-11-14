@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { Key } from 'selenium-webdriver';
-
 const webdriver = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
