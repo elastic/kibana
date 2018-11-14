@@ -48,10 +48,15 @@ export class BatchIndexHelper {
       this.log.debug(`Batch index helper is cancelled. Skip.`);
       return;
     }
-    this.log.info(`Batch indexed ${this.batch.length / 2} documents.`);
-    const res = await this.client.bulk({ body: this.batch });
-    this.batch = [];
-    return res;
+    try {
+      this.log.info(`Batch indexed ${this.batch.length / 2} documents.`);
+      return await this.client.bulk({ body: this.batch });
+    } catch (error) {
+      // TODO(mengwei): should we throw this exception again?
+      this.log.error(`Batch index ${this.batch.length / 2} documents error: ${error}. Skip.`);
+    } finally {
+      this.batch = [];
+    }
   }
 
   public isCancelled() {
