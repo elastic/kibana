@@ -59,8 +59,8 @@ addBannerExtension((indices) =>{
     }),
   };
 });
-addSummaryExtension((index, urlService) => {
-  return <IndexLifecycleSummary index={index} urlService={urlService} />;
+addSummaryExtension((index) => {
+  return <IndexLifecycleSummary index={index} />;
 });
 
 

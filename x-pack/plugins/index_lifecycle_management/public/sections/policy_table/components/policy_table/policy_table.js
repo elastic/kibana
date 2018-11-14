@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { BASE_PATH } from '../../../../../common/constants';
 import { NoMatch } from '../no_match';
+import { getPolicyPath } from '../../../../services/navigation';
 import {
   EuiButton,
   EuiLink,
@@ -158,7 +159,7 @@ export class PolicyTableUi extends Component {
         <EuiLink
           className="policyTable__link"
           data-test-subj="policyTablePolicyNameLink"
-          href={encodeURI(`#${BASE_PATH}policies/edit/?policyName=${encodeURIComponent(value)}`)}
+          href={getPolicyPath(value)}
         >
           {value}
         </EuiLink>

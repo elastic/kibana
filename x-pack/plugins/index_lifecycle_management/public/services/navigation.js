@@ -18,6 +18,6 @@ export const goToPolicyList = () => {
   urlService.change(`${BASE_PATH}policies`);
 };
 
-export const goToPolicy = (policyName, urlService = getUrlService()) => {
-  urlService.change(`${BASE_PATH}policies/edit/${policyName}`);
+export const getPolicyPath = (policyName) => {
+  return encodeURI(`#${BASE_PATH}policies/edit/?policyName=${encodeURIComponent(policyName)}`);
 };

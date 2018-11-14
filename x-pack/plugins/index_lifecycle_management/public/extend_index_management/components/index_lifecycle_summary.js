@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n }  from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { goToPolicy } from '../../services/navigation';
+import { getPolicyPath } from '../../services/navigation';
 const HEADERS = {
   policy: i18n.translate('xpack.indexLifecycleMgmt.summary.headers.lifecyclePolicyHeader', {
     defaultMessage: 'Lifecycle policy',
@@ -40,7 +40,7 @@ const HEADERS = {
 export class IndexLifecycleSummary extends Component {
 
   buildRows() {
-    const { index: { ilm = {} }, urlService } = this.props;
+    const { index: { ilm = {} } } = this.props;
     const rows = {
       left: [],
       right: []
@@ -51,7 +51,7 @@ export class IndexLifecycleSummary extends Component {
       if (fieldName === 'action_time') {
         content = moment(value).format('YYYY-MM-DD HH:mm:ss');
       } else if (fieldName === 'policy') {
-        content = (<EuiLink onClick={() => goToPolicy(value, urlService)}>{value}</EuiLink>);
+        content = (<EuiLink href={getPolicyPath(value)}>{value}</EuiLink>);
       } else {
         content = value;
       }
