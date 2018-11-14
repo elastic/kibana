@@ -246,14 +246,16 @@ export class VectorStyle {
     return color;
   }
 
-  _getMBOpacity() {
+  _getMBOpacity(isTemp) {
     const DEFAULT_OPACITY = 0.5;
-    return this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
+    return isTemp
+      ? .3
+      : this._descriptor.properties.alphaValue || DEFAULT_OPACITY;
   }
 
 
-  setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId) {
-    const opacity = this._getMBOpacity();
+  setMBPaintProperties(mbMap, sourceId, fillLayerId, lineLayerId, isTemp) {
+    const opacity = this._getMBOpacity(isTemp);
     if (this._descriptor.properties.fillColor) {
       const color = this._getMBColor('fillColor');
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
