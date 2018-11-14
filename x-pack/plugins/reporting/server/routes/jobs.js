@@ -95,8 +95,10 @@ export function jobs(server) {
 
       try {
         let response = await jobResponseHandler(request.pre.management.jobTypes, request.pre.user, h, { docId });
-        if (!response.isBoom) {
+        if (response && !response.isBoom) {
           response = response.header('accept-ranges', 'none');
+        } else if (!response) {
+          response = boom.badImplementation('error fetching the download');
         }
 
         return response;
