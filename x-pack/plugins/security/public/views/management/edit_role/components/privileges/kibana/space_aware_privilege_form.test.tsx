@@ -37,7 +37,12 @@ const buildProps = (customProps: any = {}) => {
         name: 'Marketing',
       },
     ],
-    userProfile: { hasCapability: () => true },
+    uiCapabilities: {
+      navLinks: {},
+      spaces: {
+        manage: true,
+      },
+    },
     editable: true,
     kibanaAppPrivileges: ['all', 'read'],
     onChange: jest.fn(),
@@ -236,13 +241,9 @@ describe('<SpaceAwarePrivilegeForm>', () => {
   describe('with user profile disabling "manageSpaces"', () => {
     it('renders a warning message instead of the privilege form', () => {
       const props = buildProps({
-        userProfile: {
-          hasCapability: (capability: string) => {
-            if (capability === 'manageSpaces') {
-              return false;
-            }
-            throw new Error(`unexpected call to hasCapability: ${capability}`);
-          },
+        uiCapabilities: {
+          navLinks: {},
+          spaces: { manage: false },
         },
       });
 

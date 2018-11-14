@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import { UiSettingsState } from '../ui_settings';
-import { deepFreeze } from './deep_freeze';
+import { deepFreeze } from '../utils/deep_freeze';
 
 export interface InjectedMetadataParams {
   injectedMetadata: {

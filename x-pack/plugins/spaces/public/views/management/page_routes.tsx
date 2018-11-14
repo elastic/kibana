@@ -14,7 +14,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 // @ts-ignore
 import routes from 'ui/routes';
-import { UserProfile } from '../../../../xpack_main/common/user_profile';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
 import { SpacesGridPage } from './spaces_grid';
@@ -28,8 +27,7 @@ routes.when('/management/spaces/list', {
     $http: any,
     chrome: any,
     spacesNavState: SpacesNavState,
-    spaceSelectorURL: string,
-    userProfile: UserProfile
+    spaceSelectorURL: string
   ) {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
@@ -38,11 +36,7 @@ routes.when('/management/spaces/list', {
 
       render(
         <I18nProvider>
-          <SpacesGridPage
-            spacesManager={spacesManager}
-            spacesNavState={spacesNavState}
-            userProfile={userProfile}
-          />
+          <SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />
         </I18nProvider>,
         domNode
       );
@@ -64,8 +58,7 @@ routes.when('/management/spaces/create', {
     $http: any,
     chrome: any,
     spacesNavState: SpacesNavState,
-    spaceSelectorURL: string,
-    userProfile: UserProfile
+    spaceSelectorURL: string
   ) {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
@@ -74,11 +67,7 @@ routes.when('/management/spaces/create', {
 
       render(
         <I18nProvider>
-          <ManageSpacePage
-            spacesManager={spacesManager}
-            spacesNavState={spacesNavState}
-            userProfile={userProfile}
-          />
+          <ManageSpacePage spacesManager={spacesManager} spacesNavState={spacesNavState} />
         </I18nProvider>,
         domNode
       );
@@ -106,8 +95,7 @@ routes.when('/management/spaces/edit/:spaceId', {
     chrome: any,
     Private: any,
     spacesNavState: SpacesNavState,
-    spaceSelectorURL: string,
-    userProfile: UserProfile
+    spaceSelectorURL: string
   ) {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById(reactRootNodeId);
@@ -122,7 +110,6 @@ routes.when('/management/spaces/edit/:spaceId', {
             spaceId={spaceId}
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
-            userProfile={userProfile}
           />
         </I18nProvider>,
         domNode
