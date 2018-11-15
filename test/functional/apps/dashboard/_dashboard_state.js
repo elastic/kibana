@@ -130,6 +130,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.closeInspector();
 
       await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
 
       await PageObjects.visualize.clickMapZoomIn();

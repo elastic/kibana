@@ -7,4 +7,3 @@
 
 
 import './forecasting_modal_directive';
-import './styles/main.less';
