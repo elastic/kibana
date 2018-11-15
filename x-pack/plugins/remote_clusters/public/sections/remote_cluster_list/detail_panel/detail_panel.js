@@ -9,6 +9,9 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -16,10 +19,13 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+
+import { ConnectionStatus } from '../components';
 
 export class DetailPanelUi extends Component {
   static propTypes = {
@@ -34,25 +40,63 @@ export class DetailPanelUi extends Component {
     super(props);
   }
 
-  renderTabs() {
-    const { cluster } = this.props;
-
-    if (!cluster) {
-      return;
-    }
-
-    return (
-      <div>Remote cluster details</div>
-    );
-  }
-
   renderCluster() {
-    // const { cluster, intl } = this.props;
+    const { cluster } = this.props;
+    const { connected, seeds, num_nodes_connected: connectedNodesCount } = cluster;
+
+    const renderedSeeds = seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>);
 
     return (
       <Fragment>
         <EuiFlyoutBody>
-          <div>Remote cluster details</div>
+          <EuiDescriptionList>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.connectedLabel"
+                      defaultMessage="Connection"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  <ConnectionStatus isConnected={connected} />
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.connectedNodesLabel"
+                      defaultMessage="Connected nodes"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {connectedNodesCount}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.seedsLabel"
+                  defaultMessage="Seeds"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription>
+              {renderedSeeds}
+            </EuiDescriptionListDescription>
+          </EuiDescriptionList>
         </EuiFlyoutBody>
       </Fragment>
     );
@@ -98,9 +142,7 @@ export class DetailPanelUi extends Component {
           </EuiFlexGroup>
         </EuiFlyoutBody>
       );
-    }
-
-    if (cluster) {
+    } else if (cluster) {
       content = this.renderCluster();
     } else {
       content = (

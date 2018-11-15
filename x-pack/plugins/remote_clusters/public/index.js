@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -13,12 +13,9 @@ import { management } from 'ui/management';
 import routes from 'ui/routes';
 
 import { CRUD_APP_BASE_PATH } from './constants';
-import template from './main.html';
-
-import { setHttpClient } from './services';
-import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
-
+import { setHttpClient, setUserHasLeftApp } from './services';
 import { App } from './app';
+import template from './main.html';
 import { remoteClustersStore } from './store';
 
 const esSection = management.getSection('elasticsearch');
@@ -52,10 +49,33 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
       // e.g. to check license status per request.
       setHttpClient($http);
 
+      // If returning to the app, we'll need to reset this state.
+      setUserHasLeftApp(false);
+
       $scope.$$postDigest(() => {
-        const elem = document.getElementById('remoteClustersReactRoot');
-        renderReact(elem);
-        manageAngularLifecycle($scope, $route, elem);
+        const appElement = document.getElementById('remoteClustersReactRoot');
+        renderReact(appElement);
+
+        const appRoute = $route.current;
+        const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
+          const currentRoute = $route.current;
+
+          const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
+
+          // When we navigate within rollups, prevent Angular from re-matching the route and
+          // rebuilding the app.
+          if (isNavigationInApp) {
+            $route.current = appRoute;
+          } else {
+            // Set internal flag so we can prevent reacting to the route change internally.
+            setUserHasLeftApp(true);
+          }
+        });
+
+        $scope.$on('$destroy', () => {
+          stopListeningForLocationChange();
+          unmountComponentAtNode(appElement);
+        });
       });
     }
   }

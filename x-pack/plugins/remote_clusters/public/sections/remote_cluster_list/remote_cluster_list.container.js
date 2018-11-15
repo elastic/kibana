@@ -15,8 +15,8 @@ import {
 import {
   loadClusters,
   refreshClusters,
-  // openDetailPanel,
-  // closeDetailPanel,
+  openDetailPanel,
+  closeDetailPanel,
 } from '../../store/actions';
 
 import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_list';
@@ -37,11 +37,11 @@ const mapDispatchToProps = (dispatch) => {
     refreshClusters: () => {
       dispatch(refreshClusters());
     },
-    openDetailPanel: (/*remoteClusterId*/) => {
-      // dispatch(openDetailPanel({ remoteClusterId }));
+    openDetailPanel: (name) => {
+      dispatch(openDetailPanel({ name }));
     },
     closeDetailPanel: () => {
-      // dispatch(closeDetailPanel());
+      dispatch(closeDetailPanel());
     },
   };
 };

@@ -9,6 +9,8 @@ export const getClustersByName = (state) => state.clusters.byName;
 export const getClusterByName = (state, name) => getClustersByName(state)[name];
 
 export const isDetailPanelOpen = (state) => state.detailPanel.isOpen;
+export const getDetailPanelCluster = (state) => getClusterByName(state, state.detailPanel.clusterName);
+export const getDetailPanelClusterName = (state) => state.detailPanel.clusterName;
 
 export const isLoading = (state) => state.clusters.isLoading;
 export const clusterLoadError = (state) => state.clusters.clusterLoadError;

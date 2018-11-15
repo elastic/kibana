@@ -9,9 +9,9 @@ import { DetailPanel as DetailPanelView } from './detail_panel';
 
 import {
   isDetailPanelOpen,
-  // getDetailPanelCluster,
-  // getDetailPanelClusterName,
-  // isLoading,
+  getDetailPanelCluster,
+  getDetailPanelClusterName,
+  isLoading,
 } from '../../../store/selectors';
 
 import {
@@ -21,9 +21,9 @@ import {
 const mapStateToProps = (state) => {
   return {
     isOpen: isDetailPanelOpen(state),
-    // isLoading: isLoading(state),
-    // cluster: getDetailPanelCluster(state),
-    // clusterName: getDetailPanelClusterName(state),
+    isLoading: isLoading(state),
+    cluster: getDetailPanelCluster(state),
+    clusterName: getDetailPanelClusterName(state),
   };
 };
 
