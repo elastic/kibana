@@ -6,5 +6,5 @@
 
 describe('toggleUiCapabilities', () => {
   // TODO: implement tests once spaces have the concept of disabled features
-  it('should be tested', () => null);
+  // it('should be tested', () => null);
 });
