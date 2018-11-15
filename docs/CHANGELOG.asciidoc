@@ -93,14 +93,19 @@ See <<breaking-changes>>.
 
 * {kib} gets stuck when upgrading from an older version when {security} is enabled.
 +
-After upgrading from an older version of {kib} while using {security}, if you get a permission error when you start {kib} for the first time, do the following steps to recover:
+After upgrading from an older version of {kib} while using {security}, 
+if you get a permission error when you start {kib} for the first time, do the following steps to recover:
 +
-1. Stop Kibana
-2. Delete the `.kibana_1` and `.kibana_2` indices that were created
-3. Create a new role in Elasticsearch that has the `all` permission for the `.tasks` index
-4. Create a new user in Elasticsearch that has the `kibana_system` role as well as the new role you just created
-5. Update `elasticsearch.username` and `elasticsearch.password` in kibana.yml with the details from that new user
-6. Start Kibana
+. Stop {kib}.
+. Delete the `.kibana_1` and `.kibana_2` indices that were created.
+. Create a new role in Elasticsearch that has the `create_index`, `create`, and 
+`read`  permission for the `.tasks` index.
+. Create a new user in {es} that has the `kibana_system` role as well as the new role you just created.
+. Update `elasticsearch.username` and `elasticsearch.password` in `kibana.yml` with the details from that new user.
+. If using a {kib} secure settings keystore, remove keys `elasticsearch.username` and `elasticsearch.password`
+from the keystore using the kibana-keystore tool. Add these keys back to the keystore using the new user 
+and password as values.
+. Start Kibana.
 +
 This will be fixed in a future bug fix release, at which time you can go back to using the built-in `kibana` user.
 
