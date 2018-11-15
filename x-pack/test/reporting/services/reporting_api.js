@@ -30,7 +30,6 @@ export function ReportingAPIProvider({ getService }) {
             .set('kbn-xsrf', 'xxx');
           log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
           if (response.statusCode !== JOB_IS_PENDING_CODE) {
-            if (response.statusCode !== 200) log.debug(response);
             clearInterval(intervalId);
             resolve(response.statusCode);
           }
