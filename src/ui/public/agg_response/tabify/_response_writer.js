@@ -32,7 +32,7 @@ import { tabifyGetColumns } from './_get_columns';
  */
 function TabbedAggResponseWriter(aggs, {
   isHierarchical = false,
-  metricsAtAllLevels = false,
+  metricsAtAllLevels,
   partialRows = false,
   timeRange
 } = {}) {
@@ -41,15 +41,11 @@ function TabbedAggResponseWriter(aggs, {
   this.metricBuffer = [];
 
   this.aggs = aggs;
-
-  // `this.isHierarchical` is unused in the current implementation. It is only included to prevent
-  // confusion with the existing `metricsAtAllLevels`, which merely indicates the value of
-  // `vis.params.showMetricsAtAllLevels`, but doesn't necessarily reflect the value of `vis.isHierarchical()`.
-  this.isHierarchical = isHierarchical;
-  this.showMetricsAtAllLevels = metricsAtAllLevels;
   this.showPartialRows = partialRows;
+  // Fall back to `isHierarchical` if this vis doesn't have the showMetricsAtAllLevels param
+  this.metricsAtAllLevels = typeof metricsAtAllLevels !== 'undefined' ? metricsAtAllLevels : isHierarchical;
 
-  this.columns = tabifyGetColumns(aggs.getResponseAggs(), !this.showMetricsAtAllLevels);
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), !this.metricsAtAllLevels);
   this.aggStack = [...this.columns];
 
   this.rows = [];
