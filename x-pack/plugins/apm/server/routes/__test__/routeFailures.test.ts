@@ -13,49 +13,47 @@ import { initStatusApi } from '../status_check';
 import { initTracesApi } from '../traces';
 import { initTransactionsApi } from '../transactions';
 
-async function testRouteFailures(init: (server: Server) => void) {
-  const mockServer = { route: jest.fn() };
-  init((mockServer as unknown) as Server);
-  expect(mockServer.route).toHaveBeenCalled();
-
-  const routes = mockServer.route.mock.calls;
-  const mockReq = {
-    params: {},
-    query: {},
-    pre: {
-      setup: {
-        config: { get: jest.fn() },
-        client: jest.fn(() => Promise.reject(new Error('request failed')))
-      }
-    }
-  };
-
-  routes.forEach(async (route, i) => {
-    test(`route ${i + 1} of ${
-      routes.length
-    } should fail with a Boom error`, async () => {
-      try {
-        await route[0].handler(mockReq);
-      } catch (err) {
-        expect(err.isBoom).toEqual(true);
-        return;
-      }
-
-      throw new Error('Route succeeded when it should have failed');
-    });
-  });
-}
-
 describe('route handlers fail properly', () => {
-  let consoleError: () => void;
+  let consoleErrorSpy: any;
+
+  async function testRouteFailures(init: (server: Server) => void) {
+    const mockServer = { route: jest.fn() };
+    init((mockServer as unknown) as Server);
+    expect(mockServer.route).toHaveBeenCalled();
+
+    const routes = mockServer.route.mock.calls;
+    const mockReq = {
+      params: {},
+      query: {},
+      pre: {
+        setup: {
+          config: { get: jest.fn() },
+          client: jest.fn(() => Promise.reject(new Error('request failed')))
+        }
+      }
+    };
+
+    routes.forEach(async (route, i) => {
+      test(`route ${i + 1} of ${
+        routes.length
+      } should fail with a Boom error`, async () => {
+        await expect(route[0].handler(mockReq)).rejects.toMatchObject({
+          message: 'request failed',
+          isBoom: true
+        });
+        expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+  }
 
   beforeEach(() => {
-    consoleError = window.console.error;
-    window.console.error = jest.fn();
+    consoleErrorSpy = jest
+      .spyOn(global.console, 'error')
+      .mockImplementation(undefined);
   });
 
   afterEach(() => {
-    window.console.error = consoleError;
+    consoleErrorSpy.mockRestore();
   });
 
   describe('error routes', async () => {
