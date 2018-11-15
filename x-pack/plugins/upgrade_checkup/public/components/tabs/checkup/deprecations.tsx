@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { StatelessComponent } from 'react';
+import React, { ReactNode, StatelessComponent } from 'react';
 
 import {
   EuiAccordion,
@@ -23,6 +23,7 @@ import {
   MIGRATION_DEPRECATION_LEVEL as LEVEL,
 } from 'src/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../server/lib/es_migration_apis';
+import { IndexDeprecation, IndexDeprecationTable } from './index_table';
 import { GroupByOption, LevelFilterOption } from './types';
 
 // TODO: use TS enum?
@@ -53,68 +54,139 @@ const filterDeps = (levels: Set<LevelFilterOption>) => (dep: DeprecationInfo) =>
   return levels.has(dep.level as LevelFilterOption);
 };
 
-const DeprecationAction: StatelessComponent<{ deprecation: DeprecationInfo }> = ({
-  deprecation,
-}) => {
-  const action = ACTION_MAP[deprecation.level];
-  if (action) {
-    return (
-      <div>
+interface DeprecationCellProps {
+  headline?: string;
+  healthColor?: string;
+  docUrl: string;
+  items: Array<{ title: string; body: string }>;
+  children?: ReactNode;
+}
+
+const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
+  headline,
+  healthColor,
+  docUrl,
+  items,
+  children,
+}) => (
+  <EuiFlexItem className="upgrade-checkup__deprecation-cell">
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem grow>
+        {headline && (
+          <EuiText>
+            <h4>
+              {healthColor && <EuiIcon type="dot" color={healthColor} />} {headline}
+            </h4>
+          </EuiText>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton size="s" href={docUrl} target="_blank">
+          Read Documentation
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+
+    {items.map(item => (
+      <div key={item.title}>
         <EuiSpacer size="m" />
-        <EuiText>
-          <h6>Action</h6>
-          <p>{action}</p>
+        <EuiText color="subdued">
+          <h6>{item.title}</h6>
+          <p>{item.body}</p>
         </EuiText>
       </div>
+    ))}
+
+    {children && (
+      <div>
+        <EuiSpacer size="m" />
+        {children}
+      </div>
+    )}
+  </EuiFlexItem>
+);
+
+const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationInfo }> = ({
+  deprecation,
+}) => {
+  const items = [];
+
+  if (deprecation.index) {
+    items.push({ title: 'Index', body: deprecation.index });
+  }
+
+  const action = ACTION_MAP[deprecation.level];
+  if (action) {
+    items.push({ title: 'Action', body: action });
+  }
+
+  if (deprecation.details) {
+    items.push({ title: 'Details', body: deprecation.details });
+  }
+
+  return (
+    <DeprecationCell
+      headline={deprecation.message}
+      healthColor={COLOR_MAP[deprecation.level]}
+      docUrl={deprecation.url}
+      items={items}
+    />
+  );
+};
+
+interface DeprecationSummary {
+  message: string;
+  url: string;
+  level: string;
+}
+
+interface IndexDeprecationProps {
+  deprecation: DeprecationSummary;
+  indices: IndexDeprecation[];
+}
+
+const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
+  const items = [];
+
+  const action = ACTION_MAP[deprecation.level];
+  if (action) {
+    items.push({ title: 'Action', body: action });
+  }
+
+  return (
+    <DeprecationCell
+      headline={deprecation.message}
+      healthColor={COLOR_MAP[deprecation.level]}
+      docUrl={deprecation.url}
+      items={items}
+    >
+      <IndexDeprecationTable indices={indices} />
+    </DeprecationCell>
+  );
+};
+
+const DeprecationList: StatelessComponent<{
+  deprecations: EnrichedDeprecationInfo[];
+  currentGroupBy: GroupByOption;
+}> = ({ deprecations, currentGroupBy }) => {
+  if (currentGroupBy === GroupByOption.index) {
+    return (
+      <div>
+        {deprecations.map(dep => (
+          <MessageDeprecation deprecation={dep} key={dep.message} />
+        ))}
+      </div>
     );
+  } else if (currentGroupBy === GroupByOption.message) {
+    // If we're grouping by index we assume that every deprecation message is the same
+    // issue and that each deprecation will have an index associated with it.
+    const indices = deprecations.map(dep => ({ index: dep.index!, details: dep.details }));
+
+    return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else {
     return null;
   }
 };
-
-interface DeprecationsProps {
-  deprecations: EnrichedDeprecationInfo[];
-}
-
-export const Deprecations: StatelessComponent<DeprecationsProps> = ({ deprecations }) => (
-  <EuiFlexGroup direction="column" gutterSize="none">
-    {deprecations.sort(sortByLevelDesc).map(dep => (
-      <EuiFlexItem className="upgrade-checkup__deprecation-cell" key={dep.message}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow>
-            <EuiText>
-              <h4>
-                <EuiIcon type="dot" color={COLOR_MAP[dep.level]} /> {dep.message}
-              </h4>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" href={dep.url} target="_blank">
-              Read Documentation
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        {dep.index && [
-          <EuiSpacer size="m" />,
-          <EuiText color="subdued">
-            <h6>Index</h6>
-            <p>{dep.index}</p>
-          </EuiText>,
-        ]}
-
-        <DeprecationAction deprecation={dep} />
-
-        <EuiSpacer size="m" />
-
-        <EuiText color="subdued">
-          <h6>Details</h6>
-          <p>{dep.details}</p>
-        </EuiText>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
-);
 
 const EmptyMessage: StatelessComponent = () => {
   return (
@@ -152,15 +224,15 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
         .sort()
         .map(groupName => [
           <EuiAccordion
-            key={groupName}
+            key={`acc-${groupName}`}
             id={`depgroup-${groupName}`}
             buttonContent={groupName}
             extraAction={<DeprecationSummary deprecations={groups[groupName]} />}
           >
             <EuiSpacer />
-            <Deprecations deprecations={groups[groupName]} />
+            <DeprecationList deprecations={groups[groupName]} currentGroupBy={currentGroupBy} />
           </EuiAccordion>,
-          <EuiSpacer />,
+          <EuiSpacer key={`spc-${groupName}`} />,
         ])}
     </div>
   );
