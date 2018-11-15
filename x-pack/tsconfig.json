@@ -22,6 +22,9 @@
       ],
       "plugins/spaces/*": [
         "x-pack/plugins/spaces/public/*"
+      ],
+      "test_utils/*": [
+        "x-pack/test_utils/*"
       ]
     },
     "types": [
