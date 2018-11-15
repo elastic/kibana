@@ -6,10 +6,12 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
+  EuiIcon,
+  EuiLink,
   EuiInMemoryTable,
 } from '@elastic/eui';
 
@@ -26,43 +28,83 @@ export class RemoteClusterTableUi extends Component {
   constructor(props) {
     super(props);
 
+    const { clusters } = props;
+
     this.state = {
       selectedItems: [],
+      searchedClusters: clusters.slice(0),
     };
   }
 
+  onSearch = ({ query }) => {
+    const { clusters } = this.props;
+    const { text } = query;
+    const normalizedSearchText = text.toLowerCase();
+
+    const searchedClusters = clusters.filter(cluster => {
+      const { name, seeds } = cluster;
+      const normalizedName = name.toLowerCase();
+      if (normalizedName.toLowerCase().includes(normalizedSearchText)) {
+        return true;
+      }
+
+      return seeds.some(seed => seed.includes(normalizedSearchText));
+    });
+
+    this.setState({
+      searchedClusters,
+    });
+  };
+
   render() {
     const {
-      clusters,
       openDetailPanel,
     } = this.props;
 
-    const { selectedItems } = this.state;
+    const {
+      selectedItems,
+      searchedClusters,
+    } = this.state;
 
     const columns = [{
       field: 'name',
       name: 'Name',
       sortable: true,
       truncateText: false,
+      render: (name) => {
+        return (
+          <EuiLink onClick={() => openDetailPanel(name)}>
+            {name}
+          </EuiLink>
+        );
+      }
     }, {
-      fields: 'seeds',
+      field: 'seeds',
       name: 'Seeds',
       truncateText: true,
-      render: ({ seeds }) => seeds.join(', '),
+      render: (seeds) => seeds.join(', '),
     }, {
       field: 'connected',
       name: 'Connected',
+      sortable: true,
+      render: (connected) => {
+        if (connected) {
+          return (
+            <EuiIcon type="check" color="success" />
+          );
+        }
+
+        return (
+          <EuiIcon type="cross" color="danger" />
+        );
+      },
+      width: '100px',
     }, {
       field: 'num_nodes_connected',
       name: 'Connected nodes',
+      sortable: true,
+      width: '160px',
     }];
-
-    const getRowProps = (item) => {
-      const { name } = item;
-      return {
-        onClick: () => openDetailPanel(name),
-      };
-    };
 
     const sorting = {
       sort: {
@@ -74,9 +116,13 @@ export class RemoteClusterTableUi extends Component {
     const search = {
       toolsLeft: selectedItems.length ? (
         <EuiButton color="danger">
-          Disconnect remote clusters
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterList.table.disconnectButtonLabel"
+            defaultMessage="Disconnect remote clusters"
+          />
         </EuiButton>
       ) : undefined,
+      onChange: this.onSearch,
       box: {
         incremental: true,
       },
@@ -93,10 +139,9 @@ export class RemoteClusterTableUi extends Component {
 
     return (
       <EuiInMemoryTable
-        items={clusters}
+        items={searchedClusters}
         itemId="name"
         columns={columns}
-        rowProps={getRowProps}
         search={search}
         pagination={pagination}
         sorting={sorting}
