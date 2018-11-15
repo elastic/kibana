@@ -7,24 +7,14 @@
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { IServiceListItemResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
+import { IServiceListItem } from 'x-pack/plugins/apm/typings/Service';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { RelativeLink } from '../../../../utils/url';
 import { ManagedTable } from '../../../shared/ManagedTable';
 
-// TODO: Can we just use camelCase in the server to avoid this mismatch, and avoid
-// having to magically transform keys?
-export interface IApmService {
-  serviceName: IServiceListItemResponse['service_name'];
-  agentName: IServiceListItemResponse['agent_name'];
-  avgResponseTime: IServiceListItemResponse['avg_response_time'];
-  transactionsPerMinute: IServiceListItemResponse['transactions_per_minute'];
-  errorsPerMinute: IServiceListItemResponse['errors_per_minute'];
-}
-
 interface Props {
-  items: IApmService[];
+  items: IServiceListItem[];
   noItemsMessage?: React.ReactNode;
 }
 

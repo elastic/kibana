@@ -6,16 +6,18 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { Component } from 'react';
+import { RRRRenderResponse } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { IServiceListItem } from 'x-pack/plugins/apm/typings/Service';
 import { loadAgentStatus } from '../../../services/rest/apm';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
-import { IApmService, ServiceList } from './ServiceList';
+import { ServiceList } from './ServiceList';
 
 interface Props {
   urlParams: IUrlParams;
-  serviceList: IApmService[];
+  serviceList: RRRRenderResponse<IServiceListItem[]>;
 }
 
 interface State {
@@ -61,7 +63,7 @@ export class ServiceOverview extends Component<Props, State> {
           urlParams={urlParams}
           render={() => (
             <ServiceList
-              items={this.props.serviceList}
+              items={this.props.serviceList.data}
               noItemsMessage={noItemsMessage}
             />
           )}
