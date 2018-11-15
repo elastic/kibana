@@ -142,12 +142,15 @@ export class VectorLayer extends ALayer {
   async _canSkipSourceUpdate(source, sourceDataId, filters) {
     const timeAware = await source.isTimeAware();
     const extentAware = source.isFilterByMapBounds();
+    const isFieldAware = source.isFieldAware();
 
-    if (!timeAware && !extentAware) {
+    if (!timeAware && !extentAware && !isFieldAware) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
       if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
         return true;
       }
+
+      return false;
     }
 
     const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
@@ -164,7 +167,12 @@ export class VectorLayer extends ALayer {
       updateDueToTime = !_.isEqual(meta.timeFilters, filters.timeFilters);
     }
 
-    return !updateDueToTime && !this.updateDueToExtent(source, meta, filters);
+    let updateDueToFields = false;
+    if (isFieldAware) {
+      updateDueToFields = !_.isEqual(meta.fieldNames, filters.fieldNames);
+    }
+
+    return !updateDueToTime && !this.updateDueToExtent(source, meta, filters) && !updateDueToFields;
 
   }
 
@@ -213,7 +221,18 @@ export class VectorLayer extends ALayer {
     const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
     try {
-      const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, dataFilters);
+      const fieldNames = [
+        ...this._source.getFieldNames(),
+        ...this._style.getSourceFieldNames(),
+        ...this._joins.map(join => {
+          return join.getLeftFieldName();
+        })
+      ];
+      const filters = {
+        ...dataFilters,
+        fieldNames: _.uniq(fieldNames).sort()
+      };
+      const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, filters);
       if (canSkip) {
         const sourceDataRequest = this.getSourceDataRequest();
         return {
@@ -221,13 +240,12 @@ export class VectorLayer extends ALayer {
           featureCollection: sourceDataRequest.getData()
         };
       }
-      startLoading(sourceDataId, requestToken, dataFilters);
+      startLoading(sourceDataId, requestToken, filters);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJson({
         layerId: this.getId(),
         layerName,
-        styleFieldNames: this._style.getDynamicFieldNames()
-      }, dataFilters);
+      }, filters);
       stopLoading(sourceDataId, requestToken, data, meta);
       return {
         refreshed: true,

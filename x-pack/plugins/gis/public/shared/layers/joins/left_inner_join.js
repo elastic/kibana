@@ -26,6 +26,11 @@ export class LeftInnerJoin {
     return `count of ${this._descriptor.right.indexPatternTitle} by ${this._descriptor.right.term}`;
   }
 
+  getLeftFieldName() {
+    return this._descriptor.leftField;
+  }
+
+  // Name of key added to the geoJson properties that contains the results of the join
   getJoinFieldName() {
     return `__kbn__join(${this.getSourceId()})`;
   }

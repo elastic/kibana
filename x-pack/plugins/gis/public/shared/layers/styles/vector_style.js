@@ -100,8 +100,7 @@ export class VectorStyle {
     );
   }
 
-  // Return list of fields used by dynamic properties
-  getDynamicFieldNames() {
+  getSourceFieldNames() {
     const properties = this.getProperties();
     const fieldNames = [];
     Object.keys(properties).forEach(propertyName => {
@@ -109,9 +108,9 @@ export class VectorStyle {
         return;
       }
 
-      const fieldName = _.get(properties[propertyName], 'options.field.name');
-      if (fieldName) {
-        fieldNames.push(fieldName);
+      const field = _.get(properties[propertyName], 'options.field', {});
+      if (field.origin === 'source' && field.name) {
+        fieldNames.push(field.name);
       }
     });
 
@@ -175,7 +174,8 @@ export class VectorStyle {
       : null;
   }
 
-  static computeScaledValues(featureCollection, fieldName) {
+  static computeScaledValues(featureCollection, field) {
+    const fieldName = field.name;
     const features = featureCollection.features;
     if (!features.length) {
       return false;
@@ -201,9 +201,12 @@ export class VectorStyle {
   }
 
   addScaledPropertiesBasedOnStyle(featureCollection) {
-
-    const dynamicFieldNames = this.getDynamicFieldNames();
-    if (dynamicFieldNames.length === 0) {
+    if (
+      !this._isPropertyDynamic('fillColor') &&
+      !this._isPropertyDynamic('lineColor') &&
+      !this._isPropertyDynamic('iconSize') &&
+      !this._isPropertyDynamic('lineWidth')
+    ) {
       return false;
     }
 
@@ -215,8 +218,29 @@ export class VectorStyle {
       featureCollection.computed = [];
     }
 
-    const updateStatuses = dynamicFieldNames.map((fieldName) => {
-      return VectorStyle.computeScaledValues(featureCollection, fieldName);
+    const dynamicFields = [];
+    //todo: should always be intialized really
+    //todo: don't hardcode styling properties. can be discovered automatically
+    //todo: this is adding duplicate fields..
+    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options
+      && this._descriptor.properties.fillColor.options.field) {
+      dynamicFields.push(this._descriptor.properties.fillColor.options.field);
+    }
+    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options
+      && this._descriptor.properties.lineColor.options.field) {
+      dynamicFields.push(this._descriptor.properties.lineColor.options.field);
+    }
+    if (this._descriptor.properties.iconSize && this._descriptor.properties.iconSize.options
+      && this._descriptor.properties.iconSize.options.field) {
+      dynamicFields.push(this._descriptor.properties.iconSize.options.field);
+    }
+    if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options
+      && this._descriptor.properties.lineWidth.options.field) {
+      dynamicFields.push(this._descriptor.properties.lineWidth.options.field);
+    }
+
+    const updateStatuses = dynamicFields.map((field) => {
+      return VectorStyle.computeScaledValues(featureCollection, field);
     });
     return updateStatuses.some(r => r === true);
   }

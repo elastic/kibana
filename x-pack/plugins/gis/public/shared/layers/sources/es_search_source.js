@@ -58,6 +58,17 @@ export class ESSearchSource extends VectorSource {
     return numberFields.map(f => f.name);
   }
 
+  isFieldAware() {
+    return true;
+  }
+
+  getFieldNames() {
+    return [
+      this._descriptor.geoField,
+      ...this._descriptor.tooltipProperties
+    ];
+  }
+
   renderDetails() {
     return (
       <ESSourceDetails
@@ -99,12 +110,7 @@ export class ESSearchSource extends VectorSource {
       // 1) all scripted fields
       // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
       // By setting "fields", SearchSource removes all of defaults
-      // TODO re-enable once join fields are added and new search is triggered if fields change
-      /*searchSource.setField('fields', [
-        this._descriptor.geoField,
-        ...this._descriptor.tooltipProperties,
-        ...styleFieldNames,
-      ]);*/
+      searchSource.setField('fields', searchFilters.fieldNames);
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];

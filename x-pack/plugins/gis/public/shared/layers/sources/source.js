@@ -44,6 +44,14 @@ export class ASource {
   isFilterByMapBounds() {
     return false;
   }
+
+  isFieldAware() {
+    return false;
+  }
+
+  getFieldNames() {
+    return [];
+  }
 }
 
 export class TMSSource extends ASource {
