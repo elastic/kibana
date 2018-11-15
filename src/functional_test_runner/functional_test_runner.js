@@ -20,10 +20,23 @@
 import {
   createLifecycle,
   readConfigFile,
-  createProviderCollection,
+  ProviderCollection,
+  readProviderSpec,
   setupMocha,
   runTests,
 } from './lib';
+
+// provider that returns a promise-like object which never "resolves" and is
+// used to disable all the services while still allowing us to load the test
+// files (and therefore define the tests) for --test-stats
+const STUB_PROVIDER =  () => ({
+  then: () => {}
+});
+
+const replaceValues = (object, value) => Object.keys(object).reduce((acc, key) => ({
+  ...acc,
+  [key]: value
+}), {});
 
 export function createFunctionalTestRunner({ log, configFile, configOverrides }) {
   const lifecycle = createLifecycle();
@@ -36,8 +49,58 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
     log.verbose('ending %j lifecycle phase', name);
   });
 
+
   class FunctionalTestRunner {
     async run() {
+      return await this._run(async (config, coreProviders) => {
+        const providers = new ProviderCollection(log, [
+          ...coreProviders,
+          ...readProviderSpec('Service', config.get('services')),
+          ...readProviderSpec('PageObject', config.get('pageObjects'))
+        ]);
+
+        await providers.loadAll();
+
+        const mocha = await setupMocha(lifecycle, log, config, providers);
+        await lifecycle.trigger('beforeTests');
+        log.info('Starting tests');
+
+        return await runTests(lifecycle, log, mocha);
+      });
+    }
+
+    async getTestStats() {
+      return await this._run(async (config, coreProviders) => {
+        const providers = new ProviderCollection(log, [
+          ...coreProviders,
+          ...readProviderSpec('Service', replaceValues(config.get('services'), STUB_PROVIDER)),
+          ...readProviderSpec('PageObject', replaceValues(config.get('pageObjects'), STUB_PROVIDER))
+        ]);
+
+        const countTests = suite =>
+          suite.suites.reduce((sum, suite) => (
+            sum + countTests(suite)
+          ), suite.tests.length);
+
+        const mocha = await setupMocha(lifecycle, log, config, providers);
+
+        return {
+          tests: countTests(mocha.suite),
+          excludedTests: mocha.excludedTests.length
+        };
+      });
+    }
+
+    async close() {
+      if (this._closed) {
+        return;
+      }
+
+      this._closed = true;
+      await lifecycle.trigger('cleanup');
+    }
+
+    async _run(handler) {
       let runErrorOccurred = false;
 
       try {
@@ -49,14 +112,14 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
           return;
         }
 
-        const providers = createProviderCollection(lifecycle, log, config);
-        await providers.loadAll();
+        // base level services that functional_test_runner exposes
+        const coreProviders = readProviderSpec('Service', {
+          lifecycle: () => lifecycle,
+          log: () => log,
+          config: () => config,
+        });
 
-        const mocha = await setupMocha(lifecycle, log, config, providers);
-        await lifecycle.trigger('beforeTests');
-        log.info('Starting tests');
-        return await runTests(lifecycle, log, mocha);
-
+        return await handler(config, coreProviders);
       } catch (runError) {
         runErrorOccurred = true;
         throw runError;
@@ -74,13 +137,6 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
           }
         }
       }
-    }
-
-    async close() {
-      if (this._closed) return;
-
-      this._closed = true;
-      await lifecycle.trigger('cleanup');
     }
   }
 
