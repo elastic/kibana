@@ -44,6 +44,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .findByCssSelector('button[aria-label=\'Search\']');
     }
 
+    async getBarValue() {
+      await this.hoverOverBar();
+      return getRemote()
+        .findByCssSelector('input[ng-model=\'state.query\']');
+    }
+
     getChartTimespan() {
       return getRemote()
         .findByCssSelector('.small > span:nth-child(1)')
@@ -123,6 +129,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getCurrentQueryName() {
       return await testSubjects.getVisibleText('discoverCurrentQuery');
+    }
+
+    async getBarChartXTicks() {
+      return getRemote()
+        .findAllByCssSelector('.x.axis.CategoryAxis-1 > .tick > text')
+        .getVisibleText();
     }
 
     getBarChartData() {
@@ -272,6 +284,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .getNoResultsTimepicker()
         .then(() => true)
         .catch(() => false);
+    }
+
+    async hoverOverBar(index = 0) {
+      await testSubjects.moveMouseTo(`.series.histogram :nth-child(${index + 1})`);
+
     }
 
     async clickFieldListItem(field) {
