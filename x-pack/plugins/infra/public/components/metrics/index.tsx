@@ -26,80 +26,76 @@ interface Props {
 interface State {
   crosshairValue: number | null;
 }
-
-class MetricsUI extends React.PureComponent<Props, State> {
-  public readonly state = {
-    crosshairValue: null,
-  };
-
-  public render() {
-    const { intl } = this.props;
-    if (this.props.loading) {
+export const Metrics = injectI18n(
+  class extends React.PureComponent<Props, State> {
+    public displayName = 'Metrics';
+    public readonly state = {
+      crosshairValue: null,
+    };
+    public render() {
+      const { intl } = this.props;
+      if (this.props.loading) {
+        return (
+          <InfraLoadingPanel
+            height="100vh"
+            width="auto"
+            text={intl.formatMessage(
+              {
+                id: 'xpack.infra.metrics.loadingNodeDataText',
+                defaultMessage: 'Loading data for {nodeName}',
+              },
+              {
+                nodeName: this.props.nodeName,
+              }
+            )}
+          />
+        );
+      }
+      return <React.Fragment>{this.props.layouts.map(this.renderLayout)}</React.Fragment>;
+    }
+    private renderLayout = (layout: InfraMetricLayout) => {
       return (
-        <InfraLoadingPanel
-          height="100vh"
-          width="auto"
-          text={intl.formatMessage(
-            {
-              id: 'xpack.infra.metrics.loadingNodeDataText',
-              defaultMessage: 'Loading data for {nodeName}',
-            },
-            {
-              nodeName: this.props.nodeName,
-            }
-          )}
+        <React.Fragment key={layout.id}>
+          <EuiPageContentBody>
+            <EuiTitle size="m">
+              <h2 id={layout.id}>
+                <FormattedMessage
+                  id="xpack.infra.metrics.layoutLabelOverviewTitle"
+                  defaultMessage="{layoutLabel} Overview"
+                  values={{
+                    layoutLabel: layout.label,
+                  }}
+                />
+              </h2>
+            </EuiTitle>
+          </EuiPageContentBody>
+          {layout.sections.map(this.renderSection(layout))}
+        </React.Fragment>
+      );
+    };
+    private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
+      let sectionProps = {};
+      if (section.type === 'chart') {
+        const { onChangeRangeTime } = this.props;
+        sectionProps = {
+          onChangeRangeTime,
+          crosshairValue: this.state.crosshairValue,
+          onCrosshairUpdate: this.onCrosshairUpdate,
+        };
+      }
+      return (
+        <Section
+          section={section}
+          metrics={this.props.metrics}
+          key={`${layout.id}-${section.id}`}
+          {...sectionProps}
         />
       );
-    }
-    return <React.Fragment>{this.props.layouts.map(this.renderLayout)}</React.Fragment>;
+    };
+    private onCrosshairUpdate = (crosshairValue: number) => {
+      this.setState({
+        crosshairValue,
+      });
+    };
   }
-
-  private renderLayout = (layout: InfraMetricLayout) => {
-    return (
-      <React.Fragment key={layout.id}>
-        <EuiPageContentBody>
-          <EuiTitle size="m">
-            <h2 id={layout.id}>
-              <FormattedMessage
-                id="xpack.infra.metrics.layoutLabelOverviewTitle"
-                defaultMessage="{layoutLabel} Overview"
-                values={{
-                  layoutLabel: layout.label,
-                }}
-              />
-            </h2>
-          </EuiTitle>
-        </EuiPageContentBody>
-        {layout.sections.map(this.renderSection(layout))}
-      </React.Fragment>
-    );
-  };
-
-  private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
-    let sectionProps = {};
-    if (section.type === 'chart') {
-      const { onChangeRangeTime } = this.props;
-      sectionProps = {
-        onChangeRangeTime,
-        crosshairValue: this.state.crosshairValue,
-        onCrosshairUpdate: this.onCrosshairUpdate,
-      };
-    }
-    return (
-      <Section
-        section={section}
-        metrics={this.props.metrics}
-        key={`${layout.id}-${section.id}`}
-        {...sectionProps}
-      />
-    );
-  };
-
-  private onCrosshairUpdate = (crosshairValue: number) => {
-    this.setState({
-      crosshairValue,
-    });
-  };
-}
-
-export const Metrics = injectI18n(MetricsUI);
+);

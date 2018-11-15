@@ -112,71 +112,69 @@ const initialState = {
 };
 type State = Readonly<typeof initialState>;
 
-class WaffleMetricControlsUI extends React.PureComponent<Props, State> {
-  public readonly state: State = initialState;
-  public render() {
-    const { metric, intl } = this.props;
-    const options = OPTIONS[this.props.nodeType];
-    const value = metric.type;
-    if (!options.length || !value) {
-      throw Error(
-        intl.formatMessage({
-          id: 'xpack.infra.waffle.unableToSelectMetricErrorTitle',
-          defaultMessage: 'Unable to select options or value for metric.',
-        })
+export const WaffleMetricControls = injectI18n(
+  class extends React.PureComponent<Props, State> {
+    public displayName = 'WaffleMetricControls';
+    public readonly state: State = initialState;
+    public render() {
+      const { metric, intl } = this.props;
+      const options = OPTIONS[this.props.nodeType];
+      const value = metric.type;
+      if (!options.length || !value) {
+        throw Error(
+          intl.formatMessage({
+            id: 'xpack.infra.waffle.unableToSelectMetricErrorTitle',
+            defaultMessage: 'Unable to select options or value for metric.',
+          })
+        );
+      }
+      const currentLabel = options.find(o => o.value === metric.type);
+      if (!currentLabel) {
+        return 'null';
+      }
+      const panels: EuiContextMenuPanelDescriptor[] = [
+        {
+          id: 0,
+          title: '',
+          items: options.map(o => {
+            const icon = o.value === metric.type ? 'check' : 'empty';
+            const panel = { name: o.text, onClick: this.handleClick(o.value), icon };
+            return panel;
+          }),
+        },
+      ];
+      const button = (
+        <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
+          <FormattedMessage
+            id="xpack.infra.waffle.metricButtonLabel"
+            defaultMessage="Metric: {selectedMetric}"
+            values={{ selectedMetric: currentLabel.text }}
+          />
+        </EuiFilterButton>
+      );
+      return (
+        <EuiFilterGroup>
+          <EuiPopover
+            isOpen={this.state.isPopoverOpen}
+            id="metricsPanel"
+            button={button}
+            panelPaddingSize="none"
+            closePopover={this.handleClose}
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiPopover>
+        </EuiFilterGroup>
       );
     }
-    const currentLabel = options.find(o => o.value === metric.type);
-    if (!currentLabel) {
-      return 'null';
-    }
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: '',
-        items: options.map(o => {
-          const icon = o.value === metric.type ? 'check' : 'empty';
-          const panel = { name: o.text, onClick: this.handleClick(o.value), icon };
-          return panel;
-        }),
-      },
-    ];
-    const button = (
-      <EuiFilterButton iconType="arrowDown" onClick={this.handleToggle}>
-        <FormattedMessage
-          id="xpack.infra.waffle.metricButtonLabel"
-          defaultMessage="Metric: {selectedMetric}"
-          values={{ selectedMetric: currentLabel.text }}
-        />
-      </EuiFilterButton>
-    );
-
-    return (
-      <EuiFilterGroup>
-        <EuiPopover
-          isOpen={this.state.isPopoverOpen}
-          id="metricsPanel"
-          button={button}
-          panelPaddingSize="none"
-          closePopover={this.handleClose}
-        >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
-        </EuiPopover>
-      </EuiFilterGroup>
-    );
+    private handleClose = () => {
+      this.setState({ isPopoverOpen: false });
+    };
+    private handleToggle = () => {
+      this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
+    };
+    private handleClick = (value: InfraMetricType) => () => {
+      this.props.onChange({ type: value });
+      this.handleClose();
+    };
   }
-  private handleClose = () => {
-    this.setState({ isPopoverOpen: false });
-  };
-
-  private handleToggle = () => {
-    this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
-  };
-
-  private handleClick = (value: InfraMetricType) => () => {
-    this.props.onChange({ type: value });
-    this.handleClose();
-  };
-}
-
-export const WaffleMetricControls = injectI18n(WaffleMetricControlsUI);
+);
