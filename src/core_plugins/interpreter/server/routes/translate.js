@@ -26,9 +26,10 @@ export function translate(server) {
   server.route({
     method: 'GET',
     path: '/api/canvas/ast',
-    handler: function(request, h) {
-      if (!request.query.expression)
+    handler: function (request, h) {
+      if (!request.query.expression) {
         return h.response({ error: '"expression" query is required' }).code(400);
+      }
       return fromExpression(request.query.expression);
     },
   });
@@ -36,7 +37,7 @@ export function translate(server) {
   server.route({
     method: 'POST',
     path: '/api/canvas/expression',
-    handler: function(request, h) {
+    handler: function (request, h) {
       try {
         return toExpression(request.payload);
       } catch (e) {

@@ -125,8 +125,9 @@ export function interpretProvider(config) {
       (argAsts, argAst, argName) => {
         const argDef = getByAlias(argDefs, argName);
         // TODO: Implement a system to allow for undeclared arguments
-        if (!argDef)
+        if (!argDef) {
           throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
+        }
 
         argAsts[argDef.name] = (argAsts[argDef.name] || []).concat(argAst);
         return argAsts;
@@ -155,8 +156,9 @@ export function interpretProvider(config) {
     const argAstsWithDefaults = reduce(
       argDefs,
       (argAsts, argDef, argName) => {
-        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined')
+        if (typeof argAsts[argName] === 'undefined' && typeof argDef.default !== 'undefined')  {
           argAsts[argName] = [fromExpression(argDef.default, 'argument')];
+        }
 
         return argAsts;
       },

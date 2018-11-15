@@ -20,4 +20,5 @@
 import 'babel-polyfill';
 import { typeSpecs } from './index';
 
+// eslint-disable-next-line no-undef
 typeSpecs.forEach(canvas.register);

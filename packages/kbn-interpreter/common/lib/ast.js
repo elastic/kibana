@@ -61,8 +61,9 @@ function getExpressionArgs(block, level = 0) {
       const lineLength = acc.split('\n').pop().length;
 
       // if arg values are too long, move it to the next line
-      if (level === 0 && lineLength + argString.length > MAX_LINE_LENGTH)
+      if (level === 0 && lineLength + argString.length > MAX_LINE_LENGTH) {
         return `${acc}\n  ${argString}`;
+      }
 
       // append arg values to existing arg values
       if (lineLength > 0) return `${acc} ${argString}`;

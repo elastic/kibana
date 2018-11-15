@@ -24,10 +24,12 @@ export function plugins(server) {
   server.route({
     method: 'GET',
     path: '/api/canvas/plugins',
-    handler: function(request, h) {
+    handler: function (request, h) {
       const { type } = request.query;
 
-      if (!pluginPaths[type]) return h.response({ error: 'Invalid type' }).code(400);
+      if (!pluginPaths[type]) {
+        return h.response({ error: 'Invalid type' }).code(400);
+      }
 
       return getPluginStream(type);
     },
