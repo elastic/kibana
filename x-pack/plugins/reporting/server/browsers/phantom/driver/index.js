@@ -132,17 +132,15 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
         intlPath,
         function hasIntl() {
           return (window.Intl !== undefined);
-        },
-        'Intl'
+        }
       )
         .then(() =>
           injectPolyfill(
             page,
             promisePath,
             function hasPromise() {
-              return (typeof window.Promise !== 'undefined');
-            },
-            'Promise'
+              return (window.Promise !== undefined);
+            }
           ))
         .then(() => {
           return fromCallback(cb => {
@@ -333,7 +331,7 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
   };
 }
 
-async function injectPolyfill(page, pathToPolyfillFile, checkFunction, libraryName) {
+async function injectPolyfill(page, pathToPolyfillFile, checkFunction) {
   const hasPolyfill = await fromCallback(cb => {
     page.evaluate(checkFunction, cb);
   });
@@ -344,15 +342,15 @@ async function injectPolyfill(page, pathToPolyfillFile, checkFunction, libraryNa
 
   const status = await fromCallback(cb => page.injectJs(pathToPolyfillFile, cb));
 
-  if (status !== true) {
-    return Promise.reject(`Failed to load ${libraryName} library`);
+  if (!status) {
+    return Promise.reject(`Failed to load ${pathToPolyfillFile} library`);
   }
 
   const hasPolyfillLoaded = await fromCallback(cb => {
     page.evaluate(checkFunction, cb);
   });
 
-  if (hasPolyfillLoaded !== true) {
-    return Promise.reject(`Failed to inject ${libraryName}`);
+  if (!hasPolyfillLoaded) {
+    return Promise.reject(`Failed to inject ${pathToPolyfillFile}`);
   }
 }
