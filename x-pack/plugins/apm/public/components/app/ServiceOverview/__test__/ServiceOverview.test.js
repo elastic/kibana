@@ -27,7 +27,7 @@ describe('Service Overview -> View', () => {
       Promise.resolve(mockAgentStatus)
     );
 
-    wrapper = shallow(<ServiceOverview serviceList={[]} />);
+    wrapper = shallow(<ServiceOverview serviceList={{ data: [] }} />);
     instance = wrapper.instance();
   });
 
