@@ -88,17 +88,13 @@ export function processOptions(userOptions, defaultConfigPath) {
     delete userOptions['kibana-install-dir'];
   }
 
-  function createLogger() {
-    return new ToolingLog({
-      level: pickLevelFromFlags(userOptions),
-      writeTo: process.stdout,
-    });
-  }
-
   return {
     ...userOptions,
     config,
-    createLogger,
+    log: new ToolingLog({
+      level: pickLevelFromFlags(userOptions),
+      writeTo: process.stdout,
+    }),
     extraKbnOpts: userOptions._,
   };
 }

@@ -18,6 +18,12 @@
  */
 
 import { displayHelp, processOptions } from './args';
+import { ToolingLog } from '@kbn/dev-utils';
+
+expect.addSnapshotSerializer({
+  print: () => '[object ToolingLog]',
+  test: value => value instanceof ToolingLog,
+});
 
 describe('display help for run tests CLI', () => {
   it('displays as expected', () => {

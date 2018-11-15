@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { createFunctionalTestRunner } from '../../../../../src/functional_test_runner';
+import * as FunctionalTestRunner from '../../../../../src/functional_test_runner';
 import { CliError } from './run_cli';
 
-export async function runFtr({
-  configPath,
-  options: { log, bail, grep, updateBaselines, suiteTags, assertNoneExcluded },
-}) {
-  const ftr = createFunctionalTestRunner({
+function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {
+  return FunctionalTestRunner.createFunctionalTestRunner({
     log,
     configFile: configPath,
     configOverrides: {
@@ -36,22 +33,26 @@ export async function runFtr({
       suiteTags,
     },
   });
+}
 
-  if (assertNoneExcluded) {
-    const stats = await ftr.getTestStats();
-    if (stats.excludedTests > 0) {
-      throw new CliError(`
-        ${stats.excludedTests} tests in the ${configPath} config
-        are excluded when filtering by the tags run on CI. Make sure that all suites are
-        tagged with one of the following tags, or extend the list of tags in test/scripts/jenkins_xpack.sh
+export async function assertNoneExcluded({ configPath, options }) {
+  const ftr = createFtr({ configPath, options });
 
-        ${suiteTags.include.join(', ')}
+  const stats = await ftr.getTestStats();
+  if (stats.excludedTests > 0) {
+    throw new CliError(`
+      ${stats.excludedTests} tests in the ${configPath} config
+      are excluded when filtering by the tags run on CI. Make sure that all suites are
+      tagged with one of the following tags, or extend the list of tags in test/scripts/jenkins_xpack.sh
 
-      `);
-    }
+      ${JSON.stringify(options.suiteTags)}
 
-    return;
+    `);
   }
+}
+
+export async function runFtr({ configPath, options }) {
+  const ftr = createFtr({ configPath, options });
 
   const failureCount = await ftr.run();
   if (failureCount > 0) {
@@ -59,4 +60,10 @@ export async function runFtr({
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
     );
   }
+}
+
+export async function hasTests({ configPath, options }) {
+  const ftr = createFtr({ configPath, options });
+  const stats = await ftr.getTestStats();
+  return stats.tests > 0;
 }

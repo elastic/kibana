@@ -36,7 +36,7 @@ describe('start servers CLI', () => {
     const processMock = {
       exit: exitMock,
       argv: argvMock,
-      stdout: { on: jest.fn(), once: jest.fn(), emit: jest.fn() },
+      stdout: { on: jest.fn(), once: jest.fn(), emit: jest.fn(), write: jest.fn() },
       cwd: jest.fn(),
     };
 

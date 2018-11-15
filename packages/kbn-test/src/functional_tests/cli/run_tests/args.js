@@ -119,17 +119,13 @@ export function processOptions(userOptions, defaultConfigPaths) {
   userOptions.assertNoneExcluded = !!userOptions['assert-none-excluded'];
   delete userOptions['assert-none-excluded'];
 
-  function createLogger() {
-    return new ToolingLog({
-      level: pickLevelFromFlags(userOptions),
-      writeTo: process.stdout,
-    });
-  }
-
   return {
     ...userOptions,
     configs,
-    createLogger,
+    log: new ToolingLog({
+      level: pickLevelFromFlags(userOptions),
+      writeTo: process.stdout,
+    }),
     extraKbnOpts: userOptions._,
   };
 }

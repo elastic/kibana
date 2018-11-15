@@ -24,10 +24,10 @@ Object {
   "config": Array [
     "foo",
   ],
-  "createLogger": [Function],
   "debug": true,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "log": [object ToolingLog],
 }
 `;
 
@@ -36,9 +36,9 @@ Object {
   "config": Array [
     "foo",
   ],
-  "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "log": [object ToolingLog],
 }
 `;
 
@@ -50,11 +50,11 @@ Object {
   "config": Array [
     "foo",
   ],
-  "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": Object {
     "server.foo": "bar",
   },
+  "log": [object ToolingLog],
 }
 `;
 
@@ -63,9 +63,9 @@ Object {
   "config": Array [
     "foo",
   ],
-  "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "log": [object ToolingLog],
   "quiet": true,
 }
 `;
@@ -75,9 +75,9 @@ Object {
   "config": Array [
     "foo",
   ],
-  "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "log": [object ToolingLog],
   "silent": true,
 }
 `;
@@ -87,9 +87,9 @@ Object {
   "config": Array [
     "foo",
   ],
-  "createLogger": [Function],
   "esFrom": "source",
   "extraKbnOpts": undefined,
+  "log": [object ToolingLog],
 }
 `;
 
@@ -98,10 +98,10 @@ Object {
   "config": Array [
     "foo",
   ],
-  "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "installDir": "foo",
+  "log": [object ToolingLog],
 }
 `;
 
@@ -110,9 +110,9 @@ Object {
   "config": Array [
     "foo",
   ],
-  "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "log": [object ToolingLog],
   "verbose": true,
 }
 `;
