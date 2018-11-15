@@ -5,11 +5,11 @@
 ++++
 
 [WARNING]
-.Known Bugs
+.Known Issue
 ============================
-There is a known bug when upgrading to Kibana 6.5.0 when Security is enabled.
+There is a known issue when upgrading to Kibana 6.5.0 when Security is enabled.
 If you are using Security, please wait for 6.5.1 to be released before
-upgrading.
+upgrading, or see <<known-issues-6.5.0>> for a workaround.
 ============================
 
 Each release of {kib} brings new features and product improvements.
