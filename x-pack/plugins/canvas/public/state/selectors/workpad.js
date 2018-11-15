@@ -29,7 +29,7 @@ export function getWorkpadPersisted(state) {
 }
 
 export function getWorkpadInfo(state) {
-  return omit(getWorkpad(state), ['pages']);
+  return { ...omit(getWorkpad(state), ['pages']), assets: getAssets(state) };
 }
 
 export function isWriteable(state) {

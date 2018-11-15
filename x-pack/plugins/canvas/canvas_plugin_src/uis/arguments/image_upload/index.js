@@ -6,25 +6,25 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { reduce } from 'lodash';
 import {
   EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiSpacer,
-  EuiSelect,
+  EuiButtonGroup,
   EuiButton,
   EuiFieldText,
 } from '@elastic/eui';
 
 // TODO: (clintandrewhall) This is a quick fix for #25342 -- we should figure out how to use the overall component.
 import { Loading } from '../../../../public/components/loading/loading';
-
+import { AssetPicker } from '../../../../public/components/asset_picker';
 import { FileUpload } from '../../../../public/components/file_upload';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
 import { isValidHttpUrl } from '../../../../common/lib/httpurl';
-import { encode, isValidDataUrl } from '../../../../common/lib/dataurl';
+import { encode } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import './image_upload.scss';
 
@@ -34,13 +34,19 @@ class ImageUpload extends React.Component {
     onValueChange: PropTypes.func.isRequired,
     typeInstance: PropTypes.object.isRequired,
     resolvedArgValue: PropTypes.string,
+    workpad: PropTypes.shape({
+      assets: PropTypes.object.isRequired,
+    }).isRequired,
   };
 
   constructor(props) {
     super(props);
 
-    const url = this.props.resolvedArgValue || null;
-    const urlType = isValidHttpUrl(url) ? 'src' : 'inline'; // if not a valid base64 string, will show as missing asset icon
+    const url = props.resolvedArgValue || null;
+
+    let urlType = Object.keys(props.workpad.assets).length ? 'asset' : 'file';
+    // if not a valid base64 string, will show as missing asset icon
+    if (isValidHttpUrl(url)) urlType = 'link';
 
     this.inputRefs = {};
 
@@ -60,34 +66,38 @@ class ImageUpload extends React.Component {
     this._isMounted = false;
   }
 
+  updateAST = assetId => {
+    this.props.onValueChange({
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'asset',
+          arguments: {
+            _: [assetId],
+          },
+        },
+      ],
+    });
+  };
+
   handleUpload = files => {
-    const { onAssetAdd, onValueChange } = this.props;
+    const { onAssetAdd } = this.props;
     const [upload] = files;
     this.setState({ loading: true }); // start loading indicator
 
     encode(upload)
       .then(dataurl => onAssetAdd('dataurl', dataurl))
       .then(assetId => {
-        onValueChange({
-          type: 'expression',
-          chain: [
-            {
-              type: 'function',
-              function: 'asset',
-              arguments: {
-                _: [assetId],
-              },
-            },
-          ],
-        });
+        this.updateAST(assetId);
 
         // this component can go away when onValueChange is called, check for _isMounted
         this._isMounted && this.setState({ loading: false }); // set loading state back to false
       });
   };
 
-  changeUrlType = ({ target = {} }) => {
-    this.setState({ urlType: target.value });
+  changeUrlType = optionId => {
+    this.setState({ urlType: optionId });
   };
 
   setSrcUrl = () => {
@@ -98,74 +108,79 @@ class ImageUpload extends React.Component {
     onValueChange(srcUrl);
   };
 
-  urlTypeOptions = [
-    { value: 'inline', text: 'Upload Image' },
-    { value: 'src', text: 'Paste Image URL' },
-  ];
-
   render() {
     const { loading, url, urlType } = this.state;
-    const urlTypeInline = urlType === 'inline';
-    const urlTypeSrc = urlType === 'src';
+    const { workpad } = this.props;
+
+    let selectedAsset = {};
+    const assets = reduce(
+      workpad.assets,
+      (acc, asset) => {
+        if (asset.value === url) {
+          selectedAsset = asset;
+          acc.unshift(asset); // move selected asset to the front
+        } else {
+          acc.push(asset);
+        }
+        return acc;
+      },
+      []
+    );
+
+    const urlTypeOptions = [{ id: 'file', label: 'Import' }, { id: 'link', label: 'Link' }];
+    if (assets.length) urlTypeOptions.unshift({ id: 'asset', label: 'Asset' });
 
     const selectUrlType = (
-      <EuiSelect
-        compressed
-        options={this.urlTypeOptions}
-        value={urlType}
+      <EuiButtonGroup
+        buttonSize="s"
+        options={urlTypeOptions}
+        idSelected={urlType}
         onChange={this.changeUrlType}
+        isFullWidth
       />
     );
 
-    let uploadImage = null;
-    if (urlTypeInline) {
-      uploadImage = loading ? (
+    const forms = {
+      file: loading ? (
         <Loading animated text="Image uploading" />
       ) : (
         <FileUpload onUpload={this.handleUpload} />
-      );
-    }
-
-    const pasteImageUrl = urlTypeSrc ? (
-      <EuiForm onSubmit={this.setSrcUrl} className="eui-textRight">
-        <EuiFieldText
-          compressed
-          defaultValue={this.state.url}
-          inputRef={ref => (this.inputRefs.srcUrlText = ref)}
-          placeholder="Image URL"
-          aria-label="Image URL"
-        />
-        <EuiSpacer size="m" />
-        <EuiButton type="submit" size="s" onClick={this.setSrcUrl}>
-          Set
-        </EuiButton>
-      </EuiForm>
-    ) : null;
-
-    const shouldPreview =
-      (urlTypeSrc && isValidHttpUrl(url)) || (urlTypeInline && isValidDataUrl(url));
-
-    return (
-      <div>
-        {selectUrlType}
-        <EuiSpacer size="s" />
-        <EuiFlexGroup alignItems="center" gutterSize="s" className="canvasArgImage">
-          <EuiFlexItem grow={8}>
-            {uploadImage}
-            {pasteImageUrl}
-          </EuiFlexItem>
-          {shouldPreview ? (
-            <EuiFlexItem grow={3} className="canvasArgImage--preview">
-              <EuiImage
-                size="s"
-                hasShadow
-                alt="Image Preview"
-                url={this.state.url}
-                className="canvasCheckered"
+      ),
+      link: (
+        <EuiForm onSubmit={this.setSrcUrl} className="eui-textRight">
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem>
+              <EuiFieldText
+                compressed
+                defaultValue={url}
+                inputRef={ref => (this.inputRefs.srcUrlText = ref)}
+                placeholder="Image URL"
+                aria-label="Image URL"
               />
             </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton type="submit" size="s" onClick={this.setSrcUrl}>
+                Set
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiForm>
+      ),
+      asset: (
+        <AssetPicker
+          assets={assets}
+          selected={selectedAsset.id}
+          onChange={({ id }) => this.updateAST(id)}
+        />
+      ),
+    };
+
+    return (
+      <div className="canvasSidebar__panel-noMinWidth" style={{ position: 'relative' }}>
+        {selectUrlType}
+        <EuiSpacer size="s" />
+        {forms[urlType]}
+        <EuiSpacer size="s" />
       </div>
     );
   }
