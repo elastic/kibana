@@ -22,56 +22,52 @@ interface LogSearchInputState {
   query: string;
 }
 
-class LogSearchInputUI extends React.PureComponent<LogSearchInputProps, LogSearchInputState> {
-  public readonly state = {
-    query: '',
-  };
-
-  public handleSubmit: React.FormEventHandler<HTMLFormElement> = evt => {
-    evt.preventDefault();
-
-    const { query } = this.state;
-
-    if (query === '') {
-      this.props.onClear();
-    } else {
-      this.props.onSearch(this.state.query);
+export const LogSearchInput = injectI18n(
+  class extends React.PureComponent<LogSearchInputProps, LogSearchInputState> {
+    public displayName = 'LogSearchInput';
+    public readonly state = {
+      query: '',
+    };
+    public handleSubmit: React.FormEventHandler<HTMLFormElement> = evt => {
+      evt.preventDefault();
+      const { query } = this.state;
+      if (query === '') {
+        this.props.onClear();
+      } else {
+        this.props.onSearch(this.state.query);
+      }
+    };
+    public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = evt => {
+      this.setState({
+        query: evt.target.value,
+      });
+    };
+    public render() {
+      const { className, isLoading, intl } = this.props;
+      const { query } = this.state;
+      const classes = classNames('loggingSearchInput', className);
+      return (
+        <form onSubmit={this.handleSubmit}>
+          <PlainSearchField
+            aria-label={intl.formatMessage({
+              id: 'xpack.infra.logs.search.searchInLogsAriaLabel',
+              defaultMessage: 'search',
+            })}
+            className={classes}
+            fullWidth
+            isLoading={isLoading}
+            onChange={this.handleChangeQuery}
+            placeholder={intl.formatMessage({
+              id: 'xpack.infra.logs.search.searchInLogsPlaceholder',
+              defaultMessage: 'Search',
+            })}
+            value={query}
+          />
+        </form>
+      );
     }
-  };
-
-  public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = evt => {
-    this.setState({
-      query: evt.target.value,
-    });
-  };
-
-  public render() {
-    const { className, isLoading, intl } = this.props;
-    const { query } = this.state;
-
-    const classes = classNames('loggingSearchInput', className);
-
-    return (
-      <form onSubmit={this.handleSubmit}>
-        <PlainSearchField
-          aria-label={intl.formatMessage({
-            id: 'xpack.infra.logs.search.searchInLogsAriaLabel',
-            defaultMessage: 'search',
-          })}
-          className={classes}
-          fullWidth
-          isLoading={isLoading}
-          onChange={this.handleChangeQuery}
-          placeholder={intl.formatMessage({
-            id: 'xpack.infra.logs.search.searchInLogsPlaceholder',
-            defaultMessage: 'Search',
-          })}
-          value={query}
-        />
-      </form>
-    );
   }
-}
+);
 
 const PlainSearchField = styled(EuiFieldSearch)`
   background: transparent;
@@ -81,5 +77,3 @@ const PlainSearchField = styled(EuiFieldSearch)`
     box-shadow: inset 0 -2px 0 0 ${props => props.theme.eui.euiColorPrimary};
   }
 `;
-
-export const LogSearchInput = injectI18n(LogSearchInputUI);

@@ -5,7 +5,7 @@
  */
 
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
 interface IntervalSizeDescriptor {
@@ -17,10 +17,9 @@ interface LogMinimapScaleControlsProps {
   availableIntervalSizes: IntervalSizeDescriptor[];
   intervalSize: number;
   setIntervalSize: (intervalSize: number) => any;
-  intl: InjectedIntl;
 }
 
-class LogMinimapScaleControlsUI extends React.PureComponent<LogMinimapScaleControlsProps> {
+export class LogMinimapScaleControls extends React.PureComponent<LogMinimapScaleControlsProps> {
   public handleScaleChange = (intervalSizeDescriptorKey: string) => {
     const { availableIntervalSizes, setIntervalSize } = this.props;
     const [sizeDescriptor] = availableIntervalSizes.filter(
@@ -33,15 +32,17 @@ class LogMinimapScaleControlsUI extends React.PureComponent<LogMinimapScaleContr
   };
 
   public render() {
-    const { availableIntervalSizes, intervalSize, intl } = this.props;
+    const { availableIntervalSizes, intervalSize } = this.props;
     const [currentSizeDescriptor] = availableIntervalSizes.filter(intervalSizeEquals(intervalSize));
 
     return (
       <EuiFormRow
-        label={intl.formatMessage({
-          id: 'xpack.infra.logs.customizeLogs.minimapScaleFormRowLabel',
-          defaultMessage: 'Minimap Scale',
-        })}
+        label={
+          <FormattedMessage
+            id="xpack.infra.logs.customizeLogs.minimapScaleFormRowLabel"
+            defaultMessage="Minimap Scale"
+          />
+        }
       >
         <EuiRadioGroup
           options={availableIntervalSizes.map(sizeDescriptor => ({
@@ -64,5 +65,3 @@ const intervalKeyEquals = (key: string) => (sizeDescriptor: IntervalSizeDescript
 
 const intervalSizeEquals = (size: number) => (sizeDescriptor: IntervalSizeDescriptor) =>
   sizeDescriptor.intervalSize === size;
-
-export const LogMinimapScaleControls = injectI18n(LogMinimapScaleControlsUI);

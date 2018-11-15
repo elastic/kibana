@@ -62,7 +62,7 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
           </InlineWrapper>
           <EuiFilterButton iconType="play" iconSide="left" onClick={this.startLiveStreaming}>
             <FormattedMessage
-              id="xpack.infra.logs.streamLiveButtonLabel"
+              id="xpack.infra.logs.startStreamingButtonLabel"
               defaultMessage="Stream live"
             />
           </EuiFilterButton>
