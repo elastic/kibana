@@ -13,9 +13,9 @@ import {
 export const openDetailPanel = ({ name }) => (dispatch) => {
   const { history } = getRouter();
   const search = history.location.search;
-  const { cluster: remoteClusterName } = extractQueryParams(search);
+  const { cluster: clusterName } = extractQueryParams(search);
 
-  if (remoteClusterName !== name) {
+  if (clusterName !== name) {
     // Allow the user to share a deep link to this job.
     history.replace({
       search: `?cluster=${name}`,
@@ -24,7 +24,7 @@ export const openDetailPanel = ({ name }) => (dispatch) => {
 
   dispatch({
     type: OPEN_DETAIL_PANEL,
-    payload: { remoteClusterName: name },
+    payload: { clusterName: name },
   });
 };
 

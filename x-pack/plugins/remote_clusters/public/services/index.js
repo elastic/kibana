@@ -10,6 +10,11 @@ export {
 } from './api';
 
 export {
+  showApiError,
+  showApiWarning,
+} from './api_errors';
+
+export {
   extractQueryParams,
 } from './query_params';
 

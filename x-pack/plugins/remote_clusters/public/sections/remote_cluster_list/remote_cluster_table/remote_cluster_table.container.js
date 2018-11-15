@@ -18,8 +18,8 @@ const mapDispatchToProps = (dispatch) => {
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
     },
-    openDetailPanel: (remoteClusterName) => {
-      dispatch(openDetailPanel({ name: remoteClusterName }));
+    openDetailPanel: (clusterName) => {
+      dispatch(openDetailPanel({ name: clusterName }));
     },
   };
 };

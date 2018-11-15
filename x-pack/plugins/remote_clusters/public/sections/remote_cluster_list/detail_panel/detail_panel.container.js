@@ -9,8 +9,8 @@ import { DetailPanel as DetailPanelView } from './detail_panel';
 
 import {
   isDetailPanelOpen,
-  // getDetailPanelRemoteCluster,
-  // getDetailPanelRemoteClusterId,
+  // getDetailPanelCluster,
+  // getDetailPanelClusterName,
   // isLoading,
 } from '../../../store/selectors';
 
@@ -22,8 +22,8 @@ const mapStateToProps = (state) => {
   return {
     isOpen: isDetailPanelOpen(state),
     // isLoading: isLoading(state),
-    // remoteCluster: getDetailPanelRemoteCluster(state),
-    // remoteClusterName: getDetailPanelRemoteClusterName(state),
+    // cluster: getDetailPanelCluster(state),
+    // clusterName: getDetailPanelClusterName(state),
   };
 };
 

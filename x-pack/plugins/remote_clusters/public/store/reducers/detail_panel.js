@@ -11,7 +11,7 @@ import {
 
 const initialState = {
   isOpen: false,
-  remoteClusterName: undefined,
+  clusterName: undefined,
 };
 
 export function detailPanel(state = initialState, action) {
@@ -20,17 +20,17 @@ export function detailPanel(state = initialState, action) {
   switch (type) {
     case OPEN_DETAIL_PANEL:
       const {
-        remoteClusterName,
+        clusterName,
       } = payload;
 
       return {
-        remoteClusterName,
+        clusterName,
         isOpen: true,
       };
 
     case CLOSE_DETAIL_PANEL:
       return {
-        remoteClusterName: undefined,
+        clusterName: undefined,
         isOpen: false,
       };
 
