@@ -1,7 +1,7 @@
-const semver = require('semver')
+const semver = require('semver');
 
 const PKG = require('../../package.json');
-const RESTRICTED_GLOBALS = require('./restricted_globals')
+const RESTRICTED_GLOBALS = require('./restricted_globals');
 
 module.exports = {
   parser: 'babel-eslint',
