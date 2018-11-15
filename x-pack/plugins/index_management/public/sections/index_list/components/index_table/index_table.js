@@ -92,7 +92,16 @@ export class IndexTableUi extends Component {
       selectedIndicesMap: {},
     };
   }
-
+  componentDidMount() {
+    const {
+      filterChanged,
+      filterFromURI
+    } = this.props;
+    if (filterFromURI) {
+      const decodedFilter = decodeURIComponent(filterFromURI);
+      filterChanged(decodedFilter);
+    }
+  }
   onSort = column => {
     const { sortField, isSortAscending, sortChanged } = this.props;
 

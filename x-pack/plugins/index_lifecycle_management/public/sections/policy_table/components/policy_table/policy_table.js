@@ -31,11 +31,13 @@ import {
   EuiTableRowCell,
   EuiTitle,
   EuiText,
+  EuiToolTip,
   EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
 
 import { ConfirmDelete } from './confirm_delete';
+import { getFilteredIndicesUri } from '../../../../../../index_management/public/services/navigation';
 const HEADERS = {
   name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
     defaultMessage: 'Name',
@@ -167,7 +169,7 @@ export class PolicyTableUi extends Component {
     } else if (fieldName === 'coveredIndices' && value) {
       return (
         <EuiText>
-          <b>{value.length}</b>
+          <b>{value.length}</b>{' '}
         </EuiText>
       );
     } else if (fieldName === 'modified_date' && value) {
@@ -177,6 +179,7 @@ export class PolicyTableUi extends Component {
   }
 
   buildRowCells(policy) {
+    const { intl } = this.props;
     const { name } = policy;
     const cells = Object.keys(HEADERS).map(fieldName => {
       const value = policy[fieldName];
@@ -190,6 +193,14 @@ export class PolicyTableUi extends Component {
         </EuiTableRowCell>
       );
     });
+    const viewIndicesLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
+      defaultMessage: 'View indices',
+    });
+    const deletePolicyLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText',
+      defaultMessage: 'Delete policy',
+    });
     cells.push(
       <EuiTableRowCell
         key={`delete-${name}`}
@@ -197,12 +208,30 @@ export class PolicyTableUi extends Component {
         data-test-subj={`policyTableCell-delete-${name}`}
         style={{ width: 100 }}
       >
-        <EuiButtonIcon
-          aria-label={'Delete policy'}
-          color={'danger'}
-          onClick={() => this.setState({ policyToDelete: policy })}
-          iconType="trash"
-        />
+        <EuiToolTip
+          position="bottom"
+          content={deletePolicyLabel}
+        >
+          <EuiButtonIcon
+            aria-label={deletePolicyLabel}
+            color={'danger'}
+            onClick={() => this.setState({ policyToDelete: policy })}
+            iconType="trash"
+          />
+        </EuiToolTip>
+        { policy.coveredIndices && policy.coveredIndices.length ? (
+          <EuiToolTip
+            position="bottom"
+            content={viewIndicesLabel}
+          >
+            <EuiButtonIcon
+              color="primary"
+              aria-label={viewIndicesLabel}
+              href={getFilteredIndicesUri(`ilm.policy:${policy.name}`)}
+              iconType="list"
+            />
+          </EuiToolTip>
+        ) : null}
       </EuiTableRowCell>
     );
     return cells;
