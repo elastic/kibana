@@ -132,7 +132,7 @@ exports[`Timeline should render with data 1`] = `
                       textAnchor="middle"
                       transform="translate(0, -20)"
                     >
-                      0
+                      0 ms
                     </text>
                   </g>
                   <g
@@ -827,6 +827,11 @@ exports[`Timeline should render with data 1`] = `
                 y1={0}
                 y2={116}
               />
+            </g>
+            <g
+              className="rv-xy-plot__grid-lines"
+              transform="translate(50,100)"
+            >
               <line
                 className="rv-xy-plot__grid-lines__line"
                 style={

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Brand } from '../../../core/public/chrome';
+
 interface IInjector {
   get<T>(injectable: string): T;
 }
@@ -30,6 +32,12 @@ declare class Chrome {
   public getUiSettingsClient(): any;
   public setVisible(visible: boolean): any;
   public getInjected(key: string, defaultValue?: any): any;
+  public setRootController(name: string, Controller: any): any;
+  public setBrand(brand: Brand): this;
+  public getBrand(key: keyof Brand): Brand[keyof Brand];
+  public addApplicationClass(classNames: string | string[]): this;
+  public removeApplicationClass(classNames: string | string[]): this;
+  public getApplicationClasses(): string;
 }
 
 declare const chrome: Chrome;

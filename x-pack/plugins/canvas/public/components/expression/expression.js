@@ -27,7 +27,7 @@ export const Expression = ({
   toggleAutocompleteEnabled,
 }) => {
   return (
-    <EuiPanel>
+    <EuiPanel className="canvasTray__panel">
       <ExpressionInput
         functionDefinitions={functionDefinitions}
         error={error}

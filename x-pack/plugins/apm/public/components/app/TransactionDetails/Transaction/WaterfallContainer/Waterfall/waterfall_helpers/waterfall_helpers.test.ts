@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy, indexBy } from 'lodash';
+import { groupBy } from 'lodash';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import {
   getClockSkew,
   getWaterfallItems,
-  IWaterfallIndex,
   IWaterfallItem
 } from './waterfall_helpers';
 
@@ -95,86 +94,84 @@ describe('waterfall_helpers', () => {
         items,
         hit => (hit.parentId ? hit.parentId : 'root')
       );
-      const itemsById: IWaterfallIndex = indexBy(items, 'id');
       const entryTransactionItem = childrenByParentId.root[0];
       expect(
-        getWaterfallItems(childrenByParentId, itemsById, entryTransactionItem)
+        getWaterfallItems(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
   });
 
   describe('getClockSkew', () => {
     it('should adjust when child starts before parent', () => {
-      const item = {
+      const child = {
         docType: 'transaction',
         timestamp: 0,
         duration: 50
       } as IWaterfallItem;
 
-      const parentItem = {
+      const parent = {
         timestamp: 100,
-        skew: 5,
-        duration: 100
+        duration: 100,
+        skew: 5
       } as IWaterfallItem;
-      const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(130);
+      expect(getClockSkew(child, parent)).toBe(130);
     });
 
     it('should adjust when child starts after parent has ended', () => {
-      const item = {
+      const child = {
         docType: 'transaction',
         timestamp: 250,
         duration: 50
       } as IWaterfallItem;
 
-      const parentItem = {
+      const parent = {
         timestamp: 100,
-        skew: 5,
-        duration: 100
+        duration: 100,
+        skew: 5
       } as IWaterfallItem;
-      const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(-120);
+      expect(getClockSkew(child, parent)).toBe(-120);
     });
 
     it('should not adjust when child starts within parent duration', () => {
-      const item = {
+      const child = {
         docType: 'transaction',
         timestamp: 150,
         duration: 50
       } as IWaterfallItem;
 
-      const parentItem = {
+      const parent = {
         timestamp: 100,
-        skew: 5,
-        duration: 100
+        duration: 100,
+        skew: 5
       } as IWaterfallItem;
-      const parentTransactionSkew = 1337;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(0);
+      expect(getClockSkew(child, parent)).toBe(0);
     });
 
-    it('should return parentTransactionSkew for spans', () => {
-      const item = {
+    it('should return parent skew for spans', () => {
+      const child = {
         docType: 'span'
       } as IWaterfallItem;
 
-      const parentItem = {} as IWaterfallItem;
-      const parentTransactionSkew = 1337;
+      const parent = {
+        timestamp: 100,
+        duration: 100,
+        skew: 5
+      } as IWaterfallItem;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(1337);
+      expect(getClockSkew(child, parent)).toBe(5);
     });
 
-    it('should handle missing parentItem', () => {
-      const item = {
+    it('should handle missing parent', () => {
+      const child = {
         docType: 'transaction'
       } as IWaterfallItem;
 
-      const parentItem = undefined;
-      const parentTransactionSkew = 1337;
+      const parent = undefined;
 
-      expect(getClockSkew(item, parentItem, parentTransactionSkew)).toBe(0);
+      expect(getClockSkew(child, parent)).toBe(0);
     });
   });
 });

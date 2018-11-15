@@ -25,6 +25,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
@@ -117,6 +118,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
@@ -209,6 +211,7 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
@@ -301,6 +304,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
@@ -393,6 +397,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
         <EuiTitle
           className="loginWelcome__title"
           size="l"
+          textTransform="none"
         >
           <h1>
             <FormattedMessage
