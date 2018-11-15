@@ -22,6 +22,13 @@ export function indexLifecycleManagement(kibana) {
     uiExports: {
       managementSections: ['plugins/index_lifecycle_management'],
     },
+    isEnabled(config) {
+      return (
+        config.get('xpack.index_lifecycle_management.enabled') &&
+        config.has('index_management.enabled') &&
+        config.get('index_management.enabled')
+      );
+    },
     init: function (server) {
       registerLicenseChecker(server);
       registerTemplatesRoutes(server);
