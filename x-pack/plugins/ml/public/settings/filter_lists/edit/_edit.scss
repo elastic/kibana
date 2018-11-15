@@ -1,0 +1,35 @@
+.ml-edit-filter-lists {
+  .ml-edit-filter-lists-content {
+    max-width: 1100px;
+    width: 100%;
+    margin-top: $euiSize;
+    margin-bottom: $euiSize;
+  }
+
+  .ml-filter-list-usage > div {
+    display: inline;
+  }
+
+  .ml-filter-list-usage {
+    .euiButtonEmpty.euiButtonEmpty--small {
+      padding-bottom: $euiSizeXS;
+    }
+
+    .euiButtonEmpty .euiButtonEmpty__content {
+      padding: 0px $euiSizeXS;
+    }
+  }
+}
+
+.ml-add-filter-item-popover {
+  .euiFormRow {
+    width: 300px;
+    padding-bottom: $euiSizeXS;
+  }
+}
+
+.ml-filter-list-usage-popover {
+  li {
+    line-height: $euiSizeL;
+  }
+}
