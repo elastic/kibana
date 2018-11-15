@@ -94,13 +94,16 @@ export class ESSearchSource extends VectorSource {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
-      searchSource.setField('source', {
-        includes: [
-          this._descriptor.geoField,
-          ...this._descriptor.tooltipProperties,
-          ...styleFieldNames,
-        ],
-      });
+      // Setting "fields" instead of "source: { includes: []}"
+      // because SearchSource automatically adds bunch of junk to the search request
+      // 1) all scripted fields
+      // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
+      // By setting "fields", SearchSource removes all of this garbage and only requests what is really needed.
+      searchSource.setField('fields', [
+        this._descriptor.geoField,
+        ...this._descriptor.tooltipProperties,
+        ...styleFieldNames,
+      ]);
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];
