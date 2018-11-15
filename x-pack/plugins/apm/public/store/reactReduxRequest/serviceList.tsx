@@ -14,7 +14,7 @@ import { IUrlParams } from '../urlParams';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'serviceList';
-const INITIAL_DATA: [] = [];
+const INITIAL_DATA: IServiceListItem[] = [];
 const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getServiceList(
