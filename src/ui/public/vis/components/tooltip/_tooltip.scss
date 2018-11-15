@@ -24,7 +24,8 @@
   overflow-wrap: break-word;
 
   table {
-    td,th {
+    td,
+    th {
       padding: $euiSizeXS;
       vertical-align: bottom;
     }
