@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { Overrides } from './overrides';
@@ -40,7 +40,7 @@ describe('Overrides', () => {
     const props = getProps();
     props.overrides.format = FORMAT_1;
 
-    const component = shallow(
+    const component = mount(
       <Overrides {...props} />
     );
 
