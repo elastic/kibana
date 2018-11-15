@@ -61,12 +61,12 @@ export async function runTests(options) {
 
       if (options.assertNoneExcluded) {
         await assertNoneExcluded({ configPath, options });
-        return;
+        continue;
       }
 
       if (!(await hasTests({ configPath, options }))) {
         log.info('Skipping', configPath, 'since all tests are excluded');
-        return;
+        continue;
       }
 
       await withProcRunner(log, async procs => {
