@@ -27,6 +27,8 @@ const markdownIt = new MarkdownIt({
   linkify: true
 });
 
+const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
+
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
 
@@ -49,7 +51,6 @@ uiModules.get('kibana')
     };
 
 
-
     class ServiceSettings {
 
       constructor() {
@@ -63,6 +64,7 @@ uiModules.get('kibana')
 
         this._invalidateSettings();
       }
+
       _invalidateSettings() {
 
         this._loadCatalogue = _.once(async () => {
@@ -115,7 +117,6 @@ uiModules.get('kibana')
             const preppedService = _.cloneDeep(tmsService);
             preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
             preppedService.subdomains = preppedService.subdomains || [];
-            preppedService.url = this._extendUrlWithParams(preppedService.url);
             preppedService.origin = 'ems';
             return preppedService;
           });
@@ -147,7 +148,7 @@ uiModules.get('kibana')
         const fileLayers = await this._loadFileLayers();
 
         const strippedFileLayers = fileLayers.map(fileLayer => {
-          const strippedFileLayer = {...fileLayer};
+          const strippedFileLayer = { ...fileLayer };
           //remove the properties that should not propagate and be used by clients.
           delete strippedFileLayer.url;
           return strippedFileLayer;
@@ -167,8 +168,7 @@ uiModules.get('kibana')
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
           // tmsService.url = tilemapsConfig.deprecated.config.url;
-          // delete tmsService.url;
-          tmsService.id = 'TMS in config/kibana.yml';
+          tmsService.id = TMS_IN_YML_ID;
           tmsService.origin = 'yml';
           allServices.push(tmsService);
         }
@@ -176,12 +176,14 @@ uiModules.get('kibana')
         const servicesFromManifest = await this._loadTMSServices();
 
         const strippedServiceFromManifest = servicesFromManifest.map((service) => {
-          const strippedService = {... service};
+          const strippedService = { ...service };
+          //do not expose url. needs to be resolved dynamically
           delete strippedService.url;
           return strippedService;
         });
 
-        return allServices.concat(strippedServiceFromManifest);
+        const st = allServices.concat(strippedServiceFromManifest);
+        return st;
 
       }
 
@@ -209,16 +211,28 @@ uiModules.get('kibana')
       }
 
 
+      async _getUrlTemplateForEMSTMSLayer(tmsServiceConfig) {
+        const tmsServices = await this._loadTMSServices();
+        const serviceConfig = tmsServices.find(service => {
+          return service.id === tmsServiceConfig.id;
+        });
+        return this._extendUrlWithParams(serviceConfig.url);
+      }
+
       async getUrlTemplateForTMSLayer(tmsServiceConfig) {
 
         if (tmsServiceConfig.origin === 'ems') {
-          const tmsServices = await this._loadTMSServices();
-          const serviceConfig = tmsServices.find(service => {
-            return service.id === tmsServiceConfig.id
-          });
-          return this._extendUrlWithParams(serviceConfig.url);
+          return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
+        } else if (tmsServiceConfig.origin === 'yml') {
+          return tilemapsConfig.deprecated.config.url;
         } else {
-          throw new Error('not implemented');
+          //this is an older config. need to resolve this dynamically.
+          if (tmsServiceConfig.id === TMS_IN_YML_ID) {
+            return tilemapsConfig.deprecated.config.url;
+          } else {
+            //assume ems
+            return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
+          }
         }
 
       }
@@ -228,7 +242,7 @@ uiModules.get('kibana')
         //the id is the filename
         const fileLayers = await this._loadFileLayers();
         const layerConfig = fileLayers.find(fileLayer => {
-          return fileLayer.name === filename
+          return fileLayer.name === filename;
         });
 
         const extendedUrl = this._extendUrlWithParams(layerConfig.url);
