@@ -21,20 +21,23 @@ import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 function SplitByEverything(props) {
   const { onChange, model } = props;
+  const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
   return (
-    <div className="vis_editor__split-container">
-      <div className="vis_editor__label">Group By</div>
-      <div className="vis_editor__split-selects">
-        <GroupBySelect
-          value={model.split_mode}
-          onChange={handleSelectChange('split_mode')}
-        />
-      </div>
-    </div>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>
+        <EuiFormRow id={htmlId('group')} label="Group by">
+          <GroupBySelect
+            value={model.split_mode}
+            onChange={handleSelectChange('split_mode')}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
 }

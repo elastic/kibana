@@ -20,6 +20,7 @@ import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
 import {
   EuiLink,
 } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const filterFields = [ 'job_id', 'state', 'node.name' ];
 const columns = [
@@ -92,20 +93,22 @@ Try changing the filter or time range.`
 
       scope.$watch('jobs', (jobs = []) => {
         const mlTable = (
-          <MonitoringTable
-            className="mlJobsTable"
-            rows={jobs}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder="Filter Jobs..."
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={jobRowFactory(scope, kbnUrl)}
-            getNoDataMessage={getNoDataMessage}
-          />
+          <I18nProvider>
+            <MonitoringTable
+              className="mlJobsTable"
+              rows={jobs}
+              pageIndex={scope.pageIndex}
+              filterText={scope.filterText}
+              sortKey={scope.sortKey}
+              sortOrder={scope.sortOrder}
+              onNewState={scope.onNewState}
+              placeholder="Filter Jobs..."
+              filterFields={filterFields}
+              columns={columns}
+              rowComponent={jobRowFactory(scope, kbnUrl)}
+              getNoDataMessage={getNoDataMessage}
+            />
+          </I18nProvider>
         );
         render(mlTable, $el[0]);
       });
