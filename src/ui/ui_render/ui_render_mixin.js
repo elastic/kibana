@@ -43,7 +43,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         navLinks: navLinkSpecs.reduce((acc, navLinkSpec) => ({
           ...acc,
           [navLinkSpec._id]: true
-        }))
+        }), {})
       }
     };
   }
