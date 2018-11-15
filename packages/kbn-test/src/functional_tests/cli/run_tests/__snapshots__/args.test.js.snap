@@ -29,7 +29,7 @@ exports[`process options for run tests CLI accepts boolean value for updateBasel
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],
@@ -45,7 +45,7 @@ exports[`process options for run tests CLI accepts debug option 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "debug": true,
   "extraKbnOpts": undefined,
@@ -62,7 +62,7 @@ Object {
   "assertNoneExcluded": false,
   "config": "",
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],
@@ -80,7 +80,7 @@ Object {
   },
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "extraKbnOpts": Object {
     "server.foo": "bar",
@@ -97,7 +97,7 @@ exports[`process options for run tests CLI accepts quiet option 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],
@@ -113,7 +113,7 @@ exports[`process options for run tests CLI accepts silent option 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],
@@ -129,7 +129,7 @@ exports[`process options for run tests CLI accepts source value for esFrom 1`] =
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "esFrom": "source",
   "extraKbnOpts": undefined,
@@ -145,7 +145,7 @@ exports[`process options for run tests CLI accepts string value for kibana-insta
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "extraKbnOpts": undefined,
   "installDir": "foo",
@@ -161,7 +161,7 @@ exports[`process options for run tests CLI accepts value for grep 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "extraKbnOpts": undefined,
   "grep": "management",
@@ -177,7 +177,7 @@ exports[`process options for run tests CLI accepts verbose option 1`] = `
 Object {
   "assertNoneExcluded": false,
   "configs": Array [
-    "foo",
+    <absolute path>/foo,
   ],
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],

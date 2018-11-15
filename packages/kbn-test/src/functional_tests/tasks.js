@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { relative, resolve } from 'path';
+import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-utils';
@@ -45,7 +45,7 @@ in another terminal session by running this command from this directory:
 /**
  * Run servers and tests for each config
  * @param {object} options                   Optional
- * @property {string[]} configPaths          Array of paths to configs
+ * @property {string[]} options.configs      Array of paths to configs
  * @property {function} options.log          An instance of the ToolingLog
  * @property {string} options.installDir     Optional installation dir from which to run Kibana
  * @property {boolean} options.bail          Whether to exit test run at the first failure
@@ -88,17 +88,16 @@ export async function runTests(options) {
 /**
  * Start only servers using single config
  * @param {object} options                   Optional
- * @property {string} options.configPath     Path to a config file
+ * @property {string} options.config         Path to a config file
  * @property {function} options.log          An instance of the ToolingLog
  * @property {string} options.installDir     Optional installation dir from which to run Kibana
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function startServers(options) {
-  const { config: configOption, log } = options;
-  const configPath = resolve(configOption);
+  const { log } = options;
 
   await withProcRunner(log, async procs => {
-    const config = await readConfigFile(log, configPath);
+    const config = await readConfigFile(log, options.config);
 
     const es = await runElasticsearch({ config, options });
     await runKibanaServer({

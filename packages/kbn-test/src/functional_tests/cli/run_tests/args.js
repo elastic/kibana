@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 import dedent from 'dedent';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
@@ -121,7 +123,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
 
   return {
     ...userOptions,
-    configs,
+    configs: configs.map(c => resolve(c)),
     log: new ToolingLog({
       level: pickLevelFromFlags(userOptions),
       writeTo: process.stdout,

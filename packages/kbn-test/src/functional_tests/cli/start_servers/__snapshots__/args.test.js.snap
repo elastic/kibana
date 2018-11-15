@@ -21,9 +21,7 @@ Options:
 
 exports[`process options for start servers CLI accepts debug option 1`] = `
 Object {
-  "config": Array [
-    "foo",
-  ],
+  "config": <absolute path>/foo,
   "debug": true,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
@@ -33,9 +31,7 @@ Object {
 
 exports[`process options for start servers CLI accepts empty config value if default passed 1`] = `
 Object {
-  "config": Array [
-    "foo",
-  ],
+  "config": <absolute path>/foo,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],
@@ -47,9 +43,7 @@ Object {
   "_": Object {
     "server.foo": "bar",
   },
-  "config": Array [
-    "foo",
-  ],
+  "config": <absolute path>/foo,
   "esFrom": "snapshot",
   "extraKbnOpts": Object {
     "server.foo": "bar",
@@ -60,9 +54,7 @@ Object {
 
 exports[`process options for start servers CLI accepts quiet option 1`] = `
 Object {
-  "config": Array [
-    "foo",
-  ],
+  "config": <absolute path>/foo,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],
@@ -72,9 +64,7 @@ Object {
 
 exports[`process options for start servers CLI accepts silent option 1`] = `
 Object {
-  "config": Array [
-    "foo",
-  ],
+  "config": <absolute path>/foo,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],
@@ -84,9 +74,7 @@ Object {
 
 exports[`process options for start servers CLI accepts source value for esFrom 1`] = `
 Object {
-  "config": Array [
-    "foo",
-  ],
+  "config": <absolute path>/foo,
   "esFrom": "source",
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],
@@ -95,9 +83,7 @@ Object {
 
 exports[`process options for start servers CLI accepts string value for kibana-install-dir 1`] = `
 Object {
-  "config": Array [
-    "foo",
-  ],
+  "config": <absolute path>/foo,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "installDir": "foo",
@@ -107,9 +93,7 @@ Object {
 
 exports[`process options for start servers CLI accepts verbose option 1`] = `
 Object {
-  "config": Array [
-    "foo",
-  ],
+  "config": <absolute path>/foo,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "log": [object ToolingLog],

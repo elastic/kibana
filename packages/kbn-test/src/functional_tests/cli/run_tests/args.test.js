@@ -25,6 +25,11 @@ expect.addSnapshotSerializer({
   test: value => value instanceof ToolingLog,
 });
 
+expect.addSnapshotSerializer({
+  print: value => value.replace(process.cwd(), '<absolute path>').replace(/\\/g, '/'),
+  test: value => typeof value === 'string' && value.startsWith(process.cwd()),
+});
+
 describe('display help for run tests CLI', () => {
   it('displays as expected', () => {
     expect(displayHelp()).toMatchSnapshot();
