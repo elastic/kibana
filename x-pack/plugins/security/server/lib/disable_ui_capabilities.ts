@@ -13,8 +13,8 @@ interface FeatureAndCapability {
   uiCapability: string;
 }
 
-export function disableUiCapabilitesFactory(server: any, request: any) {
-  const { spaces } = server.plugins.spaces;
+export function disableUICapabilitesFactory(server: any, request: any) {
+  const { spaces } = server.plugins;
   const { authorization } = server.plugins.security;
   const actions: Actions = authorization.actions;
 
@@ -65,8 +65,10 @@ export function disableUiCapabilitesFactory(server: any, request: any) {
             feature[uiCapability] = false;
           }
         }
+
+        return resultUICapabilities;
       }
-      return resultUICapabilities;
+      throw err;
     }
   };
 }
