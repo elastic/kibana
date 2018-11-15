@@ -142,9 +142,7 @@ export class DetailPanelUi extends Component {
           </EuiFlexGroup>
         </EuiFlyoutBody>
       );
-    }
-
-    if (cluster) {
+    } else if (cluster) {
       content = this.renderCluster();
     } else {
       content = (
