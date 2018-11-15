@@ -60,7 +60,7 @@ export function screenshotsObservableFactory(server) {
   };
 
   const waitForNotFoundError = async (browser) => {
-    await browser.waitForSelector(`.toast.alert.alert-danger`);
+    await browser.waitForSelector(`.toast.alert.alert-danger`, { silent: true });
     throw new Error('Reporting subject could not be loaded to take a screenshot.');
   };
 
