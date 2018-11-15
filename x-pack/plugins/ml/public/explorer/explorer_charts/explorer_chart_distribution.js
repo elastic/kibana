@@ -9,8 +9,6 @@
  * the Machine Learning Explorer dashboard.
  */
 
-import './styles/explorer_chart.less';
-
 import PropTypes from 'prop-types';
 import React from 'react';
 

@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 import './new_job_controller';
 import './detectors_list_directive';
 import './save_status_modal';
