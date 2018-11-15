@@ -28,7 +28,14 @@ import createTextHandler from '../lib/create_text_handler';
 import createNumberHandler from '../lib/create_number_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiSpacer,
+  EuiFormRow,
+  EuiCode,
+  EuiTextArea,
 } from '@elastic/eui';
 
 export const MovingAverageAgg = props => {
@@ -71,91 +78,109 @@ export const MovingAverageAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-            />
-          </div>
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Metric</div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('metric')}
+            label="Metric"
+          >
             <MetricSelect
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
               value={model.field}
             />
-          </div>
-        </div>
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('model')}>Model</label>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('model')}
+            label="Model"
+          >
             <EuiComboBox
               isClearable={false}
-              id={htmlId('model')}
-              placeholder="Select..."
+              placeholder="Select"
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
-              Window Size
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('windowSize')} label="Window size">
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
             <input
-              id={htmlId('windowSize')}
-              className="vis_editor__input-grows-100"
+              className="tvbAgg__input"
               type="text"
               onChange={handleNumberChange('window')}
               value={model.window}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('minimize')}>Minimize</label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('minimize')} label="Minimize">
             <EuiComboBox
-              id={htmlId('minimize')}
-              placeholder="Select..."
+              placeholder="Select"
               options={minimizeOptions}
               selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
               onChange={handleSelectChange('minimize')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
-              Predict
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow id={htmlId('predict')} label="Predict">
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
             <input
-              id={htmlId('predict')}
-              className="vis_editor__input-grows-100"
+              className="tvbAgg__input"
               type="text"
               onChange={handleNumberChange('predict')}
               value={model.predict}
             />
-          </div>
-        </div>
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('settings')}>
-              Settings (<code>Key=Value</code> space-delimited)
-            </label>
-            <input
-              id={htmlId('settings')}
-              className="vis_editor__input-grows-100"
-              type="text"
-              onChange={handleTextChange('settings')}
-              value={model.settings}
-            />
-          </div>
-        </div>
-      </div>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexItem>
+        <EuiFormRow
+          fullWidth
+          id={htmlId('settings')}
+          label="Settings"
+          helpText={
+            <span><EuiCode>Key=Value</EuiCode> space-delimited</span>
+          }
+        >
+          <EuiTextArea
+            onChange={handleTextChange('settings')}
+            value={model.settings}
+            fullWidth
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     </AggRow>
   );
 };

@@ -25,6 +25,7 @@ import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 
 function MarkdownSeries(props) {
   const {
@@ -45,15 +46,11 @@ function MarkdownSeries(props) {
   const handleChange = createTextHandler(onChange);
   const aggs = model.metrics.map(createAggRowRender(props));
 
-  let caretClassName = 'fa fa-caret-down';
-  if (!visible) caretClassName = 'fa fa-caret-right';
+  let caretIcon = 'arrowDown';
+  if (!visible) caretIcon = 'arrowRight';
 
   let body = null;
   if (visible) {
-    let metricsClassName = 'kbnTabs__tab';
-    let optionsClassname = 'kbnTabs__tab';
-    if (selectedTab === 'metrics') metricsClassName += '-active';
-    if (selectedTab === 'options') optionsClassname += '-active';
     let seriesBody;
     if (selectedTab === 'metrics') {
       const handleSort = (data) => {
@@ -67,19 +64,17 @@ function MarkdownSeries(props) {
             dynamic={true}
             direction="vertical"
             onSort={handleSort}
-            sortHandle="vis_editor__agg_sort"
+            sortHandle="tvbAggRow__sortHandle"
           >
             { aggs }
           </Sortable>
-          <div className="vis_editor__series_row">
-            <div className="vis_editor__series_row-item">
-              <Split
-                onChange={props.onChange}
-                fields={fields}
-                panel={panel}
-                model={model}
-              />
-            </div>
+          <div className="tvbAggRow tvbAggRow--split">
+            <Split
+              onChange={props.onChange}
+              fields={fields}
+              panel={panel}
+              model={model}
+            />
           </div>
         </div>
       );
@@ -93,24 +88,22 @@ function MarkdownSeries(props) {
       );
     }
     body = (
-      <div className="vis_editor__series-row">
-        <div className="kbnTabs sm" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'metrics'}
-            className={metricsClassName}
+      <div className="tvbSeries__body">
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'metrics'}
             onClick={() => props.switchTab('metrics')}
-          >Metrics
-          </button>
-          <button
-            role="tab"
+          >
+            Metrics
+          </EuiTab>
+          <EuiTab
             data-test-subj="seriesOptions"
-            aria-selected={selectedTab === 'metrics'}
-            className={optionsClassname}
+            isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
-          >Options
-          </button>
-        </div>
+          >
+            Options
+          </EuiTab>
+        </EuiTabs>
         {seriesBody}
       </div>
     );
@@ -118,47 +111,55 @@ function MarkdownSeries(props) {
 
   return (
     <div
-      className={`${props.className} vis_editor__series`}
+      className={`${props.className}`}
       style={props.style}
       onMouseDown={props.onMouseDown}
       onTouchStart={props.onTouchStart}
     >
-      <div className="vis_editor__container">
-        <div className="vis_editor__series-details">
-          <button
-            className="vis_editor__series-visibility-toggle"
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={caretIcon}
+            color="text"
             onClick={props.toggleVisible}
             aria-label="Toggle series editor"
             aria-expanded={props.visible}
-          >
-            <i className={caretClassName}/>
-          </button>
-          <div className="vis_editor__row vis_editor__row_item">
-            <input
-              className="vis_editor__input-grows vis_editor__row_item"
-              onChange={handleChange('label')}
-              placeholder="Label"
-              value={model.label}
-            />
-            <input
-              className="vis_editor__input-grows"
-              onChange={handleChange('var_name')}
-              placeholder="Variable Name"
-              value={model.var_name}
-            />
-          </div>
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFieldText
+            fullWidth
+            onChange={handleChange('label')}
+            placeholder="Label"
+            value={model.label}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFieldText
+            fullWidth
+            onChange={handleChange('var_name')}
+            placeholder="Variable name"
+            value={model.var_name}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip="Add Series"
-            deleteTooltip="Delete Series"
-            cloneTooltip="Clone Series"
+            addTooltip="Add series"
+            deleteTooltip="Delete series"
+            cloneTooltip="Clone series"
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
+            responsive={false}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       { body }
     </div>
   );
