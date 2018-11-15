@@ -45,8 +45,8 @@ export default function ({ getService }) {
       // more efficient to post them all up front, then sequentially.
       it('multiple jobs posted', async () => {
         // skipping this to check every first test works
-        // const path1 = await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3);
-        // await reportingAPI.waitForJobToFinish(path1);
+        const path1 = await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3);
+        await reportingAPI.waitForJobToFinish(path1);
         const path2 = await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3);
         await reportingAPI.waitForJobToFinish(path2);
 
