@@ -3,6 +3,11 @@
 exports[`Table should render normally 1`] = `
 <React.Fragment>
   <EuiSearchBar
+    box={
+      Object {
+        "data-test-subj": "savedObjectSearchBar",
+      }
+    }
     filters={
       Array [
         Object {
