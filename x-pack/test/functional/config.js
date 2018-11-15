@@ -16,7 +16,9 @@ import {
   GrokDebuggerPageProvider,
   WatcherPageProvider,
   ReportingPageProvider,
+  SpaceSelectorPageProvider,
   AccountSettingProvider,
+  InfraHomePageProvider,
 } from './page_objects';
 
 import {
@@ -65,8 +67,10 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/watcher'),
       resolve(__dirname, './apps/dashboard_mode'),
       resolve(__dirname, './apps/security'),
+      resolve(__dirname, './apps/spaces'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
+      resolve(__dirname, './apps/infra'),
     ],
 
     // define the name and providers for services that should be
@@ -115,6 +119,8 @@ export default async function ({ readConfigFile }) {
       grokDebugger: GrokDebuggerPageProvider,
       watcher: WatcherPageProvider,
       reporting: ReportingPageProvider,
+      spaceSelector: SpaceSelectorPageProvider,
+      infraHome: InfraHomePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -137,7 +143,11 @@ export default async function ({ readConfigFile }) {
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       ],
     },
-
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+      },
+    },
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.
     // Merge urls for your plugin with the urls defined in
@@ -161,6 +171,12 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/grokdebugger'
       },
+      spaceSelector: {
+        pathname: '/',
+      },
+      infraOps: {
+        pathname: '/app/infra'
+      }
     },
 
     // choose where esArchiver should load archives from

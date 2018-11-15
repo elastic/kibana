@@ -31,9 +31,13 @@ chrome.setRootTemplate(template);
 const store = configureStore();
 
 initTimepicker(history, store.dispatch).then(() => {
+  const showPluginBreadcrumbs = !chrome
+    .getUiSettingsClient()
+    .get('k7design', false);
+
   ReactDOM.render(
     <Router history={history}>
-      <Breadcrumbs />
+      <Breadcrumbs showPluginBreadcrumbs={showPluginBreadcrumbs} />
     </Router>,
     document.getElementById('react-apm-breadcrumbs')
   );

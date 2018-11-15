@@ -19,7 +19,8 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 
@@ -66,7 +67,7 @@ describe('renders', () => {
         size: 5,
       }
     };
-    const component = shallowWithIntl(<ListControlEditor.WrappedComponent
+    const component = shallow(<ListControlEditor
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParams}
@@ -91,7 +92,7 @@ describe('renders', () => {
       { value: '1', text: 'fieldA' },
       { value: '2', text: 'fieldB' }
     ];
-    const component = shallowWithIntl(<ListControlEditor.WrappedComponent
+    const component = shallow(<ListControlEditor
       getIndexPattern={getIndexPatternMock}
       controlIndex={0}
       controlParams={controlParams}
@@ -125,7 +126,7 @@ describe('renders', () => {
           size: 5,
         }
       };
-      const component = shallowWithIntl(<ListControlEditor.WrappedComponent
+      const component = shallow(<ListControlEditor
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
         controlParams={controlParams}
@@ -158,7 +159,7 @@ describe('renders', () => {
           size: 5,
         }
       };
-      const component = shallowWithIntl(<ListControlEditor.WrappedComponent
+      const component = shallow(<ListControlEditor
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
         controlParams={controlParams}
@@ -191,7 +192,7 @@ describe('renders', () => {
           size: 5,
         }
       };
-      const component = shallowWithIntl(<ListControlEditor.WrappedComponent
+      const component = shallow(<ListControlEditor
         getIndexPattern={getIndexPatternMock}
         controlIndex={0}
         controlParams={controlParams}
@@ -214,7 +215,7 @@ describe('renders', () => {
 });
 
 test('handleCheckboxOptionChange - multiselect', async () => {
-  const component = mountWithIntl(<ListControlEditor.WrappedComponent
+  const component = mountWithIntl(<ListControlEditor
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
@@ -251,7 +252,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
 });
 
 test('handleNumberOptionChange - size', async () => {
-  const component = mountWithIntl(<ListControlEditor.WrappedComponent
+  const component = mountWithIntl(<ListControlEditor
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
@@ -285,4 +286,53 @@ test('handleNumberOptionChange - size', async () => {
       }
       return false;
     }, 'unexpected input event'));
+});
+
+test('field name change', async () => {
+  const component = shallowWithIntl(
+    <ListControlEditor
+      getIndexPattern={getIndexPatternMock}
+      controlIndex={0}
+      controlParams={controlParams}
+      handleFieldNameChange={handleFieldNameChange}
+      handleIndexPatternChange={handleIndexPatternChange}
+      handleCheckboxOptionChange={handleCheckboxOptionChange}
+      handleNumberOptionChange={handleNumberOptionChange}
+      handleParentChange={() => {}}
+      parentCandidates={[]}
+    />
+  );
+
+  const update = async () => {
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+  };
+
+  // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(0);
+  await update();
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(1);
+
+  component.setProps({
+    controlParams: {
+      ...controlParams,
+      fieldName: 'numberField',
+    },
+  });
+
+  // ensure that after async loading is complete the DynamicOptionsSwitch is disabled, because this is not a "string" field
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')).toHaveLength(0);
+  await update();
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=true]')).toHaveLength(1);
+
+  component.setProps({
+    controlParams
+  });
+
+  // ensure that after async loading is complete the DynamicOptionsSwitch is not disabled again, because we switched to original "string" field
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(0);
+  await update();
+  expect(component.find('[data-test-subj="listControlDynamicOptionsSwitch"][disabled=false]')).toHaveLength(1);
 });

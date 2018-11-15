@@ -25,7 +25,7 @@ export const markdown = () => ({
     },
     font: {
       types: ['style'],
-      help: 'Font settings. Technically you can stick other styles in here too!',
+      help: 'Font settings. Technically, you can add other styles in here as well',
       default: '{font}',
     },
   },

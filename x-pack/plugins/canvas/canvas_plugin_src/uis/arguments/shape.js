@@ -7,14 +7,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { shapes } from '../../renderers/shape/shapes';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ShapePickerMini } from '../../../public/components/shape_picker_mini/';
 
-const ShapeArgInput = ({ onValueChange, argValue }) => (
+const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={false}>
-      <ShapePickerMini value={argValue} onChange={onValueChange} shapes={shapes} />
+      <ShapePickerMini
+        value={argValue}
+        onChange={onValueChange}
+        shapes={typeInstance.options.shapes}
+      />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -22,6 +25,9 @@ const ShapeArgInput = ({ onValueChange, argValue }) => (
 ShapeArgInput.propTypes = {
   argValue: PropTypes.any.isRequired,
   onValueChange: PropTypes.func.isRequired,
+  typeInstance: PropTypes.shape({
+    options: PropTypes.shape({ shapes: PropTypes.object.isRequired }).isRequired,
+  }).isRequired,
 };
 
 export const shape = () => ({

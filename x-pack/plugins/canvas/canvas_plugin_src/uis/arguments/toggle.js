@@ -9,16 +9,17 @@ import PropTypes from 'prop-types';
 import { EuiSwitch } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
-const ToggleArgInput = ({ onValueChange, argValue, argId }) => {
+const ToggleArgInput = ({ onValueChange, argValue, argId, renderError }) => {
   const handleChange = () => onValueChange(!argValue);
-
+  if (typeof argValue !== 'boolean') renderError();
   return <EuiSwitch id={argId} checked={argValue} onChange={handleChange} />;
 };
 
 ToggleArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.bool.isRequired,
+  argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.string, PropTypes.object]).isRequired,
   argId: PropTypes.string.isRequired,
+  renderError: PropTypes.func.isRequired,
 };
 
 export const toggle = () => ({

@@ -26,7 +26,7 @@ import { createFailError } from '../../run';
 /**
  * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
  */
-const PUG_I18N_REGEX = /(?<=\#\{)i18n\((([^)']|'([^'\\]|\\.)*')*\)(?=\}))/g;
+const PUG_I18N_REGEX = /i18n\((([^)']|'([^'\\]|\\.)*')*)\)/g;
 
 /**
  * Example: `#{i18n('message-id', { defaultMessage: 'Message text' })}`

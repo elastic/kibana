@@ -24,6 +24,7 @@ export const searchprofiler = (kibana) => {
       devTools: ['plugins/searchprofiler/app'],
       hacks: ['plugins/searchprofiler/register'],
       home: ['plugins/searchprofiler/register_feature'],
+      styleSheetPaths: `${__dirname}/public/index.scss`,
     },
     init: function (server) {
       const thisPlugin = this;
@@ -38,12 +39,12 @@ export const searchprofiler = (kibana) => {
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
-          function forbidApiAccess(request, reply) {
+          function forbidApiAccess() {
             const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
             if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
-              reply();
+              return null;
             } else {
-              reply(Boom.forbidden(licenseCheckResults.message));
+              throw Boom.forbidden(licenseCheckResults.message);
             }
           }
         ]

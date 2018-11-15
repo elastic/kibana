@@ -32,6 +32,17 @@ import { KuiCodeEditor } from '@kbn/ui-framework/components';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 
@@ -93,61 +104,91 @@ class MarkdownPanelConfig extends Component {
       );
     } else {
       view = (
-        <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
-          <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              Panel Filter
-            </label>
-            <input
-              id={htmlId('panelFilter')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <div className="vis_editor__label">Ignore Global Filter</div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
+        <div className="tvbPanelConfig__container">
+          <EuiPanel>
+            <EuiTitle size="s"><span>Data</span></EuiTitle>
+            <EuiSpacer size="m" />
+
+            <IndexPattern
+              fields={this.props.fields}
+              model={this.props.model}
               onChange={this.props.onChange}
             />
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Show Scrollbars</div>
-            <YesNo
-              value={model.markdown_scrollbars}
-              name="markdown_scrollbars"
-              onChange={this.props.onChange}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('valign')}>
-              Vertical Alignment
-            </label>
-            <div className="vis_editor__row_item">
-              <EuiComboBox
-                isClearable={false}
-                id={htmlId('valign')}
-                options={alignOptions}
-                selectedOptions={selectedAlignOption ? [selectedAlignOption] : []}
-                onChange={handleSelectChange('markdown_vertical_align')}
-                singleSelection={true}
-              />
-            </div>
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Custom CSS (supports Less)</div>
-          </div>
-          <div className="vis_editor__ace-editor">
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('panelFilter')}
+                  label="Panel filter"
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('filter')}
+                    value={model.filter}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>Ignore global filter?</EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_global_filter}
+                  name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          <EuiSpacer />
+
+          <EuiPanel>
+            <EuiTitle size="s"><span>Style</span></EuiTitle>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>Background color:</EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ColorPicker
+                  onChange={this.props.onChange}
+                  name="background_color"
+                  value={model.background_color}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>Show scrollbars?</EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <YesNo
+                  value={model.markdown_scrollbars}
+                  name="markdown_scrollbars"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('valign')}>Vertical alignment:</EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiComboBox
+                  id={htmlId('valign')}
+                  isClearable={false}
+                  options={alignOptions}
+                  selectedOptions={selectedAlignOption ? [selectedAlignOption] : []}
+                  onChange={handleSelectChange('markdown_vertical_align')}
+                  singleSelection={{ asPlainText: true }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+
+            <EuiTitle size="xxs"><span>Custom CSS (supports Less)</span></EuiTitle>
+            <EuiSpacer size="s" />
             <KuiCodeEditor
               mode="less"
               theme="github"
@@ -157,36 +198,33 @@ class MarkdownPanelConfig extends Component {
               value={model.markdown_less}
               onChange={this.handleCSSChange}
             />
-          </div>
+          </EuiPanel>
         </div>
       );
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'markdown'}
-            className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'markdown'}
             onClick={() => this.switchTab('markdown')}
-          >Markdown
-          </button>
-          <button
+          >
+            Markdown
+          </EuiTab>
+          <EuiTab
             data-test-subj="markdownDataBtn"
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
-          >Data
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          >
+            Data
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
-          >Panel Options
-          </button>
-        </div>
+          >
+            Panel options
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );
@@ -197,7 +235,6 @@ MarkdownPanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData: PropTypes.object,
   dateFormat: PropTypes.string
 };
 

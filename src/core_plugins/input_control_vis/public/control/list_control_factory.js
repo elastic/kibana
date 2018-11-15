@@ -76,10 +76,11 @@ class ListControl extends Control {
     let ancestorFilters;
     if (this.hasAncestors()) {
       if (this.hasUnsetAncestor()) {
-        this.disable(i18n.translate('inputControl.listControl.disableTootip', {
+        this.disable(i18n.translate('inputControl.listControl.disableTooltip', {
           defaultMessage: 'Disabled until \'{label}\' is set.',
           values: { label: this.ancestors[0].label }
         }));
+        this.lastAncestorValues = undefined;
         return;
       }
 
@@ -117,7 +118,7 @@ class ListControl extends Control {
     try {
       resp = await searchSource.fetch();
     } catch(error) {
-      this.disable(i18n.translate('inputControl.listControl.unableToFetchTootip', {
+      this.disable(i18n.translate('inputControl.listControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch terms, error: {errorMessage}',
         values: { errorMessage: error.message }
       }));

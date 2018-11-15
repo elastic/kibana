@@ -79,7 +79,11 @@ const not = fun => (...args) => !fun(...args);
 const removeDuplicates = (idFun, a) =>
   a.filter((d, i) => a.findIndex(s => idFun(s) === idFun(d)) === i);
 
+const epsilon = 1 / 1000;
+const applyTolerance = d => Math.round(d / epsilon) * epsilon;
+
 module.exports = {
+  applyTolerance,
   disjunctiveUnion,
   flatten,
   identity,

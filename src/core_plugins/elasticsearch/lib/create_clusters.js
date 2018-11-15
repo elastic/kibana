@@ -22,7 +22,7 @@ import { Cluster } from './cluster';
 export function createClusters(server) {
   const clusters = new Map();
 
-  server.on('stop', () => {
+  server.events.on('stop', () => {
     for (const [name, cluster] of clusters) {
       cluster.close();
       clusters.delete(name);

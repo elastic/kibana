@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Server } from 'hapi-latest';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { Server } from 'hapi';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import { sample } from 'lodash';
-import { ByteSizeValue } from '../config/schema';
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
@@ -66,7 +66,7 @@ export class BasePathProxyServer {
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
-    await this.server.register({ plugin: require('h2o2-latest') });
+    await this.server.register({ plugin: require('h2o2') });
 
     if (this.httpConfig.ssl.enabled) {
       const tlsOptions = serverOptions.tls as TlsOptions;

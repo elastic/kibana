@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import contextSizePickerTemplate from './size_picker.html';
-import './size_picker.less';
 
 const module = uiModules.get('apps/context', [
   'kibana',

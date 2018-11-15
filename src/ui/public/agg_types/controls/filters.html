@@ -28,6 +28,7 @@
 
     <div class="form-group">
       <input
+        data-test-subj="visEditorFilterInput_{{agg.id}}_{{$index}}"
         id="visEditorFilterInput{{agg.id}}"
         parse-query
         ng-model="filter.input.query"
@@ -58,6 +59,7 @@
 </div>
 
 <button
+  data-test-subj="visEditorAddFilterButton"
   click-focus="'filter'+(agg.params.filters.length-1)"
   ng-click="agg.params.filters.push({input:{}})"
   class="kuiButton kuiButton--primary kuiButton--fullWidth"

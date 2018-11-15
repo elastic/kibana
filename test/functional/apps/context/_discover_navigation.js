@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('should open the context view with the selected document as anchor', async function () {
       const discoverDocTable = await docTable.getTable();
-      const firstRow = (await docTable.getBodyRows(discoverDocTable))[0];
+      const rows = await docTable.getBodyRows(discoverDocTable);
+      const firstRow = (rows)[0];
 
       // get the timestamp of the first row
       const firstTimestamp = await (await docTable.getFields(firstRow))[0]
@@ -60,8 +61,8 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async () => {
         const contextDocTable = await docTable.getTable();
         const anchorRow = await docTable.getAnchorRow(contextDocTable);
-        const anchorTimestamp = await (await docTable.getFields(anchorRow))[0]
-          .getText();
+        const fields = await docTable.getFields(anchorRow);
+        const anchorTimestamp = await (fields[0]).getText();
         expect(anchorTimestamp).to.equal(firstTimestamp);
       });
     });

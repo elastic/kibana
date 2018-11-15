@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function logstashMetricsSpecProvider() {
+export function logstashMetricsSpecProvider(server, context) {
   const moduleName = 'logstash';
   return {
     id: moduleName + 'Metrics',
@@ -31,7 +31,7 @@ export function logstashMetricsSpecProvider() {
     isBeta: true,
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.shortDescription', {
-      defaultMessage: 'Fetch interal metrics from a Logstash server.',
+      defaultMessage: 'Fetch internal metrics from a Logstash server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.logstashMetrics.longDescription', {
       defaultMessage: 'The `{moduleName}` Metricbeat module fetches internal metrics from a Logstash server. \
@@ -55,7 +55,7 @@ export function logstashMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

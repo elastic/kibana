@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function kafkaMetricsSpecProvider() {
+export function kafkaMetricsSpecProvider(server, context) {
   const moduleName = 'kafka';
   return {
     id: 'kafkaMetrics',
@@ -40,6 +40,7 @@ export function kafkaMetricsSpecProvider() {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-kafka.html',
       },
     }),
+    euiIconType: 'logoKafka',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.kafkaMetrics.artifacts.application.label', {
@@ -53,7 +54,7 @@ export function kafkaMetricsSpecProvider() {
       }
     },
     completionTimeMinutes: 10,
-    onPrem: onPremInstructions(moduleName),
+    onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
     onPremElasticCloud: onPremCloudInstructions(moduleName)
   };

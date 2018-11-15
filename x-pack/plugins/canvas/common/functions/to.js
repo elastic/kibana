@@ -9,7 +9,7 @@ import { castProvider } from '../interpreter/cast';
 export const to = () => ({
   name: 'to',
   aliases: [],
-  help: 'Explicitly cast from one type to another.',
+  help: 'Explicitly cast from one type to another',
   context: {},
   args: {
     type: {

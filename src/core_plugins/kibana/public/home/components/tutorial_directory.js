@@ -58,10 +58,10 @@ class TutorialDirectoryUi extends React.Component {
       name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.metricsTitle', defaultMessage: 'Metrics' }),
     }, {
       id: 'security',
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.securityAnalyticsTitle', defaultMessage: 'Security Analytics' }),
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.securityAnalyticsTitle', defaultMessage: 'Security analytics' }),
     }, {
       id: SAMPLE_DATA_TAB_ID,
-      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.sampleDataTitle', defaultMessage: 'Sample Data' }),
+      name: this.props.intl.formatMessage({ id: 'kbn.home.tutorial.tabs.sampleDataTitle', defaultMessage: 'Sample data' }),
     }];
 
     let openTab = ALL_TAB_ID;
@@ -148,9 +148,6 @@ class TutorialDirectoryUi extends React.Component {
     if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
       return (
         <SampleDataSetCards
-          getConfig={this.props.getConfig}
-          setConfig={this.props.setConfig}
-          clearIndexPatternsCache={this.props.clearIndexPatternsCache}
           addBasePath={this.props.addBasePath}
         />
       );
@@ -222,9 +219,6 @@ TutorialDirectoryUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
-  getConfig: PropTypes.func.isRequired,
-  setConfig: PropTypes.func.isRequired,
-  clearIndexPatternsCache: PropTypes.func.isRequired,
 };
 
 export const TutorialDirectory = injectI18n(TutorialDirectoryUi);

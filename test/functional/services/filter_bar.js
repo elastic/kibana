@@ -19,10 +19,11 @@
 
 import { By, Key } from 'selenium-webdriver';
 
-export function FilterBarProvider({ getService }) {
+export function FilterBarProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const PageObjects = getPageObjects(['common', 'header']);
 
   async function typeIntoReactSelect(testSubj, value) {
     const select = await testSubjects.find(testSubj);
@@ -45,12 +46,14 @@ export function FilterBarProvider({ getService }) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterEnabled(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);
       await testSubjects.click(`filter & filter-key-${key} disableFilter-${key}`);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async toggleFilterPinned(key) {
@@ -82,7 +85,7 @@ export function FilterBarProvider({ getService }) {
       await typeIntoReactSelect('filterfieldSuggestionList', field);
       await typeIntoReactSelect('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
-      // const paramFields = await params.findAllByTagName('input');
+      
       const paramFields = await params.findElements(By.css('input'));
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
@@ -90,12 +93,12 @@ export function FilterBarProvider({ getService }) {
           fieldValues = [fieldValues];
         }
         for (let j = 0; j < fieldValues.length; j++) {
-          // await paramFields[i].type(fieldValues[j]);
           await find.setValueElement(paramFields[i], fieldValues[j]);
           await paramFields[i].sendKeys(Key.RETURN);
         }
       }
       await testSubjects.click('saveFilter');
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickEditFilter(key, value) {

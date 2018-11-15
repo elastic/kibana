@@ -1,0 +1,15 @@
+// SASSTODO: Does this selector exist today?
+.tilemap {
+  margin-bottom: 6px;
+  border: $euiBorderThin;
+  position: relative;
+}
+
+/**
+* 1. Visualizations have some padding by default but tilemaps look nice flush against the edge to maximize viewing
+* space.
+*/
+// SASSTODO: Does this selector exist today?
+.tile_map {
+  padding: 0; /* 1. */
+}

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set as setBreadcrumbs } from 'ui/chrome/services/breadcrumb_state';
+
 // Helper for making objects to use in a link element
 const createCrumb = (url, label, testSubj) => {
   const crumb = { url, label };
@@ -25,6 +27,8 @@ function getElasticsearchBreadcrumbs(mainInstance) {
     } else if (mainInstance.name === 'ml') {
       // ML Instance (for user later)
       breadcrumbs.push(createCrumb('#/elasticsearch/ml_jobs', 'Jobs'));
+    } else if (mainInstance.name === 'ccr_shard') {
+      breadcrumbs.push(createCrumb('#/elasticsearch/ccr', 'CCR'));
     }
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
@@ -117,6 +121,8 @@ export function breadcrumbsProvider() {
     if (mainInstance.inApm) {
       breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
     }
+
+    setBreadcrumbs(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
 
     return breadcrumbs;
   };

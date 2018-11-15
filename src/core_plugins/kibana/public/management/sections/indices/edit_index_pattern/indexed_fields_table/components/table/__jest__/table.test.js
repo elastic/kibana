@@ -28,9 +28,9 @@ const indexPattern = {
 };
 
 const items = [
-  { name: 'Elastic', displayName: 'Elastic', searchable: true },
-  { name: 'timestamp', displayName: 'timestamp', type: 'date' },
-  { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict' },
+  { name: 'Elastic', displayName: 'Elastic', searchable: true, info: {} },
+  { name: 'timestamp', displayName: 'timestamp', type: 'date', info: {} },
+  { name: 'conflictingField', displayName: 'conflictingField', type: 'conflict', info: {} },
 ];
 
 describe('Table', () => {
@@ -55,7 +55,7 @@ describe('Table', () => {
       />
     );
 
-    const tableCell = shallow(component.prop('columns')[0].render('Elastic'));
+    const tableCell = shallow(component.prop('columns')[0].render('Elastic', items[0]));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -68,7 +68,7 @@ describe('Table', () => {
       />
     );
 
-    const tableCell = shallow(component.prop('columns')[0].render('timestamp', true));
+    const tableCell = shallow(component.prop('columns')[0].render('timestamp', items[1]));
     expect(tableCell).toMatchSnapshot();
   });
 
@@ -94,7 +94,7 @@ describe('Table', () => {
       />
     );
 
-    const tableCell = shallow(component.prop('columns')[3].render(false));
+    const tableCell = shallow(component.prop('columns')[3].render(false, items[2]));
     expect(tableCell).toMatchSnapshot();
   });
 

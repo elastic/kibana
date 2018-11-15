@@ -1,3 +1,5 @@
 {
-  test: 'test' // JSON5 test
+  messages: {
+    test: 'test' // JSON5 test
+  }
 }

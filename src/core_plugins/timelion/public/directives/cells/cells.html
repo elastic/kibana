@@ -21,18 +21,18 @@
       <button
         class="timCell__action"
         ng-click="removeCell($index)"
-        tooltip="Remove"
+        tooltip="{{ ::'timelion.cells.actions.removeTooltip' | i18n: { defaultMessage: 'Remove' } }}"
         tooltip-append-to-body="1"
-        aria-label="Remove chart"
+        aria-label="{{ ::'timelion.cells.actions.removeAriaLabel' | i18n: { defaultMessage: 'Remove chart' } }}"
       >
         <span class="fa fa-remove"></span>
       </button>
       <button
         class="timCell__action"
-        tooltip="Drag to reorder"
+        tooltip="{{ ::'timelion.cells.actions.reorderTooltip' | i18n: { defaultMessage: 'Drag to reorder' } }}"
         tooltip-append-to-body="1"
         sv-handle
-        aria-label="Drag to reorder"
+        aria-label="{{ ::'timelion.cells.actions.reorderAriaLabel' | i18n: { defaultMessage: 'Drag to reorder' } }}"
         tabindex="-1"
       >
         <span class="fa fa-arrows"></span>
@@ -40,9 +40,9 @@
       <button
         class="timCell__action"
         ng-click="transient.fullscreen = true"
-        tooltip="Full screen"
+        tooltip="{{ ::'timelion.cells.actions.fullscreenTooltip' | i18n: { defaultMessage: 'Full screen' } }}"
         tooltip-append-to-body="1"
-        aria-label="Full screen chart"
+        aria-label="{{ ::'timelion.cells.actions.fullscreenAriaLabel' | i18n: { defaultMessage: 'Full screen chart' } }}"
       >
         <span class="fa fa-expand"></span>
       </button>

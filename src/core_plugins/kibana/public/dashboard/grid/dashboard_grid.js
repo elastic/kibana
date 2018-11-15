@@ -70,7 +70,7 @@ function ResponsiveGrid({
     'dshLayout--viewing': isViewMode,
     'dshLayout--editing': !isViewMode,
     'dshLayout-isMaximizedPanel': maximizedPanelId !== undefined,
-    'dshLayout-withMargins': useMargins,
+    'dshLayout-withoutMargins': !useMargins,
   });
 
   const MARGINS = useMargins ? 8 : 0;

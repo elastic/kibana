@@ -22,6 +22,7 @@ describe('Authenticator', () => {
   let server;
   let session;
   let cluster;
+  let authorizationMode;
   beforeEach(() => {
     server = serverFixture();
     session = sinon.createStubInstance(Session);
@@ -33,6 +34,8 @@ describe('Authenticator', () => {
     // a static singleton, so we should use sandbox to set/reset its behavior between tests.
     cluster = sinon.stub({ callWithRequest() {} });
     sandbox.stub(ClientShield, 'getClient').returns(cluster);
+
+    authorizationMode = { initialize: sinon.stub() };
 
     server.config.returns(config);
     server.register.yields();
@@ -83,7 +86,7 @@ describe('Authenticator', () => {
       server.plugins.kibana.systemApi.isSystemApiRequest.returns(true);
       session.clear.throws(new Error('`Session.clear` is not supposed to be called!'));
 
-      await initAuthenticator(server);
+      await initAuthenticator(server, authorizationMode);
 
       // Second argument will be a method we'd like to test.
       authenticate = server.expose.withArgs('authenticate').firstCall.args[1];
@@ -112,6 +115,18 @@ describe('Authenticator', () => {
       expect(authenticationResult.error).to.be(failureReason);
     });
 
+    it(`doesn't initialize authorizationMode when authentication fails.`, async () => {
+      const request = requestFixture({ headers: { authorization: 'Basic ***' } });
+      session.get.withArgs(request).returns(Promise.resolve(null));
+
+      const failureReason = new Error('Not Authorized');
+      cluster.callWithRequest.withArgs(request).returns(Promise.reject(failureReason));
+
+      await authenticate(request);
+
+      sinon.assert.notCalled(authorizationMode.initialize);
+    });
+
     it('returns user that authentication provider returns.', async () => {
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
       const user = { username: 'user' };
@@ -123,6 +138,15 @@ describe('Authenticator', () => {
         ...user,
         scope: []
       });
+    });
+
+    it('initiliazes authorizationMode when authentication succeeds.', async () => {
+      const request = requestFixture({ headers: { authorization: 'Basic ***' } });
+      const user = { username: 'user' };
+      cluster.callWithRequest.withArgs(request).returns(Promise.resolve(user));
+
+      await authenticate(request);
+      sinon.assert.calledWith(authorizationMode.initialize, request);
     });
 
     it('creates session whenever authentication provider returns state to store.', async () => {
@@ -505,7 +529,7 @@ describe('Authenticator', () => {
 
     it('throw non-401 boom errors.', async () => {
       const request = requestFixture();
-      const non401Error = Boom.wrap(new TypeError());
+      const non401Error = Boom.boomify(new TypeError());
       server.plugins.security.getUser
         .withArgs(request)
         .returns(Promise.reject(non401Error));

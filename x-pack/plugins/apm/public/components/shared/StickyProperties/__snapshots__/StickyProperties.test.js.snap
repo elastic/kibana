@@ -1,168 +1,176 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`StickyProperties should render 1`] = `
-.c0 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  padding: 0 24px;
-  width: 100%;
-  -webkit-box-pack: start;
-  -webkit-justify-content: flex-start;
-  -ms-flex-pack: start;
-  justify-content: flex-start;
-  -webkit-flex-wrap: wrap;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-}
-
-.c1 {
-  width: 33%;
-  margin-bottom: 16px;
-}
-
-.c2 {
-  margin-bottom: 8px;
-  font-size: 12px;
-  color: #999999;
-}
-
-.c2 span {
-  cursor: help;
-}
-
-.c4 {
-  color: #999999;
-}
-
-.c3 {
-  display: inline-block;
-  line-height: 16px;
-}
-
-.c5 {
-  display: inline-block;
-  line-height: 16px;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-<div
-  className="c0"
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  direction="row"
+  gutterSize="none"
+  justifyContent="flexStart"
+  responsive={true}
+  style={
+    Object {
+      "marginBottom": "-1em",
+      "marginTop": "-1em",
+    }
+  }
+  wrap={true}
 >
-  <div
-    className="c1"
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="0"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
-    <div
-      className="c2"
-    >
-      <span
-        aria-describedby="overlay1"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            @timestamp
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        Timestamp
-      </span>
-    </div>
-    <div
-      className="c3"
-    >
-      1337 minutes ago (mocking 1536405447)
-       
-      <span
-        className="c4"
-      >
-        (
-        1st of January (mocking 1536405447)
-        )
-      </span>
-    </div>
-  </div>
-  <div
-    className="c1"
+        <span>
+          Timestamp
+        </span>
+      </EuiToolTip>
+    </styled.div>
+    <TimestampValue
+      timestamp={1536405447640}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="1"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
-    <div
-      className="c2"
-    >
-      <span
-        aria-describedby="overlay2"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            context.request.url.full
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        URL
-      </span>
-    </div>
-    <span
-      aria-describedby="overlay3"
-      className="c5"
-      onMouseOut={[Function]}
-      onMouseOver={[Function]}
+        <span>
+          URL
+        </span>
+      </EuiToolTip>
+    </styled.div>
+    <EuiToolTip
+      content="https://www.elastic.co/test"
+      delay="regular"
+      position="top"
     >
-      https://www.elastic.co/test
-    </span>
-  </div>
-  <div
-    className="c1"
+      <styled.span>
+        https://www.elastic.co/test
+      </styled.span>
+    </EuiToolTip>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="2"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
-    <div
-      className="c2"
-    >
-      <span
-        aria-describedby="overlay4"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            context.request.method
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        Request method
-      </span>
-    </div>
-    <div
-      className="c3"
-    >
+        <span>
+          Request method
+        </span>
+      </EuiToolTip>
+    </styled.div>
+    <styled.div>
       GET
-    </div>
-  </div>
-  <div
-    className="c1"
+    </styled.div>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="3"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
-    <div
-      className="c2"
-    >
-      <span
-        aria-describedby="overlay5"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            error.exception.handled
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        Handled
-      </span>
-    </div>
-    <div
-      className="c3"
-    >
+        <span>
+          Handled
+        </span>
+      </EuiToolTip>
+    </styled.div>
+    <styled.div>
       true
-    </div>
-  </div>
-  <div
-    className="c1"
+    </styled.div>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+    key="4"
+    style={
+      Object {
+        "minWidth": 0,
+        "padding": "1em 1em 1em 0",
+      }
+    }
   >
-    <div
-      className="c2"
-    >
-      <span
-        aria-describedby="overlay6"
-        onMouseOut={[Function]}
-        onMouseOver={[Function]}
+    <styled.div>
+      <EuiToolTip
+        content={
+          <styled.span>
+            context.user.id
+          </styled.span>
+        }
+        delay="regular"
+        position="top"
       >
-        User ID
-      </span>
-    </div>
-    <div
-      className="c3"
-    >
+        <span>
+          User ID
+        </span>
+      </EuiToolTip>
+    </styled.div>
+    <styled.div>
       1337
-    </div>
-  </div>
-</div>
+    </styled.div>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;

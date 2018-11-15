@@ -87,6 +87,8 @@ const updateGlobalPositions = (setPosition, { shapes, gestureEnd }, elems) => {
         angle: Math.round(matrixToAngle(shape.transformMatrix)),
       };
 
+      if (1 / newProps.angle === -Infinity) newProps.angle = 0; // recompose.shallowEqual discerns between 0 and -0
+
       if (!shallowEqual(oldProps, newProps)) setPosition(shape.id, newProps);
     }
   });
@@ -159,6 +161,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
       // Create the aeroelastic store, which happens once per page creation; disposed on workbook change.
       // TODO: consider implementing a store removal upon page removal to reclaim a small amount of storage
       pages.map(p => p.id).forEach(createStore);
+    }
+
+    if (action.type === restoreHistory.toString()) {
+      aero.clearStores();
+      action.payload.workpad.pages.map(p => p.id).forEach(createStore);
     }
 
     if (action.type === appReady.toString()) {

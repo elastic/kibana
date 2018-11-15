@@ -26,6 +26,7 @@ import { LoggerConfigType, LoggingConfig } from './logging_config';
 
 /**
  * Service that is responsible for maintaining loggers and logger appenders.
+ * @internal
  */
 export class LoggingService implements LoggerFactory {
   private config?: LoggingConfig;

@@ -33,7 +33,7 @@ export function indicesByNodes() {
 
       // If the node is null then it's an unassigned shard and we need to
       // add it to the unassigned array.
-      if (shard.node === null) {
+      if (!shard.node || (shard.node === null)) {
         obj[index].unassigned.push(shard);
         // if the shard is a primary we need to set the unassignedPrimaries flag
         if (shard.primary) {

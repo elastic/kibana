@@ -125,8 +125,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      */
     async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
-      const exists = await testSubjects.exists('dashboardLandingPage');
-      return exists;
+      return await testSubjects.exists('dashboardLandingPage', 5000);
+    }
+
+    async expectExistsDashboardLandingPage() {
+      log.debug(`expectExistsDashboardLandingPage`);
+      await testSubjects.existOrFail('dashboardLandingPage');
     }
 
     async clickDashboardBreadcrumbLink() {
@@ -138,11 +142,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
       if (!onPage) {
-        await retry.try(async () => {
-          await this.clickDashboardBreadcrumbLink();
-          const onDashboardLandingPage = await this.onDashboardLandingPage();
-          if (!onDashboardLandingPage) throw new Error('Not on the landing page.');
-        });
+        await this.clickDashboardBreadcrumbLink();
       }
     }
 
@@ -317,11 +317,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await this.clickSave();
       }
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       // Confirm that the Dashboard has actually been saved
       await testSubjects.existOrFail('saveDashboardSuccess');
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await this.waitForSaveModalToClose();
     }
 
@@ -348,10 +346,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async clickSave() {
-      await retry.try(async () => {
-        log.debug('clicking final Save button for named dashboard');
-        return await testSubjects.click('confirmSaveSavedObjectButton');
-      });
+      log.debug('DashboardPage.clickSave');
+      await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
     /**
@@ -436,16 +432,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await this.gotoDashboardLandingPage();
 
-      await retry.try(async () => {
-        await this.searchForDashboardWithName(dashName);
-        await this.selectDashboard(dashName);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.searchForDashboardWithName(dashName);
+      await this.selectDashboard(dashName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const onDashboardLandingPage = await this.onDashboardLandingPage();
-        if (onDashboardLandingPage) {
-          throw new Error('Failed to open the dashboard up');
-        }
-      });
     }
 
     async getPanelTitles() {

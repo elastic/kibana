@@ -3,8 +3,9 @@
   omit-breadcrumb-pages="{{ jsonWatchEdit.omitBreadcrumbPages }}"
   page-title="jsonWatchEdit.breadcrumb"
 >
-  <div class="kuiViewContent kuiViewContent--constrainedWidth">
-    <div class="kuiViewContentItem kuiVerticalRhythm">
+  <div class="euiSpacer euiSpacer--l"></div>
+  <div class="kuiViewContent euiPanel euiPanel--paddingLarge kuiViewContent--constrainedWidth">
+    <div class="kuiVerticalRhythm">
       <watch-edit-title-bar
         xpack-watch="jsonWatchEdit.watch"
         is-watch-valid="jsonWatchEdit.isValid"
@@ -14,35 +15,35 @@
       ></watch-edit-title-bar>
     </div>
 
-    <div class="kuiViewContentItem kuiVerticalRhythm">
+    <div class="kuiVerticalRhythm">
       <kbn-tabs
         selected-tab-id="jsonWatchEdit.selectedTabId"
         on-tab-select="jsonWatchEdit.onTabSelect"
       >
         <kbn-tab
           tab-id="edit-watch"
-          title="Edit Watch"
+          title="{{ 'xpack.watcher.sections.watchEdit.json.editTabTitle' | i18n: { defaultMessage: 'Edit Watch' } }}"
         >
-          Edit
+          {{ 'xpack.watcher.sections.watchEdit.json.editTabLabel' | i18n: { defaultMessage: 'Edit' } }}
         </kbn-tab>
         <kbn-tab
           tab-id="watch-simulate"
-          title="Simulate Watch"
+          title="{{ 'xpack.watcher.sections.watchEdit.json.simulateTabTitle' | i18n: { defaultMessage: 'Simulate Watch' } }}"
         >
-          Simulate
+          {{ 'xpack.watcher.sections.watchEdit.json.simulateTabLabel' | i18n: { defaultMessage: 'Simulate' } }}
         </kbn-tab>
         <kbn-tab
           tab-id="simulate-results"
-          title="Simulate Results"
+          title="{{ 'xpack.watcher.sections.watchEdit.json.simulateResultsTabTitle' | i18n: { defaultMessage: 'Simulate Results' } }}"
           ng-if="jsonWatchEdit.simulateResults"
         >
-          Simulation Results
+          {{ 'xpack.watcher.sections.watchEdit.json.simulateResultsTabLabel' | i18n: { defaultMessage: 'Simulation Results' } }}
         </kbn-tab>
       </kbn-tabs>
     </div>
 
     <div
-      class="kuiViewContentItem kuiVerticalRhythm"
+      class="kuiVerticalRhythm"
       ng-show="jsonWatchEdit.selectedTabId === 'edit-watch'"
     >
       <watch-edit-detail
@@ -54,7 +55,7 @@
     </div>
 
     <div
-      class="kuiViewContentItem kuiVerticalRhythm"
+      class="kuiVerticalRhythm"
       ng-show="jsonWatchEdit.selectedTabId === 'watch-simulate'"
     >
       <div class="kuiVerticalRhythm">
@@ -78,14 +79,17 @@
           ng-click="jsonWatchEdit.onWatchExecute()"
           data-test-subj="btnSimulateWatch"
         >
-          <span class="kuiButton__icon kuiIcon fa-play"></span>
-          Simulate Watch
+          <span
+            class="kuiButton__icon kuiIcon fa-play"
+            i18n-id="xpack.watcher.sections.watchEdit.json.simulateWatchButtonLabel"
+            i18n-default-message="Simulate Watch"
+          ></span>
         </button>
       </div>
     </div>
 
     <div
-      class="kuiViewContentItem kuiVerticalRhythm"
+      class="kuiVerticalRhythm"
       ng-show="jsonWatchEdit.selectedTabId === 'simulate-results'"
     >
       <div class="kuiVerticalRhythm">
@@ -103,7 +107,10 @@
       </div>
 
       <div class="kuiVerticalRhythm">
-        <label>Simulation Output:</label>
+        <label
+          i18n-id="xpack.watcher.sections.watchEdit.json.simulationOutputLabel"
+          i18n-default-message="Simulation Output:"
+        ></label>
         <watch-history-item-detail
           watch-history-item="jsonWatchEdit.simulateResults"
         ></watch-history-item-detail>

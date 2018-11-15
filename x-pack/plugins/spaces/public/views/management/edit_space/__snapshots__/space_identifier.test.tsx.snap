@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders without crashing 1`] = `
+<React.Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    fullWidth={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <p>
+        If the identifier is 
+        <strong>
+          engineering
+        </strong>
+        , the Kibana URL is 
+        <br />
+         https://my-kibana.example
+        <strong>
+          /s/engineering/
+        </strong>
+        app/kibana.
+      </p>
+    }
+    isInvalid={false}
+    label={
+      <p>
+        URL identifier 
+        <EuiLink
+          color="primary"
+          onClick={[Function]}
+          type="button"
+        >
+          [edit]
+        </EuiLink>
+      </p>
+    }
+  >
+    <EuiFieldText
+      compressed={false}
+      fullWidth={true}
+      inputRef={[Function]}
+      isLoading={false}
+      onChange={[Function]}
+      placeholder="The URL identifier is generated from the space name."
+      readOnly={true}
+      value=""
+    />
+  </EuiFormRow>
+</React.Fragment>
+`;

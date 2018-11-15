@@ -21,6 +21,12 @@
       },
       "title": {
         "type": "text"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "typeMeta": {
+        "type": "keyword"
       }
     }
   },
@@ -165,6 +171,16 @@
     "properties": {
       "uuid": {
         "type": "keyword"
+      }
+    }
+  },
+  "kql-telemetry": {
+    "properties": {
+      "optInCount": {
+        "type": "long"
+      },
+      "optOutCount": {
+        "type": "long"
       }
     }
   }

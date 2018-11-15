@@ -7,12 +7,49 @@
 import { difference, isEmpty, isEqual } from 'lodash';
 import { buildPrivilegeMap } from './privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
+import { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
+
+const serializePrivileges = (application, privilegeMap) => {
+  return {
+    [application]: {
+      ...Object.entries(privilegeMap.global).reduce((acc, [privilegeName, privilegeActions]) => {
+        acc[privilegeName] = {
+          application,
+          name: privilegeName,
+          actions: privilegeActions,
+          metadata: {},
+        };
+        return acc;
+      }, {}),
+      ...Object.entries(privilegeMap.space).reduce((acc, [privilegeName, privilegeActions]) => {
+        const name = spaceApplicationPrivilegesSerializer.privilege.serialize(privilegeName);
+        acc[name] = {
+          application,
+          name,
+          actions: privilegeActions,
+          metadata: {},
+        };
+        return acc;
+      }, {})
+    }
+  };
+};
 
 export async function registerPrivilegesWithCluster(server) {
 
   const { authorization } = server.plugins.security;
   const { types: savedObjectTypes } = server.savedObjects;
   const { actions, application } = authorization;
+
+  const arePrivilegesEqual = (existingPrivileges, expectedPrivileges) => {
+    // when comparing privileges, the order of the actions doesn't matter, lodash's isEqual
+    // doesn't know how to compare Sets
+    return isEqual(existingPrivileges, expectedPrivileges, (value, other, key) => {
+      if (key === 'actions' && Array.isArray(value) && Array.isArray(other)) {
+        return isEqual(value.sort(), other.sort());
+      }
+    });
+  };
 
   const shouldRemovePrivileges = (existingPrivileges, expectedPrivileges) => {
     if (isEmpty(existingPrivileges)) {
@@ -22,9 +59,8 @@ export async function registerPrivilegesWithCluster(server) {
     return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application])).length > 0;
   };
 
-  const expectedPrivileges = {
-    [application]: buildPrivilegeMap(savedObjectTypes, application, actions)
-  };
+  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions);
+  const expectedPrivileges = serializePrivileges(application, privilegeMap);
 
   server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);
 
@@ -34,7 +70,7 @@ export async function registerPrivilegesWithCluster(server) {
     // we only want to post the privileges when they're going to change as Elasticsearch has
     // to clear the role cache to get these changes reflected in the _has_privileges API
     const existingPrivileges = await callCluster(`shield.getPrivilege`, { privilege: application });
-    if (isEqual(existingPrivileges, expectedPrivileges)) {
+    if (arePrivilegesEqual(existingPrivileges, expectedPrivileges)) {
       server.log(['security', 'debug'], `Kibana Privileges already registered with Elasticearch for ${application}`);
       return;
     }

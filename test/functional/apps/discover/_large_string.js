@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects([
     'common',
     'home',
@@ -62,7 +63,8 @@ export default function ({ getService, getPageObjects }) {
     describe('test large data', function () {
       it('search Newsletter should show the correct hit count', async function () {
         const expectedHitCount = '1';
-        await PageObjects.discover.query('Newsletter');
+        await queryBar.setQuery('Newsletter');
+        await queryBar.submitQuery();
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);

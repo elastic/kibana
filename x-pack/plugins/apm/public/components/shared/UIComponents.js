@@ -5,14 +5,7 @@
  */
 
 import styled from 'styled-components';
-import {
-  unit,
-  units,
-  px,
-  fontSizes,
-  colors,
-  fontSize
-} from '../../style/variables';
+import { unit, units, px, fontSizes, colors } from '../../style/variables';
 import { RelativeLink } from '../../utils/url';
 
 export const HeaderContainer = styled.div`
@@ -44,12 +37,6 @@ export const HeaderMedium = styled.h2`
 export const HeaderSmall = styled.h3`
   margin: ${px(units.plus)} 0;
   font-size: ${fontSizes.large};
-  ${props => props.css};
-`;
-
-export const HeaderXSmall = styled.h4`
-  margin: ${px(units.plus)} 0;
-  font-size: ${fontSize};
   ${props => props.css};
 `;
 

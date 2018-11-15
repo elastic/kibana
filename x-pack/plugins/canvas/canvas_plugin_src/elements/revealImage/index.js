@@ -13,7 +13,7 @@ export const revealImage = () => ({
   image: header,
   expression: `filters
 | demodata
-| math "sum(min(cost) / max(cost))"
+| math "mean(percent_uptime)"
 | revealImage origin=bottom image=null
 | render`,
 });

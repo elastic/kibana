@@ -9,11 +9,36 @@ import { withBreadcrumbs } from 'react-router-breadcrumbs-hoc';
 import { toQuery } from '../../../utils/url';
 import { routes } from './routeConfig';
 import { flatten, capitalize } from 'lodash';
+import { set } from 'ui/chrome/services/breadcrumb_state';
 
 class Breadcrumbs extends React.Component {
+  updateHeaderBreadcrumbs() {
+    const { _g = '', kuery = '' } = toQuery(this.props.location.search);
+    const breadcrumbs = this.props.breadcrumbs.map(({ breadcrumb, match }) => ({
+      text: breadcrumb,
+      href: `#${match.url}?_g=${_g}&kuery=${kuery}`
+    }));
+
+    set(breadcrumbs);
+  }
+
+  componentDidMount() {
+    this.updateHeaderBreadcrumbs();
+  }
+
+  componentDidUpdate() {
+    this.updateHeaderBreadcrumbs();
+  }
+
   render() {
-    const { breadcrumbs, location } = this.props;
+    const { breadcrumbs, location, showPluginBreadcrumbs } = this.props;
     const { _g = '', kuery = '' } = toQuery(location.search);
+
+    // If we don't display plugin breadcrumbs, render null, but continue
+    // to push updates to header.
+    if (!showPluginBreadcrumbs) {
+      return null;
+    }
 
     return (
       <div className="kuiLocalBreadcrumbs">

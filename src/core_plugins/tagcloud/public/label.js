@@ -28,7 +28,7 @@ export class Label extends Component {
   render() {
     return (
       <div
-        className="tagcloud-custom-label"
+        className="tgcVisLabel"
         style={{ display: this.state.shouldShowLabel ? 'block' : 'none' }}
       >{this.state.label}
       </div>

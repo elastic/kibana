@@ -3,15 +3,37 @@
 exports[`ObjectsTable delete should show a confirm modal 1`] = `
 <EuiConfirmModal
   buttonColor="primary"
-  cancelButtonText="Cancel"
-  confirmButtonText="Delete"
+  cancelButtonText={
+    <FormattedMessage
+      defaultMessage="Cancel"
+      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+      values={Object {}}
+    />
+  }
+  confirmButtonText={
+    <FormattedMessage
+      defaultMessage="Delete"
+      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+      values={Object {}}
+    />
+  }
   defaultFocusedButton="confirm"
   onCancel={[Function]}
   onConfirm={[Function]}
-  title="Delete saved objects"
+  title={
+    <FormattedMessage
+      defaultMessage="Delete saved objects"
+      id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModalTitle"
+      values={Object {}}
+    />
+  }
 >
   <p>
-    This action will delete the following saved objects:
+    <FormattedMessage
+      defaultMessage="This action will delete the following saved objects:"
+      id="kbn.management.objects.deleteSavedObjectsConfirmModalDescription"
+      values={Object {}}
+    />
   </p>
   <EuiInMemoryTable
     columns={
@@ -50,15 +72,41 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
 exports[`ObjectsTable export should allow the user to choose when exporting all 1`] = `
 <EuiConfirmModal
   buttonColor="primary"
-  cancelButtonText="Cancel"
-  confirmButtonText="Export All"
+  cancelButtonText={
+    <FormattedMessage
+      defaultMessage="Cancel"
+      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
+      values={Object {}}
+    />
+  }
+  confirmButtonText={
+    <FormattedMessage
+      defaultMessage="Export All"
+      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
+      values={Object {}}
+    />
+  }
   defaultFocusedButton="confirm"
   onCancel={[Function]}
   onConfirm={[Function]}
-  title="Export 4 objects"
+  title={
+    <FormattedMessage
+      defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+      id="kbn.management.objects.objectsTable.exportObjectsConfirmModalTitle"
+      values={
+        Object {
+          "filteredItemCount": 4,
+        }
+      }
+    />
+  }
 >
   <p>
-    Select which types to export. The number in parentheses indicates how many of this type are available to export.
+    <FormattedMessage
+      defaultMessage="Select which types to export. The number in parentheses indicates how many of this type are available to export."
+      id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+      values={Object {}}
+    />
   </p>
   <EuiCheckboxGroup
     idToSelectedMap={
@@ -95,7 +143,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
 `;
 
 exports[`ObjectsTable import should show the flyout 1`] = `
-<Flyout
+<InjectIntl(FlyoutUI)
   close={[Function]}
   done={[Function]}
   indexPatterns={
@@ -111,7 +159,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
 `;
 
 exports[`ObjectsTable relationships should show the flyout 1`] = `
-<Relationships
+<InjectIntl(RelationshipsUI)
   close={[Function]}
   getEditUrl={[Function]}
   getRelationships={[Function]}
@@ -150,7 +198,7 @@ exports[`ObjectsTable should render normally 1`] = `
       <EuiSpacer
         size="xs"
       />
-      <Table
+      <InjectIntl(TableUI)
         filterOptions={
           Array [
             Object {

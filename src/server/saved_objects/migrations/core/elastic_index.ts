@@ -31,6 +31,8 @@ import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call
 // tslint:disable-next-line:no-var-requires
 const { getTypes } = require('../../../mappings');
 
+const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
+
 export interface FullIndexInfo {
   aliases: { [name: string]: object };
   exists: boolean;
@@ -150,39 +152,51 @@ export async function write(callCluster: CallCluster, index: string, docs: RawDo
 export async function migrationsUpToDate(
   callCluster: CallCluster,
   index: string,
-  migrationVersion: MigrationVersion
+  migrationVersion: MigrationVersion,
+  retryCount: number = 10
 ): Promise<boolean> {
-  const indexInfo = await fetchInfo(callCluster, index);
+  try {
+    const indexInfo = await fetchInfo(callCluster, index);
 
-  if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
-    return false;
-  }
+    if (!_.get(indexInfo, 'mappings.doc.properties.migrationVersion')) {
+      return false;
+    }
 
-  // If no migrations are actually defined, we're up to date!
-  if (Object.keys(migrationVersion).length <= 0) {
-    return true;
-  }
+    // If no migrations are actually defined, we're up to date!
+    if (Object.keys(migrationVersion).length <= 0) {
+      return true;
+    }
 
-  const { count } = await callCluster('count', {
-    body: {
-      query: {
-        bool: {
-          should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
-            bool: {
-              must: [
-                { exists: { field: type } },
-                { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
-              ],
-            },
-          })),
+    const { count } = await callCluster('count', {
+      body: {
+        query: {
+          bool: {
+            should: Object.entries(migrationVersion).map(([type, latestVersion]) => ({
+              bool: {
+                must: [
+                  { exists: { field: type } },
+                  { bool: { must_not: { term: { [`migrationVersion.${type}`]: latestVersion } } } },
+                ],
+              },
+            })),
+          },
         },
       },
-    },
-    index,
-    type: ROOT_TYPE,
-  });
+      index,
+      type: ROOT_TYPE,
+    });
 
-  return count === 0;
+    return count === 0;
+  } catch (e) {
+    // retry for Service Unavailable
+    if (e.status !== 503 || retryCount === 0) {
+      throw e;
+    }
+
+    await new Promise(r => setTimeout(r, 1000));
+
+    return await migrationsUpToDate(callCluster, index, migrationVersion, retryCount - 1);
+  }
 }
 
 /**
@@ -201,7 +215,7 @@ export async function createIndex(
   index: string,
   mappings?: IndexMapping
 ) {
-  await callCluster('indices.create', { body: { mappings }, index });
+  await callCluster('indices.create', { body: { mappings, settings }, index });
 }
 
 export async function deleteIndex(callCluster: CallCluster, index: string) {
@@ -217,20 +231,18 @@ export async function deleteIndex(callCluster: CallCluster, index: string) {
  * @param {FullIndexInfo} info - Information about the mappings and name of the new index
  * @param {string} alias - The name of the index being converted to an alias
  */
-export async function convertToAlias(callCluster: CallCluster, info: FullIndexInfo, alias: string) {
+export async function convertToAlias(
+  callCluster: CallCluster,
+  info: FullIndexInfo,
+  alias: string,
+  batchSize: number
+) {
   await callCluster('indices.create', {
-    body: { mappings: info.mappings },
+    body: { mappings: info.mappings, settings },
     index: info.indexName,
   });
 
-  await callCluster('reindex', {
-    body: {
-      dest: { index: info.indexName },
-      source: { index: alias },
-    },
-    refresh: true,
-    waitForCompletion: true,
-  });
+  await reindex(callCluster, alias, info.indexName, batchSize);
 
   await claimAlias(callCluster, info.indexName, alias, [{ remove_index: { index: alias } }]);
 }
@@ -283,4 +295,33 @@ async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
     );
   }
   return indexInfo;
+}
+
+/**
+ * Reindexes from source to dest, polling for the reindex completion.
+ */
+async function reindex(callCluster: CallCluster, source: string, dest: string, batchSize: number) {
+  // We poll instead of having the request wait for completion, as for large indices,
+  // the request times out on the Elasticsearch side of things. We have a relatively tight
+  // polling interval, as the request is fairly efficent, and we don't
+  // want to block index migrations for too long on this.
+  const pollInterval = 250;
+  const { task } = await callCluster('reindex', {
+    body: {
+      dest: { index: dest },
+      source: { index: source, size: batchSize },
+    },
+    refresh: true,
+    waitForCompletion: false,
+  });
+
+  let completed = false;
+
+  while (!completed) {
+    await new Promise(r => setTimeout(r, pollInterval));
+
+    completed = await callCluster('tasks.get', {
+      taskId: task,
+    }).then(result => result.completed);
+  }
 }

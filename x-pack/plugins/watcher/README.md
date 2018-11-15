@@ -23,7 +23,6 @@ public/
           directives/ (Subcomponents of my_directive_name are defined here, and this follows the same structure as *A)
           index.js (no code here; only `export from my_directive_name.js`)
           my_directive_name.js
-          my_directive_name.less
           my_directive_name.html
         index.js (imports the directives in this folder, i.e.,my_directive_name)
       routes/

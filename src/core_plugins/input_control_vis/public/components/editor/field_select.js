@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFormRow,
@@ -141,10 +141,7 @@ class FieldSelectUi extends Component {
     return (
       <EuiFormRow
         id={selectId}
-        label={intl.formatMessage({
-          id: 'inputControl.editor.fieldSelect.fieldLabel',
-          defaultMessage: 'Field'
-        })}
+        label={<FormattedMessage id="inputControl.editor.fieldSelect.fieldLabel" defaultMessage="Field" />}
       >
         <EuiComboBox
           placeholder={intl.formatMessage({

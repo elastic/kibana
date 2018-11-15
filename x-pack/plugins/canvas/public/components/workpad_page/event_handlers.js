@@ -126,4 +126,5 @@ export const withEventHandlers = withHandlers({
   onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
   onKeyDown: props => e => handleKeyDown(props.commit, e, props.isEditable, props.remove),
   onKeyUp: props => e => handleKeyUp(props.commit, e, props.isEditable),
+  resetHandler: () => () => resetHandler(),
 });

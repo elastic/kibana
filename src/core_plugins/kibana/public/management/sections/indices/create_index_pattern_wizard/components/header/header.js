@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import {
+  EuiBetaBadge,
   EuiSpacer,
   EuiTitle,
   EuiFlexGroup,
@@ -32,19 +33,30 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = ({
+  prompt,
+  indexPatternName,
+  showSystemIndices,
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
+  isBeta,
 }) => (
   <div>
-    <EuiSpacer size="m"/>
     <EuiTitle>
       <h1>
         <FormattedMessage
           id="kbn.management.createIndexPatternHeader"
-          defaultMessage="Create index pattern"
+          defaultMessage="Create {indexPatternName}"
+          values={{
+            indexPatternName
+          }}
         />
+        { isBeta ? (
+          <Fragment>
+            {' '}
+            <EuiBetaBadge label="Beta" />
+          </Fragment>
+        ) : null }
       </h1>
-
     </EuiTitle>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
       <EuiFlexItem grow={false}>
@@ -59,18 +71,30 @@ export const Header = ({
           </p>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          label={<FormattedMessage
-            id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch"
-            defaultMessage="Include system indices"
-          />}
-          id="checkboxShowSystemIndices"
-          checked={isIncludingSystemIndices}
-          onChange={onChangeIncludingSystemIndices}
-        />
-      </EuiFlexItem>
+      {
+        showSystemIndices ? (
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={<FormattedMessage
+                id="kbn.management.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+                defaultMessage="Include system indices"
+              />}
+              id="checkboxShowSystemIndices"
+              checked={isIncludingSystemIndices}
+              onChange={onChangeIncludingSystemIndices}
+            />
+          </EuiFlexItem>
+        ) : null
+      }
     </EuiFlexGroup>
+    {
+      prompt ? (
+        <Fragment>
+          <EuiSpacer size="s" />
+          {prompt}
+        </Fragment>
+      ) : null
+    }
     <EuiSpacer size="m"/>
   </div>
 );

@@ -27,8 +27,12 @@ export interface TimeRange {
   to: string;
 }
 
+export interface FilterMeta {
+  disabled: boolean;
+}
+
 export interface Filter {
-  meta: object;
+  meta: FilterMeta;
   query: object;
 }
 

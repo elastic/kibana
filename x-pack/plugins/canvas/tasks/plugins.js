@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import path from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import webpack from 'webpack';
+import del from 'del';
 import webpackConfig from './helpers/webpack.plugins';
 
 const devtool = 'inline-cheap-module-source-map';
+const buildDir = path.resolve(__dirname, '../canvas_plugin');
 
 export default function pluginsTasks(gulp, { log, colors }) {
+  log(buildDir);
   const onComplete = done => (err, stats) => {
     if (err) {
       done && done(err);
@@ -22,16 +26,20 @@ export default function pluginsTasks(gulp, { log, colors }) {
   };
 
   gulp.task('canvas:plugins:build', function(done) {
-    webpack({ ...webpackConfig, devtool }, onComplete(done));
+    del(buildDir).then(() => webpack({ ...webpackConfig, devtool }, onComplete(done)));
   });
 
   // eslint-disable-next-line no-unused-vars
   gulp.task('canvas:plugins:dev', function(done /* added to make gulp async */) {
     log(`${colors.green.bold('canvas:plugins')} Starting initial build, this will take a while`);
-    webpack({ ...webpackConfig, devtool, watch: true }, (err, stats) => {
-      onComplete()(err, stats);
-    });
+    del(buildDir).then(() =>
+      webpack({ ...webpackConfig, devtool, watch: true }, (err, stats) => {
+        onComplete()(err, stats);
+      })
+    );
   });
 
-  gulp.task('canvas:plugins:build-prod', done => webpack(webpackConfig, onComplete(done)));
+  gulp.task('canvas:plugins:build-prod', function(done) {
+    del(buildDir).then(() => webpack(webpackConfig, onComplete(done)));
+  });
 }

@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -15,12 +16,15 @@ import {
   EuiButton,
   EuiFieldText,
 } from '@elastic/eui';
-import { Loading } from '../../../../public/components/loading';
+
+// TODO: (clintandrewhall) This is a quick fix for #25342 -- we should figure out how to use the overall component.
+import { Loading } from '../../../../public/components/loading/loading';
+
 import { FileUpload } from '../../../../public/components/file_upload';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
-import { isValid as isValidHttpUrl } from '../../../../common/lib/httpurl';
-import { encode, isValid as isValidDataUrl } from '../../../../common/lib/dataurl';
+import { isValidHttpUrl } from '../../../../common/lib/httpurl';
+import { encode, isValidDataUrl } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import './image_upload.scss';
 
@@ -47,12 +51,14 @@ class ImageUpload extends React.Component {
     };
   }
 
+  componentDidMount() {
+    // keep track of whether or not the component is mounted, to prevent rogue setState calls
+    this._isMounted = true;
+  }
+
   componentWillUnmount() {
     this._isMounted = false;
   }
-
-  // keep track of whether or not the component is mounted, to prevent rogue setState calls
-  _isMounted = true;
 
   handleUpload = files => {
     const { onAssetAdd, onValueChange } = this.props;
@@ -106,7 +112,7 @@ class ImageUpload extends React.Component {
       <EuiSelect
         compressed
         options={this.urlTypeOptions}
-        defaultValue={urlType}
+        value={urlType}
         onChange={this.changeUrlType}
       />
     );
@@ -121,7 +127,7 @@ class ImageUpload extends React.Component {
     }
 
     const pasteImageUrl = urlTypeSrc ? (
-      <form onSubmit={this.setSrcUrl} className="eui-textRight">
+      <EuiForm onSubmit={this.setSrcUrl} className="eui-textRight">
         <EuiFieldText
           compressed
           defaultValue={this.state.url}
@@ -129,10 +135,11 @@ class ImageUpload extends React.Component {
           placeholder="Image URL"
           aria-label="Image URL"
         />
+        <EuiSpacer size="m" />
         <EuiButton type="submit" size="s" onClick={this.setSrcUrl}>
           Set
         </EuiButton>
-      </form>
+      </EuiForm>
     ) : null;
 
     const shouldPreview =
@@ -166,7 +173,7 @@ class ImageUpload extends React.Component {
 
 export const imageUpload = () => ({
   name: 'imageUpload',
-  displayName: 'Image Upload',
+  displayName: 'Image upload',
   help: 'Select or upload an image',
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),

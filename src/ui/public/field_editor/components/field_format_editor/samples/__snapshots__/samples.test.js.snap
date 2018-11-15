@@ -5,7 +5,13 @@ exports[`FormatEditorSamples should render normally 1`] = `
   describedByIds={Array []}
   fullWidth={false}
   hasEmptyLabelSpace={false}
-  label="Samples"
+  label={
+    <FormattedMessage
+      defaultMessage="Samples"
+      id="common.ui.fieldEditor.samplesHeader"
+      values={Object {}}
+    />
+  }
 >
   <EuiBasicTable
     className="fieldFormatEditor__samples"
