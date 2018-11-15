@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, flatten } from 'lodash';
+import { cloneDeep, flatten, mapValues } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Actions } from './authorization';
 
@@ -60,13 +60,9 @@ export function disableUICapabilitesFactory(server: any, request: any) {
       return resultUICapabilities;
     } catch (err) {
       if (err.statusCode === 401 || err.statusCode === 403) {
-        for (const feature of Object.values(resultUICapabilities)) {
-          for (const uiCapability of Object.keys(feature)) {
-            feature[uiCapability] = false;
-          }
-        }
-
-        return resultUICapabilities;
+        return mapValues(uiCapabilities, featureUICapabilities =>
+          mapValues(featureUICapabilities, () => false)
+        );
       }
       throw err;
     }
