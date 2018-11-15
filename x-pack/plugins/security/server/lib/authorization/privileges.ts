@@ -30,6 +30,8 @@ export function privilegesFactory(
 ) {
   return {
     get() {
+      // TODO: I'd like to ensure an explicit Error is thrown here if all
+      // plugins haven't had a chance to register their features yet
       const features = xpackMainPlugin.getFeatures();
       const validSavedObjectTypes = allSavedObjectTypes.filter(
         type => !IGNORED_TYPES.includes(type)
