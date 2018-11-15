@@ -21,7 +21,7 @@ export default function (kibana) {
   return new kibana.Plugin({
     uiExports: {
       visTypes: [
-        'plugins/custom_visualziations/self_changing_vis/self_changing_vis',
+        'plugins/kbn_tp_custom_visualizations/self_changing_vis/self_changing_vis',
       ],
     },
   });

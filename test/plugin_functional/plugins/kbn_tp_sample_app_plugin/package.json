@@ -1,0 +1,8 @@
+{
+  "name": "kbn_tp_sample_app_plugin",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  }
+}

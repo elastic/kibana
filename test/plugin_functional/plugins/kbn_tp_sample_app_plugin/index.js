@@ -23,7 +23,7 @@ export default function (kibana) {
       app: {
         title: 'Test Plugin App',
         description: 'This is a sample plugin for the functional tests.',
-        main: 'plugins/sample_app_plugin/app',
+        main: 'plugins/kbn_tp_sample_app_plugin/app',
       }
     }
   });

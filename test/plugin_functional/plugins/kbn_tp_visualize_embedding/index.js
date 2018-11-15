@@ -23,7 +23,7 @@ export default function (kibana) {
       app: {
         title: 'Embedding Vis',
         description: 'This is a sample plugin to test embedding of visualizations',
-        main: 'plugins/visualize_embedding/app',
+        main: 'plugins/kbn_tp_visualize_embedding/app',
       }
     },
 
@@ -31,7 +31,7 @@ export default function (kibana) {
       // The following lines copy over some configuration variables from Kibana
       // to this plugin. This will be needed when embedding visualizations, so that e.g.
       // region map is able to get its configuration.
-      server.injectUiAppVars('visualize_embedding', async () => {
+      server.injectUiAppVars('kbn_tp_visualize_embedding', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
     }

@@ -69,14 +69,16 @@
     "packages": [
       "packages/*",
       "x-pack",
-      "x-pack/plugins/*"
+      "x-pack/plugins/*",
+      "test/plugin_functional/plugins/*"
     ],
     "nohoist": [
       "**/@types/*",
       "**/@types/*/**",
       "**/grunt-*",
       "**/grunt-*/**",
-      "x-pack/typescript"
+      "x-pack/typescript",
+      "kbn_tp_*/**"
     ]
   },
   "dependencies": {
