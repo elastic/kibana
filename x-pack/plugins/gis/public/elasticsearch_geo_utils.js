@@ -31,6 +31,14 @@ export function hitsToGeoJson(hits, geoFieldName, geoFieldType) {
         }
       }
 
+      // hit.fields contains calculated values from docvalue_fields and script_fields
+      for (const fieldName in hit.fields) {
+        if (hit.fields.hasOwnProperty(fieldName)) {
+          const val = hit.fields[fieldName];
+          properties[fieldName] = Array.isArray(val) && val.length === 1 ? val[0] : val;
+        }
+      }
+
       return {
         type: 'Feature',
         geometry: geometry,
