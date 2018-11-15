@@ -5,8 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+// import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { AutocompleteField } from '../../components/autocomplete_field';
@@ -22,30 +22,35 @@ import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
-const TITLES = {
-  [InfraNodeType.host]: i18n.translate('xpack.infra.homePage.toolbar.hostsTitle', {
-    defaultMessage: 'Hosts',
-  }),
-  [InfraNodeType.pod]: i18n.translate('xpack.infra.homePage.toolbar.kubernetesPodsTitle', {
-    defaultMessage: 'Kubernetes Pods',
-  }),
-  [InfraNodeType.container]: i18n.translate('xpack.infra.homePage.toolbar.dockerContainersTitle', {
-    defaultMessage: 'Docker Containers',
-  }),
+const getTitle = (nodeType: string) => {
+  const TITLES = {
+    [InfraNodeType.host as string]: (
+      <FormattedMessage id="xpack.infra.homePage.toolbar.hostsTitle" defaultMessage="Hosts" />
+    ),
+    [InfraNodeType.pod as string]: (
+      <FormattedMessage
+        id="xpack.infra.homePage.toolbar.kubernetesPodsTitle"
+        defaultMessage="Kubernetes Pods"
+      />
+    ),
+    [InfraNodeType.container as string]: (
+      <FormattedMessage
+        id="xpack.infra.homePage.toolbar.dockerContainersTitle"
+        defaultMessage="Docker Containers"
+      />
+    ),
+  };
+  return TITLES[nodeType];
 };
 
-interface Props {
-  intl: InjectedIntl;
-}
-
-const HomeToolbarUI: React.SFC<Props> = ({ intl }) => (
+export const HomeToolbar = injectI18n(({ intl }) => (
   <Toolbar>
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <WithWaffleOptions>
           {({ nodeType }) => (
             <EuiTitle size="m">
-              <h1>{TITLES[nodeType]}</h1>
+              <h1>{getTitle(nodeType)}</h1>
             </EuiTitle>
           )}
         </WithWaffleOptions>
@@ -89,7 +94,7 @@ const HomeToolbarUI: React.SFC<Props> = ({ intl }) => (
                   onChange={setFilterQueryDraftFromKueryExpression}
                   onSubmit={applyFilterQueryFromKueryExpression}
                   placeholder={intl.formatMessage({
-                    id: 'xpack.infra.homePage.toolbar.searchForInfrastructureDataFieldPlaceholder',
+                    id: 'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
                     defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
                   })}
                   suggestions={suggestions}
@@ -131,6 +136,4 @@ const HomeToolbarUI: React.SFC<Props> = ({ intl }) => (
       </EuiFlexItem>
     </EuiFlexGroup>
   </Toolbar>
-);
-
-export const HomeToolbar = injectI18n(HomeToolbarUI);
+));

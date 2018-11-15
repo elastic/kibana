@@ -25,60 +25,60 @@ import { WithSource } from '../../containers/with_source';
 interface Props {
   intl: InjectedIntl;
 }
-
-class LogsPageUI extends React.Component<Props> {
-  public render() {
-    const { intl } = this.props;
-    return (
-      <ColumnarPage>
-        <WithSource>
-          {({ logIndicesExist }) =>
-            logIndicesExist || logIndicesExist === null ? (
-              <>
-                <WithLogFilterUrlState />
-                <WithLogPositionUrlState />
-                <WithLogMinimapUrlState />
-                <WithLogTextviewUrlState />
-                <Header
-                  appendSections={<LogsBetaBadgeHeaderSection />}
-                  breadcrumbs={[
-                    {
-                      text: intl.formatMessage({
-                        id: 'xpack.infra.logsPage.logsBreadcrumbsText',
-                        defaultMessage: 'Logs',
-                      }),
-                    },
-                  ]}
-                />
-                <LogsToolbar />
-                <LogsPageContent />
-              </>
-            ) : (
-              <WithKibanaChrome>
-                {({ basePath }) => (
-                  <EmptyPage
-                    title={intl.formatMessage({
-                      id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
-                      defaultMessage: "Looks like you don't have any logging indices.",
-                    })}
-                    message={intl.formatMessage({
-                      id: 'xpack.infra.logsPage.noLoggingIndicesDescription',
-                      defaultMessage: "Let's add some!",
-                    })}
-                    actionLabel={intl.formatMessage({
-                      id: 'xpack.infra.logsPage.noLoggingIndicesActionLabel',
-                      defaultMessage: 'Setup Instructions',
-                    })}
-                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
+export const LogsPage = injectI18n(
+  class extends React.Component<Props> {
+    public displayName = 'LogsPage';
+    public render() {
+      const { intl } = this.props;
+      return (
+        <ColumnarPage>
+          <WithSource>
+            {({ logIndicesExist }) =>
+              logIndicesExist || logIndicesExist === null ? (
+                <>
+                  <WithLogFilterUrlState />
+                  <WithLogPositionUrlState />
+                  <WithLogMinimapUrlState />
+                  <WithLogTextviewUrlState />
+                  <Header
+                    appendSections={<LogsBetaBadgeHeaderSection />}
+                    breadcrumbs={[
+                      {
+                        text: intl.formatMessage({
+                          id: 'xpack.infra.logsPage.logsBreadcrumbsText',
+                          defaultMessage: 'Logs',
+                        }),
+                      },
+                    ]}
                   />
-                )}
-              </WithKibanaChrome>
-            )
-          }
-        </WithSource>
-      </ColumnarPage>
-    );
+                  <LogsToolbar />
+                  <LogsPageContent />
+                </>
+              ) : (
+                <WithKibanaChrome>
+                  {({ basePath }) => (
+                    <EmptyPage
+                      title={intl.formatMessage({
+                        id: 'xpack.infra.logsPage.noLoggingIndicesTitle',
+                        defaultMessage: "Looks like you don't have any logging indices.",
+                      })}
+                      message={intl.formatMessage({
+                        id: 'xpack.infra.logsPage.noLoggingIndicesDescription',
+                        defaultMessage: "Let's add some!",
+                      })}
+                      actionLabel={intl.formatMessage({
+                        id: 'xpack.infra.logsPage.noLoggingIndicesActionLabel',
+                        defaultMessage: 'Setup Instructions',
+                      })}
+                      actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/logging`}
+                    />
+                  )}
+                </WithKibanaChrome>
+              )
+            }
+          </WithSource>
+        </ColumnarPage>
+      );
+    }
   }
-}
-
-export const LogsPage = injectI18n(LogsPageUI);
+);

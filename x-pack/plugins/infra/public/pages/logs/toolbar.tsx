@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { AutocompleteField } from '../../components/autocomplete_field';
@@ -21,11 +21,7 @@ import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithLogTextview } from '../../containers/logs/with_log_textview';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
-interface Props {
-  intl: InjectedIntl;
-}
-
-const LogsToolbarUI: React.SFC<Props> = ({ intl }) => (
+export const LogsToolbar = injectI18n(({ intl }) => (
   <Toolbar>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
@@ -46,7 +42,7 @@ const LogsToolbarUI: React.SFC<Props> = ({ intl }) => (
                   onChange={setFilterQueryDraftFromKueryExpression}
                   onSubmit={applyFilterQueryFromKueryExpression}
                   placeholder={intl.formatMessage({
-                    id: 'xpack.infra.logsToolbar.searchFieldPlaceholder',
+                    id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
                     defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
                   })}
                   suggestions={suggestions}
@@ -103,6 +99,4 @@ const LogsToolbarUI: React.SFC<Props> = ({ intl }) => (
       </EuiFlexItem>
     </EuiFlexGroup>
   </Toolbar>
-);
-
-export const LogsToolbar = injectI18n(LogsToolbarUI);
+));

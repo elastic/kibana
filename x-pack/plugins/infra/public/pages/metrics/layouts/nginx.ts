@@ -21,9 +21,12 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
     sections: [
       {
         id: InfraMetric.nginxHits,
-        label: i18n.translate('xpack.infra.nginxMetrics.hitsSectionLabel', {
-          defaultMessage: 'Hits',
-        }),
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.nginxMetricsLayout.hitsSection.layoutLabel',
+          {
+            defaultMessage: 'Hits',
+          }
+        ),
         requires: ['nginx.access'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -39,9 +42,12 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxRequestRate,
-        label: i18n.translate('xpack.infra.nginxMetrics.requestRateSectionLabel', {
-          defaultMessage: 'Request Rate',
-        }),
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.nginxMetricsLayout.requestRateSection.layoutLabel',
+          {
+            defaultMessage: 'Request Rate',
+          }
+        ),
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -54,9 +60,12 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxActiveConnections,
-        label: i18n.translate('xpack.infra.nginxMetrics.activeConnectionsSectionLabel', {
-          defaultMessage: 'Active Connections',
-        }),
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.nginxMetricsLayout.activeConnectionsSection.layoutLabel',
+          {
+            defaultMessage: 'Active Connections',
+          }
+        ),
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -71,9 +80,12 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.nginxRequestsPerConnection,
-        label: i18n.translate('xpack.infra.nginxMetrics.requestsPerConnectionsSectionLabel', {
-          defaultMessage: 'Requests per Connections',
-        }),
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.nginxMetricsLayout.requestsPerConnectionsSection.layoutLabel',
+          {
+            defaultMessage: 'Requests per Connections',
+          }
+        ),
         requires: ['nginx.statusstub'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -82,9 +94,12 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
             reqPerConns: {
               color: theme.eui.euiColorVis1,
               type: InfraMetricLayoutVisualizationType.bar,
-              name: i18n.translate('xpack.infra.nginxMetrics.visConfig.requestsAliasName', {
-                defaultMessage: 'reqs per conn',
-              }),
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.nginxMetricsLayout.requestsPerConnectionsSection.reqsPerConnSeriesLabel',
+                {
+                  defaultMessage: 'reqs per conn',
+                }
+              ),
             },
           },
         },

@@ -25,49 +25,50 @@ interface HomePageProps {
   intl: InjectedIntl;
 }
 
-class HomePageUI extends React.PureComponent<HomePageProps, {}> {
-  public render() {
-    const { intl } = this.props;
-    return (
-      <ColumnarPage>
-        <WithSource>
-          {({ metricIndicesExist }) =>
-            metricIndicesExist || metricIndicesExist === null ? (
-              <>
-                <WithWaffleTimeUrlState />
-                <WithWaffleFilterUrlState />
-                <WithWaffleOptionsUrlState />
-                <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
-                <HomeToolbar />
-                <HomePageContent />
-              </>
-            ) : (
-              <WithKibanaChrome>
-                {({ basePath }) => (
-                  <EmptyPage
-                    title={intl.formatMessage({
-                      id: 'xpack.infra.homePage.noMetricsIndicesTitle',
-                      defaultMessage: "Looks like you don't have any metrics indices.",
-                    })}
-                    message={intl.formatMessage({
-                      id: 'xpack.infra.homePage.noMetricsIndicesDescription',
-                      defaultMessage: "Let's add some!",
-                    })}
-                    actionLabel={intl.formatMessage({
-                      id: 'xpack.infra.homePage.noMetricsIndicesActionLabel',
-                      defaultMessage: 'Setup Instructions',
-                    })}
-                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
-                    data-test-subj="noMetricsIndicesPrompt"
-                  />
-                )}
-              </WithKibanaChrome>
-            )
-          }
-        </WithSource>
-      </ColumnarPage>
-    );
+export const HomePage = injectI18n(
+  class extends React.PureComponent<HomePageProps, {}> {
+    public displayName = 'HomePage';
+    public render() {
+      const { intl } = this.props;
+      return (
+        <ColumnarPage>
+          <WithSource>
+            {({ metricIndicesExist }) =>
+              metricIndicesExist || metricIndicesExist === null ? (
+                <>
+                  <WithWaffleTimeUrlState />
+                  <WithWaffleFilterUrlState />
+                  <WithWaffleOptionsUrlState />
+                  <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
+                  <HomeToolbar />
+                  <HomePageContent />
+                </>
+              ) : (
+                <WithKibanaChrome>
+                  {({ basePath }) => (
+                    <EmptyPage
+                      title={intl.formatMessage({
+                        id: 'xpack.infra.homePage.noMetricsIndicesTitle',
+                        defaultMessage: "Looks like you don't have any metrics indices.",
+                      })}
+                      message={intl.formatMessage({
+                        id: 'xpack.infra.homePage.noMetricsIndicesDescription',
+                        defaultMessage: "Let's add some!",
+                      })}
+                      actionLabel={intl.formatMessage({
+                        id: 'xpack.infra.homePage.noMetricsIndicesActionLabel',
+                        defaultMessage: 'Setup Instructions',
+                      })}
+                      actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                      data-test-subj="noMetricsIndicesPrompt"
+                    />
+                  )}
+                </WithKibanaChrome>
+              )
+            }
+          </WithSource>
+        </ColumnarPage>
+      );
+    }
   }
-}
-
-export const HomePage = injectI18n(HomePageUI);
+);
