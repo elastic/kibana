@@ -19,6 +19,7 @@
 
 import AggRow from './agg_row';
 import React from 'react';
+import { EuiCode, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function UnsupportedAgg(props) {
@@ -30,15 +31,15 @@ export function UnsupportedAgg(props) {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <p>
+      <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
+        <span>
           <FormattedMessage
             id="metrics.unsupportedAgg.aggIsNotSupportedDescription"
             defaultMessage="The {modelType} aggregation is no longer supported."
-            values={{ modelType: (<code>{props.model.type}</code>) }}
+            values={{ modelType: (<EuiCode>{props.model.type}</EuiCode>) }}
           />
-        </p>
-      </div>
+        </span>
+      </EuiTitle>
     </AggRow>
   );
 }

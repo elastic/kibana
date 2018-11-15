@@ -60,11 +60,11 @@ export function filterRows(includeSiblings) {
 }
 
 function MetricSelectUi(props) {
-  const { restrict, metric, onChange, value, exclude, includeSiblings, intl } = props;
+  const { additionalOptions, restrict, metric, metrics, onChange, value, exclude, includeSiblings, clearable, intl, ...rest } = props;
 
-  const metrics = props.metrics.filter(createTypeFilter(restrict, exclude));
+  const calculatedMetrics = metrics.filter(createTypeFilter(restrict, exclude));
 
-  const siblings = calculateSiblings(metrics, metric);
+  const siblings = calculateSiblings(calculatedMetrics, metric);
 
   // Percentiles need to be handled differently because one percentile aggregation
   // could have multiple percentiles associated with it. So the user needs a way
@@ -72,7 +72,7 @@ function MetricSelectUi(props) {
   const percentileOptions = siblings
     .filter(row => /^percentile/.test(row.type))
     .reduce((acc, row) => {
-      const label = calculateLabel(row, metrics);
+      const label = calculateLabel(row, calculatedMetrics);
       row.percentiles.forEach(p => {
         if (p.value) {
           const value = /\./.test(p.value) ? p.value : `${p.value}.0`;
@@ -86,10 +86,10 @@ function MetricSelectUi(props) {
     }, []);
 
   const options = siblings.filter(filterRows(includeSiblings)).map(row => {
-    const label = calculateLabel(row, metrics);
+    const label = calculateLabel(row, calculatedMetrics);
     return { value: row.id, label };
   });
-  const allOptions = [...options, ...props.additionalOptions, ...percentileOptions];
+  const allOptions = [...options, ...additionalOptions, ...percentileOptions];
 
   const selectedOption = allOptions.find(option => {
     return value === option.value;
@@ -102,7 +102,9 @@ function MetricSelectUi(props) {
       options={allOptions}
       selectedOptions={selectedOptions}
       onChange={onChange}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
+      isClearable={clearable}
+      {...rest}
     />
   );
 }

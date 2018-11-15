@@ -28,7 +28,14 @@ import createTextHandler from '../lib/create_text_handler';
 import createNumberHandler from '../lib/create_number_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiSpacer,
+  EuiFormRow,
+  EuiCode,
+  EuiTextArea,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -88,121 +95,147 @@ const MovingAverageAggUi = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.movingAverage.aggregationLabel"
-                defaultMessage="Aggregation"
-              />
-            </div>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.movingAverage.aggregationLabel"
+              defaultMessage="Aggregation"
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.movingAverage.metricLabel"
-                defaultMessage="Metric"
-              />
-            </div>
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('metric')}
+            label={(<FormattedMessage
+              id="metrics.movingAverage.metricLabel"
+              defaultMessage="Metric"
+            />)}
+          >
             <MetricSelect
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
               value={model.field}
             />
-          </div>
-        </div>
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('model')}>
-              <FormattedMessage
-                id="metrics.movingAverage.modelLabel"
-                defaultMessage="Model"
-              />
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('model')}
+            label={(<FormattedMessage
+              id="metrics.movingAverage.modelLabel"
+              defaultMessage="Model"
+            />)}
+          >
             <EuiComboBox
               isClearable={false}
-              id={htmlId('model')}
-              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.model.selectPlaceholder', defaultMessage: 'Select…' })}
+              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.model.selectPlaceholder', defaultMessage: 'Select' })}
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
-              <FormattedMessage
-                id="metrics.movingAverage.windowSizeLabel"
-                defaultMessage="Window Size"
-              />
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('windowSize')}
+            label={(<FormattedMessage
+              id="metrics.movingAverage.windowSizeLabel"
+              defaultMessage="Window Size"
+            />)}
+          >
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
             <input
-              id={htmlId('windowSize')}
-              className="vis_editor__input-grows-100"
+              className="tvbAgg__input"
               type="text"
               onChange={handleNumberChange('window')}
               value={model.window}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('minimize')}>
-              <FormattedMessage
-                id="metrics.movingAverage.minimizeLabel"
-                defaultMessage="Minimize"
-              />
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('minimize')}
+            label={(<FormattedMessage
+              id="metrics.movingAverage.minimizeLabel"
+              defaultMessage="Minimize"
+            />)}
+          >
             <EuiComboBox
-              id={htmlId('minimize')}
-              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select…' })}
+              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select' })}
               options={minimizeOptions}
               selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
               onChange={handleSelectChange('minimize')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
-              <FormattedMessage
-                id="metrics.movingAverage.predictLabel"
-                defaultMessage="Predict"
-              />
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('predict')}
+            label={(<FormattedMessage
+              id="metrics.movingAverage.predictLabel"
+              defaultMessage="Predict"
+            />)}
+          >
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
             <input
-              id={htmlId('predict')}
-              className="vis_editor__input-grows-100"
+              className="tvbAgg__input"
               type="text"
               onChange={handleNumberChange('predict')}
               value={model.predict}
             />
-          </div>
-        </div>
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('settings')}>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexItem>
+        <EuiFormRow
+          fullWidth
+          id={htmlId('settings')}
+          label={(<FormattedMessage
+            id="metrics.movingAverage.settingsLabel"
+            defaultMessage="Settings"
+          />)}
+          helpText={
+            <span>
               <FormattedMessage
-                id="metrics.movingAverage.settingsLabel"
-                defaultMessage="Settings ({keyValue} space-delimited)"
-                values={{ keyValue: (<code>Key=Value</code>) }}
+                id="metrics.movingAverage.settingsDescription"
+                defaultMessage="{keyValue} space-delimited"
+                values={{ keyValue: (<EuiCode>Key=Value</EuiCode>) }}
               />
-            </label>
-            <input
-              id={htmlId('settings')}
-              className="vis_editor__input-grows-100"
-              type="text"
-              onChange={handleTextChange('settings')}
-              value={model.settings}
-            />
-          </div>
-        </div>
-      </div>
+            </span>
+          }
+        >
+          <EuiTextArea
+            onChange={handleTextChange('settings')}
+            value={model.settings}
+            fullWidth
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     </AggRow>
   );
 };

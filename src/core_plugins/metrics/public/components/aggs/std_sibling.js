@@ -27,7 +27,12 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
   EuiComboBox,
+  EuiFormLabel,
+  EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -44,20 +49,20 @@ const StandardSiblingAggUi = props => {
   const stdDev = {};
   if (model.type === 'std_deviation_bucket') {
     stdDev.sigma = (
-      <div className="vis_editor__std_deviation-sigma_item">
-        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>
-          <FormattedMessage
+      <EuiFlexItem grow={false}>
+        <EuiFormRow
+          id={htmlId('sigma')}
+          label={(<FormattedMessage
             id="metrics.stdSibling.sigmaLabel"
             defaultMessage="Sigma"
+          />)}
+        >
+          <EuiFieldText
+            value={model.sigma}
+            onChange={handleTextChange('sigma')}
           />
-        </label>
-        <input
-          id={htmlId('sigma')}
-          className="vis_editor__std_deviation-sigma"
-          value={model.sigma}
-          onChange={handleTextChange('sigma')}
-        />
-      </div>
+        </EuiFormRow>
+      </EuiFlexItem>
     );
 
     const modeOptions = [
@@ -83,21 +88,22 @@ const StandardSiblingAggUi = props => {
     });
 
     stdDev.mode = (
-      <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('mode')}>
-          <FormattedMessage
+      <EuiFlexItem>
+        <EuiFormRow
+          id={htmlId('mode')}
+          label={(<FormattedMessage
             id="metrics.stdSibling.modeLabel"
             defaultMessage="Mode"
+          />)}
+        >
+          <EuiComboBox
+            options={modeOptions}
+            selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+            onChange={handleSelectChange('mode')}
+            singleSelection={{ asPlainText: true }}
           />
-        </label>
-        <EuiComboBox
-          id={htmlId('mode')}
-          options={modeOptions}
-          selectedOptions={selectedModeOption ? [selectedModeOption] : []}
-          onChange={handleSelectChange('mode')}
-          singleSelection={true}
-        />
-      </div>
+        </EuiFormRow>
+      </EuiFlexItem>
     );
   }
 
@@ -109,37 +115,42 @@ const StandardSiblingAggUi = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.stdSibling.aggregationLabel"
-            defaultMessage="Aggregation"
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.stdSibling.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
           />
-        </div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__std_sibling-metric">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.stdSibling.metricLabel"
-            defaultMessage="Metric"
-          />
-        </div>
-        <MetricSelect
-          onChange={handleSelectChange('field')}
-          exclude={['percentile']}
-          metrics={siblings}
-          metric={model}
-          value={model.field}
-        />
-      </div>
-      { stdDev.sigma }
-      { stdDev.mode }
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('metric')}
+            label={(<FormattedMessage
+              id="metrics.stdSibling.metricLabel"
+              defaultMessage="Metric"
+            />)}
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              exclude={['percentile']}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        { stdDev.sigma }
+        { stdDev.mode }
+      </EuiFlexGroup>
     </AggRow>
   );
 };

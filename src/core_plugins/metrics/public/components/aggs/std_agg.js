@@ -24,7 +24,7 @@ import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 function StandardAgg(props) {
@@ -48,42 +48,51 @@ function StandardAgg(props) {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.stdAgg.aggregationLabel"
-            defaultMessage="Aggregation"
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.stdAgg.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+            fullWidth
           />
-        </div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      {
-        model.type !== 'count'
-          ? (
-            <div className="vis_editor__item">
-              <label className="vis_editor__label" htmlFor={htmlId('field')}>
-                <FormattedMessage
-                  id="metrics.stdAgg.fieldLabel"
-                  defaultMessage="Field"
-                />
-              </label>
-              <FieldSelect
-                id={htmlId('field')}
-                fields={fields}
-                type={model.type}
-                restrict={restrict}
-                indexPattern={indexPattern}
-                value={model.field}
-                onChange={handleSelectChange('field')}
-              />
-            </div>
-          ) : null
-      }
+        </EuiFlexItem>
+
+        {
+          model.type !== 'count'
+            ? (
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('field')}
+                  label={(<FormattedMessage
+                    id="metrics.stdAgg.fieldLabel"
+                    defaultMessage="Field"
+                  />)}
+                  fullWidth
+                >
+                  <FieldSelect
+                    fields={fields}
+                    type={model.type}
+                    restrict={restrict}
+                    indexPattern={indexPattern}
+                    value={model.field}
+                    onChange={handleSelectChange('field')}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            ) : null
+        }
+
+      </EuiFlexGroup>
     </AggRow>
   );
 

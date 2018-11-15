@@ -24,6 +24,7 @@ import MetricSelect from './metric_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PositiveOnlyAgg = props => {
@@ -32,6 +33,7 @@ export const PositiveOnlyAgg = props => {
   const defaults = { unit: '' };
   const model = { ...defaults, ...props.model };
 
+  const htmlId = htmlIdGenerator();
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
 
@@ -43,34 +45,39 @@ export const PositiveOnlyAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.positiveOnly.aggregationLabel"
-            defaultMessage="Aggregation"
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.positiveOnly.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
           />
-        </div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.positiveOnly.metricLabel"
-            defaultMessage="Metric"
-          />
-        </div>
-        <MetricSelect
-          onChange={handleSelectChange('field')}
-          metrics={siblings}
-          metric={model}
-          value={model.field}
-        />
-      </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('metric')}
+            label={(<FormattedMessage
+              id="metrics.positiveOnly.metricLabel"
+              defaultMessage="Metric"
+            />)}
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

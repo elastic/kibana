@@ -26,12 +26,12 @@ import generateByTypeFilter from '../lib/generate_by_type_filter';
 import { injectI18n } from '@kbn/i18n/react';
 
 function FieldSelectUi(props) {
-  const { type, fields, indexPattern, value, onChange, disabled, intl } = props;
+  const { type, fields, indexPattern, value, onChange, disabled, restrict, intl, ...rest } = props;
   if (type === 'count') {
     return null;
   }
   const options = (fields[indexPattern] || [])
-    .filter(generateByTypeFilter(props.restrict))
+    .filter(generateByTypeFilter(restrict))
     .map(field => {
       return { label: field.name, value: field.name };
     });
@@ -48,7 +48,8 @@ function FieldSelectUi(props) {
       options={options}
       selectedOptions={selectedOptions}
       onChange={onChange}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
+      {...rest}
     />
   );
 }

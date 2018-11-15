@@ -27,7 +27,12 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -76,66 +81,71 @@ const StandardDeviationAggUi = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.stdDeviation.aggregationLabel"
-            defaultMessage="Aggregation"
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.stdDeviation.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
           />
-        </div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__std_deviation-field">
-        <label className="vis_editor__label" htmlFor={htmlId('field')}>
-          <FormattedMessage
-            id="metrics.stdDeviation.fieldLabel"
-            defaultMessage="Field"
-          />
-        </label>
-        <FieldSelect
-          id={htmlId('field')}
-          fields={fields}
-          type={model.type}
-          restrict="numeric"
-          indexPattern={indexPattern}
-          value={model.field}
-          onChange={handleSelectChange('field')}
-        />
-      </div>
-      <div className="vis_editor__std_deviation-sigma_item">
-        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>
-          <FormattedMessage
-            id="metrics.stdDeviation.sigmaLabel"
-            defaultMessage="Sigma"
-          />
-        </label>
-        <input
-          id={htmlId('sigma')}
-          className="vis_editor__std_deviation-sigma"
-          value={model.sigma}
-          onChange={handleTextChange('sigma')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('mode')}>
-          <FormattedMessage
-            id="metrics.stdDeviation.modeLabel"
-            defaultMessage="Mode"
-          />
-        </label>
-        <EuiComboBox
-          id={htmlId('mode')}
-          options={modeOptions}
-          selectedOptions={selectedModeOption ? [selectedModeOption] : []}
-          onChange={handleSelectChange('mode')}
-          singleSelection={true}
-        />
-      </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('field')}
+            label={(<FormattedMessage
+              id="metrics.stdDeviation.fieldLabel"
+              defaultMessage="Field"
+            />)}
+          >
+            <FieldSelect
+              fields={fields}
+              type={model.type}
+              restrict="numeric"
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('sigma')}
+            label={(<FormattedMessage
+              id="metrics.stdDeviation.sigmaLabel"
+              defaultMessage="Sigma"
+            />)}
+          >
+            <EuiFieldText
+              value={model.sigma}
+              onChange={handleTextChange('sigma')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('mode')}
+            label={(<FormattedMessage
+              id="metrics.stdDeviation.modeLabel"
+              defaultMessage="Mode"
+            />)}
+          >
+            <EuiComboBox
+              options={modeOptions}
+              selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+              onChange={handleSelectChange('mode')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

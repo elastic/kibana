@@ -25,7 +25,14 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFieldText,
+  EuiFormRow,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PercentileRankAgg = props => {
@@ -48,51 +55,55 @@ export const PercentileRankAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.percentileRank.aggregationLabel"
-            defaultMessage="Aggregation"
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.percentileRank.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
           />
-        </div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('field')}>
-          <FormattedMessage
-            id="metrics.percentileRank.fieldLabel"
-            defaultMessage="Field"
-          />
-        </label>
-        <FieldSelect
-          id={htmlId('field')}
-          fields={fields}
-          type={model.type}
-          restrict="numeric"
-          indexPattern={indexPattern}
-          value={model.field}
-          onChange={handleSelectChange('field')}
-        />
-      </div>
-      <div className="vis_editor__percentile_rank_value">
-        <label className="vis_editor__label" htmlFor={htmlId('value')}>
-          <FormattedMessage
-            id="metrics.percentileRank.valueLabel"
-            defaultMessage="Value"
-          />
-        </label>
-        <input
-          id={htmlId('value')}
-          className="vis_editor__input-grows"
-          value={model.value}
-          onChange={handleTextChange('value')}
-        />
-      </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('field')}
+            label={(<FormattedMessage
+              id="metrics.percentileRank.fieldLabel"
+              defaultMessage="Field"
+            />)}
+          >
+            <FieldSelect
+              fields={fields}
+              type={model.type}
+              restrict="numeric"
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('value')}
+            label={(<FormattedMessage
+              id="metrics.percentileRank.valueLabel"
+              defaultMessage="Value"
+            />)}
+          >
+            <EuiFieldText
+              value={model.value}
+              onChange={handleTextChange('value')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

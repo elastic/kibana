@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import '../visualizations/less/main.less';
-import '../less/main.less';
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { ReactEditorControllerProvider } from './editor_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
@@ -41,7 +39,6 @@ export default function MetricsVisProvider(Private, i18n) {
       { defaultMessage: 'Build time-series using a visual pipeline interface' }),
     category: CATEGORY.TIME,
     icon: 'visVisualBuilder',
-    stage: 'experimental',
     feedbackMessage: defaultFeedbackMessage,
     visConfig: {
       defaults: {

@@ -25,7 +25,12 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiTitle,
+  EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -88,14 +93,14 @@ function SeriesAggUi(props) {
         onDelete={props.onDelete}
         siblings={props.siblings}
       >
-        <div className="vis_editor__item">
-          <div className="vis_editor__label">
+        <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
+          <span>
             <FormattedMessage
               id="metrics.seriesAgg.seriesAggIsNotCompatibleLabel"
               defaultMessage="Series Agg is not compatible with the table visualization."
             />
-          </div>
-        </div>
+          </span>
+        </EuiTitle>
       </AggRow>
     );
   }
@@ -108,35 +113,39 @@ function SeriesAggUi(props) {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.seriesAgg.aggregationLabel"
-            defaultMessage="Aggregation"
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.seriesAgg.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
           />
-        </div>
-        <AggSelect
-          panelType={panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__item">
-        <label className="vis_editor__label" htmlFor={htmlId('function')}>
-          <FormattedMessage
-            id="metrics.seriesAgg.functionLabel"
-            defaultMessage="Function"
-          />
-        </label>
-        <EuiComboBox
-          id={htmlId('function')}
-          options={functionOptions}
-          selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
-          onChange={handleSelectChange('function')}
-          singleSelection={true}
-        />
-      </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('function')}
+            label={(<FormattedMessage
+              id="metrics.seriesAgg.functionLabel"
+              defaultMessage="Function"
+            />)}
+          >
+            <EuiComboBox
+              options={functionOptions}
+              selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
+              onChange={handleSelectChange('function')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 

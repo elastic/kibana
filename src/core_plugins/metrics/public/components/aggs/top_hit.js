@@ -26,7 +26,12 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiSpacer,
+  EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -91,31 +96,31 @@ const TopHitAggUi = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.topHit.aggregationLabel"
-                defaultMessage="Aggregation"
-              />
-            </div>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.topHit.aggregationLabel"
+              defaultMessage="Aggregation"
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('field')}>
-              <FormattedMessage
-                id="metrics.topHit.fieldLabel"
-                defaultMessage="Field"
-              />
-            </label>
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('field')}
+            label={(<FormattedMessage
+              id="metrics.topHit.fieldLabel"
+              defaultMessage="Field"
+            />)}
+          >
             <FieldSelect
-              id={htmlId('field')}
               fields={fields}
               type={model.type}
               restrict="numeric"
@@ -123,75 +128,86 @@ const TopHitAggUi = props => {
               value={model.field}
               onChange={handleSelectChange('field')}
             />
-          </div>
-        </div>
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('size')}>
-              <FormattedMessage
-                id="metrics.topHit.sizeLabel"
-                defaultMessage="Size"
-              />
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('size')}
+            label={(<FormattedMessage
+              id="metrics.topHit.sizeLabel"
+              defaultMessage="Size"
+            />)}
+          >
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
             <input
-              id={htmlId('size')}
-              className="vis_editor__input-grows-100"
+              className="tvbAgg__input"
               value={model.size}
               onChange={handleTextChange('size')}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('agg_with')}>
-              <FormattedMessage
-                id="metrics.topHit.aggregateWithLabel"
-                defaultMessage="Aggregate with"
-              />
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('agg_with')}
+            label={(<FormattedMessage
+              id="metrics.topHit.aggregateWithLabel"
+              defaultMessage="Aggregate with"
+            />)}
+          >
             <EuiComboBox
               isClearable={false}
-              id={htmlId('agg_with')}
               placeholder={intl.formatMessage({ id: 'metrics.topHit.aggregateWith.selectPlaceholder', defaultMessage: 'Select…' })}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
               onChange={handleSelectChange('agg_with')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('order_by')}>
-              <FormattedMessage
-                id="metrics.topHit.orderByLabel"
-                defaultMessage="Order by"
-              />
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('order_by')}
+            label={(<FormattedMessage
+              id="metrics.topHit.orderByLabel"
+              defaultMessage="Order by"
+            />)}
+          >
             <FieldSelect
-              id={htmlId('order_by')}
               restrict="date"
               value={model.order_by}
               onChange={handleSelectChange('order_by')}
               indexPattern={indexPattern}
               fields={fields}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('order')}>
-              <FormattedMessage
-                id="metrics.topHit.orderLabel"
-                defaultMessage="Order"
-              />
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('order')}
+            label={(<FormattedMessage
+              id="metrics.topHit.orderLabel"
+              defaultMessage="Order"
+            />)}
+          >
             <EuiComboBox
               isClearable={false}
-              id={htmlId('order')}
               placeholder={intl.formatMessage({ id: 'metrics.topHit.order.selectPlaceholder', defaultMessage: 'Select…' })}
               options={orderOptions}
               selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
               onChange={handleSelectChange('order')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-        </div>
-      </div>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };
