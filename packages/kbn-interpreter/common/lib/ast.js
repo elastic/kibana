@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getType } from '../lib/get_type';
+import { getType } from './get_type';
 import { parse } from './grammar';
 
 function getArgumentString(arg, argKey, level = 0) {

@@ -5,15 +5,15 @@
  */
 
 import socket from 'socket.io';
-import { serializeProvider } from '../../common/lib/serialize';
-import { typesRegistry } from '../../common/lib/types_registry';
-import { getServerRegistries } from '../lib/server_registries';
-import { routeExpressionProvider } from '../lib/route_expression';
+import { serializeProvider } from '../../../../../packages/kbn-interpreter/common/lib/serialize';
+import { typesRegistry } from '../../../../../packages/kbn-interpreter/common/lib/types_registry';
+import { getServerRegistries } from '../../../../../packages/kbn-interpreter/server/server_registries';
+import { routeExpressionProvider } from '../lib/route_expression/index';
 import { browser } from '../lib/route_expression/browser';
-import { thread } from '../lib/route_expression/thread';
+import { thread } from '../lib/route_expression/thread/index';
 import { server as serverEnv } from '../lib/route_expression/server';
 import { getRequest } from '../lib/get_request';
-import { API_ROUTE } from '../../common/lib/constants';
+import { API_ROUTE } from '../../../../../x-pack/plugins/canvas/common/lib/constants';
 
 async function getModifiedRequest(server, socket) {
   try {

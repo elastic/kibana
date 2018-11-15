@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromExpression, toExpression } from '../../common/lib/ast';
+import { fromExpression, toExpression } from '../../../../../packages/kbn-interpreter/common/lib/ast';
 
 export function translate(server) {
   /*

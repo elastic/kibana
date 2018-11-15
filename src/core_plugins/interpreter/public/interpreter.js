@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
-import { serializeProvider } from '../../common/lib/serialize';
-import { getSocket } from '../socket';
-import { typesRegistry } from '../../common/lib/types_registry';
+import { socketInterpreterProvider } from '../../../../packages/kbn-interpreter/common/interpreter/socket_interpret';
+import { serializeProvider } from '../../../../packages/kbn-interpreter/common/lib/serialize';
+import { getSocket } from './socket';
+import { typesRegistry } from '../../../../packages/kbn-interpreter/common/lib/types_registry';
 import { createHandlers } from './create_handlers';
-import { functionsRegistry } from './functions_registry';
-import { getBrowserRegistries } from './browser_registries';
+import { functionsRegistry } from '../../../../x-pack/plugins/canvas/public/lib/functions_registry';
+import { getBrowserRegistries } from '../../../../packages/kbn-interpreter/public/browser_registries';
 
 let socket;
 let resolve;

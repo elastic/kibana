@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Registry } from '../../common/lib/registry';
-import { Type } from '../../common/lib/type';
+import { Registry } from './registry';
+import { Type } from './type';
 
 class TypesRegistry extends Registry {
   wrapper(obj) {

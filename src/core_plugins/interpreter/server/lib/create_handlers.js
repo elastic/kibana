@@ -5,7 +5,7 @@
  */
 
 import boom from 'boom';
-import { SECURITY_AUTH_MESSAGE } from '../../common/lib/constants';
+import { SECURITY_AUTH_MESSAGE } from '../../../../../x-pack/plugins/canvas/common/lib/constants';
 import { isSecurityEnabled } from './feature_check';
 
 export const createHandlers = (request, server) => {

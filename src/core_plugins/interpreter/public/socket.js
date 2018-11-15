@@ -5,8 +5,8 @@
  */
 
 import io from 'socket.io-client';
-import { functionsRegistry } from '../common/lib/functions_registry';
-import { getBrowserRegistries } from './lib/browser_registries';
+import { functionsRegistry } from '../../../../packages/kbn-interpreter/common/lib/functions_registry';
+import { getBrowserRegistries } from '../../../../packages/kbn-interpreter/public/browser_registries';
 
 const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
 let socket;

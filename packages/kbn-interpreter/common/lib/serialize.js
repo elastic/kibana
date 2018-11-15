@@ -5,7 +5,7 @@
  */
 
 import { get, identity } from 'lodash';
-import { getType } from '../lib/get_type';
+import { getType } from './get_type';
 
 export function serializeProvider(types) {
   return {

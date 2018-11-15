@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getServerRegistries } from '../server_registries';
+import { getServerRegistries } from '../../../../../../packages/kbn-interpreter/server/server_registries';
 import { interpretProvider } from '../../../common/interpreter/interpret';
 import { createHandlers } from '../create_handlers';
 

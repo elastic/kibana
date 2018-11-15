@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Registry } from '../../common/lib/registry';
-import { Fn } from '../lib/fn';
+import { Registry } from './registry';
+import { Fn } from './fn';
 
 class FunctionsRegistry extends Registry {
   wrapper(obj) {

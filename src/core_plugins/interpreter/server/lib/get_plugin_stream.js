@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import ss from 'stream-stream';
-import { getPluginPaths } from './get_plugin_paths';
+import { getPluginPaths } from '../../../../../x-pack/plugins/canvas/server/lib/get_plugin_paths';
 
 export const getPluginStream = type => {
   const stream = ss({

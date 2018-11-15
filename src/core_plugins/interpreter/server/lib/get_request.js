@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import boom from 'boom';
-import { API_ROUTE } from '../../common/lib/constants';
+import { API_ROUTE } from '../../../../../x-pack/plugins/canvas/common/lib/constants';
 
 export function getRequest(server, { headers }) {
   const url = `${API_ROUTE}/ping`;

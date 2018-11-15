@@ -13,11 +13,11 @@ import {
   transformRegistry,
   modelRegistry,
   viewRegistry,
-} from '../expression_types';
-import { elementsRegistry } from './elements_registry';
-import { renderFunctionsRegistry } from './render_functions_registry';
-import { functionsRegistry as browserFunctions } from './functions_registry';
-import { loadPrivateBrowserFunctions } from './load_private_browser_functions';
+} from '../../../x-pack/plugins/canvas/public/expression_types/index';
+import { elementsRegistry } from '../../../x-pack/plugins/canvas/public/lib/elements_registry';
+import { renderFunctionsRegistry } from '../../../x-pack/plugins/canvas/public/lib/render_functions_registry';
+import { functionsRegistry as browserFunctions } from '../../../x-pack/plugins/canvas/public/lib/functions_registry';
+import { loadPrivateBrowserFunctions } from '../../../x-pack/plugins/canvas/public/lib/load_private_browser_functions';
 
 const registries = {
   browserFunctions: browserFunctions,

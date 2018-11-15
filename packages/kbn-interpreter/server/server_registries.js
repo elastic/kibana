@@ -6,7 +6,7 @@
 
 import { typesRegistry } from '../../common/lib/types_registry';
 import { functionsRegistry as serverFunctions } from '../../common/lib/functions_registry';
-import { getPluginPaths } from './get_plugin_paths';
+import { getPluginPaths } from '../../../x-pack/plugins/canvas/server/lib/get_plugin_paths';
 
 const registries = {
   serverFunctions: serverFunctions,

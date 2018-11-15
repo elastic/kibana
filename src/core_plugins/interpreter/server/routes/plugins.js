@@ -5,7 +5,7 @@
  */
 
 import { getPluginStream } from '../lib/get_plugin_stream';
-import { pluginPaths } from '../lib/plugin_paths';
+import { pluginPaths } from '../../../../../x-pack/plugins/canvas/server/lib/plugin_paths';
 
 export function plugins(server) {
   server.route({

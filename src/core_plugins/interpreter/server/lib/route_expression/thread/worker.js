@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid/v4';
-import { populateServerRegistries } from '../../server_registries';
+import { populateServerRegistries } from '../../../../../../../packages/kbn-interpreter/server/server_registries';
 import { interpretProvider } from '../../../../common/interpreter/interpret';
 import { serializeProvider } from '../../../../common/lib/serialize';
 
