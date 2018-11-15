@@ -243,7 +243,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       });
     }
 
-
     _isFilteredByCollar() {
       const DEFAULT = false;
       const agg = this._getGeoHashAgg();

@@ -37,7 +37,7 @@ const EMPTY_STYLE = {
 };
 
 
-let emsServiceSettings = new Promise((resolve, reject) => {
+const emsServiceSettings = new Promise((resolve, reject) => {
   uiModules.get('kibana').run(($injector) => {
     const Private = $injector.get('Private');
     const serviceSttings = $injector.get('serviceSettings');
@@ -158,15 +158,15 @@ export default class ChoroplethLayer extends KibanaMapLayer {
         let errorMessage;
         if (e.status === 404) {
           errorMessage = i18n.translate('regionMap.choroplethLayer.downloadingVectorData404ErrorMessage', {
-            defaultMessage: 'Server responding with \'404\' when attempting to fetch {geojsonUrl}. \
+            defaultMessage: 'Server responding with \'404\' when attempting to fetch {name}. \
 Make sure the file exists at that location.',
-            values: { geojsonUrl: name },
+            values: { name: name },
           });
         } else {
           errorMessage = i18n.translate('regionMap.choroplethLayer.downloadingVectorDataErrorMessage', {
-            defaultMessage: 'Cannot download {geojsonUrl} file. Please ensure the \
+            defaultMessage: 'Cannot download {name} file. Please ensure the \
 CORS configuration of the server permits requests from the Kibana application on this host.',
-            values: { geojsonUrl: name },
+            values: { name: name },
           });
         }
 

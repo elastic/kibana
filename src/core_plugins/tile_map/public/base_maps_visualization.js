@@ -23,9 +23,18 @@ import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
+import { uiModules } from 'ui/modules';
 
 const MINZOOM = 0;
 const MAXZOOM = 22;//increase this to 22. Better for WMS
+
+const emsServiceSettings = new Promise((resolve, reject) => {
+  uiModules.get('kibana').run(($injector) => {
+    const Private = $injector.get('Private');
+    const serviceSttings = $injector.get('serviceSettings');
+    resolve(serviceSttings);
+  });
+});
 
 export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
@@ -184,7 +193,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
-      const url = tmsLayer.url;
+      // const url = tmsLayer.url;
+      const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
       delete options.url;
@@ -209,7 +219,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
      */
     async _updateParams() {
       const mapParams = this._getMapsParams();
-      await this._updateBaseLayer(mapParams);
+      await this._updateBaseLayer();
       this._kibanaMap.setLegendPosition(mapParams.legendPosition);
       this._kibanaMap.setShowTooltip(mapParams.addTooltip);
       this._kibanaMap.useUiStateFromVisualization(this.vis);

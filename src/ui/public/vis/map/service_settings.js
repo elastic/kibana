@@ -21,7 +21,6 @@ import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
-import {mapToLayerWithId} from '../../../../core_plugins/region_map/public/util';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -117,6 +116,7 @@ uiModules.get('kibana')
             preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
             preppedService.subdomains = preppedService.subdomains || [];
             preppedService.url = this._extendUrlWithParams(preppedService.url);
+            preppedService.origin = 'ems';
             return preppedService;
           });
 
@@ -166,13 +166,22 @@ uiModules.get('kibana')
         const allServices = [];
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
-          tmsService.url = tilemapsConfig.deprecated.config.url;
+          // tmsService.url = tilemapsConfig.deprecated.config.url;
+          // delete tmsService.url;
           tmsService.id = 'TMS in config/kibana.yml';
+          tmsService.origin = 'yml';
           allServices.push(tmsService);
         }
 
         const servicesFromManifest = await this._loadTMSServices();
-        return allServices.concat(servicesFromManifest);
+
+        const strippedServiceFromManifest = servicesFromManifest.map((service) => {
+          const strippedService = {... service};
+          delete strippedService.url;
+          return strippedService;
+        });
+
+        return allServices.concat(strippedServiceFromManifest);
 
       }
 
@@ -200,12 +209,24 @@ uiModules.get('kibana')
       }
 
 
+      async getUrlTemplateForTMSLayer(tmsServiceConfig) {
+
+        if (tmsServiceConfig.origin === 'ems') {
+          const tmsServices = await this._loadTMSServices();
+          const serviceConfig = tmsServices.find(service => {
+            return service.id === tmsServiceConfig.id
+          });
+          return this._extendUrlWithParams(serviceConfig.url);
+        } else {
+          throw new Error('not implemented');
+        }
+
+      }
+
       async getGeoJsonForRegionLayer(filename) {
 
         //the id is the filename
         const fileLayers = await this._loadFileLayers();
-
-        console.log('fi', fileLayers);
         const layerConfig = fileLayers.find(fileLayer => {
           return fileLayer.name === filename
         });
