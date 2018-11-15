@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
 import { randomBytes } from 'crypto';
 import { fromCallback } from 'bluebird';
 import { transformFn } from './transform_fn';
@@ -125,9 +124,8 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
         randomBytes(6).toString('base64'),
       ].join('-');
 
-      const xpackRoot = path.resolve(__dirname, '..', '..', '..', '..', '..', '..');
-      const intlPath = path.join(xpackRoot, '..', 'node_modules', 'intl', 'dist', 'Intl.js');
-      const promisePath = path.join(xpackRoot, 'node_modules', 'bluebird', 'js', 'browser', 'bluebird.js');
+      const intlPath = require.resolve('intl/dist/Intl.min.js');
+      const promisePath = require.resolve('bluebird/js/browser/bluebird.js');
 
       return injectPolyfill(
         page,
