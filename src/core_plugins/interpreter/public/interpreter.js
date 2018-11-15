@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { socketInterpreterProvider } from '../../../../packages/kbn-interpreter/common/interpreter/socket_interpret';
-import { serializeProvider } from '../../../../packages/kbn-interpreter/common/lib/serialize';
+import { socketInterpreterProvider } from '@kbn/interpreter/common/interpreter/socket_interpret';
+import { serializeProvider } from '@kbn/interpreter/common/lib/serialize';
 import { getSocket } from './socket';
-import { typesRegistry } from '../../../../packages/kbn-interpreter/common/lib/types_registry';
+import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
 import { createHandlers } from './create_handlers';
-import { functionsRegistry } from '../../../../x-pack/plugins/canvas/public/lib/functions_registry';
-import { getBrowserRegistries } from '../../../../packages/kbn-interpreter/public/browser_registries';
+import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { getBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
 
 let socket;
 let resolve;

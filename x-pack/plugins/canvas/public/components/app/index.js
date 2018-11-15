@@ -6,9 +6,9 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { createSocket } from '../../socket';
-import { initialize as initializeInterpreter } from '../../lib/interpreter';
-import { populateBrowserRegistries } from '../../lib/browser_registries';
+import { createSocket } from 'plugins/interpreter/socket';
+import { initialize as initializeInterpreter } from 'plugins/interpreter/interpreter';
+import { populateBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 import { trackRouteChange } from './track_route_change';

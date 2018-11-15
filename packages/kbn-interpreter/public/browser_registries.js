@@ -19,7 +19,7 @@
 
 import chrome from 'ui/chrome';
 import $script from 'scriptjs';
-import { typesRegistry } from '../../common/lib/types_registry';
+import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
 import {
   argTypeRegistry,
   datasourceRegistry,

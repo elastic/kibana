@@ -8,13 +8,13 @@ import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
+import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common/lib/ast';
+import { interpretAst } from 'plugins/interpreter/interpreter';
 import { getPages, getElementById, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
-import { toExpression, safeElementFromExpression } from '../../../common/lib/ast';
 import { notify } from '../../lib/notify';
 import { runInterpreter } from '../../lib/run_interpreter';
-import { interpretAst } from '../../lib/interpreter';
 import { selectElement } from './transient';
 import * as args from './resolved_args';
 
