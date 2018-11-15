@@ -11,6 +11,7 @@ import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -47,11 +48,13 @@ uiRoutes.when('/elasticsearch/nodes', {
 
       this.renderReact = ({ clusterStatus, nodes }) => {
         super.renderReact(
-          <ElasticsearchNodes
-            clusterStatus={clusterStatus}
-            nodes={nodes}
-            showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
-          />
+          <I18nProvider>
+            <ElasticsearchNodes
+              clusterStatus={clusterStatus}
+              nodes={nodes}
+              showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+            />
+          </I18nProvider>
         );
       };
     }

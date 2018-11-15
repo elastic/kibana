@@ -74,8 +74,10 @@ function MetricVisualization(props) {
     params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
   }
   const style = { backgroundColor: panelBackgroundColor };
+  params.backgroundColor = panelBackgroundColor;
+
   return (
-    <div className="dashboard__visualization" style={style}>
+    <div className="tvbVis" style={style}>
       <Metric {...params}/>
     </div>
   );
