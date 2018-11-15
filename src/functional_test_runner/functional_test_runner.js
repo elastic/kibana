@@ -91,15 +91,6 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
       });
     }
 
-    async close() {
-      if (this._closed) {
-        return;
-      }
-
-      this._closed = true;
-      await lifecycle.trigger('cleanup');
-    }
-
     async _run(handler) {
       let runErrorOccurred = false;
 
@@ -137,6 +128,13 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
           }
         }
       }
+    }
+
+    async close() {
+      if (this._closed) return;
+
+      this._closed = true;
+      await lifecycle.trigger('cleanup');
     }
   }
 
