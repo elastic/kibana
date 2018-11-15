@@ -1,0 +1,103 @@
+@mixin tvbVisMetricReversedColor {
+  // Some hacking in the CSS to provide the correct text color
+  // depending on dark/light theme and/or background color provided
+  // An easier way would be to provide if the theme is dark in the JS,
+  // but it wasn't passed down.
+  .tab-dashboard.theme-dark .tvbVisMetric--noBackground &,
+  .tvbVisMetric--reversed & {
+    @content;
+  }
+}
+
+/**
+ * 1. Text is scaled using a matrix so all font sizes and related metrics
+ *    are being calcuated from a percentage of the base font size of 100% (14px).
+ */
+
+.tvbVisMetric {
+  font-size: 100%; /* 1 */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.tvbVisMetric__resize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.tvbVisMetric__label--primary {
+  color: $tvbTextColor;
+  text-align: center;
+  font-size: 0.5em; /* 1 */
+  margin-bottom: 0.25em; /* 1 */
+  line-height: 1em; /* 1 */
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbTextColorReversed;
+  }
+}
+
+.tvbVisMetric__value--primary {
+  color: $tvbValueColor;
+  text-align: center;
+  font-size: 1em; /* 1 */
+  font-weight: $euiFontWeightBold;
+  line-height: 1em; /* 1 */
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbValueColorReversed;
+  }
+}
+
+.tvbVisMetric__secondary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.05em; /* 1 */
+}
+
+.tvbVisMetric__label--secondary {
+  font-size: 0.35em; /* 1 */
+  margin-right: 0.3em; /* 1 */
+  color: $tvbTextColor;
+  line-height: 1em; /* 1 */
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbTextColorReversed;
+  }
+}
+
+.tvbVisMetric__value--secondary {
+  font-size: 0.35em; /* 1 */
+  color: $tvbValueColor;
+  line-height: 1em; /* 1 */
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbValueColorReversed;
+  }
+}
+
+.tvbVisMetric__inner {
+  position: absolute;
+  padding: $euiSizeXS $euiSizeS $euiSizeS;
+}
+
+.tvbVisMetric__label--additional {
+  @include euiTextTruncate;
+  font-size: 0.25em; /* 1 */
+  padding: $euiSizeXS/2 0 0 0;
+  text-align: center;
+  color: $tvbValueColor;
+  line-height: 1.2; // Ensure the descenders don't get cut off
+
+  @include tvbVisMetricReversedColor {
+    color: $tvbValueColorReversed;
+  }
+}

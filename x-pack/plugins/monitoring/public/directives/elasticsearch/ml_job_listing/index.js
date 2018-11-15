@@ -21,6 +21,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const filterFields = [ 'job_id', 'state', 'node.name' ];
 const columns = [
@@ -137,20 +138,22 @@ uiModule.directive('monitoringMlListing', (kbnUrl, i18n) => {
 
       scope.$watch('jobs', (jobs = []) => {
         const mlTable = (
-          <MonitoringTable
-            className="mlJobsTable"
-            rows={jobs}
-            pageIndex={scope.pageIndex}
-            filterText={scope.filterText}
-            sortKey={scope.sortKey}
-            sortOrder={scope.sortOrder}
-            onNewState={scope.onNewState}
-            placeholder={filterJobsPlaceholder}
-            filterFields={filterFields}
-            columns={columns}
-            rowComponent={jobRowFactory(scope, kbnUrl)}
-            getNoDataMessage={getNoDataMessage}
-          />
+          <I18nProvider>
+            <MonitoringTable
+              className="mlJobsTable"
+              rows={jobs}
+              pageIndex={scope.pageIndex}
+              filterText={scope.filterText}
+              sortKey={scope.sortKey}
+              sortOrder={scope.sortOrder}
+              onNewState={scope.onNewState}
+              placeholder={filterJobsPlaceholder}
+              filterFields={filterFields}
+              columns={columns}
+              rowComponent={jobRowFactory(scope, kbnUrl)}
+              getNoDataMessage={getNoDataMessage}
+            />
+          </I18nProvider>
         );
         render(mlTable, $el[0]);
       });
