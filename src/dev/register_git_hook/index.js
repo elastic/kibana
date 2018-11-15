@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export function createFailError(msg: string, exitCode?: number): Error;
+export { registerPrecommitGitHook } from './register_git_hook';
