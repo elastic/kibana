@@ -202,7 +202,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async waitForDeleted(selector) {
-      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
+      await remote.waitForElementNotPresent(By.css(testSubjSelector(selector)));
     }
   }
 

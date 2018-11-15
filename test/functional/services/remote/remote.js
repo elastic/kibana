@@ -139,6 +139,11 @@ export async function RemoteProvider({ getService }) {
         await element.click();
       },
 
+      async waitAndClick(selectorObj, timeout = defaultFindTimeout) {
+        const element = await this.waitForElementPresent(selectorObj, timeout);
+        await element.click();
+      },
+
       async get(url, insertTimestamp = true) {
         if (insertTimestamp) {
           const urlWithTime = modifyUrl(url, parsed => {
@@ -220,12 +225,12 @@ export async function RemoteProvider({ getService }) {
         await driver.wait(conditionFunc);
       },
 
-      async waitForElementPresent(selectorObj) {
-        await driver.wait(until.elementLocated(selectorObj));
+      async waitForElementPresent(selectorObj, timeout = defaultFindTimeout) {
+        return await driver.wait(until.elementLocated(selectorObj), timeout);
       },
 
-      async waitForElementEnabled(selectorObj) {
-        await driver.wait(until.elementIsEnabled(selectorObj));
+      async waitForElementEnabled(element, timeout = defaultFindTimeout) {
+        await driver.wait(until.elementIsEnabled(element), timeout);
       },
 
       async waitForElementToContainText(selectorObj, substring) {
@@ -246,6 +251,35 @@ export async function RemoteProvider({ getService }) {
 
       async goBack() {
         await driver.navigate().back();
+      },
+
+      async waitForElementNotPresent(selectorObj) {
+        await driver.wait(() => {
+          return driver.findElements(selectorObj).then((elements) => {
+            if (elements.length <= 0) {
+              return true;
+            }
+            return false;
+          });
+        },
+        defaultFindTimeout,
+        `The element ${selectorObj} was still present when it should have disappeared.`);
+      },
+
+      async isElementVisible(selectorObj) {
+        try {
+          return await driver.findElement(selectorObj).isDisplayed();
+        } catch (err) {
+          return false;
+        }
+      },
+
+      async waitStainlessOf(element) {
+        await driver.wait(until.stalenessOf(element), defaultFindTimeout);
+      },
+
+      async clickViaJS(element) {
+        await driver.executeScript('arguments[0].click();', element);
       }
     };
   }
