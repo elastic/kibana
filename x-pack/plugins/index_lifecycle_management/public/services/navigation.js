@@ -19,5 +19,5 @@ export const goToPolicyList = () => {
 };
 
 export const getPolicyPath = (policyName) => {
-  return encodeURI(`#${BASE_PATH}policies/edit/?policyName=${encodeURIComponent(policyName)}`);
+  return encodeURI(`#${BASE_PATH}policies/edit/${encodeURIComponent(policyName)}`);
 };

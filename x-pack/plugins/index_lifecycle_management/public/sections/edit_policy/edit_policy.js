@@ -5,7 +5,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import queryString from 'query-string';
 import PropTypes from 'prop-types';
 import { toastNotifications } from 'ui/notify';
 import { goToPolicyList } from '../../services/navigation';
@@ -65,32 +64,24 @@ class EditPolicyUi extends Component {
       setSelectedPolicy(selectedPolicy);
     }
   };
-  getPolicyNameFromUri() {
-    const { hash } = window.location;
-    if (!hash.includes('?')) {
-      return null;
-    }
-    const query = hash.split('?').pop();
-    const { policyName } = queryString.parse(query);
-    if (policyName) {
-      return decodeURIComponent(policyName);
-    } else {
-      return null;
-    }
-  }
   componentDidMount() {
     window.scrollTo(0, 0);
     const {
       isPolicyListLoaded,
       fetchPolicies,
+      match: {
+        params: {
+          policyName
+        }
+      }
     } = this.props;
-    const policyName = this.getPolicyNameFromUri();
     if (policyName) {
+      const decodedPolicyName = decodeURIComponent(policyName);
       if (isPolicyListLoaded) {
-        this.selectPolicy(policyName);
+        this.selectPolicy(decodedPolicyName);
       } else {
         fetchPolicies(true, () => {
-          this.selectPolicy(policyName);
+          this.selectPolicy(decodedPolicyName);
         });
       }
     }
