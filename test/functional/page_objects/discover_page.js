@@ -44,12 +44,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .findByCssSelector('button[aria-label=\'Search\']');
     }
 
-    async getBarValue() {
-      await this.hoverOverBar();
-      return getRemote()
-        .findByCssSelector('input[ng-model=\'state.query\']');
-    }
-
     getChartTimespan() {
       return getRemote()
         .findByCssSelector('.small > span:nth-child(1)')
@@ -284,11 +278,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         .getNoResultsTimepicker()
         .then(() => true)
         .catch(() => false);
-    }
-
-    async hoverOverBar(index = 0) {
-      await testSubjects.moveMouseTo(`.series.histogram :nth-child(${index + 1})`);
-
     }
 
     async clickFieldListItem(field) {
