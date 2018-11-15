@@ -21,7 +21,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import createLegendSeries from '../lib/create_legend_series';
 import reactcss from 'reactcss';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
 
 function VerticalLegend(props) {
   const rows = props.series.map(createLegendSeries(props));
@@ -38,27 +38,30 @@ function VerticalLegend(props) {
       control: { order: '2' }
     },
     hideLegend: {
-      legend: { width: 12 },
+      legend: { width: 24 },
       series: { display: 'none' },
     }
   }, { hideLegend, leftLegend });
 
-  const openClass = leftLegend ? 'fa-chevron-right' : 'fa-chevron-left';
-  const closeClass = leftLegend ? 'fa-chevron-left' : 'fa-chevron-right';
-  const legendControlClass = hideLegend ? `fa ${openClass}` : `fa ${closeClass}`;
+  const openIcon = leftLegend ? 'arrowRight' : 'arrowLeft';
+  const closeIcon = leftLegend ? 'arrowLeft' : 'arrowRight';
+  const legendToggleIcon = hideLegend ? `${openIcon}` : `${closeIcon}`;
 
   return (
-    <div className="rhythm_chart__legend" style={styles.legend}>
-      <div className="rhythm_chart__legend-control" style={styles.control}>
-        <button
-          className={legendControlClass}
-          onClick={props.onClick}
-          aria-label="Toggle chart legend"
-          aria-expanded={!!props.showLegend}
-          aria-controls={htmlId('legend')}
-        />
-      </div>
-      <div className="rhythm_chart__legend-series" style={styles.series} id={htmlId('legend')}>
+    <div className="tvbLegend" style={styles.legend}>
+      <EuiButtonIcon
+        className="tvbLegend__toggle"
+        style={styles.control}
+        iconType={legendToggleIcon}
+        color="text"
+        iconSize="s"
+        onClick={props.onClick}
+        aria-label="Toggle chart legend"
+        aria-expanded={!!props.showLegend}
+        aria-controls={htmlId('legend')}
+      />
+
+      <div className="tvbLegend__series" style={styles.series} id={htmlId('legend')}>
         { rows }
       </div>
     </div>
