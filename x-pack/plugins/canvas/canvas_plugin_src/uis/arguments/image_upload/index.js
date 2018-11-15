@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { reduce } from 'lodash';
 import {
   EuiForm,
   EuiFlexGroup,
@@ -110,25 +109,16 @@ class ImageUpload extends React.Component {
 
   render() {
     const { loading, url, urlType } = this.state;
-    const { workpad } = this.props;
+    const assets = Object.values(this.props.workpad.assets);
 
     let selectedAsset = {};
-    const assets = reduce(
-      workpad.assets,
-      (acc, asset) => {
-        if (asset.value === url) {
-          selectedAsset = asset;
-          acc.unshift(asset); // move selected asset to the front
-        } else {
-          acc.push(asset);
-        }
-        return acc;
-      },
-      []
-    );
 
     const urlTypeOptions = [{ id: 'file', label: 'Import' }, { id: 'link', label: 'Link' }];
-    if (assets.length) urlTypeOptions.unshift({ id: 'asset', label: 'Asset' });
+    if (assets.length) {
+      urlTypeOptions.unshift({ id: 'asset', label: 'Asset' });
+      selectedAsset = assets.find(({ value }) => value === url);
+      console.log({ selectedAsset });
+    }
 
     const selectUrlType = (
       <EuiButtonGroup
