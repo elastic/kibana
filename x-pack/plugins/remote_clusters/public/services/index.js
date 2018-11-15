@@ -15,10 +15,6 @@ export {
 } from './api_errors';
 
 export {
-  filterItems,
-} from './filter_items';
-
-export {
   extractQueryParams,
 } from './query_params';
 
