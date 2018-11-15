@@ -26,18 +26,6 @@ import {
   runTests,
 } from './lib';
 
-// provider that returns a promise-like object which never "resolves" and is
-// used to disable all the services while still allowing us to load the test
-// files (and therefore define the tests) for --test-stats
-const STUB_PROVIDER =  () => ({
-  then: () => {}
-});
-
-const replaceValues = (object, value) => Object.keys(object).reduce((acc, key) => ({
-  ...acc,
-  [key]: value
-}), {});
-
 export function createFunctionalTestRunner({ log, configFile, configOverrides }) {
   const lifecycle = createLifecycle();
 
@@ -71,18 +59,30 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
 
     async getTestStats() {
       return await this._run(async (config, coreProviders) => {
+        // replace the function of a provider so that it returns a promise-like object which
+        // never "resolves", essentially disabling all the services while still allowing us
+        // to load the test files and populate the mocha suites
+        const stubProvider = provider => ({
+          ...provider,
+          fn: () => ({
+            then: () => {}
+          })
+        });
+
         const providers = new ProviderCollection(log, [
           ...coreProviders,
-          ...readProviderSpec('Service', replaceValues(config.get('services'), STUB_PROVIDER)),
-          ...readProviderSpec('PageObject', replaceValues(config.get('pageObjects'), STUB_PROVIDER))
+          ...readProviderSpec('Service', config.get('services')).map(stubProvider),
+          ...readProviderSpec('PageObject', config.get('pageObjects')).map(stubProvider)
         ]);
 
-        const countTests = suite =>
-          suite.suites.reduce((sum, suite) => (
-            sum + countTests(suite)
-          ), suite.tests.length);
-
         const mocha = await setupMocha(lifecycle, log, config, providers);
+
+        const countTests = suite => (
+          suite.suites.reduce(
+            (sum, suite) => sum + countTests(suite),
+            suite.tests.length
+          )
+        );
 
         return {
           tests: countTests(mocha.suite),
