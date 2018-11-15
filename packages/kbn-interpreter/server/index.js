@@ -17,25 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import init from './init';
-import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
-import { pluginPaths } from './plugin_paths';
+import { populateServerRegistries, getServerRegistries } from './server_registries';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      hacks: [
-        'plugins/interpreter/load_browser_plugins.js',
-      ],
-    },
-    preInit: () => {
-      pathsRegistry.registerAll(pluginPaths);
-    },
-    init,
-  });
-}
-
+export { populateServerRegistries, getServerRegistries };

@@ -17,25 +17,5 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import init from './init';
-import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
-import { pluginPaths } from './plugin_paths';
-
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      hacks: [
-        'plugins/interpreter/load_browser_plugins.js',
-      ],
-    },
-    preInit: () => {
-      pathsRegistry.registerAll(pluginPaths);
-    },
-    init,
-  });
-}
-
+export const SECURITY_AUTH_MESSAGE = 'Authentication failed';
+export const API_ROUTE = '/api/canvas';

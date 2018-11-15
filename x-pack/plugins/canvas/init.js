@@ -5,7 +5,7 @@
  */
 
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { populateServerRegistries } from '@kbn/interpreter/server/server_registries';
+import { getServerRegistries } from '@kbn/interpreter/server/server_registries';
 import { routes } from './server/routes';
 import { commonFunctions } from './common/functions';
 import { registerCanvasUsageCollector } from './server/usage';
@@ -34,6 +34,6 @@ export default async function(server /*options*/) {
   loadSampleData(server);
 
   // Do not initialize the app until the registries are populated
-  await populateServerRegistries(['serverFunctions', 'types']);
+  await getServerRegistries();
   routes(server);
 }

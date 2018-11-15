@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { createHandlers } from '../create_handlers';
-import { SECURITY_AUTH_MESSAGE } from '../../../../../../x-pack/plugins/canvas/common/lib/constants';
+import { SECURITY_AUTH_MESSAGE } from '../../../common/constants';
 
 let securityMode = 'pass';
 let isSecurityAvailable = true;

@@ -19,36 +19,11 @@
 
 import chrome from 'ui/chrome';
 import $script from 'scriptjs';
-import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
-import {
-  argTypeRegistry,
-  datasourceRegistry,
-  transformRegistry,
-  modelRegistry,
-  viewRegistry,
-} from '../../../x-pack/plugins/canvas/public/expression_types/index';
-import { elementsRegistry } from '../../../x-pack/plugins/canvas/public/lib/elements_registry';
-import { renderFunctionsRegistry } from '../../../x-pack/plugins/canvas/public/lib/render_functions_registry';
-import { functionsRegistry as browserFunctions } from '../../../x-pack/plugins/canvas/public/lib/functions_registry';
-import { loadPrivateBrowserFunctions } from '../../../x-pack/plugins/canvas/public/lib/load_private_browser_functions';
-
-const registries = {
-  browserFunctions: browserFunctions,
-  commonFunctions: browserFunctions,
-  elements: elementsRegistry,
-  types: typesRegistry,
-  renderers: renderFunctionsRegistry,
-  transformUIs: transformRegistry,
-  datasourceUIs: datasourceRegistry,
-  modelUIs: modelRegistry,
-  viewUIs: viewRegistry,
-  argumentUIs: argTypeRegistry,
-};
 
 let resolve = null;
 let called = false;
 
-const populatePromise = new Promise(_resolve => {
+let populatePromise = new Promise(_resolve => {
   resolve = _resolve;
 });
 
@@ -56,12 +31,20 @@ export const getBrowserRegistries = () => {
   return populatePromise;
 };
 
-export const populateBrowserRegistries = () => {
-  if (called) throw new Error('function should only be called once per process');
+export const populateBrowserRegistries = (registries) => {
+  if (called) {
+    const oldPromise = populatePromise;
+    let newResolve;
+    populatePromise = new Promise(_resolve => {
+      newResolve = _resolve;
+    });
+    return oldPromise.then(() => {
+      resolve = newResolve;
+      called = false;
+      return populateBrowserRegistries(registries);
+    });
+  }
   called = true;
-
-  // loadPrivateBrowserFunctions is sync. No biggie.
-  loadPrivateBrowserFunctions();
 
   const remainingTypes = Object.keys(registries);
   const populatedTypes = {};

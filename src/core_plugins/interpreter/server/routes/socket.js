@@ -26,7 +26,7 @@ import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread/index';
 import { server as serverEnv } from '../lib/route_expression/server';
 import { getRequest } from '../lib/get_request';
-import { API_ROUTE } from '../../../../../x-pack/plugins/canvas/common/lib/constants';
+import { API_ROUTE } from '../../common/constants';
 
 async function getModifiedRequest(server, socket) {
   try {

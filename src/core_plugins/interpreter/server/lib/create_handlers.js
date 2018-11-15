@@ -18,8 +18,8 @@
  */
 
 import boom from 'boom';
-import { SECURITY_AUTH_MESSAGE } from '../../../../../x-pack/plugins/canvas/common/lib/constants';
 import { isSecurityEnabled } from './feature_check';
+import { SECURITY_AUTH_MESSAGE } from '../../common/constants';
 
 export const createHandlers = (request, server) => {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');

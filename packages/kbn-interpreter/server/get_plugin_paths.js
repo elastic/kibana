@@ -17,25 +17,28 @@
  * under the License.
  */
 
+import fs from 'fs';
 import { resolve } from 'path';
-import init from './init';
-import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
-import { pluginPaths } from './plugin_paths';
+import { promisify } from 'util';
+import { flatten } from 'lodash';
+import { pathsRegistry } from '../common/lib/paths_registry';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      hacks: [
-        'plugins/interpreter/load_browser_plugins.js',
-      ],
-    },
-    preInit: () => {
-      pathsRegistry.registerAll(pluginPaths);
-    },
-    init,
-  });
-}
+const readdir = promisify(fs.readdir);
 
+export const getPluginPaths = type => {
+  const typePaths = pathsRegistry.get(type);
+  if (!typePaths) {
+    throw new Error(`Unknown type: ${type}`);
+  }
+
+  return Promise.all(typePaths.map(path => {
+
+    // Get the full path of all files in the directory
+    return readdir(path).then(files => files.map(file => {
+      if (!file.endsWith('.js')) {
+        return;
+      }
+      return resolve(path, file);
+    }).filter(path => path)).catch();
+  })).then(flatten);
+};

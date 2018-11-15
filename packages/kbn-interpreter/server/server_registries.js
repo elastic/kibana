@@ -19,7 +19,7 @@
 
 import { typesRegistry } from '../common/lib/types_registry';
 import { functionsRegistry as serverFunctions } from '../common/lib/functions_registry';
-import { getPluginPaths } from '../../../x-pack/plugins/canvas/server/lib/get_plugin_paths';
+import { getPluginPaths } from './get_plugin_paths';
 
 const registries = {
   serverFunctions: serverFunctions,
@@ -46,6 +46,8 @@ export const populateServerRegistries = types => {
   const remainingTypes = types;
   const populatedTypes = {};
 
+  const globalKeys = Object.keys(global);
+
   const loadType = () => {
     const type = remainingTypes.pop();
     getPluginPaths(type).then(paths => {
@@ -56,7 +58,12 @@ export const populateServerRegistries = types => {
         require(path);
       });
 
-      global.canvas = undefined;
+      Object.keys(global).forEach(key => {
+        if (!globalKeys.includes(key)) {
+          delete global[key];
+        }
+      });
+
       populatedTypes[type] = registries[type];
       if (remainingTypes.length) loadType();
       else resolve(populatedTypes);

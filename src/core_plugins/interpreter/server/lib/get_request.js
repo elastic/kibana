@@ -18,7 +18,7 @@
  */
 
 import boom from 'boom';
-import { API_ROUTE } from '../../../../../x-pack/plugins/canvas/common/lib/constants';
+import { API_ROUTE } from '../../common/constants';
 
 export function getRequest(server, { headers }) {
   const url = `${API_ROUTE}/ping`;
