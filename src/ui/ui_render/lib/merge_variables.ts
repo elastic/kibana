@@ -17,24 +17,17 @@
  * under the License.
  */
 
+const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
+
 export function mergeVariables(...sources: Array<Record<string, any>>) {
   const result: Record<string, any> = {};
 
   for (const source of sources) {
     Object.entries(source).forEach(([key, value]) => {
-      // uiCapabilites should be merged together, rather than defaulted like all other variables.
-      // Additionally, the navLinks property of uiCapabilities needs to be merged as well, as multiple
-      // plugins can specify entries within this property.
-      if (key === 'uiCapabilities') {
-        const resultNavLinks = (result[key] || {}).navLinks;
-
+      if (ELIGIBLE_FLAT_MERGE_KEYS.includes(key)) {
         result[key] = {
           ...value,
           ...result[key],
-          navLinks: {
-            ...value.navLinks,
-            ...resultNavLinks,
-          },
         };
       } else if (!result.hasOwnProperty(key)) {
         result[key] = value;
