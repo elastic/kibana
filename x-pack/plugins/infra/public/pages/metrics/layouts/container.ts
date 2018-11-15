@@ -16,7 +16,7 @@ import {
 export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'containerOverview',
-    label: 'Container Overview',
+    label: 'Container',
     sections: [
       {
         id: InfraMetric.containerOverview,

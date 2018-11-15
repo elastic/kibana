@@ -37,7 +37,6 @@ class Annotation extends Component {
     const [ timestamp, messageSource ] = this.props.series;
     const reversed = this.props.reversed ? '-reversed' : '';
     const messages = messageSource.map((message, i) => {
-      console.log(message);
       return (
         <div
           key={`${message}-${i}`}

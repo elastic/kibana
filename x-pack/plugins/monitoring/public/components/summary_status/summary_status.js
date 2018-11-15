@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import { isEmpty, capitalize } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StatusIcon } from '../status_icon/index.js';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const wrapChild = ({ label, value, dataTestSubj }, index) => (
   <EuiFlexItem
@@ -29,9 +31,23 @@ const wrapChild = ({ label, value, dataTestSubj }, index) => (
 
 const DefaultIconComponent = ({ status }) => (
   <Fragment>
-    Status: {(
-      <StatusIcon type={status.toUpperCase()} label={`Status: ${status}`} />
-    )}
+    <FormattedMessage
+      id="xpack.monitoring.summaryStatus.statusIconTitle"
+      defaultMessage="Status: {statusIcon}"
+      values={{
+        statusIcon: (
+          <StatusIcon
+            type={status.toUpperCase()}
+            label={i18n.translate('xpack.monitoring.summaryStatus.statusIconLabel', {
+              defaultMessage: 'Status: {status}',
+              values: {
+                status
+              }
+            })}
+          />
+        )
+      }}
+    />
   </Fragment>
 );
 
@@ -52,7 +68,8 @@ const StatusIndicator = ({ status, isOnline, IconComponent }) => {
   );
 };
 
-export function SummaryStatus({ metrics, status, isOnline, IconComponent = DefaultIconComponent, ...props }) {
+// eslint-disable-next-line no-unused-vars
+export function SummaryStatus({ metrics, status, isOnline, IconComponent = DefaultIconComponent, intl, ...props }) {
   return (
     <div className="monSummaryStatus" role="status">
       <div {...props}>
