@@ -225,7 +225,8 @@ export class VectorLayer extends ALayer {
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJson({
         layerId: this.getId(),
-        layerName
+        layerName,
+        styleFieldNames: this._style.getDynamicFieldNames()
       }, dataFilters);
       stopLoading(sourceDataId, requestToken, data, meta);
       return {

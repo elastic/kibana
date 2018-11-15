@@ -61,6 +61,42 @@ describe('hitsToGeoJson', () => {
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(1);
   });
+
+  it('Should populate properties from _source and fields', () => {
+    const hits = [
+      {
+        _source: {
+          [geoFieldName]: { lat: 20, lon: 100 },
+          myField: 8,
+        },
+        fields: {
+          myScriptedField: 10
+        }
+      }
+    ];
+    const geojson = hitsToGeoJson(hits, geoFieldName, 'geo_point');
+    expect(geojson.features.length).toBe(1);
+    const feature = geojson.features[0];
+    expect(feature.properties.myField).toBe(8);
+    expect(feature.properties.myScriptedField).toBe(10);
+  });
+
+  it('Should unwrap computed fields', () => {
+    const hits = [
+      {
+        _source: {
+          [geoFieldName]: { lat: 20, lon: 100 },
+        },
+        fields: {
+          myScriptedField: [ 10 ] // script_fields are returned in an array
+        }
+      }
+    ];
+    const geojson = hitsToGeoJson(hits, geoFieldName, 'geo_point');
+    expect(geojson.features.length).toBe(1);
+    const feature = geojson.features[0];
+    expect(feature.properties.myScriptedField).toBe(10);
+  });
 });
 
 describe('geoPointToGeometry', () => {
