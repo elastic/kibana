@@ -8,6 +8,8 @@ import { TestInvoker } from './lib/types';
 // tslint:disable:no-default-export
 export default function statusPage({ loadTestFile }: TestInvoker) {
   describe('Status page', function statusPageTestSuite() {
+    (this as any).tags('ciGroup3');
+
     loadTestFile(require.resolve('./status_page'));
   });
 }
