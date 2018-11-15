@@ -74,6 +74,7 @@ interface Props {
   indexPatterns: IndexPattern[];
   store: Storage;
   intl: InjectedIntl;
+  prepend: any;
 }
 
 interface State {
@@ -510,6 +511,7 @@ export class QueryBarUI extends Component<Props, State> {
                         this.state.isSuggestionsVisible ? 'suggestion-' + this.state.index : ''
                       }
                       role="textbox"
+                      prepend={this.props.prepend}
                     />
                     <div className="kuiLocalSearchAssistedInput__assistance">
                       <QueryLanguageSwitcher

@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+// @ts-ignore
+import { EuiFilterButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { SFC } from 'react';
+import React, { Component } from 'react';
+import ResizeObserver from 'resize-observer-polyfill';
 import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
 import { FilterBar } from 'ui/filter_bar/react';
 import { IndexPattern } from 'ui/index_patterns';
@@ -43,50 +45,123 @@ interface Props {
   onFilterDelete: (filter: MetaFilter) => void;
 }
 
-export const SearchBar: SFC<Props> = props => {
-  const classes = classNames('globalFilterGroup__wrapper', {
-    'globalFilterGroup__wrapper-isVisible': true,
-  });
+interface State {
+  isFiltersVisible: boolean;
+}
 
-  return (
-    <div>
-      <QueryBar
-        query={props.query}
-        onSubmit={props.onQuerySubmit}
-        appName={props.appName}
-        indexPatterns={props.indexPatterns}
-        store={props.store}
-      />
+export class SearchBar extends Component<Props, State> {
+  public filterBarRef: Element | null = null;
+  public filterBarWrapperRef: Element | null = null;
 
-      <div
-        id="GlobalFilterGroup"
-        // ref={node => { this.filterBarWrapper = node; }}
-        className={classes}
+  public state = {
+    isFiltersVisible: true,
+  };
+
+  public setFilterBarHeight = () => {
+    requestAnimationFrame(() => {
+      const height =
+        this.filterBarRef && this.state.isFiltersVisible ? this.filterBarRef.clientHeight + 4 : 0;
+      if (this.filterBarWrapperRef) {
+        this.filterBarWrapperRef.setAttribute('style', `height: ${height}px`);
+      }
+    });
+  };
+
+  // member-ordering rules conflict with use-before-declaration rules
+  /* tslint:disable */
+  public ro = new ResizeObserver(this.setFilterBarHeight);
+  /* tslint:enable */
+
+  public toggleFiltersVisible = () => {
+    this.setState({
+      isFiltersVisible: !this.state.isFiltersVisible,
+    });
+  };
+
+  public componentDidMount() {
+    if (this.filterBarRef) {
+      this.setFilterBarHeight();
+      this.ro.observe(this.filterBarRef);
+    }
+  }
+
+  public componentDidUpdate() {
+    if (this.filterBarRef) {
+      this.setFilterBarHeight();
+      this.ro.unobserve(this.filterBarRef);
+    }
+  }
+
+  public render() {
+    const filterButtonTitle = `${this.props.filters.length} filters applied. Select to ${
+      this.state.isFiltersVisible ? 'hide' : 'show'
+    }.`;
+
+    const filterTriggerButton = (
+      <EuiFilterButton
+        onClick={this.toggleFiltersVisible}
+        isSelected={this.state.isFiltersVisible}
+        hasActiveFilters={this.state.isFiltersVisible}
+        numFilters={this.props.filters.length > 0 ? this.props.filters.length : null}
+        aria-controls="GlobalFilterGroup"
+        aria-expanded={!!this.state.isFiltersVisible}
+        title={filterButtonTitle}
       >
-        <div>
-          <EuiFlexGroup
-            className="globalFilterGroup"
-            gutterSize="none"
-            alignItems="flexStart"
-            responsive={false}
-          >
-            {/*<EuiFlexItem className="globalFilterGroup__branch" grow={false}>*/}
-            {/*<GlobalFilterOptions />*/}
-            {/*</EuiFlexItem>*/}
+        Filters
+      </EuiFilterButton>
+    );
 
-            <EuiFlexItem>
-              <FilterBar
-                className="globalFilterGroup__filterBar"
-                filters={props.filters}
-                onTogglePin={props.onToggleFilterPin}
-                onToggleDisabled={props.onToggleFilterDisabled}
-                onDelete={props.onFilterDelete}
-                onToggleNegate={props.onToggleFilterNegate}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+    const classes = classNames('globalFilterGroup__wrapper', {
+      'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
+    });
+
+    return (
+      <div>
+        <QueryBar
+          query={this.props.query}
+          onSubmit={this.props.onQuerySubmit}
+          appName={this.props.appName}
+          indexPatterns={this.props.indexPatterns}
+          store={this.props.store}
+          prepend={filterTriggerButton}
+        />
+
+        <div
+          id="GlobalFilterGroup"
+          ref={node => {
+            this.filterBarWrapperRef = node;
+          }}
+          className={classes}
+        >
+          <div
+            ref={node => {
+              this.filterBarRef = node;
+            }}
+          >
+            <EuiFlexGroup
+              className="globalFilterGroup"
+              gutterSize="none"
+              alignItems="flexStart"
+              responsive={false}
+            >
+              {/*<EuiFlexItem className="globalFilterGroup__branch" grow={false}>*/}
+              {/*<GlobalFilterOptions />*/}
+              {/*</EuiFlexItem>*/}
+
+              <EuiFlexItem>
+                <FilterBar
+                  className="globalFilterGroup__filterBar"
+                  filters={this.props.filters}
+                  onTogglePin={this.props.onToggleFilterPin}
+                  onToggleDisabled={this.props.onToggleFilterDisabled}
+                  onDelete={this.props.onFilterDelete}
+                  onToggleNegate={this.props.onToggleFilterNegate}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
