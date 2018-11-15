@@ -10,8 +10,7 @@ import { serializePrivileges } from './privileges_serializer';
 
 export async function registerPrivilegesWithCluster(server) {
 
-  const { authorization } = server.plugins.security;
-  const { application } = authorization;
+  const { application, privileges } = server.plugins.security.authorization;
 
   const arePrivilegesEqual = (existingPrivileges, expectedPrivileges) => {
     // when comparing privileges, the order of the actions doesn't matter, lodash's isEqual
@@ -34,7 +33,7 @@ export async function registerPrivilegesWithCluster(server) {
     return difference(Object.keys(existingPrivileges[application]), Object.keys(expectedPrivileges[application])).length > 0;
   };
 
-  const expectedPrivileges = serializePrivileges(application, authorization.getPrivileges());
+  const expectedPrivileges = serializePrivileges(application, privileges.get());
 
   server.log(['security', 'debug'], `Registering Kibana Privileges with Elasticsearch for ${application}`);
 

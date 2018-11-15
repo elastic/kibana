@@ -15,50 +15,65 @@ export interface PrivilegeMap {
   space: Record<string, string[]>;
 }
 
-export function buildPrivilegeMap(
+export interface PrivilegesService {
+  get(): PrivilegeMap;
+}
+
+interface XPackMainPlugin {
+  getFeatures(): Feature[];
+}
+
+export function privilegesFactory(
   allSavedObjectTypes: string[],
   actions: Actions,
-  features: Feature[]
-): PrivilegeMap {
-  const validSavedObjectTypes = allSavedObjectTypes.filter(type => !IGNORED_TYPES.includes(type));
-  const featuresPrivilegesBuilder = new FeaturesPrivilegesBuilder(actions);
-
+  xpackMainPlugin: XPackMainPlugin
+) {
   return {
-    features: featuresPrivilegesBuilder.buildFeaturesPrivileges(features),
-    global: {
-      all: [
-        actions.login,
-        actions.version,
-        actions.api.all,
-        actions.savedObject.all,
-        actions.space.manage,
-        actions.ui.all,
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        ...featuresPrivilegesBuilder.getApiReadActions(features),
-        ...actions.savedObject.readOperations(validSavedObjectTypes),
-        ...featuresPrivilegesBuilder.getUIReadActions(features),
-        actions.ui.allNavLinks,
-      ],
-    },
-    space: {
-      all: [
-        actions.login,
-        actions.version,
-        actions.api.all,
-        ...actions.savedObject.allOperations(validSavedObjectTypes),
-        actions.ui.all,
-      ],
-      read: [
-        actions.login,
-        actions.version,
-        ...featuresPrivilegesBuilder.getApiReadActions(features),
-        ...actions.savedObject.readOperations(validSavedObjectTypes),
-        ...featuresPrivilegesBuilder.getUIReadActions(features),
-        actions.ui.allNavLinks,
-      ],
+    get() {
+      const features = xpackMainPlugin.getFeatures();
+      const validSavedObjectTypes = allSavedObjectTypes.filter(
+        type => !IGNORED_TYPES.includes(type)
+      );
+      const featuresPrivilegesBuilder = new FeaturesPrivilegesBuilder(actions);
+
+      return {
+        features: featuresPrivilegesBuilder.buildFeaturesPrivileges(features),
+        global: {
+          all: [
+            actions.login,
+            actions.version,
+            actions.api.all,
+            actions.savedObject.all,
+            actions.space.manage,
+            actions.ui.all,
+          ],
+          read: [
+            actions.login,
+            actions.version,
+            ...featuresPrivilegesBuilder.getApiReadActions(features),
+            ...actions.savedObject.readOperations(validSavedObjectTypes),
+            ...featuresPrivilegesBuilder.getUIReadActions(features),
+            actions.ui.allNavLinks,
+          ],
+        },
+        space: {
+          all: [
+            actions.login,
+            actions.version,
+            actions.api.all,
+            ...actions.savedObject.allOperations(validSavedObjectTypes),
+            actions.ui.all,
+          ],
+          read: [
+            actions.login,
+            actions.version,
+            ...featuresPrivilegesBuilder.getApiReadActions(features),
+            ...actions.savedObject.readOperations(validSavedObjectTypes),
+            ...featuresPrivilegesBuilder.getUIReadActions(features),
+            actions.ui.allNavLinks,
+          ],
+        },
+      };
     },
   };
 }

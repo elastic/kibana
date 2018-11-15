@@ -46,7 +46,9 @@ const registerPrivilegesWithClusterTest = (description, {
           authorization: {
             actions: Symbol(),
             application,
-            getPrivileges: () => privilegeMap
+            privileges: {
+              get: () => privilegeMap
+            }
           }
         }
       }

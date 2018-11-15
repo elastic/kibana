@@ -76,13 +76,13 @@ export function initPutRolesApi(
   };
 
   const getGlobalItemsSchema = () => {
-    const privileges = authorization.getPrivileges();
+    const privileges = authorization.privileges.get();
     const validPrivileges = [...Object.keys(privileges.global), ...getFeaturePrivileges(privileges.features)];
     return Joi.string().valid(validPrivileges);
   };
 
   const getSpaceItemsSchema = () => {
-    const privileges = authorization.getPrivileges();
+    const privileges = authorization.privileges.get();
     const validPrivileges = [...Object.keys(privileges.space), ...getFeaturePrivileges(privileges.features)];
     return Joi.string().valid(validPrivileges);
   };

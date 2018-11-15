@@ -8,9 +8,9 @@
 import { Feature } from '../../../../xpack_main/types';
 import { IGNORED_TYPES } from '../../../common/constants';
 import { Actions } from './actions';
-import { buildPrivilegeMap } from './privileges';
+import { privilegesFactory } from './privileges';
 
-test(`snapshot test`, () => {
+test(`builds privileges correctly`, () => {
   const actions = new Actions('1.0.0-zeta1');
 
   const savedObjectTypes = ['foo-saved-object-type', 'bar-saved-object-type', ...IGNORED_TYPES];
@@ -67,8 +67,16 @@ test(`snapshot test`, () => {
     },
   ];
 
-  const privilegeMap = buildPrivilegeMap(savedObjectTypes, actions, features);
-  expect(privilegeMap).toEqual({
+  const mockXPackMainPlugin = {
+    getFeatures: jest.fn().mockReturnValue(features),
+  };
+
+  const privileges = privilegesFactory(savedObjectTypes, actions, mockXPackMainPlugin);
+
+  // we want to make sure we don't call `xpackMainPlugin.getFeatures` until `get` is called
+  // to ensure that plugins have the time to register their features before we build the privilegeMap
+  expect(mockXPackMainPlugin.getFeatures).not.toHaveBeenCalled();
+  expect(privileges.get()).toEqual({
     features: {
       'bar-feature': {
         all: [
@@ -195,4 +203,5 @@ test(`snapshot test`, () => {
       ],
     },
   });
+  expect(mockXPackMainPlugin.getFeatures).toHaveBeenCalled();
 });

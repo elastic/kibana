@@ -6,7 +6,7 @@
 
 import { createAuthorizationService } from './service';
 import { actionsFactory } from './actions';
-import { buildPrivilegeMap } from './privileges';
+import { privilegesFactory } from './privileges';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { authorizationModeFactory } from './mode';
@@ -24,7 +24,7 @@ jest.mock('./actions', () => ({
 }));
 
 jest.mock('./privileges', () => ({
-  buildPrivilegeMap: jest.fn()
+  privilegesFactory: jest.fn()
 }));
 
 jest.mock('./mode', () => ({
@@ -41,7 +41,7 @@ const createMockConfig = (settings = {}) => {
   return mockConfig;
 };
 
-test(`calls server.expose with exposed services`, () => {
+test(`returns exposed services`, () => {
   const kibanaIndex = '.a-kibana-index';
   const mockConfig = createMockConfig({
     'kibana.index': kibanaIndex
@@ -66,6 +66,10 @@ test(`calls server.expose with exposed services`, () => {
   const mockXpackMainPlugin = {
     getFeatures: () => mockFeatures
   };
+  const mockPrivilegesService = Symbol();
+  privilegesFactory.mockReturnValue(mockPrivilegesService);
+  const mockAuthorizationMode = Symbol();
+  authorizationModeFactory.mockReturnValue(mockAuthorizationMode);
 
   const authorization = createAuthorizationService(mockServer, mockXpackInfoFeature, mockSavedObjectTypes, mockXpackMainPlugin);
 
@@ -73,6 +77,7 @@ test(`calls server.expose with exposed services`, () => {
   expect(getClient).toHaveBeenCalledWith(mockServer);
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockActions, application, mockShieldClient);
+  expect(privilegesFactory).toHaveBeenCalledWith(mockSavedObjectTypes, mockActions, mockXpackMainPlugin);
   expect(authorizationModeFactory).toHaveBeenCalledWith(
     application,
     mockConfig,
@@ -81,10 +86,11 @@ test(`calls server.expose with exposed services`, () => {
     mockXpackInfoFeature,
   );
 
-  const mockPrivilegeMap = Symbol();
-  buildPrivilegeMap.mockReturnValue(mockPrivilegeMap);
-  expect(buildPrivilegeMap).not.toHaveBeenCalled();
-  const returnedPrivilegeMap = authorization.getPrivileges();
-  expect(returnedPrivilegeMap).toBe(mockPrivilegeMap);
-  expect(buildPrivilegeMap).toHaveBeenCalledWith(mockSavedObjectTypes, mockActions, mockFeatures);
+  expect(authorization).toEqual({
+    actions: mockActions,
+    application,
+    checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+    mode: mockAuthorizationMode,
+    privileges: mockPrivilegesService,
+  });
 });

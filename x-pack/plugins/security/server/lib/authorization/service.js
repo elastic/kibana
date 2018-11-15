@@ -6,7 +6,7 @@
 
 import { actionsFactory } from './actions';
 import { authorizationModeFactory } from './mode';
-import { buildPrivilegeMap } from './privileges';
+import { privilegesFactory } from './privileges';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
@@ -24,16 +24,13 @@ export function createAuthorizationService(server, xpackInfoFeature, savedObject
     shieldClient,
     xpackInfoFeature,
   );
+  const privileges = privilegesFactory(savedObjectTypes, actions, xpackMainPlugin);
 
   return {
     actions,
     application,
     checkPrivilegesWithRequest,
     mode,
-    // we can't just set privileges as this generally happens before other plugins have had a chance
-    // to register their features, so the privilege map would potentially be incomplete.
-    getPrivileges: () => {
-      return buildPrivilegeMap(savedObjectTypes, actions, xpackMainPlugin.getFeatures());
-    },
+    privileges,
   };
 }
