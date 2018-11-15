@@ -40,7 +40,7 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('redirects non-AJAX request that can not be authenticated to the IdP.', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
       callWithInternalUser
         .withArgs('shield.samlPrepare')
@@ -61,7 +61,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).to.be('https://idp-host/path/login?SAMLRequest=some%20request%20');
       expect(authenticationResult.state).to.eql({
         requestId: 'some-request-id',
-        nextURL: `/test-base-path/some-path`
+        nextURL: `/s/foo/some-path`
       });
     });
 
@@ -334,7 +334,7 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('initiates SAML handshake for non-AJAX requests if refresh token is used more than once.', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
       callWithInternalUser
         .withArgs('shield.samlPrepare')
@@ -372,7 +372,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).to.be('https://idp-host/path/login?SAMLRequest=some%20request%20');
       expect(authenticationResult.state).to.eql({
         requestId: 'some-request-id',
-        nextURL: `/test-base-path/some-path`
+        nextURL: `/s/foo/some-path`
       });
     });
 
@@ -404,7 +404,7 @@ describe('SAMLAuthenticationProvider', () => {
     });
 
     it('initiates SAML handshake for non-AJAX requests if refresh token is expired.', async () => {
-      const request = requestFixture({ path: '/some-path' });
+      const request = requestFixture({ path: '/some-path', basePath: '/s/foo' });
 
       callWithInternalUser
         .withArgs('shield.samlPrepare')
@@ -442,7 +442,7 @@ describe('SAMLAuthenticationProvider', () => {
       expect(authenticationResult.redirectURL).to.be('https://idp-host/path/login?SAMLRequest=some%20request%20');
       expect(authenticationResult.state).to.eql({
         requestId: 'some-request-id',
-        nextURL: `/test-base-path/some-path`
+        nextURL: `/s/foo/some-path`
       });
     });
 

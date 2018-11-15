@@ -14,8 +14,6 @@ import {
   EuiDatePicker,
 } from '@elastic/eui';
 
-import './styles/main.less';
-
 import moment from 'moment';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
