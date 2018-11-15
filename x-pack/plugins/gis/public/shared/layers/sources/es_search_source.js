@@ -79,7 +79,7 @@ export class ESSearchSource extends VectorSource {
     return indexPattern;
   }
 
-  async getGeoJson({ layerId, layerName, styleFieldNames }, searchFilters) {
+  async getGeoJson({ layerId, layerName }, searchFilters) {
     const indexPattern = await this._getIndexPattern();
 
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];
@@ -95,15 +95,16 @@ export class ESSearchSource extends VectorSource {
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', this._descriptor.limit);
       // Setting "fields" instead of "source: { includes: []}"
-      // because SearchSource automatically adds bunch of junk to the search request
+      // because SearchSource automatically adds the following by default
       // 1) all scripted fields
       // 2) docvalue_fields value is added for each date field in an index - see getComputedFields
-      // By setting "fields", SearchSource removes all of this garbage and only requests what is really needed.
-      searchSource.setField('fields', [
+      // By setting "fields", SearchSource removes all of defaults
+      // TODO re-enable once join fields are added and new search is triggered if fields change
+      /*searchSource.setField('fields', [
         this._descriptor.geoField,
         ...this._descriptor.tooltipProperties,
         ...styleFieldNames,
-      ]);
+      ]);*/
       const isTimeAware = await this.isTimeAware();
       searchSource.setField('filter', () => {
         const filters = [];
