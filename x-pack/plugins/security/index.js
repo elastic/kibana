@@ -24,6 +24,7 @@ import { createAuthorizationService, registerPrivilegesWithCluster } from './ser
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
+import { disableUiCapabilitesFactory } from './server/lib/disable_ui_capabilities';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -87,6 +88,13 @@ export const security = (kibana) => new kibana.Plugin({
         secureCookies: config.get('xpack.security.secureCookies'),
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
         enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
+      };
+    },
+    replaceInjectedVars: async function (originalInjectedVars, request, server) {
+      const disableUiCapabilites = disableUiCapabilitesFactory(server, request);
+      return {
+        ...originalInjectedVars,
+        uiCapabilities: await disableUiCapabilites(originalInjectedVars.uiCapabilities)
       };
     }
   },

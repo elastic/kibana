@@ -8,3 +8,4 @@ export { registerPrivilegesWithCluster } from './register_privileges_with_cluste
 export { createAuthorizationService } from './service';
 export { PrivilegeSerializer } from './privilege_serializer';
 export { ResourceSerializer } from './resource_serializer';
+export { Actions } from './actions';
