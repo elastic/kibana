@@ -84,8 +84,21 @@ export class HeadlessChromiumDriver {
     return result;
   }
 
-  public waitForSelector(selector: string) {
-    return this.page.waitFor(selector);
+  public async waitForSelector(selector: string) {
+    this.logger.debug(`HeadlessChromiumDriver: waitForSelector [${selector}]`);
+
+    let resp;
+    try {
+      resp = await this.page.waitFor(selector, { timeout: 2000 });
+    } catch (err) {
+      this.logger.error(
+        `HeadlessChromiumDriver: waitForSelector [${selector}] failed on [${this.page.url()}]`
+      );
+      throw err;
+    }
+
+    this.logger.debug(`HeadlessChromiumDriver: waitForSelector [${selector}] resolved`);
+    return resp;
   }
 
   public async waitFor<T>({ fn, args, toEqual }: { fn: EvalFn<T>; args: EvalArgs; toEqual: T }) {
