@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, flatten, mapValues } from 'lodash';
+import { mapValues } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Actions } from './authorization';
-
-interface FeatureAndCapability {
-  featureId: string;
-  uiCapability: string;
-}
 
 export function disableUICapabilitesFactory(server: any, request: any) {
   const { spaces } = server.plugins;
@@ -29,36 +24,23 @@ export function disableUICapabilitesFactory(server: any, request: any) {
   };
 
   return async function disableUICapabilities(uiCapabilities: UICapabilities) {
-    const resultUICapabilities = cloneDeep(uiCapabilities);
-    const featuresAndCapabilities = flatten(
-      Object.entries(uiCapabilities).map(([featureId, key]) => {
-        const capabilities = Object.keys(key);
-        return capabilities.map(uiCapability => ({
-          featureId,
-          uiCapability,
-        }));
-      })
+    const uiActions = Object.entries(uiCapabilities).reduce<string[]>(
+      (acc, [featureId, featureUICapabilities]) => [
+        ...acc,
+        ...Object.keys(featureUICapabilities).map(uiCapability =>
+          actions.ui.get(featureId, uiCapability)
+        ),
+      ],
+      []
     );
 
-    const map = new Map<string, FeatureAndCapability>(
-      featuresAndCapabilities.map<[string, FeatureAndCapability]>(featureAndCapability => [
-        actions.ui.get(featureAndCapability.featureId, featureAndCapability.uiCapability),
-        featureAndCapability,
-      ])
-    );
-
+    let checkPrivilegesResponse: any;
     try {
-      const checkPrivilegesResponse = await checkPrivilegesWhereYouCan(Array.from(map.keys()));
-
-      for (const [uiAction, hasAction] of Object.entries(checkPrivilegesResponse.privileges)) {
-        if (!hasAction) {
-          const { featureId, uiCapability } = map.get(uiAction)!;
-          resultUICapabilities[featureId][uiCapability] = false;
-        }
-      }
-
-      return resultUICapabilities;
+      checkPrivilegesResponse = await checkPrivilegesWhereYouCan(uiActions);
     } catch (err) {
+      // if we get a 401/403, then we want to disable all uiCapabilities, as this
+      // is generally when the user hasn't authenticated yet and we're displaying the
+      // login screen, which isn't driven any uiCapabilities
       if (err.statusCode === 401 || err.statusCode === 403) {
         return mapValues(uiCapabilities, featureUICapabilities =>
           mapValues(featureUICapabilities, () => false)
@@ -66,5 +48,17 @@ export function disableUICapabilitesFactory(server: any, request: any) {
       }
       throw err;
     }
+
+    return mapValues(uiCapabilities, (featureUICapabilities, featureId) => {
+      return mapValues(featureUICapabilities, (enabled, uiCapability) => {
+        // if the uiCapability has already been disabled, we don't want to re-enable it
+        if (!enabled) {
+          return false;
+        }
+
+        const action = actions.ui.get(featureId!, uiCapability!);
+        return checkPrivilegesResponse.privileges[action];
+      });
+    });
   };
 }
