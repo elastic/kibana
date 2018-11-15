@@ -37,7 +37,23 @@ export async function runFtr({
     },
   });
 
-  const failureCount = assertNoneExcluded ? await ftr.assertNoneExcluded() : await ftr.run();
+  if (assertNoneExcluded) {
+    const stats = await ftr.getTestStats();
+    if (stats.excludedTests > 0) {
+      throw new CliError(`
+        ${stats.excludedTests} tests in the ${configPath} config
+        are excluded when filtering by the tags run on CI. Make sure that all suites are
+        tagged with one of the following tags, or extend the list of tags in test/scripts/jenkins_xpack.sh
+
+        ${suiteTags.include.join(', ')}
+
+      `);
+    }
+
+    return;
+  }
+
+  const failureCount = await ftr.run();
   if (failureCount > 0) {
     throw new CliError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`

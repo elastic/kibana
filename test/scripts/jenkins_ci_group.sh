@@ -10,8 +10,10 @@ node scripts/build --debug --oss;
 export TEST_BROWSER_HEADLESS=1
 export TEST_ES_FROM=${TEST_ES_FROM:-source}
 
-"$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTestsReleaseGroup${CI_GROUP}" --from=source;
+"$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
 
-if [ "$CI_GROUP" == "12" ]; then
+"$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}" --from=source;
+
+if [ "$CI_GROUP" == "1" ]; then
   "$(FORCE_COLOR=0 yarn bin)/grunt" run:pluginFunctionalTestsRelease --from=source;
 fi

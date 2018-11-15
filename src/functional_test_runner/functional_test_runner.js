@@ -28,7 +28,7 @@ import {
 
 // provider that returns a promise-like object which never "resolves" and is
 // used to disable all the services while still allowing us to load the test
-// files (and therefore define the tests) for assert-none-excluded
+// files (and therefore define the tests) for --test-stats
 const STUB_PROVIDER =  () => ({
   then: () => {}
 });
@@ -75,7 +75,7 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
       });
     }
 
-    async assertNoneExcluded() {
+    async getTestStats() {
       return await this._run(async (config) => {
         const providers = new ProviderCollection(log, [
           // base level services that functional_test_runner exposes
@@ -89,15 +89,17 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
           ...readProviderSpec('PageObject', replaceValues(config.get('pageObjects'), STUB_PROVIDER))
         ]);
 
-        const { excludedTests } = await setupMocha(lifecycle, log, config, providers);
+        const countTests = suite =>
+          suite.suites.reduce((sum, suite) => (
+            sum + countTests(suite)
+          ), suite.tests.length);
 
-        if (excludedTests.length) {
-          log.error(`${excludedTests.length} tests excluded by tags:\n  -${excludedTests.map(t => t.fullTitle()).join('\n  -')}`);
-        } else {
-          log.info('All tests included by tags');
-        }
+        const mocha = await setupMocha(lifecycle, log, config, providers);
 
-        return excludedTests.length;
+        return {
+          tests: countTests(mocha.suite),
+          excludedTests: mocha.excludedTests.length
+        };
       });
     }
 

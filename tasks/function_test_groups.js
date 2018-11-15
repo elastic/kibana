@@ -17,21 +17,38 @@
  * under the License.
  */
 
-const TEST_GROUP_IDS = new Array(12).fill(undefined).map((_, i) => i + 1);
-const getTaskName = id => `functionalTestsReleaseGroup${id}`;
-const getTag = id => `ciGroup${id}`;
+import execa from 'execa';
+import grunt from 'grunt';
+
+/**
+ * The list of tags that we use in the functional tests, if we add a new group we need to add it to this list
+ * and to the list of jobs in .ci/jobs.yml
+ */
+const TEST_TAGS = [
+  'ciGroup1',
+  'ciGroup2',
+  'ciGroup3',
+  'ciGroup4',
+  'ciGroup5',
+  'ciGroup6',
+  'ciGroup7',
+  'ciGroup8',
+  'ciGroup9',
+  'ciGroup10',
+  'ciGroup11',
+  'ciGroup12'
+];
 
 export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = {}) {
-
   return {
     // include a run task for each test group
-    ...TEST_GROUP_IDS.reduce((acc, id) => ({
+    ...TEST_TAGS.reduce((acc, tag) => ({
       ...acc,
-      [getTaskName(id)]: {
+      [`functionalTests_${tag}`]: {
         cmd: process.execPath,
         args: [
           'scripts/functional_tests',
-          '--include-tag', getTag(id),
+          '--include-tag', tag,
           '--config', 'test/functional/config.js',
           '--esFrom', esFrom,
           '--bail',
@@ -42,19 +59,35 @@ export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = 
         ],
       }
     }), {}),
-
-    // also include a run task for any test that is not in a group
-    functionalTestsAssertTagCoverage: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_test_runner',
-        '--assert-none-excluded',
-        ...TEST_GROUP_IDS.reduce((acc, id) => [
-          ...acc,
-          '--include-tag',
-          getTag(id)
-        ], [])
-      ],
-    },
   };
 }
+
+grunt.registerTask(
+  'functionalTests:ensureAllTestsInCiGroup',
+  'Check that all of the functional tests are in a CI group',
+  async function () {
+    const done = this.async();
+
+    try {
+      const stats = JSON.parse(await execa.stderr(process.execPath, [
+        'scripts/functional_test_runner',
+        ...TEST_TAGS.map(tag => `--include-tag=${tag}`),
+        '--config', 'test/functional/config.js',
+        '--test-stats'
+      ]));
+
+      if (stats.excludedTests > 0) {
+        grunt.fail.fatal(`
+          ${stats.excludedTests} tests are excluded by the ciGroup tags, make sure that
+          all test suites have a "ciGroup{X}" tag and that "tasks/functional_test_groups.js"
+          knows about the tag that you are using.
+        `);
+        return;
+      }
+
+      done();
+    } catch (error) {
+      grunt.fail.fatal(error.stack);
+    }
+  }
+);
