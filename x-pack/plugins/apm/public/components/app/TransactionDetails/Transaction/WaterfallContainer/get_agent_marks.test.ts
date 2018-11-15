@@ -8,7 +8,7 @@ import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { getAgentMarks } from './get_agent_marks';
 
 describe('getAgentMarks', () => {
-  it('should sort the marks', () => {
+  it('should sort the marks by time', () => {
     const transaction: Transaction = {
       transaction: {
         marks: {
@@ -25,6 +25,13 @@ describe('getAgentMarks', () => {
       { name: 'domInteractive', us: 117000 },
       { name: 'domComplete', us: 118000 }
     ]);
+  });
+
+  it('should return empty array if marks are missing', () => {
+    const transaction: Transaction = {
+      transaction: {}
+    } as any;
+    expect(getAgentMarks(transaction)).toEqual([]);
   });
 
   it('should return empty array if agent marks are missing', () => {
