@@ -1,0 +1,86 @@
+{
+  "id": "auditbeat_process_docker",
+  "title": "Auditbeat Docker processes",
+  "description": "Detect unusual processes on Docker containers",
+  "type": "Auditbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*",
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "auditd"
+          }
+        },
+        {
+          "exists": {
+            "field": "docker.container.id"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "docker_high_count_events",
+      "file": "docker_high_count_events.json"
+    },
+    {
+      "id": "docker_suspicious_process_activity",
+      "file": "docker_suspicious_process_activity.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-docker_high_count_events",
+      "file": "datafeed_docker_high_count_events.json",
+      "job_id": "docker_high_count_events"
+    },
+    {
+      "id": "datafeed-docker_suspicious_process_activity",
+      "file": "datafeed_docker_suspicious_process_activity.json",
+      "job_id": "docker_suspicious_process_activity"
+    }
+  ],
+  "kibana": {
+    "dashboard": [
+      {
+        "id": "ML-Auditbeat-Docker-Audit-Events",
+        "file": "ML-Auditbeat-Docker-Audit-Events.json"
+      }
+    ],
+    "search": [
+      {
+        "id": "ML-Auditbeat-Docker-Events",
+        "file": "ML-Auditbeat-Docker-Events.json"
+      }
+    ],
+    "visualization": [
+      {
+        "id": "ML-Auditbeat-Docker-Commands",
+        "file": "ML-Auditbeat-Docker-Commands.json"
+      },
+      {
+        "id": "ML-Auditbeat-Docker-Container-Count",
+        "file": "ML-Auditbeat-Docker-Container-Count.json"
+      },
+      {
+        "id": "ML-Auditbeat-Docker-Container-Event-Volume",
+        "file": "ML-Auditbeat-Docker-Container-Event-Volume.json"
+      },
+      {
+        "id": "ML-Auditbeat-Docker-Container-Images",
+        "file": "ML-Auditbeat-Docker-Container-Images.json"
+      },
+      {
+        "id": "ML-Auditbeat-Docker-Processes",
+        "file": "ML-Auditbeat-Docker-Processes.json"
+      },
+      {
+        "id": "ML-Auditbeat-Docker-Process-Presence",
+        "file": "ML-Auditbeat-Docker-Process-Presence.json"
+      }
+    ]
+  }
+}

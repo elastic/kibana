@@ -1,0 +1,96 @@
+{
+  "id": "auditbeat_process_hosts",
+  "title": "Auditbeat host processes",
+  "description": "Detect unusual processes on hosts",
+  "type": "Auditbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*",
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "exists": {
+            "field": "auditd"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "exists": {
+            "field": "docker.container.id"
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "hosts_high_count_events",
+      "file": "hosts_high_count_events.json"
+    },
+    {
+      "id": "hosts_suspicious_process_activity",
+      "file": "hosts_suspicious_process_activity.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-hosts_high_count_events",
+      "file": "datafeed_hosts_high_count_events.json",
+      "job_id": "hosts_high_count_events"
+    },
+    {
+      "id": "datafeed-hosts_suspicious_process_activity",
+      "file": "datafeed_hosts_suspicious_process_activity.json",
+      "job_id": "hosts_suspicious_process_activity"
+    }
+  ],
+  "kibana": {
+    "dashboard": [
+      {
+        "id": "ML-Auditbeat-Hosts-Audit-Events",
+        "file": "ML-Auditbeat-Hosts-Audit-Events.json"
+      }
+    ],
+    "search": [
+      {
+        "id": "ML-Auditbeat-Hosts-Events",
+        "file": "ML-Auditbeat-Hosts-Events.json"
+      },
+      {
+        "id": "ML-Auditbeat-All-Events",
+        "file": "ML-Auditbeat-All-Events.json"
+      }
+    ],
+    "visualization": [
+      {
+        "id": "ML-Auditbeat-Hosts-Command-Line",
+        "file": "ML-Auditbeat-Hosts-Command-Line.json"
+      },
+      {
+        "id": "ML-Auditbeat-Hosts-Event-Volume",
+        "file": "ML-Auditbeat-Hosts-Event-Volume.json"
+      },
+      {
+        "id": "ML-Auditbeat-Hosts-Exe-Thing",
+        "file": "ML-Auditbeat-Hosts-Exe-Thing.json"
+      },
+      {
+        "id": "ML-Auditbeat-Hosts-Kernel-Action-Presence",
+        "file": "ML-Auditbeat-Hosts-Kernel-Action-Presence.json"
+      },
+      {
+        "id": "ML-Auditbeat-Hosts-Kernel-Actions",
+        "file": "ML-Auditbeat-Hosts-Kernel-Actions.json"
+      },
+      {
+        "id": "ML-Auditbeat-Hosts-Process-Presence",
+        "file": "ML-Auditbeat-Hosts-Process-Presence.json"
+      },
+      {
+        "id": "ML-Auditbeat-Hosts-Processes",
+        "file": "ML-Auditbeat-Hosts-Processes.json"
+      }
+    ]
+  }
+}
