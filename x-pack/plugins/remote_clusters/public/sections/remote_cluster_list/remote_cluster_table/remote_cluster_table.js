@@ -99,12 +99,12 @@ export class RemoteClusterTableUi extends Component {
       name: (
         <FormattedMessage
           id="xpack.remoteClusters.remoteClusterList.table.connectedColumnTitle"
-          defaultMessage="Connected"
+          defaultMessage="Connection"
         />
       ),
       sortable: true,
       render: (connected) => <ConnectionStatus isConnected={connected} />,
-      width: '100px',
+      width: '160px',
     }, {
       field: 'num_nodes_connected',
       name: (

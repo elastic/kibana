@@ -9,30 +9,52 @@ import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiIcon
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 
 export function ConnectionStatus({ isConnected }) {
+  let icon;
+  let message;
+
   if (isConnected) {
-    return (
+    icon = (
       <EuiIcon
         type="check"
         color="success"
-        aria-label={i18n.translate('xpack.remoteClusters.connectedStatus.connectedAriaLabel', {
-          defaultMessage: 'Connected',
-        })}
       />
     );
+
+    message = i18n.translate('xpack.remoteClusters.connectedStatus.connectedAriaLabel', {
+      defaultMessage: 'Connected',
+    });
+  } else {
+    icon = (
+      <EuiIcon
+        type="cross"
+        color="danger"
+      />
+    );
+
+    message = i18n.translate('xpack.remoteClusters.connectedStatus.notConnectedAriaLabel', {
+      defaultMessage: 'Not connected',
+    });
   }
 
   return (
-    <EuiIcon
-      type="cross"
-      color="danger"
-      aria-label={i18n.translate('xpack.remoteClusters.connectedStatus.notConnectedAriaLabel', {
-        defaultMessage: 'Not connected',
-      })}
-    />
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        {icon}
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiText>
+          {message}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

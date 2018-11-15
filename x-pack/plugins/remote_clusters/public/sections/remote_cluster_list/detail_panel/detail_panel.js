@@ -56,7 +56,7 @@ export class DetailPanelUi extends Component {
                   <EuiTitle size="xs">
                     <FormattedMessage
                       id="xpack.remoteClusters.detailPanel.connectedLabel"
-                      defaultMessage="Connected"
+                      defaultMessage="Connection"
                     />
                   </EuiTitle>
                 </EuiDescriptionListTitle>
