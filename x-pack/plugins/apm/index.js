@@ -65,7 +65,7 @@ export function apm(kibana) {
             app: ['apm'],
             savedObject: {
               all: [],
-              read: []
+              read: ['config']
             },
             ui: []
           }
