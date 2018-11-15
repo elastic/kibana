@@ -29,6 +29,7 @@ interface Props {
   onToggleDisabled: (filter: MetaFilter) => void;
   onTogglePin: (filter: MetaFilter) => void;
   onDelete: (filter: MetaFilter) => void;
+  className: string;
 }
 
 export class FilterBar extends Component<Props> {
@@ -49,6 +50,8 @@ export class FilterBar extends Component<Props> {
   };
 
   public render() {
+    const classes = classNames('globalFilterBar', this.props.className);
+
     const filterItems = this.props.filters.map(filter => {
       return (
         <EuiFlexItem grow={false}>
@@ -63,43 +66,17 @@ export class FilterBar extends Component<Props> {
       );
     });
 
-    const classes = classNames('globalFilterGroup__wrapper', {
-      'globalFilterGroup__wrapper-isVisible': true,
-    });
-
     return (
-      <div
-        id="GlobalFilterGroup"
-        // ref={node => {
-        //   this.filterBarWrapper = node;
-        // }}
+      <EuiFlexGroup
         className={classes}
+        wrap={true}
+        responsive={false}
+        gutterSize="xs"
+        alignItems="center"
       >
-        <div>
-          <EuiFlexGroup
-            className="globalFilterGroup"
-            gutterSize="none"
-            alignItems="flexStart"
-            responsive={false}
-          >
-            {/*<EuiFlexItem className="globalFilterGroup__branch" grow={false}>*/}
-            {/*<GlobalFilterOptions />*/}
-            {/*</EuiFlexItem>*/}
-
-            <EuiFlexItem>
-              <EuiFlexGroup
-                className="globalFilterGroup__filterBar globalFilterBar"
-                wrap={true}
-                responsive={false}
-                gutterSize="xs"
-                alignItems="center"
-              >
-                {filterItems}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </div>
+        {/* TODO display pinned filters first*/}
+        {filterItems}
+      </EuiFlexGroup>
     );
   }
 }

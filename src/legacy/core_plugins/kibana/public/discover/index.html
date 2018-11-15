@@ -28,25 +28,23 @@
 
       <!-- Search. -->
       <div data-transclude-slot="bottomRow" class="fullWidth">
-        <query-bar
+        <search-bar
           query="state.query"
-          on-submit="updateQueryAndFetch"
+          on-query-submit="updateQueryAndFetch"
           app-name="'discover'"
           index-patterns="[indexPattern]"
-        ></query-bar>
+          filters="reactFilters"
+          on-toggle-filter-negate="onToggleNegate"
+          on-toggle-filter-pin="onTogglePin"
+          on-toggle-filter-disabled="onToggleDisabled"
+          on-filter-delete="onDelete"
+        ></search-bar>
       </div>
     </div>
   </kbn-top-nav>
 
   <main class="container-fluid">
     <div class="row">
-      <react-filter-bar
-        filters="reactFilters"
-        on-toggle-negate="onToggleNegate"
-        on-toggle-pin="onTogglePin"
-        on-toggle-disabled="onToggleDisabled"
-        on-delete="onDelete"
-      ></react-filter-bar>
       <filter-bar
         state="state"
         index-patterns="[indexPattern]"
