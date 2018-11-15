@@ -44,7 +44,7 @@ export class DetailPanelUi extends Component {
     const { cluster } = this.props;
     const { connected, seeds, num_nodes_connected: connectedNodesCount } = cluster;
 
-    const renderedSeeds = seeds.map(seed => <EuiText>{seed}</EuiText>);
+    const renderedSeeds = seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>);
 
     return (
       <Fragment>
