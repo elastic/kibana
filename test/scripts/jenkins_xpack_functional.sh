@@ -11,9 +11,18 @@ export TEST_BROWSER_HEADLESS=1
 export XPACK_DIR="$(cd "$(dirname "$0")/../../x-pack"; pwd)"
 echo "-> XPACK_DIR ${XPACK_DIR}"
 
+
+echo " -> building and extracting default Kibana distributable for use in functional tests"
+cd "$KIBANA_DIR"
+node scripts/build --debug --no-oss
+linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
+installDir="$PARENT_DIR/install/kibana"
+mkdir -p "$installDir"
+tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+
 export TEST_ES_FROM=${TEST_ES_FROM:-source}
-echo " -> Running reporting phantomapi functional tests"
+echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
-node scripts/functional_tests --config ./test/reporting/configs/phantom_api.js --debug --bail
+node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir"
 echo ""
 echo ""
