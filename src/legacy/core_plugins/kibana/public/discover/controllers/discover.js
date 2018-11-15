@@ -67,7 +67,7 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { createPhraseFilter } from '../../../../../ui/public/filter_bar/filters/phrase_filter';
 import {
-  createMetaFilter,
+  createMetaFilter, enable, disable, pin, unpin,
   toggleDisabled,
   toggleNegation, togglePinned,
 } from '../../../../../ui/public/filter_bar/filters/meta_filter';
@@ -213,6 +213,36 @@ function discoverController(
 
   $scope.onDelete = (filterToDelete) => {
     $scope.reactFilters = $scope.reactFilters.filter((filter) => filter !== filterToDelete);
+  };
+
+  $scope.onAllFiltersAction = (action) => {
+    if (action === 'delete') {
+      $scope.reactFilters = [];
+    }
+    else {
+      $scope.reactFilters.forEach((filter, index) => {
+        switch (action) {
+          case 'enable':
+            $scope.reactFilters[index] = enable(filter);
+            break;
+          case 'disable':
+            $scope.reactFilters[index] = disable(filter);
+            break;
+          case 'pin':
+            $scope.reactFilters[index] = pin(filter);
+            break;
+          case 'unpin':
+            $scope.reactFilters[index] = unpin(filter);
+            break;
+          case 'toggleNegate':
+            $scope.reactFilters[index] = toggleNegation(filter);
+            break;
+          case 'toggleDisabled':
+            $scope.reactFilters[index] = toggleDisabled(filter);
+            break;
+        }
+      });
+    }
   };
 
   $scope.getDocLink = getDocLink;

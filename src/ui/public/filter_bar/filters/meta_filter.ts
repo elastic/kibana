@@ -54,6 +54,34 @@ export function createMetaFilter(
   };
 }
 
+export function enable(metaFilter: MetaFilter) {
+  return {
+    ...metaFilter,
+    disabled: false,
+  };
+}
+
+export function disable(metaFilter: MetaFilter) {
+  return {
+    ...metaFilter,
+    disabled: true,
+  };
+}
+
+export function pin(metaFilter: MetaFilter) {
+  return {
+    ...metaFilter,
+    pinned: true,
+  };
+}
+
+export function unpin(metaFilter: MetaFilter) {
+  return {
+    ...metaFilter,
+    pinned: false,
+  };
+}
+
 export function toggleNegation(metaFilter: MetaFilter) {
   const negate = !metaFilter.negate;
   return {
