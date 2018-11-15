@@ -48,7 +48,7 @@ cmd
   .option('--exclude [file]', 'Path to a test file that should not be loaded', collectExcludePaths(), [])
   .option('--include-tag [tag]', 'A tag to be included, pass multiple times for multiple tags', collectIncludeTags(), [])
   .option('--exclude-tag [tag]', 'A tag to be excluded, pass multiple times for multiple tags', collectExcludeTags(), [])
-  .option('--test-stats', 'Print the number of tests, suites, and excluded counts to STDERR.', false)
+  .option('--test-stats', 'Print the number of tests (included and excluded) to STDERR', false)
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
