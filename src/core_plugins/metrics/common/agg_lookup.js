@@ -100,7 +100,10 @@ export function createOptions(type = '_all', siblings = []) {
       const disabled = _.includes(pipeline, value) ? !enablePipelines : false;
       return {
         label: disabled
-          ? `${label} (use the "+" button to add this pipeline agg)`
+          ? i18n.translate('metrics.aggLookup.addPipelineAggDescription', {
+            defaultMessage: '{label} (use the "+" button to add this pipeline agg)',
+            values: { label }
+          })
           : label,
         value,
         disabled,
