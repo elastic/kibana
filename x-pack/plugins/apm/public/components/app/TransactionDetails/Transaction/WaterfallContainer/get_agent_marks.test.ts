@@ -27,9 +27,9 @@ describe('getAgentMarks', () => {
     ]);
   });
 
-  it('should return empty array if marks are missing', () => {
+  it('should return empty array if agent marks are missing', () => {
     const transaction: Transaction = {
-      transaction: {}
+      transaction: { marks: {} }
     } as any;
     expect(getAgentMarks(transaction)).toEqual([]);
   });
