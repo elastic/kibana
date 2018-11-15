@@ -124,15 +124,23 @@ export class VectorStyle {
     const defaultStroke = 'grey';
     const strokeWidth = '1px';
     return (isPointsOnly = false) => {
-      const { fillColor, lineColor } = this._descriptor.properties;
-      const stroke = _.get(lineColor, 'options.color');
-      const fill = _.get(fillColor, 'options.color');
-
-      const style = {
-        ...stroke && { stroke } || { stroke: defaultStroke },
+      let style = {
+        stroke: defaultStroke,
         strokeWidth,
-        ...fill && { fill },
+        fill: 'none'
       };
+      const isDynamic = this._isPropertyDynamic('fillColor');
+      if (!isDynamic) {
+        const { fillColor, lineColor } = this._descriptor.properties;
+        const stroke = _.get(lineColor, 'options.color');
+        const fill = _.get(fillColor, 'options.color');
+
+        style = {
+          ...stroke && { stroke } || { stroke: defaultStroke },
+          strokeWidth,
+          ...fill && { fill },
+        };
+      }
 
       return (
         isPointsOnly
