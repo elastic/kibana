@@ -20,6 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
+import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
 
 function YesNo(props) {
   const { name, value } = props;
@@ -30,29 +31,31 @@ function YesNo(props) {
       props.onChange(parts);
     };
   };
+  const htmlId = htmlIdGenerator();
   const inputName = name + _.uniqueId();
   return (
-    <div className="thor__yes_no">
-      <label>
-        <input
-          type="radio"
-          name={inputName}
-          checked={Boolean(value)}
-          value="yes"
-          onChange={handleChange(1)}
-        />
-        Yes
-      </label>
-      <label>
-        <input
-          type="radio"
-          name={inputName}
-          checked={!Boolean(value)}
-          value="no"
-          onChange={handleChange(0)}
-        />
-        No
-      </label>
+    <div>
+      <EuiRadio
+        id={htmlId('yes')}
+        label="Yes"
+        className="eui-displayInlineBlock"
+        name={inputName}
+        checked={Boolean(value)}
+        value="yes"
+        onChange={handleChange(1)}
+      />
+
+      &emsp;
+
+      <EuiRadio
+        id={htmlId('no')}
+        label="No"
+        className="eui-displayInlineBlock"
+        name={inputName}
+        checked={!Boolean(value)}
+        value="no"
+        onChange={handleChange(0)}
+      />
     </div>
   );
 }
