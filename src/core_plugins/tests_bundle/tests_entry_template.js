@@ -80,6 +80,20 @@ new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
+      uiCapabilities: {
+        discover: {
+          showWriteControls: true
+        },
+        visualize: {
+          showWriteControls: true
+        },
+        dashboard: {
+          showWriteControls: true
+        },
+        timelion: {
+          showWriteControls: true
+        },
+      }
     },
   },
   rootDomElement,
