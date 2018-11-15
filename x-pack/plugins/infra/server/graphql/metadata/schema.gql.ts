@@ -7,14 +7,14 @@
 import gql from 'graphql-tag';
 
 export const metadataSchema = gql`
-  "One specific metadata information for a node."
+  "One metadata entry for a node."
   type InfraNodeMetadata {
     name: String!
     source: String!
   }
 
   extend type InfraSource {
-    "A hierarchy of metadata information by node"
+    "A hierarchy of metadata entries by node"
     metadataByNode(nodeName: String!, nodeType: InfraNodeType!): [InfraNodeMetadata]!
   }
 `;

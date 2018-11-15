@@ -112,7 +112,7 @@
           },
           {
             "name": "metadataByNode",
-            "description": "A hierarchy of metadata information by node",
+            "description": "A hierarchy of metadata entries by node",
             "args": [
               {
                 "name": "nodeName",
@@ -782,7 +782,7 @@
       {
         "kind": "OBJECT",
         "name": "InfraNodeMetadata",
-        "description": "One specific metadata information for a node.",
+        "description": "One metadata entry for a node.",
         "fields": [
           {
             "name": "name",

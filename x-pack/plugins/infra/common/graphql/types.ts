@@ -17,7 +17,7 @@ export interface InfraSource {
   id: string /** The id of the source */;
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
   status: InfraSourceStatus /** The status of the source */;
-  metadataByNode: (InfraNodeMetadata | null)[] /** A hierarchy of metadata information by node */;
+  metadataByNode: (InfraNodeMetadata | null)[] /** A hierarchy of metadata entries by node */;
   logEntriesAround: InfraLogEntryInterval /** A consecutive span of log entries surrounding a point in time */;
   logEntriesBetween: InfraLogEntryInterval /** A consecutive span of log entries within an interval */;
   logSummaryBetween: InfraLogSummaryInterval /** A consecutive span of summary buckets within an interval */;
@@ -56,7 +56,7 @@ export interface InfraIndexField {
   searchable: boolean /** Whether the field's values can be efficiently searched for */;
   aggregatable: boolean /** Whether the field's values can be aggregated */;
 }
-/** One specific metadata information for a node. */
+/** One metadata entry for a node. */
 export interface InfraNodeMetadata {
   name: string;
   source: string;
@@ -163,7 +163,7 @@ export namespace InfraSourceResolvers {
     id?: IdResolver /** The id of the source */;
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
     status?: StatusResolver /** The status of the source */;
-    metadataByNode?: MetadataByNodeResolver /** A hierarchy of metadata information by node */;
+    metadataByNode?: MetadataByNodeResolver /** A hierarchy of metadata entries by node */;
     logEntriesAround?: LogEntriesAroundResolver /** A consecutive span of log entries surrounding a point in time */;
     logEntriesBetween?: LogEntriesBetweenResolver /** A consecutive span of log entries within an interval */;
     logSummaryBetween?: LogSummaryBetweenResolver /** A consecutive span of summary buckets within an interval */;
@@ -286,7 +286,7 @@ export namespace InfraIndexFieldResolvers {
   export type SearchableResolver = Resolver<boolean>;
   export type AggregatableResolver = Resolver<boolean>;
 }
-/** One specific metadata information for a node. */
+/** One metadata entry for a node. */
 export namespace InfraNodeMetadataResolvers {
   export interface Resolvers {
     name?: NameResolver;
