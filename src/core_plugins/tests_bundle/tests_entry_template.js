@@ -81,6 +81,10 @@ new CoreSystem({
         enableExternalUrls: true
       },
       uiCapabilities: {
+        navLinks: {
+          myLink: true,
+          notMyLink: true,
+        },
         discover: {
           showWriteControls: true
         },
