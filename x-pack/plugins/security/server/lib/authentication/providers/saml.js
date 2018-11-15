@@ -357,7 +357,7 @@ export class SAMLAuthenticationProvider {
       return AuthenticationResult.redirectTo(
         redirect,
         // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
-        { requestId, nextURL: `${this._options.basePath}${request.url.path}` }
+        { requestId, nextURL: `${request.getBasePath()}${request.url.path}` }
       );
     } catch (err) {
       this._options.log(['debug', 'security', 'saml'], `Failed to initiate SAML handshake: ${err.message}`);
@@ -410,7 +410,7 @@ export class SAMLAuthenticationProvider {
         return DeauthenticationResult.redirectTo(redirect);
       }
 
-      return DeauthenticationResult.succeeded();
+      return DeauthenticationResult.redirectTo('/logged_out');
     } catch(err) {
       this._options.log(['debug', 'security', 'saml'], `Failed to deauthenticate user: ${err.message}`);
       return DeauthenticationResult.failed(err);

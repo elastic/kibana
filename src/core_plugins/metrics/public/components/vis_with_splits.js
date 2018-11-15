@@ -65,22 +65,20 @@ export function visWithSplits(WrappedComponent) {
         }
       };
       return (
-        <div key={key} className="splitVis_split">
-          <div className="splitVis_visualization">
-            <WrappedComponent
-              model={model}
-              visData={newVisData}
-              onBrush={props.onBrush}
-              additionalLabel={label}
-              backgroundColor={props.backgroundColor}
-            />
-          </div>
+        <div key={key} className="tvbSplitVis__split">
+          <WrappedComponent
+            model={model}
+            visData={newVisData}
+            onBrush={props.onBrush}
+            additionalLabel={label}
+            backgroundColor={props.backgroundColor}
+          />
         </div>
       );
     });
 
     return (
-      <div className="splitVis">{rows}</div>
+      <div className="tvbSplitVis">{rows}</div>
     );
   }
   SplitVisComponent.displayName = `SplitVisComponent(${getDisplayName(WrappedComponent)})`;

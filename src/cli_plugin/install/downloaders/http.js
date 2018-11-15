@@ -19,7 +19,6 @@
 
 import Wreck from 'wreck';
 import Progress from '../progress';
-import { fromNode as fn } from 'bluebird';
 import { createWriteStream } from 'fs';
 import HttpProxyAgent from 'http-proxy-agent';
 import HttpsProxyAgent from 'https-proxy-agent';
@@ -41,32 +40,31 @@ function getProxyAgent(sourceUrl, logger) {
   }
 }
 
-function sendRequest({ sourceUrl, timeout }, logger) {
+async function sendRequest({ sourceUrl, timeout }, logger) {
   const maxRedirects = 11; //Because this one goes to 11.
-  return fn(cb => {
-    const reqOptions = { timeout, redirects: maxRedirects };
-    const proxyAgent = getProxyAgent(sourceUrl, logger);
+  const reqOptions = { timeout, redirects: maxRedirects };
+  const proxyAgent = getProxyAgent(sourceUrl, logger);
 
-    if (proxyAgent) {
-      reqOptions.agent = proxyAgent;
+  if (proxyAgent) {
+    reqOptions.agent = proxyAgent;
+  }
+
+  try {
+    const promise = Wreck.request('GET', sourceUrl, reqOptions);
+    const req = promise.req;
+    const resp = await promise;
+    if (resp.statusCode >= 400) {
+      throw new Error('ENOTFOUND');
     }
 
-    const req = Wreck.request('GET', sourceUrl, reqOptions, (err, resp) => {
-      if (err) {
-        if (err.code === 'ECONNREFUSED') {
-          err = new Error('ENOTFOUND');
-        }
+    return { req, resp };
+  } catch (err) {
+    if (err.code === 'ECONNREFUSED') {
+      err = new Error('ENOTFOUND');
+    }
 
-        return cb(err);
-      }
-
-      if (resp.statusCode >= 400) {
-        return cb(new Error('ENOTFOUND'));
-      }
-
-      cb(null, { req, resp });
-    });
-  });
+    throw err;
+  }
 }
 
 function downloadResponse({ resp, targetPath, progress }) {

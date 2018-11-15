@@ -50,7 +50,7 @@ export class CcrShard extends PureComponent {
 
   renderErrors() {
     const { stat } = this.props;
-    if (stat.fetch_exceptions && stat.fetch_exceptions.length > 0) {
+    if (stat.read_exceptions && stat.read_exceptions.length > 0) {
       return (
         <Fragment>
           <EuiPanel>
@@ -61,7 +61,7 @@ export class CcrShard extends PureComponent {
             </EuiTitle>
             <EuiSpacer size="s"/>
             <EuiBasicTable
-              items={stat.fetch_exceptions}
+              items={stat.read_exceptions}
               columns={[
                 {
                   name: 'Type',

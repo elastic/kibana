@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 export function noValuesDisableMsg(fieldName, indexPatternName) {
-  return i18n.translate('inputControl.control.noValuesDisableTootip', {
+  return i18n.translate('inputControl.control.noValuesDisableTooltip', {
     defaultMessage: 'Filtering occurs on the "{fieldName}" field, which doesn\'t exist on any documents in the "{indexPatternName}" \
 index pattern. Choose a different field or index documents that contain values for this field.',
     values: { fieldName: fieldName, indexPatternName: indexPatternName }
@@ -31,7 +31,7 @@ index pattern. Choose a different field or index documents that contain values f
 }
 
 export function noIndexPatternMsg(indexPatternId) {
-  return i18n.translate('inputControl.control.noIndexPatternTootip', {
+  return i18n.translate('inputControl.control.noIndexPatternTooltip', {
     defaultMessage: 'Could not locate index-pattern id: {indexPatternId}.',
     values: { indexPatternId }
   });
@@ -51,7 +51,7 @@ export class Control {
     // restore state from kibana filter context
     this.reset();
     // disable until initialized
-    this.disable(i18n.translate('inputControl.control.notInitializedTootip', {
+    this.disable(i18n.translate('inputControl.control.notInitializedTooltip', {
       defaultMessage: 'Control has not been initialized'
     }));
   }

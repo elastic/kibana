@@ -137,8 +137,6 @@ exports.Cluster = class Cluster {
     await this._outcome;
   }
 
-  _stopCalled = false;
-
   /**
    * Stops ES process, if it's running
    *

@@ -8,6 +8,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
+import { InfraTimerangeInput } from 'x-pack/plugins/infra/common/graphql/types';
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
@@ -20,19 +21,19 @@ const initialState = {
 type State = Readonly<typeof initialState>;
 
 interface Props {
-  onDrilldown: () => void;
   squareSize: number;
   options: InfraWaffleMapOptions;
   node: InfraWaffleMapNode;
   formatter: (val: number) => string;
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
+  timeRange: InfraTimerangeInput;
 }
 
 export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { nodeType, node, options, squareSize, bounds, formatter } = this.props;
+    const { nodeType, node, options, squareSize, bounds, formatter, timeRange } = this.props;
     const { isPopoverOpen } = this.state;
     const { metric } = node;
     const valueMode = squareSize > 110;
@@ -46,6 +47,7 @@ export class Node extends React.PureComponent<Props, State> {
         isPopoverOpen={isPopoverOpen}
         closePopover={this.closePopover}
         options={options}
+        timeRange={timeRange}
       >
         <EuiToolTip position="top" content={`${node.name} | ${value}`}>
           <NodeContainer

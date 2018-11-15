@@ -14,7 +14,7 @@ export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
   server.route({
     method: 'PUT',
     path: '/api/spaces/space/{id}',
-    async handler(request: any, reply: any) {
+    async handler(request: any) {
       const { SavedObjectsClient } = server.savedObjects;
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
@@ -28,12 +28,12 @@ export function initPutSpacesApi(server: any, routePreCheckLicenseFn: any) {
         result = await spacesClient.update(id, { ...space });
       } catch (error) {
         if (SavedObjectsClient.errors.isNotFoundError(error)) {
-          return reply(Boom.notFound());
+          return Boom.notFound();
         }
-        return reply(wrapError(error));
+        return wrapError(error);
       }
 
-      return reply(result);
+      return result;
     },
     config: {
       validate: {

@@ -24,7 +24,7 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     },
     auth: false,
   },
-  handler: async (request: any, reply: any) => {
+  handler: async (request: any, h: any) => {
     const beatId = request.params.beatId;
     const accessToken = request.headers['kbn-beats-access-token'];
 
@@ -33,12 +33,12 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
     try {
       beat = await libs.beats.getById(libs.framework.internalUser, beatId);
       if (beat === null) {
-        return reply({ message: `Beat "${beatId}" not found` }).code(404);
+        return h.response({ message: `Beat "${beatId}" not found` }).code(404);
       }
 
       const isAccessTokenValid = beat.access_token === accessToken;
       if (!isAccessTokenValid) {
-        return reply({ message: 'Invalid access token' }).code(401);
+        return h.response({ message: 'Invalid access token' }).code(401);
       }
 
       let newStatus: CMBeat['config_status'] = 'OK';
@@ -53,7 +53,7 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
 
       tags = await libs.tags.getTagsWithIds(libs.framework.internalUser, beat.tags || []);
     } catch (err) {
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
 
     const configurationBlocks = tags.reduce(
@@ -75,8 +75,8 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
       []
     );
 
-    reply({
+    return {
       configuration_blocks: configurationBlocks,
-    });
+    };
   },
 });

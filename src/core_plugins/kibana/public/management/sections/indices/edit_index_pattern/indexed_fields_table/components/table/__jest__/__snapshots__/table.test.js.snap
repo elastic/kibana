@@ -97,16 +97,19 @@ exports[`Table should render normally 1`] = `
     Array [
       Object {
         "displayName": "Elastic",
+        "info": Object {},
         "name": "Elastic",
         "searchable": true,
       },
       Object {
         "displayName": "timestamp",
+        "info": Object {},
         "name": "timestamp",
         "type": "date",
       },
       Object {
         "displayName": "conflictingField",
+        "info": Object {},
         "name": "conflictingField",
         "type": "conflict",
       },

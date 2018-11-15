@@ -9,6 +9,7 @@ import { initTransactionsApi } from './server/routes/transactions';
 import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
+import { initTracesApi } from './server/routes/traces';
 
 export function apm(kibana) {
   return new kibana.Plugin({
@@ -23,13 +24,13 @@ export function apm(kibana) {
         description: 'APM for the Elastic Stack',
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
-        euiIconType: 'apmApp'
+        euiIconType: 'apmApp',
+        order: 8100
       },
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          mlEnabled: config.get('xpack.ml.enabled'),
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
           apmIndexPattern: config.get('apm_oss.indexPattern')
         };
@@ -55,6 +56,7 @@ export function apm(kibana) {
 
     init(server) {
       initTransactionsApi(server);
+      initTracesApi(server);
       initServicesApi(server);
       initErrorsApi(server);
       initStatusApi(server);

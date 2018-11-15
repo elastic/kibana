@@ -57,7 +57,6 @@ exports[`BasicLoginForm renders as expected 1`] = `
         data-test-subj="loginSubmit"
         fill={true}
         iconSide="left"
-        isDisabled={true}
         isLoading={false}
         onClick={[Function]}
         type="submit"

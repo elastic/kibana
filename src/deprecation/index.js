@@ -20,4 +20,5 @@
 import { rename, unused } from './deprecations';
 
 export { createTransform } from './create_transform';
+export { getTransform } from './get_transform';
 export const Deprecations = { rename, unused };

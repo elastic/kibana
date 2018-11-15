@@ -21,6 +21,7 @@ import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
+import { i18n }  from '@kbn/i18n';
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import * as topojson from 'topojson-client';
@@ -73,7 +74,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._metrics = null;
     this._joinField = null;
-    this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]];
+    this._colorRamp = truncatedColorMaps[Object.keys(truncatedColorMaps)[0]].value;
     this._lineWeight = 1;
     this._tooltipFormatter = () => '';
     this._attribution = attribution;
@@ -123,7 +124,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
           featureCollection = topojson.feature(data, features);//conversion to geojson
         } else {
           //should never happen
-          throw new Error('Unrecognized format ' + formatType);
+          throw new Error(i18n.translate('regionMap.choroplethLayer.unrecognizedFormatErrorMessage', {
+            defaultMessage: 'Unrecognized format {formatType}',
+            values: { formatType },
+          }));
         }
         this._sortedFeatures = featureCollection.features.slice();
         this._sortFeatures();
@@ -143,15 +147,23 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
         let errorMessage;
         if (e.status === 404) {
-          errorMessage = `Server responding with '404' when attempting to fetch ${geojsonUrl}.
-                          Make sure the file exists at that location.`;
+          errorMessage = i18n.translate('regionMap.choroplethLayer.downloadingVectorData404ErrorMessage', {
+            defaultMessage: 'Server responding with \'404\' when attempting to fetch {geojsonUrl}. \
+Make sure the file exists at that location.',
+            values: { geojsonUrl },
+          });
         } else {
-          errorMessage = `Cannot download ${geojsonUrl} file. Please ensure the
-CORS configuration of the server permits requests from the Kibana application on this host.`;
+          errorMessage = i18n.translate('regionMap.choroplethLayer.downloadingVectorDataErrorMessage', {
+            defaultMessage: 'Cannot download {geojsonUrl} file. Please ensure the \
+CORS configuration of the server permits requests from the Kibana application on this host.',
+            values: { geojsonUrl },
+          });
         }
 
         toastNotifications.addDanger({
-          title: 'Error downloading vector data',
+          title: i18n.translate('regionMap.choroplethLayer.downloadingVectorDataErrorMessageTitle', {
+            defaultMessage: 'Error downloading vector data',
+          }),
           text: errorMessage,
         });
 

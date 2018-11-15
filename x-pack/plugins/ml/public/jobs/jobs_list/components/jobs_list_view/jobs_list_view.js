@@ -5,7 +5,6 @@
  */
 
 
-import './styles/main.less';
 import { timefilter } from 'ui/timefilter';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -257,7 +256,7 @@ export class JobsListView extends Component {
               fullJobsList[job.id] = job.fullJob;
               delete job.fullJob;
             }
-            job.latestTimeStampSortValue = (job.latestTimeStampMs || 0);
+            job.latestTimestampSortValue = (job.latestTimestampMs || 0);
             return job;
           });
           const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);

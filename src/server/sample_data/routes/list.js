@@ -28,7 +28,7 @@ export const createListRoute = () => ({
   path: '/api/sample_data',
   method: 'GET',
   config: {
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
 
       const sampleDatasets = request.server.getSampleDatasets().map(sampleDataset => {
@@ -86,7 +86,7 @@ export const createListRoute = () => ({
       });
 
       await Promise.all(isInstalledPromises);
-      reply(sampleDatasets);
+      return sampleDatasets;
     }
   }
 });

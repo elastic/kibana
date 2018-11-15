@@ -154,9 +154,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
       case AssignmentActionType.Delete:
         this.deleteSelected();
         break;
-      case AssignmentActionType.Search:
-        this.handleSearchQuery(payload);
-        break;
       case AssignmentActionType.Reload:
         this.loadTags();
         break;
@@ -187,11 +184,6 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
     setTimeout(async () => {
       await this.props.loadBeats();
     }, 100);
-  };
-
-  // todo: add reference to ES filter endpoint
-  private handleSearchQuery = (query: any) => {
-    // await this.props.libs.beats.searach(query);
   };
 
   private loadTags = async () => {

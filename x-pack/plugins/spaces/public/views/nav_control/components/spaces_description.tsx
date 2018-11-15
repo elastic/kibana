@@ -9,7 +9,6 @@ import React, { SFC } from 'react';
 import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { ManageSpacesButton } from '../../../components';
 import { SPACES_FEATURE_DESCRIPTION } from '../../../lib/constants';
-import './spaces_description.less';
 
 interface Props {
   userProfile: UserProfile;
@@ -18,16 +17,16 @@ interface Props {
 
 export const SpacesDescription: SFC<Props> = (props: Props) => {
   const panelProps = {
-    className: 'spacesDescription',
+    className: 'spcDescription',
     title: 'Spaces',
   };
 
   return (
     <EuiContextMenuPanel {...panelProps}>
-      <EuiText className="spacesDescription__text">
+      <EuiText className="spcDescription__text">
         <p>{SPACES_FEATURE_DESCRIPTION}</p>
       </EuiText>
-      <div key="manageSpacesButton" className="spacesDescription__manageButtonWrapper">
+      <div key="manageSpacesButton" className="spcDescription__manageButtonWrapper">
         <ManageSpacesButton
           size="s"
           style={{ width: `100%` }}

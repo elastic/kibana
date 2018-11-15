@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { InfraNodeType } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
@@ -16,13 +16,14 @@ import { GroupName } from './group_name';
 import { Node } from './node';
 
 interface Props {
-  onDrilldown: () => void;
+  onDrilldown: (filter: string) => void;
   options: InfraWaffleMapOptions;
   group: InfraWaffleMapGroupOfNodes;
   formatter: (val: number) => string;
   isChild: boolean;
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
+  timeRange: InfraTimerangeInput;
 }
 
 export const GroupOfNodes: React.SFC<Props> = ({
@@ -33,11 +34,12 @@ export const GroupOfNodes: React.SFC<Props> = ({
   isChild = false,
   bounds,
   nodeType,
+  timeRange,
 }) => {
   const width = group.width > 200 ? group.width : 200;
   return (
     <GroupOfNodesContainer style={{ width }}>
-      <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} />
+      <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
       <Nodes>
         {group.nodes.map(node => (
           <Node
@@ -45,10 +47,10 @@ export const GroupOfNodes: React.SFC<Props> = ({
             options={options}
             squareSize={group.squareSize}
             node={node}
-            onDrilldown={onDrilldown}
             formatter={formatter}
             bounds={bounds}
             nodeType={nodeType}
+            timeRange={timeRange}
           />
         ))}
       </Nodes>

@@ -8,14 +8,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Dropzone from 'react-dropzone';
 
-export const WorkpadDropzone = ({ setDropping, onDropAccepted, onDropRejected, children }) => (
+export const WorkpadDropzone = ({ onDropAccepted, onDropRejected, disabled, children }) => (
   <Dropzone
     accept="application/json"
     onDropAccepted={onDropAccepted}
     onDropRejected={onDropRejected}
-    onDragEnter={() => setDropping(true)}
-    onDragLeave={() => setDropping(false)}
     disableClick
+    disabled={disabled}
     className="canvasWorkpad__dropzone"
     activeClassName="canvasWorkpad__dropzone--active"
   >
@@ -24,9 +23,8 @@ export const WorkpadDropzone = ({ setDropping, onDropAccepted, onDropRejected, c
 );
 
 WorkpadDropzone.propTypes = {
-  isDropping: PropTypes.bool.isRequired,
-  setDropping: PropTypes.func.isRequired,
   onDropAccepted: PropTypes.func.isRequired,
   onDropRejected: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired,
   children: PropTypes.node.isRequired,
 };

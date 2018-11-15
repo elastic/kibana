@@ -316,7 +316,6 @@ const outputConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Output Type',
       type: 'select',
-      transform: 'removed',
     },
     options: [
       {

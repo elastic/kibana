@@ -19,23 +19,8 @@ import {
 } from '../../inputs';
 
 addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
-  if (values && values.length > 0 && values instanceof Array) {
-    return values.reduce((pass: boolean, value: string) => {
-      if (
-        pass &&
-        value.match(
-          new RegExp(
-            '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'
-          )
-        ) !== null
-      ) {
-        return true;
-      }
-      return false;
-    }, true);
-  } else {
-    return true;
-  }
+  // TODO add more validation
+  return true;
 });
 
 addValidationRule('isString', (values: FormData, value: FieldValue) => {
@@ -54,7 +39,6 @@ addValidationRule('isPath', (values: FormData, value: FieldValue) => {
 
 addValidationRule('isPaths', (values: FormData, value: FieldValue) => {
   // TODO add more validation
-
   return true;
 });
 
@@ -109,22 +93,8 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     if (!this.props.onSubmit) {
       return;
     }
-    const processed = JSON.parse(JSON.stringify(model), (key, value) => {
-      return _.isObject(value) && !_.isArray(value)
-        ? _.mapKeys(value, (v, k: string) => {
-            return k.replace(/{{[^{}]+}}/g, (token: string) => {
-              return model[token.replace(/[{}]+/g, '')] || 'error';
-            });
-          })
-        : value;
-    });
 
-    this.props.schema.forEach(s => {
-      if (s.ui.transform && s.ui.transform === 'removed') {
-        delete processed[s.id];
-      }
-    });
-    this.props.onSubmit(processed);
+    this.props.onSubmit(model);
   };
   public render() {
     return (

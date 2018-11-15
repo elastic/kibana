@@ -10,6 +10,7 @@
   "scripts": {
     "preinstall": "node ../../kibana/preinstall_check",
     "kbn": "node ../../kibana/scripts/kbn",
+    "es": "node ../../kibana/scripts/es",
     "lint": "eslint .",
     "start": "plugin-helpers start",
     "test:server": "plugin-helpers test:server",

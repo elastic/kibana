@@ -26,6 +26,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private XPackInfoProvider: any;
   private xpackInfo: null | any;
   private chrome: any;
+  private shieldUser: any;
 
   constructor(
     uiModule: IModule,
@@ -57,11 +58,18 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     this.rootComponent = component;
   };
 
-  public hadValidLicense() {
+  public hasValidLicense() {
     if (!this.xpackInfo) {
       return false;
     }
     return this.xpackInfo.get('features.beats_management.licenseValid', false);
+  }
+
+  public licenseExpired() {
+    if (!this.xpackInfo) {
+      return false;
+    }
+    return this.xpackInfo.get('features.beats_management.licenseExpired', false);
   }
 
   public securityEnabled() {
@@ -72,11 +80,27 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     return this.xpackInfo.get('features.beats_management.securityEnabled', false);
   }
 
+  public getDefaultUserRoles() {
+    if (!this.xpackInfo) {
+      return [];
+    }
+
+    return this.xpackInfo.get('features.beats_management.defaultUserRoles');
+  }
+
+  public getCurrentUser() {
+    try {
+      return this.shieldUser;
+    } catch (e) {
+      return null;
+    }
+  }
+
   public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
     this.register(this.uiModule);
 
     this.hookAngular(() => {
-      if (this.hadValidLicense() && this.securityEnabled()) {
+      if (this.hasValidLicense()) {
         const registerSection = () =>
           this.management.register(pluginId, {
             display: 'Beats', // TODO these need to be config options not hard coded in the adapter
@@ -84,7 +108,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
             order: 30,
           });
         const getSection = () => this.management.getSection(pluginId);
-
         const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
 
         section.register(pluginId, {
@@ -119,11 +142,19 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   private hookAngular(done: () => any) {
-    this.chrome.dangerouslyGetActiveInjector().then(($injector: any) => {
+    this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
       const Private = $injector.get('Private');
       const xpackInfo = Private(this.XPackInfoProvider);
 
       this.xpackInfo = xpackInfo;
+      if (this.securityEnabled()) {
+        try {
+          this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+        } catch (e) {
+          // errors when security disabled, even though we check first because angular
+        }
+      }
+
       done();
     });
   }

@@ -566,5 +566,51 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
+  ml.fileStructure = ca({
+    urls: [
+      {
+        // eslint-disable-next-line max-len
+        fmt: '/_xpack/ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>',
+        req: {
+          charset: {
+            type: 'string'
+          },
+          format: {
+            type: 'string'
+          },
+          has_header_row: {
+            type: 'string'
+          },
+          column_names: {
+            type: 'string'
+          },
+          delimiter: {
+            type: 'string'
+          },
+          quote: {
+            type: 'string'
+          },
+          should_trim_fields: {
+            type: 'string'
+          },
+          grok_pattern: {
+            type: 'string'
+          },
+          timestamp_field: {
+            type: 'string'
+          },
+          timestamp_format: {
+            type: 'string'
+          },
+        }
+      },
+      {
+        fmt: '/_xpack/ml/find_file_structure'
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
 };
 

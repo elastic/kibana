@@ -26,7 +26,7 @@ import { LegacyLoggingServer } from './legacy_logging_server';
 test('correctly forwards log records.', () => {
   const loggingServer = new LegacyLoggingServer({ events: {} });
   const onLogMock = jest.fn();
-  loggingServer.on('log', onLogMock);
+  loggingServer.events.on('log', onLogMock);
 
   const timestamp = 1554433221100;
   const firstLogRecord = {

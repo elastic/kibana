@@ -19,6 +19,7 @@ export function Beat({ summary, metrics, ...props }) {
     metrics.beat_memory,
     metrics.beat_cpu_utilization,
     metrics.beat_os_load,
+    metrics.beat_handles,
   ];
 
   const wrapChild = ({ label, value, dataTestSubj }, index) => (
@@ -53,6 +54,8 @@ export function Beat({ summary, metrics, ...props }) {
     { label: 'Events emitted', value: formatMetric(summary.eventsEmitted, 'int_commas'), dataTestSubj: 'eventsEmitted' },
     { label: 'Events dropped', value: formatMetric(summary.eventsDropped, 'int_commas'), dataTestSubj: 'eventsDropped' },
     { label: 'Bytes sent', value: formatMetric(summary.bytesWritten, 'byte'), dataTestSubj: 'bytesWritten' },
+    { label: 'Handles limit (soft)', value: formatMetric(summary.handlesSoftLimit, 'byte'), dataTestSubj: 'handlesLimitSoft' },
+    { label: 'Handles limit (hard)', value: formatMetric(summary.handlesHardLimit, 'byte'), dataTestSubj: 'handlesLimitHard' },
   ];
 
   return (

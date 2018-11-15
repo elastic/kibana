@@ -27,6 +27,7 @@ import { notifications } from './plugins/notifications';
 import { kueryAutocomplete } from './plugins/kuery_autocomplete';
 import { canvas } from './plugins/canvas';
 import { infra } from './plugins/infra';
+import { rollup } from './plugins/rollup';
 import { taskManager } from './plugins/task_manager';
 import { alertService } from './plugins/alerts';
 
@@ -55,6 +56,7 @@ module.exports = function (kibana) {
     notifications(kibana),
     kueryAutocomplete(kibana),
     infra(kibana),
+    rollup(kibana),
     taskManager(kibana),
     alertService(kibana),
   ];

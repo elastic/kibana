@@ -10,7 +10,6 @@ import 'plugins/security/views/management/users';
 import 'plugins/security/views/management/roles';
 import 'plugins/security/views/management/edit_user';
 import 'plugins/security/views/management/edit_role/index';
-import 'plugins/security/views/management/management.less';
 import routes from 'ui/routes';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import '../../services/shield_user';
