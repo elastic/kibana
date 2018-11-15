@@ -69,9 +69,7 @@ export class BaseVisType {
   }
 
   shouldMarkAsExperimentalInUI() {
-    //we are not making a distinction in the UI if a plugin is experimental and/or labs.
-    //we just want to indicate it is special. the current flask icon is sufficient for that.
-    return this.stage === 'experimental' || this.stage === 'lab';
+    return this.stage === 'experimental';
   }
 
   get schemas() {
