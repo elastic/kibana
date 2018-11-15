@@ -10,10 +10,11 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
-  EuiIcon,
   EuiLink,
   EuiInMemoryTable,
 } from '@elastic/eui';
+
+import { ConnectionStatus } from '../components';
 
 export class RemoteClusterTableUi extends Component {
   static propTypes = {
@@ -68,7 +69,12 @@ export class RemoteClusterTableUi extends Component {
 
     const columns = [{
       field: 'name',
-      name: 'Name',
+      name: (
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterList.table.nameColumnTitle"
+          defaultMessage="Name"
+        />
+      ),
       sortable: true,
       truncateText: false,
       render: (name) => {
@@ -80,28 +86,33 @@ export class RemoteClusterTableUi extends Component {
       }
     }, {
       field: 'seeds',
-      name: 'Seeds',
+      name: (
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterList.table.seedsColumnTitle"
+          defaultMessage="Seeds"
+        />
+      ),
       truncateText: true,
       render: (seeds) => seeds.join(', '),
     }, {
       field: 'connected',
-      name: 'Connected',
+      name: (
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterList.table.connectedColumnTitle"
+          defaultMessage="Connected"
+        />
+      ),
       sortable: true,
-      render: (connected) => {
-        if (connected) {
-          return (
-            <EuiIcon type="check" color="success" />
-          );
-        }
-
-        return (
-          <EuiIcon type="cross" color="danger" />
-        );
-      },
+      render: (connected) => <ConnectionStatus isConnected={connected} />,
       width: '100px',
     }, {
       field: 'num_nodes_connected',
-      name: 'Connected nodes',
+      name: (
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterList.table.connectedNodesColumnTitle"
+          defaultMessage="Connected nodes"
+        />
+      ),
       sortable: true,
       width: '160px',
     }];
