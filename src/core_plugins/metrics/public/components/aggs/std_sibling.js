@@ -27,7 +27,12 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
   EuiComboBox,
+  EuiFormLabel,
+  EuiFormRow,
 } from '@elastic/eui';
 
 export const StandardSiblingAgg = props => {
@@ -43,15 +48,14 @@ export const StandardSiblingAgg = props => {
   const stdDev = {};
   if (model.type === 'std_deviation_bucket') {
     stdDev.sigma = (
-      <div className="vis_editor__std_deviation-sigma_item">
-        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>Sigma</label>
-        <input
-          id={htmlId('sigma')}
-          className="vis_editor__std_deviation-sigma"
-          value={model.sigma}
-          onChange={handleTextChange('sigma')}
-        />
-      </div>
+      <EuiFlexItem grow={false}>
+        <EuiFormRow id={htmlId('sigma')} label="Sigma">
+          <EuiFieldText
+            value={model.sigma}
+            onChange={handleTextChange('sigma')}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     );
 
     const modeOptions = [
@@ -65,16 +69,16 @@ export const StandardSiblingAgg = props => {
     });
 
     stdDev.mode = (
-      <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
-        <EuiComboBox
-          id={htmlId('mode')}
-          options={modeOptions}
-          selectedOptions={selectedModeOption ? [selectedModeOption] : []}
-          onChange={handleSelectChange('mode')}
-          singleSelection={true}
-        />
-      </div>
+      <EuiFlexItem>
+        <EuiFormRow id={htmlId('mode')} label="Mode">
+          <EuiComboBox
+            options={modeOptions}
+            selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+            onChange={handleSelectChange('mode')}
+            singleSelection={{ asPlainText: true }}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
     );
   }
 
@@ -86,27 +90,34 @@ export const StandardSiblingAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__std_sibling-metric">
-        <div className="vis_editor__label">Metric</div>
-        <MetricSelect
-          onChange={handleSelectChange('field')}
-          exclude={['percentile']}
-          metrics={siblings}
-          metric={model}
-          value={model.field}
-        />
-      </div>
-      { stdDev.sigma }
-      { stdDev.mode }
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('metric')}
+            label="Metric"
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              exclude={['percentile']}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        { stdDev.sigma }
+        { stdDev.mode }
+      </EuiFlexGroup>
     </AggRow>
   );
 };
