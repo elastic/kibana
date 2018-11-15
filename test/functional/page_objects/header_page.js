@@ -92,11 +92,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickTimepicker() {
-      const timePicker = await testSubjects.find('globalTimepickerButton');
-      timePicker.click();
+      const timePicker = await remote.waitForElementPresent(By.css('[data-test-subj="globalTimepickerButton"]'));
+      await remote.waitForElementEnabled(timePicker);
+      await testSubjects.click('globalTimepickerButton');
       await wait.forElementPresent(quickButtonSelector);
       const quickButton = await remote.findElement(quickButtonSelector);
-      await wait.forElementVisible(quickButton);
+      await remote.waitForElementEnabled(quickButton);
     }
 
     async clickQuickButton() {
@@ -221,8 +222,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async getToastMessage(findTimeout = defaultFindTimeout) {
-      const toastMessage =
-        await find.displayedByCssSelector('kbn-truncated.toast-message', findTimeout);
+      const toastMessage = await remote.findElement(By.css('kbn-truncated.toast-message'), findTimeout);
       const messageText = await toastMessage.getText();
       log.debug(`getToastMessage: ${messageText}`);
       return messageText;
@@ -232,8 +232,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('clickToastOK');
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findElement(By.css('button[ng-if="notif.accept"]'))
-          .click();
+        const toastOK =  await remote.findElement(By.css('button[ng-if="notif.accept"]'));
+        await toastOK.click();
       });
     }
 

@@ -165,7 +165,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async query(queryString) {
       const searchInput = await remote.findElement(By.css('input[aria-label="Search input"]'));
       await searchInput.clear();
-      await remote.type(By.css('input[aria-label="Search input"]'), queryString);
+      await remote.type(searchInput, queryString);
       const searchButton = await remote.findElement(By.css('button[aria-label="Search"]'));
       await searchButton.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -177,7 +177,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getDocTableIndex(index) {
-      const docTableIndex = await remote.findElement(By.css('tr.discover-table-row:nth-child(' + (index) + ')'));
+      const docTableIndex = await remote.findElement(By.css(`tr.discover-table-row:nth-child(${index})`));
       return await docTableIndex.getText();
     }
 
@@ -192,8 +192,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getMarks() {
-      const marks = await remote.findElements(By.css('mark'));
-      return await marks.getText();
+      return await remote.findElements(By.css('mark'));
     }
 
     async toggleSidebarCollapse() {
@@ -207,11 +206,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getSidebarWidth() {
       const sidebar = await remote.findElement(By.className('sidebar-list'));
-      return await sidebar.getProperty('clientWidth');
+      return await sidebar.getAttribute('clientWidth');
     }
 
     async hasNoResults() {
-      return await testSubjects.exists('discoverNoResults');
+      return await remote.isElementVisible(By.css('div[data-test-subj="discoverNoResults"]'));
     }
 
     async getNoResultsTimepicker() {
@@ -274,18 +273,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (!fieldFilterFormExists) {
+      const isFilterExpanded = await remote.isElementVisible(By.css('div[data-test-subj="discoverFieldFilter"]'));
+      if (!isFilterExpanded) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.existOrFail('discoverFieldFilter');
+        await remote.waitForElementPresent(By.css('div[data-test-subj="discoverFieldFilter"]'));
       }
     }
 
     async closeSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (fieldFilterFormExists) {
+      const isFilterExpanded = await remote.isElementVisible(By.css('div[data-test-subj="discoverFieldFilter"]'));
+      if (!isFilterExpanded) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter');
+        await remote.waitForElementNotPresent(By.css('div[data-test-subj="discoverFieldFilter"]'));
       }
     }
 

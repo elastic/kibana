@@ -17,8 +17,12 @@
  * under the License.
  */
 
+import { By } from 'selenium-webdriver';
+
+
 export function SharePageProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
+  const remote = getService('remote');
   const PageObjects = getPageObjects(['visualize', 'common']);
   const log = getService('log');
 
@@ -52,9 +56,9 @@ export function SharePageProvider({ getService, getPageObjects }) {
     }
 
     async checkShortenUrl() {
-      const shareForm = await testSubjects.find('shareUrlForm');
+      await testSubjects.find('shareUrlForm');
       await PageObjects.visualize.checkCheckbox('useShortUrl');
-      await shareForm.waitForDeletedByClassName('euiLoadingSpinner');
+      await remote.waitForElementNotPresent(By.css('.euiLoadingSpinner'));
     }
 
     async exportAsSavedObject() {
