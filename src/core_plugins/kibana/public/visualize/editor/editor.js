@@ -152,7 +152,7 @@ function VisEditor(
   };
 
   $scope.topNavMenu = [{
-    key: 'save',
+    key: i18n('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
     }),
@@ -197,7 +197,7 @@ function VisEditor(
       showSaveModal(saveModal);
     }
   }, {
-    key: 'share',
+    key: i18n('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
     description: i18n('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
       defaultMessage: 'Share Visualization',
     }),
@@ -219,7 +219,7 @@ function VisEditor(
       });
     }
   }, {
-    key: 'inspect',
+    key: i18n('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
     description: i18n('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
       defaultMessage: 'Open Inspector for visualization',
     }),
@@ -238,7 +238,7 @@ function VisEditor(
       }
     }
   }, {
-    key: 'refresh',
+    key: i18n('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
     description: i18n('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
       defaultMessage: 'Refresh',
     }),
