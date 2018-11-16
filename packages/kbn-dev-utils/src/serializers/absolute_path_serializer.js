@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
+export function createAbsolutePathSerializer(rootPath) {
+  return {
+    print: value => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
+    test: value => typeof value === 'string' && value.startsWith(rootPath),
+  };
+}
