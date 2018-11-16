@@ -1,7 +1,24 @@
 JOB:
-  - selenium
-  - intake
-  - x-pack
+  - kibana-intake
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
+  - x-pack-intake
+  - x-pack-ciGroup1
+  - x-pack-ciGroup2
+  - x-pack-ciGroup3
+  - x-pack-ciGroup4
+  - x-pack-ciGroup5
+  - x-pack-ciGroup6
 
 # `~` is yaml for `null`
 exclude: ~
