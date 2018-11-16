@@ -43,9 +43,9 @@ export function getEditPanelAction() {
       isDisabled: ({ embeddable }) =>
         !embeddable || !embeddable.metadata || !embeddable.metadata.editUrl,
       isVisible: ({ containerState }) => containerState.viewMode === DashboardViewMode.EDIT,
-      onClick: ({ embeddable }) => {
+      getHref: ({ embeddable }) => {
         if (embeddable && embeddable.metadata.editUrl) {
-          window.location.href = embeddable.metadata.editUrl;
+          return embeddable.metadata.editUrl;
         }
       },
     }
