@@ -7,6 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import moment from 'moment-timezone';
 import {
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +16,8 @@ import {
   EuiDescriptionListDescription,
   EuiSpacer,
   EuiTitle,
-  EuiLink
+  EuiLink,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n }  from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -38,7 +40,37 @@ const HEADERS = {
   }),
 };
 export class IndexLifecycleSummary extends Component {
-
+  constructor(props) {
+    super(props);
+    this.state = {
+      showStackPopover: false,
+    };
+  }
+  toggleStackPopover = () => {
+    this.setState({ showStackPopover: !this.state.showStackPopover });
+  }
+  renderStackPopoverButton(ilm) {
+    const button = (
+      <EuiButtonEmpty onClick={this.toggleStackPopover}>
+        <FormattedMessage
+          defaultMessage="Stack trace"
+          id="xpack.indexLifecycleMgmt.indexManagementTable.stackTraceButton"
+        />
+      </EuiButtonEmpty>
+    );
+    return (
+      <EuiPopover
+        id="popover"
+        button={button}
+        isOpen={this.state.showStackPopover}
+        closePopover={this.toggleStackPopover}
+      >
+        <div style={{ maxHeight: '400px', width: '900px', overflowY: 'scroll' }}>
+          <pre>{ilm.step_info.stack_trace}</pre>
+        </div>
+      </EuiPopover>
+    );
+  }
   buildRows() {
     const { index: { ilm = {} } } = this.props;
     const rows = {
@@ -103,6 +135,7 @@ export class IndexLifecycleSummary extends Component {
               iconType="cross"
             >
               {ilm.step_info.type}: {ilm.step_info.reason}
+              {this.renderStackPopoverButton(ilm)}
             </EuiCallOut>
           </Fragment>
         ) : null}
