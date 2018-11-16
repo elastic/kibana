@@ -6,6 +6,13 @@
 
 import { AppActions } from './app';
 
+describe('#all', () => {
+  test(`returns app:*`, () => {
+    const appActions = new AppActions();
+    expect(appActions.all).toBe('app:*');
+  });
+});
+
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((appid: any) => {
     test(`appId of ${JSON.stringify(appid)} throws error`, () => {
