@@ -38,7 +38,7 @@ export const SplitByFilter = props => {
         <EuiFormRow
           id={htmlId('group')}
           label={(<FormattedMessage
-            id="metrics.splits.filter.groupByLabel"
+            id="tsvb.splits.filter.groupByLabel"
             defaultMessage="Group by"
           />)}
         >
@@ -52,7 +52,7 @@ export const SplitByFilter = props => {
         <EuiFormRow
           id={htmlId('query')}
           label={(<FormattedMessage
-            id="metrics.splits.filter.queryStringLabel"
+            id="tsvb.splits.filter.queryStringLabel"
             defaultMessage="Query string"
           />)}
         >

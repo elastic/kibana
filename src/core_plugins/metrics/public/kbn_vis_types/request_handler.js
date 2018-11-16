@@ -23,7 +23,7 @@ import { timefilter } from 'ui/timefilter';
 import { BuildESQueryProvider } from 'ui/courier';
 
 const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http, i18n) {
-  const notify = new Notifier({ location: i18n('metrics.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
+  const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
   const buildEsQuery = Private(BuildESQueryProvider);
 
   return {

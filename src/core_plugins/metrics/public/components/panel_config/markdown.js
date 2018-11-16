@@ -85,15 +85,15 @@ class MarkdownPanelConfigUi extends Component {
 
     const alignOptions = [
       {
-        label: intl.formatMessage({ id: 'metrics.markdown.alignOptions.topLabel', defaultMessage: 'Top' }),
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.topLabel', defaultMessage: 'Top' }),
         value: 'top'
       },
       {
-        label: intl.formatMessage({ id: 'metrics.markdown.alignOptions.middleLabel', defaultMessage: 'Middle' }),
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.middleLabel', defaultMessage: 'Middle' }),
         value: 'middle'
       },
       {
-        label: intl.formatMessage({ id: 'metrics.markdown.alignOptions.bottomLabel', defaultMessage: 'Bottom' }),
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.bottomLabel', defaultMessage: 'Bottom' }),
         value: 'bottom'
       }
     ];
@@ -120,7 +120,7 @@ class MarkdownPanelConfigUi extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.markdown.optionsTab.dataLabel"
+                  id="tsvb.markdown.optionsTab.dataLabel"
                   defaultMessage="Data"
                 />
               </span>
@@ -140,7 +140,7 @@ class MarkdownPanelConfigUi extends Component {
                 <EuiFormRow
                   id={htmlId('panelFilter')}
                   label={(<FormattedMessage
-                    id="metrics.markdown.optionsTab.panelFilterLabel"
+                    id="tsvb.markdown.optionsTab.panelFilterLabel"
                     defaultMessage="Panel filter"
                   />)}
                   fullWidth
@@ -155,7 +155,7 @@ class MarkdownPanelConfigUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
                   <FormattedMessage
-                    id="metrics.markdown.optionsTab.ignoreGlobalFilterLabel"
+                    id="tsvb.markdown.optionsTab.ignoreGlobalFilterLabel"
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
@@ -175,7 +175,7 @@ class MarkdownPanelConfigUi extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.markdown.optionsTab.styleLabel"
+                  id="tsvb.markdown.optionsTab.styleLabel"
                   defaultMessage="Style"
                 />
               </span>
@@ -186,7 +186,7 @@ class MarkdownPanelConfigUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel style={{ marginBottom: 0 }}>
                   <FormattedMessage
-                    id="metrics.markdown.optionsTab.backgroundColorLabel"
+                    id="tsvb.markdown.optionsTab.backgroundColorLabel"
                     defaultMessage="Background color:"
                   />
                 </EuiFormLabel>
@@ -201,7 +201,7 @@ class MarkdownPanelConfigUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel style={{ marginBottom: 0 }}>
                   <FormattedMessage
-                    id="metrics.markdown.optionsTab.showScrollbarsLabel"
+                    id="tsvb.markdown.optionsTab.showScrollbarsLabel"
                     defaultMessage="Show scrollbars?"
                   />
                 </EuiFormLabel>
@@ -216,7 +216,7 @@ class MarkdownPanelConfigUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('valign')}>
                   <FormattedMessage
-                    id="metrics.markdown.optionsTab.verticalAlignmentLabel"
+                    id="tsvb.markdown.optionsTab.verticalAlignmentLabel"
                     defaultMessage="Vertical alignment:"
                   />
                 </EuiFormLabel>
@@ -238,7 +238,7 @@ class MarkdownPanelConfigUi extends Component {
             <EuiTitle size="xxs">
               <span>
                 <FormattedMessage
-                  id="metrics.markdown.optionsTab.custoCSSLabel"
+                  id="tsvb.markdown.optionsTab.custoCSSLabel"
                   defaultMessage="Custom CSS (supports Less)"
                 />
               </span>
@@ -265,7 +265,7 @@ class MarkdownPanelConfigUi extends Component {
             onClick={() => this.switchTab('markdown')}
           >
             <FormattedMessage
-              id="metrics.markdown.markdownTab.markdownButtonLabel"
+              id="tsvb.markdown.markdownTab.markdownButtonLabel"
               defaultMessage="Markdown"
             />
           </EuiTab>
@@ -275,7 +275,7 @@ class MarkdownPanelConfigUi extends Component {
             onClick={() => this.switchTab('data')}
           >
             <FormattedMessage
-              id="metrics.markdown.dataTab.dataButtonLabel"
+              id="tsvb.markdown.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
@@ -284,7 +284,7 @@ class MarkdownPanelConfigUi extends Component {
             onClick={() => this.switchTab('options')}
           >
             <FormattedMessage
-              id="metrics.markdown.optionsTab.panelOptionsButtonLabel"
+              id="tsvb.markdown.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
             />
           </EuiTab>

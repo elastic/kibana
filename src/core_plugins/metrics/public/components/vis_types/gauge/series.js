@@ -99,7 +99,7 @@ function GaugeSeriesUi(props) {
             onClick={() => props.switchTab('metrics')}
           >
             <FormattedMessage
-              id="metrics.gauge.dataTab.metricsButtonLabel"
+              id="tsvb.gauge.dataTab.metricsButtonLabel"
               defaultMessage="Metrics"
             />
           </EuiTab>
@@ -109,7 +109,7 @@ function GaugeSeriesUi(props) {
             onClick={() => props.switchTab('options')}
           >
             <FormattedMessage
-              id="metrics.gauge.optionsTab.optionsButtonLabel"
+              id="tsvb.gauge.optionsTab.optionsButtonLabel"
               defaultMessage="Options"
             />
           </EuiTab>
@@ -134,14 +134,14 @@ function GaugeSeriesUi(props) {
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={(<FormattedMessage
-            id="metrics.gauge.sort.dragToSortTooltip"
+            id="tsvb.gauge.sort.dragToSortTooltip"
             defaultMessage="Drag to sort"
           />)}
         >
           <EuiButtonIcon
             className="tvbSeries__sortHandle"
             iconType="grab"
-            aria-label={intl.formatMessage({ id: 'metrics.gauge.sort.sortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.gauge.sort.sortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
             onKeyDown={createUpDownHandler(props.onShouldSortItem)}
           />
         </EuiToolTip>
@@ -163,7 +163,7 @@ function GaugeSeriesUi(props) {
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({ id: 'metrics.gauge.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.gauge.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
@@ -176,7 +176,7 @@ function GaugeSeriesUi(props) {
           <EuiFieldText
             fullWidth
             onChange={handleChange('label')}
-            placeholder={intl.formatMessage({ id: 'metrics.gauge.editor.labelPlaceholder', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({ id: 'tsvb.gauge.editor.labelPlaceholder', defaultMessage: 'Label' })}
             value={model.label}
           />
         </EuiFlexItem>
@@ -185,9 +185,9 @@ function GaugeSeriesUi(props) {
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip={intl.formatMessage({ id: 'metrics.gauge.editor.addSeriesTooltip', defaultMessage: 'Add Series' })}
-            deleteTooltip={intl.formatMessage({ id: 'metrics.gauge.editor.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
-            cloneTooltip={intl.formatMessage({ id: 'metrics.gauge.editor.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
+            addTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.addSeriesTooltip', defaultMessage: 'Add Series' })}
+            deleteTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
+            cloneTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}

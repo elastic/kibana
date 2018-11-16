@@ -37,21 +37,21 @@ const SplitByTermsUi = props => {
   const { metrics } = model;
   const defaultCount = {
     value: '_count',
-    label: intl.formatMessage({ id: 'metrics.splits.terms.defaultCountLabel', defaultMessage: 'Doc Count (default)' })
+    label: intl.formatMessage({ id: 'tsvb.splits.terms.defaultCountLabel', defaultMessage: 'Doc Count (default)' })
   };
   const terms = {
     value: '_term',
-    label: intl.formatMessage({ id: 'metrics.splits.terms.termsLabel', defaultMessage: 'Terms' })
+    label: intl.formatMessage({ id: 'tsvb.splits.terms.termsLabel', defaultMessage: 'Terms' })
   };
 
   const dirOptions = [
     {
       value: 'desc',
-      label: intl.formatMessage({ id: 'metrics.splits.terms.dirOptions.descendingLabel', defaultMessage: 'Descending' })
+      label: intl.formatMessage({ id: 'tsvb.splits.terms.dirOptions.descendingLabel', defaultMessage: 'Descending' })
     },
     {
       value: 'asc',
-      label: intl.formatMessage({ id: 'metrics.splits.terms.dirOptions.ascendingLabel', defaultMessage: 'Ascending' })
+      label: intl.formatMessage({ id: 'tsvb.splits.terms.dirOptions.ascendingLabel', defaultMessage: 'Ascending' })
     },
   ];
   const selectedDirectionOption = dirOptions.find(option => {
@@ -65,7 +65,7 @@ const SplitByTermsUi = props => {
           <EuiFormRow
             id={htmlId('group')}
             label={(<FormattedMessage
-              id="metrics.splits.terms.groupByLabel"
+              id="tsvb.splits.terms.groupByLabel"
               defaultMessage="Group by"
             />)}
           >
@@ -79,7 +79,7 @@ const SplitByTermsUi = props => {
           <EuiFormRow
             id={htmlId('by')}
             label={(<FormattedMessage
-              id="metrics.splits.terms.byLabel"
+              id="tsvb.splits.terms.byLabel"
               defaultMessage="By"
             />)}
           >
@@ -100,12 +100,12 @@ const SplitByTermsUi = props => {
           <EuiFormRow
             id={htmlId('top')}
             label={(<FormattedMessage
-              id="metrics.splits.terms.topLabel"
+              id="tsvb.splits.terms.topLabel"
               defaultMessage="Top"
             />)}
           >
             <EuiFieldNumber
-              placeholder={intl.formatMessage({ id: 'metrics.splits.terms.top.sizePlaceholder', defaultMessage: 'Size' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.splits.terms.top.sizePlaceholder', defaultMessage: 'Size' })}
               value={Number(model.terms_size)}
               onChange={handleTextChange('terms_size')}
             />
@@ -115,7 +115,7 @@ const SplitByTermsUi = props => {
           <EuiFormRow
             id={htmlId('order')}
             label={(<FormattedMessage
-              id="metrics.splits.terms.orderByLabel"
+              id="tsvb.splits.terms.orderByLabel"
               defaultMessage="Order by"
             />)}
           >
@@ -133,7 +133,7 @@ const SplitByTermsUi = props => {
           <EuiFormRow
             id={htmlId('direction')}
             label={(<FormattedMessage
-              id="metrics.splits.terms.directionLabel"
+              id="tsvb.splits.terms.directionLabel"
               defaultMessage="Direction"
             />)}
           >

@@ -85,12 +85,12 @@ class GaugePanelConfigUi extends Component {
     const styleOptions = [
       {
         label: intl.formatMessage({
-          id: 'metrics.gauge.styleOptions.circleLabel', defaultMessage: 'Circle' }),
+          id: 'tsvb.gauge.styleOptions.circleLabel', defaultMessage: 'Circle' }),
         value: 'circle'
       },
       {
         label: intl.formatMessage({
-          id: 'metrics.gauge.styleOptions.halfCircleLabel', defaultMessage: 'Half Circle' }),
+          id: 'tsvb.gauge.styleOptions.halfCircleLabel', defaultMessage: 'Half Circle' }),
         value: 'half'
       }
     ];
@@ -117,7 +117,7 @@ class GaugePanelConfigUi extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.gauge.optionsTab.dataLabel"
+                  id="tsvb.gauge.optionsTab.dataLabel"
                   defaultMessage="Data"
                 />
               </span>
@@ -137,7 +137,7 @@ class GaugePanelConfigUi extends Component {
                 <EuiFormRow
                   id={htmlId('panelFilter')}
                   label={(<FormattedMessage
-                    id="metrics.gauge.optionsTab.panelFilterLabel"
+                    id="tsvb.gauge.optionsTab.panelFilterLabel"
                     defaultMessage="Panel filter"
                   />)}
                   fullWidth
@@ -152,7 +152,7 @@ class GaugePanelConfigUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
                   <FormattedMessage
-                    id="metrics.gauge.optionsTab.ignoreGlobalFilterLabel"
+                    id="tsvb.gauge.optionsTab.ignoreGlobalFilterLabel"
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
@@ -172,7 +172,7 @@ class GaugePanelConfigUi extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.gauge.optionsTab.styleLabel"
+                  id="tsvb.gauge.optionsTab.styleLabel"
                   defaultMessage="Style"
                 />
               </span>
@@ -184,7 +184,7 @@ class GaugePanelConfigUi extends Component {
                 <EuiFormRow
                   id={htmlId('gaugeMax')}
                   label={(<FormattedMessage
-                    id="metrics.gauge.optionsTab.gaugeMaxLabel"
+                    id="tsvb.gauge.optionsTab.gaugeMaxLabel"
                     defaultMessage="Gauge max (empty for auto)"
                   />)}
                 >
@@ -205,7 +205,7 @@ class GaugePanelConfigUi extends Component {
                 <EuiFormRow
                   id={htmlId('gaugeStyle')}
                   label={(<FormattedMessage
-                    id="metrics.gauge.optionsTab.gaugeStyleLabel"
+                    id="tsvb.gauge.optionsTab.gaugeStyleLabel"
                     defaultMessage="Gauge style"
                   />)}
                 >
@@ -222,7 +222,7 @@ class GaugePanelConfigUi extends Component {
                 <EuiFormRow
                   id={htmlId('innerLine')}
                   label={(<FormattedMessage
-                    id="metrics.gauge.optionsTab.innerLineWidthLabel"
+                    id="tsvb.gauge.optionsTab.innerLineWidthLabel"
                     defaultMessage="Inner line width"
                   />)}
                 >
@@ -236,7 +236,7 @@ class GaugePanelConfigUi extends Component {
                 <EuiFormRow
                   id={htmlId('gaugeLine')}
                   label={(<FormattedMessage
-                    id="metrics.gauge.optionsTab.gaugerLineWidthLabel"
+                    id="tsvb.gauge.optionsTab.gaugerLineWidthLabel"
                     defaultMessage="Gauge line width"
                   />)}
                 >
@@ -254,7 +254,7 @@ class GaugePanelConfigUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel style={{ marginBottom: 0 }}>
                   <FormattedMessage
-                    id="metrics.gauge.optionsTab.backgroundColorLabel"
+                    id="tsvb.gauge.optionsTab.backgroundColorLabel"
                     defaultMessage="Background color:"
                   />
                 </EuiFormLabel>
@@ -269,7 +269,7 @@ class GaugePanelConfigUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel style={{ marginBottom: 0 }}>
                   <FormattedMessage
-                    id="metrics.gauge.optionsTab.innerColorLabel"
+                    id="tsvb.gauge.optionsTab.innerColorLabel"
                     defaultMessage="Inner color:"
                   />
                 </EuiFormLabel>
@@ -288,7 +288,7 @@ class GaugePanelConfigUi extends Component {
             <EuiTitle size="xxs">
               <span>
                 <FormattedMessage
-                  id="metrics.gauge.optionsTab.colorRulesLabel"
+                  id="tsvb.gauge.optionsTab.colorRulesLabel"
                   defaultMessage="Color rules"
                 />
               </span>
@@ -315,7 +315,7 @@ class GaugePanelConfigUi extends Component {
             onClick={() => this.switchTab('data')}
           >
             <FormattedMessage
-              id="metrics.gauge.dataTab.dataButtonLabel"
+              id="tsvb.gauge.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
@@ -324,7 +324,7 @@ class GaugePanelConfigUi extends Component {
             onClick={() => this.switchTab('options')}
           >
             <FormattedMessage
-              id="metrics.gauge.optionsTab.panelOptionsButtonLabel"
+              id="tsvb.gauge.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
             />
           </EuiTab>

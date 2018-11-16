@@ -28,19 +28,19 @@ function GroupBySelectUi(props) {
   const { intl } = props;
   const modeOptions = [
     {
-      label: intl.formatMessage({ id: 'metrics.splits.groupBySelect.modeOptions.everythingLabel', defaultMessage: 'Everything' }),
+      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.everythingLabel', defaultMessage: 'Everything' }),
       value: 'everything'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.splits.groupBySelect.modeOptions.filterLabel', defaultMessage: 'Filter' }),
+      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.filterLabel', defaultMessage: 'Filter' }),
       value: 'filter'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.splits.groupBySelect.modeOptions.filtersLabel', defaultMessage: 'Filters' }),
+      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.filtersLabel', defaultMessage: 'Filters' }),
       value: 'filters'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.splits.groupBySelect.modeOptions.termsLabel', defaultMessage: 'Terms' }),
+      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.termsLabel', defaultMessage: 'Terms' }),
       value: 'terms'
     }
   ];

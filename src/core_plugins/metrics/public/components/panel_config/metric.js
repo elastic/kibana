@@ -86,7 +86,7 @@ class MetricPanelConfig extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.metric.optionsTab.dataLabel"
+                  id="tsvb.metric.optionsTab.dataLabel"
                   defaultMessage="Data"
                 />
               </span>
@@ -106,7 +106,7 @@ class MetricPanelConfig extends Component {
                 <EuiFormRow
                   id={htmlId('panelFilter')}
                   label={(<FormattedMessage
-                    id="metrics.metric.optionsTab.panelFilterLabel"
+                    id="tsvb.metric.optionsTab.panelFilterLabel"
                     defaultMessage="Panel filter"
                   />)}
                   fullWidth
@@ -121,7 +121,7 @@ class MetricPanelConfig extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
                   <FormattedMessage
-                    id="metrics.metric.optionsTab.ignoreGlobalFilterLabel"
+                    id="tsvb.metric.optionsTab.ignoreGlobalFilterLabel"
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
@@ -141,7 +141,7 @@ class MetricPanelConfig extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.metric.optionsTab.colorRulesLabel"
+                  id="tsvb.metric.optionsTab.colorRulesLabel"
                   defaultMessage="Color rules"
                 />
               </span>
@@ -165,7 +165,7 @@ class MetricPanelConfig extends Component {
             onClick={() => this.switchTab('data')}
           >
             <FormattedMessage
-              id="metrics.metric.dataTab.dataButtonLabel"
+              id="tsvb.metric.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
@@ -175,7 +175,7 @@ class MetricPanelConfig extends Component {
             data-test-subj="metricEditorPanelOptionsBtn"
           >
             <FormattedMessage
-              id="metrics.metric.optionsTab.panelOptionsButtonLabel"
+              id="tsvb.metric.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
             />
           </EuiTab>

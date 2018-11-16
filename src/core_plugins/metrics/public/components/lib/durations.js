@@ -21,50 +21,50 @@ import { i18n } from '@kbn/i18n';
 
 export const durationOutputOptions = [
   {
-    label: i18n.translate('metrics.durationOptions.millisecondsLabel', { defaultMessage: 'milliseconds' }),
+    label: i18n.translate('tsvb.durationOptions.millisecondsLabel', { defaultMessage: 'milliseconds' }),
     value: 'ms'
   },
   {
-    label: i18n.translate('metrics.durationOptions.secondsLabel', { defaultMessage: 'seconds' }),
+    label: i18n.translate('tsvb.durationOptions.secondsLabel', { defaultMessage: 'seconds' }),
     value: 's'
   },
   {
-    label: i18n.translate('metrics.durationOptions.minutesLabel', { defaultMessage: 'minutes' }),
+    label: i18n.translate('tsvb.durationOptions.minutesLabel', { defaultMessage: 'minutes' }),
     value: 'm'
   },
   {
-    label: i18n.translate('metrics.durationOptions.hoursLabel', { defaultMessage: 'hours' }),
+    label: i18n.translate('tsvb.durationOptions.hoursLabel', { defaultMessage: 'hours' }),
     value: 'h'
   },
   {
-    label: i18n.translate('metrics.durationOptions.daysLabel', { defaultMessage: 'days' }),
+    label: i18n.translate('tsvb.durationOptions.daysLabel', { defaultMessage: 'days' }),
     value: 'd'
   },
   {
-    label: i18n.translate('metrics.durationOptions.weeksLabel', { defaultMessage: 'weeks' }),
+    label: i18n.translate('tsvb.durationOptions.weeksLabel', { defaultMessage: 'weeks' }),
     value: 'w'
   },
   {
-    label: i18n.translate('metrics.durationOptions.monthsLabel', { defaultMessage: 'months' }),
+    label: i18n.translate('tsvb.durationOptions.monthsLabel', { defaultMessage: 'months' }),
     value: 'M'
   },
   {
-    label: i18n.translate('metrics.durationOptions.yearsLabel', { defaultMessage: 'years' }),
+    label: i18n.translate('tsvb.durationOptions.yearsLabel', { defaultMessage: 'years' }),
     value: 'Y'
   }
 ];
 
 export const durationInputOptions = [
   {
-    label: i18n.translate('metrics.durationOptions.picosecondsLabel', { defaultMessage: 'picoseconds' }),
+    label: i18n.translate('tsvb.durationOptions.picosecondsLabel', { defaultMessage: 'picoseconds' }),
     value: 'ps'
   },
   {
-    label: i18n.translate('metrics.durationOptions.nanosecondsLabel', { defaultMessage: 'nanoseconds' }),
+    label: i18n.translate('tsvb.durationOptions.nanosecondsLabel', { defaultMessage: 'nanoseconds' }),
     value: 'ns'
   },
   {
-    label: i18n.translate('metrics.durationOptions.microsecondsLabel', { defaultMessage: 'microseconds' }),
+    label: i18n.translate('tsvb.durationOptions.microsecondsLabel', { defaultMessage: 'microseconds' }),
     value: 'us' },
   ...durationOutputOptions
 ];

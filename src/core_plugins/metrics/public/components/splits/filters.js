@@ -36,7 +36,7 @@ function SplitByFilters(props) {
           <EuiFormRow
             id={htmlId('group')}
             label={(<FormattedMessage
-              id="metrics.splits.filters.groupByLabel"
+              id="tsvb.splits.filters.groupByLabel"
               defaultMessage="Group by"
             />)}
           >

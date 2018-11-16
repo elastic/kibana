@@ -87,7 +87,7 @@ class TopNPanelConfig extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.topN.optionsTab.dataLabel"
+                  id="tsvb.topN.optionsTab.dataLabel"
                   defaultMessage="Data"
                 />
               </span>
@@ -96,13 +96,13 @@ class TopNPanelConfig extends Component {
             <EuiFormRow
               id={htmlId('itemUrl')}
               label={(<FormattedMessage
-                id="metrics.topN.optionsTab.itemUrlLabel"
+                id="tsvb.topN.optionsTab.itemUrlLabel"
                 defaultMessage="Item url"
               />)}
               helpText={
                 <span>
                   <FormattedMessage
-                    id="metrics.topN.optionsTab.itemUrlDescription"
+                    id="tsvb.topN.optionsTab.itemUrlDescription"
                     defaultMessage="This supports mustache templating. {key} is set to the term."
                     values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
                   />
@@ -130,7 +130,7 @@ class TopNPanelConfig extends Component {
                 <EuiFormRow
                   id={htmlId('panelFilter')}
                   label={(<FormattedMessage
-                    id="metrics.topN.optionsTab.panelFilterLabel"
+                    id="tsvb.topN.optionsTab.panelFilterLabel"
                     defaultMessage="Panel filter"
                   />)}
                   fullWidth
@@ -145,7 +145,7 @@ class TopNPanelConfig extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
                   <FormattedMessage
-                    id="metrics.topN.optionsTab.ignoreGlobalFilterLabel"
+                    id="tsvb.topN.optionsTab.ignoreGlobalFilterLabel"
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
@@ -165,7 +165,7 @@ class TopNPanelConfig extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.topN.optionsTab.styleLabel"
+                  id="tsvb.topN.optionsTab.styleLabel"
                   defaultMessage="Style"
                 />
               </span>
@@ -176,7 +176,7 @@ class TopNPanelConfig extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel style={{ marginBottom: 0 }}>
                   <FormattedMessage
-                    id="metrics.topN.optionsTab.backgroundColorLabel"
+                    id="tsvb.topN.optionsTab.backgroundColorLabel"
                     defaultMessage="Background color:"
                   />
                 </EuiFormLabel>
@@ -195,7 +195,7 @@ class TopNPanelConfig extends Component {
             <EuiTitle size="xxs">
               <span>
                 <FormattedMessage
-                  id="metrics.topN.optionsTab.colorRulesLabel"
+                  id="tsvb.topN.optionsTab.colorRulesLabel"
                   defaultMessage="Color rules"
                 />
               </span>
@@ -221,7 +221,7 @@ class TopNPanelConfig extends Component {
             onClick={() => this.switchTab('data')}
           >
             <FormattedMessage
-              id="metrics.topN.dataTab.dataButtonLabel"
+              id="tsvb.topN.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
@@ -230,7 +230,7 @@ class TopNPanelConfig extends Component {
             onClick={() => this.switchTab('options')}
           >
             <FormattedMessage
-              id="metrics.topN.optionsTab.panelOptionsButtonLabel"
+              id="tsvb.topN.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
             />
           </EuiTab>

@@ -23,13 +23,13 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 const unitLookup = {
-  s: i18n.translate('metrics.axisLabelOptions.secondsLabel', { defaultMessage: 'seconds' }),
-  m: i18n.translate('metrics.axisLabelOptions.minutesLabel', { defaultMessage: 'minutes' }),
-  h: i18n.translate('metrics.axisLabelOptions.hoursLabel', { defaultMessage: 'hours' }),
-  d: i18n.translate('metrics.axisLabelOptions.daysLabel', { defaultMessage: 'days' }),
-  w: i18n.translate('metrics.axisLabelOptions.weeksLabel', { defaultMessage: 'weeks' }),
-  M: i18n.translate('metrics.axisLabelOptions.monthsLabel', { defaultMessage: 'months' }),
-  y: i18n.translate('metrics.axisLabelOptions.yearsLabel', { defaultMessage: 'years' })
+  s: i18n.translate('tsvb.axisLabelOptions.secondsLabel', { defaultMessage: 'seconds' }),
+  m: i18n.translate('tsvb.axisLabelOptions.minutesLabel', { defaultMessage: 'minutes' }),
+  h: i18n.translate('tsvb.axisLabelOptions.hoursLabel', { defaultMessage: 'hours' }),
+  d: i18n.translate('tsvb.axisLabelOptions.daysLabel', { defaultMessage: 'days' }),
+  w: i18n.translate('tsvb.axisLabelOptions.weeksLabel', { defaultMessage: 'weeks' }),
+  M: i18n.translate('tsvb.axisLabelOptions.monthsLabel', { defaultMessage: 'months' }),
+  y: i18n.translate('tsvb.axisLabelOptions.yearsLabel', { defaultMessage: 'years' })
 };
 export function getAxisLabelString(interval) {
   const units = _.pluck(_.clone(relativeOptions).reverse(), 'value')
@@ -40,7 +40,7 @@ export function getAxisLabelString(interval) {
     if (Math.abs(as) > 1) {
       const unitValue = Math.round(Math.abs(as));
       const unitString = unitLookup[units[i]];
-      return i18n.translate('metrics.axisLabel.axisStringText',
+      return i18n.translate('tsvb.axisLabel.axisStringText',
         { defaultMessage: 'per {unitValue} {unitString}', values: { unitValue, unitString } });
     }
   }

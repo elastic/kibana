@@ -68,8 +68,8 @@ class FilterItemsUi extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            placeholder={intl.formatMessage({ id: 'metrics.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
-            aria-label={intl.formatMessage({ id: 'metrics.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
+            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
             onChange={this.handleChange(model, 'filter')}
             value={model.filter}
             fullWidth
@@ -77,8 +77,8 @@ class FilterItemsUi extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            placeholder={intl.formatMessage({ id: 'metrics.splits.filterItems.labelPlaceholder', defaultMessage: 'Label' })}
-            aria-label={intl.formatMessage({ id: 'metrics.splits.filterItems.labelAriaLabel', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelPlaceholder', defaultMessage: 'Label' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelAriaLabel', defaultMessage: 'Label' })}
             onChange={this.handleChange(model, 'label')}
             value={model.label}
             fullWidth

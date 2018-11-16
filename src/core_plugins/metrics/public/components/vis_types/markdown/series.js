@@ -97,7 +97,7 @@ function MarkdownSeriesUi(props) {
             onClick={() => props.switchTab('metrics')}
           >
             <FormattedMessage
-              id="metrics.markdown.dataTab.metricsButtonLabel"
+              id="tsvb.markdown.dataTab.metricsButtonLabel"
               defaultMessage="Metrics"
             />
           </EuiTab>
@@ -107,7 +107,7 @@ function MarkdownSeriesUi(props) {
             onClick={() => props.switchTab('options')}
           >
             <FormattedMessage
-              id="metrics.markdown.optionsTab.optionsButtonLabel"
+              id="tsvb.markdown.optionsTab.optionsButtonLabel"
               defaultMessage="Options"
             />
           </EuiTab>
@@ -130,7 +130,7 @@ function MarkdownSeriesUi(props) {
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
-            aria-label={intl.formatMessage({ id: 'metrics.markdown.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.markdown.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
@@ -139,7 +139,7 @@ function MarkdownSeriesUi(props) {
           <EuiFieldText
             fullWidth
             onChange={handleChange('label')}
-            placeholder={intl.formatMessage({ id: 'metrics.markdown.editor.labelPlaceholder', defaultMessage: 'Label' })}
+            placeholder={intl.formatMessage({ id: 'tsvb.markdown.editor.labelPlaceholder', defaultMessage: 'Label' })}
             value={model.label}
           />
         </EuiFlexItem>
@@ -148,16 +148,16 @@ function MarkdownSeriesUi(props) {
           <EuiFieldText
             fullWidth
             onChange={handleChange('var_name')}
-            placeholder={intl.formatMessage({ id: 'metrics.markdown.editor.variableNamePlaceholder', defaultMessage: 'Variable name' })}
+            placeholder={intl.formatMessage({ id: 'tsvb.markdown.editor.variableNamePlaceholder', defaultMessage: 'Variable name' })}
             value={model.var_name}
           />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip={intl.formatMessage({ id: 'metrics.markdown.editor.addSeriesTooltip', defaultMessage: 'Add series' })}
-            deleteTooltip={intl.formatMessage({ id: 'metrics.markdown.editor.deleteSeriesTooltip', defaultMessage: 'Delete series' })}
-            cloneTooltip={intl.formatMessage({ id: 'metrics.markdown.editor.cloneSeriesTooltip', defaultMessage: 'Clone series' })}
+            addTooltip={intl.formatMessage({ id: 'tsvb.markdown.editor.addSeriesTooltip', defaultMessage: 'Add series' })}
+            deleteTooltip={intl.formatMessage({ id: 'tsvb.markdown.editor.deleteSeriesTooltip', defaultMessage: 'Delete series' })}
+            cloneTooltip={intl.formatMessage({ id: 'tsvb.markdown.editor.cloneSeriesTooltip', defaultMessage: 'Clone series' })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}

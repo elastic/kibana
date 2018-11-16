@@ -80,7 +80,7 @@ class TablePanelConfig extends Component {
               <EuiText>
                 <p>
                   <FormattedMessage
-                    id="metrics.table.dataTab.defineFieldDescription"
+                    id="tsvb.table.dataTab.defineFieldDescription"
                     defaultMessage="For the table visualization you need to define a field to group by using a terms aggregation."
                   />
                 </p>
@@ -92,7 +92,7 @@ class TablePanelConfig extends Component {
                   <EuiFormRow
                     id={htmlId('field')}
                     label={(<FormattedMessage
-                      id="metrics.table.dataTab.groupByFieldLabel"
+                      id="tsvb.table.dataTab.groupByFieldLabel"
                       defaultMessage="Group by field"
                     />)}
                   >
@@ -109,7 +109,7 @@ class TablePanelConfig extends Component {
                   <EuiFormRow
                     id={htmlId('pivotLabelInput')}
                     label={(<FormattedMessage
-                      id="metrics.table.dataTab.columnLabel"
+                      id="tsvb.table.dataTab.columnLabel"
                       defaultMessage="Column label"
                     />)}
                     fullWidth
@@ -126,7 +126,7 @@ class TablePanelConfig extends Component {
                   <EuiFormRow
                     id={htmlId('pivotRowsInput')}
                     label={(<FormattedMessage
-                      id="metrics.table.dataTab.rowsLabel"
+                      id="tsvb.table.dataTab.rowsLabel"
                       defaultMessage="Rows"
                     />)}
                   >
@@ -161,7 +161,7 @@ class TablePanelConfig extends Component {
             <EuiTitle size="s">
               <span>
                 <FormattedMessage
-                  id="metrics.table.optionsTab.dataLabel"
+                  id="tsvb.table.optionsTab.dataLabel"
                   defaultMessage="Data"
                 />
               </span>
@@ -170,13 +170,13 @@ class TablePanelConfig extends Component {
             <EuiFormRow
               id={htmlId('drilldownInput')}
               label={(<FormattedMessage
-                id="metrics.table.optionsTab.itemUrlLabel"
+                id="tsvb.table.optionsTab.itemUrlLabel"
                 defaultMessage="Item url"
               />)}
               helpText={
                 <span>
                   <FormattedMessage
-                    id="metrics.table.optionsTab.itemUrlDescription"
+                    id="tsvb.table.optionsTab.itemUrlDescription"
                     defaultMessage="This supports mustache templating. {key} is set to the term."
                     values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
                   />
@@ -204,7 +204,7 @@ class TablePanelConfig extends Component {
                 <EuiFormRow
                   id={htmlId('panelFilterInput')}
                   label={(<FormattedMessage
-                    id="metrics.table.optionsTab.panelFilterLabel"
+                    id="tsvb.table.optionsTab.panelFilterLabel"
                     defaultMessage="Panel filter"
                   />)}
                   fullWidth
@@ -219,7 +219,7 @@ class TablePanelConfig extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel htmlFor={htmlId('globalFilterOption')}>
                   <FormattedMessage
-                    id="metrics.table.optionsTab.ignoreGlobalFilterLabel"
+                    id="tsvb.table.optionsTab.ignoreGlobalFilterLabel"
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
@@ -244,7 +244,7 @@ class TablePanelConfig extends Component {
             onClick={() => this.switchTab('data')}
           >
             <FormattedMessage
-              id="metrics.table.dataTab.columnsButtonLabel"
+              id="tsvb.table.dataTab.columnsButtonLabel"
               defaultMessage="Columns"
             />
           </EuiTab>
@@ -253,7 +253,7 @@ class TablePanelConfig extends Component {
             onClick={() => this.switchTab('options')}
           >
             <FormattedMessage
-              id="metrics.table.optionsTab.panelOptionsButtonLabel"
+              id="tsvb.table.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
             />
           </EuiTab>
