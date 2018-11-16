@@ -45,6 +45,26 @@ export default function ({ getService }) {
           ]
         });
       });
+      it('should not allow us to re-add an existing remote cluster', async () => {
+        const uri = `${API_BASE_PATH}`;
+
+        const { body } = await supertest
+          .post(uri)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            "name": "test_cluster",
+            "seeds": [
+              "localhost:9300"
+            ]
+          })
+          .expect(409);
+
+        expect(body).to.eql({
+          "statusCode": 409,
+          "error": "Conflict",
+          "message": "There is already a remote cluster with that name."
+        });
+      });
     });
 
     describe('Update', () => {

@@ -10,6 +10,7 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapEsError, wrapCustomError, wrapUnknownError } from '../../../lib/error_wrappers';
 
 import { get } from 'lodash';
+import { doesClusterExist } from '../../../lib/does_cluster_exist';
 
 export function registerAddRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -34,6 +35,16 @@ export function registerAddRoute(server) {
         }
       };
 
+      // Check if cluster already exists
+      try {
+        const existingCluster = await doesClusterExist(callWithRequest, name);
+        if(existingCluster) {
+          return wrapCustomError(new Error('There is already a remote cluster with that name.'), 409);
+        }
+      } catch (err) {
+        return wrapCustomError(err, 400);
+      }
+
       try {
         const response = await callWithRequest('cluster.putSettings', { body: addClusterPayload });
         const acknowledged = get(response, 'acknowledged');
@@ -48,7 +59,7 @@ export function registerAddRoute(server) {
 
         // If for some reason the ES response does not have the newly added cluster information,
         // return an error. This shouldn't happen.
-        return wrapCustomError(new Error('Unable to add cluster'), 400);
+        return wrapCustomError(new Error('Unable to add cluster, no information returned from ES.'), 400);
       } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
