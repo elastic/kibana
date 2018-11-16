@@ -80,7 +80,6 @@ export default function init(input, output, sourceLocation = 'stored', source) {
       }
 
       $.ajax(loadFrom).done((data) => {
-        console.log('data', data);
         resetToValues(data);
         input.moveToNextRequestEdge(true);
         input.highlightCurrentRequestsAndUpdateActionBar();

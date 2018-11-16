@@ -61,7 +61,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
         source = `POST /${urlParams.index}/_search\n${JSON.stringify(searchRequest, null, 2)}`;
       } catch (e) {
         toastNotifications.addWarning({
-          title: 'Unable to decode GET request'
+          title: 'Unable to decode search request'
         });
       }
     }
