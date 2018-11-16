@@ -11,6 +11,7 @@ import {
   EuiPagination,
   EuiSearchBar,
   EuiSpacer,
+  EuiTab,
 } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
@@ -21,9 +22,11 @@ import Url from 'url';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { DocumentSearchResult } from '../../../model';
 import { documentSearch } from '../../actions';
+import { SearchScope } from '../../common/constants';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
+import { RepoItem, Repos, ScopeSelectorContainer } from './repository_item';
 
 interface Props {
   query: string;
@@ -34,6 +37,7 @@ interface Props {
   error?: Error;
   searchResult?: DocumentSearchResult;
   documentSearch: (q: string, p: number) => void;
+  repositorySearch: any;
 }
 
 interface State {
@@ -133,7 +137,64 @@ class SearchPage extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { query, searchResult, languages, repositories } = this.props;
+    const emptyFunction = () => null;
+    const { query, searchResult, languages, repositories, repositorySearch } = this.props;
+    const scopeSelector = (
+      <ScopeSelectorContainer>
+        <EuiTab
+          isSelected={repositorySearch.scope !== SearchScope.repository}
+          onClick={emptyFunction}
+        >
+          <Link to={`/search?q=${query}&scope=${SearchScope.symbol}`}>Code</Link>
+        </EuiTab>
+        <EuiTab
+          isSelected={repositorySearch.scope === SearchScope.repository}
+          onClick={emptyFunction}
+        >
+          <Link to={`/search?q=${query}&scope=${SearchScope.repository}`}>Repository</Link>
+        </EuiTab>
+      </ScopeSelectorContainer>
+    );
+    if (repositorySearch.scope === SearchScope.repository) {
+      const { repositories: repos } = repositorySearch.repositories;
+      const resultComps =
+        repos &&
+        repos.map(repo => <RepoItem key={repo.repository.uri} uri={repo.repository.uri} />);
+      const mainComp = (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={2}>
+            <div>
+              <p>
+                <strong>Repository</strong>
+              </p>
+            </div>
+            <EuiSpacer />
+            <div>
+              <p>
+                <strong>Language</strong>
+              </p>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={8}>
+            <Repos>
+              <tbody>{resultComps}</tbody>
+            </Repos>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+      return (
+        <div>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiSearchBar defaultQuery={query} query={query} onChange={this.onSearchChanged} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <div>{scopeSelector}</div>
+          {mainComp}
+        </div>
+      );
+    }
 
     if (searchResult) {
       const { stats, results } = searchResult!;
@@ -273,6 +334,7 @@ class SearchPage extends React.PureComponent<Props, State> {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
+          <div>{scopeSelector}</div>
           {mainComp}
           <EuiSpacer />
           <EuiFlexGroup justifyContent="spaceAround">
@@ -303,6 +365,7 @@ class SearchPage extends React.PureComponent<Props, State> {
 
 const mapStateToProps = (state: RootState) => ({
   ...state.documentSearch,
+  repositorySearch: state.repositorySearch,
 });
 
 const mapDispatchToProps = {

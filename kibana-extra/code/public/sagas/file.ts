@@ -29,11 +29,11 @@ import {
   fetchRepoTreeFailed,
   FetchRepoTreePayload,
   fetchRepoTreeSuccess,
-  gotoRepo,
-  Match,
   fetchTreeCommits,
   fetchTreeCommitsFailed,
   fetchTreeCommitsSuccess,
+  gotoRepo,
+  Match,
   openTreePath,
   setNotFound,
 } from '../actions';

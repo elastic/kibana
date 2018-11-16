@@ -5,10 +5,12 @@
  */
 import { DetailSymbolInformation } from '@code/lsp-extension';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -29,8 +31,10 @@ import {
   FetchFileResponse,
   fetchRepoTree,
   FetchRepoTreePayload,
+  repositorySearchQueryChanged,
   symbolSearchQueryChanged,
 } from '../../actions';
+import { RepositorySearchPayload } from '../../actions/search';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
@@ -43,6 +47,7 @@ import { CloneStatus } from './clone_status';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
 import 'github-markdown-css/github-markdown.css';
+import { SearchScope } from '../../common/constants';
 import { cloneProgressSelector, progressSelector, treeCommitsSelector } from '../../selectors';
 import { AlignCenterContainer } from '../../styled_components/align_center_container';
 import { CommitMessages } from './commit_messages';
@@ -52,6 +57,11 @@ enum Tabs {
   STRUCTURE_TREE = 'structure-tree',
 }
 
+enum SearchTabs {
+  settings,
+  box,
+}
+
 const noMarginStyle = {
   margin: 0,
 };
@@ -59,6 +69,8 @@ const noMarginStyle = {
 interface State {
   showSearchBox: boolean;
   tab: Tabs;
+  searchTab: SearchTabs;
+  searchScope: SearchScope;
 }
 interface Props {
   match: match<{ [key: string]: string }>;
@@ -68,6 +80,8 @@ interface Props {
   closeTreePath: (path: string) => void;
   symbols: DetailSymbolInformation[];
   symbolSearchQueryChanged: (query: string) => void;
+  repositorySearchQueryChanged: (p: RepositorySearchPayload) => void;
+  repositorySearchResults: any;
   isSymbolsLoading: boolean;
   isNotFound: boolean;
   file: FetchFileResponse;
@@ -133,6 +147,8 @@ export class LayoutPage extends React.Component<Props, State> {
     this.state = {
       showSearchBox: false,
       tab: parseQuery(props.location.search).tab,
+      searchTab: SearchTabs.box,
+      searchScope: SearchScope.default,
     };
   }
 
@@ -183,7 +199,11 @@ export class LayoutPage extends React.Component<Props, State> {
   };
 
   public onSearchChange = (searchValue: string) => {
-    this.props.symbolSearchQueryChanged(searchValue.toLowerCase());
+    if (this.state.searchScope === SearchScope.symbol) {
+      this.props.symbolSearchQueryChanged(searchValue.toLowerCase());
+    } else if (this.state.searchScope === SearchScope.repository) {
+      this.props.repositorySearchQueryChanged({ query: searchValue.toLowerCase() });
+    }
   };
 
   public onSelectedTabChanged = (tab: Tabs) => {
@@ -263,19 +283,43 @@ export class LayoutPage extends React.Component<Props, State> {
     }
   };
 
+  public showSearchSettings = () => {
+    this.setState({ searchTab: SearchTabs.settings });
+  };
+
+  public showSearchBox = () => {
+    this.setState({ searchTab: SearchTabs.box });
+  };
+
+  public setSearchScope = (scope: SearchScope) => () => {
+    this.setState({ searchScope: scope });
+  };
+
+  public getComboBoxOptions = () => {
+    if (this.state.searchScope === SearchScope.symbol) {
+      return this.props.symbols.map((symbol: DetailSymbolInformation) => {
+        return {
+          label: symbol.qname,
+          symbol,
+        };
+      });
+    } else if (this.state.searchScope === SearchScope.repository) {
+      return this.props.repositorySearchResults
+        ? this.props.repositorySearchResults.map(r => ({
+            label: r.repository.name,
+          }))
+        : [];
+    } else {
+      return [];
+    }
+  };
+
   public render() {
     const { progress, isNotFound, cloneProgress } = this.props;
     if (isNotFound) {
       return <NotFound />;
     }
-    const { symbols, isSymbolsLoading } = this.props;
-
-    const symbolOptions = symbols.map((symbol: DetailSymbolInformation) => {
-      return {
-        label: symbol.qname,
-        symbol,
-      };
-    });
+    const { isSymbolsLoading } = this.props;
 
     // NOTICE: this is a temporary solution. Will be removed soon.
     const submit = (event: any) => {
@@ -287,38 +331,75 @@ export class LayoutPage extends React.Component<Props, State> {
       if (query.trim().length === 0) {
         return;
       }
-      history.push(`/search?q=${query}`);
+      if (this.state.searchScope === SearchScope.repository) {
+        history.push(`/search?q=${query}&scope=${SearchScope.repository}`);
+      } else {
+        history.push(`/search?q=${query}`);
+      }
     };
 
-    const searchBox = (
-      <EuiFlexItem grow={false} style={noMarginStyle}>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          className="topBar"
-          direction="column"
-          style={noMarginStyle}
-        >
-          <EuiFlexItem grow={false} style={noMarginStyle}>
-            <form onSubmit={submit}>
-              <EuiComboBox
-                placeholder="Search..."
-                async={true}
-                options={symbolOptions}
-                isLoading={isSymbolsLoading}
-                onChange={this.onChange}
-                onSearchChange={this.onSearchChange}
-              />
-              <input type="submit" hidden={true} />
-            </form>
+    const searchSettings = (
+      <div className="searchSettings">
+        <EuiFlexGroup>
+          <EuiFlexItem className="searchTypeTitle">Search Type</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="sortUp" onClick={this.showSearchBox} className="collapseButton" />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <div className="searchSettingButtons">
+          <EuiButton onClick={this.setSearchScope(SearchScope.default)}>Default</EuiButton>
+          <EuiButton onClick={this.setSearchScope(SearchScope.symbol)}>Symbol</EuiButton>
+          <EuiButton onClick={this.setSearchScope(SearchScope.repository)}>Repository</EuiButton>
+        </div>
+      </div>
+    );
+
+    const searchBox = (
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        className="topBar"
+        direction="column"
+        style={noMarginStyle}
+      >
+        <EuiFlexItem grow={false} style={noMarginStyle}>
+          <form onSubmit={submit}>
+            <EuiComboBox
+              placeholder="Search..."
+              async={true}
+              options={this.getComboBoxOptions()}
+              isLoading={isSymbolsLoading}
+              onChange={this.onChange}
+              onSearchChange={this.onSearchChange}
+            />
+            <input type="submit" hidden={true} />
+          </form>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+
+    const searchTabContent = {
+      [SearchTabs.box]: searchBox,
+      [SearchTabs.settings]: searchSettings,
+    };
+
+    const search = (
+      <EuiFlexItem grow={false} style={noMarginStyle}>
+        <div className="reverseRow">
+          <div className="searchSettingButtons">
+            <EuiButton>Save</EuiButton>
+            <EuiButton>Open</EuiButton>
+            <EuiButton onClick={this.showSearchSettings}>Settings</EuiButton>
+          </div>
+          <div />
+        </div>
+        {searchTabContent[this.state.searchTab]}
       </EuiFlexItem>
     );
 
     if (this.shouldRenderProgress(progress, cloneProgress)) {
       return (
         <EuiFlexGroup direction="column" className="mainRoot" style={noMarginStyle}>
-          {this.state.showSearchBox && searchBox}
+          {this.state.showSearchBox && search}
           <EuiFlexItem grow={false} style={noMarginStyle}>
             <EuiFlexGroup justifyContent="spaceBetween" className="topBar" style={noMarginStyle}>
               <EuiFlexItem grow={false} style={noMarginStyle}>
@@ -351,7 +432,7 @@ export class LayoutPage extends React.Component<Props, State> {
 
     return (
       <EuiFlexGroup direction="column" className="mainRoot" style={noMarginStyle}>
-        {this.state.showSearchBox && searchBox}
+        {this.state.showSearchBox && search}
         <EuiFlexItem grow={false} style={noMarginStyle}>
           <EuiFlexGroup justifyContent="spaceBetween" className="topBar" style={noMarginStyle}>
             <EuiFlexItem grow={false} style={noMarginStyle}>
@@ -413,12 +494,14 @@ const mapStateToProps = (state: RootState) => ({
   file: state.file.file,
   progress: progressSelector(state),
   cloneProgress: cloneProgressSelector(state),
+  repositorySearchResults: state.repositorySearch.repositories.repositories,
 });
 
 const mapDispatchToProps = {
   fetchRepoTree,
   closeTreePath,
   symbolSearchQueryChanged,
+  repositorySearchQueryChanged,
 };
 
 export const Layout = connect(

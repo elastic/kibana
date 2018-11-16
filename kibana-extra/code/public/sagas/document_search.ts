@@ -9,12 +9,15 @@ import { kfetch } from 'ui/kfetch';
 
 import { Action } from 'redux-actions';
 import {
+  changeSearchScope,
   documentSearch,
   documentSearchFailed,
   DocumentSearchPayload,
   documentSearchSuccess,
   Match,
+  repositorySearch,
 } from '../actions';
+import { SearchScope } from '../common/constants';
 import { searchRoutePattern } from './patterns';
 
 function requestDocumentSearch(payload: DocumentSearchPayload) {
@@ -66,7 +69,11 @@ export function* watchDocumentSearch() {
 function* handleSearchRouteChange(action: Action<Match>) {
   const { location } = action.payload!;
   const queryParams = queryString.parse(location.search);
-  const { q, p, langs, repos } = queryParams;
+  const { q, p, langs, repos, scope } = queryParams;
+  yield put(changeSearchScope(scope));
+  if (scope === SearchScope.repository) {
+    yield put(repositorySearch({ query: q }));
+  }
   yield put(
     documentSearch({
       query: q,

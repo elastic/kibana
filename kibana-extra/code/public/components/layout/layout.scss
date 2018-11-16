@@ -77,3 +77,25 @@
 .autoMargin {
   margin: auto;
 }
+
+.searchSettingButtons {
+  padding: 1rem;
+}
+
+.collapseButton {
+  cursor: pointer;
+}
+
+.reverseRow {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.searchTypeTitle {
+  padding: 1rem;
+}
+
+.searchSettings {
+  border: 1px solid;
+  margin: 0 0.5rem;
+}

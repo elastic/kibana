@@ -10,6 +10,7 @@ import { documentSearch, DocumentSearchState } from './document_search';
 import { editor, EditorState } from './editor';
 import { file, FileState } from './file';
 import { repository, RepositoryState } from './repository';
+import { repositorySearch, RepositorySearchState } from './repository_search';
 import { route, RouteState } from './route';
 import { status, StatusState } from './status';
 import { symbol, SymbolState } from './symbol';
@@ -19,6 +20,7 @@ export interface RootState {
   repository: RepositoryState;
   symbolSearch: SymbolSearchState;
   documentSearch: DocumentSearchState;
+  repositorySearch: RepositorySearchState;
   file: FileState;
   symbol: SymbolState;
   editor: EditorState;
@@ -34,6 +36,7 @@ export const rootReducer = combineReducers({
   symbol,
   editor,
   documentSearch,
+  repositorySearch,
   symbolSearch,
   route,
   status,
