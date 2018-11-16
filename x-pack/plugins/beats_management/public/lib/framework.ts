@@ -9,7 +9,7 @@ import { LICENSES, LicenseType } from '../../common/constants/security';
 import { FrameworkAdapter } from './adapters/framework/adapter_types';
 
 export class FrameworkLib {
-  public init = this.adapter.init.bind(this.adapter);
+  public hookFrameworkLifecycle = this.adapter.hookFrameworkLifecycle.bind(this.adapter);
   public renderUIAtPath = this.adapter.renderUIAtPath.bind(this.adapter);
   public registerManagementSection = this.adapter.registerManagementSection.bind(this.adapter);
   public registerManagementUI = this.adapter.registerManagementUI.bind(this.adapter);

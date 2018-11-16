@@ -30,7 +30,8 @@ import { PLUGIN } from './../../../common/constants/plugin';
 import { FrameworkLib } from './../framework';
 
 // A super early spot in kibana loading that we can use to hook before most other things
-const onKibanaReady = uiModules.get('app/sense').run;
+const onKibanaReady = uiModules.get('security').run;
+
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
   const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
