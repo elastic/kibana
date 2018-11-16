@@ -125,6 +125,11 @@ export default function ({ getService, getPageObjects }) {
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
+      it('should show bars in the correct time zone', async function () {
+        const ticks = await PageObjects.discover.getBarChartXTicks();
+        expect(ticks).to.eql(['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00']);
+      });
+
       it('should show correct initial chart interval of Auto', async function () {
         const actualInterval = await PageObjects.discover.getChartInterval();
 
@@ -402,6 +407,16 @@ export default function ({ getService, getPageObjects }) {
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
         });
+      });
+    });
+
+    describe('time zone switch', () => {
+      it('should show bars in the correct time zone after switching', async function () {
+        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await remote.refresh();
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        const ticks = await PageObjects.discover.getBarChartXTicks();
+        expect(ticks).to.eql(['2015-09-19 17:00', '2015-09-20 17:00', '2015-09-21 17:00', '2015-09-22 17:00']);
       });
     });
   });
