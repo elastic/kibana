@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiLink,
   EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { i18n }  from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -44,10 +45,20 @@ export class IndexLifecycleSummary extends Component {
     super(props);
     this.state = {
       showStackPopover: false,
+      showPhaseExecutionPopover: false,
     };
   }
   toggleStackPopover = () => {
     this.setState({ showStackPopover: !this.state.showStackPopover });
+  }
+  closeStackPopover = () => {
+    this.setState({ showStackPopover: false });
+  }
+  togglePhaseExecutionPopover = () => {
+    this.setState({ showPhaseExecutionPopover: !this.state.showPhaseExecutionPopover });
+  }
+  closePhaseExecutionPopover = () => {
+    this.setState({ showPhaseExecutionPopover: false });
   }
   renderStackPopoverButton(ilm) {
     const button = (
@@ -60,13 +71,46 @@ export class IndexLifecycleSummary extends Component {
     );
     return (
       <EuiPopover
-        id="popover"
+        id="stackPopover"
         button={button}
         isOpen={this.state.showStackPopover}
-        closePopover={this.toggleStackPopover}
+        closePopover={this.closeStackPopover}
       >
         <div style={{ maxHeight: '400px', width: '900px', overflowY: 'scroll' }}>
           <pre>{ilm.step_info.stack_trace}</pre>
+        </div>
+      </EuiPopover>
+    );
+  }
+  renderPhaseExecutionPopoverButton(ilm) {
+    if (!ilm.phase_execution) {
+      return null;
+    }
+    const button = (
+      <EuiLink onClick={this.togglePhaseExecutionPopover}>
+        <FormattedMessage
+          defaultMessage="Show phase definition"
+          id="xpack.indexLifecycleMgmt.indexManagementTable.showPhaseDefinitionButton"
+        />
+      </EuiLink>
+    );
+    return (
+      <EuiPopover
+        key="phaseExecutionPopover"
+        id="phaseExecutionPopover"
+        button={button}
+        isOpen={this.state.showPhaseExecutionPopover}
+        closePopover={this.closePhaseExecutionPopover}
+        withTitle
+      >
+        <EuiPopoverTitle>
+          <FormattedMessage
+            defaultMessage="Phase definition"
+            id="xpack.indexLifecycleMgmt.indexManagementTable.phaseDefinitionTitle"
+          />
+        </EuiPopoverTitle>
+        <div style={{ maxHeight: '400px', width: '400px', overflowY: 'scroll' }}>
+          <pre>{JSON.stringify(ilm.phase_execution, null, 2)}</pre>
         </div>
       </EuiPopover>
     );
@@ -102,6 +146,7 @@ export class IndexLifecycleSummary extends Component {
         rows.right.push(cell);
       }
     });
+    rows.right.push(this.renderPhaseExecutionPopoverButton(ilm));
     return rows;
   }
 
