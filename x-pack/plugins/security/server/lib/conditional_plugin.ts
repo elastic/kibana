@@ -4,26 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function createConditionalPlugin(
-  config: any,
+interface Config {
+  get(key: string): any;
+}
+
+interface Plugins {
+  [key: string]: any;
+}
+
+interface ConditionalPlugin {
+  isEnabled: boolean;
+}
+
+export function createConditionalPlugin<T>(
+  config: Config,
   configPrefix: string,
-  plugins: any,
+  plugins: Plugins,
   pluginId: string
-) {
+): ConditionalPlugin & T {
   return new Proxy(
     {},
     {
       get(obj, prop) {
+        const isEnabled = config.get(`${configPrefix}.enabled`);
         if (prop === 'isEnabled') {
-          return config.get(`${configPrefix}.enabled`);
+          return isEnabled;
         }
 
-        if (!plugins[pluginId]) {
+        if (!plugins[pluginId] && isEnabled) {
           throw new Error(`Plugin accessed before it's available`);
+        }
+
+        if (!plugins[pluginId] && !isEnabled) {
+          throw new Error(`Plugin isn't enabled, check isEnabled before using`);
         }
 
         return plugins[pluginId][prop];
       },
     }
-  );
+  ) as ConditionalPlugin & T;
 }
