@@ -32,7 +32,7 @@ import editorConfigTemplate from './timelion_vis_params.html';
 // register the provider with the visTypes registry so that other know it exists
 VisTypesRegistryProvider.register(TimelionVisProvider);
 
-export default function TimelionVisProvider(Private) {
+export default function TimelionVisProvider(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
   const timelionRequestHandler = Private(TimelionRequestHandlerProvider);
 
@@ -42,7 +42,9 @@ export default function TimelionVisProvider(Private) {
     name: 'timelion',
     title: 'Timelion',
     icon: 'visTimelion',
-    description: 'Build time-series using functional expressions',
+    description: i18n('timelion.timelionDescription', {
+      defaultMessage: 'Build time-series using functional expressions',
+    }),
     visConfig: {
       defaults: {
         expression: '.es(*)',
