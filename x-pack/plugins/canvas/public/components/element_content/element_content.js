@@ -89,4 +89,5 @@ ElementContent.propTypes = {
     onComplete: PropTypes.func.isRequired, // local, not passed through
   }).isRequired,
   state: PropTypes.string,
+  backgroundColor: PropTypes.string,
 };
