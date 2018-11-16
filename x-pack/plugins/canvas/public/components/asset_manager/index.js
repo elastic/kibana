@@ -22,7 +22,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  addImageElement: pageId => asset => {
+  addImageElement: pageId => assetId => {
     const imageElement = elementsRegistry.get('image');
     const elementAST = fromExpression(imageElement.expression);
     const selector = ['chain', '0', 'arguments', 'dataurl'];
@@ -34,7 +34,7 @@ const mapDispatchToProps = dispatch => ({
             type: 'function',
             function: 'asset',
             arguments: {
-              _: [asset.id],
+              _: [assetId],
             },
           },
         ],

@@ -52,8 +52,8 @@ export class AssetManager extends React.PureComponent {
     this.props.removeAsset(this.state.deleteId);
   };
 
-  addElement = asset => {
-    this.props.addImageElement(asset);
+  addElement = assetId => {
+    this.props.addImageElement(assetId);
   };
 
   resetDelete = () => this.setState({ deleteId: null });
@@ -90,10 +90,10 @@ export class AssetManager extends React.PureComponent {
           <EuiFlexItem className="asset-create-image" grow={false}>
             <EuiToolTip content="Create image element">
               <EuiButtonIcon
-                iconType="plusInCircle"
+                iconType="vector"
                 aria-label="Create image element"
                 onClick={() => {
-                  this.addElement(asset);
+                  this.addElement(asset.id);
                   this.closeModal();
                 }}
               />

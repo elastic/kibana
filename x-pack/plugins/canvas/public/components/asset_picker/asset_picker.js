@@ -38,4 +38,6 @@ export const AssetPicker = ({ assets, selected, onChange }) => {
 
 AssetPicker.propTypes = {
   assets: PropTypes.array,
+  selected: PropTypes.string,
+  onChange: PropTypes.func,
 };

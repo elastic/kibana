@@ -6,26 +6,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiForm,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiButtonGroup,
-  EuiButton,
-  EuiFieldText,
-} from '@elastic/eui';
+import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 
 // TODO: (clintandrewhall) This is a quick fix for #25342 -- we should figure out how to use the overall component.
-import { Loading } from '../../../../public/components/loading/loading';
 import { AssetPicker } from '../../../../public/components/asset_picker';
-import { FileUpload } from '../../../../public/components/file_upload';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
 import { isValidHttpUrl } from '../../../../common/lib/httpurl';
 import { encode } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import './image_upload.scss';
+import { FileForm, LinkForm } from './forms';
 
 class ImageUpload extends React.Component {
   static propTypes = {
@@ -111,13 +102,12 @@ class ImageUpload extends React.Component {
     const { loading, url, urlType } = this.state;
     const assets = Object.values(this.props.workpad.assets);
 
-    let selectedAsset = {};
+    let selectedAsset;
 
     const urlTypeOptions = [{ id: 'file', label: 'Import' }, { id: 'link', label: 'Link' }];
     if (assets.length) {
       urlTypeOptions.unshift({ id: 'asset', label: 'Asset' });
-      selectedAsset = assets.find(({ value }) => value === url);
-      console.log({ selectedAsset });
+      selectedAsset = assets.find(({ value }) => value === url) || {};
     }
 
     const selectUrlType = (
@@ -131,30 +121,13 @@ class ImageUpload extends React.Component {
     );
 
     const forms = {
-      file: loading ? (
-        <Loading animated text="Image uploading" />
-      ) : (
-        <FileUpload onUpload={this.handleUpload} />
-      ),
+      file: <FileForm loading={loading} onUpload={this.handleUpload} />,
       link: (
-        <EuiForm onSubmit={this.setSrcUrl} className="eui-textRight">
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem>
-              <EuiFieldText
-                compressed
-                defaultValue={url}
-                inputRef={ref => (this.inputRefs.srcUrlText = ref)}
-                placeholder="Image URL"
-                aria-label="Image URL"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton type="submit" size="s" onClick={this.setSrcUrl}>
-                Set
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiForm>
+        <LinkForm
+          url={url}
+          inputRef={ref => (this.inputRefs.srcUrlText = ref)}
+          onSubmit={this.setSrcUrl}
+        />
       ),
       asset: (
         <AssetPicker
