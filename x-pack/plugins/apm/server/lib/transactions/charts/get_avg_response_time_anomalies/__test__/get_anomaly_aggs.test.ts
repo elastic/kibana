@@ -7,10 +7,21 @@
 // @ts-ignore
 import { getAnomalyAggs } from '../get_anomaly_aggs';
 
-test('getAnomalyAggs should swallow errors', () => {
-  const failClient = jest.fn(() =>
-    Promise.reject(new Error('anomaly lookup failed'))
-  );
+test('getAnomalyAggs should swallow HTTP errors', () => {
+  const httpError = new Error('anomaly lookup failed') as any;
+  httpError.statusCode = 418;
+  const failClient = jest.fn(() => Promise.reject(httpError));
 
-  expect(getAnomalyAggs({ client: failClient })).resolves.toEqual(null);
+  return expect(getAnomalyAggs({ client: failClient })).resolves.toEqual(null);
+});
+
+test('getAnomalyAggs should throw other errors', () => {
+  const otherError = new Error('anomaly lookup ASPLODED') as any;
+  const failClient = jest.fn(() => Promise.reject(otherError));
+
+  return expect(
+    getAnomalyAggs({
+      client: failClient
+    })
+  ).rejects.toThrow(otherError);
 });

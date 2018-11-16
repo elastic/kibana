@@ -62,9 +62,13 @@ export async function getAnomalyAggs({
   try {
     const resp = await client('search', params);
     return resp.aggregations;
-  } catch (e) {
-    // swallow error because there are lots of reasons
-    // the ml index lookup may fail
-    return null;
+  } catch (err) {
+    if ('statusCode' in err) {
+      // swallow HTTP errors because there are lots of reasons
+      // the ml index lookup may fail, and we're ok with that
+      return null;
+    }
+
+    throw err;
   }
 }
