@@ -31,6 +31,12 @@ export function isSeedNodePortValid(seedNode) {
     return false;
   }
 
-  const isPortNumeric = parts[1].match(/[0-9]*/)[0] === parts[1];
+  const port = parts[1];
+
+  if (!port) {
+    return false;
+  }
+
+  const isPortNumeric = port.match(/[0-9]*/)[0] === port;
   return isPortNumeric;
 }

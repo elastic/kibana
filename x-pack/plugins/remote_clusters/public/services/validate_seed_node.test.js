@@ -9,7 +9,6 @@ import {
   isSeedNodePortValid,
 } from './validate_seed_node';
 
-
 describe('Validate seed node', () => {
   describe('isSeedNodeValid', () => {
     describe('rejects', () => {
@@ -55,6 +54,10 @@ describe('Validate seed node', () => {
     describe('rejects', () => {
       it('missing port', () => {
         expect(isSeedNodePortValid('abcd')).toBe(false);
+      });
+
+      it('empty port', () => {
+        expect(isSeedNodePortValid('abcd:')).toBe(false);
       });
 
       it('letters', () => {

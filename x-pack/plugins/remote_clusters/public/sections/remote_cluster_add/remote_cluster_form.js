@@ -139,11 +139,12 @@ export class RemoteClusterFormUi extends Component {
     return null;
   }
 
-  getLocalSeedErrors = (value) => {
+  getLocalSeedErrors = (seedNode) => {
     const { intl } = this.props;
+
     const errors = [];
 
-    const isInvalid = !isSeedNodeValid(value);
+    const isInvalid = !isSeedNodeValid(seedNode);
 
     if (isInvalid) {
       errors.push(intl.formatMessage({
@@ -153,7 +154,7 @@ export class RemoteClusterFormUi extends Component {
       }));
     }
 
-    const isPortInvalid = !isSeedNodePortValid(value);
+    const isPortInvalid = !isSeedNodePortValid(seedNode);
 
     if (isPortInvalid) {
       errors.push(intl.formatMessage({
@@ -190,12 +191,32 @@ export class RemoteClusterFormUi extends Component {
   };
 
   onSearchChange = (searchValue) => {
+    const {
+      fields: {
+        seeds,
+      },
+      intl,
+    } = this.props;
+
+    const localSeedErrors = this.getLocalSeedErrors(searchValue);
+
     // Allow typing to clear the errors, but not to add new ones.
-    if (!searchValue || this.getLocalSeedErrors(searchValue).length === 0) {
-      this.setState({
-        localSeedErrors: [],
-      });
+    const errors = (!searchValue || localSeedErrors.length === 0) ? [] : localSeedErrors;
+
+    // EuiComboBox internally checks for duplicates and prevents calling onCreateOption if the
+    // input is a duplicate. So we need to surface this error here instead.
+    const isDuplicate = seeds.includes(searchValue);
+
+    if (isDuplicate) {
+      errors.push(intl.formatMessage({
+        id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.duplicateMessage',
+        defaultMessage: `Duplicate seed nodes aren't allowed.`,
+      }));
     }
+
+    this.setState({
+      localSeedErrors: errors,
+    });
   };
 
   onChange = (selectedOptions) => {
