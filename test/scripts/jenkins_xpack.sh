@@ -27,4 +27,4 @@ echo ""
 
 echo " -> Ensuring all functional tests are in a ciGroup"
 cd "$XPACK_DIR"
-node scripts/functional_tests --assert-none-excluded --include-tag ciGroup1 --include-tag ciGroup2 --include-tag ciGroup3 --include-tag ciGroup4
+node scripts/functional_tests --assert-none-excluded --include-tag ciGroup1 --include-tag ciGroup2 --include-tag ciGroup3 --include-tag ciGroup4 --include-tag ciGroup5

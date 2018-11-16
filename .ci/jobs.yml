@@ -17,6 +17,7 @@ JOB:
   - x-pack-ciGroup2
   - x-pack-ciGroup3
   - x-pack-ciGroup4
+  - x-pack-ciGroup5
 
 # `~` is yaml for `null`
 exclude: ~
