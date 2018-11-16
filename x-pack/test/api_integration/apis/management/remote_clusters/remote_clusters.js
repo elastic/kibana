@@ -39,19 +39,10 @@ export default function ({ getService }) {
           .expect(200);
 
         expect(body).to.eql({
-          "acknowledged": true,
-          "persistent": {
-            "cluster": {
-              "remote": {
-                "test_cluster": {
-                  "seeds": [
-                    "localhost:9300"
-                  ]
-                }
-              }
-            }
-          },
-          "transient": {}
+          "name": "test_cluster",
+          "seeds": [
+            "localhost:9300"
+          ]
         });
       });
     });
