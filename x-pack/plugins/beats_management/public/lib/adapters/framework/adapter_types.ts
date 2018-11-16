@@ -49,12 +49,6 @@ export const RuntimeFrameworkInfo = t.type({
 
 export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
 
-export const RuntimeManagementAPI = t.type({
-  hasItem: t.Function,
-  register: t.Function,
-  getSection: t.Function,
-});
-
 interface ManagementSection {
   register(
     sectionId: string,
@@ -66,7 +60,7 @@ interface ManagementSection {
     }
   ): void;
 }
-export interface ManagementAPI extends t.TypeOf<typeof RuntimeManagementAPI> {
+export interface ManagementAPI {
   getSection(sectionId: string): ManagementSection;
   hasItem(sectionId: string): boolean;
   register(sectionId: string, options: { display: string; icon: string; order: number }): void;

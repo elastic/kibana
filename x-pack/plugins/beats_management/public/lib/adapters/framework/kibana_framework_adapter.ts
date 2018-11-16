@@ -10,13 +10,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UIRoutes } from 'ui/routes';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
-import {
-  FrameworkAdapter,
-  FrameworkInfo,
-  FrameworkUser,
-  ManagementAPI,
-  RuntimeManagementAPI,
-} from './adapter_types';
+import { FrameworkAdapter, FrameworkInfo, FrameworkUser, ManagementAPI } from './adapter_types';
 import { RuntimeFrameworkInfo } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
@@ -35,14 +29,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly XPackInfoProvider: unknown
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
-    const assertManagementAPI = RuntimeManagementAPI.decode(management);
-    if (assertManagementAPI.isLeft()) {
-      throw new Error(
-        `Error ui/management management object was not formed as expected by ${this.PLUGIN_ID},   ${
-          PathReporter.report(assertManagementAPI)[0]
-        }`
-      );
-    }
   }
 
   public get info() {
