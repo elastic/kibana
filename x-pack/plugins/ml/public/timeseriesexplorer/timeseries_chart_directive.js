@@ -34,7 +34,7 @@ module.directive('mlTimeseriesChart', function () {
       scope.$root.$broadcast('contextChartSelected', selection);
     }
 
-    function renderReactComponent() {
+    function renderReactComponent(renderFocusChartOnly = false) {
       // Set the size of the components according to the width of the parent container at render time.
       svgWidth = Math.max(angular.element('.results-container').width(), 0);
 
@@ -49,6 +49,7 @@ module.directive('mlTimeseriesChart', function () {
         focusForecastData: scope.focusForecastData,
         focusAggregationInterval: scope.focusAggregationInterval,
         modelPlotEnabled: scope.modelPlotEnabled,
+        renderFocusChartOnly,
         selectedJob: scope.selectedJob,
         showForecast: scope.showForecast,
         showModelBounds: scope.showModelBounds,
@@ -71,9 +72,13 @@ module.directive('mlTimeseriesChart', function () {
       renderReactComponent();
     });
 
-    scope.$watchCollection('focusForecastData', renderReactComponent);
-    scope.$watchCollection('focusChartData', renderReactComponent);
-    scope.$watchGroup(['showModelBounds', 'showForecast'], renderReactComponent);
+    function renderFocusChart() {
+      renderReactComponent(true);
+    }
+
+    scope.$watchCollection('focusForecastData', renderFocusChart);
+    scope.$watchCollection('focusChartData', renderFocusChart);
+    scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
 
     // Redraw the charts when the container is resize.
     const resizeChecker = new ResizeChecker(angular.element('.ml-timeseries-chart'));

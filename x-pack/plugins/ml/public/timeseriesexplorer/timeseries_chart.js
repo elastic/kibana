@@ -85,6 +85,7 @@ export class TimeseriesChart extends React.Component {
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool,
+    renderFocusChartOnly: PropTypes.bool,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool,
     showModelBounds: PropTypes.bool,
@@ -161,8 +162,11 @@ export class TimeseriesChart extends React.Component {
   }
 
   componentDidUpdate() {
-    this.renderChart();
-    this.drawContextChartSelection();
+    if (this.props.renderFocusChartOnly === false) {
+      this.renderChart();
+      this.drawContextChartSelection();
+    }
+
     this.renderFocusChart();
   }
 
