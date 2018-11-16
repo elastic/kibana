@@ -29,6 +29,10 @@ import { getRouterLinkProps } from '../../services';
 
 import { RemoteClusterForm } from '../remote_cluster_form';
 
+const disabledFields = {
+  name: true,
+};
+
 export class RemoteClusterEditUi extends Component {
   static propTypes = {
     isLoading: PropTypes.bool,
@@ -39,6 +43,7 @@ export class RemoteClusterEditUi extends Component {
     isUpdatingRemoteCluster: PropTypes.bool,
     updateRemoteClusterError: PropTypes.node,
     clearUpdateRemoteClusterErrors: PropTypes.func,
+    openDetailPanel: PropTypes.func,
   }
 
   constructor(props) {
@@ -71,6 +76,13 @@ export class RemoteClusterEditUi extends Component {
 
   save = (clusterConfig) => {
     this.props.updateRemoteCluster(clusterConfig);
+  };
+
+  cancel = () => {
+    const { history, openDetailPanel } = this.props;
+    const { clusterName } = this.state;
+    history.push(CRUD_APP_BASE_PATH);
+    openDetailPanel(clusterName);
   };
 
   renderContent() {
@@ -132,9 +144,11 @@ export class RemoteClusterEditUi extends Component {
     return (
       <RemoteClusterForm
         fields={cluster}
+        disabledFields={disabledFields}
         isSaving={isUpdatingRemoteCluster}
         saveError={updateRemoteClusterError}
         save={this.save}
+        cancel={this.cancel}
       />
     );
   }

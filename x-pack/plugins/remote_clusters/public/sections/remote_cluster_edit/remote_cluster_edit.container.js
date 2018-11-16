@@ -10,14 +10,15 @@ import { RemoteClusterEdit as RemoteClusterEditView } from './remote_cluster_edi
 import {
   isLoading,
   getEditedCluster,
-//   isUpdatingRemoteCluster,
-//   getUpdateRemoteClusterError,
+  // isUpdatingRemoteCluster,
+  // getUpdateRemoteClusterError,
 } from '../../store/selectors';
 
 import {
   startEditingCluster,
-//   updateRemoteCluster,
-//   clearUpdateRemoteClusterErrors,
+  // updateRemoteCluster,
+  // clearUpdateRemoteClusterErrors,
+  openDetailPanel,
 } from '../../store/actions';
 
 const mapStateToProps = (state) => {
@@ -42,6 +43,9 @@ const mapDispatchToProps = (dispatch) => {
     },
     clearUpdateRemoteClusterErrors: () => {
       // dispatch(clearUpdateRemoteClusterErrors());
+    },
+    openDetailPanel: (clusterName) => {
+      dispatch(openDetailPanel({ name: clusterName }));
     },
   };
 };

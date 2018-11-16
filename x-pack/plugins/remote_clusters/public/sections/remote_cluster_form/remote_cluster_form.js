@@ -11,6 +11,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiDescribedFormGroup,
@@ -39,24 +40,28 @@ const defaultFields = {
 
 export class RemoteClusterFormUi extends Component {
   static propTypes = {
-    save: PropTypes.func,
+    save: PropTypes.func.isRequired,
+    cancel: PropTypes.func,
     isSaving: PropTypes.bool,
     saveError: PropTypes.object,
     fields: PropTypes.object,
+    disabledFields: PropTypes.object,
   }
 
   static defaultProps = {
     fields: cloneDeep(defaultFields),
+    disabledFields: {},
   }
 
   constructor(props) {
     super(props);
 
-    const { fields } = props;
+    const { fields, disabledFields } = props;
 
     this.state = {
       localSeedErrors: [],
       fields,
+      disabledFields,
       fieldsErrors: this.getFieldsErrors(fields),
       areErrorsVisible: false,
     };
@@ -70,7 +75,7 @@ export class RemoteClusterFormUi extends Component {
     if (!name || !name.trim()) {
       errors.name = (
         <FormattedMessage
-          id="xpack.remoteClusters.add.errors.nameMissing"
+          id="xpack.remoteClusters.form.errors.nameMissing"
           defaultMessage="Name is required."
         />
       );
@@ -79,7 +84,7 @@ export class RemoteClusterFormUi extends Component {
     if (!seeds.some(seed => Boolean(seed.trim()))) {
       errors.seeds = (
         <FormattedMessage
-          id="xpack.remoteClusters.add.errors.seedMissing"
+          id="xpack.remoteClusters.form.errors.seedMissing"
           defaultMessage="At least one seed is required."
         />
       );
@@ -300,7 +305,7 @@ export class RemoteClusterFormUi extends Component {
   }
 
   renderActions() {
-    const { isSaving } = this.props;
+    const { isSaving, cancel } = this.props;
 
     if (isSaving) {
       return (
@@ -312,7 +317,7 @@ export class RemoteClusterFormUi extends Component {
           <EuiFlexItem grow={false}>
             <EuiText>
               <FormattedMessage
-                id="xpack.remoteClusters.add.actions.savingText"
+                id="xpack.remoteClusters.form.actions.savingText"
                 defaultMessage="Saving"
               />
             </EuiText>
@@ -321,18 +326,42 @@ export class RemoteClusterFormUi extends Component {
       );
     }
 
+    let cancelButton;
+
+    if (cancel) {
+      cancelButton = (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            color="primary"
+            onClick={cancel}
+          >
+            <FormattedMessage
+              id="xpack.remoteClusters.form.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      );
+    }
+
     return (
-      <EuiButton
-        color="secondary"
-        iconType="check"
-        onClick={this.save}
-        fill
-      >
-        <FormattedMessage
-          id="xpack.remoteClusters.add.saveButtonLabel"
-          defaultMessage="Save"
-        />
-      </EuiButton>
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="secondary"
+            iconType="check"
+            onClick={this.save}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.remoteClusters.form.saveButtonLabel"
+              defaultMessage="Save"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+
+        {cancelButton}
+      </EuiFlexGroup>
     );
   }
 
@@ -390,6 +419,12 @@ export class RemoteClusterFormUi extends Component {
 
   render() {
     const {
+      disabledFields: {
+        name: disabledName,
+      },
+    } = this.props;
+
+    const {
       areErrorsVisible,
       fields: {
         name,
@@ -439,6 +474,7 @@ export class RemoteClusterFormUi extends Component {
                 value={name}
                 onChange={e => this.onFieldsChange({ name: e.target.value })}
                 fullWidth
+                disabled={disabledName}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
