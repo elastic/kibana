@@ -8,8 +8,15 @@ import { IScope } from 'angular';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { UIRoutes } from 'ui/routes';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
-import { FrameworkAdapter, FrameworkInfo, FrameworkUser } from './adapter_types';
+import {
+  FrameworkAdapter,
+  FrameworkInfo,
+  FrameworkUser,
+  ManagementAPI,
+  RuntimeManagementAPI,
+} from './adapter_types';
 import { RuntimeFrameworkInfo } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
@@ -18,14 +25,23 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private rootComponent: React.ReactElement<any> | null = null;
   private shieldUser: FrameworkUser | null = null;
   private hasInit: boolean = false;
+
   constructor(
     private readonly PLUGIN_ID: string,
-    private readonly management: any,
-    private readonly routes: any,
-    private readonly chrome: any,
-    private readonly XPackInfoProvider: any
+    private readonly management: ManagementAPI,
+    private readonly frameworkWhenRoute: UIRoutes['when'],
+    private readonly getBasePath: () => string,
+    private readonly XPackInfoProvider: unknown
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
+    const assertManagementAPI = RuntimeManagementAPI.decode(management);
+    if (assertManagementAPI.isLeft()) {
+      throw new Error(
+        `Error ui/management management object was not formed as expected by ${this.PLUGIN_ID},   ${
+          PathReporter.report(assertManagementAPI)[0]
+        }`
+      );
+    }
   }
 
   public get info() {
@@ -100,7 +116,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   }
 
-  private manageAngularLifecycle($scope: any, $route: any, elem: any) {
+  private manageAngularLifecycle($scope: any, $route: any, elem: HTMLElement) {
     const lastRoute = $route.current;
     const deregister = $scope.$on('$locationChangeSuccess', () => {
       const currentRoute = $route.current;
@@ -130,7 +146,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         let xpackInfoUnpacked: FrameworkInfo;
         try {
           xpackInfoUnpacked = {
-            basePath: this.chrome.getBasePath(),
+            basePath: this.getBasePath(),
             license: {
               type: xpackInfo.getLicense().type,
               expired: !xpackInfo.getLicense().isActive,
@@ -163,7 +179,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   private registerPath = (path: string) => {
     const adapter = this;
-    this.routes.when(
+    this.frameworkWhenRoute(
       `${path}${[...Array(50)].map(n => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
       {
         template: `<${this.PLUGIN_ID.replace('_', '-')}><div id="${this.PLUGIN_ID.replace(
@@ -173,25 +189,30 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           '_',
           '-'
         )}>`,
-        controllerAs: this.PLUGIN_ID.replace('_', ''),
         // tslint:disable-next-line: max-classes-per-file
-        controller: class KibanaFrameworkAdapterController {
-          constructor($scope: any, $route: any, $timeout: any) {
-            $timeout(
-              () => {
-                const elem = document.getElementById(
-                  adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot'
+        controller: ($scope: any, $route: any, $timeout: any) => {
+          $timeout(
+            () => {
+              const elem = document.getElementById(
+                adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot'
+              );
+              if (!elem) {
+                throw new Error(
+                  `Error rendering UI for plugin ${
+                    this.PLUGIN_ID
+                  }, element ${adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot'} could not be found`
                 );
-                ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
-                adapter.manageAngularLifecycle($scope, $route, elem);
-              },
-              0,
-              false
-            );
-            $scope.$onInit = () => {
-              $scope.topNavMenu = [];
-            };
-          }
+              }
+
+              ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
+              adapter.manageAngularLifecycle($scope, $route, elem);
+            },
+            0,
+            false
+          );
+          $scope.$onInit = () => {
+            $scope.topNavMenu = [];
+          };
         },
       }
     );

@@ -46,7 +46,31 @@ export const RuntimeFrameworkInfo = t.type({
     defaultUserRoles: t.array(t.string),
   }),
 });
+
 export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
+
+export const RuntimeManagementAPI = t.type({
+  hasItem: t.Function,
+  register: t.Function,
+  getSection: t.Function,
+});
+
+interface ManagementSection {
+  register(
+    sectionId: string,
+    options: {
+      visible: boolean;
+      display: string;
+      order: number;
+      url: string;
+    }
+  ): void;
+}
+export interface ManagementAPI extends t.TypeOf<typeof RuntimeManagementAPI> {
+  getSection(sectionId: string): ManagementSection;
+  hasItem(sectionId: string): boolean;
+  register(sectionId: string, options: { display: string; icon: string; order: number }): void;
+}
 
 export interface FrameworkUser {
   email: string | null;

@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore not typed yed
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-// @ts-ignore
-import 'ui/autoload/all';
-// @ts-ignore: path dynamic for kibana
-import chrome from 'ui/chrome';
-// @ts-ignore: path dynamic for kibana
+// @ts-ignore not typed yet
 import { management } from 'ui/management';
-// @ts-ignore: path dynamic for kibana
-import { uiModules } from 'ui/modules';
-// @ts-ignore: path dynamic for kibana
-import routes from 'ui/routes';
 
+import 'ui/autoload/all';
+import chrome from 'ui/chrome';
+import { uiModules } from 'ui/modules';
+import routes from 'ui/routes';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { supportedConfigs } from '../../config_schemas';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
@@ -43,7 +39,13 @@ export function compose(): FrontendLibs {
   });
 
   const framework = new FrameworkLib(
-    new KibanaFrameworkAdapter(PLUGIN.ID, management, routes, chrome, XPackInfoProvider)
+    new KibanaFrameworkAdapter(
+      PLUGIN.ID,
+      management,
+      routes.when,
+      chrome.getBasePath,
+      XPackInfoProvider
+    )
   );
 
   const libs: FrontendLibs = {
