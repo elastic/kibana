@@ -121,7 +121,7 @@ describe('index table', () => {
     store = indexManagementStore();
     component = (
       <Provider store={store}>
-        <MemoryRouter initialEntries={[BASE_PATH]}>
+        <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
           <App />
         </MemoryRouter>
       </Provider>
