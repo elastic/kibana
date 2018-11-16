@@ -17,7 +17,7 @@ class EssqlDatasource extends PureComponent {
     else this.props.setInvalid(!query.trim());
   }
 
-  defaultQuery = 'SELECT * FROM logstash*';
+  defaultQuery = 'SELECT * FROM "logstash*"';
 
   getQuery = () => getSimpleArg(this.getArgName(), this.props.args)[0];
 

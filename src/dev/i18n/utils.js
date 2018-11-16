@@ -26,6 +26,7 @@ import {
   isObjectProperty,
   isStringLiteral,
   isTemplateLiteral,
+  isBinaryExpression,
 } from '@babel/types';
 import fs from 'fs';
 import glob from 'glob';
@@ -37,6 +38,8 @@ import { createFailError } from '../run';
 
 const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
+
+const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
@@ -126,6 +129,37 @@ export function createParserErrorMessage(content, error) {
 }
 
 /**
+ * Recursively extracts all references from ICU message ast.
+ *
+ * Example: `'Removed tag {tag} from {assignmentsLength, plural, one {beat {beatName}} other {# beats}}.'`
+ *
+ * @param {any} node
+ * @param {Set<string>} keys
+ */
+function extractValueReferencesFromIcuAst(node, keys = new Set()) {
+  if (Array.isArray(node.elements)) {
+    for (const element of node.elements) {
+      if (element.type !== ARGUMENT_ELEMENT_TYPE) {
+        continue;
+      }
+
+      keys.add(element.id);
+
+      // format contains all specific parameters for complex argumentElements
+      if (element.format && Array.isArray(element.format.options)) {
+        for (const option of element.format.options) {
+          extractValueReferencesFromIcuAst(option, keys);
+        }
+      }
+    }
+  } else if (node.value) {
+    extractValueReferencesFromIcuAst(node.value, keys);
+  }
+
+  return [...keys];
+}
+
+/**
  * Checks whether values from "values" and "defaultMessage" correspond to each other.
  *
  * @param {string[]} valuesKeys array of "values" property keys
@@ -161,19 +195,12 @@ export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
     throw error;
   }
 
-  const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
-
   // skip validation if intl-messageformat-parser didn't return an AST with nonempty elements array
   if (!defaultMessageAst || !defaultMessageAst.elements || !defaultMessageAst.elements.length) {
     return;
   }
 
-  const defaultMessageValueReferences = defaultMessageAst.elements.reduce((keys, element) => {
-    if (element.type === ARGUMENT_ELEMENT_TYPE) {
-      keys.push(element.id);
-    }
-    return keys;
-  }, []);
+  const defaultMessageValueReferences = extractValueReferencesFromIcuAst(defaultMessageAst);
 
   const missingValuesKeys = difference(defaultMessageValueReferences, valuesKeys);
   if (missingValuesKeys.length) {
@@ -212,7 +239,7 @@ function parseTemplateLiteral(node, messageId) {
   return node.quasis[0].value.cooked;
 }
 
-export function extractMessageValueFromNode(node, messageId) {
+function extractStringFromNode(node, messageId, errorMessage) {
   if (isStringLiteral(node)) {
     return node.value;
   }
@@ -221,21 +248,28 @@ export function extractMessageValueFromNode(node, messageId) {
     return parseTemplateLiteral(node, messageId);
   }
 
-  throw createFailError(
+  if (isBinaryExpression(node, { operator: '+' })) {
+    return (
+      extractStringFromNode(node.left, messageId, errorMessage) +
+      extractStringFromNode(node.right, messageId, errorMessage)
+    );
+  }
+
+  throw createFailError(errorMessage);
+}
+
+export function extractMessageValueFromNode(node, messageId) {
+  return extractStringFromNode(
+    node,
+    messageId,
     `defaultMessage value should be a string or template literal ("${messageId}").`
   );
 }
 
 export function extractDescriptionValueFromNode(node, messageId) {
-  if (isStringLiteral(node)) {
-    return node.value;
-  }
-
-  if (isTemplateLiteral(node)) {
-    return parseTemplateLiteral(node, messageId);
-  }
-
-  throw createFailError(
+  return extractStringFromNode(
+    node,
+    messageId,
     `description value should be a string or template literal ("${messageId}").`
   );
 }

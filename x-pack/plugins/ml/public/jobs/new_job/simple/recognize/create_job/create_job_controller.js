@@ -122,7 +122,8 @@ module
       query,
       filters: [],
       useFullIndexData: true,
-      startDatafeedAfterSave: true
+      startDatafeedAfterSave: true,
+      useDedicatedIndex: false,
     };
 
     $scope.resultsUrl = '';
@@ -250,10 +251,11 @@ module
         const prefix = $scope.formConfig.jobLabel;
         const indexPatternName = $scope.formConfig.indexPattern.title;
         const groups = $scope.formConfig.jobGroups;
+        const useDedicatedIndex = $scope.formConfig.useDedicatedIndex;
         const tempQuery = (savedSearch.id === undefined) ?
           undefined : combinedQuery;
 
-        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName })
+        ml.setupDataRecognizerConfig({ moduleId, prefix, groups, query: tempQuery, indexPatternName, useDedicatedIndex })
           .then((resp) => {
             if (resp.jobs) {
               $scope.formConfig.jobs.forEach((job) => {

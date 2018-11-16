@@ -9,9 +9,12 @@
 import React from 'react';
 import { calculateClass } from '../lib/calculateClass';
 import { vents } from '../lib/vents';
+import { i18n } from '@kbn/i18n';
 
 export class Shard extends React.Component {
-  static displayName = 'Shard';
+  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.shardDisplayName', {
+    defaultMessage: 'Shard',
+  });
   state = { tooltipVisible: false };
 
   componentDidMount() {
