@@ -1,18 +1,18 @@
 JOB:
-  - intake
-  - ciGroup1
-  - ciGroup2
-  - ciGroup3
-  - ciGroup4
-  - ciGroup5
-  - ciGroup6
-  - ciGroup7
-  - ciGroup8
-  - ciGroup9
-  - ciGroup10
-  - ciGroup11
-  - ciGroup12
-  - x-pack
+  - kibana-intake
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
+  - x-pack-intake
   - x-pack-ciGroup1
   - x-pack-ciGroup2
   - x-pack-ciGroup3

@@ -6,14 +6,14 @@ set -e
 cd "$(dirname "$0")/.."
 
 case "$JOB" in
-"intake")
+kibana-intake)
   ./test/scripts/jenkins_unit.sh
   ;;
-ciGroup*)
-  export CI_GROUP="${JOB##ciGroup}"
+kibana-ciGroup*)
+  export CI_GROUP="${JOB##kibana-ciGroup}"
   ./test/scripts/jenkins_ci_group.sh
   ;;
-x-pack)
+x-pack-intake)
   ./test/scripts/jenkins_xpack.sh
   ;;
 x-pack-ciGroup*)
