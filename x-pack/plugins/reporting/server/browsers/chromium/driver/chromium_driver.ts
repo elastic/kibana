@@ -104,7 +104,7 @@ export class HeadlessChromiumDriver {
           fn: () => document.querySelector('body')!.innerText,
           args: [],
         });
-        this.logger.debug(`Page plain text:\n${pageText}`);
+        this.logger.debug(`Page plain text: ${pageText.replace(/\n/g, '\\n')}`); // replace newline with escaped for single log line
       }
       throw err;
     }
