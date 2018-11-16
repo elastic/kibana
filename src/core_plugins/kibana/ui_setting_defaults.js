@@ -220,7 +220,7 @@ export function getUiSettingDefaults() {
     'visualize:enableLabs': {
       name: 'Enable experimental visualizations',
       value: true,
-      description: `Allows users to create, view and edit experimental visualizations. If disabled
+      description: `Allows users to create, view, and edit experimental visualizations. If disabled,
         only visualizations that are considered production-ready are available to the user.`,
       category: ['visualization'],
     },
