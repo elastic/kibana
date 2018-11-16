@@ -5,6 +5,7 @@
  */
 // @ts-ignore
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
@@ -14,6 +15,7 @@ import { FeatureTable } from './feature_table';
 interface Props {
   space: Partial<Space>;
   features: Feature[];
+  intl: InjectedIntl;
   onChange: (space: Partial<Space>) => void;
 }
 
@@ -24,7 +26,12 @@ export class EnabledFeatures extends Component<Props, {}> {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Enable features within this space</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
+                  defaultMessage="Enable features within this space"
+                />
+              </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
             {this.getDescription()}
@@ -34,6 +41,7 @@ export class EnabledFeatures extends Component<Props, {}> {
               features={this.props.features}
               space={this.props.space}
               onChange={this.props.onChange}
+              intl={this.props.intl}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -52,26 +60,51 @@ export class EnabledFeatures extends Component<Props, {}> {
     if (disabledCount === 0) {
       details = (
         <EuiText size={'s'} style={{ display: 'inline-block' }}>
-          <em>(all features enabled)</em>
+          <em>
+            <FormattedMessage
+              id="xpack.spaces.management.enabledSpaceFeatures.allFeaturesEnabledMessage"
+              defaultMessage="(all features enabled)"
+            />
+          </em>
         </EuiText>
       );
     } else if (enabledCount === 0) {
       details = (
         <EuiText color="danger" size={'s'} style={{ display: 'inline-block' }}>
-          <em>(no features enabled)</em>
+          <em>
+            <FormattedMessage
+              id="xpack.spaces.management.enabledSpaceFeatures.noFeaturesEnabledMessage"
+              defaultMessage="(no features enabled)"
+            />
+          </em>
         </EuiText>
       );
     } else {
       details = (
         <EuiText size={'s'} style={{ display: 'inline-block' }}>
           <em>
-            ({enabledCount} / {featureCount} features enabled)
+            <FormattedMessage
+              id="xpack.spaces.management.enabledSpaceFeatures.someFeaturesEnabledMessage"
+              defaultMessage="({enabledCount} / {featureCount} feature enabled"
+              values={{
+                enabledCount,
+                featureCount,
+              }}
+            />
           </em>
         </EuiText>
       );
     }
 
-    return <span>Enabled features {details}</span>;
+    return (
+      <span>
+        <FormattedMessage
+          id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
+          defaultMessage="Enabled features"
+        />{' '}
+        {details}
+      </span>
+    );
   };
 
   private getKnownDisabledFeatures = () => {
@@ -88,9 +121,17 @@ export class EnabledFeatures extends Component<Props, {}> {
     return (
       <Fragment>
         <EuiText size="s" color="subdued">
-          <p>Choose which features are enabled within this space.</p>
           <p>
-            <strong>Note: </strong> this is not a security mechanism.
+            <FormattedMessage
+              id="xpack.spaces.management.enabledSpaceFeatures.chooseEnabledFeaturesMessage"
+              defaultMessage="Choose which features are enabled within this space."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
+              defaultMessage="Note: this is not a security mechanism"
+            />
           </p>
         </EuiText>
         {enabledCount === 0 && (
@@ -98,7 +139,10 @@ export class EnabledFeatures extends Component<Props, {}> {
             <EuiSpacer />
             <EuiCallOut
               color="danger"
-              title="At least one feature must be enabled"
+              title={this.props.intl.formatMessage({
+                id: 'xpack.spaces.management.enabledSpaceFeatures.enableAtLeastOneFeatureMessage',
+                defaultMessage: 'At least one feature must be enabled',
+              })}
               iconType="alert"
               size="s"
             />

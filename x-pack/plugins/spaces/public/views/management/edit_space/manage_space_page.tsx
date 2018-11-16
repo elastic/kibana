@@ -159,6 +159,7 @@ class ManageSpacePageUI extends Component<Props, State> {
           space={this.state.space}
           features={this.props.features}
           onChange={this.onSpaceChange}
+          intl={this.props.intl}
         />
 
         <EuiSpacer />

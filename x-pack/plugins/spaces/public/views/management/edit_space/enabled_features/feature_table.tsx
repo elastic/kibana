@@ -5,6 +5,7 @@
  */
 // @ts-ignore
 import { EuiCheckbox, EuiIcon, EuiInMemoryTable, EuiSwitch, EuiText, IconType } from '@elastic/eui';
+import { InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
@@ -13,6 +14,7 @@ import { Feature } from 'x-pack/plugins/xpack_main/types';
 interface Props {
   space: Partial<Space>;
   features: Feature[];
+  intl: InjectedIntl;
   onChange: (space: Partial<Space>) => void;
 }
 
@@ -49,7 +51,10 @@ export class FeatureTable extends Component<Props, {}> {
   private getColumns = () => [
     {
       field: 'feature',
-      name: 'Feature',
+      name: this.props.intl.formatMessage({
+        id: 'xpack.spaces.management.enabledSpaceFeaturesFeatureColumnTitle',
+        defaultMessage: 'Feature',
+      }),
       render: (feature: Feature) => {
         return (
           <EuiText>
@@ -63,7 +68,10 @@ export class FeatureTable extends Component<Props, {}> {
       field: 'space',
       width: '80',
       align: 'right',
-      name: 'Enabled?',
+      name: this.props.intl.formatMessage({
+        id: 'xpack.spaces.management.enabledSpaceFeaturesEnabledColumnTitle',
+        defaultMessage: 'Enabled?',
+      }),
       render: (spaceEntry: Space, record: Record<string, any>) => {
         const checked = !(
           spaceEntry.disabledFeatures && spaceEntry.disabledFeatures.includes(record.feature.id)
