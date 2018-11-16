@@ -11,7 +11,7 @@ export default function ({ loadTestFile, getService }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('phantom', function () {
-    this.tags('ciGroup5');
+    this.tags('ciGroup6');
 
     before(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
