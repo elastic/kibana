@@ -18,11 +18,12 @@ describe('ML - Advanced Job Wizard - New Job Controller', () => {
   });
 
   it('Initialize New Job Controller', (done) => {
-    sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
+    const stub = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
       indexPattern: {},
       savedSearch: {},
       combinedQuery: {}
     }));
+
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
       $controller('MlNewJob', { $scope: scope });
@@ -31,6 +32,7 @@ describe('ML - Advanced Job Wizard - New Job Controller', () => {
       // all angularjs based dependencies get loaded without error.
       // This simple scope test is just a final sanity check.
       expect(scope.ui.pageTitle).to.be('Create a new job');
+      stub.restore();
       done();
     });
   });
