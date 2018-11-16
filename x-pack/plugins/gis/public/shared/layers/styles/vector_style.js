@@ -138,13 +138,15 @@ export class VectorStyle {
   }
 
   getIcon= (() => {
-    const defaultStroke = 'grey';
-    const strokeWidth = '1px';
+    const defaultStyle = {
+      stroke: 'grey',
+      strokeWidth: '1px',
+      fill: 'none'
+    };
+
     return (isPointsOnly = false) => {
       let style = {
-        stroke: defaultStroke,
-        strokeWidth,
-        fill: 'none'
+        ...defaultStyle
       };
       const isDynamic = this._isPropertyDynamic('fillColor');
       if (!isDynamic) {
@@ -153,8 +155,8 @@ export class VectorStyle {
         const fill = _.get(fillColor, 'options.color');
 
         style = {
-          ...stroke && { stroke } || { stroke: defaultStroke },
-          strokeWidth,
+          ...style,
+          ...stroke && { stroke },
           ...fill && { fill },
         };
       }
