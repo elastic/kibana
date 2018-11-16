@@ -8,7 +8,7 @@ import { mapValues } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Actions } from './actions';
 
-export function disableUICapabilitesFactory(server: any, request: any) {
+export function disableUICapabilitesFactory(server: Record<string, any>, request: Record<string, any>) {
   const { authorization } = server.plugins.security;
   const actions: Actions = authorization.actions;
 
