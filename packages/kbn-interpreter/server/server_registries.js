@@ -39,7 +39,10 @@ export const getServerRegistries = () => {
 };
 
 export const populateServerRegistries = types => {
-  if (called) throw new Error('function should only be called once per process');
+  if (called) {
+    console.log('function should only be called once per process');
+    return populatePromise;
+  }
   called = true;
   if (!types || !types.length) throw new Error('types is required');
 
