@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiEmptyPrompt,
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  EuiButton,
 } from '@elastic/eui';
 
 import { InspectorView } from 'ui/inspector';
@@ -31,6 +32,9 @@ import { RequestStatus } from 'ui/inspector/adapters';
 
 import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
+
+import chrome from 'ui/chrome';
+import rison from 'rison-node';
 
 class RequestsViewComponent extends Component {
 
@@ -92,6 +96,25 @@ class RequestsViewComponent extends Component {
       req => req.status === RequestStatus.ERROR
     ).length;
 
+    let showInConsole;
+    if (this.state.request
+      && this.state.request.isEsSearchRequest
+      && this.state.request.esIndex
+      && this.state.request.json) {
+      const searchRequest = rison.encode(this.state.request.json);
+      showInConsole = (
+        <Fragment>
+          <EuiSpacer size="xs"/>
+          <EuiButton
+            href={chrome.addBasePath(`/app/kibana#/dev_tools/console?search_request=${searchRequest}&index=${this.state.request.esIndex}`)}
+            iconType="console"
+          >
+            open in console
+          </EuiButton>
+        </Fragment>
+      );
+    }
+
     return (
       <InspectorView>
         <EuiText size="xs">
@@ -122,6 +145,7 @@ class RequestsViewComponent extends Component {
             <p>{this.state.request.description}</p>
           </EuiText>
         }
+        {showInConsole}
         <EuiSpacer size="m" />
         { this.state.request &&
           <RequestDetails

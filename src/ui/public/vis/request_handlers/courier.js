@@ -97,6 +97,8 @@ const CourierRequestHandlerProvider = function () {
           {
             description: i18n.translate('common.ui.vis.courier.inspector.dataRequest.description',
               { defaultMessage: 'This request queries Elasticsearch to fetch the data for the visualization.' }),
+            isEsSearchRequest: true,
+            esIndex: searchSource.getField('index').title,
           }
         );
         request.stats(getRequestInspectorStats(requestSearchSource));

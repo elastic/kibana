@@ -139,6 +139,8 @@ uiModules.get('kibana')
               $scope.inspectorAdapters.requests.reset();
               inspectorRequest = $scope.inspectorAdapters.requests.start('Data', {
                 description: `This request queries Elasticsearch to fetch the data for the search.`,
+                isEsSearchRequest: true,
+                esIndex: $scope.indexPattern.title,
               });
               inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
               $scope.searchSource.getSearchRequestBody().then(body => {

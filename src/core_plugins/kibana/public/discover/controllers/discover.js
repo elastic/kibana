@@ -660,6 +660,8 @@ function discoverController(
           `Segment ${$scope.fetchStatus.complete}`,
           {
             description: `This request queries Elasticsearch to fetch the data for the search.`,
+            isEsSearchRequest: true,
+            esIndex: $scope.indexPattern.title,
           });
         inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
         $scope.searchSource.getSearchRequestBody().then(body => {

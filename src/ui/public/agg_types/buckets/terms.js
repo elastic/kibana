@@ -105,7 +105,9 @@ export const termsBucketAgg = new BucketAggType({
 
       const request = inspectorAdapters.requests.start('Other bucket', {
         description: `This request counts the number of documents that fall
-          outside the criterion of the data buckets.`
+          outside the criterion of the data buckets.`,
+        isEsSearchRequest: true,
+        esIndex: searchSource.getField('index').title,
       });
       nestedSearchSource.getSearchRequestBody().then(body => {
         request.json(body);

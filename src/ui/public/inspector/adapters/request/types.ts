@@ -47,6 +47,8 @@ export interface Request extends RequestParams {
 
 export interface RequestParams {
   description?: string;
+  esIndex?: string;
+  isEsSearchRequest?: boolean;
 }
 
 export interface RequestStatistics {

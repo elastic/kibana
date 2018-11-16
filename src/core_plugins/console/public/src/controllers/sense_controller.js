@@ -25,6 +25,8 @@ import init from '../app';
 import { SenseTopNavController } from './sense_top_nav_controller';
 import { getEndpointFromPosition } from '../autocomplete';
 import { DOC_LINK_VERSION } from 'ui/documentation_links';
+import rison from 'rison-node';
+import { toastNotifications } from 'ui/notify';
 
 const module = require('ui/modules').get('app/sense');
 
@@ -46,7 +48,24 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   $timeout(async () => {
     output = initializeOutput($('#ConAppOutput'));
     input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), output, $scope.openDocumentation);
-    init(input, output, $location.search().load_from);
+    let sourceLocation = 'stored';
+    let source;
+    const urlParams = $location.search();
+    if (urlParams.load_from) {
+      sourceLocation = 'http';
+      source = urlParams.load_from;
+    } else if (urlParams.search_request && urlParams.index) {
+      try {
+        const searchRequest = rison.decode(urlParams.search_request);
+        sourceLocation = 'inline';
+        source = `POST /${urlParams.index}/_search\n${JSON.stringify(searchRequest, null, 2)}`;
+      } catch (e) {
+        toastNotifications.addWarning({
+          title: 'Unable to decode GET request'
+        });
+      }
+    }
+    init(input, output, sourceLocation, source);
     kbnUiAceKeyboardModeService.initialize($scope, $('#ConAppEditor'));
     const session = input.getSession();
     session.getSelection().on('changeCursor', () => {
