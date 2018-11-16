@@ -7,7 +7,10 @@
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
+import { wrapCustomError, wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
+
+import { get } from 'lodash';
+import { doesClusterExist } from '../../../lib/does_cluster_exist';
 
 export function registerDeleteRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -28,7 +31,7 @@ export function registerDeleteRoute(server) {
                 seeds: null,
 
                 // If this setting was set on the cluster, we're not able to delete it unless
-                // we also set the setting to null. Leave this here until ES issue is confirmed/fixed.
+                // we also set the setting to null. Leave this here until ES is fixed.
                 skip_unavailable: null,
               }
             }
@@ -36,14 +39,34 @@ export function registerDeleteRoute(server) {
         }
       };
 
+      // Check if cluster does exist
       try {
-        return await callWithRequest('cluster.putSettings', { body: deleteClusterPayload });
+        const existingCluster = await doesClusterExist(callWithRequest, name);
+        if(!existingCluster) {
+          return wrapCustomError(new Error('There is no remote cluster with that name.'), 404);
+        }
       } catch (err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
+        return wrapCustomError(err, 400);
+      }
+
+      try {
+        const response = await callWithRequest('cluster.putSettings', { body: deleteClusterPayload });
+        const acknowledged = get(response, 'acknowledged');
+        const cluster = get(response, `persistent.cluster.remote.${name}`);
+
+        if(acknowledged && !cluster) {
+          return {};
         }
 
-        throw wrapUnknownError(err);
+        // If for some reason the ES response still returns the cluster information,
+        // return an error. This shouldn't happen.
+        return wrapCustomError(new Error('Unable to delete cluster, information still returned from ES.'), 400);
+      } catch (err) {
+        if (isEsError(err)) {
+          return wrapEsError(err);
+        }
+
+        return wrapUnknownError(err);
       }
     },
     config: {

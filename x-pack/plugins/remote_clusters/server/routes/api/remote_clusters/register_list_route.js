@@ -9,7 +9,7 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 
-import { serializeCluster } from '../../../lib/serialize_cluster';
+import { deserializeCluster } from '../../../lib/cluster_serialization';
 
 export function registerListRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -25,7 +25,7 @@ export function registerListRoute(server) {
         const clusterInfoByName = await callWithRequest('cluster.remoteInfo');
         const clusterNames = (clusterInfoByName && Object.keys(clusterInfoByName)) || [];
         return clusterNames.map(name => {
-          return serializeCluster(name, clusterInfoByName[name]);
+          return deserializeCluster(name, clusterInfoByName[name]);
         });
       } catch (err) {
         if (isEsError(err)) {

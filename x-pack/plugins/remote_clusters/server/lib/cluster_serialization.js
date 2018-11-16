@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function serializeCluster(name, esClusterObject) {
-  let serializedClusterObject;
+export function deserializeCluster(name, esClusterObject) {
+  if(!name || !esClusterObject || typeof esClusterObject !== 'object') {
+    throw new Error('Unable to deserialize cluster');
+  }
+
+  let deserializedClusterObject;
   const {
     seeds,
     connected: isConnected,
@@ -16,7 +20,7 @@ export function serializeCluster(name, esClusterObject) {
     transport,
   } = esClusterObject;
 
-  serializedClusterObject = {
+  deserializedClusterObject = {
     name,
     seeds,
     isConnected,
@@ -32,12 +36,29 @@ export function serializeCluster(name, esClusterObject) {
       compress: transportCompress,
     } = transport;
 
-    serializedClusterObject = {
-      ...serializedClusterObject,
+    deserializedClusterObject = {
+      ...deserializedClusterObject,
       transportPingSchedule,
       transportCompress,
     };
   }
 
-  return serializedClusterObject;
+  return deserializedClusterObject;
+}
+
+export function serializeCluster(deserializedClusterObject) {
+  if(!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
+    throw new Error('Unable to serialize cluster');
+  }
+  const {
+    seeds,
+    skipUnavailable,
+  } = deserializedClusterObject;
+
+  const esClusterObject = {
+    seeds,
+    skip_unavailable: skipUnavailable,
+  };
+
+  return esClusterObject;
 }
