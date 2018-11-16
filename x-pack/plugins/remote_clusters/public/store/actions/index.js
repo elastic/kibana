@@ -16,3 +16,8 @@ export {
 export {
   refreshClusters
 } from './refresh_clusters';
+
+export {
+  addCluster,
+  clearAddClusterErrors,
+} from './add_cluster';

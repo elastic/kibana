@@ -14,3 +14,5 @@ export const getDetailPanelClusterName = (state) => state.detailPanel.clusterNam
 
 export const isLoading = (state) => state.clusters.isLoading;
 export const clusterLoadError = (state) => state.clusters.clusterLoadError;
+export const isAddingCluster = (state) => state.addCluster.isAdding;
+export const getAddClusterError = (state) => state.addCluster.error;

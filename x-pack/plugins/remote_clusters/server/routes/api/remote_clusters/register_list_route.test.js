@@ -36,8 +36,8 @@ describe('[API Routes] Remote Clusters List', () => {
 
   it('should convert Elasticsearch response object to array', async () => {
     const mock = {
-      abc: { test: 'xyz' },
-      foo: { test: 'bar' },
+      abc: { seeds: ['xyz'] },
+      foo: { seeds: ['bar'] },
     };
     setHttpRequestResponse(null, mock);
 
@@ -45,8 +45,8 @@ describe('[API Routes] Remote Clusters List', () => {
     const response = await routeHandler();
 
     expect(response).toEqual([
-      { name: 'abc', test: 'xyz' },
-      { name: 'foo', test: 'bar' }
+      { name: 'abc', seeds: ['xyz'] },
+      { name: 'foo', seeds: ['bar'] }
     ]);
   });
 

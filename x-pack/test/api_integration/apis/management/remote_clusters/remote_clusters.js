@@ -39,19 +39,30 @@ export default function ({ getService }) {
           .expect(200);
 
         expect(body).to.eql({
-          "acknowledged": true,
-          "persistent": {
-            "cluster": {
-              "remote": {
-                "test_cluster": {
-                  "seeds": [
-                    "localhost:9300"
-                  ]
-                }
-              }
-            }
-          },
-          "transient": {}
+          "name": "test_cluster",
+          "seeds": [
+            "localhost:9300"
+          ]
+        });
+      });
+      it('should not allow us to re-add an existing remote cluster', async () => {
+        const uri = `${API_BASE_PATH}`;
+
+        const { body } = await supertest
+          .post(uri)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            "name": "test_cluster",
+            "seeds": [
+              "localhost:9300"
+            ]
+          })
+          .expect(409);
+
+        expect(body).to.eql({
+          "statusCode": 409,
+          "error": "Conflict",
+          "message": "There is already a remote cluster with that name."
         });
       });
     });
@@ -98,11 +109,11 @@ export default function ({ getService }) {
             "seeds": [
               "127.0.0.1:9300"
             ],
-            "connected": true,
-            "num_nodes_connected": 1,
-            "max_connections_per_cluster": 3,
-            "initial_connect_timeout": "30s",
-            "skip_unavailable": true
+            "isConnected": true,
+            "connectedNodesCount": 1,
+            "maxConnectionsPerCluster": 3,
+            "initialConnectTimeout": "30s",
+            "skipUnavailable": true
           }
         ]);
       });

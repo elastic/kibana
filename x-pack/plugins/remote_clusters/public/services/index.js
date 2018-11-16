@@ -7,6 +7,7 @@
 export {
   setHttpClient,
   loadClusters,
+  addCluster,
 } from './api';
 
 export {
@@ -25,7 +26,3 @@ export {
   getRouter,
   getRouterLinkProps,
 } from './routing';
-
-export {
-  sortTable,
-} from './sort_table';

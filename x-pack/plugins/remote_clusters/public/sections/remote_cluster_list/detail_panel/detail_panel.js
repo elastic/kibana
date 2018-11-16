@@ -42,7 +42,7 @@ export class DetailPanelUi extends Component {
 
   renderCluster() {
     const { cluster } = this.props;
-    const { connected, seeds, num_nodes_connected: connectedNodesCount } = cluster;
+    const { isConnected, seeds, connectedNodesCount } = cluster;
 
     const renderedSeeds = seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>);
 
@@ -62,7 +62,7 @@ export class DetailPanelUi extends Component {
                 </EuiDescriptionListTitle>
 
                 <EuiDescriptionListDescription>
-                  <ConnectionStatus isConnected={connected} />
+                  <ConnectionStatus isConnected={isConnected} />
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
 
