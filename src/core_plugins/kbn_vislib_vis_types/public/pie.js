@@ -46,6 +46,9 @@ export default function HistogramVisType(Private, i18n) {
         }
       },
     },
+    events: {
+      brush: { disabled: true },
+    },
     editorConfig: {
       collections: {
         legendPositions: [{
