@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { createConditionalPlugin } from './conditional_plugin';
+import { createOptionalPlugin } from './optional_plugin';
 
 class FooPlugin {
   get aProp() {
@@ -32,30 +32,20 @@ const createMockConfig = (settings: Record<string, any>) => {
 describe('isEnabled', () => {
   test('returns true when config.get(`${configPrefix}.enabled`) is true', () => {
     const config = createMockConfig({ 'xpack.fooPlugin.enabled': true });
-    const conditionalFooPlugin = createConditionalPlugin(
-      config,
-      'xpack.fooPlugin',
-      {},
-      'fooPlugin'
-    );
+    const conditionalFooPlugin = createOptionalPlugin(config, 'xpack.fooPlugin', {}, 'fooPlugin');
     expect(conditionalFooPlugin.isEnabled).toBe(true);
   });
 
   test('returns false when config.get(`${configPrefix}.enabled`) is false', () => {
     const config = createMockConfig({ 'xpack.fooPlugin.enabled': false });
-    const conditionalFooPlugin = createConditionalPlugin(
-      config,
-      'xpack.fooPlugin',
-      {},
-      'fooPlugin'
-    );
+    const conditionalFooPlugin = createOptionalPlugin(config, 'xpack.fooPlugin', {}, 'fooPlugin');
     expect(conditionalFooPlugin.isEnabled).toBe(false);
   });
 });
 
 test(`throws error when invoked before it's available`, () => {
   const config = createMockConfig({ 'xpack.fooPlugin.enabled': true });
-  const conditionalFooPlugin = createConditionalPlugin<FooPlugin>(
+  const conditionalFooPlugin = createOptionalPlugin<FooPlugin>(
     config,
     'xpack.fooPlugin',
     {},
@@ -68,7 +58,7 @@ test(`throws error when invoked before it's available`, () => {
 
 test(`throws error when invoked when it's not enabled`, () => {
   const config = createMockConfig({ 'xpack.fooPlugin.enabled': false });
-  const conditionalFooPlugin = createConditionalPlugin<FooPlugin>(
+  const conditionalFooPlugin = createOptionalPlugin<FooPlugin>(
     config,
     'xpack.fooPlugin',
     {},
@@ -81,7 +71,7 @@ test(`throws error when invoked when it's not enabled`, () => {
 
 test(`behaves normally when it's enabled and available`, () => {
   const config = createMockConfig({ 'xpack.fooPlugin.enabled': false });
-  const conditionalFooPlugin = createConditionalPlugin<FooPlugin>(
+  const conditionalFooPlugin = createOptionalPlugin<FooPlugin>(
     config,
     'xpack.fooPlugin',
     {

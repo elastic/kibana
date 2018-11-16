@@ -24,7 +24,7 @@ import { createAuthorizationService, disableUICapabilitesFactory, registerPrivil
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
-import { createConditionalPlugin } from './server/lib/conditional_plugin';
+import { createOptionalPlugin } from './server/lib/optional_plugin';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -125,7 +125,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     const { savedObjects } = server;
 
-    const spaces = createConditionalPlugin(config, 'xpack.spaces', server.plugins, 'spaces');
+    const spaces = createOptionalPlugin(config, 'xpack.spaces', server.plugins, 'spaces');
 
     // exposes server.plugins.security.authorization
     const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin, spaces);
