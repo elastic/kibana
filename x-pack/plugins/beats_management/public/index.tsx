@@ -14,7 +14,7 @@ import { FrontendLibs } from './lib/lib';
 import { PageRouter } from './router';
 
 function startApp(libs: FrontendLibs) {
-  libs.framework.registerManagementSection('beats', 'Central Management', BASE_PATH);
+  libs.framework.registerManagementSection('beats', 'Central Management (Beta)', BASE_PATH);
   libs.framework.render(
     <ThemeProvider theme={{ eui: euiVars }}>
       <BreadcrumbProvider>
