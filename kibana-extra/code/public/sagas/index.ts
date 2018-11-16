@@ -6,6 +6,7 @@
 
 import { fork } from 'redux-saga/effects';
 
+import { watchBlame, watchLoadBlame } from './blame';
 import { watchLoadCommit } from './commit';
 import { watchDocumentSearch, watchSearchRouteChange } from './document_search';
 import {
@@ -54,4 +55,6 @@ export function* rootSaga() {
   yield fork(watchMainRouteChange);
   yield fork(watchLoadRepo);
   yield fork(watchRepoRouteChange);
+  yield fork(watchLoadBlame);
+  yield fork(watchBlame);
 }

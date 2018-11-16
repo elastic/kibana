@@ -99,3 +99,17 @@
   border: 1px solid;
   margin: 0 0.5rem;
 }
+
+.editorBlameContainer {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  overflow: auto;
+}
+
+.blameContainer {
+  flex-grow: false;
+  max-width: 25rem;
+  height: 100%;
+  overflow: auto;
+}

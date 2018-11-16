@@ -48,8 +48,10 @@ import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
 import 'github-markdown-css/github-markdown.css';
 import { SearchScope } from '../../common/constants';
+import { GitBlame } from '../../../common/git_blame';
 import { cloneProgressSelector, progressSelector, treeCommitsSelector } from '../../selectors';
 import { AlignCenterContainer } from '../../styled_components/align_center_container';
+import { Blame } from './blame';
 import { CommitMessages } from './commit_messages';
 
 enum Tabs {
@@ -71,6 +73,7 @@ interface State {
   tab: Tabs;
   searchTab: SearchTabs;
   searchScope: SearchScope;
+  showBlame: boolean;
 }
 interface Props {
   match: match<{ [key: string]: string }>;
@@ -87,6 +90,7 @@ interface Props {
   file: FetchFileResponse;
   progress?: number;
   cloneProgress?: CloneProgress;
+  blames: GitBlame[];
 }
 
 const DirectoryView = withRouter(props => {
@@ -149,8 +153,17 @@ export class LayoutPage extends React.Component<Props, State> {
       tab: parseQuery(props.location.search).tab,
       searchTab: SearchTabs.box,
       searchScope: SearchScope.default,
+      showBlame: false,
     };
   }
+
+  public showBlame = () => {
+    this.setState({ showBlame: true });
+  };
+
+  public hideBlame = () => {
+    this.setState({ showBlame: false });
+  };
 
   public onClick = (node: Tree) => {
     const { resource, org, repo, revision } = this.props.match.params;
@@ -244,6 +257,22 @@ export class LayoutPage extends React.Component<Props, State> {
       />
     );
 
+  public scrollBlameInResponseOfScrollingEditor = ele => {
+    const observer = new MutationObserver(records => {
+      if (!ele) {
+        observer.disconnect();
+        return;
+      }
+      ele.scrollTop = -parseInt(records[records.length - 1].target.style.top, 10);
+    });
+    const targetNode = document.querySelector('#mainEditor:first-child:first-child:first-child');
+    observer.observe(targetNode, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
+  };
+
   public renderContent = () => {
     const { path, pathType, resource, org, repo } = this.props.match.params;
     const repoId = `${resource}/${org}/${repo}`;
@@ -277,7 +306,17 @@ export class LayoutPage extends React.Component<Props, State> {
           </div>
         );
       }
-      return <Editor />;
+      const blame = this.state.showBlame && (
+        <div className="blameContainer" ref={this.scrollBlameInResponseOfScrollingEditor}>
+          <Blame blames={this.props.blames} lineHeight={18} />
+        </div>
+      );
+      return (
+        <div className="editorBlameContainer">
+          {blame}
+          <Editor />
+        </div>
+      );
     } else {
       return null;
     }
@@ -452,6 +491,11 @@ export class LayoutPage extends React.Component<Props, State> {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiSpacer size="xs" className="spacer" />
+        <div>
+          <EuiButton onClick={this.hideBlame}>RAW</EuiButton>
+          <EuiButton onClick={this.showBlame}>BLAME</EuiButton>
+          <EuiButton onClick={this.hideBlame}>HISTORY</EuiButton>
+        </div>
         <EuiFlexItem className="codeMainContainer" style={noMarginStyle}>
           <EuiFlexGroup justifyContent="spaceBetween" className="codeMain">
             <EuiFlexItem grow={false} style={noMarginStyle} className="fileTreeContainer">
@@ -495,6 +539,7 @@ const mapStateToProps = (state: RootState) => ({
   progress: progressSelector(state),
   cloneProgress: cloneProgressSelector(state),
   repositorySearchResults: state.repositorySearch.repositories.repositories,
+  blames: state.blame.blames,
 });
 
 const mapDispatchToProps = {

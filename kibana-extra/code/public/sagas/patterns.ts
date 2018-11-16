@@ -14,6 +14,9 @@ export const adminRoutePattern = generatePattern(ROUTES.ADMIN);
 export const repoRoutePattern = generatePattern(ROUTES.REPO);
 export const mainRoutePattern = (action: Action<Match>) =>
   action.type === String(routeChange) &&
-  (ROUTES.MAIN === action.payload.path || ROUTES.MAIN_ROOT === action.payload.path);
+  (ROUTES.MAIN === action.payload!.path || ROUTES.MAIN_ROOT === action.payload!.path);
 export const searchRoutePattern = generatePattern(ROUTES.SEARCH);
 export const commitRoutePattern = generatePattern(ROUTES.DIFF);
+
+export const sourceFilePattern = (action: Action<Match>) =>
+  mainRoutePattern(action) && action.payload!.params.pathType === ROUTES.PathTypes.blob;

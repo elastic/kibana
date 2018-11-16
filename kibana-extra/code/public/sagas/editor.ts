@@ -115,7 +115,7 @@ function* handleFile(repoUri: string, file: string, revision: string) {
 }
 
 function fetchRepo(repoUri: string) {
-  return kfetch({ pathname: `../api/cs/repo/${repoUri}` });
+  return kfetch({ pathname: `../api/code/repo/${repoUri}` });
 }
 
 function* loadRepoSaga(action: any) {

@@ -5,6 +5,7 @@
  */
 import { combineReducers } from 'redux';
 
+import { blame, BlameState } from './blame';
 import { commit, CommitState } from './commit';
 import { documentSearch, DocumentSearchState } from './document_search';
 import { editor, EditorState } from './editor';
@@ -28,6 +29,7 @@ export interface RootState {
   status: StatusState;
   userConfig: UserConfigState;
   commit: CommitState;
+  blame: BlameState;
 }
 
 export const rootReducer = combineReducers({
@@ -42,4 +44,5 @@ export const rootReducer = combineReducers({
   status,
   userConfig,
   commit,
+  blame,
 });
