@@ -28,7 +28,7 @@
       {
         "url_name": "Docker Events",
         "time_range": "1h",
-        "url_value": "kibana#/dashboard/ML-Auditbeat-Docker-Audit-Events?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'docker.container.id:\"$docker.container.id$\" AND process.exe:\"$process.exe$\"'))"
+        "url_value": "kibana#/dashboard/ml_auditbeat_docker_audit_events?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'docker.container.id:\"$docker.container.id$\" AND process.exe:\"$process.exe$\"'))"
       }
     ]
   }

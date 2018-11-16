@@ -46,40 +46,40 @@
   "kibana": {
     "dashboard": [
       {
-        "id": "ML-Auditbeat-Docker-Audit-Events",
-        "file": "ML-Auditbeat-Docker-Audit-Events.json"
+        "id": "ml_auditbeat_docker_audit_events",
+        "file": "ml_auditbeat_docker_audit_events.json"
       }
     ],
     "search": [
       {
-        "id": "ML-Auditbeat-Docker-Events",
-        "file": "ML-Auditbeat-Docker-Events.json"
+        "id": "ml_auditbeat_docker_events",
+        "file": "ml_auditbeat_docker_events.json"
       }
     ],
     "visualization": [
       {
-        "id": "ML-Auditbeat-Docker-Commands",
-        "file": "ML-Auditbeat-Docker-Commands.json"
+        "id": "ml_auditbeat_docker_commands",
+        "file": "ml_auditbeat_docker_commands.json"
       },
       {
-        "id": "ML-Auditbeat-Docker-Container-Count",
-        "file": "ML-Auditbeat-Docker-Container-Count.json"
+        "id": "ml_auditbeat_docker_container_count",
+        "file": "ml_auditbeat_docker_container_count.json"
       },
       {
-        "id": "ML-Auditbeat-Docker-Container-Event-Volume",
-        "file": "ML-Auditbeat-Docker-Container-Event-Volume.json"
+        "id": "ml_auditbeat_docker_container_event_volume",
+        "file": "ml_auditbeat_docker_container_event_volume.json"
       },
       {
-        "id": "ML-Auditbeat-Docker-Container-Images",
-        "file": "ML-Auditbeat-Docker-Container-Images.json"
+        "id": "ml_auditbeat_docker_container_images",
+        "file": "ml_auditbeat_docker_container_images.json"
       },
       {
-        "id": "ML-Auditbeat-Docker-Processes",
-        "file": "ML-Auditbeat-Docker-Processes.json"
+        "id": "ml_auditbeat_docker_processes",
+        "file": "ml_auditbeat_docker_processes.json"
       },
       {
-        "id": "ML-Auditbeat-Docker-Process-Presence",
-        "file": "ML-Auditbeat-Docker-Process-Presence.json"
+        "id": "ml_auditbeat_docker_process_presence",
+        "file": "ml_auditbeat_docker_process_presence.json"
       }
     ]
   }

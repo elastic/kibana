@@ -48,48 +48,48 @@
   "kibana": {
     "dashboard": [
       {
-        "id": "ML-Auditbeat-Hosts-Audit-Events",
-        "file": "ML-Auditbeat-Hosts-Audit-Events.json"
+        "id": "ml_auditbeat_hosts_audit_events",
+        "file": "ml_auditbeat_hosts_audit_events.json"
       }
     ],
     "search": [
       {
-        "id": "ML-Auditbeat-Hosts-Events",
-        "file": "ML-Auditbeat-Hosts-Events.json"
+        "id": "ml_auditbeat_hosts_events",
+        "file": "ml_auditbeat_hosts_events.json"
       },
       {
-        "id": "ML-Auditbeat-All-Events",
-        "file": "ML-Auditbeat-All-Events.json"
+        "id": "ml_auditbeat_all_events",
+        "file": "ml_auditbeat_all_events.json"
       }
     ],
     "visualization": [
       {
-        "id": "ML-Auditbeat-Hosts-Command-Line",
-        "file": "ML-Auditbeat-Hosts-Command-Line.json"
+        "id": "ml_auditbeat_hosts_command_line",
+        "file": "ml_auditbeat_hosts_command_line.json"
       },
       {
-        "id": "ML-Auditbeat-Hosts-Event-Volume",
-        "file": "ML-Auditbeat-Hosts-Event-Volume.json"
+        "id": "ml_auditbeat_hosts_event_volume",
+        "file": "ml_auditbeat_hosts_event_volume.json"
       },
       {
-        "id": "ML-Auditbeat-Hosts-Exe-Thing",
-        "file": "ML-Auditbeat-Hosts-Exe-Thing.json"
+        "id": "ml_auditbeat_hosts_exe_thing",
+        "file": "ml_auditbeat_hosts_exe_thing.json"
       },
       {
-        "id": "ML-Auditbeat-Hosts-Kernel-Action-Presence",
-        "file": "ML-Auditbeat-Hosts-Kernel-Action-Presence.json"
+        "id": "ml_auditbeat_hosts_kernel_action_presence",
+        "file": "ml_auditbeat_hosts_kernel_action_presence.json"
       },
       {
-        "id": "ML-Auditbeat-Hosts-Kernel-Actions",
-        "file": "ML-Auditbeat-Hosts-Kernel-Actions.json"
+        "id": "ml_auditbeat_hosts_kernel_actions",
+        "file": "ml_auditbeat_hosts_kernel_actions.json"
       },
       {
-        "id": "ML-Auditbeat-Hosts-Process-Presence",
-        "file": "ML-Auditbeat-Hosts-Process-Presence.json"
+        "id": "ml_auditbeat_hosts_process_presence",
+        "file": "ml_auditbeat_hosts_process_presence.json"
       },
       {
-        "id": "ML-Auditbeat-Hosts-Processes",
-        "file": "ML-Auditbeat-Hosts-Processes.json"
+        "id": "ml_auditbeat_hosts_processes",
+        "file": "ml_auditbeat_hosts_processes.json"
       }
     ]
   }

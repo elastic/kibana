@@ -28,7 +28,7 @@
       {
         "url_name": "Host Events",
         "time_range": "1h",
-        "url_value": "kibana#/dashboard/ML-Auditbeat-Hosts-Audit-Events?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'beat.hostname:\"$beat.hostname$\" AND process.exe:\"$process.exe$\"'))"
+        "url_value": "kibana#/dashboard/ml_auditbeat_hosts_audit_events?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'beat.hostname:\"$beat.hostname$\" AND process.exe:\"$process.exe$\"'))"
       }
     ]
   }
