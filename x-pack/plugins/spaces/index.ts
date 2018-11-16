@@ -103,7 +103,7 @@ export const spaces = (kibana: any) =>
 
         if (vars.activeSpace.space) {
           const features = server.plugins.xpack_main.getFeatures();
-          vars.uiCapabilities = await toggleUiCapabilities(
+          vars.uiCapabilities = toggleUiCapabilities(
             features,
             vars.uiCapabilities,
             vars.activeSpace.space
