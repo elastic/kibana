@@ -22,6 +22,7 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import { getFilterDisplayText } from 'ui/filter_bar/filters/filter_views';
 import { MetaFilter } from 'ui/filter_bar/filters/meta_filter';
+import { FilterEditor } from 'ui/filter_bar/react/filter_editor';
 
 interface Props {
   filter: MetaFilter;
@@ -77,43 +78,59 @@ export class FilterItem extends Component<Props, State> {
       </EuiBadge>
     );
 
-    const panelTree = {
-      id: 0,
-      items: [
-        {
-          name: `${pinned ? 'Unpin' : 'Pin across all apps'}`,
-          icon: 'pin',
-          onClick: () => {
-            this.closePopover();
-            this.props.onTogglePin(filter);
+    const panelTree = [
+      {
+        id: 0,
+        items: [
+          {
+            name: `${pinned ? 'Unpin' : 'Pin across all apps'}`,
+            icon: 'pin',
+            onClick: () => {
+              this.closePopover();
+              this.props.onTogglePin(filter);
+            },
           },
-        },
-        {
-          name: `${negate ? 'Include results' : 'Exclude results'}`,
-          icon: `${negate ? 'plusInCircle' : 'minusInCircle'}`,
-          onClick: () => {
-            this.closePopover();
-            this.props.onToggleNegate(filter);
+          {
+            name: 'Edit filter',
+            icon: 'pencil',
+            panel: 1,
           },
-        },
-        {
-          name: `${disabled ? 'Re-enable' : 'Temporarily disable'}`,
-          icon: `${disabled ? 'eye' : 'eyeClosed'}`,
-          onClick: () => {
-            this.closePopover();
-            this.props.onToggleDisabled(filter);
+          {
+            name: `${negate ? 'Include results' : 'Exclude results'}`,
+            icon: `${negate ? 'plusInCircle' : 'minusInCircle'}`,
+            onClick: () => {
+              this.closePopover();
+              this.props.onToggleNegate(filter);
+            },
           },
-        },
-        {
-          name: 'Delete',
-          icon: 'trash',
-          onClick: () => {
-            this.closePopover();
-            this.props.onDelete(filter);
+          {
+            name: `${disabled ? 'Re-enable' : 'Temporarily disable'}`,
+            icon: `${disabled ? 'eye' : 'eyeClosed'}`,
+            onClick: () => {
+              this.closePopover();
+              this.props.onToggleDisabled(filter);
+            },
           },
-        },
-      ],
-    };
+          {
+            name: 'Delete',
+            icon: 'trash',
+            onClick: () => {
+              this.closePopover();
+              this.props.onDelete(filter);
+            },
+          },
+        ],
+      },
+      {
+        id: 1,
+        width: 400,
+        content: (
+          <div style={{ padding: 16 }}>
+            <FilterEditor foo={'yo'} />
+          </div>
+        ),
+      },
+    ];
 
     return (
       <EuiPopover
@@ -124,7 +141,7 @@ export class FilterItem extends Component<Props, State> {
         anchorPosition="downCenter"
         panelPaddingSize="none"
       >
-        <EuiContextMenu initialPanelId={0} panels={[panelTree]} />
+        <EuiContextMenu initialPanelId={0} panels={panelTree} />
       </EuiPopover>
     );
   }
