@@ -29,14 +29,22 @@ const defaultPreCheckLicenseImpl = () => null;
 
 const privilegeMap = {
   global: {
-    'test-global-privilege-1': [],
-    'test-global-privilege-2': [],
-    'test-global-privilege-3': [],
+    all: [],
+    read: [],
   },
   space: {
-    'test-space-privilege-1': [],
-    'test-space-privilege-2': [],
-    'test-space-privilege-3': [],
+    all: [],
+    read: [],
+  },
+  features: {
+    foo: {
+      'foo-privilege-1': [],
+      'foo-privilege-2': [],
+    },
+    bar: {
+      'bar-privilege-1': [],
+      'bar-privilege-2': [],
+    }
   }
 };
 
@@ -53,11 +61,16 @@ const putRoleTest = (
     for (const impl of callWithRequestImpls) {
       mockCallWithRequest.mockImplementationOnce(impl);
     }
+    const mockAuthorization = {
+      privileges: {
+        get: () => privilegeMap
+      }
+    };
     initPutRolesApi(
       mockServer,
       mockCallWithRequest,
       mockPreCheckLicense,
-      privilegeMap,
+      mockAuthorization,
       application,
     );
     const headers = {
@@ -129,7 +142,7 @@ describe('PUT role', () => {
       },
     });
 
-    putRoleTest(`only allows known Kibana global privileges`, {
+    putRoleTest(`only allows known Kibana global or feature privileges`, {
       name: 'foo-role',
       payload: {
         kibana: {
@@ -141,7 +154,7 @@ describe('PUT role', () => {
         result: {
           error: 'Bad Request',
           //eslint-disable-next-line max-len
-          message: `child \"kibana\" fails because [child \"global\" fails because [\"global\" at position 0 fails because [\"0\" must be one of [test-global-privilege-1, test-global-privilege-2, test-global-privilege-3]]]]`,
+          message: `child \"kibana\" fails because [child \"global\" fails because [\"global\" at position 0 fails because [\"0\" must be one of [all, read, foo_foo-privilege-1, foo_foo-privilege-2, bar_bar-privilege-1, bar_bar-privilege-2]]]]`,
           statusCode: 400,
           validation: {
             keys: ['kibana.global.0'],
@@ -151,7 +164,7 @@ describe('PUT role', () => {
       },
     });
 
-    putRoleTest(`only allows known Kibana space privileges`, {
+    putRoleTest(`only allows known Kibana space or feature privileges`, {
       name: 'foo-role',
       payload: {
         kibana: {
@@ -165,7 +178,7 @@ describe('PUT role', () => {
         result: {
           error: 'Bad Request',
           //eslint-disable-next-line max-len
-          message: `child \"kibana\" fails because [child \"space\" fails because [child \"quz\" fails because [\"quz\" at position 0 fails because [\"0\" must be one of [test-space-privilege-1, test-space-privilege-2, test-space-privilege-3]]]]]`,
+          message: `child \"kibana\" fails because [child \"space\" fails because [child \"quz\" fails because [\"quz\" at position 0 fails because [\"0\" must be one of [all, read, foo_foo-privilege-1, foo_foo-privilege-2, bar_bar-privilege-1, bar_bar-privilege-2]]]]]`,
           statusCode: 400,
           validation: {
             keys: ['kibana.space.quz.0'],
@@ -285,11 +298,11 @@ describe('PUT role', () => {
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: {
-          global: ['test-global-privilege-1', 'test-global-privilege-2', 'test-global-privilege-3'],
+          global: ['all', 'read', 'foo_foo-privilege-1', 'foo_foo-privilege-2', 'bar_bar-privilege-1', 'bar_bar-privilege-2'],
           space: {
-            'test-space-1': ['test-space-privilege-1', 'test-space-privilege-2'],
-            'test-space-2': ['test-space-privilege-3'],
-          }
+            'test-space-1': ['all', 'read', 'bar_bar-privilege-1', 'bar_bar-privilege-2'],
+            'test-space-2': ['all', 'read', 'foo_foo-privilege-1', 'foo_foo-privilege-2'],
+          },
         },
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
@@ -306,24 +319,32 @@ describe('PUT role', () => {
                   {
                     application,
                     privileges: [
-                      'test-global-privilege-1',
-                      'test-global-privilege-2',
-                      'test-global-privilege-3'
+                      'all',
+                      'read',
+                      'feature_foo_foo-privilege-1',
+                      'feature_foo_foo-privilege-2',
+                      'feature_bar_bar-privilege-1',
+                      'feature_bar_bar-privilege-2',
                     ],
                     resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
                     privileges: [
-                      'space_test-space-privilege-1',
-                      'space_test-space-privilege-2'
+                      'space_all',
+                      'space_read',
+                      'feature_bar_bar-privilege-1',
+                      'feature_bar_bar-privilege-2',
                     ],
                     resources: ['space:test-space-1']
                   },
                   {
                     application,
                     privileges: [
-                      'space_test-space-privilege-3',
+                      'space_all',
+                      'space_read',
+                      'feature_foo_foo-privilege-1',
+                      'feature_foo_foo-privilege-2',
                     ],
                     resources: ['space:test-space-2']
                   },
@@ -376,10 +397,10 @@ describe('PUT role', () => {
           run_as: ['test-run-as-1', 'test-run-as-2'],
         },
         kibana: {
-          global: ['test-global-privilege-1', 'test-global-privilege-2', 'test-global-privilege-3'],
+          global: ['all', 'foo_foo-privilege-1', 'bar_bar-privilege-1'],
           space: {
-            'test-space-1': ['test-space-privilege-1', 'test-space-privilege-2'],
-            'test-space-2': ['test-space-privilege-3'],
+            'test-space-1': ['all', 'foo_foo-privilege-2'],
+            'test-space-2': ['read', 'bar_bar-privilege-2'],
           }
         },
       },
@@ -429,24 +450,25 @@ describe('PUT role', () => {
                   {
                     application,
                     privileges: [
-                      'test-global-privilege-1',
-                      'test-global-privilege-2',
-                      'test-global-privilege-3'
+                      'all',
+                      'feature_foo_foo-privilege-1',
+                      'feature_bar_bar-privilege-1'
                     ],
                     resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
                     privileges: [
-                      'space_test-space-privilege-1',
-                      'space_test-space-privilege-2'
+                      'space_all',
+                      'feature_foo_foo-privilege-2'
                     ],
                     resources: ['space:test-space-1']
                   },
                   {
                     application,
                     privileges: [
-                      'space_test-space-privilege-3',
+                      'space_read',
+                      'feature_bar_bar-privilege-2',
                     ],
                     resources: ['space:test-space-2']
                   },
@@ -500,9 +522,8 @@ describe('PUT role', () => {
           },
           kibana: {
             global: [
-              'test-global-privilege-1',
-              'test-global-privilege-2',
-              'test-global-privilege-3'
+              'all',
+              'read',
             ],
           },
         },
@@ -557,9 +578,8 @@ describe('PUT role', () => {
                     {
                       application,
                       privileges: [
-                        'test-global-privilege-1',
-                        'test-global-privilege-2',
-                        'test-global-privilege-3'
+                        'all',
+                        'read',
                       ],
                       resources: [GLOBAL_RESOURCE],
                     },

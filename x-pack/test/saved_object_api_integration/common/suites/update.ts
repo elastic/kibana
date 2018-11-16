@@ -60,7 +60,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to update ${type}, missing action:saved_objects/${type}/update`,
+      message: `Unable to update ${type}, missing saved_object:${type}/update`,
     });
   };
 

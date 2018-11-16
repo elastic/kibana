@@ -57,8 +57,18 @@ export const init = (monitoringPlugin, server) => {
   xpackMainPlugin.registerFeature({
     id: 'monitoring',
     name: 'Monitoring',
-    type: 'app',
-    icon: 'monitoringApp'
+    icon: 'monitoringApp',
+    navLinkId: 'monitoring',
+    privileges: {
+      all: {
+        app: ['monitoring'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: [],
+      },
+    }
   });
 
   const bulkUploader = initBulkUploader(kbnServer, server);

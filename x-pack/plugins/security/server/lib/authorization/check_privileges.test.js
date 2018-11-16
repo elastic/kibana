@@ -142,7 +142,7 @@ describe('#checkPrivilegesAtSpace', () => {
 
   checkPrivilegesAtSpaceTest(`successful when checking for two actions and the user has both`, {
     spaceId: 'space_1',
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: true,
       username: 'foo-username',
@@ -151,8 +151,8 @@ describe('#checkPrivilegesAtSpace', () => {
           'space:space_1': {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           }
         }
       }
@@ -161,15 +161,15 @@ describe('#checkPrivilegesAtSpace', () => {
       hasAllRequested: true,
       username: 'foo-username',
       privileges: {
-        [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-        [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+        [`saved_object:${savedObjectTypes[0]}/get`]: true,
+        [`saved_object:${savedObjectTypes[1]}/get`]: true,
       }
     },
   });
 
   checkPrivilegesAtSpaceTest(`failure when checking for two actions and the user has only one`, {
     spaceId: 'space_1',
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: false,
       username: 'foo-username',
@@ -178,8 +178,8 @@ describe('#checkPrivilegesAtSpace', () => {
           'space:space_1': {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: false,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           }
         }
       }
@@ -188,8 +188,8 @@ describe('#checkPrivilegesAtSpace', () => {
       hasAllRequested: false,
       username: 'foo-username',
       privileges: {
-        [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-        [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+        [`saved_object:${savedObjectTypes[0]}/get`]: false,
+        [`saved_object:${savedObjectTypes[1]}/get`]: true,
       }
     },
   });
@@ -197,7 +197,7 @@ describe('#checkPrivilegesAtSpace', () => {
   describe('with a malformed Elasticsearch response', () => {
     checkPrivilegesAtSpaceTest(`throws a validation error when an extra privilege is present in the response`, {
       spaceId: 'space_1',
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
@@ -206,8 +206,8 @@ describe('#checkPrivilegesAtSpace', () => {
             'space:space_1': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-              [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
             }
           }
         }
@@ -217,7 +217,7 @@ describe('#checkPrivilegesAtSpace', () => {
 
     checkPrivilegesAtSpaceTest(`throws a validation error when privileges are missing in the response`, {
       spaceId: 'space_1',
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
@@ -372,19 +372,19 @@ describe('#checkPrivilegesAtSpaces', () => {
 
   checkPrivilegesAtSpacesTest(`throws error when Elasticsearch returns malformed response`, {
     spaceIds: ['space_1', 'space_2'],
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: true,
       username: 'foo-username',
       application: {
         [application]: {
           'space:space_1': {
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           },
           'space:space_2': {
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           }
         }
       }
@@ -394,7 +394,7 @@ describe('#checkPrivilegesAtSpaces', () => {
 
   checkPrivilegesAtSpacesTest(`successful when checking for two actions at two spaces and user has it all`, {
     spaceIds: ['space_1', 'space_2'],
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: true,
       username: 'foo-username',
@@ -403,14 +403,14 @@ describe('#checkPrivilegesAtSpaces', () => {
           'space:space_1': {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           },
           'space:space_2': {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           }
         }
       }
@@ -420,12 +420,12 @@ describe('#checkPrivilegesAtSpaces', () => {
       username: 'foo-username',
       spacePrivileges: {
         space_1: {
-          [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-          [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          [`saved_object:${savedObjectTypes[0]}/get`]: true,
+          [`saved_object:${savedObjectTypes[1]}/get`]: true,
         },
         space_2: {
-          [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-          [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          [`saved_object:${savedObjectTypes[0]}/get`]: true,
+          [`saved_object:${savedObjectTypes[1]}/get`]: true,
         }
       }
     },
@@ -433,7 +433,7 @@ describe('#checkPrivilegesAtSpaces', () => {
 
   checkPrivilegesAtSpacesTest(`failure when checking for two actions at two spaces and user has one action at one space`, {
     spaceIds: ['space_1', 'space_2'],
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: false,
       username: 'foo-username',
@@ -442,14 +442,14 @@ describe('#checkPrivilegesAtSpaces', () => {
           'space:space_1': {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: false,
           },
           'space:space_2': {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+            [`saved_object:${savedObjectTypes[0]}/get`]: false,
+            [`saved_object:${savedObjectTypes[1]}/get`]: false,
           }
         }
       }
@@ -459,12 +459,12 @@ describe('#checkPrivilegesAtSpaces', () => {
       username: 'foo-username',
       spacePrivileges: {
         space_1: {
-          [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-          [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+          [`saved_object:${savedObjectTypes[0]}/get`]: true,
+          [`saved_object:${savedObjectTypes[1]}/get`]: false,
         },
         space_2: {
-          [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-          [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+          [`saved_object:${savedObjectTypes[0]}/get`]: false,
+          [`saved_object:${savedObjectTypes[1]}/get`]: false,
         }
       }
     },
@@ -472,7 +472,7 @@ describe('#checkPrivilegesAtSpaces', () => {
 
   checkPrivilegesAtSpacesTest(`failure when checking for two actions at two spaces and user has two actions at one space`, {
     spaceIds: ['space_1', 'space_2'],
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: false,
       username: 'foo-username',
@@ -481,14 +481,14 @@ describe('#checkPrivilegesAtSpaces', () => {
           'space:space_1': {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           },
           'space:space_2': {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+            [`saved_object:${savedObjectTypes[0]}/get`]: false,
+            [`saved_object:${savedObjectTypes[1]}/get`]: false,
           }
         }
       }
@@ -498,12 +498,12 @@ describe('#checkPrivilegesAtSpaces', () => {
       username: 'foo-username',
       spacePrivileges: {
         space_1: {
-          [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-          [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+          [`saved_object:${savedObjectTypes[0]}/get`]: true,
+          [`saved_object:${savedObjectTypes[1]}/get`]: true,
         },
         space_2: {
-          [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-          [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+          [`saved_object:${savedObjectTypes[0]}/get`]: false,
+          [`saved_object:${savedObjectTypes[1]}/get`]: false,
         }
       }
     },
@@ -512,7 +512,7 @@ describe('#checkPrivilegesAtSpaces', () => {
   checkPrivilegesAtSpacesTest(
     `failure when checking for two actions at two spaces and user has two actions at one space & one action at the other`, {
       spaceIds: ['space_1', 'space_2'],
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
@@ -521,14 +521,14 @@ describe('#checkPrivilegesAtSpaces', () => {
             'space:space_1': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-              [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+              [`saved_object:${savedObjectTypes[0]}/get`]: true,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
             'space:space_2': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-              [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+              [`saved_object:${savedObjectTypes[0]}/get`]: true,
+              [`saved_object:${savedObjectTypes[1]}/get`]: false,
             }
           }
         }
@@ -538,12 +538,12 @@ describe('#checkPrivilegesAtSpaces', () => {
         username: 'foo-username',
         spacePrivileges: {
           space_1: {
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           },
           space_2: {
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: false,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: false,
           }
         }
       },
@@ -552,7 +552,7 @@ describe('#checkPrivilegesAtSpaces', () => {
   describe('with a malformed Elasticsearch response', () => {
     checkPrivilegesAtSpacesTest(`throws a validation error when an extra privilege is present in the response`, {
       spaceIds: ['space_1', 'space_2'],
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
@@ -561,13 +561,13 @@ describe('#checkPrivilegesAtSpaces', () => {
             'space:space_1': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-              [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
             },
             'space:space_1': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
             }
           }
         }
@@ -577,7 +577,7 @@ describe('#checkPrivilegesAtSpaces', () => {
 
     checkPrivilegesAtSpacesTest(`throws a validation error when privileges are missing in the response`, {
       spaceIds: ['space_1', 'space_2'],
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
@@ -590,7 +590,7 @@ describe('#checkPrivilegesAtSpaces', () => {
             'space:space_1': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
             }
           }
         }
@@ -600,7 +600,7 @@ describe('#checkPrivilegesAtSpaces', () => {
 
     checkPrivilegesAtSpacesTest(`throws a validation error when an extra space is present in the response`, {
       spaceIds: ['space_1', 'space_2'],
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
@@ -609,17 +609,17 @@ describe('#checkPrivilegesAtSpaces', () => {
             'space:space_1': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
             },
             'space:space_2': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
             },
             'space:space_3': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
             },
           }
         }
@@ -629,7 +629,7 @@ describe('#checkPrivilegesAtSpaces', () => {
 
     checkPrivilegesAtSpacesTest(`throws a validation error when an a space is missing in the response`, {
       spaceIds: ['space_1', 'space_2'],
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
@@ -638,7 +638,7 @@ describe('#checkPrivilegesAtSpaces', () => {
             'space:space_1': {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
             }
           }
         }
@@ -759,15 +759,15 @@ describe('#checkPrivilegesGlobally', () => {
   });
 
   checkPrivilegesGloballyTest(`throws error when Elasticsearch returns malformed response`, {
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: false,
       username: 'foo-username',
       application: {
         [application]: {
           [GLOBAL_RESOURCE]: {
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: false,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           }
         }
       }
@@ -776,7 +776,7 @@ describe('#checkPrivilegesGlobally', () => {
   });
 
   checkPrivilegesGloballyTest(`successful when checking for two actions and the user has both`, {
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: true,
       username: 'foo-username',
@@ -785,8 +785,8 @@ describe('#checkPrivilegesGlobally', () => {
           [GLOBAL_RESOURCE]: {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: true,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           }
         }
       }
@@ -795,14 +795,14 @@ describe('#checkPrivilegesGlobally', () => {
       hasAllRequested: true,
       username: 'foo-username',
       privileges: {
-        [`action:saved_objects/${savedObjectTypes[0]}/get`]: true,
-        [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+        [`saved_object:${savedObjectTypes[0]}/get`]: true,
+        [`saved_object:${savedObjectTypes[1]}/get`]: true,
       }
     },
   });
 
   checkPrivilegesGloballyTest(`failure when checking for two actions and the user has only one`, {
-    privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`, `action:saved_objects/${savedObjectTypes[1]}/get`],
+    privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`, `saved_object:${savedObjectTypes[1]}/get`],
     esHasPrivilegesResponse: {
       has_all_requested: false,
       username: 'foo-username',
@@ -811,8 +811,8 @@ describe('#checkPrivilegesGlobally', () => {
           [GLOBAL_RESOURCE]: {
             [mockActions.login]: true,
             [mockActions.version]: true,
-            [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-            [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+            [`saved_object:${savedObjectTypes[0]}/get`]: false,
+            [`saved_object:${savedObjectTypes[1]}/get`]: true,
           }
         }
       }
@@ -821,15 +821,15 @@ describe('#checkPrivilegesGlobally', () => {
       hasAllRequested: false,
       username: 'foo-username',
       privileges: {
-        [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-        [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+        [`saved_object:${savedObjectTypes[0]}/get`]: false,
+        [`saved_object:${savedObjectTypes[1]}/get`]: true,
       }
     },
   });
 
   describe('with a malformed Elasticsearch response', () => {
     checkPrivilegesGloballyTest(`throws a validation error when an extra privilege is present in the response`, {
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
@@ -838,8 +838,8 @@ describe('#checkPrivilegesGlobally', () => {
             [GLOBAL_RESOURCE]: {
               [mockActions.login]: true,
               [mockActions.version]: true,
-              [`action:saved_objects/${savedObjectTypes[0]}/get`]: false,
-              [`action:saved_objects/${savedObjectTypes[1]}/get`]: true,
+              [`saved_object:${savedObjectTypes[0]}/get`]: false,
+              [`saved_object:${savedObjectTypes[1]}/get`]: true,
             }
           }
         }
@@ -848,7 +848,7 @@ describe('#checkPrivilegesGlobally', () => {
     });
 
     checkPrivilegesGloballyTest(`throws a validation error when privileges are missing in the response`, {
-      privilegeOrPrivileges: [`action:saved_objects/${savedObjectTypes[0]}/get`],
+      privilegeOrPrivileges: [`saved_object:${savedObjectTypes[0]}/get`],
       esHasPrivilegesResponse: {
         has_all_requested: false,
         username: 'foo-username',
