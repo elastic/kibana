@@ -8,10 +8,11 @@
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 // @ts-ignore not typed yet
 import { management } from 'ui/management';
+// @ts-ignore not typed yet
+import { uiModules } from 'ui/modules';
 
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
-import { uiModules } from 'ui/modules';
 import routes from 'ui/routes';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { supportedConfigs } from '../../config_schemas';
@@ -28,6 +29,8 @@ import { FrontendLibs } from '../types';
 import { PLUGIN } from './../../../common/constants/plugin';
 import { FrameworkLib } from './../framework';
 
+// A super early spot in kibana loading that we can use to hook before most other things
+const onKibanaReady = uiModules.get('app/sense').run;
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
   const esAdapter = new RestElasticsearchAdapter(api, INDEX_NAMES.BEATS);
@@ -44,6 +47,7 @@ export function compose(): FrontendLibs {
       management,
       routes.when,
       chrome.getBasePath,
+      onKibanaReady,
       XPackInfoProvider
     )
   );

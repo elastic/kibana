@@ -31,6 +31,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly management: ManagementAPI,
     private readonly frameworkWhenRoute: UIRoutes['when'],
     private readonly getBasePath: () => string,
+    private readonly onKibanaReady: (Private: any) => void,
     private readonly XPackInfoProvider: unknown
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
@@ -138,10 +139,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   private async hookAngular() {
-    const module = require('ui/modules').get('app/sense');
-
     return new Promise(resolve => {
-      module.run((Private: any) => {
+      this.onKibanaReady(async (Private: any, $injector: any) => {
         const xpackInfo = Private(this.XPackInfoProvider);
         let xpackInfoUnpacked: FrameworkInfo;
         try {
@@ -170,7 +169,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         }
         this.xpackInfo = xpackInfoUnpacked;
 
-        // this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+        this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
 
         resolve();
       });

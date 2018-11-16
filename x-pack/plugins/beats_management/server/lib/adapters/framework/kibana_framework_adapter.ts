@@ -9,6 +9,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
+import { KibanaUser } from './adapter_types';
 import {
   BackendFrameworkAdapter,
   FrameworkInfo,
@@ -20,7 +21,6 @@ import {
   KibanaLegacyServer,
   KibanaServerRequest,
   RuntimeFrameworkInfo,
-  RuntimeKibanaLegacyServer,
   XpackInfo,
 } from './adapter_types';
 
@@ -28,27 +28,16 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public readonly internalUser = internalUser;
   public info: null | FrameworkInfo = null;
 
-  private server: KibanaLegacyServer;
-
   constructor(
     private readonly PLUGIN_ID: string,
-    hapiServer: KibanaLegacyServer,
+    private readonly server: KibanaLegacyServer,
     private readonly CONFIG_PREFIX?: string
   ) {
-    const assertKibanaServer = RuntimeKibanaLegacyServer.decode(hapiServer);
-    if (assertKibanaServer.isLeft()) {
-      throw new Error(
-        `Error Kibana server object was not formed as expected by ${this.PLUGIN_ID},   ${
-          PathReporter.report(assertKibanaServer)[0]
-        }`
-      );
-    }
-    this.server = hapiServer;
-
-    const xpackMainPlugin = hapiServer.plugins.xpack_main;
-    const thisPlugin = hapiServer.plugins.beats_management;
+    const xpackMainPlugin = this.server.plugins.xpack_main;
+    const thisPlugin = this.server.plugins.beats_management;
 
     mirrorPluginStatus(xpackMainPlugin, thisPlugin);
+
     xpackMainPlugin.status.once('green', () => {
       this.xpackInfoWasUpdatedHandler(xpackMainPlugin.info);
       // Register a function that is called whenever the xpack info changes,
@@ -107,18 +96,25 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   ): Promise<FrameworkRequest<InternalRequest>> {
     const { params, payload, query, headers, info } = req;
 
-    const isAuthenticated = headers.authorization != null;
-
+    let isAuthenticated = headers.authorization != null;
+    let user;
+    if (isAuthenticated) {
+      user = await this.getUser(req);
+      if (!user) {
+        isAuthenticated = false;
+      }
+    }
     return {
-      user: isAuthenticated
-        ? {
-            kind: 'authenticated',
-            [internalAuthData]: headers,
-            ...(await this.getUser(req)),
-          }
-        : {
-            kind: 'unauthenticated',
-          },
+      user:
+        isAuthenticated && user
+          ? {
+              kind: 'authenticated',
+              [internalAuthData]: headers,
+              ...user,
+            }
+          : {
+              kind: 'unauthenticated',
+            },
       headers,
       info,
       params,
@@ -127,9 +123,19 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     };
   }
 
-  private async getUser(request: KibanaServerRequest) {
+  private async getUser(request: KibanaServerRequest): Promise<KibanaUser | null> {
     try {
-      return await this.server.plugins.security.getUser(request);
+      const user = await this.server.plugins.security.getUser(request);
+      const assertKibanaUser = RuntimeFrameworkInfo.decode(user);
+      if (assertKibanaUser.isLeft()) {
+        throw new Error(
+          `Error parsing user info in ${this.PLUGIN_ID},   ${
+            PathReporter.report(assertKibanaUser)[0]
+          }`
+        );
+      }
+
+      return await user;
     } catch (e) {
       return null;
     }

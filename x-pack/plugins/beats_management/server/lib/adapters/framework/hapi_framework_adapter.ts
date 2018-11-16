@@ -133,7 +133,6 @@ export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
             roles: ['superuser'],
             full_name: null,
             email: null,
-            metadata: {},
             enabled: true,
           }
         : {
