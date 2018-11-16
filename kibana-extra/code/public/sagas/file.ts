@@ -37,33 +37,19 @@ import {
   openTreePath,
   setNotFound,
 } from '../actions';
-import { getTree } from '../selectors';
 import { repoRoutePattern } from './patterns';
 
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
-    let currentTree: FileTree = yield select(getTree);
     const { uri, revision, path } = action.payload!;
     if (path) {
+      yield call(fetchPath, { uri, revision, path });
       const pathSegments = path.split('/');
       let currentPath = '';
       // open all directories on the path
       for (const p of pathSegments) {
-        if (!currentTree.children) {
-          currentTree = yield call(fetchPath, { uri, revision, path: currentPath });
-        }
-        const child = currentTree.children!.find(c => c.name === p);
-        if (child) {
-          currentTree = child;
-          currentPath = currentPath ? `${currentPath}/${p}` : p;
-          if (!currentTree.children) {
-            yield call(fetchPath, { uri, revision, path: currentPath });
-          }
-          yield put(openTreePath(currentPath));
-        } else {
-          // path in missing in tree?
-          break;
-        }
+        currentPath = currentPath ? `${currentPath}/${p}` : p;
+        yield put(openTreePath(currentPath));
       }
     } else {
       yield call(fetchPath, action.payload!);
@@ -84,14 +70,14 @@ function* fetchPath(payload: FetchRepoTreePayload) {
     }
   });
   update.repoUri = payload.uri;
-  yield put(fetchRepoTreeSuccess(update));
+  yield put(fetchRepoTreeSuccess({ tree: update, path: payload.path }));
   return update;
 }
 
-function requestRepoTree({ uri, revision, path, depth = 1 }: FetchRepoTreePayload) {
+function requestRepoTree({ uri, revision, path, limit = 50 }: FetchRepoTreePayload) {
   return kfetch({
     pathname: `../api/code/repo/${uri}/tree/${revision}/${path}`,
-    query: { depth },
+    query: { parents: true, limit },
   });
 }
 

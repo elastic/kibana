@@ -19,7 +19,7 @@ export interface FetchFilePayload extends FetchRepoPayloadWithRevision {
   path: string;
 }
 export interface FetchRepoTreePayload extends FetchFilePayload {
-  depth?: number;
+  limit?: number;
 }
 
 export interface FetchFileResponse {
@@ -31,8 +31,13 @@ export interface FetchFileResponse {
   url?: string;
 }
 
+export interface RepoTreePayload {
+  tree: FileTree;
+  path: string;
+}
+
 export const fetchRepoTree = createAction<FetchRepoTreePayload>('FETCH REPO TREE');
-export const fetchRepoTreeSuccess = createAction<FileTree>('FETCH REPO TREE SUCCESS');
+export const fetchRepoTreeSuccess = createAction<RepoTreePayload>('FETCH REPO TREE SUCCESS');
 export const fetchRepoTreeFailed = createAction<Error>('FETCH REPO TREE FAILED');
 export const resetRepoTree = createAction('CLEAR REPO TREE');
 export const closeTreePath = createAction<string>('CLOSE TREE PATH');

@@ -24,6 +24,7 @@ import {
   fetchRepoTreeSuccess,
   fetchTreeCommitsSuccess,
   openTreePath,
+  RepoTreePayload,
   resetRepoTree,
   routeChange,
   setNotFound,
@@ -60,26 +61,24 @@ const initialState: FileState = {
   currentPath: '',
 };
 
-function mergeTree(draft: FileState, update: FileTree) {
-  if (update.path) {
-    const pathSegments = update.path.split('/');
-    let current = draft.tree;
-    pathSegments.forEach((p, pidx) => {
-      if (current.children == null) {
-        current.children = [];
+function mergeTree(draft: FileState, tree: FileTree, path: string) {
+  const pathSegments = path.split('/');
+  let current = draft.tree;
+  let node = tree;
+  if (path && current.children != null) {
+    const pLastIndex = pathSegments.length - 1;
+    pathSegments.forEach((p, pidx, arr) => {
+      const idx = current.children.findIndex(child => child.name === p);
+      const index = node.children.findIndex(child => child.name === p);
+      node = node.children[index];
+      if (pidx === pLastIndex) {
+        current.children![idx] = node;
       }
-      current.children.map((child, idx) => {
-        if (child.name === p) {
-          if (pidx === pathSegments.length - 1) {
-            current.children![idx] = update;
-          }
-          current = child;
-        }
-      });
+      current = current.children[idx];
     });
   } else {
     // it's root
-    draft.tree = update;
+    draft.tree = tree;
   }
 }
 
@@ -90,12 +89,11 @@ export const file = handleActions(
         draft.currentPath = action.payload.path;
         draft.loading = true;
       }),
-    [String(fetchRepoTreeSuccess)]: (state: FileState, action: Action<FileTree>) =>
+    [String(fetchRepoTreeSuccess)]: (state: FileState, action: Action<RepoTreePayload>) =>
       produce<FileState>(state, draft => {
         draft.loading = false;
-        const update = action.payload!;
-        mergeTree(draft, update);
-        const path = update.path!;
+        const { tree, path } = action.payload!;
+        mergeTree(draft, tree, path);
         if (draft.openedPaths.indexOf(path) < 0) {
           draft.openedPaths.push(path);
         }
