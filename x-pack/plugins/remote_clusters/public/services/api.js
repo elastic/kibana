@@ -15,3 +15,7 @@ export async function loadClusters() {
   const response = await httpClient.get(`${apiPrefix}`);
   return response.data;
 }
+
+export async function addCluster(cluster) {
+  return await httpClient.post(`${apiPrefix}`, cluster);
+}

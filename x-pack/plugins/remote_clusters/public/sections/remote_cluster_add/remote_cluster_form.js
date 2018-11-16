@@ -30,7 +30,7 @@ export class RemoteClusterFormUi extends Component {
   static propTypes = {
     save: PropTypes.func,
     isSaving: PropTypes.bool,
-    saveError: PropTypes.node,
+    saveError: PropTypes.object,
     areErrorsVisible: PropTypes.bool,
     fields: PropTypes.object,
     fieldsErrors: PropTypes.object,
@@ -210,10 +210,10 @@ export class RemoteClusterFormUi extends Component {
     const {
       areErrorsVisible,
       fields: {
-        remoteClusterName,
+        clusterName,
       },
       fieldsErrors: {
-        remoteClusterName: errorRemoteClusterName,
+        clusterName: errorClusterName,
       },
       onFieldsChange,
     } = this.props;
@@ -249,14 +249,14 @@ export class RemoteClusterFormUi extends Component {
                   defaultMessage="Remote cluster name"
                 />
               )}
-              error={errorRemoteClusterName}
-              isInvalid={Boolean(areErrorsVisible && errorRemoteClusterName)}
+              error={errorClusterName}
+              isInvalid={Boolean(areErrorsVisible && errorClusterName)}
               fullWidth
             >
               <EuiFieldText
-                isInvalid={Boolean(areErrorsVisible && errorRemoteClusterName)}
-                value={remoteClusterName}
-                onChange={e => onFieldsChange({ remoteClusterName: e.target.value })}
+                isInvalid={Boolean(areErrorsVisible && errorClusterName)}
+                value={clusterName}
+                onChange={e => onFieldsChange({ clusterName: e.target.value })}
                 fullWidth
               />
             </EuiFormRow>

@@ -7,6 +7,7 @@
 export {
   setHttpClient,
   loadClusters,
+  addCluster,
 } from './api';
 
 export {

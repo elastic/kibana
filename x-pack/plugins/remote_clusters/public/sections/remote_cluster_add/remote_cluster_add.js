@@ -25,16 +25,16 @@ import { getRouterLinkProps } from '../../services';
 import { RemoteClusterForm } from './remote_cluster_form';
 
 const defaultFields = {
-  remoteClusterName: '',
+  clusterName: '',
   seeds: [],
 };
 
 export class RemoteClusterAddUi extends Component {
   static propTypes = {
-    addRemoteCluster: PropTypes.func,
-    isAddingRemoteCluster: PropTypes.bool,
-    addRemoteClusterError: PropTypes.node,
-    clearAddRemoteClusterErrors: PropTypes.func,
+    addCluster: PropTypes.func,
+    isAddingCluster: PropTypes.bool,
+    addClusterError: PropTypes.object,
+    clearAddClusterErrors: PropTypes.func,
   }
 
   constructor(props) {
@@ -51,16 +51,16 @@ export class RemoteClusterAddUi extends Component {
 
   componentWillUnmount() {
     // Clean up after ourselves.
-    this.props.clearAddRemoteClusterErrors();
+    this.props.clearAddClusterErrors();
   }
 
   getFieldsErrors(fields) {
-    const { remoteClusterName, seeds } = fields;
+    const { clusterName, seeds } = fields;
 
     const errors = {};
 
-    if (!remoteClusterName || !remoteClusterName.trim()) {
-      errors.remoteClusterName = (
+    if (!clusterName || !clusterName.trim()) {
+      errors.clusterName = (
         <FormattedMessage
           id="xpack.remoteClusters.add.errors.nameMissing"
           defaultMessage="Name is required."
@@ -97,19 +97,19 @@ export class RemoteClusterAddUi extends Component {
   getAllFields() {
     const {
       fields: {
-        remoteClusterName,
+        clusterName,
         seeds,
       },
     } = this.state;
 
     return {
-      remoteClusterName,
+      name: clusterName,
       seeds,
     };
   }
 
   save = () => {
-    const { addRemoteCluster } = this.props;
+    const { addCluster } = this.props;
     const { fieldsErrors } = this.state;
 
     if (Object.keys(fieldsErrors).length > 0) {
@@ -119,13 +119,13 @@ export class RemoteClusterAddUi extends Component {
       return;
     }
 
-    const remoteClusterConfig = this.getAllFields();
+    const cluster = this.getAllFields();
 
-    addRemoteCluster(remoteClusterConfig);
+    addCluster(cluster);
   };
 
   render() {
-    const { isAddingRemoteCluster, addRemoteClusterError } = this.props;
+    const { isAddingCluster, addClusterError } = this.props;
     const { fields, fieldsErrors, areErrorsVisible } = this.state;
 
     const breadcrumbs = [{
@@ -168,12 +168,12 @@ export class RemoteClusterAddUi extends Component {
               </EuiPageContentHeader>
 
               <RemoteClusterForm
-                isSaving={isAddingRemoteCluster}
+                isSaving={isAddingCluster}
                 fields={fields}
                 fieldsErrors={fieldsErrors}
                 onFieldsChange={this.onFieldsChange}
                 areErrorsVisible={areErrorsVisible}
-                saveError={addRemoteClusterError}
+                saveError={addClusterError}
                 save={this.save}
               />
             </EuiPageContent>

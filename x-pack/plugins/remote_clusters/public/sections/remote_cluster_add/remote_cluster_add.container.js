@@ -7,30 +7,30 @@
 import { connect } from 'react-redux';
 import { RemoteClusterAdd as RemoteClusterAddView } from './remote_cluster_add';
 
-// import {
-//   isAddingRemoteCluster,
-//   getAddRemoteClusterError,
-// } from '../../store/selectors';
+import {
+  isAddingCluster,
+  getAddClusterError,
+} from '../../store/selectors';
 
-// import {
-//   addRemoteCluster,
-//   clearAddRemoteClusterErrors,
-// } from '../../store/actions';
+import {
+  addCluster,
+  clearAddClusterErrors,
+} from '../../store/actions';
 
-const mapStateToProps = (/*state*/) => {
+const mapStateToProps = (state) => {
   return {
-    // isAddingRemoteCluster: isAddingRemoteCluster(state),
-    // addRemoteClusterError: getAddRemoteClusterError(state),
+    isAddingCluster: isAddingCluster(state),
+    addClusterError: getAddClusterError(state),
   };
 };
 
-const mapDispatchToProps = (/*dispatch*/) => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    addRemoteCluster: (/*remoteClusterConfig*/) => {
-      // dispatch(addRemoteCluster(remoteClusterConfig));
+    addCluster: (cluster) => {
+      dispatch(addCluster(cluster));
     },
-    clearAddRemoteClusterErrors: () => {
-      // dispatch(clearAddRemoteClusterErrors());
+    clearAddClusterErrors: () => {
+      dispatch(clearAddClusterErrors());
     },
   };
 };
