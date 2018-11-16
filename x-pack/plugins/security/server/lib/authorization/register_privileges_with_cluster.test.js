@@ -297,16 +297,28 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
       [application]: {
-        foo: {
+        all: {
           application,
-          name: 'foo',
-          actions: ['action:foo'],
+          name: 'all',
+          actions: ['action:all'],
           metadata: {},
         },
-        space_bar: {
+        space_read: {
           application,
-          name: 'space_bar',
-          actions: ['action:bar'],
+          name: 'space_read',
+          actions: ['action:read'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:foo_all'],
+          metadata: {},
+        },
+        feature_bar_read: {
+          application,
+          name: 'feature_bar_read',
+          actions: ['action:bar_read'],
           metadata: {},
         }
       }
