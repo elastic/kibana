@@ -63,9 +63,8 @@ export async function getAnomalyAggs({
     const resp = await client('search', params);
     return resp.aggregations;
   } catch (e) {
-    if (e.statusCode === 404) {
-      return null;
-    }
-    throw e;
+    // swallow error because there are lots of reasons
+    // the ml index lookup may fail
+    return null;
   }
 }
