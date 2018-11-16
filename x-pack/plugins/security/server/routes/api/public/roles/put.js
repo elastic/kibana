@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pick, identity } from 'lodash';
+import { flatten, pick, identity } from 'lodash';
 import Joi from 'joi';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
-import { spaceApplicationPrivilegesSerializer } from '../../../../lib/authorization';
+import { PrivilegeSerializer, ResourceSerializer } from '../../../../lib/authorization';
 
 export function initPutRolesApi(
   server,
   callWithRequest,
   routePreCheckLicenseFn,
-  privilegeMap,
+  authorization,
   application
 ) {
 
@@ -22,7 +22,7 @@ export function initPutRolesApi(
     const kibanaApplicationPrivileges = [];
     if (kibanaPrivileges.global && kibanaPrivileges.global.length) {
       kibanaApplicationPrivileges.push({
-        privileges: kibanaPrivileges.global,
+        privileges: kibanaPrivileges.global.map(privilege => PrivilegeSerializer.serializePrivilegeAssignedGlobally(privilege)),
         application,
         resources: [GLOBAL_RESOURCE],
       });
@@ -31,9 +31,9 @@ export function initPutRolesApi(
     if (kibanaPrivileges.space) {
       for(const [spaceId, privileges] of Object.entries(kibanaPrivileges.space)) {
         kibanaApplicationPrivileges.push({
-          privileges: privileges.map(privilege => spaceApplicationPrivilegesSerializer.privilege.serialize(privilege)),
+          privileges: privileges.map(privilege => PrivilegeSerializer.serializePrivilegeAssignedAtSpace(privilege)),
           application,
-          resources: [spaceApplicationPrivilegesSerializer.resource.serialize(spaceId)]
+          resources: [ResourceSerializer.serializeSpaceResource(spaceId)]
         });
       }
     }
@@ -62,6 +62,31 @@ export function initPutRolesApi(
     }, identity);
   };
 
+  // this should be short-lived once we refactor the way that these APIs work, hence the ugly string concatenation
+  // if you see this code in master, please yell at Brandon
+  const getFeaturePrivileges = (features) => {
+    return flatten(Object.entries(features).map(
+      ([featureName, featurePrivileges]) => {
+        return Object.keys(featurePrivileges).map(
+          (privilegeName) => {
+            return `${featureName}_${privilegeName}`;
+          });
+      })
+    );
+  };
+
+  const getGlobalItemsSchema = () => {
+    const privileges = authorization.privileges.get();
+    const validPrivileges = [...Object.keys(privileges.global), ...getFeaturePrivileges(privileges.features)];
+    return Joi.string().valid(validPrivileges);
+  };
+
+  const getSpaceItemsSchema = () => {
+    const privileges = authorization.privileges.get();
+    const validPrivileges = [...Object.keys(privileges.space), ...getFeaturePrivileges(privileges.features)];
+    return Joi.string().valid(validPrivileges);
+  };
+
   const schema = Joi.object().keys({
     metadata: Joi.object().optional(),
     elasticsearch: Joi.object().keys({
@@ -78,8 +103,8 @@ export function initPutRolesApi(
       run_as: Joi.array().items(Joi.string()),
     }),
     kibana: Joi.object().keys({
-      global: Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.global))),
-      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.string().valid(Object.keys(privilegeMap.space))))
+      global: Joi.array().items(Joi.lazy(() => getGlobalItemsSchema())),
+      space: Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.array().items(Joi.lazy(() => getSpaceItemsSchema())))
     })
   });
 

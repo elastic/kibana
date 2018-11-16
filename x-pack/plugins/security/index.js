@@ -115,8 +115,10 @@ export const security = (kibana) => new kibana.Plugin({
     // automatically assigned to all routes that don't contain an auth config.
     server.auth.default('session');
 
+    const { savedObjects } = server;
+
     // exposes server.plugins.security.authorization
-    const authorization = createAuthorizationService(server, xpackInfoFeature);
+    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin);
     server.expose('authorization', deepFreeze(authorization));
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
@@ -127,7 +129,6 @@ export const security = (kibana) => new kibana.Plugin({
 
     const auditLogger = new SecurityAuditLogger(server.config(), new AuditLogger(server, 'security'));
 
-    const { savedObjects } = server;
     savedObjects.setScopedSavedObjectsClientFactory(({
       request,
     }) => {
@@ -192,10 +193,19 @@ export const security = (kibana) => new kibana.Plugin({
     server.ext('onPostAuth', async function (req, h) {
       const path = req.path;
 
+      const { actions, checkPrivilegesWithRequest } = server.plugins.security.authorization;
+      const checkPrivileges = checkPrivilegesWithRequest(req);
+
       // Enforce app restrictions
       if (path.startsWith('/app/')) {
-        // const appId = path.split('/', 3)[2];
-        // TODO: feature access check
+        const appId = path.split('/', 3)[2];
+        const appAction = actions.app.get(appId);
+
+        // TODO: Check this at the specific space
+        const checkPrivilegesResponse = await checkPrivileges.globally(appAction);
+        if (!checkPrivilegesResponse.hasAllRequested) {
+          return Boom.notFound();
+        }
       }
 
       // Enforce API restrictions for associated applications
@@ -206,13 +216,11 @@ export const security = (kibana) => new kibana.Plugin({
 
         if (actionTags.length > 0) {
           const feature = path.split('/', 3)[2];
-          const actions = actionTags.map(tag => `api:${feature}/${tag.split(':', 2)[1]}`);
+          const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
 
-          const { checkPrivilegesWithRequest } = server.plugins.security.authorization;
-          const checkPrivileges = checkPrivilegesWithRequest(req);
-          const canExecute = await checkPrivileges.globally(actions);
-
-          if (!canExecute.hasAllRequested) {
+          // TODO: Check this at the specific space
+          const checkPrivilegesResponse = await checkPrivileges.globally(apiActions);
+          if (!checkPrivilegesResponse.hasAllRequested) {
             return Boom.notFound();
           }
         }

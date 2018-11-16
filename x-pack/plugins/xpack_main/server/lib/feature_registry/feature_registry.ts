@@ -6,13 +6,27 @@
 
 import { IconType } from '@elastic/eui';
 import _ from 'lodash';
+
+export interface FeaturePrivilegeDefinition {
+  api?: string[];
+  app: string[];
+  savedObject: {
+    all: string[];
+    read: string[];
+  };
+  ui: string[];
+}
+
 export interface Feature {
   id: string;
   name: string;
-  type: 'app' | 'subFeature';
   validLicenses?: Array<'basic' | 'gold' | 'platinum'>;
   icon?: IconType;
   description?: string;
+  navLinkId?: string;
+  privileges: {
+    [key: string]: FeaturePrivilegeDefinition;
+  };
 }
 
 const features: Record<string, Feature> = {};

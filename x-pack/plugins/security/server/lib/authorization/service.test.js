@@ -6,6 +6,7 @@
 
 import { createAuthorizationService } from './service';
 import { actionsFactory } from './actions';
+import { privilegesFactory } from './privileges';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { authorizationModeFactory } from './mode';
@@ -22,6 +23,10 @@ jest.mock('./actions', () => ({
   actionsFactory: jest.fn(),
 }));
 
+jest.mock('./privileges', () => ({
+  privilegesFactory: jest.fn()
+}));
+
 jest.mock('./mode', () => ({
   authorizationModeFactory: jest.fn(),
 }));
@@ -36,7 +41,7 @@ const createMockConfig = (settings = {}) => {
   return mockConfig;
 };
 
-test(`calls server.expose with exposed services`, () => {
+test(`returns exposed services`, () => {
   const kibanaIndex = '.a-kibana-index';
   const mockConfig = createMockConfig({
     'kibana.index': kibanaIndex
@@ -56,13 +61,23 @@ test(`calls server.expose with exposed services`, () => {
   actionsFactory.mockReturnValue(mockActions);
   mockConfig.get.mock;
   const mockXpackInfoFeature = Symbol();
+  const mockSavedObjectTypes = Symbol();
+  const mockFeatures = Symbol();
+  const mockXpackMainPlugin = {
+    getFeatures: () => mockFeatures
+  };
+  const mockPrivilegesService = Symbol();
+  privilegesFactory.mockReturnValue(mockPrivilegesService);
+  const mockAuthorizationMode = Symbol();
+  authorizationModeFactory.mockReturnValue(mockAuthorizationMode);
 
-  createAuthorizationService(mockServer, mockXpackInfoFeature);
+  const authorization = createAuthorizationService(mockServer, mockXpackInfoFeature, mockSavedObjectTypes, mockXpackMainPlugin);
 
   const application = `kibana-${kibanaIndex}`;
   expect(getClient).toHaveBeenCalledWith(mockServer);
   expect(actionsFactory).toHaveBeenCalledWith(mockConfig);
   expect(checkPrivilegesWithRequestFactory).toHaveBeenCalledWith(mockActions, application, mockShieldClient);
+  expect(privilegesFactory).toHaveBeenCalledWith(mockSavedObjectTypes, mockActions, mockXpackMainPlugin);
   expect(authorizationModeFactory).toHaveBeenCalledWith(
     application,
     mockConfig,
@@ -70,4 +85,12 @@ test(`calls server.expose with exposed services`, () => {
     mockShieldClient,
     mockXpackInfoFeature,
   );
+
+  expect(authorization).toEqual({
+    actions: mockActions,
+    application,
+    checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+    mode: mockAuthorizationMode,
+    privileges: mockPrivilegesService,
+  });
 });

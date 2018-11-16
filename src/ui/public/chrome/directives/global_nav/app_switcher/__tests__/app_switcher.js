@@ -65,6 +65,7 @@ describe('appSwitcher directive', function () {
     const myLink = {
       active: true,
       title: 'myLink',
+      id: 'myLink',
       url: 'http://localhost:555/app/myApp',
       lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl'
     };
@@ -72,6 +73,7 @@ describe('appSwitcher directive', function () {
     const notMyLink = {
       active: false,
       title: 'notMyLink',
+      id: 'notMyLink',
       url: 'http://localhost:555/app/notMyApp',
       lastSubUrl: 'http://localhost:555/app/notMyApp#/lastSubUrl'
     };
@@ -95,6 +97,7 @@ describe('appSwitcher directive', function () {
     const myLink = {
       active: false,
       title: 'myLink',
+      id: 'myLink',
       url: 'http://localhost:555/app/myApp',
       lastSubUrl: 'http://localhost:555/app/myApp#/lastSubUrl'
     };
@@ -102,6 +105,7 @@ describe('appSwitcher directive', function () {
     const notMyLink = {
       active: false,
       title: 'notMyLink',
+      id: 'notMyLink',
       url: 'http://localhost:555/app/notMyApp',
       lastSubUrl: 'http://localhost:555/app/notMyApp#/lastSubUrl'
     };
@@ -124,7 +128,7 @@ describe('appSwitcher directive', function () {
   describe('clicking a link with matching href but missing hash', function () {
     const url = 'http://localhost:555/app/myApp?query=1';
     beforeEach(setup(url + '#/lastSubUrl', [
-      { url: url }
+      { url: url, id: 'myLink' }
     ]));
 
     it('just prevents propagation (no reload)', function () {
@@ -147,7 +151,7 @@ describe('appSwitcher directive', function () {
   describe('clicking a link that matches entire url', function () {
     const url = 'http://localhost:555/app/myApp#/lastSubUrl';
     beforeEach(setup(url, [
-      { url: url }
+      { url: url, id: 'myLink' }
     ]));
 
     it('calls window.location.reload and prevents propagation', function () {
@@ -172,7 +176,7 @@ describe('appSwitcher directive', function () {
     const url = rootUrl + '#/lastSubUrl2';
 
     beforeEach(setup(url + '#/lastSubUrl', [
-      { url: url }
+      { url: url, id: 'myLink' }
     ]));
 
     it('calls window.location.reload and prevents propagation', function () {
@@ -195,6 +199,7 @@ describe('appSwitcher directive', function () {
   describe('clicking a link with matching host', function () {
     beforeEach(setup('http://localhost:555/someOtherPath', [
       {
+        id: 'myLink',
         active: true,
         url: 'http://localhost:555/app/myApp'
       }
@@ -216,6 +221,7 @@ describe('appSwitcher directive', function () {
   describe('clicking a link with matching host and path', function () {
     beforeEach(setup('http://localhost:555/app/myApp?someQuery=true', [
       {
+        id: 'myLink',
         active: true,
         url: 'http://localhost:555/app/myApp?differentQuery=true'
       }

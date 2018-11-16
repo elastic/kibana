@@ -5,6 +5,6 @@
  */
 
 export { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
-export { buildPrivilegeMap } from './privileges';
 export { createAuthorizationService } from './service';
-export { spaceApplicationPrivilegesSerializer } from './space_application_privileges_serializer';
+export { PrivilegeSerializer } from './privilege_serializer';
+export { ResourceSerializer } from './resource_serializer';

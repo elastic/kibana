@@ -25,6 +25,7 @@ import { settingsRoute } from './server/routes/api/v1/settings';
 import mappings from './mappings.json';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
+import { registerOssFeatures } from './server/lib/register_oss_features';
 
 /**
  * Determine if Telemetry is enabled.
@@ -119,6 +120,7 @@ export const xpackMain = (kibana) => {
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
       setupXPackMain(server);
+      registerOssFeatures();
 
       // register routes
       xpackInfoRoute(server);
