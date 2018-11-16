@@ -8,7 +8,7 @@ export function checkPrivilegesDynamicallyWithRequestFactory(
   checkPrivilegesWithRequest: any,
   spaces: any
 ) {
-  return function checkPrivilegesDynamicallyWithRequest(request: any) {
+  return function checkPrivilegesDynamicallyWithRequest(request: Record<string, any>) {
     const checkPrivileges = checkPrivilegesWithRequest(request);
     return async function checkPrivilegesDynamically(privilegeOrPrivileges: string | string[]) {
       if (spaces.isEnabled) {
