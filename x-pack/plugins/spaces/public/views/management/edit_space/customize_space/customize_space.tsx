@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { isReservedSpace } from 'x-pack/plugins/spaces/common';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
@@ -29,6 +30,7 @@ interface Props {
   validator: SpaceValidator;
   space: Partial<Space>;
   editingExistingSpace: boolean;
+  intl: InjectedIntl;
   onChange: (space: Partial<Space>) => void;
 }
 
@@ -44,21 +46,38 @@ export class CustomizeSpace extends Component<Props, State> {
   };
 
   public render() {
-    const { validator, editingExistingSpace } = this.props;
+    const { validator, editingExistingSpace, intl } = this.props;
     const { name = '', description = '' } = this.props.space;
     return (
       <EuiPanel>
         <EuiDescribedFormGroup
-          title={<h3>Customize your space</h3>}
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.spaces.management.manageSpacePage.customizeSpaceTitle"
+                defaultMessage="Customize your space"
+              />
+            </h3>
+          }
           description={this.getPanelDescription()}
           fullWidth
         >
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem>
-              <EuiFormRow label="Name" {...validator.validateSpaceName(this.props.space)} fullWidth>
+              <EuiFormRow
+                label={intl.formatMessage({
+                  id: 'xpack.spaces.management.manageSpacePage.nameFormRowLabel',
+                  defaultMessage: 'Name',
+                })}
+                {...validator.validateSpaceName(this.props.space)}
+                fullWidth
+              >
                 <EuiFieldText
                   name="name"
-                  placeholder={'Awesome space'}
+                  placeholder={intl.formatMessage({
+                    id: 'xpack.spaces.management.manageSpacePage.awesomeSpacePlaceholder',
+                    defaultMessage: 'Awesome space',
+                  })}
                   value={name}
                   onChange={this.onNameChange}
                   fullWidth
@@ -66,11 +85,22 @@ export class CustomizeSpace extends Component<Props, State> {
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFormRow label="Avatar">
+              <EuiFormRow
+                label={intl.formatMessage({
+                  id: 'xpack.spaces.management.manageSpacePage.avatarFormRowLabel',
+                  defaultMessage: 'Avatar',
+                })}
+              >
                 <EuiPopover
                   id="customizeAvatarPopover"
                   button={
-                    <button title="Click to customize" onClick={this.togglePopover}>
+                    <button
+                      title={intl.formatMessage({
+                        id: 'xpack.spaces.management.manageSpacePage.clickToCustomizeTooltip',
+                        defaultMessage: 'Click to Customize',
+                      })}
+                      onClick={this.togglePopover}
+                    >
                       <SpaceAvatar space={this.props.space} size="l" />
                     </button>
                   }
@@ -99,8 +129,14 @@ export class CustomizeSpace extends Component<Props, State> {
           )}
 
           <EuiFormRow
-            label="Description (optional)"
-            helpText="Displayed alongside the space avatar on the space selection screen"
+            label={intl.formatMessage({
+              id: 'xpack.spaces.management.manageSpacePage.spaceDescriptionFormRowLabel',
+              defaultMessage: 'Description (optional)',
+            })}
+            helpText={intl.formatMessage({
+              id: 'xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText',
+              defaultMessage: 'Displayed alongside the space avatar on the space selection scree',
+            })}
             {...validator.validateSpaceDescription(this.props.space)}
             fullWidth
           >
@@ -132,11 +168,26 @@ export class CustomizeSpace extends Component<Props, State> {
   public getPanelDescription = () => {
     return (
       <EuiText>
-        <p>Give your space a meaningful name, and customize its avatar to your liking.</p>
+        <p>
+          <FormattedMessage
+            id="xpack.spaces.management.manageSpacePage.customizeSpacePanelDescription"
+            defaultMessage="Give your space a meaningful name, and customize its avatar to your liking."
+          />
+        </p>
         {this.props.editingExistingSpace ? (
-          <p>The url identifier cannot be changed.</p>
+          <p>
+            <FormattedMessage
+              id="xpack.spaces.management.manageSpacePage.customizeSpacePanelUrlIdentifierNotEditable"
+              defaultMessage="The url identifier cannot be changed."
+            />
+          </p>
         ) : (
-          <p>Take note of the url identifier. It cannot be changed after the space is created.</p>
+          <p>
+            <FormattedMessage
+              id="xpack.spaces.management.manageSpacePage.customizeSpacePanelUrlIdentifierEditable"
+              defaultMessage="Take note of the url identifier. It cannot be changed after the space is created."
+            />
+          </p>
         )}
       </EuiText>
     );

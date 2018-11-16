@@ -2,36 +2,44 @@
 
 exports[`renders without crashing 1`] = `
 <React.Fragment>
-  <EuiFormRow
-    describedByIds={Array []}
-    fullWidth={false}
-    hasEmptyLabelSpace={false}
-    label="Initials (2 max)"
+  <EuiFlexItem
+    component="div"
+    grow={false}
   >
-    <EuiFieldText
-      compressed={false}
-      disabled={true}
+    <EuiFormRow
+      describedByIds={Array []}
       fullWidth={false}
-      inputRef={[Function]}
-      isLoading={false}
-      name="spaceInitials"
-      onChange={[Function]}
-      value=""
-    />
-  </EuiFormRow>
-  <EuiFormRow
-    describedByIds={Array []}
-    fullWidth={false}
-    hasEmptyLabelSpace={false}
-    label="Color"
+      hasEmptyLabelSpace={false}
+      label="Initials (2 max)"
+    >
+      <EuiFieldText
+        compressed={false}
+        fullWidth={false}
+        inputRef={[Function]}
+        isLoading={false}
+        name="spaceInitials"
+        onChange={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
   >
-    <EuiColorPicker
-      aria-label="Select a color"
-      color="#BFA180"
-      disabled={true}
-      onChange={[Function]}
-      showColorLabel={true}
-    />
-  </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      label="Color"
+    >
+      <EuiColorPicker
+        aria-label="Select a color"
+        color="#BFA180"
+        onChange={[Function]}
+        showColorLabel={true}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
 </React.Fragment>
 `;

@@ -22,9 +22,7 @@ test('renders without crashing', () => {
 });
 
 test('shows customization fields', () => {
-  const wrapper = mountWithIntl(
-    <CustomizeSpaceAvatar.WrappedComponent space={space} onChange={jest.fn()} />
-  );
+  const wrapper = mountWithIntl(<CustomizeSpaceAvatar space={space} onChange={jest.fn()} />);
 
   expect(wrapper.find(EuiLink)).toHaveLength(0);
   expect(wrapper.find(EuiFieldText)).toHaveLength(1);
@@ -42,7 +40,7 @@ test('invokes onChange callback when avatar is customized', () => {
   const changeHandler = jest.fn();
 
   const wrapper = mountWithIntl(
-    <CustomizeSpaceAvatar.WrappedComponent space={customizedSpace} onChange={changeHandler} />
+    <CustomizeSpaceAvatar space={customizedSpace} onChange={changeHandler} />
   );
 
   wrapper

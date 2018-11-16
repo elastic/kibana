@@ -3,9 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { I18nProvider } from '@kbn/i18n/react';
 
-// @ts-ignore
 import { I18nProvider } from '@kbn/i18n/react';
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
@@ -70,7 +68,11 @@ routes.when('/management/spaces/create', {
 
       render(
         <I18nProvider>
-          <ManageSpacePage spacesManager={spacesManager} spacesNavState={spacesNavState} />
+          <ManageSpacePage
+            spacesManager={spacesManager}
+            spacesNavState={spacesNavState}
+            features={features}
+          />
         </I18nProvider>,
         domNode
       );
@@ -115,6 +117,7 @@ routes.when('/management/spaces/edit/:spaceId', {
             spaceId={spaceId}
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
+            features={features}
           />
         </I18nProvider>,
         domNode
