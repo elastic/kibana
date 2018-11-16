@@ -71,9 +71,9 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
 
         const providers = new ProviderCollection(log, [
           ...coreProviders,
-          ...readProviderSpec('Service', config.get('services')).map(stubProvider),
-          ...readProviderSpec('PageObject', config.get('pageObjects')).map(stubProvider)
-        ]);
+          ...readProviderSpec('Service', config.get('services')),
+          ...readProviderSpec('PageObject', config.get('pageObjects'))
+        ].map(stubProvider));
 
         const mocha = await setupMocha(lifecycle, log, config, providers);
 
