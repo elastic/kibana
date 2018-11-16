@@ -7,8 +7,8 @@
 import { EuiCheckbox, EuiIcon, EuiInMemoryTable, EuiSwitch, EuiText, IconType } from '@elastic/eui';
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { Feature } from 'x-pack/common/feature';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 
 interface Props {
   space: Partial<Space>;

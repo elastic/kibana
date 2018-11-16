@@ -24,7 +24,7 @@ import React, { Component, Fragment } from 'react';
 import { uiCapabilities } from 'ui/capabilities';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-import { Feature } from 'x-pack/common/feature';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib';

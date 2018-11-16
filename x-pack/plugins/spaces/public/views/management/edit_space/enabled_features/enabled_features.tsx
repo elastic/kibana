@@ -6,8 +6,8 @@
 // @ts-ignore
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React, { Component, Fragment, ReactNode } from 'react';
-import { Feature } from 'x-pack/common/feature';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { CollapsiblePanel } from 'x-pack/public/components';
 import { FeatureTable } from './feature_table';
 

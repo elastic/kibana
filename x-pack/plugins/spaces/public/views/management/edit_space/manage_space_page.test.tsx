@@ -40,7 +40,7 @@ describe('ManageSpacePage', () => {
       <ManageSpacePage.WrappedComponent
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', type: 'app' }]}
+        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
         intl={null as any}
       />
     );
@@ -95,7 +95,7 @@ describe('ManageSpacePage', () => {
         spaceId={'existing-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
-        features={[{ id: 'foo', name: 'foo', type: 'app' }]}
+        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
         intl={null as any}
       />
     );

@@ -14,6 +14,7 @@ exports[`renders without crashing 1`] = `
           values={
             Object {
               "spaceIdentifier": <strong>
+                /s/
                 <FormattedMessage
                   defaultMessage="awesome-space"
                   id="xpack.spaces.management.spaceIdentifier.spaceIdentifierText"
@@ -29,7 +30,7 @@ exports[`renders without crashing 1`] = `
     label={
       <p>
         <FormattedMessage
-          defaultMessage="URL identifier"
+          defaultMessage="URL identifier "
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
           values={Object {}}
         />

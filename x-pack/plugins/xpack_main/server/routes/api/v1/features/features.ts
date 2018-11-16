@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from 'x-pack/common/feature';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 
 export function featuresRoute(server: Record<string, any>) {
   server.route({
