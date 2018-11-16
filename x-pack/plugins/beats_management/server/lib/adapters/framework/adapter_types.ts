@@ -5,11 +5,25 @@
  */
 import { Lifecycle, ResponseToolkit } from 'hapi';
 import * as t from 'io-ts';
+import { PLUGIN } from 'x-pack/plugins/beats_management/common/constants';
 
 export const internalAuthData = Symbol('internalAuthData');
 export const internalUser: FrameworkInternalUser = {
   kind: 'internal',
 };
+
+export const RuntimeXpackInfo = t.type({
+  license: t.type({
+    getType: t.Function,
+    isActive: t.Function,
+    getExpiryDateInMillis: t.Function,
+  }),
+  feature: t.Function,
+  isAvailable: t.Function,
+});
+
+export interface XpackInfo extends t.TypeOf<typeof RuntimeXpackInfo> {}
+
 export interface BackendFrameworkAdapter {
   internalUser: FrameworkInternalUser;
   info: null | FrameworkInfo;
@@ -17,13 +31,40 @@ export interface BackendFrameworkAdapter {
   on(event: 'xpack.status.green', cb: () => void): void;
   getSetting(settingPath: string): any;
   exposeStaticDir(urlPath: string, dir: string): void;
-  registerRoute<
-    RouteRequest extends FrameworkWrappableRequest,
-    RouteResponse extends FrameworkResponse
-  >(
+  registerRoute<RouteRequest extends FrameworkRequest, RouteResponse extends FrameworkResponse>(
     route: FrameworkRouteOptions<RouteRequest, RouteResponse>
   ): void;
 }
+
+export const RuntimeKibanaLegacyServer = t.type({
+  plugins: t.type({
+    xpack_main: t.type({
+      status: t.type({
+        once: t.Function,
+      }),
+      info: RuntimeXpackInfo,
+    }),
+    kibana: t.type({
+      status: t.type({
+        plugin: t.type({
+          version: t.string,
+        }),
+      }),
+    }),
+    security: t.type({
+      getUser: t.Function,
+    }),
+    elasticsearch: t.type({
+      getCluster: t.Function,
+    }),
+    [PLUGIN.ID]: t.type({}),
+  }),
+  config: t.Function,
+  route: t.Function,
+  log: t.Function,
+});
+
+export interface KibanaLegacyServer extends t.TypeOf<typeof RuntimeKibanaLegacyServer> {}
 
 export const RuntimeFrameworkInfo = t.type({
   kibana: t.type({
@@ -44,6 +85,19 @@ export const RuntimeFrameworkInfo = t.type({
   }),
 });
 export interface FrameworkInfo extends t.TypeOf<typeof RuntimeFrameworkInfo> {}
+
+export const RuntimeKibanaServerRequest = t.type({
+  params: t.object,
+  payload: t.object,
+  query: t.object,
+  headers: t.type({
+    authorization: t.union([t.string, t.null]),
+  }),
+  info: t.type({
+    remoteAddress: t.string,
+  }),
+});
+export interface KibanaServerRequest extends t.TypeOf<typeof RuntimeKibanaServerRequest> {}
 
 export interface FrameworkAuthenticatedUser<AuthDataType = any> {
   kind: 'authenticated';
@@ -71,18 +125,18 @@ export type FrameworkUser<AuthDataType = any> =
   | FrameworkUnAuthenticatedUser
   | FrameworkInternalUser;
 export interface FrameworkRequest<
-  InternalRequest extends FrameworkWrappableRequest = FrameworkWrappableRequest
+  KibanaServerRequestGenaric extends Partial<KibanaServerRequest> = any
 > {
-  user: FrameworkUser<InternalRequest['headers']>;
-  headers: InternalRequest['headers'];
-  info: InternalRequest['info'];
-  payload: InternalRequest['payload'];
-  params: InternalRequest['params'];
-  query: InternalRequest['query'];
+  user: FrameworkUser<KibanaServerRequestGenaric['headers']>;
+  headers: KibanaServerRequestGenaric['headers'];
+  info: KibanaServerRequest['info'];
+  payload: KibanaServerRequestGenaric['payload'];
+  params: KibanaServerRequestGenaric['params'];
+  query: KibanaServerRequestGenaric['query'];
 }
 
 export interface FrameworkRouteOptions<
-  RouteRequest extends FrameworkWrappableRequest = any,
+  RouteRequest extends FrameworkRequest = FrameworkRequest,
   RouteResponse extends FrameworkResponse = any
 > {
   path: string;
@@ -95,22 +149,8 @@ export interface FrameworkRouteOptions<
 }
 
 export type FrameworkRouteHandler<
-  RouteRequest extends FrameworkWrappableRequest,
+  RouteRequest extends KibanaServerRequest,
   RouteResponse extends FrameworkResponse
 > = (request: FrameworkRequest<RouteRequest>, h: ResponseToolkit) => void;
-
-export interface FrameworkWrappableRequest<
-  Payload = any,
-  Params = any,
-  Query = any,
-  Headers = any,
-  Info = any
-> {
-  headers: Headers;
-  info: Info;
-  payload: Payload;
-  params: Params;
-  query: Query;
-}
 
 export type FrameworkResponse = Lifecycle.ReturnValue;

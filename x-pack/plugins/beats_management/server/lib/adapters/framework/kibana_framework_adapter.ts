@@ -4,35 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ResponseToolkit } from 'hapi';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import {
+  BackendFrameworkAdapter,
   FrameworkInfo,
   FrameworkRequest,
-  internalAuthData,
-  internalUser,
-  RuntimeFrameworkInfo,
-} from './adapter_types';
-import {
-  BackendFrameworkAdapter,
   FrameworkResponse,
   FrameworkRouteOptions,
-  FrameworkWrappableRequest,
+  internalAuthData,
+  internalUser,
+  KibanaLegacyServer,
+  KibanaServerRequest,
+  RuntimeFrameworkInfo,
+  RuntimeKibanaLegacyServer,
+  XpackInfo,
 } from './adapter_types';
 
 export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   public readonly internalUser = internalUser;
   public info: null | FrameworkInfo = null;
 
-  private server: any;
+  private server: KibanaLegacyServer;
 
   constructor(
     private readonly PLUGIN_ID: string,
-    hapiServer: any,
+    hapiServer: KibanaLegacyServer,
     private readonly CONFIG_PREFIX?: string
   ) {
+    const assertKibanaServer = RuntimeKibanaLegacyServer.decode(hapiServer);
+    if (assertKibanaServer.isLeft()) {
+      throw new Error(
+        `Error Kibana server object was not formed as expected by ${this.PLUGIN_ID},   ${
+          PathReporter.report(assertKibanaServer)[0]
+        }`
+      );
+    }
     this.server = hapiServer;
 
     const xpackMainPlugin = hapiServer.plugins.xpack_main;
@@ -77,12 +87,14 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public registerRoute<
-    RouteRequest extends FrameworkWrappableRequest,
+    RouteRequest extends FrameworkRequest,
     RouteResponse extends FrameworkResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     this.server.route({
-      handler: async (request: any, h: any) => {
-        return await route.handler(await this.wrapRequest(request), h);
+      handler: async (request: KibanaServerRequest, h: ResponseToolkit) => {
+        // Note, RuntimeKibanaServerRequest is avalaible to validate request, and its type *is* KibanaServerRequest
+        // but is not used here for perf reasons. It's value here is not high enough...
+        return await route.handler(await this.wrapRequest<RouteRequest>(request), h);
       },
       method: route.method,
       path: route.path,
@@ -90,8 +102,8 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  private async wrapRequest<InternalRequest extends FrameworkWrappableRequest>(
-    req: InternalRequest
+  private async wrapRequest<InternalRequest extends KibanaServerRequest>(
+    req: KibanaServerRequest
   ): Promise<FrameworkRequest<InternalRequest>> {
     const { params, payload, query, headers, info } = req;
 
@@ -115,7 +127,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     };
   }
 
-  private async getUser(request: FrameworkWrappableRequest) {
+  private async getUser(request: KibanaServerRequest) {
     try {
       return await this.server.plugins.security.getUser(request);
     } catch (e) {
@@ -123,7 +135,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     }
   }
 
-  private xpackInfoWasUpdatedHandler = (xpackInfo: any) => {
+  private xpackInfoWasUpdatedHandler = (xpackInfo: XpackInfo) => {
     let xpackInfoUnpacked: FrameworkInfo;
 
     // If, for some reason, we cannot get the license information
@@ -163,7 +175,6 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
       );
     }
-
     this.info = xpackInfoUnpacked;
 
     return {

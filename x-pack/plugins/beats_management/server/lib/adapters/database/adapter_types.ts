@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
+
 export interface DatabaseAdapter {
   putTemplate(user: FrameworkUser, params: DatabasePutTemplateParams): Promise<any>;
   get<Source>(

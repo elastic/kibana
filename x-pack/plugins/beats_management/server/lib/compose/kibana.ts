@@ -18,13 +18,15 @@ import { CMTokensDomain } from '../tokens';
 
 import { PLUGIN } from 'x-pack/plugins/beats_management/common/constants';
 import { CONFIG_PREFIX } from 'x-pack/plugins/beats_management/common/constants/plugin';
+import { DatabaseKbnESPlugin } from '../adapters/database/adapter_types';
+import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
 import { CMServerLibs } from '../types';
 
-export function compose(server: any): CMServerLibs {
-  const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch);
+export function compose(server: KibanaLegacyServer): CMServerLibs {
   const framework = new BackendFrameworkLib(
     new KibanaBackendFrameworkAdapter(PLUGIN.ID, server, CONFIG_PREFIX)
   );
+  const database = new KibanaDatabaseAdapter(server.plugins.elasticsearch as DatabaseKbnESPlugin);
 
   const tags = new CMTagsDomain(new ElasticsearchTagsAdapter(database));
   const tokens = new CMTokensDomain(new ElasticsearchTokensAdapter(database), {

@@ -12,7 +12,6 @@ import {
   BackendFrameworkAdapter,
   FrameworkResponse,
   FrameworkRouteOptions,
-  FrameworkWrappableRequest,
 } from './adapters/framework/adapter_types';
 
 export class BackendFrameworkLib {
@@ -23,7 +22,7 @@ export class BackendFrameworkLib {
   }
 
   public registerRoute<
-    RouteRequest extends FrameworkWrappableRequest,
+    RouteRequest extends FrameworkRequest,
     RouteResponse extends FrameworkResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     this.adapter.registerRoute({

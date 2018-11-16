@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { CONFIG_PREFIX } from './common/constants/plugin';
 import { initServerWithKibana } from './server/kibana.index';
+import { KibanaLegacyServer } from './server/lib/adapters/framework/adapter_types';
 
 const DEFAULT_ENROLLMENT_TOKENS_TTL_S = 10 * 60; // 10 minutes
 
@@ -34,7 +35,7 @@ export function beats(kibana: any) {
     },
     config: () => config,
     configPrefix: CONFIG_PREFIX,
-    init(server: any) {
+    init(server: KibanaLegacyServer) {
       initServerWithKibana(server);
     },
   });

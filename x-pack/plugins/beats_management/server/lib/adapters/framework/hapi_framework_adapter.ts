@@ -5,13 +5,13 @@
  */
 
 import { LicenseType } from './../../../../common/constants/security';
+import { KibanaServerRequest } from './adapter_types';
 import {
   BackendFrameworkAdapter,
   FrameworkInfo,
   FrameworkRequest,
   FrameworkResponse,
   FrameworkRouteOptions,
-  FrameworkWrappableRequest,
   internalAuthData,
   internalUser,
 } from './adapter_types';
@@ -92,7 +92,7 @@ export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   public registerRoute<
-    RouteRequest extends FrameworkWrappableRequest,
+    RouteRequest extends FrameworkRequest,
     RouteResponse extends FrameworkResponse
   >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
     if (!this.server) {
@@ -117,7 +117,7 @@ export class HapiBackendFrameworkAdapter implements BackendFrameworkAdapter {
     return await this.server.inject({ method, url, headers, payload });
   }
 
-  private wrapRequest<InternalRequest extends FrameworkWrappableRequest>(
+  private wrapRequest<InternalRequest extends KibanaServerRequest>(
     req: InternalRequest
   ): FrameworkRequest<InternalRequest> {
     const { params, payload, query, headers, info } = req;
