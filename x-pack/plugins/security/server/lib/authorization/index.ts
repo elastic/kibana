@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
-export { createAuthorizationService } from './service';
-export { PrivilegeSerializer } from './privilege_serializer';
-export { ResourceSerializer } from './resource_serializer';
 export { Actions } from './actions';
+export { createAuthorizationService } from './service';
+export { disableUICapabilitesFactory } from './disable_ui_capabilities';
+export { PrivilegeSerializer } from './privilege_serializer';
+export { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
+export { ResourceSerializer } from './resource_serializer';

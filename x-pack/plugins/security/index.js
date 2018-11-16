@@ -20,11 +20,10 @@ import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
-import { createAuthorizationService, registerPrivilegesWithCluster } from './server/lib/authorization';
+import { createAuthorizationService, disableUICapabilitesFactory, registerPrivilegesWithCluster } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
-import { disableUICapabilitesFactory } from './server/lib/disable_ui_capabilities';
 import { createConditionalPlugin } from './server/lib/conditional_plugin';
 
 export const security = (kibana) => new kibana.Plugin({
@@ -202,8 +201,8 @@ export const security = (kibana) => new kibana.Plugin({
     server.ext('onPostAuth', async function (req, h) {
       const path = req.path;
 
-      const { actions, checkPrivilegesWithRequest } = server.plugins.security.authorization;
-      const checkPrivileges = checkPrivilegesWithRequest(req);
+      const { actions, checkPrivilegesDynamicallyWithRequest } = server.plugins.security.authorization;
+      const checkPrivileges = checkPrivilegesDynamicallyWithRequest(req);
 
       // Enforce app restrictions
       if (path.startsWith('/app/')) {
@@ -211,7 +210,7 @@ export const security = (kibana) => new kibana.Plugin({
         const appAction = actions.app.get(appId);
 
         // TODO: Check this at the specific space
-        const checkPrivilegesResponse = await checkPrivileges.dynamically(appAction);
+        const checkPrivilegesResponse = await checkPrivileges(appAction);
         if (!checkPrivilegesResponse.hasAllRequested) {
           return Boom.notFound();
         }
@@ -228,7 +227,7 @@ export const security = (kibana) => new kibana.Plugin({
           const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
 
           // TODO: Check this at the specific space
-          const checkPrivilegesResponse = await checkPrivileges.dynamically(apiActions);
+          const checkPrivilegesResponse = await checkPrivileges(apiActions);
           if (!checkPrivilegesResponse.hasAllRequested) {
             return Boom.notFound();
           }

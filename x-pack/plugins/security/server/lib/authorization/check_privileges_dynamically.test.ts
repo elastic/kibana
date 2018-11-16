@@ -6,18 +6,13 @@
 
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 
-const createMockCheckPrivileges = () => {
-  return {
-    atSpace: jest.fn(),
-    globally: jest.fn(),
-  };
-};
-
 test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const expectedResult = Symbol();
   const spaceId = 'foo-space';
-  const mockCheckPrivileges = createMockCheckPrivileges();
-  mockCheckPrivileges.atSpace.mockResolvedValue(expectedResult);
+  const mockCheckPrivileges = {
+    atSpace: jest.fn().mockReturnValue(expectedResult),
+  };
+  const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
   const mockSpaces = {
     isEnabled: true,
     getSpaceId: jest.fn().mockReturnValue(spaceId),
@@ -25,30 +20,34 @@ test(`checkPrivileges.atSpace when spaces is enabled`, async () => {
   const request = Symbol();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
-    mockCheckPrivileges,
+    mockCheckPrivilegesWithRequest,
     mockSpaces
   )(request);
   const result = await checkPrivilegesDynamically(privilegeOrPrivileges);
 
   expect(result).toBe(expectedResult);
+  expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
   expect(mockCheckPrivileges.atSpace).toHaveBeenCalledWith(spaceId, privilegeOrPrivileges);
 });
 
 test(`checkPrivileges.globally when spaces is disabled`, async () => {
   const expectedResult = Symbol();
-  const mockCheckPrivileges = createMockCheckPrivileges();
-  mockCheckPrivileges.globally.mockResolvedValue(expectedResult);
+  const mockCheckPrivileges = {
+    globally: jest.fn().mockReturnValue(expectedResult),
+  };
+  const mockCheckPrivilegesWithRequest = jest.fn().mockReturnValue(mockCheckPrivileges);
   const mockSpaces = {
     isEnabled: false,
   };
   const request = Symbol();
   const privilegeOrPrivileges = ['foo', 'bar'];
   const checkPrivilegesDynamically = checkPrivilegesDynamicallyWithRequestFactory(
-    mockCheckPrivileges,
+    mockCheckPrivilegesWithRequest,
     mockSpaces
   )(request);
   const result = await checkPrivilegesDynamically(privilegeOrPrivileges);
 
   expect(result).toBe(expectedResult);
+  expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
   expect(mockCheckPrivileges.globally).toHaveBeenCalledWith(privilegeOrPrivileges);
 });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Actions } from './authorization';
+import { Actions } from '.';
 import { disableUICapabilitesFactory } from './disable_ui_capabilities';
 
 interface MockServerOptions {

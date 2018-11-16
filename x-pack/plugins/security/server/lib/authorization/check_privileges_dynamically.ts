@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function checkPrivilegesDynamicallyWithRequestFactory(checkPrivileges: any, spaces: any) {
+export function checkPrivilegesDynamicallyWithRequestFactory(
+  checkPrivilegesWithRequest: any,
+  spaces: any
+) {
   return function checkPrivilegesDynamicallyWithRequest(request: any) {
+    const checkPrivileges = checkPrivilegesWithRequest(request);
     return async function checkPrivilegesDynamically(privilegeOrPrivileges: string | string[]) {
       if (spaces.isEnabled) {
         const spaceId = spaces.getSpaceId(request);
