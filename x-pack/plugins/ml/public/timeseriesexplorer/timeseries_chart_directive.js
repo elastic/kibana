@@ -7,7 +7,7 @@
 
 
 /*
- * Chart showing plot time series data, with or without model plot enabled,
+ * Chart plotting data from a single time series, with or without model plot enabled,
  * annotated with anomalies.
  */
 

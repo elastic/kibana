@@ -7,7 +7,7 @@
 
 
 /*
- * React component chart showing plot time series data, with or without model plot enabled,
+ * React component chart plotting data from a single time series, with or without model plot enabled,
  * annotated with anomalies.
  */
 
