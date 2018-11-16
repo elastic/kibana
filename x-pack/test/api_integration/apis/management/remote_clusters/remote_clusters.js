@@ -109,11 +109,11 @@ export default function ({ getService }) {
             "seeds": [
               "127.0.0.1:9300"
             ],
-            "connected": true,
-            "num_nodes_connected": 1,
-            "max_connections_per_cluster": 3,
-            "initial_connect_timeout": "30s",
-            "skip_unavailable": true
+            "isConnected": true,
+            "connectedNodesCount": 1,
+            "maxConnectionsPerCluster": 3,
+            "initialConnectTimeout": "30s",
+            "skipUnavailable": true
           }
         ]);
       });

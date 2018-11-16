@@ -95,7 +95,7 @@ export class RemoteClusterTableUi extends Component {
       truncateText: true,
       render: (seeds) => seeds.join(', '),
     }, {
-      field: 'connected',
+      field: 'isConnected',
       name: (
         <FormattedMessage
           id="xpack.remoteClusters.remoteClusterList.table.connectedColumnTitle"
@@ -103,10 +103,10 @@ export class RemoteClusterTableUi extends Component {
         />
       ),
       sortable: true,
-      render: (connected) => <ConnectionStatus isConnected={connected} />,
+      render: (isConnected) => <ConnectionStatus isConnected={isConnected} />,
       width: '160px',
     }, {
-      field: 'num_nodes_connected',
+      field: 'connectedNodesCount',
       name: (
         <FormattedMessage
           id="xpack.remoteClusters.remoteClusterList.table.connectedNodesColumnTitle"

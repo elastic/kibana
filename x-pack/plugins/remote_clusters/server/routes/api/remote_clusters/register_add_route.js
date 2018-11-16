@@ -11,6 +11,7 @@ import { wrapEsError, wrapCustomError, wrapUnknownError } from '../../../lib/err
 
 import { get } from 'lodash';
 import { doesClusterExist } from '../../../lib/does_cluster_exist';
+import { serializeCluster } from '../../../lib/serialize_cluster';
 
 export function registerAddRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -51,10 +52,7 @@ export function registerAddRoute(server) {
         const cluster = get(response, `persistent.cluster.remote.${name}`);
 
         if(acknowledged && cluster) {
-          return {
-            name,
-            ...cluster,
-          };
+          return serializeCluster(name, cluster);
         }
 
         // If for some reason the ES response does not have the newly added cluster information,
