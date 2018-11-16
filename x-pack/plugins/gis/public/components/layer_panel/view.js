@@ -57,7 +57,7 @@ export class LayerPanel  extends React.Component {
       minZoom: this.props.selectedLayer.getMinZoom(),
       maxZoom: this.props.selectedLayer.getMaxZoom(),
       alphaValue: _.get(this.props.selectedLayer.getCurrentStyle(),
-        '_descriptor.properties.alphaValue', null),
+        '_descriptor.properties.alphaValue', 0.5),
       onMinZoomChange: (zoom) => {
         this.props.updateMinZoom(this.props.selectedLayer.getId(), zoom);
       },
@@ -119,12 +119,10 @@ export class LayerPanel  extends React.Component {
       >
         <EuiFlexItem grow={false} className="gisViewPanel__header">
           <EuiTitle size="s" className="gisViewPanel__title">
-            <p>
-              <h1>
-                {selectedLayer.getIcon()}
-                {this.state.displayName}
-              </h1>
-            </p>
+            <h1>
+              {selectedLayer.getIcon()}
+              {this.state.displayName}
+            </h1>
           </EuiTitle>
           <EuiSpacer size="m"/>
           <EuiHorizontalRule margin="none"/>
