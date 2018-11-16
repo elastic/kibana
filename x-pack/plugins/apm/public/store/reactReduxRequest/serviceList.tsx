@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
-import { IServiceListItem } from 'x-pack/plugins/apm/typings/Service';
+import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { loadServiceList } from '../../services/rest/apm';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';

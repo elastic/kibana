@@ -8,7 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import React, { Component } from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { IServiceListItem } from 'x-pack/plugins/apm/typings/Service';
+import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { loadAgentStatus } from '../../../services/rest/apm';
 import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
 import { EmptyMessage } from '../../shared/EmptyMessage';

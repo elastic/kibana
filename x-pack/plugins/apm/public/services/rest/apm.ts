@@ -7,8 +7,8 @@
 // @ts-ignore
 import { camelizeKeys } from 'humps';
 import { ServiceResponse } from 'x-pack/plugins/apm/server/lib/services/get_service';
+import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
-import { IServiceListItem } from 'x-pack/plugins/apm/typings/Service';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { ITransactionGroup } from 'x-pack/plugins/apm/typings/TransactionGroup';

@@ -6,7 +6,6 @@
 
 import { oc } from 'ts-optchain';
 import { TermsAggsBucket } from 'x-pack/plugins/apm/typings/elasticsearch';
-import { IServiceListItem } from 'x-pack/plugins/apm/typings/Service';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
@@ -14,6 +13,14 @@ import {
   TRANSACTION_DURATION
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
+
+export interface IServiceListItem {
+  serviceName: string;
+  agentName: string | undefined;
+  transactionsPerMinute: number;
+  errorsPerMinute: number;
+  avgResponseTime: number;
+}
 
 export async function getServices(setup: Setup): Promise<IServiceListItem[]> {
   const { start, end, esFilterQuery, client, config } = setup;
