@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 import { DEFAULT_TIME_FORMAT } from '../../common/lib';
@@ -30,47 +31,87 @@ export default new Chainable('legend', {
     {
       name: 'position',
       types: ['string', 'boolean', 'null'],
-      help: 'Corner to place the legend in: nw, ne, se, or sw. You can also pass false to disable the legend',
+      help: i18n.translate('timelion.help.functions.legend.args.positionHelpText', {
+        defaultMessage:
+          'Corner to place the legend in: nw, ne, se, or sw. You can also pass false to disable the legend',
+        description: '"nw", "ne", "se", "sw" and "false" are keywords and must not be translated.',
+      }),
       suggestions: [
         {
           name: 'false',
-          help: 'disable legend',
+          help: i18n.translate(
+            'timelion.help.functions.legend.args.position.suggestions.falseHelpText',
+            {
+              defaultMessage: 'disable legend',
+            }
+          ),
         },
         {
           name: 'nw',
-          help: 'place legend in north west corner'
+          help: i18n.translate(
+            'timelion.help.functions.legend.args.position.suggestions.nwHelpText',
+            {
+              defaultMessage: 'place legend in north west corner',
+            }
+          ),
         },
         {
           name: 'ne',
-          help: 'place legend in north east corner'
+          help: i18n.translate(
+            'timelion.help.functions.legend.args.position.suggestions.neHelpText',
+            {
+              defaultMessage: 'place legend in north east corner',
+            }
+          ),
         },
         {
           name: 'se',
-          help: 'place legend in south east corner'
+          help: i18n.translate(
+            'timelion.help.functions.legend.args.position.suggestions.seHelpText',
+            {
+              defaultMessage: 'place legend in south east corner',
+            }
+          ),
         },
         {
           name: 'sw',
-          help: 'place legend in south west corner'
+          help: i18n.translate(
+            'timelion.help.functions.legend.args.position.suggestions.swHelpText',
+            {
+              defaultMessage: 'place legend in south west corner',
+            }
+          ),
         }
       ]
     },
     {
       name: 'columns',
       types: ['number', 'null'],
-      help: 'Number of columns to divide the legend into'
+      help: i18n.translate('timelion.help.functions.legend.args.columnsHelpText', {
+        defaultMessage: 'Number of columns to divide the legend into',
+      }),
     },
     {
       name: 'showTime',
       types: ['boolean'],
-      help: 'Show time value in legend when hovering over graph. Default: true'
+      help: i18n.translate('timelion.help.functions.legend.args.showTimeHelpText', {
+        defaultMessage: 'Show time value in legend when hovering over graph. Default: true',
+      }),
     },
     {
       name: 'timeFormat',
       types: ['string'],
-      help: `moment.js format pattern. Default: ${DEFAULT_TIME_FORMAT}`
+      help: i18n.translate('timelion.help.functions.legend.args.timeFormatHelpText', {
+        defaultMessage: 'moment.js format pattern. Default: {defaultTimeFormat}',
+        values: {
+          defaultTimeFormat: DEFAULT_TIME_FORMAT,
+        },
+      }),
     }
   ],
-  help: 'Set the position and style of the legend on the plot',
+  help: i18n.translate('timelion.help.functions.legendHelpText', {
+    defaultMessage: 'Set the position and style of the legend on the plot',
+  }),
   fn: function legendFn(args) {
     return alter(args, function (eachSeries, position, columns, showTime = true, timeFormat = DEFAULT_TIME_FORMAT) {
       eachSeries._global = eachSeries._global || {};

@@ -24,8 +24,8 @@ dashboard-listing {
 // Yes, this is a hack because bootstrap will be removed and everything must move to EUI theming
 // Can't reliably remove all/any of these because of embeddables
 
-.tab-dashboard.theme-dark {
-  @import './../../../../../node_modules/@elastic/eui/src/themes/k6/k6_colors_dark';
+.theme-dark {
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
 
   // /src/ui/public/styles/bootstrap/scaffolding.less
   a {

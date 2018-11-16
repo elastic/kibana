@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 
 import { Query } from '@elastic/eui';
@@ -52,7 +53,32 @@ describe('Search', () => {
         onQueryChange={onQueryChange}
       />
     );
-    component.find('input').simulate('keyup', { target: { value: 'new filter' } });
+    findTestSubject(component, 'settingsSearchBar').simulate('keyup', { target: { value: 'new filter' } });
     expect(onQueryChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle query parse error', async () => {
+    const onQueryChangeMock = jest.fn();
+    const component = mountWithIntl(
+      <Search.WrappedComponent
+        query={query}
+        categories={categories}
+        onQueryChange={onQueryChangeMock}
+      />
+    );
+
+    const searchBar = findTestSubject(component, 'settingsSearchBar');
+
+    // Send invalid query
+    searchBar.simulate('keyup', { target: { value: '?' } });
+    expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
+    expect(component.state().isSearchTextValid).toBe(false);
+
+    onQueryChangeMock.mockReset();
+
+    // Send valid query to ensure component can recover from invalid query
+    searchBar.simulate('keyup', { target: { value: 'dateFormat' } });
+    expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
+    expect(component.state().isSearchTextValid).toBe(true);
   });
 });
