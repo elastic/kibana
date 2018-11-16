@@ -68,6 +68,7 @@ module.exports = {
         test: /\.js$/,
         loaders: 'babel-loader',
         options: {
+          babelrc: false,
           plugins: [
             'transform-object-rest-spread',
             'transform-async-to-generator',

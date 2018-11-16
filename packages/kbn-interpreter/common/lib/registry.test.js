@@ -17,48 +17,47 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-import { Registry } from '../registry';
+import { Registry } from './registry';
 
 function validateRegistry(registry, elements) {
   it('gets items by lookup property', () => {
-    expect(registry.get('__test2')).to.eql(elements[1]());
+    expect(registry.get('__test2')).toEqual(elements[1]());
   });
 
   it('ignores case when getting items', () => {
-    expect(registry.get('__TeSt2')).to.eql(elements[1]());
-    expect(registry.get('__tESt2')).to.eql(elements[1]());
+    expect(registry.get('__TeSt2')).toEqual(elements[1]());
+    expect(registry.get('__tESt2')).toEqual(elements[1]());
   });
 
   it('gets a shallow clone', () => {
-    expect(registry.get('__test2')).to.not.equal(elements[1]());
+    expect(registry.get('__test2')).not.toBe(elements[1]());
   });
 
   it('is null with no match', () => {
-    expect(registry.get('@@nope_nope')).to.be(null);
+    expect(registry.get('@@nope_nope')).toBe(null);
   });
 
   it('returns shallow clone of the whole registry via toJS', () => {
     const regAsJs = registry.toJS();
-    expect(regAsJs).to.eql({
+    expect(regAsJs).toEqual({
       __test1: elements[0](),
       __test2: elements[1](),
     });
-    expect(regAsJs.__test1).to.eql(elements[0]());
-    expect(regAsJs.__test1).to.not.equal(elements[0]());
+    expect(regAsJs.__test1).toEqual(elements[0]());
+    expect(regAsJs.__test1).not.toBe(elements[0]());
   });
 
   it('returns shallow clone array via toArray', () => {
     const regAsArray = registry.toArray();
-    expect(regAsArray).to.be.an(Array);
-    expect(regAsArray[0]).to.eql(elements[0]());
-    expect(regAsArray[0]).to.not.equal(elements[0]());
+    expect(regAsArray).toBeInstanceOf(Array);
+    expect(regAsArray[0]).toEqual(elements[0]());
+    expect(regAsArray[0]).not.toBe(elements[0]());
   });
 
   it('resets the registry', () => {
-    expect(registry.get('__test2')).to.eql(elements[1]());
+    expect(registry.get('__test2')).toEqual(elements[1]());
     registry.reset();
-    expect(registry.get('__test2')).to.equal(null);
+    expect(registry.get('__test2')).toBe(null);
   });
 }
 
@@ -83,12 +82,12 @@ describe('Registry', () => {
     validateRegistry(registry, elements);
 
     it('has a prop of name', () => {
-      expect(registry.getProp()).to.equal('name');
+      expect(registry.getProp()).toBe('name');
     });
 
     it('throws when object is missing the lookup prop', () => {
       const check = () => registry.register(() => ({ hello: 'world' }));
-      expect(check).to.throwException(/object with a name property/i);
+      expect(check).toThrowError(/object with a name property/);
     });
   });
 
@@ -112,12 +111,12 @@ describe('Registry', () => {
     validateRegistry(registry, elements);
 
     it('has a prop of type', () => {
-      expect(registry.getProp()).to.equal('type');
+      expect(registry.getProp()).toBe('type');
     });
 
     it('throws when object is missing the lookup prop', () => {
       const check = () => registry.register(() => ({ hello: 'world' }));
-      expect(check).to.throwException(/object with a type property/i);
+      expect(check).toThrowError(/object with a type property/);
     });
   });
 
@@ -150,9 +149,8 @@ describe('Registry', () => {
     registry.register(elements[1]);
 
     it('contains wrapped elements', () => {
-      // test for the custom prop on the returned elements
-      expect(registry.get(elements[0]().name)).to.have.property('__CUSTOM_PROP__', 1);
-      expect(registry.get(elements[1]().name)).to.have.property('__CUSTOM_PROP__', 2);
+      expect(registry.get(elements[0]().name)).toHaveProperty('__CUSTOM_PROP__');
+      expect(registry.get(elements[1]().name)).toHaveProperty('__CUSTOM_PROP__');
     });
   });
 
@@ -184,20 +182,18 @@ describe('Registry', () => {
     });
 
     it('get contains the full prototype', () => {
-      expect(thing().baseFunc).to.be.a('function');
-      expect(registry.get(name).baseFunc).to.be.a('function');
+      expect(typeof thing().baseFunc).toBe('function');
+      expect(typeof registry.get(name).baseFunc).toBe('function');
     });
 
     it('toJS contains the full prototype', () => {
       const val = registry.toJS();
-      expect(val[name].baseFunc).to.be.a('function');
+      expect(typeof val[name].baseFunc).toBe('function');
     });
   });
 
   describe('throws when lookup prop is not a string', () => {
     const check = () => new Registry(2);
-    expect(check).to.throwException(e => {
-      expect(e.message).to.be('Registry property name must be a string');
-    });
+    expect(check).toThrowError(/must be a string/);
   });
 });

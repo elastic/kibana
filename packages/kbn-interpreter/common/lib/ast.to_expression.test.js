@@ -17,15 +17,23 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-import { toExpression } from '../ast';
+import { toExpression } from './ast';
 
 describe('ast toExpression', () => {
   describe('single expression', () => {
+    it('throws if no type included', () => {
+      const errMsg = 'Objects must have a type property';
+      const astObject = { hello: 'world' };
+      expect(() => toExpression(astObject)).toThrowError(errMsg);
+    });
+
     it('throws if not correct type', () => {
       const errMsg = 'Expression must be an expression or argument function';
-      const astObject = { hello: 'world' };
-      expect(() => toExpression(astObject)).to.throwException(errMsg);
+      const astObject = {
+        type: 'hi',
+        hello: 'world',
+      };
+      expect(() => toExpression(astObject)).toThrowError(errMsg);
     });
 
     it('throws if expression without chain', () => {
@@ -34,7 +42,7 @@ describe('ast toExpression', () => {
         type: 'expression',
         hello: 'world',
       };
-      expect(() => toExpression(astObject)).to.throwException(errMsg);
+      expect(() => toExpression(astObject)).toThrowError(errMsg);
     });
 
     it('throws if arguments type is invalid', () => {
@@ -42,7 +50,7 @@ describe('ast toExpression', () => {
       const invalidTypes = [null, []];
 
       function validate(obj) {
-        expect(() => toExpression(obj)).to.throwException(errMsg);
+        expect(() => toExpression(obj)).toThrowError(errMsg);
       }
 
       for (let i = 0; i < invalidTypes.length; i++) {
@@ -69,12 +77,12 @@ describe('ast toExpression', () => {
         function: 'pointseries',
         arguments: null,
       };
-      expect(() => toExpression(astObject)).to.throwException(errMsg);
+      expect(() => toExpression(astObject)).toThrowError(errMsg);
     });
 
     it('throws on invalid argument type', () => {
       const argType = '__invalid__wat__';
-      const errMsg = `invalid argument type: ${argType}`;
+      const errMsg = `Invalid argument type in AST: ${argType}`;
       const astObject = {
         type: 'expression',
         chain: [
@@ -93,7 +101,7 @@ describe('ast toExpression', () => {
         ],
       };
 
-      expect(() => toExpression(astObject)).to.throwException(errMsg);
+      expect(() => toExpression(astObject)).toThrowError(errMsg);
     });
 
     it('throws on expressions without chains', () => {
@@ -117,7 +125,7 @@ describe('ast toExpression', () => {
         ],
       };
 
-      expect(() => toExpression(astObject)).to.throwException(errMsg);
+      expect(() => toExpression(astObject)).toThrowError(errMsg);
     });
 
     it('throws on nameless functions and partials', () => {
@@ -133,7 +141,7 @@ describe('ast toExpression', () => {
         ],
       };
 
-      expect(() => toExpression(astObject)).to.throwException(errMsg);
+      expect(() => toExpression(astObject)).toThrowError(errMsg);
     });
 
     it('single expression', () => {
@@ -149,7 +157,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv');
+      expect(expression).toBe('csv');
     });
 
     it('single expression with string argument', () => {
@@ -167,7 +175,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv input="stuff\nthings"');
+      expect(expression).toBe('csv input="stuff\nthings"');
     });
 
     it('single expression string value with a backslash', () => {
@@ -185,7 +193,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv input="slash \\\\\\\\ slash"');
+      expect(expression).toBe('csv input="slash \\\\\\\\ slash"');
     });
 
     it('single expression string value with a double quote', () => {
@@ -203,7 +211,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv input="stuff\nthings\n\\"such\\""');
+      expect(expression).toBe('csv input="stuff\nthings\n\\"such\\""');
     });
 
     it('single expression with number argument', () => {
@@ -221,7 +229,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('series input=1234');
+      expect(expression).toBe('series input=1234');
     });
 
     it('single expression with boolean argument', () => {
@@ -239,7 +247,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('series input=true');
+      expect(expression).toBe('series input=true');
     });
 
     it('single expression with null argument', () => {
@@ -257,7 +265,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('series input=null');
+      expect(expression).toBe('series input=null');
     });
 
     it('single expression with multiple arguments', () => {
@@ -276,7 +284,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv input="stuff\nthings" separator="\\\\n"');
+      expect(expression).toBe('csv input="stuff\nthings" separator="\\\\n"');
     });
 
     it('single expression with multiple and repeated arguments', () => {
@@ -295,12 +303,12 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal(
+      expect(expression).toBe(
         'csv input="stuff\nthings" input="more,things\nmore,stuff" separator="\\\\n"'
       );
     });
 
-    it('single expression with expression argument', () => {
+    it('single expression with `getcalc` expression argument', () => {
       const astObj = {
         type: 'expression',
         chain: [
@@ -327,10 +335,10 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv calc={getcalc} input="stuff\nthings"');
+      expect(expression).toBe('csv calc={getcalc} input="stuff\nthings"');
     });
 
-    it('single expression with expression argument', () => {
+    it('single expression with `partcalc` expression argument', () => {
       const astObj = {
         type: 'expression',
         chain: [
@@ -357,7 +365,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv calc={partcalc} input="stuff\nthings"');
+      expect(expression).toBe('csv calc={partcalc} input="stuff\nthings"');
     });
 
     it('single expression with expression arguments, with arguments', () => {
@@ -403,7 +411,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal(
+      expect(expression).toBe(
         'csv sep={partcalc type="comma"} input="stuff\nthings" break={setBreak type="newline"}'
       );
     });
@@ -481,7 +489,7 @@ describe('ast toExpression', () => {
         '2016,honda,fit,15890,',
         '2016,honda,civic,18640"\n| line x={distinct f="year"} y={sum f="price"} colors={distinct f="model"}',
       ];
-      expect(expression).to.equal(expected.join('\n'));
+      expect(expression).toBe(expected.join('\n'));
     });
 
     it('three chained expressions', () => {
@@ -576,7 +584,7 @@ describe('ast toExpression', () => {
         '2016,honda,civic,18640"\n| pointseries x={distinct f="year"} y={sum f="price"} ' +
           'colors={distinct f="model"}\n| line pallette={getColorPallette name="elastic"}',
       ];
-      expect(expression).to.equal(expected.join('\n'));
+      expect(expression).toBe(expected.join('\n'));
     });
   });
 
@@ -596,7 +604,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('list "one" "two" "three"');
+      expect(expression).toBe('list "one" "two" "three"');
     });
 
     it('named and unnamed', () => {
@@ -616,7 +624,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('both named="example" another="item" "one" "two" "three"');
+      expect(expression).toBe('both named="example" another="item" "one" "two" "three"');
     });
   });
 });

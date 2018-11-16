@@ -17,32 +17,31 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-import { fromExpression } from '../ast';
-import { getType } from '../get_type';
+import { fromExpression } from './ast';
+import { getType } from './get_type';
 
 describe('ast fromExpression', () => {
   describe('invalid expression', () => {
     it('throws when empty', () => {
       const check = () => fromExpression('');
-      expect(check).to.throwException(/Unable to parse expression/i);
+      expect(check).toThrowError(/Unable to parse expression/i);
     });
 
     it('throws with invalid expression', () => {
       const check = () => fromExpression('wat!');
-      expect(check).to.throwException(/Unable to parse expression/i);
+      expect(check).toThrowError(/Unable to parse expression/i);
     });
   });
 
   describe('single item expression', () => {
     it('is a chain', () => {
       const expression = 'whatever';
-      expect(fromExpression(expression)).to.have.property('chain');
+      expect(fromExpression(expression)).toHaveProperty('chain');
     });
 
     it('is a value', () => {
       const expression = '"hello"';
-      expect(fromExpression(expression, 'argument')).to.equal('hello');
+      expect(fromExpression(expression, 'argument')).toBe('hello');
     });
 
     describe('function without arguments', () => {
@@ -57,15 +56,15 @@ describe('ast fromExpression', () => {
       });
 
       it('is a function ', () => {
-        expect(getType(block)).to.equal('function');
+        expect(getType(block)).toBe('function');
       });
 
       it('is csv function', () => {
-        expect(block.function).to.equal('csv');
+        expect(block.function).toBe('csv');
       });
 
       it('has no arguments', () => {
-        expect(block.arguments).to.eql({});
+        expect(block.arguments).toEqual({});
       });
     });
 
@@ -81,17 +80,17 @@ describe('ast fromExpression', () => {
       });
 
       it('has arguemnts properties', () => {
-        expect(block.arguments).not.to.eql({});
+        expect(block.arguments).not.toEqual({});
       });
 
       it('has index argument with string value', () => {
-        expect(block.arguments).to.have.property('index');
-        expect(block.arguments.index).to.eql(['logstash-*']);
+        expect(block.arguments).toHaveProperty('index');
+        expect(block.arguments.index).toEqual(['logstash-*']);
       });
 
       it('has oranges argument with string value', () => {
-        expect(block.arguments).to.have.property('oranges');
-        expect(block.arguments.oranges).to.eql(['bananas']);
+        expect(block.arguments).toHaveProperty('oranges');
+        expect(block.arguments.oranges).toEqual(['bananas']);
       });
     });
 
@@ -107,12 +106,12 @@ describe('ast fromExpression', () => {
       });
 
       it('is expression type', () => {
-        expect(block.arguments).to.have.property('exampleFunction');
-        expect(block.arguments.exampleFunction[0]).to.have.property('type', 'expression');
+        expect(block.arguments).toHaveProperty('exampleFunction');
+        expect(block.arguments.exampleFunction[0]).toHaveProperty('type');
       });
 
       it('has expected shape', () => {
-        expect(block.arguments.exampleFunction).to.eql([
+        expect(block.arguments.exampleFunction).toEqual([
           {
             type: 'expression',
             chain: [
@@ -141,12 +140,12 @@ describe('ast fromExpression', () => {
       });
 
       it('is expression type', () => {
-        expect(block.arguments).to.have.property('examplePartial');
-        expect(block.arguments.examplePartial[0]).to.have.property('type', 'expression');
+        expect(block.arguments).toHaveProperty('examplePartial');
+        expect(block.arguments.examplePartial[0]).toHaveProperty('type');
       });
 
       it('has expected shape', () => {
-        expect(block.arguments.examplePartial).to.eql([
+        expect(block.arguments.examplePartial).toEqual([
           {
             type: 'expression',
             chain: [
