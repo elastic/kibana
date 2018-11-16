@@ -19,8 +19,6 @@ import {
 
 import { formatValue } from '../../../../formatters/format_value';
 
-import './styles/main.less';
-
 export function DetectorDescriptionList({
   job,
   detector,
