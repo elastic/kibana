@@ -25,7 +25,3 @@ export {
   getRouter,
   getRouterLinkProps,
 } from './routing';
-
-export {
-  sortTable,
-} from './sort_table';
