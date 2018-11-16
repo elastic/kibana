@@ -13,8 +13,8 @@ cacheDir="${CACHE_DIR:-"$HOME/.kibana"}";
 
 echo ""
 echo ""
-echo "archiving untracked and ignored files == $(date)"
-tar cf "$cacheDir/untracked.tar" \
+echo "archiving node_modules and other cache files == $(date)"
+tar cf "$cacheDir/untracked_file_cache.tar" \
   node_modules \
   packages/*/node_modules \
   x-pack/node_modules \
@@ -32,7 +32,7 @@ git clean -fdx;
 echo ""
 echo ""
 echo "extracting untracked and ignored files from archive == $(date)"
-tar xf "$cacheDir/untracked_files";
+tar xf "$cacheDir/untracked_file_cache.tar";
 
 echo ""
 echo ""
