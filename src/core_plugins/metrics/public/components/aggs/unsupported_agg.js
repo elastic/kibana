@@ -19,6 +19,8 @@
 
 import AggRow from './agg_row';
 import React from 'react';
+import { EuiCode, EuiTitle } from '@elastic/eui';
+
 export function UnsupportedAgg(props) {
   return (
     <AggRow
@@ -28,12 +30,9 @@ export function UnsupportedAgg(props) {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <p>
-          The <code>{props.model.type}</code> aggregation is no longer
-          supported.
-        </p>
-      </div>
+      <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
+        <span>The <EuiCode>{props.model.type}</EuiCode> aggregation is no longer supported.</span>
+      </EuiTitle>
     </AggRow>
   );
 }
