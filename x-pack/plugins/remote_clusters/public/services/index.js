@@ -16,6 +16,11 @@ export {
 } from './api_errors';
 
 export {
+  isSeedNodeValid,
+  isSeedNodePortValid,
+} from './validate_seed_node';
+
+export {
   extractQueryParams,
 } from './query_params';
 
