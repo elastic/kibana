@@ -59,9 +59,16 @@ export function screenshotsObservableFactory(server) {
     await browser.waitForSelector(`${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`);
   };
 
-  const waitForNotFoundError = async (browser) => {
-    await browser.waitForSelector(`.toast.alert.alert-danger`);
-    throw new Error('Reporting subject could not be loaded to take a screenshot.');
+  const checkForToastMessage = async (browser, layout) => {
+    await browser.waitForSelector(layout.selectors.toastHeader);
+    const toastHeaderText = await browser.evaluate({
+      fn: function (selector) {
+        const nodeList = document.querySelectorAll(selector);
+        return nodeList.item(0).innerText;
+      },
+      args: [layout.selectors.toastHeader],
+    });
+    throw new Error('Encountered an unexpected message on the page: ' + toastHeaderText);
   };
 
   const getNumberOfItems = async (browser, layout) => {
@@ -250,7 +257,6 @@ export function screenshotsObservableFactory(server) {
           logger.debug(line, ['browserConsole']);
         });
 
-
         const screenshot$ = driver$.pipe(
           tap(() => logger.debug(`opening ${url}`)),
           mergeMap(
@@ -266,7 +272,7 @@ export function screenshotsObservableFactory(server) {
           mergeMap(
             browser => Rx.race(
               Rx.from(waitForElementOrItemsCountAttribute(browser, layout)),
-              Rx.from(waitForNotFoundError(browser))
+              Rx.from(checkForToastMessage(browser, layout))
             ),
             browser => browser
           ),
