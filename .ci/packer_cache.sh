@@ -12,7 +12,7 @@ node scripts/build;
 echo ""
 echo ""
 echo "caching es snapshots"
-node scripts/es snapshot --download;
+node scripts/es snapshot --download-only;
 
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}";
 
