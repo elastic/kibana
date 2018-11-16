@@ -44,7 +44,7 @@ function CumulativeSumAgg(props) {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.cumulativeSum.aggregationLabel"
+              id="tsvb.cumulativeSum.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -60,7 +60,7 @@ function CumulativeSumAgg(props) {
           <EuiFormRow
             id={htmlId('metric')}
             label={(<FormattedMessage
-              id="metrics.cumulativeSum.metricLabel"
+              id="tsvb.cumulativeSum.metricLabel"
               defaultMessage="Metric"
             />)}
           >

@@ -25,131 +25,131 @@ import { injectI18n } from '@kbn/i18n/react';
 
 const metricAggs = [
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.averageLabel', { defaultMessage: 'Average' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.averageLabel', { defaultMessage: 'Average' }),
     value: 'avg',
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.cardinalityLabel', { defaultMessage: 'Cardinality' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.cardinalityLabel', { defaultMessage: 'Cardinality' }),
     value: 'cardinality',
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.countLabel', { defaultMessage: 'Count' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.countLabel', { defaultMessage: 'Count' }),
     value: 'count'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.filterRatioLabel', { defaultMessage: 'Filter Ratio' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.filterRatioLabel', { defaultMessage: 'Filter Ratio' }),
     value: 'filter_ratio'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.maxLabel', { defaultMessage: 'Max' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.maxLabel', { defaultMessage: 'Max' }),
     value: 'max'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.minLabel', { defaultMessage: 'Min' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.minLabel', { defaultMessage: 'Min' }),
     value: 'min'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.percentileLabel', { defaultMessage: 'Percentile' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.percentileLabel', { defaultMessage: 'Percentile' }),
     value: 'percentile'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.percentileRankLabel', { defaultMessage: 'Percentile Rank' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.percentileRankLabel', { defaultMessage: 'Percentile Rank' }),
     value: 'percentile_rank'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.staticValueLabel', { defaultMessage: 'Static Value' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.staticValueLabel', { defaultMessage: 'Static Value' }),
     value: 'static'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.stdDeviationLabel', { defaultMessage: 'Std. Deviation' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.stdDeviationLabel', { defaultMessage: 'Std. Deviation' }),
     value: 'std_deviation'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.sumLabel', { defaultMessage: 'Sum' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.sumLabel', { defaultMessage: 'Sum' }),
     value: 'sum'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.sumOfSquaresLabel', { defaultMessage: 'Sum of Squares' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.sumOfSquaresLabel', { defaultMessage: 'Sum of Squares' }),
     value: 'sum_of_squares'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.topHitLabel', { defaultMessage: 'Top Hit' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.topHitLabel', { defaultMessage: 'Top Hit' }),
     value: 'top_hit'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.valueCountLabel', { defaultMessage: 'Value Count' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.valueCountLabel', { defaultMessage: 'Value Count' }),
     value: 'value_count'
   },
   {
-    label: i18n.translate('metrics.aggSelect.metricsAggs.varianceLabel', { defaultMessage: 'Variance' }),
+    label: i18n.translate('tsvb.aggSelect.metricsAggs.varianceLabel', { defaultMessage: 'Variance' }),
     value: 'variance'
   },
 ];
 
 const pipelineAggs = [
   {
-    label: i18n.translate('metrics.aggSelect.pipelineAggs.bucketScriptLabel', { defaultMessage: 'Bucket Script' }),
+    label: i18n.translate('tsvb.aggSelect.pipelineAggs.bucketScriptLabel', { defaultMessage: 'Bucket Script' }),
     value: 'calculation'
   },
   {
-    label: i18n.translate('metrics.aggSelect.pipelineAggs.cumulativeSumLabel', { defaultMessage: 'Cumulative Sum' }),
+    label: i18n.translate('tsvb.aggSelect.pipelineAggs.cumulativeSumLabel', { defaultMessage: 'Cumulative Sum' }),
     value: 'cumulative_sum'
   },
   {
-    label: i18n.translate('metrics.aggSelect.pipelineAggs.derivativeLabel', { defaultMessage: 'Derivative' }),
+    label: i18n.translate('tsvb.aggSelect.pipelineAggs.derivativeLabel', { defaultMessage: 'Derivative' }),
     value: 'derivative'
   },
   {
-    label: i18n.translate('metrics.aggSelect.pipelineAggs.movingAverageLabel', { defaultMessage: 'Moving Average' }),
+    label: i18n.translate('tsvb.aggSelect.pipelineAggs.movingAverageLabel', { defaultMessage: 'Moving Average' }),
     value: 'moving_average'
   },
   {
-    label: i18n.translate('metrics.aggSelect.pipelineAggs.positiveOnlyLabel', { defaultMessage: 'Positive Only' }),
+    label: i18n.translate('tsvb.aggSelect.pipelineAggs.positiveOnlyLabel', { defaultMessage: 'Positive Only' }),
     value: 'positive_only'
   },
   {
-    label: i18n.translate('metrics.aggSelect.pipelineAggs.serialDifferenceLabel', { defaultMessage: 'Serial Difference' }),
+    label: i18n.translate('tsvb.aggSelect.pipelineAggs.serialDifferenceLabel', { defaultMessage: 'Serial Difference' }),
     value: 'serial_diff'
   },
 ];
 
 const siblingAggs = [
   {
-    label: i18n.translate('metrics.aggSelect.siblingAggs.overallAverageLabel', { defaultMessage: 'Overall Average' }),
+    label: i18n.translate('tsvb.aggSelect.siblingAggs.overallAverageLabel', { defaultMessage: 'Overall Average' }),
     value: 'avg_bucket' },
   {
-    label: i18n.translate('metrics.aggSelect.siblingAggs.overallMaxLabel', { defaultMessage: 'Overall Max' }),
+    label: i18n.translate('tsvb.aggSelect.siblingAggs.overallMaxLabel', { defaultMessage: 'Overall Max' }),
     value: 'max_bucket'
   },
   {
-    label: i18n.translate('metrics.aggSelect.siblingAggs.overallMinLabel', { defaultMessage: 'Overall Min' }),
+    label: i18n.translate('tsvb.aggSelect.siblingAggs.overallMinLabel', { defaultMessage: 'Overall Min' }),
     value: 'min_bucket'
   },
   {
-    label: i18n.translate('metrics.aggSelect.siblingAggs.overallStdDeviationLabel', { defaultMessage: 'Overall Std. Deviation' }),
+    label: i18n.translate('tsvb.aggSelect.siblingAggs.overallStdDeviationLabel', { defaultMessage: 'Overall Std. Deviation' }),
     value: 'std_deviation_bucket'
   },
   {
-    label: i18n.translate('metrics.aggSelect.siblingAggs.overallSumLabel', { defaultMessage: 'Overall Sum' }),
+    label: i18n.translate('tsvb.aggSelect.siblingAggs.overallSumLabel', { defaultMessage: 'Overall Sum' }),
     value: 'sum_bucket'
   },
   {
-    label: i18n.translate('metrics.aggSelect.siblingAggs.overallSumOfSquaresLabel', { defaultMessage: 'Overall Sum of Squares' }),
+    label: i18n.translate('tsvb.aggSelect.siblingAggs.overallSumOfSquaresLabel', { defaultMessage: 'Overall Sum of Squares' }),
     value: 'sum_of_squares_bucket'
   },
   {
-    label: i18n.translate('metrics.aggSelect.siblingAggs.overallVarianceLabel', { defaultMessage: 'Overall Variance' }),
+    label: i18n.translate('tsvb.aggSelect.siblingAggs.overallVarianceLabel', { defaultMessage: 'Overall Variance' }),
     value: 'variance_bucket'
   },
 ];
 
 const specialAggs = [
   {
-    label: i18n.translate('metrics.aggSelect.specialAggs.seriesAggLabel', { defaultMessage: 'Series Agg' }),
+    label: i18n.translate('tsvb.aggSelect.specialAggs.seriesAggLabel', { defaultMessage: 'Series Agg' }),
     value: 'series_agg'
   },
   {
-    label: i18n.translate('metrics.aggSelect.specialAggs.mathLabel', { defaultMessage: 'Math' }),
+    label: i18n.translate('tsvb.aggSelect.specialAggs.mathLabel', { defaultMessage: 'Math' }),
     value: 'math'
   },
 ];
@@ -186,23 +186,23 @@ function AggSelectUi(props) {
   } else {
     options = [
       {
-        label: intl.formatMessage({ id: 'metrics.aggSelect.aggGroups.metricAggLabel', defaultMessage: 'Metric Aggregations' }),
+        label: intl.formatMessage({ id: 'tsvb.aggSelect.aggGroups.metricAggLabel', defaultMessage: 'Metric Aggregations' }),
         options: metricAggs,
       },
       {
         label: intl.formatMessage({
-          id: 'metrics.aggSelect.aggGroups.parentPipelineAggLabel', defaultMessage: 'Parent Pipeline Aggregations' }),
+          id: 'tsvb.aggSelect.aggGroups.parentPipelineAggLabel', defaultMessage: 'Parent Pipeline Aggregations' }),
         options: pipelineAggs
           .filter(filterByPanelType(panelType))
           .map(agg => ({ ...agg, disabled: !enablePipelines })),
       },
       {
         label: intl.formatMessage({
-          id: 'metrics.aggSelect.aggGroups.siblingPipelineAggLabel', defaultMessage: 'Sibling Pipeline Aggregations' }),
+          id: 'tsvb.aggSelect.aggGroups.siblingPipelineAggLabel', defaultMessage: 'Sibling Pipeline Aggregations' }),
         options: siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
       },
       {
-        label: intl.formatMessage({ id: 'metrics.aggSelect.aggGroups.specialAggLabel', defaultMessage: 'Special Aggregations' }),
+        label: intl.formatMessage({ id: 'tsvb.aggSelect.aggGroups.specialAggLabel', defaultMessage: 'Special Aggregations' }),
         options: specialAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
       },
     ];
@@ -217,7 +217,7 @@ function AggSelectUi(props) {
     <div data-test-subj="aggSelector">
       <EuiComboBox
         isClearable={false}
-        placeholder={intl.formatMessage({ id: 'metrics.aggSelect.selectAggPlaceholder', defaultMessage: 'Select aggregation' })}
+        placeholder={intl.formatMessage({ id: 'tsvb.aggSelect.selectAggPlaceholder', defaultMessage: 'Select aggregation' })}
         options={options}
         selectedOptions={selectedOptions}
         onChange={handleChange}

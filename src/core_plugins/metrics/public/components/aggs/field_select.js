@@ -43,7 +43,7 @@ function FieldSelectUi(props) {
 
   return (
     <EuiComboBox
-      placeholder={intl.formatMessage({ id: 'metrics.fieldSelect.selectFieldPlaceholder', defaultMessage: 'Select field…' })}
+      placeholder={intl.formatMessage({ id: 'tsvb.fieldSelect.selectFieldPlaceholder', defaultMessage: 'Select field…' })}
       isDisabled={disabled}
       options={options}
       selectedOptions={selectedOptions}

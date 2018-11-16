@@ -53,30 +53,30 @@ const TopHitAggUi = props => {
 
   const aggWithOptions = [
     {
-      label: intl.formatMessage({ id: 'metrics.topHit.aggWithOptions.averageLabel', defaultMessage: 'Avg' }),
+      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.averageLabel', defaultMessage: 'Avg' }),
       value: 'avg',
     },
     {
-      label: intl.formatMessage({ id: 'metrics.topHit.aggWithOptions.maxLabel', defaultMessage: 'Max' }),
+      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.maxLabel', defaultMessage: 'Max' }),
       value: 'max'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.topHit.aggWithOptions.minLabel', defaultMessage: 'Min' }),
+      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.minLabel', defaultMessage: 'Min' }),
       value: 'min'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.topHit.aggWithOptions.sumLabel', defaultMessage: 'Sum' }),
+      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.sumLabel', defaultMessage: 'Sum' }),
       value: 'sum'
     },
   ];
 
   const orderOptions = [
     {
-      label: intl.formatMessage({ id: 'metrics.topHit.orderOptions.ascLabel', defaultMessage: 'Asc' }),
+      label: intl.formatMessage({ id: 'tsvb.topHit.orderOptions.ascLabel', defaultMessage: 'Asc' }),
       value: 'asc'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.topHit.orderOptions.descLabel', defaultMessage: 'Desc' }),
+      label: intl.formatMessage({ id: 'tsvb.topHit.orderOptions.descLabel', defaultMessage: 'Desc' }),
       value: 'desc'
     },
   ];
@@ -100,7 +100,7 @@ const TopHitAggUi = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.topHit.aggregationLabel"
+              id="tsvb.topHit.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -116,7 +116,7 @@ const TopHitAggUi = props => {
           <EuiFormRow
             id={htmlId('field')}
             label={(<FormattedMessage
-              id="metrics.topHit.fieldLabel"
+              id="tsvb.topHit.fieldLabel"
               defaultMessage="Field"
             />)}
           >
@@ -139,7 +139,7 @@ const TopHitAggUi = props => {
           <EuiFormRow
             id={htmlId('size')}
             label={(<FormattedMessage
-              id="metrics.topHit.sizeLabel"
+              id="tsvb.topHit.sizeLabel"
               defaultMessage="Size"
             />)}
           >
@@ -158,13 +158,13 @@ const TopHitAggUi = props => {
           <EuiFormRow
             id={htmlId('agg_with')}
             label={(<FormattedMessage
-              id="metrics.topHit.aggregateWithLabel"
+              id="tsvb.topHit.aggregateWithLabel"
               defaultMessage="Aggregate with"
             />)}
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={intl.formatMessage({ id: 'metrics.topHit.aggregateWith.selectPlaceholder', defaultMessage: 'Select…' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.topHit.aggregateWith.selectPlaceholder', defaultMessage: 'Select…' })}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
               onChange={handleSelectChange('agg_with')}
@@ -176,7 +176,7 @@ const TopHitAggUi = props => {
           <EuiFormRow
             id={htmlId('order_by')}
             label={(<FormattedMessage
-              id="metrics.topHit.orderByLabel"
+              id="tsvb.topHit.orderByLabel"
               defaultMessage="Order by"
             />)}
           >
@@ -193,13 +193,13 @@ const TopHitAggUi = props => {
           <EuiFormRow
             id={htmlId('order')}
             label={(<FormattedMessage
-              id="metrics.topHit.orderLabel"
+              id="tsvb.topHit.orderLabel"
               defaultMessage="Order"
             />)}
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={intl.formatMessage({ id: 'metrics.topHit.order.selectPlaceholder', defaultMessage: 'Select…' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.topHit.order.selectPlaceholder', defaultMessage: 'Select…' })}
               options={orderOptions}
               selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
               onChange={handleSelectChange('order')}

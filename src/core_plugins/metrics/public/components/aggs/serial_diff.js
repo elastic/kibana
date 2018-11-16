@@ -51,7 +51,7 @@ export const SerialDiffAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.serialDiff.aggregationLabel"
+              id="tsvb.serialDiff.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -67,7 +67,7 @@ export const SerialDiffAgg = props => {
           <EuiFormRow
             id={htmlId('metric')}
             label={(<FormattedMessage
-              id="metrics.serialDiff.metricLabel"
+              id="tsvb.serialDiff.metricLabel"
               defaultMessage="Metric"
             />)}
           >
@@ -83,7 +83,7 @@ export const SerialDiffAgg = props => {
           <EuiFormRow
             id={htmlId('lag')}
             label={(<FormattedMessage
-              id="metrics.serialDiff.lagLabel"
+              id="tsvb.serialDiff.lagLabel"
               defaultMessage="Lag"
             />)}
           >

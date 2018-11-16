@@ -36,28 +36,28 @@ const paths = [
   'positive_only',
 ];
 export default function calculateLabel(metric, metrics) {
-  if (!metric) return i18n.translate('metrics.calculateLabel.unknownLabel', { defaultMessage: 'Unknown' });
+  if (!metric) return i18n.translate('tsvb.calculateLabel.unknownLabel', { defaultMessage: 'Unknown' });
   if (metric.alias) return metric.alias;
 
-  if (metric.type === 'count') return i18n.translate('metrics.calculateLabel.countLabel', { defaultMessage: 'Count' });
+  if (metric.type === 'count') return i18n.translate('tsvb.calculateLabel.countLabel', { defaultMessage: 'Count' });
   if (metric.type === 'calculation') {
-    return i18n.translate('metrics.calculateLabel.bucketScriptsLabel', { defaultMessage: 'Bucket Script' });
+    return i18n.translate('tsvb.calculateLabel.bucketScriptsLabel', { defaultMessage: 'Bucket Script' });
   }
-  if (metric.type === 'math') return i18n.translate('metrics.calculateLabel.mathLabel', { defaultMessage: 'Math' });
+  if (metric.type === 'math') return i18n.translate('tsvb.calculateLabel.mathLabel', { defaultMessage: 'Math' });
   if (metric.type === 'series_agg') {
-    return i18n.translate('metrics.calculateLabel.seriesAggLabel',
+    return i18n.translate('tsvb.calculateLabel.seriesAggLabel',
       { defaultMessage: 'Series Agg ({metricFunction})', values: { metricFunction: metric.function } }
     );
   }
-  if (metric.type === 'filter_ratio') return i18n.translate('metrics.calculateLabel.filterRatioLabel', { defaultMessage: 'Filter Ratio' });
+  if (metric.type === 'filter_ratio') return i18n.translate('tsvb.calculateLabel.filterRatioLabel', { defaultMessage: 'Filter Ratio' });
   if (metric.type === 'static') {
-    return i18n.translate('metrics.calculateLabel.staticValueLabel',
+    return i18n.translate('tsvb.calculateLabel.staticValueLabel',
       { defaultMessage: 'Static Value of {metricValue}', values: { metricValue: metric.value } }
     );
   }
 
   if (metric.type === 'percentile_rank') {
-    return i18n.translate('metrics.calculateLabel.percentileRankLabel', {
+    return i18n.translate('tsvb.calculateLabel.percentileRankLabel', {
       defaultMessage: '{lookupMetricType} ({metricValue}) of {metricField}',
       values: { lookupMetricType: lookup[metric.type], metricValue: metric.value, metricField: metric.field }
     });
@@ -77,13 +77,13 @@ export default function calculateLabel(metric, metrics) {
         additionalLabel += ` (${matches[1]})`;
       }
     }
-    return i18n.translate('metrics.calculateLabel.lookupMetricTypeOfTargetAndAdditionalLabel', {
+    return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetAndAdditionalLabel', {
       defaultMessage: '{lookupMetricType} of {targetLabel}{additionalLabel}',
       values: { lookupMetricType: lookup[metric.type], targetLabel, additionalLabel }
     });
   }
 
-  return i18n.translate('metrics.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
+  return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
     defaultMessage: '{lookupMetricType} of {metricField}',
     values: { lookupMetricType: lookup[metric.type], metricField: metric.field }
   });

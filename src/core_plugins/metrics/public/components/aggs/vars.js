@@ -52,8 +52,8 @@ class CalculationVarsUi extends Component {
           <EuiFlexItem>
             <EuiFieldText
               className="tvbAggs__varName"
-              aria-label={intl.formatMessage({ id: 'metrics.vars.variableNameAriaLabel', defaultMessage: 'Variable name' })}
-              placeholder={intl.formatMessage({ id: 'metrics.vars.variableNamePlaceholder', defaultMessage: 'Variable Name' })}
+              aria-label={intl.formatMessage({ id: 'tsvb.vars.variableNameAriaLabel', defaultMessage: 'Variable name' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.vars.variableNamePlaceholder', defaultMessage: 'Variable Name' })}
               onChange={this.handleChange(row, 'name')}
               value={row.name}
             />

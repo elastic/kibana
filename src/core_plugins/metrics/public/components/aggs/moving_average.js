@@ -54,24 +54,24 @@ const MovingAverageAggUi = props => {
   const handleNumberChange = createNumberHandler(handleChange);
   const modelOptions = [
     {
-      label: intl.formatMessage({ id: 'metrics.movingAverage.modelOptions.simpleLabel', defaultMessage: 'Simple' }),
+      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.simpleLabel', defaultMessage: 'Simple' }),
       value: 'simple'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.movingAverage.modelOptions.linearLabel', defaultMessage: 'Linear' }),
+      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.linearLabel', defaultMessage: 'Linear' }),
       value: 'linear'
     },
     {
       label: intl.formatMessage({
-        id: 'metrics.movingAverage.modelOptions.exponentiallyWeightedLabel', defaultMessage: 'Exponentially Weighted' }),
+        id: 'tsvb.movingAverage.modelOptions.exponentiallyWeightedLabel', defaultMessage: 'Exponentially Weighted' }),
       value: 'ewma'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.movingAverage.modelOptions.holtLinearLabel', defaultMessage: 'Holt-Linear' }),
+      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.holtLinearLabel', defaultMessage: 'Holt-Linear' }),
       value: 'holt'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.movingAverage.modelOptions.holtWintersLabel', defaultMessage: 'Holt-Winters' }),
+      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.holtWintersLabel', defaultMessage: 'Holt-Winters' }),
       value: 'holt_winters'
     }
   ];
@@ -99,7 +99,7 @@ const MovingAverageAggUi = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.movingAverage.aggregationLabel"
+              id="tsvb.movingAverage.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -115,7 +115,7 @@ const MovingAverageAggUi = props => {
           <EuiFormRow
             id={htmlId('metric')}
             label={(<FormattedMessage
-              id="metrics.movingAverage.metricLabel"
+              id="tsvb.movingAverage.metricLabel"
               defaultMessage="Metric"
             />)}
           >
@@ -136,13 +136,13 @@ const MovingAverageAggUi = props => {
           <EuiFormRow
             id={htmlId('model')}
             label={(<FormattedMessage
-              id="metrics.movingAverage.modelLabel"
+              id="tsvb.movingAverage.modelLabel"
               defaultMessage="Model"
             />)}
           >
             <EuiComboBox
               isClearable={false}
-              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.model.selectPlaceholder', defaultMessage: 'Select' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.movingAverage.model.selectPlaceholder', defaultMessage: 'Select' })}
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model')}
@@ -154,7 +154,7 @@ const MovingAverageAggUi = props => {
           <EuiFormRow
             id={htmlId('windowSize')}
             label={(<FormattedMessage
-              id="metrics.movingAverage.windowSizeLabel"
+              id="tsvb.movingAverage.windowSizeLabel"
               defaultMessage="Window Size"
             />)}
           >
@@ -174,12 +174,12 @@ const MovingAverageAggUi = props => {
           <EuiFormRow
             id={htmlId('minimize')}
             label={(<FormattedMessage
-              id="metrics.movingAverage.minimizeLabel"
+              id="tsvb.movingAverage.minimizeLabel"
               defaultMessage="Minimize"
             />)}
           >
             <EuiComboBox
-              placeholder={intl.formatMessage({ id: 'metrics.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select' })}
               options={minimizeOptions}
               selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
               onChange={handleSelectChange('minimize')}
@@ -191,7 +191,7 @@ const MovingAverageAggUi = props => {
           <EuiFormRow
             id={htmlId('predict')}
             label={(<FormattedMessage
-              id="metrics.movingAverage.predictLabel"
+              id="tsvb.movingAverage.predictLabel"
               defaultMessage="Predict"
             />)}
           >
@@ -216,13 +216,13 @@ const MovingAverageAggUi = props => {
           fullWidth
           id={htmlId('settings')}
           label={(<FormattedMessage
-            id="metrics.movingAverage.settingsLabel"
+            id="tsvb.movingAverage.settingsLabel"
             defaultMessage="Settings"
           />)}
           helpText={
             <span>
               <FormattedMessage
-                id="metrics.movingAverage.settingsDescription"
+                id="tsvb.movingAverage.settingsDescription"
                 defaultMessage="{keyValue} space-delimited"
                 values={{ keyValue: (<EuiCode>Key=Value</EuiCode>) }}
               />

@@ -53,7 +53,7 @@ const StandardSiblingAggUi = props => {
         <EuiFormRow
           id={htmlId('sigma')}
           label={(<FormattedMessage
-            id="metrics.stdSibling.sigmaLabel"
+            id="tsvb.stdSibling.sigmaLabel"
             defaultMessage="Sigma"
           />)}
         >
@@ -67,19 +67,19 @@ const StandardSiblingAggUi = props => {
 
     const modeOptions = [
       {
-        label: intl.formatMessage({ id: 'metrics.stdSibling.modeOptions.rawLabel', defaultMessage: 'Raw' }),
+        label: intl.formatMessage({ id: 'tsvb.stdSibling.modeOptions.rawLabel', defaultMessage: 'Raw' }),
         value: 'raw'
       },
       {
-        label: intl.formatMessage({ id: 'metrics.stdSibling.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
+        label: intl.formatMessage({ id: 'tsvb.stdSibling.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
         value: 'upper'
       },
       {
-        label: intl.formatMessage({ id: 'metrics.stdSibling.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
+        label: intl.formatMessage({ id: 'tsvb.stdSibling.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
         value: 'lower'
       },
       {
-        label: intl.formatMessage({ id: 'metrics.stdSibling.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
+        label: intl.formatMessage({ id: 'tsvb.stdSibling.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
         value: 'band'
       }
     ];
@@ -92,7 +92,7 @@ const StandardSiblingAggUi = props => {
         <EuiFormRow
           id={htmlId('mode')}
           label={(<FormattedMessage
-            id="metrics.stdSibling.modeLabel"
+            id="tsvb.stdSibling.modeLabel"
             defaultMessage="Mode"
           />)}
         >
@@ -119,7 +119,7 @@ const StandardSiblingAggUi = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.stdSibling.aggregationLabel"
+              id="tsvb.stdSibling.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -135,7 +135,7 @@ const StandardSiblingAggUi = props => {
           <EuiFormRow
             id={htmlId('metric')}
             label={(<FormattedMessage
-              id="metrics.stdSibling.metricLabel"
+              id="tsvb.stdSibling.metricLabel"
               defaultMessage="Metric"
             />)}
           >

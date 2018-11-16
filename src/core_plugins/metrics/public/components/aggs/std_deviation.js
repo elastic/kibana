@@ -43,22 +43,22 @@ const StandardDeviationAggUi = props => {
 
   const modeOptions = [
     {
-      label: intl.formatMessage({ id: 'metrics.stdDeviation.modeOptions.rawLabel', defaultMessage: 'Raw' }),
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.rawLabel', defaultMessage: 'Raw' }),
       value: 'raw'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.stdDeviation.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
       value: 'upper'
     },
     {
-      дabel: intl.formatMessage({ id: 'metrics.stdDeviation.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
+      дabel: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
       value: 'lower'
     },
   ];
 
   if (panel.type !== 'table') {
     modeOptions.push({
-      label: intl.formatMessage({ id: 'metrics.stdDeviation.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
       value: 'band'
     });
   }
@@ -85,7 +85,7 @@ const StandardDeviationAggUi = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.stdDeviation.aggregationLabel"
+              id="tsvb.stdDeviation.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -101,7 +101,7 @@ const StandardDeviationAggUi = props => {
           <EuiFormRow
             id={htmlId('field')}
             label={(<FormattedMessage
-              id="metrics.stdDeviation.fieldLabel"
+              id="tsvb.stdDeviation.fieldLabel"
               defaultMessage="Field"
             />)}
           >
@@ -119,7 +119,7 @@ const StandardDeviationAggUi = props => {
           <EuiFormRow
             id={htmlId('sigma')}
             label={(<FormattedMessage
-              id="metrics.stdDeviation.sigmaLabel"
+              id="tsvb.stdDeviation.sigmaLabel"
               defaultMessage="Sigma"
             />)}
           >
@@ -133,7 +133,7 @@ const StandardDeviationAggUi = props => {
           <EuiFormRow
             id={htmlId('mode')}
             label={(<FormattedMessage
-              id="metrics.stdDeviation.modeLabel"
+              id="tsvb.stdDeviation.modeLabel"
               defaultMessage="Mode"
             />)}
           >

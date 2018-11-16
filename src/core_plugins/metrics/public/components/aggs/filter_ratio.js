@@ -72,7 +72,7 @@ export const FilterRatioAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.filterRatio.aggregationLabel"
+              id="tsvb.filterRatio.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -89,7 +89,7 @@ export const FilterRatioAgg = props => {
           <EuiFormRow
             id={htmlId('numerator')}
             label={(<FormattedMessage
-              id="metrics.filterRatio.numeratorLabel"
+              id="tsvb.filterRatio.numeratorLabel"
               defaultMessage="Numerator"
             />)}
           >
@@ -104,7 +104,7 @@ export const FilterRatioAgg = props => {
           <EuiFormRow
             id={htmlId('denominator')}
             label={(<FormattedMessage
-              id="metrics.filterRatio.denominatorLabel"
+              id="tsvb.filterRatio.denominatorLabel"
               defaultMessage="Denominator"
             />)}
           >
@@ -124,7 +124,7 @@ export const FilterRatioAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('metric')}>
             <FormattedMessage
-              id="metrics.filterRatio.metricAggregationLabel"
+              id="tsvb.filterRatio.metricAggregationLabel"
               defaultMessage="Metric Aggregation"
             />
           </EuiFormLabel>
@@ -142,7 +142,7 @@ export const FilterRatioAgg = props => {
             <EuiFormRow
               id={htmlId('aggField')}
               label={(<FormattedMessage
-                id="metrics.filterRatio.fieldLabel"
+                id="tsvb.filterRatio.fieldLabel"
                 defaultMessage="Field"
               />)}
             >

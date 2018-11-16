@@ -49,7 +49,7 @@ export const PositiveOnlyAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.positiveOnly.aggregationLabel"
+              id="tsvb.positiveOnly.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -65,7 +65,7 @@ export const PositiveOnlyAgg = props => {
           <EuiFormRow
             id={htmlId('metric')}
             label={(<FormattedMessage
-              id="metrics.positiveOnly.metricLabel"
+              id="tsvb.positiveOnly.metricLabel"
               defaultMessage="Metric"
             />)}
           >

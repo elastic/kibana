@@ -52,7 +52,7 @@ function StandardAgg(props) {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.stdAgg.aggregationLabel"
+              id="tsvb.stdAgg.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -73,7 +73,7 @@ function StandardAgg(props) {
                 <EuiFormRow
                   id={htmlId('field')}
                   label={(<FormattedMessage
-                    id="metrics.stdAgg.fieldLabel"
+                    id="tsvb.stdAgg.fieldLabel"
                     defaultMessage="Field"
                   />)}
                   fullWidth

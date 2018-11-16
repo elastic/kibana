@@ -98,7 +98,7 @@ function MetricSelectUi(props) {
 
   return (
     <EuiComboBox
-      placeholder={intl.formatMessage({ id: 'metrics.metricSelect.selectMetricPlaceholder', defaultMessage: 'Select metric…' })}
+      placeholder={intl.formatMessage({ id: 'tsvb.metricSelect.selectMetricPlaceholder', defaultMessage: 'Select metric…' })}
       options={allOptions}
       selectedOptions={selectedOptions}
       onChange={onChange}

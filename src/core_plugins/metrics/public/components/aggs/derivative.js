@@ -59,7 +59,7 @@ export const DerivativeAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.derivative.aggregationLabel"
+              id="tsvb.derivative.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -76,7 +76,7 @@ export const DerivativeAgg = props => {
           <EuiFormRow
             id={htmlId('metric')}
             label={(<FormattedMessage
-              id="metrics.derivative.metricLabel"
+              id="tsvb.derivative.metricLabel"
               defaultMessage="Metric"
             />)}
             fullWidth
@@ -94,7 +94,7 @@ export const DerivativeAgg = props => {
           <EuiFormRow
             id={htmlId('units')}
             label={(<FormattedMessage
-              id="metrics.derivative.unitsLabel"
+              id="tsvb.derivative.unitsLabel"
               defaultMessage="Units (1s, 1m, etc)"
             />)}
             fullWidth

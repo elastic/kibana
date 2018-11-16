@@ -74,7 +74,7 @@ class CalculationAgg extends Component {
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('aggregation')}>
               <FormattedMessage
-                id="metrics.calculation.aggregationLabel"
+                id="tsvb.calculation.aggregationLabel"
                 defaultMessage="Aggregation"
               />
             </EuiFormLabel>
@@ -90,7 +90,7 @@ class CalculationAgg extends Component {
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('variables')}>
               <FormattedMessage
-                id="metrics.calculation.variablesLabel"
+                id="tsvb.calculation.variablesLabel"
                 defaultMessage="Variables"
               />
             </EuiFormLabel>
@@ -107,14 +107,14 @@ class CalculationAgg extends Component {
             <EuiFormRow
               id={htmlId('painless')}
               label={(<FormattedMessage
-                id="metrics.calculation.painlessScriptLabel"
+                id="tsvb.calculation.painlessScriptLabel"
                 defaultMessage="Painless Script"
               />)}
               fullWidth
               helpText={
                 <div>
                   <FormattedMessage
-                    id="metrics.calculation.painlessScriptDescription"
+                    id="tsvb.calculation.painlessScriptDescription"
                     defaultMessage="Variables are keys on the {params} object, i.e. {paramsName}. To access the bucket
                     interval (in milliseconds) use {paramsInterval}."
                     values={{

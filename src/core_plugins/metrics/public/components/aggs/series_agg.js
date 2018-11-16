@@ -44,39 +44,39 @@ function SeriesAggUi(props) {
 
   const functionOptions = [
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.sumLabel', defaultMessage: 'Sum' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.sumLabel', defaultMessage: 'Sum' }),
       value: 'sum'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.maxLabel', defaultMessage: 'Max' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.maxLabel', defaultMessage: 'Max' }),
       value: 'max'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.minLabel', defaultMessage: 'Min' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.minLabel', defaultMessage: 'Min' }),
       value: 'min'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.avgLabel', defaultMessage: 'Avg' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.avgLabel', defaultMessage: 'Avg' }),
       value: 'mean'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.overallSumLabel', defaultMessage: 'Overall Sum' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallSumLabel', defaultMessage: 'Overall Sum' }),
       value: 'overall_sum'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.overallMaxLabel', defaultMessage: 'Overall Max' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallMaxLabel', defaultMessage: 'Overall Max' }),
       value: 'overall_max'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.overallMinLabel', defaultMessage: 'Overall Min' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallMinLabel', defaultMessage: 'Overall Min' }),
       value: 'overall_min'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.overallAvgLabel', defaultMessage: 'Overall Avg' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallAvgLabel', defaultMessage: 'Overall Avg' }),
       value: 'overall_avg'
     },
     {
-      label: intl.formatMessage({ id: 'metrics.seriesAgg.functionOptions.cumulativeSumLabel', defaultMessage: 'Cumulative Sum' }),
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.cumulativeSumLabel', defaultMessage: 'Cumulative Sum' }),
       value: 'cumulative_sum'
     },
   ];
@@ -96,7 +96,7 @@ function SeriesAggUi(props) {
         <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
           <span>
             <FormattedMessage
-              id="metrics.seriesAgg.seriesAggIsNotCompatibleLabel"
+              id="tsvb.seriesAgg.seriesAggIsNotCompatibleLabel"
               defaultMessage="Series Agg is not compatible with the table visualization."
             />
           </span>
@@ -117,7 +117,7 @@ function SeriesAggUi(props) {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.seriesAgg.aggregationLabel"
+              id="tsvb.seriesAgg.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -133,7 +133,7 @@ function SeriesAggUi(props) {
           <EuiFormRow
             id={htmlId('function')}
             label={(<FormattedMessage
-              id="metrics.seriesAgg.functionLabel"
+              id="tsvb.seriesAgg.functionLabel"
               defaultMessage="Function"
             />)}
           >

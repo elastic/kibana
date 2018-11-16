@@ -41,13 +41,13 @@ function AggRowUi(props) {
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={(<FormattedMessage
-            id="metrics.aggRow.dragToSortTooltip"
+            id="tsvb.aggRow.dragToSortTooltip"
             defaultMessage="Drag to sort"
           />)}
         >
           <EuiButtonIcon
             className="tvbAggRow__sortHandle"
-            aria-label={intl.formatMessage({ id: 'metrics.aggRow.dragToSortAriaLabel', defaultMessage: 'Drag to sort' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.aggRow.dragToSortAriaLabel', defaultMessage: 'Drag to sort' })}
             iconType="grab"
           />
         </EuiToolTip>
@@ -68,8 +68,8 @@ function AggRowUi(props) {
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             testSubj="addMetric"
-            addTooltip={intl.formatMessage({ id: 'metrics.aggRow.addMetricButtonTooltip', defaultMessage: 'Add Metric' })}
-            deleteTooltip={intl.formatMessage({ id: 'metrics.aggRow.deleteMetricButtonTooltip', defaultMessage: 'Delete Metric' })}
+            addTooltip={intl.formatMessage({ id: 'tsvb.aggRow.addMetricButtonTooltip', defaultMessage: 'Add Metric' })}
+            deleteTooltip={intl.formatMessage({ id: 'tsvb.aggRow.deleteMetricButtonTooltip', defaultMessage: 'Delete Metric' })}
             onAdd={props.onAdd}
             onDelete={props.onDelete}
             disableDelete={props.disableDelete}

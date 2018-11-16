@@ -74,7 +74,7 @@ class MathAgg extends Component {
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('aggregation')}>
               <FormattedMessage
-                id="metrics.math.aggregationLabel"
+                id="tsvb.math.aggregationLabel"
                 defaultMessage="Aggregation"
               />
             </EuiFormLabel>
@@ -89,7 +89,7 @@ class MathAgg extends Component {
           <EuiFlexItem>
             <EuiFormLabel htmlFor={htmlId('variables')}>
               <FormattedMessage
-                id="metrics.math.variablesLabel"
+                id="tsvb.math.variablesLabel"
                 defaultMessage="Variables"
               />
             </EuiFormLabel>
@@ -107,12 +107,12 @@ class MathAgg extends Component {
             <EuiFormRow
               id="mathExpressionInput"
               label={(<FormattedMessage
-                id="metrics.math.expressionLabel"
+                id="tsvb.math.expressionLabel"
                 defaultMessage="Expression"
               />)}
               fullWidth
               helpText={(<FormattedMessage
-                id="metrics.math.expressionDescription"
+                id="tsvb.math.expressionDescription"
                 defaultMessage="This field uses basic math expressions (see {link}) - Variables are keys on the {params} object,
                 i.e. {paramsName} To access all the data use {paramsValues} for an array of the values and {paramsTimestamps} for
                 an array of the timestamps. {paramsTimestamp} is available for the current bucket&apos;s timestamp,
@@ -125,7 +125,7 @@ class MathAgg extends Component {
                       target="_blank"
                     >
                       <FormattedMessage
-                        id="metrics.math.expressionDescription.tinyMathLinkText"
+                        id="tsvb.math.expressionDescription.tinyMathLinkText"
                         defaultMessage="TinyMath"
                       />
                     </EuiLink>),

@@ -59,7 +59,7 @@ export const PercentileRankAgg = props => {
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
-              id="metrics.percentileRank.aggregationLabel"
+              id="tsvb.percentileRank.aggregationLabel"
               defaultMessage="Aggregation"
             />
           </EuiFormLabel>
@@ -75,7 +75,7 @@ export const PercentileRankAgg = props => {
           <EuiFormRow
             id={htmlId('field')}
             label={(<FormattedMessage
-              id="metrics.percentileRank.fieldLabel"
+              id="tsvb.percentileRank.fieldLabel"
               defaultMessage="Field"
             />)}
           >
@@ -93,7 +93,7 @@ export const PercentileRankAgg = props => {
           <EuiFormRow
             id={htmlId('value')}
             label={(<FormattedMessage
-              id="metrics.percentileRank.valueLabel"
+              id="tsvb.percentileRank.valueLabel"
               defaultMessage="Value"
             />)}
           >

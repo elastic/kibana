@@ -34,7 +34,7 @@ export function UnsupportedAgg(props) {
       <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
         <span>
           <FormattedMessage
-            id="metrics.unsupportedAgg.aggIsNotSupportedDescription"
+            id="tsvb.unsupportedAgg.aggIsNotSupportedDescription"
             defaultMessage="The {modelType} aggregation is no longer supported."
             values={{ modelType: (<EuiCode>{props.model.type}</EuiCode>) }}
           />
