@@ -65,6 +65,8 @@ const ItemLabel = styled.div`
   position: absolute;
   right: 0;
   width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
   display: inline-block;
   text-align: left;
   margin: 0;
