@@ -15,7 +15,13 @@ export default async function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
-    const reportingBrowserType = config.get('xpack.reporting.capture.browser.type');
+    const reportingBrowserType = (() => {
+      try {
+        return config.get('xpack.reporting.capture.browser.type');
+      } catch (e) {
+        return null;
+      }
+    })();
 
     return {
       kbnIndex: config.get('kibana.index'),
