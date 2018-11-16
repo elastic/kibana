@@ -75,7 +75,6 @@ export function checkPrivilegesWithRequestFactory(actions, application, shieldCl
             result[ResourceSerializer.deserializeSpaceResource(key)] = value;
           }),
         };
-
       },
       async globally(privilegeOrPrivileges) {
         return await checkPrivilegesAtResource(GLOBAL_RESOURCE, privilegeOrPrivileges);

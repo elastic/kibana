@@ -24,7 +24,8 @@ import { createAuthorizationService, registerPrivilegesWithCluster } from './ser
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
-import { disableUiCapabilitesFactory } from './server/lib/disable_ui_capabilities';
+import { disableUICapabilitesFactory } from './server/lib/disable_ui_capabilities';
+import { createConditionalPlugin } from './server/lib/conditional_plugin';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -91,10 +92,10 @@ export const security = (kibana) => new kibana.Plugin({
       };
     },
     replaceInjectedVars: async function (originalInjectedVars, request, server) {
-      const disableUiCapabilites = disableUiCapabilitesFactory(server, request);
+      const disableUICapabilites = disableUICapabilitesFactory(server, request);
       return {
         ...originalInjectedVars,
-        uiCapabilities: await disableUiCapabilites(originalInjectedVars.uiCapabilities)
+        uiCapabilities: await disableUICapabilites(originalInjectedVars.uiCapabilities)
       };
     }
   },
@@ -125,8 +126,10 @@ export const security = (kibana) => new kibana.Plugin({
 
     const { savedObjects } = server;
 
+    const spaces = createConditionalPlugin(config, 'xpack.spaces', server.plugins, 'spaces');
+
     // exposes server.plugins.security.authorization
-    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin);
+    const authorization = createAuthorizationService(server, xpackInfoFeature, savedObjects.types, xpackMainPlugin, spaces);
     server.expose('authorization', deepFreeze(authorization));
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
@@ -155,17 +158,15 @@ export const security = (kibana) => new kibana.Plugin({
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
-        const { spaces } = server.plugins;
 
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
           auditLogger,
           baseClient: client,
-          checkPrivilegesWithRequest: authorization.checkPrivilegesWithRequest,
+          checkPrivilegesDynamicallyWithRequest: authorization.checkPrivilegesDynamicallyWithRequest,
           errors: savedObjects.SavedObjectsClient.errors,
           request,
           savedObjectTypes: savedObjects.types,
-          spaces,
         });
       }
 
@@ -210,7 +211,7 @@ export const security = (kibana) => new kibana.Plugin({
         const appAction = actions.app.get(appId);
 
         // TODO: Check this at the specific space
-        const checkPrivilegesResponse = await checkPrivileges.globally(appAction);
+        const checkPrivilegesResponse = await checkPrivileges.dynamically(appAction);
         if (!checkPrivilegesResponse.hasAllRequested) {
           return Boom.notFound();
         }
@@ -227,7 +228,7 @@ export const security = (kibana) => new kibana.Plugin({
           const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
 
           // TODO: Check this at the specific space
-          const checkPrivilegesResponse = await checkPrivileges.globally(apiActions);
+          const checkPrivilegesResponse = await checkPrivileges.dynamically(apiActions);
           if (!checkPrivilegesResponse.hasAllRequested) {
             return Boom.notFound();
           }

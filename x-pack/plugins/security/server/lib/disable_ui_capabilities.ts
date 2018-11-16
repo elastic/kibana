@@ -9,19 +9,8 @@ import { UICapabilities } from 'ui/capabilities';
 import { Actions } from './authorization';
 
 export function disableUICapabilitesFactory(server: any, request: any) {
-  const { spaces } = server.plugins;
   const { authorization } = server.plugins.security;
   const actions: Actions = authorization.actions;
-
-  const checkPrivilegesWhereYouCan = async (checkActions: string[]) => {
-    const checkPrivileges: any = authorization.checkPrivilegesWithRequest(request);
-    if (spaces) {
-      const spaceId = spaces.getSpaceId(request);
-      return await checkPrivileges.atSpace(spaceId, checkActions);
-    } else {
-      return await checkPrivileges.globally(checkActions);
-    }
-  };
 
   return async function disableUICapabilities(uiCapabilities: UICapabilities) {
     const uiActions = Object.entries(uiCapabilities).reduce<string[]>(
@@ -36,7 +25,10 @@ export function disableUICapabilitesFactory(server: any, request: any) {
 
     let checkPrivilegesResponse: any;
     try {
-      checkPrivilegesResponse = await checkPrivilegesWhereYouCan(uiActions);
+      const checkPrivilegesDynamically: any = authorization.checkPrivilegesDynamicallyWithRequest(
+        request
+      );
+      checkPrivilegesResponse = await checkPrivilegesDynamically(uiActions);
     } catch (err) {
       // if we get a 401/403, then we want to disable all uiCapabilities, as this
       // is generally when the user hasn't authenticated yet and we're displaying the

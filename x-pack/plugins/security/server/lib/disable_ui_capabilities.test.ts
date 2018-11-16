@@ -24,23 +24,21 @@ const createMockServer = (options: MockServerOptions) => {
 
   const mockAuthorizationService = {
     actions,
-    checkPrivilegesWithRequest(request: any) {
+    checkPrivilegesDynamicallyWithRequest(request: any) {
       expect(request).toBe(mockRequest);
 
-      return {
-        atSpace: jest.fn().mockImplementation((spaceId, checkActions) => {
-          if (options.checkPrivileges.reject) {
-            throw options.checkPrivileges.reject;
-          }
+      return jest.fn().mockImplementation(checkActions => {
+        if (options.checkPrivileges.reject) {
+          throw options.checkPrivileges.reject;
+        }
 
-          if (options.checkPrivileges.resolve) {
-            expect(checkActions).toEqual(Object.keys(options.checkPrivileges.resolve.privileges));
-            return options.checkPrivileges.resolve;
-          }
+        if (options.checkPrivileges.resolve) {
+          expect(checkActions).toEqual(Object.keys(options.checkPrivileges.resolve.privileges));
+          return options.checkPrivileges.resolve;
+        }
 
-          throw new Error('resolve or reject should have been provided');
-        }),
-      };
+        throw new Error('resolve or reject should have been provided');
+      });
     },
   };
 

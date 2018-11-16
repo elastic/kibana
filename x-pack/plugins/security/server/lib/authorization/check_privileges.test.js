@@ -27,7 +27,7 @@ const createMockShieldClient = (response) => {
   };
 };
 
-describe('#checkPrivilegesAtSpace', () => {
+describe('#atSpace', () => {
   const checkPrivilegesAtSpaceTest = (description, {
     spaceId,
     privilegeOrPrivileges,
@@ -235,7 +235,7 @@ describe('#checkPrivilegesAtSpace', () => {
   });
 });
 
-describe('#checkPrivilegesAtSpaces', () => {
+describe('#atSpaces', () => {
   const checkPrivilegesAtSpacesTest = (description, {
     spaceIds,
     privilegeOrPrivileges,
@@ -648,7 +648,7 @@ describe('#checkPrivilegesAtSpaces', () => {
   });
 });
 
-describe('#checkPrivilegesGlobally', () => {
+describe('#globally', () => {
   const checkPrivilegesGloballyTest = (description, {
     privilegeOrPrivileges,
     esHasPrivilegesResponse,
