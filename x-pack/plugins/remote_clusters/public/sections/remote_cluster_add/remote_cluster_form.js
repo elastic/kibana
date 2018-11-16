@@ -150,7 +150,7 @@ export class RemoteClusterFormUi extends Component {
       errors.push(intl.formatMessage({
         id: 'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidCharactersMessage',
         defaultMessage: `Seed nodes must consist of valid characters, with optional parts separated
-        by periods. Valid characters are lowercase letters, numbers, underscores, and dashes.`,
+        by periods. Valid characters are lowercase letters, numbers, and dashes.`,
       }));
     }
 
