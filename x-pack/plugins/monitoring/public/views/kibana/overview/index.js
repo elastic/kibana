@@ -44,7 +44,7 @@ uiRoutes.when('/kibana', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -54,7 +54,11 @@ uiRoutes.when('/kibana', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, 'Kibana');
+    const routeTitle = i18n('xpack.monitoring.kibana.overview.routeTitle', {
+      defaultMessage: 'Kibana'
+    });
+
+    title($scope.cluster, routeTitle);
 
     const $executor = $injector.get('$executor');
     $executor.register({

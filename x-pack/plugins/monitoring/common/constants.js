@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 /**
  * Helper string to add as a tag in every logging call
  */
@@ -129,10 +131,12 @@ export const LOGSTASH = {
   }
 };
 
-export const DEFAULT_NO_DATA_MESSAGE = 'There are no records that match your query. Try changing the time range selection.';
-export const DEFAULT_NO_DATA_MESSAGE_WITH_FILTER = (
-  'There are no records that match your query with the filter [{{FILTER}}]. Try changing the filter or the time range selection.'
-);
+export const DEFAULT_NO_DATA_MESSAGE = i18n.translate('xpack.monitoring.defaultNoDataMessage', {
+  defaultMessage: 'There are no records that match your query. Try changing the time range selection.' });
+export const DEFAULT_NO_DATA_MESSAGE_WITH_FILTER = i18n.translate('xpack.monitoring.defaultNoDataWithFilterMessage', {
+  defaultMessage:
+  'There are no records that match your query with the filter [{filter}]. Try changing the filter or the time range selection.',
+  values: { filter: '{{FILTER}}' } });
 
 export const TABLE_ACTION_UPDATE_FILTER = 'UPDATE_FILTER';
 export const TABLE_ACTION_RESET_PAGING = 'RESET_PAGING';

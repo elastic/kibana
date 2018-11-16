@@ -11,6 +11,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseTableController } from '../../';
 import { ElasticsearchIndices } from '../../../components';
 import template from './index.html';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/elasticsearch/indices', {
   template,
@@ -22,7 +23,7 @@ uiRoutes.when('/elasticsearch/indices', {
   },
   controllerAs: 'elasticsearchIndices',
   controller: class ElasticsearchIndicesController extends MonitoringViewBaseTableController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       const features = $injector.get('features');
@@ -33,7 +34,9 @@ uiRoutes.when('/elasticsearch/indices', {
       let showSystemIndices = features.isEnabled('showSystemIndices', false);
 
       super({
-        title: 'Elasticsearch - Indices',
+        title: i18n('xpack.monitoring.elasticsearch.indices.routeTitle', {
+          defaultMessage: 'Elasticsearch - Indices'
+        }),
         storageKey: 'elasticsearch.indices',
         apiUrlFn: () => `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices?show_system_indices=${showSystemIndices}`,
         reactNodeId: 'elasticsearchIndicesReact',
@@ -60,12 +63,14 @@ uiRoutes.when('/elasticsearch/indices', {
 
       this.renderReact = ({ clusterStatus, indices }) => {
         super.renderReact(
-          <ElasticsearchIndices
-            clusterStatus={clusterStatus}
-            indices={indices}
-            showSystemIndices={showSystemIndices}
-            toggleShowSystemIndices={toggleShowSystemIndices}
-          />
+          <I18nProvider>
+            <ElasticsearchIndices
+              clusterStatus={clusterStatus}
+              indices={indices}
+              showSystemIndices={showSystemIndices}
+              toggleShowSystemIndices={toggleShowSystemIndices}
+            />
+          </I18nProvider>
         );
       };
     }
