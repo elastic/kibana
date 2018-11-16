@@ -22,9 +22,8 @@ import moment from 'moment';
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
-} from 'plugins/ml/../common/util/anomaly_utils';
-import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
-import { TimeBuckets } from 'ui/time_buckets';
+} from '../../common/util/anomaly_utils';
+import { formatValue } from '../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
@@ -34,13 +33,14 @@ import {
   numTicksForDateFormat,
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
-} from 'plugins/ml/util/chart_utils';
+} from '../util/chart_utils';
+import { TimeBuckets } from 'ui/time_buckets';
+import { mlAnomaliesTableService } from '../components/anomalies_table/anomalies_table_service';
+import ContextChartMask from './context_chart_mask';
+import { findChartPointForAnomalyTime } from './timeseriesexplorer_utils';
+import { mlEscape } from '../util/string_utils';
+import { mlFieldFormatService } from '../services/field_format_service';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
-import ContextChartMask from 'plugins/ml/timeseriesexplorer/context_chart_mask';
-import { formatValue } from 'plugins/ml/formatters/format_value';
-import { mlEscape } from 'plugins/ml/util/string_utils';
-import { findChartPointForAnomalyTime } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
-import { mlAnomaliesTableService } from 'plugins/ml/components/anomalies_table/anomalies_table_service';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -75,7 +75,24 @@ function getSvgHeight() {
 
 export class TimeseriesChart extends React.Component {
   static propTypes = {
-    svgWidth: PropTypes.number
+    autoZoomDuration: PropTypes.number,
+    contextAggregationInterval: PropTypes.object,
+    contextChartData: PropTypes.array,
+    contextForecastData: PropTypes.array,
+    contextChartSelected: PropTypes.func,
+    detectorIndex: PropTypes.string,
+    focusAggregationInterval: PropTypes.object,
+    focusChartData: PropTypes.array,
+    focusForecastData: PropTypes.array,
+    modelPlotEnabled: PropTypes.bool,
+    selectedJob: PropTypes.object,
+    showForecast: PropTypes.bool,
+    showModelBounds: PropTypes.bool,
+    svgWidth: PropTypes.number,
+    swimlaneData: PropTypes.array,
+    timefilter: PropTypes.object,
+    zoomFrom: PropTypes.object,
+    zoomTo: PropTypes.object
   }
 
   componentWillUnmount() {
