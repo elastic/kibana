@@ -290,8 +290,7 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
       });
     },
 
-    waitForSelector(selector, opts = {}) {
-      const { silent = false } = opts;
+    waitForSelector(selector) {
       logger.debug(`PhantomDriver: waitForSelector ${selector}`);
 
       validateInstance();
@@ -305,13 +304,6 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
       })
         .then(() => {
           logger.debug(`Finished waiting for selector ${selector}`);
-        })
-        .catch(err => {
-          if (!silent) {
-            logger.error(`Failed in waiting for selector ${selector} on ${this.page.url}`);
-            logger.error(`Page text:\n${this.page.plainText}`);
-          }
-          throw err;
         });
     },
 
