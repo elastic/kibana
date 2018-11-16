@@ -30,7 +30,13 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiFieldNumber,
+  EuiFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -74,75 +80,89 @@ class PercentilesUi extends Component {
     if (model.mode === 'line') {
       optionsStyle.display = 'none';
     }
+    const labelStyle = { marginBottom: 0 };
     const htmlId = htmlIdGenerator(model.id);
     const selectedModeOption = modeOptions.find(option => {
       return model.mode === option.value;
     });
     return  (
-      <div className="vis_editor__percentiles-row" key={model.id}>
-        <div className="vis_editor__percentiles-content">
-          <input
-            aria-label={intl.formatMessage({ id: 'metrics.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
-            placeholder={intl.formatMessage({ id: 'metrics.percentile.percentilePlaceholder', defaultMessage: 'Percentile' })}
-            className="vis_editor__input-grows"
-            type="number"
-            step="1"
-            onChange={this.handleTextChange(model, 'value')}
-            value={model.value}
-          />
-          <label className="vis_editor__label" htmlFor={htmlId('mode')}>
-            <FormattedMessage
-              id="metrics.percentile.modeLabel"
-              defaultMessage="Mode"
+      <EuiFlexItem key={model.id}>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiFieldNumber
+              aria-label={intl.formatMessage({ id: 'metrics.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
+              placeholder={intl.formatMessage({ id: 'metrics.percentile.percentilePlaceholder', defaultMessage: 'Percentile' })}
+              step={1}
+              onChange={this.handleTextChange(model, 'value')}
+              value={Number(model.value)}
             />
-          </label>
-          <div className="vis_editor__row_item">
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>
+              <FormattedMessage
+                id="metrics.percentile.modeLabel"
+                defaultMessage="Mode:"
+              />
+            </EuiFormLabel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiComboBox
               isClearable={false}
               id={htmlId('mode')}
               options={modeOptions}
               selectedOptions={selectedModeOption ? [selectedModeOption] : []}
               onChange={this.handleTextChange(model, 'mode')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-          <label style={optionsStyle} className="vis_editor__label" htmlFor={htmlId('fillTo')}>
-            <FormattedMessage
-              id="metrics.percentile.fillToLabel"
-              defaultMessage="Fill To"
+          </EuiFlexItem>
+
+          <EuiFlexItem style={optionsStyle} grow={false}>
+            <EuiFormLabel style={labelStyle} htmlFor={htmlId('fillTo')}>
+              <FormattedMessage
+                id="metrics.percentile.fillToLabel"
+                defaultMessage="Fill to:"
+              />
+            </EuiFormLabel>
+          </EuiFlexItem>
+          <EuiFlexItem style={optionsStyle} grow={false}>
+            <EuiFieldNumber
+              id={htmlId('fillTo')}
+              step={1}
+              onChange={this.handleTextChange(model, 'percentile')}
+              value={Number(model.percentile)}
             />
-          </label>
-          <input
-            id={htmlId('fillTo')}
-            style={optionsStyle}
-            className="vis_editor__input-grows"
-            type="number"
-            step="1"
-            onChange={this.handleTextChange(model, 'percentile')}
-            value={model.percentile}
-          />
-          <label style={optionsStyle} className="vis_editor__label" htmlFor={htmlId('shade')}>
-            <FormattedMessage
-              id="metrics.percentile.shadeLabel"
-              defaultMessage="Shade (0 to 1)"
+          </EuiFlexItem>
+
+          <EuiFlexItem style={optionsStyle} grow={false}>
+            <EuiFormLabel style={labelStyle} htmlFor={htmlId('shade')}>
+              <FormattedMessage
+                id="metrics.percentile.shadeLabel"
+                defaultMessage="Shade (0 to 1):"
+              />
+            </EuiFormLabel>
+          </EuiFlexItem>
+          <EuiFlexItem style={optionsStyle} grow={false}>
+            <EuiFieldNumber
+              id={htmlId('shade')}
+              style={optionsStyle}
+              step={0.1}
+              onChange={this.handleTextChange(model, 'shade')}
+              value={Number(model.shade)}
             />
-          </label>
-          <input
-            id={htmlId('shade')}
-            style={optionsStyle}
-            className="vis_editor__input-grows"
-            type="number"
-            step="0.1"
-            onChange={this.handleTextChange(model, 'shade')}
-            value={model.shade}
-          />
-        </div>
-        <AddDeleteButtons
-          onAdd={handleAdd}
-          onDelete={handleDelete}
-          disableDelete={items.length < 2}
-        />
-      </div>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <AddDeleteButtons
+              onAdd={handleAdd}
+              onDelete={handleDelete}
+              disableDelete={items.length < 2}
+              responsive={false}
+            />
+          </EuiFlexItem>
+
+        </EuiFlexGroup>
+      </EuiFlexItem>
     );
   }
 
@@ -152,9 +172,9 @@ class PercentilesUi extends Component {
 
     const rows = model[name].map(this.renderRow);
     return (
-      <div className="vis_editor__percentiles">
+      <EuiFlexGroup direction="column" gutterSize="s">
         { rows }
-      </div>
+      </EuiFlexGroup>
     );
   }
 }
@@ -187,6 +207,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
     const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+    const htmlId = htmlIdGenerator();
 
     return (
       <AggRow
@@ -196,29 +217,30 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
       >
-        <div className="vis_editor__row_item">
-          <div className="vis_editor__agg_row-item">
-            <div className="vis_editor__row_item">
-              <div className="vis_editor__label">
-                <FormattedMessage
-                  id="metrics.percentile.aggregationLabel"
-                  defaultMessage="Aggregation"
-                />
-              </div>
-              <AggSelect
-                panelType={this.props.panel.type}
-                siblings={this.props.siblings}
-                value={model.type}
-                onChange={handleSelectChange('type')}
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiFormLabel htmlFor={htmlId('aggregation')}>
+              <FormattedMessage
+                id="metrics.percentile.aggregationLabel"
+                defaultMessage="Aggregation"
               />
-            </div>
-            <div className="vis_editor__row_item">
-              <div className="vis_editor__label">
-                <FormattedMessage
-                  id="metrics.percentile.fieldLabel"
-                  defaultMessage="Field"
-                />
-              </div>
+            </EuiFormLabel>
+            <AggSelect
+              id={htmlId('aggregation')}
+              panelType={this.props.panel.type}
+              siblings={this.props.siblings}
+              value={model.type}
+              onChange={handleSelectChange('type')}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('field')}
+              label={(<FormattedMessage
+                id="metrics.percentile.fieldLabel"
+                defaultMessage="Field"
+              />)}
+            >
               <FieldSelect
                 fields={fields}
                 type={model.type}
@@ -227,14 +249,18 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
                 value={model.field}
                 onChange={handleSelectChange('field')}
               />
-            </div>
-          </div>
-          <Percentiles
-            onChange={handleChange}
-            name="percentiles"
-            model={model}
-          />
-        </div>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        <Percentiles
+          onChange={handleChange}
+          name="percentiles"
+          model={model}
+        />
+
       </AggRow>
     );
   }

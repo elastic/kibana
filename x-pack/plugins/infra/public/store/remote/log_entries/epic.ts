@@ -11,7 +11,7 @@ import { exhaustMap, filter, map, withLatestFrom } from 'rxjs/operators';
 
 import { logFilterActions, logPositionActions } from '../..';
 import { pickTimeKey, TimeKey, timeKeyIsBetween } from '../../../../common/time';
-import { loadEntries, loadMoreEntries } from './actions';
+import { loadEntries, loadMoreEntries, loadNewerEntries } from './actions';
 import { loadEntriesEpic } from './operations/load';
 import { loadMoreEntriesEpic } from './operations/load_more';
 
@@ -96,17 +96,24 @@ export const createEntriesEffectsEpic = <State>(): Epic<
     map(pickTimeKey)
   );
 
-  const shouldLoadMoreAfter$ = action$.pipe(
-    filter(logPositionActions.reportVisiblePositions.match),
-    filter(({ payload: { pagesAfterEnd } }) => pagesAfterEnd < DESIRED_BUFFER_PAGES),
-    withLatestFrom(state$),
-    filter(
-      ([action, state]) =>
-        !selectIsAutoReloadingLogEntries(state) &&
-        !selectIsLoadingLogEntries(state) &&
-        selectHasMoreLogEntriesAfterEnd(state)
+  const shouldLoadMoreAfter$ = merge(
+    action$.pipe(
+      filter(logPositionActions.reportVisiblePositions.match),
+      filter(({ payload: { pagesAfterEnd } }) => pagesAfterEnd < DESIRED_BUFFER_PAGES),
+      withLatestFrom(state$, (action, state) => state),
+      filter(
+        state =>
+          !selectIsAutoReloadingLogEntries(state) &&
+          !selectIsLoadingLogEntries(state) &&
+          selectHasMoreLogEntriesAfterEnd(state)
+      )
     ),
-    map(([action, state]) => selectLogEntriesEnd(state)),
+    action$.pipe(
+      filter(loadNewerEntries.match),
+      withLatestFrom(state$, (action, state) => state)
+    )
+  ).pipe(
+    map(state => selectLogEntriesEnd(state)),
     filter(isNotNull),
     map(pickTimeKey)
   );

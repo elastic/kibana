@@ -22,40 +22,47 @@ import createSelectHandler from '../lib/create_select_handler';
 import GroupBySelect from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SplitByFilter = props => {
   const { onChange } = props;
   const defaults = { filter: '' };
   const model = { ...defaults, ...props.model };
+  const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
   return (
-    <div className="vis_editor__split-container">
-      <div className="vis_editor__label">
-        <FormattedMessage
-          id="metrics.splits.filter.groupByLabel"
-          defaultMessage="Group By"
-        />
-      </div>
-      <div className="vis_editor__split-selects">
-        <GroupBySelect
-          value={model.split_mode}
-          onChange={handleSelectChange('split_mode')}
-        />
-      </div>
-      <div className="vis_editor__label">
-        <FormattedMessage
-          id="metrics.splits.filter.queryStringLabel"
-          defaultMessage="Query String"
-        />
-      </div>
-      <input
-        className="vis_editor__split-filter"
-        value={model.filter}
-        onChange={handleTextChange('filter')}
-      />
-    </div>
+    <EuiFlexGroup alignItems="center">
+      <EuiFlexItem>
+        <EuiFormRow
+          id={htmlId('group')}
+          label={(<FormattedMessage
+            id="metrics.splits.filter.groupByLabel"
+            defaultMessage="Group By"
+          />)}
+        >
+          <GroupBySelect
+            value={model.split_mode}
+            onChange={handleSelectChange('split_mode')}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          id={htmlId('query')}
+          label={(<FormattedMessage
+            id="metrics.splits.filter.queryStringLabel"
+            defaultMessage="Query String"
+          />)}
+        >
+          <EuiFieldText
+            value={model.filter}
+            onChange={handleTextChange('filter')}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

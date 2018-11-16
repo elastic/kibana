@@ -169,7 +169,8 @@ export class UiSettingsService {
 
   async _read(options = {}) {
     const {
-      ignore401Errors = false
+      ignore401Errors = false,
+      autoCreateOrUpgradeIfMissing = true
     } = options;
 
     const {
@@ -189,7 +190,7 @@ export class UiSettingsService {
       const resp = await this._savedObjectsClient.get(this._type, this._id);
       return resp.attributes;
     } catch (error) {
-      if (isNotFoundError(error)) {
+      if (isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
           savedObjectsClient: this._savedObjectsClient,
           version: this._id,
@@ -205,7 +206,10 @@ export class UiSettingsService {
         });
 
         if (!failedUpgradeAttributes) {
-          return await this._read(options);
+          return await this._read({
+            ...options,
+            autoCreateOrUpgradeIfMissing: false
+          });
         }
 
         return failedUpgradeAttributes;

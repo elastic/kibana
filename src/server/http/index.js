@@ -28,14 +28,12 @@ import { setupBasePathProvider } from './setup_base_path_provider';
 import { setupXsrf } from './xsrf';
 
 export default async function (kbnServer, server, config) {
-  kbnServer.server = new Hapi.Server();
+  kbnServer.server = new Hapi.Server(kbnServer.core.serverOptions);
   server = kbnServer.server;
-
-  server.connection(kbnServer.core.serverOptions);
 
   setupBasePathProvider(server, config);
 
-  registerHapiPlugins(server);
+  await registerHapiPlugins(server);
 
   // provide a simple way to expose static directories
   server.decorate('server', 'exposeStaticDir', function (routePath, dirPath) {
@@ -63,7 +61,7 @@ export default async function (kbnServer, server, config) {
   });
 
   // attach the app name to the server, so we can be sure we are actually talking to kibana
-  server.ext('onPreResponse', function (req, reply) {
+  server.ext('onPreResponse', function onPreResponse(req, h) {
     const response = req.response;
 
     const customHeaders = {
@@ -82,32 +80,34 @@ export default async function (kbnServer, server, config) {
       });
     }
 
-    return reply.continue();
+    return h.continue;
   });
 
   server.route({
     path: '/',
     method: 'GET',
-    handler(req, reply) {
+    handler(req, h) {
       const basePath = req.getBasePath();
       const defaultRoute = config.get('server.defaultRoute');
-      reply.redirect(`${basePath}${defaultRoute}`);
+      return h.redirect(`${basePath}${defaultRoute}`);
     }
   });
 
   server.route({
     method: 'GET',
     path: '/{p*}',
-    handler: function (req, reply) {
+    handler: function (req, h) {
       const path = req.path;
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
-        return reply(Boom.notFound());
+        throw Boom.notFound();
       }
+
       const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
-      return reply.redirect(format({
-        search: req.url.search,
-        pathname: pathPrefix + path.slice(0, -1),
-      }))
+      return h
+        .redirect(format({
+          search: req.url.search,
+          pathname: pathPrefix + path.slice(0, -1),
+        }))
         .permanent(true);
     }
   });

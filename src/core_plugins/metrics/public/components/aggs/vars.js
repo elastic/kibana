@@ -23,6 +23,7 @@ import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import * as collectionActions from '../lib/collection_actions';
 import MetricSelect from './metric_select';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 
 class CalculationVarsUi extends Component {
@@ -46,34 +47,36 @@ class CalculationVarsUi extends Component {
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
     const { intl } = this.props;
     return  (
-      <div className="vis_editor__calc_vars-row" key={row.id} data-test-subj="varRow">
-        <div className="vis_editor__calc_vars-name">
-          <input
-            aria-label={intl.formatMessage({ id: 'metrics.vars.variableNameAriaLabel', defaultMessage: 'Variable name' })}
-            placeholder={intl.formatMessage({ id: 'metrics.vars.variableNamePlaceholder', defaultMessage: 'Variable Name' })}
-            className="vis_editor__input-grows-100"
-            type="text"
-            onChange={this.handleChange(row, 'name')}
-            value={row.name}
-          />
-        </div>
-        <div className="vis_editor__calc_vars-var">
-          <MetricSelect
-            onChange={this.handleChange(row, 'field')}
-            metrics={this.props.metrics}
-            metric={this.props.model}
-            value={row.field}
-            includeSiblings={this.props.includeSiblings}
-          />
-        </div>
-        <div className="vis_editor__calc_vars-control">
-          <AddDeleteButtons
-            onAdd={handleAdd}
-            onDelete={handleDelete}
-            disableDelete={items.length < 2}
-          />
-        </div>
-      </div>
+      <EuiFlexItem key={row.id} data-test-subj="varRow">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+          <EuiFlexItem>
+            <EuiFieldText
+              className="tvbAggs__varName"
+              aria-label={intl.formatMessage({ id: 'metrics.vars.variableNameAriaLabel', defaultMessage: 'Variable name' })}
+              placeholder={intl.formatMessage({ id: 'metrics.vars.variableNamePlaceholder', defaultMessage: 'Variable Name' })}
+              onChange={this.handleChange(row, 'name')}
+              value={row.name}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem className="tvbAggs__varMetricWrapper">
+            <MetricSelect
+              onChange={this.handleChange(row, 'field')}
+              metrics={this.props.metrics}
+              metric={this.props.model}
+              value={row.field}
+              includeSiblings={this.props.includeSiblings}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AddDeleteButtons
+              onAdd={handleAdd}
+              onDelete={handleDelete}
+              disableDelete={items.length < 2}
+              responsive={false}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     );
   }
 
@@ -82,9 +85,9 @@ class CalculationVarsUi extends Component {
     if (!model[name]) return (<div/>);
     const rows = model[name].map(this.renderRow);
     return (
-      <div className="vis_editor__calc_vars">
+      <EuiFlexGroup direction="column" gutterSize="s">
         { rows }
-      </div>
+      </EuiFlexGroup>
     );
   }
 

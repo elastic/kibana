@@ -24,12 +24,11 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import FieldSelect from '../aggs/field_select';
 import MetricSelect from '../aggs/metric_select';
-import {
-  EuiComboBox,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSpacer } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const SplitByTermsUi = props => {
+  const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(props.onChange);
   const handleSelectChange = createSelectHandler(props.onChange);
   const { indexPattern, intl } = props;
@@ -60,77 +59,94 @@ const SplitByTermsUi = props => {
   });
 
   return (
-    <div className="vis_editor__split-container">
-      <div className="vis_editor__label">
-        <FormattedMessage
-          id="metrics.splits.terms.groupByLabel"
-          defaultMessage="Group By"
-        />
-      </div>
-      <div className="vis_editor__split-selects">
-        <GroupBySelect
-          value={model.split_mode}
-          onChange={handleSelectChange('split_mode')}
-        />
-      </div>
-      <div className="vis_editor__label">
-        <FormattedMessage
-          id="metrics.splits.terms.byLabel"
-          defaultMessage="By"
-        />
-      </div>
-      <div className="vis_editor__item">
-        <FieldSelect
-          indexPattern={indexPattern}
-          onChange={handleSelectChange('terms_field')}
-          value={model.terms_field}
-          fields={props.fields}
-        />
-      </div>
-      <div className="vis_editor__label">
-        <FormattedMessage
-          id="metrics.splits.terms.topLabel"
-          defaultMessage="Top"
-        />
-      </div>
-      <input
-        placeholder={intl.formatMessage({ id: 'metrics.splits.terms.top.sizePlaceholder', defaultMessage: 'Size…' })}
-        type="number"
-        value={model.terms_size}
-        className="vis_editor__split-term_count"
-        onChange={handleTextChange('terms_size')}
-      />
-      <div className="vis_editor__label">
-        <FormattedMessage
-          id="metrics.splits.terms.orderByLabel"
-          defaultMessage="Order By"
-        />
-      </div>
-      <div className="vis_editor__split-aggs">
-        <MetricSelect
-          metrics={metrics}
-          clearable={false}
-          additionalOptions={[defaultCount, terms]}
-          onChange={handleSelectChange('terms_order_by')}
-          restrict="basic"
-          value={model.terms_order_by}
-        />
-      </div>
-      <div className="vis_editor__label">
-        <FormattedMessage
-          id="metrics.splits.terms.directionLabel"
-          defaultMessage="Direction"
-        />
-      </div>
-      <div className="vis_editor__split-aggs">
-        <EuiComboBox
-          isClearable={false}
-          options={dirOptions}
-          selectedOptions={selectedDirectionOption ? [selectedDirectionOption] : []}
-          onChange={handleSelectChange('terms_direction')}
-          singleSelection={true}
-        />
-      </div>
+    <div>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('group')}
+            label={(<FormattedMessage
+              id="metrics.splits.terms.groupByLabel"
+              defaultMessage="Group By"
+            />)}
+          >
+            <GroupBySelect
+              value={model.split_mode}
+              onChange={handleSelectChange('split_mode')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('by')}
+            label={(<FormattedMessage
+              id="metrics.splits.terms.byLabel"
+              defaultMessage="By"
+            />)}
+          >
+            <FieldSelect
+              indexPattern={indexPattern}
+              onChange={handleSelectChange('terms_field')}
+              value={model.terms_field}
+              fields={props.fields}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('top')}
+            label={(<FormattedMessage
+              id="metrics.splits.terms.topLabel"
+              defaultMessage="Top"
+            />)}
+          >
+            <EuiFieldNumber
+              placeholder={intl.formatMessage({ id: 'metrics.splits.terms.top.sizePlaceholder', defaultMessage: 'Size' })}
+              value={Number(model.terms_size)}
+              onChange={handleTextChange('terms_size')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('order')}
+            label={(<FormattedMessage
+              id="metrics.splits.terms.orderByLabel"
+              defaultMessage="Order By"
+            />)}
+          >
+            <MetricSelect
+              metrics={metrics}
+              clearable={false}
+              additionalOptions={[defaultCount, terms]}
+              onChange={handleSelectChange('terms_order_by')}
+              restrict="basic"
+              value={model.terms_order_by}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('direction')}
+            label={(<FormattedMessage
+              id="metrics.splits.terms.directionLabel"
+              defaultMessage="Direction"
+            />)}
+          >
+            <EuiComboBox
+              isClearable={false}
+              options={dirOptions}
+              selectedOptions={selectedDirectionOption ? [selectedDirectionOption] : []}
+              onChange={handleSelectChange('terms_direction')}
+              singleSelection={true}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

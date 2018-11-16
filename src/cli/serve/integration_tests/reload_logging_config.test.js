@@ -22,8 +22,7 @@ import { writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
 import es from 'event-stream';
-import stripAnsi from 'strip-ansi';
-import { getConfigFromFiles } from '../../../core/server/config';
+import { getConfigFromFiles } from '../../../core/server/config/read_config';
 
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
 const kibanaPath = follow('../../../../scripts/kibana.js');
@@ -42,19 +41,7 @@ function setLoggingJson(enabled) {
   writeFileSync(testConfigFile, yaml);
 }
 
-const prepareJson = obj => ({
-  ...obj,
-  pid: '## PID ##',
-  '@timestamp': '## @timestamp ##'
-});
-
-const prepareLogLine = str =>
-  stripAnsi(str.replace(
-    /\[\d{2}:\d{2}:\d{2}.\d{3}\]/,
-    '[## timestamp ##]'
-  ));
-
-describe.skip('Server logging configuration', function () {
+describe('Server logging configuration', function () {
   let child;
   let isJson;
 
@@ -80,7 +67,7 @@ describe.skip('Server logging configuration', function () {
     });
   } else {
     it('should be reloadable via SIGHUP process signaling', function (done) {
-      expect.assertions(1);
+      expect.assertions(3);
 
       child = spawn('node', [kibanaPath, '--config', testConfigFile]);
 
@@ -88,12 +75,15 @@ describe.skip('Server logging configuration', function () {
         done(new Error(`error in child process while attempting to reload config. ${err.stack || err.message || err}`));
       });
 
-      const lines = [];
+      let sawJson = false;
+      let sawNonjson = false;
 
       child.on('exit', _code => {
         const code = _code === null ? 0 : _code;
 
-        expect({ code, lines }).toMatchSnapshot();
+        expect(code).toEqual(0);
+        expect(sawJson).toEqual(true);
+        expect(sawNonjson).toEqual(true);
         done();
       });
 
@@ -107,23 +97,18 @@ describe.skip('Server logging configuration', function () {
 
           if (isJson) {
             const data = JSON.parse(line);
-            lines.push(prepareJson(data));
+            sawJson = true;
 
             if (data.tags.includes('listening')) {
               switchToPlainTextLog();
             }
           } else if (line.startsWith('{')) {
             // We have told Kibana to stop logging json, but it hasn't completed
-            // the switch yet, so we verify the messages that are logged while
-            // switching over.
-
-            const data = JSON.parse(line);
-            lines.push(prepareJson(data));
+            // the switch yet, so we ignore before switching over.
           } else {
-            // Kibana has successfully stopped logging json, so we verify the
-            // log line and kill the server.
+            // Kibana has successfully stopped logging json, so kill the server.
 
-            lines.push(prepareLogLine(line));
+            sawNonjson = true;
 
             child.kill();
             child = undefined;

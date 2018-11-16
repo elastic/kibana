@@ -67,14 +67,16 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
         const search = partial ? `${partial}*` : '*';
         const resp = await savedObjectsClient.find({
           type: 'index-pattern',
-          fields: ['title'],
+          fields: ['title', 'type'],
           search: `${search}`,
           search_fields: ['title'],
           perPage: 25
         });
-        return resp.savedObjects.map(savedObject => {
-          return { name: savedObject.attributes.title };
-        });
+        return resp.savedObjects
+          .filter(savedObject => !savedObject.get('type'))
+          .map(savedObject => {
+            return { name: savedObject.attributes.title };
+          });
       },
       metric: async function (partial, functionArgs) {
         if (!partial || !partial.includes(':')) {

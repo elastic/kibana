@@ -36,6 +36,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async insert(user: FrameworkUser, beat: CMBeat) {
+    beat.config_status = 'UNKNOWN';
     const body = {
       beat,
       type: 'beat',
@@ -70,7 +71,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     const ids = beatIds.map(beatId => `beat:${beatId}`);
 
     const params = {
-      _sourceInclude: ['beat.id', 'beat.verified_on'],
+      _sourceIncludes: ['beat.id', 'beat.verified_on'],
       body: {
         ids,
       },
@@ -230,6 +231,7 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       refresh: 'wait_for',
       type: '_doc',
     });
+    // console.log(response.items[0].update.error);
     return _get<any>(response, 'items', []).map((item: any, resultIdx: any) => ({
       idxInRequest: assignments[resultIdx].idxInRequest,
       result: item.update.result,

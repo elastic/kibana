@@ -66,9 +66,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             </EuiTitle>
             <EuiText color="subdued">
               <p>
-                Tags will apply the configurations below to all beats assigned this tag.
-                <br />
-                The tag type defines the options available.
+                A tag is a group of configuration blocks that you can apply to one or more Beats.
               </p>
             </EuiText>
             <div>
@@ -109,13 +107,13 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
         >
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Tag Configurations</h3>
+              <h3>Configuration blocks</h3>
             </EuiTitle>
             <EuiText color="subdued">
               <p>
-                Tags can contain multiple configurations. These configurations can repeat or mix
-                types as necessary. For example, you may utilize three metricbeat configurations
-                alongside one input and filebeat configuration.
+                A tag can have configuration blocks for different types of Beats. For example, a tag
+                can have two Metricbeat configuration blocks and one Filebeat input configuration
+                block.
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -145,7 +143,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   this.setState({ showFlyout: true });
                 }}
               >
-                Add configuration
+                Add configuration block
               </EuiButton>
             </div>
           </EuiFlexItem>
@@ -156,7 +154,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             <EuiHorizontalRule />
 
             <EuiTitle size="xs">
-              <h3>Attached Beats</h3>
+              <h3>Beats with this tag</h3>
             </EuiTitle>
             <Table
               assignmentOptions={{

@@ -55,8 +55,8 @@ Append `request.getBasePath()` to any absolute URL path.
 const basePath = server.config().get('server.basePath');
 server.route({
   path: '/redirect',
-  handler(request, reply) {
-    reply.redirect(`${request.getBasePath()}/otherLocation`);
+  handler(request, h) {
+    return h.redirect(`${request.getBasePath()}/otherLocation`);
   }
 });
 -----------

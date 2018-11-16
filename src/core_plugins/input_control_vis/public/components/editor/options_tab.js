@@ -71,7 +71,7 @@ export class OptionsTab extends Component {
         >
           <EuiSwitch
             label={<FormattedMessage
-              id="inputControl.editor.optionsTab.useTimeFielterLabel"
+              id="inputControl.editor.optionsTab.useTimeFilterLabel"
               defaultMessage="Use time filter"
             />}
             checked={this.props.editorState.params.useTimeFilter}
@@ -85,7 +85,7 @@ export class OptionsTab extends Component {
         >
           <EuiSwitch
             label={<FormattedMessage
-              id="inputControl.editor.optionsTab.pinFieltersLabel"
+              id="inputControl.editor.optionsTab.pinFiltersLabel"
               defaultMessage="Pin filters to global state"
             />}
             checked={this.props.editorState.params.pinFilters}

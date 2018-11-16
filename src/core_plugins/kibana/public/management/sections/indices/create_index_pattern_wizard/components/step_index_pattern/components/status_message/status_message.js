@@ -35,6 +35,7 @@ export const StatusMessage = ({
   },
   isIncludingSystemIndices,
   query,
+  showSystemIndicies,
 }) => {
   let statusIcon;
   let statusMessage;
@@ -58,7 +59,7 @@ export const StatusMessage = ({
         </span>
       );
     }
-    else if (!isIncludingSystemIndices) {
+    else if (!isIncludingSystemIndices && showSystemIndicies) {
       statusMessage = (
         <span>
           <FormattedMessage
@@ -70,7 +71,6 @@ export const StatusMessage = ({
       );
     }
     else {
-      // This should never really happen but let's handle it just in case
       statusMessage = (
         <span>
           <FormattedMessage

@@ -21,57 +21,61 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 function AggRowUi(props) {
-  let iconClassName = 'fa fa-eye-slash';
-  let iconRowClassName = 'vis_editor__agg_row-icon';
+  let iconType = 'eyeClosed';
+  let iconColor = 'subdued';
   const last = _.last(props.siblings);
   const { intl } = props;
 
   if (last.id === props.model.id) {
-    iconClassName = 'fa fa-eye';
-    iconRowClassName += ' last';
+    iconType = 'eye';
+    iconColor = 'text';
   }
 
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
-      <div>
+      <EuiFlexItem grow={false}>
         <EuiToolTip
-          content={
-            <FormattedMessage
-              id="metrics.aggRow.sortTooltip"
-              defaultMessage="Sort"
-            />
-          }
+          content={(<FormattedMessage
+            id="metrics.aggRow.dragToSortTooltip"
+            defaultMessage="Drag to sort"
+          />)}
         >
-          <div className="vis_editor__agg_sort thor__button-outlined-default sm">
-            <i className="fa fa-sort" />
-          </div>
+          <EuiButtonIcon
+            className="tvbAggRow__sortHandle"
+            aria-label={intl.formatMessage({ id: 'metrics.aggRow.dragToSortAriaLabel', defaultMessage: 'Drag to sort' })}
+            iconType="grab"
+          />
         </EuiToolTip>
-      </div>
+      </EuiFlexItem>
     );
   }
 
   return (
-    <div className="vis_editor__agg_row">
-      <div className="vis_editor__agg_row-item" data-test-subj="aggRow">
-        <div className={iconRowClassName}>
-          <i className={iconClassName} />
-        </div>
-        {props.children}
-        { dragHandle }
-        <AddDeleteButtons
-          testSubj="addMetric"
-          addTooltip={intl.formatMessage({ id: 'metrics.aggRow.addMetricButtonTooltip', defaultMessage: 'Add Metric' })}
-          deleteTooltip={intl.formatMessage({ id: 'metrics.aggRow.deleteMetricButtonTooltip', defaultMessage: 'Delete Metric' })}
-          onAdd={props.onAdd}
-          onDelete={props.onDelete}
-          disableDelete={props.disableDelete}
-        />
-      </div>
+    <div className="tvbAggRow">
+      <EuiFlexGroup data-test-subj="aggRow" gutterSize="s" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon className="tvbAggRow__visibilityIcon" type={iconType} color={iconColor} />
+        </EuiFlexItem>
+        <EuiFlexItem className="tvbAggRow__children">
+          {props.children}
+        </EuiFlexItem>
+        {dragHandle}
+        <EuiFlexItem grow={false}>
+          <AddDeleteButtons
+            testSubj="addMetric"
+            addTooltip={intl.formatMessage({ id: 'metrics.aggRow.addMetricButtonTooltip', defaultMessage: 'Add metric' })}
+            deleteTooltip={intl.formatMessage({ id: 'metrics.aggRow.deleteMetricButtonTooltip', defaultMessage: 'Delete metric' })}
+            onAdd={props.onAdd}
+            onDelete={props.onDelete}
+            disableDelete={props.disableDelete}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 }

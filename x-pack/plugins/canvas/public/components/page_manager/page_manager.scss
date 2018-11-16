@@ -3,16 +3,9 @@
     position: relative;
   }
 
-  .canvasPageManager__pageList {
-    @include euiScrollBar;
-    display: flex;
-    overflow-x: auto;
-    overflow-y: hidden;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+  .canvasPageManager__pages,
+  .canvasPageManager__addPage {
+    height: 144px;
   }
 
   .canvasPageManager--trayPop > div {
@@ -26,6 +19,18 @@
     }
   }
 
+  .canvasPageManager__pageList {
+    @include euiScrollBar;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+
   .canvasPageManager__addPage {
     width: $euiSizeXXL + $euiSize;
     background: $euiColorSecondary;
@@ -33,7 +38,6 @@
     opacity: 0;
     animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;
     animation-fill-mode: forwards;
-    height: 144px;
   }
 
   .canvasPageManager__addPageTip {

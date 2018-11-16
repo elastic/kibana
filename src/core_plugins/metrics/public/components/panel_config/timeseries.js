@@ -29,6 +29,17 @@ import YesNo from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -122,189 +133,240 @@ class TimeseriesPanelConfigUi extends Component {
       );
     } else {
       view = (
-        <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.axisMinLabel"
-                defaultMessage="Axis Min"
-              />
-            </label>
-            <input
-              id={htmlId('axisMin')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('axis_min')}
-              value={model.axis_min}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.axisMaxLabel"
-                defaultMessage="Axis Max"
-              />
-            </label>
-            <input
-              id={htmlId('axisMax')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('axis_max')}
-              value={model.axis_max}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.axisPositionLabel"
-                defaultMessage="Axis Position"
-              />
-            </label>
-            <div className="vis_editor__row_item">
-              <EuiComboBox
-                isClearable={false}
-                id={htmlId('axisPos')}
-                options={positionOptions}
-                selectedOptions={selectedPositionOption ? [selectedPositionOption] : []}
-                onChange={handleSelectChange('axis_position')}
-                singleSelection={true}
-              />
-            </div>
-            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.axisScaleLabel"
-                defaultMessage="Axis Scale"
-              />
-            </label>
-            <div className="vis_editor__row_item">
-              <EuiComboBox
-                isClearable={false}
-                id={htmlId('axisScale')}
-                options={scaleOptions}
-                selectedOptions={selectedAxisScaleOption ? [selectedAxisScaleOption] : []}
-                onChange={handleSelectChange('axis_scale')}
-                singleSelection={true}
-              />
-            </div>
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.backgroundColorLabel"
-                defaultMessage="Background Color"
-              />
-            </div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}
-            />
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.showLegendLabel"
-                defaultMessage="Show Legend"
-              />
-            </div>
-            <YesNo
-              value={model.show_legend}
-              name="show_legend"
+        <div className="tvbPanelConfig__container">
+          <EuiPanel>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="metrics.timeseries.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+
+            <IndexPattern
+              fields={this.props.fields}
+              model={this.props.model}
               onChange={this.props.onChange}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('legendPos')}>
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.legendPositionLabel"
-                defaultMessage="Legend Position"
-              />
-            </label>
-            <div className="vis_editor__row_item">
-              <EuiComboBox
-                isClearable={false}
-                id={htmlId('legendPos')}
-                options={legendPositionOptions}
-                selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
-                onChange={handleSelectChange('legend_position')}
-                singleSelection={true}
-              />
-            </div>
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.displayGridnLabel"
-                defaultMessage="Display Grid"
-              />
-            </div>
-            <YesNo
-              value={model.show_grid}
-              name="show_grid"
-              onChange={this.props.onChange}
-            />
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.panelFilterLabel"
-                defaultMessage="Panel Filter"
-              />
-            </label>
-            <input
-              id={htmlId('panelFilter')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.timeseries.optionsTab.ignoreGlobalFilterLabel"
-                defaultMessage="Ignore Global Filter"
-              />
-            </div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
-              onChange={this.props.onChange}
-            />
-          </div>
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('panelFilter')}
+                  label={(<FormattedMessage
+                    id="metrics.timeseries.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('filter')}
+                    value={model.filter}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="metrics.timeseries.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_global_filter}
+                  name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          <EuiSpacer />
+
+          <EuiPanel>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="metrics.timeseries.optionsTab.styleLabel"
+                  defaultMessage="Style"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('axisMin')}
+                  label={(<FormattedMessage
+                    id="metrics.timeseries.optionsTab.axisMinLabel"
+                    defaultMessage="Axis min"
+                  />)}
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('axis_min')}
+                    value={model.axis_min}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('axisMax')}
+                  label={(<FormattedMessage
+                    id="metrics.timeseries.optionsTab.axisMaxLabel"
+                    defaultMessage="Axis max"
+                  />)}
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('axis_max')}
+                    value={model.axis_max}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('axisPos')}
+                  label={(<FormattedMessage
+                    id="metrics.timeseries.optionsTab.axisPositionLabel"
+                    defaultMessage="Axis position"
+                  />)}
+                >
+                  <EuiComboBox
+                    isClearable={false}
+                    options={positionOptions}
+                    selectedOptions={selectedPositionOption ? [selectedPositionOption] : []}
+                    onChange={handleSelectChange('axis_position')}
+                    singleSelection={{ asPlainText: true }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('axisScale')}
+                  label={(<FormattedMessage
+                    id="metrics.timeseries.optionsTab.axisScaleLabel"
+                    defaultMessage="Axis scale"
+                  />)}
+                >
+                  <EuiComboBox
+                    isClearable={false}
+                    options={scaleOptions}
+                    selectedOptions={selectedAxisScaleOption ? [selectedAxisScaleOption] : []}
+                    onChange={handleSelectChange('axis_scale')}
+                    singleSelection={{ asPlainText: true }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="metrics.timeseries.optionsTab.backgroundColorLabel"
+                    defaultMessage="Background color:"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ColorPicker
+                  onChange={this.props.onChange}
+                  name="background_color"
+                  value={model.background_color}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="metrics.timeseries.optionsTab.showLegendLabel"
+                    defaultMessage="Show legend?"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <YesNo
+                  value={model.show_legend}
+                  name="show_legend"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('legendPos')}>
+                  <FormattedMessage
+                    id="metrics.timeseries.optionsTab.legendPositionLabel"
+                    defaultMessage="Legend position"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiComboBox
+                  isClearable={false}
+                  id={htmlId('legendPos')}
+                  options={legendPositionOptions}
+                  selectedOptions={selectedLegendPosOption ? [selectedLegendPosOption] : []}
+                  onChange={handleSelectChange('legend_position')}
+                  singleSelection={{ asPlainText: true }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="metrics.timeseries.optionsTab.displayGridnLabel"
+                    defaultMessage="Display grid"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <YesNo
+                  value={model.show_grid}
+                  name="show_grid"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
         </div>
       );
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
             <FormattedMessage
               id="metrics.timeseries.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
           >
             <FormattedMessage
               id="metrics.timeseries.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel Options"
             />
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'annotations'}
-            className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'annotations'}
             onClick={() => this.switchTab('annotations')}
           >
             <FormattedMessage
               id="metrics.timeseries.annotationsTab.annotationsButtonLabel"
               defaultMessage="Annotations"
             />
-          </button>
-        </div>
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );
@@ -317,7 +379,6 @@ TimeseriesPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData: PropTypes.object,
 };
 
 const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);

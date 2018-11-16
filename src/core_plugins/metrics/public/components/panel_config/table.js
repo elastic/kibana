@@ -26,7 +26,22 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiCode,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 class TablePanelConfig extends Component {
@@ -60,62 +75,77 @@ class TablePanelConfig extends Component {
     if (selectedTab === 'data') {
       view = (
         <div>
-          <div className="vis_editor__table-pivot-fields">
-            <div className="vis_editor__container">
-              <div className="vis_editor__vis_config-row">
+          <div className="tvbPanelConfig__container">
+            <EuiPanel>
+              <EuiText>
                 <p>
                   <FormattedMessage
                     id="metrics.table.dataTab.defineFieldDescription"
                     defaultMessage="For the table visualization you need to define a field to group by using a terms aggregation."
                   />
                 </p>
-              </div>
-              <div className="vis_editor__vis_config-row">
-                <label className="vis_editor__label" htmlFor={htmlId('field')}>
-                  <FormattedMessage
-                    id="metrics.table.dataTab.groupByFieldLabel"
-                    defaultMessage="Group By Field"
-                  />
-                </label>
-                <div className="vis_editor__row_item" data-test-subj="groupByField">
-                  <FieldSelect
+              </EuiText>
+              <EuiSpacer size="m" />
+
+              <EuiFlexGroup responsive={false} wrap={true}>
+                <EuiFlexItem data-test-subj="groupByField">
+                  <EuiFormRow
                     id={htmlId('field')}
-                    fields={this.props.fields}
-                    value={model.pivot_id}
-                    indexPattern={model.index_pattern}
-                    onChange={handleSelectChange('pivot_id')}
-                  />
-                </div>
-                <label className="vis_editor__label" htmlFor={htmlId('pivotLabelInput')}>
-                  <FormattedMessage
-                    id="metrics.table.dataTab.columnLabel"
-                    defaultMessage="Column Label"
-                  />
-                </label>
-                <input
-                  id={htmlId('pivotLabelInput')}
-                  className="vis_editor__input-grows"
-                  data-test-subj="columnLabelName"
-                  type="text"
-                  onChange={handleTextChange('pivot_label')}
-                  value={model.pivot_label}
-                />
-                <label className="vis_editor__label" htmlFor={htmlId('pivotRowsInput')}>
-                  <FormattedMessage
-                    id="metrics.table.dataTab.rowsLabel"
-                    defaultMessage="Rows"
-                  />
-                </label>
-                <input
-                  id={htmlId('pivotRowsInput')}
-                  className="vis_editor__input-number"
-                  type="number"
-                  onChange={handleTextChange('pivot_rows')}
-                  value={model.pivot_rows}
-                />
-              </div>
-            </div>
+                    label={(<FormattedMessage
+                      id="metrics.table.dataTab.groupByFieldLabel"
+                      defaultMessage="Group by field"
+                    />)}
+                  >
+                    <FieldSelect
+                      fields={this.props.fields}
+                      value={model.pivot_id}
+                      indexPattern={model.index_pattern}
+                      onChange={handleSelectChange('pivot_id')}
+                      fullWidth
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    id={htmlId('pivotLabelInput')}
+                    label={(<FormattedMessage
+                      id="metrics.table.dataTab.columnLabel"
+                      defaultMessage="Column label"
+                    />)}
+                    fullWidth
+                  >
+                    <EuiFieldText
+                      data-test-subj="columnLabelName"
+                      onChange={handleTextChange('pivot_label')}
+                      value={model.pivot_label}
+                      fullWidth
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow
+                    id={htmlId('pivotRowsInput')}
+                    label={(<FormattedMessage
+                      id="metrics.table.dataTab.rowsLabel"
+                      defaultMessage="Rows"
+                    />)}
+                  >
+                    {/*
+                      EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                      Should it be number or string?
+                    */}
+                    <input
+                      className="tvbAgg__input"
+                      type="number"
+                      onChange={handleTextChange('pivot_rows')}
+                      value={model.pivot_rows}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </div>
+
           <SeriesEditor
             fields={this.props.fields}
             model={this.props.model}
@@ -126,79 +156,101 @@ class TablePanelConfig extends Component {
       );
     } else {
       view = (
-        <div className="vis_editor__container">
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('drilldownInput')}>
-              <FormattedMessage
-                id="metrics.table.optionsTab.itemUrlLabel"
-                defaultMessage="Item Url (This supports mustache templating. {key} is set to the term)"
-                values={{ key: (<code>{'{{key}}'}</code>) }}
-              />
-            </label>
-            <input
+        <div className="tvbPanelConfig__container">
+          <EuiPanel>
+            <EuiTitle size="s"><span>Data</span></EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiFormRow
               id={htmlId('drilldownInput')}
-              className="vis_editor__input-grows"
-              onChange={handleTextChange('drilldown_url')}
-              value={model.drilldown_url}
-            />
-          </div>
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilterInput')}>
-              <FormattedMessage
-                id="metrics.table.optionsTab.panelFilterLabel"
-                defaultMessage="Panel Filter"
+              label={(<FormattedMessage
+                id="metrics.table.optionsTab.itemUrlLabel"
+                defaultMessage="Item url"
+              />)}
+              helpText={
+                <span>
+                  <FormattedMessage
+                    id="metrics.table.optionsTab.itemUrlDescription"
+                    defaultMessage="This supports mustache templating. {key} is set to the term."
+                    values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
+                  />
+                </span>
+              }
+            >
+              <EuiFieldText
+                onChange={handleTextChange('drilldown_url')}
+                value={model.drilldown_url}
               />
-            </label>
-            <input
-              id={htmlId('panelFilterInput')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('globalFilterOption')}>
-              <FormattedMessage
-                id="metrics.table.optionsTab.ignoreGlobalFilterLabel"
-                defaultMessage="Ignore Global Filter"
-              />
-            </label>
-            <YesNo
-              id={htmlId('globalFilterOption')}
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
+            </EuiFormRow>
+
+            <EuiHorizontalRule />
+
+            <IndexPattern
+              fields={this.props.fields}
+              model={this.props.model}
               onChange={this.props.onChange}
             />
-          </div>
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('panelFilterInput')}
+                  label={(<FormattedMessage
+                    id="metrics.table.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('filter')}
+                    value={model.filter}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel htmlFor={htmlId('globalFilterOption')}>
+                  <FormattedMessage
+                    id="metrics.table.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  id={htmlId('globalFilterOption')}
+                  value={model.ignore_global_filter}
+                  name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
         </div>
       );
     }
     return (
       <div>
-        <div className="kbnTabs">
-          <div
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
             <FormattedMessage
               id="metrics.table.dataTab.columnsButtonLabel"
               defaultMessage="Columns"
             />
-          </div>
-          <div
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
           >
             <FormattedMessage
               id="metrics.table.optionsTab.panelOptionsButtonLabel"
-              defaultMessage="Panel Options"
+              defaultMessage="Panel options"
             />
-          </div>
-        </div>
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );
@@ -210,7 +262,6 @@ TablePanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData: PropTypes.object,
 };
 
 export default TablePanelConfig;

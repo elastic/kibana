@@ -16,6 +16,7 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agents_tags/assignments',
   licenseRequired: true,
+  requiredRoles: ['beats_admin'],
   config: {
     validate: {
       payload: Joi.object({
@@ -28,15 +29,15 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest, reply: any) => {
+  handler: async (request: FrameworkRequest) => {
     const { assignments }: { assignments: BeatsTagAssignment[] } = request.payload;
 
     try {
       const response = await libs.beats.assignTagsToBeats(request.user, assignments);
-      reply(response);
+      return response;
     } catch (err) {
       // TODO move this to kibana route thing in adapter
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
   },
 });

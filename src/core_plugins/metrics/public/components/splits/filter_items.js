@@ -25,6 +25,7 @@ import AddDeleteButtons from '../add_delete_buttons';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import { injectI18n } from '@kbn/i18n/react';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 class FilterItemsUi extends Component {
 
@@ -57,41 +58,42 @@ class FilterItemsUi extends Component {
     const { intl } = this.props;
 
     return  (
-      <div className="vis_editor__split-filter-row" key={model.id}>
-        <div className="vis_editor__split-filter-color">
+      <EuiFlexGroup gutterSize="s" className="tvbAggRow" alignItems="center" key={model.id}>
+        <EuiFlexItem grow={false}>
           <ColorPicker
             disableTrash={true}
             onChange={handleChange}
             name="color"
             value={model.color}
           />
-        </div>
-        <div className="vis_editor__split-filter-item">
-          <input
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFieldText
             placeholder={intl.formatMessage({ id: 'metrics.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
-            className="vis_editor__input-grows-100"
-            type="text"
+            aria-label={intl.formatMessage({ id: 'metrics.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
             onChange={this.handleChange(model, 'filter')}
             value={model.filter}
+            fullWidth
           />
-        </div>
-        <div className="vis_editor__split-filter-item">
-          <input
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFieldText
             placeholder={intl.formatMessage({ id: 'metrics.splits.filterItems.labelPlaceholder', defaultMessage: 'Label' })}
-            className="vis_editor__input-grows-100"
-            type="text"
+            aria-label={intl.formatMessage({ id: 'metrics.splits.filterItems.labelAriaLabel', defaultMessage: 'Label' })}
             onChange={this.handleChange(model, 'label')}
             value={model.label}
+            fullWidth
           />
-        </div>
-        <div className="vis_editor__split-filter-control">
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <AddDeleteButtons
             onAdd={handleAdd}
             onDelete={handleDelete}
             disableDelete={items.length < 2}
+            responsive={false}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -100,7 +102,7 @@ class FilterItemsUi extends Component {
     if (!model[name]) return (<div/>);
     const rows = model[name].map(this.renderRow);
     return (
-      <div className="vis_editor__split-filters">
+      <div>
         { rows }
       </div>
     );

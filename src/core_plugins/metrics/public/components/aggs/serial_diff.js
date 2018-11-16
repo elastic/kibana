@@ -25,7 +25,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createNumberHandler from '../lib/create_number_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SerialDiffAgg = props => {
@@ -47,49 +47,59 @@ export const SerialDiffAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.serialDiff.aggregationLabel"
-            defaultMessage="Aggregation"
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="metrics.serialDiff.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
           />
-        </div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">
-          <FormattedMessage
-            id="metrics.serialDiff.metricLabel"
-            defaultMessage="Metric"
-          />
-        </div>
-        <MetricSelect
-          onChange={handleSelectChange('field')}
-          metrics={siblings}
-          metric={model}
-          value={model.field}
-        />
-      </div>
-      <div>
-        <label className="vis_editor__label" htmlFor={htmlId('lag')}>
-          <FormattedMessage
-            id="metrics.serialDiff.lagLabel"
-            defaultMessage="Lag"
-          />
-        </label>
-        <input
-          id={htmlId('lag')}
-          className="vis_editor__input"
-          onChange={handleNumberChange('lag')}
-          value={model.lag}
-          type="text"
-        />
-      </div>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('metric')}
+            label={(<FormattedMessage
+              id="metrics.serialDiff.metricLabel"
+              defaultMessage="Metric"
+            />)}
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('lag')}
+            label={(<FormattedMessage
+              id="metrics.serialDiff.lagLabel"
+              defaultMessage="Lag"
+            />)}
+          >
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
+            <input
+              className="tvbAgg__input"
+              onChange={handleNumberChange('lag')}
+              value={model.lag}
+              type="text"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

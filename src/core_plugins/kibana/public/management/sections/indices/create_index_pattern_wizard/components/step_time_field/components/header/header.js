@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = ({
   indexPattern,
+  indexPatternName,
 }) => (
   <div>
     <EuiTitle size="s">
@@ -43,8 +44,11 @@ export const Header = ({
     <EuiText color="subdued">
       <FormattedMessage
         id="kbn.management.createIndexPattern.stepTimeLabel"
-        defaultMessage="You've defined {indexPattern} as your index pattern. Now you can specify some settings before we create it."
-        values={{ indexPattern: <strong>{indexPattern}</strong> }}
+        defaultMessage="You've defined {indexPattern} as your {indexPatternName}. Now you can specify some settings before we create it."
+        values={{
+          indexPattern: <strong>{indexPattern}</strong>,
+          indexPatternName,
+        }}
       />
     </EuiText>
   </div>

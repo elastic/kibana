@@ -50,6 +50,7 @@ function GroupBySelectUi(props) {
   });
   return (
     <EuiComboBox
+      id={props.id}
       isClearable={false}
       options={modeOptions}
       selectedOptions={[selectedOption]}

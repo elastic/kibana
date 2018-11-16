@@ -135,7 +135,7 @@ export class ExpressionInput extends React.Component {
   };
 
   render() {
-    const { value, error } = this.props;
+    const { value, error, isAutocompleteEnabled } = this.props;
     const { suggestions } = this.state;
 
     const helpText = error
@@ -144,21 +144,32 @@ export class ExpressionInput extends React.Component {
     return (
       <div className="expressionInput">
         <EuiFormRow fullWidth isInvalid={Boolean(error)} error={error} helpText={helpText}>
-          <Autocomplete
-            header={this.getHeader()}
-            items={suggestions}
-            onSelect={this.onSuggestionSelect}
-            reference={this.getReference}
-          >
+          {isAutocompleteEnabled ? (
+            <Autocomplete
+              header={this.getHeader()}
+              items={suggestions}
+              onSelect={this.onSuggestionSelect}
+              reference={this.getReference}
+            >
+              <EuiTextArea
+                onKeyDown={this.onKeyDown}
+                className="canvasTextArea--code"
+                value={value}
+                onChange={this.onChange}
+                inputRef={ref => (this.ref = ref)}
+                spellCheck="false"
+              />
+            </Autocomplete>
+          ) : (
             <EuiTextArea
               onKeyDown={this.onKeyDown}
               className="canvasTextArea--code"
               value={value}
               onChange={this.onChange}
               inputRef={ref => (this.ref = ref)}
-              spellcheck="false"
+              spellCheck="false"
             />
-          </Autocomplete>
+          )}
         </EuiFormRow>
       </div>
     );
@@ -170,4 +181,5 @@ ExpressionInput.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   error: PropTypes.string,
+  isAutocompleteEnabled: PropTypes.bool,
 };

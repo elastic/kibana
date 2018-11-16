@@ -61,6 +61,7 @@ exports[`InspectorPanel should render as expected 1`] = `
             >
               <EuiTitle
                 size="s"
+                textTransform="none"
               >
                 <h1
                   className="euiTitle euiTitle--small"
@@ -130,6 +131,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                   isOpen={false}
                   ownFocus={true}
                   panelPaddingSize="none"
+                  repositionOnScroll={true}
                 >
                   <EuiOutsideClickDetector
                     onOutsideClick={[Function]}

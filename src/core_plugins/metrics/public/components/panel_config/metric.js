@@ -25,7 +25,20 @@ import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
 import uuid from 'uuid';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiTitle,
+  EuiHorizontalRule,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 class MetricPanelConfig extends Component {
@@ -68,82 +81,105 @@ class MetricPanelConfig extends Component {
       );
     } else {
       view = (
-        <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              <FormattedMessage
-                id="metrics.metric.optionsTab.panelFilterLabel"
-                defaultMessage="Panel Filter"
-              />
-            </label>
-            <input
-              id={htmlId('panelFilter')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.metric.optionsTab.ignoreGlobalFilterLabel"
-                defaultMessage="Ignore Global Filter"
-              />
-            </div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
+        <div className="tvbPanelConfig__container">
+          <EuiPanel>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="metrics.metric.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
+              </span>
+            </EuiTitle>
+
+            <EuiSpacer size="m" />
+
+            <IndexPattern
+              fields={this.props.fields}
+              model={this.props.model}
               onChange={this.props.onChange}
             />
-          </div>
-          <div>
-            <div className="vis_editor__label">
-              <FormattedMessage
-                id="metrics.metric.optionsTab.colorRulesLabel"
-                defaultMessage="Color Rules"
-              />
-            </div>
-          </div>
-          <div className="vis_editor__vis_config-row">
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('panelFilter')}
+                  label={(<FormattedMessage
+                    id="metrics.metric.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('filter')}
+                    value={model.filter}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="metrics.metric.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_global_filter}
+                  name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          <EuiSpacer />
+
+          <EuiPanel>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="metrics.metric.optionsTab.colorRulesLabel"
+                  defaultMessage="Color rules"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="m" />
             <ColorRules
               model={model}
               onChange={this.props.onChange}
               name="background_color_rules"
             />
-          </div>
+          </EuiPanel>
         </div>
       );
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
             <FormattedMessage
               id="metrics.metric.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
+            data-test-subj="metricEditorPanelOptionsBtn"
           >
             <FormattedMessage
               id="metrics.metric.optionsTab.panelOptionsButtonLabel"
-              defaultMessage="Panel Options"
+              defaultMessage="Panel options"
             />
-          </button>
-        </div>
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );
@@ -155,7 +191,6 @@ MetricPanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData: PropTypes.object,
 };
 
 export default MetricPanelConfig;

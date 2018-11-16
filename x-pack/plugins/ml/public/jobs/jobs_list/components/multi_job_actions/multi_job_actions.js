@@ -24,9 +24,10 @@ export class MultiJobActions extends Component {
 
   render() {
     const s = (this.props.selectedJobs.length > 1) ? 's' : '';
+    const jobsSelected = (this.props.selectedJobs.length > 0);
     return (
-      <div className="multi-select-actions">
-        {this.props.selectedJobs.length > 0 &&
+      <div className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}>
+        {jobsSelected &&
           <React.Fragment>
             <span className="jobs-selected-title">{this.props.selectedJobs.length} job{s} selected</span>
             <div className="actions-border-large" />

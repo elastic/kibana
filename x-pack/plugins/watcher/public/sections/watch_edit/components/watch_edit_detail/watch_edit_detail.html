@@ -50,12 +50,22 @@
 </form>
 
 <div class="kuiFormSection">
-  <label
-    class="kuiFormLabel"
-    i18n-id="xpack.watcher.sections.watchEdit.detail.watchJSONLabel"
-    i18n-default-message="Watch JSON({syntax})"
-    i18n-values="{ syntax: '<a href=\'{{ watchEditDetail.documentationLinks.watcher.putWatchApi }}\' target=\'_blank\' rel=\'noopener noreferrer\' data-test-subj=\'lnkPutWatchApiDoc\'>' + watchEditDetail.syntaxLinkLabel + '</a>'}"
-  ></label>
+  <label class="kuiFormLabel">
+    <span
+      i18n-id="xpack.watcher.sections.watchEdit.detail.watchJSONLabel"
+      i18n-default-message="Watch JSON"
+    ></span>
+    (
+      <a
+        href="{{ watchEditDetail.documentationLinks.watcher.putWatchApi }}"
+        target="_blank"
+        rel="noopener noreferrer"
+        data-test-subj="lnkPutWatchApiDoc"
+        i18n-id="xpack.watcher.sections.watchEdit.detail.syntaxLinkLabel"
+        i18n-default-message="Syntax"
+      ></a>
+    )
+  </label>
   <json-editor
     json="watchEditDetail.watch.watch"
     on-change="watchEditDetail.onJsonChange"

@@ -14,6 +14,7 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
   method: 'PUT',
   path: '/api/beats/agent/{beatId}',
   licenseRequired: true,
+  requiredRoles: ['beats_admin'],
   config: {
     validate: {
       headers: Joi.object({
@@ -36,16 +37,16 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
       }),
     },
   },
-  handler: async (request: FrameworkRequest, reply: any) => {
+  handler: async (request: FrameworkRequest, h: any) => {
     const { beatId } = request.params;
     const accessToken = request.headers['kbn-beats-access-token'];
     const remoteAddress = request.info.remoteAddress;
     const userOrToken = accessToken || request.user;
 
     if (request.user.kind === 'unauthenticated' && request.payload.active !== undefined) {
-      return reply({ message: 'access-token is not a valid auth type to change beat status' }).code(
-        401
-      );
+      return h
+        .response({ message: 'access-token is not a valid auth type to change beat status' })
+        .code(401);
     }
 
     try {
@@ -56,14 +57,14 @@ export const createBeatUpdateRoute = (libs: CMServerLibs) => ({
 
       switch (status) {
         case 'beat-not-found':
-          return reply({ message: 'Beat not found', success: false }).code(404);
+          return h.response({ message: 'Beat not found', success: false }).code(404);
         case 'invalid-access-token':
-          return reply({ message: 'Invalid access token', success: false }).code(401);
+          return h.response({ message: 'Invalid access token', success: false }).code(401);
       }
 
-      reply({ success: true }).code(204);
+      return h.response({ success: true }).code(204);
     } catch (err) {
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
   },
 });

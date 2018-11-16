@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import ServiceOverview from '../view';
+import { ServiceOverview } from '../view';
 import { STATUS } from '../../../../constants';
 import * as apmRestServices from '../../../../services/rest/apm';
 

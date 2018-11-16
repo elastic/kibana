@@ -6,12 +6,14 @@
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 
 interface EmptyPageProps {
   message: string;
   title: string;
   actionLabel: string;
   actionUrl: string;
+  'data-test-subj'?: string;
 }
 
 export const EmptyPage: React.SFC<EmptyPageProps> = ({
@@ -19,8 +21,9 @@ export const EmptyPage: React.SFC<EmptyPageProps> = ({
   actionUrl,
   message,
   title,
+  ...rest
 }) => (
-  <EuiEmptyPrompt
+  <CenteredEmptyPrompt
     title={<h2>{title}</h2>}
     body={<p>{message}</p>}
     actions={
@@ -28,5 +31,10 @@ export const EmptyPage: React.SFC<EmptyPageProps> = ({
         {actionLabel}
       </EuiButton>
     }
+    {...rest}
   />
 );
+
+const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
+  align-self: center;
+`;
