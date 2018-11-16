@@ -14,7 +14,7 @@ cacheDir="${CACHE_DIR:-"$HOME/.kibana"}";
 echo ""
 echo ""
 echo "archiving node_modules and other cache files == $(date)"
-tar cf "$cacheDir/untracked_file_cache.tar" \
+tar -cf "$cacheDir/untracked_file_cache.tar" \
   node_modules \
   packages/*/node_modules \
   x-pack/node_modules \
