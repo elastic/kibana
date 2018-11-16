@@ -5,30 +5,41 @@
  */
 
 import { UICapabilities } from 'ui/capabilities';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../common/model/space';
 
-export async function toggleUiCapabilities(uiCapabilities: UICapabilities, activeSpace: Space) {
-  toggleDisabledFeatures(uiCapabilities, activeSpace);
+export async function toggleUiCapabilities(
+  features: Feature[],
+  uiCapabilities: UICapabilities,
+  activeSpace: Space
+) {
+  toggleDisabledFeatures(features, uiCapabilities, activeSpace);
 
   return uiCapabilities;
 }
 
-function toggleDisabledFeatures(uiCapabilities: UICapabilities, activeSpace: Space) {
-  // TODO: get disabled features from active space
-  // @ts-ignore
-  const disabledFeatures: string[] = activeSpace.disabledFeatures || [];
+function toggleDisabledFeatures(
+  features: Feature[],
+  uiCapabilities: UICapabilities,
+  activeSpace: Space
+) {
+  const disabledFeatureKeys: string[] = activeSpace.disabledFeatures;
+
+  const disabledFeatures: Feature[] = disabledFeatureKeys
+    .map(key => features.find(feature => feature.id === key))
+    .filter(feature => typeof feature !== 'undefined') as Feature[];
 
   const navLinks: Record<string, boolean> = uiCapabilities.navLinks as Record<string, boolean>;
 
   for (const feature of disabledFeatures) {
     // Disable associated navLink, if one exists
-    if (uiCapabilities.navLinks.hasOwnProperty(feature)) {
-      navLinks[feature] = false;
+    if (feature.navLinkId && uiCapabilities.navLinks.hasOwnProperty(feature.navLinkId)) {
+      navLinks[feature.navLinkId] = false;
     }
 
     // Disable "sub features" that match the disabled feature
-    if (uiCapabilities.hasOwnProperty(feature)) {
-      const capability = uiCapabilities[feature];
+    if (uiCapabilities.hasOwnProperty(feature.id)) {
+      const capability = uiCapabilities[feature.id];
       Object.keys(capability).forEach(featureKey => {
         capability[featureKey] = false;
       });

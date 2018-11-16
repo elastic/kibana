@@ -92,7 +92,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
       <p>
         <FormattedMessage
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
-          defaultMessage="URL identifier"
+          defaultMessage="URL identifier "
         />
         <EuiLink onClick={this.onEditClick}>{editLinkText}</EuiLink>
       </p>
@@ -108,6 +108,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
           values={{
             spaceIdentifier: (
               <strong>
+                /s/
                 <FormattedMessage
                   id="xpack.spaces.management.spaceIdentifier.spaceIdentifierText"
                   defaultMessage={identifier || 'awesome-space'}
