@@ -24,6 +24,9 @@ class NodeAllocationUi extends Component {
       nodeOptions,
       errors
     } = this.props;
+    if (!nodeOptions.length) {
+      return null;
+    }
     return (
       <ErrableFormRow
         id={`${phase}.${PHASE_NODE_ATTRS}`}
