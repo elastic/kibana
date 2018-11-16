@@ -32,7 +32,7 @@ interface TypeSelectionProps {
   isOpen: boolean;
   onClose: () => void;
   visTypesRegistry: VisType[];
-  editorParams: string[];
+  editorParams?: string[];
 }
 
 class NewVisModal extends React.Component<TypeSelectionProps> {
@@ -70,9 +70,9 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
       visType.requiresSearch && visType.options.showIndexSelection
         ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
         : `#${VisualizeConstants.CREATE_PATH}?`;
-    const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams];
-    location.href = `${baseUrl}${params.join('&')}`;
+    const params = [`type=${encodeURIComponent(visType.name)}`, ...this.props.editorParams!];
     this.props.onClose();
+    location.assign(`${baseUrl}${params.join('&')}`);
   };
 }
 
