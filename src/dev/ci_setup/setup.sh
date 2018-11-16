@@ -95,7 +95,7 @@ hash -r
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn kbn bootstrap
+yarn kbn bootstrap --prefer-offline
 
 ###
 ### verify no git modifications
