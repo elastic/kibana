@@ -6,14 +6,10 @@ set -e
 cd "$(dirname "$0")/.."
 
 case "$JOB" in
-"selenium")
-  ./test/scripts/jenkins_selenium.sh
-  ;;
-"intake")
-  ./test/scripts/jenkins_unit.sh
-  ;;
-"x-pack")
-  ./test/scripts/jenkins_xpack.sh
+"test")
+  ./.ci/packer_cache.sh
+  echo "sleeping for 30 minutes to spot check"
+  sleep 2400
   ;;
 *)
   echo "JOB '$JOB' is not implemented."
