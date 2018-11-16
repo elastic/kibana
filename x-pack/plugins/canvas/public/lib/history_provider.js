@@ -6,7 +6,8 @@
 
 import chrome from 'ui/chrome';
 import lzString from 'lz-string';
-import { createBrowserHistory, createMemoryHistory, parsePath, createPath } from 'history';
+import { createMemoryHistory, parsePath, createPath } from 'history';
+import createHashStateHistory from 'history-extra';
 import { get } from 'lodash';
 import { APP_ROUTE } from '../../common/lib/constants';
 import { getWindow } from './get_window';
@@ -140,9 +141,7 @@ const getHistoryInstance = win => {
   if (win.location.hash === '') win.history.replaceState({}, '', `${basename}`);
 
   // if window object, create browser instance
-  return createBrowserHistory({
-    basename,
-  });
+  return createHashStateHistory();
 };
 
 export const historyProvider = (win = getWindow()) => {
