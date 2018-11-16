@@ -12,12 +12,12 @@ import {
 describe('Validate seed node', () => {
   describe('isSeedNodeValid', () => {
     describe('rejects', () => {
-      it('uppercase letters', () => {
-        expect(isSeedNodeValid('A.B.C.D')).toBe(false);
-      });
-
       it('adjacent periods', () => {
         expect(isSeedNodeValid('a..b')).toBe(false);
+      });
+
+      it('underscores', () => {
+        expect(isSeedNodeValid('____')).toBe(false);
       });
 
       ['/', '\\', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '=', '+', '?'].forEach(char => {
@@ -28,6 +28,10 @@ describe('Validate seed node', () => {
     });
 
     describe('accepts', () => {
+      it('uppercase letters', () => {
+        expect(isSeedNodeValid('A.B.C.D')).toBe(true);
+      });
+
       it('lowercase letters', () => {
         expect(isSeedNodeValid('a')).toBe(true);
       });
@@ -38,10 +42,6 @@ describe('Validate seed node', () => {
 
       it('dashes', () => {
         expect(isSeedNodeValid('----')).toBe(true);
-      });
-
-      it('underscores', () => {
-        expect(isSeedNodeValid('____')).toBe(true);
       });
 
       it('many parts', () => {

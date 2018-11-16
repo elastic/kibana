@@ -186,7 +186,7 @@ export class RemoteClusterFormUi extends Component {
     } = this.props;
 
     const newSeeds = seeds.slice(0);
-    newSeeds.push(searchValue);
+    newSeeds.push(searchValue.toLowerCase());
     onFieldsChange({ seeds: newSeeds });
   };
 
@@ -198,10 +198,10 @@ export class RemoteClusterFormUi extends Component {
       intl,
     } = this.props;
 
-    const localSeedErrors = this.getLocalSeedErrors(searchValue);
+    const { localSeedErrors } = this.state;
 
     // Allow typing to clear the errors, but not to add new ones.
-    const errors = (!searchValue || localSeedErrors.length === 0) ? [] : localSeedErrors;
+    const errors = (!searchValue || this.getLocalSeedErrors(searchValue).length === 0) ? [] : localSeedErrors;
 
     // EuiComboBox internally checks for duplicates and prevents calling onCreateOption if the
     // input is a duplicate. So we need to surface this error here instead.
