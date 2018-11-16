@@ -7,7 +7,7 @@ import _ from 'lodash';
 import Boom from 'boom';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { wrapError } from '../../../../lib/errors';
-import { spaceApplicationPrivilegesSerializer } from '../../../../lib/authorization';
+import { PrivilegeSerializer, ResourceSerializer } from '../../../../lib/authorization';
 
 export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn, application) {
 
@@ -21,14 +21,17 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
 
     return resourcePrivileges.reduce((result, { resource, privileges }) => {
       if (resource === GLOBAL_RESOURCE) {
-        result.global = _.uniq([...result.global, ...privileges]);
+        result.global = _.uniq([
+          ...result.global,
+          ...privileges.map(privilege => PrivilegeSerializer.deserializePrivilegeAssignedGlobally(privilege))
+        ]);
         return result;
       }
 
-      const spaceId = spaceApplicationPrivilegesSerializer.resource.deserialize(resource);
+      const spaceId = ResourceSerializer.deserializeSpaceResource(resource);
       result.space[spaceId] = _.uniq([
         ...result.space[spaceId] || [],
-        ...privileges.map(privilege => spaceApplicationPrivilegesSerializer.privilege.deserialize(privilege))
+        ...privileges.map(privilege => PrivilegeSerializer.deserializePrivilegeAssignedAtSpace(privilege))
       ]);
       return result;
     }, {

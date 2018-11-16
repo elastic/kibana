@@ -132,13 +132,6 @@ export default function (kibana) {
           kbnIndex: options.index,
           kbnBaseUrl,
           uiCapabilities: {
-            navLinks: {
-              'kibana:discover': true,
-              'kibana:visualize': true,
-              'kibana:dashboard': true,
-              'kibana:dev_tools': true,
-              'kibana:management': true,
-            },
             discover: {
               showWriteControls: true
             },

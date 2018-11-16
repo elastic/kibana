@@ -44,9 +44,6 @@ export default function (kibana) {
       injectDefaultVars() {
         return {
           uiCapabilities: {
-            navLinks: {
-              timelion: true
-            },
             timelion: {
               showWriteControls: true,
             }

@@ -37,7 +37,7 @@ const registerPrivilegesWithClusterTest = (description, {
 
   const defaultVersion = 'default-version';
 
-  const createMockServer = () => {
+  const createMockServer = ({ privilegeMap }) => {
     const mockServer = {
       config: jest.fn().mockReturnValue({
         get: jest.fn(),
@@ -47,7 +47,10 @@ const registerPrivilegesWithClusterTest = (description, {
         security: {
           authorization: {
             actions: Symbol(),
-            application
+            application,
+            privileges: {
+              get: () => privilegeMap
+            }
           }
         }
       }
@@ -145,7 +148,9 @@ const registerPrivilegesWithClusterTest = (description, {
   };
 
   test(description, async () => {
-    const mockServer = createMockServer();
+    const mockServer = createMockServer({
+      privilegeMap
+    });
     const mockCallWithInternalUser = registerMockCallWithInternalUser()
       .mockImplementation((api) => {
         switch(api) {
@@ -181,8 +186,6 @@ const registerPrivilegesWithClusterTest = (description, {
         }
       });
 
-    buildPrivilegeMap.mockReturnValue(privilegeMap);
-
     let error;
     try {
       await registerPrivilegesWithCluster(mockServer);
@@ -202,42 +205,50 @@ const registerPrivilegesWithClusterTest = (description, {
   });
 };
 
-registerPrivilegesWithClusterTest(`passes saved object types, and actions to buildPrivilegeMap`, {
-  savedObjectTypes: [
-    'foo-type',
-    'bar-type',
-  ],
-  assert: ({ mocks }) => {
-    expect(mocks.buildPrivilegeMap).toHaveBeenCalledWith(
-      ['foo-type', 'bar-type'],
-      mocks.server.plugins.security.authorization.actions,
-    );
-  },
-});
-
 registerPrivilegesWithClusterTest(`inserts privileges when we don't have any existing privileges`, {
   privilegeMap: {
+    features: {},
     global: {
-      foo: ['action:foo']
+      all: ['action:all']
     },
     space: {
-      bar: ['action:bar']
+      read: ['action:read']
+    },
+    features: {
+      foo: {
+        all: ['action:foo_all'],
+      },
+      bar: {
+        read: ['action:bar_read'],
+      }
     }
   },
   existingPrivileges: null,
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
       [application]: {
-        foo: {
+        all: {
           application,
-          name: 'foo',
-          actions: ['action:foo'],
+          name: 'all',
+          actions: ['action:all'],
           metadata: {},
         },
-        space_bar: {
+        space_read: {
           application,
-          name: 'space_bar',
-          actions: ['action:bar'],
+          name: 'space_read',
+          actions: ['action:read'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:foo_all'],
+          metadata: {},
+        },
+        feature_bar_read: {
+          application,
+          name: 'feature_bar_read',
+          actions: ['action:bar_read'],
           metadata: {},
         }
       }
@@ -247,30 +258,31 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
 
 registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
   privilegeMap: {
+    features: {},
     global: {
-      foo: ['action:foo'],
+      all: ['action:foo'],
     },
     space: {
-      bar: ['action:bar']
+      read: ['action:bar']
     }
   },
   existingPrivileges: {
     [application]: {
-      foo: {
+      all: {
         application,
-        name: 'foo',
+        name: 'all',
         actions: ['action:not-foo'],
         metadata: {},
       },
-      quz: {
+      read: {
         application,
-        name: 'quz',
+        name: 'read',
         actions: ['action:not-quz'],
         metadata: {},
       },
-      space_bar: {
+      space_read: {
         application,
-        name: 'space_bar',
+        name: 'space_read',
         actions: ['action:not-bar'],
         metadata: {},
       },
@@ -302,44 +314,227 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
   }
 });
 
-registerPrivilegesWithClusterTest(`updates privileges when actions don't match`, {
+registerPrivilegesWithClusterTest(`updates privileges when global actions don't match`, {
   privilegeMap: {
+    features: {},
     global: {
-      foo: ['action:foo']
+      all: ['action:foo']
     },
     space: {
-      bar: ['action:bar']
+      read: ['action:bar']
+    },
+    features: {
+      foo: {
+        all: ['action:baz']
+      },
+      bar: {
+        read: ['action:quz']
+      }
     }
   },
   existingPrivileges: {
     [application]: {
-      foo: {
+      all: {
         application,
-        name: 'foo',
-        actions: ['action:not-foo'],
+        name: 'all',
+        actions: ['action:foo'],
         metadata: {},
       },
-      space_bar: {
+      space_read: {
         application,
-        name: 'space_bar',
-        actions: ['action:not-bar'],
+        name: 'space_read',
+        actions: ['action:bar'],
         metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:baz'],
+      },
+      feature_bar_read: {
+        application,
+        name: 'feature_bar_read',
+        actions: ['action:not-quz'],
       }
     }
   },
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
       [application]: {
-        foo: {
+        all: {
           application,
-          name: 'foo',
+          name: 'all',
           actions: ['action:foo'],
           metadata: {},
         },
-        space_bar: {
+        space_read: {
           application,
-          name: 'space_bar',
+          name: 'space_read',
           actions: ['action:bar'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:baz'],
+          metadata: {},
+        },
+        feature_bar_read: {
+          application,
+          name: 'feature_bar_read',
+          actions: ['action:quz'],
+          metadata: {},
+        }
+      }
+    });
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when space actions don't match`, {
+  privilegeMap: {
+    features: {},
+    global: {
+      all: ['action:foo']
+    },
+    space: {
+      read: ['action:bar']
+    },
+    features: {
+      foo: {
+        all: ['action:baz']
+      },
+      bar: {
+        read: ['action:quz']
+      }
+    }
+  },
+  existingPrivileges: {
+    [application]: {
+      all: {
+        application,
+        name: 'all',
+        actions: ['action:foo'],
+        metadata: {},
+      },
+      space_read: {
+        application,
+        name: 'space_read',
+        actions: ['action:not-bar'],
+        metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:baz'],
+      },
+      feature_bar_read: {
+        application,
+        name: 'feature_bar_read',
+        actions: ['action:quz'],
+      }
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges({
+      [application]: {
+        all: {
+          application,
+          name: 'all',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_read: {
+          application,
+          name: 'space_read',
+          actions: ['action:bar'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:baz'],
+          metadata: {},
+        },
+        feature_bar_read: {
+          application,
+          name: 'feature_bar_read',
+          actions: ['action:quz'],
+          metadata: {},
+        }
+      }
+    });
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when feature actions don't match`, {
+  privilegeMap: {
+    features: {},
+    global: {
+      all: ['action:foo']
+    },
+    space: {
+      read: ['action:bar']
+    },
+    features: {
+      foo: {
+        all: ['action:baz']
+      },
+      bar: {
+        read: ['action:quz']
+      }
+    }
+  },
+  existingPrivileges: {
+    [application]: {
+      all: {
+        application,
+        name: 'all',
+        actions: ['action:foo'],
+        metadata: {},
+      },
+      space_read: {
+        application,
+        name: 'space_read',
+        actions: ['action:bar'],
+        metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:baz'],
+      },
+      feature_bar_read: {
+        application,
+        name: 'feature_bar_read',
+        actions: ['action:not-quz'],
+      }
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges({
+      [application]: {
+        all: {
+          application,
+          name: 'all',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_read: {
+          application,
+          name: 'space_read',
+          actions: ['action:bar'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:baz'],
+          metadata: {},
+        },
+        feature_bar_read: {
+          application,
+          name: 'feature_bar_read',
+          actions: ['action:quz'],
           metadata: {},
         }
       }
@@ -349,26 +544,38 @@ registerPrivilegesWithClusterTest(`updates privileges when actions don't match`,
 
 registerPrivilegesWithClusterTest(`updates privileges when global privilege added`, {
   privilegeMap: {
+    features: {},
     global: {
-      foo: ['action:foo'],
-      quz: ['action:quz']
+      all: ['action:foo'],
+      read: ['action:quz']
     },
     space: {
-      bar: ['action:bar']
+      read: ['action:bar']
+    },
+    features: {
+      foo: {
+        all: ['action:foo-all']
+      }
     }
   },
   existingPrivileges: {
     [application]: {
-      foo: {
+      all: {
         application,
-        name: 'foo',
-        actions: ['action:not-foo'],
+        name: 'all',
+        actions: ['action:foo'],
         metadata: {},
       },
-      space_bar: {
+      space_read: {
         application,
-        name: 'space_bar',
-        actions: ['action:not-bar'],
+        name: 'space_read',
+        actions: ['action:bar'],
+        metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:foo-all'],
         metadata: {},
       }
     }
@@ -376,22 +583,28 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
       [application]: {
-        foo: {
+        all: {
           application,
-          name: 'foo',
+          name: 'all',
           actions: ['action:foo'],
           metadata: {},
         },
-        quz: {
+        read: {
           application,
-          name: 'quz',
+          name: 'read',
           actions: ['action:quz'],
           metadata: {},
         },
-        space_bar: {
+        space_read: {
           application,
-          name: 'space_bar',
+          name: 'space_read',
           actions: ['action:bar'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:foo-all'],
           metadata: {},
         }
       }
@@ -401,26 +614,38 @@ registerPrivilegesWithClusterTest(`updates privileges when global privilege adde
 
 registerPrivilegesWithClusterTest(`updates privileges when space privilege added`, {
   privilegeMap: {
+    features: {},
     global: {
-      foo: ['action:foo'],
+      all: ['action:foo'],
     },
     space: {
-      bar: ['action:bar'],
-      quz: ['action:quz']
+      all: ['action:bar'],
+      read: ['action:quz']
+    },
+    features: {
+      foo: {
+        all: ['action:foo-all']
+      }
     }
   },
   existingPrivileges: {
     [application]: {
-      foo: {
+      all: {
         application,
         name: 'foo',
         actions: ['action:not-foo'],
         metadata: {},
       },
-      space_bar: {
+      space_read: {
         application,
-        name: 'space_bar',
+        name: 'space_read',
         actions: ['action:not-bar'],
+        metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:foo-all'],
         metadata: {},
       }
     }
@@ -428,24 +653,100 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
   assert: ({ expectUpdatedPrivileges }) => {
     expectUpdatedPrivileges({
       [application]: {
-        foo: {
+        all: {
           application,
-          name: 'foo',
+          name: 'all',
           actions: ['action:foo'],
           metadata: {},
         },
-        space_bar: {
+        space_all: {
           application,
-          name: 'space_bar',
+          name: 'space_all',
           actions: ['action:bar'],
           metadata: {},
         },
-        space_quz: {
+        space_read: {
           application,
-          name: 'space_quz',
+          name: 'space_read',
           actions: ['action:quz'],
           metadata: {},
         },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:foo-all'],
+          metadata: {},
+        }
+      }
+    });
+  }
+});
+
+registerPrivilegesWithClusterTest(`updates privileges when feature privilege added`, {
+  privilegeMap: {
+    features: {},
+    global: {
+      all: ['action:foo'],
+    },
+    space: {
+      all: ['action:bar'],
+    },
+    features: {
+      foo: {
+        all: ['action:foo-all'],
+        read: ['action:foo-read']
+      }
+    }
+  },
+  existingPrivileges: {
+    [application]: {
+      all: {
+        application,
+        name: 'foo',
+        actions: ['action:not-foo'],
+        metadata: {},
+      },
+      space_all: {
+        application,
+        name: 'space_all',
+        actions: ['action:not-bar'],
+        metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:foo-all'],
+        metadata: {},
+      }
+    }
+  },
+  assert: ({ expectUpdatedPrivileges }) => {
+    expectUpdatedPrivileges({
+      [application]: {
+        all: {
+          application,
+          name: 'all',
+          actions: ['action:foo'],
+          metadata: {},
+        },
+        space_all: {
+          application,
+          name: 'space_all',
+          actions: ['action:bar'],
+          metadata: {},
+        },
+        feature_foo_all: {
+          application,
+          name: 'feature_foo_all',
+          actions: ['action:foo-all'],
+          metadata: {},
+        },
+        feature_foo_read: {
+          application,
+          name: 'feature_foo_read',
+          actions: ['action:foo-read'],
+          metadata: {},
+        }
       }
     });
   }
@@ -454,24 +755,35 @@ registerPrivilegesWithClusterTest(`updates privileges when space privilege added
 registerPrivilegesWithClusterTest(`doesn't update privileges when order of actions differ`, {
   privilegeMap: {
     global: {
-      foo: ['action:foo', 'action:quz']
+      all: ['action:foo', 'action:quz']
     },
     space: {
-      bar: ['action:bar']
+      read: ['action:bar', 'action:quz']
+    },
+    features: {
+      foo: {
+        all: ['action:foo-all', 'action:bar-all']
+      }
     }
   },
   existingPrivileges: {
     [application]: {
-      foo: {
+      all: {
         application,
-        name: 'foo',
+        name: 'all',
         actions: ['action:quz', 'action:foo'],
         metadata: {},
       },
-      space_bar: {
+      space_read: {
         application,
-        name: 'space_bar',
-        actions: ['action:bar'],
+        name: 'space_read',
+        actions: ['action:quz', 'action:bar'],
+        metadata: {},
+      },
+      feature_foo_all: {
+        application,
+        name: 'feature_foo_all',
+        actions: ['action:bar-all', 'action:foo-all'],
         metadata: {},
       }
     }
@@ -483,6 +795,7 @@ registerPrivilegesWithClusterTest(`doesn't update privileges when order of actio
 
 registerPrivilegesWithClusterTest(`throws and logs error when errors getting privileges`, {
   privilegeMap: {
+    features: {},
     global: {},
     space: {}
   },
@@ -516,11 +829,12 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors deleting pr
 
 registerPrivilegesWithClusterTest(`throws and logs error when errors putting privileges`, {
   privilegeMap: {
+    features: {},
     global: {
-      foo: []
+      all: []
     },
     space: {
-      bar: []
+      read: []
     }
   },
   existingPrivileges: null,

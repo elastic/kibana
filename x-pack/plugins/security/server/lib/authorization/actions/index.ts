@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-describe('toggleUiCapabilities', () => {
-  // TODO: implement tests once spaces have the concept of disabled features
-  it('should be tested', () => null);
-});
+export { Actions, actionsFactory } from './actions';
