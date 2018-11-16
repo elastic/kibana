@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
@@ -27,14 +28,26 @@ interface VisHelpTextProps {
   visType: VisType;
 }
 
-export const VisHelpText = (props: VisHelpTextProps) => {
-  const { visType } = props;
+export const VisHelpText = ({ visType }: VisHelpTextProps) => {
   return (
     <React.Fragment>
       <EuiTitle size="s">
         <h2>{visType.title}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
+      {visType.stage === 'experimental' && (
+        <React.Fragment>
+          <EuiText>
+            <em>
+              <FormattedMessage
+                id="kbn.visualize.newVisWizard.experimentalDescription"
+                defaultMessage="This visualization is experimental."
+              />
+            </em>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </React.Fragment>
+      )}
       <EuiText>{visType.description}</EuiText>
     </React.Fragment>
   );

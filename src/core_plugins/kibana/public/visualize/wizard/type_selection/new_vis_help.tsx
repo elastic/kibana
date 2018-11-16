@@ -17,14 +17,18 @@
  * under the License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
 
 export const NewVisHelp = () => (
   <EuiText>
-    <p>Start creating your visualization by selecting a type for that visualization.</p>
-    <p>Different kind of visualizations fulfill different purposes.</p>
-    <p>And an even more elaborate description...</p>
+    <p>
+      <FormattedMessage
+        id="kbn.visualize.newVisWizard.helpText"
+        defaultMessage="Start creating your visualization by selecting a type for that visualization."
+      />
+    </p>
   </EuiText>
 );

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import classnames from 'classnames';
 import { sortByOrder } from 'lodash';
@@ -48,7 +49,7 @@ interface VisTypeListEntry extends VisType {
 interface TypeSelectionProps {
   onVisTypeSelected: (visType: VisType) => void;
   visTypesRegistry: VisType[];
-  showLabVis: boolean;
+  showExperimental: boolean;
 }
 
 interface TypeSelectionState {
@@ -124,11 +125,11 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   private filteredVisTypes(visTypes: VisType[], query: string): VisTypeListEntry[] {
     const types = visTypes.filter(type => {
       // Filter out all lab visualizations if lab mode is not enabled
-      if (!this.props.showLabVis && type.stage === 'lab') {
+      if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
       }
 
-      // Filter out visualizations in the hidden category
+      // Filter out hidden visualizations
       if (type.hidden) {
         return false;
       }
@@ -157,13 +158,12 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     let stage = {};
     if (visType.stage === 'experimental') {
       stage = {
-        betaBadgeLabel: 'Experimental',
-        betaBadgeTooltipContent: 'This visualization is yet experimental.',
-      };
-    } else if (visType.stage === 'lab') {
-      stage = {
-        betaBadgeLabel: 'Lab',
-        betaBadgeTooltipContent: 'This visualization is in an early experimental lab state.',
+        betaBadgeLabel: i18n.translate('kbn.visualize.newVisWizard.experimentalTitle', {
+          defaultMessage: 'Experimental',
+        }),
+        betaBadgeTooltipContent: i18n.translate('kbn.visualize.newVisWizard.experimentalTooltip', {
+          defaultMessage: 'This visualization is experimental.',
+        }),
       };
     }
     const isDisabled = this.state.query !== '' && !visType.highlighted;

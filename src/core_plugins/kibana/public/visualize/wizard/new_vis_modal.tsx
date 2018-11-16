@@ -56,7 +56,7 @@ class NewVisModal extends React.Component<TypeSelectionProps> {
       <EuiOverlayMask>
         <EuiModal onClose={this.props.onClose} maxWidth={false} className="visNewVisDialog">
           <TypeSelection
-            showLabVis={this.isLabsEnabled}
+            showExperimental={this.isLabsEnabled}
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
           />
