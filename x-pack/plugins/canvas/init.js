@@ -27,6 +27,31 @@ export default async function(server /*options*/) {
     };
   });
 
+  server.plugins.xpack_main.registerFeature({
+    id: 'canvas',
+    name: 'Canvas',
+    icon: 'canvasApp',
+    navLinkId: 'canvas',
+    privileges: {
+      all: {
+        app: ['canvas'],
+        savedObject: {
+          all: ['canvas'],
+          read: ['config', 'index-pattern'],
+        },
+        ui: [],
+      },
+      read: {
+        app: ['canvas'],
+        savedObject: {
+          all: [],
+          read: ['config', 'index-pattern', 'canvas'],
+        },
+        ui: [],
+      },
+    },
+  });
+
   // There are some common functions that use private APIs, load them here
   commonFunctions.forEach(func => functionsRegistry.register(func));
 

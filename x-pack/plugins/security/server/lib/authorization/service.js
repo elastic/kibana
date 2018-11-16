@@ -6,10 +6,11 @@
 
 import { actionsFactory } from './actions';
 import { authorizationModeFactory } from './mode';
+import { privilegesFactory } from './privileges';
 import { checkPrivilegesWithRequestFactory } from './check_privileges';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 
-export function createAuthorizationService(server, xpackInfoFeature) {
+export function createAuthorizationService(server, xpackInfoFeature, savedObjectTypes, xpackMainPlugin) {
   const shieldClient = getClient(server);
   const config = server.config();
 
@@ -23,11 +24,13 @@ export function createAuthorizationService(server, xpackInfoFeature) {
     shieldClient,
     xpackInfoFeature,
   );
+  const privileges = privilegesFactory(savedObjectTypes, actions, xpackMainPlugin);
 
   return {
     actions,
     application,
     checkPrivilegesWithRequest,
     mode,
+    privileges,
   };
 }

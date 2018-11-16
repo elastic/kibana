@@ -50,6 +50,31 @@ export function graph(kibana) {
         };
       });
 
+      server.plugins.xpack_main.registerFeature({
+        id: 'graph',
+        name: 'Graph',
+        icon: 'graphApp',
+        navLinkId: 'graph',
+        privileges: {
+          all: {
+            app: ['graph'],
+            savedObject: {
+              all: ['graph-workspace'],
+              read: ['config', 'index-pattern'],
+            },
+            ui: [],
+          },
+          read: {
+            app: ['graph'],
+            savedObject: {
+              all: [],
+              read: ['config', 'index-pattern', 'graph-workspace'],
+            },
+            ui: [],
+          }
+        }
+      });
+
       initServer(server);
     },
   });

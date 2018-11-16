@@ -63,6 +63,23 @@ export function apm(kibana) {
     },
 
     init(server) {
+      server.plugins.xpack_main.registerFeature({
+        id: 'apm',
+        name: 'APM',
+        icon: 'apmApp',
+        navLinkId: 'apm',
+        privileges: {
+          all: {
+            app: ['apm'],
+            savedObject: {
+              all: [],
+              read: ['config']
+            },
+            ui: []
+          }
+        }
+      });
+
       initTransactionsApi(server);
       initTracesApi(server);
       initServicesApi(server);
