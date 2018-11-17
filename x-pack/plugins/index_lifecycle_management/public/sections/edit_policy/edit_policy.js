@@ -24,6 +24,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiDescribedFormGroup
 } from '@elastic/eui';
 import { HotPhase } from './components/hot_phase';
 import { WarmPhase } from './components/warm_phase';
@@ -205,7 +206,20 @@ class EditPolicyUi extends Component {
                   </Fragment>
                 )}
                 {saveAsNewPolicy || isNewPolicy ? (
-                  <Fragment>
+                  <EuiDescribedFormGroup
+                    title={
+                      <div>
+                        <span className="eui-displayInlineBlock eui-alignMiddle">
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.editPolicy.nameLabel"
+                            defaultMessage="Name"
+                          />
+                        </span>
+                      </div>
+                    }
+                    titleSize="s"
+                    fullWidth
+                  >
                     <ErrableFormRow
                       id={STRUCTURE_POLICY_NAME}
                       label={intl.formatMessage({
@@ -223,7 +237,7 @@ class EditPolicyUi extends Component {
                         }}
                       />
                     </ErrableFormRow>
-                  </Fragment>
+                  </EuiDescribedFormGroup>
                 ) : null}
               </Fragment>
               <EuiSpacer />
