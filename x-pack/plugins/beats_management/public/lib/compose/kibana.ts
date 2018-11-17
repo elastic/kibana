@@ -46,7 +46,7 @@ export function compose(): FrontendLibs {
     new KibanaFrameworkAdapter(
       PLUGIN.ID,
       management,
-      routes.when,
+      routes,
       chrome.getBasePath,
       onKibanaReady,
       XPackInfoProvider

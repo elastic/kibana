@@ -28,7 +28,7 @@ async function startApp(libs: FrontendLibs) {
     </ThemeProvider>
   );
 
-  await libs.framework.hookFrameworkLifecycle();
+  await libs.framework.waitUntilFrameworkReady();
 
   if (libs.framework.licenseIsAtLeast('standard')) {
     libs.framework.registerManagementSection({

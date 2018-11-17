@@ -9,7 +9,7 @@ import { last } from 'lodash';
 interface PathTree {
   [path: string]: string[];
 }
-interface RouteConfig {
+export interface RouteConfig {
   path: string;
   component: React.ComponentType<any>;
   routes?: RouteConfig[];

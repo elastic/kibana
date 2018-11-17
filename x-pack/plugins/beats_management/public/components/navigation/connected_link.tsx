@@ -13,6 +13,7 @@ export function ConnectedLinkComponent({
   path,
   query,
   disabled,
+  children,
   ...props
 }: {
   location: any;
@@ -30,7 +31,7 @@ export function ConnectedLinkComponent({
 
   return (
     <Link
-      {...props}
+      children={children}
       to={{ ...location, ...props.to, pathname, query }}
       className={`euiLink euiLink--primary ${props.className || ''}`}
     />

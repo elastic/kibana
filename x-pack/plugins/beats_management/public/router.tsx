@@ -22,7 +22,6 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
   const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys(), {
     '/beat/': '/beat/:beatId/',
   });
-
   return (
     <HashRouter basename="/management/beats_management">
       <Subscribe to={[BeatsContainer, TagsContainer]}>
@@ -31,45 +30,50 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
             {/* Redirects mapping */}
             <Switch>
               {/* License check (UI displays when license exists but is expired) */}
-              <Route
-                render={props =>
-                  get(libs.framework.info, 'license.expired', true) &&
-                  !props.location.pathname.includes('/error/invalid_license') ? (
-                    <Redirect to="/error/invalid_license" />
-                  ) : null
-                }
-              />
+              {get(libs.framework.info, 'license.expired', true) && (
+                <Route
+                  render={props =>
+                    !props.location.pathname.includes('/error') ? (
+                      <Redirect to="/error/invalid_license" />
+                    ) : null
+                  }
+                />
+              )}
 
               {/* Ensure security is eanabled for elastic and kibana */}
-              <Route
-                render={props =>
-                  get(libs.framework.info, 'security.enabled', true) &&
-                  !props.location.pathname.includes('/error/enforce_security') ? (
-                    <Redirect to="/error/enforce_security" />
-                  ) : null
-                }
-              />
+              {!get(libs.framework.info, 'security.enabled', true) && (
+                <Route
+                  render={props =>
+                    !props.location.pathname.includes('/error') ? (
+                      <Redirect to="/error/enforce_security" />
+                    ) : null
+                  }
+                />
+              )}
 
               {/* Make sure the user has correct permissions */}
-              <Route
-                render={props =>
-                  !libs.framework.currentUserHasOneOfRoles(
-                    ['beats_admin'].concat(libs.framework.info.settings.defaultUserRoles)
-                  ) && !props.location.pathname.includes('/error/no_access') ? (
-                    <Redirect to="/error/no_access" />
-                  ) : null
-                }
-              />
+              {!libs.framework.currentUserHasOneOfRoles(
+                ['beats_admin'].concat(libs.framework.info.settings.defaultUserRoles)
+              ) && (
+                <Route
+                  render={props =>
+                    !props.location.pathname.includes('/error') ? (
+                      <Redirect to="/error/no_access" />
+                    ) : null
+                  }
+                />
+              )}
 
               {/* If there are no beats or tags yet, redirect to the walkthrough */}
-              <Route
-                render={props =>
-                  beats.state.list.length + tags.state.list.length === 0 &&
-                  !props.location.pathname.includes('/overview/initial') ? (
-                    <Redirect to="/walkthrough/initial/help" />
-                  ) : null
-                }
-              />
+              {beats.state.list.length + tags.state.list.length === 0 && (
+                <Route
+                  render={props =>
+                    !props.location.pathname.includes('/walkthrough') ? (
+                      <Redirect to="/walkthrough/initial" />
+                    ) : null
+                  }
+                />
+              )}
 
               {/* This app does not make use of a homepage. The mainpage is beats/overivew */}
               <Route path="/" exact={true} render={() => <Redirect to="/overview/beats" />} />

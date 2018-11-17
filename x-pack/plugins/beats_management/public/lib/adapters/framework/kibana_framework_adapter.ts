@@ -20,21 +20,6 @@ import { FrameworkAdapter, FrameworkInfo, FrameworkUser, ManagementAPI } from '.
 import { RuntimeFrameworkInfo } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
-  private xpackInfo: FrameworkInfo | null = null;
-  private adapterService: KibanaAdapterServiceProvider;
-  private shieldUser: FrameworkUser | null = null;
-
-  constructor(
-    private readonly PLUGIN_ID: string,
-    private readonly management: ManagementAPI,
-    private readonly whenRoute: UIRoutes['when'],
-    private readonly getBasePath: () => string,
-    private readonly onKibanaReady: (Private: any) => void,
-    private readonly XPackInfoProvider: unknown
-  ) {
-    this.adapterService = new KibanaAdapterServiceProvider();
-  }
-
   public get info() {
     if (this.xpackInfo) {
       return this.xpackInfo;
@@ -43,17 +28,31 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
+  public get currentUser() {
+    return this.shieldUser!;
+  }
+  private xpackInfo: FrameworkInfo | null = null;
+  private adapterService: KibanaAdapterServiceProvider;
+  private shieldUser: FrameworkUser | null = null;
+
+  constructor(
+    private readonly PLUGIN_ID: string,
+    private readonly management: ManagementAPI,
+    private readonly routes: UIRoutes,
+    private readonly getBasePath: () => string,
+    private readonly onKibanaReady: (Private: any) => void,
+    private readonly XPackInfoProvider: unknown
+  ) {
+    this.adapterService = new KibanaAdapterServiceProvider();
+  }
+
   public setUISettings = (key: string, value: any) => {
     this.adapterService.callOrBuffer(({ config }) => {
       config.set(key, value);
     });
   };
 
-  public get currentUser() {
-    return this.shieldUser!;
-  }
-
-  public hookFrameworkLifecycle(): Promise<void> {
+  public waitUntilFrameworkReady(): Promise<void> {
     return new Promise(resolve => {
       this.onKibanaReady(async (Private: any, $injector: any) => {
         const xpackInfo = Private(this.XPackInfoProvider);
@@ -92,40 +91,25 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public renderUIAtPath(path: string, component: React.ReactElement<any>) {
+    const DOM_ELEMENT_NAME = this.PLUGIN_ID.replace('_', '-');
     const adapter = this;
-    this.whenRoute(
-      `${path}${[...Array(10)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
+    this.routes.when(
+      `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
       {
-        template: `<${this.PLUGIN_ID.replace('_', '-')}><div id="${this.PLUGIN_ID.replace(
-          '_',
-          ''
-        )}ReactRoot" style="flex-grow: 1; height: 100vh; background: #f5f5f5"></div></${this.PLUGIN_ID.replace(
-          '_',
-          '-'
-        )}>`,
-        controller: ($scope: any, $route: any, $timeout: any) => {
-          $timeout(
-            () => {
-              const elem = document.getElementById(
-                adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot'
-              );
-              if (!elem) {
-                throw new Error(
-                  `Error rendering UI for plugin ${
-                    this.PLUGIN_ID
-                  }, element ${adapter.PLUGIN_ID.replace('_', '') + 'ReactRoot'} could not be found`
-                );
-              }
-
-              ReactDOM.render(component as React.ReactElement<any>, elem);
+        template: `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`,
+        controllerAs: 'beatsManagement',
+        // tslint:disable-next-line: max-classes-per-file
+        controller: class BeatsManagementController {
+          constructor($scope: any, $route: any) {
+            $scope.$$postDigest(() => {
+              const elem = document.getElementById(`${DOM_ELEMENT_NAME}ReactRoot`);
+              ReactDOM.render(component, elem);
               adapter.manageAngularLifecycle($scope, $route, elem);
-            },
-            0,
-            false
-          );
-          $scope.$onInit = () => {
-            $scope.topNavMenu = [];
-          };
+            });
+            $scope.$onInit = () => {
+              $scope.topNavMenu = [];
+            };
+          }
         },
       }
     );
@@ -173,20 +157,22 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   }
 
-  private manageAngularLifecycle($scope: any, $route: any, elem: HTMLElement) {
+  private manageAngularLifecycle($scope: any, $route: any, elem: any) {
     const lastRoute = $route.current;
-    const deregister = $scope.$on('$locationChangeSuccess', () => {
-      const currentRoute = $route.current;
-      // if templates are the same we are on the same route
-      if (lastRoute.$$route.template === currentRoute.$$route.template) {
-        // this prevents angular from destroying scope
-        $route.current = lastRoute;
-      }
-    });
+    // const deregister = $scope.$on('$locationChangeSuccess', () => {
+    //   const currentRoute = $route.current;
+    //   // if templates are the same we are on the same route
+    //   if (lastRoute.$$route.template === currentRoute.$$route.template) {
+    //     console.log('saving');
+    //     // this prevents angular from destroying scope
+    //     $route.current = lastRoute;
+    //   }
+    // });
     $scope.$on('$destroy', () => {
-      if (deregister) {
-        deregister();
-      }
+      // if (deregister) {
+      //   deregister();
+      // }
+
       // manually unmount component when scope is destroyed
       if (elem) {
         ReactDOM.unmountComponentAtNode(elem);
