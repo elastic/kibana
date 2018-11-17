@@ -6,6 +6,7 @@
 
 import {
   EDIT_CLUSTER_START,
+  EDIT_CLUSTER_STOP,
 } from '../action_types';
 
 import { loadClusters } from './load_clusters';

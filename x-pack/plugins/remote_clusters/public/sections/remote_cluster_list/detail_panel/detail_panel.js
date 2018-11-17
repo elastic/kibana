@@ -28,7 +28,6 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
-import { getRouterLinkProps } from '../../../services';
 
 import { ConnectionStatus } from '../components';
 
