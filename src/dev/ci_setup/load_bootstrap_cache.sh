@@ -2,8 +2,11 @@
 
 set -e
 
-if [ -f "$HOME/.kibana/bootstrap_cache/master.tar" ]; then
-  tar -xf "$HOME/.kibana/bootstrap_cache/master.tar";
+bootstrapCache="$HOME/.kibana/bootstrap_cache/master.tar"
+
+if [ -f "$bootstrapCache" ]; then
+  echo "extracting bootstrap_cache from $bootstrapCache";
+  tar -xf "$bootstrapCache";
 else
   echo "bootstrap_cache missing";
   exit 1;
