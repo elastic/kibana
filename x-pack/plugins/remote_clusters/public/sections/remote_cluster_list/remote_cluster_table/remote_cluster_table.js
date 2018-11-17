@@ -9,12 +9,11 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiButton,
   EuiLink,
   EuiInMemoryTable,
 } from '@elastic/eui';
 
-import { ConnectionStatus } from '../components';
+import { ConnectionStatus, DisconnectButton } from '../components';
 
 export class RemoteClusterTableUi extends Component {
   static propTypes = {
@@ -126,12 +125,9 @@ export class RemoteClusterTableUi extends Component {
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <EuiButton color="danger">
-          <FormattedMessage
-            id="xpack.remoteClusters.remoteClusterList.table.disconnectButtonLabel"
-            defaultMessage="Disconnect remote clusters"
-          />
-        </EuiButton>
+        <DisconnectButton
+          clusterNames={selectedItems.map(({ name }) => name)}
+        />
       ) : undefined,
       onChange: this.onSearch,
       box: {

@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ConnectionStatus } from './connection_status';
-export { DisconnectButton } from './disconnect_button';
+export { DisconnectButton } from './disconnect_button.container';
