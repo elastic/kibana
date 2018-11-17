@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 // SASS TODO: Import wizard.scss instead
 // import 'plugins/kibana/visualize/wizard/wizard.less';
 import './steps/index_or_search';

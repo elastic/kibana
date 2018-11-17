@@ -37,7 +37,7 @@ async function startApp(libs: FrontendLibs) {
     });
 
     libs.framework.registerManagementUI({
-      name: 'Central Management',
+      name: 'Central Management (Beta)',
       basePath: BASE_PATH,
     });
   }
