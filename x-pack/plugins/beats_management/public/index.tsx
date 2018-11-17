@@ -9,6 +9,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Provider as UnstatedProvider } from 'unstated';
 import { BASE_PATH } from '../common/constants';
+import { Background } from './components/layouts/background';
 import { BreadcrumbProvider } from './components/navigation/route_with_breadcrumb';
 import { BeatsContainer } from './containers/beats';
 import { TagsContainer } from './containers/tags';
@@ -22,7 +23,9 @@ async function startApp(libs: FrontendLibs) {
     <ThemeProvider theme={{ eui: euiVars }}>
       <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
         <BreadcrumbProvider>
-          <AppRouter libs={libs} />
+          <Background>
+            <AppRouter libs={libs} />
+          </Background>
         </BreadcrumbProvider>
       </UnstatedProvider>
     </ThemeProvider>
