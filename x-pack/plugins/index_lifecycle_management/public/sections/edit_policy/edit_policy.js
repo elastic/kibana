@@ -24,7 +24,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiDescribedFormGroup
+  EuiDescribedFormGroup,
 } from '@elastic/eui';
 import { HotPhase } from './components/hot_phase';
 import { WarmPhase } from './components/warm_phase';
@@ -53,7 +53,7 @@ class EditPolicyUi extends Component {
       isShowingErrors: false,
       isShowingNodeDetailsFlyout: false,
       selectedNodeAttrsForDetails: undefined,
-      isShowingPolicyJsonFlyout: false
+      isShowingPolicyJsonFlyout: false,
     };
   }
   selectPolicy = policyName => {
@@ -71,10 +71,8 @@ class EditPolicyUi extends Component {
       isPolicyListLoaded,
       fetchPolicies,
       match: {
-        params: {
-          policyName
-        }
-      }
+        params: { policyName },
+      },
     } = this.props;
     if (policyName) {
       const decodedPolicyName = decodeURIComponent(policyName);
@@ -90,21 +88,18 @@ class EditPolicyUi extends Component {
   backToPolicyList = () => {
     this.props.setSelectedPolicy(null);
     goToPolicyList();
-  }
+  };
   submit = async () => {
     const { intl } = this.props;
     this.setState({ isShowingErrors: true });
-    const {
-      saveLifecyclePolicy,
-      lifecycle,
-      saveAsNewPolicy,
-      firstError
-    } = this.props;
+    const { saveLifecyclePolicy, lifecycle, saveAsNewPolicy, firstError } = this.props;
     if (firstError) {
-      toastNotifications.addDanger(intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage',
-        defaultMessage: 'Please the fix errors on the page'
-      }));
+      toastNotifications.addDanger(
+        intl.formatMessage({
+          id: 'xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage',
+          defaultMessage: 'Please the fix errors on the page',
+        })
+      );
       const element = document.getElementById(`${firstError}-row`);
       if (element) {
         element.scrollIntoView();
@@ -133,7 +128,7 @@ class EditPolicyUi extends Component {
       setSelectedPolicyName,
       isNewPolicy,
       lifecycle,
-      originalPolicyName
+      originalPolicyName,
     } = this.props;
     const selectedPolicyName = selectedPolicy.name;
     const { isShowingErrors } = this.state;
@@ -151,12 +146,15 @@ class EditPolicyUi extends Component {
                 {isNewPolicy
                   ? intl.formatMessage({
                     id: 'xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage',
-                    defaultMessage: 'Create an index lifecycle policy'
+                    defaultMessage: 'Create an index lifecycle policy',
                   })
-                  : intl.formatMessage({
-                    id: 'xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage',
-                    defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
-                  }, { originalPolicyName }) }
+                  : intl.formatMessage(
+                    {
+                      id: 'xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage',
+                      defaultMessage: 'Edit index lifecycle policy {originalPolicyName}',
+                    },
+                    { originalPolicyName }
+                  )}
               </h4>
             </EuiTitle>
             <div className="euiAnimateContentLoad">
@@ -176,7 +174,8 @@ class EditPolicyUi extends Component {
                               id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
                               defaultMessage="You are editing an existing policy"
                             />
-                          </strong>.{' '}
+                          </strong>
+                          .{' '}
                           <FormattedMessage
                             id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
                             defaultMessage={`Any changes you make will affect indices that this policy is attached to.
@@ -224,7 +223,7 @@ class EditPolicyUi extends Component {
                       id={STRUCTURE_POLICY_NAME}
                       label={intl.formatMessage({
                         id: 'xpack.indexLifecycleMgmt.editPolicy.policyNameLabel',
-                        defaultMessage: 'Policy name'
+                        defaultMessage: 'Policy name',
                       })}
                       errorKey={STRUCTURE_POLICY_NAME}
                       isShowingErrors={isShowingErrors}
@@ -268,20 +267,26 @@ class EditPolicyUi extends Component {
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        iconType="check"
+                        iconSide="left"
+                        onClick={this.submit}
+                        color="secondary"
+                      >
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
+                          defaultMessage="Save your policy"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
                       <EuiButtonEmpty onClick={this.backToPolicyList}>
                         <FormattedMessage
                           id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
                           defaultMessage="Cancel"
                         />
                       </EuiButtonEmpty>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton fill onClick={this.submit}>
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
-                          defaultMessage="Save your policy"
-                        />
-                      </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
