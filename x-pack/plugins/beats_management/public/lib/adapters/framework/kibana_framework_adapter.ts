@@ -16,7 +16,13 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UIRoutes } from 'ui/routes';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
-import { FrameworkAdapter, FrameworkInfo, FrameworkUser, ManagementAPI } from './adapter_types';
+import {
+  FrameworkAdapter,
+  FrameworkInfo,
+  FrameworkUser,
+  ManagementAPI,
+  RuntimeFrameworkUser,
+} from './adapter_types';
 import { RuntimeFrameworkInfo } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
@@ -84,6 +90,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         this.xpackInfo = xpackInfoUnpacked;
 
         this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+
+        const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
+        if (assertUser.isLeft()) {
+          throw new Error(
+            `Error parsing user info in ${this.PLUGIN_ID},   ${PathReporter.report(assertUser)[0]}`
+          );
+        }
 
         resolve();
       });

@@ -66,12 +66,14 @@ export interface ManagementAPI {
   register(sectionId: string, options: { display: string; icon: string; order: number }): void;
 }
 
-export interface FrameworkUser {
-  email: string | null;
-  enabled: boolean;
-  full_name: string | null;
-  metadata: { _reserved: true };
-  roles: string[];
-  scope: string[];
-  username: string;
-}
+export const RuntimeFrameworkUser = t.interface(
+  {
+    username: t.string,
+    roles: t.array(t.string),
+    full_name: t.union([t.null, t.string]),
+    email: t.union([t.null, t.string]),
+    enabled: t.boolean,
+  },
+  'FrameworkUser'
+);
+export interface FrameworkUser extends t.TypeOf<typeof RuntimeFrameworkUser> {}

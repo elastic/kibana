@@ -135,7 +135,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         );
       }
 
-      return await user;
+      return user;
     } catch (e) {
       return null;
     }
