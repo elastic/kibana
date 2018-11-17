@@ -90,18 +90,7 @@ export class PolicyTableUi extends Component {
             </p>
           </Fragment>
         }
-        actions={
-          <EuiButton
-            href={`#${BASE_PATH}policies/edit`}
-            fill
-            iconType="plusInCircle"
-          >
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel"
-              defaultMessage="Create new policy"
-            />
-          </EuiButton>
-        }
+        actions={this.renderCreatePolicyButton()}
       />
     );
   }
@@ -177,7 +166,21 @@ export class PolicyTableUi extends Component {
     }
     return value;
   }
-
+  renderCreatePolicyButton() {
+    return (
+      <EuiButton
+        href={`#${BASE_PATH}policies/edit`}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="createPolicyButton"
+      >
+        <FormattedMessage
+          id="xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel"
+          defaultMessage="Create new policy"
+        />
+      </EuiButton>
+    );
+  }
   buildRowCells(policy) {
     const { intl } = this.props;
     const { name } = policy;
@@ -338,16 +341,12 @@ export class PolicyTableUi extends Component {
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  data-test-subj="createUserButton"
-                  href={`#${BASE_PATH}policies/edit`}
-                  iconType="plusInCircle"
-                >
-                  Create new policy
-                </EuiButton>
-              </EuiFlexItem>
+              { policies.length ? (
+                <EuiFlexItem grow={false}>
+                  {this.renderCreatePolicyButton()}
+                </EuiFlexItem>
+              ) : null}
+
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiText>
@@ -362,7 +361,7 @@ export class PolicyTableUi extends Component {
             <EuiSpacer />
             {content}
             <EuiSpacer size="m" />
-            {policies.length > 0 ? this.renderPager() : null}
+            {policies.length ? this.renderPager() : null}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
