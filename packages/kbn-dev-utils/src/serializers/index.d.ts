@@ -17,30 +17,4 @@
  * under the License.
  */
 
-import { createFunctionalTestRunner } from '../../../../../src/functional_test_runner';
-import { CliError } from './run_cli';
-
-export async function runFtr({
-  configPath,
-  options: { log, bail, grep, updateBaselines, suiteTags },
-}) {
-  const ftr = createFunctionalTestRunner({
-    log,
-    configFile: configPath,
-    configOverrides: {
-      mochaOpts: {
-        bail: !!bail,
-        grep,
-      },
-      updateBaselines,
-      suiteTags,
-    },
-  });
-
-  const failureCount = await ftr.run();
-  if (failureCount > 0) {
-    throw new CliError(
-      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
-    );
-  }
-}
+export { createAbsolutePathSerializer } from './absolute_path_serializer';

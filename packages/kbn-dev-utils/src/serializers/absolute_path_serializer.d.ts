@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { withProcRunner } from './proc_runner';
-export { ToolingLog, ToolingLogTextWriter, pickLevelFromFlags } from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
+export function createAbsolutePathSerializer(
+  rootPath: string
+): { print(...args: any[]): string; test(value: any): boolean };
