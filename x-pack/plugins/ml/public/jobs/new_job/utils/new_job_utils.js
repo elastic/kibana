@@ -115,3 +115,44 @@ export function focusOnResultsLink(linkId, $timeout) {
     $(`#${linkId}`).focus();
   }, 0);
 }
+
+// Only model plot cardinality relevant
+// format:[{id:"cardinality_model_plot_high",modelPlotCardinality:11405}, {id:"cardinality_partition_field",fieldName:"clientip"}]
+export function checkCardinalitySuccess(data) {
+  const response = {
+    success: true,
+  };
+  // There were no fields to run cardinality on.
+  if (Array.isArray(data) && data.length === 0) {
+    return response;
+  }
+
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].id === 'success_cardinality') {
+      break;
+    }
+
+    if (data[i].id === 'cardinality_model_plot_high') {
+      response.success = false;
+      response.highCardinality = data[i].modelPlotCardinality;
+      break;
+    }
+  }
+
+  return response;
+}
+
+// Ensure validation endpoints are given job with expected minimum fields
+export function getMinimalValidJob() {
+  return {
+    analysis_config: {
+      bucket_span: '15m',
+      detectors: [],
+      influencers: []
+    },
+    data_description: { time_field: '@timestamp' },
+    datafeed_config: {
+      indices: []
+    }
+  };
+}
