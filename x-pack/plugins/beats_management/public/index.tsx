@@ -32,11 +32,13 @@ async function startApp(libs: FrontendLibs) {
 
   if (libs.framework.licenseIsAtLeast('standard')) {
     libs.framework.registerManagementSection({
+      id: 'beats',
       name: 'Beats',
       iconName: 'logoBeats',
     });
 
     libs.framework.registerManagementUI({
+      sectionId: 'beats',
       name: 'Central Management (Beta)',
       basePath: BASE_PATH,
     });

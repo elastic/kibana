@@ -97,19 +97,16 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
       {
         template: `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`,
-        controllerAs: 'beatsManagement',
         // tslint:disable-next-line: max-classes-per-file
-        controller: class BeatsManagementController {
-          constructor($scope: any, $route: any) {
-            $scope.$$postDigest(() => {
-              const elem = document.getElementById(`${DOM_ELEMENT_NAME}ReactRoot`);
-              ReactDOM.render(component, elem);
-              adapter.manageAngularLifecycle($scope, $route, elem);
-            });
-            $scope.$onInit = () => {
-              $scope.topNavMenu = [];
-            };
-          }
+        controller: ($scope: any, $route: any) => {
+          $scope.$$postDigest(() => {
+            const elem = document.getElementById(`${DOM_ELEMENT_NAME}ReactRoot`);
+            ReactDOM.render(component, elem);
+            adapter.manageAngularLifecycle($scope, $route, elem);
+          });
+          $scope.$onInit = () => {
+            $scope.topNavMenu = [];
+          };
         },
       }
     );
@@ -133,13 +130,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerManagementUI(settings: {
-    id?: string;
+    sectionId?: string;
     name: string;
     basePath: string;
     visable?: boolean;
     order?: number;
   }) {
-    const sectionId = settings.id || this.PLUGIN_ID;
+    const sectionId = settings.sectionId || this.PLUGIN_ID;
 
     if (!this.management.hasItem(sectionId)) {
       throw new Error(
@@ -159,23 +156,28 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   private manageAngularLifecycle($scope: any, $route: any, elem: any) {
     const lastRoute = $route.current;
-    // const deregister = $scope.$on('$locationChangeSuccess', () => {
-    //   const currentRoute = $route.current;
-    //   // if templates are the same we are on the same route
-    //   if (lastRoute.$$route.template === currentRoute.$$route.template) {
-    //     console.log('saving');
-    //     // this prevents angular from destroying scope
-    //     $route.current = lastRoute;
-    //   }
-    // });
+    const deregister = $scope.$on('$locationChangeSuccess', () => {
+      const currentRoute = $route.current;
+      // if templates are the same we are on the same route
+      if (lastRoute.$$route.template === currentRoute.$$route.template) {
+        // this prevents angular from destroying scope
+        $route.current = lastRoute;
+      } else {
+        if (elem) {
+          ReactDOM.unmountComponentAtNode(elem);
+          elem.remove();
+        }
+      }
+    });
     $scope.$on('$destroy', () => {
-      // if (deregister) {
-      //   deregister();
-      // }
+      if (deregister) {
+        deregister();
+      }
 
       // manually unmount component when scope is destroyed
       if (elem) {
         ReactDOM.unmountComponentAtNode(elem);
+        elem.remove();
       }
     });
   }
