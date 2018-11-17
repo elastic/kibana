@@ -6,10 +6,12 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import cloneDeep from 'lodash/lang/cloneDeep';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiComboBox,
   EuiDescribedFormGroup,
@@ -31,113 +33,109 @@ import {
   isSeedNodePortValid,
 } from '../../services';
 
+const defaultFields = {
+  name: '',
+  seeds: [],
+};
+
 export class RemoteClusterFormUi extends Component {
   static propTypes = {
-    save: PropTypes.func,
+    save: PropTypes.func.isRequired,
+    cancel: PropTypes.func,
     isSaving: PropTypes.bool,
     saveError: PropTypes.object,
-    areErrorsVisible: PropTypes.bool,
     fields: PropTypes.object,
-    fieldsErrors: PropTypes.object,
-    onFieldsChange: PropTypes.func,
+    disabledFields: PropTypes.object,
+  }
+
+  static defaultProps = {
+    fields: cloneDeep(defaultFields),
+    disabledFields: {},
   }
 
   constructor(props) {
     super(props);
 
+    const { fields, disabledFields } = props;
+
     this.state = {
       localSeedErrors: [],
+      fields,
+      disabledFields,
+      fieldsErrors: this.getFieldsErrors(fields),
+      areErrorsVisible: false,
     };
   }
 
-  renderActions() {
-    const { isSaving, save } = this.props;
+  getFieldsErrors(fields) {
+    const { name, seeds } = fields;
 
-    if (isSaving) {
-      return (
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l"/>
-          </EuiFlexItem>
+    const errors = {};
 
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.remoteClusters.add.actions.savingText"
-                defaultMessage="Saving"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
-    return (
-      <EuiButton
-        color="secondary"
-        iconType="check"
-        onClick={save}
-        fill
-      >
+    if (!name || !name.trim()) {
+      errors.name = (
         <FormattedMessage
-          id="xpack.remoteClusters.add.saveButtonLabel"
-          defaultMessage="Save"
+          id="xpack.remoteClusters.form.errors.nameMissing"
+          defaultMessage="Name is required."
         />
-      </EuiButton>
-    );
-  }
-
-  renderSavingFeedback() {
-    if (this.props.isAddingRemoteCluster) {
-      return (
-        <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
-        </EuiOverlayMask>
       );
     }
 
-    return null;
-  }
-
-  renderSaveErrorFeedback() {
-    const { saveError } = this.props;
-
-    if (saveError) {
-      const { message, cause } = saveError;
-
-      let errorBody;
-
-      if (cause) {
-        if (cause.length === 1) {
-          errorBody = (
-            <p>{cause[0]}</p>
-          );
-        } else {
-          errorBody = (
-            <ul>
-              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
-            </ul>
-          );
-        }
-      }
-
-      return (
-        <Fragment>
-          <EuiCallOut
-            title={message}
-            icon="cross"
-            color="danger"
-          >
-            {errorBody}
-          </EuiCallOut>
-
-          <EuiSpacer />
-        </Fragment>
+    if (!seeds.some(seed => Boolean(seed.trim()))) {
+      errors.seeds = (
+        <FormattedMessage
+          id="xpack.remoteClusters.form.errors.seedMissing"
+          defaultMessage="At least one seed is required."
+        />
       );
     }
 
-    return null;
+    return errors;
   }
+
+  onFieldsChange = (changedFields) => {
+    const { fields: prevFields } = this.state;
+
+    const newFields = {
+      ...prevFields,
+      ...changedFields,
+    };
+
+    this.setState({
+      fields: newFields,
+      fieldsErrors: this.getFieldsErrors(newFields),
+    });
+  };
+
+  getAllFields() {
+    const {
+      fields: {
+        name,
+        seeds,
+      },
+    } = this.state;
+
+    return {
+      name: name,
+      seeds,
+    };
+  }
+
+  save = () => {
+    const { save } = this.props;
+    const { fieldsErrors } = this.state;
+
+    if (Object.keys(fieldsErrors).length > 0) {
+      this.setState({
+        areErrorsVisible: true,
+      });
+      return;
+    }
+
+    const cluster = this.getAllFields();
+
+    save(cluster);
+  };
 
   getLocalSeedErrors = (seedNode) => {
     const { intl } = this.props;
@@ -166,8 +164,8 @@ export class RemoteClusterFormUi extends Component {
     return errors;
   };
 
-  onCreateOption = (searchValue) => {
-    const localSeedErrors = this.getLocalSeedErrors(searchValue);
+  onCreateSeed = (newSeed) => {
+    const localSeedErrors = this.getLocalSeedErrors(newSeed);
 
     if (localSeedErrors.length !== 0) {
       this.setState({
@@ -179,33 +177,32 @@ export class RemoteClusterFormUi extends Component {
     }
 
     const {
-      onFieldsChange,
       fields: {
         seeds,
       },
-    } = this.props;
+    } = this.state;
 
     const newSeeds = seeds.slice(0);
-    newSeeds.push(searchValue.toLowerCase());
-    onFieldsChange({ seeds: newSeeds });
+    newSeeds.push(newSeed.toLowerCase());
+    this.onFieldsChange({ seeds: newSeeds });
   };
 
-  onSearchChange = (searchValue) => {
+  onSeedsInputChange = (seedInput) => {
+    const { intl } = this.props;
+
     const {
       fields: {
         seeds,
       },
-      intl,
-    } = this.props;
-
-    const { localSeedErrors } = this.state;
+      localSeedErrors,
+    } = this.state;
 
     // Allow typing to clear the errors, but not to add new ones.
-    const errors = (!searchValue || this.getLocalSeedErrors(searchValue).length === 0) ? [] : localSeedErrors;
+    const errors = (!seedInput || this.getLocalSeedErrors(seedInput).length === 0) ? [] : localSeedErrors;
 
     // EuiComboBox internally checks for duplicates and prevents calling onCreateOption if the
     // input is a duplicate. So we need to surface this error here instead.
-    const isDuplicate = seeds.includes(searchValue);
+    const isDuplicate = seeds.includes(seedInput);
 
     if (isDuplicate) {
       errors.push(intl.formatMessage({
@@ -219,9 +216,8 @@ export class RemoteClusterFormUi extends Component {
     });
   };
 
-  onChange = (selectedOptions) => {
-    const { onFieldsChange } = this.props;
-    onFieldsChange({ seeds: selectedOptions.map(({ label }) => label) });
+  onSeedsChange = (seeds) => {
+    this.onFieldsChange({ seeds: seeds.map(({ label }) => label) });
   };
 
   renderSeeds() {
@@ -233,10 +229,10 @@ export class RemoteClusterFormUi extends Component {
       fieldsErrors: {
         seeds: errorsSeeds,
       },
-      intl,
-    } = this.props;
+      localSeedErrors,
+    } = this.state;
 
-    const { localSeedErrors } = this.state;
+    const { intl } = this.props;
 
     // Show errors if there is a general form error or local errors.
     const areFormErrorsVisible = Boolean(areErrorsVisible && errorsSeeds);
@@ -297,9 +293,9 @@ export class RemoteClusterFormUi extends Component {
               defaultMessage: 'Type and then hit ENTER',
             })}
             selectedOptions={formattedSeeds}
-            onCreateOption={this.onCreateOption}
-            onChange={this.onChange}
-            onSearchChange={this.onSearchChange}
+            onCreateOption={this.onCreateSeed}
+            onChange={this.onSeedsChange}
+            onSearchChange={this.onSeedsInputChange}
             isInvalid={showErrors}
             fullWidth
           />
@@ -308,17 +304,135 @@ export class RemoteClusterFormUi extends Component {
     );
   }
 
+  renderActions() {
+    const { isSaving, cancel } = this.props;
+
+    if (isSaving) {
+      return (
+        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l"/>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <FormattedMessage
+                id="xpack.remoteClusters.form.actions.savingText"
+                defaultMessage="Saving"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    let cancelButton;
+
+    if (cancel) {
+      cancelButton = (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            color="primary"
+            onClick={cancel}
+          >
+            <FormattedMessage
+              id="xpack.remoteClusters.form.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      );
+    }
+
+    return (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="secondary"
+            iconType="check"
+            onClick={this.save}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.remoteClusters.form.saveButtonLabel"
+              defaultMessage="Save"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+
+        {cancelButton}
+      </EuiFlexGroup>
+    );
+  }
+
+  renderSavingFeedback() {
+    if (this.props.isSaving) {
+      return (
+        <EuiOverlayMask>
+          <EuiLoadingKibana size="xl"/>
+        </EuiOverlayMask>
+      );
+    }
+
+    return null;
+  }
+
+  renderSaveErrorFeedback() {
+    const { saveError } = this.props;
+
+    if (saveError) {
+      const { message, cause } = saveError;
+
+      let errorBody;
+
+      if (cause) {
+        if (cause.length === 1) {
+          errorBody = (
+            <p>{cause[0]}</p>
+          );
+        } else {
+          errorBody = (
+            <ul>
+              {cause.map(causeValue => <li key={causeValue}>{causeValue}</li>)}
+            </ul>
+          );
+        }
+      }
+
+      return (
+        <Fragment>
+          <EuiCallOut
+            title={message}
+            icon="cross"
+            color="danger"
+          >
+            {errorBody}
+          </EuiCallOut>
+
+          <EuiSpacer />
+        </Fragment>
+      );
+    }
+
+    return null;
+  }
+
   render() {
+    const {
+      disabledFields: {
+        name: disabledName,
+      },
+    } = this.props;
+
     const {
       areErrorsVisible,
       fields: {
-        clusterName,
+        name,
       },
       fieldsErrors: {
-        clusterName: errorClusterName,
+        name: errorClusterName,
       },
-      onFieldsChange,
-    } = this.props;
+    } = this.state;
 
     return (
       <Fragment>
@@ -357,9 +471,10 @@ export class RemoteClusterFormUi extends Component {
             >
               <EuiFieldText
                 isInvalid={Boolean(areErrorsVisible && errorClusterName)}
-                value={clusterName}
-                onChange={e => onFieldsChange({ clusterName: e.target.value })}
+                value={name}
+                onChange={e => this.onFieldsChange({ name: e.target.value })}
                 fullWidth
+                disabled={disabledName}
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

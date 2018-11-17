@@ -40,7 +40,7 @@ const renderReact = async (elem) => {
   );
 };
 
-routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
+routes.when(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
   template: template,
   controllerAs: 'remoteClusters',
   controller: class RemoteClustersController {
@@ -59,7 +59,6 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?`, {
         const appRoute = $route.current;
         const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
           const currentRoute = $route.current;
-
           const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
 
           // When we navigate within rollups, prevent Angular from re-matching the route and

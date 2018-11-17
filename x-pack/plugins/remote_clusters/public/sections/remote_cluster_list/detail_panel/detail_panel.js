@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiButton,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -17,6 +18,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -24,6 +26,9 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+
+import { CRUD_APP_BASE_PATH } from '../../../constants';
+import { getRouterLinkProps } from '../../../services';
 
 import { ConnectionStatus } from '../components';
 
@@ -186,6 +191,32 @@ export class DetailPanelUi extends Component {
         </EuiFlyoutHeader>
 
         {content}
+
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButton color="danger">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.disconnectButtonLabel"
+                  defaultMessage="Disconnect"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
+                fill
+                color="primary"
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.editButtonLabel"
+                  defaultMessage="Edit"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }

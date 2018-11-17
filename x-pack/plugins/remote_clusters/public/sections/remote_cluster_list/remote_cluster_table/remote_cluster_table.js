@@ -19,7 +19,7 @@ import { ConnectionStatus } from '../components';
 export class RemoteClusterTableUi extends Component {
   static propTypes = {
     clusters: PropTypes.array,
-    closeDetailPanel: PropTypes.func.isRequired,
+    openDetailPanel: PropTypes.func.isRequired,
   }
 
   static defaultProps = {

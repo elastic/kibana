@@ -10,11 +10,16 @@ export {
 } from './detail_panel';
 
 export {
-  loadClusters
+  startEditingCluster,
+  stopEditingCluster,
+} from './edit_cluster';
+
+export {
+  loadClusters,
 } from './load_clusters';
 
 export {
-  refreshClusters
+  refreshClusters,
 } from './refresh_clusters';
 
 export {
