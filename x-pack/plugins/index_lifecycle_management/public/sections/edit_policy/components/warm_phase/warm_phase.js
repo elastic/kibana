@@ -93,6 +93,30 @@ class WarmPhaseUi extends PureComponent {
                   defaultMessage="Your index becomes read-only when it enters the warm phase. You can optimize this phase for search."
                 />
               </p>
+              {phaseData[PHASE_ENABLED] ? (
+                <EuiButton
+                  color="danger"
+                  onClick={async () => {
+                    await setPhaseData(PHASE_ENABLED, false);
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.deactivateWarmPhaseButton"
+                    defaultMessage="Deactivate warm phase"
+                  />
+                </EuiButton>
+              ) : (
+                <EuiButton
+                  onClick={async () => {
+                    await setPhaseData(PHASE_ENABLED, true);
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.activateWarmPhaseButton"
+                    defaultMessage="Activate warm phase"
+                  />
+                </EuiButton>
+              )}
               <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </Fragment>
           }
@@ -101,21 +125,6 @@ class WarmPhaseUi extends PureComponent {
           <Fragment>
             {phaseData[PHASE_ENABLED] ? (
               <Fragment>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <div>
-                    <EuiButton
-                      color="danger"
-                      onClick={async () => {
-                        await setPhaseData(PHASE_ENABLED, false);
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.deactivateWarmPhaseButton"
-                        defaultMessage="Deactivate warm phase"
-                      />
-                    </EuiButton>
-                  </div>
-                </EuiFormRow>
                 {hotPhaseRolloverEnabled ? (
                   <EuiFormRow
                     label={intl.formatMessage({
@@ -182,142 +191,131 @@ class WarmPhaseUi extends PureComponent {
               </Fragment>
             ) : (
               <EuiFormRow hasEmptyLabelSpace>
-                <div>
-                  <EuiButton
-                    onClick={async () => {
-                      await setPhaseData(PHASE_ENABLED, true);
-                    }}
-                  >
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.activateWarmPhaseButton"
-                      defaultMessage="Activate warm phase"
-                    />
-                  </EuiButton>
-                </div>
+                <div />
               </EuiFormRow>
             )}
           </Fragment>
         </EuiDescribedFormGroup>
         {phaseData[PHASE_ENABLED] ? (
-          <EuiDescribedFormGroup
-            title={
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkText"
-                  defaultMessage="Shrink"
-                />
-              </p>
-            }
-            description={
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkIndexExplanationText"
-                  defaultMessage="Shrink the index into a new index with fewer primary shards."
-                />{' '}
-                <LearnMoreLink docPath="indices-shrink-index.html#indices-shrink-index" />
-              </EuiTextColor>
-            }
-            fullWidth
-            titleSize="xs"
-          >
-            <Fragment>
-              <EuiSwitch
-                checked={phaseData[PHASE_SHRINK_ENABLED]}
-                onChange={async e => {
-                  await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
-                }}
-                label={intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel',
-                  defaultMessage: 'Shrink index',
-                })}
-              />
-              {phaseData[PHASE_SHRINK_ENABLED] ? (
-                <Fragment>
-                  <EuiSpacer />
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <ErrableFormRow
-                        id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
-                        label={intl.formatMessage({
-                          id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
-                          defaultMessage: 'Number of primary shards',
-                        })}
-                        errorKey={PHASE_PRIMARY_SHARD_COUNT}
-                        isShowingErrors={isShowingErrors}
-                        errors={errors}
-                      >
-                        <EuiFieldNumber
-                          value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
-                          onChange={async e => {
-                            await setPhaseData(PHASE_PRIMARY_SHARD_COUNT, e.target.value);
-                          }}
-                          min={1}
-                        />
-                      </ErrableFormRow>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiSpacer />
-                </Fragment>
-              ) : null}
-            </Fragment>
-          </EuiDescribedFormGroup>
-        ) : null}
-        {phaseData[PHASE_ENABLED] ? (
-          <EuiDescribedFormGroup
-            title={
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataText"
-                  defaultMessage="Force merge"
-                />
-              </p>
-            }
-            description={
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataExplanationText"
-                  defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
-                />{' '}
-                <LearnMoreLink docPath="indices-forcemerge.html" />
-              </EuiTextColor>
-            }
-            titleSize="xs"
-            fullWidth
-          >
-            <EuiSwitch
-              label={intl.formatMessage({
-                id: 'xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel',
-                defaultMessage: 'Force merge data',
-              })}
-              checked={phaseData[PHASE_FORCE_MERGE_ENABLED]}
-              onChange={async e => {
-                await setPhaseData(PHASE_FORCE_MERGE_ENABLED, e.target.checked);
-              }}
-            />
-
-            <EuiSpacer />
-
-            {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
-              <ErrableFormRow
-                id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
-                label={intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
-                  defaultMessage: 'Number of segments',
-                })}
-                errorKey={PHASE_FORCE_MERGE_SEGMENTS}
-                isShowingErrors={isShowingErrors}
-                errors={errors}
-              >
-                <EuiFieldNumber
-                  value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
+          <Fragment>
+            <EuiDescribedFormGroup
+              title={
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkText"
+                    defaultMessage="Shrink"
+                  />
+                </p>
+              }
+              description={
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.shrinkIndexExplanationText"
+                    defaultMessage="Shrink the index into a new index with fewer primary shards."
+                  />{' '}
+                  <LearnMoreLink docPath="indices-shrink-index.html#indices-shrink-index" />
+                </EuiTextColor>
+              }
+              fullWidth
+              titleSize="xs"
+            >
+              <Fragment>
+                <EuiSwitch
+                  checked={phaseData[PHASE_SHRINK_ENABLED]}
                   onChange={async e => {
-                    await setPhaseData(PHASE_FORCE_MERGE_SEGMENTS, e.target.value);
+                    await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
                   }}
-                  min={1}
+                  label={intl.formatMessage({
+                    id: 'xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel',
+                    defaultMessage: 'Shrink index',
+                  })}
                 />
-              </ErrableFormRow>
-            ) : null}
-          </EuiDescribedFormGroup>
+                {phaseData[PHASE_SHRINK_ENABLED] ? (
+                  <Fragment>
+                    <EuiSpacer />
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <ErrableFormRow
+                          id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
+                          label={intl.formatMessage({
+                            id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
+                            defaultMessage: 'Number of primary shards',
+                          })}
+                          errorKey={PHASE_PRIMARY_SHARD_COUNT}
+                          isShowingErrors={isShowingErrors}
+                          errors={errors}
+                        >
+                          <EuiFieldNumber
+                            value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
+                            onChange={async e => {
+                              await setPhaseData(PHASE_PRIMARY_SHARD_COUNT, e.target.value);
+                            }}
+                            min={1}
+                          />
+                        </ErrableFormRow>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer />
+                  </Fragment>
+                ) : null}
+              </Fragment>
+            </EuiDescribedFormGroup>
+            <EuiDescribedFormGroup
+              title={
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataText"
+                    defaultMessage="Force merge"
+                  />
+                </p>
+              }
+              description={
+                <EuiTextColor color="subdued">
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.forceMergeDataExplanationText"
+                    defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
+                  />{' '}
+                  <LearnMoreLink docPath="indices-forcemerge.html" />
+                </EuiTextColor>
+              }
+              titleSize="xs"
+              fullWidth
+            >
+              <EuiSwitch
+                label={intl.formatMessage({
+                  id: 'xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel',
+                  defaultMessage: 'Force merge data',
+                })}
+                checked={phaseData[PHASE_FORCE_MERGE_ENABLED]}
+                onChange={async e => {
+                  await setPhaseData(PHASE_FORCE_MERGE_ENABLED, e.target.checked);
+                }}
+              />
+
+              <EuiSpacer />
+
+              {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
+                <ErrableFormRow
+                  id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
+                  label={intl.formatMessage({
+                    id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
+                    defaultMessage: 'Number of segments',
+                  })}
+                  errorKey={PHASE_FORCE_MERGE_SEGMENTS}
+                  isShowingErrors={isShowingErrors}
+                  errors={errors}
+                >
+                  <EuiFieldNumber
+                    value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
+                    onChange={async e => {
+                      await setPhaseData(PHASE_FORCE_MERGE_SEGMENTS, e.target.value);
+                    }}
+                    min={1}
+                  />
+                </ErrableFormRow>
+              ) : null}
+            </EuiDescribedFormGroup>
+          </Fragment>
         ) : null}
       </Fragment>
     );

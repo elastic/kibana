@@ -13,8 +13,6 @@ import PropTypes from 'prop-types';
 import { MinAgeInput } from '../min_age_input';
 
 import {
-  EuiTitle,
-  EuiSpacer,
   EuiDescribedFormGroup,
   EuiButton,
 } from '@elastic/eui';
@@ -74,16 +72,7 @@ export class DeletePhase extends PureComponent {
               />
 
             </p>
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
-          </Fragment>
-        }
-        fullWidth
-      >
-        {phaseData[PHASE_ENABLED] ? (
-          <Fragment>
-
-            <div>
-              <EuiSpacer />
+            {phaseData[PHASE_ENABLED] ? (
               <EuiButton
                 color="danger"
                 onClick={async () => {
@@ -95,41 +84,32 @@ export class DeletePhase extends PureComponent {
                   defaultMessage="Deactivate delete phase"
                 />
               </EuiButton>
-            </div>
-
-            <EuiSpacer size="m" />
-            <EuiTitle size="s">
-              <p>
+            ) : (
+              <EuiButton
+                onClick={async () => {
+                  await setPhaseData(PHASE_ENABLED, true);
+                }}
+              >
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.configurationTitle"
-                  defaultMessage="Configuration"
+                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.activateDeletePhaseButton"
+                  defaultMessage="Activate delete phase"
                 />
-              </p>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <MinAgeInput
-              errors={errors}
-              phaseData={phaseData}
-              phase={PHASE_DELETE}
-              isShowingErrors={isShowingErrors}
-              setPhaseData={setPhaseData}
-            />
+              </EuiButton>
+            )}
+            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
           </Fragment>
-        ) : (
-          <div>
-            <EuiSpacer />
-            <EuiButton
-              onClick={async () => {
-                await setPhaseData(PHASE_ENABLED, true);
-              }}
-            >
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.activateDeletePhaseButton"
-                defaultMessage="Activate delete phase"
-              />
-            </EuiButton>
-          </div>
-        )}
+        }
+        fullWidth
+      >
+        {phaseData[PHASE_ENABLED] ? (
+          <MinAgeInput
+            errors={errors}
+            phaseData={phaseData}
+            phase={PHASE_DELETE}
+            isShowingErrors={isShowingErrors}
+            setPhaseData={setPhaseData}
+          />
+        ) : null}
       </EuiDescribedFormGroup>
     );
   }

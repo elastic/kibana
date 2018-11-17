@@ -84,14 +84,7 @@ class ColdPhaseUi extends PureComponent {
               />
             </p>
             <PhaseErrorMessage isShowingErrors={isShowingErrors} />
-          </Fragment>
-        }
-        fullWidth
-      >
-        {phaseData[PHASE_ENABLED] ? (
-          <Fragment>
-            <div>
-              <EuiSpacer />
+            {phaseData[PHASE_ENABLED] ? (
               <EuiButton
                 color="danger"
                 onClick={async () => {
@@ -99,13 +92,29 @@ class ColdPhaseUi extends PureComponent {
                 }}
               >
                 <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.deactivateColdPhaseButton"
+                  id="xpack.indexLifecycleMgmt.editPolicy.coldhase.deactivateColdPhaseButton"
                   defaultMessage="Deactivate cold phase"
                 />
               </EuiButton>
-            </div>
-
-            <EuiSpacer size="m" />
+            ) : (
+              <EuiButton
+                onClick={async () => {
+                  await setPhaseData(PHASE_ENABLED, true);
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
+                  defaultMessage="Activate cold phase"
+                />
+              </EuiButton>
+            )}
+            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+          </Fragment>
+        }
+        fullWidth
+      >
+        {phaseData[PHASE_ENABLED] ? (
+          <Fragment>
             <MinAgeInput
               errors={errors}
               phaseData={phaseData}
@@ -156,21 +165,7 @@ class ColdPhaseUi extends PureComponent {
               </EuiFlexItem>
             </EuiFlexGroup>
           </Fragment>
-        ) : (
-          <div>
-            <EuiSpacer />
-            <EuiButton
-              onClick={async () => {
-                await setPhaseData(PHASE_ENABLED, true);
-              }}
-            >
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
-                defaultMessage="Activate cold phase"
-              />
-            </EuiButton>
-          </div>
-        )}
+        ) : null}
       </EuiDescribedFormGroup>
     );
   }
