@@ -54,8 +54,8 @@ export class NodeAttrsDetailsUi extends PureComponent {
             <EuiSpacer size="s" />
             {allocationRules ? (
               <Fragment>
+                <EuiSpacer size="s" />
                 <EuiCallOut
-                  style={{ marginTop: '1rem' }}
                   title="Heads up"
                   color="warning"
                 >
