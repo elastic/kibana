@@ -6,6 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import { toastNotifications } from 'ui/notify';
 import copy from 'copy-to-clipboard';
 
 import {
@@ -27,6 +28,14 @@ export class PolicyJsonFlyoutUi extends PureComponent {
     close: PropTypes.func.isRequired,
     lifecycle: PropTypes.string.isRequired,
   };
+  copyToClipboard(lifecycle) {
+    const { intl } = this.props;
+    copy(lifecycle);
+    toastNotifications.add(intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.editPolicy.policyJsonFlyout.copiedToClipboardMessage',
+      defaultMessage: 'JSON copied to clipboard',
+    }));
+  }
   render() {
     const { lifecycle, close, policyName } = this.props;
 
@@ -51,7 +60,7 @@ export class PolicyJsonFlyoutUi extends PureComponent {
               isReadOnly
             />
             <EuiSpacer size="s" />
-            <EuiButton onClick={() => copy(lifecycle)}>
+            <EuiButton onClick={() => this.copyToClipboard(lifecycle)}>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.policyJsonFlyout.copyToClipboardButton"
                 defaultMessage="Copy to clipboard"
