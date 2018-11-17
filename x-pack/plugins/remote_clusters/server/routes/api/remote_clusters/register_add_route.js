@@ -11,7 +11,7 @@ import { wrapEsError, wrapCustomError, wrapUnknownError } from '../../../lib/err
 
 import { get } from 'lodash';
 import { doesClusterExist } from '../../../lib/does_cluster_exist';
-import { serializeCluster } from '../../../lib/serialize_cluster';
+import { deserializeCluster, serializeCluster } from '../../../lib/cluster_serialization';
 
 export function registerAddRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -29,7 +29,7 @@ export function registerAddRoute(server) {
           cluster: {
             remote: {
               [name]: {
-                ...rest,
+                ...serializeCluster(rest),
               }
             }
           }
@@ -52,10 +52,10 @@ export function registerAddRoute(server) {
         const cluster = get(response, `persistent.cluster.remote.${name}`);
 
         if(acknowledged && cluster) {
-          return serializeCluster(name, cluster);
+          return deserializeCluster(name, cluster);
         }
 
-        // If for some reason the ES response does not have the newly added cluster information,
+        // If for some reason the ES response does not have the updated cluster information,
         // return an error. This shouldn't happen.
         return wrapCustomError(new Error('Unable to add cluster, no information returned from ES.'), 400);
       } catch (err) {
@@ -72,7 +72,7 @@ export function registerAddRoute(server) {
         payload: Joi.object({
           name: Joi.string().required(),
           seeds: Joi.array().items(Joi.string()).required(),
-          skip_unavailable: Joi.boolean().optional(),
+          skipUnavailable: Joi.boolean().optional(),
         }).required()
       }
     }

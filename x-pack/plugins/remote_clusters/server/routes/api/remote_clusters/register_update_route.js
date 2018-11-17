@@ -8,7 +8,11 @@ import Joi from 'joi';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
-import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
+import { wrapCustomError, wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
+
+import { get } from 'lodash';
+import { doesClusterExist } from '../../../lib/does_cluster_exist';
+import { deserializeCluster, serializeCluster } from '../../../lib/cluster_serialization';
 
 export function registerUpdateRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -26,21 +30,41 @@ export function registerUpdateRoute(server) {
           cluster: {
             remote: {
               [name]: {
-                ...request.payload,
+                ...serializeCluster(request.payload),
               }
             }
           }
         }
       };
 
+      // Check if cluster does exist
       try {
-        return await callWithRequest('cluster.putSettings', { body: updateClusterPayload });
+        const existingCluster = await doesClusterExist(callWithRequest, name);
+        if(!existingCluster) {
+          return wrapCustomError(new Error('There is no remote cluster with that name.'), 404);
+        }
       } catch (err) {
-        if (isEsError(err)) {
-          throw wrapEsError(err);
+        return wrapCustomError(err, 400);
+      }
+
+      try {
+        const response = await callWithRequest('cluster.putSettings', { body: updateClusterPayload });
+        const acknowledged = get(response, 'acknowledged');
+        const cluster = get(response, `persistent.cluster.remote.${name}`);
+
+        if(acknowledged && cluster) {
+          return deserializeCluster(name, cluster);
         }
 
-        throw wrapUnknownError(err);
+        // If for some reason the ES response does not have the newly added cluster information,
+        // return an error. This shouldn't happen.
+        return wrapCustomError(new Error('Unable to update cluster, no information returned from ES.'), 400);
+      } catch (err) {
+        if (isEsError(err)) {
+          return wrapEsError(err);
+        }
+
+        return wrapUnknownError(err);
       }
     },
     config: {
@@ -48,7 +72,7 @@ export function registerUpdateRoute(server) {
       validate: {
         payload: Joi.object({
           seeds: Joi.array().items(Joi.string()),
-          skip_unavailable: Joi.boolean().optional()
+          skipUnavailable: Joi.boolean().optional()
         }).required()
       }
     }

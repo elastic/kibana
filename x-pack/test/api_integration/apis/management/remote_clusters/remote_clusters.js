@@ -34,7 +34,8 @@ export default function ({ getService }) {
             "name": "test_cluster",
             "seeds": [
               "localhost:9300"
-            ]
+            ],
+            "skipUnavailable": true,
           })
           .expect(200);
 
@@ -42,7 +43,8 @@ export default function ({ getService }) {
           "name": "test_cluster",
           "seeds": [
             "localhost:9300"
-          ]
+          ],
+          "skipUnavailable": "true", // ES issue #35671
         });
       });
       it('should not allow us to re-add an existing remote cluster', async () => {
@@ -75,22 +77,13 @@ export default function ({ getService }) {
           .put(uri)
           .set('kbn-xsrf', 'xxx')
           .send({
-            "skip_unavailable": true,
+            "skipUnavailable": false,
           })
           .expect(200);
 
         expect(body).to.eql({
-          "acknowledged": true,
-          "persistent": {
-            "cluster": {
-              "remote": {
-                "test_cluster": {
-                  "skip_unavailable": "true"
-                }
-              }
-            }
-          },
-          "transient": {}
+          "name": "test_cluster",
+          "skipUnavailable": "false", // ES issue #35671
         });
       });
     });
@@ -113,7 +106,7 @@ export default function ({ getService }) {
             "connectedNodesCount": 1,
             "maxConnectionsPerCluster": 3,
             "initialConnectTimeout": "30s",
-            "skipUnavailable": true
+            "skipUnavailable": false
           }
         ]);
       });
@@ -128,11 +121,7 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
-        expect(body).to.eql({
-          "acknowledged": true,
-          "persistent": {},
-          "transient": {}
-        });
+        expect(body).to.eql({});
       });
     });
   });
