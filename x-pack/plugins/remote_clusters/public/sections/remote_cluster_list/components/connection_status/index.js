@@ -5,4 +5,3 @@
  */
 
 export { ConnectionStatus } from './connection_status';
-export { DisconnectButton } from './disconnect_button';
