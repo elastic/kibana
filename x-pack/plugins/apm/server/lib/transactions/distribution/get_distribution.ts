@@ -9,7 +9,7 @@ import { Setup } from '../../helpers/setup_request';
 import { calculateBucketSize } from './calculate_bucket_size';
 import { getBuckets, IBucket } from './get_buckets';
 
-export interface IDistributionResponse {
+export interface ITransactionDistributionAPIResponse {
   totalHits: number;
   buckets: IBucket[];
   bucketSize: number;
@@ -33,7 +33,7 @@ export async function getDistribution(
   serviceName: string,
   transactionName: string,
   setup: Setup
-): Promise<IDistributionResponse> {
+): Promise<ITransactionDistributionAPIResponse> {
   const bucketSize = await calculateBucketSize(
     serviceName,
     transactionName,

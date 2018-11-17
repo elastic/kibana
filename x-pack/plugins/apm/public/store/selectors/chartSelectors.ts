@@ -9,7 +9,7 @@ import { difference, last, memoize, zipObject } from 'lodash';
 import { rgba } from 'polished';
 import {
   AvgAnomalyBuckets,
-  TimeSeriesResponse
+  TimeSeriesAPIResponse
 } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { colors } from '../../style/variables';
@@ -44,7 +44,10 @@ export const getEmptySerie = memoize(
   (start: number, end: number) => [start, end].join('_')
 );
 
-export function getCharts(urlParams: IUrlParams, charts: TimeSeriesResponse) {
+export function getCharts(
+  urlParams: IUrlParams,
+  charts: TimeSeriesAPIResponse
+) {
   const { start, end, transactionType } = urlParams;
   const noHits = charts.totalHits === 0;
   const tpmSeries = noHits
@@ -74,7 +77,7 @@ interface TimeSerie {
   areaColor?: string;
 }
 
-export function getResponseTimeSeries(chartsData: TimeSeriesResponse) {
+export function getResponseTimeSeries(chartsData: TimeSeriesAPIResponse) {
   const { dates, overallAvgDuration } = chartsData;
   const { avg, p95, p99, avgAnomalies } = chartsData.responseTimes;
 
@@ -137,7 +140,7 @@ export function getResponseTimeSeries(chartsData: TimeSeriesResponse) {
 }
 
 export function getTpmSeries(
-  chartsData: TimeSeriesResponse,
+  chartsData: TimeSeriesAPIResponse,
   transactionType?: string
 ) {
   const { dates, tpmBuckets } = chartsData;

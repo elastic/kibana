@@ -14,7 +14,12 @@ import {
 } from '../../../../common/constants';
 import { Setup } from '../../helpers/setup_request';
 
-export async function getSpans(transactionId: string, setup: Setup) {
+export type SpanListAPIResponse = Span[];
+
+export async function getSpans(
+  transactionId: string,
+  setup: Setup
+): Promise<SpanListAPIResponse> {
   const { start, end, client, config } = setup;
 
   const params = {

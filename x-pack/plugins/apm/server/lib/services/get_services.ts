@@ -22,7 +22,11 @@ export interface IServiceListItem {
   avgResponseTime: number;
 }
 
-export async function getServices(setup: Setup): Promise<IServiceListItem[]> {
+export type ServiceListAPIResponse = IServiceListItem[];
+
+export async function getServices(
+  setup: Setup
+): Promise<ServiceListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {

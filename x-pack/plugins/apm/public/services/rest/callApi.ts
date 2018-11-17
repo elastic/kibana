@@ -27,10 +27,10 @@ function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   };
 }
 
-export async function callApi(
+export async function callApi<T = never>(
   fetchOptions: KFetchOptions,
   { camelcase = true, prependBasePath = true } = {}
-) {
+): Promise<T> {
   const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);
   const res = await kfetch(combinedFetchOptions, { prependBasePath });
   return camelcase ? camelizeKeys(res) : res;

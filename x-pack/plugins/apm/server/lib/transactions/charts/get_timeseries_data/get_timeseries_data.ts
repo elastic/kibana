@@ -70,7 +70,7 @@ export interface AvgAnomalyBuckets {
   upper: number | null;
 }
 
-export interface TimeSeriesResponse {
+export interface TimeSeriesAPIResponse {
   totalHits: number;
   dates: number[];
   responseTimes: {
@@ -95,7 +95,7 @@ export async function getTimeseriesData({
   transactionType,
   transactionName,
   setup
-}: Props): Promise<TimeSeriesResponse> {
+}: Props): Promise<TimeSeriesAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
   const { intervalString, bucketSize } = getBucketSize(start, end, 'auto');
 

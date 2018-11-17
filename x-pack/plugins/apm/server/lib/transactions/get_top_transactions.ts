@@ -19,6 +19,8 @@ import {
   TRANSACTION_GROUP_AGGREGATES
 } from '../helpers/transaction_group_query';
 
+export type TransactionListAPIResponse = ITransactionGroup[];
+
 export async function getTopTransactions({
   setup,
   transactionType,
@@ -27,7 +29,7 @@ export async function getTopTransactions({
   setup: Setup;
   transactionType: string;
   serviceName: string;
-}): Promise<ITransactionGroup[]> {
+}): Promise<TransactionListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params: SearchParams = {

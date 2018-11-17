@@ -8,13 +8,13 @@ import _ from 'lodash';
 import {
   getTimeseriesData,
   getTpmBuckets,
-  TimeSeriesResponse
+  TimeSeriesAPIResponse
 } from '../get_timeseries_data';
 import { responseTimeAnomalyResponse } from './response_time_anomaly_response';
 import { timeseriesResponse } from './timeseries_response';
 
 describe('get_timeseries_data', () => {
-  let res: TimeSeriesResponse;
+  let res: TimeSeriesAPIResponse;
   let clientSpy: jest.Mock;
   beforeEach(async () => {
     clientSpy = jest

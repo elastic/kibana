@@ -8,7 +8,7 @@ import { get, isEmpty } from 'lodash';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import { TimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
 import { loadCharts } from '../../services/rest/apm';
 import { IReduxState } from '../rootReducer';
 import { getCharts } from '../selectors/chartSelectors';
@@ -49,7 +49,7 @@ export function hasDynamicBaseline(state: IReduxState) {
 
 interface Props {
   urlParams: IUrlParams;
-  render: RRRRender<TimeSeriesResponse>;
+  render: RRRRender<TimeSeriesAPIResponse>;
 }
 
 export function TransactionOverviewChartsRequest({ urlParams, render }: Props) {

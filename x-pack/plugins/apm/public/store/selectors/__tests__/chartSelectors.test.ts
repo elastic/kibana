@@ -13,7 +13,7 @@ import {
 
 import {
   AvgAnomalyBuckets,
-  TimeSeriesResponse
+  TimeSeriesAPIResponse
 } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
 import anomalyData from './mockData/anomalyData.json';
 
@@ -65,7 +65,7 @@ describe('chartSelectors', () => {
         p99: [300, 400, 350, 450, 100, 50]
       },
       overallAvgDuration: 200
-    } as TimeSeriesResponse;
+    } as TimeSeriesAPIResponse;
 
     it('should match snapshot', () => {
       expect(getResponseTimeSeries(chartsData)).toMatchSnapshot();
@@ -96,7 +96,7 @@ describe('chartSelectors', () => {
           values: [0, 1, 2, 1, 0, 2]
         }
       ]
-    } as TimeSeriesResponse;
+    } as TimeSeriesAPIResponse;
 
     const transactionType = 'MyTransactionType';
 

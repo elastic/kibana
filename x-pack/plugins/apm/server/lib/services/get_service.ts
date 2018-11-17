@@ -13,7 +13,7 @@ import {
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
-export interface ServiceResponse {
+export interface ServiceAPIResponse {
   service_name: string;
   types: string[];
   agent_name?: string;
@@ -22,7 +22,7 @@ export interface ServiceResponse {
 export async function getService(
   serviceName: string,
   setup: Setup
-): Promise<ServiceResponse> {
+): Promise<ServiceAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {

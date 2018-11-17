@@ -20,7 +20,11 @@ import {
   TRANSACTION_GROUP_AGGREGATES
 } from '../helpers/transaction_group_query';
 
-export async function getTopTraces(setup: Setup): Promise<ITransactionGroup[]> {
+export type TraceListAPIResponse = ITransactionGroup[];
+
+export async function getTopTraces(
+  setup: Setup
+): Promise<TraceListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {

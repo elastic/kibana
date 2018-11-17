@@ -14,11 +14,13 @@ import {
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
+export type TransactionAPIResponse = Transaction | null;
+
 export async function getTransaction(
   transactionId: string,
   traceId: string | undefined,
   setup: Setup
-) {
+): Promise<TransactionAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params: SearchParams = {
