@@ -1,0 +1,27 @@
+{
+    "chatop": {
+      "properties": {
+        "name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 2048
+            }
+          }
+        },
+        "command": {
+          "type": "text"
+        },
+        "owner": {
+          "type": "keyword"
+        },
+        "@timestamp": {
+          "type": "keyword"
+        },
+        "_reserved": {
+          "type": "boolean"
+        }
+      }
+    }
+  }

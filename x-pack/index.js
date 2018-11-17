@@ -8,6 +8,7 @@ import { xpackMain } from './plugins/xpack_main';
 import { graph } from './plugins/graph';
 import { monitoring } from './plugins/monitoring';
 import { reporting } from './plugins/reporting';
+import { chatops } from './plugins/chat_ops';
 import { security } from './plugins/security';
 import { searchprofiler } from './plugins/searchprofiler';
 import { ml } from './plugins/ml';
@@ -35,6 +36,7 @@ module.exports = function (kibana) {
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),
+    chatops(kibana),
     spaces(kibana),
     security(kibana),
     searchprofiler(kibana),

@@ -8257,6 +8257,11 @@ extend-shallow@^3.0.0, extend-shallow@^3.0.2:
     assign-symbols "^1.0.0"
     is-extendable "^1.0.1"
 
+extend@^2.0.1:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/extend/-/extend-2.0.2.tgz#1b74985400171b85554894459c978de6ef453ab7"
+  integrity sha512-AgFD4VU+lVLP6vjnlNfF7OeInLTyeyckCNPEsuxz1vi786UuK/nk6ynPuhn/h+Ju9++TQyr5EpLRI14fc1QtTQ==
+
 extend@^3.0.0, extend@~3.0.0, extend@~3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.1.tgz#a755ea7bc1adfcc5a31ce7e762dbaadc5e636444"
@@ -18229,6 +18234,32 @@ request@2.87.0, request@^2.87.0:
     tunnel-agent "^0.6.0"
     uuid "^3.1.0"
 
+request@^2.56.0, request@^2.88.0:
+  version "2.88.0"
+  resolved "https://registry.yarnpkg.com/request/-/request-2.88.0.tgz#9c2fca4f7d35b592efe57c7f0a55e81052124fef"
+  integrity sha512-NAqBSrijGLZdM0WZNsInLJpkJokL72XYjUpnB0iwsRgxh7dB6COrHnTBNwN0E+lHDAJzu7kLAkDeY08z2/A0hg==
+  dependencies:
+    aws-sign2 "~0.7.0"
+    aws4 "^1.8.0"
+    caseless "~0.12.0"
+    combined-stream "~1.0.6"
+    extend "~3.0.2"
+    forever-agent "~0.6.1"
+    form-data "~2.3.2"
+    har-validator "~5.1.0"
+    http-signature "~1.2.0"
+    is-typedarray "~1.0.0"
+    isstream "~0.1.2"
+    json-stringify-safe "~5.0.1"
+    mime-types "~2.1.19"
+    oauth-sign "~0.9.0"
+    performance-now "^2.1.0"
+    qs "~6.5.2"
+    safe-buffer "^5.1.2"
+    tough-cookie "~2.4.3"
+    tunnel-agent "^0.6.0"
+    uuid "^3.3.2"
+
 request@^2.65.0:
   version "2.85.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.85.0.tgz#5a03615a47c61420b3eb99b7dba204f83603e1fa"
@@ -18284,32 +18315,6 @@ request@^2.74.0, request@^2.79.0, request@^2.83.0:
     tough-cookie "~2.3.3"
     tunnel-agent "^0.6.0"
     uuid "^3.1.0"
-
-request@^2.88.0:
-  version "2.88.0"
-  resolved "https://registry.yarnpkg.com/request/-/request-2.88.0.tgz#9c2fca4f7d35b592efe57c7f0a55e81052124fef"
-  integrity sha512-NAqBSrijGLZdM0WZNsInLJpkJokL72XYjUpnB0iwsRgxh7dB6COrHnTBNwN0E+lHDAJzu7kLAkDeY08z2/A0hg==
-  dependencies:
-    aws-sign2 "~0.7.0"
-    aws4 "^1.8.0"
-    caseless "~0.12.0"
-    combined-stream "~1.0.6"
-    extend "~3.0.2"
-    forever-agent "~0.6.1"
-    form-data "~2.3.2"
-    har-validator "~5.1.0"
-    http-signature "~1.2.0"
-    is-typedarray "~1.0.0"
-    isstream "~0.1.2"
-    json-stringify-safe "~5.0.1"
-    mime-types "~2.1.19"
-    oauth-sign "~0.9.0"
-    performance-now "^2.1.0"
-    qs "~6.5.2"
-    safe-buffer "^5.1.2"
-    tough-cookie "~2.4.3"
-    tunnel-agent "^0.6.0"
-    uuid "^3.3.2"
 
 request@~2.79.0:
   version "2.79.0"
@@ -19160,6 +19165,25 @@ sisteransi@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/sisteransi/-/sisteransi-0.1.1.tgz#5431447d5f7d1675aac667ccd0b865a4994cb3ce"
   integrity sha512-PmGOd02bM9YO5ifxpw36nrNMBTptEtfRl4qUYl9SndkolplkrZZOW7PGHjrZL53QvMVj9nQ+TKqUnRsw4tJa4g==
+
+slack@^11.0.1:
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/slack/-/slack-11.0.1.tgz#4275999d0d7016425f83c760b7e66ca0a8b93484"
+  integrity sha512-IrNIVPZtnflzjo0Rpy947SL2ITAHfw1Mm1VVQAPwUk0Yyy+UW2PCwSJGFUbgagFrR66LviHuhOUqpR+ZMspaeQ==
+  dependencies:
+    tiny-json-http "^7.0.0"
+
+slackbots@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/slackbots/-/slackbots-1.2.0.tgz#a3f6517ef0ef2caf9affdd77c92b93ceca75d732"
+  integrity sha512-fld5BJ16QXavgalKbIAOIkycSObQyGXTWvjGSD/jJxI7c8lDf5aVFWWqNI2f/eAvEVU5KgaTwqmo80pHEcPZUA==
+  dependencies:
+    extend "^2.0.1"
+    lodash "^4.17.2"
+    request "^2.56.0"
+    vow "^0.4.9"
+    ws "^1.0.1"
+    ws-heartbeat "^1.0.4"
 
 slash@^1.0.0:
   version "1.0.0"
@@ -20507,6 +20531,11 @@ tiny-invariant@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/tiny-invariant/-/tiny-invariant-0.0.3.tgz#4c7283c950e290889e9e94f64d3586ec9156cf44"
   integrity sha512-SA2YwvDrCITM9fTvHTHRpq9W6L2fBsClbqm3maT5PZux4Z73SPPDYwJMtnoWh6WMgmCkJij/LaOlWiqJqFMK8g==
+
+tiny-json-http@^7.0.0:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/tiny-json-http/-/tiny-json-http-7.0.2.tgz#be5a52d75d4a92046bc1c5c99a928b49eee1cd6b"
+  integrity sha512-5MsAvlq5tvgCY98Y7iQPmpP5ZqLzESrv/S5AwXWIvHL0Z0zVVAfWku7WC6V4rHJb+judXhd28KBnE5+FLOVYaQ==
 
 tiny-lr@^1.1.1:
   version "1.1.1"
@@ -22040,6 +22069,11 @@ void-elements@^2.0.0, void-elements@^2.0.1:
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
   integrity sha1-wGavtYK7HLQSjWDqkjkulNXp2+w=
 
+vow@^0.4.9:
+  version "0.4.18"
+  resolved "https://registry.yarnpkg.com/vow/-/vow-0.4.18.tgz#18a77994ce30790ccd22d57a3a25cf5e131d8d1b"
+  integrity sha512-7QGozxlOhour77BCQbbyW5XFP8ioIz/DPK67IyO3DnJtF0WXrXueMwqrYFM9yqyfgENcyxL+vktz2oJeZfdWtw==
+
 w3c-blob@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/w3c-blob/-/w3c-blob-0.0.1.tgz#b0cd352a1a50f515563420ffd5861f950f1d85b8"
@@ -22500,10 +22534,23 @@ write@^0.2.1:
   dependencies:
     mkdirp "^0.5.1"
 
+ws-heartbeat@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/ws-heartbeat/-/ws-heartbeat-1.0.4.tgz#3b6d65e479f6f146d94b5703f2a17d45e6838202"
+  integrity sha512-OFr46ds6+OAXDdt9JXb7mA+xgNg1XN0qhrM5CmnbvTL2vx8jsgspUYSR75OKqkmM8s4R8aJ2AHhm7webf7RfOw==
+
 ws@1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/ws/-/ws-1.1.2.tgz#8a244fa052401e08c9886cf44a85189e1fd4067f"
   integrity sha1-iiRPoFJAHgjJiGz0SoUYnh/UBn8=
+  dependencies:
+    options ">=0.0.5"
+    ultron "1.0.x"
+
+ws@^1.0.1:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-1.1.5.tgz#cbd9e6e75e09fc5d2c90015f21f0c40875e0dd51"
+  integrity sha512-o3KqipXNUdS7wpQzBHSe180lBGO60SoK0yVo3CYJgb2MkobuWuBX6dhkYP5ORCLd55y+SaflMOV5fqAB53ux4w==
   dependencies:
     options ">=0.0.5"
     ultron "1.0.x"
