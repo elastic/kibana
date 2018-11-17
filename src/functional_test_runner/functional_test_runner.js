@@ -59,15 +59,19 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
 
     async getTestStats() {
       return await this._run(async (config, coreProviders) => {
-        // replace the function of a provider so that it returns a promise-like object which
-        // never "resolves", essentially disabling all the services while still allowing us
-        // to load the test files and populate the mocha suites
-        const stubProvider = provider => ({
-          ...provider,
-          fn: () => ({
-            then: () => {}
-          })
-        });
+        // replace the function of custom service providers so that they return
+        // promise-like objects which never resolve, essentially disabling them
+        // allowing us to load the test files and populate the mocha suites
+        const stubProvider = provider => (
+          coreProviders.includes(provider)
+            ? provider
+            : {
+              ...provider,
+              fn: () => ({
+                then: () => {}
+              })
+            }
+        );
 
         const providers = new ProviderCollection(log, [
           ...coreProviders,
