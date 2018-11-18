@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
-import { ITransactionDistributionAPIResponse } from '../../../server/lib/transactions/distribution/get_distribution';
+import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
 import { loadTransactionDistribution } from '../../services/rest/apm';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';

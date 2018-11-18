@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AvgAnomalyBucket } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_avg_response_time_anomalies/get_anomaly_aggs/transform';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
 import {
   getAnomalyBoundaryValues,
   getAnomalyScoreValues,
   getResponseTimeSeries,
   getTpmSeries
 } from '../chartSelectors';
-
-import {
-  AvgAnomalyBuckets,
-  TimeSeriesAPIResponse
-} from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
-import anomalyData from './mockData/anomalyData.json';
+import { anomalyData } from './mockData/anomalyData';
 
 describe('chartSelectors', () => {
   describe('getAnomalyScoreValues', () => {
@@ -43,7 +40,7 @@ describe('chartSelectors', () => {
         {
           anomalyScore: 0
         }
-      ] as AvgAnomalyBuckets[];
+      ] as AvgAnomalyBucket[];
 
       expect(getAnomalyScoreValues(dates, buckets, 1000)).toEqual([
         { x: 1000, y: 1 },
@@ -107,10 +104,10 @@ describe('chartSelectors', () => {
 
   describe('getAnomalyBoundaryValues', () => {
     const { dates, buckets } = anomalyData;
-    const bucketSpan = 240000;
+    const bucketSize = 240000;
 
     it('should return correct buckets', () => {
-      expect(getAnomalyBoundaryValues(dates, buckets, bucketSpan)).toEqual([
+      expect(getAnomalyBoundaryValues(dates, buckets, bucketSize)).toEqual([
         { x: 1530614880000, y: 54799, y0: 15669 },
         { x: 1530615060000, y: 49874, y0: 17808 },
         { x: 1530615300000, y: 49421, y0: 18012 },
@@ -123,18 +120,18 @@ describe('chartSelectors', () => {
       ]);
     });
 
-    it('should extend the last bucket with a size of bucketSpan', () => {
+    it('should extend the last bucket with a size of bucketSize', () => {
       const [lastBucket, secondLastBuckets] = getAnomalyBoundaryValues(
         dates,
         buckets,
-        bucketSpan
+        bucketSize
       ).reverse();
 
       expect(secondLastBuckets.y).toBe(lastBucket.y);
       expect(secondLastBuckets.y0).toBe(lastBucket.y0);
       expect(
         (lastBucket.x as number) - (secondLastBuckets.x as number)
-      ).toBeLessThanOrEqual(bucketSpan);
+      ).toBeLessThanOrEqual(bucketSize);
     });
   });
 });

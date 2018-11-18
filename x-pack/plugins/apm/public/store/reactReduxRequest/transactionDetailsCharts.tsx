@@ -7,7 +7,7 @@
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
 import { loadCharts } from '../../services/rest/apm';
 import { IReduxState } from '../rootReducer';
 import { getCharts } from '../selectors/chartSelectors';

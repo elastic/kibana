@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { SearchParams } from 'elasticsearch';
 import { TRACE_ID } from '../../../common/constants';
 import { Span } from '../../../typings/Span';
 import { Transaction } from '../../../typings/Transaction';
@@ -41,10 +41,6 @@ export async function getTrace(
     }
   };
 
-  const resp: SearchResponse<Span | Transaction> = await client(
-    'search',
-    params
-  );
-
+  const resp = await client<Span | Transaction>('search', params);
   return resp.hits.hits.map(hit => hit._source);
 }

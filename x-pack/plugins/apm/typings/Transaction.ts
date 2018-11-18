@@ -21,17 +21,22 @@ interface ContextSystem {
 interface Context {
   process?: {
     pid: number;
+    [key: string]: any;
   };
   service: ContextService;
   system?: ContextSystem;
   request: {
     url: {
       full: string;
+      [key: string]: string;
     };
     method: string;
+    [key: string]: any;
   };
   user?: {
     id: string;
+    username?: string;
+    email?: string;
   };
   [key: string]: any;
 }

@@ -14,6 +14,7 @@ export interface APMDocV1 {
   host: {
     name: string;
   };
+  agent?: object;
 }
 
 export interface APMDocV2 extends APMDocV1 {
@@ -46,6 +47,7 @@ export interface ContextService {
     name: string;
     version?: string;
   };
+  [key: string]: any;
 }
 
 export interface Stackframe {

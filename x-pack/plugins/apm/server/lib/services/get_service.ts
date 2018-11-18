@@ -14,9 +14,9 @@ import {
 import { Setup } from '../helpers/setup_request';
 
 export interface ServiceAPIResponse {
-  service_name: string;
+  serviceName: string;
   types: string[];
-  agent_name?: string;
+  agentName?: string;
 }
 
 export async function getService(
@@ -72,12 +72,12 @@ export async function getService(
     };
   }
 
-  const resp = await client('search', params);
-  const aggs: Aggs = resp.aggregations;
-
+  const { aggregations } = await client<void, Aggs>('search', params);
   return {
-    service_name: serviceName,
-    types: aggs.types.buckets.map(bucket => bucket.key),
-    agent_name: oc(aggs).agents.buckets[0].key()
+    serviceName,
+    types: oc(aggregations)
+      .types.buckets([])
+      .map(bucket => bucket.key),
+    agentName: oc(aggregations).agents.buckets[0].key()
   };
 }

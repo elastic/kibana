@@ -10,8 +10,8 @@ import { ServiceAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_s
 import { ServiceListAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
 import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
-import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
+import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
 import { TransactionListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_top_transactions';
 import { TransactionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
 import { SpanListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/spans/get_spans';

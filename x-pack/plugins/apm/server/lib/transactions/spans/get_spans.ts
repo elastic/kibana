@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import {
   PROCESSOR_EVENT,
@@ -55,6 +54,6 @@ export async function getSpans(
     }
   };
 
-  const resp: SearchResponse<Span> = await client('search', params);
+  const resp = await client<Span>('search', params);
   return resp.hits.hits.map(hit => hit._source);
 }

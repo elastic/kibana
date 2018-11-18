@@ -103,8 +103,8 @@ export async function getServices(
     };
   }
 
-  const resp = await client('search', params);
-  const aggs: Aggs = resp.aggregations;
+  const resp = await client<void, Aggs>('search', params);
+  const aggs = resp.aggregations;
   const serviceBuckets = oc(aggs).services.buckets([]);
 
   return serviceBuckets.map(bucket => {

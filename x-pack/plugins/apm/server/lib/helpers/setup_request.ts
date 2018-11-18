@@ -5,7 +5,7 @@
  */
 
 /* tslint:disable no-console */
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import moment from 'moment';
 
@@ -28,16 +28,16 @@ declare module 'hapi' {
   }
 }
 
-export type ESClient<T> = (
+export type ESClient = <T, U = void>(
   type: string,
   params: SearchParams
-) => SearchResponse<T>;
+) => Promise<AggregationSearchResponse<T, U>>;
 
-export interface Setup<T = any> {
+export interface Setup {
   start: number;
   end: number;
   esFilterQuery?: any;
-  client: ESClient<T>;
+  client: ESClient;
   config: KibanaConfig;
 }
 
@@ -52,7 +52,10 @@ export function setupRequest(req: Request) {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
-  function client<T>(type: string, params: SearchParams): SearchResponse<T> {
+  function client<T, U>(
+    type: string,
+    params: SearchParams
+  ): AggregationSearchResponse<T, U> {
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
       console.log(

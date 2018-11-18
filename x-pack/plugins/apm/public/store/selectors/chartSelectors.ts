@@ -7,10 +7,8 @@
 import d3 from 'd3';
 import { difference, last, memoize, zipObject } from 'lodash';
 import { rgba } from 'polished';
-import {
-  AvgAnomalyBuckets,
-  TimeSeriesAPIResponse
-} from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/get_timeseries_data';
+import { AvgAnomalyBucket } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_avg_response_time_anomalies/get_anomaly_aggs/transform';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { colors } from '../../style/variables';
 import { asDecimal, asMillis, tpmUnit } from '../../utils/formatters';
@@ -114,7 +112,7 @@ export function getResponseTimeSeries(chartsData: TimeSeriesAPIResponse) {
       data: getAnomalyBoundaryValues(
         dates,
         avgAnomalies.buckets,
-        avgAnomalies.bucketSpanAsMillis
+        avgAnomalies.bucketSizeAsMillis
       ),
       type: 'area',
       color: 'none',
@@ -128,7 +126,7 @@ export function getResponseTimeSeries(chartsData: TimeSeriesAPIResponse) {
       data: getAnomalyScoreValues(
         dates,
         avgAnomalies.buckets,
-        avgAnomalies.bucketSpanAsMillis
+        avgAnomalies.bucketSizeAsMillis
       ),
       type: 'areaMaxHeight',
       color: 'none',
@@ -199,12 +197,12 @@ function getChartValues(
 
 export function getAnomalyScoreValues(
   dates: number[] = [],
-  buckets: AvgAnomalyBuckets[] = [],
-  bucketSpanAsMillis: number
+  buckets: AvgAnomalyBucket[] = [],
+  bucketSizeAsMillis: number
 ) {
   const ANOMALY_THRESHOLD = 75;
   const getX = (currentX: number, i: number) =>
-    currentX + bucketSpanAsMillis * i;
+    currentX + bucketSizeAsMillis * i;
 
   return dates
     .map((date, i) => {
@@ -241,8 +239,8 @@ export function getAnomalyScoreValues(
 
 export function getAnomalyBoundaryValues(
   dates: number[] = [],
-  buckets: AvgAnomalyBuckets[] = [],
-  bucketSpanAsMillis: number
+  buckets: AvgAnomalyBucket[] = [],
+  bucketSizeAsMillis: number
 ) {
   const lastX = last(dates);
   return dates
@@ -262,7 +260,7 @@ export function getAnomalyBoundaryValues(
       if (isLast) {
         acc.push({
           ...p,
-          x: Math.min(p.x + bucketSpanAsMillis, lastX) // avoid going beyond the last date
+          x: Math.min(p.x + bucketSizeAsMillis, lastX) // avoid going beyond the last date
         });
       }
       return acc;
