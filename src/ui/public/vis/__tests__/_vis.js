@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
 import expect from 'expect.js';
 import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -41,15 +40,6 @@ describe('Vis Class', function () {
     params: { isDonut: true },
     listeners: { click: _.noop }
   };
-
-  // Wrap the given vis type definition in a state, that can be passed to vis
-  const state = (type) => ({
-    type: {
-      visConfig: { defaults: {} },
-      schemas: {},
-      ...type,
-    }
-  });
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -113,43 +103,6 @@ describe('Vis Class', function () {
     it('should return false for non-hierarchical vis (like histogram)', function () {
       const vis = new Vis(indexPattern);
       expect(vis.isHierarchical()).to.be(false);
-    });
-  });
-
-  describe('vis addFilter method', () => {
-    let aggConfig;
-    let data;
-
-    beforeEach(() => {
-      aggConfig = {
-        type: { name: 'terms' },
-        params: {},
-        createFilter: sinon.stub()
-      };
-
-      data = {
-        columns: [{
-          id: 'col-0',
-          title: 'test',
-          aggConfig
-        }],
-        rows: [{ 'col-0': 'US' }]
-      };
-    });
-
-
-    it('adds a simple filter', () => {
-      const vis = new Vis(indexPattern, state({ requestHandler: 'none' }));
-      vis.API.events.addFilter(data, 0, 0);
-      expect(aggConfig.createFilter.callCount).to.be(1);
-      expect(aggConfig.createFilter.getCall(0).args[0]).to.be('US');
-    });
-
-    it('adds a filter if value is provided instead of row index', () => {
-      const vis = new Vis(indexPattern, state({ requestHandler: 'none' }));
-      vis.API.events.addFilter(data, 0, -1, 'UK');
-      expect(aggConfig.createFilter.callCount).to.be(1);
-      expect(aggConfig.createFilter.getCall(0).args[0]).to.be('UK');
     });
   });
 
