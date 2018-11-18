@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import dashboard from './dashboard';
+import visualization from './visualization';
 import help from './help';
 import store from './store';
 import show from './show';
@@ -14,6 +15,7 @@ import list from './list';
 export default {
   show,
   dashboard,
+  visualization,
   help,
   store,
   recall,

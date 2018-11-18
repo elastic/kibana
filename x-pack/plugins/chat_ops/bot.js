@@ -20,8 +20,6 @@ export function chatbot(server) {
 
   inputBot.on('open', () => {
     console.log(`${name} started successfully`);
-    //poll();
-
   });
 
   inputBot.on('close', () => {
@@ -46,7 +44,7 @@ export function chatbot(server) {
       const input = text.split(match)[1].trim();
 
       const timeout1 = setTimeout(() => {
-        inputBot.postEphemeral(channel, user, 'Ok, working on it. Give me a few moments here');
+        inputBot.postEphemeral(channel, user, 'Ok, working on it. Give me a few moments');
       }, 2000);
 
       const timeout2 = setTimeout(() => {

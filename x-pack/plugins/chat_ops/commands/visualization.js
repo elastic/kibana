@@ -7,13 +7,13 @@ import fetch from 'axios';
 import rison from 'rison-node';
 
 export default (server) => ({
-  help: 'Get a snapshot of a dashboard back',
-  example: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+  help: 'Get a snapshot of a visualization back',
+  example: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
   fn: args => {
     args = args.replace(/[\u2018\u2019]/g, '\'').replace(/[\u201C\u201D]/g, '"');
 
-    const dashboardID = args.split(' ')[0];
-    const dashboardURL = `/app/kibana#/dashboard/${dashboardID}`;
+    const visualizationID = args.split(' ')[0];
+    const visualizationURL = `/app/kibana#/visualize/edit/${visualizationID}`;
 
     const chatconfig = {
       browserTimezone: 'America/Phoenix',
@@ -23,9 +23,9 @@ export default (server) => ({
           height: 720,
         },
       },
-      objectType: 'dashboard',
-      relativeUrl: dashboardURL,
-      title: 'Dashboard',
+      objectType: 'visualization',
+      relativeUrl: visualizationURL,
+      title: 'visualization',
     };
 
     const encoded = rison.encode(chatconfig);
@@ -63,9 +63,9 @@ export default (server) => ({
                   resolve({
                     type: 'file',
                     value: {
-                      title: 'Kibana Dashboard',
+                      title: 'Kibana visualization',
                       file: resp.data,
-                      filename: 'dashboard.png',
+                      filename: 'visualization.png',
                       type: 'png',
                       initial_comment: `Output of \`${args.trim()}\``,
                     },
@@ -74,7 +74,7 @@ export default (server) => ({
                 .catch(() => {
                   if (!timeout) {
                     resolve(
-                      'The Dashboard creation timed out. Please try again.'
+                      'The visualization creation timed out. Please try again.'
                     );
                     return;
                   }

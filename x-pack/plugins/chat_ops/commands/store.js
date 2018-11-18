@@ -7,7 +7,7 @@ import client from '../lib/es_client';
 
 export default (server) => ({
   help: 'Remember a command with a given name, and recall it with the `recall` command',
-  example: 'store dashboard xxxx-xxxx-xxxx-xxxx',
+  example: 'dashboard xxxx-xxxx-xxxx-xxxx',
   fn: (args, message) => {
     const parts = args.split(' ');
     const name = parts.shift();
@@ -16,19 +16,37 @@ export default (server) => ({
     if (!name || !command) throw new Error('Name and command are required');
 
     return client(server)
-      .create("chatop", {
-        name,
-        command,
-        owner: message.user,
-        '@timestamp': new Date().toISOString(),
+      .find({
+        type: "chatop",
+        search: name,
+        perPage: 10000,
+        searchFields: ['name']
       })
-      .then(
-        () =>
-          `Shortcut has been stored. You can get it back with \`@${server.config().get('xpack.chatops.chatname')} recall ${name}\``
-      )
+      .then(doc => {
+        const indexPatternSavedObject = doc.saved_objects.find(savedObject => {
+          return savedObject.attributes.name === name;
+        });
+        if (indexPatternSavedObject) {
+        // index argument does match the name
+          return `The stored command, \`${name}\` already exists. Remove it with \`@${
+            server.config().get('xpack.chatops.chatname')
+          } remove ${name}\``;
+        }
+        return client(server)
+          .create("chatop", {
+            name,
+            command,
+            owner: message.user,
+            '@timestamp': new Date().toISOString(),
+          })
+          .then(
+            () =>
+              `Shortcut has been stored. You can get it back with \`@${server.config().get('xpack.chatops.chatname')} recall ${name}\``
+          );
+      })
       .catch(err => {
         if (err.status === 409)
-        {return `Oops, \`${name}\` already exists. Remove it with \`@${
+        {return `The stored command, \`${name}\` already exists. Remove it with \`@${
           server.config().get('xpack.chatops.chatname')
         } remove ${name}\``;}
         return err.message;

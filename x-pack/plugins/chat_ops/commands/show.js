@@ -7,7 +7,7 @@ import client from '../lib/es_client';
 
 export default (server) => ({
   help: 'Show the text of a stored command',
-  example: 'show mycommand',
+  example: 'mycommand',
   fn: args => {
     const name = args.trim();
 
@@ -15,14 +15,26 @@ export default (server) => ({
 
     return client(server)
       .find({
-        type: 'chatop',
-        name: name,
+        type: "chatop",
+        search: name,
+        perPage: 10000,
+        searchFields: ['name']
       })
       .then(doc => {
+        if (doc.saved_objects.length === 0) {
+          return `The stored command \`${name}\` could not be found.`;
+        }
+        const indexPatternSavedObject = doc.saved_objects.find(savedObject => {
+          return savedObject.attributes.name === name;
+        });
+        if (!indexPatternSavedObject) {
+          // index argument does not match the name
+          return `The stored command \`${name}\` could not be found.`;
+        }
         return `Here's what I found for \`${name}\`: 
 
 \`\`\`
-${doc.saved_objects[0].attributes.command}
+${indexPatternSavedObject.attributes.command}
 \`\`\``;
       })
       .catch(resp => resp.message);

@@ -7,7 +7,7 @@ import commands from './index';
 
 export default (server) => ({
   help: 'Get a list of commands, or help for a command',
-  example: 'who',
+  example: 'dashboard',
   fn: args => {
     const commandName = args.trim();
     const command = commands[commandName];
@@ -17,7 +17,7 @@ export default (server) => ({
       .sort()
       .join(
         ', '
-      )}. For more information on a function, try something like: \`@${server.config().get('xpack.chatops.chatname')} help random\``;}
+      )}. For more information on a function, try something like: \`@${server.config().get('xpack.chatops.chatname')} help list\``;}
 
     return `${commandName}: ${command().help}. For example: \`@${server.config().get('xpack.chatops.chatname')} ${commandName} ${
       command().example

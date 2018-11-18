@@ -8,7 +8,7 @@ import run from '../run';
 
 export default (server) => ({
   help: 'Run a command that has been stored with `store`',
-  example: 'recall mycommand',
+  example: 'mycommand',
   fn: (args, message, handlers) => {
     const name = args.trim();
 
@@ -16,11 +16,23 @@ export default (server) => ({
 
     return client(server)
       .find({
-        type: 'chatop',
-        name: name,
+        type: "chatop",
+        search: name,
+        perPage: 10000,
+        searchFields: ['name']
       })
       .then(doc => {
-        return run(doc.saved_objects[0].attributes.command, message, handlers, server);
+        if (doc.saved_objects.length === 0) {
+          return `The stored command \`${name}\` could not be found.`;
+        }
+        const indexPatternSavedObject = doc.saved_objects.find(savedObject => {
+          return savedObject.attributes.name === name;
+        });
+        if (!indexPatternSavedObject) {
+          // index argument does not match the name
+          return `The stored command \`${name}\` could not be found.`;
+        }
+        return run(indexPatternSavedObject.attributes.command, message, handlers, server);
       })
       .catch(resp => resp.message);
   },

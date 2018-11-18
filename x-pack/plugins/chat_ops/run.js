@@ -15,16 +15,14 @@ export default (str, data, handlers, server) => {
 
   // No command found
   if (commandName === '') {
-    throw new Error(`No command entered. Try: \`@${name} help\``);
+    return Promise.resolve(normalizeOutput(`No command entered. Try: \`@${name} help\``));
   }
 
   const command = commands[commandName];
 
   // Invalid command
   if (!command) {
-    throw new Error(
-      `Invalid command "${commandName}". Try: \`@${name} help\``
-    );
+    return Promise.resolve(normalizeOutput(`Invalid command "${commandName}". Try: \`@${name} help\``));
   }
 
   return Promise.resolve(command(server).fn(commandArgument, data, handlers)).then(normalizeOutput);
