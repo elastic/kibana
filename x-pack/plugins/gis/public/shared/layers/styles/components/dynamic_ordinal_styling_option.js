@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 
 import {
@@ -11,12 +13,20 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 
+import { ColorRampSelector } from './vector/color/color_ramp_selector';
+import { SizeRangeSelector } from './vector/size/size_range_selector';
+
+export const styleTypes = {
+  COLOR_RAMP: 'color_ramp',
+  SIZE_RANGE: 'size_range'
+};
+
 export class DynamicOrdinalStyleOption extends React.Component {
 
   constructor() {
     super();
     this.state = {
-      fieldSelection: null
+      fieldSelection: ''
     };
   }
 
@@ -76,12 +86,43 @@ export class DynamicOrdinalStyleOption extends React.Component {
     }
   }
 
-  render() {
-    const DynamicStylingOption = this.props.DynamicStylingOption;
+  _renderStyleInput() {
+    const {
+      selectedOptions,
+      type,
+    } = this.props;
+
+    // do not show style input until field has been selected
+    if (!_.has(selectedOptions, 'field')) {
+      return;
+    }
+
     const onChange = (additionalOptions) => {
       this._fireChange(this.state.fieldSelection, additionalOptions);
     };
 
+    switch (type) {
+      case styleTypes.COLOR_RAMP:
+        return (
+          <ColorRampSelector
+            onChange={onChange}
+            color={_.get(selectedOptions, 'color')}
+          />
+        );
+      case styleTypes.SIZE_RANGE:
+        return (
+          <SizeRangeSelector
+            onChange={onChange}
+            minSize={_.get(selectedOptions, 'minSize')}
+            maxSize={_.get(selectedOptions, 'maxSize')}
+          />
+        );
+      default:
+        throw new Error(`Unhandled style type ${type}`);
+    }
+  }
+
+  render() {
     const ordinalFieldComboboxOptions = this._getComboBoxOptionsFromFields();
     const fieldSelection = this._getFieldSelectionFromPropsAndState(ordinalFieldComboboxOptions);
 
@@ -94,13 +135,27 @@ export class DynamicOrdinalStyleOption extends React.Component {
           singleSelection={{}}
           fullWidth
         />
+
         <EuiSpacer size="m" />
-        <DynamicStylingOption onChange={onChange} selectedOptions={this.props.selectedOptions}/>
+
+        {this._renderStyleInput()}
+
       </Fragment>
     );
   }
 
 }
+
+DynamicOrdinalStyleOption.propTypes = {
+  selectedOptions: PropTypes.object,
+  fields: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired,
+  type: PropTypes.oneOf(
+    Object.keys(styleTypes).map(styleType => {
+      return styleTypes[styleType];
+    })
+  ).isRequired,
+};
 
 
 
