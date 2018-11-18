@@ -21,84 +21,61 @@ export const styleTypes = {
   SIZE_RANGE: 'size_range'
 };
 
-export class DynamicOrdinalStyleOption extends React.Component {
+export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, type }) {
 
-  constructor() {
-    super();
-    this.state = {
-      fieldSelection: ''
-    };
-  }
-
-
-  _onFieldSelected = (fieldSelection) => {
-    this.setState({
-      fieldSelection: fieldSelection
-    });
-    this._fireChange(fieldSelection, {});
+  const fireChange = (newField, dynamicOptions) => {
+    let newOptions = { ...selectedOptions };
+    newOptions.field = newField && newField.length ? newField[0].value : selectedOptions.field;
+    newOptions = { ...newOptions, ...dynamicOptions };
+    onChange(newOptions);
   };
 
+  const onFieldSelected = (fieldSelection) => {
+    fireChange(fieldSelection, {});
+  };
 
-  _fireChange(newField, dynamicOptions) {
-    let newOptions = { ...this.props.selectedOptions };
-    newOptions.field = newField && newField.length ? newField[0].value : this.props.selectedOptions.field;
-    newOptions = { ...newOptions, ...dynamicOptions };
-    this.props.onChange(newOptions);
-  }
+  const groupFieldsByOrigin = () => {
+    const fieldsByOriginMap = new Map();
+    fields
+      .forEach(field => {
+        if (fieldsByOriginMap.has(field.origin)) {
+          const fieldsList = fieldsByOriginMap.get(field.origin);
+          fieldsList.push(field);
+          fieldsByOriginMap.set(field.origin, fieldsList);
+        } else {
+          fieldsByOriginMap.set(field.origin, [field]);
+        }
+      });
 
-  _getComboBoxOptionsFromFields() {
-    return this.props.fields.map(field => {
-      return { label: field.label, value: field };
+    const optionGroups = [];
+    fieldsByOriginMap.forEach((fieldsList, fieldOrigin) => {
+      optionGroups.push({
+        label: fieldOrigin,
+        options: fieldsList
+          .map(field => {
+            return { value: field, label: field.label };
+          })
+          .sort((a, b) => {
+            return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+          })
+      });
     });
-    // if (this.props.selectedOptions) {
-    //   const { color, field } = this.props.selectedOptions;
-    //   if (!this.state.comboBoxOptions && field) {
-    //     const selectedValue = options.find(({ value }) => {
-    //       return value.name === field.name;
-    //     });
-    //     this.state.comboBoxOptions = selectedValue ? [selectedValue] : [];
-    //   }
-    //   if (!this.state.selectedColorRamp && color) {
-    //     this.state.selectedColorRamp = color;
-    //   }
-    //   if (!this.state.comboBoxOptions) this.state.comboBoxOptions = [];
-    // } else {
-    //   this.state.comboBoxOptions = [];
-    // }
 
-  }
+    optionGroups.sort((a, b) => {
+      return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+    });
 
-  _getFieldSelectionFromPropsAndState(options) {
+    return optionGroups;
+  };
 
-    if (this.state.fieldSelection) {
-      return this.state.fieldSelection;
-    }
-
-    if (this.props.selectedOptions) {
-      if (this.props.selectedOptions.field) {
-        const selectedValue = options.find(({ value }) => {
-          return value.name === this.props.selectedOptions.field.name;
-        });
-        return (selectedValue) ? [selectedValue] : [];
-      }
-    } else {
-      return [];
-    }
-  }
-
-  _renderStyleInput() {
-    const {
-      selectedOptions,
-      type,
-    } = this.props;
-
+  const renderStyleInput = () => {
     // do not show style input until field has been selected
     if (!_.has(selectedOptions, 'field')) {
       return;
     }
 
     const onChange = (additionalOptions) => {
-      this._fireChange(this.state.fieldSelection, additionalOptions);
+      fireChange(selectedOptions.field, additionalOptions);
     };
 
     switch (type) {
@@ -120,29 +97,32 @@ export class DynamicOrdinalStyleOption extends React.Component {
       default:
         throw new Error(`Unhandled style type ${type}`);
     }
+  };
+
+  const comboBoxValue = [];
+  if (_.has(selectedOptions, 'field')) {
+    comboBoxValue.push({
+      label: selectedOptions.field.label,
+      value: selectedOptions.field
+    });
   }
 
-  render() {
-    const ordinalFieldComboboxOptions = this._getComboBoxOptionsFromFields();
-    const fieldSelection = this._getFieldSelectionFromPropsAndState(ordinalFieldComboboxOptions);
+  return (
+    <Fragment>
+      <EuiComboBox
+        selectedOptions={comboBoxValue}
+        options={groupFieldsByOrigin()}
+        onChange={onFieldSelected}
+        singleSelection={true}
+        fullWidth
+      />
 
-    return (
-      <Fragment>
-        <EuiComboBox
-          selectedOptions={fieldSelection}
-          options={ordinalFieldComboboxOptions}
-          onChange={this._onFieldSelected}
-          singleSelection={{}}
-          fullWidth
-        />
+      <EuiSpacer size="m" />
 
-        <EuiSpacer size="m" />
+      {renderStyleInput()}
 
-        {this._renderStyleInput()}
-
-      </Fragment>
-    );
-  }
+    </Fragment>
+  );
 
 }
 

@@ -137,7 +137,7 @@ export class VectorLayer extends ALayer {
       };
     });
 
-    return numberFieldOptions.concat(joinFields);
+    return [...numberFieldOptions, ...joinFields];
   }
 
   _findDataRequestForSource(sourceDataId) {
