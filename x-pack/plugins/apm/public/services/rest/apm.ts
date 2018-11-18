@@ -37,7 +37,7 @@ export async function loadServerStatus() {
 }
 
 export async function loadAgentStatus() {
-  return callApi({
+  return callApi<{ dataFound: boolean }>({
     pathname: `/api/apm/status/agent`
   });
 }
