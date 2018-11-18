@@ -42,11 +42,12 @@ export class ColorRampSelector extends React.Component {
     if (this.state.selectedColorRamp) {
       return this.state.selectedColorRamp;
     }
+
     if (this.props.selectedOptions && this.props.selectedOptions.color) {
       return this.props.selectedOptions.color;
-    } else {
-      return null;
     }
+
+    return '';
   }
 
 

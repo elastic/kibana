@@ -144,7 +144,7 @@ export class ALayer {
   }
 
   getLabel() {
-    return this._descriptor.label;
+    return this._descriptor.label ? this._descriptor.label : '';
   }
 
   getIcon() {
