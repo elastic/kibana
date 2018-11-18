@@ -19,6 +19,11 @@ import _ from 'lodash';
 
 const DEFAULT_COLORS = ['#e6194b', '#3cb44b', '#ffe119', '#f58231', '#911eb4'];
 
+const EMPTY_FEATURE_COLLECTION = {
+  type: 'FeatureCollection',
+  features: []
+};
+
 export class VectorLayer extends ALayer {
 
   static type = 'VECTOR';
@@ -316,17 +321,22 @@ export class VectorLayer extends ALayer {
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
+    const mbGeoJSONSource = mbMap.getSource(this.getId());
 
     const featureCollection = this._getSourceFeatureCollection();
-    const mbSourceAfterAdding = mbMap.getSource(this.getId());
+    if (!featureCollection) {
+      mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
+      return;
+    }
+
     const dataBoundToMap = ALayer.getBoundDataForSource(mbMap, this.getId());
     if (featureCollection !== dataBoundToMap) {
-      mbSourceAfterAdding.setData(featureCollection);
+      mbGeoJSONSource.setData(featureCollection);
     }
 
     const shouldRefresh = this._style.addScaledPropertiesBasedOnStyle(featureCollection);
     if (shouldRefresh) {
-      mbSourceAfterAdding.setData(featureCollection);
+      mbGeoJSONSource.setData(featureCollection);
     }
   }
 
