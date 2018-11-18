@@ -3,11 +3,11 @@
 # run setup script that gives us node, yarn, and bootstraps the project
 source "src/dev/ci_setup/setup.sh";
 
-# run the build for both oss and default distributions to warm the babel and optimizer caches
-node scripts/build;
-
 # cache es snapshots
 node scripts/es snapshot --download-only;
+
+# run the optimizer to warn the babel and cache-loader caches
+node scripts/kibana --logging.json=false --optimize;
 
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
