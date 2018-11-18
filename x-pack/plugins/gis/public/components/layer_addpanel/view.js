@@ -150,7 +150,7 @@ export class AddLayerPanel extends React.Component {
   }
 
   _renderSourceSelect() {
-    this.sourceOptions = [
+    const sourceOptions = [
       {
         value: EMSFileSource.type,
         inputDisplay: EMSFileSource.typeDisplayName,
@@ -229,7 +229,7 @@ export class AddLayerPanel extends React.Component {
       <EuiFormRow label="Source">
         <EuiSuperSelect
           itemClassName="sourceSelectItem"
-          options={this.sourceOptions}
+          options={sourceOptions}
           valueOfSelected={this.state.sourceType}
           onChange={this._onSourceTypeChange}
           itemLayoutAlign="top"
