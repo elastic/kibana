@@ -29,7 +29,6 @@ import {
 import { watchRepositorySearch } from './repository_search';
 import { watchRepoCloneSuccess } from './status';
 import { watchLoadStructure } from './structure';
-import { watchSymbolSearchQueryChanged } from './symbol_search';
 import { watchLoadUserConfig } from './user';
 
 export function* rootSaga() {
@@ -39,7 +38,6 @@ export function* rootSaga() {
   yield fork(watchImportRepo);
   yield fork(watchFetchRepoTree);
   yield fork(watchFetchBranchesAndCommits);
-  yield fork(watchSymbolSearchQueryChanged);
   yield fork(watchDocumentSearch);
   yield fork(watchRepositorySearch);
   yield fork(watchLoadStructure);

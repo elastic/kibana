@@ -15,11 +15,9 @@ import { repositorySearch, RepositorySearchState } from './repository_search';
 import { route, RouteState } from './route';
 import { status, StatusState } from './status';
 import { symbol, SymbolState } from './symbol';
-import { symbolSearch, SymbolSearchState } from './symbol_search';
 import { userConfig, UserConfigState } from './user';
 export interface RootState {
   repository: RepositoryState;
-  symbolSearch: SymbolSearchState;
   documentSearch: DocumentSearchState;
   repositorySearch: RepositorySearchState;
   file: FileState;
@@ -39,7 +37,6 @@ export const rootReducer = combineReducers({
   editor,
   documentSearch,
   repositorySearch,
-  symbolSearch,
   route,
   status,
   userConfig,

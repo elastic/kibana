@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { DetailSymbolInformation } from '@code/lsp-extension';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -24,6 +24,7 @@ import { parse as parseQuery } from 'query-string';
 import { Link, match, withRouter } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
 import { Location } from 'vscode-languageserver';
+import { GitBlame } from '../../../common/git_blame';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { CloneProgress, FileTree as Tree, FileTreeItemType } from '../../../model';
 import {
@@ -31,16 +32,14 @@ import {
   FetchFileResponse,
   fetchRepoTree,
   FetchRepoTreePayload,
-  repositorySearchQueryChanged,
-  symbolSearchQueryChanged,
 } from '../../actions';
-import { RepositorySearchPayload } from '../../actions/search';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { FileTree } from '../file_tree/file_tree';
 import { NotFound } from './not_found';
 
+import { AutocompleteSuggestion, QueryBar, SymbolSuggestionsProvider } from '../query_bar';
 import { PathTypes } from '../routes';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
 import { CloneStatus } from './clone_status';
@@ -75,17 +74,14 @@ interface State {
   searchScope: SearchScope;
   showBlame: boolean;
 }
+
 interface Props {
   match: match<{ [key: string]: string }>;
   tree: FileTree;
   openedPaths: string[];
   fetchRepoTree: (payload: FetchRepoTreePayload) => void;
   closeTreePath: (path: string) => void;
-  symbols: DetailSymbolInformation[];
-  symbolSearchQueryChanged: (query: string) => void;
-  repositorySearchQueryChanged: (p: RepositorySearchPayload) => void;
   repositorySearchResults: any;
-  isSymbolsLoading: boolean;
   isNotFound: boolean;
   file: FetchFileResponse;
   progress?: number;
@@ -192,10 +188,6 @@ export class LayoutPage extends React.Component<Props, State> {
     }
   };
 
-  public searchInputOnChangedHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.props.symbolSearchQueryChanged(event.target.value);
-  };
-
   public getSymbolLinkUrl = (loc: Location) => {
     return RepositoryUtils.locationToUrl(loc);
   };
@@ -209,14 +201,6 @@ export class LayoutPage extends React.Component<Props, State> {
     const location = symbol.symbolInformation.location;
     const url = this.getSymbolLinkUrl(location);
     history.push(url);
-  };
-
-  public onSearchChange = (searchValue: string) => {
-    if (this.state.searchScope === SearchScope.symbol) {
-      this.props.symbolSearchQueryChanged(searchValue.toLowerCase());
-    } else if (this.state.searchScope === SearchScope.repository) {
-      this.props.repositorySearchQueryChanged({ query: searchValue.toLowerCase() });
-    }
   };
 
   public onSelectedTabChanged = (tab: Tabs) => {
@@ -358,24 +342,6 @@ export class LayoutPage extends React.Component<Props, State> {
     if (isNotFound) {
       return <NotFound />;
     }
-    const { isSymbolsLoading } = this.props;
-
-    // NOTICE: this is a temporary solution. Will be removed soon.
-    const submit = (event: any) => {
-      const queryInput = event.target.querySelector('input');
-      if (!queryInput) {
-        return;
-      }
-      const query: string = queryInput.value;
-      if (query.trim().length === 0) {
-        return;
-      }
-      if (this.state.searchScope === SearchScope.repository) {
-        history.push(`/search?q=${query}&scope=${SearchScope.repository}`);
-      } else {
-        history.push(`/search?q=${query}`);
-      }
-    };
 
     const searchSettings = (
       <div className="searchSettings">
@@ -393,6 +359,21 @@ export class LayoutPage extends React.Component<Props, State> {
       </div>
     );
 
+    const onSubmit = (query: string) => {
+      if (query.trim().length === 0) {
+        return;
+      }
+      if (this.state.searchScope === SearchScope.repository) {
+        history.push(`/search?q=${query}&scope=${SearchScope.repository}`);
+      } else {
+        history.push(`/search?q=${query}`);
+      }
+    };
+
+    const onSelect = (item: AutocompleteSuggestion) => {
+      history.push(item.selectUrl);
+    };
+
     const searchBox = (
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -400,18 +381,14 @@ export class LayoutPage extends React.Component<Props, State> {
         direction="column"
         style={noMarginStyle}
       >
-        <EuiFlexItem grow={false} style={noMarginStyle}>
-          <form onSubmit={submit}>
-            <EuiComboBox
-              placeholder="Search..."
-              async={true}
-              options={this.getComboBoxOptions()}
-              isLoading={isSymbolsLoading}
-              onChange={this.onChange}
-              onSearchChange={this.onSearchChange}
-            />
-            <input type="submit" hidden={true} />
-          </form>
+        <EuiFlexItem>
+          <QueryBar
+            query=""
+            onSubmit={onSubmit}
+            onSelect={onSelect}
+            appName="code"
+            suggestionsProvider={new SymbolSuggestionsProvider()}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -532,8 +509,6 @@ const mapStateToProps = (state: RootState) => ({
   openedPaths: state.file.openedPaths,
   loading: state.file.loading,
   isNotFound: state.file.isNotFound,
-  symbols: state.symbolSearch.symbols,
-  isSymbolsLoading: state.symbolSearch.isLoading,
   commits: treeCommitsSelector(state),
   file: state.file.file,
   progress: progressSelector(state),
@@ -545,8 +520,6 @@ const mapStateToProps = (state: RootState) => ({
 const mapDispatchToProps = {
   fetchRepoTree,
   closeTreePath,
-  symbolSearchQueryChanged,
-  repositorySearchQueryChanged,
 };
 
 export const Layout = connect(

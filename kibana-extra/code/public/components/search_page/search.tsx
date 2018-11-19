@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
+ * This
+ */
+
 import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPagination,
-  EuiSearchBar,
   EuiSpacer,
   EuiTab,
 } from '@elastic/eui';
@@ -26,6 +29,7 @@ import { SearchScope } from '../../common/constants';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
+import { AutocompleteSuggestion, QueryBar, SymbolSuggestionsProvider } from '../query_bar';
 import { RepoItem, Repos, ScopeSelectorContainer } from './repository_item';
 
 interface Props {
@@ -49,7 +53,7 @@ class SearchPage extends React.PureComponent<Props, State> {
     uri: '',
   };
 
-  public onSearchChanged = ({ query }) => {
+  public onSearchChanged = (query: string) => {
     // Update the url and push to history as well.
     const queries = querystring.parse(history.location.search.replace('?', ''));
     history.push(
@@ -57,7 +61,7 @@ class SearchPage extends React.PureComponent<Props, State> {
         pathname: '/search',
         query: {
           ...queries,
-          q: query.text,
+          q: query,
         },
       })
     );
@@ -139,6 +143,17 @@ class SearchPage extends React.PureComponent<Props, State> {
   public render() {
     const emptyFunction = () => null;
     const { query, searchResult, languages, repositories, repositorySearch } = this.props;
+
+    const onSubmit = (q: string) => {
+      this.onSearchChanged(q);
+    };
+
+    const onSelect = (item: AutocompleteSuggestion) => {
+      history.push(item.selectUrl);
+    };
+
+    const suggestionsProvider = new SymbolSuggestionsProvider();
+
     const scopeSelector = (
       <ScopeSelectorContainer>
         <EuiTab
@@ -186,7 +201,13 @@ class SearchPage extends React.PureComponent<Props, State> {
         <div>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiSearchBar defaultQuery={query} query={query} onChange={this.onSearchChanged} />
+              <QueryBar
+                query={this.props.query}
+                onSubmit={onSubmit}
+                onSelect={onSelect}
+                appName="code"
+                suggestionsProvider={suggestionsProvider}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
@@ -330,7 +351,13 @@ class SearchPage extends React.PureComponent<Props, State> {
         <div>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiSearchBar defaultQuery={query} query={query} onChange={this.onSearchChanged} />
+              <QueryBar
+                query={this.props.query}
+                onSubmit={onSubmit}
+                onSelect={onSelect}
+                appName="code"
+                suggestionsProvider={suggestionsProvider}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
@@ -353,7 +380,13 @@ class SearchPage extends React.PureComponent<Props, State> {
         <div>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiSearchBar defaultQuery={query} onChange={this.onSearchChanged} />
+              <QueryBar
+                query={this.props.query}
+                onSubmit={onSubmit}
+                onSelect={onSelect}
+                appName="code"
+                suggestionsProvider={suggestionsProvider}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
