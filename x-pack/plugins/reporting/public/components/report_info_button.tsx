@@ -33,8 +33,9 @@ interface State {
 const NA = 'n/a';
 
 const getDimensions = (info: JobInfo) => {
-  const { width, height } = get(info, 'payload.layout.dimensions');
-  if (info && info.payload) {
+  const defaultDimensions = { width: null, height: null };
+  const { width, height } = get(info, 'payload.layout.dimensions', defaultDimensions);
+  if (width && height) {
     return (
       <Fragment>
         Width: {width} x Height: {height}
