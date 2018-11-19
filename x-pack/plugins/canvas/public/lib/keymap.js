@@ -16,6 +16,7 @@ export const keymap = {
     GRID: 'alt+g',
     REFRESH: 'alt+r',
     COPY: 'alt+c',
+    CUT: 'alt+x',
     PASTE: 'alt+v',
   },
   ELEMENT: {

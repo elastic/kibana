@@ -88,7 +88,8 @@ export const WorkpadPage = compose(
         let element = null;
         if (elementLookup.has(shape.id)) {
           element = elementLookup.get(shape.id);
-          if (selectedElementIds.indexOf(shape.id) > -1) selectedElements.push(element);
+          if (selectedElementIds.indexOf(shape.id) > -1)
+            selectedElements.push({ ...element, id: shape.id });
         }
         // instead of just combining `element` with `shape`, we make property transfer explicit
         return element ? { ...shape, filter: element.filter } : shape;
@@ -109,6 +110,13 @@ export const WorkpadPage = compose(
           console.log('copy', JSON.stringify(selectedElements));
           if (selectedElements.length)
             storage.set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(selectedElements));
+        },
+        cutElements: () => {
+          console.log('cut', JSON.stringify(selectedElements));
+          if (selectedElements.length) {
+            storage.set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(selectedElements));
+            removeElements(page.id)(selectedElementIds);
+          }
         },
         pasteElements: () => {
           const elements = JSON.parse(storage.get(LOCALSTORAGE_CLIPBOARD));

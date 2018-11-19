@@ -44,6 +44,9 @@ export class WorkpadPage extends PureComponent {
     onMouseUp: PropTypes.func,
     onAnimationEnd: PropTypes.func,
     resetHandler: PropTypes.func,
+    copyElements: PropTypes.func,
+    cutElements: PropTypes.func,
+    pasteElements: PropTypes.func,
   };
 
   componentWillUnmount() {
@@ -67,14 +70,19 @@ export class WorkpadPage extends PureComponent {
       onMouseMove,
       onMouseUp,
       onAnimationEnd,
+      copyElements,
+      cutElements,
+      pasteElements,
     } = this.props;
 
     const keyHandler = action => {
-      const { copyElements, pasteElements } = this.props;
       console.log({ action });
       switch (action) {
         case 'COPY':
           copyElements();
+          break;
+        case 'CUT':
+          cutElements();
           break;
         case 'PASTE':
           pasteElements();
