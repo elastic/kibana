@@ -55,12 +55,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getMetricValue() {
-      const metricValue = await find.byCssSelector('.rhythm_metric__primary-value');
+      const metricValue = await find.byCssSelector('.tvbVisMetric__value--primary');
       return metricValue.getVisibleText();
     }
 
     async enterMarkdown(markdown) {
-      const input = await find.byCssSelector('.vis_editor__markdown-editor textarea');
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
@@ -76,7 +76,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getMarkdownText() {
-      const el = await find.byCssSelector('.vis_editor__visualization');
+      const el = await find.byCssSelector('.tvbEditorVisualization');
       return await el.getVisibleText();
     }
 
@@ -104,7 +104,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getRhythmChartLegendValue() {
-      const metricValue = await find.byCssSelector('.rhythm_chart__legend_value');
+      const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
       await metricValue.session.moveMouseTo(metricValue);
       return await metricValue.getVisibleText();
     }
@@ -115,12 +115,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getGaugeLabel() {
-      const gaugeLabel = await find.byCssSelector('.thorHalfGauge__label');
+      const gaugeLabel = await find.byCssSelector('.tvbVisGauge__label');
       return await gaugeLabel.getVisibleText();
     }
 
     async getGaugeCount() {
-      const gaugeCount = await find.byCssSelector('.thorHalfGauge__value');
+      const gaugeCount = await find.byCssSelector('.tvbVisGauge__value');
       return await gaugeCount.getVisibleText();
     }
 
@@ -130,12 +130,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async getTopNLabel() {
-      const topNLabel = await find.byCssSelector('.rhythm_top_n__label');
+      const topNLabel = await find.byCssSelector('.tvbVisTopN__label');
       return await topNLabel.getVisibleText();
     }
 
     async getTopNCount() {
-      const gaugeCount = await find.byCssSelector('.rhythm_top_n__value');
+      const gaugeCount = await find.byCssSelector('.tvbVisTopN__value');
       return await gaugeCount.getVisibleText();
     }
 
@@ -170,9 +170,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async fillInVariable(name = 'test', metric = 'count', nth = 0) {
       const elements = await testSubjects.findAll('varRow');
-      const varNameInput = await elements[nth].findByCssSelector('.vis_editor__calc_vars-name input');
+      const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
       await varNameInput.type(name);
-      const metricSelectWrapper = await elements[nth].findByCssSelector('.vis_editor__calc_vars-var');
+      const metricSelectWrapper = await elements[nth].findByCssSelector('.tvbAggs__varMetricWrapper');
       await comboBox.setElement(metricSelectWrapper, metric);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -193,8 +193,24 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       const tableView = await testSubjects.find('tableView');
       return await tableView.getVisibleText();
     }
-
-
+    async clickMetricPanelOptions() {
+      const button = await testSubjects.find('metricEditorPanelOptionsBtn');
+      await button.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+    async setIndexPatternValue(value) {
+      const el = await testSubjects.find('metricsIndexPatternInput');
+      await el.clearValue();
+      await el.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+    async selectIndexPatternTimeField(timeField) {
+      const el = await testSubjects.find('comboBoxSearchInput');
+      await el.clearValue();
+      await el.type(timeField);
+      await el.session.pressKeys(Keys.RETURN);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
   }
 
   return new VisualBuilderPage();

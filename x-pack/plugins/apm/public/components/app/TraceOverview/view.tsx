@@ -6,11 +6,11 @@
 
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import { RRRRenderArgs } from 'react-redux-request';
+import { RRRRenderResponse } from 'react-redux-request';
 import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 // @ts-ignore
 import { TraceListRequest } from '../../../store/reactReduxRequest/traceList';
-import EmptyMessage from '../../shared/EmptyMessage';
+import { EmptyMessage } from '../../shared/EmptyMessage';
 import { TraceList } from './TraceList';
 
 interface Props {
@@ -37,7 +37,7 @@ export function TraceOverview(props: Props) {
       <EuiSpacer />
       <TraceListRequest
         urlParams={urlParams}
-        render={({ data, status }: RRRRenderArgs<ITransactionGroup[]>) => (
+        render={({ data, status }: RRRRenderResponse<ITransactionGroup[]>) => (
           <TraceList
             items={data}
             isLoading={status === 'LOADING'}

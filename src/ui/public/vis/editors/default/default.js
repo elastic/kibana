@@ -33,7 +33,7 @@ import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_typ
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 
 
-const defaultEditor = function ($rootScope, $compile) {
+const defaultEditor = function ($rootScope, $compile, i18n) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -44,7 +44,11 @@ const defaultEditor = function ($rootScope, $compile) {
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
-          { name: 'options', title: 'Options', editor: this.vis.type.editorConfig.optionsTemplate }
+          {
+            name: 'options',
+            title: i18n('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            editor: this.vis.type.editorConfig.optionsTemplate,
+          }
         ];
       }
     }

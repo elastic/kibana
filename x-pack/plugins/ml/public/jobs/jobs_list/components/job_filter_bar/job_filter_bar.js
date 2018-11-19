@@ -13,10 +13,12 @@ import React, {
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobGroup } from '../job_group';
 
-import './styles/main.less';
-
 import {
   EuiSearchBar,
+  EuiCallOut,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 function loadGroups() {
@@ -41,13 +43,38 @@ export class JobFilterBar extends Component {
   constructor(props) {
     super(props);
 
+    this.state = { error: null };
     this.setFilters = props.setFilters;
   }
 
-  onChange = ({ query }) => {
-    const clauses = query.ast.clauses;
-    this.setFilters(clauses);
+  onChange = ({ query, error }) => {
+    if (error) {
+      this.setState({ error });
+    } else {
+      let clauses = [];
+      if (query && query.ast !== undefined && query.ast.clauses !== undefined) {
+        clauses = query.ast.clauses;
+      }
+      this.setFilters(clauses);
+      this.setState({ error: null });
+    }
   };
+
+  renderError() {
+    const { error } = this.state;
+    if (!error) {
+      return;
+    }
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiCallOut
+          color="danger"
+          title={`Invalid search: ${error.message}`}
+        />
+        <EuiSpacer size="l" />
+      </EuiFlexItem>
+    );
+  }
 
   render() {
     const filters = [
@@ -95,13 +122,19 @@ export class JobFilterBar extends Component {
     ];
 
     return (
-      <EuiSearchBar
-        box={{
-          incremental: true,
-        }}
-        filters={filters}
-        onChange={this.onChange}
-      />
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          <EuiSearchBar
+            box={{
+              incremental: true,
+            }}
+            filters={filters}
+            onChange={this.onChange}
+            className="mlJobFilterBar"
+          />
+        </EuiFlexItem>
+        { this.renderError() || ''}
+      </EuiFlexGroup>
     );
   }
 }

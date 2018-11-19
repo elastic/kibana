@@ -23,9 +23,11 @@ uiRoutes.when('/logstash/nodes', {
   controllerAs: 'lsNodes',
   controller: class LsNodesList extends MonitoringViewBaseTableController {
 
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       super({
-        title: 'Logstash - Nodes',
+        title: i18n('xpack.monitoring.logstash.nodes.routeTitle', {
+          defaultMessage: 'Logstash - Nodes'
+        }),
         storageKey: 'logstash.nodes',
         getPageData,
         $scope,

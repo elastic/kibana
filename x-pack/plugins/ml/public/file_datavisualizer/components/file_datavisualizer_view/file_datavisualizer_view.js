@@ -82,7 +82,7 @@ export class FileDataVisualizerView extends Component {
   };
 
   async loadFile(file) {
-    if (file.size < MAX_BYTES) {
+    if (file.size <= MAX_BYTES) {
       try {
         const fileContents = await readFile(file);
         const data = fileContents.data;
@@ -308,6 +308,7 @@ export class FileDataVisualizerView extends Component {
               fileContents={fileContents}
               fileSize={fileSize}
               indexPatterns={this.props.indexPatterns}
+              kibanaConfig={this.props.kibanaConfig}
               showBottomBar={this.showBottomBar}
               hideBottomBar={this.hideBottomBar}
             />

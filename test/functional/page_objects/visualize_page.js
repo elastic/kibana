@@ -194,10 +194,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async getLabTypeLinks() {
-      return await remote.findAllByPartialLinkText('(Lab)');
-    }
-
     async getExperimentalTypeLinks() {
       return await remote.findAllByPartialLinkText('(Experimental)');
     }
@@ -605,7 +601,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
-    async toggleAggegationEditor(agg) {
+
+    async toggleAggregationEditor(agg) {
       await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -649,7 +646,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-
     async changeHeatmapColorNumbers(value = 6) {
       const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
       await input.clearValue();
@@ -686,6 +682,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       toCell.clearValue();
       toCell.type(`${to}`);
     }
+
     async clickYAxisOptions(axisId) {
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
@@ -1152,6 +1149,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await remote.moveMouseTo(cell);
       const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
       await filterBtn.click();
+    }
+
+    async toggleLegend(show = true) {
+      const isVisible = remote.findByCssSelector('vislib-legend .legend-ul');
+      if ((show && !isVisible) || (!show && isVisible)) {
+        await testSubjects.click('vislibToggleLegend');
+      }
+    }
+
+    async filterLegend(name) {
+      await this.toggleLegend();
+      await testSubjects.click(`legend-${name}`);
+      await testSubjects.click(`legend-${name}-filterIn`);
     }
 
     async doesLegendColorChoiceExist(color) {

@@ -1,25 +1,30 @@
 {
   "paths": {
     "common.ui": "src/ui",
-    "inputControl":"src/core_plugins/input_control_vis",
+    "console": "src/core_plugins/console",
+    "inputControl": "src/core_plugins/input_control_vis",
     "kbn": "src/core_plugins/kibana",
     "kbnVislibVisTypes": "src/core_plugins/kbn_vislib_vis_types",
     "markdownVis": "src/core_plugins/markdown_vis",
     "metricVis": "src/core_plugins/metric_vis",
+    "vega": "src/core_plugins/vega",
     "tableVis": "src/core_plugins/table_vis",
     "regionMap": "src/core_plugins/region_map",
     "statusPage": "src/core_plugins/status_page",
     "tileMap": "src/core_plugins/tile_map",
+    "timelion": "src/core_plugins/timelion",
     "tagCloud": "src/core_plugins/tagcloud",
+    "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
-    "xpack.watcher": "x-pack/plugins/watcher",
+    "xpack.licenseMgmt": "x-pack/plugins/license_management",
+    "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
-    "xpack.security": "x-pack/plugins/security"
+    "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
+    "xpack.security": "x-pack/plugins/security",
+    "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
-    "src/ui/ui_render/ui_render_mixin.js",
-    "x-pack/plugins/monitoring/public/components/cluster/overview/alerts_panel.js",
-    "x-pack/plugins/monitoring/public/directives/alerts/index.js"
+    "src/ui/ui_render/ui_render_mixin.js"
   ]
 }

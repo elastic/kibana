@@ -19,6 +19,7 @@
 
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
+import { IS_KIBANA_RELEASE } from '../../utils';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
@@ -46,7 +47,7 @@ export function getUiSettingDefaults() {
     },
     'k7design': {
       name: 'Use the new K7 UI design',
-      value: false,
+      value: IS_KIBANA_RELEASE,
       description: `When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are
         implemented.`,
     },
@@ -217,9 +218,10 @@ export function getUiSettingDefaults() {
       description: `Never show more than this many bars in date histograms, scale values if needed`,
     },
     'visualize:enableLabs': {
-      name: 'Enable labs',
+      name: 'Enable experimental visualizations',
       value: true,
-      description: `Enable lab visualizations in Visualize.`,
+      description: `Allows users to create, view, and edit experimental visualizations. If disabled,
+        only visualizations that are considered production-ready are available to the user.`,
       category: ['visualization'],
     },
     'visualization:tileMap:maxPrecision': {
@@ -532,6 +534,15 @@ export function getUiSettingDefaults() {
         Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.
       `,
       category: ['accessibility'],
+    },
+    'rollups:enableIndexPatterns': {
+      name: 'Enable rollup index patterns',
+      value: true,
+      description: `
+        Enable the creation of index patterns which capture rollup indices, which in turn enable
+        visualizations based on rollup data. Refresh the page to apply the changes.
+      `,
+      category: ['rollups'],
     },
   };
 }

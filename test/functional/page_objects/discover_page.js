@@ -125,6 +125,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverCurrentQuery');
     }
 
+    async getBarChartXTicks() {
+      return getRemote()
+        .findAllByCssSelector('.x.axis.CategoryAxis-1 > .tick > text')
+        .getVisibleText();
+    }
+
     getBarChartData() {
       let yAxisLabel = 0;
       let yAxisHeight;
@@ -289,25 +295,28 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    clickFieldListPlusFilter(field, value) {
+    async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      return getRemote()
+      await getRemote()
         .findByCssSelector(`[data-test-subj="plus-${field}-${value}"]`)
         .click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    clickFieldListMinusFilter(field, value) {
+    async clickFieldListMinusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      return getRemote()
+      await getRemote()
         .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
         .click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectIndexPattern(indexPattern) {
       await getRemote().findByClassName('index-pattern-selection').click();
       await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async removeAllFilters() {

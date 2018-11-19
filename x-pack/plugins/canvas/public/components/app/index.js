@@ -27,13 +27,17 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
   setAppReady: basePath => async () => {
-    // initialize the socket and interpreter
-    createSocket(basePath);
-    await populateBrowserRegistries();
-    await initializeInterpreter();
+    try {
+      // initialize the socket and interpreter
+      await createSocket(basePath);
+      await populateBrowserRegistries();
+      await initializeInterpreter();
 
-    // set app state to ready
-    dispatch(appReady());
+      // set app state to ready
+      dispatch(appReady());
+    } catch (e) {
+      dispatch(appError(e));
+    }
   },
   setAppError: payload => dispatch(appError(payload)),
 });

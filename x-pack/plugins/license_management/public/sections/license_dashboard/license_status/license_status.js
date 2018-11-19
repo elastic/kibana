@@ -14,6 +14,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class LicenseStatus extends React.PureComponent {
   render() {
@@ -26,20 +27,58 @@ export class LicenseStatus extends React.PureComponent {
       icon = <EuiIcon color="danger" type="alert" />;
       message = (
         <Fragment>
-          Your license expired on <strong>{expiryDate}</strong>
+          <FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription"
+            defaultMessage="Your license expired on {expiryDate}"
+            values={{
+              expiryDate: (
+                <strong>{expiryDate}</strong>
+              )
+            }}
+          />
         </Fragment>
       );
-      title = `Your ${typeTitleCase} license has expired`;
+      title = (
+        <FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle"
+          defaultMessage="Your {typeTitleCase} license has expired"
+          values={{
+            typeTitleCase
+          }}
+        />
+      );
     } else {
       icon = <EuiIcon color="success" type="checkInCircleFilled" />;
       message = expiryDate ? (
         <Fragment>
-          Your license will expire on <strong>{expiryDate}</strong>
+          <FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription"
+            defaultMessage="Your license will expire on {expiryDate}"
+            values={{
+              expiryDate: (
+                <strong>{expiryDate}</strong>
+              )
+            }}
+          />
         </Fragment>
       ) : (
-        <Fragment>Your license will never expire.</Fragment>
+        <Fragment>
+          <FormattedMessage
+            id="xpack.licenseMgmt.licenseDashboard.licenseStatus.permanentActiveLicenseStatusDescription"
+            defaultMessage="Your license will never expire."
+          />
+        </Fragment>
       );
-      title = `Your ${typeTitleCase} license is ${status.toLowerCase()}`;
+      title = (
+        <FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusTitle"
+          defaultMessage="Your {typeTitleCase} license is {status}"
+          values={{
+            typeTitleCase,
+            status: status.toLowerCase()
+          }}
+        />
+      );
     }
     return (
       <div>
