@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { bindToElasticSearchStatus, TaskManager } from './task_manager';
+import { TaskManager } from './task_manager';
 
 describe('TaskManager', () => {
   let clock: sinon.SinonFakeTimers;
@@ -26,35 +26,6 @@ describe('TaskManager', () => {
 
   afterEach(() => clock.restore());
 
-  test('starts / stops the poller when es goes green / red', async () => {
-    const handlers: any = {};
-    const es = {
-      status: {
-        on: (color: string, handler: any) => (handlers[color] = () => Promise.resolve(handler())),
-      },
-    };
-    const start = sinon.spy(async () => undefined);
-    const stop = sinon.spy(async () => undefined);
-    const init = sinon.spy(async () => undefined);
-
-    bindToElasticSearchStatus(es, { info: _.noop, debug: _.noop }, { stop, start }, { init });
-
-    await handlers.green();
-    sinon.assert.calledOnce(init);
-    sinon.assert.calledOnce(start);
-    sinon.assert.notCalled(stop);
-
-    await handlers.red();
-    sinon.assert.calledOnce(init);
-    sinon.assert.calledOnce(start);
-    sinon.assert.calledOnce(stop);
-
-    await handlers.green();
-    sinon.assert.calledTwice(init);
-    sinon.assert.calledTwice(start);
-    sinon.assert.calledOnce(stop);
-  });
-
   test('disallows schedule before init', async () => {
     const { opts } = testOpts();
     const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
@@ -62,19 +33,19 @@ describe('TaskManager', () => {
       taskType: 'foo',
       params: {},
     };
-    await expect(client.schedule(task)).rejects.toThrow(/The task manager is initializing/i);
+    await expect(client.schedule(task)).rejects.toThrow(/^NotInitialized: .*/i);
   });
 
   test('disallows fetch before init', async () => {
     const { opts } = testOpts();
     const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
-    await expect(client.fetch({})).rejects.toThrow(/The task manager is initializing/i);
+    await expect(client.fetch({})).rejects.toThrow(/^NotInitialized: .*/i);
   });
 
   test('disallows remove before init', async () => {
     const { opts } = testOpts();
     const client = new TaskManager(opts.kbnServer, opts.server, opts.config);
-    await expect(client.remove('23')).rejects.toThrow(/The task manager is initializing/i);
+    await expect(client.remove('23')).rejects.toThrow(/^NotInitialized: .*/i);
   });
 
   test('allows middleware registration before init', () => {

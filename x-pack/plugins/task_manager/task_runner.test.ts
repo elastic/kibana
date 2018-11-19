@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import sinon from 'sinon';
 import { minutesFromNow } from './lib/intervals';
-import { ConcreteTaskInstance, TaskDefinition } from './task';
+import { ConcreteTaskInstance } from './task';
 import { TaskManagerRunner } from './task_runner';
 
 describe('TaskManagerRunner', () => {
@@ -52,12 +52,14 @@ describe('TaskManagerRunner', () => {
         params: { a: 'b' },
         state: { hey: 'there' },
       },
-      definition: {
-        createTaskRunner: () => ({
-          async run() {
-            throw new Error('Dangit!');
-          },
-        }),
+      definitions: {
+        testtype: {
+          createTaskRunner: () => ({
+            async run() {
+              throw new Error('Dangit!');
+            },
+          }),
+        },
       },
     });
 
@@ -92,12 +94,14 @@ describe('TaskManagerRunner', () => {
   test('reschedules tasks that return a runAt', async () => {
     const runAt = minutesFromNow(_.random(1, 10));
     const { runner, store } = testOpts({
-      definition: {
-        createTaskRunner: () => ({
-          async run() {
-            return { runAt };
-          },
-        }),
+      definitions: {
+        bar: {
+          createTaskRunner: () => ({
+            async run() {
+              return { runAt };
+            },
+          }),
+        },
       },
     });
 
@@ -113,12 +117,14 @@ describe('TaskManagerRunner', () => {
       instance: {
         interval: '20m',
       },
-      definition: {
-        createTaskRunner: () => ({
-          async run() {
-            return { runAt };
-          },
-        }),
+      definitions: {
+        bar: {
+          createTaskRunner: () => ({
+            async run() {
+              return { runAt };
+            },
+          }),
+        },
       },
     });
 
@@ -135,12 +141,14 @@ describe('TaskManagerRunner', () => {
         id,
         interval: undefined,
       },
-      definition: {
-        createTaskRunner: () => ({
-          async run() {
-            return undefined;
-          },
-        }),
+      definitions: {
+        bar: {
+          createTaskRunner: () => ({
+            async run() {
+              return undefined;
+            },
+          }),
+        },
       },
     });
 
@@ -153,20 +161,22 @@ describe('TaskManagerRunner', () => {
   test('cancel cancels the task runner, if it is cancellable', async () => {
     let wasCancelled = false;
     const { runner, logger } = testOpts({
-      definition: {
-        createTaskRunner: () => ({
-          async run() {
-            await new Promise(r => setTimeout(r, 1000));
-          },
-          async cancel() {
-            wasCancelled = true;
-          },
-        }),
+      definitions: {
+        bar: {
+          createTaskRunner: () => ({
+            async run() {
+              await new Promise(r => setTimeout(r, 1000));
+            },
+            async cancel() {
+              wasCancelled = true;
+            },
+          }),
+        },
       },
     });
 
     const promise = runner.run();
-    await new Promise(r => setTimeout(r, 1));
+    await new Promise(r => setInterval(r, 1));
     await runner.cancel();
     await promise;
 
@@ -176,10 +186,12 @@ describe('TaskManagerRunner', () => {
 
   test('warns if cancel is called on a non-cancellable task', async () => {
     const { runner, logger } = testOpts({
-      definition: {
-        createTaskRunner: () => ({
-          run: async () => undefined,
-        }),
+      definitions: {
+        testType: {
+          createTaskRunner: () => ({
+            run: async () => undefined,
+          }),
+        },
       },
     });
 
@@ -192,7 +204,7 @@ describe('TaskManagerRunner', () => {
 
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
-    definition?: Partial<TaskDefinition>;
+    definitions?: any;
   }
 
   function testOpts(opts: TestOpts) {
@@ -229,14 +241,13 @@ describe('TaskManagerRunner', () => {
         },
         opts.instance || {}
       ),
-      definition: Object.assign(
-        {
+      definitions: Object.assign(opts.definitions || {}, {
+        testbar: {
           type: 'bar',
           title: 'Bar!',
           createTaskRunner,
         },
-        opts.definition || {}
-      ),
+      }),
     });
 
     return {
@@ -250,25 +261,21 @@ describe('TaskManagerRunner', () => {
 
   async function testReturn(result: any, shouldBeValid: boolean) {
     const { runner, logger } = testOpts({
-      definition: {
-        createTaskRunner: () => ({
-          run: async () => result,
-        }),
+      definitions: {
+        bar: {
+          createTaskRunner: () => ({
+            run: async () => result,
+          }),
+        },
       },
     });
 
     await runner.run();
 
-    try {
-      if (shouldBeValid) {
-        sinon.assert.notCalled(logger.warning);
-      } else {
-        sinon.assert.calledWith(logger.warning, sinon.match(/invalid task result/i));
-      }
-    } catch (err) {
-      sinon.assert.fail(
-        `Expected result ${JSON.stringify(result)} to be ${shouldBeValid ? 'valid' : 'invalid'}`
-      );
+    if (shouldBeValid) {
+      sinon.assert.notCalled(logger.warning);
+    } else {
+      sinon.assert.calledWith(logger.warning, sinon.match(/invalid task result/i));
     }
   }
 

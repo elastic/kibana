@@ -51,12 +51,11 @@ describe('TaskStore', () => {
         maxAttempts: 2,
         supportedTypes: ['report', 'dernstraight', 'yawn'],
       });
-
       const result = await store.schedule(task);
 
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledTwice(callCluster);
 
-      return { result, callCluster, arg: callCluster.args[0][1] };
+      return { result, callCluster, arg: callCluster.args[1][1] };
     }
 
     test('serializes the params and state', async () => {
@@ -67,7 +66,6 @@ describe('TaskStore', () => {
       };
       const { callCluster, arg } = await testSchedule(task);
 
-      sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWith(callCluster, 'index');
 
       expect(arg).toMatchObject({

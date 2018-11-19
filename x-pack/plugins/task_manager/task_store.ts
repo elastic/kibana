@@ -68,6 +68,7 @@ export class TaskStore {
   private index: string;
   private maxAttempts: number;
   private supportedTypes: string[];
+  private wasInitialized = false;
 
   /**
    * Constructs a new TaskStore.
@@ -84,10 +85,22 @@ export class TaskStore {
     this.supportedTypes = opts.supportedTypes;
   }
 
+  public addSupportedTypes(types: string[]) {
+    if (!this.wasInitialized) {
+      this.supportedTypes = this.supportedTypes.concat(types);
+    } else {
+      throw Error('Cannot add task types after initializattion');
+    }
+  }
+
   /**
    * Initializes the store, ensuring the task manager index is created and up to date.
    */
   public async init() {
+    if (this.wasInitialized) {
+      return;
+    }
+
     const properties = {
       type: { type: 'keyword' },
       task: {
@@ -106,7 +119,7 @@ export class TaskStore {
     };
 
     try {
-      return await this.callCluster('indices.putTemplate', {
+      const templateResult = await this.callCluster('indices.putTemplate', {
         name: this.index,
         body: {
           index_patterns: [this.index],
@@ -122,9 +135,13 @@ export class TaskStore {
           },
         },
       });
+      this.wasInitialized = true;
+      return templateResult;
     } catch (err) {
       throw err;
     }
+
+    return;
   }
 
   /**
@@ -133,8 +150,13 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
+    await this.init();
     if (!this.supportedTypes.includes(taskInstance.taskType)) {
-      throw new Error(`Unsupported task type "${taskInstance.taskType}".`);
+      throw new Error(
+        `Unsupported task type "${
+          taskInstance.taskType
+        }". Supported types are ${this.supportedTypes.join(', ')}`
+      );
     }
 
     const { id, ...body } = rawSource(taskInstance);
