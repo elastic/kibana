@@ -78,10 +78,15 @@ export async function registerPrivilegesWithCluster(server) {
     const privilegesToDelete = getPrivilegesToDelete(existingPrivileges, expectedPrivileges);
     for (const privilegeToDelete of privilegesToDelete) {
       server.log(['security', 'debug'], `Deleting Kibana Privilege ${privilegeToDelete} from Elasticearch for ${application}`);
-      await callCluster('shield.deletePrivilege', {
-        application,
-        privilege: privilegeToDelete
-      });
+      try {
+        await callCluster('shield.deletePrivilege', {
+          application,
+          privilege: privilegeToDelete
+        });
+      } catch (err) {
+        server.log(['security', 'error'], `Error deleting Kibana Privilege ${privilegeToDelete}`);
+        throw err;
+      }
     }
 
     await callCluster('shield.postPrivileges', {

@@ -21,6 +21,8 @@ const registerPrivilegesWithClusterTest = (description, {
   savedObjectTypes,
   privilegeMap,
   existingPrivileges,
+  throwErrorWhenDeletingPrivileges,
+  errorDeletingPrivilegeName,
   throwErrorWhenGettingPrivileges,
   throwErrorWhenPuttingPrivileges,
   assert
@@ -128,6 +130,13 @@ const registerPrivilegesWithClusterTest = (description, {
       expect(actualError).toBeInstanceOf(Error);
       expect(actualError.message).toEqual(expectedErrorMessage);
 
+      if (throwErrorWhenDeletingPrivileges) {
+        expect(mockServer.log).toHaveBeenCalledWith(
+          ['security', 'error'],
+          `Error deleting Kibana Privilege ${errorDeletingPrivilegeName}`
+        );
+      }
+
       expect(mockServer.log).toHaveBeenCalledWith(
         ['security', 'error'],
         `Error registering Kibana Privileges with Elasticsearch for ${application}: ${expectedErrorMessage}`
@@ -138,21 +147,37 @@ const registerPrivilegesWithClusterTest = (description, {
   test(description, async () => {
     const mockServer = createMockServer();
     const mockCallWithInternalUser = registerMockCallWithInternalUser()
-      .mockImplementationOnce(async () => {
-        if (throwErrorWhenGettingPrivileges) {
-          throw throwErrorWhenGettingPrivileges;
-        }
+      .mockImplementation((api) => {
+        switch(api) {
+          case 'shield.getPrivilege': {
+            if (throwErrorWhenGettingPrivileges) {
+              throw throwErrorWhenGettingPrivileges;
+            }
 
-        // ES returns an empty object if we don't have any privileges
-        if (!existingPrivileges) {
-          return {};
-        }
+            // ES returns an empty object if we don't have any privileges
+            if (!existingPrivileges) {
+              return {};
+            }
 
-        return existingPrivileges;
-      })
-      .mockImplementationOnce(async () => {
-        if (throwErrorWhenPuttingPrivileges) {
-          throw throwErrorWhenPuttingPrivileges;
+            return existingPrivileges;
+          }
+          case 'shield.deletePrivilege': {
+            if (throwErrorWhenDeletingPrivileges) {
+              throw throwErrorWhenDeletingPrivileges;
+            }
+
+            break;
+          }
+          case 'shield.postPrivileges': {
+            if (throwErrorWhenPuttingPrivileges) {
+              throw throwErrorWhenPuttingPrivileges;
+            }
+
+            return;
+          }
+          default: {
+            expect(true).toBe(false);
+          }
         }
       });
 
@@ -464,6 +489,28 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors getting pri
   throwErrorWhenGettingPrivileges: new Error('Error getting privileges'),
   assert: ({ expectErrorThrown }) => {
     expectErrorThrown('Error getting privileges');
+  }
+});
+
+registerPrivilegesWithClusterTest(`throws and logs error when errors deleting privileges`, {
+  privilegeMap: {
+    global: {},
+    space: {}
+  },
+  existingPrivileges: {
+    [application]: {
+      foo: {
+        application,
+        name: 'foo',
+        actions: ['action:not-foo'],
+        metadata: {},
+      }
+    }
+  },
+  throwErrorWhenDeletingPrivileges: new Error('Error deleting privileges'),
+  errorDeletingPrivilegeName: 'foo',
+  assert: ({ expectErrorThrown }) => {
+    expectErrorThrown('Error deleting privileges');
   }
 });
 
