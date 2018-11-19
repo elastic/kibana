@@ -107,12 +107,10 @@ export const WorkpadPage = compose(
           if (selectedElementIds.length) removeElements(page.id)(selectedElementIds);
         },
         copyElements: () => {
-          console.log('copy', JSON.stringify(selectedElements));
           if (selectedElements.length)
             storage.set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(selectedElements));
         },
         cutElements: () => {
-          console.log('cut', JSON.stringify(selectedElements));
           if (selectedElements.length) {
             storage.set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(selectedElements));
             removeElements(page.id)(selectedElementIds);
@@ -121,7 +119,6 @@ export const WorkpadPage = compose(
         pasteElements: () => {
           const elements = JSON.parse(storage.get(LOCALSTORAGE_CLIPBOARD));
           if (elements) elements.map(element => duplicateElement(page.id)(element));
-          console.log('paste', elements);
         },
       };
     }

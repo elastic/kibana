@@ -76,7 +76,6 @@ export class WorkpadPage extends PureComponent {
     } = this.props;
 
     const keyHandler = action => {
-      console.log({ action });
       switch (action) {
         case 'COPY':
           copyElements();
