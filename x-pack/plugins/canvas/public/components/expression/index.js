@@ -20,6 +20,7 @@ import { getSelectedPage, getSelectedElement } from '../../state/selectors/workp
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { getFunctionDefinitions } from '../../lib/function_definitions';
 import { getWindow } from '../../lib/get_window';
+import { LOCALSTORAGE_PREFIX } from '../../../common/lib/constants';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
 
@@ -83,12 +84,12 @@ export const Expression = compose(
     dirty: false,
   })),
   withState('isAutocompleteEnabled', 'setIsAutocompleteEnabled', () => {
-    const setting = storage.get('kibana.canvas.isAutocompleteEnabled');
+    const setting = storage.get(`${LOCALSTORAGE_PREFIX}isAutocompleteEnabled`);
     return setting === null ? true : setting;
   }),
   withHandlers({
     toggleAutocompleteEnabled: ({ isAutocompleteEnabled, setIsAutocompleteEnabled }) => () => {
-      storage.set('kibana.canvas.isAutocompleteEnabled', !isAutocompleteEnabled);
+      storage.set(`${LOCALSTORAGE_PREFIX}isAutocompleteEnabled`, !isAutocompleteEnabled);
       setIsAutocompleteEnabled(!isAutocompleteEnabled);
     },
     updateValue: ({ setFormState }) => expression => {
