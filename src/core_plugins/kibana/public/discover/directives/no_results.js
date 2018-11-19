@@ -72,7 +72,7 @@ export class DiscoverNoResults extends Component {
                       id="kbn.discover.noResults.indexFailureIndexText"
                       defaultMessage="Index {failureIndex}"
                       values={{
-                        failureIndex: '"' + failure.index + '"',
+                        failureIndex: `&lsquo;${failure.index}&rsquo;`,
                       }}
                     />
                   </strong>
