@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerAutoFollowPatternRoutes } from './api/register_auto_follow_pattern_routes';
+import { registerAutoFollowPatternRoutes } from './api/auto_follow_pattern';
 
 export function registerRoutes(server) {
   registerAutoFollowPatternRoutes(server);

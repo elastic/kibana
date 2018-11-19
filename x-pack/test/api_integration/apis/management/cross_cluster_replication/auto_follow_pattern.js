@@ -19,7 +19,7 @@ export default function ({ getService }) {
           .get(uri)
           .expect(200);
 
-        expect(Object.keys(body).length).to.eql(0);
+        expect(body).to.eql({});
       });
 
       // TODO: Add more tests when the Create API route is done

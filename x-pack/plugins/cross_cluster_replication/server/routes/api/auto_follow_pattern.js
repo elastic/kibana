@@ -18,7 +18,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
    * Returns a list of all Auto Follow patterns
    */
   server.route({
-    path: `${API_BASE_PATH}/auto_follow_patterns`,
+    path: `${API_BASE_PATH}/auto_follow_patternsxx`,
     method: 'GET',
     config: {
       pre: [ licensePreRouting ]
