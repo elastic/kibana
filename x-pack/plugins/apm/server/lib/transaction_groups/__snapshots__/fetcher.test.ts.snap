@@ -44,7 +44,9 @@ Array [
             },
           },
         },
-        "query": "myBodyQuery",
+        "query": Object {
+          "my": "bodyQuery",
+        },
         "size": 0,
       },
       "index": "myIndex",

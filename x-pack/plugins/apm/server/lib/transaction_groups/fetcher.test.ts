@@ -20,7 +20,7 @@ describe('transactionGroupsFetcher', () => {
         get: () => 'myIndex' as any
       }
     };
-    const bodyQuery = { my: 'stringmap' };
+    const bodyQuery = { my: 'bodyQuery' };
     res = await transactionGroupsFetcher(setup, bodyQuery);
   });
 
