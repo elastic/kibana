@@ -165,7 +165,7 @@ class ColdPhaseUi extends PureComponent {
               </EuiFlexItem>
             </EuiFlexGroup>
           </Fragment>
-        ) : null}
+        ) : <div />}
       </EuiDescribedFormGroup>
     );
   }

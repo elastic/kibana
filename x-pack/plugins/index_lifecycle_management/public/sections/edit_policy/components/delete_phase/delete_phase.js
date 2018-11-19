@@ -109,7 +109,7 @@ export class DeletePhase extends PureComponent {
             isShowingErrors={isShowingErrors}
             setPhaseData={setPhaseData}
           />
-        ) : null}
+        ) : <div />}
       </EuiDescribedFormGroup>
     );
   }
