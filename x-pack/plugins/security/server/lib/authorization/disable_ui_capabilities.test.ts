@@ -15,7 +15,9 @@ interface MockServerOptions {
 }
 
 const actions = new Actions('1.0.0-zeta1');
-const mockRequest = Symbol();
+const mockRequest = {
+  foo: Symbol(),
+};
 
 const createMockServer = (options: MockServerOptions) => {
   const mockSpacesPlugin = {

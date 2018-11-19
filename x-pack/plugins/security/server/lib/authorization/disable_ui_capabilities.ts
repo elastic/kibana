@@ -57,7 +57,7 @@ export function disableUICapabilitesFactory(
         }
 
         const action = actions.ui.get(featureId!, uiCapability!);
-        return checkPrivilegesResponse.privileges[action];
+        return checkPrivilegesResponse.privileges[action] === true;
       });
     });
   };
