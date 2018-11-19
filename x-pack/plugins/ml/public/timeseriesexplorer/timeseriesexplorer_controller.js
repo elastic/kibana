@@ -52,7 +52,16 @@ import { initPromise } from 'plugins/ml/util/promise';
 
 // annotations
 import mockAnnotations from './__mocks__/cp_daylight_annotations.json';
-const focusAnnotationData = mockAnnotations.tests[0].validations.result_range.expected;
+const focusAnnotationData = mockAnnotations.tests[0].validations.result_range.expected.map((d) => {
+  // transform to annotations format
+  return {
+    job_id: 'cp_daylight_annotation-1447',
+    result_type: 'annotation',
+    timestamp: d.start,
+    end_timestamp: d.end,
+    annotation: d.comment
+  };
+});
 
 uiRoutes
   .when('/timeseriesexplorer/?', {

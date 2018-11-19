@@ -588,15 +588,15 @@ export class TimeseriesChart extends React.Component {
     annotationRects
       .classed('ml-annotation-rect-hidden', !showAnnotations)
       .attr('x', (d) => {
-        const date = moment(d.start);
+        const date = moment(d.timestamp);
         console.warn('x', focusXScale(date));
         return focusXScale(date);
       })
       .attr('y', focusZoomPanelHeight + 1)
       .attr('height', focusChartHeight - 2)
       .attr('width', (d) => {
-        const s = focusXScale(moment(d.start)) + 1;
-        const e = (typeof d.end !== 'undefined') ? (focusXScale(moment(d.end)) - 1) : (s + 2);
+        const s = focusXScale(moment(d.timestamp)) + 1;
+        const e = (typeof d.end_timestamp !== 'undefined') ? (focusXScale(moment(d.end_timestamp)) - 1) : (s + 2);
         const width = Math.max(2, (e - s));
         console.warn('width', width);
         return width;
@@ -1244,6 +1244,15 @@ export class TimeseriesChart extends React.Component {
 
     if (_.has(marker, 'scheduledEvents')) {
       contents += `<br/><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}`;
+    }
+
+    if (_.has(marker, 'annotation')) {
+      contents = marker.annotation;
+      contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
+
+      if (typeof marker.end_timestamp !== 'undefined') {
+        contents += ` - ${moment(marker.end_timestamp).format('MMMM Do YYYY, HH:mm')}`;
+      }
     }
 
     mlChartTooltipService.show(contents, circle, {
