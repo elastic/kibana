@@ -17,8 +17,6 @@ import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import _ from 'lodash';
 
-const DEFAULT_COLOR = '#e6194b';
-
 export class VectorStyle {
 
   static type = 'VECTOR';
@@ -301,7 +299,7 @@ export class VectorStyle {
     if (
       this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.STATIC
     ) {
-      color = this.getHexColor(property) || DEFAULT_COLOR;
+      color = this.getHexColor(property);
     } else if (this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC) {
       color = this._getMBDataDrivenColor(property);
     } else {
