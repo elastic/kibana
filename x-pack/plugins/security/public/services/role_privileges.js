@@ -17,6 +17,8 @@ const clusterPrivileges = [
   'monitor_ml',
   'manage_watcher',
   'monitor_watcher',
+  'read_ccr',
+  'manage_ccr',
 ];
 const indexPrivileges = [
   'all',

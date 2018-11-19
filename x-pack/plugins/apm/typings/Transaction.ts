@@ -28,6 +28,7 @@ interface Context {
     url: {
       full: string;
     };
+    method: string;
   };
   user?: {
     id: string;
@@ -36,7 +37,7 @@ interface Context {
 }
 
 interface Marks {
-  agent: {
+  agent?: {
     [name: string]: number;
   };
 }

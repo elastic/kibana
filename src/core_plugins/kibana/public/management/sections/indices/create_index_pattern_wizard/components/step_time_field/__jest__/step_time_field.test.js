@@ -29,6 +29,9 @@ jest.mock('../components/action_buttons', () => ({ ActionButtons: 'ActionButtons
 jest.mock('../../../lib/extract_time_fields', () => ({
   extractTimeFields: fields => fields,
 }));
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => { },
+}));
 
 const mockIndexPatternCreationType = {
   getIndexPatternType: () => 'default',
