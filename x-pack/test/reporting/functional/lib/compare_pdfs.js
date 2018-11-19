@@ -44,10 +44,7 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
   const convertOptions = {
-<<<<<<< HEAD
-=======
     // '-density': '300',
->>>>>>> Enabling report tests, adjusting the config export for it, and having successes(!)
   };
 
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
