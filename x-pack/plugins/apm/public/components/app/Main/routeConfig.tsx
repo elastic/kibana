@@ -28,13 +28,19 @@ interface RenderArgs {
   location: StringMap<any>;
 }
 
+const renderAsRedirectTo = (to: string) => {
+  return ({ location }: RenderArgs) => (
+    <Redirect
+      to={{
+        ...location,
+        pathname: to
+      }}
+    />
+  );
+};
+
 export const routes = [
-  {
-    exact: true,
-    path: '/',
-    component: Home,
-    breadcrumb: 'APM'
-  },
+  { exact: true, path: '/', render: renderAsRedirectTo('/services') },
   {
     exact: true,
     path: '/:serviceName/errors/:groupId',
@@ -58,18 +64,15 @@ export const routes = [
       },
       {
         exact: true,
-        path: '/:serviceName',
-        breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
-        render: ({ location }: RenderArgs) => {
-          return (
-            <Redirect
-              to={{
-                ...location,
-                pathname: `${location.pathname}/transactions`
-              }}
-            />
-          );
-        }
+        path: '/services',
+        component: Home,
+        breadcrumb: 'APM Services'
+      },
+      {
+        exact: true,
+        path: '/traces',
+        component: Home,
+        breadcrumb: 'APM Traces'
       }
     ]
   },
@@ -94,3 +97,18 @@ export const routes = [
       legacyDecodeURIComponent(match.params.transactionName)
   }
 ];
+// {
+//   exact: true,
+//   path: '/:serviceName',
+//   breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
+//   render: ({ location }: RenderArgs) => {
+//     return (
+//       <Redirect
+//         to={{
+//           ...location,
+//           pathname: `${location.pathname}/transactions`
+//         }}
+//       />
+//     );
+//   }
+// }
