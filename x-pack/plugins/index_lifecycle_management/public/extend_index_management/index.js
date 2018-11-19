@@ -36,7 +36,7 @@ addActionExtension((indices) => {
 });
 addActionExtension((indices) => {
   const allHaveIlm = every(indices, (index) => {
-    return index.ilm;
+    return index.ilm && index.ilm.managed;
   });
   if (!allHaveIlm) {
     return null;
