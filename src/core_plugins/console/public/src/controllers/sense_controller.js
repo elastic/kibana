@@ -54,11 +54,22 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     if (urlParams.load_from) {
       sourceLocation = 'http';
       source = urlParams.load_from;
-    } else if (urlParams.search_request && urlParams.index) {
+    } else if (urlParams.commands) {
       try {
-        const searchRequest = rison.decode(urlParams.search_request);
+        const commands = rison.decode(urlParams.commands);
         sourceLocation = 'inline';
-        source = `POST /${urlParams.index}/_search\n${JSON.stringify(searchRequest, null, 2)}`;
+        source = commands
+          .map(({ comments = [], cmd, body }) => {
+            const out = [...comments];
+            if (cmd) {
+              out.push(cmd);
+              if (body) {
+                out.push(JSON.stringify(body, null, 2));
+              }
+            }
+            return out.join('\n');
+          })
+          .join('\n');
       } catch (e) {
         toastNotifications.addWarning({
           title: 'Unable to decode search request'
