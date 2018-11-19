@@ -11,6 +11,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { MonitoringViewBaseController } from '../../base_controller';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/elasticsearch/ccr', {
   template,
@@ -40,7 +41,9 @@ uiRoutes.when('/elasticsearch/ccr', {
 
       this.renderReact = ({ data }) => {
         super.renderReact(
-          <Ccr data={data} />
+          <I18nProvider>
+            <Ccr data={data} />
+          </I18nProvider>
         );
       };
     }
