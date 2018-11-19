@@ -170,7 +170,7 @@ function getShareConfig(action) {
  */
 function getOptionsConfig(action) {
   return {
-    key: i18n.translate('kbn.dashboard.topNave.shareButtonAriaLabel', {
+    key: i18n.translate('kbn.dashboard.topNave.optionsButtonAriaLabel', {
       defaultMessage: 'options',
     }),
     description: i18n.translate('kbn.dashboard.topNave.optionsConfigDescription', {
