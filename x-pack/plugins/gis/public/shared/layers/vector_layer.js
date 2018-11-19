@@ -88,6 +88,12 @@ export class VectorLayer extends ALayer {
     return this._joins.slice();
   }
 
+  getValidJoins() {
+    return this._joins.filter(join => {
+      return join.hasCompleteConfig();
+    });
+  }
+
   getSupportedStyles() {
     return [VectorStyle];
   }
@@ -128,7 +134,7 @@ export class VectorLayer extends ALayer {
         origin: 'source'
       };
     });
-    const joinFields = this._joins.map(join => {
+    const joinFields = this.getValidJoins().map(join => {
       return {
         label: join.getHumanReadableName(),
         name: join.getJoinFieldName(),
@@ -215,7 +221,7 @@ export class VectorLayer extends ALayer {
 
 
   async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    const joinSyncs = this._joins.map(async join => {
+    const joinSyncs = this.getValidJoins().map(async join => {
       return this._syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters });
     });
     return await Promise.all(joinSyncs);
@@ -229,7 +235,7 @@ export class VectorLayer extends ALayer {
       const fieldNames = [
         ...this._source.getFieldNames(),
         ...this._style.getSourceFieldNames(),
-        ...this._joins.map(join => {
+        ...this.getValidJoins().map(join => {
           return join.getLeftFieldName();
         })
       ];
