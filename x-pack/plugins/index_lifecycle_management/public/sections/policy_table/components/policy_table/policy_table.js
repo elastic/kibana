@@ -182,6 +182,7 @@ export class PolicyTableUi extends Component {
     );
   }
   buildRowCells(policy) {
+    const hasCoveredIndices = policy.coveredIndices && policy.coveredIndices.length;
     const { intl } = this.props;
     const { name } = policy;
     const cells = Object.keys(HEADERS).map(fieldName => {
@@ -200,8 +201,11 @@ export class PolicyTableUi extends Component {
       id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
       defaultMessage: 'View indices',
     });
-    const deletePolicyLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText',
+    const deletePolicyLabel = hasCoveredIndices ? intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
+      defaultMessage: 'Cannot delete a policy that is used by an index',
+    }) : intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
       defaultMessage: 'Delete policy',
     });
     cells.push(
@@ -216,13 +220,14 @@ export class PolicyTableUi extends Component {
           content={deletePolicyLabel}
         >
           <EuiButtonIcon
+            isDisabled={hasCoveredIndices}
             aria-label={deletePolicyLabel}
-            color={'danger'}
+            color={hasCoveredIndices ? 'disabled' : 'danger'}
             onClick={() => this.setState({ policyToDelete: policy })}
             iconType="trash"
           />
         </EuiToolTip>
-        { policy.coveredIndices && policy.coveredIndices.length ? (
+        { hasCoveredIndices ? (
           <EuiToolTip
             position="bottom"
             content={viewIndicesLabel}
