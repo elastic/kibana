@@ -1,4 +1,4 @@
-// ML has app specific coloring for it's various warning levels. 
+// ML has app specific coloring for it's various warning levels.
 // These are used almost everywhere.
 
 .ml-icon-severity-critical,
@@ -10,21 +10,21 @@
 }
 
 .ml-icon-severity-critical {
-  color: $mchColorCriticalText;
+  color: $mlColorCriticalText;
 }
 
 .ml-icon-severity-major {
-  color: $mchColorMajorText;
+  color: $mlColorMajorText;
 }
 
 .ml-icon-severity-minor {
-  color: $mchColorMinorText;
+  color: $mlColorMinorText;
 }
 
 .ml-icon-severity-warning {
-  color: $mchColorWarningText;
+  color: $mlColorWarningText;
 }
 
 .ml-icon-severity-unknown {
-  color: $mchColorUnknownText;
+  color: $mlColorUnknownText;
 }
