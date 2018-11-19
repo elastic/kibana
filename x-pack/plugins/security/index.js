@@ -92,9 +92,17 @@ export const security = (kibana) => new kibana.Plugin({
     },
     replaceInjectedVars: async function (originalInjectedVars, request, server) {
       const disableUICapabilites = disableUICapabilitesFactory(server, request);
+      // if we're an anonymous route, we disable all ui capabilities
+      if (request.route.settings.auth === false) {
+        return {
+          ...originalInjectedVars,
+          uiCapabilities: disableUICapabilites.all(originalInjectedVars.uiCapabilities)
+        };
+      }
+
       return {
         ...originalInjectedVars,
-        uiCapabilities: await disableUICapabilites(originalInjectedVars.uiCapabilities)
+        uiCapabilities: await disableUICapabilites.usingPrivileges(originalInjectedVars.uiCapabilities)
       };
     }
   },

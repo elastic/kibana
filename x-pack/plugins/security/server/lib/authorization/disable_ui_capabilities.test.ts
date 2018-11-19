@@ -52,17 +52,127 @@ const createMockServer = (options: MockServerOptions) => {
   };
 };
 
-describe('checkPrivileges errors', () => {
-  test(`disables all uiCapabilities when a 401 is thrown`, async () => {
+describe('usingPrivileges', () => {
+  describe('checkPrivileges errors', () => {
+    test(`disables all uiCapabilities when a 401 is thrown`, async () => {
+      const mockServer = createMockServer({
+        checkPrivileges: {
+          reject: {
+            statusCode: 401,
+          },
+        },
+      });
+      const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
+      const result = await usingPrivileges(
+        Object.freeze({
+          navLinks: {
+            foo: true,
+            bar: true,
+          },
+          fooFeature: {
+            foo: true,
+            bar: true,
+          },
+          barFeature: {
+            foo: true,
+            bar: true,
+          },
+        })
+      );
+
+      expect(result).toEqual({
+        navLinks: {
+          foo: false,
+          bar: false,
+        },
+        fooFeature: {
+          foo: false,
+          bar: false,
+        },
+        barFeature: {
+          foo: false,
+          bar: false,
+        },
+      });
+    });
+
+    test(`disables all uiCapabilities when a 403 is thrown`, async () => {
+      const mockServer = createMockServer({
+        checkPrivileges: {
+          reject: {
+            statusCode: 403,
+          },
+        },
+      });
+      const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
+      const result = await usingPrivileges(
+        Object.freeze({
+          navLinks: {
+            foo: true,
+            bar: true,
+          },
+          fooFeature: {
+            foo: true,
+            bar: true,
+          },
+          barFeature: {
+            foo: true,
+            bar: true,
+          },
+        })
+      );
+
+      expect(result).toEqual({
+        navLinks: {
+          foo: false,
+          bar: false,
+        },
+        fooFeature: {
+          foo: false,
+          bar: false,
+        },
+        barFeature: {
+          foo: false,
+          bar: false,
+        },
+      });
+    });
+
+    test(`otherwise it throws the error`, async () => {
+      const mockServer = createMockServer({
+        checkPrivileges: {
+          reject: new Error('something else entirely'),
+        },
+      });
+      const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
+      await expect(
+        usingPrivileges({
+          navLinks: {
+            foo: true,
+            bar: false,
+          },
+        })
+      ).rejects.toThrowErrorMatchingSnapshot();
+    });
+  });
+
+  test(`disables ui capabilities when they don't have privileges`, async () => {
     const mockServer = createMockServer({
       checkPrivileges: {
-        reject: {
-          statusCode: 401,
+        resolve: {
+          privileges: {
+            [actions.ui.get('navLinks', 'foo')]: true,
+            [actions.ui.get('navLinks', 'bar')]: false,
+            [actions.ui.get('fooFeature', 'foo')]: true,
+            [actions.ui.get('fooFeature', 'bar')]: false,
+            [actions.ui.get('barFeature', 'foo')]: true,
+            [actions.ui.get('barFeature', 'bar')]: false,
+          },
         },
       },
     });
-    const disableUICapabilites = disableUICapabilitesFactory(mockServer, mockRequest);
-    const result = await disableUICapabilites(
+    const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
+    const result = await usingPrivileges(
       Object.freeze({
         navLinks: {
           foo: true,
@@ -81,147 +191,54 @@ describe('checkPrivileges errors', () => {
 
     expect(result).toEqual({
       navLinks: {
-        foo: false,
+        foo: true,
         bar: false,
       },
       fooFeature: {
-        foo: false,
+        foo: true,
         bar: false,
       },
       barFeature: {
-        foo: false,
+        foo: true,
         bar: false,
       },
     });
   });
 
-  test(`disables all uiCapabilities when a 403 is thrown`, async () => {
+  test(`doesn't re-enable disabled uiCapabilities`, async () => {
     const mockServer = createMockServer({
       checkPrivileges: {
-        reject: {
-          statusCode: 403,
+        resolve: {
+          privileges: {
+            [actions.ui.get('navLinks', 'foo')]: true,
+            [actions.ui.get('navLinks', 'bar')]: true,
+            [actions.ui.get('fooFeature', 'foo')]: true,
+            [actions.ui.get('fooFeature', 'bar')]: true,
+            [actions.ui.get('barFeature', 'foo')]: true,
+            [actions.ui.get('barFeature', 'bar')]: true,
+          },
         },
       },
     });
-    const disableUICapabilites = disableUICapabilitesFactory(mockServer, mockRequest);
-    const result = await disableUICapabilites(
+    const { usingPrivileges } = disableUICapabilitesFactory(mockServer, mockRequest);
+    const result = await usingPrivileges(
       Object.freeze({
         navLinks: {
-          foo: true,
-          bar: true,
+          foo: false,
+          bar: false,
         },
         fooFeature: {
-          foo: true,
-          bar: true,
+          foo: false,
+          bar: false,
         },
         barFeature: {
-          foo: true,
-          bar: true,
-        },
-      })
-    );
-
-    expect(result).toEqual({
-      navLinks: {
-        foo: false,
-        bar: false,
-      },
-      fooFeature: {
-        foo: false,
-        bar: false,
-      },
-      barFeature: {
-        foo: false,
-        bar: false,
-      },
-    });
-  });
-
-  test(`otherwise it throws the error`, async () => {
-    const mockServer = createMockServer({
-      checkPrivileges: {
-        reject: new Error('something else entirely'),
-      },
-    });
-    const disableUICapabilites = disableUICapabilitesFactory(mockServer, mockRequest);
-    await expect(
-      disableUICapabilites({
-        navLinks: {
-          foo: true,
+          foo: false,
           bar: false,
         },
       })
-    ).rejects.toThrowErrorMatchingSnapshot();
-  });
-});
+    );
 
-test(`disables ui capabilities when they don't have privileges`, async () => {
-  const mockServer = createMockServer({
-    checkPrivileges: {
-      resolve: {
-        privileges: {
-          [actions.ui.get('navLinks', 'foo')]: true,
-          [actions.ui.get('navLinks', 'bar')]: false,
-          [actions.ui.get('fooFeature', 'foo')]: true,
-          [actions.ui.get('fooFeature', 'bar')]: false,
-          [actions.ui.get('barFeature', 'foo')]: true,
-          [actions.ui.get('barFeature', 'bar')]: false,
-        },
-      },
-    },
-  });
-  const disableUICapabilites = disableUICapabilitesFactory(mockServer, mockRequest);
-  const result = await disableUICapabilites(
-    Object.freeze({
-      navLinks: {
-        foo: true,
-        bar: true,
-      },
-      fooFeature: {
-        foo: true,
-        bar: true,
-      },
-      barFeature: {
-        foo: true,
-        bar: true,
-      },
-    })
-  );
-
-  expect(result).toEqual({
-    navLinks: {
-      foo: true,
-      bar: false,
-    },
-    fooFeature: {
-      foo: true,
-      bar: false,
-    },
-    barFeature: {
-      foo: true,
-      bar: false,
-    },
-  });
-});
-
-test(`doesn't re-enable disabled uiCapabilities`, async () => {
-  const mockServer = createMockServer({
-    checkPrivileges: {
-      resolve: {
-        privileges: {
-          [actions.ui.get('navLinks', 'foo')]: true,
-          [actions.ui.get('navLinks', 'bar')]: true,
-          [actions.ui.get('fooFeature', 'foo')]: true,
-          [actions.ui.get('fooFeature', 'bar')]: true,
-          [actions.ui.get('barFeature', 'foo')]: true,
-          [actions.ui.get('barFeature', 'bar')]: true,
-        },
-      },
-    },
-  });
-  const disableUICapabilites = disableUICapabilitesFactory(mockServer, mockRequest);
-  const result = await disableUICapabilites(
-    Object.freeze({
+    expect(result).toEqual({
       navLinks: {
         foo: false,
         bar: false,
@@ -234,21 +251,47 @@ test(`doesn't re-enable disabled uiCapabilities`, async () => {
         foo: false,
         bar: false,
       },
-    })
-  );
+    });
+  });
+});
 
-  expect(result).toEqual({
-    navLinks: {
-      foo: false,
-      bar: false,
-    },
-    fooFeature: {
-      foo: false,
-      bar: false,
-    },
-    barFeature: {
-      foo: false,
-      bar: false,
-    },
+describe('all', () => {
+  test(`disables all uiCapabilities`, () => {
+    const mockServer = createMockServer({
+      checkPrivileges: {
+        reject: new Error(`Don't use me`),
+      },
+    });
+    const { all } = disableUICapabilitesFactory(mockServer, mockRequest);
+    const result = all(
+      Object.freeze({
+        navLinks: {
+          foo: true,
+          bar: true,
+        },
+        fooFeature: {
+          foo: true,
+          bar: true,
+        },
+        barFeature: {
+          foo: true,
+          bar: true,
+        },
+      })
+    );
+    expect(result).toEqual({
+      navLinks: {
+        foo: false,
+        bar: false,
+      },
+      fooFeature: {
+        foo: false,
+        bar: false,
+      },
+      barFeature: {
+        foo: false,
+        bar: false,
+      },
+    });
   });
 });

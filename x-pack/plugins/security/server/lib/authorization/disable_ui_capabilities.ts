@@ -12,7 +12,13 @@ export function disableUICapabilitesFactory(server: Record<string, any>, request
   const { authorization } = server.plugins.security;
   const actions: Actions = authorization.actions;
 
-  return async function disableUICapabilities(uiCapabilities: UICapabilities) {
+  const disableAll = (uiCapabilities: UICapabilities) => {
+    return mapValues(uiCapabilities, featureUICapabilities =>
+      mapValues(featureUICapabilities, () => false)
+    );
+  };
+
+  const usingPrivileges = async (uiCapabilities: UICapabilities) => {
     const uiActions = Object.entries(uiCapabilities).reduce<string[]>(
       (acc, [featureId, featureUICapabilities]) => [
         ...acc,
@@ -34,9 +40,7 @@ export function disableUICapabilitesFactory(server: Record<string, any>, request
       // is generally when the user hasn't authenticated yet and we're displaying the
       // login screen, which isn't driven any uiCapabilities
       if (err.statusCode === 401 || err.statusCode === 403) {
-        return mapValues(uiCapabilities, featureUICapabilities =>
-          mapValues(featureUICapabilities, () => false)
-        );
+        return disableAll(uiCapabilities);
       }
       throw err;
     }
@@ -52,5 +56,10 @@ export function disableUICapabilitesFactory(server: Record<string, any>, request
         return checkPrivilegesResponse.privileges[action];
       });
     });
+  };
+
+  return {
+    all: disableAll,
+    usingPrivileges,
   };
 }
