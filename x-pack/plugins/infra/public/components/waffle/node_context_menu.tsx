@@ -41,6 +41,7 @@ export const NodeContextMenu = injectI18n(
           to: timeRange.to,
         })
       : undefined;
+
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
@@ -71,6 +72,7 @@ export const NodeContextMenu = injectI18n(
         ],
       },
     ];
+
     return (
       <EuiPopover
         closePopover={closePopover}

@@ -212,6 +212,7 @@ export const ChartSection = injectI18n(
         </EuiPageContentBody>
       );
     }
+
     private handleSelectionBrushEnd = (area: Area) => {
       const { onChangeRangeTime } = this.props;
       const { startX, endX } = area.domainArea;

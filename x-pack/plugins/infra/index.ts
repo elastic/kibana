@@ -20,7 +20,7 @@ export function infra(kibana: any) {
     require: ['kibana', 'elasticsearch'],
     uiExports: {
       app: {
-        description: i18n.translate('xpack.infra.infrastructureDescriptions', {
+        description: i18n.translate('xpack.infra.infrastructureDescription', {
           defaultMessage: 'Explore your infrastructure',
         }),
         icon: 'plugins/infra/images/infra_mono_white.svg',
@@ -34,7 +34,7 @@ export function infra(kibana: any) {
       home: ['plugins/infra/register_feature'],
       links: [
         {
-          description: i18n.translate('xpack.infra.linkInfrastructureDescriptions', {
+          description: i18n.translate('xpack.infra.linkInfrastructureDescription', {
             defaultMessage: 'Explore your infrastructure',
           }),
           icon: 'plugins/infra/images/infra_mono_white.svg',
@@ -47,7 +47,7 @@ export function infra(kibana: any) {
           url: `/app/${APP_ID}#/home`,
         },
         {
-          description: i18n.translate('xpack.infra.linkLogsDescriptions', {
+          description: i18n.translate('xpack.infra.linkLogsDescription', {
             defaultMessage: 'Explore your logs',
           }),
           icon: 'plugins/infra/images/logging_mono_white.svg',

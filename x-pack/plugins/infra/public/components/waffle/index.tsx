@@ -176,6 +176,7 @@ export const Waffle = injectI18n(
         </AutoSizer>
       );
     }
+
     // TODO: Change this to a real implimentation using the tickFormatter from the prototype as an example.
     private formatter = (val: string | number) => {
       const { metric } = this.props.options;
@@ -190,6 +191,7 @@ export const Waffle = injectI18n(
       const formatter = createFormatter(metricFormatter.formatter, metricFormatter.template);
       return formatter(val);
     };
+
     private handleDrilldown = (filter: string) => {
       this.props.onDrilldown({
         kind: 'kuery',
@@ -197,6 +199,7 @@ export const Waffle = injectI18n(
       });
       return;
     };
+
     private renderGroup = (bounds: InfraWaffleMapBounds, timeRange: InfraTimerangeInput) => (
       group: InfraWaffleMapGroup
     ) => {

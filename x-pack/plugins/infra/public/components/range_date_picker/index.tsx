@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { find } from 'lodash';
+import { find, get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 
@@ -30,51 +30,62 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+enum DatePickerDateOptions {
+  today = 'today',
+  yesterday = 'yesterday',
+  thisWeek = 'this_week',
+  weekToDate = 'week_to_date',
+  thisMonth = 'this_month',
+  monthToDate = 'month_to_date',
+  thisYear = 'this_year',
+  yearToDate = 'year_to_date',
+}
+
 const commonDates: Array<{ id: string; label: any }> = [
   {
-    id: 'today',
+    id: DatePickerDateOptions.today,
     label: i18n.translate('xpack.infra.rangeDatePicker.todayText', {
       defaultMessage: 'Today',
     }),
   },
   {
-    id: 'yesterday',
+    id: DatePickerDateOptions.yesterday,
     label: i18n.translate('xpack.infra.rangeDatePicker.yesterdayText', {
       defaultMessage: 'Yesterday',
     }),
   },
   {
-    id: 'this_week',
+    id: DatePickerDateOptions.thisWeek,
     label: i18n.translate('xpack.infra.rangeDatePicker.thisWeekText', {
       defaultMessage: 'This week',
     }),
   },
   {
-    id: 'week_to_date',
+    id: DatePickerDateOptions.weekToDate,
     label: i18n.translate('xpack.infra.rangeDatePicker.weekToDateText', {
       defaultMessage: 'Week to date',
     }),
   },
   {
-    id: 'this_month',
+    id: DatePickerDateOptions.thisMonth,
     label: i18n.translate('xpack.infra.rangeDatePicker.thisMonthText', {
       defaultMessage: 'This month',
     }),
   },
   {
-    id: 'month_to_date',
+    id: DatePickerDateOptions.monthToDate,
     label: i18n.translate('xpack.infra.rangeDatePicker.monthToDateText', {
       defaultMessage: 'Month to date',
     }),
   },
   {
-    id: 'this_year',
+    id: DatePickerDateOptions.thisYear,
     label: i18n.translate('xpack.infra.rangeDatePicker.thisYearText', {
       defaultMessage: 'This year',
     }),
   },
   {
-    id: 'year_to_date',
+    id: DatePickerDateOptions.yearToDate,
     label: i18n.translate('xpack.infra.rangeDatePicker.yearToDateText', {
       defaultMessage: 'Year to date',
     }),
@@ -211,6 +222,7 @@ export const RangeDatePicker = injectI18n(
       quickSelectTime: 1,
       quickSelectUnit: 'hours',
     };
+
     public render() {
       const { isLoading, disabled, intl } = this.props;
       const { startDate, endDate } = this.state;
@@ -231,11 +243,13 @@ export const RangeDatePicker = injectI18n(
           <EuiIcon type="calendar" />
         </EuiButtonEmpty>
       );
+
       const commonlyUsed = this.renderCommonlyUsed(commonDates);
       const recentlyUsed = this.renderRecentlyUsed([
         ...this.state.recentlyUsed,
         ...this.props.recentlyUsed,
       ]);
+
       const quickSelectPopover = (
         <EuiPopover
           id="QuickSelectPopover"
@@ -254,6 +268,7 @@ export const RangeDatePicker = injectI18n(
           </div>
         </EuiPopover>
       );
+
       return (
         <EuiFormControlLayout prepend={quickSelectPopover}>
           <EuiDatePickerRange
@@ -299,6 +314,7 @@ export const RangeDatePicker = injectI18n(
         </EuiFormControlLayout>
       );
     }
+
     public resetRangeDate(startDate: moment.Moment, endDate: moment.Moment) {
       this.setState({
         ...this.state,
@@ -306,6 +322,7 @@ export const RangeDatePicker = injectI18n(
         endDate,
       });
     }
+
     private handleChangeStart = (date: moment.Moment | null) => {
       if (date && this.state.startDate !== date) {
         this.props.onChangeRangeTime(date, this.state.endDate, false);
@@ -314,6 +331,7 @@ export const RangeDatePicker = injectI18n(
         });
       }
     };
+
     private handleChangeEnd = (date: moment.Moment | null) => {
       if (date && this.state.endDate !== date) {
         this.props.onChangeRangeTime(this.state.startDate, date, false);
@@ -322,11 +340,13 @@ export const RangeDatePicker = injectI18n(
         });
       }
     };
+
     private onButtonClick = () => {
       this.setState({
         isPopoverOpen: !this.state.isPopoverOpen,
       });
     };
+
     private closePopover = (type: string, from?: string, to?: string) => {
       const { startDate, endDate, recentlyUsed } = this.managedStartEndDateFromType(type, from, to);
       this.setState(
@@ -344,11 +364,13 @@ export const RangeDatePicker = injectI18n(
         }
       );
     };
+
     private managedStartEndDateFromType(type: string, from?: string, to?: string) {
       const { intl } = this.props;
       let { startDate, endDate } = this.state;
       let recentlyUsed: RecentlyUsed[] = this.state.recentlyUsed;
       let textJustUsed = type;
+
       if (type === 'quick-select') {
         textJustUsed = intl.formatMessage(
           {
@@ -366,12 +388,12 @@ export const RangeDatePicker = injectI18n(
         startDate = moment().subtract(this.state.quickSelectTime, this.state
           .quickSelectUnit as moment.unitOfTime.DurationConstructor);
         endDate = moment();
-      } else if (type === 'today') {
+      } else if (type === DatePickerDateOptions.today) {
         startDate = moment().startOf('day');
         endDate = moment()
           .startOf('day')
           .add(24, 'hour');
-      } else if (type === 'yesterday') {
+      } else if (type === DatePickerDateOptions.yesterday) {
         startDate = moment()
           .subtract(1, 'day')
           .startOf('day');
@@ -379,50 +401,53 @@ export const RangeDatePicker = injectI18n(
           .subtract(1, 'day')
           .startOf('day')
           .add(24, 'hour');
-      } else if (type === 'this_week') {
+      } else if (type === DatePickerDateOptions.thisWeek) {
         startDate = moment().startOf('week');
         endDate = moment()
           .startOf('week')
           .add(1, 'week');
-      } else if (type === 'week_to_date') {
+      } else if (type === DatePickerDateOptions.weekToDate) {
         startDate = moment().subtract(1, 'week');
         endDate = moment();
-      } else if (type === 'this_month') {
+      } else if (type === DatePickerDateOptions.thisMonth) {
         startDate = moment().startOf('month');
         endDate = moment()
           .startOf('month')
           .add(1, 'month');
-      } else if (type === 'month_to_date') {
+      } else if (type === DatePickerDateOptions.monthToDate) {
         startDate = moment().subtract(1, 'month');
         endDate = moment();
-      } else if (type === 'this_year') {
+      } else if (type === DatePickerDateOptions.thisYear) {
         startDate = moment().startOf('year');
         endDate = moment()
           .startOf('year')
           .add(1, 'year');
-      } else if (type === 'year_to_date') {
+      } else if (type === DatePickerDateOptions.yearToDate) {
         startDate = moment().subtract(1, 'year');
         endDate = moment();
       } else if (type === 'date-range' && to && from) {
         startDate = moment(from);
         endDate = moment(to);
       }
+
       textJustUsed =
-        textJustUsed && !textJustUsed.includes('Last')
-          ? find(commonDates, { id: type })!.label
-          : textJustUsed;
+        type === 'date-range' || !type ? type : get(find(commonDates, { id: type }), 'label');
+
       if (textJustUsed !== undefined && !find(recentlyUsed, ['text', textJustUsed])) {
         recentlyUsed.unshift({ type, text: textJustUsed });
         recentlyUsed = recentlyUsed.slice(0, 5);
       }
+
       return {
         startDate,
         endDate,
         recentlyUsed,
       };
     }
+
     private renderQuickSelect = () => {
       const { intl } = this.props;
+
       return (
         <Fragment>
           <EuiTitle size="xxxs">
@@ -489,8 +514,10 @@ export const RangeDatePicker = injectI18n(
         </Fragment>
       );
     };
+
     private onChange = (stateType: string, args: any) => {
       let value = args.currentTarget.value;
+
       if (stateType === 'quickSelectTime' && value !== '') {
         value = parseInt(args.currentTarget.value, 10);
       }
@@ -499,6 +526,7 @@ export const RangeDatePicker = injectI18n(
         [stateType]: value,
       });
     };
+
     private renderCommonlyUsed = (recentlyCommonDates: Array<{ id: string; label: any }>) => {
       const links = recentlyCommonDates.map(date => {
         return (
@@ -507,6 +535,7 @@ export const RangeDatePicker = injectI18n(
           </EuiFlexItem>
         );
       });
+
       return (
         <Fragment>
           <EuiTitle size="xxxs">
@@ -526,6 +555,7 @@ export const RangeDatePicker = injectI18n(
         </Fragment>
       );
     };
+
     private renderRecentlyUsed = (recentDates: RecentlyUsed[]) => {
       const links = recentDates.map((date: RecentlyUsed) => {
         let dateRange;
@@ -546,6 +576,7 @@ export const RangeDatePicker = injectI18n(
           </EuiFlexItem>
         );
       });
+
       return (
         <Fragment>
           <EuiTitle size="xxxs">

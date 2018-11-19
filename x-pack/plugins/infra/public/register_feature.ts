@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   FeatureCatalogueCategory,
   FeatureCatalogueRegistryProvider,
@@ -12,12 +11,12 @@ import {
 
 const APP_ID = 'infra';
 
-FeatureCatalogueRegistryProvider.register(() => ({
+FeatureCatalogueRegistryProvider.register(i18n => ({
   id: 'infraops',
-  title: i18n.translate('xpack.infra.registerFeatures.infraOpsTitle', {
+  title: i18n('xpack.infra.registerFeatures.infraOpsTitle', {
     defaultMessage: 'Infrastructure',
   }),
-  description: i18n.translate('xpack.infra.registerFeatures.infraOpsDescription', {
+  description: i18n('xpack.infra.registerFeatures.infraOpsDescription', {
     defaultMessage:
       'Explore infrastructure metrics and logs for common servers, containers, and services.',
   }),
@@ -27,12 +26,12 @@ FeatureCatalogueRegistryProvider.register(() => ({
   category: FeatureCatalogueCategory.DATA,
 }));
 
-FeatureCatalogueRegistryProvider.register(() => ({
+FeatureCatalogueRegistryProvider.register(i18n => ({
   id: 'infralogging',
-  title: i18n.translate('xpack.infra.registerFeatures.logsTitle', {
+  title: i18n('xpack.infra.registerFeatures.logsTitle', {
     defaultMessage: 'Logs',
   }),
-  description: i18n.translate('xpack.infra.registerFeatures.logsDescription', {
+  description: i18n('xpack.infra.registerFeatures.logsDescription', {
     defaultMessage:
       'Stream logs in real time or scroll through historical views in a console-like experience.',
   }),

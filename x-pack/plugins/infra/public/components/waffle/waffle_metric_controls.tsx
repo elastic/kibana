@@ -22,89 +22,102 @@ interface Props {
   intl: InjectedIntl;
 }
 
-const CPUUsage = i18n.translate('xpack.infra.waffle.metricOptions.cpuUsageText', {
-  defaultMessage: 'CPU Usage',
-});
+let OPTIONS;
+const getOptions = (nodeType: string, intl: any) => {
+  if (!OPTIONS) {
+    const CPUUsage = intl.formatMessage({
+      id: 'xpack.infra.waffle.metricOptions.cpuUsageText',
+      defaultMessage: 'CPU Usage',
+    });
 
-const MemoryUsage = i18n.translate('xpack.infra.waffle.metricOptions.memoryUsageText', {
-  defaultMessage: 'Memory Usage',
-});
+    const MemoryUsage = intl.formatMessage({
+      id: 'xpack.infra.waffle.metricOptions.memoryUsageText',
+      defaultMessage: 'Memory Usage',
+    });
 
-const InboundTraffic = i18n.translate('xpack.infra.waffle.metricOptions.inboundTrafficText', {
-  defaultMessage: 'Inbound Traffic',
-});
+    const InboundTraffic = intl.formatMessage({
+      id: 'xpack.infra.waffle.metricOptions.inboundTrafficText',
+      defaultMessage: 'Inbound Traffic',
+    });
 
-const OutboundTraffic = i18n.translate('xpack.infra.waffle.metricOptions.outboundTrafficText', {
-  defaultMessage: 'Outbound Traffic',
-});
+    const OutboundTraffic = intl.formatMessage({
+      id: 'xpack.infra.waffle.metricOptions.outboundTrafficText',
+      defaultMessage: 'Outbound Traffic',
+    });
 
-const OPTIONS = {
-  [InfraNodeType.pod]: [
-    {
-      text: CPUUsage,
-      value: InfraMetricType.cpu,
-    },
-    {
-      text: MemoryUsage,
-      value: InfraMetricType.memory,
-    },
-    {
-      text: InboundTraffic,
-      value: InfraMetricType.rx,
-    },
-    {
-      text: OutboundTraffic,
-      value: InfraMetricType.tx,
-    },
-  ],
-  [InfraNodeType.container]: [
-    {
-      text: CPUUsage,
-      value: InfraMetricType.cpu,
-    },
-    {
-      text: MemoryUsage,
-      value: InfraMetricType.memory,
-    },
-    {
-      text: InboundTraffic,
-      value: InfraMetricType.rx,
-    },
-    {
-      text: OutboundTraffic,
-      value: InfraMetricType.tx,
-    },
-  ],
-  [InfraNodeType.host]: [
-    {
-      text: CPUUsage,
-      value: InfraMetricType.cpu,
-    },
-    {
-      text: MemoryUsage,
-      value: InfraMetricType.memory,
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.metricOptions.loadText', {
-        defaultMessage: 'Load',
-      }),
-      value: InfraMetricType.load,
-    },
-    {
-      text: InboundTraffic,
-      value: InfraMetricType.rx,
-    },
-    {
-      text: OutboundTraffic,
-      value: InfraMetricType.tx,
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.metricOptions.hostLogRateText', {
-        defaultMessage: 'Log Rate',
-      }),
-      value: InfraMetricType.logRate,
-    },
-  ],
+    OPTIONS = {
+      [InfraNodeType.pod]: [
+        {
+          text: CPUUsage,
+          value: InfraMetricType.cpu,
+        },
+        {
+          text: MemoryUsage,
+          value: InfraMetricType.memory,
+        },
+        {
+          text: InboundTraffic,
+          value: InfraMetricType.rx,
+        },
+        {
+          text: OutboundTraffic,
+          value: InfraMetricType.tx,
+        },
+      ],
+      [InfraNodeType.container]: [
+        {
+          text: CPUUsage,
+          value: InfraMetricType.cpu,
+        },
+        {
+          text: MemoryUsage,
+          value: InfraMetricType.memory,
+        },
+        {
+          text: InboundTraffic,
+          value: InfraMetricType.rx,
+        },
+        {
+          text: OutboundTraffic,
+          value: InfraMetricType.tx,
+        },
+      ],
+      [InfraNodeType.host]: [
+        {
+          text: CPUUsage,
+          value: InfraMetricType.cpu,
+        },
+        {
+          text: MemoryUsage,
+          value: InfraMetricType.memory,
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.metricOptions.loadText',
+            defaultMessage: 'Load',
+          }),
+          value: InfraMetricType.load,
+        },
+        {
+          text: InboundTraffic,
+          value: InfraMetricType.rx,
+        },
+        {
+          text: OutboundTraffic,
+          value: InfraMetricType.tx,
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.metricOptions.hostLogRateText',
+            defaultMessage: 'Log Rate',
+          }),
+          value: InfraMetricType.logRate,
+        },
+      ],
+    };
+  }
+
+  return OPTIONS[nodeType];
 };
 
 const initialState = {
@@ -117,9 +130,10 @@ export const WaffleMetricControls = injectI18n(
     public displayName = 'WaffleMetricControls';
     public readonly state: State = initialState;
     public render() {
-      const { metric, intl } = this.props;
-      const options = OPTIONS[this.props.nodeType];
+      const { metric, nodeType, intl } = this.props;
+      const options = getOptions(nodeType, intl);
       const value = metric.type;
+
       if (!options.length || !value) {
         throw Error(
           intl.formatMessage({
@@ -152,6 +166,7 @@ export const WaffleMetricControls = injectI18n(
           />
         </EuiFilterButton>
       );
+
       return (
         <EuiFilterGroup>
           <EuiPopover
@@ -169,9 +184,11 @@ export const WaffleMetricControls = injectI18n(
     private handleClose = () => {
       this.setState({ isPopoverOpen: false });
     };
+
     private handleToggle = () => {
       this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
     };
+
     private handleClick = (value: InfraMetricType) => () => {
       this.props.onChange({ type: value });
       this.handleClose();

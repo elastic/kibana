@@ -24,95 +24,114 @@ interface Props {
   intl: InjectedIntl;
 }
 
-const OPTIONS = {
-  [InfraNodeType.pod]: [
-    {
-      text: i18n.translate('xpack.infra.waffle.podGroupByOptions.namespaceLabel', {
-        defaultMessage: 'Namespace',
-      }),
-      type: InfraPathType.terms,
-      field: 'kubernetes.namespace',
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.podGroupByOptions.nodeLabel', {
-        defaultMessage: 'Node',
-      }),
-      type: InfraPathType.terms,
-      field: 'kubernetes.node.name',
-    },
-  ],
-  [InfraNodeType.container]: [
-    {
-      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.hostLabel', {
-        defaultMessage: 'Host',
-      }),
-      type: InfraPathType.terms,
-      field: 'host.name',
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.availabilityZoneLabel', {
-        defaultMessage: 'Availability Zone',
-      }),
-      type: InfraPathType.terms,
-      field: 'meta.cloud.availability_zone',
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.machineTypeLabel', {
-        defaultMessage: 'Machine Type',
-      }),
-      type: InfraPathType.terms,
-      field: 'meta.cloud.machine_type',
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.projectIDLabel', {
-        defaultMessage: 'Project ID',
-      }),
-      type: InfraPathType.terms,
-      field: 'meta.cloud.project_id',
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.containerGroupByOptions.providerLabel', {
-        defaultMessage: 'Provider',
-      }),
-      type: InfraPathType.terms,
-      field: 'meta.cloud.provider',
-    },
-  ],
-  [InfraNodeType.host]: [
-    {
-      text: i18n.translate('xpack.infra.waffle.hostGroupByOptions.availabilityZoneLabel', {
-        defaultMessage: 'Availability Zone',
-      }),
-      type: InfraPathType.terms,
-      field: 'meta.cloud.availability_zone',
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.hostGroupByOptions.machineTypeLabel', {
-        defaultMessage: 'Machine Type',
-      }),
-      type: InfraPathType.terms,
-      field: 'meta.cloud.machine_type',
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.hostGroupByOptions.projectIDLabel', {
-        defaultMessage: 'Project ID',
-      }),
-      type: InfraPathType.terms,
-      field: 'meta.cloud.project_id',
-    },
-    {
-      text: i18n.translate('xpack.infra.waffle.hostGroupByOptions.cloudProviderLabel', {
-        defaultMessage: 'Cloud Provider',
-      }),
-      type: InfraPathType.terms,
-      field: 'meta.cloud.provider',
-    },
-  ],
+let OPTIONS;
+const getOptions = (nodeType: string, intl: any) => {
+  if (!OPTIONS) {
+    OPTIONS = {
+      [InfraNodeType.pod]: [
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.podGroupByOptions.namespaceLabel',
+            defaultMessage: 'Namespace',
+          }),
+          type: InfraPathType.terms,
+          field: 'kubernetes.namespace',
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.podGroupByOptions.nodeLabel',
+            defaultMessage: 'Node',
+          }),
+          type: InfraPathType.terms,
+          field: 'kubernetes.node.name',
+        },
+      ],
+      [InfraNodeType.container]: [
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.containerGroupByOptions.hostLabel',
+            defaultMessage: 'Host',
+          }),
+          type: InfraPathType.terms,
+          field: 'host.name',
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.containerGroupByOptions.availabilityZoneLabel',
+            defaultMessage: 'Availability Zone',
+          }),
+          type: InfraPathType.terms,
+          field: 'meta.cloud.availability_zone',
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.containerGroupByOptions.machineTypeLabel',
+            defaultMessage: 'Machine Type',
+          }),
+          type: InfraPathType.terms,
+          field: 'meta.cloud.machine_type',
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.containerGroupByOptions.projectIDLabel',
+            defaultMessage: 'Project ID',
+          }),
+          type: InfraPathType.terms,
+          field: 'meta.cloud.project_id',
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.containerGroupByOptions.providerLabel',
+            defaultMessage: 'Provider',
+          }),
+          type: InfraPathType.terms,
+          field: 'meta.cloud.provider',
+        },
+      ],
+      [InfraNodeType.host]: [
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.hostGroupByOptions.availabilityZoneLabel',
+            defaultMessage: 'Availability Zone',
+          }),
+          type: InfraPathType.terms,
+          field: 'meta.cloud.availability_zone',
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.hostGroupByOptions.machineTypeLabel',
+            defaultMessage: 'Machine Type',
+          }),
+          type: InfraPathType.terms,
+          field: 'meta.cloud.machine_type',
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.hostGroupByOptions.projectIDLabel',
+            defaultMessage: 'Project ID',
+          }),
+          type: InfraPathType.terms,
+          field: 'meta.cloud.project_id',
+        },
+        {
+          text: intl.formatMessage({
+            id: 'xpack.infra.waffle.hostGroupByOptions.cloudProviderLabel',
+            defaultMessage: 'Cloud Provider',
+          }),
+          type: InfraPathType.terms,
+          field: 'meta.cloud.provider',
+        },
+      ],
+    };
+  }
+
+  return OPTIONS[nodeType];
 };
 
 const initialState = {
   isPopoverOpen: false,
 };
+
 type State = Readonly<typeof initialState>;
 
 export const WaffleGroupByControls = injectI18n(
@@ -120,9 +139,9 @@ export const WaffleGroupByControls = injectI18n(
     public displayName = 'WaffleGroupByControls';
     public readonly state: State = initialState;
     public render() {
-      const { intl } = this.props;
-      const { nodeType, groupBy } = this.props;
-      const options = OPTIONS[nodeType];
+      const { nodeType, groupBy, intl } = this.props;
+      const options = getOptions(nodeType, intl);
+
       if (!options.length) {
         throw Error(
           intl.formatMessage(
@@ -187,6 +206,7 @@ export const WaffleGroupByControls = injectI18n(
           {buttonBody}
         </EuiFilterButton>
       );
+
       return (
         <EuiFilterGroup>
           <EuiPopover
@@ -201,6 +221,7 @@ export const WaffleGroupByControls = injectI18n(
         </EuiFilterGroup>
       );
     }
+
     private handleRemove = (field: string) => () => {
       const { groupBy } = this.props;
       this.props.onChange(groupBy.filter(g => g.field !== field));
@@ -208,12 +229,15 @@ export const WaffleGroupByControls = injectI18n(
       // it will remain open because the click is still captured by the EuiFilterButton
       setTimeout(() => this.handleClose());
     };
+
     private handleClose = () => {
       this.setState({ isPopoverOpen: false });
     };
+
     private handleToggle = () => {
       this.setState(state => ({ isPopoverOpen: !state.isPopoverOpen }));
     };
+
     private handleClick = (field: string) => () => {
       const { groupBy } = this.props;
       if (groupBy.some(g => g.field === field)) {

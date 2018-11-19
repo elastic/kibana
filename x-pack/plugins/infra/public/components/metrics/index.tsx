@@ -26,12 +26,14 @@ interface Props {
 interface State {
   crosshairValue: number | null;
 }
+
 export const Metrics = injectI18n(
   class extends React.PureComponent<Props, State> {
     public displayName = 'Metrics';
     public readonly state = {
       crosshairValue: null,
     };
+
     public render() {
       const { intl } = this.props;
       if (this.props.loading) {
@@ -53,6 +55,7 @@ export const Metrics = injectI18n(
       }
       return <React.Fragment>{this.props.layouts.map(this.renderLayout)}</React.Fragment>;
     }
+
     private renderLayout = (layout: InfraMetricLayout) => {
       return (
         <React.Fragment key={layout.id}>
@@ -73,6 +76,7 @@ export const Metrics = injectI18n(
         </React.Fragment>
       );
     };
+
     private renderSection = (layout: InfraMetricLayout) => (section: InfraMetricLayoutSection) => {
       let sectionProps = {};
       if (section.type === 'chart') {
@@ -92,6 +96,7 @@ export const Metrics = injectI18n(
         />
       );
     };
+
     private onCrosshairUpdate = (crosshairValue: number) => {
       this.setState({
         crosshairValue,
