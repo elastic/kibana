@@ -28,6 +28,39 @@ const { installArchive } = require('./archive');
 const { log: defaultLog, cache } = require('../utils');
 
 /**
+ * Download an ES snapshot
+ *
+ * @param {Object} options
+ * @property {('oss'|'basic'|'trial')} options.license
+ * @property {String} options.version
+ * @property {String} options.basePath
+ * @property {String} options.installPath
+ * @property {ToolingLog} options.log
+ */
+exports.downloadSnapshot = async function installSnapshot({
+  license = 'basic',
+  version,
+  basePath = BASE_PATH,
+  installPath = path.resolve(basePath, version),
+  log = defaultLog,
+}) {
+  // TODO: remove -alpha1 once elastic/elasticsearch#35172 has been merged
+  const fileName = getFilename(license, version + '-alpha1');
+  const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
+  const dest = path.resolve(basePath, 'cache', fileName);
+
+  log.info('version: %s', chalk.bold(version));
+  log.info('install path: %s', chalk.bold(installPath));
+  log.info('license: %s', chalk.bold(license));
+
+  await downloadFile(url, dest, log);
+
+  return {
+    downloadPath: dest,
+  };
+};
+
+/**
  * Installs ES from snapshot
  *
  * @param {Object} options
@@ -46,17 +79,15 @@ exports.installSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
 }) {
-  // TODO: remove -alpha1 once elastic/elasticsearch#35172 has been merged
-  const fileName = getFilename(license, version + '-alpha1');
-  const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
-  const dest = path.resolve(basePath, 'cache', fileName);
+  const { downloadPath } = await exports.downloadSnapshot({
+    license,
+    version,
+    basePath,
+    installPath,
+    log,
+  });
 
-  log.info('version: %s', chalk.bold(version));
-  log.info('install path: %s', chalk.bold(installPath));
-  log.info('license: %s', chalk.bold(license));
-
-  await downloadFile(url, dest, log);
-  return await installArchive(dest, {
+  return await installArchive(downloadPath, {
     license,
     password,
     basePath,
