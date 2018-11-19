@@ -87,7 +87,7 @@ export class StaticDynamicStyleSelector extends React.Component {
 
   _onTypeToggle = (() => {
     let lastOptions = {
-      color: 'none'
+      color: null
     };
     const { DYNAMIC, STATIC } = VectorStyle.STYLE_TYPE;
     return ({ target }, currentOptions) => {

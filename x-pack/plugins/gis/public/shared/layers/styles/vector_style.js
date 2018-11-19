@@ -174,6 +174,18 @@ export class VectorStyle {
       : null;
   }
 
+  getTOCDetails() {
+    const isDynamic = this._isPropertyDynamic('fillColor');
+    if (isDynamic) {
+      return (
+        <React.Fragment>
+          {this.getColorRamp()}
+        </React.Fragment>
+      );
+    }
+    return null;
+  }
+
   static computeScaledValues(featureCollection, field) {
     const fieldName = field.name;
     const features = featureCollection.features;

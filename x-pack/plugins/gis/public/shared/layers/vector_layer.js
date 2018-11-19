@@ -109,15 +109,7 @@ export class VectorLayer extends ALayer {
   }
 
   getTOCDetails() {
-    if (this._joins && this._joins.length) {
-      return (
-        <React.Fragment>
-          {this.getColorRamp()}
-        </React.Fragment>
-      );
-    } else {
-      return null;
-    }
+    return this._style.getTOCDetails();
   }
 
   async getStringFields() {
