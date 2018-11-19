@@ -14,7 +14,7 @@ function decodeEsQuery(esQuery?: string): object {
 }
 
 interface KibanaConfig {
-  get: <T = unknown>(key: string) => T;
+  get: <T = void>(key: string) => T;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -28,7 +28,7 @@ declare module 'hapi' {
   }
 }
 
-export type ESClient = <T, U = void>(
+export type ESClient = <T = void, U = void>(
   type: string,
   params: SearchParams
 ) => Promise<AggregationSearchResponse<T, U>>;

@@ -27,7 +27,7 @@ function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   };
 }
 
-export async function callApi<T = never>(
+export async function callApi<T = void>(
   fetchOptions: KFetchOptions,
   { camelcase = true, prependBasePath = true } = {}
 ): Promise<T> {
