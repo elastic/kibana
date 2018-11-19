@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('Print Layout', () => {
+      describe.skip('Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           this.timeout(TEN_MINUTES);
@@ -178,7 +178,6 @@ export default function ({ getService, getPageObjects }) {
             log
           );
           expect(percentSimilar).to.be.lessThan(0.05);
-
         });
       });
 
