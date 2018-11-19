@@ -67,7 +67,10 @@
   cursor: pointer;
   padding: $euiSizeXS;
   display: flex;
-  max-width: 130px;
+
+  > * {
+    max-width: 100%;
+  }
 
   &.disabled {
     opacity: 0.5;
