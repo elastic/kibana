@@ -23,15 +23,9 @@ export const styleTypes = {
 
 export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, type }) {
 
-  const fireChange = (newField, dynamicOptions) => {
-    let newOptions = { ...selectedOptions };
-    newOptions.field = newField && newField.length ? newField[0].value : selectedOptions.field;
-    newOptions = { ...newOptions, ...dynamicOptions };
-    onChange(newOptions);
-  };
-
-  const onFieldSelected = (fieldSelection) => {
-    fireChange(fieldSelection, {});
+  const onFieldChange = (selectedFields) => {
+    const field = selectedFields.length > 0 ? selectedFields[0].value : null;
+    onChange({ field });
   };
 
   const groupFieldsByOrigin = () => {
@@ -68,62 +62,57 @@ export function DynamicOrdinalStyleOption({ fields, selectedOptions, onChange, t
     return optionGroups;
   };
 
-  const renderStyleInput = () => {
-    // do not show style input until field has been selected
+  const renderAdditionalOptions = () => {
     if (!_.has(selectedOptions, 'field')) {
       return;
     }
 
-    const onChange = (additionalOptions) => {
-      fireChange(selectedOptions.field, additionalOptions);
+    const onAdditionalOptionsChange = (additionalOptions) => {
+      onChange({ field: selectedOptions.field, ...additionalOptions });
     };
 
     switch (type) {
       case styleTypes.COLOR_RAMP:
         return (
           <ColorRampSelector
-            onChange={onChange}
+            onChange={onAdditionalOptionsChange}
             color={_.get(selectedOptions, 'color')}
           />
         );
       case styleTypes.SIZE_RANGE:
         return (
           <SizeRangeSelector
-            onChange={onChange}
+            onChange={onAdditionalOptionsChange}
             minSize={_.get(selectedOptions, 'minSize')}
             maxSize={_.get(selectedOptions, 'maxSize')}
           />
         );
       default:
-        throw new Error(`Unhandled style type ${type}`);
+        throw new Error(`Unhandled type ${type}`);
     }
   };
-
-  const comboBoxValue = [];
-  if (_.has(selectedOptions, 'field')) {
-    comboBoxValue.push({
-      label: selectedOptions.field.label,
-      value: selectedOptions.field
-    });
-  }
 
   return (
     <Fragment>
       <EuiComboBox
-        selectedOptions={comboBoxValue}
+        selectedOptions={
+          _.has(selectedOptions, 'field')
+            ? [{ label: selectedOptions.field.label, value: selectedOptions.field }]
+            : []
+        }
         options={groupFieldsByOrigin()}
-        onChange={onFieldSelected}
+        onChange={onFieldChange}
         singleSelection={true}
+        isClearable={false}
         fullWidth
       />
 
       <EuiSpacer size="m" />
 
-      {renderStyleInput()}
+      {renderAdditionalOptions()}
 
     </Fragment>
   );
-
 }
 
 DynamicOrdinalStyleOption.propTypes = {
@@ -136,6 +125,3 @@ DynamicOrdinalStyleOption.propTypes = {
     })
   ).isRequired,
 };
-
-
-
