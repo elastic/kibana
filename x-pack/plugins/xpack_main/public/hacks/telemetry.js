@@ -23,6 +23,7 @@ export class Telemetry {
     this._telemetryOptedIn = $injector.get('telemetryOptedIn');
     this._attributes = this._storage.get(LOCALSTORAGE_KEY) || {};
     this._fetchTelemetry = fetchTelemetry;
+    this._sending = false;
   }
 
   _set(key, value) {
@@ -57,11 +58,16 @@ export class Telemetry {
     return false;
   }
 
-  /*
+  /**
    * Check report permission and if passes, send the report
+   *
+   * This function never throws an exception.
    */
   _sendIfDue() {
-    if (!this._checkReportStatus()) { return Promise.resolve(null); }
+    if (this._sending || !this._checkReportStatus()) { return Promise.resolve(false); }
+
+    // mark that we are working so future requests are ignored until we're done
+    this._sending = true;
 
     return this._fetchTelemetry()
       .then(response => {
@@ -76,22 +82,22 @@ export class Telemetry {
           return this._$http(req);
         });
       })
-      .then(response => {
+      // the response object is ignored because we do not check it
+      .then(() => {
         // we sent a report, so we need to record and store the current time stamp
         this._set('lastReport', Date.now());
         this._saveToBrowser();
-        return response;
       })
-      .catch(() => {
-        // no ajaxErrorHandlers for telemetry
-        return Promise.resolve(null);
-      });
+      // no ajaxErrorHandlers for telemetry
+      .catch(() => null)
+      .then(() => this._sending = false);
   }
 
-  /*
+  /**
    * Public method
    */
   start() {
+    // continuously check if it's due time for a report
     window.setInterval(() => this._sendIfDue(), 60000);
   }
 
