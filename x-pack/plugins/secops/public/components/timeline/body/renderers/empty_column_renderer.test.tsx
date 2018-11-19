@@ -5,46 +5,17 @@
  */
 
 import { mount } from 'enzyme';
-import { omit } from 'lodash/fp';
+import { cloneDeep, omit } from 'lodash/fp';
 import React from 'react';
 
 import { EMPTY_VALUE, emptyColumnRenderer } from '.';
+import { mockECSData } from '../../../../pages/mock/mock_ecs';
 import { ECS } from '../../ecs';
 
 describe('empty_column_renderer', () => {
   let mockDatum: ECS;
   beforeEach(() => {
-    mockDatum = {
-      _id: '1',
-      timestamp: '2018-11-05T19:03:25.937Z',
-      host: {
-        hostname: 'apache',
-        ip: '192.168.0.1',
-      },
-      event: {
-        id: '1',
-        category: 'Access',
-        type: 'HTTP Request',
-        module: 'nginx',
-        severity: 3,
-      },
-      source: {
-        ip: '192.168.0.1',
-        port: 80,
-      },
-      destination: {
-        ip: '192.168.0.3',
-        port: 6343,
-      },
-      user: {
-        id: '1',
-        name: 'john.dee',
-      },
-      geo: {
-        region_name: 'xx',
-        country_iso_code: 'xx',
-      },
-    };
+    mockDatum = cloneDeep(mockECSData[0]);
   });
 
   test('should return isInstance true if source is empty', () => {
