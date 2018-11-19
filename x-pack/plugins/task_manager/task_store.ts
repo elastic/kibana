@@ -97,47 +97,50 @@ export class TaskStore {
    * Initializes the store, ensuring the task manager index is created and up to date.
    */
   public async init() {
-    if (!this.wasInitialized) {
-      const properties = {
-        type: { type: 'keyword' },
-        task: {
-          properties: {
-            taskType: { type: 'keyword' },
-            runAt: { type: 'date' },
-            interval: { type: 'text' },
-            attempts: { type: 'integer' },
-            status: { type: 'keyword' },
-            params: { type: 'text' },
-            state: { type: 'text' },
-            user: { type: 'keyword' },
-            scope: { type: 'keyword' },
+    if (this.wasInitialized) {
+      return;
+    }
+
+    const properties = {
+      type: { type: 'keyword' },
+      task: {
+        properties: {
+          taskType: { type: 'keyword' },
+          runAt: { type: 'date' },
+          interval: { type: 'text' },
+          attempts: { type: 'integer' },
+          status: { type: 'keyword' },
+          params: { type: 'text' },
+          state: { type: 'text' },
+          user: { type: 'keyword' },
+          scope: { type: 'keyword' },
+        },
+      },
+    };
+
+    try {
+      const templateResult = await this.callCluster('indices.putTemplate', {
+        name: this.index,
+        body: {
+          index_patterns: [this.index],
+          mappings: {
+            _doc: {
+              dynamic: 'strict',
+              properties,
+            },
+          },
+          settings: {
+            number_of_shards: 1,
+            auto_expand_replicas: '0-1',
           },
         },
-      };
-
-      try {
-        const templateResult = await this.callCluster('indices.putTemplate', {
-          name: this.index,
-          body: {
-            index_patterns: [this.index],
-            mappings: {
-              _doc: {
-                dynamic: 'strict',
-                properties,
-              },
-            },
-            settings: {
-              number_of_shards: 1,
-              auto_expand_replicas: '0-1',
-            },
-          },
-        });
-        this.wasInitialized = true;
-        return templateResult;
-      } catch (err) {
-        throw err;
-      }
+      });
+      this.wasInitialized = true;
+      return templateResult;
+    } catch (err) {
+      throw err;
     }
+
     return;
   }
 
