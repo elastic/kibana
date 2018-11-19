@@ -24,6 +24,17 @@ import esResponse from './es_response';
 
 export default function () {
 
+  const config = {
+    get(key) {
+      switch (key) {
+        case 'elasticsearch.shardTimeout':
+          return 30000;
+        default:
+          throw new Error(`unexpected config ${key}`);
+      }
+    }
+  };
+
   const functions = require('../../../lib/load_functions')('series_functions');
   const server = {
     plugins: {
@@ -41,18 +52,7 @@ export default function () {
         })
       }
     },
-    config: () => {
-      return {
-        get: (key) => {
-          switch (key) {
-            case 'elasticsearch.shardTimeout':
-              return 30000;
-            default:
-              throw new Error(`unexpected config ${key}`);
-          }
-        }
-      };
-    }
+    config: () => config,
   };
 
   const tlConfig = require('../../../handlers/lib/tl_config.js')({
