@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { setMockCapabilities } from 'x-pack/plugins/__mocks__/ui/capabilities';
 import { ManageSpacesButton } from './manage_spaces_button';
 
@@ -18,7 +18,7 @@ describe('ManageSpacesButton', () => {
     });
 
     const component = <ManageSpacesButton />;
-    expect(shallow(component)).toMatchSnapshot();
+    expect(shallowWithIntl(component)).toMatchSnapshot();
   });
 
   it(`doesn't render if user profile forbids managing spaces`, () => {
@@ -30,6 +30,6 @@ describe('ManageSpacesButton', () => {
     });
 
     const component = <ManageSpacesButton />;
-    expect(shallow(component)).toMatchSnapshot();
+    expect(shallowWithIntl(component)).toMatchSnapshot();
   });
 });

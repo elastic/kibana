@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { setMockCapabilities } from 'x-pack/plugins/__mocks__/ui/capabilities';
 import { SecureSpaceMessage } from './secure_space_message';
 
@@ -14,7 +14,7 @@ describe('SecureSpaceMessage', () => {
       navLinks: {},
       spaces: { manage: false },
     });
-    expect(shallow(<SecureSpaceMessage />)).toMatchSnapshot();
+    expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();
   });
 
   it(`renders if user profile allows security to be managed`, () => {
@@ -22,6 +22,6 @@ describe('SecureSpaceMessage', () => {
       navLinks: {},
       spaces: { manage: true },
     });
-    expect(shallow(<SecureSpaceMessage />)).toMatchSnapshot();
+    expect(shallowWithIntl(<SecureSpaceMessage />)).toMatchSnapshot();
   });
 });

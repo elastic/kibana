@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
 import { ManageSpacePage } from './manage_space_page';
@@ -35,8 +35,12 @@ describe('ManageSpacePage', () => {
       refreshSpacesList: jest.fn(),
     };
 
-    const wrapper = mount(
-      <ManageSpacePage spacesManager={spacesManager} spacesNavState={spacesNavState} />
+    const wrapper = mountWithIntl(
+      <ManageSpacePage.WrappedComponent
+        spacesManager={spacesManager}
+        spacesNavState={spacesNavState}
+        intl={null as any}
+      />
     );
     const nameInput = wrapper.find('input[name="name"]');
     const descriptionInput = wrapper.find('input[name="description"]');
@@ -82,11 +86,12 @@ describe('ManageSpacePage', () => {
       getActiveSpace: () => space,
       refreshSpacesList: jest.fn(),
     };
-    const wrapper = mount(
-      <ManageSpacePage
+    const wrapper = mountWithIntl(
+      <ManageSpacePage.WrappedComponent
         spaceId={'existing-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        intl={null as any}
       />
     );
 

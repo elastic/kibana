@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib';
 import { SpacesNavState } from '../../nav_control';
@@ -49,13 +49,23 @@ const spacesManager = new SpacesManager(mockHttp, mockChrome, '');
 describe('SpacesGridPage', () => {
   it('renders as expected', () => {
     expect(
-      shallow(<SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />)
+      shallowWithIntl(
+        <SpacesGridPage.WrappedComponent
+          spacesManager={spacesManager}
+          spacesNavState={spacesNavState}
+          intl={null as any}
+        />
+      )
     ).toMatchSnapshot();
   });
 
   it('renders the list of spaces', async () => {
-    const wrapper = mount(
-      <SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />
+    const wrapper = mountWithIntl(
+      <SpacesGridPage.WrappedComponent
+        spacesManager={spacesManager}
+        spacesNavState={spacesNavState}
+        intl={null as any}
+      />
     );
 
     // allow spacesManager to load spaces

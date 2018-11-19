@@ -16,14 +16,14 @@
 /**
  * 1. Don't duplicate styles in dark mode
  */
-.tab-dashboard.theme-light { /* 1 */
+.theme-light { /* 1 */
   @import 'dashboard_app';
   @import 'grid/index';
   @import 'panel/index';
   @import 'viewport/index';
 }
 
-// Imports outside of .tab-dashboard selector don't change between light/dark modes
+// Imports outside of theme selector don't change between light/dark modes
 @import 'components/index';
 
 // Must be outside of theme selector because it lives in a portal
@@ -33,7 +33,7 @@
 // EUI global scope -- dark
 @import '@elastic/eui/src/themes/k6/k6_colors_dark';
 
-.tab-dashboard.theme-dark {
+.theme-dark {
   background-color: $euiColorEmptyShade;
 
   @import 'dashboard_app';
@@ -41,6 +41,8 @@
   @import 'panel/index';
   @import 'viewport/index';
 
-  // Vis imports
+  // Vis imports -- will have some duplicate styling
+  // because they will be imported via ui/public as well
+  // (without .theme-[] prefix)
   @import 'src/ui/public/vis/map/index';
 }

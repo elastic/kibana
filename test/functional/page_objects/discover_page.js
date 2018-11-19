@@ -125,6 +125,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverCurrentQuery');
     }
 
+    async getBarChartXTicks() {
+      return getRemote()
+        .findAllByCssSelector('.x.axis.CategoryAxis-1 > .tick > text')
+        .getVisibleText();
+    }
+
     getBarChartData() {
       let yAxisLabel = 0;
       let yAxisHeight;
