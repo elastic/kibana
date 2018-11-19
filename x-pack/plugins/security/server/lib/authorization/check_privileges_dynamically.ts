@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CheckPrivilegesWithRequest } from './check_privileges';
+import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from './check_privileges';
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -12,10 +12,18 @@ import { CheckPrivilegesWithRequest } from './check_privileges';
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export type CheckPrivilegesDynamically = (
+  privilegeOrPrivileges: string | string[]
+) => Promise<CheckPrivilegesAtResourceResponse>;
+
+export type CheckPrivilegesDynamicallyWithRequest = (
+  request: Record<string, any>
+) => CheckPrivilegesDynamically;
+
 export function checkPrivilegesDynamicallyWithRequestFactory(
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
   spaces: any
-) {
+): CheckPrivilegesDynamicallyWithRequest {
   return function checkPrivilegesDynamicallyWithRequest(request: Record<string, any>) {
     const checkPrivileges = checkPrivilegesWithRequest(request);
     return async function checkPrivilegesDynamically(privilegeOrPrivileges: string | string[]) {

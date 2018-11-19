@@ -7,8 +7,12 @@
 import { mapValues } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Actions } from './actions';
+import { CheckPrivilegesDynamically } from './check_privileges_dynamically';
 
-export function disableUICapabilitesFactory(server: Record<string, any>, request: Record<string, any>) {
+export function disableUICapabilitesFactory(
+  server: Record<string, any>,
+  request: Record<string, any>
+) {
   const { authorization } = server.plugins.security;
   const actions: Actions = authorization.actions;
 
@@ -31,7 +35,7 @@ export function disableUICapabilitesFactory(server: Record<string, any>, request
 
     let checkPrivilegesResponse: any;
     try {
-      const checkPrivilegesDynamically: any = authorization.checkPrivilegesDynamicallyWithRequest(
+      const checkPrivilegesDynamically: CheckPrivilegesDynamically = authorization.checkPrivilegesDynamicallyWithRequest(
         request
       );
       checkPrivilegesResponse = await checkPrivilegesDynamically(uiActions);
