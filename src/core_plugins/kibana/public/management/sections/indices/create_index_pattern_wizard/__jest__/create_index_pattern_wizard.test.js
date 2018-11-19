@@ -42,6 +42,9 @@ jest.mock('../lib/get_indices', () => ({
     ];
   },
 }));
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => { },
+}));
 
 const loadingDataDocUrl = '';
 const initialQuery = '';
@@ -80,6 +83,26 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       allIndices: [],
+      remoteClustersExist: false
+    });
+
+    await component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders when there are no indices but there are remote clusters', async () => {
+    const component = shallow(
+      <CreateIndexPatternWizard
+        loadingDataDocUrl={loadingDataDocUrl}
+        initialQuery={initialQuery}
+        services={services}
+      />
+    );
+
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      allIndices: [],
+      remoteClustersExist: true
     });
 
     await component.update();

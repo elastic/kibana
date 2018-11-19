@@ -27,7 +27,8 @@ import {
   EuiIcon,
   EuiLink,
   EuiSpacer,
-  EuiToolTip
+  EuiToolTip,
+  EuiFormErrorText
 } from '@elastic/eui';
 import { getSavedObjectLabel, getSavedObjectIcon } from '../../../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -61,6 +62,27 @@ class TableUI extends PureComponent {
     onShowRelationships: PropTypes.func.isRequired,
   };
 
+  state = {
+    isSearchTextValid: true,
+    parseErrorMessage: null,
+  }
+
+  onChange = ({ query, error }) => {
+    if (error) {
+      this.setState({
+        isSearchTextValid: false,
+        parseErrorMessage: error.message,
+      });
+      return;
+    }
+
+    this.setState({
+      isSearchTextValid: true,
+      parseErrorMessage: null,
+    });
+    this.props.onQueryChange({ query });
+  }
+
   render() {
     const {
       pageIndex,
@@ -74,7 +96,6 @@ class TableUI extends PureComponent {
       onDelete,
       onExport,
       selectedSavedObjects,
-      onQueryChange,
       onTableChange,
       goInApp,
       getEditUrl,
@@ -182,11 +203,25 @@ class TableUI extends PureComponent {
       },
     ];
 
+    let queryParseError;
+    if (!this.state.isSearchTextValid) {
+      const parseErrorMsg = intl.formatMessage({
+        id: 'kbn.management.objects.objectsTable.searchBar.unableToParseQueryErrorMessage',
+        defaultMessage: 'Unable to parse query',
+      });
+      queryParseError = (
+        <EuiFormErrorText>
+          {`${parseErrorMsg}. ${this.state.parseErrorMessage}`}
+        </EuiFormErrorText>
+      );
+    }
+
     return (
       <Fragment>
         <EuiSearchBar
+          box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters}
-          onChange={onQueryChange}
+          onChange={this.onChange}
           toolsRight={[
             <EuiButton
               key="deleteSO"
@@ -213,6 +248,7 @@ class TableUI extends PureComponent {
             </EuiButton>,
           ]}
         />
+        {queryParseError}
         <EuiSpacer size="s" />
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable

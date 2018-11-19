@@ -36,22 +36,22 @@ function ErrorComponent(props) {
     const scriptStack = _.get(error, 'error.caused_by.script_stack');
     reason = _.get(error, 'error.caused_by.caused_by.reason');
     additionalInfo = (
-      <div className="metrics_error__additional">
-        <div className="metrics_error__reason">{reason}</div>
-        <div className="metrics_error__stack">{scriptStack.join('\n')}</div>
+      <div className="tvbError__additional">
+        <div className="tvbError__reason">{reason}</div>
+        <div className="tvbError__stack">{scriptStack.join('\n')}</div>
       </div>
     );
   } else if (reason) {
     additionalInfo = (
-      <div className="metrics_error__additional">
-        <div className="metrics_error__reason">{reason}</div>
+      <div className="tvbError__additional">
+        <div className="tvbError__reason">{reason}</div>
       </div>
     );
   }
 
   return (
-    <div className="metrics_error">
-      <div className="metrics_error__title">{title || 'The request for this panel failed.'}</div>
+    <div className="tvbError">
+      <div className="tvbError__title">{title || 'The request for this panel failed'}</div>
       {additionalInfo}
     </div>
   );

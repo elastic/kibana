@@ -24,7 +24,7 @@ import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 import { createUpDownHandler } from '../../lib/sort_keyhandler';
@@ -48,15 +48,11 @@ function MetricSeries(props) {
   const handleChange = createTextHandler(onChange);
   const aggs = model.metrics.map(createAggRowRender(props));
 
-  let caretClassName = 'fa fa-caret-down';
-  if (!visible) caretClassName = 'fa fa-caret-right';
+  let caretIcon = 'arrowDown';
+  if (!visible) caretIcon = 'arrowRight';
 
   let body = null;
   if (visible) {
-    let metricsClassName = 'kbnTabs__tab';
-    let optionsClassname = 'kbnTabs__tab';
-    if (selectedTab === 'metrics') metricsClassName += '-active';
-    if (selectedTab === 'options') optionsClassname += '-active';
     let seriesBody;
     if (selectedTab === 'metrics') {
       const handleSort = (data) => {
@@ -70,19 +66,17 @@ function MetricSeries(props) {
             dynamic={true}
             direction="vertical"
             onSort={handleSort}
-            sortHandle="vis_editor__agg_sort"
+            sortHandle="tvbAggRow__sortHandle"
           >
             { aggs }
           </Sortable>
-          <div className="vis_editor__series_row">
-            <div className="vis_editor__series_row-item">
-              <Split
-                onChange={props.onChange}
-                fields={fields}
-                panel={panel}
-                model={model}
-              />
-            </div>
+          <div className="tvbAggRow tvbAggRow--split">
+            <Split
+              onChange={props.onChange}
+              fields={fields}
+              panel={panel}
+              model={model}
+            />
           </div>
         </div>
       );
@@ -96,24 +90,22 @@ function MetricSeries(props) {
       );
     }
     body = (
-      <div className="vis_editor__series-row">
-        <div className="kbnTabs sm" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'metrics'}
-            className={metricsClassName}
+      <div className="tvbSeries__body">
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'metrics'}
             onClick={() => props.switchTab('metrics')}
-          >Metrics
-          </button>
-          <button
-            role="tab"
+          >
+            Metrics
+          </EuiTab>
+          <EuiTab
             data-test-subj="seriesOptions"
-            aria-selected={selectedTab === 'options'}
-            className={optionsClassname}
+            isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
-          >Options
-          </button>
-        </div>
+          >
+            Options
+          </EuiTab>
+        </EuiTabs>
         {seriesBody}
       </div>
     );
@@ -122,57 +114,65 @@ function MetricSeries(props) {
   let colorPicker;
   if (props.colorPicker) {
     colorPicker = (
-      <ColorPicker
-        disableTrash={true}
-        onChange={props.onChange}
-        name="color"
-        value={model.color}
-      />
+      <EuiFlexItem grow={false}>
+        <ColorPicker
+          disableTrash={true}
+          onChange={props.onChange}
+          name="color"
+          value={model.color}
+        />
+      </EuiFlexItem>
     );
   }
 
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
-      <EuiToolTip content="Sort">
-        <button
-          className="vis_editor__sort thor__button-outlined-default sm"
-          aria-label="Sort series by pressing up/down"
-          onKeyDown={createUpDownHandler(props.onShouldSortItem)}
-        >
-          <i className="fa fa-sort" />
-        </button>
-      </EuiToolTip>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Drag to sort">
+          <EuiButtonIcon
+            className="tvbSeries__sortHandle"
+            iconType="grab"
+            aria-label="Sort series by pressing up/down"
+            onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     );
   }
 
   return (
     <div
-      className={`${props.className} vis_editor__series`}
+      className={`${props.className}`}
       style={props.style}
       onMouseDown={props.onMouseDown}
       onTouchStart={props.onTouchStart}
     >
-      <div className="vis_editor__container">
-        <div className="vis_editor__series-details">
-          <button
-            className="vis_editor__series-visibility-toggle"
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={caretIcon}
+            color="text"
             onClick={props.toggleVisible}
             aria-label="Toggle series editor"
             aria-expanded={props.visible}
-          >
-            <i className={caretClassName}/>
-          </button>
-          { colorPicker }
-          <div className="vis_editor__row vis_editor__row_item">
-            <input
-              className="vis_editor__input-grows"
-              onChange={handleChange('label')}
-              placeholder="Label"
-              value={model.label}
-            />
-          </div>
-          { dragHandle }
+          />
+        </EuiFlexItem>
+
+        { colorPicker }
+
+        <EuiFlexItem>
+          <EuiFieldText
+            fullWidth
+            onChange={handleChange('label')}
+            placeholder="Label"
+            value={model.label}
+          />
+        </EuiFlexItem>
+
+        { dragHandle }
+
+        <EuiFlexItem grow={false}>
           <AddDeleteButtons
             addTooltip="Add Series"
             deleteTooltip="Delete Series"
@@ -182,9 +182,11 @@ function MetricSeries(props) {
             onAdd={onAdd}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
+            responsive={false}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       { body }
     </div>
   );
