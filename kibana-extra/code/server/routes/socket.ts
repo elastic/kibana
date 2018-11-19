@@ -15,7 +15,7 @@ export function socketRoute(server: Server, socketService: SocketService, log: L
   const socketIO = SocketIO(server.listener, { path: '/ws' });
 
   socketIO.on('connection', (socket: Socket) => {
-    log.info('User connected, attaching handlers and register socket.');
+    log.debug('User connected, attaching handlers and register socket.');
 
     socketService.registerSocket(SocketKind.CLONE_PROGRESS, socket);
     socketService.registerSocket(SocketKind.DELETE_PROGRESS, socket);
@@ -26,7 +26,7 @@ export function socketRoute(server: Server, socketService: SocketService, log: L
     // const authHeader = getAuthHeader(request, server);
 
     socket.on('disconnect', () => {
-      log.info('User disconnected, removing handlers and unregister sockets.');
+      log.debug('User disconnected, removing handlers and unregister sockets.');
       socketService.unregisterSocket(SocketKind.CLONE_PROGRESS);
       socketService.unregisterSocket(SocketKind.DELETE_PROGRESS);
       socketService.unregisterSocket(SocketKind.INDEX_PROGRESS);
