@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiSwitch,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class IndexLabel extends React.Component {
 
@@ -38,7 +39,10 @@ class IndexLabel extends React.Component {
         <EuiFlexItem
           grow={false}
         >
-          Indices
+          <FormattedMessage
+            id="xpack.monitoring.elasticsearch.shardAllocation.tableHead.indicesLabel"
+            defaultMessage="Indices"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
