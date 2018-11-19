@@ -103,9 +103,8 @@ export class StaticDynamicStyleSelector extends React.Component {
     };
   })();
 
-  _renderStaticAndDynamicStyles = () => {
+  _renderStyleSelector(currentOptions) {
     let styleSelector;
-    const currentOptions = _.get(this.props, 'styleDescriptor.options');
     if (this.state.isDynamic) {
       if (this.state.ordinalFields && this.state.ordinalFields.length) {
         const DynamicSelector = this.props.DynamicSelector;
@@ -128,7 +127,11 @@ export class StaticDynamicStyleSelector extends React.Component {
         />
       );
     }
+    return styleSelector;
+  }
 
+  _renderStaticAndDynamicStyles = () => {
+    const currentOptions = _.get(this.props, 'styleDescriptor.options');
     return (
       <div>
         <EuiFlexGroup alignItems="center">
@@ -140,14 +143,14 @@ export class StaticDynamicStyleSelector extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiSwitch
               label={'Dynamic?'}
-              checked={this.state.dynamic}
+              checked={this.state.isDynamic}
               onChange={e => this._onTypeToggle(e, currentOptions)}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
-        {styleSelector}
+        {this._renderStyleSelector(currentOptions)}
       </div>
     );
   };
