@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiCallOut, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiPortal,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { JobInfo, jobQueueClient } from '../lib/job_queue_client';
@@ -15,7 +23,7 @@ interface Props {
 
 interface State {
   isLoading: boolean;
-  isPopoverOpen: boolean;
+  isFlyoutVisible: boolean;
   calloutTitle: string;
   info: JobInfo | null;
 }
@@ -30,10 +38,13 @@ export class ReportInfoButton extends Component<Props, State> {
 
     this.state = {
       isLoading: false,
-      isPopoverOpen: false,
+      isFlyoutVisible: false,
       calloutTitle: 'Job info',
       info: null,
     };
+
+    this.closeFlyout = this.closeFlyout.bind(this);
+    this.showFlyout = this.showFlyout.bind(this);
   }
 
   public renderInfo() {
@@ -74,31 +85,6 @@ export class ReportInfoButton extends Component<Props, State> {
     );
   }
 
-  public render() {
-    const button = (
-      <EuiButtonIcon
-        onClick={this.togglePopover}
-        iconType="iInCircle"
-        color={'primary'}
-        aria-label="Show report info"
-      />
-    );
-
-    return (
-      <EuiPopover
-        id="popover"
-        button={button}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover}
-        anchorPosition="downRight"
-      >
-        <EuiCallOut color="primary" title={this.state.calloutTitle}>
-          {this.renderInfo()}
-        </EuiCallOut>
-      </EuiPopover>
-    );
-  }
-
   public componentWillUnmount() {
     this.mounted = false;
   }
@@ -107,19 +93,38 @@ export class ReportInfoButton extends Component<Props, State> {
     this.mounted = true;
   }
 
-  private togglePopover = () => {
-    this.setState(prevState => {
-      return { isPopoverOpen: !prevState.isPopoverOpen };
-    });
+  public render() {
+    let flyout;
 
-    if (!this.state.info) {
-      this.loadInfo();
+    if (this.state.isFlyoutVisible) {
+      flyout = (
+        <EuiPortal>
+          <EuiFlyout ownFocus onClose={this.closeFlyout} size="s" aria-labelledby="flyoutTitle">
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="s">
+                <h2 id="flyoutTitle">{this.state.calloutTitle}</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <EuiText>{this.renderInfo()}</EuiText>
+            </EuiFlyoutBody>
+          </EuiFlyout>
+        </EuiPortal>
+      );
     }
-  };
 
-  private closePopover = () => {
-    this.setState({ isPopoverOpen: false });
-  };
+    return (
+      <Fragment>
+        <EuiButtonIcon
+          onClick={this.showFlyout}
+          iconType="iInCircle"
+          color={'primary'}
+          aria-label="Show report info"
+        />
+        {flyout}
+      </Fragment>
+    );
+  }
 
   private loadInfo = async () => {
     this.setState({ isLoading: true });
@@ -136,6 +141,18 @@ export class ReportInfoButton extends Component<Props, State> {
           info: kfetchError.message,
         });
       }
+    }
+  };
+
+  private closeFlyout = () => {
+    this.setState({ isFlyoutVisible: false });
+  };
+
+  private showFlyout = () => {
+    this.setState({ isFlyoutVisible: true });
+
+    if (!this.state.info) {
+      this.loadInfo();
     }
   };
 }
