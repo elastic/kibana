@@ -9,6 +9,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { deletePolicy } from '../../../../services/api';
+import { showApiError } from '../../../../services/api_errors';
 export class ConfirmDeleteUi extends Component {
   deletePolicy = async () => {
     const { intl, policyToDelete, callback } = this.props;
@@ -22,11 +23,11 @@ export class ConfirmDeleteUi extends Component {
       }, { policyName });
       toastNotifications.addSuccess(message);
     } catch (e) {
-      const message = intl.formatMessage({
+      const title = intl.formatMessage({
         id: 'xpack.indexLifecycleMgmt.confirmDelete.errorMessage',
-        defaultMessage: 'Error deleting policy {policyName} {message}',
-      }, { policyName, message: e.message });
-      toastNotifications.addDanger(message);
+        defaultMessage: 'Error deleting policy {policyName}',
+      }, { policyName });
+      showApiError(e, title);
     }
     if (callback) {
       callback();

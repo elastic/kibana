@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
+import { i18n } from '@kbn/i18n';
+import { showApiError } from '../../services/api_errors';
 import { createAction } from 'redux-actions';
-import { toastNotifications } from 'ui/notify';
 import { loadPolicies } from '../../services/api';
 import { SET_PHASE_DATA } from '../constants';
 export const fetchedPolicies = createAction('FETCHED_POLICIES');
@@ -28,7 +26,13 @@ export const fetchPolicies = (withIndices, callback) => async dispatch => {
     policies = await loadPolicies(withIndices);
   }
   catch (err) {
-    return toastNotifications.addDanger(err.data.message);
+    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.loadPolicyErrorMessage',
+      {
+        defaultMessage: 'Error loading policies',
+      },
+    );
+    showApiError(err, title);
+    return false;
   }
 
   dispatch(fetchedPolicies(policies));

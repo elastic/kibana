@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import { createAction } from 'redux-actions';
-import { toastNotifications } from 'ui/notify';
+import { showApiError } from '../../services/api_errors';
 import { loadNodes, loadNodeDetails } from '../../services/api';
 import { SET_SELECTED_NODE_ATTRS } from '../constants';
 
@@ -26,7 +26,12 @@ export const fetchNodes = () => async dispatch => {
       dispatch(fetchedNodes(nodes));
     }
   } catch (err) {
-    return toastNotifications.addDanger(err.data.message);
+    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeInfoErrorMessage',
+      {
+        defaultMessage: 'Error loading node attribute information',
+      },
+    );
+    showApiError(err, title);
   } finally {
     fetchingNodes = false;
   }
@@ -44,8 +49,13 @@ export const fetchNodeDetails = selectedNodeAttrs => async dispatch => {
   try {
     details = await loadNodeDetails(selectedNodeAttrs);
   } catch (err) {
-    return toastNotifications.addDanger(err.data.message);
+    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.nodeDetailErrorMessage',
+      {
+        defaultMessage: 'Error loading node attribute details',
+      },
+    );
+    showApiError(err, title);
+    return false;
   }
-
   dispatch(fetchedNodeDetails(selectedNodeAttrs, details));
 };

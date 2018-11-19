@@ -5,6 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
+import { showApiError } from '../../services/api_errors';
 import { saveLifecycle as saveLifecycleApi } from '../../services/api';
 
 
@@ -13,7 +14,12 @@ export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
     await saveLifecycleApi(lifecycle);
   }
   catch (err) {
-    toastNotifications.addDanger(err.data.message);
+    const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage',
+      {
+        defaultMessage: 'Error saving lifecycle policy {lifecycleName}',
+      }
+    );
+    showApiError(err, title);
     return false;
   }
   const message = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage',
