@@ -157,22 +157,14 @@ export class StepLogisticsUi extends Component {
             error={errorRollupCron}
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
             helpText={(
-              <Fragment>
-                <p>
+              <p>
+                <EuiLink href={cronUrl} target="_blank">
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLabel"
-                    defaultMessage="{link}"
-                    values={{ link: (
-                      <EuiLink href={cronUrl} target="_blank">
-                        <FormattedMessage
-                          id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReference.link"
-                          defaultMessage="Learn more about cron expressions"
-                        />
-                      </EuiLink>
-                    ) }}
+                    id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
+                    defaultMessage="Learn more about cron expressions"
                   />
-                </p>
-              </Fragment>
+                </EuiLink>
+              </p>
             )}
             fullWidth
           >
@@ -187,7 +179,7 @@ export class StepLogisticsUi extends Component {
           <EuiText size="s">
             <EuiLink onClick={this.hideAdvancedCron}>
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonAdvancedLabel"
+                id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonBasicLabel"
                 defaultMessage="Create basic interval"
               />
             </EuiLink>
@@ -270,7 +262,7 @@ export class StepLogisticsUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepLogisticsDescription"
+                  id="xpack.rollupJobs.create.stepLogistics.logisticsDescription"
                   defaultMessage="Define how to run the rollup job and when to index the documents."
                 />
               </p>
@@ -416,9 +408,7 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionScheduleDescription"
-                defaultMessage={`
-                  How often do you want to roll up the data?
-                `}
+                defaultMessage="How often do you want to roll up the data?"
               />
             )}
             fullWidth
@@ -440,10 +430,7 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeDescription"
-                defaultMessage={`
-                  A larger page size
-                  will roll up data quicker, but requires more memory.
-                `}
+                defaultMessage="A larger page size will roll up data quicker, but requires more memory."
               />
             )}
             fullWidth
@@ -474,7 +461,7 @@ export class StepLogisticsUi extends Component {
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.rollupJobs.create.stepLogistics.sectionPageSizeTitle"
+                    id="xpack.rollupJobs.create.stepLogistics.sectionDelayTitle"
                     defaultMessage="How long should the rollup job wait before rolling up new data?"
                   />
                 </h5>
@@ -483,11 +470,9 @@ export class StepLogisticsUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionDelayDescription"
-                defaultMessage={`
-                  A latency buffer will delay rolling up data. This will yield a higher-fidelity
-                  rollup by allowing for variable ingest latency. By default, the rollup job
-                  attempts to roll up all data that is available.
-                `}
+                defaultMessage="A latency buffer will delay rolling up data. This will yield a
+                  higher-fidelity rollup by allowing for variable ingest latency. By default, the
+                  rollup job attempts to roll up all data that is available."
               />
             )}
             fullWidth

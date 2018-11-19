@@ -25,11 +25,11 @@ import {
   formatHTMLString,
   extractMessageIdFromNode,
   extractMessageValueFromNode,
-  extractContextValueFromNode,
+  extractDescriptionValueFromNode,
   extractValuesKeysFromNode,
   checkValuesProperty,
 } from '../utils';
-import { DEFAULT_MESSAGE_KEY, CONTEXT_KEY, VALUES_KEY } from '../constants';
+import { DEFAULT_MESSAGE_KEY, VALUES_KEY, DESCRIPTION_KEY } from '../constants';
 import { createFailError } from '../../run';
 
 /**
@@ -46,10 +46,10 @@ export function extractIntlMessages(node) {
     );
   }
 
-  const [messageIdProperty, messageProperty, contextProperty] = [
+  const [messageIdProperty, messageProperty, descriptionProperty] = [
     'id',
     DEFAULT_MESSAGE_KEY,
-    CONTEXT_KEY,
+    DESCRIPTION_KEY,
   ].map(key => options.properties.find(property => isPropertyWithKey(property, key)));
 
   const messageId = messageIdProperty
@@ -64,8 +64,8 @@ export function extractIntlMessages(node) {
     ? formatJSString(extractMessageValueFromNode(messageProperty.value, messageId))
     : undefined;
 
-  const context = contextProperty
-    ? formatJSString(extractContextValueFromNode(contextProperty.value, messageId))
+  const description = descriptionProperty
+    ? formatJSString(extractDescriptionValueFromNode(descriptionProperty.value, messageId))
     : undefined;
 
   if (!message) {
@@ -78,7 +78,7 @@ export function extractIntlMessages(node) {
 
   checkValuesProperty(valuesKeys, message, messageId);
 
-  return [messageId, { message, context }];
+  return [messageId, { message, description }];
 }
 
 /**
@@ -87,10 +87,10 @@ export function extractIntlMessages(node) {
  * @returns {[string, string][]} Array of id-message tuples
  */
 export function extractFormattedMessages(node) {
-  const [messageIdAttribute, messageAttribute, contextAttribute, valuesAttribute] = [
+  const [messageIdAttribute, messageAttribute, descriptionAttribute, valuesAttribute] = [
     'id',
     DEFAULT_MESSAGE_KEY,
-    CONTEXT_KEY,
+    DESCRIPTION_KEY,
     VALUES_KEY,
   ].map(key => node.attributes.find(attribute => isJSXIdentifier(attribute.name, { name: key })));
 
@@ -106,8 +106,8 @@ export function extractFormattedMessages(node) {
     ? formatHTMLString(extractMessageValueFromNode(messageAttribute.value, messageId))
     : undefined;
 
-  const context = contextAttribute
-    ? formatHTMLString(extractContextValueFromNode(contextAttribute.value, messageId))
+  const description = descriptionAttribute
+    ? formatHTMLString(extractDescriptionValueFromNode(descriptionAttribute.value, messageId))
     : undefined;
 
   if (!message) {
@@ -132,5 +132,5 @@ export function extractFormattedMessages(node) {
 
   checkValuesProperty(valuesKeys, message, messageId);
 
-  return [messageId, { message, context }];
+  return [messageId, { message, description }];
 }

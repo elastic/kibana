@@ -24,6 +24,7 @@ export const isLoading = (state) => state.jobs.isLoading;
 export const jobLoadError = (state) => state.jobs.jobLoadError;
 export const isSaving = (state) => state.createJob.isSaving;
 export const getCreateJobError = (state) => state.createJob.error;
+export const isUpdating = (state) => state.updateJob.isUpdating;
 
 export const getJobStatusByJobName = (state, jobName) => {
   const jobs = getJobs(state);

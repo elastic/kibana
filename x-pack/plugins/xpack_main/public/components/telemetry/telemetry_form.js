@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { CONFIG_TELEMETRY_DESC, PRIVACY_STATEMENT_URL } from '../../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
-import './telemetry_form.less';
 import { Field } from 'ui/management';
 
 const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];

@@ -20,59 +20,70 @@ import {
 } from '../../../../../../style/variables';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
-interface ItemBarProps {
-  type: 'transaction' | 'span';
+type ItemType = 'transaction' | 'span';
+
+interface IContainerStyleProps {
+  type: ItemType;
+  timelineMargins: ITimelineMargins;
+  isSelected: boolean;
+}
+
+interface IBarStyleProps {
+  type: ItemType;
   left: number;
   width: number;
   color: string;
 }
 
-const ItemBar = styled<ItemBarProps, any>('div')`
-  box-sizing: border-box;
-  position: relative;
-  height: ${px(unit)};
-  left: ${props => props.left}%;
-  width: ${props => props.width}%;
-  min-width: '2px';
-  background-color: ${props => props.color};
-`;
-
-const SpanLabel = styled<{ left: number }, any>('div')`
-  white-space: nowrap;
-  position: relative;
-  left: ${props => `${props.left}%`};
-  width: ${props => `${100 - props.left}%`};
-  text-align: left;
-  margin: ${px(units.quarter)} 0 0;
-  font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.small};
-`;
-
-const TransactionLabel = styled(SpanLabel)`
-  font-weight: 600;
-  font-family: ${fontFamily};
-  font-size: ${fontSize};
-`;
-
-interface IContainerProps {
-  item: IWaterfallItem;
-  timelineMargins: ITimelineMargins;
-  isSelected: boolean;
-}
-
-const Container = styled<IContainerProps, 'div'>('div')`
+const Container = styled<IContainerStyleProps, 'div'>('div')`
   position: relative;
   display: block;
   user-select: none;
-  padding: ${px(units.half)} ${props => px(props.timelineMargins.right)}
-    ${props => px(props.item.docType === 'span' ? units.half : units.quarter)}
-    ${props => px(props.timelineMargins.left)};
+  padding-top: ${px(units.half)};
+  padding-bottom: ${props =>
+    px(props.type === 'span' ? units.plus + units.quarter : units.plus)};
+  margin-right: ${props => px(props.timelineMargins.right)};
+  margin-left: ${props => px(props.timelineMargins.left)};
   border-top: 1px solid ${colors.gray4};
   background-color: ${props => (props.isSelected ? colors.gray5 : 'initial')};
   cursor: pointer;
   &:hover {
     background-color: ${colors.gray5};
   }
+`;
+
+const ItemBar = styled<IBarStyleProps, any>('div')`
+  box-sizing: border-box;
+  position: relative;
+  height: ${px(unit)};
+  min-width: 2px;
+  background-color: ${props => props.color};
+`;
+
+const ItemLabel = styled.div`
+  white-space: nowrap;
+  position: absolute;
+  right: 0;
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  text-align: left;
+  margin: 0;
+`;
+
+const SpanLabel = styled(ItemLabel)`
+  font-weight: normal;
+  font-family: ${fontFamilyCode};
+  font-size: ${fontSizes.small};
+  bottom: ${px(units.half)};
+`;
+
+const TransactionLabel = styled(ItemLabel)`
+  font-weight: 600;
+  font-family: ${fontFamily};
+  font-size: ${fontSize};
+  bottom: ${px(units.quarter)};
 `;
 
 interface ITimelineMargins {
@@ -84,7 +95,7 @@ interface ITimelineMargins {
 
 interface IWaterfallItemProps {
   timelineMargins: ITimelineMargins;
-  totalDuration: number;
+  totalDuration?: number;
   item: IWaterfallItem;
   color: string;
   isSelected: boolean;
@@ -111,21 +122,30 @@ export function WaterfallItem({
   isSelected,
   onClick
 }: IWaterfallItemProps) {
+  if (!totalDuration) {
+    return null;
+  }
+
   const width = (item.duration / totalDuration) * 100;
-  const left = (item.offset / totalDuration) * 100;
-  const Label = item.docType === 'transaction' ? TransactionLabel : SpanLabel;
+  const left = ((item.offset + item.skew) / totalDuration) * 100;
+  const Label = item.docType === 'span' ? SpanLabel : TransactionLabel;
 
   return (
     <Container
-      item={item}
+      type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       onClick={onClick}
     >
-      <ItemBar left={left} width={width} color={color} type={item.docType} />
-      <Label left={left}>
-        <Prefix item={item} />
-        {item.name}
+      <ItemBar // using inline styles instead of props to avoid generating a css class for each item
+        style={{ left: `${left}%`, width: `${width}%` }}
+        color={color}
+        type={item.docType}
+      />
+      <Label // using inline styles instead of props to avoid generating a css class for each item
+        style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
+      >
+        <Prefix item={item} /> {item.name}
       </Label>
     </Container>
   );

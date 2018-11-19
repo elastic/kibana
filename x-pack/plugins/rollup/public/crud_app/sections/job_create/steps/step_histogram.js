@@ -74,7 +74,6 @@ export class StepHistogramUi extends Component {
     const columns = [{
       field: 'name',
       name: 'Field',
-      truncateText: true,
       sortable: true,
     }];
 
@@ -96,10 +95,8 @@ export class StepHistogramUi extends Component {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.rollupJobs.create.stepHistogramDescription"
-                  defaultMessage={`
-                    Select the fields you want to bucket using numeric intervals.
-                  `}
+                  id="xpack.rollupJobs.create.stepHistogram.histogramDescription"
+                  defaultMessage="Select the fields you want to bucket using numeric intervals."
                 />
               </p>
             </EuiText>
@@ -190,12 +187,10 @@ export class StepHistogramUi extends Component {
           description={(
             <FormattedMessage
               id="xpack.rollupJobs.create.stepHistogram.sectionHistogramIntervalDescription"
-              defaultMessage={`
-                This is the interval of histogram buckets to be generated when rolling up, e.g. 5
-                will create buckets that are five units wide (0-5, 5-10, etc). Note that only one
-                interval can be specified in the histogram group, meaning that all fields being
-                grouped via the histogram must share the same interval.
-              `}
+              defaultMessage="This is the interval of histogram buckets to be generated when rolling
+                up, e.g. 5 will create buckets that are five units wide (0-5, 5-10, etc). Note that
+                only one interval can be specified in the histogram group, meaning that all fields
+                being grouped via the histogram must share the same interval."
             />
           )}
           fullWidth

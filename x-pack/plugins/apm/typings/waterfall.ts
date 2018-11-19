@@ -7,7 +7,4 @@
 import { Span } from './Span';
 import { Transaction } from './Transaction';
 
-export interface WaterfallResponse {
-  services: string[];
-  hits: Array<Transaction | Span>;
-}
+export type WaterfallResponse = Array<Transaction | Span>;

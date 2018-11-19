@@ -47,4 +47,15 @@ describe('dev/build/lib/version_info', () => {
       expect(versionInfo).to.have.property('buildNumber').a('number').greaterThan(1000);
     });
   });
+
+  describe('versionQualifier', () => {
+    it('appends a version qualifier', async () => {
+      const versionInfo = await getVersionInfo({
+        isRelease: true,
+        versionQualifier: 'beta55',
+        pkg
+      });
+      expect(versionInfo).to.have.property('buildVersion').be(pkg.version + '-beta55');
+    });
+  });
 });

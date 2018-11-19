@@ -4,6 +4,17 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 
-import './agg_type_filter';
-import './agg_type_field_filter';
-import './editor_config';
+import chrome from 'ui/chrome';
+
+import { initAggTypeFilter } from './agg_type_filter';
+import { initAggTypeFieldFilter } from './agg_type_field_filter';
+import { initEditorConfig } from './editor_config';
+
+const uiSettings = chrome.getUiSettingsClient();
+const isRollupIndexPatternsEnabled = uiSettings.get('rollups:enableIndexPatterns');
+
+if (isRollupIndexPatternsEnabled) {
+  initAggTypeFilter();
+  initAggTypeFieldFilter();
+  initEditorConfig();
+}

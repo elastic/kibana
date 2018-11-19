@@ -1,0 +1,30 @@
+// ML has app specific coloring for it's various warning levels.
+// These are used almost everywhere.
+
+.ml-icon-severity-critical,
+.ml-icon-severity-major,
+.ml-icon-severity-minor,
+.ml-icon-severity-warning,
+.ml-icon-severity-unknown {
+  text-shadow: 1px 1px 1px $euiColorLightShade;
+}
+
+.ml-icon-severity-critical {
+  color: $mlColorCriticalText;
+}
+
+.ml-icon-severity-major {
+  color: $mlColorMajorText;
+}
+
+.ml-icon-severity-minor {
+  color: $mlColorMinorText;
+}
+
+.ml-icon-severity-warning {
+  color: $mlColorWarningText;
+}
+
+.ml-icon-severity-unknown {
+  color: $mlColorUnknownText;
+}

@@ -67,6 +67,7 @@ function ExplorerChartContainer({
           {detectorLabel}<br />y-axis event distribution split by &quot;{byField.fieldName}&quot;
         </React.Fragment>
       );
+      wrapLabel = true;
     }
   }
 

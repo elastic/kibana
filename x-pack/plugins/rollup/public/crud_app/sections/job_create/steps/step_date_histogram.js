@@ -235,7 +235,7 @@ export class StepDateHistogramUi extends Component {
                       link: (
                         <EuiLink href={dateHistogramAggregationUrl} target="_blank">
                           <FormattedMessage
-                            id="xpack.rollupJobs.create.stepDateHistogram.descriptio"
+                            id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
                             defaultMessage="date histogram aggregations"
                           />
                         </EuiLink>
@@ -247,9 +247,7 @@ export class StepDateHistogramUi extends Component {
                 <p>
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepDateHistogram.sectionDataSourceDescription"
-                    defaultMessage={`
-                      Note that smaller time buckets take up proportionally more space.
-                    `}
+                    defaultMessage="Note that smaller time buckets take up proportionally more space."
                   />
                 </p>
               </Fragment>
