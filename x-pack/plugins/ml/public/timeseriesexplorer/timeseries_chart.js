@@ -138,6 +138,39 @@ export class TimeseriesChart extends React.Component {
 
     this.fieldFormat = undefined;
 
+    // Annotations Brush
+    this.annotateBrush = d3.svg.brush()
+      .x(focusXScale)
+      .y(focusYScale)
+      .on('brush', brushmove)
+      .on('brushend', brushend);
+    const annotateBrush = this.annotateBrush;
+
+    function brushmove() {
+      //const extent = annotateBrush.extent();
+    }
+
+    const that = this;
+    function brushend() {
+      const { focusChartData } = that.props;
+      const extent = annotateBrush.extent();
+      console.warn(`x: ${extent[0][0].getTime()} - ${extent[1][0].getTime()} \ny: ${extent[0][1]} - ${extent[1][1]}`);
+      const data = focusChartData.filter((d) => {
+        let match = false;
+        if (
+          (d.value >= extent[0][1] && d.value <= extent[1][1]) &&
+          (d.date.getTime() >= extent[0][0].getTime() && d.date.getTime() <= extent[1][0].getTime())
+        ) {
+          match = true;
+        }
+        return match;
+      }).map((d) => {
+        return d.value;
+      });
+      console.warn('anomalies', data);
+    }
+
+    // brush for focus brushing
     this.brush = d3.svg.brush();
 
     this.mask = undefined;
@@ -338,6 +371,8 @@ export class TimeseriesChart extends React.Component {
       contextForecastData
     } = this.props;
 
+    const annotateBrush = this.annotateBrush.bind(this);
+
     // Add a group at the top to display info on the chart aggregation interval
     // and links to set the brush span to 1h, 1d, 1w etc.
     const zoomGroup = fcsGroup.append('g')
@@ -349,6 +384,12 @@ export class TimeseriesChart extends React.Component {
       .attr('height', focusZoomPanelHeight)
       .attr('class', 'chart-border');
     this.createZoomInfoElements(zoomGroup, fcsWidth);
+
+    fcsGroup.append('g')
+      .attr('class', 'annotate-brush')
+      .call(annotateBrush)
+      .selectAll('rect')
+      .attr('height', focusChartHeight);
 
     // Add border round plot area.
     fcsGroup.append('rect')
