@@ -7,4 +7,3 @@
 
 
 import './directive';
-import './styles/main.less';
