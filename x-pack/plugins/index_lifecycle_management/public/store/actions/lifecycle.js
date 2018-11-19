@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { saveLifecycle as saveLifecycleApi } from '../../services/api';
 
@@ -16,7 +16,16 @@ export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
     toastNotifications.addDanger(err.data.message);
     return false;
   }
-  const verb = isNew ? 'created' : 'updated';
-  toastNotifications.addSuccess(`Successfully ${verb} lifecycle policy '${lifecycle.name}'`);
+  const message = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage',
+    {
+      defaultMessage: 'Successfully {verb} lifecycle policy {lifecycleName}',
+      values: { verb: isNew ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createdMessage', {
+        defaultMessage: 'created',
+      }) : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.updatedMessage', {
+        defaultMessage: 'updated',
+      }), lifecycleName: lifecycle.name }
+    },
+  );
+  toastNotifications.addSuccess(message);
   return true;
 };
