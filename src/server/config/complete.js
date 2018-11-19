@@ -28,12 +28,20 @@ const getFlattenedKeys = object => (
 );
 
 async function getUnusedConfigKeys(plugins, disabledPluginSpecs, rawSettings, configValues) {
-  // transform deprecated settings
-  const transforms = [
-    transformDeprecations,
-    ...await Promise.all(plugins.map(({ spec }) => getTransform(spec)))
-  ];
-  const settings = transforms.reduce((a, c) => c(a), rawSettings);
+  // transform deprecated core settings
+  const settings = transformDeprecations(rawSettings);
+
+  // transform deprecated plugin settings
+  for (let i = 0; i < plugins.length; i++) {
+    const { spec } = plugins[i];
+    const transform = await getTransform(spec);
+    const prefix = spec.getConfigPrefix();
+    const pluginSettings = settings[prefix];
+    if (pluginSettings) {
+      settings[prefix] = transform(pluginSettings);
+    }
+  }
+
 
   // remove config values from disabled plugins
   for (const spec of disabledPluginSpecs) {
