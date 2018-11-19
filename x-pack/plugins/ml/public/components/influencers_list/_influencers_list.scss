@@ -40,37 +40,37 @@
   // SASSTODO: This range of color is too large, needs to be rewritten and variablized
   .progress.critical {
     .progress-bar {
-      background-color: $mchColorCritical;
+      background-color: $mlColorCritical;
     }
     .score-label {
-      border-color: $mchColorCritical;
+      border-color: $mlColorCritical;
     }
   }
 
   .progress.major {
     .progress-bar {
-      background-color: $mchColorMajor;
+      background-color: $mlColorMajor;
     }
     .score-label {
-      border-color: $mchColorMajor;
+      border-color: $mlColorMajor;
     }
   }
 
   .progress.minor {
     .progress-bar {
-      background-color: $mchColorMinor;
+      background-color: $mlColorMinor;
     }
     .score-label {
-      border-color: $mchColorMinor;
+      border-color: $mlColorMinor;
     }
   }
 
   .progress.warning {
     .progress-bar {
-      background-color: $mchColorWarning;
+      background-color: $mlColorWarning;
     }
     .score-label {
-      border-color: $mchColorWarning;
+      border-color: $mlColorWarning;
     }
   }
 
