@@ -229,7 +229,10 @@ export class ReportInfoButton extends Component<Props, State> {
   };
 
   private closeFlyout = () => {
-    this.setState({ isFlyoutVisible: false });
+    this.setState({
+      isFlyoutVisible: false,
+      info: null, // force re-read for next click
+    });
   };
 
   private showFlyout = () => {
