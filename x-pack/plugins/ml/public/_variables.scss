@@ -1,11 +1,11 @@
-$mchColorCritical: #fe5050;
-$mchColorMajor: #fba740;
-$mchColorMinor: #fdec25;
-$mchColorWarning: #8bc8fb;
-$mchColorUnknown: #c0c0c0;
+$mlColorCritical: #fe5050;
+$mlColorMajor: #fba740;
+$mlColorMinor: #fdec25;
+$mlColorWarning: #8bc8fb;
+$mlColorUnknown: #c0c0c0;
 
-$mchColorCriticalText: makeHighContrastColor($mchColorCritical, $euiColorEmptyShade);
-$mchColorMajorText: makeHighContrastColor($mchColorMajor, $euiColorEmptyShade);
-$mchColorMinorText: makeHighContrastColor($mchColorMinor, $euiColorEmptyShade);
-$mchColorWarningText: makeHighContrastColor($mchColorWarning, $euiColorEmptyShade);
-$mchColorUnknownText: $euiColorDarkShade;
+$mlColorCriticalText: makeHighContrastColor($mlColorCritical, $euiColorEmptyShade);
+$mlColorMajorText: makeHighContrastColor($mlColorMajor, $euiColorEmptyShade);
+$mlColorMinorText: makeHighContrastColor($mlColorMinor, $euiColorEmptyShade);
+$mlColorWarningText: makeHighContrastColor($mlColorWarning, $euiColorEmptyShade);
+$mlColorUnknownText: $euiColorDarkShade;

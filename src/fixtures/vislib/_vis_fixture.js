@@ -41,7 +41,7 @@ const visHeight = $visCanvas.height();
 $visCanvas.new = function () {
   count += 1;
   if (count > 1) $visCanvas.height(visHeight * count);
-  return $('<div>').addClass('visualize-chart').appendTo($visCanvas);
+  return $('<div>').addClass('visChart').appendTo($visCanvas);
 };
 
 afterEach(function () {
