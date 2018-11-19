@@ -12718,11 +12718,6 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
-jstimezonedetect@1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/jstimezonedetect/-/jstimezonedetect-1.0.5.tgz#93d035cd20e8c7d64eb1375cf5aa7a10a024466a"
-  integrity sha1-k9A1zSDox9ZOsTdc9ap6EKAkRmo=
-
 jstransformer-ejs@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/jstransformer-ejs/-/jstransformer-ejs-0.0.3.tgz#04d9201469274fcf260f1e7efd732d487fa234b6"
