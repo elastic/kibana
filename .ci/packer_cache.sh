@@ -6,7 +6,7 @@ source "src/dev/ci_setup/setup.sh";
 # cache es snapshots
 node scripts/es snapshot --download-only;
 
-# run the optimizer to warn the babel and cache-loader caches
+# run the optimizer to warm the babel and cache-loader caches
 node scripts/kibana --logging.json=false --optimize;
 
 # archive cacheable directories
