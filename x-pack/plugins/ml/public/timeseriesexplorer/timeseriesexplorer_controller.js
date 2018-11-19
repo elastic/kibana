@@ -50,6 +50,10 @@ import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import { initPromise } from 'plugins/ml/util/promise';
 
+// annotations
+import mockAnnotations from './__mocks__/cp_daylight_annotations.json';
+const focusAnnotationData = mockAnnotations.tests[0].validations.result_range.expected;
+
 uiRoutes
   .when('/timeseriesexplorer/?', {
     template,
@@ -95,8 +99,12 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.modelPlotEnabled = false;
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
+  $scope.showAnnotations = true;            // Toggles display of annotations in the focus chart
+  $scope.showAnnotationsCheckbox = true;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
+
+  $scope.focusAnnotationData = focusAnnotationData;
 
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
@@ -550,6 +558,12 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.toggleShowModelBounds = function () {
     $timeout(() => {
       $scope.showModelBounds = !$scope.showModelBounds;
+    }, 0);
+  };
+
+  $scope.toggleShowAnnotations = function () {
+    $timeout(() => {
+      $scope.showAnnotations = !$scope.showAnnotations;
     }, 0);
   };
 

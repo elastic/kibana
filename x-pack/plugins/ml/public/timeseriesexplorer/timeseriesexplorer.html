@@ -86,6 +86,15 @@
           <label for="toggleShowModelBoundsCheckbox" class="kuiCheckBoxLabel">show model bounds</label>
         </div>
 
+        <div ng-show="showAnnotationsCheckbox === true">
+          <input id="toggleAnnotationsCheckbox"
+            type="checkbox"
+            class="kuiCheckBox"
+            ng-click="toggleShowAnnotations()"
+            ng-checked="showAnnotations === true">
+          <label for="toggleAnnotationsCheckbox" class="kuiCheckBoxLabel">show annotations</label>
+        </div>
+
         <div ng-show="showForecastCheckbox === true">
           <input id="toggleShowForecastCheckbox"
             type="checkbox"
@@ -106,9 +115,11 @@
           context-forecast-data="contextForecastData"
           context-aggregation-interval="contextAggregationInterval"
           swimlane-data="swimlaneData"
+          focus-annotation-data="focusAnnotationData"
           focus-chart-data="focusChartData"
           focus-forecast-data="focusForecastData"
           focus-aggregation-interval="focusAggregationInterval"
+          show-annotations="showAnnotations"
           show-model-bounds="showModelBounds"
           show-forecast="showForecast"
           zoom-from="zoomFrom"

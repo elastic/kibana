@@ -45,12 +45,14 @@ module.directive('mlTimeseriesChart', function () {
         contextForecastData: scope.contextForecastData,
         contextChartSelected: contextChartSelected,
         detectorIndex: scope.detectorIndex,
+        focusAnnotationData: scope.focusAnnotationData,
         focusChartData: scope.focusChartData,
         focusForecastData: scope.focusForecastData,
         focusAggregationInterval: scope.focusAggregationInterval,
         modelPlotEnabled: scope.modelPlotEnabled,
         renderFocusChartOnly,
         selectedJob: scope.selectedJob,
+        showAnnotations: scope.showAnnotations,
         showForecast: scope.showForecast,
         showModelBounds: scope.showModelBounds,
         svgWidth,
@@ -78,7 +80,11 @@ module.directive('mlTimeseriesChart', function () {
 
     scope.$watchCollection('focusForecastData', renderFocusChart);
     scope.$watchCollection('focusChartData', renderFocusChart);
-    scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
+    scope.$watchGroup([
+      'showAnnotations',
+      'showModelBounds',
+      'showForecast'
+    ], renderFocusChart);
 
     // Redraw the charts when the container is resize.
     const resizeChecker = new ResizeChecker(angular.element('.ml-timeseries-chart'));
@@ -105,12 +111,14 @@ module.directive('mlTimeseriesChart', function () {
       contextChartAnomalyData: '=',
       focusChartData: '=',
       swimlaneData: '=',
+      focusAnnotationData: '=',
       focusForecastData: '=',
       contextAggregationInterval: '=',
       focusAggregationInterval: '=',
       zoomFrom: '=',
       zoomTo: '=',
       autoZoomDuration: '=',
+      showAnnotations: '=',
       showModelBounds: '=',
       showForecast: '='
     },

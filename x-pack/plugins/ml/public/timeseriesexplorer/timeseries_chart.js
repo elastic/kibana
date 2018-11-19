@@ -42,11 +42,6 @@ import { mlEscape } from '../util/string_utils';
 import { mlFieldFormatService } from '../services/field_format_service';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 
-// annotations
-import mockAnnotations from './__mocks__/cp_daylight_annotations.json';
-const validations = mockAnnotations.tests[0].validations.result_range.expected;
-console.warn('mockAnnotations', validations);
-
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
 const focusHeight = focusZoomPanelHeight + focusChartHeight;
@@ -87,6 +82,7 @@ export class TimeseriesChart extends React.Component {
     contextChartSelected: PropTypes.func,
     detectorIndex: PropTypes.string,
     focusAggregationInterval: PropTypes.object,
+    focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool,
@@ -426,10 +422,12 @@ export class TimeseriesChart extends React.Component {
   renderFocusChart() {
     const {
       focusAggregationInterval,
+      focusAnnotationData,
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
       selectedJob,
+      showAnnotations,
       showForecast,
       showModelBounds
     } = this.props;
@@ -538,7 +536,7 @@ export class TimeseriesChart extends React.Component {
     }
 
     // render annotations
-    const annotationRects = focusChart.select('.ml-annotations').selectAll('rect').data(validations);
+    const annotationRects = focusChart.select('.ml-annotations').selectAll('rect').data(focusAnnotationData);
 
     annotationRects.enter()
       .append('rect')
@@ -547,6 +545,7 @@ export class TimeseriesChart extends React.Component {
     const focusXScale = this.focusXScale;
 
     annotationRects
+      .classed('ml-annotation-rect-hidden', !showAnnotations)
       .attr('x', (d) => {
         const date = moment(d.start);
         console.warn('x', focusXScale(date));
@@ -565,6 +564,8 @@ export class TimeseriesChart extends React.Component {
         showFocusChartTooltip(d, this);
       })
       .on('mouseout', () => mlChartTooltipService.hide());
+
+    annotationRects.exit().remove();
 
     focusChart.select('.values-line')
       .attr('d', this.focusValuesLine(data));
