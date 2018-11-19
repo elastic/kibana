@@ -22,13 +22,32 @@ import { chmod, unlink, writeFile } from 'fs';
 import dedent from 'dedent';
 import { resolve } from 'path';
 import { promisify } from 'util';
+import SimpleGit from 'simple-git';
 import { REPO_ROOT } from '../constants';
+
+const simpleGit = new SimpleGit(REPO_ROOT);
 
 const chmodAsync = promisify(chmod);
 const unlinkAsync = promisify(unlink);
 const writeFileAsync = promisify(writeFile);
 
-const PRECOMMIT_GIT_HOOK_SCRIPT_PATH = resolve(REPO_ROOT, '.git/hooks/pre-commit');
+async function getPrecommitGitHookScriptPath(rootPath) {
+  return new Promise((pResolve, pReject) => {
+    simpleGit.revparse(['--git-dir'], (error, gitDirPath) => {
+      if (error) {
+        return pReject(error);
+      }
+
+      pResolve(
+        resolve(
+          rootPath,
+          gitDirPath.trim(),
+          'hooks/pre-commit'
+        )
+      );
+    });
+  });
+}
 
 function getKbnPrecommitGitHookScript(rootPath) {
   return dedent(`
@@ -69,7 +88,7 @@ export async function registerPrecommitGitHook(log) {
 
   try {
     await writeGitHook(
-      PRECOMMIT_GIT_HOOK_SCRIPT_PATH,
+      await getPrecommitGitHookScriptPath(REPO_ROOT),
       getKbnPrecommitGitHookScript(REPO_ROOT)
     );
   } catch (e) {
