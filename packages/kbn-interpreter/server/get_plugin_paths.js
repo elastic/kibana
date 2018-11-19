@@ -23,7 +23,13 @@ import { promisify } from 'util';
 import { flatten } from 'lodash';
 import { pathsRegistry } from '../common/lib/paths_registry';
 
+const lstat = promisify(fs.lstat);
 const readdir = promisify(fs.readdir);
+
+const isDirectory = path =>
+  lstat(path)
+    .then(stat => stat.isDirectory())
+    .catch(() => false);
 
 export const getPluginPaths = type => {
   const typePaths = pathsRegistry.get(type);
@@ -31,14 +37,19 @@ export const getPluginPaths = type => {
     throw new Error(`Unknown type: ${type}`);
   }
 
-  return Promise.all(typePaths.map(path => {
-
-    // Get the full path of all files in the directory
-    return readdir(path).then(files => files.map(file => {
-      if (!file.endsWith('.js')) {
-        return;
-      }
-      return resolve(path, file);
-    }).filter(path => path)).catch();
+  return Promise.all(typePaths.map(async path => {
+    const isDir = await isDirectory(path);
+    if (!isDir) {
+      return;
+    }
+    // Get the full path of all js files in the directory
+    return readdir(path).then(files => {
+      return files.reduce((acc, file) => {
+        if (file.endsWith('.js')) {
+          acc.push(resolve(path, file));
+        }
+        return acc;
+      }, []);
+    }).catch();
   })).then(flatten);
 };

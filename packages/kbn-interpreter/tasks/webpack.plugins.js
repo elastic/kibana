@@ -37,6 +37,7 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.json'],
+    mainFields: ['browser', 'main'],
   },
 
   plugins: [
@@ -51,12 +52,15 @@ module.exports = {
       });
 
       this.plugin('done', function (stats) {
-        if (stats.compilation.errors && stats.compilation.errors.length) {
-          if (isWatch) {
-            console.error(stats.compilation.errors[0]);
-          } else {
-            throw stats.compilation.errors[0];
-          }
+        if (!stats.hasErrors()) {
+          return;
+        }
+        const errorMessage = stats.toString('errors-only');
+        if (isWatch) {
+          console.error(errorMessage);
+        }
+        else {
+          throw new Error(errorMessage);
         }
       });
     },
@@ -66,28 +70,12 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
+        exclude: [/node_modules/],
         loaders: 'babel-loader',
         options: {
           babelrc: false,
-          plugins: [
-            'transform-object-rest-spread',
-            'transform-async-to-generator',
-            'transform-class-properties',
-          ],
-          presets: [
-            'es2015',
-            'react',
-            [
-              'env',
-              {
-                targets: {
-                  node: 'current',
-                },
-              },
-            ],
-          ],
+          presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
         },
-        exclude: [/node_modules/],
       },
       {
         test: /\.(png|jpg|gif|jpeg|svg)$/,
