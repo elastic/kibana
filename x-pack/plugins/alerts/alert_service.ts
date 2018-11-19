@@ -11,9 +11,17 @@ interface AlertCondition {
   runnable(params: any): boolean;
 }
 
+interface AlertTemplate {
+  id: string;
+
+  description: string;
+
+  runnable: (context: any) => {};
+}
+
 export class AlertService {
-  private conditions: AlertCondition[] = [];
-  private condMap = new Map<string, AlertCondition>();
+  private templates: AlertTemplate[] = [];
+  private templatesMap = new Map<string, AlertTemplate>();
   private alerts: any = {};
   private kbnServer: any;
   private taskManager: TaskManager;
@@ -53,8 +61,8 @@ export class AlertService {
     server.route({
       method: 'GET',
       path: '/api/alerts',
-      handler: (_: any, reply: any) => {
-        reply('Hello World!');
+      handler: (_: any) => {
+        return 'Hello World!';
       },
     });
 
@@ -90,23 +98,22 @@ export class AlertService {
     this.kbnServer.afterPluginsInit(this.initAfterPlugins.bind(this));
   }
 
-  public getConditions(): string[] {
-    return Object.keys(this.condMap);
+  public getTemplates(): string[] {
+    return Object.keys(this.templatesMap);
   }
 
-  public registerCondition(cond: AlertCondition) {
-    if (!this.condMap.has(cond.name)) {
-      this.conditions.push(cond);
-      this.condMap[cond.name] = cond;
+  public registerAlertTemplate(template: AlertTemplate) {
+    if (!this.templatesMap.has(template.id)) {
+      this.templatesMap.set(template.id, template);
     } else {
       throw new Error('Condition name already taken');
     }
   }
 
-  public registerAlert(condName: string, params: any): string {
+  public registerAlert(templateId: string, params: any): string {
     const guid = 'abc';
     this.alerts[guid] = {
-      condition: this.condMap[condName],
+      template: this.templatesMap.get(templateId),
       params,
     };
 
@@ -116,7 +123,7 @@ export class AlertService {
 
   public async start() {
     return {
-      registerCondition: this.registerCondition,
+      registerAlertTemplate: this.registerAlertTemplate,
     };
   }
 
