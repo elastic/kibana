@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { compose, withState, withProps } from 'recompose';
 import { getWindow } from '../../lib/get_window';
+import { notify } from '../../lib/notify';
 import { aeroelastic } from '../../lib/aeroelastic_kibana';
 import { removeElements, duplicateElement } from '../../state/actions/elements';
 import { getFullscreen, canUserWrite } from '../../state/selectors/app';
@@ -107,13 +108,16 @@ export const WorkpadPage = compose(
           if (selectedElementIds.length) removeElements(page.id)(selectedElementIds);
         },
         copyElements: () => {
-          if (selectedElements.length)
+          if (selectedElements.length) {
             storage.set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(selectedElements));
+            notify.success('Copied element to clipboard');
+          }
         },
         cutElements: () => {
           if (selectedElements.length) {
             storage.set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(selectedElements));
             removeElements(page.id)(selectedElementIds);
+            notify.success('Copied element to clipboard');
           }
         },
         pasteElements: () => {
