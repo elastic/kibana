@@ -30,7 +30,7 @@ To create, edit, and delete spaces, use *Management > Spaces*.
 Or, if you prefer to create your spaces programmatically, you can use the <<spaces-api, {kib} Spaces API>>.
 
 [float]
-=== Monitor cross-cluster replication (beta)
+=== Monitor cross-cluster replication (beta^*^)
 
 Monitoring includes a new UI for monitoring {ref}/ccr-apis.html[cross-cluster replication] as a beta 
 feature in 6.5. Cross-cluster replication gives you resiliency in case the primary 
@@ -43,7 +43,7 @@ You’ll also get verification on whether the replication process is viable.
 image::images/highlights_6_5_cross-cluster.png[Monitoring for cross-cluster dashboard]
 
 [float]
-=== Showcase your data in Canvas (beta)
+=== Showcase your data in Canvas (beta^*^)
 
 <<canvas, Canvas>> is {kib}’s new place for showcasing your data live in a pixel-perfect design. 
 Starting with a blank workpad, you can create a story about your data by combining 
@@ -76,7 +76,7 @@ task that aggregates the data for the rollup index. To navigate to the UI, go to
 image::images/highlights_6_5_rollup.png[Create a rollup job dashboard]
 
 [float]
-=== View rolled up data in visualizations (beta)
+=== View rolled up data in visualizations (beta^*^)
 
 {kib} now has <<visualize-rollup-data, beta features for visualizing rolled up data>>. 
 You can create index 
@@ -90,7 +90,7 @@ and raw data are available in Discover.
 image::images/highlights_6_5_rollup-viz.png[Beats management UI]
 
 [float]
-=== Manage your Beats in a central location (beta)
+=== Manage your Beats in a central location (beta^*^)
 
 The Beats management UI is your one-stop shop for centrally managing your Beats 
 deployments. This new UI saves you time because you no longer have to log onto the 
@@ -103,7 +103,7 @@ initially only available for Filebeat and Metricbeat.
 image::images/highlights_6_5_beats.png[Beats management UI]
 
 [float]
-=== Monitor and manage your infrastructure (beta)
+=== Monitor and manage your infrastructure (beta^*^)
 
 {kib} has two new beta features for logging and metrics use cases, Infrastructure 
 and Logs, both available from the side navigation.  With Infrastructure, you can 
@@ -119,7 +119,7 @@ a console-like experience
 image::images/highlights_6_5_logs.gif[Animated view of log management features]
 
 [float]
-=== Distributed tracing in APM (beta)
+=== Distributed tracing in APM (beta^*^)
 
 The APM UI now supports distributed tracing as a beta feature in 6.5. Distributed 
 tracing enables you to analyze and view performance throughout your microservices 
@@ -162,4 +162,8 @@ limited to files up to 100 MB in size.
 [role="screenshot"]
 image::images/highlights_6_5_viz-logs.png[Example visualization of data from a log file]
 
+^*^ This functionality is in beta and is subject to change. The design and code 
+is less mature than official GA features and is being provided as-is with no 
+warranties. Please try this functionality in your test and development environments 
+and provide feedback in the https://discuss.elastic.co/[Elastic community forums].
 
