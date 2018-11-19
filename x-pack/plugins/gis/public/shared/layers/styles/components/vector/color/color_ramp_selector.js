@@ -19,22 +19,28 @@ const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorKey => ({
   inputDisplay: <ColorGradient color={colorKey}/>
 }));
 
-export function ColorRampSelector({ color, onChange }) {
-
-  const onColorRampChange = (selectedColorRampString = null) => {
+const onColorRampChange = onChange =>
+  selectedColorRampString => {
     onChange({
       color: selectedColorRampString
     });
   };
 
-  return (
-    <EuiSuperSelect
-      options={COLOR_GRADIENTS}
-      onChange={onColorRampChange}
-      valueOfSelected={color}
-      hasDividers={true}
-    />
-  );
+export function ColorRampSelector({ color, onChange }) {
+  if (color) {
+    return (
+      <EuiSuperSelect
+        options={COLOR_GRADIENTS}
+        onChange={onColorRampChange(onChange)}
+        valueOfSelected={color}
+        hasDividers={true}
+      />
+    );
+  } else {
+    // Default to first color gradient
+    onColorRampChange(onChange)(COLOR_GRADIENTS[0].value);
+    return null;
+  }
 }
 
 ColorRampSelector.propTypes = {

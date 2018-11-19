@@ -8,16 +8,22 @@ import React from 'react';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { getLegendColors } from 'ui/vis/map/color_util';
 
+const GRADIENT_INTERVALS = 7;
+const COLOR_KEYS = Object.keys(vislibColorMaps);
+
 export const ColorGradient = ({ color }) => {
-  const GRADIENT_INTERVALS = 7;
-  const rgbColorStrings = getLegendColors(vislibColorMaps[color].value, GRADIENT_INTERVALS);
-  const background = getLinearGradient(rgbColorStrings, GRADIENT_INTERVALS);
-  return (
-    <div
-      className="colorGradient"
-      style={{ background }}
-    />
-  );
+  if (!color || !COLOR_KEYS.includes(color)) {
+    return null;
+  } else {
+    const rgbColorStrings = getLegendColors(vislibColorMaps[color].value, GRADIENT_INTERVALS);
+    const background = getLinearGradient(rgbColorStrings, GRADIENT_INTERVALS);
+    return (
+      <div
+        className="colorGradient"
+        style={{ background }}
+      />
+    );
+  }
 };
 
 function getLinearGradient(colorStrings, intervals) {
