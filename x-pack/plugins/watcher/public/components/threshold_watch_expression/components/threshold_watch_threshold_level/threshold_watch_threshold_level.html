@@ -16,17 +16,17 @@
       xpack-aria-describes="{{thresholdWatchThresholdLevel.makeId('threshold')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchThresholdLevel.isValidationMessageVisible('threshold', 'required')"
-    >
-      A value is required.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage"
+      i18n-default-message="A value is required."
+    ></div>
     <div
       id="{{thresholdWatchThresholdLevel.makeId(['threshold', 'number'])}}"
       xpack-aria-describes="{{thresholdWatchThresholdLevel.makeId('threshold')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchThresholdLevel.isValidationMessageVisible('threshold', 'number')"
-    >
-      Value must be a valid number.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.thresholdLevel.valueMustBeValidNumberValidationMessage"
+      i18n-default-message="Value must be a valid number."
+    ></div>
     <select
       id="{{thresholdWatchThresholdLevel.makeId('thresholdComparator')}}"
       name="thresholdComparator"

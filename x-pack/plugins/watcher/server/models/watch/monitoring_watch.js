@@ -8,6 +8,7 @@ import { merge } from 'lodash';
 import { badRequest } from 'boom';
 import { BaseWatch } from './base_watch';
 import { WATCH_TYPES } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 export class MonitoringWatch extends BaseWatch {
   // This constructor should not be used directly.
@@ -29,16 +30,37 @@ export class MonitoringWatch extends BaseWatch {
   }
 
   getVisualizeQuery() {
-    throw badRequest('getVisualizeQuery called for monitoring watch');
+    throw badRequest(
+      i18n.translate('xpack.watcher.models.monitoringWatch.getVisualizeQueryCalledBadRequestMessage', {
+        defaultMessage: '{getVisualizeQuery} called for monitoring watch',
+        values: {
+          getVisualizeQuery: 'getVisualizeQuery'
+        }
+      }),
+    );
   }
 
   formatVisualizeData() {
-    throw badRequest('formatVisualizeData called for monitoring watch');
+    throw badRequest(
+      i18n.translate('xpack.watcher.models.monitoringWatch.formatVisualizeDataCalledBadRequestMessage', {
+        defaultMessage: '{formatVisualizeData} called for monitoring watch',
+        values: {
+          formatVisualizeData: 'formatVisualizeData'
+        }
+      }),
+    );
   }
 
   // To Elasticsearch
   get upstreamJson() {
-    throw badRequest('upstreamJson called for monitoring watch');
+    throw badRequest(
+      i18n.translate('xpack.watcher.models.monitoringWatch.upstreamJsonCalledBadRequestMessage', {
+        defaultMessage: '{upstreamJson} called for monitoring watch',
+        values: {
+          upstreamJson: 'upstreamJson'
+        }
+      }),
+    );
   }
 
   // To Kibana
@@ -66,7 +88,14 @@ export class MonitoringWatch extends BaseWatch {
 
   // From Kibana
   static fromDownstreamJson() {
-    throw badRequest('fromDownstreamJson called for monitoring watch');
+    throw badRequest(
+      i18n.translate('xpack.watcher.models.monitoringWatch.fromDownstreamJsonCalledBadRequestMessage', {
+        defaultMessage: '{fromDownstreamJson} called for monitoring watch',
+        values: {
+          fromDownstreamJson: 'fromDownstreamJson'
+        }
+      }),
+    );
   }
 
 }

@@ -30,6 +30,7 @@ export const revealImage = () => ({
       types: ['string'],
       help: 'Where to start from. Eg, top, left, bottom or right',
       default: 'bottom',
+      options: ['top', 'left', 'bottom', 'right'],
     },
   },
   fn: (percent, args) => {

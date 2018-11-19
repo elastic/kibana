@@ -15,7 +15,6 @@ import { ThemeProvider } from 'styled-components';
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
-import '@elastic/eui/dist/eui_theme_light.css';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';

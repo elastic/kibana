@@ -6,10 +6,20 @@ exports[`CallOuts should render normally 1`] = `
     color="warning"
     iconType="bolt"
     size="m"
-    title="Caution: You can break stuff here"
+    title={
+      <FormattedMessage
+        defaultMessage="Caution: You can break stuff here"
+        id="kbn.management.settings.callOutCautionTitle"
+        values={Object {}}
+      />
+    }
   >
     <p>
-      Be careful in here, these settings are for very advanced users only. Tweaks you make here can break large portions of Kibana. Some of these settings may be undocumented, unsupported or experimental. If a field has a default value, blanking the field will reset it to its default which may be unacceptable given other configuration directives. Deleting a custom setting will permanently remove it from Kibana's config.
+      <FormattedMessage
+        defaultMessage="Be careful in here, these settings are for very advanced users only. Tweaks you make here can break large portions of Kibana. Some of these settings may be undocumented, unsupported or experimental. If a field has a default value, blanking the field will reset it to its default which may be unacceptable given other configuration directives. Deleting a custom setting will permanently remove it from Kibana's config."
+        id="kbn.management.settings.callOutCautionDescription"
+        values={Object {}}
+      />
     </p>
   </EuiCallOut>
 </div>

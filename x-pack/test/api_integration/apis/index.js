@@ -12,6 +12,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./xpack_main'));
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
+    loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./beats'));
   });
 }

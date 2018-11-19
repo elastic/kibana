@@ -20,7 +20,7 @@ export function getErrorDistribution(state) {
 export function ErrorDistributionRequest({ urlParams, render }) {
   const { serviceName, start, end, errorGroupId, kuery } = urlParams;
 
-  if (!(serviceName, start, end, errorGroupId)) {
+  if (!(serviceName && start && end && errorGroupId)) {
     return null;
   }
 

@@ -29,12 +29,12 @@ function buildRequest(req, config, esIndexPattern) {
   const aggs = {
     ops_synced_max: {
       max: {
-        field: 'ccr_stats.number_of_operations_indexed'
+        field: 'ccr_stats.operations_written'
       }
     },
     ops_synced_min: {
       min: {
-        field: 'ccr_stats.number_of_operations_indexed'
+        field: 'ccr_stats.operations_written'
       }
     },
     lag_ops_leader_max: {
@@ -81,12 +81,13 @@ function buildRequest(req, config, esIndexPattern) {
     index: esIndexPattern,
     size: maxBucketSize,
     filterPath: [
-      'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.fetch_exceptions',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.read_exceptions',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.follower_index',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.shard_id',
-      'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.time_since_last_fetch_millis',
+      'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.time_since_last_read_millis',
       'aggregations.by_follower_index.buckets.key',
       'aggregations.by_follower_index.buckets.leader_index.buckets.key',
+      'aggregations.by_follower_index.buckets.leader_index.buckets.remote_cluster.buckets.key',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.key',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.ops_synced.value',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.lag_ops.value',
@@ -139,6 +140,14 @@ function buildRequest(req, config, esIndexPattern) {
               terms: {
                 field: 'ccr_stats.leader_index',
                 size: 1
+              },
+              aggs: {
+                remote_cluster: {
+                  terms: {
+                    field: 'ccr_stats.remote_cluster',
+                    size: 1
+                  }
+                }
               }
             },
             by_shard_id: {
@@ -173,7 +182,7 @@ export function ccrRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
@@ -183,8 +192,7 @@ export function ccrRoute(server) {
         const response = await callWithRequest(req, 'search', buildRequest(req, config, esIndexPattern));
 
         if (!response || Object.keys(response).length === 0) {
-          reply({ data: [] });
-          return;
+          return { data: [] };
         }
 
         const fullStats = get(response, 'hits.hits').reduce((accum, hit) => {
@@ -201,12 +209,8 @@ export function ccrRoute(server) {
         const buckets = get(response, 'aggregations.by_follower_index.buckets');
         const data = buckets.reduce((accum, bucket) => {
           const leaderIndex = get(bucket, 'leader_index.buckets[0].key');
-          let follows = leaderIndex;
-          if (follows.includes(':')) {
-            const followsSplit = follows.split(':');
-            follows = `${followsSplit[1]} on ${followsSplit[0]}`;
-          }
-
+          const remoteCluster = get(bucket, 'leader_index.buckets[0].remote_cluster.buckets[0].key');
+          const follows = remoteCluster ? `${leaderIndex} on ${remoteCluster}` : leaderIndex;
           const stat = {
             id: bucket.key,
             index: bucket.key,
@@ -217,9 +221,9 @@ export function ccrRoute(server) {
             const fullStat = get(fullStats[`${bucket.key}:${shardBucket.key}`], '[0]', {});
             const shardStat = {
               shardId: shardBucket.key,
-              error: fullStat.fetch_exceptions.length ? fullStat.fetch_exceptions[0].exception.type : null,
+              error: fullStat.read_exceptions.length ? fullStat.read_exceptions[0].exception.type : null,
               opsSynced: get(shardBucket, 'ops_synced.value'),
-              syncLagTime: fullStat.time_since_last_fetch_millis,
+              syncLagTime: fullStat.time_since_last_read_millis,
               syncLagOps: get(shardBucket, 'lag_ops.value'),
               syncLagOpsLeader: get(shardBucket, 'leader_lag_ops.value'),
               syncLagOpsFollower: get(shardBucket, 'follower_lag_ops.value'),
@@ -237,9 +241,9 @@ export function ccrRoute(server) {
           return accum;
         }, []);
 
-        reply({ data });
+        return { data };
       } catch(err) {
-        reply(handleError(err, req));
+        return handleError(err, req);
       }
     }
   });

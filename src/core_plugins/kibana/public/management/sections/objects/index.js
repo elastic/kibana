@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { management } from 'ui/management';
 import './_view';
 import './_objects';
@@ -29,7 +30,9 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 uiModules.get('apps/management');
 
 management.getSection('kibana').register('objects', {
-  display: 'Saved Objects',
+  display: i18n.translate('kbn.management.objects.savedObjectsSectionLabel', {
+    defaultMessage: 'Saved Objects',
+  }),
   order: 10,
   url: '#/management/kibana/objects'
 });
@@ -37,8 +40,12 @@ management.getSection('kibana').register('objects', {
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'saved_objects',
-    title: 'Saved Objects',
-    description: 'Import, export, and manage your saved searches, visualizations, and dashboards.',
+    title: i18n.translate('kbn.management.objects.savedObjectsTitle', {
+      defaultMessage: 'Saved Objects',
+    }),
+    description: i18n.translate('kbn.management.objects.savedObjectsDescription', {
+      defaultMessage: 'Import, export, and manage your saved searches, visualizations, and dashboards.',
+    }),
     icon: 'savedObjectsApp',
     path: '/app/kibana#/management/kibana/objects',
     showOnHomePage: true,

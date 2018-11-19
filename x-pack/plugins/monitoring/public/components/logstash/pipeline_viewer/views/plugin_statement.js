@@ -84,6 +84,7 @@ export function PluginStatement({
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              aria-label={name}
               className="monPipelineViewer__plugin"
               color="primary"
               flush="left"

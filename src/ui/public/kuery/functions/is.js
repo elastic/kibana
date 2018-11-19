@@ -48,6 +48,14 @@ export function toElasticsearchQuery(node, indexPattern) {
   const type = isPhraseArg.value ? 'phrase' : 'best_fields';
 
   if (fieldNameArg.value === null) {
+    if (valueArg.type === 'wildcard') {
+      return {
+        query_string: {
+          query: wildcard.toQueryStringQuery(valueArg),
+        },
+      };
+    }
+
     return {
       multi_match: {
         type,

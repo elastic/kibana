@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { InfraNodeType } from '../../../common/graphql/types';
+import { InfraNodeType, InfraTimerangeInput } from '../../../common/graphql/types';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfGroups,
@@ -16,18 +16,19 @@ import { GroupName } from './group_name';
 import { GroupOfNodes } from './group_of_nodes';
 
 interface Props {
-  onDrilldown: () => void;
+  onDrilldown: (filter: string) => void;
   options: InfraWaffleMapOptions;
   group: InfraWaffleMapGroupOfGroups;
   formatter: (val: number) => string;
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
+  timeRange: InfraTimerangeInput;
 }
 
 export const GroupOfGroups: React.SFC<Props> = props => {
   return (
     <GroupOfGroupsContainer>
-      <GroupName group={props.group} onDrilldown={props.onDrilldown} />
+      <GroupName group={props.group} onDrilldown={props.onDrilldown} options={props.options} />
       <Groups>
         {props.group.groups.map(group => (
           <GroupOfNodes
@@ -39,6 +40,7 @@ export const GroupOfGroups: React.SFC<Props> = props => {
             formatter={props.formatter}
             bounds={props.bounds}
             nodeType={props.nodeType}
+            timeRange={props.timeRange}
           />
         ))}
       </Groups>

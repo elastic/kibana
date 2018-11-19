@@ -39,7 +39,7 @@ const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const utimesAsync = promisify(fs.utimes);
 
-function assertAbsolute(path) {
+export function assertAbsolute(path) {
   if (!isAbsolute(path)) {
     throw new TypeError(
       'Please use absolute paths to keep things explicit. You probably want to use `build.resolvePath()` or `config.resolveFromRepo()`.'
@@ -129,9 +129,22 @@ export async function copyAll(sourceDir, destination, options = {}) {
       base: sourceDir,
       dot,
     }),
-    vfs.dest(destination),
-    ...(Boolean(time) ? [createMapStream(file => utimesAsync(file.path, time, time))] : []),
+    vfs.dest(destination)
   ]);
+
+  // we must update access and modified file times after the file copy
+  // has completed, otherwise the copy action can effect modify times.
+  if (Boolean(time)) {
+    await createPromiseFromStreams([
+      vfs.src(select, {
+        buffer: false,
+        cwd: destination,
+        base: destination,
+        dot,
+      }),
+      createMapStream(file => utimesAsync(file.path, time, time))
+    ]);
+  }
 }
 
 export async function getFileHash(path, algo) {

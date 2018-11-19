@@ -10,7 +10,6 @@ import { UserProfile } from '../../../../../xpack_main/public/services/user_prof
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
 import { ManageSpacesButton, SpaceAvatar } from '../../../components';
-import './spaces_menu.less';
 
 interface Props {
   spaces: Space[];
@@ -36,7 +35,7 @@ export class SpacesMenu extends Component<Props, State> {
     const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
-      className: 'spacesMenu',
+      className: 'spcMenu',
       title: 'Change current space',
       watchedItemProps: ['data-search-term'],
     };
@@ -85,9 +84,9 @@ export class SpacesMenu extends Component<Props, State> {
 
     return (
       <EuiContextMenuPanel
-        key={`spacesMenuList`}
+        key={`spcMenuList`}
         data-search-term={searchTerm}
-        className="spacesMenu__spacesList"
+        className="spcMenu__spacesList"
         hasFocus={this.state.allowSpacesListFocus}
         initialFocusedItemIndex={this.state.allowSpacesListFocus ? 0 : undefined}
         items={items}
@@ -97,7 +96,7 @@ export class SpacesMenu extends Component<Props, State> {
 
   private renderSearchField = () => {
     return (
-      <div key="manageSpacesSearchField" className="spacesMenu__searchFieldWrapper">
+      <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
         <EuiFieldSearch
           placeholder="Find a space"
           incremental={true}
@@ -135,14 +134,13 @@ export class SpacesMenu extends Component<Props, State> {
 
   private renderManageButton = () => {
     return (
-      <div key="manageSpacesButton" className="spacesMenu__manageButtonWrapper">
-        <ManageSpacesButton
-          size="s"
-          style={{ width: `100%` }}
-          userProfile={this.props.userProfile}
-          onClick={this.props.onManageSpacesClick}
-        />
-      </div>
+      <ManageSpacesButton
+        key="manageSpacesButton"
+        className="spcMenu__manageButton"
+        size="s"
+        userProfile={this.props.userProfile}
+        onClick={this.props.onManageSpacesClick}
+      />
     );
   };
 

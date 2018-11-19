@@ -1,495 +1,499 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AdvancedSettings should render normally 1`] = `
-<EuiPage
-  restrictWidth={true}
->
-  <div
-    className="mgtAdvancedSettings"
+<I18nProvider>
+  <EuiPage
+    restrictWidth={true}
   >
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="none"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+    <div
+      className="mgtAdvancedSettings"
     >
-      <EuiFlexItem
+      <EuiFlexGroup
+        alignItems="stretch"
         component="div"
-        grow={true}
+        direction="row"
+        gutterSize="none"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
       >
-        <advanced_settings_page_title />
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <Search
-          categories={
-            Array [
-              "general",
-              "elasticsearch",
-            ]
-          }
-          onQueryChange={[Function]}
-          query={
-            Query {
-              "ast": _AST {
-                "_clauses": Array [],
-                "_indexedClauses": Object {
-                  "field": Object {},
-                  "is": Object {},
-                  "term": Array [],
-                },
-              },
-              "syntax": Object {
-                "parse": [Function],
-                "print": [Function],
-              },
-              "text": "",
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <advanced_settings_page_title />
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <Search
+            categories={
+              Array [
+                "general",
+                "elasticsearch",
+              ]
             }
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <advanced_settings_page_subtitle />
-    <EuiSpacer
-      size="m"
-    />
-    <CallOuts />
-    <EuiSpacer
-      size="m"
-    />
-    <Form
-      categories={
-        Array [
-          "general",
-          "elasticsearch",
-        ]
-      }
-      categoryCounts={
-        Object {
-          "elasticsearch": 2,
-          "general": 11,
+            onQueryChange={[Function]}
+            query={
+              Query {
+                "ast": _AST {
+                  "_clauses": Array [],
+                  "_indexedClauses": Object {
+                    "field": Object {},
+                    "is": Object {},
+                    "term": Array [],
+                  },
+                },
+                "syntax": Object {
+                  "parse": [Function],
+                  "print": [Function],
+                },
+                "text": "",
+              }
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <advanced_settings_page_subtitle />
+      <EuiSpacer
+        size="m"
+      />
+      <CallOuts />
+      <EuiSpacer
+        size="m"
+      />
+      <InjectIntl(FormUI)
+        categories={
+          Array [
+            "general",
+            "elasticsearch",
+          ]
         }
-      }
-      clear={[Function]}
-      clearQuery={[Function]}
-      save={[Function]}
-      settings={
-        Object {
-          "elasticsearch": Array [
-            Object {
-              "ariaName": "test array setting",
-              "category": Array [
-                "elasticsearch",
-              ],
-              "defVal": Array [
-                "default_value",
-              ],
-              "description": "Description for Test array setting",
-              "displayName": "Test array setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:array:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "array",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test boolean setting",
-              "category": Array [
-                "elasticsearch",
-              ],
-              "defVal": true,
-              "description": "Description for Test boolean setting",
-              "displayName": "Test boolean setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:boolean:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "boolean",
-              "value": undefined,
-            },
-          ],
-          "general": Array [
-            Object {
-              "ariaName": "test customstring setting",
-              "category": Array [
-                "general",
-              ],
-              "defVal": null,
-              "description": "Description for Test custom string setting",
-              "displayName": "Test custom string setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:customstring:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "string",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test image setting",
-              "category": Array [
-                "general",
-              ],
-              "defVal": null,
-              "description": "Description for Test image setting",
-              "displayName": "Test image setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:image:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "image",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test is overridden json",
-              "category": Array [
-                "general",
-              ],
-              "defVal": "{
+        categoryCounts={
+          Object {
+            "elasticsearch": 2,
+            "general": 11,
+          }
+        }
+        clear={[Function]}
+        clearQuery={[Function]}
+        save={[Function]}
+        settings={
+          Object {
+            "elasticsearch": Array [
+              Object {
+                "ariaName": "test array setting",
+                "category": Array [
+                  "elasticsearch",
+                ],
+                "defVal": Array [
+                  "default_value",
+                ],
+                "description": "Description for Test array setting",
+                "displayName": "Test array setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:array:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "array",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test boolean setting",
+                "category": Array [
+                  "elasticsearch",
+                ],
+                "defVal": true,
+                "description": "Description for Test boolean setting",
+                "displayName": "Test boolean setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:boolean:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "boolean",
+                "value": undefined,
+              },
+            ],
+            "general": Array [
+              Object {
+                "ariaName": "test customstring setting",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": null,
+                "description": "Description for Test custom string setting",
+                "displayName": "Test custom string setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:customstring:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "string",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test image setting",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": null,
+                "description": "Description for Test image setting",
+                "displayName": "Test image setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:image:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "image",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test is overridden json",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": "{
   \\"foo\\": \\"bar\\"
 }",
-              "description": "Description for overridden json",
-              "displayName": "An overridden json",
-              "isCustom": undefined,
-              "isOverridden": true,
-              "name": "test:isOverridden:json",
-              "options": undefined,
-              "readonly": false,
-              "type": "json",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test is overridden number",
-              "category": Array [
-                "general",
-              ],
-              "defVal": 1234,
-              "description": "Description for overridden number",
-              "displayName": "An overridden number",
-              "isCustom": undefined,
-              "isOverridden": true,
-              "name": "test:isOverridden:number",
-              "options": undefined,
-              "readonly": false,
-              "type": "number",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test is overridden select",
-              "category": Array [
-                "general",
-              ],
-              "defVal": "orange",
-              "description": "Description for overridden select setting",
-              "displayName": "Test overridden select setting",
-              "isCustom": undefined,
-              "isOverridden": true,
-              "name": "test:isOverridden:select",
-              "options": Array [
-                "apple",
-                "orange",
-                "banana",
-              ],
-              "readonly": false,
-              "type": "select",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test is overridden string",
-              "category": Array [
-                "general",
-              ],
-              "defVal": "foo",
-              "description": "Description for overridden string",
-              "displayName": "An overridden string",
-              "isCustom": undefined,
-              "isOverridden": true,
-              "name": "test:isOverridden:string",
-              "options": undefined,
-              "readonly": false,
-              "type": "string",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test json setting",
-              "category": Array [
-                "general",
-              ],
-              "defVal": "{\\"foo\\": \\"bar\\"}",
-              "description": "Description for Test json setting",
-              "displayName": "Test json setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:json:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "json",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test markdown setting",
-              "category": Array [
-                "general",
-              ],
-              "defVal": "",
-              "description": "Description for Test markdown setting",
-              "displayName": "Test markdown setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:markdown:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "markdown",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test number setting",
-              "category": Array [
-                "general",
-              ],
-              "defVal": 5,
-              "description": "Description for Test number setting",
-              "displayName": "Test number setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:number:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "number",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test select setting",
-              "category": Array [
-                "general",
-              ],
-              "defVal": "orange",
-              "description": "Description for Test select setting",
-              "displayName": "Test select setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:select:setting",
-              "options": Array [
-                "apple",
-                "orange",
-                "banana",
-              ],
-              "readonly": false,
-              "type": "select",
-              "value": undefined,
-            },
-            Object {
-              "ariaName": "test string setting",
-              "category": Array [
-                "general",
-              ],
-              "defVal": null,
-              "description": "Description for Test string setting",
-              "displayName": "Test string setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:string:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "string",
-              "value": undefined,
-            },
-          ],
+                "description": "Description for overridden json",
+                "displayName": "An overridden json",
+                "isCustom": undefined,
+                "isOverridden": true,
+                "name": "test:isOverridden:json",
+                "options": undefined,
+                "readonly": false,
+                "type": "json",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test is overridden number",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": 1234,
+                "description": "Description for overridden number",
+                "displayName": "An overridden number",
+                "isCustom": undefined,
+                "isOverridden": true,
+                "name": "test:isOverridden:number",
+                "options": undefined,
+                "readonly": false,
+                "type": "number",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test is overridden select",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": "orange",
+                "description": "Description for overridden select setting",
+                "displayName": "Test overridden select setting",
+                "isCustom": undefined,
+                "isOverridden": true,
+                "name": "test:isOverridden:select",
+                "options": Array [
+                  "apple",
+                  "orange",
+                  "banana",
+                ],
+                "readonly": false,
+                "type": "select",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test is overridden string",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": "foo",
+                "description": "Description for overridden string",
+                "displayName": "An overridden string",
+                "isCustom": undefined,
+                "isOverridden": true,
+                "name": "test:isOverridden:string",
+                "options": undefined,
+                "readonly": false,
+                "type": "string",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test json setting",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": "{\\"foo\\": \\"bar\\"}",
+                "description": "Description for Test json setting",
+                "displayName": "Test json setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:json:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "json",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test markdown setting",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": "",
+                "description": "Description for Test markdown setting",
+                "displayName": "Test markdown setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:markdown:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "markdown",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test number setting",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": 5,
+                "description": "Description for Test number setting",
+                "displayName": "Test number setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:number:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "number",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test select setting",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": "orange",
+                "description": "Description for Test select setting",
+                "displayName": "Test select setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:select:setting",
+                "options": Array [
+                  "apple",
+                  "orange",
+                  "banana",
+                ],
+                "readonly": false,
+                "type": "select",
+                "value": undefined,
+              },
+              Object {
+                "ariaName": "test string setting",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": null,
+                "description": "Description for Test string setting",
+                "displayName": "Test string setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:string:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "string",
+                "value": undefined,
+              },
+            ],
+          }
         }
-      }
-      showNoResultsMessage={true}
-    />
-    <advanced_settings_page_footer
-      onQueryMatchChange={[Function]}
-      query={
-        Query {
-          "ast": _AST {
-            "_clauses": Array [],
-            "_indexedClauses": Object {
-              "field": Object {},
-              "is": Object {},
-              "term": Array [],
+        showNoResultsMessage={true}
+      />
+      <advanced_settings_page_footer
+        onQueryMatchChange={[Function]}
+        query={
+          Query {
+            "ast": _AST {
+              "_clauses": Array [],
+              "_indexedClauses": Object {
+                "field": Object {},
+                "is": Object {},
+                "term": Array [],
+              },
             },
-          },
-          "syntax": Object {
-            "parse": [Function],
-            "print": [Function],
-          },
-          "text": "",
+            "syntax": Object {
+              "parse": [Function],
+              "print": [Function],
+            },
+            "text": "",
+          }
         }
-      }
-    />
-  </div>
-</EuiPage>
+      />
+    </div>
+  </EuiPage>
+</I18nProvider>
 `;
 
 exports[`AdvancedSettings should render specific setting if given setting key 1`] = `
-<EuiPage
-  restrictWidth={true}
->
-  <div
-    className="mgtAdvancedSettings"
+<I18nProvider>
+  <EuiPage
+    restrictWidth={true}
   >
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="none"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+    <div
+      className="mgtAdvancedSettings"
     >
-      <EuiFlexItem
+      <EuiFlexGroup
+        alignItems="stretch"
         component="div"
-        grow={true}
+        direction="row"
+        gutterSize="none"
+        justifyContent="flexStart"
+        responsive={true}
+        wrap={false}
       >
-        <advanced_settings_page_title />
-      </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <Search
-          categories={
-            Array [
-              "general",
-              "elasticsearch",
-            ]
-          }
-          onQueryChange={[Function]}
-          query={
-            Query {
-              "ast": _AST {
-                "_clauses": Array [
-                  Object {
-                    "field": "ariaName",
-                    "match": "must",
-                    "operator": "eq",
-                    "type": "field",
-                    "value": "test string setting",
-                  },
-                ],
-                "_indexedClauses": Object {
-                  "field": Object {
-                    "ariaName": Array [
-                      Object {
-                        "field": "ariaName",
-                        "match": "must",
-                        "operator": "eq",
-                        "type": "field",
-                        "value": "test string setting",
-                      },
-                    ],
-                  },
-                  "is": Object {},
-                  "term": Array [],
-                },
-              },
-              "syntax": Object {
-                "parse": [Function],
-                "print": [Function],
-              },
-              "text": "ariaName:\\"test string setting\\"",
-            }
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <advanced_settings_page_subtitle />
-    <EuiSpacer
-      size="m"
-    />
-    <CallOuts />
-    <EuiSpacer
-      size="m"
-    />
-    <Form
-      categories={
-        Array [
-          "general",
-          "elasticsearch",
-        ]
-      }
-      categoryCounts={
-        Object {
-          "elasticsearch": 2,
-          "general": 11,
-        }
-      }
-      clear={[Function]}
-      clearQuery={[Function]}
-      save={[Function]}
-      settings={
-        Object {
-          "general": Array [
-            Object {
-              "ariaName": "test string setting",
-              "category": Array [
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <advanced_settings_page_title />
+        </EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
+          <Search
+            categories={
+              Array [
                 "general",
-              ],
-              "defVal": null,
-              "description": "Description for Test string setting",
-              "displayName": "Test string setting",
-              "isCustom": undefined,
-              "isOverridden": false,
-              "name": "test:string:setting",
-              "options": undefined,
-              "readonly": false,
-              "type": "string",
-              "value": undefined,
-            },
-          ],
+                "elasticsearch",
+              ]
+            }
+            onQueryChange={[Function]}
+            query={
+              Query {
+                "ast": _AST {
+                  "_clauses": Array [
+                    Object {
+                      "field": "ariaName",
+                      "match": "must",
+                      "operator": "eq",
+                      "type": "field",
+                      "value": "test string setting",
+                    },
+                  ],
+                  "_indexedClauses": Object {
+                    "field": Object {
+                      "ariaName": Array [
+                        Object {
+                          "field": "ariaName",
+                          "match": "must",
+                          "operator": "eq",
+                          "type": "field",
+                          "value": "test string setting",
+                        },
+                      ],
+                    },
+                    "is": Object {},
+                    "term": Array [],
+                  },
+                },
+                "syntax": Object {
+                  "parse": [Function],
+                  "print": [Function],
+                },
+                "text": "ariaName:\\"test string setting\\"",
+              }
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <advanced_settings_page_subtitle />
+      <EuiSpacer
+        size="m"
+      />
+      <CallOuts />
+      <EuiSpacer
+        size="m"
+      />
+      <InjectIntl(FormUI)
+        categories={
+          Array [
+            "general",
+            "elasticsearch",
+          ]
         }
-      }
-      showNoResultsMessage={true}
-    />
-    <advanced_settings_page_footer
-      onQueryMatchChange={[Function]}
-      query={
-        Query {
-          "ast": _AST {
-            "_clauses": Array [
+        categoryCounts={
+          Object {
+            "elasticsearch": 2,
+            "general": 11,
+          }
+        }
+        clear={[Function]}
+        clearQuery={[Function]}
+        save={[Function]}
+        settings={
+          Object {
+            "general": Array [
               Object {
-                "field": "ariaName",
-                "match": "must",
-                "operator": "eq",
-                "type": "field",
-                "value": "test string setting",
+                "ariaName": "test string setting",
+                "category": Array [
+                  "general",
+                ],
+                "defVal": null,
+                "description": "Description for Test string setting",
+                "displayName": "Test string setting",
+                "isCustom": undefined,
+                "isOverridden": false,
+                "name": "test:string:setting",
+                "options": undefined,
+                "readonly": false,
+                "type": "string",
+                "value": undefined,
               },
             ],
-            "_indexedClauses": Object {
-              "field": Object {
-                "ariaName": Array [
-                  Object {
-                    "field": "ariaName",
-                    "match": "must",
-                    "operator": "eq",
-                    "type": "field",
-                    "value": "test string setting",
-                  },
-                ],
-              },
-              "is": Object {},
-              "term": Array [],
-            },
-          },
-          "syntax": Object {
-            "parse": [Function],
-            "print": [Function],
-          },
-          "text": "ariaName:\\"test string setting\\"",
+          }
         }
-      }
-    />
-  </div>
-</EuiPage>
+        showNoResultsMessage={true}
+      />
+      <advanced_settings_page_footer
+        onQueryMatchChange={[Function]}
+        query={
+          Query {
+            "ast": _AST {
+              "_clauses": Array [
+                Object {
+                  "field": "ariaName",
+                  "match": "must",
+                  "operator": "eq",
+                  "type": "field",
+                  "value": "test string setting",
+                },
+              ],
+              "_indexedClauses": Object {
+                "field": Object {
+                  "ariaName": Array [
+                    Object {
+                      "field": "ariaName",
+                      "match": "must",
+                      "operator": "eq",
+                      "type": "field",
+                      "value": "test string setting",
+                    },
+                  ],
+                },
+                "is": Object {},
+                "term": Array [],
+              },
+            },
+            "syntax": Object {
+              "parse": [Function],
+              "print": [Function],
+            },
+            "text": "ariaName:\\"test string setting\\"",
+          }
+        }
+      />
+    </div>
+  </EuiPage>
+</I18nProvider>
 `;

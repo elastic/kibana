@@ -22,7 +22,7 @@ import { createUpdateRoute } from './update';
 import { MockServer } from './_mock_server';
 
 describe('PUT /api/saved_objects/{type}/{id?}', () => {
-  const savedObjectsClient = { update: sinon.stub() };
+  const savedObjectsClient = { update: sinon.stub().returns('') };
   let server;
 
   beforeEach(() => {
@@ -31,8 +31,8 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
-        method(request, reply) {
-          reply(savedObjectsClient);
+        method() {
+          return savedObjectsClient;
         }
       },
     };

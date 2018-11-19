@@ -30,7 +30,11 @@ exports[`Table should render normally 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Delete
+          <FormattedMessage
+            defaultMessage="Delete"
+            id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>,
         <EuiButton
           color="primary"
@@ -41,7 +45,11 @@ exports[`Table should render normally 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Export
+          <FormattedMessage
+            defaultMessage="Export"
+            id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>,
       ]
     }

@@ -17,25 +17,33 @@
  * under the License.
  */
 
-
+import { distinctUntilChanged } from 'rxjs/operators';
 import { uiModules } from '../../modules';
 
-uiModules.get('kibana')
-  .service('globalNavState', (localStorage, $rootScope) => {
-    return {
-      isOpen: () => {
-        const isOpen = localStorage.get('kibana.isGlobalNavOpen');
-        if (isOpen === null) {
-        // The global nav should default to being open for the initial experience.
-          return true;
-        }
-        return isOpen;
-      },
+let newPlatformChrome;
+export function __newPlatformInit__(instance) {
+  if (newPlatformChrome) {
+    throw new Error('ui/chrome/global_nav_state is already initialized');
+  }
 
-      setOpen: isOpen => {
-        localStorage.set('kibana.isGlobalNavOpen', isOpen);
+  newPlatformChrome = instance;
+}
+
+uiModules.get('kibana')
+  .service('globalNavState', ($rootScope) => {
+    let isOpen = false;
+    newPlatformChrome.getIsCollapsed$().pipe(distinctUntilChanged()).subscribe(isCollapsed => {
+      $rootScope.$evalAsync(() => {
+        isOpen = !isCollapsed;
         $rootScope.$broadcast('globalNavState:change');
-        return isOpen;
+      });
+    });
+
+    return {
+      isOpen: () => isOpen,
+
+      setOpen: newValue => {
+        newPlatformChrome.setIsCollapsed(!newValue);
       }
     };
   });

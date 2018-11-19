@@ -32,6 +32,7 @@ import 'plugins/ml/components/confirm_modal';
 import 'plugins/ml/components/nav_menu';
 import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
+import 'plugins/ml/file_datavisualizer';
 
 import uiRoutes from 'ui/routes';
 

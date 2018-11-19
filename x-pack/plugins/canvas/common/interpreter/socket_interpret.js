@@ -46,19 +46,14 @@ export function socketInterpreterProvider({
         // set a unique message ID so the code knows what response to process
         const id = uuid();
 
-        return new Promise((resolve, reject) => {
+        return new Promise(resolve => {
           const { serialize, deserialize } = serializeProvider(types);
 
-          const listener = resp => {
-            if (resp.error) {
-              // cast error strings back into error instances
-              const err = resp.error instanceof Error ? resp.error : new Error(resp.error);
-              if (resp.stack) err.stack = resp.stack;
-              reject(err);
-            } else {
-              resolve(deserialize(resp.value));
-            }
-          };
+          // This will receive {type: [msgSuccess || msgError] value: foo}
+          // However it doesn't currently do anything with it. Which means `value`, regardless
+          // of failure or success, needs to be something the interpreters would logically return
+          // er, a primative or a {type: foo} object
+          const listener = resp => resolve(deserialize(resp.value));
 
           socket.once(`resp:${id}`, listener);
 

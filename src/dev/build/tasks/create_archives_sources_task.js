@@ -23,7 +23,7 @@ import { getNodeDownloadInfo } from './nodejs';
 export const CreateArchivesSourcesTask = {
   description: 'Creating platform-specific archive source directories',
   async run(config, log, build) {
-    await Promise.all(config.getPlatforms().map(async platform => {
+    await Promise.all(config.getTargetPlatforms().map(async platform => {
       // copy all files from generic build source directory into platform-specific build directory
       await copyAll(
         build.resolvePath('.'),

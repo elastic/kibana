@@ -13,7 +13,7 @@ import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
 import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { CALCULATE_DURATION_SINCE, SORT_DESCENDING } from '../../../common/constants';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
-import { FormattedMessage } from 'plugins/monitoring/components/alerts/formatted_message';
+import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../common/format_timestamp_to_duration';
 import { formatDateTimeLocal } from '../../../common/formatting';
@@ -65,7 +65,7 @@ const alertRowFactory = (scope, kbnUrl) => {
           { resolution.icon } { resolution.text }
         </KuiTableRowCell>
         <KuiTableRowCell tabIndex="0">
-          <FormattedMessage
+          <FormattedAlert
             prefix={props.prefix}
             suffix={props.suffix}
             message={props.message}

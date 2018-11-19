@@ -16,9 +16,9 @@
       xpack-aria-describes="{{thresholdWatchAggType.makeId('aggType')}}"
       class="kuiInputNote kuiInputNote--danger"
       ng-if="thresholdWatchAggType.isValidationMessageVisible('aggType', 'required')"
-    >
-      Please select an aggregation type.
-    </div>
+      i18n-id="xpack.watcher.thresholdWatchExpression.aggType.requiredTypeValidationMessage"
+      i18n-default-message="Please select an aggregation type."
+    ></div>
     <select
       id="{{thresholdWatchAggType.makeId('aggType')}}"
       class="kuiSelect"

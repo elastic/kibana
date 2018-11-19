@@ -47,14 +47,7 @@ export function compose(
   };
   const pluginUIModule = uiModules.get('app/beats_management');
 
-  const framework = new KibanaFrameworkAdapter(
-    pluginUIModule,
-    management,
-    routes,
-    null,
-    null,
-    null
-  );
+  const framework = new KibanaFrameworkAdapter(pluginUIModule, management, routes, null, null);
   const libs: FrontendLibs = {
     ...domainLibs,
     elasticsearch: new ElasticsearchLib(esAdapter),

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Form } from './form';
 
@@ -75,8 +75,8 @@ const clearQuery = () => { };
 
 describe('Form', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <Form
+    const component = shallowWithIntl(
+      <Form.WrappedComponent
         settings={settings}
         categories={categories}
         categoryCounts={categoryCounts}
@@ -91,8 +91,8 @@ describe('Form', () => {
   });
 
   it('should render no settings message when there are no settings', async () => {
-    const component = shallow(
-      <Form
+    const component = shallowWithIntl(
+      <Form.WrappedComponent
         settings={{}}
         categories={categories}
         categoryCounts={categoryCounts}
@@ -107,8 +107,8 @@ describe('Form', () => {
   });
 
   it('should not render no settings message when instructed not to', async () => {
-    const component = shallow(
-      <Form
+    const component = shallowWithIntl(
+      <Form.WrappedComponent
         settings={{}}
         categories={categories}
         categoryCounts={categoryCounts}
