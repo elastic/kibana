@@ -13,11 +13,21 @@ import * as apmRestServices from '../../../../services/rest/apm';
 jest.mock('../../../../services/rest/apm');
 
 describe('Service Overview -> View', () => {
+  let mockAgentStatus;
   let wrapper;
   let instance;
 
   beforeEach(() => {
-    wrapper = shallow(<ServiceOverview serviceList={{}} />);
+    mockAgentStatus = {
+      dataFound: true
+    };
+
+    // eslint-disable-next-line import/namespace
+    apmRestServices.loadAgentStatus = jest.fn(() =>
+      Promise.resolve(mockAgentStatus)
+    );
+
+    wrapper = shallow(<ServiceOverview serviceList={{ data: [] }} />);
     instance = wrapper.instance();
   });
 
@@ -40,53 +50,10 @@ describe('Service Overview -> View', () => {
     expect(List.props).toMatchSnapshot();
   });
 
+  it('should check for historical data once', () => {});
+
   describe('checking for historical data', () => {
-    let mockAgentStatus;
-
-    beforeEach(() => {
-      mockAgentStatus = {
-        dataFound: true
-      };
-      // eslint-disable-next-line import/namespace
-      apmRestServices.loadAgentStatus = jest.fn(() =>
-        Promise.resolve(mockAgentStatus)
-      );
-    });
-
-    it('should happen if service list status is success and data is empty', async () => {
-      const props = {
-        serviceList: {
-          status: STATUS.SUCCESS,
-          data: []
-        }
-      };
-      await instance.checkForHistoricalData(props);
-      expect(apmRestServices.loadAgentStatus).toHaveBeenCalledTimes(1);
-    });
-
-    it('should not happen if sevice list status is not success', async () => {
-      const props = {
-        serviceList: {
-          status: STATUS.FAILURE,
-          data: []
-        }
-      };
-      await instance.checkForHistoricalData(props);
-      expect(apmRestServices.loadAgentStatus).not.toHaveBeenCalled();
-    });
-
-    it('should not happen if service list data is not empty', async () => {
-      const props = {
-        serviceList: {
-          status: STATUS.SUCCESS,
-          data: [1, 2, 3]
-        }
-      };
-      await instance.checkForHistoricalData(props);
-      expect(apmRestServices.loadAgentStatus).not.toHaveBeenCalled();
-    });
-
-    it('should leave historical data state as true if data is found', async () => {
+    it('should set historical data to true if data is found', async () => {
       const props = {
         serviceList: {
           status: STATUS.SUCCESS,

@@ -159,7 +159,7 @@ export class MetricVisComponent extends Component {
       return;
     }
     const table = this.props.visData;
-    this.props.vis.API.events.addFilter(table, metric.columnIndex, metric.rowIndex);
+    this.props.vis.API.events.filter({ table, column: metric.columnIndex, row: metric.rowIndex });
   };
 
   _renderMetric = (metric, index) => {

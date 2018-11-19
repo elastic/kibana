@@ -17,30 +17,23 @@
  * under the License.
  */
 
-import { createFunctionalTestRunner } from '../../../../../src/functional_test_runner';
-import { CliError } from './run_cli';
+const ELIGIBLE_FLAT_MERGE_KEYS = ['uiCapabilities'];
 
-export async function runFtr({
-  configPath,
-  options: { log, bail, grep, updateBaselines, suiteTags },
-}) {
-  const ftr = createFunctionalTestRunner({
-    log,
-    configFile: configPath,
-    configOverrides: {
-      mochaOpts: {
-        bail: !!bail,
-        grep,
-      },
-      updateBaselines,
-      suiteTags,
-    },
-  });
+export function mergeVariables(...sources: Array<Record<string, any>>) {
+  const result: Record<string, any> = {};
 
-  const failureCount = await ftr.run();
-  if (failureCount > 0) {
-    throw new CliError(
-      `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
-    );
+  for (const source of sources) {
+    Object.entries(source).forEach(([key, value]) => {
+      if (ELIGIBLE_FLAT_MERGE_KEYS.includes(key)) {
+        result[key] = {
+          ...value,
+          ...result[key],
+        };
+      } else if (!result.hasOwnProperty(key)) {
+        result[key] = value;
+      }
+    });
   }
+
+  return result;
 }

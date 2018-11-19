@@ -78,6 +78,9 @@ export default function GaugeVisType(Private, i18n) {
         }
       },
     },
+    events: {
+      brush: { disabled: true },
+    },
     editorConfig: {
       collections: {
         gaugeTypes: ['Arc', 'Circle'],
