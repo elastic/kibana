@@ -6,10 +6,12 @@
 
 import {
   EuiButtonIcon,
+  EuiDescriptionList,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiPortal,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -29,6 +31,18 @@ interface State {
 }
 
 const NA = 'n/a';
+
+const getDimensions = (info: JobInfo) => {
+  const { width, height } = get(info, 'payload.layout.dimensions');
+  if (info && info.payload) {
+    return (
+      <Fragment>
+        Width: {width} x Height: {height}
+      </Fragment>
+    );
+  }
+  return NA;
+};
 
 export class ReportInfoButton extends Component<Props, State> {
   private mounted?: boolean;
@@ -54,33 +68,102 @@ export class ReportInfoButton extends Component<Props, State> {
     }
 
     // TODO browser type
+    // TODO queue method (clicked UI, watcher, etc)
+    const jobInfoParts = {
+      datetimes: [
+        {
+          title: 'Created By',
+          description: get(info, 'created_by', NA),
+        },
+        {
+          title: 'Created At',
+          description: get(info, 'created_at', NA),
+        },
+        {
+          title: 'Started At',
+          description: get(info, 'started_at', NA),
+        },
+        {
+          title: 'Completed At',
+          description: get(info, 'completed_at', NA),
+        },
+        {
+          title: 'Browser Timezone',
+          description: get(info, 'payload.browserTimezone', NA),
+        },
+      ],
+      payload: [
+        {
+          title: 'Title',
+          description: get(info, 'payload.title', NA),
+        },
+        {
+          title: 'Type',
+          description: get(info, 'payload.type', NA),
+        },
+        {
+          title: 'Layout',
+          description: get(info, 'meta.layout', NA),
+        },
+        {
+          title: 'Dimensions',
+          description: getDimensions(info),
+        },
+        {
+          title: 'Job Type',
+          description: get(info, 'jobtype', NA),
+        },
+        {
+          title: 'Content Type',
+          description: get(info, 'output.content_type') || NA,
+        },
+      ],
+      status: [
+        {
+          title: 'Attempts',
+          description: get(info, 'attempts', NA),
+        },
+        {
+          title: 'Max Attempts',
+          description: get(info, 'max_attempts', NA),
+        },
+        {
+          title: 'Priority',
+          description: get(info, 'priority', NA),
+        },
+        {
+          title: 'Timeout',
+          description: get(info, 'timeout', NA),
+        },
+        {
+          title: 'Status',
+          description: get(info, 'status', NA),
+        },
+      ],
+    };
+
     return (
       <Fragment>
-        <ul>
-          <li>Created By: {get(info, 'created_by', NA)}</li>
-          <li>Created At: {get(info, 'created_at', NA)}</li>
-          <li>Started At: {get(info, 'started_at', NA)}</li>
-          <li>Completed At: {get(info, 'completed_at', NA)}</li>
-          <li>Browser Timezone: {get(info, 'payload.browserTimezone', NA)}</li>
-        </ul>
-        <ul>
-          <li>Title: {get(info, 'payload.title', NA)}</li>
-          <li>Type: {get(info, 'payload.type', NA)}</li>
-          <li>Layout: {get(info, 'meta.layout', NA)}</li>
-          <li>
-            Width: {get(info, 'payload.layout.dimensions.width', NA)} Height:{' '}
-            {get(info, 'payload.layout.dimensions.height', NA)}
-          </li>
-          <li>Job Type: {get(info, 'jobtype', NA)}</li>
-          <li>Content Type: {get(info, 'output.content_type') || NA}</li>
-        </ul>
-        <ul>
-          <li>Attempts: {get(info, 'attempts', NA)}</li>
-          <li>Max Attempts: {get(info, 'max_attempts', NA)}</li>
-          <li>Priority: {get(info, 'priority', NA)}</li>
-          <li>Timeout: {get(info, 'timeout', NA)}</li>
-          <li>Status: {get(info, 'status', NA)}</li>
-        </ul>
+        <EuiDescriptionList
+          listItems={jobInfoParts.datetimes}
+          type="column"
+          align="center"
+          compressed
+        />
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          listItems={jobInfoParts.payload}
+          type="column"
+          align="center"
+          compressed
+        />
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          listItems={jobInfoParts.status}
+          type="column"
+          align="center"
+          compressed
+        />
       </Fragment>
     );
   }
