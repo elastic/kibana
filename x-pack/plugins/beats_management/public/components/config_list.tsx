@@ -9,7 +9,7 @@ import { EuiBasicTable, EuiLink } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { ConfigurationBlock } from '../../common/domain_types';
-import { supportedConfigs } from '../config_schemas';
+import { getSupportedConfig } from '../config_schemas_translations_map';
 
 interface ComponentProps {
   configs: ConfigurationBlock[];
@@ -29,7 +29,7 @@ const ConfigListUi: React.SFC<ComponentProps> = props => (
         }),
         truncateText: false,
         render: (value: string, config: ConfigurationBlock) => {
-          const type = supportedConfigs.find((sc: any) => sc.value === config.type);
+          const type = getSupportedConfig().find((sc: any) => sc.value === config.type);
 
           return (
             <EuiLink onClick={() => props.onConfigClick('edit', config)}>

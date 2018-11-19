@@ -21,7 +21,7 @@ import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/do
 import { ConnectedLink } from '../../components/connected_link';
 import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
-import { supportedConfigs } from '../../config_schemas';
+import { getSupportedConfig } from '../../config_schemas_translations_map';
 
 interface PageProps {
   beat: CMPopulatedBeat | undefined;
@@ -63,7 +63,7 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
           ...beat,
           ...configuration,
           displayValue: get(
-            supportedConfigs.find(config => config.value === configuration.type),
+            getSupportedConfig().find(config => config.value === configuration.type),
             'text',
             null
           ),
