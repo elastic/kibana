@@ -44,6 +44,14 @@ export function PointSeriesPageProvider({ getService }) {
       return await testSubjects.click('visualizeAddYAxisButton');
     }
 
+    setAxisTitle(title, { index = 0 } = {}) {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByCssSelector(`#valueAxisTitle${index}`)
+        .clearValue()
+        .type(title);
+    }
+
     getValueAxesCount() {
       return remote
         .setFindTimeout(defaultFindTimeout)
@@ -61,7 +69,7 @@ export function PointSeriesPageProvider({ getService }) {
     getRightValueAxes() {
       return remote
         .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.axis-wrapper-right g.axis')
+        .findAllByCssSelector('.visAxis__column--right g.axis')
         .then(all => all.length);
     }
 

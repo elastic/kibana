@@ -14,17 +14,15 @@ import {
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
-export interface ServiceListItemResponse {
-  service_name: string;
-  agent_name: string | undefined;
-  transactions_per_minute: number;
-  errors_per_minute: number;
-  avg_response_time: number;
+export interface IServiceListItem {
+  serviceName: string;
+  agentName: string | undefined;
+  transactionsPerMinute: number;
+  errorsPerMinute: number;
+  avgResponseTime: number;
 }
 
-export async function getServices(
-  setup: Setup
-): Promise<ServiceListItemResponse[]> {
+export async function getServices(setup: Setup): Promise<IServiceListItem[]> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
@@ -118,11 +116,11 @@ export async function getServices(
     const errorsPerMinute = totalErrors / deltaAsMinutes;
 
     return {
-      service_name: bucket.key,
-      agent_name: oc(bucket).agents.buckets[0].key(),
-      transactions_per_minute: transactionsPerMinute,
-      errors_per_minute: errorsPerMinute,
-      avg_response_time: bucket.avg.value
+      serviceName: bucket.key,
+      agentName: oc(bucket).agents.buckets[0].key(),
+      transactionsPerMinute,
+      errorsPerMinute,
+      avgResponseTime: bucket.avg.value
     };
   });
 }

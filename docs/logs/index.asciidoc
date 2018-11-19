@@ -1,0 +1,26 @@
+[role="xpack"]
+[[xpack-logs]]
+= Logs
+
+[partintro]
+--
+
+beta[]
+Use the Logs UI to explore logs for common servers, containers, and services.  
+{kib} provides a compact, console-like display that you can customize.
+
+[role="screenshot"]
+image::logs/images/logs-console.png[Log Console in Kibana]
+
+
+[float]
+== Add data sources
+
+Kibana provides step-by-step instructions to help you add your data sources.
+The {infra-guide}[Infrastructure Monitoring Guide] is good source for more detailed information and
+instructions.
+
+
+--
+
+include::logs-ui.asciidoc[]
