@@ -37,7 +37,7 @@ interface Context {
 }
 
 interface Marks {
-  agent: {
+  agent?: {
     [name: string]: number;
   };
 }
