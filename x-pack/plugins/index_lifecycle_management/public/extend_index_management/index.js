@@ -8,7 +8,7 @@ import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
 import { get, every } from 'lodash';
 import { i18n }  from '@kbn/i18n';
 import { addSummaryExtension, addBannerExtension, addActionExtension } from '../../../index_management/public/index_management_extensions';
-import { retryLifecycleForIndex } from '../services/api';
+import { retryLifecycleForIndex, removeLifecycleForIndex } from '../services/api';
 
 const stepPath = 'ilm.step';
 
@@ -26,10 +26,31 @@ addActionExtension((indices) => {
     icon: 'play',
     indexNames: [indexNames],
     buttonLabel: i18n.translate('xpack.idxMgmt.retryIndexLifecycleActionButtonLabel', {
-      defaultMessage: 'Retry lifecycle',
+      defaultMessage: 'Retry lifecycle step',
     }),
     successMessage: i18n.translate('xpack.idxMgmt.retryIndexLifecycleAction.successfullyRetriedLifecycleMessage', {
-      defaultMessage: 'Successfully called retry lifecycle for: [{indexNames}]',
+      defaultMessage: 'Successfully called retry lifecycle step for: [{indexNames}]',
+      values: { indexNames: indexNames.join(', ') }
+    }),
+  };
+});
+addActionExtension((indices) => {
+  const allHaveIlm = every(indices, (index) => {
+    return index.ilm;
+  });
+  if (!allHaveIlm) {
+    return null;
+  }
+  const indexNames = indices.map(({ name }) => name);
+  return {
+    requestMethod: removeLifecycleForIndex,
+    icon: 'stopFilled',
+    indexNames: [indexNames],
+    buttonLabel: i18n.translate('xpack.idxMgmt.removeIndexLifecycleActionButtonLabel', {
+      defaultMessage: 'Remove lifecycle policy',
+    }),
+    successMessage: i18n.translate('xpack.idxMgmt.retryIndexLifecycleAction.successfullyRemovedLifecycleMessage', {
+      defaultMessage: 'Successfully removed lifecycle policy for: [{indexNames}]',
       values: { indexNames: indexNames.join(', ') }
     }),
   };

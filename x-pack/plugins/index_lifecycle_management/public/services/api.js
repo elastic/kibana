@@ -64,3 +64,7 @@ export const retryLifecycleForIndex = async (indexNames, httpClient = getHttpCli
   const response = await httpClient.post(`${apiPrefix}/index/retry`, { indexNames });
   return response.data;
 };
+export const removeLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
+  const response = await httpClient.post(`${apiPrefix}/index/remove`, { indexNames });
+  return response.data;
+};
