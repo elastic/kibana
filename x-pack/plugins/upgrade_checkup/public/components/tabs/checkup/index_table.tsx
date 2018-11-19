@@ -8,15 +8,15 @@ import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
 
-const PAGE_SIZES = [10, 25, 50];
+const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
-export interface IndexDeprecation {
+export interface IndexDeprecationDetails {
   index: string;
   details?: string;
 }
 
 interface IndexDeprecationTableProps {
-  indices: IndexDeprecation[];
+  indices: IndexDeprecationDetails[];
 }
 
 interface IndexDeprecationTableState {
@@ -42,7 +42,6 @@ export class IndexDeprecationTable extends React.Component<
   }
 
   public render() {
-    const { indices } = this.props;
     const { pageIndex, pageSize, sortField, sortDirection } = this.state;
 
     const columns = [
@@ -50,14 +49,11 @@ export class IndexDeprecationTable extends React.Component<
       { field: 'details', name: 'Details' },
     ];
 
-    const totalItemCount = indices.length;
-
     const sorting = { sort: { field: sortField, direction: sortDirection } };
     const pagination = {
       pageIndex,
       pageSize,
-      totalItemCount,
-      pageSizeOptions: PAGE_SIZES,
+      ...this.pageSizeOptions(),
     };
 
     return (
@@ -67,6 +63,7 @@ export class IndexDeprecationTable extends React.Component<
         sorting={sorting}
         pagination={pagination}
         onChange={this.onTableChange}
+        show
       />
     );
   }
@@ -92,4 +89,22 @@ export class IndexDeprecationTable extends React.Component<
       pageSize: tableProps.page.size,
     });
   };
+
+  private pageSizeOptions() {
+    const { indices } = this.props;
+    const totalItemCount = indices.length;
+
+    // If we only have that smallest page size, don't show any page size options.
+    if (totalItemCount <= PAGE_SIZES[0]) {
+      return { totalItemCount, pageSizeOptions: [], hidePerPageOptions: true };
+    }
+
+    // Keep a size option if the # of items is larger than the previous option.
+    // This avoids having a long list of useless page sizes.
+    const pageSizeOptions = PAGE_SIZES.filter((perPage, idx) => {
+      return idx === 0 || totalItemCount > PAGE_SIZES[idx - 1];
+    });
+
+    return { totalItemCount, pageSizeOptions, hidePerPageOptions: false };
+  }
 }
