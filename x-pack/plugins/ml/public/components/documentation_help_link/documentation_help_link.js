@@ -9,8 +9,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import './styles/main.less';
-
 import { metadata } from 'ui/metadata';
 
 import { uiModules } from 'ui/modules';

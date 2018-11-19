@@ -9,9 +9,12 @@
 import _ from 'lodash';
 import React from 'react';
 import { Shard } from './shard';
+import { i18n } from '@kbn/i18n';
 
 export class Unassigned extends React.Component {
-  static displayName = 'Unassigned';
+  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.unassignedDisplayName', {
+    defaultMessage: 'Unassigned',
+  });
 
   createShard = (shard) => {
     const type = shard.primary ? 'primary' : 'replica';
