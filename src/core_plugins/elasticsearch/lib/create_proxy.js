@@ -31,7 +31,7 @@ export function createProxy(server) {
         parse: 'gunzip'
       }
     },
-    async handler(req, reply) {
+    async handler(req, h) {
       try {
         const { payload } = req;
         const body = payload
@@ -42,12 +42,12 @@ export function createProxy(server) {
         const response = await callWithRequest(req, 'msearch', {
           body
         });
-        reply(response);
+        return h.response(response);
       } catch(e) {
         if (e instanceof Error) {
-          reply(Boom.badRequest('Unable to parse request'));
+          h.response(Boom.badRequest('Unable to parse request'));
         } else {
-          reply(e);
+          h.response(e);
         }
       }
     },
@@ -63,16 +63,16 @@ export function createProxy(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req, h) {
       const { payload } = req;
       try {
         const response = await callWithRequest(req, 'search', {
           index: req.params.index,
           body: payload
         });
-        reply(response);
+        h.response(response);
       } catch(e) {
-        reply(e);
+        h.response(e);
       }
     }
   });
