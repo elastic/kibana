@@ -14,7 +14,7 @@ import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
-import EmptyMessage from '../../../shared/EmptyMessage';
+import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
@@ -133,9 +133,9 @@ export class Distribution extends Component<Props> {
             bucket.y > 0 && bucket.sample
           }
           tooltipHeader={(bucket: IChartPoint) =>
-            `${timeFormatter(bucket.x0, false)} - ${timeFormatter(
+            `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
               bucket.x,
-              false
+              { withUnit: false }
             )} ${unit}`
           }
           tooltipFooter={(bucket: IChartPoint) =>

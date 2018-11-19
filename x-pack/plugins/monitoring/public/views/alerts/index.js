@@ -45,7 +45,7 @@ uiRoutes.when('/alerts', {
   },
   controllerAs: 'alerts',
   controller: class AlertsView extends MonitoringViewBaseController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
 
@@ -53,7 +53,7 @@ uiRoutes.when('/alerts', {
       $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
 
       super({
-        title: 'Cluster Alerts',
+        title: i18n('xpack.monitoring.alerts.clusterAlertsTitle', { defaultMessage: 'Cluster Alerts' }),
         getPageData,
         $scope,
         $injector

@@ -273,8 +273,11 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndices();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickOptionalAddNewButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
           await this.setIndexPatternField(indexPatternName);
         });
@@ -300,15 +303,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return await this.getIndexPatternIdFromUrl();
     }
 
-    //adding a method to check if the create index pattern button is visible(while adding more than 1 index pattern)
-
+    // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
     async clickOptionalAddNewButton() {
-      const buttonParent = await testSubjects.find('createIndexPatternParent');
-      const buttonVisible = (await buttonParent.getProperty('innerHTML')).includes(
-        'createIndexPatternButton'
-      );
-      log.debug('found the button ' + buttonVisible);
-      if (buttonVisible) {
+      if (await testSubjects.isDisplayed('createIndexPatternButton')) {
         await testSubjects.click('createIndexPatternButton');
       }
     }

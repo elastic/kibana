@@ -13,8 +13,6 @@ import React, {
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobGroup } from '../job_group';
 
-import './styles/main.less';
-
 import {
   EuiSearchBar,
   EuiCallOut,
@@ -70,7 +68,6 @@ export class JobFilterBar extends Component {
     return (
       <EuiFlexItem grow={false}>
         <EuiCallOut
-          iconType="faceSad"
           color="danger"
           title={`Invalid search: ${error.message}`}
         />
@@ -133,6 +130,7 @@ export class JobFilterBar extends Component {
             }}
             filters={filters}
             onChange={this.onChange}
+            className="mlJobFilterBar"
           />
         </EuiFlexItem>
         { this.renderError() || ''}
