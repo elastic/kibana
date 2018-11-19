@@ -20,16 +20,48 @@ import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
 import {
   EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 
 const filterFields = [ 'job_id', 'state', 'node.name' ];
 const columns = [
-  { title: 'Job ID', sortKey: 'job_id', sortOrder: SORT_ASCENDING },
-  { title: 'State', sortKey: 'state' },
-  { title: 'Processed Records', sortKey: 'data_counts.processed_record_count' },
-  { title: 'Model Size', sortKey: 'model_size_stats.model_bytes' },
-  { title: 'Forecasts', sortKey: 'forecasts_stats.total' },
-  { title: 'Node', sortKey: 'node.name' }
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.jobIdTitle', {
+      defaultMessage: 'Job ID'
+    }),
+    sortKey: 'job_id',
+    sortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.stateTitle', {
+      defaultMessage: 'State'
+    }),
+    sortKey: 'state'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.processedRecordsTitle', {
+      defaultMessage: 'Processed Records'
+    }),
+    sortKey: 'data_counts.processed_record_count'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.modelSizeTitle', {
+      defaultMessage: 'Model Size'
+    }),
+    sortKey: 'model_size_stats.model_bytes'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.forecastsTitle', {
+      defaultMessage: 'Forecasts'
+    }),
+    sortKey: 'forecasts_stats.total'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.nodeTitle', {
+      defaultMessage: 'Node'
+    }),
+    sortKey: 'node.name'
+  }
 ];
 const jobRowFactory = (scope, kbnUrl) => {
   const goToNode = nodeId => {
@@ -45,7 +77,9 @@ const jobRowFactory = (scope, kbnUrl) => {
         </EuiLink>
       );
     }
-    return 'N/A';
+    return i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.noDataLabel', {
+      defaultMessage: 'N/A'
+    });
   };
 
   return function JobRow(props) {
@@ -68,7 +102,7 @@ const jobRowFactory = (scope, kbnUrl) => {
 };
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringMlListing', kbnUrl => {
+uiModule.directive('monitoringMlListing', (kbnUrl, i18n) => {
   return {
     restrict: 'E',
     scope: {
@@ -84,12 +118,23 @@ uiModule.directive('monitoringMlListing', kbnUrl => {
       const getNoDataMessage = filterText => {
         if (filterText) {
           return (
-            `There are no Machine Learning Jobs that match the filter [${filterText.trim()}] or the time range.
-Try changing the filter or time range.`
+            i18n('xpack.monitoring.elasticsearch.mlJobListing.noFilteredJobsDescription', {
+              // eslint-disable-next-line max-len
+              defaultMessage: 'There are no Machine Learning Jobs that match the filter [{filterText}] or the time range. Try changing the filter or time range.',
+              values: {
+                filterText: filterText.trim()
+              }
+            })
           );
         }
-        return 'There are no Machine Learning Jobs that match your query. Try changing the time range selection.';
+        return i18n('xpack.monitoring.elasticsearch.mlJobListing.noJobsDescription', {
+          defaultMessage: 'There are no Machine Learning Jobs that match your query. Try changing the time range selection.'
+        });
       };
+
+      const filterJobsPlaceholder = i18n('xpack.monitoring.elasticsearch.mlJobListing.filterJobsPlaceholder', {
+        defaultMessage: 'Filter Jobs…'
+      });
 
       scope.$watch('jobs', (jobs = []) => {
         const mlTable = (
@@ -102,7 +147,7 @@ Try changing the filter or time range.`
               sortKey={scope.sortKey}
               sortOrder={scope.sortOrder}
               onNewState={scope.onNewState}
-              placeholder="Filter Jobs..."
+              placeholder={filterJobsPlaceholder}
               filterFields={filterFields}
               columns={columns}
               rowComponent={jobRowFactory(scope, kbnUrl)}

@@ -37,7 +37,12 @@ class Timefilter extends SimpleEmitter {
   }
 
   getTime = () => {
-    return _.clone(this._time);
+    const { from, to } = this._time;
+    return {
+      ...this._time,
+      from: moment.isMoment(from) ? from.toISOString() : from,
+      to: moment.isMoment(to) ? to.toISOString() : to
+    };
   }
 
   /**

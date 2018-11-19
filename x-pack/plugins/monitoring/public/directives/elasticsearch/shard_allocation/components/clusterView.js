@@ -9,9 +9,12 @@
 import React from 'react';
 import { TableHead } from './tableHead';
 import { TableBody } from './tableBody';
+import { i18n } from '@kbn/i18n';
 
 export class ClusterView extends React.Component {
-  static displayName = 'ClusterView';
+  static displayName = i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.clusterViewDisplayName', {
+    defaultMessage: 'ClusterView',
+  });
 
   constructor(props) {
     super(props);
