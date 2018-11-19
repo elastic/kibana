@@ -53,7 +53,7 @@ export class ReportInfoButton extends Component<Props, State> {
     this.state = {
       isLoading: false,
       isFlyoutVisible: false,
-      calloutTitle: 'Job info',
+      calloutTitle: 'Job Info',
       info: null,
     };
 
