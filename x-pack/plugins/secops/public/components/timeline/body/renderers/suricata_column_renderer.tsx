@@ -6,15 +6,16 @@
 
 import { get, getOr } from 'lodash/fp';
 import React from 'react';
-import { ColumnRenderer, getSuricataCVEFromSignature } from '.';
+
+import { ColumnRenderer, EMPTY_VALUE, getSuricataCVEFromSignature } from '.';
 import { ECS } from '../../ecs';
 
-const columnsOverriden = ['event'];
+const suricataColumnsOverridden = ['event'];
 
 export const suricataColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, ecs: ECS) => {
     if (
-      columnsOverriden.includes(columnName) &&
+      suricataColumnsOverridden.includes(columnName) &&
       ecs &&
       ecs.event &&
       ecs.event.module &&
@@ -33,11 +34,11 @@ export const suricataColumnRenderer: ColumnRenderer = {
         if (cve != null) {
           return <React.Fragment>{cve}</React.Fragment>;
         } else {
-          return <React.Fragment>{getOr('--', 'event.id', data)}</React.Fragment>;
+          return <React.Fragment>{getOr(EMPTY_VALUE, 'event.id', data)}</React.Fragment>;
         }
       default:
         // unknown column name
-        return <React.Fragment>--</React.Fragment>;
+        return <React.Fragment>{EMPTY_VALUE}</React.Fragment>;
     }
   },
 };

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+
 import { RowRenderer } from '.';
 import { ECS } from '../../ecs';
 
@@ -24,6 +25,6 @@ const PlainRow = styled.div`
 `;
 
 export const plainRowRenderer: RowRenderer = {
-  isInstance: () => true,
+  isInstance: (data: ECS) => true,
   renderRow: (data: ECS, children: React.ReactNode) => <PlainRow>{children}</PlainRow>,
 };
