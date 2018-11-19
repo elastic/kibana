@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.5.1>>
 * <<release-notes-6.5.0>>
 * <<release-notes-6.4.3>>
 * <<release-notes-6.4.2>>
@@ -78,6 +79,63 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+
+[[release-notes-6.5.1]]
+== {kib} 6.5.1
+coming[6.5.1]
+
+[float]
+[[breaking-changes-6.5.1]]
+=== Breaking changes
+
+See <<breaking-changes, Breaking changes>> for the changes to be aware of 
+when migrating your application from one version of Kibana to another.
+
+[float]
+[[enhancements-6.5.1]]
+=== Enhancements
+
+Machine Learning::
+* Updates job type and APM module icon to new designs {pull}25380[#25380]
+
+Security::
+* Grant `.tasks` access to `kibana_system` role https://github.com/elastic/elasticsearch/pull/35573[#35573]
++
+{kib} now uses the tasks API to manage automatic reindexing of the `.kibana` index during upgrades.
+
+[float]
+[[bug-6.5.1]]
+=== Bug fixes
+
+Canvas::
+* Fixes duplicate `Value` options in math select value {pull}25556[#25556]
+* Gets correct plugins path {pull}25448[#25448]
+* Quotes the index pattern in SQL input {pull}25488[#25488]
+* Fixes issues with loading in IE11 {pull}25562[#25562]
+* Fixes Canvas test runner {pull}25492[#25492]
+* Improves plugin pre-build {pull}25267[#25267]
+
+Dashboard::
+* Fixes flashing of unstyled dashboard content {pull}25559[#25559]
+
+Management::
+* Wraps long field names in tables in Rollup Job wizard {pull}25405[#25405]
++
+Long field names used to be truncated by the table cell. Now they wrap so users can read the entire field name.
+
+* Updates the Saved Objects management page and the Advanced Settings management page to handle query parse failures {pull}25235[#25235]
+
+Operations::
+* Adds types for `setRootController()` and theme-related methods in `ui/chrome` types {pull}25611[#25611]
+
+Platform::
+* Increases start timeout for snapshots in es-test-cluster {pull}25600[#25600]
+
+Visualizations::
+* Fixes Timelion issue when `elasticsearch.shardTimeout` is 0 {pull}25461[#25461]
+* Fixes map bounds {pull}25040[#25040]
+
 
 [[release-notes-6.5.0]]
 == {kib} 6.5.0
