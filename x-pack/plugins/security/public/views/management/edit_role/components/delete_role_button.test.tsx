@@ -10,7 +10,7 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from '../../../../../../../test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { DeleteRoleButton } from './delete_role_button';
 
 test('it renders without crashing', () => {
