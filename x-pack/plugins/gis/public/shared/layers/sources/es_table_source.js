@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import _ from 'lodash';
 import React, { Fragment } from 'react';
 
 import { ASource } from './source';
@@ -52,13 +52,20 @@ export class ESTableSource extends ASource {
     return (<Fragment>table source details</Fragment>);
   }
 
+  hasCompleteConfig() {
+    if (_.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term')) {
+      return true;
+    }
+
+    return false;
+  }
+
   async getTable(searchFilters) {
 
     // inspectorAdapters.requests.resetRequest(layerId);
 
 
-    if (!this._descriptor.indexPatternId && !this._descriptor.term) {
-      console.warn('Table source incorrectly configured');
+    if (!this.hasCompleteConfig()) {
       return [];
     }
 

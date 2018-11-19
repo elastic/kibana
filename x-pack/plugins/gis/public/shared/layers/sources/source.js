@@ -52,6 +52,10 @@ export class ASource {
   getFieldNames() {
     return [];
   }
+
+  hasCompleteConfig() {
+    throw new Error(`Source#hasCompleteConfig not implemented`);
+  }
 }
 
 export class TMSSource extends ASource {

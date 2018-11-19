@@ -18,6 +18,14 @@ export class LeftInnerJoin {
     this._rightSource = new ESTableSource(joinDescriptor.right);
   }
 
+  hasCompleteConfig() {
+    if (this._rightSource) {
+      return this._rightSource.hasCompleteConfig();
+    }
+
+    return false;
+  }
+
   getSourceId() {
     return LeftInnerJoin.toHash(this._descriptor);
   }
