@@ -31,8 +31,8 @@ export async function getServices(
 
   const params = {
     index: [
-      config.get('apm_oss.errorIndices'),
-      config.get('apm_oss.transactionIndices')
+      config.get<string>('apm_oss.errorIndices'),
+      config.get<string>('apm_oss.transactionIndices')
     ],
     body: {
       size: 0,

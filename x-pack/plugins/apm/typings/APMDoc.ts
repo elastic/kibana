@@ -47,7 +47,7 @@ export interface ContextService {
     name: string;
     version?: string;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Stackframe {
@@ -72,7 +72,7 @@ export interface Stackframe {
     updated?: boolean;
     error?: string;
   };
-  vars?: any;
+  vars?: unknown;
   orig?: {
     filename?: string;
     abs_path?: string;

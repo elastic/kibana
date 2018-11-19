@@ -14,7 +14,7 @@ function decodeEsQuery(esQuery?: string): object {
 }
 
 interface KibanaConfig {
-  get: (key: string) => any;
+  get: <T = unknown>(key: string) => T;
 }
 
 // Extend the defaults with the plugins and server methods we need.

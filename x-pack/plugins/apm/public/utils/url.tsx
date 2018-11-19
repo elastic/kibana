@@ -30,7 +30,7 @@ interface ViewMlJobArgs {
   serviceName: string;
   transactionType: string;
   location: any;
-  children?: any;
+  children?: React.ReactNode;
 }
 
 export function ViewMLJob({

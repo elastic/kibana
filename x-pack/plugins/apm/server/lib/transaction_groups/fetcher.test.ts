@@ -17,10 +17,10 @@ describe('transactionGroupsFetcher', () => {
       end: 1528977600000,
       client: clientSpy,
       config: {
-        get: () => 'myIndex'
+        get: () => 'myIndex' as any
       }
     };
-    const bodyQuery = 'myBodyQuery';
+    const bodyQuery = { my: 'stringmap' };
     res = await transactionGroupsFetcher(setup, bodyQuery);
   });
 

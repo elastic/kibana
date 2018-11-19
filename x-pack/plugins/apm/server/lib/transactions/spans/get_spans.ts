@@ -22,7 +22,7 @@ export async function getSpans(
   const { start, end, client, config } = setup;
 
   const params = {
-    index: config.get('apm_oss.spanIndices'),
+    index: config.get<string>('apm_oss.spanIndices'),
     body: {
       size: 500,
       query: {

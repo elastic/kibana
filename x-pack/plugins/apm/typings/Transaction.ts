@@ -21,7 +21,7 @@ interface ContextSystem {
 interface Context {
   process?: {
     pid: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   service: ContextService;
   system?: ContextSystem;
@@ -31,14 +31,14 @@ interface Context {
       [key: string]: string;
     };
     method: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   user?: {
     id: string;
     username?: string;
     email?: string;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface Marks {

@@ -23,7 +23,7 @@ describe('get_avg_response_time_anomalies', () => {
         end: 1528977600000,
         client: clientSpy,
         config: {
-          get: () => 'myIndex'
+          get: () => 'myIndex' as any
         }
       }
     });

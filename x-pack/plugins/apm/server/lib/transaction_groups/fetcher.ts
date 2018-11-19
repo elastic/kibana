@@ -5,6 +5,7 @@
  */
 
 import { AggregationSearchResponse } from 'elasticsearch';
+import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME
@@ -44,11 +45,11 @@ export type ESResponse = AggregationSearchResponse<void, Aggs>;
 
 export function transactionGroupsFetcher(
   setup: Setup,
-  bodyQuery: any
+  bodyQuery: StringMap
 ): Promise<ESResponse> {
   const { esFilterQuery, client, config } = setup;
   const params = {
-    index: config.get('apm_oss.transactionIndices'),
+    index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: bodyQuery,

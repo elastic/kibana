@@ -6,13 +6,13 @@
 
 // @ts-ignore
 import { EuiButtonEmpty } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { KibanaLink } from '../../utils/url';
 
 interface Props {
   query: StringMap;
-  children: any;
+  children: ReactNode;
 }
 
 export function DiscoverButton({ query, children, ...rest }: Props) {

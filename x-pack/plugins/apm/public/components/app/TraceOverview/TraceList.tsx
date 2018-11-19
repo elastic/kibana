@@ -22,7 +22,7 @@ const StyledTransactionLink = styled(TransactionLink)`
 
 interface Props {
   items: ITransactionGroup[];
-  noItemsMessage: any;
+  noItemsMessage: React.ReactNode;
   isLoading: boolean;
 }
 

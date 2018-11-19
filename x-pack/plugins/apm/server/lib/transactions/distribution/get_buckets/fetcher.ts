@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AggregationSearchResponse,
-  SearchParams,
-  SearchResponse
-} from 'elasticsearch';
+import { AggregationSearchResponse, SearchResponse } from 'elasticsearch';
 import {
   SERVICE_NAME,
   TRACE_ID,
@@ -20,7 +16,7 @@ import {
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 
-interface ESBucket {
+interface Bucket {
   key: number;
   doc_count: number;
   sample: SearchResponse<{
@@ -33,7 +29,7 @@ interface ESBucket {
 
 interface Aggs {
   distribution: {
-    buckets: ESBucket[];
+    buckets: Bucket[];
   };
 }
 
@@ -46,9 +42,9 @@ export function bucketFetcher(
   setup: Setup
 ): Promise<ESResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
-  const bucketTargetCount: number = config.get('xpack.apm.bucketTargetCount');
-  const params: SearchParams = {
-    index: config.get('apm_oss.transactionIndices'),
+  const bucketTargetCount = config.get<number>('xpack.apm.bucketTargetCount');
+  const params = {
+    index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
       query: {
