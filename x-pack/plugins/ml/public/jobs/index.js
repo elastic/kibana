@@ -6,7 +6,6 @@
 
 
 
-import './styles/main.less';
 import './jobs_list';
 import './new_job/advanced';
 import './new_job/simple/single_metric';
