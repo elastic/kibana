@@ -43,7 +43,9 @@ export interface CheckPrivilegesAtSpacesResponse {
   };
 }
 
-export interface CheckPrivilegesWithRequest {
+export type CheckPrivilegesWithRequest = (request: any) => CheckPrivileges;
+
+export interface CheckPrivileges {
   atSpace(
     spaceId: string,
     privilegeOrPrivileges: string | string[]
@@ -70,7 +72,7 @@ export function checkPrivilegesWithRequestFactory(
     );
   };
 
-  return function checkPrivilegesWithRequest(request: any): CheckPrivilegesWithRequest {
+  return function checkPrivilegesWithRequest(request: any): CheckPrivileges {
     const checkPrivilegesAtResources = async (
       resources: string[],
       privilegeOrPrivileges: string | string[]
