@@ -12,6 +12,7 @@ export const API_ROUTE = '/api/canvas';
 export const API_ROUTE_WORKPAD = `${API_ROUTE}/workpad`;
 export const LOCALSTORAGE_PREFIX = `kibana.canvas`;
 export const LOCALSTORAGE_CLIPBOARD = `${LOCALSTORAGE_PREFIX}.clipboard`;
+export const LOCALSTORAGE_AUTOCOMPLETE_ENABLED = `${LOCALSTORAGE_PREFIX}.isAutocompleteEnabled`;
 export const LOCALSTORAGE_LASTPAGE = 'canvas:lastpage';
 export const FETCH_TIMEOUT = 30000; // 30 seconds
 export const CANVAS_USAGE_TYPE = 'canvas';
