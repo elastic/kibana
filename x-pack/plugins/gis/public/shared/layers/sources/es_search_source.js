@@ -404,10 +404,6 @@ class Editor extends React.Component {
     );
   }
 
-  filterForGeoPointOrShape = fields => {
-    return fields.some(({ type }) => type === 'geo_point' || type === 'geo_shape');
-  }
-
   render() {
     return (
       <Fragment>
@@ -433,7 +429,7 @@ class Editor extends React.Component {
             indexPatternId={this.state.indexPatternId}
             onChange={this.onIndexPatternSelect}
             placeholder="Select index pattern"
-            filterIndexPatterns={this.filterForGeoPointOrShape}
+            fieldTypes={['geo_point', 'geo_shape']}
           />
         </EuiFormRow>
 

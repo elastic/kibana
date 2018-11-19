@@ -5,8 +5,7 @@
  */
 
 import React from 'react';
-import { DynamicOrdinalStyleOption } from '../../dynamic_ordinal_styling_option';
-import { ColorRampSelector } from './color_ramp_selector';
+import { DynamicOrdinalStyleOption, styleTypes } from '../../dynamic_ordinal_styling_option';
 
 export class DynamicColorSelection extends React.Component {
 
@@ -15,7 +14,7 @@ export class DynamicColorSelection extends React.Component {
       <DynamicOrdinalStyleOption
         fields={this.props.fields}
         selectedOptions={this.props.selectedOptions}
-        DynamicStylingOption={ColorRampSelector}
+        type={styleTypes.COLOR_RAMP}
         onChange={this.props.onChange}
       />
     );

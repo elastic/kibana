@@ -24,7 +24,7 @@ import chrome from 'ui/chrome';
 
 import { EuiComboBox } from '@elastic/eui';
 
-const getIndexPatterns = async (search, fields, filterIndexPatterns) => {
+const getIndexPatterns = async (search, fields) => {
   const resp = await chrome.getSavedObjectsClient().find({
     type: 'index-pattern',
     fields,
@@ -32,8 +32,7 @@ const getIndexPatterns = async (search, fields, filterIndexPatterns) => {
     search_fields: ['title'],
     perPage: 100
   });
-  const filteredResult = filterIndexPatterns(resp.savedObjects);
-  return filteredResult;
+  return resp.savedObjects;
 };
 
 const getIndexPatternTitle = async (indexPatternId) => {
@@ -101,10 +100,27 @@ export class IndexPatternSelect extends Component {
   }
 
   debouncedFetch = _.debounce(async (searchValue) => {
-    const fields = this.getFields();
-    const filterIndexPatterns = this.getFilterIndexPatterns();
-    const savedObjects = await getIndexPatterns(searchValue, fields,
-      filterIndexPatterns);
+    const { fieldTypes } = this.props;
+
+    const savedObjectFields = ['title'];
+    if (fieldTypes) {
+      savedObjectFields.push('fields');
+    }
+    let savedObjects = await getIndexPatterns(searchValue, savedObjectFields);
+
+    if (fieldTypes) {
+      savedObjects = savedObjects.filter(savedObject => {
+        try {
+          const indexPatternFields = JSON.parse(savedObject.attributes.fields);
+          return indexPatternFields.some(({ type }) => {
+            return fieldTypes.includes(type);
+          });
+        } catch (err) {
+          // Unable to parse fields JSON, invalid index pattern
+          return false;
+        }
+      });
+    }
 
     if (!this._isMounted) {
       return;
@@ -133,36 +149,13 @@ export class IndexPatternSelect extends Component {
     }, this.debouncedFetch.bind(null, searchValue));
   }
 
-  getFields = () => {
-    const fieldDefaults = ['title'];
-    const fields = [...fieldDefaults, ...(this.props.fields ? this.props.fields : [])];
-    if (this.props.filterIndexPatterns && !fields.includes('fields')) {
-      fields.push('fields'); // Field filter must have fields to search
-    }
-    return fields;
-  }
-
-  getFilterIndexPatterns = () => {
-    const { filterIndexPatterns } = this.props;
-    return (savedObjects = []) => {
-      if (filterIndexPatterns && savedObjects.length) {
-        return savedObjects.filter(savedObject => {
-          const { fields } = savedObject.attributes;
-          const parsedFields = JSON.parse(fields);
-          return filterIndexPatterns(parsedFields);
-        });
-      } else {
-        return savedObjects;
-      }
-    };
-  }
-
   onChange = (selectedOptions) => {
     this.props.onChange(_.get(selectedOptions, '0.value'));
   }
 
   render() {
     const {
+      fieldTypes, // eslint-disable-line no-unused-vars
       onChange, // eslint-disable-line no-unused-vars
       indexPatternId, // eslint-disable-line no-unused-vars
       placeholder,
@@ -188,6 +181,8 @@ IndexPatternSelect.propTypes = {
   onChange: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   placeholder: PropTypes.string,
-  fields: PropTypes.arrayOf(PropTypes.string),
-  filterIndexPatterns: PropTypes.func
+  /**
+   * Filter index patterns to only those that include the field types
+   */
+  fieldTypes: PropTypes.arrayOf(PropTypes.string),
 };

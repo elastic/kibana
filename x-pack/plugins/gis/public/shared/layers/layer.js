@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormHelpText,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { AlphaSelection } from
   '../../shared/layers/styles/components/vector/color/alpha_selection';
@@ -61,6 +61,7 @@ export class ALayer {
                 value={minZoom.toString()}
                 onChange={(event) => onMinZoomChange(ALayer._sanitizeSliderValue(event))}
                 showInput
+                showRange
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -75,6 +76,7 @@ export class ALayer {
                 value={maxZoom.toString()}
                 onChange={(event) => onMaxZoomChange(ALayer._sanitizeSliderValue(event))}
                 showInput
+                showRange
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -96,26 +98,19 @@ export class ALayer {
       </EuiFormRow>
     );
   }
-
-  static _renderAlpha(alphaValue, onAlphaValueChange) {
-    return (
-      <EuiFormRow label="Layer opacity">
-        <AlphaSelection
-          alphaValue={alphaValue}
-          changeAlphaValue={alphaValue => onAlphaValueChange(alphaValue)}
-        />
-      </EuiFormRow>
-    );
-  }
-
   static renderGlobalSettings({ label, onLabelChange, minZoom, maxZoom,
     alphaValue, onMinZoomChange, onMaxZoomChange, onAlphaValueChange }) {
     return (
       <Fragment>
         {ALayer._renderLabel(label, onLabelChange)}
         {ALayer._renderZoomSliders(minZoom, maxZoom, onMinZoomChange, onMaxZoomChange)}
+
         <EuiSpacer size="m"/>
-        {ALayer._renderAlpha(alphaValue, onAlphaValueChange)}
+
+        <AlphaSelection
+          alphaValue={alphaValue}
+          onAlphaValueChange={onAlphaValueChange}
+        />
       </Fragment>
     );
   }
@@ -149,7 +144,7 @@ export class ALayer {
   }
 
   getLabel() {
-    return this._descriptor.label;
+    return this._descriptor.label ? this._descriptor.label : '';
   }
 
   getIcon() {

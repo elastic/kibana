@@ -5,56 +5,27 @@
  */
 
 import React from 'react';
-import { EuiRange } from '@elastic/eui';
+import { EuiRange, EuiFormRow } from '@elastic/eui';
 
-export class AlphaSelection extends React.Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      alphaValue: props.alphaValue
-    };
-  }
-
-  componentDidMount() {
-    this.setState({
-      alphaValue: this.props.alphaValue
-    });
-  }
-
-  componentDidUpdate() {
-    const { alphaValue } = this.props;
-    if (alphaValue !== this.state.alphaValue) {
-      this.setState({
-        alphaValue
-      });
-    }
-  }
-
-  _changeAlphaValue({ value }) {
-    this.setState({ alphaValue: +value });
-    this.props.changeAlphaValue(+value);
-  }
-
-  render() {
-    return(
+export function AlphaSelection({ alphaValue, onAlphaValueChange }) {
+  const onChange = e => {
+    const sanitizedValue = parseFloat(e.target.value);
+    onAlphaValueChange(isNaN(sanitizedValue) ? '' : sanitizedValue);
+  };
+  return(
+    <EuiFormRow label="Layer opacity">
       <div className="alphaRange">
         <EuiRange
-          id={`${this.props.name} alpha range`}
           min={.00}
           max={1.00}
           step={.01}
-          value={this.state.alphaValue}
-          onChange={({ target }) => {
-            this._changeAlphaValue(target);
-          }}
-          aria-label="Use aria labels when no actual label is in use"
-          name={`${this.props.name} alpha range`}
+          value={alphaValue.toString()} // EuiRange value must be string
+          onChange={onChange}
           showLabels
           showInput
           showRange
         />
       </div>
-    );
-  }
+    </EuiFormRow>
+  );
 }

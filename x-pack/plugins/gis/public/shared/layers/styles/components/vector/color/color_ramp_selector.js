@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import {
   EuiSuperSelect
@@ -12,53 +13,35 @@ import {
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { ColorGradient } from '../../../../../icons/color_gradient';
 
-
 const COLOR_GRADIENTS = Object.keys(vislibColorMaps).map(colorKey => ({
   value: colorKey,
   text: colorKey,
   inputDisplay: <ColorGradient color={colorKey}/>
 }));
 
+export function ColorRampSelector({ color, onChange }) {
 
-export class ColorRampSelector extends React.Component {
-
-  constructor() {
-    super();
-    this.state = {
-      selectedColorRamp: null
-    };
-  }
-
-  _onColorRampSelected = (selectedColorRampString = null) => {
-    this.setState({
-      selectedColorRamp: selectedColorRampString
-    });
-    this.props.onChange({
+  const onColorRampChange = (selectedColorRampString = null) => {
+    onChange({
       color: selectedColorRampString
     });
   };
 
-  _getColorRampFromPropsAndState() {
-    if (this.state.selectedColorRamp) {
-      return this.state.selectedColorRamp;
-    }
-    if (this.props.selectedOptions && this.props.selectedOptions.color) {
-      return this.props.selectedOptions.color;
-    } else {
-      return null;
-    }
-  }
-
-
-  render() {
-    const selectedColorRamp = this._getColorRampFromPropsAndState();
-    return (
-      <EuiSuperSelect
-        options={COLOR_GRADIENTS}
-        onChange={this._onColorRampSelected}
-        valueOfSelected={selectedColorRamp}
-        hasDividers={true}
-      />);
-  }
-
+  return (
+    <EuiSuperSelect
+      options={COLOR_GRADIENTS}
+      onChange={onColorRampChange}
+      valueOfSelected={color}
+      hasDividers={true}
+    />
+  );
 }
+
+ColorRampSelector.propTypes = {
+  color: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+};
+
+ColorRampSelector.defaultProps = {
+  color: '',
+};

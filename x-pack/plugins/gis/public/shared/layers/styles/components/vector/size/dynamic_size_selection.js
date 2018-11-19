@@ -6,8 +6,7 @@
 
 import React from 'react';
 
-import { DynamicOrdinalStyleOption } from '../../dynamic_ordinal_styling_option';
-import { SizeRangeSelector } from './size_range_selector';
+import { DynamicOrdinalStyleOption, styleTypes } from '../../dynamic_ordinal_styling_option';
 
 
 export class DynamicSizeSelection extends React.Component {
@@ -17,7 +16,7 @@ export class DynamicSizeSelection extends React.Component {
       <DynamicOrdinalStyleOption
         fields={this.props.fields}
         selectedOptions={this.props.selectedOptions}
-        DynamicStylingOption={SizeRangeSelector}
+        type={styleTypes.SIZE_RANGE}
         onChange={this.props.onChange}
       />
     );
