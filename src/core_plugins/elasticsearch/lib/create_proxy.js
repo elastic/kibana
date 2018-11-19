@@ -45,9 +45,9 @@ export function createProxy(server) {
         return h.response(response);
       } catch(e) {
         if (e instanceof Error) {
-          h.response(Boom.badRequest('Unable to parse request'));
+          return h.response(Boom.badRequest('Unable to parse request'));
         } else {
-          h.response(e);
+          return h.response(e);
         }
       }
     },
@@ -70,9 +70,9 @@ export function createProxy(server) {
           index: req.params.index,
           body: payload
         });
-        h.response(response);
+        return h.response(response);
       } catch(e) {
-        h.response(e);
+        return h.response(e);
       }
     }
   });
