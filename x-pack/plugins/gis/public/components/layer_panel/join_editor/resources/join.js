@@ -136,12 +136,21 @@ export class Join extends Component {
   }
 
   _onRightFieldChange = (term) => {
-    console.log('term', term);
     this.props.onJoinSelection({
       leftField: this.props.join.leftField,
       right: {
         ...this.props.join.right,
         term
+      },
+    });
+  }
+
+  _onMetricsChange = (metrics) => {
+    this.props.onJoinSelection({
+      leftField: this.props.join.leftField,
+      right: {
+        ...this.props.join.right,
+        metrics,
       },
     });
   }
@@ -192,7 +201,9 @@ export class Join extends Component {
 
         <EuiFlexItem grow={false}>
           <SelectExpression
+            metrics={right.metrics}
             rightFields={rightFields}
+            onChange={this._onMetricsChange}
           />
         </EuiFlexItem>
 

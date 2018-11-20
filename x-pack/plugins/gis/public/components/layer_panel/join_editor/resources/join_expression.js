@@ -20,7 +20,6 @@ import {
   indexPatternService,
 } from '../../../../kibana_services';
 
-// TODO add support for inner join
 export class JoinExpression extends Component {
 
   state = {
@@ -74,7 +73,7 @@ export class JoinExpression extends Component {
         }
       >
         <div style={{ width: 300 }}>
-          <EuiPopoverTitle>LEFT JOIN</EuiPopoverTitle>
+          <EuiPopoverTitle>JOIN</EuiPopoverTitle>
           <EuiFormRow
             label="Index pattern"
             helpText={`Select right source`}
@@ -83,6 +82,7 @@ export class JoinExpression extends Component {
               placeholder="Select index pattern"
               indexPatternId={indexPatternId}
               onChange={this._onChange}
+              isClearable={false}
             />
           </EuiFormRow>
         </div>
