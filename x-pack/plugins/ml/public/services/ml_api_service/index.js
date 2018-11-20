@@ -19,6 +19,14 @@ import { fileDatavisualizer } from './datavisualizer';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const ml = {
+  addAnnotation(obj) {
+    return http({
+      url: `${basePath}/annotation/add`,
+      method: 'PUT',
+      data: obj
+    });
+  },
+
   getJobs(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
     return http({

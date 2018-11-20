@@ -24,6 +24,8 @@ import { ResizeChecker } from 'ui/resize_checker';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+import { ml } from 'plugins/ml/services/ml_api_service';
+
 module.directive('mlTimeseriesChart', function () {
 
   function link(scope, element) {
@@ -39,6 +41,7 @@ module.directive('mlTimeseriesChart', function () {
       svgWidth = Math.max(angular.element('.results-container').width(), 0);
 
       const props = {
+        addAnnotation: ml.addAnnotation,
         autoZoomDuration: scope.autoZoomDuration,
         contextAggregationInterval: scope.contextAggregationInterval,
         contextChartData: scope.contextChartData,
@@ -50,6 +53,7 @@ module.directive('mlTimeseriesChart', function () {
         focusForecastData: scope.focusForecastData,
         focusAggregationInterval: scope.focusAggregationInterval,
         modelPlotEnabled: scope.modelPlotEnabled,
+        refresh: scope.refresh,
         renderFocusChartOnly,
         selectedJob: scope.selectedJob,
         showAnnotations: scope.showAnnotations,
@@ -118,6 +122,7 @@ module.directive('mlTimeseriesChart', function () {
       zoomFrom: '=',
       zoomTo: '=',
       autoZoomDuration: '=',
+      refresh: '=',
       showAnnotations: '=',
       showModelBounds: '=',
       showForecast: '='

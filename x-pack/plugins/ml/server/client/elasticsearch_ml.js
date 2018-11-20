@@ -613,4 +613,3 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   });
 
 };
-

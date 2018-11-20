@@ -50,19 +50,6 @@ import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import { initPromise } from 'plugins/ml/util/promise';
 
-// annotations
-import mockAnnotations from './__mocks__/cp_daylight_annotations.json';
-const focusAnnotationData = mockAnnotations.tests[0].validations.result_range.expected.map((d) => {
-  // transform to annotations format
-  return {
-    job_id: 'cp_daylight_annotation-1447',
-    result_type: 'annotation',
-    timestamp: d.start,
-    end_timestamp: d.end,
-    annotation: d.comment
-  };
-});
-
 uiRoutes
   .when('/timeseriesexplorer/?', {
     template,
@@ -93,6 +80,7 @@ module.controller('MlTimeSeriesExplorerController', function (
 
   const CHARTS_POINT_TARGET = 500;
   const ANOMALIES_MAX_RESULTS = 500;
+  const MAX_ANNOTATIONS = 10;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
@@ -113,7 +101,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
 
-  $scope.focusAnnotationData = focusAnnotationData;
+  $scope.focusAnnotationData = [];
 
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
@@ -361,7 +349,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.refreshFocusData = function (fromDate, toDate) {
 
     // Counter to keep track of the queries to populate the chart.
-    let awaitingCount = 3;
+    let awaitingCount = 4;
 
     // This object is used to store the results of individual remote requests
     // before we transform it into the final data and apply it to $scope. Otherwise
@@ -455,6 +443,21 @@ module.controller('MlTimeSeriesExplorerController', function (
       finish();
     }).catch((resp) => {
       console.log('Time series explorer - error getting scheduled events from elasticsearch:', resp);
+    });
+
+    // Query 4 - load any annotations for the selected job.
+    mlResultsService.getAnnotations(
+      [$scope.selectedJob.job_id],
+      searchBounds.min.valueOf(),
+      searchBounds.max.valueOf(),
+      MAX_ANNOTATIONS
+    ).then((resp) => {
+      console.warn('resp', resp);
+      refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id];
+      console.warn('focusAnnotationData', refreshFocusData.focusAnnotationData);
+      finish();
+    }).catch((resp) => {
+      console.log('Time series explorer - error getting annotations from elasticsearch:', resp);
     });
 
     // Plus query for forecast data if there is a forecastId stored in the appState.

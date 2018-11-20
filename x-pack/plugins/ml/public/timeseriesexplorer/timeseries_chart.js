@@ -75,6 +75,7 @@ function getSvgHeight() {
 
 export class TimeseriesChart extends React.Component {
   static propTypes = {
+    addAnnotation: PropTypes.func,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
     contextChartData: PropTypes.array,
@@ -152,9 +153,15 @@ export class TimeseriesChart extends React.Component {
 
     const that = this;
     function brushend() {
-      const { focusChartData } = that.props;
+      const {
+        addAnnotation,
+        // focusChartData,
+        // refresh,
+        selectedJob
+      } = that.props;
+
       const extent = annotateBrush.extent();
-      console.warn(`x: ${extent[0][0].getTime()} - ${extent[1][0].getTime()} \ny: ${extent[0][1]} - ${extent[1][1]}`);
+      /*
       const data = focusChartData.filter((d) => {
         let match = false;
         if (
@@ -167,7 +174,21 @@ export class TimeseriesChart extends React.Component {
       }).map((d) => {
         return d.value;
       });
-      console.warn('anomalies', data);
+      */
+
+      const annotation = {
+        timestamp: extent[0][0].getTime(),
+        end_timestamp: extent[1][0].getTime(),
+        annotation: 'dummy text',
+        job_id: selectedJob.job_id,
+        result_type: 'annotation',
+      };
+
+      addAnnotation(annotation).then(() => {
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      });
     }
 
     // brush for focus brushing
@@ -577,7 +598,7 @@ export class TimeseriesChart extends React.Component {
     }
 
     // render annotations
-    const annotationRects = focusChart.select('.ml-annotations').selectAll('rect').data(focusAnnotationData);
+    const annotationRects = focusChart.select('.ml-annotations').selectAll('rect').data(focusAnnotationData || []);
 
     annotationRects.enter()
       .append('rect')
