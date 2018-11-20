@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './github_markdown.less';
 import classNames from 'classnames';
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
