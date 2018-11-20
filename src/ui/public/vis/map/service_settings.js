@@ -150,12 +150,11 @@ uiModules.get('kibana')
 
       async getFileLayers() {
         const fileLayers = await this._loadFileLayers();
-
         return fileLayers.map(fileLayer => {
-          const strippedFileLayer = { ...fileLayer };
-          //remove the properties that should not propagate and be used by clients.
-          delete strippedFileLayer.url;
-          return strippedFileLayer;
+          const massagedFileLayer = { ...fileLayer };
+          delete massagedFileLayer.url;
+          massagedFileLayer.origin = ORIGIN.EMS;
+          return massagedFileLayer;
         });
       }
 
@@ -237,7 +236,7 @@ uiModules.get('kibana')
 
       }
 
-      async getGeoJsonForRegionLayer(fileLayerConfig) {
+      async _getUrlForRegionLayer(fileLayerConfig) {
         let url;
         if (fileLayerConfig.origin === ORIGIN.EMS) {
           const fileLayers = await this._loadFileLayers();
@@ -254,7 +253,12 @@ uiModules.get('kibana')
           //configuration is not from EMS. fallback.
           url = fileLayerConfig.url;
         }
+        return url;
+      }
 
+      async getGeoJsonForRegionLayer(fileLayerConfig) {
+
+        const url = await this._getUrlForRegionLayer(fileLayerConfig);
         const geojson = await $http({
           url: url,
           method: 'GET'

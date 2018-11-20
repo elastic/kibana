@@ -295,7 +295,7 @@ describe('service_settings (FKA tilemaptest)', function () {
     it('should load manifest', async function () {
       serviceSettings.addQueryParams({ foo: 'bar' });
       const fileLayers = await serviceSettings.getFileLayers();
-      fileLayers.forEach(function (fileLayer, index) {
+      const asserttions = fileLayers.map(async function (fileLayer, index) {
         const expected = vectorManifest.layers[index];
         expect(expected.attribution).to.eql(fileLayer.attribution);
         expect(expected.format).to.eql(fileLayer.format);
@@ -303,12 +303,15 @@ describe('service_settings (FKA tilemaptest)', function () {
         expect(expected.name).to.eql(fileLayer.name);
         expect(expected.created_at).to.eql(fileLayer.created_at);
 
-        const urlObject = url.parse(fileLayer.url, true);
+        const fileUrl = await serviceSettings._getUrlForRegionLayer(fileLayer);
+        const urlObject = url.parse(fileUrl, true);
         Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach(key => {
           expect(urlObject.query).to.have.property(key, expected[key]);
         });
 
       });
+
+      return Promise.all(asserttions);
     });
 
     it('should exclude all when not configured', async () => {
