@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTab'"
 import { EuiTab } from '@elastic/eui';
 import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
