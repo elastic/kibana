@@ -26,7 +26,7 @@ import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { MetricsTimeControls } from '../../components/metrics/time_controls';
 import { ColumnarPage, PageContent } from '../../components/page';
-import { WithCapabilities } from '../../containers/capabilities/with_capabilites';
+import { WithMetadata } from '../../containers/metadata/with_metadata';
 import { WithMetrics } from '../../containers/metrics/with_metrics';
 import {
   WithMetricsTime,
@@ -106,7 +106,7 @@ export const MetricDetail = withTheme(
                       startMetricsAutoReload,
                       stopMetricsAutoReload,
                     }) => (
-                      <WithCapabilities
+                      <WithMetadata
                         layouts={layouts}
                         sourceId={sourceId}
                         nodeType={nodeType}
@@ -170,8 +170,6 @@ export const MetricDetail = withTheme(
                                                       currentTimeRange={currentTimeRange}
                                                       isLiveStreaming={isAutoReloading}
                                                       onChangeRangeTime={setRangeTime}
-                                                      startLiveStreaming={startMetricsAutoReload}
-                                                      stopLiveStreaming={stopMetricsAutoReload}
                                                     />
                                                   </MetricsTitleTimeRangeContainer>
                                                 </EuiPageHeaderSection>
@@ -201,7 +199,7 @@ export const MetricDetail = withTheme(
                             </WithMetrics>
                           );
                         }}
-                      </WithCapabilities>
+                      </WithMetadata>
                     )}
                   </WithMetricsTime>
                 )}

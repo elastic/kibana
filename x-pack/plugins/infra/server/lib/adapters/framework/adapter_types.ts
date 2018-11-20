@@ -148,15 +148,15 @@ export interface InfraDateRangeAggregationResponse {
   buckets: InfraDateRangeAggregationBucket[];
 }
 
-export interface InfraCapabilityAggregationBucket {
+export interface InfraMetadataAggregationBucket {
   key: string;
   names?: {
-    buckets: InfraCapabilityAggregationBucket[];
+    buckets: InfraMetadataAggregationBucket[];
   };
 }
 
-export interface InfraCapabilityAggregationResponse {
-  buckets: InfraCapabilityAggregationBucket[];
+export interface InfraMetadataAggregationResponse {
+  buckets: InfraMetadataAggregationBucket[];
 }
 
 export interface InfraFieldsResponse {
