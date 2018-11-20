@@ -191,7 +191,7 @@ exports[`NewVisModal should render as expected 1`] = `
       <EuiOverlayMask>
         <EuiModal
           className="visNewVisDialog"
-          maxWidth={false}
+          maxWidth="100vw"
           onClose={[Function]}
         >
           <FocusTrap
@@ -210,6 +210,11 @@ exports[`NewVisModal should render as expected 1`] = `
               <div
                 className="euiModal visNewVisDialog"
                 onKeyDown={[Function]}
+                style={
+                  Object {
+                    "maxWidth": "100vw",
+                  }
+                }
                 tabIndex={0}
               >
                 <EuiButtonIcon
@@ -327,111 +332,124 @@ exports[`NewVisModal should render as expected 1`] = `
                             className="euiModalHeader__title"
                           >
                             <FormattedMessage
-                              defaultMessage="New Visualizations"
+                              defaultMessage="New Visualization"
                               id="kbn.visualize.newVisWizard.title"
                               values={Object {}}
                             >
-                              New Visualizations
+                              New Visualization
                             </FormattedMessage>
                           </div>
                         </EuiModalHeaderTitle>
                       </div>
                     </EuiModalHeader>
-                    <EuiFlexGroup
-                      alignItems="stretch"
-                      component="div"
-                      direction="row"
-                      gutterSize="none"
-                      justifyContent="flexStart"
-                      responsive={true}
-                      wrap={false}
+                    <div
+                      className="visNewVisDialog__body"
                     >
-                      <div
-                        className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      <EuiFlexGroup
+                        alignItems="stretch"
+                        component="div"
+                        direction="row"
+                        gutterSize="xl"
+                        justifyContent="flexStart"
+                        responsive={true}
+                        wrap={false}
                       >
-                        <EuiFlexItem
-                          component="div"
-                          grow={false}
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterExtraLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <div
-                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          <EuiFlexItem
+                            component="div"
+                            grow={true}
                           >
-                            <EuiModalBody
-                              className="visNewVisDialog__body"
+                            <div
+                              className="euiFlexItem"
                             >
-                              <div
-                                className="euiModalBody visNewVisDialog__body"
+                              <EuiFlexGroup
+                                alignItems="stretch"
+                                component="div"
+                                direction="column"
+                                gutterSize="none"
+                                justifyContent="flexStart"
+                                responsive={false}
+                                wrap={false}
                               >
-                                <EuiFlexGroup
-                                  alignItems="stretch"
-                                  component="div"
-                                  direction="column"
-                                  gutterSize="l"
-                                  justifyContent="flexStart"
-                                  responsive={true}
-                                  wrap={false}
+                                <div
+                                  className="euiFlexGroup euiFlexGroup--directionColumn"
                                 >
-                                  <div
-                                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                                  <EuiFlexItem
+                                    className="visNewVisDialog__searchWrapper"
+                                    component="div"
+                                    grow={false}
                                   >
-                                    <EuiFlexItem
-                                      component="div"
-                                      grow={false}
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrowZero visNewVisDialog__searchWrapper"
                                     >
-                                      <div
-                                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                                      <EuiFieldSearch
+                                        compressed={false}
+                                        fullWidth={true}
+                                        incremental={false}
+                                        isLoading={false}
+                                        onChange={[Function]}
+                                        placeholder="Filter"
+                                        value=""
                                       >
-                                        <EuiFieldSearch
+                                        <EuiFormControlLayout
                                           compressed={false}
-                                          fullWidth={false}
-                                          incremental={false}
+                                          fullWidth={true}
+                                          icon="search"
                                           isLoading={false}
-                                          onChange={[Function]}
-                                          placeholder="Filter"
-                                          value=""
                                         >
-                                          <EuiFormControlLayout
-                                            compressed={false}
-                                            fullWidth={false}
-                                            icon="search"
-                                            isLoading={false}
+                                          <div
+                                            className="euiFormControlLayout euiFormControlLayout--fullWidth"
                                           >
                                             <div
-                                              className="euiFormControlLayout"
+                                              className="euiFormControlLayout__childrenWrapper"
                                             >
-                                              <div
-                                                className="euiFormControlLayout__childrenWrapper"
+                                              <EuiValidatableControl>
+                                                <input
+                                                  className="euiFieldSearch euiFieldSearch--fullWidth"
+                                                  onChange={[Function]}
+                                                  onKeyUp={[Function]}
+                                                  placeholder="Filter"
+                                                  type="search"
+                                                  value=""
+                                                />
+                                              </EuiValidatableControl>
+                                              <EuiFormControlLayoutIcons
+                                                icon="search"
+                                                isLoading={false}
                                               >
-                                                <EuiValidatableControl>
-                                                  <input
-                                                    className="euiFieldSearch"
-                                                    onChange={[Function]}
-                                                    onKeyUp={[Function]}
-                                                    placeholder="Filter"
-                                                    type="search"
-                                                    value=""
-                                                  />
-                                                </EuiValidatableControl>
-                                                <EuiFormControlLayoutIcons
-                                                  icon="search"
-                                                  isLoading={false}
+                                                <div
+                                                  className="euiFormControlLayoutIcons"
                                                 >
-                                                  <div
-                                                    className="euiFormControlLayoutIcons"
+                                                  <EuiFormControlLayoutCustomIcon
+                                                    type="search"
                                                   >
-                                                    <EuiFormControlLayoutCustomIcon
-                                                      type="search"
+                                                    <span
+                                                      className="euiFormControlLayoutCustomIcon"
                                                     >
-                                                      <span
-                                                        className="euiFormControlLayoutCustomIcon"
+                                                      <EuiIcon
+                                                        aria-hidden="true"
+                                                        className="euiFormControlLayoutCustomIcon__icon"
+                                                        size="m"
+                                                        type="search"
                                                       >
-                                                        <EuiIcon
+                                                        <search
                                                           aria-hidden="true"
-                                                          className="euiFormControlLayoutCustomIcon__icon"
-                                                          size="m"
-                                                          type="search"
+                                                          className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
+                                                          focusable="false"
+                                                          height="16"
+                                                          style={
+                                                            Object {
+                                                              "fill": undefined,
+                                                            }
+                                                          }
+                                                          viewBox="0 0 16 16"
+                                                          width="16"
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                          xmlnsXlink="http://www.w3.org/1999/xlink"
                                                         >
-                                                          <search
+                                                          <svg
                                                             aria-hidden="true"
                                                             className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
                                                             focusable="false"
@@ -446,102 +464,98 @@ exports[`NewVisModal should render as expected 1`] = `
                                                             xmlns="http://www.w3.org/2000/svg"
                                                             xmlnsXlink="http://www.w3.org/1999/xlink"
                                                           >
-                                                            <svg
-                                                              aria-hidden="true"
-                                                              className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
-                                                              focusable="false"
-                                                              height="16"
-                                                              style={
-                                                                Object {
-                                                                  "fill": undefined,
-                                                                }
-                                                              }
-                                                              viewBox="0 0 16 16"
-                                                              width="16"
-                                                              xmlns="http://www.w3.org/2000/svg"
-                                                              xmlnsXlink="http://www.w3.org/1999/xlink"
-                                                            >
-                                                              <defs>
-                                                                <path
-                                                                  d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
-                                                                  id="search-a"
-                                                                />
-                                                              </defs>
-                                                              <use
-                                                                xlinkHref="#search-a"
+                                                            <defs>
+                                                              <path
+                                                                d="M11.271 11.978l3.872 3.873a.502.502 0 0 0 .708 0 .502.502 0 0 0 0-.708l-3.565-3.564c2.38-2.747 2.267-6.923-.342-9.532-2.73-2.73-7.17-2.73-9.898 0-2.728 2.729-2.728 7.17 0 9.9a6.955 6.955 0 0 0 4.949 2.05.5.5 0 0 0 0-1 5.96 5.96 0 0 1-4.242-1.757 6.01 6.01 0 0 1 0-8.486c2.337-2.34 6.143-2.34 8.484 0a6.01 6.01 0 0 1 0 8.486.5.5 0 0 0 .034.738z"
+                                                                id="search-a"
                                                               />
-                                                            </svg>
-                                                          </search>
-                                                        </EuiIcon>
-                                                      </span>
-                                                    </EuiFormControlLayoutCustomIcon>
-                                                  </div>
-                                                </EuiFormControlLayoutIcons>
-                                              </div>
+                                                            </defs>
+                                                            <use
+                                                              xlinkHref="#search-a"
+                                                            />
+                                                          </svg>
+                                                        </search>
+                                                      </EuiIcon>
+                                                    </span>
+                                                  </EuiFormControlLayoutCustomIcon>
+                                                </div>
+                                              </EuiFormControlLayoutIcons>
                                             </div>
-                                          </EuiFormControlLayout>
-                                        </EuiFieldSearch>
-                                      </div>
-                                    </EuiFlexItem>
-                                    <EuiFlexItem
-                                      component="div"
-                                      grow={true}
+                                          </div>
+                                        </EuiFormControlLayout>
+                                      </EuiFieldSearch>
+                                    </div>
+                                  </EuiFlexItem>
+                                  <EuiFlexItem
+                                    className="visNewVisDialog__typesWrapper"
+                                    component="div"
+                                    grow={1}
+                                  >
+                                    <div
+                                      className="euiFlexItem euiFlexItem--flexGrow1 visNewVisDialog__typesWrapper"
                                     >
-                                      <div
-                                        className="euiFlexItem"
+                                      <EuiKeyPadMenu
+                                        className="visNewVisDialog__types"
+                                        data-test-subj="visNewDialogTypes"
                                       >
-                                        <EuiKeyPadMenu
-                                          className="visNewVisDialog__types"
+                                        <div
+                                          className="euiKeyPadMenu visNewVisDialog__types"
                                           data-test-subj="visNewDialogTypes"
+                                          role="menu"
                                         >
-                                          <div
-                                            className="euiKeyPadMenu visNewVisDialog__types"
-                                            data-test-subj="visNewDialogTypes"
-                                            role="menu"
+                                          <EuiKeyPadMenuItemButton
+                                            className="visNewVisDialog__type"
+                                            data-test-subj="visType-vis"
+                                            data-vis-stage="production"
+                                            disabled={false}
+                                            key="vis"
+                                            label={
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis Type 1
+                                              </span>
+                                            }
+                                            onBlur={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
                                           >
-                                            <EuiKeyPadMenuItemButton
-                                              className="visNewVisDialog__type"
+                                            <button
+                                              className="euiKeyPadMenuItem visNewVisDialog__type"
                                               data-test-subj="visType-vis"
                                               data-vis-stage="production"
                                               disabled={false}
-                                              key="vis"
-                                              label={
-                                                <span
-                                                  data-test-subj="visTypeTitle"
-                                                >
-                                                  Vis Type 1
-                                                </span>
-                                              }
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              type="button"
                                             >
-                                              <button
-                                                className="euiKeyPadMenuItem visNewVisDialog__type"
-                                                data-test-subj="visType-vis"
-                                                data-vis-stage="production"
-                                                disabled={false}
-                                                onBlur={[Function]}
-                                                onClick={[Function]}
-                                                onFocus={[Function]}
-                                                onMouseEnter={[Function]}
-                                                onMouseLeave={[Function]}
-                                                type="button"
+                                              <div
+                                                className="euiKeyPadMenuItem__inner"
                                               >
                                                 <div
-                                                  className="euiKeyPadMenuItem__inner"
+                                                  className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <div
-                                                    className="euiKeyPadMenuItem__icon"
+                                                  <EuiIcon
+                                                    aria-hidden="true"
+                                                    color="secondary"
+                                                    size="l"
                                                   >
-                                                    <EuiIcon
+                                                    <empty
                                                       aria-hidden="true"
-                                                      color="secondary"
-                                                      size="l"
+                                                      className="euiIcon euiIcon--large euiIcon--secondary"
+                                                      focusable="false"
+                                                      height="16"
+                                                      style={null}
+                                                      viewBox="0 0 16 16"
+                                                      width="16"
+                                                      xmlns="http://www.w3.org/2000/svg"
                                                     >
-                                                      <empty
+                                                      <svg
                                                         aria-hidden="true"
                                                         className="euiIcon euiIcon--large euiIcon--secondary"
                                                         focusable="false"
@@ -550,75 +564,75 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         viewBox="0 0 16 16"
                                                         width="16"
                                                         xmlns="http://www.w3.org/2000/svg"
-                                                      >
-                                                        <svg
-                                                          aria-hidden="true"
-                                                          className="euiIcon euiIcon--large euiIcon--secondary"
-                                                          focusable="false"
-                                                          height="16"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width="16"
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </empty>
-                                                    </EuiIcon>
-                                                  </div>
-                                                  <p
-                                                    className="euiKeyPadMenuItem__label"
-                                                  >
-                                                    <span
-                                                      data-test-subj="visTypeTitle"
-                                                    >
-                                                      Vis Type 1
-                                                    </span>
-                                                  </p>
+                                                      />
+                                                    </empty>
+                                                  </EuiIcon>
                                                 </div>
-                                              </button>
-                                            </EuiKeyPadMenuItemButton>
-                                            <EuiKeyPadMenuItemButton
-                                              className="visNewVisDialog__type"
+                                                <p
+                                                  className="euiKeyPadMenuItem__label"
+                                                >
+                                                  <span
+                                                    data-test-subj="visTypeTitle"
+                                                  >
+                                                    Vis Type 1
+                                                  </span>
+                                                </p>
+                                              </div>
+                                            </button>
+                                          </EuiKeyPadMenuItemButton>
+                                          <EuiKeyPadMenuItemButton
+                                            className="visNewVisDialog__type"
+                                            data-test-subj="visType-visWithSearch"
+                                            data-vis-stage="production"
+                                            disabled={false}
+                                            key="visWithSearch"
+                                            label={
+                                              <span
+                                                data-test-subj="visTypeTitle"
+                                              >
+                                                Vis with search
+                                              </span>
+                                            }
+                                            onBlur={[Function]}
+                                            onClick={[Function]}
+                                            onFocus={[Function]}
+                                            onMouseEnter={[Function]}
+                                            onMouseLeave={[Function]}
+                                          >
+                                            <button
+                                              className="euiKeyPadMenuItem visNewVisDialog__type"
                                               data-test-subj="visType-visWithSearch"
                                               data-vis-stage="production"
                                               disabled={false}
-                                              key="visWithSearch"
-                                              label={
-                                                <span
-                                                  data-test-subj="visTypeTitle"
-                                                >
-                                                  Vis with search
-                                                </span>
-                                              }
                                               onBlur={[Function]}
                                               onClick={[Function]}
                                               onFocus={[Function]}
                                               onMouseEnter={[Function]}
                                               onMouseLeave={[Function]}
+                                              type="button"
                                             >
-                                              <button
-                                                className="euiKeyPadMenuItem visNewVisDialog__type"
-                                                data-test-subj="visType-visWithSearch"
-                                                data-vis-stage="production"
-                                                disabled={false}
-                                                onBlur={[Function]}
-                                                onClick={[Function]}
-                                                onFocus={[Function]}
-                                                onMouseEnter={[Function]}
-                                                onMouseLeave={[Function]}
-                                                type="button"
+                                              <div
+                                                className="euiKeyPadMenuItem__inner"
                                               >
                                                 <div
-                                                  className="euiKeyPadMenuItem__inner"
+                                                  className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <div
-                                                    className="euiKeyPadMenuItem__icon"
+                                                  <EuiIcon
+                                                    aria-hidden="true"
+                                                    color="secondary"
+                                                    size="l"
                                                   >
-                                                    <EuiIcon
+                                                    <empty
                                                       aria-hidden="true"
-                                                      color="secondary"
-                                                      size="l"
+                                                      className="euiIcon euiIcon--large euiIcon--secondary"
+                                                      focusable="false"
+                                                      height="16"
+                                                      style={null}
+                                                      viewBox="0 0 16 16"
+                                                      width="16"
+                                                      xmlns="http://www.w3.org/2000/svg"
                                                     >
-                                                      <empty
+                                                      <svg
                                                         aria-hidden="true"
                                                         className="euiIcon euiIcon--large euiIcon--secondary"
                                                         focusable="false"
@@ -627,97 +641,86 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         viewBox="0 0 16 16"
                                                         width="16"
                                                         xmlns="http://www.w3.org/2000/svg"
-                                                      >
-                                                        <svg
-                                                          aria-hidden="true"
-                                                          className="euiIcon euiIcon--large euiIcon--secondary"
-                                                          focusable="false"
-                                                          height="16"
-                                                          style={null}
-                                                          viewBox="0 0 16 16"
-                                                          width="16"
-                                                          xmlns="http://www.w3.org/2000/svg"
-                                                        />
-                                                      </empty>
-                                                    </EuiIcon>
-                                                  </div>
-                                                  <p
-                                                    className="euiKeyPadMenuItem__label"
-                                                  >
-                                                    <span
-                                                      data-test-subj="visTypeTitle"
-                                                    >
-                                                      Vis with search
-                                                    </span>
-                                                  </p>
+                                                      />
+                                                    </empty>
+                                                  </EuiIcon>
                                                 </div>
-                                              </button>
-                                            </EuiKeyPadMenuItemButton>
-                                          </div>
-                                        </EuiKeyPadMenu>
-                                      </div>
-                                    </EuiFlexItem>
-                                  </div>
-                                </EuiFlexGroup>
-                              </div>
-                            </EuiModalBody>
-                          </div>
-                        </EuiFlexItem>
-                        <EuiFlexItem
-                          className="visNewVisDialog__description"
-                          component="div"
-                          grow={true}
-                        >
-                          <div
-                            className="euiFlexItem visNewVisDialog__description"
+                                                <p
+                                                  className="euiKeyPadMenuItem__label"
+                                                >
+                                                  <span
+                                                    data-test-subj="visTypeTitle"
+                                                  >
+                                                    Vis with search
+                                                  </span>
+                                                </p>
+                                              </div>
+                                            </button>
+                                          </EuiKeyPadMenuItemButton>
+                                        </div>
+                                      </EuiKeyPadMenu>
+                                    </div>
+                                  </EuiFlexItem>
+                                </div>
+                              </EuiFlexGroup>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            className="visNewVisDialog__description"
+                            component="div"
+                            grow={false}
                           >
-                            <EuiTitle
-                              size="s"
-                              textTransform="none"
+                            <div
+                              className="euiFlexItem euiFlexItem--flexGrowZero visNewVisDialog__description"
                             >
-                              <h2
-                                className="euiTitle euiTitle--small"
+                              <EuiTitle
+                                size="s"
+                                textTransform="none"
                               >
-                                <FormattedMessage
-                                  defaultMessage="Select a visualization type"
-                                  id="kbn.visualize.newVisWizard.selectVisType"
-                                  values={Object {}}
+                                <h2
+                                  className="euiTitle euiTitle--small"
                                 >
-                                  Select a visualization type
-                                </FormattedMessage>
-                              </h2>
-                            </EuiTitle>
-                            <EuiSpacer
-                              size="m"
-                            >
-                              <div
-                                className="euiSpacer euiSpacer--m"
-                              />
-                            </EuiSpacer>
-                            <Component>
-                              <EuiText
-                                grow={true}
+                                  <FormattedMessage
+                                    defaultMessage="Select a visualization type"
+                                    id="kbn.visualize.newVisWizard.selectVisType"
+                                    values={Object {}}
+                                  >
+                                    Select a visualization type
+                                  </FormattedMessage>
+                                </h2>
+                              </EuiTitle>
+                              <EuiSpacer
                                 size="m"
                               >
                                 <div
-                                  className="euiText euiText--medium"
+                                  className="euiSpacer euiSpacer--m"
+                                />
+                              </EuiSpacer>
+                              <Component>
+                                <EuiText
+                                  grow={true}
+                                  size="m"
                                 >
-                                  <p>
-                                    <FormattedMessage
-                                      defaultMessage="Start creating your visualization by selecting a type for that visualization."
-                                      id="kbn.visualize.newVisWizard.helpText"
-                                      values={Object {}}
-                                    >
-                                      Start creating your visualization by selecting a type for that visualization.
-                                    </FormattedMessage>
-                                  </p>
-                                </div>
-                              </EuiText>
-                            </Component>
-                          </div>
-                        </EuiFlexItem>
-                      </div>
-                    </EuiFlexGroup>
+                                  <div
+                                    className="euiText euiText--medium"
+                                  >
+                                    <p>
+                                      <FormattedMessage
+                                        defaultMessage="Start creating your visualization by selecting a type for that visualization."
+                                        id="kbn.visualize.newVisWizard.helpText"
+                                        values={Object {}}
+                                      >
+                                        Start creating your visualization by selecting a type for that visualization.
+                                      </FormattedMessage>
+                                    </p>
+                                  </div>
+                                </EuiText>
+                              </Component>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </div>
                   </TypeSelection>
                 </div>
               </div>
