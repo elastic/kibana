@@ -23,6 +23,10 @@ import 'ui/pager';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { i18n } from '@kbn/i18n';
+<<<<<<< HEAD
+=======
+import chrome from 'ui/chrome';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 import { VisualizeListingTable } from './visualize_listing_table';
 
@@ -52,7 +56,7 @@ export function VisualizeListingController($injector) {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'lab'));
+        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'));
       });
   };
 
@@ -61,7 +65,11 @@ export function VisualizeListingController($injector) {
       .catch(error => notify.error(error));
   };
 
+<<<<<<< HEAD
   breadcrumbState.set([{
+=======
+  chrome.breadcrumbs.set([{
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
       defaultMessage: 'Visualize',
     })

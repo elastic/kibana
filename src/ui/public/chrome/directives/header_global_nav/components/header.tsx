@@ -18,7 +18,11 @@
  */
 
 import React, { Component } from 'react';
+<<<<<<< HEAD
 import { Subscribable } from 'rxjs';
+=======
+import * as Rx from 'rxjs';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 import {
   // TODO: add type annotations
@@ -38,11 +42,20 @@ import { HeaderNavControls } from './header_nav_controls';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
+<<<<<<< HEAD
 import { Breadcrumb, NavControlSide, NavLink } from '../';
 
 interface Props {
   appTitle?: string;
   breadcrumbs: Subscribable<Breadcrumb[]>;
+=======
+import { NavControlSide, NavLink } from '../';
+import { Breadcrumb } from '../../../../../../core/public/chrome';
+
+interface Props {
+  appTitle?: string;
+  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   homeHref: string;
   isVisible: boolean;
   navLinks: NavLink[];
@@ -66,7 +79,11 @@ class HeaderUI extends Component<Props> {
   }
 
   public render() {
+<<<<<<< HEAD
     const { appTitle, breadcrumbs, isVisible, navControls, navLinks } = this.props;
+=======
+    const { appTitle, breadcrumbs$, isVisible, navControls, navLinks } = this.props;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     if (!isVisible) {
       return null;
@@ -82,7 +99,11 @@ class HeaderUI extends Component<Props> {
 
           <HeaderNavControls navControls={leftNavControls} />
 
+<<<<<<< HEAD
           <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs={breadcrumbs} />
+=======
+          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </EuiHeaderSection>
 
         <EuiHeaderSection side="right">

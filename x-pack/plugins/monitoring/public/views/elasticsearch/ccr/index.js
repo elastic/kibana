@@ -11,6 +11,10 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { Ccr } from '../../../components/elasticsearch/ccr';
 import { MonitoringViewBaseController } from '../../base_controller';
+<<<<<<< HEAD
+=======
+import { I18nProvider } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 uiRoutes.when('/elasticsearch/ccr', {
   template,
@@ -23,9 +27,17 @@ uiRoutes.when('/elasticsearch/ccr', {
   },
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
+<<<<<<< HEAD
     constructor($injector, $scope) {
       super({
         title: 'Elasticsearch - Ccr',
+=======
+    constructor($injector, $scope, i18n) {
+      super({
+        title: i18n('xpack.monitoring.elasticsearch.ccr.routeTitle', {
+          defaultMessage: 'Elasticsearch - Ccr'
+        }),
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         reactNodeId: 'elasticsearchCcrReact',
         getPageData,
         $scope,
@@ -38,7 +50,13 @@ uiRoutes.when('/elasticsearch/ccr', {
 
       this.renderReact = ({ data }) => {
         super.renderReact(
+<<<<<<< HEAD
           <Ccr data={data} />
+=======
+          <I18nProvider>
+            <Ccr data={data} />
+          </I18nProvider>
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         );
       };
     }

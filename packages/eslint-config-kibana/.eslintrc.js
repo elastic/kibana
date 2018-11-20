@@ -1,4 +1,7 @@
-const RESTRICTED_GLOBALS = require('./restricted_globals')
+const semver = require('semver');
+
+const PKG = require('../../package.json');
+const RESTRICTED_GLOBALS = require('./restricted_globals');
 
 module.exports = {
   parser: 'babel-eslint',
@@ -12,7 +15,17 @@ module.exports = {
     'prefer-object-spread',
     'jsx-a11y',
   ],
+<<<<<<< HEAD
   
+=======
+
+  settings: {
+    react: {
+      version: semver.coerce(PKG.dependencies.react),
+    },
+  },
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   env: {
     es6: true,
     node: true,

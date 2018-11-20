@@ -5,6 +5,10 @@
  */
 
 import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
+<<<<<<< HEAD
+=======
+import { I18nProvider } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React, { Component, ComponentClass } from 'react';
 import { UserProfile } from '../../../../xpack_main/public/services/user_profile';
 import { Space } from '../../../common/model/space';
@@ -70,12 +74,23 @@ export class NavControlPopover extends Component<Props, State> {
       );
     } else {
       element = (
+<<<<<<< HEAD
         <SpacesMenu
           spaces={this.state.spaces}
           onSelectSpace={this.onSelectSpace}
           userProfile={this.props.userProfile}
           onManageSpacesClick={this.toggleSpaceSelector}
         />
+=======
+        <I18nProvider>
+          <SpacesMenu
+            spaces={this.state.spaces}
+            onSelectSpace={this.onSelectSpace}
+            userProfile={this.props.userProfile}
+            onManageSpacesClick={this.toggleSpaceSelector}
+          />
+        </I18nProvider>
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       );
     }
 

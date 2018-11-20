@@ -114,29 +114,57 @@ app.controller('timelion', function (
   const savedSheet = $route.current.locals.savedSheet;
 
   $scope.topNavMenu = [{
+<<<<<<< HEAD
     key: 'new',
     description: i18n('timelion.topNavMenu.newDescription', {
+=======
+    key: i18n('timelion.topNavMenu.newSheetButtonLabel', {
+      defaultMessage: 'new',
+    }),
+    description: i18n('timelion.topNavMenu.newSheetButtonAriaLabel', {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       defaultMessage: 'New Sheet',
     }),
     run: function () { kbnUrl.change('/'); },
     testId: 'timelionNewButton',
   }, {
+<<<<<<< HEAD
     key: 'add',
     description: i18n('timelion.topNavMenu.addDescription', {
+=======
+    key: i18n('timelion.topNavMenu.addChartButtonLabel', {
+      defaultMessage: 'add',
+    }),
+    description: i18n('timelion.topNavMenu.addChartButtonAriaLabel', {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       defaultMessage: 'Add a chart',
     }),
     run: function () { $scope.newCell(); },
     testId: 'timelionAddChartButton',
   }, {
+<<<<<<< HEAD
     key: 'save',
     description: i18n('timelion.topNavMenu.saveDescription', {
+=======
+    key: i18n('timelion.topNavMenu.saveSheetButtonLabel', {
+      defaultMessage: 'save',
+    }),
+    description: i18n('timelion.topNavMenu.saveSheetButtonAriaLabel', {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       defaultMessage: 'Save Sheet',
     }),
     template: require('plugins/timelion/partials/save_sheet.html'),
     testId: 'timelionSaveButton',
   }, {
+<<<<<<< HEAD
     key: 'delete',
     description: i18n('timelion.topNavMenu.deleteDescription', {
+=======
+    key: i18n('timelion.topNavMenu.deleteSheetButtonLabel', {
+      defaultMessage: 'delete',
+    }),
+    description: i18n('timelion.topNavMenu.deleteSheetButtonAriaLabel', {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       defaultMessage: 'Delete current sheet',
     }),
     disableButton: function () {
@@ -177,22 +205,43 @@ app.controller('timelion', function (
     },
     testId: 'timelionDeleteButton',
   }, {
+<<<<<<< HEAD
     key: 'open',
     description: i18n('timelion.topNavMenu.openDescription', {
+=======
+    key: i18n('timelion.topNavMenu.openSheetButtonLabel', {
+      defaultMessage: 'open',
+    }),
+    description: i18n('timelion.topNavMenu.openSheetButtonAriaLabel', {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       defaultMessage: 'Open Sheet',
     }),
     template: require('plugins/timelion/partials/load_sheet.html'),
     testId: 'timelionOpenButton',
   }, {
+<<<<<<< HEAD
     key: 'options',
     description: i18n('timelion.topNavMenu.optionsDescription', {
+=======
+    key: i18n('timelion.topNavMenu.optionsButtonLabel', {
+      defaultMessage: 'options',
+    }),
+    description: i18n('timelion.topNavMenu.optionsButtonAriaLabel', {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       defaultMessage: 'Options',
     }),
     template: require('plugins/timelion/partials/sheet_options.html'),
     testId: 'timelionOptionsButton',
   }, {
+<<<<<<< HEAD
     key: 'help',
     description: i18n('timelion.topNavMenu.helpDescription', {
+=======
+    key: i18n('timelion.topNavMenu.helpButtonLabel', {
+      defaultMessage: 'help',
+    }),
+    description: i18n('timelion.topNavMenu.helpButtonAriaLabel', {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       defaultMessage: 'Help',
     }),
     template: '<timelion-help></timelion-help>',

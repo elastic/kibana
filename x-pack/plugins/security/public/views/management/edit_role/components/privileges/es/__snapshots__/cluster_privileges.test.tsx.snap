@@ -71,6 +71,17 @@ exports[`it renders without crashing 1`] = `
             "isGroupLabelOption": false,
             "label": "monitor_watcher",
           },
+<<<<<<< HEAD
+=======
+          Object {
+            "isGroupLabelOption": false,
+            "label": "read_ccr",
+          },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "manage_ccr",
+          },
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         ]
       }
       selectedOptions={Array []}

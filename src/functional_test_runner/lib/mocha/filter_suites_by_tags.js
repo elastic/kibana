@@ -28,6 +28,17 @@
  * @param options.exclude an array of tags that will be used to exclude suites from the run
  */
 export function filterSuitesByTags({ log, mocha, include, exclude }) {
+<<<<<<< HEAD
+=======
+  mocha.excludedTests = [];
+  // collect all the tests from some suite, including it's children
+  const collectTests = (suite) =>
+    suite.suites.reduce(
+      (acc, s) => acc.concat(collectTests(s)),
+      suite.tests
+    );
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   // if include tags were provided, filter the tree once to
   // only include branches that are included at some point
   if (include.length) {
@@ -47,14 +58,27 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
           continue;
         }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         // this suite has an included child but is not included
         // itself, so strip out its tests and recurse to filter
         // out child suites which are not included
         if (isChildIncluded(child)) {
+<<<<<<< HEAD
+=======
+          mocha.excludedTests = mocha.excludedTests.concat(child.tests);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           child.tests = [];
           parentSuite.suites.push(child);
           recurse(child);
           continue;
+<<<<<<< HEAD
+=======
+        } else {
+          mocha.excludedTests = mocha.excludedTests.concat(collectTests(child));
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         }
       }
     }(mocha.suite));
@@ -78,6 +102,11 @@ export function filterSuitesByTags({ log, mocha, include, exclude }) {
         if (isNotExcluded(child)) {
           parentSuite.suites.push(child);
           recurse(child);
+<<<<<<< HEAD
+=======
+        } else {
+          mocha.excludedTests = mocha.excludedTests.concat(collectTests(child));
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         }
       }
     }(mocha.suite));

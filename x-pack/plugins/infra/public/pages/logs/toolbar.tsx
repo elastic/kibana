@@ -5,6 +5,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+<<<<<<< HEAD
+=======
+import { injectI18n } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React from 'react';
 
 import { AutocompleteField } from '../../components/autocomplete_field';
@@ -20,7 +24,11 @@ import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithLogTextview } from '../../containers/logs/with_log_textview';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
+<<<<<<< HEAD
 export const LogsToolbar: React.SFC = () => (
+=======
+export const LogsToolbar = injectI18n(({ intl }) => (
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   <Toolbar>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
       <EuiFlexItem>
@@ -40,7 +48,14 @@ export const LogsToolbar: React.SFC = () => (
                   loadSuggestions={loadSuggestions}
                   onChange={setFilterQueryDraftFromKueryExpression}
                   onSubmit={applyFilterQueryFromKueryExpression}
+<<<<<<< HEAD
                   placeholder="Search for log entries... (e.g. host.name:host-1)"
+=======
+                  placeholder={intl.formatMessage({
+                    id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',
+                    defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
+                  })}
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
                   suggestions={suggestions}
                   value={filterQueryDraft ? filterQueryDraft.expression : ''}
                 />
@@ -95,4 +110,8 @@ export const LogsToolbar: React.SFC = () => (
       </EuiFlexItem>
     </EuiFlexGroup>
   </Toolbar>
+<<<<<<< HEAD
 );
+=======
+));
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

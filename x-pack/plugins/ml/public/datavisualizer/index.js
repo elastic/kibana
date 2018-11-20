@@ -6,7 +6,10 @@
 
 
 
+<<<<<<< HEAD
 import './styles/main.less';
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import './selector';
 import './datavisualizer_controller';
 import 'plugins/ml/components/data_recognizer';

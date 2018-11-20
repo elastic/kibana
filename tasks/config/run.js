@@ -18,6 +18,7 @@
  */
 
 import { resolve } from 'path';
+import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
 const { version } = require('../../package.json');
 const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
@@ -220,6 +221,7 @@ module.exports = function (grunt) {
       ],
     },
 
+<<<<<<< HEAD
     functionalTestsRelease: {
       cmd: process.execPath,
       args: [
@@ -233,5 +235,11 @@ module.exports = function (grunt) {
         '--server.maxPayloadBytes=1648576',
       ],
     },
+=======
+    ...getFunctionalTestGroupRunConfigs({
+      esFrom,
+      kibanaInstallDir: KIBANA_INSTALL_DIR
+    })
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   };
 };

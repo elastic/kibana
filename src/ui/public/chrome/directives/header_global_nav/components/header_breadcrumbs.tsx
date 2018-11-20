@@ -18,18 +18,30 @@
  */
 
 import React, { Component } from 'react';
+<<<<<<< HEAD
 import { Subscribable, Unsubscribable } from 'rxjs';
+=======
+import * as Rx from 'rxjs';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 import {
   // @ts-ignore
   EuiHeaderBreadcrumbs,
 } from '@elastic/eui';
 
+<<<<<<< HEAD
 import { Breadcrumb } from '../';
 
 interface Props {
   appTitle?: string;
   breadcrumbs: Subscribable<Breadcrumb[]>;
+=======
+import { Breadcrumb } from '../../../../../../core/public/chrome';
+
+interface Props {
+  appTitle?: string;
+  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 }
 
 interface State {
@@ -37,7 +49,11 @@ interface State {
 }
 
 export class HeaderBreadcrumbs extends Component<Props, State> {
+<<<<<<< HEAD
   private unsubscribable?: Unsubscribable;
+=======
+  private subscription?: Rx.Subscription;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
   constructor(props: Props) {
     super(props);
@@ -50,7 +66,11 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+<<<<<<< HEAD
     if (prevProps.breadcrumbs === this.props.breadcrumbs) {
+=======
+    if (prevProps.breadcrumbs$ === this.props.breadcrumbs$) {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       return;
     }
 
@@ -73,15 +93,28 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   private subscribe() {
+<<<<<<< HEAD
     this.unsubscribable = this.props.breadcrumbs.subscribe(breadcrumbs => {
       this.setState({ breadcrumbs });
+=======
+    this.subscription = this.props.breadcrumbs$.subscribe(breadcrumbs => {
+      this.setState({
+        breadcrumbs,
+      });
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     });
   }
 
   private unsubscribe() {
+<<<<<<< HEAD
     if (this.unsubscribable) {
       this.unsubscribable.unsubscribe();
       delete this.unsubscribable;
+=======
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      delete this.subscription;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
   }
 }

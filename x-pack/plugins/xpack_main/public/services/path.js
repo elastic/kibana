@@ -10,7 +10,11 @@ export function PathProvider($window) {
   const path = chrome.removeBasePath($window.location.pathname);
   return {
     isUnauthenticated() {
+<<<<<<< HEAD
       return path === '/login' || path === '/logout' || path === '/logged_out';
+=======
+      return path === '/login' || path === '/logout' || path === '/logged_out' || path === '/status';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
   };
 }

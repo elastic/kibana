@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
 import expect from 'expect.js';
 import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -41,15 +40,6 @@ describe('Vis Class', function () {
     params: { isDonut: true },
     listeners: { click: _.noop }
   };
-
-  // Wrap the given vis type definition in a state, that can be passed to vis
-  const state = (type) => ({
-    type: {
-      visConfig: { defaults: {} },
-      schemas: {},
-      ...type,
-    }
-  });
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
@@ -116,6 +106,7 @@ describe('Vis Class', function () {
     });
   });
 
+<<<<<<< HEAD
   describe('vis addFilter method', () => {
     let aggConfig;
     let data;
@@ -153,4 +144,6 @@ describe('Vis Class', function () {
     });
   });
 
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 });

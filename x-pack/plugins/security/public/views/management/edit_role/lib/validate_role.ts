@@ -10,6 +10,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+<<<<<<< HEAD
+=======
+import { i18n } from '@kbn/i18n';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
@@ -52,6 +56,7 @@ export class RoleValidator {
     }
 
     if (!role.name) {
+<<<<<<< HEAD
       return invalid(`Please provide a role name`);
     }
     if (role.name.length > 1024) {
@@ -60,6 +65,36 @@ export class RoleValidator {
     if (!role.name.match(/^[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*$/)) {
       return invalid(
         `Name must begin with a letter or underscore and contain only letters, underscores, and numbers.`
+=======
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRoles.validateRole.provideRoleNameWarningMessage',
+          {
+            defaultMessage: 'Please provide a role name',
+          }
+        )
+      );
+    }
+    if (role.name.length > 1024) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRoles.validateRole.nameLengthWarningMessage',
+          {
+            defaultMessage: 'Name must not exceed 1024 characters',
+          }
+        )
+      );
+    }
+    if (!role.name.match(/^[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*$/)) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRoles.validateRole.nameAllowedCharactersWarningMessage',
+          {
+            defaultMessage:
+              'Name must begin with a letter or underscore and contain only letters, underscores, and numbers.',
+          }
+        )
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       );
     }
     return valid();
@@ -71,7 +106,18 @@ export class RoleValidator {
     }
 
     if (!Array.isArray(role.elasticsearch.indices)) {
+<<<<<<< HEAD
       throw new TypeError(`Expected role.elasticsearch.indices to be an array`);
+=======
+      throw new TypeError(
+        i18n.translate('xpack.security.management.editRoles.validateRole.indicesTypeErrorMessage', {
+          defaultMessage: 'Expected {elasticIndices} to be an array',
+          values: {
+            elasticIndices: '"role.elasticsearch.indices"',
+          },
+        })
+      );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     const areIndicesValid =
@@ -91,7 +137,18 @@ export class RoleValidator {
     }
 
     if (indexPrivilege.names.length && !indexPrivilege.privileges.length) {
+<<<<<<< HEAD
       return invalid(`At least one privilege is required`);
+=======
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRoles.validateRole.onePrivilegeRequiredWarningMessage',
+          {
+            defaultMessage: 'At least one privilege is required',
+          }
+        )
+      );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
     return valid();
   }
@@ -112,7 +169,18 @@ export class RoleValidator {
     if (Array.isArray(spaceIds) && spaceIds.length > 0) {
       return valid();
     }
+<<<<<<< HEAD
     return invalid('At least one space is required');
+=======
+    return invalid(
+      i18n.translate(
+        'xpack.security.management.editRoles.validateRole.oneSpaceRequiredWarningMessage',
+        {
+          defaultMessage: 'At least one space is required',
+        }
+      )
+    );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   }
 
   public validateSelectedPrivilege(
@@ -131,7 +199,18 @@ export class RoleValidator {
     if (privilege) {
       return valid();
     }
+<<<<<<< HEAD
     return invalid('Privilege is required');
+=======
+    return invalid(
+      i18n.translate(
+        'xpack.security.management.editRoles.validateRole.privilegeRequiredWarningMessage',
+        {
+          defaultMessage: 'Privilege is required',
+        }
+      )
+    );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   }
 
   public setInProgressSpacePrivileges(inProgressSpacePrivileges: any[]) {

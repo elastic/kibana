@@ -17,6 +17,11 @@ const clusterPrivileges = [
   'monitor_ml',
   'manage_watcher',
   'monitor_watcher',
+<<<<<<< HEAD
+=======
+  'read_ccr',
+  'manage_ccr',
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 ];
 const indexPrivileges = [
   'all',

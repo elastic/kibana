@@ -5,17 +5,19 @@
  */
 
 import { workpad } from './workpad';
-import { socketApi } from './socket';
-import { translate } from './translate';
 import { esFields } from './es_fields';
+<<<<<<< HEAD
 import { esIndices } from './es_indices';
 import { plugins } from './plugins';
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 export function routes(server) {
   workpad(server);
-  socketApi(server);
-  translate(server);
   esFields(server);
+<<<<<<< HEAD
   esIndices(server);
   plugins(server);
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 }

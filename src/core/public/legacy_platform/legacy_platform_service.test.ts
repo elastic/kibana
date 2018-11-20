@@ -110,6 +110,17 @@ jest.mock('ui/chrome/api/theme', () => {
   };
 });
 
+<<<<<<< HEAD
+=======
+const mockChromeBreadcrumbsInit = jest.fn();
+jest.mock('ui/chrome/api/breadcrumbs', () => {
+  mockLoadOrder.push('ui/chrome/api/breadcrumbs');
+  return {
+    __newPlatformInit__: mockChromeBreadcrumbsInit,
+  };
+});
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 const mockGlobalNavStateInit = jest.fn();
 jest.mock('ui/chrome/services/global_nav_state', () => {
   mockLoadOrder.push('ui/chrome/services/global_nav_state');
@@ -272,6 +283,20 @@ describe('#start()', () => {
       expect(mockChromeThemeInit).toHaveBeenCalledWith(chromeStartContract);
     });
 
+<<<<<<< HEAD
+=======
+    it('passes chrome service to ui/chrome/api/breadcrumbs', () => {
+      const legacyPlatform = new LegacyPlatformService({
+        ...defaultParams,
+      });
+
+      legacyPlatform.start(defaultStartDeps);
+
+      expect(mockChromeBreadcrumbsInit).toHaveBeenCalledTimes(1);
+      expect(mockChromeBreadcrumbsInit).toHaveBeenCalledWith(chromeStartContract);
+    });
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     it('passes chrome service to ui/chrome/api/global_nav_state', () => {
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,

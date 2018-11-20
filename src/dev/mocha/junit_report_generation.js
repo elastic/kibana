@@ -26,6 +26,11 @@ import xmlBuilder from 'xmlbuilder';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../xml';
+<<<<<<< HEAD
+=======
+
+const dateNow = Date.now.bind(Date);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
@@ -47,11 +52,11 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   );
 
   const setStartTime = (node) => {
-    node.startTime = Date.now();
+    node.startTime = dateNow();
   };
 
   const setEndTime = node => {
-    node.endTime = Date.now();
+    node.endTime = dateNow();
   };
 
   const getFullTitle = node => {
@@ -85,6 +90,9 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   runner.on('end', () => {
     // crawl the test graph to collect all defined tests
     const allTests = findAllTests(runner.suite);
+    if (!allTests.length) {
+      return;
+    }
 
     // filter out just the failures
     const failures = results.filter(result => result.failed);

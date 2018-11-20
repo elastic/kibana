@@ -37,7 +37,11 @@ interface Context {
 }
 
 interface Marks {
+<<<<<<< HEAD
   agent: {
+=======
+  agent?: {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     [name: string]: number;
   };
 }

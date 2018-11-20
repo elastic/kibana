@@ -7,19 +7,21 @@
 
 
 /*
- * Chart showing plot time series data, with or without model plot enabled,
+ * Chart plotting data from a single time series, with or without model plot enabled,
  * annotated with anomalies.
  */
 
-import _ from 'lodash';
-import $ from 'jquery';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import { TimeseriesChart } from './timeseries_chart';
+
 import angular from 'angular';
-import d3 from 'd3';
-import moment from 'moment';
 import { timefilter } from 'ui/timefilter';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
+<<<<<<< HEAD
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -43,15 +45,17 @@ import { mlEscape } from 'plugins/ml/util/string_utils';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.directive('mlTimeseriesChart', function () {
 
   function link(scope, element) {
-
     // Key dimensions for the viz and constituent charts.
     let svgWidth = angular.element('.results-container').width();
+<<<<<<< HEAD
     const focusZoomPanelHeight = 25;
     const focusChartHeight = 310;
     const focusHeight = focusZoomPanelHeight + focusChartHeight;
@@ -70,48 +74,54 @@ module.directive('mlTimeseriesChart', function () {
       { duration: moment.duration(1, 'w'), label: '1w' },
       { duration: moment.duration(2, 'w'), label: '2w' },
       { duration: moment.duration(1, 'M'), label: '1M' }];
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
-    // Set up the color scale to use for indicating score.
-    const anomalyColorScale = d3.scale.threshold()
-      .domain([3, 25, 50, 75, 100])
-      .range(['#d2e9f7', '#8bc8fb', '#ffdd00', '#ff7e00', '#fe5050']);
+    function contextChartSelected(selection) {
+      scope.$root.$broadcast('contextChartSelected', selection);
+    }
 
-    // Create a gray-toned version of the color scale to use under the context chart mask.
-    const anomalyGrayScale = d3.scale.threshold()
-      .domain([3, 25, 50, 75, 100])
-      .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
+    function renderReactComponent(renderFocusChartOnly = false) {
+      // Set the size of the components according to the width of the parent container at render time.
+      svgWidth = Math.max(angular.element('.results-container').width(), 0);
 
-    const focusXScale = d3.time.scale().range([0, vizWidth]);
-    const focusYScale = d3.scale.linear().range([focusHeight, focusZoomPanelHeight]);
+      const props = {
+        autoZoomDuration: scope.autoZoomDuration,
+        contextAggregationInterval: scope.contextAggregationInterval,
+        contextChartData: scope.contextChartData,
+        contextForecastData: scope.contextForecastData,
+        contextChartSelected: contextChartSelected,
+        detectorIndex: scope.detectorIndex,
+        focusChartData: scope.focusChartData,
+        focusForecastData: scope.focusForecastData,
+        focusAggregationInterval: scope.focusAggregationInterval,
+        modelPlotEnabled: scope.modelPlotEnabled,
+        renderFocusChartOnly,
+        selectedJob: scope.selectedJob,
+        showForecast: scope.showForecast,
+        showModelBounds: scope.showModelBounds,
+        svgWidth,
+        swimlaneData: scope.swimlaneData,
+        timefilter,
+        zoomFrom: scope.zoomFrom,
+        zoomTo: scope.zoomTo
+      };
 
-    const focusXAxis = d3.svg.axis().scale(focusXScale).orient('bottom')
-      .innerTickSize(-focusChartHeight).outerTickSize(0).tickPadding(10);
-    const focusYAxis = d3.svg.axis().scale(focusYScale).orient('left')
-      .innerTickSize(-vizWidth).outerTickSize(0).tickPadding(10);
+      ReactDOM.render(
+        React.createElement(TimeseriesChart, props),
+        element[0]
+      );
+    }
 
-    const focusValuesLine = d3.svg.line()
-      .x(function (d) { return focusXScale(d.date); })
-      .y(function (d) { return focusYScale(d.value); })
-      .defined(d => d.value !== null);
-    const focusBoundedArea = d3.svg.area()
-      .x (function (d) { return focusXScale(d.date) || 1; })
-      .y0(function (d) { return focusYScale(d.upper); })
-      .y1(function (d) { return focusYScale(d.lower); })
-      .defined(d => (d.lower !== null && d.upper !== null));
-
-    let contextXScale = d3.time.scale().range([0, vizWidth]);
-    let contextYScale = d3.scale.linear().range([contextChartHeight, contextChartLineTopMargin]);
-
-    let fieldFormat = undefined;
-
-    const brush = d3.svg.brush();
-    let mask;
+    renderReactComponent();
 
     scope.$on('render', () => {
-      fieldFormat = mlFieldFormatService.getFieldFormat(scope.selectedJob.job_id, scope.detectorIndex);
-      render();
-      drawContextChartSelection();
+      renderReactComponent();
     });
+
+    function renderFocusChart() {
+      renderReactComponent(true);
+    }
 
     scope.$watchCollection('focusForecastData', renderFocusChart);
     scope.$watchCollection('focusChartData', renderFocusChart);
@@ -121,34 +131,16 @@ module.directive('mlTimeseriesChart', function () {
     const resizeChecker = new ResizeChecker(angular.element('.ml-timeseries-chart'));
     resizeChecker.on('resize', () => {
       scope.$evalAsync(() => {
-        // Wait a digest cycle before rendering to prevent
-        // the underlying ResizeObserver going into an infinite loop.
-        render();
-        drawContextChartSelection();
-        renderFocusChart();
+        renderReactComponent();
       });
     });
 
-    // Listeners for mouseenter/leave events for rows in the table
-    // to highlight the corresponding anomaly mark in the focus chart.
-    const tableRecordMousenterListener = function (record) {
-      highlightFocusChartAnomaly(record);
-    };
-
-    const tableRecordMouseleaveListener = function (record) {
-      unhighlightFocusChartAnomaly(record);
-    };
-
-    mlAnomaliesTableService.anomalyRecordMouseenter.watch(tableRecordMousenterListener);
-    mlAnomaliesTableService.anomalyRecordMouseleave.watch(tableRecordMouseleaveListener);
-
     element.on('$destroy', () => {
-      mlAnomaliesTableService.anomalyRecordMouseenter.unwatch(tableRecordMousenterListener);
-      mlAnomaliesTableService.anomalyRecordMouseleave.unwatch(tableRecordMouseleaveListener);
       resizeChecker.destroy();
       scope.$destroy();
     });
 
+<<<<<<< HEAD
     function render() {
       // Clear any existing elements from the visualization,
       // then build the svg elements for the bubble chart.
@@ -1084,6 +1076,8 @@ module.directive('mlTimeseriesChart', function () {
     }
 
 
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   }
 
   return {

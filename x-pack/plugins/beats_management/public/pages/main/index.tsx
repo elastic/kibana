@@ -117,7 +117,11 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
     if (this.props.location.pathname === '/overview/initial/help') {
       return (
         <NoDataLayout
+<<<<<<< HEAD
           title="Beats central management"
+=======
+          title="Beats central management (Beta)"
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           actionSection={
             <ConnectedLink path="/overview/initial/beats">
               <EuiButton color="primary" fill>

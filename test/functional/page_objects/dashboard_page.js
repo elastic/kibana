@@ -135,7 +135,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
+<<<<<<< HEAD
       await remote.click(By.css(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`));
+=======
+      await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
+      await this.expectExistsDashboardLandingPage();
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async gotoDashboardLandingPage() {

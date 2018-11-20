@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButtonIcon, EuiSwitch, EuiTextArea } from '@elastic/eui';
+<<<<<<< HEAD
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+=======
+import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { RoleValidator } from '../../../lib/validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 
@@ -31,7 +36,11 @@ test('it renders without crashing', () => {
     onDelete: jest.fn(),
   };
 
+<<<<<<< HEAD
   const wrapper = shallow(<IndexPrivilegeForm {...props} />);
+=======
+  const wrapper = shallowWithIntl(<IndexPrivilegeForm {...props} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   expect(wrapper).toMatchSnapshot();
 });
 
@@ -62,7 +71,11 @@ describe('delete button', () => {
       ...props,
       allowDelete: false,
     };
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
   });
 
@@ -71,7 +84,11 @@ describe('delete button', () => {
       ...props,
       allowDelete: true,
     };
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
   });
 
@@ -80,7 +97,11 @@ describe('delete button', () => {
       ...props,
       allowDelete: true,
     };
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     wrapper.find(EuiButtonIcon).simulate('click');
     expect(testProps.onDelete).toHaveBeenCalledTimes(1);
   });
@@ -114,7 +135,11 @@ describe(`document level security`, () => {
       allowDocumentLevelSecurity: false,
     };
 
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find(EuiSwitch)).toHaveLength(0);
     expect(wrapper.find(EuiTextArea)).toHaveLength(0);
   });
@@ -128,7 +153,11 @@ describe(`document level security`, () => {
       },
     };
 
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find(EuiSwitch)).toHaveLength(1);
     expect(wrapper.find(EuiTextArea)).toHaveLength(0);
   });
@@ -138,7 +167,11 @@ describe(`document level security`, () => {
       ...props,
     };
 
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find(EuiSwitch)).toHaveLength(1);
     expect(wrapper.find(EuiTextArea)).toHaveLength(1);
   });
@@ -172,7 +205,11 @@ describe('field level security', () => {
       allowFieldLevelSecurity: false,
     };
 
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find('.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(0);
   });
 
@@ -181,7 +218,11 @@ describe('field level security', () => {
       ...props,
     };
 
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
   });
 
@@ -196,7 +237,11 @@ describe('field level security', () => {
       },
     };
 
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('.euiFormHelpText')).toHaveLength(1);
   });
@@ -206,7 +251,11 @@ describe('field level security', () => {
       ...props,
     };
 
+<<<<<<< HEAD
     const wrapper = mount(<IndexPrivilegeForm {...testProps} />);
+=======
+    const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find('div.indexPrivilegeForm__grantedFieldsRow')).toHaveLength(1);
     expect(wrapper.find('.euiFormHelpText')).toHaveLength(0);
   });

@@ -10,7 +10,15 @@ exports[`<ImpactedSpacesFlyout> renders without crashing 1`] = `
       onClick={[Function]}
       type="button"
     >
+<<<<<<< HEAD
       View summary of spaces privileges
+=======
+      <FormattedMessage
+        defaultMessage="View summary of spaces privileges"
+        id="xpack.security.management.editRoles.impactedSpacesFlyout.viewSpacesPrivilegesSummaryLinkText"
+        values={Object {}}
+      />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     </EuiLink>
   </div>
 </React.Fragment>

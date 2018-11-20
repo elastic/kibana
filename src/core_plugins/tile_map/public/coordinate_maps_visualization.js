@@ -21,7 +21,10 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
+<<<<<<< HEAD
 import { AggConfig } from 'ui/vis/agg_config';
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { toastNotifications } from 'ui/notify';
 
@@ -202,15 +205,15 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       if (agg) {
         const searchSource = this.vis.searchSource.createChild();
         searchSource.setField('size', 0);
-        searchSource.setField('aggs', function () {
-          const geoBoundsAgg = new AggConfig(agg.vis, {
+        searchSource.setField('aggs', () => {
+          const geoBoundsAgg = this.vis.getAggConfig().createAggConfig({
             type: 'geo_bounds',
             enabled: true,
             params: {
               field: agg.getField()
             },
-            schema: 'metric'
-          });
+            schema: 'metric',
+          }, { addToAggConfigs: false });
           return {
             '1': geoBoundsAgg.toDsl()
           };

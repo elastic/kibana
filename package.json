@@ -55,7 +55,11 @@
     "uiFramework:documentComponent": "cd packages/kbn-ui-framework && yarn documentComponent",
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
     "build:types": "tsc --p tsconfig.types.json",
+<<<<<<< HEAD
     "kbn:bootstrap": "yarn build:types"
+=======
+    "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook"
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   },
   "repository": {
     "type": "git",
@@ -92,6 +96,10 @@
     "@kbn/pm": "1.0.0",
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
+<<<<<<< HEAD
+=======
+    "@kbn/interpreter": "1.0.0",
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",
@@ -145,7 +153,6 @@
     "js-yaml": "3.4.1",
     "json-stringify-pretty-compact": "1.0.4",
     "json-stringify-safe": "5.0.1",
-    "jstimezonedetect": "1.0.5",
     "leaflet": "1.0.3",
     "leaflet-draw": "0.4.10",
     "leaflet-responsive-popup": "0.2.0",
@@ -329,7 +336,10 @@
     "gulp-babel": "^7.0.1",
     "gulp-sourcemaps": "1.7.3",
     "has-ansi": "^3.0.0",
+<<<<<<< HEAD
     "husky": "^0.14.3",
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     "image-diff": "1.6.0",
     "intl-messageformat-parser": "^1.4.0",
     "istanbul-instrumenter-loader": "3.0.0",

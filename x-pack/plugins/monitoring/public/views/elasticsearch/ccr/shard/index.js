@@ -12,6 +12,10 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
+<<<<<<< HEAD
+=======
+import { I18nProvider } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,
@@ -24,16 +28,34 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   },
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
+<<<<<<< HEAD
     constructor($injector, $scope, pageData) {
       super({
         title: 'Elasticsearch - Ccr - Shard',
+=======
+    constructor($injector, $scope, pageData, i18n) {
+      super({
+        title: i18n('xpack.monitoring.elasticsearch.ccr.shard.routeTitle', {
+          defaultMessage: 'Elasticsearch - Ccr - Shard'
+        }),
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         reactNodeId: 'elasticsearchCcrShardReact',
         getPageData,
         $scope,
         $injector
       });
 
+<<<<<<< HEAD
       $scope.instance = `Index: ${get(pageData, 'stat.follower_index')} Shard: ${get(pageData, 'stat.shard_id')}`;
+=======
+      $scope.instance = i18n('xpack.monitoring.elasticsearch.ccr.shard.instanceTitle', {
+        defaultMessage: 'Index: {followerIndex} Shard: {shardId}',
+        values: {
+          followerIndex: get(pageData, 'stat.follower_index'),
+          shardId: get(pageData, 'stat.shard_id')
+        }
+      });
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
@@ -41,7 +63,11 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
 
       this.renderReact = (props) => {
         super.renderReact(
+<<<<<<< HEAD
           <CcrShard {...props} />
+=======
+          <I18nProvider><CcrShard {...props} /> </I18nProvider>
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         );
       };
     }

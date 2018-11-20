@@ -9,6 +9,10 @@ import {
   EuiDescribedFormGroup,
   EuiFormRow,
 } from '@elastic/eui';
+<<<<<<< HEAD
+=======
+import { FormattedMessage } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React, { Component, Fragment } from 'react';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
@@ -35,11 +39,36 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
         ? (assignedPrivileges.global[0] as KibanaPrivilege)
         : NO_PRIVILEGE_VALUE;
 
+<<<<<<< HEAD
     const description = <p>Specifies the Kibana privilege for this role.</p>;
 
     return (
       <Fragment>
         <EuiDescribedFormGroup title={<h3>Kibana privileges</h3>} description={description}>
+=======
+    const description = (
+      <p>
+        <FormattedMessage
+          id="xpack.security.management.editRoles.simplePrivilegeForm.specifyPrivilegeForRoleDescription"
+          defaultMessage="Specifies the Kibana privilege for this role."
+        />
+      </p>
+    );
+
+    return (
+      <Fragment>
+        <EuiDescribedFormGroup
+          title={
+            <h3>
+              <FormattedMessage
+                id="xpack.security.management.editRoles.simplePrivilegeForm.kibanaPrivilegesTitle"
+                defaultMessage="Kibana privileges"
+              />
+            </h3>
+          }
+          description={description}
+        >
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           <EuiFormRow hasEmptyLabelSpace>
             <PrivilegeSelector
               data-test-subj={'kibanaPrivilege'}

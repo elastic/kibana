@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { injectI18nProvider } from '@kbn/i18n/react';
 import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
+import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
 import dashboardTemplate from './dashboard_app.html';
@@ -42,8 +44,14 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardListing', function (reactDirective) {
-  return reactDirective(DashboardListing);
+  return reactDirective(injectI18nProvider(DashboardListing));
 });
+
+function createNewDashboardCtrl($scope, i18n) {
+  $scope.visitVisualizeAppLinkText = i18n('kbn.dashboard.visitVisualizeAppLinkText', {
+    defaultMessage: 'visit the Visualize app',
+  });
+}
 
 uiRoutes
   .defaults(/dashboard/, {
@@ -51,7 +59,11 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
+<<<<<<< HEAD
     controller($injector, $location, $scope, Private, config, breadcrumbState) {
+=======
+    controller($injector, $location, $scope, Private, config, i18n) {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const dashboardConfig = $injector.get('dashboardConfig');
 
@@ -64,8 +76,13 @@ uiRoutes
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
+<<<<<<< HEAD
       breadcrumbState.set([{
         text: i18n.translate('kbn.dashboard.dashboardBreadcrumbsTitle', {
+=======
+      chrome.breadcrumbs.set([{
+        text: i18n('kbn.dashboard.dashboardBreadcrumbsTitle', {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           defaultMessage: 'Dashboards',
         }),
       }]);
@@ -98,6 +115,7 @@ uiRoutes
   })
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
+    controller: createNewDashboardCtrl,
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()
@@ -109,8 +127,9 @@ uiRoutes
   })
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
+    controller: createNewDashboardCtrl,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState) {
+      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState, i18n) {
         const id = $route.current.params.id;
 
         return savedDashboards.get(id)
@@ -131,7 +150,9 @@ uiRoutes
             if (error instanceof SavedObjectNotFound && id === 'create') {
               // Note "new AppState" is necessary so the state in the url is preserved through the redirect.
               kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-              toastNotifications.addWarning('The url "dashboard/create" was removed in 6.0. Please update your bookmarks.');
+              toastNotifications.addWarning(i18n('kbn.dashboard.urlWasRemovedInSixZeroWarningMessage',
+                { defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.' }
+              ));
             } else {
               throw error;
             }
@@ -143,11 +164,15 @@ uiRoutes
     }
   });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register((i18n) => {
   return {
     id: 'dashboard',
-    title: 'Dashboard',
-    description: 'Display and share a collection of visualizations and saved searches.',
+    title: i18n('kbn.dashboard.featureCatalogue.dashboardTitle', {
+      defaultMessage: 'Dashboard',
+    }),
+    description: i18n('kbn.dashboard.featureCatalogue.dashboardDescription', {
+      defaultMessage: 'Display and share a collection of visualizations and saved searches.',
+    }),
     icon: 'dashboardApp',
     path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,

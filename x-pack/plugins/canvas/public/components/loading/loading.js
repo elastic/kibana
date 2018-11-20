@@ -41,11 +41,13 @@ export const Loading = ({ animated, text, backgroundColor }) => {
 
 Loading.propTypes = {
   animated: PropTypes.bool,
+  backgroundColor: PropTypes.string,
   text: PropTypes.string,
   backgroundColor: PropTypes.string,
 };
 
 Loading.defaultProps = {
   animated: false,
+  backgroundColor: '#000000',
   text: '',
 };

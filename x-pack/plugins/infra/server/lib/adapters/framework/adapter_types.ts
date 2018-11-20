@@ -148,6 +148,7 @@ export interface InfraDateRangeAggregationResponse {
   buckets: InfraDateRangeAggregationBucket[];
 }
 
+<<<<<<< HEAD
 export interface InfraCapabilityAggregationBucket {
   key: string;
   names?: {
@@ -157,6 +158,17 @@ export interface InfraCapabilityAggregationBucket {
 
 export interface InfraCapabilityAggregationResponse {
   buckets: InfraCapabilityAggregationBucket[];
+=======
+export interface InfraMetadataAggregationBucket {
+  key: string;
+  names?: {
+    buckets: InfraMetadataAggregationBucket[];
+  };
+}
+
+export interface InfraMetadataAggregationResponse {
+  buckets: InfraMetadataAggregationBucket[];
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 }
 
 export interface InfraFieldsResponse {

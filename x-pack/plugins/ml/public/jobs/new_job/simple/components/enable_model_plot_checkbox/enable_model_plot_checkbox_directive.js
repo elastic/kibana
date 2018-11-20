@@ -9,6 +9,10 @@ import ReactDOM from 'react-dom';
 
 import { EnableModelPlotCheckbox } from './enable_model_plot_checkbox_view.js';
 import { ml } from '../../../../../services/ml_api_service';
+<<<<<<< HEAD
+=======
+import { checkCardinalitySuccess } from '../../../utils/new_job_utils';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -34,6 +38,7 @@ module.directive('mlEnableModelPlotCheckbox', function () {
       function errorHandler(error) {
         console.log('Cardinality could not be validated', error);
         $scope.ui.cardinalityValidator.status = STATUS.FAILED;
+<<<<<<< HEAD
         $scope.ui.cardinalityValidator.message = 'Cardinality could not be validated';
       }
 
@@ -61,6 +66,14 @@ module.directive('mlEnableModelPlotCheckbox', function () {
         }
 
         return response;
+=======
+        $scope.ui.cardinalityValidator.message = `An error occurred validating the configuration
+            for running the job with model plot enabled.
+            Creating model plots can be resource intensive and not recommended where the cardinality of the selected fields is high.
+            You may want to select a dedicated results index on the Job Details tab.`;
+        // Go ahead and check the dedicated index box for them
+        $scope.formConfig.useDedicatedIndex = true;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       }
 
       function validateCardinality() {
@@ -131,7 +144,14 @@ module.directive('mlEnableModelPlotCheckbox', function () {
           $scope.formConfig.enableModelPlot === false)
         );
         const validatorRunning = ($scope.ui.cardinalityValidator.status === STATUS.RUNNING);
+<<<<<<< HEAD
         const warningStatus = ($scope.ui.cardinalityValidator.status === STATUS.WARNING && $scope.ui.formValid === true);
+=======
+        const warningStatus = (
+          ($scope.ui.cardinalityValidator.status === STATUS.WARNING ||
+            $scope.ui.cardinalityValidator.status === STATUS.FAILED) &&
+            $scope.ui.formValid === true);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         const checkboxText = (validatorRunning) ? 'Validating cardinality...' : 'Enable model plot';
 
         const props = {

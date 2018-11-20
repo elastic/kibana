@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+<<<<<<< HEAD
+=======
+import { i18n } from '@kbn/i18n';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { toastNotifications } from 'ui/notify';
 
 import { IHttpResponse } from 'angular';
@@ -66,8 +70,17 @@ export class SpacesManager extends EventEmitter {
 
   public _displayError() {
     toastNotifications.addDanger({
+<<<<<<< HEAD
       title: 'Unable to change your Space',
       text: 'please try again later',
+=======
+      title: i18n.translate('xpack.spaces.spacesManager.unableToChangeSpaceWarningTitle', {
+        defaultMessage: 'Unable to change your Space',
+      }),
+      text: i18n.translate('xpack.spaces.spacesManager.unableToChangeSpaceWarningDescription', {
+        defaultMessage: 'please try again later',
+      }),
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     });
   }
 }

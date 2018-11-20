@@ -150,8 +150,14 @@ export default class BaseOptimizer {
         },
         {
           test,
+<<<<<<< HEAD
           include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
           exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
+=======
+          include: /[\/\\]node_modules[\/\\](x-pack|@kbn[\/\\]interpreter)[\/\\]/,
+          exclude: /[\/\\]node_modules[\/\\](x-pack|@kbn[\/\\]interpreter)[\/\\]node_modules[\/\\]/,
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         }
       ];
     };

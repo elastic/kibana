@@ -240,7 +240,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const isReservedElementVisible = await role.findByCssSelector('td:nth-child(3)');
 
         return {
+<<<<<<< HEAD
           rolename: await rolenameElement.getText(),
+=======
+          rolename: await rolenameElement.getVisibleText(),
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('roleRowReserved')
         };
       });
@@ -362,7 +366,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
               .click()
               .then(function () {
                 return addGrantedField(userObj.elasticsearch.indices[0].field_security.grant);
+<<<<<<< HEAD
                });
+=======
+              });
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           }
         })    //clicking save button
         .then(function () {

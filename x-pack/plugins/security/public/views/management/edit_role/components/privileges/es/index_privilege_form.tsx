@@ -15,6 +15,10 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
+<<<<<<< HEAD
+=======
+import { FormattedMessage } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { IndexPrivilege } from '../../../../../../../common/model/index_privilege';
 // @ts-ignore
@@ -81,7 +85,16 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
+<<<<<<< HEAD
               label={'Indices'}
+=======
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRoles.indexPrivilegeForm.indicesFormRowLabel"
+                  defaultMessage="Indices"
+                />
+              }
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               fullWidth={true}
               {...this.props.validator.validateIndexPrivilege(this.props.indexPrivilege)}
             >
@@ -96,7 +109,19 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
+<<<<<<< HEAD
             <EuiFormRow label={'Privileges'} fullWidth={true}>
+=======
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRoles.indexPrivilegeForm.privilegesFormRowLabel"
+                  defaultMessage="Privileges"
+                />
+              }
+              fullWidth={true}
+            >
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               <EuiComboBox
                 data-test-subj={`privilegesInput${this.props.formIndex}`}
                 options={getIndexPrivileges().map(toOption)}
@@ -129,6 +154,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       return (
         <EuiFlexItem>
           <EuiFormRow
+<<<<<<< HEAD
             label={'Granted fields (optional)'}
             fullWidth={true}
             className="indexPrivilegeForm__grantedFieldsRow"
@@ -136,6 +162,25 @@ export class IndexPrivilegeForm extends Component<Props, State> {
               !isReservedRole && grant.length === 0
                 ? 'If no fields are granted, then users assigned to this role will not be able to see any data for this index.'
                 : undefined
+=======
+            label={
+              <FormattedMessage
+                id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowLabel"
+                defaultMessage="Granted fields (optional)"
+              />
+            }
+            fullWidth={true}
+            className="indexPrivilegeForm__grantedFieldsRow"
+            helpText={
+              !isReservedRole && grant.length === 0 ? (
+                <FormattedMessage
+                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowHelpText"
+                  defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
+                />
+              ) : (
+                undefined
+              )
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
             }
           >
             <Fragment>
@@ -170,7 +215,16 @@ export class IndexPrivilegeForm extends Component<Props, State> {
           <EuiFlexItem>
             <EuiSwitch
               data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
+<<<<<<< HEAD
               label={'Grant read privileges to specific documents'}
+=======
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantReadPrivilegesLabel"
+                  defaultMessage="Grant read privileges to specific documents"
+                />
+              }
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               // @ts-ignore
               compressed={true}
               // @ts-ignore
@@ -181,7 +235,19 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         )}
         {this.state.queryExpanded && (
           <EuiFlexItem>
+<<<<<<< HEAD
             <EuiFormRow label={'Granted documents query'} fullWidth={true}>
+=======
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRoles.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel"
+                  defaultMessage="Granted documents query"
+                />
+              }
+              fullWidth={true}
+            >
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               <EuiTextArea
                 data-test-subj={`queryInput${this.props.formIndex}`}
                 style={{ resize: 'none' }}

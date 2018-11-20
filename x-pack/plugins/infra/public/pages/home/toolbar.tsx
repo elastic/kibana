@@ -5,6 +5,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+<<<<<<< HEAD
+=======
+// import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React from 'react';
 
 import { AutocompleteField } from '../../components/autocomplete_field';
@@ -20,6 +25,7 @@ import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 
+<<<<<<< HEAD
 const TITLES = {
   [InfraNodeType.host]: 'Hosts',
   [InfraNodeType.pod]: 'Kubernetes Pods',
@@ -27,18 +33,55 @@ const TITLES = {
 };
 
 export const HomeToolbar: React.SFC = () => (
+=======
+const getTitle = (nodeType: string) => {
+  const TITLES = {
+    [InfraNodeType.host as string]: (
+      <FormattedMessage id="xpack.infra.homePage.toolbar.hostsTitle" defaultMessage="Hosts" />
+    ),
+    [InfraNodeType.pod as string]: (
+      <FormattedMessage
+        id="xpack.infra.homePage.toolbar.kubernetesPodsTitle"
+        defaultMessage="Kubernetes Pods"
+      />
+    ),
+    [InfraNodeType.container as string]: (
+      <FormattedMessage
+        id="xpack.infra.homePage.toolbar.dockerContainersTitle"
+        defaultMessage="Docker Containers"
+      />
+    ),
+  };
+  return TITLES[nodeType];
+};
+
+export const HomeToolbar = injectI18n(({ intl }) => (
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   <Toolbar>
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <WithWaffleOptions>
           {({ nodeType }) => (
             <EuiTitle size="m">
+<<<<<<< HEAD
               <h1>{TITLES[nodeType]}</h1>
+=======
+              <h1>{getTitle(nodeType)}</h1>
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
             </EuiTitle>
           )}
         </WithWaffleOptions>
         <EuiText color="subdued">
+<<<<<<< HEAD
           <p>Showing the last 1 minute of data from the time period</p>
+=======
+          <p>
+            <FormattedMessage
+              id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
+              defaultMessage="Showing the last 1 minute of data from the time period"
+            />
+          </p>
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </EuiText>
       </EuiFlexItem>
       <WithWaffleOptions>
@@ -71,7 +114,14 @@ export const HomeToolbar: React.SFC = () => (
                   loadSuggestions={loadSuggestions}
                   onChange={setFilterQueryDraftFromKueryExpression}
                   onSubmit={applyFilterQueryFromKueryExpression}
+<<<<<<< HEAD
                   placeholder="Search for infrastructure data... (e.g. host.name:host-1)"
+=======
+                  placeholder={intl.formatMessage({
+                    id: 'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
+                    defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
+                  })}
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
                   suggestions={suggestions}
                   value={filterQueryDraft ? filterQueryDraft.expression : ''}
                 />
@@ -111,4 +161,8 @@ export const HomeToolbar: React.SFC = () => (
       </EuiFlexItem>
     </EuiFlexGroup>
   </Toolbar>
+<<<<<<< HEAD
 );
+=======
+));
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

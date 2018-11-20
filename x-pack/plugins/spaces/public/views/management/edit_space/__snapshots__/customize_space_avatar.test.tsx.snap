@@ -16,7 +16,15 @@ exports[`renders without crashing 1`] = `
       onClick={[Function]}
       type="button"
     >
+<<<<<<< HEAD
       Customize
+=======
+      <FormattedMessage
+        defaultMessage="Customize"
+        id="xpack.spaces.management.customizeSpaceAvatar.customizeLinkText"
+        values={Object {}}
+      />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     </EuiLink>
   </EuiFormRow>
 </EuiFlexItem>

@@ -93,7 +93,11 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap) {
   const entries = await globAsync('*.{js,jsx,pug,ts,tsx,html,hbs,handlebars}', {
     cwd: inputPath,
     matchBase: true,
+<<<<<<< HEAD
     ignore: ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}'],
+=======
+    ignore: ['**/node_modules/**', '**/__tests__/**', '**/*.test.{js,jsx,ts,tsx}', '**/*.d.ts'],
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   });
 
   const { htmlEntries, codeEntries, pugEntries, hbsEntries } = entries.reduce(

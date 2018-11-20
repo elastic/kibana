@@ -83,6 +83,14 @@ hash -r
 ###
 yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
 npm install -g yarn@^${yarnVersion}
+<<<<<<< HEAD
+=======
+
+###
+### setup yarn offline cache
+###
+yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 ###
 ### "install" yarn into this shell
@@ -95,7 +103,11 @@ hash -r
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
+<<<<<<< HEAD
 yarn kbn bootstrap
+=======
+yarn kbn bootstrap --prefer-offline
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 ###
 ### verify no git modifications

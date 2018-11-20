@@ -18,7 +18,11 @@
  */
 
 import { EventEmitter } from 'events';
+<<<<<<< HEAD
 import { debounce } from 'lodash';
+=======
+import { debounce, forEach } from 'lodash';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
@@ -80,7 +84,13 @@ export class EmbeddedVisualizeHandler {
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
   private dataSubject: Rx.Subject<any>;
+<<<<<<< HEAD
   private inspectorAdapters: Adapters = {};
+=======
+  private readonly inspectorAdapters: Adapters = {};
+  private actions: any = {};
+  private events$: Rx.Observable<any>;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
   constructor(
     private readonly element: HTMLElement,
@@ -128,6 +138,26 @@ export class EmbeddedVisualizeHandler {
     this.vis.openInspector = this.openInspector;
     this.vis.hasInspector = this.hasInspector;
 
+<<<<<<< HEAD
+=======
+    // init default actions
+    forEach(this.vis.type.events, (event, eventName) => {
+      if (event.disabled || !eventName) {
+        return;
+      } else {
+        this.actions[eventName] = event.defaultAction;
+      }
+    });
+
+    this.vis.eventsSubject = new Rx.Subject();
+    this.events$ = this.vis.eventsSubject.asObservable().pipe(share());
+    this.events$.subscribe(event => {
+      if (this.actions[event.name]) {
+        this.actions[event.name](event.data);
+      }
+    });
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     this.dataSubject = new Rx.Subject();
     this.data$ = this.dataSubject.asObservable().pipe(share());
 

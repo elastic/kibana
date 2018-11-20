@@ -41,7 +41,11 @@ export class Overrides extends Component {
     this.state = {};
   }
 
+<<<<<<< HEAD
   static getDerivedStateFromProps(props) {
+=======
+  static getDerivedStateFromProps(props, state) {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     const { originalSettings } = props;
 
     const {
@@ -67,7 +71,11 @@ export class Overrides extends Component {
       originalColumnNames
     } = getColumnNames(columnNames, originalSettings);
 
+<<<<<<< HEAD
     return {
+=======
+    const initialState =  {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       charset: (charset === undefined) ? originalSettings.charset : charset,
       format: (format === undefined) ? originalSettings.format : format,
       hasHeaderRow: (hasHeaderRow === undefined) ? originalSettings.hasHeaderRow : hasHeaderRow,
@@ -81,6 +89,11 @@ export class Overrides extends Component {
       timestampFormat: (timestampFormat === undefined) ? originalSettings.timestampFormat : timestampFormat,
       timestampField: (timestampField === undefined) ? originalSettings.timestampField : timestampField,
     };
+<<<<<<< HEAD
+=======
+
+    return { ...initialState, ...state };
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   }
 
   componentDidMount() {

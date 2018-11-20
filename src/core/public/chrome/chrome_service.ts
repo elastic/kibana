@@ -34,6 +34,14 @@ export interface Brand {
   smallLogo?: string;
 }
 
+<<<<<<< HEAD
+=======
+export interface Breadcrumb {
+  text: string;
+  href?: string;
+}
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
 
@@ -44,6 +52,10 @@ export class ChromeService {
     const isVisible$ = new Rx.BehaviorSubject(true);
     const isCollapsed$ = new Rx.BehaviorSubject(!!localStorage.getItem(IS_COLLAPSED_KEY));
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
+<<<<<<< HEAD
+=======
+    const breadcrumbs$ = new Rx.BehaviorSubject<Breadcrumb[]>([]);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     return {
       /**
@@ -135,6 +147,21 @@ export class ChromeService {
           map(set => [...set]),
           takeUntil(this.stop$)
         ),
+<<<<<<< HEAD
+=======
+
+      /**
+       * Get an observable of the current list of breadcrumbs
+       */
+      getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
+
+      /**
+       * Override the current set of breadcrumbs
+       */
+      setBreadcrumbs: (newBreadcrumbs: Breadcrumb[]) => {
+        breadcrumbs$.next(newBreadcrumbs);
+      },
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     };
   }
 

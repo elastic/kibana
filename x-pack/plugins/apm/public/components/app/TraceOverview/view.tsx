@@ -10,7 +10,11 @@ import { RRRRenderResponse } from 'react-redux-request';
 import { ITransactionGroup } from '../../../../typings/TransactionGroup';
 // @ts-ignore
 import { TraceListRequest } from '../../../store/reactReduxRequest/traceList';
+<<<<<<< HEAD
 import EmptyMessage from '../../shared/EmptyMessage';
+=======
+import { EmptyMessage } from '../../shared/EmptyMessage';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { TraceList } from './TraceList';
 
 interface Props {

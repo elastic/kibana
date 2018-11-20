@@ -205,16 +205,69 @@ Array [
 `);
     });
   });
+<<<<<<< HEAD
 });
 
 describe('stop', () => {
   it('completes applicationClass$, isCollapsed$, isVisible$, and brand$ observables', async () => {
+=======
+
+  describe('breadcrumbs', () => {
+    it('updates/emits the current set of breadcrumbs', async () => {
+      const service = new ChromeService();
+      const start = service.start();
+      const promise = start
+        .getBreadcrumbs$()
+        .pipe(toArray())
+        .toPromise();
+
+      start.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
+      start.setBreadcrumbs([{ text: 'foo' }]);
+      start.setBreadcrumbs([{ text: 'bar' }]);
+      start.setBreadcrumbs([]);
+      service.stop();
+
+      await expect(promise).resolves.toMatchInlineSnapshot(`
+Array [
+  Array [],
+  Array [
+    Object {
+      "text": "foo",
+    },
+    Object {
+      "text": "bar",
+    },
+  ],
+  Array [
+    Object {
+      "text": "foo",
+    },
+  ],
+  Array [
+    Object {
+      "text": "bar",
+    },
+  ],
+  Array [],
+]
+`);
+    });
+  });
+});
+
+describe('stop', () => {
+  it('completes applicationClass$, isCollapsed$, breadcrumbs$, isVisible$, and brand$ observables', async () => {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     const service = new ChromeService();
     const start = service.start();
     const promise = Rx.combineLatest(
       start.getBrand$(),
       start.getApplicationClasses$(),
       start.getIsCollapsed$(),
+<<<<<<< HEAD
+=======
+      start.getBreadcrumbs$(),
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       start.getIsVisible$()
     ).toPromise();
 
@@ -232,6 +285,10 @@ describe('stop', () => {
         start.getBrand$(),
         start.getApplicationClasses$(),
         start.getIsCollapsed$(),
+<<<<<<< HEAD
+=======
+        start.getBreadcrumbs$(),
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         start.getIsVisible$()
       ).toPromise()
     ).resolves.toBe(undefined);

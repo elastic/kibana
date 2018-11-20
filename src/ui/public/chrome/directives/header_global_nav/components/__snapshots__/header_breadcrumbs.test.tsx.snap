@@ -1,6 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+<<<<<<< HEAD
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs observable 1`] = `
+=======
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 <span
   aria-current="page"
   className="euiBreadcrumb euiBreadcrumb--last"
@@ -10,7 +14,11 @@ exports[`HeaderBreadcrumbs renders updates to the breadcrumbs observable 1`] = `
 </span>
 `;
 
+<<<<<<< HEAD
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs observable 2`] = `
+=======
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 2`] = `
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 Array [
   <EuiLink
     className="euiBreadcrumb"
@@ -43,4 +51,8 @@ Array [
 ]
 `;
 
+<<<<<<< HEAD
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs observable 3`] = `null`;
+=======
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 3`] = `null`;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

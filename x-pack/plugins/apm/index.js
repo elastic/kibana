@@ -10,6 +10,11 @@ import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
 import { initTracesApi } from './server/routes/traces';
+<<<<<<< HEAD
+=======
+import mappings from './mappings';
+import { makeApmUsageCollector } from './server/lib/apm_telemetry';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 export function apm(kibana) {
   return new kibana.Plugin({
@@ -35,7 +40,13 @@ export function apm(kibana) {
           apmIndexPattern: config.get('apm_oss.indexPattern')
         };
       },
-      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav']
+      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
+      savedObjectSchemas: {
+        'apm-telemetry': {
+          isNamespaceAgnostic: true
+        }
+      },
+      mappings
     },
 
     config(Joi) {
@@ -60,6 +71,7 @@ export function apm(kibana) {
       initServicesApi(server);
       initErrorsApi(server);
       initStatusApi(server);
+      makeApmUsageCollector(server);
     }
   });
 }

@@ -5,7 +5,11 @@
  */
 
 import React from 'react';
+<<<<<<< HEAD
 import { shallow } from 'enzyme';
+=======
+import { shallowWithIntl } from '../../../../../../test_utils/enzyme_helpers';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { Ccr } from './ccr';
 
 describe('Ccr', () => {
@@ -67,7 +71,11 @@ describe('Ccr', () => {
       }
     ];
 
+<<<<<<< HEAD
     const component = shallow(<Ccr data={data} />);
+=======
+    const component = shallowWithIntl(<Ccr.WrappedComponent data={data} />);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(component).toMatchSnapshot();
   });
 });

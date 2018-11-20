@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+<<<<<<< HEAD
+=======
+
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,6 +23,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+<<<<<<< HEAD
+=======
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { toastNotifications } from 'ui/notify';
@@ -47,6 +55,10 @@ interface Props {
   spaces?: Space[];
   spacesEnabled: boolean;
   userProfile: UserProfile;
+<<<<<<< HEAD
+=======
+  intl: InjectedIntl;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 }
 
 interface State {
@@ -54,7 +66,11 @@ interface State {
   formError: RoleValidationResult | null;
 }
 
+<<<<<<< HEAD
 export class EditRolePage extends Component<Props, State> {
+=======
+class EditRolePageUI extends Component<Props, State> {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   private validator: RoleValidator;
 
   constructor(props: Props) {
@@ -67,9 +83,23 @@ export class EditRolePage extends Component<Props, State> {
   }
 
   public render() {
+<<<<<<< HEAD
     const description = this.props.spacesEnabled
       ? `Set privileges on your Elasticsearch data and control access to your Kibana spaces.`
       : `Set privileges on your Elasticsearch data and control access to Kibana.`;
+=======
+    const description = this.props.spacesEnabled ? (
+      <FormattedMessage
+        id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
+        defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.management.editRole.setPrivilegesToKibanaDescription"
+        defaultMessage="Set privileges on your Elasticsearch data and control access to Kibana."
+      />
+    );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     return (
       <EuiPage className="editRolePage" restrictWidth>
@@ -86,7 +116,14 @@ export class EditRolePage extends Component<Props, State> {
                 <EuiSpacer size="s" />
                 <EuiText size="s" color="subdued">
                   <p id="reservedRoleDescription" tabIndex={1}>
+<<<<<<< HEAD
                     Reserved roles are built-in and cannot be removed or modified.
+=======
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.modifyingReversedRolesDescription"
+                      defaultMessage="Reserved roles are built-in and cannot be removed or modified."
+                    />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
                   </p>
                 </EuiText>
               </Fragment>
@@ -115,12 +152,36 @@ export class EditRolePage extends Component<Props, State> {
       tabIndex: 0,
     };
     if (isReservedRole(this.props.role)) {
+<<<<<<< HEAD
       titleText = 'Viewing role';
       props['aria-describedby'] = 'reservedRoleDescription';
     } else if (this.editingExistingRole()) {
       titleText = 'Edit role';
     } else {
       titleText = 'Create role';
+=======
+      titleText = (
+        <FormattedMessage
+          id="xpack.security.management.editRole.viewingRoleTitle"
+          defaultMessage="Viewing role"
+        />
+      );
+      props['aria-describedby'] = 'reservedRoleDescription';
+    } else if (this.editingExistingRole()) {
+      titleText = (
+        <FormattedMessage
+          id="xpack.security.management.editRole.editRoleTitle"
+          defaultMessage="Edit role"
+        />
+      );
+    } else {
+      titleText = (
+        <FormattedMessage
+          id="xpack.security.management.editRole.createRoleTitle"
+          defaultMessage="Create role"
+        />
+      );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     return (
@@ -148,11 +209,29 @@ export class EditRolePage extends Component<Props, State> {
     return (
       <EuiPanel>
         <EuiFormRow
+<<<<<<< HEAD
           label={'Role name'}
           helpText={
             !isReservedRole(this.props.role) && this.editingExistingRole()
               ? "A role's name cannot be changed once it has been created."
               : undefined
+=======
+          label={
+            <FormattedMessage
+              id="xpack.security.management.editRole.roleNameFormRowTitle"
+              defaultMessage="Role name"
+            />
+          }
+          helpText={
+            !isReservedRole(this.props.role) && this.editingExistingRole() ? (
+              <FormattedMessage
+                id="xpack.security.management.editRole.roleNameFormRowHelpText"
+                defaultMessage="A role's name cannot be changed once it has been created."
+              />
+            ) : (
+              undefined
+            )
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           }
           {...this.validator.validateRoleName(this.state.role)}
         >
@@ -225,10 +304,34 @@ export class EditRolePage extends Component<Props, State> {
 
   public getFormButtons = () => {
     if (isReservedRole(this.props.role)) {
+<<<<<<< HEAD
       return <EuiButton onClick={this.backToRoleList}>Return to role list</EuiButton>;
     }
 
     const saveText = this.editingExistingRole() ? 'Update role' : 'Create role';
+=======
+      return (
+        <EuiButton onClick={this.backToRoleList}>
+          <FormattedMessage
+            id="xpack.security.management.editRole.returnToRoleListButtonLabel"
+            defaultMessage="Return to role list"
+          />
+        </EuiButton>
+      );
+    }
+
+    const saveText = this.editingExistingRole() ? (
+      <FormattedMessage
+        id="xpack.security.management.editRole.updateRoleText"
+        defaultMessage="Update role"
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.security.management.editRole.createRoleText"
+        defaultMessage="Create role"
+      />
+    );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     return (
       <EuiFlexGroup responsive={false}>
@@ -244,7 +347,14 @@ export class EditRolePage extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty data-test-subj={`roleFormCancelButton`} onClick={this.backToRoleList}>
+<<<<<<< HEAD
             Cancel
+=======
+            <FormattedMessage
+              id="xpack.security.management.editRole.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
@@ -274,7 +384,11 @@ export class EditRolePage extends Component<Props, State> {
         formError: null,
       });
 
+<<<<<<< HEAD
       const { httpClient } = this.props;
+=======
+      const { httpClient, intl } = this.props;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       const role = {
         ...this.state.role,
@@ -287,7 +401,16 @@ export class EditRolePage extends Component<Props, State> {
 
       saveRole(httpClient, role)
         .then(() => {
+<<<<<<< HEAD
           toastNotifications.addSuccess('Saved role');
+=======
+          toastNotifications.addSuccess(
+            intl.formatMessage({
+              id: 'xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage',
+              defaultMessage: 'Saved role',
+            })
+          );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           this.backToRoleList();
         })
         .catch((error: any) => {
@@ -297,11 +420,24 @@ export class EditRolePage extends Component<Props, State> {
   };
 
   public handleDeleteRole = () => {
+<<<<<<< HEAD
     const { httpClient, role } = this.props;
 
     deleteRole(httpClient, role.name)
       .then(() => {
         toastNotifications.addSuccess('Deleted role');
+=======
+    const { httpClient, role, intl } = this.props;
+
+    deleteRole(httpClient, role.name)
+      .then(() => {
+        toastNotifications.addSuccess(
+          intl.formatMessage({
+            id: 'xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage',
+            defaultMessage: 'Deleted role',
+          })
+        );
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         this.backToRoleList();
       })
       .catch((error: any) => {
@@ -313,3 +449,8 @@ export class EditRolePage extends Component<Props, State> {
     window.location.hash = ROLES_PATH;
   };
 }
+<<<<<<< HEAD
+=======
+
+export const EditRolePage = injectI18n(EditRolePageUI);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

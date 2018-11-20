@@ -5,6 +5,10 @@
  */
 // @ts-ignore
 import { EuiColorPicker, EuiFieldText, EuiFlexItem, EuiFormRow, EuiLink } from '@elastic/eui';
+<<<<<<< HEAD
+=======
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { MAX_SPACE_INITIALS } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
@@ -13,6 +17,10 @@ import { getSpaceColor, getSpaceInitials } from '../../../../common/space_attrib
 interface Props {
   space: Partial<Space>;
   onChange: (space: Partial<Space>) => void;
+<<<<<<< HEAD
+=======
+  intl: InjectedIntl;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 }
 
 interface State {
@@ -21,7 +29,11 @@ interface State {
   pendingInitials?: string | null;
 }
 
+<<<<<<< HEAD
 export class CustomizeSpaceAvatar extends Component<Props, State> {
+=======
+class CustomizeSpaceAvatarUI extends Component<Props, State> {
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   private initialsRef: HTMLInputElement | null = null;
 
   constructor(props: Props) {
@@ -37,14 +49,27 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
   }
 
   public getCustomizeFields = () => {
+<<<<<<< HEAD
     const { space } = this.props;
+=======
+    const { space, intl } = this.props;
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     const { initialsHasFocus, pendingInitials } = this.state;
 
     return (
       <Fragment>
         <EuiFlexItem grow={false}>
+<<<<<<< HEAD
           <EuiFormRow label={'Initials (2 max)'}>
+=======
+          <EuiFormRow
+            label={intl.formatMessage({
+              id: 'xpack.spaces.management.customizeSpaceAvatar.initialItemsFormRowLabel',
+              defaultMessage: 'Initials (2 max)',
+            })}
+          >
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
             <EuiFieldText
               inputRef={this.initialsInputRef}
               name="spaceInitials"
@@ -56,7 +81,16 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
+<<<<<<< HEAD
           <EuiFormRow label={'Color'}>
+=======
+          <EuiFormRow
+            label={intl.formatMessage({
+              id: 'xpack.spaces.management.customizeSpaceAvatar.colorFormRowLabel',
+              defaultMessage: 'Color',
+            })}
+          >
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
             <EuiColorPicker color={getSpaceColor(space)} onChange={this.onColorChange} />
           </EuiFormRow>
         </EuiFlexItem>
@@ -97,7 +131,14 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace={true}>
           <EuiLink name="customize_space_link" onClick={this.showFields}>
+<<<<<<< HEAD
             Customize
+=======
+            <FormattedMessage
+              id="xpack.spaces.management.customizeSpaceAvatar.customizeLinkText"
+              defaultMessage="Customize"
+            />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           </EuiLink>
         </EuiFormRow>
       </EuiFlexItem>
@@ -130,3 +171,8 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
     });
   };
 }
+<<<<<<< HEAD
+=======
+
+export const CustomizeSpaceAvatar = injectI18n(CustomizeSpaceAvatarUI);
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

@@ -17,8 +17,11 @@
  * under the License.
  */
 
+<<<<<<< HEAD
 import { By } from 'selenium-webdriver';
 
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 export function DocTableProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');

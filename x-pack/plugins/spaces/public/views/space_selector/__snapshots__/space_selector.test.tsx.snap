@@ -29,7 +29,15 @@ exports[`it renders without crashing 1`] = `
         textTransform="none"
       >
         <h1>
+<<<<<<< HEAD
           Select your space
+=======
+          <FormattedMessage
+            defaultMessage="Select your space"
+            id="xpack.spaces.spaceSelector.selectSpacesTitle"
+            values={Object {}}
+          />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </h1>
       </EuiTitle>
       <EuiText
@@ -38,7 +46,15 @@ exports[`it renders without crashing 1`] = `
         size="s"
       >
         <p>
+<<<<<<< HEAD
           You can change your space at anytime
+=======
+          <FormattedMessage
+            defaultMessage="You can change your space at anytime"
+            id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
+            values={Object {}}
+          />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </p>
       </EuiText>
     </EuiPageHeader>
@@ -72,7 +88,15 @@ exports[`it renders without crashing 1`] = `
           size="m"
           textAlign="center"
         >
+<<<<<<< HEAD
           No spaces match search criteria
+=======
+          <FormattedMessage
+            defaultMessage="No spaces match search criteria"
+            id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
+            values={Object {}}
+          />
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </EuiText>
       </React.Fragment>
     </EuiPageContent>

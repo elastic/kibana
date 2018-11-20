@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+<<<<<<< HEAD
 import './styles/explorer_chart_label_badge.less';
 
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import PropTypes from 'prop-types';
 import React from 'react';
 

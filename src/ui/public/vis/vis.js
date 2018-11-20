@@ -32,13 +32,15 @@ import _ from 'lodash';
 import { VisTypesRegistryProvider } from '../registry/vis_types';
 import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
-import { onBrushEvent } from '../utils/brush_event';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
 import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 import { timefilter } from 'ui/timefilter';
+<<<<<<< HEAD
 import { VisFiltersProvider } from './vis_filters';
+=======
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
@@ -73,6 +75,7 @@ export function VisProvider(Private, indexPatterns, getAppState) {
         timeFilter: timefilter,
         queryFilter: queryFilter,
         events: {
+<<<<<<< HEAD
           // the filter method will be removed in the near feature
           // you should rather use addFilter method below
           filter: visFilter.filter,
@@ -81,6 +84,10 @@ export function VisProvider(Private, indexPatterns, getAppState) {
           brush: (event) => {
             onBrushEvent(event, getAppState());
           }
+=======
+          filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
+          brush: data => this.eventsSubject.next({ name: 'brush', data }),
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         },
         getAppState,
       };

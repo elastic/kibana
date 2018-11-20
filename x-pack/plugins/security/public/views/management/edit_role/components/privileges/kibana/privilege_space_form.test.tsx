@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+<<<<<<< HEAD
 import { shallow } from 'enzyme';
 import React from 'react';
+=======
+import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { RoleValidator } from '../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
@@ -40,6 +45,10 @@ const buildProps = (customProps = {}) => {
 
 describe('<PrivilegeSpaceForm>', () => {
   it('renders without crashing', () => {
+<<<<<<< HEAD
     expect(shallow(<PrivilegeSpaceForm {...buildProps()} />)).toMatchSnapshot();
+=======
+    expect(shallowWithIntl(<PrivilegeSpaceForm {...buildProps()} />)).toMatchSnapshot();
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   });
 });

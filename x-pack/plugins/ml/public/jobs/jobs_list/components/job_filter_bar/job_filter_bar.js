@@ -13,8 +13,6 @@ import React, {
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { JobGroup } from '../job_group';
 
-import './styles/main.less';
-
 import {
   EuiSearchBar,
   EuiCallOut,
@@ -132,6 +130,10 @@ export class JobFilterBar extends Component {
             }}
             filters={filters}
             onChange={this.onChange}
+<<<<<<< HEAD
+=======
+            className="mlJobFilterBar"
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           />
         </EuiFlexItem>
         { this.renderError() || ''}

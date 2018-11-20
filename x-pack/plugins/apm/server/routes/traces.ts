@@ -17,7 +17,11 @@ const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
   // @ts-ignore
+<<<<<<< HEAD
   return Boom.boomify(err, { statusCode: 400 });
+=======
+  throw Boom.boomify(err, { statusCode: 400 });
+>>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 };
 
 export function initTracesApi(server: Server) {
