@@ -7,10 +7,25 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { wrapError } from '../../../lib/errors';
-import { BasicCredentials } from '../../../../server/lib/authentication/providers/basic';
 import { canRedirectRequest } from '../../../lib/can_redirect_request';
 
 export function initAuthenticateApi(server) {
+
+  const loginAttempts = new WeakMap();
+  server.decorate('request', 'loginAttempt', function () {
+    const request = this;
+    return {
+      getCredentials() {
+        return loginAttempts.get(request);
+      },
+      setCredentials(username, password) {
+        if (loginAttempts.has(request)) {
+          throw new Error('Credentials for login attempt have already been set');
+        }
+        loginAttempts.set(request, { username, password });
+      }
+    };
+  });
 
   server.route({
     method: 'POST',
@@ -31,9 +46,8 @@ export function initAuthenticateApi(server) {
       const { username, password } = request.payload;
 
       try {
-        const authenticationResult = await server.plugins.security.authenticate(
-          BasicCredentials.decorateRequest(request, username, password)
-        );
+        request.loginAttempt(request).setCredentials(username, password);
+        const authenticationResult = await server.plugins.security.authenticate(request);
 
         if (!authenticationResult.succeeded()) {
           throw Boom.unauthorized(authenticationResult.error);
