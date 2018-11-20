@@ -6,31 +6,26 @@
 
 import { InfraSourceResolvers } from '../../../common/graphql/types';
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
-import { InfraCapabilitiesDomain } from '../../lib/domains/capabilities_domain';
+import { InfraMetadataDomain } from '../../lib/domains/metadata_domain';
 import { InfraContext } from '../../lib/infra_types';
 import { QuerySourceResolver } from '../sources/resolvers';
 
-type InfraSourceCapabilitiesByNodeResolver = InfraResolverOf<
-  InfraSourceResolvers.CapabilitiesByNodeResolver,
+type InfraSourceMetadataByNodeResolver = InfraResolverOf<
+  InfraSourceResolvers.MetadataByNodeResolver,
   InfraResolvedResult<QuerySourceResolver>,
   InfraContext
 >;
 
-export const createCapabilitiesResolvers = (libs: {
-  capabilities: InfraCapabilitiesDomain;
+export const createMetadataResolvers = (libs: {
+  metadata: InfraMetadataDomain;
 }): {
   InfraSource: {
-    capabilitiesByNode: InfraSourceCapabilitiesByNodeResolver;
+    metadataByNode: InfraSourceMetadataByNodeResolver;
   };
 } => ({
   InfraSource: {
-    async capabilitiesByNode(source, args, { req }) {
-      const result = await libs.capabilities.getCapabilities(
-        req,
-        source.id,
-        args.nodeName,
-        args.nodeType
-      );
+    async metadataByNode(source, args, { req }) {
+      const result = await libs.metadata.getMetadata(req, source.id, args.nodeName, args.nodeType);
       return result;
     },
   },
