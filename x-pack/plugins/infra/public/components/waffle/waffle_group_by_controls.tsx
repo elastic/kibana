@@ -12,7 +12,6 @@ import {
   EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { InfraNodeType, InfraPathInput, InfraPathType } from '../../../common/graphql/types';
@@ -24,7 +23,7 @@ interface Props {
   intl: InjectedIntl;
 }
 
-let OPTIONS;
+let OPTIONS: { [P in InfraNodeType]: Array<{ text: any; type: InfraPathType; field: string }> };
 const getOptions = (nodeType: string, intl: any) => {
   if (!OPTIONS) {
     OPTIONS = {
@@ -138,6 +137,7 @@ export const WaffleGroupByControls = injectI18n(
   class extends React.PureComponent<Props, State> {
     public static displayName = 'WaffleGroupByControls';
     public readonly state: State = initialState;
+
     public render() {
       const { nodeType, groupBy, intl } = this.props;
       const options = getOptions(nodeType, intl);

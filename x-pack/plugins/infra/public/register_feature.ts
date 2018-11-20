@@ -11,7 +11,7 @@ import {
 
 const APP_ID = 'infra';
 
-FeatureCatalogueRegistryProvider.register(i18n => ({
+FeatureCatalogueRegistryProvider.register((i18n: any) => ({
   id: 'infraops',
   title: i18n('xpack.infra.registerFeatures.infraOpsTitle', {
     defaultMessage: 'Infrastructure',
@@ -26,7 +26,7 @@ FeatureCatalogueRegistryProvider.register(i18n => ({
   category: FeatureCatalogueCategory.DATA,
 }));
 
-FeatureCatalogueRegistryProvider.register(i18n => ({
+FeatureCatalogueRegistryProvider.register((i18n: any) => ({
   id: 'infralogging',
   title: i18n('xpack.infra.registerFeatures.logsTitle', {
     defaultMessage: 'Logs',

@@ -11,7 +11,6 @@ import {
   EuiFilterGroup,
   EuiPopover,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { InfraMetricInput, InfraMetricType, InfraNodeType } from '../../../common/graphql/types';
@@ -22,7 +21,7 @@ interface Props {
   intl: InjectedIntl;
 }
 
-let OPTIONS;
+let OPTIONS: { [P in InfraNodeType]: Array<{ text: any; value: InfraMetricType }> };
 const getOptions = (nodeType: string, intl: any) => {
   if (!OPTIONS) {
     const CPUUsage = intl.formatMessage({
