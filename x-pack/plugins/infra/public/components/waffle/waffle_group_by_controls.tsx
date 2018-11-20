@@ -136,7 +136,7 @@ type State = Readonly<typeof initialState>;
 
 export const WaffleGroupByControls = injectI18n(
   class extends React.PureComponent<Props, State> {
-    public displayName = 'WaffleGroupByControls';
+    public static displayName = 'WaffleGroupByControls';
     public readonly state: State = initialState;
     public render() {
       const { nodeType, groupBy, intl } = this.props;

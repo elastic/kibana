@@ -119,7 +119,7 @@ const seriesHasLessThen2DataPoints = (series: InfraDataSeries): boolean => {
 
 export const ChartSection = injectI18n(
   class extends React.PureComponent<Props> {
-    public displayName = 'ChartSection';
+    public static displayName = 'ChartSection';
     public render() {
       const { crosshairValue, section, metric, onCrosshairUpdate, intl } = this.props;
       const { visConfig } = section;

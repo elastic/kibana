@@ -93,7 +93,7 @@ const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
 
 export const Waffle = injectI18n(
   class extends React.Component<Props, {}> {
-    public displayName = 'Waffle';
+    public static displayName = 'Waffle';
     public render() {
       const { loading, map, reload, timeRange, intl } = this.props;
       if (loading) {

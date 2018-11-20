@@ -213,7 +213,7 @@ interface RangeDatePickerState {
 
 export const RangeDatePicker = injectI18n(
   class extends React.PureComponent<RangeDatePickerProps, RangeDatePickerState> {
-    public displayName = 'RangeDatePicker';
+    public static displayName = 'RangeDatePicker';
     public readonly state = {
       startDate: this.props.startDate,
       endDate: this.props.endDate,

@@ -127,7 +127,7 @@ type State = Readonly<typeof initialState>;
 
 export const WaffleMetricControls = injectI18n(
   class extends React.PureComponent<Props, State> {
-    public displayName = 'WaffleMetricControls';
+    public static displayName = 'WaffleMetricControls';
     public readonly state: State = initialState;
     public render() {
       const { metric, nodeType, intl } = this.props;

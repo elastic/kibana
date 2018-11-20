@@ -29,7 +29,7 @@ interface State {
 
 export const Metrics = injectI18n(
   class extends React.PureComponent<Props, State> {
-    public displayName = 'Metrics';
+    public static displayName = 'Metrics';
     public readonly state = {
       crosshairValue: null,
     };
