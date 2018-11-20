@@ -24,34 +24,15 @@ describe('TaskStore', () => {
 
       sinon.assert.calledOnce(callCluster);
 
-      callCluster.calledOnceWith('indices.create', {
-        index: 'tasky',
-        settings: {
-          number_of_shards: 1,
-          auto_expand_replicas: '0-1',
+      sinon.assert.calledWithMatch(callCluster, 'indices.putTemplate', {
+        body: {
+          index_patterns: ['tasky'],
+          settings: {
+            number_of_shards: 1,
+            auto_expand_replicas: '0-1',
+          },
         },
-      });
-    });
-
-    test('patches the task manager index mappings if the index already exists', async () => {
-      const callCluster = sinon.spy((path: string) => {
-        if (path === 'indices.create') {
-          return Promise.reject({ body: { error: { type: 'resource_already_exists_exception' } } });
-        }
-      });
-      const store = new TaskStore({
-        callCluster,
-        index: 'taskalicious',
-        maxAttempts: 2,
-        supportedTypes: ['a', 'b', 'c'],
-      });
-
-      await store.init();
-
-      sinon.assert.calledTwice(callCluster);
-
-      callCluster.calledOnceWith('indices.putMapping', {
-        index: 'taskalicious',
+        name: 'tasky',
       });
     });
   });
@@ -70,12 +51,11 @@ describe('TaskStore', () => {
         maxAttempts: 2,
         supportedTypes: ['report', 'dernstraight', 'yawn'],
       });
-
       const result = await store.schedule(task);
 
-      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledTwice(callCluster);
 
-      return { result, callCluster, arg: callCluster.args[0][1] };
+      return { result, callCluster, arg: callCluster.args[1][1] };
     }
 
     test('serializes the params and state', async () => {
@@ -86,7 +66,6 @@ describe('TaskStore', () => {
       };
       const { callCluster, arg } = await testSchedule(task);
 
-      sinon.assert.calledOnce(callCluster);
       sinon.assert.calledWith(callCluster, 'index');
 
       expect(arg).toMatchObject({
@@ -320,6 +299,23 @@ describe('TaskStore', () => {
         args: callCluster.args[0][1],
       };
     }
+
+    test('it returns normally with no tasks when the index does not exist.', async () => {
+      const callCluster = sinon.spy(async () => ({ hits: { hits: [] } }));
+      const store = new TaskStore({
+        callCluster,
+        supportedTypes: ['a', 'b', 'c'],
+        index: 'tasky',
+        maxAttempts: 2,
+      });
+
+      const result = await store.fetchAvailableTasks();
+
+      sinon.assert.calledOnce(callCluster);
+      sinon.assert.calledWithMatch(callCluster, 'search', { ignoreUnavailable: true });
+
+      expect(result.length).toBe(0);
+    });
 
     test('it filters tasks by supported types, maxAttempts, and runAt', async () => {
       const maxAttempts = _.random(2, 43);

@@ -32,7 +32,7 @@ export function taskManager(kibana) {
           .default({})
       }).default();
     },
-    preInit(server) {
+    init(server) {
       const config = server.config();
       const taskManager = new TaskManager(this.kbnServer, server, config);
       server.decorate('server', 'taskManager', taskManager);

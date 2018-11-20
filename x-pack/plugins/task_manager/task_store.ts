@@ -68,6 +68,7 @@ export class TaskStore {
   private index: string;
   private maxAttempts: number;
   private supportedTypes: string[];
+  private wasInitialized = false;
 
   /**
    * Constructs a new TaskStore.
@@ -84,10 +85,22 @@ export class TaskStore {
     this.supportedTypes = opts.supportedTypes;
   }
 
+  public addSupportedTypes(types: string[]) {
+    if (!this.wasInitialized) {
+      this.supportedTypes = this.supportedTypes.concat(types);
+    } else {
+      throw Error('Cannot add task types after initializattion');
+    }
+  }
+
   /**
    * Initializes the store, ensuring the task manager index is created and up to date.
    */
   public async init() {
+    if (this.wasInitialized) {
+      return;
+    }
+
     const properties = {
       type: { type: 'keyword' },
       task: {
@@ -106,9 +119,10 @@ export class TaskStore {
     };
 
     try {
-      await this.callCluster('indices.create', {
-        index: this.index,
+      const templateResult = await this.callCluster('indices.putTemplate', {
+        name: this.index,
         body: {
+          index_patterns: [this.index],
           mappings: {
             _doc: {
               dynamic: 'strict',
@@ -121,22 +135,13 @@ export class TaskStore {
           },
         },
       });
+      this.wasInitialized = true;
+      return templateResult;
     } catch (err) {
-      if (
-        !err.body ||
-        !err.body.error ||
-        err.body.error.type !== 'resource_already_exists_exception'
-      ) {
-        throw err;
-      }
-      return this.callCluster('indices.putMapping', {
-        index: this.index,
-        type: DOC_TYPE,
-        body: {
-          properties,
-        },
-      });
+      throw err;
     }
+
+    return;
   }
 
   /**
@@ -145,8 +150,13 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
+    await this.init();
     if (!this.supportedTypes.includes(taskInstance.taskType)) {
-      throw new Error(`Unsupported task type "${taskInstance.taskType}".`);
+      throw new Error(
+        `Unsupported task type "${
+          taskInstance.taskType
+        }". Supported types are ${this.supportedTypes.join(', ')}`
+      );
     }
 
     const { id, ...body } = rawSource(taskInstance);
@@ -215,6 +225,15 @@ export class TaskStore {
   };
 
   /**
+   * getter for maxAttempts
+   *
+   * @returns {number} maxAttempts
+   */
+  public getMaxAttempts(): number {
+    return this.maxAttempts;
+  }
+
+  /**
    * Updates the specified doc in the index, returning the doc
    * with its version up to date.
    *
@@ -277,6 +296,7 @@ export class TaskStore {
     const result = await this.callCluster('search', {
       type: DOC_TYPE,
       index: this.index,
+      ignoreUnavailable: true,
       body: {
         ...opts,
         query,

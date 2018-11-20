@@ -19,7 +19,8 @@ import {
   CancellableTask,
   ConcreteTaskInstance,
   RunResult,
-  TaskDefinition,
+  SanitizedTaskDefinition,
+  TaskDictionary,
   validateRunResult,
 } from './task';
 import { RemoveResult } from './task_store';
@@ -36,11 +37,12 @@ export interface TaskRunner {
 interface Updatable {
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<RemoveResult>;
+  getMaxAttempts(): number;
 }
 
 interface Opts {
   logger: Logger;
-  definition: TaskDefinition;
+  definitions: TaskDictionary<SanitizedTaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
   kbnServer: any;
@@ -58,7 +60,7 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definition: TaskDefinition;
+  private definitions: TaskDictionary<SanitizedTaskDefinition>;
   private logger: Logger;
   private store: Updatable;
   private kbnServer: any;
@@ -77,7 +79,7 @@ export class TaskManagerRunner implements TaskRunner {
    */
   constructor(opts: Opts) {
     this.instance = sanitizeInstance(opts.instance);
-    this.definition = opts.definition;
+    this.definitions = opts.definitions;
     this.logger = opts.logger;
     this.store = opts.store;
     this.kbnServer = opts.kbnServer;
@@ -103,6 +105,13 @@ export class TaskManagerRunner implements TaskRunner {
    */
   public get taskType() {
     return this.instance.taskType;
+  }
+
+  /**
+   * Gets the task defintion from the dictionary.
+   */
+  public get definition() {
+    return this.definitions[this.taskType];
   }
 
   /**
@@ -197,17 +206,32 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private async processResult(result: RunResult): Promise<RunResult> {
-    const runAt = result.runAt || intervalFromNow(this.instance.interval);
-    const state = result.state || this.instance.state || {};
+    const recurring = result.runAt || this.instance.interval || result.error;
+    if (recurring) {
+      // recurring task: update the task instance
+      const state = result.state || this.instance.state || {};
+      const status = this.instance.attempts < this.store.getMaxAttempts() ? 'idle' : 'failed';
 
-    if (runAt || result.error) {
+      let runAt;
+      if (status === 'failed') {
+        // task run errored, keep the same runAt
+        runAt = this.instance.runAt;
+      } else {
+        runAt =
+          result.runAt ||
+          intervalFromNow(this.instance.interval) ||
+          minutesFromNow((this.instance.attempts + 1) * 5);
+      }
+
       await this.store.update({
         ...this.instance,
-        runAt: runAt || minutesFromNow((this.instance.attempts + 1) * 5),
+        runAt,
         state,
+        status,
         attempts: result.error ? this.instance.attempts + 1 : 0,
       });
     } else {
+      // not a recurring task: clean up by removing the task instance from store
       try {
         await this.store.remove(this.instance.id);
       } catch (err) {
