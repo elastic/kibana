@@ -21,6 +21,7 @@ import 'ngreact';
 import React, { Fragment } from 'react';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { FormattedMessage, injectI18nProvider } from '@kbn/i18n/react';
 
 import {
   EuiFlexGroup,
@@ -43,9 +44,26 @@ const DiscoverFetchError = ({ fetchError }) => {
 
     body = (
       <p>
-         You can address this error by editing the &lsquo;{fetchError.script}&rsquo; field
-         in <a href={url}>Management &gt; Index Patterns</a>,
-         under the &ldquo;Scripted fields&rdquo; tab.
+        <FormattedMessage
+          id="kbn.discover.fetchError.howToAddressErrorDescription"
+          defaultMessage="You can address this error by editing the {fetchErrorScript} field
+            in {managementLink}, under the {scriptedFields} tab."
+          values={{
+            fetchErrorScript: '&lsquo;' + fetchError.script + '&rsquo;',
+            scriptedFields: <FormattedMessage
+              id="kbn.discover.fetchError.scriptedFieldsText"
+              defaultMessage="&ldquo;Scripted fields&rdquo;"
+            />,
+            managementLink: (
+              <a href={url}>
+                <FormattedMessage
+                  id="kbn.discover.fetchError.managmentLinkText"
+                  defaultMessage="Management &gt; Index Patterns"
+                />
+              </a>
+            )
+          }}
+        />
       </p>
     );
   }
@@ -77,4 +95,4 @@ const DiscoverFetchError = ({ fetchError }) => {
 
 const app = uiModules.get('apps/discover', ['react']);
 
-app.directive('discoverFetchError', reactDirective => reactDirective(DiscoverFetchError));
+app.directive('discoverFetchError', reactDirective => reactDirective(injectI18nProvider(DiscoverFetchError)));
