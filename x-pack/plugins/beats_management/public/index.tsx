@@ -19,7 +19,7 @@ function startApp(libs: FrontendLibs) {
   libs.framework.registerManagementSection(
     'beats',
     i18n.translate('xpack.beatsManagement.managementMainPage.centralManagementLinkLabel', {
-      defaultMessage: 'Central Management',
+      defaultMessage: 'Central Management (Beta)',
     }),
     BASE_PATH
   );

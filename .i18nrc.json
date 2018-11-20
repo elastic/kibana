@@ -18,6 +18,7 @@
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
+    "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.security": "x-pack/plugins/security",
@@ -25,8 +26,6 @@
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
-    "src/ui/ui_render/ui_render_mixin.js",
-    "x-pack/plugins/monitoring/public/components/cluster/overview/alerts_panel.js",
-    "x-pack/plugins/monitoring/public/directives/alerts/index.js"
+    "src/ui/ui_render/ui_render_mixin.js"
   ]
 }

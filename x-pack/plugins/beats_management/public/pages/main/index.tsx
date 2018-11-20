@@ -147,7 +147,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
         <NoDataLayout
           title={intl.formatMessage({
             id: 'xpack.beatsManagement.enrollBeat.beatsCentralManagementTitle',
-            defaultMessage: 'Beats central management',
+            defaultMessage: 'Beats central management (Beta)',
           })}
           actionSection={
             <ConnectedLink path="/overview/initial/beats">

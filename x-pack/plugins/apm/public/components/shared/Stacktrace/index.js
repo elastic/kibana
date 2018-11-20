@@ -10,7 +10,7 @@ import { isEmpty, get } from 'lodash';
 import CodePreview from '../../shared/CodePreview';
 import { Ellipsis } from '../../shared/Icons';
 import { units, px } from '../../../style/variables';
-import EmptyMessage from '../../shared/EmptyMessage';
+import { EmptyMessage } from '../../shared/EmptyMessage';
 import { EuiLink, EuiTitle } from '@elastic/eui';
 
 const LibraryFrameToggle = styled.div`

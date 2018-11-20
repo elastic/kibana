@@ -90,7 +90,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
     const VisConfig = Private(VislibVisConfigProvider);
     const PersistedState = $injector.get('PersistedState');
     el = d3.select('body').append('div')
-      .attr('class', 'vis-wrapper')
+      .attr('class', 'visWrapper')
       .node();
 
     visConfig = new VisConfig({
