@@ -42,9 +42,9 @@ export async function generateNoticeFromSource({ productName, directory, log }) 
     cwd: directory,
     nodir: true,
     ignore: [
-      '{node_modules,build,target,dist,optimize}/**',
+      '{node_modules,build,target,dist,data}/**',
       'packages/*/{node_modules,build,target,dist}/**',
-      'x-pack/{node_modules,build,target,dist,optimize}/**',
+      'x-pack/{node_modules,build,target,dist,data}/**',
       'x-pack/packages/*/{node_modules,build,target,dist}/**',
     ]
   };
