@@ -19,9 +19,7 @@ import {
   EuiIcon,
   EuiText,
   EuiFieldText,
-  EuiPage,
   EuiComboBox,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -383,8 +381,7 @@ class EditUserUI extends Component {
     }
 
     return (
-      <EuiPage className="mgtUsersEditPage">
-        <EuiPageBody>
+      <div className="mgtUsersEditPage">
           <EuiPageContent className="mgtUsersEditPage__content">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
@@ -637,8 +634,7 @@ class EditUserUI extends Component {
               </form>
             </EuiPageContentBody>
           </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      </div>
     );
   }
 }

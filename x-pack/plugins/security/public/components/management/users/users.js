@@ -10,8 +10,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiInMemoryTable,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiTitle,
   EuiPageContentHeader,
@@ -93,8 +91,7 @@ class UsersUI extends Component {
     const { apiClient, intl } = this.props;
     if (permissionDenied) {
       return (
-        <EuiPage className="mgtUsersListingPage">
-          <EuiPageBody>
+        <div className="mgtUsersListingPage">
             <EuiPageContent horizontalPosition="center">
               <EuiEmptyPrompt
                 iconType="securityApp"
@@ -115,8 +112,7 @@ class UsersUI extends Component {
                   </p>}
               />
             </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+        </div>
       );
     }
     const path = '#/management/security/';
@@ -222,8 +218,7 @@ class UsersUI extends Component {
         return normalized.indexOf(normalizedQuery) !== -1;
       }) : users;
     return (
-      <EuiPage className="mgtUsersListingPage">
-        <EuiPageBody>
+      <div className="mgtUsersListingPage">
           <EuiPageContent className="mgtUsersListingPage__content">
             <EuiPageContentHeader>
               <EuiPageContentHeaderSection>
@@ -274,8 +269,7 @@ class UsersUI extends Component {
 
             </EuiPageContentBody>
           </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      </div>
     );
   }
 }

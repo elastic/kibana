@@ -12,8 +12,6 @@ import {
   // @ts-ignore
   EuiForm,
   EuiFormRow,
-  EuiPage,
-  EuiPageBody,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -72,8 +70,7 @@ export class EditRolePage extends Component<Props, State> {
       : `Set privileges on your Elasticsearch data and control access to Kibana.`;
 
     return (
-      <EuiPage className="editRolePage" restrictWidth>
-        <EuiPageBody>
+      <div className="editRolePage FIXME-restrictWidth">
           <EuiForm {...this.state.formError}>
             {this.getFormTitle()}
 
@@ -104,8 +101,7 @@ export class EditRolePage extends Component<Props, State> {
 
             {this.getFormButtons()}
           </EuiForm>
-        </EuiPageBody>
-      </EuiPage>
+      </div>
     );
   }
 

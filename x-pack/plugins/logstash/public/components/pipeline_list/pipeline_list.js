@@ -11,7 +11,6 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EuiPage,
   EuiPageContent,
 } from '@elastic/eui';
 
@@ -203,7 +202,7 @@ export class PipelineList extends React.Component {
     const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
     const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
     return (
-      <EuiPage data-test-subj="pipelineList">
+      <div data-test-subj="pipelineList">
         <EuiPageContent horizontalPosition="center">
           {this.renderNoPermissionCallOut()}
           <PipelinesTable
@@ -229,7 +228,7 @@ export class PipelineList extends React.Component {
           showAddRoleAlert={this.state.showAddRoleAlert}
           showEnableMonitoringAlert={this.state.showEnableMonitoringAlert}
         />
-      </EuiPage>
+      </div>
     );
   }
 }
