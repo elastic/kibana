@@ -115,16 +115,16 @@ uiModules.get('apps/management')
               tag: tags && tags.length ? tags[0] : null,
             };
           }).sort((a, b) => {
-            if (a.default) {
+            if(a.default) {
               return -1;
             }
-            if (b.default) {
+            if(b.default) {
               return 1;
             }
-            if (a.title < b.title) {
+            if(a.title < b.title) {
               return -1;
             }
-            if (a.title > b.title) {
+            if(a.title > b.title) {
               return 1;
             }
             return 0;
@@ -143,7 +143,6 @@ uiModules.get('apps/management')
   });
 
 management.getSection('kibana').register('indices', {
-  visible: true,
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', { defaultMessage: 'Index Patterns' }),
   order: 0,
   url: '#/management/kibana/indices/'

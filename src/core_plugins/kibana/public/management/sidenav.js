@@ -45,3 +45,4 @@ export const SideNav = ({ sections, selectedId }) =>
     items={sideNavItems(sections, selectedId)}
     style={{ width: 192 }}
   />);
+
