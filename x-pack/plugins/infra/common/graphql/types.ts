@@ -18,6 +18,7 @@ export interface InfraSource {
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
   status: InfraSourceStatus /** The status of the source */;
   metadataByNode: (InfraNodeMetadata | null)[] /** A hierarchy of metadata entries by node */;
+  serviceMetadataBetween: (ServiceMetadata | null)[];
   logEntriesAround: InfraLogEntryInterval /** A consecutive span of log entries surrounding a point in time */;
   logEntriesBetween: InfraLogEntryInterval /** A consecutive span of log entries within an interval */;
   logSummaryBetween: InfraLogSummaryInterval /** A consecutive span of summary buckets within an interval */;
@@ -56,10 +57,18 @@ export interface InfraIndexField {
   searchable: boolean /** Whether the field's values can be efficiently searched for */;
   aggregatable: boolean /** Whether the field's values can be aggregated */;
 }
-/** One metadata entry for a node. */
+/** One metadata entry for a node */
 export interface InfraNodeMetadata {
   name: string;
   source: string;
+}
+
+export interface ServiceMetadata {
+  name: string /** One metadata entry for a service */;
+  hosts: boolean;
+  pods: boolean;
+  containers: boolean;
+  logs: boolean;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -164,6 +173,7 @@ export namespace InfraSourceResolvers {
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
     status?: StatusResolver /** The status of the source */;
     metadataByNode?: MetadataByNodeResolver /** A hierarchy of metadata entries by node */;
+    serviceMetadataBetween?: ServiceMetadataBetweenResolver;
     logEntriesAround?: LogEntriesAroundResolver /** A consecutive span of log entries surrounding a point in time */;
     logEntriesBetween?: LogEntriesBetweenResolver /** A consecutive span of log entries within an interval */;
     logSummaryBetween?: LogSummaryBetweenResolver /** A consecutive span of summary buckets within an interval */;
@@ -176,8 +186,18 @@ export namespace InfraSourceResolvers {
   export type StatusResolver = Resolver<InfraSourceStatus>;
   export type MetadataByNodeResolver = Resolver<(InfraNodeMetadata | null)[], MetadataByNodeArgs>;
   export interface MetadataByNodeArgs {
-    nodeName: string;
-    nodeType: InfraNodeType;
+    nodeName: string /** The name of the node */;
+    nodeType: InfraNodeType /** The type of the node. */;
+  }
+
+  export type ServiceMetadataBetweenResolver = Resolver<
+    (ServiceMetadata | null)[],
+    ServiceMetadataBetweenArgs
+  >;
+  export interface ServiceMetadataBetweenArgs {
+    start: number /** The millisecond timestamp that corresponds to the start of the interval */;
+    end: number /** The millisecond timestamp that corresponds to the end of the interval */;
+    filterQuery?: string | null /** The query to filter the service metadata by */;
   }
 
   export type LogEntriesAroundResolver = Resolver<InfraLogEntryInterval, LogEntriesAroundArgs>;
@@ -286,7 +306,7 @@ export namespace InfraIndexFieldResolvers {
   export type SearchableResolver = Resolver<boolean>;
   export type AggregatableResolver = Resolver<boolean>;
 }
-/** One metadata entry for a node. */
+/** One metadata entry for a node */
 export namespace InfraNodeMetadataResolvers {
   export interface Resolvers {
     name?: NameResolver;
@@ -295,6 +315,22 @@ export namespace InfraNodeMetadataResolvers {
 
   export type NameResolver = Resolver<string>;
   export type SourceResolver = Resolver<string>;
+}
+
+export namespace ServiceMetadataResolvers {
+  export interface Resolvers {
+    name?: NameResolver /** One metadata entry for a service */;
+    hosts?: HostsResolver;
+    pods?: PodsResolver;
+    containers?: ContainersResolver;
+    logs?: LogsResolver;
+  }
+
+  export type NameResolver = Resolver<string>;
+  export type HostsResolver = Resolver<boolean>;
+  export type PodsResolver = Resolver<boolean>;
+  export type ContainersResolver = Resolver<boolean>;
+  export type LogsResolver = Resolver<boolean>;
 }
 /** A consecutive sequence of log entries */
 export namespace InfraLogEntryIntervalResolvers {
@@ -491,8 +527,13 @@ export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
 export interface MetadataByNodeInfraSourceArgs {
-  nodeName: string;
-  nodeType: InfraNodeType;
+  nodeName: string /** The name of the node */;
+  nodeType: InfraNodeType /** The type of the node. */;
+}
+export interface ServiceMetadataBetweenInfraSourceArgs {
+  start: number /** The millisecond timestamp that corresponds to the start of the interval */;
+  end: number /** The millisecond timestamp that corresponds to the end of the interval */;
+  filterQuery?: string | null /** The query to filter the service metadata by */;
 }
 export interface LogEntriesAroundInfraSourceArgs {
   key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
