@@ -21,8 +21,6 @@ import { ReportErrorButton } from './report_error_button';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiText,
   EuiTextColor,

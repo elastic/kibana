@@ -13,8 +13,6 @@ import {
   // @ts-ignore
   EuiInMemoryTable,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiSpacer,
   EuiText,
