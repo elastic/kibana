@@ -28,25 +28,16 @@ import { REPO_ROOT } from '../constants';
 const simpleGit = new SimpleGit(REPO_ROOT);
 
 const chmodAsync = promisify(chmod);
+const gitRevParseAsync = promisify(simpleGit.revparse.bind(simpleGit));
 const unlinkAsync = promisify(unlink);
 const writeFileAsync = promisify(writeFile);
 
 async function getPrecommitGitHookScriptPath(rootPath) {
-  return new Promise((pResolve, pReject) => {
-    simpleGit.revparse(['--git-dir'], (error, gitDirPath) => {
-      if (error) {
-        return pReject(error);
-      }
+  // gets the correct location for the .git dir for
+  // every git setup (including git worktree)
+  const gitDirPath = (await gitRevParseAsync(['--git-dir'])).trim();
 
-      pResolve(
-        resolve(
-          rootPath,
-          gitDirPath.trim(),
-          'hooks/pre-commit'
-        )
-      );
-    });
-  });
+  return resolve(rootPath, gitDirPath, 'hooks/pre-commit');
 }
 
 function getKbnPrecommitGitHookScript(rootPath) {
