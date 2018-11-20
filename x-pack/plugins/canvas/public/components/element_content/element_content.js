@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { pure, compose, branch, renderComponent } from 'recompose';
 import Style from 'style-it';
-import { getType } from '../../../common/lib/get_type';
+import { getType } from '@kbn/interpreter/common/lib/get_type';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
 import { ElementShareContainer } from '../element_share_container';
@@ -23,8 +23,7 @@ const branches = [
   // no renderable or renderable config value, render loading
   branch(({ renderable, state }) => {
     return !state || !renderable;
-  }, renderComponent(Loading)),
-
+  }, renderComponent(({ backgroundColor }) => <Loading backgroundColor={backgroundColor} />)),
   // renderable is available, but no matching element is found, render invalid
   branch(({ renderable, renderFunction }) => {
     return renderable && getType(renderable) !== 'render' && !renderFunction;
@@ -90,4 +89,5 @@ ElementContent.propTypes = {
     onComplete: PropTypes.func.isRequired, // local, not passed through
   }).isRequired,
   state: PropTypes.string,
+  backgroundColor: PropTypes.string,
 };
