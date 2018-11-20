@@ -41,8 +41,7 @@
   @import 'panel/index';
   @import 'viewport/index';
 
-  // Vis imports -- will have some duplicate styling
-  // because they will be imported via ui/public as well
-  // (without .theme-[] prefix)
-  @import 'src/ui/public/vis/map/index';
+  // Vis imports
+  @import 'src/ui/public/vis/index';
+  @import 'src/ui/public/vislib/index';
 }

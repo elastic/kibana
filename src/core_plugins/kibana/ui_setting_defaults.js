@@ -218,9 +218,10 @@ export function getUiSettingDefaults() {
       description: `Never show more than this many bars in date histograms, scale values if needed`,
     },
     'visualize:enableLabs': {
-      name: 'Enable labs',
+      name: 'Enable experimental visualizations',
       value: true,
-      description: `Enable lab visualizations in Visualize.`,
+      description: `Allows users to create, view, and edit experimental visualizations. If disabled,
+        only visualizations that are considered production-ready are available to the user.`,
       category: ['visualization'],
     },
     'visualization:tileMap:maxPrecision': {
