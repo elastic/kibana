@@ -35,6 +35,9 @@ export const buildPipeline = (vis, params) => {
   if (filters) {
     pipeline += `filters='${JSON.stringify(filters).replace(/'/g, `\\'`)}' `;
   }
+  if (vis.savedSearchId) {
+    pipeline += `savedSearchId='${vis.savedSearchId}' `;
+  }
   pipeline += '| ';
   if (vis.type.name === 'vega') {
     pipeline += `vega spec='${visState.params.spec.replace(/'/g, `\\'`)}'`;

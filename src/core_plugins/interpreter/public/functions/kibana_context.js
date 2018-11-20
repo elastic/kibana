@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
+
 export default () => ({
   name: 'kibana_context',
   type: 'kibana_context',
@@ -44,29 +46,45 @@ export default () => ({
       help: 'Sets date range to query',
       default: null,
     },
+    savedSearchId: {
+      types: ['string', 'null'],
+      help: 'Sets date range to query',
+      default: null,
+    }
   },
   fn(context, args) {
-    const queryArg = args.q ? JSON.parse(args.q) : [];
-    let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
+    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
+      const savedSearches = $injector.get('savedSearches');
+      const queryArg = args.q ? JSON.parse(args.q) : [];
+      let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
+      let filters = args.filters ? JSON.parse(args.filters) : [];
 
-    if (context.query) {
-      const contextQueries = Array.isArray(context.query) ? context.query : [context.query];
-      queries = queries.concat(contextQueries);
-    }
+      if (args.savedSearchId) {
+        const savedSearch = await savedSearches.get(args.savedSearchId);
+        const searchQuery = savedSearch.searchSource.getField('query');
+        const searchFilters = savedSearch.searchSource.getField('filter');
+        queries = queries.concat(searchQuery);
+        filters = filters.concat(searchFilters);
+      }
 
-    let filters = args.filters ? JSON.parse(args.filters) : [];
-    if (context.filters) {
-      // merge filters
-      filters = context.filters.concat(JSON.parse(args.filters));
-    }
+      if (context.query) {
+        const contextQueries = Array.isArray(context.query) ? context.query : [context.query];
+        queries = queries.concat(contextQueries);
+      }
 
-    const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;
+      if (context.filters) {
+        // merge filters
+        filters = filters.concat(context.filters);
+      }
 
-    return {
-      type: 'kibana_context',
-      query: queries,
-      filters: filters,
-      timeRange: timeRange,
-    };
+      const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;
+
+      return {
+        type: 'kibana_context',
+        query: queries,
+        filters: filters,
+        timeRange: timeRange,
+      };
+    });
   },
 });

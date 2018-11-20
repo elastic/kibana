@@ -140,6 +140,7 @@ uiModules
         self.searchSource.getField('index'),
         self.visState
       );
+      self.vis.savedSearchId = self.savedSearchId;
 
       return self.vis;
     };
@@ -150,6 +151,7 @@ uiModules
       self.vis.indexPattern = self.searchSource.getField('index');
       self.visState.title = self.title;
       self.vis.setState(self.visState);
+      self.vis.savedSearchId = self.savedSearchId;
     };
 
     return SavedVis;
