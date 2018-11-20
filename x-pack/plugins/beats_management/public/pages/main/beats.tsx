@@ -391,4 +391,7 @@ class BeatsPageUi extends React.PureComponent<BeatsPageProps, BeatsPageState> {
       .reduce((acc, cur) => acc || cur, false);
 }
 
-export const BeatsPage = injectI18n(BeatsPageUi);
+const BeatsPageWrapped = injectI18n(BeatsPageUi);
+export const BeatsPage = BeatsPageWrapped as typeof BeatsPageWrapped & {
+  ActionArea: typeof BeatsPageUi['ActionArea'];
+};

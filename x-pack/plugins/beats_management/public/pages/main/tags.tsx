@@ -120,4 +120,7 @@ class TagsPageUi extends React.PureComponent<TagsPageProps, TagsPageState> {
   }
 }
 
-export const TagsPage = injectI18n(TagsPageUi);
+const TagsPageWrapped = injectI18n(TagsPageUi);
+export const TagsPage = TagsPageWrapped as typeof TagsPageWrapped & {
+  ActionArea: typeof TagsPageUi['ActionArea'];
+};
