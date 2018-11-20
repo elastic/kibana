@@ -10,11 +10,12 @@ import styled from 'styled-components';
 
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
-import { OnDataProviderRemoved } from '../events';
+import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
 
 interface Props {
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
+  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   width: number;
 }
 
@@ -25,8 +26,14 @@ const Header = styled.header<{ width: string }>`
 `;
 
 /** Renders the timeline header */
-export const TimelineHeader = pure<Props>(({ dataProviders, onDataProviderRemoved, width }) => (
-  <Header data-test-subj="timelineHeader" width={`${width}px`}>
-    <DataProviders dataProviders={dataProviders} onDataProviderRemoved={onDataProviderRemoved} />
-  </Header>
-));
+export const TimelineHeader = pure<Props>(
+  ({ dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled, width }) => (
+    <Header data-test-subj="timelineHeader" width={`${width}px`}>
+      <DataProviders
+        dataProviders={dataProviders}
+        onDataProviderRemoved={onDataProviderRemoved}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+      />
+    </Header>
+  )
+);

@@ -17,6 +17,7 @@ describe('Header', () => {
         <TimelineHeader
           dataProviders={mockDataProviders}
           onDataProviderRemoved={noop}
+          onToggleDataProviderEnabled={noop}
           width={1000}
         />
       );

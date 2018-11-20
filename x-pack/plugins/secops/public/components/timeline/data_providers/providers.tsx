@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { OnDataProviderRemoved } from '../events';
+import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
 import { DataProvider } from './data_provider';
 
 interface CloseButtonProps {
@@ -33,9 +33,31 @@ const CloseButton = pure(({ onDataProviderRemoved, dataProvider }: CloseButtonPr
   );
 });
 
+interface SwitchButtonProps {
+  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
+  dataProvider: DataProvider;
+}
+
+/** An affordance for enabling/disabling a data provider. It invokes `onToggleDataProviderEnabled` when clicked */
+const SwitchButton = pure(({ onToggleDataProviderEnabled, dataProvider }: SwitchButtonProps) => {
+  const onClick = () => {
+    onToggleDataProviderEnabled({ dataProvider, enabled: !dataProvider.enabled });
+  };
+
+  return (
+    <EuiSwitch
+      aria-label="Toggle"
+      data-test-subj="switchButton"
+      defaultChecked={dataProvider.enabled}
+      onClick={onClick}
+    />
+  );
+});
+
 interface Props {
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
+  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
 }
 
 const PanelProviders = styled.div`
@@ -52,14 +74,22 @@ const PanelProvider = styled(EuiPanel)`
     margin: 5px;
     min-height: 50px;
     padding: 5px 5px 5px 10px;
-    max-width: 180px;
+    max-width: 240px;
   }
 `;
 
 const Spacer = styled(EuiSpacer)`
   margin-left: 10px;
-  margin-right: 5px;
+  margin-right: 0px;
   border-left: 1px solid #ccc;
+`;
+
+const FlexGroup = styled.span`
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  flex-grow: 1;
+  align-items: center;
 `;
 
 /**
@@ -69,14 +99,25 @@ const Spacer = styled(EuiSpacer)`
  * 2) temporarily disabling a data provider
  * 3) applying boolean negation to the data provider
  */
-export const Providers = pure<Props>(({ dataProviders, onDataProviderRemoved }) => (
-  <PanelProviders data-test-subj="providers">
-    {dataProviders.map(dataProvider => (
-      <PanelProvider data-test-subj="provider" key={dataProvider.id}>
-        {dataProvider.render()}
-        <Spacer />
-        <CloseButton onDataProviderRemoved={onDataProviderRemoved} dataProvider={dataProvider} />
-      </PanelProvider>
-    ))}
-  </PanelProviders>
-));
+export const Providers = pure<Props>(
+  ({ dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }) => (
+    <PanelProviders data-test-subj="providers">
+      {dataProviders.map(dataProvider => (
+        <PanelProvider data-test-subj="provider" key={dataProvider.id}>
+          {dataProvider.render()}
+          <FlexGroup>
+            <SwitchButton
+              onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+              dataProvider={dataProvider}
+            />
+            <Spacer />
+            <CloseButton
+              onDataProviderRemoved={onDataProviderRemoved}
+              dataProvider={dataProvider}
+            />
+          </FlexGroup>
+        </PanelProvider>
+      ))}
+    </PanelProviders>
+  )
+);

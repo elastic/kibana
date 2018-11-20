@@ -23,7 +23,11 @@ describe('DataProviders', () => {
       const dataProviders: DataProvider[] = [];
 
       const wrapper = mount(
-        <DataProviders dataProviders={dataProviders} onDataProviderRemoved={noop} />
+        <DataProviders
+          dataProviders={dataProviders}
+          onDataProviderRemoved={noop}
+          onToggleDataProviderEnabled={noop}
+        />
       );
 
       expect(wrapper.text()).toContain(dropMessage);
@@ -31,7 +35,11 @@ describe('DataProviders', () => {
 
     test('it should NOT render a placeholder given a non-empty collection of data providers', () => {
       const wrapper = mount(
-        <DataProviders dataProviders={mockDataProviders} onDataProviderRemoved={noop} />
+        <DataProviders
+          dataProviders={mockDataProviders}
+          onDataProviderRemoved={noop}
+          onToggleDataProviderEnabled={noop}
+        />
       );
 
       expect(wrapper.text()).not.toContain(dropMessage);
@@ -39,7 +47,11 @@ describe('DataProviders', () => {
 
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <DataProviders dataProviders={mockDataProviders} onDataProviderRemoved={noop} />
+        <DataProviders
+          dataProviders={mockDataProviders}
+          onDataProviderRemoved={noop}
+          onToggleDataProviderEnabled={noop}
+        />
       );
 
       mockDataProviderNames().forEach(name =>
