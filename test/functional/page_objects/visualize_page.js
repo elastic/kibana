@@ -605,7 +605,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
-    async toggleAggegationEditor(agg) {
+
+    async toggleAggregationEditor(agg) {
       await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -649,7 +650,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-
     async changeHeatmapColorNumbers(value = 6) {
       const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
       await input.clearValue();
@@ -686,6 +686,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       toCell.clearValue();
       toCell.type(`${to}`);
     }
+
     async clickYAxisOptions(axisId) {
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
