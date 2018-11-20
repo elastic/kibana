@@ -28,9 +28,8 @@ import { uiModules } from 'ui/modules';
 const MINZOOM = 0;
 const MAXZOOM = 22;//increase this to 22. Better for WMS
 
-const emsServiceSettings = new Promise((resolve, reject) => {
+const emsServiceSettings = new Promise((resolve) => {
   uiModules.get('kibana').run(($injector) => {
-    const Private = $injector.get('Private');
     const serviceSttings = $injector.get('serviceSettings');
     resolve(serviceSttings);
   });

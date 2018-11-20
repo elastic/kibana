@@ -167,7 +167,6 @@ uiModules.get('kibana')
         const allServices = [];
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
-          // tmsService.url = tilemapsConfig.deprecated.config.url;
           tmsService.id = TMS_IN_YML_ID;
           tmsService.origin = 'yml';
           allServices.push(tmsService);
@@ -258,8 +257,6 @@ uiModules.get('kibana')
 
       }
 
-      async getMetadataForRegionLayer() {
-      }
     }
 
     return new ServiceSettings();

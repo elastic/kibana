@@ -70,7 +70,6 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       }
 
       this._updateChoroplethLayerForNewMetrics(
-        // this._vis.params.selectedLayer.url,
         this._vis.params.selectedLayer.name,
         this._vis.params.selectedLayer.attribution,
         this._vis.params.showAllShapes,

@@ -37,9 +37,8 @@ const EMPTY_STYLE = {
 };
 
 
-const emsServiceSettings = new Promise((resolve, reject) => {
+const emsServiceSettings = new Promise((resolve) => {
   uiModules.get('kibana').run(($injector) => {
-    const Private = $injector.get('Private');
     const serviceSttings = $injector.get('serviceSettings');
     resolve(serviceSttings);
   });
@@ -89,7 +88,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._tooltipFormatter = () => '';
     this._attribution = attribution;
     this._boundsOfData = null;
-      this._showAllShapes = showAllShapes;
+    this._showAllShapes = showAllShapes;
     this._layerName = name;
     this._layerConfig = layerConfig;
 
