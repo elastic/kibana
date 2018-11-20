@@ -56,7 +56,7 @@ export const hostLayoutCreator: InfraMetricLayoutCreator = theme => [
             },
             memory: {
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.memoryUsageSeriesLabel',
+                'xpack.infra.metricDetailPage.hostMetricsLayout.overviewSection.memoryCapacitySeriesLabel',
                 {
                   defaultMessage: 'Memory Usage',
                 }

@@ -27,7 +27,7 @@ interface Props {
 }
 export const LogsPage = injectI18n(
   class extends React.Component<Props> {
-    public displayName = 'LogsPage';
+    public static displayName = 'LogsPage';
     public render() {
       const { intl } = this.props;
       return (

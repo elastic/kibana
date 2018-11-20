@@ -181,7 +181,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
             write: {
               color: theme.eui.euiColorVis2,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoOpsSection.writesRateSeriesLabel',
+                'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoOpsSection.writeRateSeriesLabel',
                 {
                   defaultMessage: 'writes',
                 }
@@ -208,7 +208,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
             read: {
               color: theme.eui.euiColorVis1,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoBytesSection.readsRateSeriesLabel',
+                'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoBytesSection.readRateSeriesLabel',
                 {
                   defaultMessage: 'reads',
                 }
@@ -217,7 +217,7 @@ export const containerLayoutCreator: InfraMetricLayoutCreator = theme => [
             write: {
               color: theme.eui.euiColorVis2,
               name: i18n.translate(
-                'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoBytesSection.writesRateSeriesLabel',
+                'xpack.infra.metricDetailPage.containerMetricsLayout.diskIoBytesSection.writeRateSeriesLabel',
                 {
                   defaultMessage: 'writes',
                 }

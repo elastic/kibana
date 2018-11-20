@@ -60,10 +60,11 @@ interface Props {
 export const MetricDetail = withTheme(
   injectI18n(
     class extends React.PureComponent<Props> {
-      public displayName = 'MetricDetailPage';
+      public static displayName = 'MetricDetailPage';
       public readonly state = {
         isSideNavOpenOnMobile: false,
       };
+
       public render() {
         const { intl } = this.props;
         const nodeName = this.props.match.params.node;
@@ -86,6 +87,7 @@ export const MetricDetail = withTheme(
         }
         const layouts = layoutCreator(this.props.theme);
         const breadcrumbs = [{ text: nodeName }];
+
         return (
           <ColumnarPage>
             <Header
@@ -174,6 +176,7 @@ export const MetricDetail = withTheme(
                                                   </MetricsTitleTimeRangeContainer>
                                                 </EuiPageHeaderSection>
                                               </EuiPageHeader>
+
                                               <EuiPageContentWithRelative>
                                                 <Metrics
                                                   nodeName={nodeName}
@@ -207,6 +210,7 @@ export const MetricDetail = withTheme(
           </ColumnarPage>
         );
       }
+
       private handleClick = (section: InfraMetricLayoutSection) => () => {
         const id = section.linkToId || section.id;
         const el = document.getElementById(id);
@@ -214,6 +218,7 @@ export const MetricDetail = withTheme(
           el.scrollIntoView();
         }
       };
+
       private toggleOpenOnMobile = () => {
         this.setState({
           isSideNavOpenOnMobile: !this.state.isSideNavOpenOnMobile,

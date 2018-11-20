@@ -50,10 +50,12 @@ export const RedirectToNodeLogs = injectI18n(
             />
           );
         }
+
         const searchString = compose(
           replaceLogFilterInQueryString(`${configuredFields[nodeType]}: ${nodeName}`),
           replaceLogPositionInQueryString(getTimeFromLocation(location))
         )('');
+
         return <Redirect to={`/logs?${searchString}`} />;
       }}
     </WithSource>

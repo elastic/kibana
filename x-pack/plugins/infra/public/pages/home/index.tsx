@@ -27,7 +27,7 @@ interface HomePageProps {
 
 export const HomePage = injectI18n(
   class extends React.PureComponent<HomePageProps, {}> {
-    public displayName = 'HomePage';
+    public static displayName = 'HomePage';
     public render() {
       const { intl } = this.props;
       return (

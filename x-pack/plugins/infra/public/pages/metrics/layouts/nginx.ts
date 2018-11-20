@@ -22,7 +22,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.nginxHits,
         label: i18n.translate(
-          'xpack.infra.metricDetailPage.nginxMetricsLayout.hitsSection.layoutLabel',
+          'xpack.infra.metricDetailPage.nginxMetricsLayout.hitsSection.sectionLabel',
           {
             defaultMessage: 'Hits',
           }
@@ -43,7 +43,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.nginxRequestRate,
         label: i18n.translate(
-          'xpack.infra.metricDetailPage.nginxMetricsLayout.requestRateSection.layoutLabel',
+          'xpack.infra.metricDetailPage.nginxMetricsLayout.requestRateSection.sectionLabel',
           {
             defaultMessage: 'Request Rate',
           }
@@ -61,7 +61,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.nginxActiveConnections,
         label: i18n.translate(
-          'xpack.infra.metricDetailPage.nginxMetricsLayout.activeConnectionsSection.layoutLabel',
+          'xpack.infra.metricDetailPage.nginxMetricsLayout.activeConnectionsSection.sectionLabel',
           {
             defaultMessage: 'Active Connections',
           }
@@ -81,7 +81,7 @@ export const nginxLayoutCreator: InfraMetricLayoutCreator = theme => [
       {
         id: InfraMetric.nginxRequestsPerConnection,
         label: i18n.translate(
-          'xpack.infra.metricDetailPage.nginxMetricsLayout.requestsPerConnectionsSection.layoutLabel',
+          'xpack.infra.metricDetailPage.nginxMetricsLayout.requestsPerConnectionsSection.sectionLabel',
           {
             defaultMessage: 'Requests per Connections',
           }
