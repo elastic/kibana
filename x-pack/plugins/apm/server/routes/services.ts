@@ -42,12 +42,12 @@ export function initServicesApi(server: Server) {
       try {
         serviceBucketList = await getServices(setup);
       } catch (error) {
-        return error;
+        return defaultErrorHandler(error);
       }
 
       // Store telemetry data derived from serviceBucketList
       const apmTelemetry = createApmTelementry(
-        serviceBucketList.map(({ agent_name }) => agent_name as AgentName)
+        serviceBucketList.map(({ agentName }) => agentName as AgentName)
       );
       storeApmTelemetry(server, apmTelemetry);
 

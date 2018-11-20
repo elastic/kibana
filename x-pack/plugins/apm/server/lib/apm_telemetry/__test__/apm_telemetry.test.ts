@@ -27,9 +27,6 @@ describe('apm_telemetry', () => {
         [AgentName.GoLang]: 2,
         [AgentName.NodeJs]: 1,
         [AgentName.JsBase]: 1,
-        [AgentName.Java]: 0,
-        [AgentName.Python]: 0,
-        [AgentName.Ruby]: 0
       });
     });
     it('should ignore undefined or unknown AgentName values', () => {
@@ -45,9 +42,6 @@ describe('apm_telemetry', () => {
         [AgentName.GoLang]: 2,
         [AgentName.NodeJs]: 1,
         [AgentName.JsBase]: 1,
-        [AgentName.Java]: 0,
-        [AgentName.Python]: 0,
-        [AgentName.Ruby]: 0
       });
     });
   });
@@ -78,9 +72,6 @@ describe('apm_telemetry', () => {
           [AgentName.GoLang]: 2,
           [AgentName.NodeJs]: 1,
           [AgentName.JsBase]: 1,
-          [AgentName.Java]: 0,
-          [AgentName.Python]: 0,
-          [AgentName.Ruby]: 0
         }
       };
     });
