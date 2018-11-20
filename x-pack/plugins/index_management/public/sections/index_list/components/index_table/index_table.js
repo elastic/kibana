@@ -5,7 +5,7 @@
  */
 
 import React, { Component } from 'react';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import { NoMatch } from '../../../no_match';
@@ -20,7 +20,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiSpacer,
   EuiSwitch,
   EuiTable,
@@ -34,7 +33,6 @@ import {
   EuiTableRowCellCheckbox,
   EuiTitle,
   EuiText,
-  EuiPageBody,
   EuiPageContent
 } from '@elastic/eui';
 
@@ -256,107 +254,103 @@ export class IndexTableUi extends Component {
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexTable.sectionHeading"
-                      defaultMessage="Index management"
-                    />
-                  </h1>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexTable.sectionDescription"
-                      defaultMessage="Update your Elasticsearch indices individually or in bulk"
-                    />
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  id="checkboxShowSystemIndices"
-                  checked={showSystemIndices}
-                  onChange={event => showSystemIndicesChanged(event.target.checked)}
-                  label={<FormattedMessage
-                    id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                    defaultMessage="Include system indices"
-                  />}
+      <EuiPageContent>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexTable.sectionHeading"
+                  defaultMessage="Index management"
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            <EuiFlexGroup gutterSize="l" alignItems="center">
-              {atLeastOneItemSelected ? (
-                <EuiFlexItem grow={false}>
-                  <Route
-                    key="menu"
-                    render={() => (
-                      <IndexActionsContextMenu
-                        indexNames={Object.keys(selectedIndicesMap)}
-                        resetSelection={() => {
-                          this.setState({ selectedIndicesMap: {} });
-                        }}
-                      />
-                    )}
+              </h1>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexTable.sectionDescription"
+                  defaultMessage="Update your Elasticsearch indices individually or in bulk"
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              id="checkboxShowSystemIndices"
+              checked={showSystemIndices}
+              onChange={event => showSystemIndicesChanged(event.target.checked)}
+              label={<FormattedMessage
+                id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
+                defaultMessage="Include system indices"
+              />}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiFlexGroup gutterSize="l" alignItems="center">
+          {atLeastOneItemSelected ? (
+            <EuiFlexItem grow={false}>
+              <Route
+                key="menu"
+                render={() => (
+                  <IndexActionsContextMenu
+                    indexNames={Object.keys(selectedIndicesMap)}
+                    resetSelection={() => {
+                      this.setState({ selectedIndicesMap: {} });
+                    }}
                   />
-                </EuiFlexItem>
-              ) : null}
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  fullWidth
-                  value={filter}
-                  onChange={event => {
-                    filterChanged(event.target.value);
-                  }}
-                  data-test-subj="indexTableFilterInput"
-                  placeholder={
-                    intl.formatMessage({
-                      id: 'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
-                      defaultMessage: 'Search',
-                    })
-                  }
-                  aria-label={
-                    intl.formatMessage({
-                      id: 'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
-                      defaultMessage: 'Search indices',
-                    })
-                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <EuiFieldSearch
+              fullWidth
+              value={filter}
+              onChange={event => {
+                filterChanged(event.target.value);
+              }}
+              data-test-subj="indexTableFilterInput"
+              placeholder={
+                intl.formatMessage({
+                  id: 'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
+                  defaultMessage: 'Search',
+                })
+              }
+              aria-label={
+                intl.formatMessage({
+                  id: 'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
+                  defaultMessage: 'Search indices',
+                })
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        {indices.length > 0 ? (
+          <EuiTable>
+            <EuiTableHeader>
+              <EuiTableHeaderCellCheckbox>
+                <EuiCheckbox
+                  id="selectAllIndexes"
+                  checked={this.areAllItemsSelected()}
+                  onChange={this.toggleAll}
+                  type="inList"
                 />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-
-            {indices.length > 0 ? (
-              <EuiTable>
-                <EuiTableHeader>
-                  <EuiTableHeaderCellCheckbox>
-                    <EuiCheckbox
-                      id="selectAllIndexes"
-                      checked={this.areAllItemsSelected()}
-                      onChange={this.toggleAll}
-                      type="inList"
-                    />
-                  </EuiTableHeaderCellCheckbox>
-                  {this.buildHeader()}
-                </EuiTableHeader>
-                <EuiTableBody>{this.buildRows()}</EuiTableBody>
-              </EuiTable>
-            ) : (
-              <NoMatch />
-            )}
-            <EuiSpacer size="m" />
-            {indices.length > 0 ? this.renderPager() : null}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+              </EuiTableHeaderCellCheckbox>
+              {this.buildHeader()}
+            </EuiTableHeader>
+            <EuiTableBody>{this.buildRows()}</EuiTableBody>
+          </EuiTable>
+        ) : (
+            <NoMatch />
+          )}
+        <EuiSpacer size="m" />
+        {indices.length > 0 ? this.renderPager() : null}
+      </EuiPageContent>
     );
   }
 }

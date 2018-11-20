@@ -17,6 +17,10 @@
  * under the License.
  */
 
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+
 import './sections';
 import 'ui/filters/start_from';
 import 'ui/field_editor';
@@ -28,6 +32,14 @@ import { management } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import 'ui/kbn_top_nav';
+
+import {
+  EuiSideNav,
+  EuiIcon
+} from '@elastic/eui';
+import { removeDotSegments } from 'uri-js';
+
+const SIDENAV_ID = 'management-sidenav';
 
 uiRoutes
   .when('/management', {
@@ -42,6 +54,49 @@ uiRoutes
 require('ui/index_patterns/route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index'
 });
+
+
+export function updateHeader(
+  $scope
+) {
+  const node = document.getElementById(SIDENAV_ID);
+  if (!node) {
+    return;
+  }
+
+  const sectionVisible = section => !section.disabled && section.visible;
+  const sectionToNav = ({ display, id, url, icon }) =>
+    ({
+      id,
+      name: display,
+      icon: icon ? <EuiIcon type={icon} /> : null,
+      isSelected: $scope.section.id === id,
+      onClick: () => url && (window.location = url)
+    });
+
+  const sideNav = $scope.sections
+    .filter(sectionVisible)
+    .filter(section => section.items.filter(sectionVisible).length)
+    .map(section => ({
+      items: section.items.filter(sectionVisible).map(sectionToNav),
+      ...sectionToNav(section)
+    }));
+
+  render(
+    <I18nProvider>
+      <EuiSideNav
+        items={sideNav}
+        style={{ width: 192 }}
+      />
+    </I18nProvider>,
+    node,
+  );
+}
+
+export const destroyHeader = () => {
+  const node = document.getElementById(SIDENAV_ID);
+  node && unmountComponentAtNode(node);
+};
 
 uiModules
   .get('apps/management')
@@ -67,6 +122,9 @@ uiModules
             item.active = `#${$location.path()}`.indexOf(item.url) > -1;
           });
         }
+
+        updateHeader($scope);
+        $scope.$on('$destroy', destroyHeader);
       }
     };
   });
