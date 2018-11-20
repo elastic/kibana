@@ -9,7 +9,7 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
-import { KibanaUser } from './adapter_types';
+import { KibanaUser, RuntimeKibanaUser } from './adapter_types';
 import {
   BackendFrameworkAdapter,
   FrameworkInfo,
@@ -124,21 +124,22 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
   }
 
   private async getUser(request: KibanaServerRequest): Promise<KibanaUser | null> {
+    let user;
     try {
-      const user = await this.server.plugins.security.getUser(request);
-      const assertKibanaUser = RuntimeFrameworkInfo.decode(user);
-      if (assertKibanaUser.isLeft()) {
-        throw new Error(
-          `Error parsing user info in ${this.PLUGIN_ID},   ${
-            PathReporter.report(assertKibanaUser)[0]
-          }`
-        );
-      }
-
-      return user;
+      user = await this.server.plugins.security.getUser(request);
     } catch (e) {
       return null;
     }
+    const assertKibanaUser = RuntimeKibanaUser.decode(user);
+    if (assertKibanaUser.isLeft()) {
+      throw new Error(
+        `Error parsing user info in ${this.PLUGIN_ID},   ${
+          PathReporter.report(assertKibanaUser)[0]
+        }`
+      );
+    }
+
+    return user;
   }
 
   private xpackInfoWasUpdatedHandler = (xpackInfo: XpackInfo) => {

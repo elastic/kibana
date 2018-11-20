@@ -25,10 +25,10 @@ export class BeatsLib {
     return beat ? (await this.mergeInTags([beat]))[0] : null;
   }
 
-  public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
+  public getBeatWithToken = async (enrollmentToken: string): Promise<CMBeat | null> => {
     const beat = await this.adapter.getBeatWithToken(enrollmentToken);
     return beat;
-  }
+  };
 
   public async getBeatsWithTag(tagId: string): Promise<CMPopulatedBeat[]> {
     const beats = await this.adapter.getBeatsWithTag(tagId);
