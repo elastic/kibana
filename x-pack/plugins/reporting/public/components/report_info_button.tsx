@@ -183,7 +183,13 @@ export class ReportInfoButton extends Component<Props, State> {
     if (this.state.isFlyoutVisible) {
       flyout = (
         <EuiPortal>
-          <EuiFlyout ownFocus onClose={this.closeFlyout} size="s" aria-labelledby="flyoutTitle">
+          <EuiFlyout
+            ownFocus
+            onClose={this.closeFlyout}
+            size="s"
+            aria-labelledby="flyoutTitle"
+            data-test-subj="reportInfoFlyout"
+          >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="s">
                 <h2 id="flyoutTitle">{this.state.calloutTitle}</h2>
@@ -203,6 +209,7 @@ export class ReportInfoButton extends Component<Props, State> {
           onClick={this.showFlyout}
           iconType="iInCircle"
           color={'primary'}
+          data-test-subj="reportInfoButton"
           aria-label="Show report info"
         />
         {flyout}
