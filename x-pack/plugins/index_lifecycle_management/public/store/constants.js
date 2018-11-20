@@ -22,7 +22,6 @@ export const PHASE_ROLLOVER_MAX_AGE = 'selectedMaxAge';
 export const PHASE_ROLLOVER_MAX_AGE_UNITS = 'selectedMaxAgeUnits';
 export const PHASE_ROLLOVER_MAX_SIZE_STORED = 'selectedMaxSizeStored';
 export const PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS = 'selectedMaxSizeStoredUnits';
-export const PHASE_ROLLOVER_MAX_DOC_SIZE = 'selectedMaxDocSize';
 export const PHASE_ROLLOVER_MINIMUM_AGE = 'selectedMinimumAge';
 export const PHASE_ROLLOVER_MINIMUM_AGE_UNITS = 'selectedMinimumAgeUnits';
 
@@ -35,14 +34,16 @@ export const PHASE_NODE_ATTRS = 'selectedNodeAttrs';
 export const PHASE_PRIMARY_SHARD_COUNT = 'selectedPrimaryShardCount';
 export const PHASE_REPLICA_COUNT = 'selectedReplicaCount';
 
-export const PHASE_ATTRIBUTES_THAT_ARE_NUMBERS = [
-  PHASE_ROLLOVER_MAX_AGE,
-  PHASE_ROLLOVER_MAX_SIZE_STORED,
-  PHASE_ROLLOVER_MAX_DOC_SIZE,
+export const PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE = [
   PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_FORCE_MERGE_SEGMENTS,
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
+];
+export const PHASE_ATTRIBUTES_THAT_ARE_NUMBERS = [
+  ...PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE,
+  PHASE_ROLLOVER_MAX_AGE,
+  PHASE_ROLLOVER_MAX_SIZE_STORED,
 ];
 
 export const STRUCTURE_INDEX_TEMPLATE = 'indexTemplate';
@@ -67,7 +68,6 @@ export const ERROR_STRUCTURE = {
     [PHASE_ROLLOVER_MAX_AGE_UNITS]: [],
     [PHASE_ROLLOVER_MAX_SIZE_STORED]: [],
     [PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]: [],
-    [PHASE_ROLLOVER_MAX_DOC_SIZE]: []
   },
   [PHASE_WARM]: {
     [PHASE_ROLLOVER_ALIAS]: [],

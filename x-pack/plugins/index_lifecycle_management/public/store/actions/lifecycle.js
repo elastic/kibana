@@ -17,6 +17,7 @@ export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
     const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage',
       {
         defaultMessage: 'Error saving lifecycle policy {lifecycleName}',
+        values: { lifecycleName: lifecycle.name }
       }
     );
     showApiError(err, title);

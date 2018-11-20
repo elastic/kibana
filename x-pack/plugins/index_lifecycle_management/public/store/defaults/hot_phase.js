@@ -11,7 +11,6 @@ import {
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_ROLLOVER_ALIAS,
-  PHASE_ROLLOVER_MAX_DOC_SIZE,
 } from '../constants';
 
 export const defaultHotPhase = {
@@ -22,5 +21,4 @@ export const defaultHotPhase = {
   [PHASE_ROLLOVER_MAX_AGE_UNITS]: 'd',
   [PHASE_ROLLOVER_MAX_SIZE_STORED]: '',
   [PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]: 'gb',
-  [PHASE_ROLLOVER_MAX_DOC_SIZE]: '',
 };

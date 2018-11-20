@@ -83,7 +83,6 @@ class ColdPhaseUi extends PureComponent {
                 defaultMessage="A cold index is queried less frequently and thus no longer needs to be on the most performant hardware."
               />
             </p>
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             {phaseData[PHASE_ENABLED] ? (
               <EuiButton
                 color="danger"

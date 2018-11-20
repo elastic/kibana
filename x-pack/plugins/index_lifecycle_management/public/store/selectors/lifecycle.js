@@ -12,14 +12,16 @@ import {
   PHASE_ENABLED,
   PHASE_ROLLOVER_ENABLED,
   PHASE_ROLLOVER_MAX_AGE,
+  PHASE_ROLLOVER_MINIMUM_AGE,
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   STRUCTURE_POLICY_NAME,
   ERROR_STRUCTURE,
-  PHASE_ATTRIBUTES_THAT_ARE_NUMBERS,
+  PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE,
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_SHRINK_ENABLED,
   PHASE_FORCE_MERGE_ENABLED,
-  PHASE_FORCE_MERGE_SEGMENTS
+  PHASE_FORCE_MERGE_SEGMENTS,
+  WARM_PHASE_ON_ROLLOVER
 } from '../constants';
 import {
   getPhase,
@@ -44,6 +46,31 @@ export const validatePhase = (type, phase, errors) => {
     return;
   }
 
+  for (const numberedAttribute of PHASE_ATTRIBUTES_THAT_ARE_NUMBERS_VALIDATE) {
+    if (phase.hasOwnProperty(numberedAttribute)) {
+      // If WARM_PHASE_ON_ROLLOVER there is no need to validate this
+      if (numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE && phase[WARM_PHASE_ON_ROLLOVER]) {
+        continue;
+      }
+      // If shrink is disabled, there is no need to validate this
+      if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && !phase[PHASE_SHRINK_ENABLED]) {
+        continue;
+      }
+      // If forcemerge is disabled, there is no need to validate this
+      if (numberedAttribute === PHASE_FORCE_MERGE_SEGMENTS && !phase[PHASE_FORCE_MERGE_ENABLED]) {
+        continue;
+      }
+      if (!isNumber(phase[numberedAttribute])) {
+        phaseErrors[numberedAttribute] = [numberRequiredMessage];
+      }
+      else if (phase[numberedAttribute] < 0) {
+        phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
+      }
+      else if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && phase[numberedAttribute] < 1) {
+        phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
+      }
+    }
+  }
   if (phase[PHASE_ROLLOVER_ENABLED]) {
     if (
       !isNumber(phase[PHASE_ROLLOVER_MAX_AGE]) &&
@@ -61,25 +88,6 @@ export const validatePhase = (type, phase, errors) => {
       ];
     }
   }
-
-  for (const numberedAttribute of PHASE_ATTRIBUTES_THAT_ARE_NUMBERS) {
-    if (phase.hasOwnProperty(numberedAttribute) && phase[numberedAttribute] !== '') {
-      // If shrink is disabled, there is no need to validate this
-      if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && !phase[PHASE_SHRINK_ENABLED]) {
-        continue;
-      }
-      if (!isNumber(phase[numberedAttribute])) {
-        phaseErrors[numberedAttribute] = [numberRequiredMessage];
-      }
-      else if (phase[numberedAttribute] < 0) {
-        phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
-      }
-      else if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && phase[numberedAttribute] < 1) {
-        phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
-      }
-    }
-  }
-
   if (phase[PHASE_SHRINK_ENABLED]) {
     if (!isNumber(phase[PHASE_PRIMARY_SHARD_COUNT])) {
       phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = [numberRequiredMessage];

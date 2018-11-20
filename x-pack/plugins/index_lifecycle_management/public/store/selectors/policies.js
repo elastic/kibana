@@ -251,15 +251,16 @@ export const phaseToES = (state, phase) => {
   if (phase[PHASE_NODE_ATTRS]) {
     const [ name, value, ] = phase[PHASE_NODE_ATTRS].split(':');
     esPhase.actions.allocate = {
-      include: {}, // TODO: this seems to be a constant, confirm?
-      exclude: {}, // TODO: this seems to be a constant, confirm?
+      include: {},
+      exclude: {},
       require: {
         [name]: value
       }
     };
-    if (isNumber(phase[PHASE_REPLICA_COUNT])) {
-      esPhase.actions.allocate.number_of_replicas = phase[PHASE_REPLICA_COUNT];
-    }
+  }
+  if (isNumber(phase[PHASE_REPLICA_COUNT])) {
+    esPhase.actions.allocate = esPhase.actions.allocate || {};
+    esPhase.actions.allocate.number_of_replicas = phase[PHASE_REPLICA_COUNT];
   }
 
   if (phase[PHASE_FORCE_MERGE_ENABLED]) {
