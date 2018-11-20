@@ -4,48 +4,81 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBreadcrumbDefinition,
-  EuiHeader,
-  EuiHeaderBreadcrumbs,
-  EuiHeaderSection,
-} from '@elastic/eui';
+import { EuiHeader, EuiHeaderBreadcrumbs, EuiHeaderSection } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import isEqual from 'lodash/fp/isEqual';
 import React from 'react';
 import styled from 'styled-components';
 
-interface HeaderProps {
-  breadcrumbs?: EuiBreadcrumbDefinition[];
-  appendSections?: React.ReactNode;
+import { Breadcrumb } from 'ui/chrome/directives/header_global_nav';
+import { WithKibanaChrome } from '../containers/with_kibana_chrome';
+
+interface HeaderProps extends LegacyHeaderProps {
   intl: InjectedIntl;
 }
 
-export const Header = injectI18n(
-  class extends React.PureComponent<HeaderProps> {
-    public static displayName = 'Header';
+interface LegacyHeaderProps {
+  breadcrumbs?: Breadcrumb[];
+  appendSections?: React.ReactNode;
+}
 
-    public render() {
-      const { breadcrumbs = [], appendSections = null, intl } = this.props;
-      const staticBreadcrumbs = [
-        {
-          href: '#/',
-          text: intl.formatMessage({
-            id: 'xpack.infra.header.infrastructureTitle',
-            defaultMessage: 'Infrastructure',
-          }),
-        },
-      ];
+interface ExternalHeaderProps {
+  breadcrumbs?: Breadcrumb[];
+  setBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
+}
 
-      return (
-        <HeaderWrapper>
-          <EuiHeaderSection>
-            <EuiHeaderBreadcrumbs breadcrumbs={[...staticBreadcrumbs, ...breadcrumbs]} />
-          </EuiHeaderSection>
-          {appendSections}
-        </HeaderWrapper>
-      );
+export const Header = injectI18n(({ appendSections, breadcrumbs, intl }: HeaderProps) => {
+  const prefixedBreadcrumbs = [
+    {
+      href: '#/',
+      text: intl.formatMessage({
+        id: 'xpack.infra.header.infrastructureTitle',
+        defaultMessage: 'Infrastructure',
+      }),
+    },
+    ...(breadcrumbs || []),
+  ];
+
+  return (
+    <WithKibanaChrome>
+      {({ setBreadcrumbs, uiSettings: { k7Design } }) =>
+        k7Design ? (
+          <ExternalHeader breadcrumbs={prefixedBreadcrumbs} setBreadcrumbs={setBreadcrumbs} />
+        ) : (
+          <LegacyHeader appendSections={appendSections} breadcrumbs={prefixedBreadcrumbs} />
+        )
+      }
+    </WithKibanaChrome>
+  );
+});
+
+class ExternalHeader extends React.Component<ExternalHeaderProps> {
+  public componentDidMount() {
+    this.setBreadcrumbs();
+  }
+
+  public componentDidUpdate(prevProps: ExternalHeaderProps) {
+    if (!isEqual(this.props.breadcrumbs, prevProps.breadcrumbs)) {
+      this.setBreadcrumbs();
     }
   }
+
+  public render() {
+    return null;
+  }
+
+  private setBreadcrumbs = () => {
+    this.props.setBreadcrumbs(this.props.breadcrumbs || []);
+  };
+}
+
+const LegacyHeader: React.SFC<LegacyHeaderProps> = ({ appendSections, breadcrumbs = [] }) => (
+  <HeaderWrapper>
+    <EuiHeaderSection>
+      <EuiHeaderBreadcrumbs breadcrumbs={breadcrumbs} />
+    </EuiHeaderSection>
+    {appendSections}
+  </HeaderWrapper>
 );
 
 const HeaderWrapper = styled(EuiHeader)`
