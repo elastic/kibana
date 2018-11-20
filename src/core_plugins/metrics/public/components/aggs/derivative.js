@@ -96,6 +96,7 @@ export const DerivativeAgg = props => {
             label={(<FormattedMessage
               id="tsvb.derivative.unitsLabel"
               defaultMessage="Units (1s, 1m, etc)"
+              description="1s and 1m are required values and must not be translated."
             />)}
             fullWidth
           >

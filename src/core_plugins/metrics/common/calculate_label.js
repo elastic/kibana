@@ -64,7 +64,7 @@ export default function calculateLabel(metric, metrics) {
   }
 
   if (includes(paths, metric.type)) {
-    let additionalLabel = '';
+    let label;
     const targetMetric = metrics.find(m => startsWith(metric.field, m.id));
     const targetLabel = calculateLabel(targetMetric, metrics);
     // For percentiles we need to parse the field id to extract the percentile
@@ -74,13 +74,19 @@ export default function calculateLabel(metric, metrics) {
       const percentileValueMatch = /\[([0-9\.]+)\]$/;
       const matches = metric.field.match(percentileValueMatch);
       if (matches) {
-        additionalLabel += ` (${matches[1]})`;
+        label = i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel', {
+          defaultMessage: '{lookupMetricType} of {targetLabel} ({additionalLabel})',
+          values: { lookupMetricType: lookup[metric.type], targetLabel, additionalLabel: matches[1] }
+        });
+      } else {
+        label = i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetLabel', {
+          defaultMessage: '{lookupMetricType} of {targetLabel}',
+          values: { lookupMetricType: lookup[metric.type], targetLabel }
+        });
       }
+
     }
-    return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetAndAdditionalLabel', {
-      defaultMessage: '{lookupMetricType} of {targetLabel}{additionalLabel}',
-      values: { lookupMetricType: lookup[metric.type], targetLabel, additionalLabel }
-    });
+    return label;
   }
 
   return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {

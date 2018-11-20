@@ -53,7 +53,7 @@ class CalculationVarsUi extends Component {
             <EuiFieldText
               className="tvbAggs__varName"
               aria-label={intl.formatMessage({ id: 'tsvb.vars.variableNameAriaLabel', defaultMessage: 'Variable name' })}
-              placeholder={intl.formatMessage({ id: 'tsvb.vars.variableNamePlaceholder', defaultMessage: 'Variable Name' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.vars.variableNamePlaceholder', defaultMessage: 'Variable name' })}
               onChange={this.handleChange(row, 'name')}
               value={row.name}
             />

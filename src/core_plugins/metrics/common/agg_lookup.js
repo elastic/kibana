@@ -35,7 +35,7 @@ const lookup = {
   cardinality: i18n.translate('tsvb.aggLookup.cardinalityLabel', { defaultMessage: 'Cardinality' }),
   value_count: i18n.translate('tsvb.aggLookup.valueCountLabel', { defaultMessage: 'Value Count' }),
   derivative: i18n.translate('tsvb.aggLookup.derivativeLabel', { defaultMessage: 'Derivative' }),
-  cumulative_sum: i18n.translate('tsvb.aggLookup.cumulativeSumLabel', { defaultMessage: 'Cumulative' }),
+  cumulative_sum: i18n.translate('tsvb.aggLookup.cumulativeSumLabel', { defaultMessage: 'Cumulative Sum' }),
   moving_average: i18n.translate('tsvb.aggLookup.movingAverageLabel', { defaultMessage: 'Moving Average' }),
   avg_bucket: i18n.translate('tsvb.aggLookup.overallAverageLabel', { defaultMessage: 'Overall Average' }),
   min_bucket: i18n.translate('tsvb.aggLookup.overallMinLabel', { defaultMessage: 'Overall Min' }),
