@@ -148,7 +148,7 @@ export class BasicAuthenticationProvider {
 
       this._options.log(['debug', 'security', 'basic'], 'Request has been authenticated via header.');
 
-      return AuthenticationResult.succeeded(user, { authorization });
+      return AuthenticationResult.succeeded(user);
     } catch(err) {
       this._options.log(['debug', 'security', 'basic'], `Failed to authenticate request via header: ${err.message}`);
       return AuthenticationResult.failed(err);
