@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@code/filename-check": "link:packages/code-filename-check",
-    "@elastic/eui": "^3.0.0",
+    "@elastic/eui": "5.0.0",
     "@kbn/plugin-helpers": "link:../../kibana/packages/kbn-plugin-helpers",
     "@types/angular": "^1.6.48",
     "@types/boom": "7.2.0",
