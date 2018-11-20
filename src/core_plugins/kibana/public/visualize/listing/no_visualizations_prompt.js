@@ -27,7 +27,7 @@ import {
   KuiButtonIcon,
 } from '@kbn/ui-framework/components';
 
-function NoVisualizationsPromptComponent({ intl }) {
+function NoVisualizationsPromptUi({ intl }) {
   return (
     <KuiEmptyTablePromptPanel>
       <KuiEmptyTablePrompt
@@ -52,4 +52,4 @@ function NoVisualizationsPromptComponent({ intl }) {
   );
 }
 
-export const NoVisualizationsPrompt = injectI18n(NoVisualizationsPromptComponent);
+export const NoVisualizationsPrompt = injectI18n(NoVisualizationsPromptUi);

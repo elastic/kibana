@@ -157,13 +157,15 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, Priv
   $scope.getVisTypeTooltip = type => {
     //to not clutter the tooltip, just only notify if labs or experimental.
     //labs is more important in this regard.
-    let prefix = '';
     if (type.stage === 'experimental') {
-      prefix = i18n('kbn.visualize.visualizationWizard.experimentalTooltipPrefixText', {
-        defaultMessage: '(Experimental)'
+      return i18n('kbn.visualize.visualizationWizard.experimentalTooltipPrefixText', {
+        defaultMessage: '(Experimental) {visTypeDescription}',
+        values: {
+          visTypeDescription: type.description,
+        },
       });
     }
-    return `${prefix} ${type.description}`;
+    return `${type.description}`;
   };
 
   $scope.getVisTypeTooltipPosition = index => {

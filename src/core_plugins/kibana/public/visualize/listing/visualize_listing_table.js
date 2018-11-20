@@ -41,7 +41,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-class VisualizeListingTableComponent extends Component {
+class VisualizeListingTableUi extends Component {
 
   constructor(props) {
     super(props);
@@ -347,9 +347,9 @@ class VisualizeListingTableComponent extends Component {
   }
 }
 
-VisualizeListingTableComponent.propTypes = {
+VisualizeListingTableUi.propTypes = {
   deleteSelectedItems: PropTypes.func,
   fetchItems: PropTypes.func,
 };
 
-export const VisualizeListingTable = injectI18n(VisualizeListingTableComponent);
+export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);
