@@ -72,7 +72,8 @@ export class DisconnectButtonUi extends Component {
     return (
       <FormattedMessage
         id="xpack.remoteClusters.disconnectButton.multipleButtonLabel"
-        defaultMessage="Disconnect remote clusters"
+        defaultMessage="Disconnect {count} remote clusters"
+        values={{ count: clusterNames.length }}
       />
     );
   }
