@@ -11,11 +11,10 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } fro
 interface DeprecationCellProps {
   headline?: string;
   healthColor?: string;
-  uiButton?: {
+  uiButtons: Array<{
     label: string;
     url: string;
-  };
-  docUrl: string;
+  }>;
   items: Array<{ title?: string; body: string }>;
   children?: ReactNode;
 }
@@ -26,8 +25,7 @@ interface DeprecationCellProps {
 export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
-  uiButton,
-  docUrl,
+  uiButtons,
   items,
   children,
 }) => (
@@ -42,18 +40,13 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
           </EuiText>
         )}
       </EuiFlexItem>
-      {uiButton && (
-        <EuiFlexItem grow={false}>
-          <EuiButton size="s" href={uiButton.url} target="_blank">
-            {uiButton.label}
+      {uiButtons.map(button => (
+        <EuiFlexItem key={button.url} grow={false}>
+          <EuiButton size="s" href={button.url} target="_blank">
+            {button.label}
           </EuiButton>
         </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiButton size="s" href={docUrl} target="_blank">
-          Read Documentation
-        </EuiButton>
-      </EuiFlexItem>
+      ))}
     </EuiFlexGroup>
 
     {items.map(item => (

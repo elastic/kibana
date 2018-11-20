@@ -18,10 +18,10 @@ import fakeDeprecations from './fake_deprecations.json';
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
-  uiButton?: {
+  uiButtons: Array<{
     label: string;
     url: string;
-  };
+  }>;
 }
 
 export interface UpgradeCheckupStatus {
@@ -58,6 +58,7 @@ export async function getUpgradeCheckupStatus(
   Object.keys(deprecations.index_settings).forEach(indexName => {
     deprecations.index_settings[indexName]
       .map(d => ({ ...d, index: indexName }))
+      .map(addUiButtonForDocs)
       .forEach(d => combinedIndexInfo.push(d));
   });
 
@@ -71,10 +72,17 @@ export async function getUpgradeCheckupStatus(
         level: 'critical',
         message: 'This index must be reindexed in order to upgrade the Elastic Stack.',
         details: 'Reindexing is irreversible, so always back up your index before proceeding.',
-        uiButton: {
-          label: 'Reindex in Console',
-          url: consoleTemplateUrl(basePath, indexName),
-        },
+        uiButtons: [
+          {
+            label: 'Reindex in Console',
+            url: consoleTemplateUrl(basePath, indexName),
+          },
+          {
+            label: 'Read Documentation',
+            url:
+              'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
+          },
+        ],
         url:
           'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
       });
@@ -85,6 +93,13 @@ export async function getUpgradeCheckupStatus(
         message: 'This index must be upgraded in order to upgrade the Elastic Stack.',
         details: 'Upgrading is irreversible, so always back up your index before proceeding.',
         // TODO: not sure what URL to put here?
+        uiButtons: [
+          {
+            label: 'Read Documentation',
+            url:
+              'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
+          },
+        ],
         url:
           'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
       });
@@ -92,8 +107,8 @@ export async function getUpgradeCheckupStatus(
   }
 
   return {
-    cluster: deprecations.cluster_settings,
-    nodes: deprecations.node_settings,
+    cluster: deprecations.cluster_settings.map(addUiButtonForDocs),
+    nodes: deprecations.node_settings.map(addUiButtonForDocs),
     indices: combinedIndexInfo,
   };
 }
@@ -106,4 +121,16 @@ const consoleTemplateUrl = (basePath: string, indexName: string) => {
   return `${basePath}/app/kibana#/dev_tools/console?load_from=${encodeURIComponent(
     reindexTemplateUrl
   )}`;
+};
+
+const addUiButtonForDocs = (dep: DeprecationInfo): EnrichedDeprecationInfo => {
+  return {
+    uiButtons: [
+      {
+        label: 'Read Documentation',
+        url: dep.url,
+      },
+    ],
+    ...dep,
+  };
 };

@@ -45,8 +45,7 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      uiButton={deprecation.uiButton}
-      docUrl={deprecation.url}
+      uiButtons={deprecation.uiButtons}
       items={items}
     />
   );
@@ -56,6 +55,10 @@ interface DeprecationSummary {
   message: string;
   url: string;
   level: string;
+  uiButtons: Array<{
+    label: string;
+    url: string;
+  }>;
 }
 
 interface IndexDeprecationProps {
@@ -74,11 +77,14 @@ const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecati
     items.push({ body: action });
   }
 
+  // Only show the last uiButton which should be the documentation link.
+  const uiButtons = [deprecation.uiButtons[deprecation.uiButtons.length - 1]];
+
   return (
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      docUrl={deprecation.url}
+      uiButtons={uiButtons}
       items={items}
     >
       <IndexDeprecationTable indices={indices} />
