@@ -119,7 +119,7 @@ const getOptions = (
     };
   }
 
-  return OPTIONS[nodeType];
+  return OPTIONS[nodeType as string];
 };
 
 const initialState = {
