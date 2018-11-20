@@ -32,12 +32,7 @@ import { management } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import 'ui/kbn_top_nav';
-
-import {
-  EuiSideNav,
-  EuiIcon
-} from '@elastic/eui';
-import { removeDotSegments } from 'uri-js';
+import { SideNav } from './sidenav';
 
 const SIDENAV_ID = 'management-sidenav';
 
@@ -64,28 +59,11 @@ export function updateHeader(
     return;
   }
 
-  const sectionVisible = section => !section.disabled && section.visible;
-  const sectionToNav = ({ display, id, url, icon }) =>
-    ({
-      id,
-      name: display,
-      icon: icon ? <EuiIcon type={icon} /> : null,
-      isSelected: $scope.section.id === id,
-      onClick: () => url && (window.location = url)
-    });
-
-  const sideNav = $scope.sections
-    .filter(sectionVisible)
-    .filter(section => section.items.filter(sectionVisible).length)
-    .map(section => ({
-      items: section.items.filter(sectionVisible).map(sectionToNav),
-      ...sectionToNav(section)
-    }));
-
   render(
     <I18nProvider>
-      <EuiSideNav
-        items={sideNav}
+      <SideNav
+        sections={$scope.sections}
+        selectedId={$scope.section.id}
         style={{ width: 192 }}
       />
     </I18nProvider>,
