@@ -68,3 +68,7 @@ export const removeLifecycleForIndex = async (indexNames, httpClient = getHttpCl
   const response = await httpClient.post(`${apiPrefix}/index/remove`, { indexNames });
   return response.data;
 };
+export const addLifecyclePolicyToIndex = async (body, httpClient = getHttpClient()) => {
+  const response = await httpClient.post(`${apiPrefix}/index/add`, body);
+  return response.data;
+};

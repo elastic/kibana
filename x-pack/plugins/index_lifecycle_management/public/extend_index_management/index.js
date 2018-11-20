@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
+import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
 import { get, every } from 'lodash';
 import { i18n }  from '@kbn/i18n';
 import { addSummaryExtension, addBannerExtension, addActionExtension } from '../../../index_management/public/index_management_extensions';
@@ -52,6 +53,34 @@ addActionExtension((indices) => {
     successMessage: i18n.translate('xpack.idxMgmt.retryIndexLifecycleAction.successfullyRemovedLifecycleMessage', {
       defaultMessage: 'Successfully removed lifecycle policy for: [{indexNames}]',
       values: { indexNames: indexNames.join(', ') }
+    }),
+  };
+});
+addActionExtension((indices) => {
+  if (indices.length !== 1) {
+    return null;
+  }
+  const index = indices[0];
+  const hasIlm = index.ilm && index.ilm.managed;
+
+  if (hasIlm) {
+    return null;
+  }
+  const indexName = index.name;
+  return {
+    renderConfirmModal: (closeModal, httpClient) => {
+      return (
+        <AddLifecyclePolicyConfirmModal
+          indexName={indexName}
+          closeModal={closeModal}
+          httpClient={httpClient}
+          index={index}
+        />
+      );
+    },
+    icon: 'plusInCircle',
+    buttonLabel: i18n.translate('xpack.idxMgmt.addLifecyclePolicyActionButtonLabel', {
+      defaultMessage: 'Add lifecycle policy',
     }),
   };
 });
