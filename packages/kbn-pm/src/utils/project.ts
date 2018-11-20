@@ -62,7 +62,7 @@ export class Project {
 
     this.packageJsonLocation = resolvePath(this.path, 'package.json');
     this.nodeModulesLocation = resolvePath(this.path, 'node_modules');
-    this.optimizeLocation = resolvePath(this.path, 'optimize');
+    this.optimizeLocation = resolvePath(this.path, 'data/optimize');
     this.targetLocation = resolvePath(this.path, 'target');
 
     this.productionDependencies = this.json.dependencies || {};

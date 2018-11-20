@@ -23,7 +23,7 @@ if (!global.__BUILT_WITH_BABEL__) {
   var resolve = require('path').resolve;
   require('ts-node').register({
     transpileOnly: true,
-    cacheDirectory: resolve(__dirname, '../../../optimize/.cache/ts-node')
+    cacheDirectory: resolve(__dirname, '../../../data/.cache/ts-node')
   });
 }
 

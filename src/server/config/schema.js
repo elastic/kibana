@@ -22,10 +22,7 @@ import {
   constants as cryptoConstants
 } from 'crypto';
 import os from 'os';
-
-import {
-  fromRoot
-} from '../../utils';
+import { join } from 'path';
 import {
   getData
 } from '../path';
@@ -212,7 +209,7 @@ export default () => Joi.object({
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
     bundleFilter: Joi.string().default('!tests'),
-    bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
+    bundleDir: Joi.string().default(join(getData(), 'optimize')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
     watch: Joi.boolean().default(false),
     watchPort: Joi.number().default(5602),
