@@ -57,7 +57,7 @@ WARNING: This option is deprecated and will be removed in Kibana 7. It is known 
 [float]
 === Installing Plugins with Linux packages
 
-The Kibana server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll
+The Kibana server needs to be able to write to files in the `data` directory.  If you're installing plugins using sudo or su you'll
 want to make sure these commands are ran as the user `kibana`.  This user is already added for you as part of the package installation.
 
 [source,shell]
