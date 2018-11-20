@@ -107,7 +107,7 @@ describe('docViews', function () {
 
     it('should have the a value for each field', function () {
       _.each(_.keys(flattened), function (field) {
-        const cellValue = $elem.find('td[title="' + field + '"]').siblings().find('.doc-viewer-value').text();
+        const cellValue = $elem.find('td[title="' + field + '"]').siblings().find('.docViewer__value').text();
 
         // This sucks, but testing the filter chain is too hairy ATM
         expect(cellValue.length).to.be.greaterThan(0);
@@ -142,23 +142,23 @@ describe('docViews', function () {
     describe('warnings', function () {
       it('displays a warning about field name starting with underscore', function () {
         const cells = $elem.find('td[title="_underscore"]').siblings();
-        expect(cells.find('.doc-viewer-underscore').length).to.be(1);
-        expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
-        expect(cells.find('.doc-viewer-object-array').length).to.be(0);
+        expect(cells.find('.docViewer--underscore').length).to.be(1);
+        expect(cells.find('.docViewer--no-mapping').length).to.be(0);
+        expect(cells.find('.docViewer--object-array').length).to.be(0);
       });
 
       it('displays a warning about missing mappings', function () {
         const cells = $elem.find('td[title="noMapping"]').siblings();
-        expect(cells.find('.doc-viewer-underscore').length).to.be(0);
-        expect(cells.find('.doc-viewer-no-mapping').length).to.be(1);
-        expect(cells.find('.doc-viewer-object-array').length).to.be(0);
+        expect(cells.find('.docViewer--underscore').length).to.be(0);
+        expect(cells.find('.docViewer--no-mapping').length).to.be(1);
+        expect(cells.find('.docViewer--object-array').length).to.be(0);
       });
 
       it('displays a warning about objects in arrays', function () {
         const cells = $elem.find('td[title="objectArray"]').siblings();
-        expect(cells.find('.doc-viewer-underscore').length).to.be(0);
-        expect(cells.find('.doc-viewer-no-mapping').length).to.be(0);
-        expect(cells.find('.doc-viewer-object-array').length).to.be(1);
+        expect(cells.find('.docViewer--underscore').length).to.be(0);
+        expect(cells.find('.docViewer--no-mapping').length).to.be(0);
+        expect(cells.find('.docViewer--object-array').length).to.be(1);
       });
     });
 
