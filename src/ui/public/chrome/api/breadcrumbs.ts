@@ -35,29 +35,17 @@ export function initBreadcrumbsApi(
   chrome: { [key: string]: any },
   internals: { [key: string]: any }
 ) {
-  // A flag used to keep track of clearing between route changes.
+  // A flag used to determine if we should automatically
+  // the breadcrumbs between angular route changes.
   let shouldClear = false;
 
+  // reset shouldClear any time the breadcrumbs change, even
+  // if it was done directly through the new platform
   newPlatformChrome.getBreadcrumbs$().subscribe({
     next() {
       shouldClear = false;
     },
   });
-
-  internals.$setupBreadcrumbsAutoClear = ($rootScope: any) => {
-    // When a route change happens we want to clear the breadcrumbs ONLY if
-    // the new route does not set any breadcrumbs. Deferring the clearing until
-    // the route finishes changing helps avoiding the breadcrumbs from 'flickering'.
-    $rootScope.$on('$routeChangeStart', () => {
-      shouldClear = true;
-    });
-
-    $rootScope.$on('$routeChangeSuccess', () => {
-      if (shouldClear) {
-        newPlatformChrome.setBreadcrumbs([]);
-      }
-    });
-  };
 
   chrome.breadcrumbs = {
     get$() {
@@ -67,5 +55,21 @@ export function initBreadcrumbsApi(
     set(newBreadcrumbs: Breadcrumb[]) {
       newPlatformChrome.setBreadcrumbs(newBreadcrumbs);
     },
+  };
+
+  // define internal angular run function that will be called when angular
+  // bootstraps and lets us integrate with the angular router so that we can
+  // automatically clear the breadcrumbs if we switch to a Kibana app that
+  // does not use breadcrumbs correctly
+  internals.$setupBreadcrumbsAutoClear = ($rootScope: any) => {
+    $rootScope.$on('$routeChangeStart', () => {
+      shouldClear = true;
+    });
+
+    $rootScope.$on('$routeChangeSuccess', () => {
+      if (shouldClear) {
+        newPlatformChrome.setBreadcrumbs([]);
+      }
+    });
   };
 }
