@@ -185,7 +185,7 @@ CORS configuration of the server permits requests from the Kibana application on
   //This method is stubbed in the tests to avoid network request during unit tests.
   async _makeJsonAjaxCall() {
     const serviceSettings = await emsServiceSettings;
-    return serviceSettings.getGeoJsonForRegionLayer(this._layerConfig.name);
+    return serviceSettings.getGeoJsonForRegionLayer(this._layerConfig);
   }
 
   _invalidateJoin() {

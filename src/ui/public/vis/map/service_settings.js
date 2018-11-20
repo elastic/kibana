@@ -28,6 +28,11 @@ const markdownIt = new MarkdownIt({
 });
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
+export const ORIGIN = {
+  EMS: 'ems',
+  KIBANA_YML: 'kibana_yml'
+};
+
 
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
@@ -117,7 +122,7 @@ uiModules.get('kibana')
             const preppedService = _.cloneDeep(tmsService);
             preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
             preppedService.subdomains = preppedService.subdomains || [];
-            preppedService.origin = 'ems';
+            preppedService.origin = ORIGIN.EMS;
             return preppedService;
           });
 
@@ -178,6 +183,7 @@ uiModules.get('kibana')
           const strippedService = { ...service };
           //do not expose url. needs to be resolved dynamically
           delete strippedService.url;
+          strippedService.origin = ORIGIN.EMS;
           return strippedService;
         });
 
@@ -220,9 +226,9 @@ uiModules.get('kibana')
 
       async getUrlTemplateForTMSLayer(tmsServiceConfig) {
 
-        if (tmsServiceConfig.origin === 'ems') {
+        if (tmsServiceConfig.origin === ORIGIN.EMS) {
           return this._getUrlTemplateForEMSTMSLayer(tmsServiceConfig);
-        } else if (tmsServiceConfig.origin === 'yml') {
+        } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
           return tilemapsConfig.deprecated.config.url;
         } else {
           //this is an older config. need to resolve this dynamically.
@@ -236,26 +242,31 @@ uiModules.get('kibana')
 
       }
 
-      async getGeoJsonForRegionLayer(filename) {
+      async getGeoJsonForRegionLayer(fileLayerConfig) {
 
-        //the id is the filename
-        const fileLayers = await this._loadFileLayers();
-        const layerConfig = fileLayers.find(fileLayer => {
-          return fileLayer.name === filename;
-        });
-
-        const extendedUrl = this._extendUrlWithParams(layerConfig.url);
-        if (layerConfig) {
-          const geojson = await $http({
-            url: extendedUrl,
-            method: 'GET'
+        let url;
+        if (fileLayerConfig.origin === ORIGIN.EMS) {
+          const fileLayers = await this._loadFileLayers();
+          const layerConfig = fileLayers.find(fileLayer => {
+            return fileLayer.name === fileLayerConfig.name;//the id is the filename
           });
-          return geojson.data;
+
+          if (layerConfig) {
+            url = this._extendUrlWithParams(layerConfig.url);
+          } else {
+            throw new Error(`File  ${fileLayerConfig.name} not recognized`);
+          }
         } else {
-          throw new Error('File - ' + filename + ' not recognized');
+          url = fileLayerConfig.url;//should dynamically resolve from regionmaps config too
         }
 
+        const geojson = await $http({
+          url: url,
+          method: 'GET'
+        });
+        return geojson.data;
       }
+
 
     }
 
