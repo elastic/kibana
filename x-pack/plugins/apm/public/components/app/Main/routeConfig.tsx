@@ -20,12 +20,15 @@ import { Home } from './Home';
 
 interface BreadcrumbArgs {
   match: {
-    params: StringMap<any>;
+    params: StringMap;
   };
 }
 
 interface RenderArgs {
-  location: StringMap<any>;
+  location: StringMap;
+  match: {
+    params: StringMap;
+  };
 }
 
 const renderAsRedirectTo = (to: string) => {
@@ -40,7 +43,12 @@ const renderAsRedirectTo = (to: string) => {
 };
 
 export const routes = [
-  { exact: true, path: '/', render: renderAsRedirectTo('/services') },
+  {
+    exact: true,
+    path: '/',
+    render: renderAsRedirectTo('/services'),
+    breadcrumb: 'APM'
+  },
   {
     exact: true,
     path: '/:serviceName/errors/:groupId',
@@ -66,13 +74,22 @@ export const routes = [
         exact: true,
         path: '/services',
         component: Home,
-        breadcrumb: 'APM Services'
+        breadcrumb: 'Services'
       },
       {
         exact: true,
         path: '/traces',
         component: Home,
-        breadcrumb: 'APM Traces'
+        breadcrumb: 'Traces'
+      },
+      {
+        exact: true,
+        path: '/:serviceName',
+        breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
+        render: (props: RenderArgs) =>
+          renderAsRedirectTo(`/${props.match.params.serviceName}/transactions`)(
+            props
+          )
       }
     ]
   },
