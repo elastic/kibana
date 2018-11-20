@@ -44,8 +44,7 @@ exports.downloadSnapshot = async function installSnapshot({
   installPath = path.resolve(basePath, version),
   log = defaultLog,
 }) {
-  // TODO: remove -alpha1 once elastic/elasticsearch#35172 has been merged
-  const fileName = getFilename(license, version + '-alpha1');
+  const fileName = getFilename(license, version);
   const url = `https://snapshots.elastic.co/downloads/elasticsearch/${fileName}`;
   const dest = path.resolve(basePath, 'cache', fileName);
 
