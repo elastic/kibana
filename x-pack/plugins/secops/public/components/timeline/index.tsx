@@ -19,7 +19,12 @@ import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import { ECS } from './ecs';
-import { OnColumnSorted, OnDataProviderRemoved, OnRangeSelected } from './events';
+import {
+  OnColumnSorted,
+  OnDataProviderRemoved,
+  OnRangeSelected,
+  OnToggleDataProviderEnabled,
+} from './events';
 import { Timeline } from './timeline';
 
 export interface OwnProps {
@@ -96,6 +101,17 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       updateRange!({ id, range: selectedRange });
     };
 
+    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
+      dataProvider,
+      enabled,
+    }) => {
+      window.alert(
+        `TODO: Plumb redux within timeline/index.tsx DataProvider: ${
+          dataProvider.name
+        } is: ${enabled}`
+      );
+    };
+
     return (
       <Timeline
         columnHeaders={headers}
@@ -105,6 +121,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onRangeSelected={onRangeSelected}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort!}

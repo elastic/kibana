@@ -8,7 +8,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { OnDataProviderRemoved } from '../events';
+import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { Providers } from './providers';
@@ -16,6 +16,7 @@ import { Providers } from './providers';
 interface Props {
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
+  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
 }
 
 const DropTargetDataProviders = styled.div`
@@ -46,12 +47,18 @@ const DropTargetDataProviders = styled.div`
  * the user to drop anything with a facet count into
  * the data pro section.
  */
-export const DataProviders = pure<Props>(({ dataProviders, onDataProviderRemoved }) => (
-  <DropTargetDataProviders data-test-subj="dataProviders">
-    {dataProviders.length ? (
-      <Providers dataProviders={dataProviders} onDataProviderRemoved={onDataProviderRemoved} />
-    ) : (
-      <Empty />
-    )}
-  </DropTargetDataProviders>
-));
+export const DataProviders = pure<Props>(
+  ({ dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }) => (
+    <DropTargetDataProviders data-test-subj="dataProviders">
+      {dataProviders.length ? (
+        <Providers
+          dataProviders={dataProviders}
+          onDataProviderRemoved={onDataProviderRemoved}
+          onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        />
+      ) : (
+        <Empty />
+      )}
+    </DropTargetDataProviders>
+  )
+);
