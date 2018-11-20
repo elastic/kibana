@@ -37,17 +37,16 @@ interface PageProps extends AppPageProps {
 
 interface PageState {
   notifications: any[];
-  tableRef: any;
   tags: BeatTag[] | null;
 }
 
 export class BeatsPage extends React.PureComponent<PageProps, PageState> {
+  private tableRef: React.RefObject<any> = React.createRef();
   constructor(props: PageProps) {
     super(props);
 
     this.state = {
       notifications: [],
-      tableRef: React.createRef(),
       tags: null,
     };
 
@@ -149,7 +148,7 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
                     },
                   }}
                   items={sortBy(beats.state.list, 'id') || []}
-                  ref={this.state.tableRef}
+                  ref={this.tableRef}
                   type={BeatsTableType}
                 />
               )}
@@ -194,7 +193,10 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
   };
 
   private getSelectedBeats = (): CMPopulatedBeat[] => {
-    const selectedIds = this.state.tableRef.current.state.selection.map((beat: any) => beat.id);
+    if (!this.tableRef.current) {
+      return [];
+    }
+    const selectedIds = this.tableRef.current.state.selection.map((beat: any) => beat.id);
     const beats: CMPopulatedBeat[] = [];
     selectedIds.forEach((id: any) => {
       const beat: CMPopulatedBeat | undefined = this.props.beats.find(b => b.id === id);

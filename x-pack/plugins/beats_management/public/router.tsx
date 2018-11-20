@@ -110,7 +110,11 @@ export class AppRouter extends Component<RouterProps, RouterState> {
             )}
 
             {/* This app does not make use of a homepage. The mainpage is beats/overivew */}
-            <Route path="/" exact={true} render={() => <Redirect to="/overview/beats" />} />
+            <Route
+              path="/"
+              exact={true}
+              render={() => <Redirect to="/overview/enrolled_beats" />}
+            />
           </Switch>
 
           {/* Render routes from the FS */}
