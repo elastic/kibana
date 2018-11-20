@@ -26,11 +26,6 @@ export function registerStatusPage(kbnServer, server, config) {
   server.decorate('toolkit', 'renderStatusPage', async function () {
     const app = server.getHiddenUiAppById('status_page');
     const h = this;
-<<<<<<< HEAD
-    const response = app
-      ? await h.renderApp(app)
-      : h.response(kbnServer.status.toString());
-=======
 
     let response;
     // An unauthenticated (anonymous) user may not have access to the customized configuration.
@@ -40,7 +35,6 @@ export function registerStatusPage(kbnServer, server, config) {
     } else {
       h.response(kbnServer.status.toString());
     }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     if (response) {
       return response.code(kbnServer.status.isGreen() ? 200 : 503);

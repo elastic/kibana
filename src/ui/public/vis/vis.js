@@ -37,17 +37,12 @@ import { updateVisualizationConfig } from './vis_update';
 import { SearchSourceProvider } from '../courier/search_source';
 import { SavedObjectsClientProvider } from '../saved_objects';
 import { timefilter } from 'ui/timefilter';
-<<<<<<< HEAD
-import { VisFiltersProvider } from './vis_filters';
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 export function VisProvider(Private, indexPatterns, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const visFilter = Private(VisFiltersProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState) {
@@ -75,19 +70,8 @@ export function VisProvider(Private, indexPatterns, getAppState) {
         timeFilter: timefilter,
         queryFilter: queryFilter,
         events: {
-<<<<<<< HEAD
-          // the filter method will be removed in the near feature
-          // you should rather use addFilter method below
-          filter: visFilter.filter,
-          createFilter: visFilter.createFilter,
-          addFilter: visFilter.addFilter,
-          brush: (event) => {
-            onBrushEvent(event, getAppState());
-          }
-=======
           filter: data => this.eventsSubject.next({ name: 'filterBucket', data }),
           brush: data => this.eventsSubject.next({ name: 'brush', data }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         },
         getAppState,
       };

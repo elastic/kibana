@@ -27,8 +27,6 @@ import { By } from 'selenium-webdriver';
 
 import { WAIT_FOR_EXISTS_TIME } from './find';
 
-import { WAIT_FOR_EXISTS_TIME } from './find';
-
 export function TestSubjectsProvider({ getService }) {
   const find = getService('find');
   const log = getService('log');
@@ -39,13 +37,8 @@ export function TestSubjectsProvider({ getService }) {
 
   class TestSubjects {
     async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
-<<<<<<< HEAD
       log.debug(`TestSubjects.exists(${selector}) with timeout ${timeout}`);
       return await find.existsByCssSelector(testSubjSelector(selector), timeout);
-=======
-      log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {

@@ -7,14 +7,9 @@
 import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { formatMetric } from '../../../lib/format_number';
-<<<<<<< HEAD
-
-export function Status({ stat, formattedLeader, oldestStat }) {
-=======
 import { injectI18n } from '@kbn/i18n/react';
 
 function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   const {
     follower_index: followerIndex,
     shard_id: shardId,
@@ -29,62 +24,42 @@ function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
 
   const metrics = [
     {
-<<<<<<< HEAD
-      label: 'Follower Index',
-=======
       label: intl.formatMessage({
         id: 'xpack.monitoring.elasticsearch.ccrShard.status.followerIndexLabel',
         defaultMessage: 'Follower Index',
       }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       value: followerIndex,
       dataTestSubj: 'followerIndex'
     },
     {
-<<<<<<< HEAD
-      label: 'Shard Id',
-=======
       label: intl.formatMessage({
         id: 'xpack.monitoring.elasticsearch.ccrShard.status.shardIdLabel',
         defaultMessage: 'Shard Id',
       }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       value: shardId,
       dataTestSubj: 'shardId'
     },
     {
-<<<<<<< HEAD
-      label: 'Leader Index',
-=======
       label: intl.formatMessage({
         id: 'xpack.monitoring.elasticsearch.ccrShard.status.leaderIndexLabel',
         defaultMessage: 'Leader Index',
       }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       value: formattedLeader,
       dataTestSubj: 'leaderIndex'
     },
     {
-<<<<<<< HEAD
-      label: 'Ops Synced',
-=======
       label: intl.formatMessage({
         id: 'xpack.monitoring.elasticsearch.ccrShard.status.opsSyncedLabel',
         defaultMessage: 'Ops Synced',
       }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       value: formatMetric(operationsReceived - oldestOperationsReceived, 'int_commas'),
       dataTestSubj: 'operationsReceived'
     },
     {
-<<<<<<< HEAD
-      label: 'Failed Fetches',
-=======
       label: intl.formatMessage({
         id: 'xpack.monitoring.elasticsearch.ccrShard.status.failedFetchesLabel',
         defaultMessage: 'Failed Fetches',
       }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       value: formatMetric(failedFetches - oldestFailedFetches, 'int_commas'),
       dataTestSubj: 'failedFetches'
     },
@@ -97,8 +72,5 @@ function StatusUI({ stat, formattedLeader, oldestStat, intl }) {
     />
   );
 }
-<<<<<<< HEAD
-=======
 
 export const Status = injectI18n(StatusUI);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

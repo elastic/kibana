@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-<<<<<<< HEAD
-import { render, shallow } from 'enzyme';
-import React from 'react';
-=======
 import React from 'react';
 import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import chrome from 'ui/chrome';
 import { Space } from '../../../common/model/space';
 import { SpacesManager } from '../../lib/spaces_manager';
@@ -36,9 +31,6 @@ function getSpacesManager(spaces: Space[] = []) {
 
 test('it renders without crashing', () => {
   const spacesManager = getSpacesManager();
-<<<<<<< HEAD
-  const component = shallow(<SpaceSelector spaces={[]} spacesManager={spacesManager as any} />);
-=======
   const component = shallowWithIntl(
     <SpaceSelector.WrappedComponent
       spaces={[]}
@@ -46,7 +38,6 @@ test('it renders without crashing', () => {
       intl={null as any}
     />
   );
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   expect(component).toMatchSnapshot();
 });
 
@@ -61,9 +52,6 @@ test('it uses the spaces on props, when provided', () => {
     },
   ];
 
-<<<<<<< HEAD
-  const component = render(<SpaceSelector spaces={spaces} spacesManager={spacesManager as any} />);
-=======
   const component = renderWithIntl(
     <SpaceSelector.WrappedComponent
       spaces={spaces}
@@ -71,7 +59,6 @@ test('it uses the spaces on props, when provided', () => {
       intl={null as any}
     />
   );
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
   return Promise.resolve().then(() => {
     expect(component.find('.spaceCard')).toHaveLength(1);
@@ -90,13 +77,9 @@ test('it queries for spaces when not provided on props', () => {
 
   const spacesManager = getSpacesManager(spaces);
 
-<<<<<<< HEAD
-  shallow(<SpaceSelector spacesManager={spacesManager as any} />);
-=======
   shallowWithIntl(
     <SpaceSelector.WrappedComponent spacesManager={spacesManager as any} intl={null as any} />
   );
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
   return Promise.resolve().then(() => {
     expect(spacesManager.getSpaces).toHaveBeenCalledTimes(1);

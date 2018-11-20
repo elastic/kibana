@@ -16,10 +16,7 @@
     "tagCloud": "src/core_plugins/tagcloud",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
-<<<<<<< HEAD
-=======
     "xpack.infra": "x-pack/plugins/infra",
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
     "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.rollupJobs": "x-pack/plugins/rollup",

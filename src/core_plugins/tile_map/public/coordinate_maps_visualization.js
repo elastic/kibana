@@ -21,10 +21,6 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
-<<<<<<< HEAD
-import { AggConfig } from 'ui/vis/agg_config';
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 import { toastNotifications } from 'ui/notify';
 

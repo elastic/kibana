@@ -30,11 +30,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-<<<<<<< HEAD
-export class DashboardPanel extends React.Component {
-=======
 class DashboardPanelUi extends React.Component {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   constructor(props) {
     super(props);
     this.state = {

@@ -17,12 +17,8 @@ import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_a
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
 import { formatTimestampToDuration } from '../../../common/format_timestamp_to_duration';
 import { formatDateTimeLocal } from '../../../common/formatting';
-<<<<<<< HEAD
-import { I18nProvider } from '@kbn/i18n/react';
-=======
 import { i18n } from '@kbn/i18n';
 import { injectI18n, I18nProvider, FormattedMessage } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 const linkToCategories = {
   'elasticsearch/nodes': i18n.translate('xpack.monitoring.alerts.esNodesCategoryLabel', {
@@ -162,11 +158,7 @@ uiModule.directive('monitoringClusterAlertsListing', (kbnUrl, i18n) => {
             <MonitoringTable
               className="alertsTable"
               rows={alerts}
-<<<<<<< HEAD
-              placeholder="Filter Alerts..."
-=======
               placeholder={filterAlertsPlaceholder}
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               filterFields={filterFields}
               columns={columns}
               rowComponent={alertRowFactory(scope, kbnUrl)}

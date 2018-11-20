@@ -221,25 +221,9 @@ module.exports = function (grunt) {
       ],
     },
 
-<<<<<<< HEAD
-    functionalTestsRelease: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
-        '--esFrom', esFrom,
-        '--bail',
-        '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
-        '--',
-        '--server.maxPayloadBytes=1648576',
-      ],
-    },
-=======
     ...getFunctionalTestGroupRunConfigs({
       esFrom,
       kibanaInstallDir: KIBANA_INSTALL_DIR
     })
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   };
 };

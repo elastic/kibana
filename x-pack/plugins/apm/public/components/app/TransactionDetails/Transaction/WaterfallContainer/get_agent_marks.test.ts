@@ -8,11 +8,7 @@ import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { getAgentMarks } from './get_agent_marks';
 
 describe('getAgentMarks', () => {
-<<<<<<< HEAD
-  it('should sort the marks', () => {
-=======
   it('should sort the marks by time', () => {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     const transaction: Transaction = {
       transaction: {
         marks: {
@@ -37,8 +33,6 @@ describe('getAgentMarks', () => {
     } as any;
     expect(getAgentMarks(transaction)).toEqual([]);
   });
-<<<<<<< HEAD
-=======
 
   it('should return empty array if agent marks are missing', () => {
     const transaction: Transaction = {
@@ -46,5 +40,4 @@ describe('getAgentMarks', () => {
     } as any;
     expect(getAgentMarks(transaction)).toEqual([]);
   });
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 });

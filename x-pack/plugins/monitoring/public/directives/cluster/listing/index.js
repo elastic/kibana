@@ -24,12 +24,8 @@ import { MonitoringTable } from 'plugins/monitoring/components/table';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { AlertsIndicator } from 'plugins/monitoring/components/cluster/listing/alerts_indicator';
 import { SORT_ASCENDING } from '../../../../common/constants';
-<<<<<<< HEAD
-import { I18nProvider } from '@kbn/i18n/react';
-=======
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 const filterFields = [ 'cluster_name', 'status', 'license.type' ];
 const columns = [
@@ -407,11 +403,7 @@ uiModule.directive('monitoringClusterListing', ($injector, i18n) => {
               sortKey={scope.sortKey}
               sortOrder={scope.sortOrder}
               onNewState={scope.onNewState}
-<<<<<<< HEAD
-              placeholder="Filter Clusters..."
-=======
               placeholder={filterClustersPlaceholder}
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               filterFields={filterFields}
               columns={columns}
               rowComponent={clusterRowFactory(scope, globalState, kbnUrl, showLicenseExpiration)}

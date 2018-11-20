@@ -23,10 +23,7 @@ import 'ui/pager';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { i18n } from '@kbn/i18n';
-<<<<<<< HEAD
-=======
 import chrome from 'ui/chrome';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 import { VisualizeListingTable } from './visualize_listing_table';
 
@@ -39,7 +36,6 @@ export function VisualizeListingController($injector) {
   const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const config = $injector.get('config');
-  const breadcrumbState = $injector.get('breadcrumbState');
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
@@ -65,11 +61,7 @@ export function VisualizeListingController($injector) {
       .catch(error => notify.error(error));
   };
 
-<<<<<<< HEAD
-  breadcrumbState.set([{
-=======
   chrome.breadcrumbs.set([{
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
       defaultMessage: 'Visualize',
     })

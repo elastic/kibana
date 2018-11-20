@@ -19,9 +19,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-<<<<<<< HEAD
-      label="Spaces"
-=======
       label={
         <FormattedMessage
           defaultMessage="Spaces"
@@ -29,7 +26,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           values={Object {}}
         />
       }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     >
       <SpaceSelector
         onChange={[Function]}
@@ -61,9 +57,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       isInvalid={false}
-<<<<<<< HEAD
-      label="Privilege"
-=======
       label={
         <FormattedMessage
           defaultMessage="Privilege"
@@ -71,7 +64,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           values={Object {}}
         />
       }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     >
       <PrivilegeSelector
         availablePrivileges={

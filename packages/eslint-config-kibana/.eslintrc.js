@@ -15,9 +15,6 @@ module.exports = {
     'prefer-object-spread',
     'jsx-a11y',
   ],
-<<<<<<< HEAD
-  
-=======
 
   settings: {
     react: {
@@ -25,7 +22,6 @@ module.exports = {
     },
   },
 
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   env: {
     es6: true,
     node: true,

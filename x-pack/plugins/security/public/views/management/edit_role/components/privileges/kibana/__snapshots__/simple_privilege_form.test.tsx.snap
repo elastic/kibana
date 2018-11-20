@@ -5,30 +5,22 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
   <EuiDescribedFormGroup
     description={
       <p>
-<<<<<<< HEAD
-        Specifies the Kibana privilege for this role.
-=======
         <FormattedMessage
           defaultMessage="Specifies the Kibana privilege for this role."
           id="xpack.security.management.editRoles.simplePrivilegeForm.specifyPrivilegeForRoleDescription"
           values={Object {}}
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </p>
     }
     fullWidth={false}
     gutterSize="l"
     title={
       <h3>
-<<<<<<< HEAD
-        Kibana privileges
-=======
         <FormattedMessage
           defaultMessage="Kibana privileges"
           id="xpack.security.management.editRoles.simplePrivilegeForm.kibanaPrivilegesTitle"
           values={Object {}}
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </h3>
     }
     titleSize="xs"

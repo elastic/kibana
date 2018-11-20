@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-<<<<<<< HEAD
-import { set as setBreadcrumbs } from 'ui/chrome/services/breadcrumb_state';
-=======
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 // Helper for making objects to use in a link element
 const createCrumb = (url, label, testSubj) => {
@@ -33,11 +29,6 @@ function getElasticsearchBreadcrumbs(mainInstance) {
         'xpack.monitoring.breadcrumbs.es.nodesLabel', { defaultMessage: 'Nodes' }), 'breadcrumbEsNodes'));
     } else if (mainInstance.name === 'ml') {
       // ML Instance (for user later)
-<<<<<<< HEAD
-      breadcrumbs.push(createCrumb('#/elasticsearch/ml_jobs', 'Jobs'));
-    } else if (mainInstance.name === 'ccr_shard') {
-      breadcrumbs.push(createCrumb('#/elasticsearch/ccr', 'CCR'));
-=======
       breadcrumbs.push(createCrumb('#/elasticsearch/ml_jobs', i18n.translate(
         'xpack.monitoring.breadcrumbs.es.jobsLabel', { defaultMessage: 'Jobs' })
       ));
@@ -45,7 +36,6 @@ function getElasticsearchBreadcrumbs(mainInstance) {
       breadcrumbs.push(createCrumb('#/elasticsearch/ccr', i18n.translate(
         'xpack.monitoring.breadcrumbs.es.ccrLabel', { defaultMessage: 'CCR' })
       ));
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
   } else {
@@ -157,11 +147,7 @@ export function breadcrumbsProvider() {
       breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
     }
 
-<<<<<<< HEAD
-    setBreadcrumbs(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
-=======
     chrome.breadcrumbs.set(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     return breadcrumbs;
   };

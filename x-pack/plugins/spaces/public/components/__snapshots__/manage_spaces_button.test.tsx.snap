@@ -11,14 +11,10 @@ exports[`ManageSpacesButton renders as expected 1`] = `
   size="s"
   type="button"
 >
-<<<<<<< HEAD
-  Manage spaces
-=======
   <FormattedMessage
     defaultMessage="Manage spaces"
     id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
     values={Object {}}
   />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 </EuiButton>
 `;

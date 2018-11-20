@@ -16,10 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-<<<<<<< HEAD
-=======
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
@@ -44,10 +41,7 @@ interface Props {
   editable: boolean;
   validator: RoleValidator;
   userProfile: UserProfile;
-<<<<<<< HEAD
-=======
   intl: InjectedIntl;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 }
 
 interface PrivilegeForm {
@@ -64,11 +58,7 @@ interface State {
   privilegeForms: PrivilegeForm[];
 }
 
-<<<<<<< HEAD
-export class SpaceAwarePrivilegeForm extends Component<Props, State> {
-=======
 class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   constructor(props: Props) {
     super(props);
     const { role } = props;
@@ -85,17 +75,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
   }
 
   public render() {
-<<<<<<< HEAD
-    const { kibanaAppPrivileges, role, userProfile } = this.props;
-
-    if (!userProfile.hasCapability('manageSpaces')) {
-      return (
-        <EuiCallOut title={<p>Insufficient Privileges</p>} iconType="alert" color="danger">
-          <p>You are not authorized to view all available spaces.</p>
-          <p>
-            Please ensure your account has all privileges granted by the{' '}
-            <strong>kibana_user</strong> role, and try again.
-=======
     const { kibanaAppPrivileges, role, userProfile, intl } = this.props;
 
     if (!userProfile.hasCapability('manageSpaces')) {
@@ -134,7 +113,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
                 ),
               }}
             />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           </p>
         </EuiCallOut>
       );
@@ -145,17 +123,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     const basePrivilege =
       assignedPrivileges.global.length > 0 ? assignedPrivileges.global[0] : NO_PRIVILEGE_VALUE;
 
-<<<<<<< HEAD
-    const description = <p>Specify the minimum actions users can perform in your spaces.</p>;
-
-    let helptext;
-    if (basePrivilege === NO_PRIVILEGE_VALUE) {
-      helptext = 'No access to spaces';
-    } else if (basePrivilege === 'all') {
-      helptext = 'View, edit, and share objects and apps within all spaces';
-    } else if (basePrivilege === 'read') {
-      helptext = 'View objects and apps within all spaces';
-=======
     const description = (
       <p>
         <FormattedMessage
@@ -183,15 +150,11 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           'xpack.security.management.editRoles.spaceAwarePrivilegeForm.viewObjectsAndAppsWithinAllSpacesHelpText',
         defaultMessage: 'View objects and apps within all spaces',
       });
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     return (
       <Fragment>
         <EuiDescribedFormGroup
-<<<<<<< HEAD
-          title={<h3>Minimum privileges for all spaces</h3>}
-=======
           title={
             <h3>
               <FormattedMessage
@@ -200,7 +163,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
               />
             </h3>
           }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           description={description}
         >
           <EuiFormRow hasEmptyLabelSpace helpText={helptext}>
@@ -241,16 +203,12 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     return (
       <Fragment>
         <EuiTitle size={'xs'}>
-<<<<<<< HEAD
-          <h3>Higher privileges for individual spaces</h3>
-=======
           <h3>
             <FormattedMessage
               id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.higherPrivilegesForIndividualSpacesTitle"
               defaultMessage="Higher privileges for individual spaces"
             />
           </h3>
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </EuiTitle>
         <EuiSpacer size={'s'} />
         <EuiText
@@ -260,11 +218,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           color={'subdued'}
         >
           <p>
-<<<<<<< HEAD
-            Grant more privileges on a per space basis. For example, if the privileges are{' '}
-            <strong>read</strong> for all spaces, you can set the privileges to <strong>all</strong>{' '}
-            for an individual space.
-=======
             <FormattedMessage
               id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
               defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are
@@ -289,7 +242,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
                 ),
               }}
             />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           </p>
         </EuiText>
         <EuiSpacer size={'s'} />
@@ -330,14 +282,10 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
                 iconType={'plusInCircle'}
                 onClick={this.addSpacePrivilege}
               >
-<<<<<<< HEAD
-                Add space privilege
-=======
                 <FormattedMessage
                   id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.addSpacePrivilegeTitle"
                   defaultMessage="Add space privilege"
                 />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               </EuiButton>
             </EuiFlexItem>
           )}
@@ -504,8 +452,5 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     this.props.onChange(role);
   };
 }
-<<<<<<< HEAD
-=======
 
 export const SpaceAwarePrivilegeForm = injectI18n(SpaceAwarePrivilegeFormUI);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

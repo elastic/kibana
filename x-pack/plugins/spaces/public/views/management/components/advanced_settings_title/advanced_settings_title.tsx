@@ -5,10 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-<<<<<<< HEAD
-=======
 import { FormattedMessage } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React from 'react';
 import { Space } from '../../../../../common/model/space';
 import { SpaceAvatar } from '../../../../components';
@@ -24,16 +21,12 @@ export const AdvancedSettingsTitle = (props: Props) => (
     </EuiFlexItem>
     <EuiFlexItem style={{ marginLeft: '10px' }}>
       <EuiText>
-<<<<<<< HEAD
-        <h1 data-test-subj="managementSettingsTitle">Settings</h1>
-=======
         <h1 data-test-subj="managementSettingsTitle">
           <FormattedMessage
             id="xpack.spaces.management.advancedSettingsTitle.settingsTitle"
             defaultMessage="Settings"
           />
         </h1>
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>

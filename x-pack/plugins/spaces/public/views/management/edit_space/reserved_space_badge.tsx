@@ -7,10 +7,7 @@
 import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-<<<<<<< HEAD
-=======
 import { FormattedMessage } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
 
@@ -23,9 +20,6 @@ export const ReservedSpaceBadge = (props: Props) => {
 
   if (space && isReservedSpace(space)) {
     return (
-<<<<<<< HEAD
-      <EuiToolTip content={'Reserved spaces are built-in and can only be partially modified.'}>
-=======
       <EuiToolTip
         content={
           <FormattedMessage
@@ -34,7 +28,6 @@ export const ReservedSpaceBadge = (props: Props) => {
           />
         }
       >
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         <EuiIcon style={{ verticalAlign: 'super' }} type={'lock'} />
       </EuiToolTip>
     );

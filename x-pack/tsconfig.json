@@ -22,12 +22,9 @@
       ],
       "plugins/spaces/*": [
         "x-pack/plugins/spaces/public/*"
-<<<<<<< HEAD
-=======
       ],
       "test_utils/*": [
         "x-pack/test_utils/*"
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       ]
     },
     "types": [

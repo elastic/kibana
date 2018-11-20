@@ -9,11 +9,8 @@ import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/nav_control/nav_control.html';
 import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
-<<<<<<< HEAD
-=======
 // @ts-ignore
 import { PathProvider } from 'plugins/xpack_main/services/path';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -50,10 +47,7 @@ module.controller(
   'spacesNavController',
   ($scope: any, $http: any, chrome: any, Private: any, activeSpace: any) => {
     const userProfile = Private(UserProfileProvider);
-<<<<<<< HEAD
-=======
     const pathProvider = Private(PathProvider);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     const domNode = document.getElementById(`spacesNavReactRoot`);
     const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
@@ -63,11 +57,7 @@ module.controller(
     let mounted = false;
 
     $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
-<<<<<<< HEAD
-      if (isVisible && !mounted) {
-=======
       if (isVisible && !mounted && !pathProvider.isUnauthenticated()) {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         render(
           <NavControlPopover
             spacesManager={spacesManager}
@@ -112,14 +102,11 @@ chromeHeaderNavControlsRegistry.register(
     side: NavControlSide.Left,
     render(el: HTMLElement) {
       const userProfile = Private(UserProfileProvider);
-<<<<<<< HEAD
-=======
       const pathProvider = Private(PathProvider);
 
       if (pathProvider.isUnauthenticated()) {
         return;
       }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       const spaceSelectorURL = chrome.getInjected('spaceSelectorURL');
 

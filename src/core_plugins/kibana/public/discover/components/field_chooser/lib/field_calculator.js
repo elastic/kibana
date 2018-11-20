@@ -62,11 +62,6 @@ function getFieldValueCounts(params) {
 
     if (params.hits.length - missing === 0) {
       return {
-<<<<<<< HEAD
-        error: 'This field is present in your Elasticsearch mapping' +
-          ' but not in the ' + params.hits.length + ' documents shown in the doc table.' +
-          ' You may still be able to visualize or search on it.'
-=======
         error: i18n.translate('kbn.discover.fieldChooser.fieldCalculator.fieldIsNotPresentInDocumentsErrorMessage', {
           // eslint-disable-next-line max-len
           defaultMessage: 'This field is present in your Elasticsearch mapping but not in the {hitsLength} documents shown in the doc table. You may still be able to visualize or search on it.',
@@ -74,7 +69,6 @@ function getFieldValueCounts(params) {
             hitsLength: params.hits.length,
           },
         })
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       };
     }
 

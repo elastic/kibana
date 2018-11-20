@@ -8,19 +8,6 @@ exports[`renders without crashing 1`] = `
     hasEmptyLabelSpace={false}
     helpText={
       <p>
-<<<<<<< HEAD
-        If the identifier is 
-        <strong>
-          engineering
-        </strong>
-        , the Kibana URL is 
-        <br />
-         https://my-kibana.example
-        <strong>
-          /s/engineering/
-        </strong>
-        app/kibana.
-=======
         <FormattedMessage
           defaultMessage="If the identifier is {engineeringIdentifier}, the Kibana URL is{nextLine}
           {engineeringKibanaUrl}."
@@ -45,35 +32,26 @@ exports[`renders without crashing 1`] = `
             }
           }
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </p>
     }
     isInvalid={false}
     label={
       <p>
-<<<<<<< HEAD
-        URL identifier 
-=======
         <FormattedMessage
           defaultMessage="URL identifier"
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
           values={Object {}}
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         <EuiLink
           color="primary"
           onClick={[Function]}
           type="button"
         >
-<<<<<<< HEAD
-          [edit]
-=======
           <FormattedMessage
             defaultMessage="[edit]"
             id="xpack.spaces.management.spaceIdentifier.editSpaceLinkText"
             values={Object {}}
           />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </EuiLink>
       </p>
     }

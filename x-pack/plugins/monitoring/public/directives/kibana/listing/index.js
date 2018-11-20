@@ -22,12 +22,8 @@ import {
 import {
   EuiLink,
 } from '@elastic/eui';
-<<<<<<< HEAD
-import { I18nProvider } from '@kbn/i18n/react';
-=======
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n, I18nProvider } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 const filterFields = [ 'kibana.name', 'kibana.host', 'kibana.status', 'kibana.transport_address' ];
 const columns = [
@@ -168,11 +164,7 @@ uiModule.directive('monitoringKibanaListing', (kbnUrl, i18n) => {
               sortKey={scope.sortKey}
               sortOrder={scope.sortOrder}
               onNewState={scope.onNewState}
-<<<<<<< HEAD
-              placeholder="Filter Instances..."
-=======
               placeholder={filterInstancesPlaceholder}
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               filterFields={filterFields}
               columns={columns}
               rowComponent={instanceRowFactory(scope, kbnUrl)}

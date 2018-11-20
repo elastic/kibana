@@ -20,10 +20,7 @@ import { LARGE_ABBREVIATED, LARGE_BYTES } from '../../../../common/formatting';
 import {
   EuiLink,
 } from '@elastic/eui';
-<<<<<<< HEAD
-=======
 import { i18n } from '@kbn/i18n';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { I18nProvider } from '@kbn/i18n/react';
 
 const filterFields = [ 'job_id', 'state', 'node.name' ];
@@ -150,11 +147,7 @@ uiModule.directive('monitoringMlListing', (kbnUrl, i18n) => {
               sortKey={scope.sortKey}
               sortOrder={scope.sortOrder}
               onNewState={scope.onNewState}
-<<<<<<< HEAD
-              placeholder="Filter Jobs..."
-=======
               placeholder={filterJobsPlaceholder}
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               filterFields={filterFields}
               columns={columns}
               rowComponent={jobRowFactory(scope, kbnUrl)}

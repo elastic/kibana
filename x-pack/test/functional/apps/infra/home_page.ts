@@ -15,13 +15,10 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
   const pageObjects = getPageObjects(['common', 'infraHome']);
 
   describe('Home page', () => {
-<<<<<<< HEAD
-=======
     before(async () => {
       await esArchiver.load('empty_kibana');
     });
 
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     describe('without metrics present', () => {
       before(async () => await esArchiver.unload('infra'));
 

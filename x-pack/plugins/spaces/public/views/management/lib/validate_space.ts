@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-<<<<<<< HEAD
-=======
 import { i18n } from '@kbn/i18n';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { Space } from '../../../../common/model/space';
 import { isValidSpaceIdentifier } from './space_identifier_utils';
@@ -36,13 +33,6 @@ export class SpaceValidator {
     }
 
     if (!space.name || !space.name.trim()) {
-<<<<<<< HEAD
-      return invalid(`Name is required`);
-    }
-
-    if (space.name.length > 1024) {
-      return invalid(`Name must not exceed 1024 characters`);
-=======
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.requiredNameErrorMessage', {
           defaultMessage: 'Name is required',
@@ -56,7 +46,6 @@ export class SpaceValidator {
           defaultMessage: 'Name must not exceed 1024 characters',
         })
       );
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     return valid();
@@ -68,15 +57,11 @@ export class SpaceValidator {
     }
 
     if (space.description && space.description.length > 2000) {
-<<<<<<< HEAD
-      return invalid(`Description must not exceed 2000 characters`);
-=======
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.describeMaxLengthErrorMessage', {
           defaultMessage: 'Description must not exceed 2000 characters',
         })
       );
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     return valid();
@@ -92,13 +77,6 @@ export class SpaceValidator {
     }
 
     if (!space.id) {
-<<<<<<< HEAD
-      return invalid(`URL identifier is required`);
-    }
-
-    if (!isValidSpaceIdentifier(space.id)) {
-      return invalid('URL identifier can only contain a-z, 0-9, and the characters "_" and "-"');
-=======
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.urlIdentifierRequiredErrorMessage', {
           defaultMessage: 'URL identifier is required',
@@ -116,7 +94,6 @@ export class SpaceValidator {
           }
         )
       );
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     return valid();

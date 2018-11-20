@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-<<<<<<< HEAD
-import { mount, shallow } from 'enzyme';
-import React from 'react';
-=======
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { RoleValidator } from '../../../lib/validate_role';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 import { PrivilegeSpaceForm } from './privilege_space_form';
@@ -53,13 +48,9 @@ const buildProps = (customProps: any = {}) => {
 
 describe('<SpaceAwarePrivilegeForm>', () => {
   it('renders without crashing', () => {
-<<<<<<< HEAD
-    expect(shallow(<SpaceAwarePrivilegeForm {...buildProps()} />)).toMatchSnapshot();
-=======
     expect(
       shallowWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...buildProps()} />)
     ).toMatchSnapshot();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   });
 
   it('shows the space table if exisitng space privileges are declared', () => {
@@ -77,11 +68,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
       },
     });
 
-<<<<<<< HEAD
-    const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
-=======
     const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toHaveLength(1);
@@ -90,11 +77,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
   it('hides the space table if there are no existing space privileges', () => {
     const props = buildProps();
 
-<<<<<<< HEAD
-    const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
-=======
     const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toMatchSnapshot();
@@ -115,11 +98,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
       },
     });
 
-<<<<<<< HEAD
-    const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
-=======
     const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     expect(wrapper.find(PrivilegeSpaceForm)).toHaveLength(0);
 
     wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]').simulate('click');
@@ -143,11 +122,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-<<<<<<< HEAD
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
-=======
       const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       const warning = wrapper.find(PrivilegeCalloutWarning);
       expect(warning.props()).toMatchObject({
@@ -178,11 +153,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-<<<<<<< HEAD
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
-=======
       const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       const warning = wrapper.find(PrivilegeCalloutWarning);
       expect(warning.props()).toMatchObject({
@@ -205,11 +176,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-<<<<<<< HEAD
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
-=======
       const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       const table = wrapper.find(PrivilegeSpaceTable);
       expect(table).toHaveLength(1);
@@ -235,11 +202,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-<<<<<<< HEAD
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
-=======
       const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       const warning = wrapper.find(PrivilegeCalloutWarning);
       expect(warning).toHaveLength(0);
@@ -260,11 +223,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-<<<<<<< HEAD
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
-=======
       const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       const table = wrapper.find(PrivilegeSpaceTable);
       expect(table).toHaveLength(1);
@@ -287,11 +246,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-<<<<<<< HEAD
-      const wrapper = shallow(<SpaceAwarePrivilegeForm {...props} />);
-=======
       const wrapper = shallowWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       expect(wrapper).toMatchSnapshot();
     });
   });

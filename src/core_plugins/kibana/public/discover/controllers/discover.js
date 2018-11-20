@@ -64,7 +64,6 @@ import { showOpenSearchPanel } from '../top_nav/show_open_search_panel';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -157,11 +156,7 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
-<<<<<<< HEAD
-  breadcrumbState
-=======
   i18n,
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 ) {
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -331,21 +326,6 @@ function discoverController(
     }, { text: savedSearch.title }]);
   } else {
     chrome.breadcrumbs.set([{
-      text: discoverBreadcrumbsTitle,
-    }]);
-  }
-
-  const discoverBreadcrumbsTitle = i18n.translate('kbn.discover.discoverBreadcrumbsTitle', {
-    defaultMessage: 'Discover',
-  });
-
-  if (savedSearch.id && savedSearch.title) {
-    breadcrumbState.set([{
-      text: discoverBreadcrumbsTitle,
-      href: '#/discover'
-    }, { text: savedSearch.title }]);
-  } else {
-    breadcrumbState.set([{
       text: discoverBreadcrumbsTitle,
     }]);
   }

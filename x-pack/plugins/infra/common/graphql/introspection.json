@@ -111,13 +111,8 @@
             "deprecationReason": null
           },
           {
-<<<<<<< HEAD
-            "name": "capabilitiesByNode",
-            "description": "A hierarchy of capabilities available on nodes",
-=======
             "name": "metadataByNode",
             "description": "A hierarchy of metadata entries by node",
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
             "args": [
               {
                 "name": "nodeName",
@@ -146,11 +141,7 @@
               "ofType": {
                 "kind": "LIST",
                 "name": null,
-<<<<<<< HEAD
-                "ofType": { "kind": "OBJECT", "name": "InfraNodeCapability", "ofType": null }
-=======
                 "ofType": { "kind": "OBJECT", "name": "InfraNodeMetadata", "ofType": null }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               }
             },
             "isDeprecated": false,
@@ -790,14 +781,8 @@
       },
       {
         "kind": "OBJECT",
-<<<<<<< HEAD
-        "name": "InfraNodeCapability",
-        "description":
-          "One specific capability available on a node. A capability corresponds to a fileset or metricset",
-=======
         "name": "InfraNodeMetadata",
         "description": "One metadata entry for a node.",
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         "fields": [
           {
             "name": "name",

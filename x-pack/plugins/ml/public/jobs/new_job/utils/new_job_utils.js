@@ -115,8 +115,6 @@ export function focusOnResultsLink(linkId, $timeout) {
     $(`#${linkId}`).focus();
   }, 0);
 }
-<<<<<<< HEAD
-=======
 
 // Only model plot cardinality relevant
 // format:[{id:"cardinality_model_plot_high",modelPlotCardinality:11405}, {id:"cardinality_partition_field",fieldName:"clientip"}]
@@ -158,4 +156,3 @@ export function getMinimalValidJob() {
     }
   };
 }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

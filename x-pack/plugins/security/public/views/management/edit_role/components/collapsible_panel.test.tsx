@@ -5,21 +5,12 @@
  */
 
 import { EuiLink } from '@elastic/eui';
-<<<<<<< HEAD
-import { mount, shallow } from 'enzyme';
-import React from 'react';
-import { CollapsiblePanel } from './collapsible_panel';
-
-test('it renders without blowing up', () => {
-  const wrapper = shallow(
-=======
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { CollapsiblePanel } from './collapsible_panel';
 
 test('it renders without blowing up', () => {
   const wrapper = shallowWithIntl(
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
       <p>child</p>
     </CollapsiblePanel>
@@ -29,11 +20,7 @@ test('it renders without blowing up', () => {
 });
 
 test('it renders children by default', () => {
-<<<<<<< HEAD
-  const wrapper = mount(
-=======
   const wrapper = mountWithIntl(
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
       <p className="child">child 1</p>
       <p className="child">child 2</p>
@@ -45,11 +32,7 @@ test('it renders children by default', () => {
 });
 
 test('it hides children when the "hide" link is clicked', () => {
-<<<<<<< HEAD
-  const wrapper = mount(
-=======
   const wrapper = mountWithIntl(
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
       <p className="child">child 1</p>
       <p className="child">child 2</p>

@@ -17,8 +17,4 @@
  * under the License.
  */
 
-<<<<<<< HEAD
-export { ChromeService, ChromeStartContract, Brand } from './chrome_service';
-=======
 export { Breadcrumb, ChromeService, ChromeStartContract, Brand } from './chrome_service';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

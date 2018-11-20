@@ -196,13 +196,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
-<<<<<<< HEAD
     async getLabTypeLinks() {
       return await remote.findElements(By.partialLinkText('(Lab)'));
     }
 
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     async getExperimentalTypeLinks() {
       return await remote.findElements(By.partialLinkText('(Experimental)'));
     }
@@ -571,13 +568,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setSize(newValue) {
       const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
-<<<<<<< HEAD
       await input.clear();
       await input.sendKeys(String(newValue));
-=======
-      await input.clearValue();
-      await input.type(String(newValue));
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async toggleDisabledAgg(agg) {
@@ -833,13 +825,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yAxisHeight = await rectangle.getAttribute('height');
       // 3). get the visWrapper__chart elements
       const chartTypes = await retry.try(
-<<<<<<< HEAD
         async () => await remote
           .findElements(By.css(`.chart-wrapper circle[data-label="${dataLabel}"][fill-opacity="1"]`), defaultFindTimeout * 2));
-=======
-        async () => await find
-          .allByCssSelector(`.visWrapper__chart circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       // 5). for each chart element, find the green circle, then the cy position
       async function getChartType(chart) {
@@ -858,13 +845,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
-<<<<<<< HEAD
       // 3). get the chart-wrapper elements
       const chartTypes = await remote.findElements(By.css(`svg > g > g.series > rect[data-label="${dataLabel}"]`));
-=======
-      // 3). get the visWrapper__chart elements
-      const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
       async function getChartType(chart) {
         const barHeight = await chart.getAttribute('height');
@@ -879,30 +861,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getChartYAxisRatio(axis = 'ValueAxis-1') {
       // 1). get the maximum chart Y-Axis marker value and Y position
       const maxYAxisChartMarker = await retry.try(
-<<<<<<< HEAD
         async () => await remote.findElement(By.css(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`))
-=======
-        async () => await find.byCssSelector(`div.visAxis__splitAxes--y > div > svg > g.${axis} > g:last-of-type.tick`)
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       );
       const maxYLabel = (await maxYAxisChartMarker.getText()).replace(/,/g, '');
       const maxYLabelYPosition = (await maxYAxisChartMarker.getRect()).y;
       log.debug(`maxYLabel = ${maxYLabel}, maxYLabelYPosition = ${maxYLabelYPosition}`);
 
       // 2). get the minimum chart Y-Axis marker value and Y position
-<<<<<<< HEAD
       const minYAxisChartMarker = await
-        remote.findElement(By.css(
-          'div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'));
+      remote.findElement(By.css(
+        'div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'));
       const minYLabel = (await minYAxisChartMarker.getText()).replace(',', '');
       const minYLabelYPosition = (await minYAxisChartMarker.getRect()).y;
-=======
-      const minYAxisChartMarker = await find.byCssSelector(
-        'div.visAxis__column--y.visAxis__column--left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'
-      );
-      const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
-      const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
     }
 
@@ -1164,11 +1134,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getLegendEntries() {
-<<<<<<< HEAD
       const legendEntries = await remote.findElements(By.css('.legend-value-title'), defaultFindTimeout * 2);
-=======
-      const legendEntries = await find.allByCssSelector('.visLegend__valueTitle', defaultFindTimeout * 2);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
     }
 

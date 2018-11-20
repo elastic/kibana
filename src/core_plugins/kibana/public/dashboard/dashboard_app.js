@@ -56,7 +56,6 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
-import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -86,18 +85,10 @@ app.directive('dashboardApp', function ($injector) {
       $rootScope,
       $route,
       $routeParams,
-<<<<<<< HEAD
-      $location,
-      getAppState,
-      dashboardConfig,
-      localStorage,
-      breadcrumbState
-=======
       getAppState,
       dashboardConfig,
       localStorage,
       i18n,
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     ) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
@@ -189,15 +180,9 @@ app.directive('dashboardApp', function ($injector) {
 
       // Push breadcrumbs to new header navigation
       const updateBreadcrumbs = () => {
-<<<<<<< HEAD
-        breadcrumbState.set([
-          {
-            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
-=======
         chrome.breadcrumbs.set([
           {
             text: i18n('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               defaultMessage: 'Dashboard',
             }),
             href: $scope.landingPageUrl()

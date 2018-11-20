@@ -24,7 +24,6 @@ cd "$XPACK_DIR"
 node scripts/jest --ci --no-cache --verbose
 echo ""
 echo ""
-<<<<<<< HEAD
 
 
 echo " -> building and extracting default Kibana distributable for use in functional tests"
@@ -41,5 +40,3 @@ cd "$XPACK_DIR"
 node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir"
 echo ""
 echo ""
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

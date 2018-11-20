@@ -12,7 +12,4 @@ import './save_status_modal';
 import './field_select_directive';
 import 'plugins/ml/components/job_group_select';
 import 'plugins/ml/jobs/components/job_timepicker_modal';
-<<<<<<< HEAD
-=======
 import './enable_model_plot_callout';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

@@ -1,60 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<KibanaPrivileges> renders without crashing 1`] = `
-<<<<<<< HEAD
-<CollapsiblePanel
-  iconType="logoKibana"
-  title="Kibana"
->
-  <SpaceAwarePrivilegeForm
-    editable={true}
-    kibanaAppPrivileges={
-      Array [
-        "all",
-      ]
-    }
-    onChange={[MockFunction]}
-    role={
-      Object {
-        "elasticsearch": Object {
-          "cluster": Array [],
-          "indices": Array [],
-          "run_as": Array [],
-        },
-        "kibana": Object {
-          "global": Array [],
-          "space": Object {},
-        },
-        "name": "",
-      }
-    }
-    spaces={
-      Array [
-        Object {
-          "_reserved": true,
-          "id": "default",
-          "name": "Default Space",
-        },
-        Object {
-          "id": "marketing",
-          "name": "Marketing",
-        },
-      ]
-    }
-    userProfile={
-      Object {
-        "hasCapability": [Function],
-      }
-    }
-    validator={
-      RoleValidator {
-        "inProgressSpacePrivileges": Array [],
-        "shouldValidate": undefined,
-      }
-    }
-  />
-</CollapsiblePanel>
-=======
 <I18nProvider>
   <CollapsiblePanel
     iconType="logoKibana"
@@ -109,5 +55,4 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
     />
   </CollapsiblePanel>
 </I18nProvider>
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 `;

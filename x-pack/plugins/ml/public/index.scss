@@ -5,13 +5,6 @@
 @import '@elastic/eui/src/components/panel/variables';
 @import '@elastic/eui/src/components/panel/mixins';
 
-<<<<<<< HEAD
-@import '@elastic/eui/src/global_styling/variables/size';
-
-@import 'datavisualizer/index';
-@import 'file_datavisualizer/index';
-@import 'components/nav_menu/index';
-=======
 // ML has it's own variables for coloring
 @import 'variables';
 
@@ -56,4 +49,3 @@
   // Hacks are last so they can ovwerite anything above if needed
   @import 'hacks';
 }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

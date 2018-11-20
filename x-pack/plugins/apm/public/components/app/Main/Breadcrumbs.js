@@ -12,11 +12,6 @@ import chrome from 'ui/chrome';
 
 import { toQuery } from '../../../utils/url';
 import { routes } from './routeConfig';
-<<<<<<< HEAD
-import { flatten, capitalize } from 'lodash';
-import { set } from 'ui/chrome/services/breadcrumb_state';
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 class Breadcrumbs extends React.Component {
   updateHeaderBreadcrumbs() {
@@ -26,11 +21,7 @@ class Breadcrumbs extends React.Component {
       href: `#${match.url}?_g=${_g}&kuery=${kuery}`
     }));
 
-<<<<<<< HEAD
-    set(breadcrumbs);
-=======
     chrome.breadcrumbs.set(breadcrumbs);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   }
 
   componentDidMount() {

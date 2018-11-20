@@ -18,10 +18,7 @@
  */
 
 import { map as mapAsync } from 'bluebird';
-<<<<<<< HEAD
 import { By } from 'selenium-webdriver';
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import expect from 'expect.js';
 
 export function SettingsPageProvider({ getService, getPageObjects }) {
@@ -330,13 +327,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setIndexPatternField(indexPatternName = 'logstash-') {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
-<<<<<<< HEAD
       await field.clear();
       await field.sendKeys(indexPatternName);
-=======
-      await field.clearValue();
-      await field.type(indexPatternName);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
       expect(currentName).to.eql(`${indexPatternName}*`);

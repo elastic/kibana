@@ -19,10 +19,7 @@ import {
   SpaceSelectorPageProvider,
   AccountSettingProvider,
   InfraHomePageProvider,
-<<<<<<< HEAD
-=======
   StatusPagePageProvider,
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 } from './page_objects';
 
 import {
@@ -75,10 +72,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
-<<<<<<< HEAD
-=======
       resolve(__dirname, './apps/status_page'),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     ],
 
     // define the name and providers for services that should be
@@ -129,10 +123,7 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
-<<<<<<< HEAD
-=======
       statusPage: StatusPagePageProvider,
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     },
 
     servers: kibanaFunctionalConfig.get('servers'),

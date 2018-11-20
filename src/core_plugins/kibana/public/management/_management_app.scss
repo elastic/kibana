@@ -3,8 +3,6 @@
   background: $euiColorEmptyShade;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * 1. Override kuiPanelBody styles to accommodate padding of items within the panel body..
  */
@@ -19,16 +17,11 @@
   padding: 5px 15px; /* 1 */
 }
 
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 // SASSTODO: Remove when this is replaced by the side nav
 .mgtPanel__link {
   @include euiFontSizeL;
 
-<<<<<<< HEAD
-  line-height: 2; // Give some buffer for when they wrap
-=======
   line-height: 1.5; // Make sure the space between wrapped lines is than the vertical space between items.
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
   &.mgtPanel__link--disabled {
     opacity: $euiColorDarkShade;
@@ -73,8 +66,4 @@ kbn-management-objects {
       display: inline-block;
     }
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

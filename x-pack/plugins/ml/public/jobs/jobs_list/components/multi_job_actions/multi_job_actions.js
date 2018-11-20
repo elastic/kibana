@@ -27,11 +27,7 @@ export class MultiJobActions extends Component {
     return (
       <div className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}>
         {jobsSelected &&
-<<<<<<< HEAD
-          <React.Fragment>
-=======
           <Fragment>
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
             <span className="jobs-selected-title">{this.props.selectedJobs.length} job{s} selected</span>
             <div className="actions-border-large" />
             <ResultLinks jobs={this.props.selectedJobs} />

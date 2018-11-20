@@ -4,12 +4,9 @@
     "paths": {
       "ui/*": [
         "src/ui/public/*"
-<<<<<<< HEAD
-=======
       ],
       "test_utils/*": [
         "src/test_utils/public/*"
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement

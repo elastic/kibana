@@ -28,10 +28,7 @@ import { htmlIdGenerator, keyCodes } from '@elastic/eui';
 uiModules.get('kibana')
   .directive('vislibLegend', function (Private, $timeout, i18n) {
     const Data = Private(VislibLibDataProvider);
-<<<<<<< HEAD
-=======
     const visFilters = Private(VisFiltersProvider);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     return {
       restrict: 'E',
@@ -109,11 +106,7 @@ uiModules.get('kibana')
         };
 
         $scope.canFilter = function (legendData) {
-<<<<<<< HEAD
-          const filters = $scope.vis.API.events.filter({ datum: legendData.values }, { simulate: true });
-=======
           const filters = visFilters.filter({ datum: legendData.values }, { simulate: true });
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           return filters.length;
         };
 

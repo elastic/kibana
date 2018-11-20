@@ -126,10 +126,7 @@
     "@kbn/datemath": "5.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/ui-framework": "1.0.0",
-<<<<<<< HEAD
-=======
     "@kbn/interpreter": "1.0.0",
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     "@samverschueren/stream-to-observable": "^0.3.0",
     "@scant/router": "^0.1.0",
     "@slack/client": "^4.2.2",
@@ -188,10 +185,7 @@
     "joi": "^13.5.2",
     "jquery": "^3.3.1",
     "jsonwebtoken": "^8.3.0",
-<<<<<<< HEAD
     "jstimezonedetect": "1.0.5",
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lodash.clone": "^4.5.0",
     "lodash.keyby": "^4.6.0",

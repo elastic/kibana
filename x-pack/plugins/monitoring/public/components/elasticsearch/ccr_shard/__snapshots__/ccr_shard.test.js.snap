@@ -16,15 +16,11 @@ exports[`CcrShard that is renders an exception properly 1`] = `
         color="danger"
         component="span"
       >
-<<<<<<< HEAD
-        Errors
-=======
         <FormattedMessage
           defaultMessage="Errors"
           id="xpack.monitoring.elasticsearch.ccrShard.errorsTableTitle"
           values={Object {}}
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </EuiTextColor>
     </h3>
   </EuiTitle>
@@ -71,11 +67,7 @@ exports[`CcrShard that it renders normally 1`] = `
   <EuiPageBody
     restrictWidth={false}
   >
-<<<<<<< HEAD
-    <Status
-=======
     <InjectIntl(StatusUI)
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       formattedLeader="leader on remote"
       oldestStat={
         Object {
@@ -173,15 +165,11 @@ exports[`CcrShard that it renders normally 1`] = `
           textTransform="none"
         >
           <h2>
-<<<<<<< HEAD
-            Advanced
-=======
             <FormattedMessage
               defaultMessage="Advanced"
               id="xpack.monitoring.elasticsearch.ccrShard.latestStateAdvancedButtonLabel"
               values={Object {}}
             />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           </h2>
         </EuiTitle>
       }

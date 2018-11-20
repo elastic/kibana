@@ -20,11 +20,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-<<<<<<< HEAD
-import './styles/main.less';
-
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
 const OPTIONS = [

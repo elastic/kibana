@@ -1,11 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<SpaceAwarePrivilegeForm> hides the space table if there are no existing space privileges 1`] = `
-<<<<<<< HEAD
-<PrivilegeSpaceTable
-=======
 <InjectIntl(PrivilegeSpaceTableUI)
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   availablePrivileges={
     Array [
       "all",
@@ -43,9 +39,6 @@ exports[`<SpaceAwarePrivilegeForm> hides the space table if there are no existin
       },
     ]
   }
-<<<<<<< HEAD
-/>
-=======
 >
   <PrivilegeSpaceTableUI
     availablePrivileges={
@@ -169,7 +162,6 @@ exports[`<SpaceAwarePrivilegeForm> hides the space table if there are no existin
     }
   />
 </InjectIntl(PrivilegeSpaceTableUI)>
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 `;
 
 exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
@@ -177,30 +169,22 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
   <EuiDescribedFormGroup
     description={
       <p>
-<<<<<<< HEAD
-        Specify the minimum actions users can perform in your spaces.
-=======
         <FormattedMessage
           defaultMessage="Specify the minimum actions users can perform in your spaces."
           id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.minimumActionsUserCanPerformInYourSpacesDescription"
           values={Object {}}
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </p>
     }
     fullWidth={false}
     gutterSize="l"
     title={
       <h3>
-<<<<<<< HEAD
-        Minimum privileges for all spaces
-=======
         <FormattedMessage
           defaultMessage="Minimum privileges for all spaces"
           id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.minPrivilegesForAllSpacesTitle"
           values={Object {}}
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </h3>
     }
     titleSize="xs"
@@ -235,15 +219,11 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       textTransform="none"
     >
       <h3>
-<<<<<<< HEAD
-        Higher privileges for individual spaces
-=======
         <FormattedMessage
           defaultMessage="Higher privileges for individual spaces"
           id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.higherPrivilegesForIndividualSpacesTitle"
           values={Object {}}
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </h3>
     </EuiTitle>
     <EuiSpacer
@@ -255,19 +235,6 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       size="s"
     >
       <p>
-<<<<<<< HEAD
-        Grant more privileges on a per space basis. For example, if the privileges are
-         
-        <strong>
-          read
-        </strong>
-         for all spaces, you can set the privileges to 
-        <strong>
-          all
-        </strong>
-         
-        for an individual space.
-=======
         <FormattedMessage
           defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are
               {read} for all spaces, you can set the privileges to {all}
@@ -292,18 +259,13 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
             }
           }
         />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       </p>
     </EuiText>
     <EuiSpacer
       size="s"
     />
     <React.Fragment>
-<<<<<<< HEAD
-      <PrivilegeSpaceTable
-=======
       <InjectIntl(PrivilegeSpaceTableUI)
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         availablePrivileges={
           Array [
             "all",
@@ -366,26 +328,18 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
           size="s"
           type="button"
         >
-<<<<<<< HEAD
-          Add space privilege
-=======
           <FormattedMessage
             defaultMessage="Add space privilege"
             id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.addSpacePrivilegeTitle"
             values={Object {}}
           />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
         grow={true}
       >
-<<<<<<< HEAD
-        <ImpactedSpacesFlyout
-=======
         <InjectIntl(ImpactedSpacesFlyoutUI)
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           role={
             Object {
               "elasticsearch": Object {
@@ -434,30 +388,15 @@ exports[`<SpaceAwarePrivilegeForm> with user profile disabling "manageSpaces" re
   size="m"
   title={
     <p>
-<<<<<<< HEAD
-      Insufficient Privileges
-=======
       <FormattedMessage
         defaultMessage="Insufficient Privileges"
         id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.insufficientPrivilegesDescription"
         values={Object {}}
       />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     </p>
   }
 >
   <p>
-<<<<<<< HEAD
-    You are not authorized to view all available spaces.
-  </p>
-  <p>
-    Please ensure your account has all privileges granted by the
-     
-    <strong>
-      kibana_user
-    </strong>
-     role, and try again.
-=======
     <FormattedMessage
       defaultMessage="You are not authorized to view all available spaces."
       id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.howToViewAllAvailableSpacesDescription"
@@ -481,7 +420,6 @@ exports[`<SpaceAwarePrivilegeForm> with user profile disabling "manageSpaces" re
         }
       }
     />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   </p>
 </EuiCallOut>
 `;

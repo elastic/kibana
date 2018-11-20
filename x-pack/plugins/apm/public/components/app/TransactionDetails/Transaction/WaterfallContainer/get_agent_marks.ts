@@ -13,11 +13,7 @@ export interface AgentMark {
 }
 
 export function getAgentMarks(transaction: Transaction): AgentMark[] {
-<<<<<<< HEAD
-  if (!transaction.transaction.marks) {
-=======
   if (!(transaction.transaction.marks && transaction.transaction.marks.agent)) {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     return [];
   }
 

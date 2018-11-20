@@ -20,10 +20,7 @@
 import _ from 'lodash';
 import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
-<<<<<<< HEAD
-=======
 import { onBrushEvent } from '../utils/brush_event';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 const getTerms = (table, columnIndex, rowIndex) => {
   if (rowIndex === -1) {
@@ -45,28 +42,6 @@ const getTerms = (table, columnIndex, rowIndex) => {
   }))];
 };
 
-<<<<<<< HEAD
-export function VisFiltersProvider(Private, getAppState) {
-  const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
-
-  const  createFilter = (data, columnIndex, rowIndex, cellValue) => {
-    const { aggConfig, id: columnId } = data.columns[columnIndex];
-    let filter = [];
-    const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
-    if (value === null || value === undefined) {
-      return;
-    }
-    if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
-      const terms = getTerms(data, columnIndex, rowIndex);
-      filter = aggConfig.createFilter(value, { terms });
-    } else {
-      filter = aggConfig.createFilter(value);
-    }
-    return filter;
-  };
-
-=======
 const createFilter = (data, columnIndex, rowIndex, cellValue) => {
   const { aggConfig, id: columnId } = data.columns[columnIndex];
   let filter = [];
@@ -87,7 +62,6 @@ const VisFiltersProvider = (Private, getAppState) => {
   const filterBarPushFilters = Private(FilterBarPushFiltersProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   const filter = (event, { simulate } = {}) => {
     let data = event.datum.aggConfigResult;
     const filters = [];
@@ -114,24 +88,12 @@ const VisFiltersProvider = (Private, getAppState) => {
     return filters;
   };
 
-<<<<<<< HEAD
-  const  addFilter = (data, columnIndex, rowIndex, cellValue) => {
-    const filter = createFilter(data, columnIndex, rowIndex, cellValue);
-=======
   const addFilter = (event) => {
     const filter = createFilter(event.table, event.column, event.row, event.value);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     queryFilter.addFilters(filter);
   };
 
   return {
-<<<<<<< HEAD
-    createFilter,
-    addFilter,
-    filter
-  };
-}
-=======
     addFilter,
     filter,
     brush: (event) => {
@@ -141,4 +103,3 @@ const VisFiltersProvider = (Private, getAppState) => {
 };
 
 export { VisFiltersProvider, createFilter };
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

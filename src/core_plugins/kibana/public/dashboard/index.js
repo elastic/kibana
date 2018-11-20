@@ -36,7 +36,6 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
-import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',
@@ -59,11 +58,7 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-<<<<<<< HEAD
-    controller($injector, $location, $scope, Private, config, breadcrumbState) {
-=======
     controller($injector, $location, $scope, Private, config, i18n) {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const dashboardConfig = $injector.get('dashboardConfig');
 
@@ -76,13 +71,8 @@ uiRoutes
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
-<<<<<<< HEAD
-      breadcrumbState.set([{
-        text: i18n.translate('kbn.dashboard.dashboardBreadcrumbsTitle', {
-=======
       chrome.breadcrumbs.set([{
         text: i18n('kbn.dashboard.dashboardBreadcrumbsTitle', {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           defaultMessage: 'Dashboards',
         }),
       }]);

@@ -5,10 +5,7 @@
  */
 
 import { EuiButton, EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
-<<<<<<< HEAD
-=======
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
 // @ts-ignore
@@ -23,10 +20,7 @@ interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
   onDelete: () => void;
-<<<<<<< HEAD
-=======
   intl: InjectedIntl;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 }
 
 interface State {
@@ -34,20 +28,13 @@ interface State {
   showConfirmRedirectModal: boolean;
 }
 
-<<<<<<< HEAD
-export class DeleteSpacesButton extends Component<Props, State> {
-=======
 class DeleteSpacesButtonUI extends Component<Props, State> {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   public state = {
     showConfirmDeleteModal: false,
     showConfirmRedirectModal: false,
   };
 
   public render() {
-<<<<<<< HEAD
-    const buttonText = `Delete space`;
-=======
     const buttonText = (
       <FormattedMessage
         id="xpack.spaces.management.deleteSpacesButton.deleteSpaceButtonLabel"
@@ -55,7 +42,6 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
       />
     );
     const { intl } = this.props;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     let ButtonComponent: any = EuiButton;
 
@@ -71,14 +57,10 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
         <ButtonComponent
           color={'danger'}
           onClick={this.onDeleteClick}
-<<<<<<< HEAD
-          aria-label={'Delete this space'}
-=======
           aria-label={intl.formatMessage({
             id: 'xpack.spaces.management.deleteSpacesButton.deleteSpaceAriaLabel',
             defaultMessage: 'Delete this space',
           })}
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           {...extraProps}
         >
           {buttonText}
@@ -117,20 +99,13 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
   };
 
   public deleteSpaces = async () => {
-<<<<<<< HEAD
-    const { spacesManager, space, spacesNavState } = this.props;
-=======
     const { spacesManager, space, spacesNavState, intl } = this.props;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     try {
       await spacesManager.deleteSpace(space);
     } catch (error) {
       const { message: errorMessage = '' } = error.data || {};
 
-<<<<<<< HEAD
-      toastNotifications.addDanger(`Error deleting space: ${errorMessage}`);
-=======
       toastNotifications.addDanger(
         intl.formatMessage(
           {
@@ -142,16 +117,12 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
           }
         )
       );
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     this.setState({
       showConfirmDeleteModal: false,
     });
 
-<<<<<<< HEAD
-    const message = `Deleted "${space.name}" space.`;
-=======
     const message = intl.formatMessage(
       {
         id:
@@ -162,7 +133,6 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
         spaceName: space.name,
       }
     );
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
     toastNotifications.addSuccess(message);
 
@@ -173,8 +143,5 @@ class DeleteSpacesButtonUI extends Component<Props, State> {
     spacesNavState.refreshSpacesList();
   };
 }
-<<<<<<< HEAD
-=======
 
 export const DeleteSpacesButton = injectI18n(DeleteSpacesButtonUI);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-<<<<<<< HEAD
-import { Fn } from '../../common/lib/fn';
-=======
 import { Fn } from '@kbn/interpreter/common/lib/fn';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { functions as browserFns } from '../../canvas_plugin_src/functions/browser';
 import { functions as commonFns } from '../../canvas_plugin_src/functions/common';
 import { functions as serverFns } from '../../canvas_plugin_src/functions/server/src';

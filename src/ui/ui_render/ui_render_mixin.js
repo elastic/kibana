@@ -145,11 +145,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         basePath,
         vars: await replaceInjectedVars(
           request,
-<<<<<<< HEAD
-          defaults(
-=======
           mergeVariables(
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
             injectedVarsOverrides,
             await server.getInjectedUiAppVars(app.getId()),
             defaultInjectedVars,

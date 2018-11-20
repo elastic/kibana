@@ -10,15 +10,11 @@ exports[`DeleteSpacesButton renders as expected 1`] = `
     onClick={[Function]}
     type="button"
   >
-<<<<<<< HEAD
-    Delete space
-=======
     <FormattedMessage
       defaultMessage="Delete space"
       id="xpack.spaces.management.deleteSpacesButton.deleteSpaceButtonLabel"
       values={Object {}}
     />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   </EuiButton>
 </React.Fragment>
 `;

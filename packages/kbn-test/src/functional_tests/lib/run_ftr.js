@@ -20,16 +20,8 @@
 import * as FunctionalTestRunner from '../../../../../src/functional_test_runner';
 import { CliError } from './run_cli';
 
-<<<<<<< HEAD
-export async function runFtr({
-  configPath,
-  options: { log, bail, grep, updateBaselines, suiteTags },
-}) {
-  const ftr = createFunctionalTestRunner({
-=======
 function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {
   return FunctionalTestRunner.createFunctionalTestRunner({
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     log,
     configFile: configPath,
     configOverrides: {

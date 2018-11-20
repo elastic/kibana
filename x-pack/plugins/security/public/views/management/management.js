@@ -30,14 +30,10 @@ routes.defaults(/\/management/, {
 
       function ensureSecurityRegistered() {
         const registerSecurity = () => management.register('security', {
-<<<<<<< HEAD
-          display: 'Security',
-=======
           display: i18n.translate(
             'xpack.security.management.securityTitle', {
               defaultMessage: 'Security',
             }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           order: 10,
           icon: 'securityApp',
         });

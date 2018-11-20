@@ -6,26 +6,16 @@
 
 import { InfraConfigurationAdapter } from './adapters/configuration';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
-<<<<<<< HEAD
-import { InfraCapabilitiesDomain } from './domains/capabilities_domain';
-import { InfraFieldsDomain } from './domains/fields_domain';
-import { InfraLogEntriesDomain } from './domains/log_entries_domain';
-=======
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetadataDomain } from './domains/metadata_domain';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { InfraMetricsDomain } from './domains/metrics_domain';
 import { InfraNodesDomain } from './domains/nodes_domain';
 import { InfraSourceStatus } from './source_status';
 import { InfraSourceConfigurations, InfraSources } from './sources';
 
 export interface InfraDomainLibs {
-<<<<<<< HEAD
-  capabilities: InfraCapabilitiesDomain;
-=======
   metadata: InfraMetadataDomain;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   fields: InfraFieldsDomain;
   logEntries: InfraLogEntriesDomain;
   nodes: InfraNodesDomain;

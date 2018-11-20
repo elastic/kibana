@@ -8,13 +8,7 @@ import { createSocket } from '@kbn/interpreter/public/socket';
 import { initialize as initializeInterpreter } from '@kbn/interpreter/public/interpreter';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-<<<<<<< HEAD
-import { createSocket } from '../../socket';
-import { initialize as initializeInterpreter } from '../../lib/interpreter';
-import { populateBrowserRegistries } from '../../lib/browser_registries';
-=======
 import { populateBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
 import { loadPrivateBrowserFunctions } from '../../lib/load_private_browser_functions';
@@ -40,8 +34,6 @@ const mapStateToProps = state => {
   };
 };
 
-<<<<<<< HEAD
-=======
 const types = {
   elements: elementsRegistry,
   renderers: renderFunctionsRegistry,
@@ -52,19 +44,14 @@ const types = {
   argumentUIs: argTypeRegistry,
 };
 
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
   setAppReady: basePath => async () => {
     try {
       // initialize the socket and interpreter
       await createSocket(basePath);
-<<<<<<< HEAD
-      await populateBrowserRegistries();
-=======
       loadPrivateBrowserFunctions();
       await populateBrowserRegistries(types);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       await initializeInterpreter();
 
       // set app state to ready

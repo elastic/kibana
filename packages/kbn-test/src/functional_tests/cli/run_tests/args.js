@@ -54,12 +54,9 @@ const options = {
     arg: '<tag>',
     desc: 'Tags that suites must NOT include to be run, can be included multiple times.',
   },
-<<<<<<< HEAD
-=======
   'assert-none-excluded': {
     desc: 'Exit with 1/0 based on if any test is excluded with the current set of tags.',
   },
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
   quiet: { desc: 'Only log errors.' },
@@ -121,12 +118,9 @@ export function processOptions(userOptions, defaultConfigPaths) {
   delete userOptions['include-tag'];
   delete userOptions['exclude-tag'];
 
-<<<<<<< HEAD
-=======
   userOptions.assertNoneExcluded = !!userOptions['assert-none-excluded'];
   delete userOptions['assert-none-excluded'];
 
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   function createLogger() {
     return new ToolingLog({
       level: pickLevelFromFlags(userOptions),

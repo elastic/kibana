@@ -8,13 +8,9 @@ import { TestInvoker } from '../../common/lib/types';
 
 // tslint:disable:no-default-export
 export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
-<<<<<<< HEAD
-  describe('spaces api without security', () => {
-=======
   describe('spaces api without security', function() {
     (this as any).tags('ciGroup5');
 
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));

@@ -106,44 +106,4 @@ describe('Vis Class', function () {
     });
   });
 
-<<<<<<< HEAD
-  describe('vis addFilter method', () => {
-    let aggConfig;
-    let data;
-
-    beforeEach(() => {
-      aggConfig = {
-        type: { name: 'terms' },
-        params: {},
-        createFilter: sinon.stub()
-      };
-
-      data = {
-        columns: [{
-          id: 'col-0',
-          title: 'test',
-          aggConfig
-        }],
-        rows: [{ 'col-0': 'US' }]
-      };
-    });
-
-
-    it('adds a simple filter', () => {
-      const vis = new Vis(indexPattern, state({ requestHandler: 'none' }));
-      vis.API.events.addFilter(data, 0, 0);
-      expect(aggConfig.createFilter.callCount).to.be(1);
-      expect(aggConfig.createFilter.getCall(0).args[0]).to.be('US');
-    });
-
-    it('adds a filter if value is provided instead of row index', () => {
-      const vis = new Vis(indexPattern, state({ requestHandler: 'none' }));
-      vis.API.events.addFilter(data, 0, -1, 'UK');
-      expect(aggConfig.createFilter.callCount).to.be(1);
-      expect(aggConfig.createFilter.getCall(0).args[0]).to.be('UK');
-    });
-  });
-
-=======
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 });

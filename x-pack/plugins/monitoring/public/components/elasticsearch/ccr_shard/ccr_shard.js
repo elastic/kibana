@@ -22,14 +22,9 @@ import {
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { Status } from './status';
 import { formatDateTimeLocal } from '../../../../common/formatting';
-<<<<<<< HEAD
-
-export class CcrShard extends PureComponent {
-=======
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class CcrShardUI extends PureComponent {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   renderCharts() {
     const { metrics } = this.props;
     const seriesToShow = [
@@ -55,27 +50,19 @@ class CcrShardUI extends PureComponent {
   }
 
   renderErrors() {
-<<<<<<< HEAD
-    const { stat } = this.props;
-=======
     const { stat, intl } = this.props;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     if (stat.read_exceptions && stat.read_exceptions.length > 0) {
       return (
         <Fragment>
           <EuiPanel>
             <EuiTitle size="s" color="danger">
               <h3>
-<<<<<<< HEAD
-                <EuiTextColor color="danger">Errors</EuiTextColor>
-=======
                 <EuiTextColor color="danger">
                   <FormattedMessage
                     id="xpack.monitoring.elasticsearch.ccrShard.errorsTableTitle"
                     defaultMessage="Errors"
                   />
                 </EuiTextColor>
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
               </h3>
             </EuiTitle>
             <EuiSpacer size="s"/>
@@ -83,13 +70,6 @@ class CcrShardUI extends PureComponent {
               items={stat.read_exceptions}
               columns={[
                 {
-<<<<<<< HEAD
-                  name: 'Type',
-                  field: 'exception.type'
-                },
-                {
-                  name: 'Reason',
-=======
                   name: intl.formatMessage({
                     id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.typeColumnTitle',
                     defaultMessage: 'Type'
@@ -101,7 +81,6 @@ class CcrShardUI extends PureComponent {
                     id: 'xpack.monitoring.elasticsearch.ccrShard.errorsTable.reasonColumnTitle',
                     defaultMessage: 'Reason'
                   }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
                   field: 'exception.reason',
                   width: '75%'
                 }
@@ -121,9 +100,6 @@ class CcrShardUI extends PureComponent {
     return (
       <EuiAccordion
         id="ccrLatestStat"
-<<<<<<< HEAD
-        buttonContent={<EuiTitle><h2>Advanced</h2></EuiTitle>}
-=======
         buttonContent={(
           <EuiTitle>
             <h2>
@@ -134,7 +110,6 @@ class CcrShardUI extends PureComponent {
             </h2>
           </EuiTitle>
         )}
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         paddingSize="l"
       >
         <Fragment>
@@ -169,8 +144,5 @@ class CcrShardUI extends PureComponent {
     );
   }
 }
-<<<<<<< HEAD
-=======
 
 export const CcrShard = injectI18n(CcrShardUI);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

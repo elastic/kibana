@@ -5,10 +5,7 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-<<<<<<< HEAD
-=======
 import { FormattedMessage } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React, { Fragment } from 'react';
 import { Space } from '../../../../../common/model/space';
 
@@ -24,10 +21,6 @@ export const AdvancedSettingsSubtitle = (props: Props) => (
       iconType="spacesApp"
       title={
         <p>
-<<<<<<< HEAD
-          The settings on this page apply to the <strong>{props.space.name}</strong> space, unless
-          otherwise specified.
-=======
           <FormattedMessage
             id="xpack.spaces.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
             defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
@@ -35,7 +28,6 @@ export const AdvancedSettingsSubtitle = (props: Props) => (
               spaceName: <strong>{props.space.name}</strong>,
             }}
           />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </p>
       }
     />

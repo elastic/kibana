@@ -26,11 +26,8 @@ import xmlBuilder from 'xmlbuilder';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../xml';
-<<<<<<< HEAD
-=======
 
 const dateNow = Date.now.bind(Date);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {

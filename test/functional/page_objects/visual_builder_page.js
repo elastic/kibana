@@ -56,11 +56,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getMetricValue() {
       const metricValue = await find.byCssSelector('.tvbVisMetric__value--primary');
-<<<<<<< HEAD
       return metricValue.getText();
-=======
-      return metricValue.getVisibleText();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async enterMarkdown(markdown) {
@@ -85,11 +81,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getMarkdownText() {
       const el = await find.byCssSelector('.tvbEditorVisualization');
-<<<<<<< HEAD
       return await el.getText();
-=======
-      return await el.getVisibleText();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async clickMarkdownData() {
@@ -128,20 +120,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getGaugeLabel() {
       const gaugeLabel = await find.byCssSelector('.tvbVisGauge__label');
-<<<<<<< HEAD
       return await gaugeLabel.getText();
-=======
-      return await gaugeLabel.getVisibleText();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async getGaugeCount() {
       const gaugeCount = await find.byCssSelector('.tvbVisGauge__value');
-<<<<<<< HEAD
       return await gaugeCount.getText();
-=======
-      return await gaugeCount.getVisibleText();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async clickTopN() {
@@ -151,20 +135,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getTopNLabel() {
       const topNLabel = await find.byCssSelector('.tvbVisTopN__label');
-<<<<<<< HEAD
       return await topNLabel.getText();
-=======
-      return await topNLabel.getVisibleText();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async getTopNCount() {
       const gaugeCount = await find.byCssSelector('.tvbVisTopN__value');
-<<<<<<< HEAD
       return await gaugeCount.getText();
-=======
-      return await gaugeCount.getVisibleText();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async clickTable() {
@@ -239,27 +215,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       await el.session.pressKeys(Keys.RETURN);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
-<<<<<<< HEAD
-=======
-    async clickMetricPanelOptions() {
-      const button = await testSubjects.find('metricEditorPanelOptionsBtn');
-      await button.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-    async setIndexPatternValue(value) {
-      const el = await testSubjects.find('metricsIndexPatternInput');
-      await el.clearValue();
-      await el.type(value);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-    async selectIndexPatternTimeField(timeField) {
-      const el = await testSubjects.find('comboBoxSearchInput');
-      await el.clearValue();
-      await el.type(timeField);
-      await el.session.pressKeys(Keys.RETURN);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   }
 
   return new VisualBuilderPage();

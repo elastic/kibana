@@ -3,8 +3,6 @@
 exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
 <PrivilegeCalloutWarning
   basePrivilege="all"
-<<<<<<< HEAD
-=======
   intl={
     Object {
       "defaultFormats": Object {
@@ -87,16 +85,12 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
       "timeZone": null,
     }
   }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   isReservedRole={false}
 >
   <EuiCallOut
     color="warning"
     iconType="iInCircle"
     size="m"
-<<<<<<< HEAD
-    title="Minimum privilege is too high to customize individual spaces"
-=======
     title={
       <FormattedMessage
         defaultMessage="Minimum privilege is too high to customize individual spaces"
@@ -104,7 +98,6 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
         values={Object {}}
       />
     }
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   >
     <div
       className="euiCallOut euiCallOut--warning"
@@ -156,9 +149,6 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
         <span
           className="euiCallOutHeader__title"
         >
-<<<<<<< HEAD
-          Minimum privilege is too high to customize individual spaces
-=======
           <FormattedMessage
             defaultMessage="Minimum privilege is too high to customize individual spaces"
             id="xpack.security.management.editRoles.privilegeCalloutWarning.minimumPrivilegeTitle"
@@ -166,7 +156,6 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
           >
             Minimum privilege is too high to customize individual spaces
           </FormattedMessage>
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </span>
       </div>
       <EuiText
@@ -177,21 +166,6 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
           className="euiText euiText--small"
         >
           <p>
-<<<<<<< HEAD
-            Setting the minimum privilege to 
-            <strong>
-              all
-            </strong>
-             grants full access to all spaces. To customize privileges for individual spaces, the minimum privilege must be either 
-            <strong>
-              read
-            </strong>
-             or 
-            <strong>
-              none
-            </strong>
-            .
-=======
             <FormattedMessage
               defaultMessage="Setting the minimum privilege to {allText} grants full access to all
                 spaces. To customize privileges for individual spaces, the minimum privilege must be
@@ -257,7 +231,6 @@ exports[`PrivilegeCalloutWarning renders without crashing 1`] = `
               </strong>
               .
             </FormattedMessage>
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           </p>
         </div>
       </EuiText>

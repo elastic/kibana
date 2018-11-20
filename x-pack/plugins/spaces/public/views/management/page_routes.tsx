@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-<<<<<<< HEAD
-=======
 import { I18nProvider } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
@@ -43,13 +40,6 @@ routes.when('/management/spaces/list', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-<<<<<<< HEAD
-        <SpacesGridPage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
-=======
         <I18nProvider>
           <SpacesGridPage
             spacesManager={spacesManager}
@@ -57,7 +47,6 @@ routes.when('/management/spaces/list', {
             userProfile={userProfile}
           />
         </I18nProvider>,
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         domNode
       );
 
@@ -89,13 +78,6 @@ routes.when('/management/spaces/create', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-<<<<<<< HEAD
-        <ManageSpacePage
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
-=======
         <I18nProvider>
           <ManageSpacePage
             spacesManager={spacesManager}
@@ -103,7 +85,6 @@ routes.when('/management/spaces/create', {
             userProfile={userProfile}
           />
         </I18nProvider>,
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         domNode
       );
 
@@ -142,14 +123,6 @@ routes.when('/management/spaces/edit/:spaceId', {
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       render(
-<<<<<<< HEAD
-        <ManageSpacePage
-          spaceId={spaceId}
-          spacesManager={spacesManager}
-          spacesNavState={spacesNavState}
-          userProfile={userProfile}
-        />,
-=======
         <I18nProvider>
           <ManageSpacePage
             spaceId={spaceId}
@@ -158,7 +131,6 @@ routes.when('/management/spaces/edit/:spaceId', {
             userProfile={userProfile}
           />
         </I18nProvider>,
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         domNode
       );
 

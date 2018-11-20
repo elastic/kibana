@@ -5,10 +5,7 @@
  */
 
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from '@elastic/eui';
-<<<<<<< HEAD
-=======
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 import React, { Component } from 'react';
 import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
@@ -20,10 +17,7 @@ interface Props {
   onSelectSpace: (space: Space) => void;
   onManageSpacesClick: () => void;
   userProfile: UserProfile;
-<<<<<<< HEAD
-=======
   intl: InjectedIntl;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
 }
 
 interface State {
@@ -31,35 +25,24 @@ interface State {
   allowSpacesListFocus: boolean;
 }
 
-<<<<<<< HEAD
-export class SpacesMenu extends Component<Props, State> {
-=======
 class SpacesMenuUI extends Component<Props, State> {
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
   public state = {
     searchTerm: '',
     allowSpacesListFocus: false,
   };
 
   public render() {
-<<<<<<< HEAD
-=======
     const { intl } = this.props;
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     const { searchTerm } = this.state;
 
     const items = this.getVisibleSpaces(searchTerm).map(this.renderSpaceMenuItem);
 
     const panelProps = {
       className: 'spcMenu',
-<<<<<<< HEAD
-      title: 'Change current space',
-=======
       title: intl.formatMessage({
         id: 'xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle',
         defaultMessage: 'Change current space',
       }),
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
       watchedItemProps: ['data-search-term'],
     };
 
@@ -99,15 +82,10 @@ class SpacesMenuUI extends Component<Props, State> {
     if (items.length === 0) {
       return (
         <EuiText color="subdued" className="eui-textCenter">
-<<<<<<< HEAD
-          {' '}
-          no spaces found{' '}
-=======
           <FormattedMessage
             id="xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle"
             defaultMessage=" no spaces found "
           />
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
         </EuiText>
       );
     }
@@ -125,12 +103,6 @@ class SpacesMenuUI extends Component<Props, State> {
   };
 
   private renderSearchField = () => {
-<<<<<<< HEAD
-    return (
-      <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
-        <EuiFieldSearch
-          placeholder="Find a space"
-=======
     const { intl } = this.props;
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
@@ -139,7 +111,6 @@ class SpacesMenuUI extends Component<Props, State> {
             id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
             defaultMessage: 'Find a space',
           })}
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
           incremental={true}
           // FIXME needs updated typedef
           // @ts-ignore
@@ -206,8 +177,5 @@ class SpacesMenuUI extends Component<Props, State> {
     );
   };
 }
-<<<<<<< HEAD
-=======
 
 export const SpacesMenu = injectI18n(SpacesMenuUI);
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1

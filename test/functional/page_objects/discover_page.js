@@ -118,7 +118,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverCurrentQuery');
     }
 
-<<<<<<< HEAD
     async getBarChartData() {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -144,66 +143,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
       const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
-=======
-    async getBarChartXTicks() {
-      return getRemote()
-        .findAllByCssSelector('.x.axis.CategoryAxis-1 > .tick > text')
-        .getVisibleText();
-    }
-
-    getBarChartData() {
-      let yAxisLabel = 0;
-      let yAxisHeight;
-
-      return PageObjects.header.waitUntilLoadingHasFinished()
-        .then(() => {
-          return getRemote()
-            .findByCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
-        })
-        .then(function setYAxisLabel(y) {
-          return y
-            .getVisibleText()
-            .then(function (yLabel) {
-              yAxisLabel = yLabel.replace(',', '');
-              log.debug('yAxisLabel = ' + yAxisLabel);
-              return yLabel;
-            });
-        })
-      // 2). find and save the y-axis pixel size (the chart height)
-        .then(function getRect() {
-          return getRemote()
-            .findByCssSelector('rect.background')
-            .then(function getRectHeight(chartAreaObj) {
-              return chartAreaObj
-                .getAttribute('height')
-                .then(function (theHeight) {
-                  yAxisHeight = theHeight; // - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
-                  log.debug('theHeight = ' + theHeight);
-                  return theHeight;
-                });
-            });
-        })
-      // 3). get the visWrapper__chart elements
-        .then(function () {
-          return getRemote()
-          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
-            .findAllByCssSelector('svg > g > g.series > rect') // rect
-            .then(function (chartTypes) {
-              function getChartType(chart) {
-                return chart
-                  .getAttribute('height')
-                  .then(function (barHeight) {
-                    return Math.round(barHeight / yAxisHeight * yAxisLabel);
-                  });
-              }
-              const getChartTypesPromises = chartTypes.map(getChartType);
-              return Promise.all(getChartTypesPromises);
-            })
-            .then(function (bars) {
-              return bars;
-            });
-        });
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async getChartInterval() {
@@ -303,21 +242,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-<<<<<<< HEAD
       const fieldListPlusFilter = await remote.findElement(By.css(`[data-test-subj="plus-${field}-${value}"]`));
       await fieldListPlusFilter.click();
-=======
-      await getRemote()
-        .findByCssSelector(`[data-test-subj="plus-${field}-${value}"]`)
-        .click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async clickFieldListMinusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-<<<<<<< HEAD
       const fieldListMinusFilter = await remote.findElement(By.css('[data-test-subj="minus-' + field + '-' + value + '"]'));
       await fieldListMinusFilter.click();
     }
@@ -327,18 +258,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await indexPatternSelection.click();
 
       await remote.type(By.css('ui-select-search'), indexPattern + '\n');
-=======
-      await getRemote()
-        .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
-        .click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async selectIndexPattern(indexPattern) {
-      await getRemote().findByClassName('index-pattern-selection').click();
-      await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
-      await PageObjects.header.waitUntilLoadingHasFinished();
->>>>>>> ff49a1c6742d67fa5daed569ff3bb269783f6bd1
     }
 
     async removeAllFilters() {
