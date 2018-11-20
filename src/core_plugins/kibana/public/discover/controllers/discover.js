@@ -157,7 +157,6 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
-  i18n,
 ) {
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
