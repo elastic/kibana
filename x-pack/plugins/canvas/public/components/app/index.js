@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSocket } from 'plugins/interpreter/socket';
-import { initialize as initializeInterpreter } from 'plugins/interpreter/interpreter';
+import { createSocket } from '@kbn/interpreter/public/socket';
+import { initialize as initializeInterpreter } from '@kbn/interpreter/public/interpreter';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { populateBrowserRegistries } from '@kbn/interpreter/public/browser_registries';

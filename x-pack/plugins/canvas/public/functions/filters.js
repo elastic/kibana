@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from 'plugins/interpreter/interpreter';
+import { interpretAst } from '@kbn/interpreter/public/interpreter';
 import { fromExpression } from '@kbn/interpreter/common/lib/ast';
 import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
 import { getState } from '../state/store';

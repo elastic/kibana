@@ -18,8 +18,8 @@
  */
 
 import io from 'socket.io-client';
-import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { getBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
+import { functionsRegistry } from '../common/lib/functions_registry';
+import { getBrowserRegistries } from './browser_registries';
 
 const SOCKET_CONNECTION_TIMEOUT = 5000; // timeout in ms
 let socket;
