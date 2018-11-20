@@ -74,7 +74,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="kbn.visualize.newVisWizard.title"
-              defaultMessage="New Visualizations"
+              defaultMessage="New Visualization"
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
