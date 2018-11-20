@@ -30,7 +30,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
-import { supportedConfigs } from '../../../config_schemas';
+import { getSupportedConfig } from '../../../config_schemas_translations_map';
 import { ConfigForm } from './config_form';
 
 interface ComponentProps {
@@ -43,6 +43,7 @@ interface ComponentProps {
 class ConfigViewUi extends React.Component<ComponentProps, any> {
   private form = React.createRef<any>();
   private editMode: boolean;
+  private supportedConfigs = getSupportedConfig();
   constructor(props: any) {
     super(props);
     this.editMode = props.configBlock !== undefined;
@@ -50,7 +51,7 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
     this.state = {
       valid: false,
       configBlock: props.configBlock || {
-        type: supportedConfigs[0].value,
+        type: this.supportedConfigs[0].value,
       },
     };
   }
@@ -101,7 +102,7 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
             }
           >
             <EuiSelect
-              options={supportedConfigs}
+              options={this.supportedConfigs}
               value={this.state.configBlock.type}
               disabled={this.editMode}
               onChange={this.onValueChange('type')}
@@ -130,7 +131,7 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
               id="xpack.beatsManagement.tagConfig.configurationTypeText"
               defaultMessage="{configType} configuration"
               values={{
-                configType: (supportedConfigs.find(
+                configType: (this.supportedConfigs.find(
                   config => this.state.configBlock.type === config.value
                 ) as any).text,
               }}
@@ -156,12 +157,14 @@ class ConfigViewUi extends React.Component<ComponentProps, any> {
             ref={this.form}
             values={this.state.configBlock}
             id={
-              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
-                .value
+              (this.supportedConfigs.find(
+                config => this.state.configBlock.type === config.value
+              ) as any).value
             }
             schema={
-              (supportedConfigs.find(config => this.state.configBlock.type === config.value) as any)
-                .config
+              (this.supportedConfigs.find(
+                config => this.state.configBlock.type === config.value
+              ) as any).config
             }
           />
         </EuiFlyoutBody>

@@ -229,18 +229,18 @@ export const getSupportedConfig = () => {
 
   translatedConfigs.forEach(({ text, config }) => {
     if (text) {
-      text = supportedConfigLabelsMap.get(text);
+      text = supportedConfigLabelsMap.get(text) || '';
     }
 
     config.forEach(yanlConfig => {
       if (yanlConfig.ui.label) {
-        yanlConfig.ui.label = supportedConfigLabelsMap.get(yanlConfig.ui.label);
+        yanlConfig.ui.label = supportedConfigLabelsMap.get(yanlConfig.ui.label) || '';
       }
       if (yanlConfig.ui.helpText) {
         yanlConfig.ui.helpText = supportedConfigLabelsMap.get(yanlConfig.ui.helpText);
       }
       if (yanlConfig.error) {
-        yanlConfig.error = supportedConfigLabelsMap.get(yanlConfig.error);
+        yanlConfig.error = supportedConfigLabelsMap.get(yanlConfig.error) || '';
       }
     });
   });
