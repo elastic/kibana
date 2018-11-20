@@ -258,7 +258,8 @@ export const ml = {
       'prefix',
       'groups',
       'indexPatternName',
-      'query'
+      'query',
+      'useDedicatedIndex'
     ]);
 
     return http({

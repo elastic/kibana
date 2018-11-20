@@ -164,8 +164,8 @@ export function VislibLibAxisProvider(Private) {
               .attr('transform', 'translate(1,0)');
           }
           if (config.get('type') === 'value') {
-            const spacerNodes = $(chartEl).find(`.y-axis-spacer-block-${position}`);
-            const elHeight = $(chartEl).find(`.axis-wrapper-${position}`).height();
+            const spacerNodes = $(chartEl).find(`.visAxis__spacer--y-${position}`);
+            const elHeight = $(chartEl).find(`.visAxis__column--${position}`).height();
             spacerNodes.height(elHeight);
           }
         } else {

@@ -6,6 +6,11 @@
 
 import Boom from 'boom';
 import { Server } from 'hapi';
+import {
+  AgentName,
+  createApmTelementry,
+  storeApmTelemetry
+} from '../lib/apm_telemetry';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getService } from '../lib/services/get_service';
@@ -17,7 +22,7 @@ const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
   // @ts-ignore
-  return Boom.boomify(err, { statusCode: 400 });
+  throw Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initServicesApi(server: Server) {
@@ -30,9 +35,23 @@ export function initServicesApi(server: Server) {
         query: withDefaultValidators()
       }
     },
-    handler: req => {
+    handler: async req => {
       const { setup } = req.pre;
-      return getServices(setup).catch(defaultErrorHandler);
+
+      let serviceBucketList;
+      try {
+        serviceBucketList = await getServices(setup);
+      } catch (error) {
+        return defaultErrorHandler(error);
+      }
+
+      // Store telemetry data derived from serviceBucketList
+      const apmTelemetry = createApmTelementry(
+        serviceBucketList.map(({ agentName }) => agentName as AgentName)
+      );
+      storeApmTelemetry(server, apmTelemetry);
+
+      return serviceBucketList;
     }
   });
 
