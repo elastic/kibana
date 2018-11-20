@@ -7,6 +7,7 @@
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { AuthScopeService } from '../auth_scope_service';
 import { BasicAuthenticationProvider } from './providers/basic';
+import { TokenAuthenticationProvider } from './providers/token';
 import { SAMLAuthenticationProvider } from './providers/saml';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -16,6 +17,7 @@ import { Session } from './session';
 // provider class that can handle specific authentication mechanism.
 const providerMap = new Map([
   ['basic', BasicAuthenticationProvider],
+  ['token', TokenAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider]
 ]);
 
