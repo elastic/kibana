@@ -1,18 +1,30 @@
 <div class="kuiLocalDropdownTitle">Settings</div>
 
-<!-- Tabs. -->
+
+<!-- ====== start tabs ====== -->
 <ul class="nav nav-tabs" ng-show="selectedIndex !== null">
-  <li ng-show="workspace" ng-class="{active: configPanel === 'lastRequest'}">
-    <a class="navbar-link" ng-click="configPanel='lastRequest'">Last request</a>
+  <li ng-show="workspace" ng-class="{active: configPanel === 'lastRequest'}" >
+    <a ng-click="configPanel='lastRequest'" class="navbar-link">
+      Last request
+    </a>
   </li>
+
   <li ng-show="workspace" ng-class="{active: configPanel ==='blacklist'}">
-    <a class="navbar-link" ng-click="configPanel='blacklist'">Blacklist</a>
+    <a ng-click="configPanel='blacklist'" class="navbar-link">
+      Blacklist
+    </a>
   </li>
+
   <li ng-class="{active: configPanel === 'settings'}">
-    <a class="navbar-link" ng-click="configPanel='settings'">Advanced settings</a>
+    <a ng-click="configPanel='settings'" class="navbar-link" >
+      Advanced settings
+    </a>
   </li>
-  <li ng-show="canEditDrillDownUrls" ng-class="{active: configPanel === 'drillDowns'}">
-    <a class="navbar-link" ng-click="configPanel='drillDowns'">Drill-downs</a>
+
+  <li ng-show="canEditDrillDownUrls" ng-class="{active: configPanel === 'drillDowns'}" >
+    <a ng-click="configPanel='drillDowns'" class="navbar-link">
+      Drill-downs
+    </a>
   </li>
 </ul>
 <!-- ====== stop tabs ====== -->
@@ -73,25 +85,102 @@
         </button>
       </div>
 
-<!--========= Begin config =========== -->
-
-    <!-- ====== start Spy ====== -->
-    <div class="list-group-item list-group-item--noBorder" ng-if="(workspace !== null)&&(configPanel === 'lastRequest')">
-      <div>
-        <small class="help-block">http://host:port/{{selectedIndex.name}}/_xpack/graph/_explore</small>
-        <ul class="nav nav-tabs">
-          <li ng-class="{active: spymode === 'request'}"><a ng-click="spymode='request'">Request</a></li>
-          <li ng-class="{active: spymode === 'response'}"><a ng-click="spymode='response'">Response</a></li>
-        </ul>
-
-        <div ng-show="spymode == 'request'" ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }" ng-model="workspace.lastRequest" class="requestJsonView"></div>
-        <div ng-show="spymode == 'response'" ui-ace="{ onLoad: aceLoaded, mode: 'json', advanced: { readOnly: true } }" ng-model="workspace.lastResponse" class="requestJsonView"></div>
+      <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+        <p class="kuiText">
+          {{n.label}}
+        </p>
       </div>
     </div>
-    <div>
-      <!-- ====== end spy ======== -->
+    <!-- ====== stop terms ====== -->
+  </div>
+
+  <button
+    type="button"
+    class="kuiButton kuiButton--danger kuiButton--iconText kuiVerticalRhythm"
+    ng-click="workspace.blacklistedNodes=[]"
+    ng-disabled="workspace.blacklistedNodes.length === 0"
+  >
+    <span class="kuiButton__icon kuiIcon fa-trash"></span>
+    <span>Clear</span>
+  </button>
+</div>
+<!-- ====== end term blacklist tab content ====== -->
 
 
+<!-- ====== start drilldowns tab content ====== -->
+<div
+  ng-if="configPanel==='drillDowns'"
+  class="list-group-item list-group-item--noBorder"
+>
+
+  <!-- ====== start add form ====== -->
+  <form ng-submit="saveUrlTemplate()" role="form" class="form-horizontal">
+
+    <!-- ====== start url ====== -->
+    <div class="form-group">
+      <div class="col-sm-1 control-label">
+        <label for="urlTemplateUrl">URL</label>
+      </div>
+      <div class="col-sm-11">
+        <input
+          id="urlTemplateUrl"
+          ng-change="checkForKibanaUrl()"
+          ng-paste="handleUrlTemplatePaste($event)"
+          autocomplete="off"
+          type="text"
+          ng-model="newUrlTemplate.url"
+          placeholder="{{'https://www.google.co.uk/#q={' + '{gquery}' + '}' }}"
+          class="form-control col-sm-12"
+        >
+
+        <span ng-if="suggestTemplateFix">
+          <i tooltip="Kibana URL pasted" class="text-color-warning fa fa-warning"></i>
+          This looks like a Kibana URL. Would you like us to convert it to a template for you?
+          <a ng-click="replaceKibanaUrlParam()">yes</a> / <a ng-click="rejectKibanaUrlSuggestion()">no</a>
+        </span>
+
+        <p class="help-block" ng-non-bindable>
+          Define template URLs using {{gquery}} where the selected vertex terms are inserted
+        </p>
+      </div>
+    </div>
+    <!-- ====== stop url ====== -->
+
+    <!-- ====== start title ====== -->
+    <div class="form-group">
+      <div class="col-sm-1 control-label">
+        <label for="urlDescription">Title</label>
+      </div>
+      <div class="col-sm-5">
+        <input
+          id="urlDescription"
+          type="text"
+          autocomplete="off"
+          ng-model="newUrlTemplate.description"
+          placeholder="Search on Google"
+          class="form-control"
+        >
+      </div>
+      <div class="col-sm-2 control-label">
+        <label for="encoder">URL parameter type</label>
+      </div>
+      <div class="col-sm-4">
+        <select
+          class="form-control"
+          name="encoder"
+          ng-options="option.title for option in outlinkEncoders"
+          ng-model="newUrlTemplate.encoder">
+        </select>
+        <p class="help-block">{{newUrlTemplate.encoder.description}}</p>
+      </div>
+    </div>
+    <!-- ====== stop title ====== -->
+
+    <!-- ====== start icon ====== -->
+    <div class="form-group">
+      <div class="col-sm-1 control-label">
+        <label for="encoder">Toolbar icon</label>
+      </div>
 
       <div class="col-sm-9">
         <span class="gphIconPicker">
@@ -105,26 +194,25 @@
         </span>
       </div>
 
-        <div class="selectionList kuiVerticalRhythm">
-          <div
-            ng-repeat="n in workspace.blacklistedNodes"
-            class="kuiFieldGroup"
+      <div class="col-sm-2">
+        <div class="pull-right kuiButtonGroup">
+          <button
+            type="reset"
+            ng-disabled="!newUrlTemplate.url&&!newUrlTemplate.description&&!newUrlTemplate.icon"
+            class="kuiButton kuiButton--basic"
+            ng-click="resetNewUrlTemplate()"
           >
-            <div class="kuiFieldGroupSection">
-              <button
-                class="kuiButton kuiButton--hollow"
-                ng-click="workspace.unblacklist(n)"
-              >
-                <span class="kuiIcon fa-times"></span>
-              </button>
-            </div>
+            Reset
+          </button>
 
-            <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
-              <p class="kuiText">
-                {{n.label}}
-              </p>
-            </div>
-          </div>
+          <button
+            type="submit"
+            ng-disabled="!newUrlTemplate.url||!newUrlTemplate.description"
+            class="kuiButton kuiButton--primary"
+            aria-label="Save drill-down"
+          >
+            Save
+          </button>
         </div>
       </div>
     </div>
@@ -192,109 +280,29 @@
           id="qIndexSampleSize"
           ng-model="exploreControls.sampleSize"
         >
-          <span class="kuiButton__icon kuiIcon fa-trash"></span>
-          <span>Clear</span>
-        </button>
-      </div>
-      <!-- ====== end blacklist ======== -->
 
-      <!-- ====== start drill-downs ====== -->
-      <div class="list-group-item list-group-item--noBorder" ng-if="configPanel==='drillDowns'">
-
-        <form ng-submit="saveUrlTemplate()" role="form" class="form-horizontal">
-          <div class="form-group">
-            <div class="col-sm-1 control-label">
-              <label for="urlTemplateUrl">URL</label>
-            </div>
-            <div class="col-sm-11">
-              <input id="urlTemplateUrl" ng-change="checkForKibanaUrl()" ng-paste="handleUrlTemplatePaste($event)" autocomplete="off" type="text" ng-model="newUrlTemplate.url" placeholder="{{'https://www.google.co.uk/#q={' + '{gquery}' + '}' }}"   class="form-control col-sm-12">
-              <span ng-if="suggestTemplateFix"><i tooltip="Kibana URL pasted" class="text-color-warning fa fa-warning"></i>This looks like a Kibana URL. Would you like us to convert it to a template for you? <a ng-click="replaceKibanaUrlParam()">yes</a> / <a ng-click="rejectKibanaUrlSuggestion()">no</a></span>
-              <p class="help-block" ng-non-bindable>Define template URLs using {{gquery}} where the selected vertex terms are inserted</p>
-            </div>
-          </div>
-          <div class="form-group" >
-            <div class="col-sm-1 control-label">
-              <label for="urlDescription">Title</label>
-            </div>
-            <div class="col-sm-5">
-              <input id="urlDescription" type="text" autocomplete="off" ng-model="newUrlTemplate.description" placeholder="Search on Google" class="form-control" >
-            </div>
-            <div class="col-sm-2 control-label">
-              <label for="encoder">URL parameter type</label>
-            </div>
-            <div class="col-sm-4">
-              <select class="form-control" name="encoder"
-                ng-options="option.title for option in outlinkEncoders"
-                ng-model="newUrlTemplate.encoder">
-              </select>
-              <p class="help-block">{{newUrlTemplate.encoder.description}}</p>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="col-sm-1 control-label">
-              <label for="encoder">Toolbar icon</label>
-            </div>
-
-            <div class="col-sm-9">
-                <span class="legend-value-icon-picker">
-                  <i ng-repeat="i in drillDownIconChoices"  ng-click="toggleDrillDownIcon(newUrlTemplate,i)" ng-class="{selectedNode:i==newUrlTemplate.icon}" class="fa icon noUserSelect">
-                                      {{i.code}}</i>
-                </span>
-            </div>
-
-            <div class="col-sm-2">
-              <div class="pull-right kuiButtonGroup">
-                <button
-                  type="reset"
-                  ng-disabled="!newUrlTemplate.url&&!newUrlTemplate.description&&!newUrlTemplate.icon"
-                  class="kuiButton kuiButton--basic"
-                  ng-click="resetNewUrlTemplate()"
-                >
-                  Reset
-                </button>
-
-                <button
-                  type="submit"
-                  ng-disabled="!newUrlTemplate.url||!newUrlTemplate.description"
-                  class="kuiButton kuiButton--primary"
-                  aria-label="Save drill-down"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-
-
-        <div class="scrollable-list">
-          <ul  class="li-striped list-group list-group-menu">
-            <li class="list-group-item" ng-repeat="urlTemplate in urlTemplates">
-              <i ng-if="urlTemplate.icon"  class="fa icon noUserSelect">
-                                  {{urlTemplate.icon.code}}</i>
-
-                {{urlTemplate.description}}
-              <span class="pull-right">
-                <button
-                  ng-click="editUrlTemplate(urlTemplate)"
-                  class="kuiButton kuiButton--basic kuiButton--iconText kuiButton--small"
-                  aria-label="Edit"
-                >
-                  <span aria-hidden="true" class="kuiIcon fa-pencil"></span>
-                </button>
-
-                <button
-                  ng-click="removeUrlTemplate(urlTemplate)"
-                  class="kuiButton kuiButton--danger kuiButton--iconText kuiButton--small"
-                  aria-label="Remove"
-                >
-                  <span aria-hidden="true" class="kuiIcon fa-trash"></span>
-                </button>
-              </span>
-            </li>
-          </ul>
+        <div class="help-block">
+          Terms are identified from samples of the most relevant documents. Bigger is not necessarily better - can be slower and less relevant.
         </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-4 col-sm-8">
+        <div class="checkbox">
+          <label>
+            <input
+              type="checkbox"
+              id="isSignifChk2"
+              ng-model="exploreControls.useSignificance"
+            >
+            Significant links
+          </label>
+        </div>
+
+        <span class="help-block">
+          Identify terms that are "significant" rather than simply popular
+        </span>
       </div>
     </div>
 
@@ -311,7 +319,11 @@
           ng-model="exploreControls.minDocCount"
         >
 
+        <div class="help-block">
+          The min number of documents that are required as evidence before introducing a related term
+        </div>
       </div>
+    </div>
 
     <div class="form-group form-group-sm gphFormGroup--small">
       <label for="qDiversityField" class="col-sm-4 control-label">
@@ -328,6 +340,12 @@
           <option value="">[No diversification]</option>
         </select>
 
+        <span class="help-block">
+          To avoid document samples being dominated by a single voice, pick the field that helps identify the source of bias.
+          <em>This must be a single-term field or searches will be rejected with an error</em>
+        </span>
+      </div>
+    </div>
 
     <div
       class="form-group form-group-sm gphFormGroup--small"
@@ -351,6 +369,11 @@
           ng-model="exploreControls.maxValuesPerDoc"
         >
 
+        <span class="help-block">
+          Max number of documents in a sample that can contain the same value for the
+          <em>{{selectedDiversityField.name}}</em> field
+        </span>
+      </div>
     </div>
 
     <div class="form-group form-group-sm gphFormGroup--small">
