@@ -29,7 +29,7 @@ import {
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
 
-import { ConnectionStatus } from '../components';
+import { ConnectionStatus, DisconnectButton } from '../components';
 
 export class DetailPanelUi extends Component {
   static propTypes = {
@@ -194,12 +194,10 @@ export class DetailPanelUi extends Component {
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButton color="danger">
-                <FormattedMessage
-                  id="xpack.remoteClusters.detailPanel.disconnectButtonLabel"
-                  defaultMessage="Disconnect"
-                />
-              </EuiButton>
+              <DisconnectButton
+                clusterNames={[clusterName]}
+                isSmallButton={true}
+              />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>

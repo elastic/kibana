@@ -6,16 +6,16 @@
 
 import { connect } from 'react-redux';
 
-// import {
-//   disconnectRemoteClusters,
-// } from '../../../../store/actions';
+import {
+  disconnectClusters,
+} from '../../../../store/actions';
 
 import { DisconnectButton as DisconnectButtonComponent } from './disconnect_button';
 
-const mapDispatchToProps = (/*dispatch*/) => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    disconnectRemoteClusters: (/*names*/) => {
-      // dispatch(disconnectRemoteClusters({ names }));
+    disconnectClusters: (names) => {
+      dispatch(disconnectClusters(names));
     },
   };
 };

@@ -58,7 +58,7 @@ export const editCluster = (cluster) => async (dispatch) => {
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
     return fatalError(error, i18n.translate('xpack.remoteClusters.editAction.errorTitle', {
-      defaultMessage: 'Error adding cluster',
+      defaultMessage: 'Error editing cluster',
     }));
   }
 

@@ -28,32 +28,37 @@ export class RemoteClusterTableUi extends Component {
   constructor(props) {
     super(props);
 
-    const { clusters } = props;
-
     this.state = {
+      queryText: undefined,
       selectedItems: [],
-      searchedClusters: clusters.slice(0),
     };
   }
 
-  onSearch = ({ query }) => {
-    const { clusters } = this.props;
-    const { text } = query;
+  onSearch = (queryObject) => {
+    const { text } = queryObject.query;
     const normalizedSearchText = text.toLowerCase();
-
-    const searchedClusters = clusters.filter(cluster => {
-      const { name, seeds } = cluster;
-      const normalizedName = name.toLowerCase();
-      if (normalizedName.toLowerCase().includes(normalizedSearchText)) {
-        return true;
-      }
-
-      return seeds.some(seed => seed.includes(normalizedSearchText));
-    });
-
     this.setState({
-      searchedClusters,
+      queryText: normalizedSearchText,
     });
+  };
+
+  getFilteredClusters = () => {
+    const { clusters } = this.props;
+    const { queryText } = this.state;
+
+    if(queryText) {
+      return clusters.filter(cluster => {
+        const { name, seeds } = cluster;
+        const normalizedName = name.toLowerCase();
+        if (normalizedName.toLowerCase().includes(queryText)) {
+          return true;
+        }
+
+        return seeds.some(seed => seed.includes(queryText));
+      });
+    } else {
+      return clusters.slice(0);
+    }
   };
 
   render() {
@@ -63,7 +68,6 @@ export class RemoteClusterTableUi extends Component {
 
     const {
       selectedItems,
-      searchedClusters,
     } = this.state;
 
     const columns = [{
@@ -144,9 +148,11 @@ export class RemoteClusterTableUi extends Component {
       onSelectionChange: (selectedItems) => this.setState({ selectedItems })
     };
 
+    const filteredClusters = this.getFilteredClusters();
+
     return (
       <EuiInMemoryTable
-        items={searchedClusters}
+        items={filteredClusters}
         itemId="name"
         columns={columns}
         search={search}
