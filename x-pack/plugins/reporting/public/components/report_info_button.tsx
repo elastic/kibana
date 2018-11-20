@@ -28,6 +28,7 @@ interface State {
   isFlyoutVisible: boolean;
   calloutTitle: string;
   info: JobInfo | null;
+  error: Error | null;
 }
 
 const NA = 'n/a';
@@ -56,6 +57,7 @@ export class ReportInfoButton extends Component<Props, State> {
       isFlyoutVisible: false,
       calloutTitle: 'Job Info',
       info: null,
+      error: null,
     };
 
     this.closeFlyout = this.closeFlyout.bind(this);
@@ -63,7 +65,10 @@ export class ReportInfoButton extends Component<Props, State> {
   }
 
   public renderInfo() {
-    const { info } = this.state;
+    const { info, error: err } = this.state;
+    if (err) {
+      return err.message;
+    }
     if (!info) {
       return null;
     }
@@ -229,8 +234,10 @@ export class ReportInfoButton extends Component<Props, State> {
         this.setState({
           isLoading: false,
           calloutTitle: 'Unable to fetch report info',
-          info: kfetchError.message,
+          info: null,
+          error: kfetchError,
         });
+        throw kfetchError;
       }
     }
   };
