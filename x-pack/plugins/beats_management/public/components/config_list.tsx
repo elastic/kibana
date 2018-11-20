@@ -24,7 +24,7 @@ const ConfigListUi: React.SFC<ComponentProps> = props => (
       {
         field: 'type',
         name: props.intl.formatMessage({
-          id: 'xpack.beatsManagement.tagConfigTable.typeColumnName',
+          id: 'xpack.beatsManagement.tagTable.typeColumnName',
           defaultMessage: 'Type',
         }),
         truncateText: false,
@@ -41,7 +41,7 @@ const ConfigListUi: React.SFC<ComponentProps> = props => (
       {
         field: 'module',
         name: props.intl.formatMessage({
-          id: 'xpack.beatsManagement.tagConfigTable.moduleColumnName',
+          id: 'xpack.beatsManagement.tagTable.moduleColumnName',
           defaultMessage: 'Module',
         }),
         truncateText: false,
@@ -49,7 +49,7 @@ const ConfigListUi: React.SFC<ComponentProps> = props => (
           return (
             value ||
             props.intl.formatMessage({
-              id: 'xpack.beatsManagement.tagConfigTable.moduleColumn.notAvailibaleLabel',
+              id: 'xpack.beatsManagement.tagTable.moduleColumn.notAvailibaleLabel',
               defaultMessage: 'N/A',
             })
           );
@@ -58,23 +58,23 @@ const ConfigListUi: React.SFC<ComponentProps> = props => (
       {
         field: 'description',
         name: props.intl.formatMessage({
-          id: 'xpack.beatsManagement.tagConfigTable.descriptionColumnName',
+          id: 'xpack.beatsManagement.tagTable.descriptionColumnName',
           defaultMessage: 'Description',
         }),
       },
       {
         name: props.intl.formatMessage({
-          id: 'xpack.beatsManagement.tagConfigTable.actionsColumnName',
+          id: 'xpack.beatsManagement.tagTable.actionsColumnName',
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             name: props.intl.formatMessage({
-              id: 'xpack.beatsManagement.tagConfigTable.actions.removeButtonAriaLabel',
+              id: 'xpack.beatsManagement.tagTable.actions.removeButtonAriaLabel',
               defaultMessage: 'Remove',
             }),
             description: props.intl.formatMessage({
-              id: 'xpack.beatsManagement.tagConfigTable.actions.removeDescription',
+              id: 'xpack.beatsManagement.tagTable.actions.removeTooltip',
               defaultMessage: 'Remove this config from tag',
             }),
             type: 'icon',
