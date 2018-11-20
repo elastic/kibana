@@ -10,14 +10,15 @@ import { RemoteClusterEdit as RemoteClusterEditView } from './remote_cluster_edi
 import {
   isLoading,
   getEditedCluster,
-  // isUpdatingRemoteCluster,
-  // getUpdateRemoteClusterError,
+  isEditingCluster,
+  getEditClusterError,
 } from '../../store/selectors';
 
 import {
+  editCluster,
   startEditingCluster,
-  // updateRemoteCluster,
-  // clearUpdateRemoteClusterErrors,
+  stopEditingCluster,
+  clearEditClusterErrors,
   openDetailPanel,
 } from '../../store/actions';
 
@@ -25,8 +26,8 @@ const mapStateToProps = (state) => {
   return {
     isLoading: isLoading(state),
     cluster: getEditedCluster(state),
-    // isUpdatingRemoteCluster: isUpdatingRemoteCluster(state),
-    // updateRemoteClusterError: getUpdateRemoteClusterError(state),
+    isEditingCluster: isEditingCluster(state),
+    getEditClusterError: getEditClusterError(state),
   };
 };
 
@@ -36,13 +37,13 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(startEditingCluster({ clusterName }));
     },
     stopEditingCluster: () => {
-
+      dispatch(stopEditingCluster());
     },
-    updateRemoteCluster: (/*remoteClusterConfig*/) => {
-      // dispatch(updateRemoteCluster(remoteClusterConfig));
+    editCluster: (cluster) => {
+      dispatch(editCluster(cluster));
     },
-    clearUpdateRemoteClusterErrors: () => {
-      // dispatch(clearUpdateRemoteClusterErrors());
+    clearEditClusterErrors: () => {
+      dispatch(clearEditClusterErrors());
     },
     openDetailPanel: (clusterName) => {
       dispatch(openDetailPanel({ name: clusterName }));

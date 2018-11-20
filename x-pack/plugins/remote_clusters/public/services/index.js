@@ -8,6 +8,7 @@ export {
   setHttpClient,
   loadClusters,
   addCluster,
+  editCluster,
 } from './api';
 
 export {

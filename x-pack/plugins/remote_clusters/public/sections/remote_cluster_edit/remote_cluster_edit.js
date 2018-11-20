@@ -39,10 +39,10 @@ export class RemoteClusterEditUi extends Component {
     cluster: PropTypes.object,
     startEditingCluster: PropTypes.func,
     stopEditingCluster: PropTypes.func,
-    updateRemoteCluster: PropTypes.func,
-    isUpdatingRemoteCluster: PropTypes.bool,
-    updateRemoteClusterError: PropTypes.node,
-    clearUpdateRemoteClusterErrors: PropTypes.func,
+    editCluster: PropTypes.func,
+    isEditingCluster: PropTypes.bool,
+    getEditClusterError: PropTypes.node,
+    clearEditClusterErrors: PropTypes.func,
     openDetailPanel: PropTypes.func,
   }
 
@@ -70,12 +70,12 @@ export class RemoteClusterEditUi extends Component {
 
   componentWillUnmount() {
     // Clean up after ourselves.
-    this.props.clearUpdateRemoteClusterErrors();
+    this.props.clearEditClusterErrors();
     this.props.stopEditingCluster();
   }
 
   save = (clusterConfig) => {
-    this.props.updateRemoteCluster(clusterConfig);
+    this.props.editCluster(clusterConfig);
   };
 
   cancel = () => {
@@ -89,8 +89,8 @@ export class RemoteClusterEditUi extends Component {
     const {
       isLoading,
       cluster,
-      isUpdatingRemoteCluster,
-      updateRemoteClusterError,
+      isEditingCluster,
+      getEditClusterError,
     } = this.props;
 
     if (isLoading) {
@@ -145,8 +145,8 @@ export class RemoteClusterEditUi extends Component {
       <RemoteClusterForm
         fields={cluster}
         disabledFields={disabledFields}
-        isSaving={isUpdatingRemoteCluster}
-        saveError={updateRemoteClusterError}
+        isSaving={isEditingCluster}
+        saveError={getEditClusterError}
         save={this.save}
         cancel={this.cancel}
       />

@@ -10,8 +10,10 @@ export {
 } from './detail_panel';
 
 export {
+  editCluster,
   startEditingCluster,
   stopEditingCluster,
+  clearEditClusterErrors,
 } from './edit_cluster';
 
 export {

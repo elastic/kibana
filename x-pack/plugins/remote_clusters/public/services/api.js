@@ -19,3 +19,12 @@ export async function loadClusters() {
 export async function addCluster(cluster) {
   return await httpClient.post(`${apiPrefix}`, cluster);
 }
+
+export async function editCluster(cluster) {
+  const {
+    name,
+    ...rest
+  } = cluster;
+
+  return await httpClient.put(`${apiPrefix}/${name}`, rest);
+}
