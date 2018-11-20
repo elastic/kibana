@@ -6,21 +6,27 @@
 
 import { AlertService } from './alert_service';
 
-const mockTaskManager = { registerTaskDefinitions: jest.fn() };
-const mockServer = {
-  start: jest.fn(),
-  stop: jest.fn(),
-  route: jest.fn(),
-  taskManager: mockTaskManager,
-};
-const mockKbnServer = { server: mockServer, afterPluginsInit: jest.fn() };
-const alertService = new AlertService(mockKbnServer);
+describe('Alerting Service', () => {
+  const mockTaskManager = { registerTaskDefinitions: jest.fn() };
+  const mockServer = {
+    start: jest.fn(),
+    stop: jest.fn(),
+    route: jest.fn(),
+    taskManager: mockTaskManager,
+  };
+  const mockKbnServer = { server: mockServer, afterPluginsInit: jest.fn() };
+  const alertService = new AlertService(mockKbnServer);
+  expect(mockTaskManager.registerTaskDefinitions.mock.calls.length).toBe(0);
 
-test('condition gets registered and saved', async () => {
-  alertService.registerCondition({
-    name: 'Test Condition',
-    runnable: () => {
-      return false;
-    },
+  it('should forward registration on to task manager', () => {
+    alertService.registerAlertTemplate({
+      id: 'my-test-template',
+      runnable: () => ({}),
+    });
+    expect(mockTaskManager.registerTaskDefinitions.mock.calls.length).toBe(1);
+  });
+
+  it('should have a register function', () => {
+    expect(typeof alertService.registerAlertTemplate).toEqual('function');
   });
 });
