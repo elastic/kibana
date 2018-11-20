@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -21,11 +21,10 @@ const columns = [{
   field: 'name',
   name: i18n.translate('xpack.rollupJobs.jobDetails.tabHistogram.nameColumnLabel', {
     defaultMessage: 'Field' }),
-  truncateText: true,
   sortable: true,
 }];
 
-export const TabHistogramUi = ({ histogram, histogramInterval }) => (
+export const TabHistogram = ({ histogram, histogramInterval }) => (
   <Fragment>
     <EuiDescriptionList textStyle="reverse">
       <EuiDescriptionListTitle>
@@ -48,5 +47,3 @@ export const TabHistogramUi = ({ histogram, histogramInterval }) => (
     />
   </Fragment>
 );
-
-export const TabHistogram = injectI18n(TabHistogramUi);

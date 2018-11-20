@@ -17,9 +17,21 @@
  * under the License.
  */
 
-import { dirname, extname, basename } from 'path';
+import path from 'path';
+import { createWriteStream } from 'fs';
+import archiver from 'archiver';
 
-import { mkdirp, exec } from '../lib';
+import { mkdirp } from '../lib';
+
+function compress(type, options = {}, source, destination) {
+  const output = createWriteStream(destination);
+  const archive = archiver(type, options);
+  const name = source.split(path.sep).slice(-1)[0];
+
+  archive.pipe(output);
+
+  return archive.directory(source, name).finalize();
+}
 
 export const CreateArchivesTask = {
   description: 'Creating the archives for each platform',
@@ -31,25 +43,15 @@ export const CreateArchivesTask = {
 
       log.info('archiving', source, 'to', destination);
 
-      await mkdirp(dirname(destination));
+      await mkdirp(path.dirname(destination));
 
-      const cwd = dirname(source);
-      const sourceName = basename(source);
-
-      switch (extname(destination)) {
+      switch (path.extname(destination)) {
         case '.zip':
-          await exec(log, 'zip', ['-rq', '-ll', destination, sourceName], { cwd });
+          await compress('zip', { zlib: { level: 9 } }, source, destination);
           break;
 
         case '.gz':
-          const args = ['-zchf', destination, sourceName];
-
-          // Add a flag to handle filepaths with colons (i.e. C://...) on windows
-          if (config.getPlatformForThisOs().isWindows()) {
-            args.push('--force-local');
-          }
-
-          await exec(log, 'tar', args, { cwd });
+          await compress('tar', { gzip: true, gzipOptions: { level: 9 } }, source, destination);
           break;
 
         default:

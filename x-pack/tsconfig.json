@@ -1,7 +1,14 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["common/**/*", "server/**/*", "plugins/**/*"],
-  "exclude": ["test/**/*", "plugins/secops/node_modules/react-split-pane"],
+  "include": [
+    "common/**/*",
+    "server/**/*",
+    "plugins/**/*",
+    "test_utils/**/*"
+  ],
+  "exclude": [
+    "test/**/*"
+  ],
   "compilerOptions": {
     "paths": {
       "ui/*": ["src/ui/public/*"],

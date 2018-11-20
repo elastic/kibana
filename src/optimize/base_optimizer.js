@@ -151,7 +151,7 @@ export default class BaseOptimizer {
         {
           test,
           include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
-          exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+          exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
         }
       ];
     };

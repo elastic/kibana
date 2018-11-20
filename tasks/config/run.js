@@ -19,7 +19,8 @@
 
 import { resolve } from 'path';
 
-const PKG_VERSION = require('../../package.json').version;
+const { version } = require('../../package.json');
+const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
 
@@ -81,6 +82,15 @@ module.exports = function (grunt) {
         '--quiet' // only log errors, not warnings
       ]
     },
+
+    // used by dev/run_precommit_hook.js
+    //    runs the stylelint script to check for linting errors in Style Components
+    // stylelint: {
+    //   cmd: process.execPath,
+    //   args: [
+    //     require.resolve('../../scripts/stylelint')
+    //   ]
+    // },
 
     // used by the test and jenkins:unit tasks
     //    runs the tslint script to check for Typescript linting errors
@@ -188,7 +198,7 @@ module.exports = function (grunt) {
         '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     },
 
@@ -200,7 +210,7 @@ module.exports = function (grunt) {
         '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
         '--',
         '--server.maxPayloadBytes=1648576',
       ],
@@ -227,7 +237,7 @@ module.exports = function (grunt) {
         '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
         '--',
         '--server.maxPayloadBytes=1648576',
       ],

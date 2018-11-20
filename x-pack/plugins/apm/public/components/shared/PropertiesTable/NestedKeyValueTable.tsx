@@ -35,6 +35,7 @@ const Row = styled.tr`
 const Cell = styled.td`
   vertical-align: top;
   padding: ${px(units.half)} 0;
+  line-height: 1.5;
 
   ${Row}:first-child> & {
     padding-top: 0;

@@ -8,6 +8,7 @@ import { EuiButton } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
+
 import { createLinkWithSignature, RowRenderer } from '.';
 import { ECS } from '../../ecs';
 
@@ -46,7 +47,7 @@ const SuricataRow = styled.div`
   padding-top: 10px;
   padding-bottom: 20px;
   animation: ${dropInEffect} 2s;
-  margin-left -1px;
+  margin-left: -1px;
   transition: 700ms background, 700ms border-color, 1s transform, 1s box-shadow;
   transition-delay: 0s;
   &:hover {
