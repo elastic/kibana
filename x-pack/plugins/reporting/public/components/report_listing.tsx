@@ -77,16 +77,12 @@ export class ReportListing extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage>
-        <EuiPageBody restrictWidth>
-          <EuiPageContent horizontalPosition="center">
-            <EuiTitle>
-              <h1>Reports</h1>
-            </EuiTitle>
-            {this.renderTable()}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
+        <EuiTitle>
+          <h1>Reports</h1>
+        </EuiTitle>
+        {this.renderTable()}
+      </EuiPageContent>
     );
   }
 

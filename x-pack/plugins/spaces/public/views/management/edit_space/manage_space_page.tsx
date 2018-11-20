@@ -14,8 +14,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
@@ -109,14 +107,12 @@ class ManageSpacePageUI extends Component<Props, State> {
     const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
     return (
-      <EuiPage className="spcManagePage">
-        <EuiPageBody>
-          <EuiPageContent className="spcManagePage__content">
-            <EuiPageContentBody>{content}</EuiPageContentBody>
-          </EuiPageContent>
-          {this.maybeGetSecureSpacesMessage()}
-        </EuiPageBody>
-      </EuiPage>
+      <div className="spcManagePage">
+        <EuiPageContent className="spcManagePage__content">
+          <EuiPageContentBody>{content}</EuiPageContentBody>
+        </EuiPageContent>
+        {this.maybeGetSecureSpacesMessage()}
+      </div>
     );
   }
 
