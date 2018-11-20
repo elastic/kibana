@@ -22,7 +22,11 @@ exports[`after fetch hideWriteControls 1`] = `
             color="subdued"
             component="span"
           >
-            Looks like you don't have any dashboards.
+            <FormattedMessage
+              defaultMessage="Looks like you don't have any dashboards."
+              id="kbn.dashboard.listing.noDashboardsItemsMessage"
+              values={Object {}}
+            />
           </EuiTextColor>
         </h2>
       </EuiText>
@@ -64,7 +68,11 @@ exports[`after fetch initialFilter 1`] = `
               textTransform="none"
             >
               <h1>
-                Dashboards
+                <FormattedMessage
+                  defaultMessage="Dashboards"
+                  id="kbn.dashboard.listing.dashboardsTitle"
+                  values={Object {}}
+                />
               </h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -80,7 +88,11 @@ exports[`after fetch initialFilter 1`] = `
               iconSide="left"
               type="button"
             >
-              Create new dashboard
+              <FormattedMessage
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboardButtonLabel"
+                values={Object {}}
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -108,7 +120,7 @@ exports[`after fetch initialFilter 1`] = `
               incremental={false}
               isLoading={false}
               onChange={[Function]}
-              placeholder="Search..."
+              placeholder="Search…"
               value="my dashboard"
             />
           </EuiFlexItem>
@@ -157,7 +169,13 @@ exports[`after fetch initialFilter 1`] = `
             ]
           }
           loading={false}
-          noItemsMessage="No dashboards matched your search."
+          noItemsMessage={
+            <FormattedMessage
+              defaultMessage="No dashboards matched your search."
+              id="kbn.dashboard.listing.noMatchedDashboardsMessage"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           pagination={
             Object {
@@ -210,24 +228,42 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
               iconType="plusInCircle"
               type="button"
             >
-              Create new dashboard
+              <FormattedMessage
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
+                values={Object {}}
+              />
             </EuiButton>
           }
           body={
             <React.Fragment>
               <p>
-                You can combine data views from any Kibana app into one dashboard and see everything in one place.
+                <FormattedMessage
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  values={Object {}}
+                />
               </p>
               <p>
-                New to Kibana? 
-                <EuiLink
-                  color="primary"
-                  href="#/home/tutorial_directory/sampleData"
-                  type="button"
-                >
-                  Install some sample data
-                </EuiLink>
-                 to take a test drive.
+                <FormattedMessage
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  values={
+                    Object {
+                      "sampleDataInstallLink": <EuiLink
+                        color="primary"
+                        href="#/home/tutorial_directory/sampleData"
+                        type="button"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        />
+                      </EuiLink>,
+                    }
+                  }
+                />
               </p>
             </React.Fragment>
           }
@@ -235,7 +271,11 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
           iconType="dashboardApp"
           title={
             <h2>
-              Create your first dashboard
+              <FormattedMessage
+                defaultMessage="Create your first dashboard"
+                id="kbn.dashboard.listing.createNewDashboard.title"
+                values={Object {}}
+              />
             </h2>
           }
         />
@@ -278,7 +318,11 @@ exports[`after fetch renders table rows 1`] = `
               textTransform="none"
             >
               <h1>
-                Dashboards
+                <FormattedMessage
+                  defaultMessage="Dashboards"
+                  id="kbn.dashboard.listing.dashboardsTitle"
+                  values={Object {}}
+                />
               </h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -294,7 +338,11 @@ exports[`after fetch renders table rows 1`] = `
               iconSide="left"
               type="button"
             >
-              Create new dashboard
+              <FormattedMessage
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboardButtonLabel"
+                values={Object {}}
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -322,7 +370,7 @@ exports[`after fetch renders table rows 1`] = `
               incremental={false}
               isLoading={false}
               onChange={[Function]}
-              placeholder="Search..."
+              placeholder="Search…"
               value=""
             />
           </EuiFlexItem>
@@ -371,7 +419,13 @@ exports[`after fetch renders table rows 1`] = `
             ]
           }
           loading={false}
-          noItemsMessage="No dashboards matched your search."
+          noItemsMessage={
+            <FormattedMessage
+              defaultMessage="No dashboards matched your search."
+              id="kbn.dashboard.listing.noMatchedDashboardsMessage"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           pagination={
             Object {
@@ -432,7 +486,11 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
               textTransform="none"
             >
               <h1>
-                Dashboards
+                <FormattedMessage
+                  defaultMessage="Dashboards"
+                  id="kbn.dashboard.listing.dashboardsTitle"
+                  values={Object {}}
+                />
               </h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -448,7 +506,11 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
               iconSide="left"
               type="button"
             >
-              Create new dashboard
+              <FormattedMessage
+                defaultMessage="Create new dashboard"
+                id="kbn.dashboard.listing.createNewDashboardButtonLabel"
+                values={Object {}}
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -460,26 +522,39 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             color="warning"
             iconType="help"
             size="m"
-            title="Listing limit exceeded"
+            title={
+              <FormattedMessage
+                defaultMessage="Listing limit exceeded"
+                id="kbn.dashboard.listing.listingLimitExceededTitle"
+                values={Object {}}
+              />
+            }
           >
             <p>
-              You have 
-              2
-               dashboards, but your 
-              <strong>
-                listingLimit
-              </strong>
-               setting prevents the table below from displaying more than 
-              1
-              . You can change this setting under 
-              <EuiLink
-                color="primary"
-                href="#/management/kibana/settings"
-                type="button"
-              >
-                Advanced Settings
-              </EuiLink>
-              .
+              <FormattedMessage
+                defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
+                id="kbn.dashboard.listing.listingLimitExceededDescription"
+                values={
+                  Object {
+                    "advancedSettingsLink": <EuiLink
+                      color="primary"
+                      href="#/management/kibana/settings"
+                      type="button"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Advanced Settings"
+                        id="kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText"
+                        values={Object {}}
+                      />
+                    </EuiLink>,
+                    "listingLimitText": <strong>
+                      listingLimit
+                    </strong>,
+                    "listingLimitValue": 1,
+                    "totalDashboards": 2,
+                  }
+                }
+              />
             </p>
           </EuiCallOut>
           <EuiSpacer
@@ -507,7 +582,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
               incremental={false}
               isLoading={false}
               onChange={[Function]}
-              placeholder="Search..."
+              placeholder="Search…"
               value=""
             />
           </EuiFlexItem>
@@ -556,7 +631,13 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
             ]
           }
           loading={false}
-          noItemsMessage="No dashboards matched your search."
+          noItemsMessage={
+            <FormattedMessage
+              defaultMessage="No dashboards matched your search."
+              id="kbn.dashboard.listing.noMatchedDashboardsMessage"
+              values={Object {}}
+            />
+          }
           onChange={[Function]}
           pagination={
             Object {

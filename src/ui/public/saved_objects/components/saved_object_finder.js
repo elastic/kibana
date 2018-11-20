@@ -120,7 +120,7 @@ export class SavedObjectFinder extends React.Component {
       resp.savedObjects = resp.savedObjects.filter(savedObject => {
         const typeName = JSON.parse(savedObject.attributes.visState).type;
         const visType = this.props.visTypes.byName[typeName];
-        return visType.stage !== 'lab';
+        return visType.stage !== 'experimental';
       });
     }
 
