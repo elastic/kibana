@@ -89,8 +89,7 @@ app.directive('dashboardApp', function ($injector) {
       $location,
       getAppState,
       dashboardConfig,
-      localStorage,
-      breadcrumbState
+      localStorage
     ) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
@@ -182,7 +181,7 @@ app.directive('dashboardApp', function ($injector) {
 
       // Push breadcrumbs to new header navigation
       const updateBreadcrumbs = () => {
-        breadcrumbState.set([
+        chrome.breadcrumbs.set([
           {
             text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
               defaultMessage: 'Dashboard',
