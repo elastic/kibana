@@ -10,7 +10,11 @@ exports[`renders DashboardCloneModal 1`] = `
   >
     <EuiModalHeader>
       <EuiModalHeaderTitle>
-        Clone Dashboard
+        <FormattedMessage
+          defaultMessage="Clone Dashboard"
+          id="kbn.dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
+          values={Object {}}
+        />
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
@@ -19,7 +23,11 @@ exports[`renders DashboardCloneModal 1`] = `
         size="m"
       >
         <p>
-          Please enter a new name for your dashboard.
+          <FormattedMessage
+            defaultMessage="Please enter a new name for your dashboard."
+            id="kbn.dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
+            values={Object {}}
+          />
         </p>
       </EuiText>
       <EuiSpacer
@@ -45,7 +53,11 @@ exports[`renders DashboardCloneModal 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Cancel
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="kbn.dashboard.topNav.cloneModal.cancelButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
       <EuiButton
         color="primary"
@@ -56,7 +68,11 @@ exports[`renders DashboardCloneModal 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Confirm Clone
+        <FormattedMessage
+          defaultMessage="Confirm Clone"
+          id="kbn.dashboard.topNav.cloneModal.confirmButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
     </EuiModalFooter>
   </EuiModal>
