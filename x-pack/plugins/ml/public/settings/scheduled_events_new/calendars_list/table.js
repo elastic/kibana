@@ -16,6 +16,7 @@ import {
 
 import { checkPermission } from '../../../privilege/check_privilege';
 import { RowButtons } from './row_buttons';
+import chrome from 'ui/chrome';
 
 
 function NewCalendarButton() {
@@ -26,8 +27,9 @@ function NewCalendarButton() {
       <EuiButton
         fill
         size="s"
+        key="new_calendar_button"
         iconType="plusInCircle"
-        onClick={() => window.alert('Button clicked')}
+        href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/new_calendar`}
         isDisabled={canCreateCalendar === false}
       >
         New calendar

@@ -6,5 +6,4 @@
 
 
 
-import './calendars_list';
-import './new_calendar';
+import './directive';
