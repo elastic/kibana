@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nServiceType } from '@kbn/i18n/angular';
 import {
   FeatureCatalogueCategory,
   FeatureCatalogueRegistryProvider,
@@ -11,7 +12,7 @@ import {
 
 const APP_ID = 'infra';
 
-FeatureCatalogueRegistryProvider.register((i18n: any) => ({
+FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
   id: 'infraops',
   title: i18n('xpack.infra.registerFeatures.infraOpsTitle', {
     defaultMessage: 'Infrastructure',
@@ -26,7 +27,7 @@ FeatureCatalogueRegistryProvider.register((i18n: any) => ({
   category: FeatureCatalogueCategory.DATA,
 }));
 
-FeatureCatalogueRegistryProvider.register((i18n: any) => ({
+FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
   id: 'infralogging',
   title: i18n('xpack.infra.registerFeatures.logsTitle', {
     defaultMessage: 'Logs',

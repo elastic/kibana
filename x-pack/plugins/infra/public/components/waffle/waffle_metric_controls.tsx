@@ -21,8 +21,11 @@ interface Props {
   intl: InjectedIntl;
 }
 
-let OPTIONS: { [P in InfraNodeType]: Array<{ text: any; value: InfraMetricType }> };
-const getOptions = (nodeType: string, intl: any) => {
+let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; value: InfraMetricType }> };
+const getOptions = (
+  nodeType: string,
+  intl: InjectedIntl
+): Array<{ text: string; value: InfraMetricType }> => {
   if (!OPTIONS) {
     const CPUUsage = intl.formatMessage({
       id: 'xpack.infra.waffle.metricOptions.cpuUsageText',
@@ -45,7 +48,7 @@ const getOptions = (nodeType: string, intl: any) => {
     });
 
     OPTIONS = {
-      [InfraNodeType.pod as string]: [
+      [InfraNodeType.pod]: [
         {
           text: CPUUsage,
           value: InfraMetricType.cpu,
@@ -63,7 +66,7 @@ const getOptions = (nodeType: string, intl: any) => {
           value: InfraMetricType.tx,
         },
       ],
-      [InfraNodeType.container as string]: [
+      [InfraNodeType.container]: [
         {
           text: CPUUsage,
           value: InfraMetricType.cpu,
@@ -81,7 +84,7 @@ const getOptions = (nodeType: string, intl: any) => {
           value: InfraMetricType.tx,
         },
       ],
-      [InfraNodeType.host as string]: [
+      [InfraNodeType.host]: [
         {
           text: CPUUsage,
           value: InfraMetricType.cpu,

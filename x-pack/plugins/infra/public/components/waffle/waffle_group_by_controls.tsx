@@ -23,11 +23,14 @@ interface Props {
   intl: InjectedIntl;
 }
 
-let OPTIONS: { [P in InfraNodeType]: Array<{ text: any; type: InfraPathType; field: string }> };
-const getOptions = (nodeType: string, intl: any) => {
+let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; type: InfraPathType; field: string }> };
+const getOptions = (
+  nodeType: string,
+  intl: InjectedIntl
+): Array<{ text: string; value: InfraMetricType }> => {
   if (!OPTIONS) {
     OPTIONS = {
-      [InfraNodeType.pod as string]: [
+      [InfraNodeType.pod]: [
         {
           text: intl.formatMessage({
             id: 'xpack.infra.waffle.podGroupByOptions.namespaceLabel',
@@ -45,7 +48,7 @@ const getOptions = (nodeType: string, intl: any) => {
           field: 'kubernetes.node.name',
         },
       ],
-      [InfraNodeType.container as string]: [
+      [InfraNodeType.container]: [
         {
           text: intl.formatMessage({
             id: 'xpack.infra.waffle.containerGroupByOptions.hostLabel',
@@ -87,7 +90,7 @@ const getOptions = (nodeType: string, intl: any) => {
           field: 'meta.cloud.provider',
         },
       ],
-      [InfraNodeType.host as string]: [
+      [InfraNodeType.host]: [
         {
           text: intl.formatMessage({
             id: 'xpack.infra.waffle.hostGroupByOptions.availabilityZoneLabel',
