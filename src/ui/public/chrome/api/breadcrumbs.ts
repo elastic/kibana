@@ -36,7 +36,7 @@ export function initBreadcrumbsApi(
   internals: { [key: string]: any }
 ) {
   // A flag used to determine if we should automatically
-  // the breadcrumbs between angular route changes.
+  // clear the breadcrumbs between angular route changes.
   let shouldClear = false;
 
   // reset shouldClear any time the breadcrumbs change, even
