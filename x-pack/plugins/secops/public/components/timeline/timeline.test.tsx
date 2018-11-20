@@ -47,6 +47,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={noop}
+            onToggleDataProviderEnabled={noop}
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={sort}
@@ -69,6 +70,7 @@ describe('Timeline', () => {
             onDataProviderRemoved={noop}
             onFilterChange={noop}
             onRangeSelected={noop}
+            onToggleDataProviderEnabled={noop}
             range={'1 Day'}
             rowRenderers={rowRenderers}
             sort={sort}
@@ -96,6 +98,7 @@ describe('Timeline', () => {
               onDataProviderRemoved={noop}
               onFilterChange={noop}
               onRangeSelected={noop}
+              onToggleDataProviderEnabled={noop}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -130,6 +133,7 @@ describe('Timeline', () => {
               onDataProviderRemoved={mockOnDataProviderRemoved}
               onFilterChange={noop}
               onRangeSelected={noop}
+              onToggleDataProviderEnabled={noop}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -178,6 +182,7 @@ describe('Timeline', () => {
               onDataProviderRemoved={noop}
               onFilterChange={mockOnFilterChange}
               onRangeSelected={noop}
+              onToggleDataProviderEnabled={noop}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -194,6 +199,56 @@ describe('Timeline', () => {
         expect(mockOnFilterChange).toBeCalledWith({
           columnId: headers[0].id,
           filter: newFilter,
+        });
+      });
+    });
+
+    describe('onToggleDataProviderEnabled', () => {
+      test('it invokes the onToggleDataProviderEnabled callback when the input is updated', () => {
+        const mockOnToggleDataProviderEnabled = jest.fn();
+
+        // for this test, all columns have text filters
+        const allColumnsHaveTextFilters = headers.map(header => ({
+          ...header,
+          columnHeaderType: 'text-filter' as ColumnHeaderType,
+        }));
+
+        const wrapper = mount(
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              columnHeaders={allColumnsHaveTextFilters}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              onColumnSorted={noop}
+              onDataProviderRemoved={noop}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </MockedProvider>
+        );
+
+        wrapper
+          .find('[data-test-subj="switchButton"]')
+          .at(1)
+          .simulate('click');
+
+        const callbackParams = pick(
+          ['enabled', 'dataProvider.id', 'dataProvider.name', 'dataProvider.negated'],
+          mockOnToggleDataProviderEnabled.mock.calls[0][0]
+        );
+
+        expect(callbackParams).toEqual({
+          dataProvider: {
+            name: 'Provider 1',
+            negated: false,
+            id: 'id-Provider 1',
+          },
+          enabled: false,
         });
       });
     });
