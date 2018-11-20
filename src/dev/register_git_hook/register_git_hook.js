@@ -33,7 +33,7 @@ const unlinkAsync = promisify(unlink);
 const writeFileAsync = promisify(writeFile);
 
 async function getPrecommitGitHookScriptPath(rootPath) {
-  // gets the correct location for the .git dir for
+  // Retrieves the correct location for the .git dir for
   // every git setup (including git worktree)
   const gitDirPath = (await gitRevParseAsync(['--git-dir'])).trim();
 
