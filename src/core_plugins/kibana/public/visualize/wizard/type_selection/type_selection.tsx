@@ -30,7 +30,6 @@ import {
   EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItemButton,
-  EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
@@ -78,18 +77,19 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
             />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiModalBody className="visNewVisDialog__body">
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={false}>
+        <div className="visNewVisDialog__body">
+          <EuiFlexGroup gutterSize="xl">
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+                <EuiFlexItem grow={false} className="visNewVisDialog__searchWrapper">
                   <EuiFieldSearch
                     placeholder="Filter"
                     value={query}
                     onChange={this.onQueryChange}
+                    fullWidth
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={true}>
+                <EuiFlexItem grow={1} className="visNewVisDialog__typesWrapper">
                   <EuiKeyPadMenu
                     className="visNewVisDialog__types"
                     data-test-subj="visNewDialogTypes"
@@ -98,26 +98,26 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   </EuiKeyPadMenu>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiModalBody>
-          </EuiFlexItem>
-          <EuiFlexItem className="visNewVisDialog__description">
-            {highlightedType && <VisHelpText visType={highlightedType} />}
-            {!highlightedType && (
-              <React.Fragment>
-                <EuiTitle size="s">
-                  <h2>
-                    <FormattedMessage
-                      id="kbn.visualize.newVisWizard.selectVisType"
-                      defaultMessage="Select a visualization type"
-                    />
-                  </h2>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <NewVisHelp />
-              </React.Fragment>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem className="visNewVisDialog__description" grow={false}>
+              {highlightedType && <VisHelpText visType={highlightedType} />}
+              {!highlightedType && (
+                <React.Fragment>
+                  <EuiTitle size="s">
+                    <h2>
+                      <FormattedMessage
+                        id="kbn.visualize.newVisWizard.selectVisType"
+                        defaultMessage="Select a visualization type"
+                      />
+                    </h2>
+                  </EuiTitle>
+                  <EuiSpacer size="m" />
+                  <NewVisHelp />
+                </React.Fragment>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </React.Fragment>
     );
   }
