@@ -1146,8 +1146,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const table = await testSubjects.find('tableVis');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await remote.moveMouseTo(cell);
+        const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });
     }
