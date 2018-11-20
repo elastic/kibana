@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe.skip('Print Layout', () => {
+      describe.skip('PDF Print Layout', () => {
         it('matches baseline report', async function () {
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
           this.timeout(TEN_MINUTES);
@@ -151,36 +151,6 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('Preserve Layout', () => {
-        it('matches baseline report', async function () {
-
-          // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
-          this.timeout(TEN_MINUTES);
-
-          await PageObjects.reporting.openPdfReportingPanel();
-          await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
-          await PageObjects.reporting.clickGenerateReportButton();
-          await PageObjects.reporting.removeForceSharedItemsContainerSize();
-
-          await PageObjects.reporting.clickDownloadReportButton(60000);
-          await PageObjects.reporting.clearToastNotifications();
-          const url = await PageObjects.reporting.getUrlOfTab(1);
-          await PageObjects.reporting.closeTab(1);
-          const reportData = await PageObjects.reporting.getRawPdfReportData(url);
-
-          const reportFileName = 'dashboard_preserve_layout';
-          const sessionReportPath = await writeSessionReport(reportFileName, reportData);
-
-          const percentSimilar = await checkIfPdfsMatch(
-            sessionReportPath,
-            getBaselineReportPath(reportFileName),
-            config.get('screenshots.directory'),
-            log
-          );
-          expect(percentSimilar).to.be.lessThan(0.05);
-        });
-      });
-
       describe('Print PNG button', () => {
         it('is not available if new', async () => {
           await PageObjects.common.navigateToApp('dashboard');
@@ -196,9 +166,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // TODO Re-enable the tests after removing Phantom:
-      // https://github.com/elastic/kibana/issues/21485
-      describe.skip('Preserve Layout', () => {
+      describe.skip('PNG Preserve Layout', () => {
         it('matches baseline report', async function () {
 
           // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
@@ -237,7 +205,6 @@ export default function ({ getService, getPageObjects }) {
             log
           );
           expect(percentSimilar).to.be.lessThan(0.05);
-
         });
       });
 
