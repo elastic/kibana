@@ -942,8 +942,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
      */
     async getTableVisData() {
-      const dataTable = await testSubjects.find('paginated-table-body');
-      return await dataTable.getVisibleText();
+      return await testSubjects.getVisibleText('paginated-table-body');
     }
 
     /**
@@ -1144,11 +1143,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async filterOnTableCell(column, row) {
-      const table = await testSubjects.find('tableVis');
-      const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-      await remote.moveMouseTo(cell);
-      const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
-      await filterBtn.click();
+      await retry.try(async () => {
+        const table = await testSubjects.find('tableVis');
+        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+        await remote.moveMouseTo(cell);
+        await filterBtn.click();
+      });
     }
 
     async toggleLegend(show = true) {
