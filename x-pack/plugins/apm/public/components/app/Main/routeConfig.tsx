@@ -114,18 +114,3 @@ export const routes = [
       legacyDecodeURIComponent(match.params.transactionName)
   }
 ];
-// {
-//   exact: true,
-//   path: '/:serviceName',
-//   breadcrumb: ({ match }: BreadcrumbArgs) => match.params.serviceName,
-//   render: ({ location }: RenderArgs) => {
-//     return (
-//       <Redirect
-//         to={{
-//           ...location,
-//           pathname: `${location.pathname}/transactions`
-//         }}
-//       />
-//     );
-//   }
-// }
