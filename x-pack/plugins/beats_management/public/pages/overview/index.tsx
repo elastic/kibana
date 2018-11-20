@@ -9,20 +9,8 @@ import { CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { ConnectedTabs } from '../../components/navigation/connected_tabs';
-import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { AppURLState } from '../../frontend_types';
-import { FrontendLibs } from '../../lib/types';
-
-interface RouteConfig {
-  path: string;
-  component: React.ComponentType<any>;
-  routes?: RouteConfig[];
-}
-interface MainPagesProps extends URLStateProps<AppURLState> {
-  libs: FrontendLibs;
-  routes: RouteConfig[];
-  location: any;
-}
+import { withUrlState } from '../../containers/with_url_state';
+import { AppPageProps } from '../../frontend_types';
 
 interface MainPagesState {
   enrollBeat?: {
@@ -32,8 +20,8 @@ interface MainPagesState {
   loadedBeatsAtLeastOnce: boolean;
 }
 
-class MainPageComponent extends React.PureComponent<MainPagesProps, MainPagesState> {
-  constructor(props: MainPagesProps) {
+class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState> {
+  constructor(props: AppPageProps) {
     super(props);
     this.state = {
       loadedBeatsAtLeastOnce: false,
@@ -58,4 +46,4 @@ class MainPageComponent extends React.PureComponent<MainPagesProps, MainPagesSta
   }
 }
 
-export const MainPage = withUrlState<MainPagesProps>(MainPageComponent);
+export const MainPage = withUrlState<AppPageProps>(MainPageComponent);

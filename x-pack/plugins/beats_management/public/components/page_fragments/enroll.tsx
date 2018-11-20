@@ -6,7 +6,6 @@
 import {
   // @ts-ignore typings for EuiBasicTable not present in current version
   EuiBasicTable,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -17,33 +16,39 @@ import {
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
 import { CMBeat } from '../../../common/domain_types';
-import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { AppURLState } from '../../frontend_types';
-import { FrontendLibs } from '../../lib/types';
 
-interface BeatsProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
-  match: any;
-  libs: FrontendLibs;
+interface ComponentProps {
+  /** Such as kibanas basePath, for use to generate command */
+  frameworkBasePath?: string;
+  enrollmentToken: string;
+  getBeatWithToken(token: string): Promise<CMBeat | null>;
+  createEnrollmentToken(): Promise<void>;
+  onBeatEnrolled(enrolledBeat: CMBeat): void;
 }
-export class EnrollBeat extends React.Component<BeatsProps, any> {
+
+interface ComponentState {
+  enrolledBeat: CMBeat | null;
+  hasPolledForBeat: boolean;
+  command: string;
+  beatType: string;
+}
+
+export class EnrollBeat extends React.Component<ComponentProps, ComponentState> {
   private pinging = false;
-  constructor(props: BeatsProps) {
+  constructor(props: ComponentProps) {
     super(props);
 
     this.state = {
       enrolledBeat: null,
+      hasPolledForBeat: false,
       command: 'sudo filebeat',
       beatType: 'filebeat',
     };
   }
-  public pingForBeatWithToken = async (
-    libs: FrontendLibs,
-    token: string
-  ): Promise<CMBeat | void> => {
+  public pingForBeatWithToken = async (token: string): Promise<CMBeat | void> => {
     try {
-      const beats = await libs.beats.getBeatWithToken(token);
+      const beats = await this.props.getBeatWithToken(token);
       if (!beats) {
         throw new Error('no beats');
       }
@@ -52,60 +57,34 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
       if (this.pinging) {
         const timeout = (ms: number) => new Promise(res => setTimeout(res, ms));
         await timeout(5000);
-        return await this.pingForBeatWithToken(libs, token);
+        return await this.pingForBeatWithToken(token);
       }
     }
   };
   public async componentDidMount() {
-    if (!this.props.urlState.enrollmentToken) {
-      const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
-      this.props.setUrlState({
-        enrollmentToken,
-      });
+    if (!this.props.enrollmentToken) {
+      await this.props.createEnrollmentToken();
     }
   }
-  public waitForToken = async (token: string) => {
+  public waitForTokenToEnrollBeat = async () => {
     if (this.pinging) {
       return;
     }
     this.pinging = true;
-    const enrolledBeat = (await this.pingForBeatWithToken(this.props.libs, token)) as CMBeat;
+    const enrolledBeat = (await this.pingForBeatWithToken(this.props.enrollmentToken)) as CMBeat;
 
     this.setState({
       enrolledBeat,
     });
+    this.props.onBeatEnrolled(enrolledBeat);
     this.pinging = false;
   };
   public render() {
-    if (!this.props.urlState.enrollmentToken) {
+    if (!this.props.enrollmentToken) {
       return null;
     }
-    if (this.props.urlState.enrollmentToken && !this.state.enrolledBeat) {
-      this.waitForToken(this.props.urlState.enrollmentToken);
-    }
-    const { goTo } = this.props;
-
-    const actions = [];
-
-    switch (this.props.location.pathname) {
-      case '/overview/initial/beats':
-        actions.push({
-          goTo: '/overview/initial/tag',
-          name: 'Continue',
-        });
-        break;
-      case '/overview/beats/enroll':
-        actions.push({
-          goTo: '/overview/beats/enroll',
-          name: 'Enroll another Beat',
-          newToken: true,
-        });
-        actions.push({
-          goTo: '/overview/beats',
-          name: 'Done',
-          clearToken: true,
-        });
-        break;
+    if (this.props.enrollmentToken && !this.state.enrolledBeat) {
+      this.waitForTokenToEnrollBeat();
     }
 
     return (
@@ -190,10 +169,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                       $ {this.state.command} enroll {window.location.protocol}
                       {`//`}
                       {window.location.host}
-                      {this.props.libs.framework.info.basePath
-                        ? this.props.libs.framework.info.basePath
-                        : ''}{' '}
-                      {this.props.urlState.enrollmentToken}
+                      {this.props.frameworkBasePath} {this.props.enrollmentToken}
                     </div>
                   </div>
                   <br />
@@ -244,36 +220,9 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
             />
             <br />
             <br />
-            {actions.map(action => (
-              <EuiButton
-                key={action.name}
-                size="s"
-                color="primary"
-                style={{ marginLeft: 10 }}
-                onClick={async () => {
-                  if (action.clearToken) {
-                    this.props.setUrlState({ enrollmentToken: '' });
-                  }
-
-                  if (action.newToken) {
-                    const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
-
-                    this.props.setUrlState({ enrollmentToken });
-                    return this.setState({
-                      enrolledBeat: null,
-                    });
-                  }
-                  goTo(action.goTo);
-                }}
-              >
-                {action.name}
-              </EuiButton>
-            ))}
           </EuiModalBody>
         )}
       </React.Fragment>
     );
   }
 }
-
-export const EnrollBeatPage = withUrlState<BeatsProps>(EnrollBeat);

@@ -5,15 +5,12 @@
  */
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
 import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../../server/lib/adapters/beats/adapter_types';
-import { URLStateProps, withUrlState } from '../../../containers/with_url_state';
-import { AppURLState } from '../../../frontend_types';
-import { FrontendLibs } from '../../../lib/types';
-interface PageProps extends URLStateProps<AppURLState>, RouteComponentProps<any> {
+import { withUrlState } from '../../../containers/with_url_state';
+import { AppPageProps } from '../../../frontend_types';
+interface PageProps extends AppPageProps {
   loadBeats: any;
-  libs: FrontendLibs;
 }
 export class ReviewWalkthrough extends React.Component<PageProps, any> {
   constructor(props: PageProps) {

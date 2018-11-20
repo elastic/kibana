@@ -20,33 +20,29 @@ import React from 'react';
 import { Subscribe } from 'unstated';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { EnrollBeatPage } from '../../components/page_fragments/enroll';
+import { EnrollBeat } from '../../components/page_fragments/enroll';
 import { BeatsTableType, Table } from '../../components/table';
 import { beatsListAssignmentOptions } from '../../components/table/assignment_schema';
 import { AssignmentActionType } from '../../components/table/table';
 import { BeatsContainer } from '../../containers/beats';
 import { TagsContainer } from '../../containers/tags';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
-import { URLStateProps } from '../../containers/with_url_state';
-import { AppURLState } from '../../frontend_types';
-import { FrontendLibs } from '../../lib/types';
+import { AppPageProps } from '../../frontend_types';
 
-interface BeatsPageProps extends URLStateProps<AppURLState> {
-  libs: FrontendLibs;
-  location: any;
+interface PageProps extends AppPageProps {
   beats: CMPopulatedBeat[];
   loadBeats: () => any;
   renderAction: (area: JSX.Element) => void;
 }
 
-interface BeatsPageState {
+interface PageState {
   notifications: any[];
   tableRef: any;
   tags: BeatTag[] | null;
 }
 
-export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageState> {
-  constructor(props: BeatsPageProps) {
+export class BeatsPage extends React.PureComponent<PageProps, PageState> {
+  constructor(props: PageProps) {
     super(props);
 
     this.state = {
@@ -94,7 +90,7 @@ export class BeatsPage extends React.PureComponent<BeatsPageProps, BeatsPageStat
               <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>
-              <EnrollBeatPage {...this.props} />
+              <EnrollBeat {...this.props} />
             </EuiModalBody>
           </EuiModal>
         </EuiOverlayMask>

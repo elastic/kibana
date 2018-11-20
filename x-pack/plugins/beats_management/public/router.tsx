@@ -11,6 +11,7 @@ import { Subscribe } from 'unstated';
 import { ChildRoutes } from './components/navigation/child_routes';
 import { BeatsContainer } from './containers/beats';
 import { TagsContainer } from './containers/tags';
+import { URLStateProps, WithURLState } from './containers/with_url_state';
 import { FrontendLibs } from './lib/types';
 import { RouteTreeBuilder } from './utils/page_loader';
 
@@ -80,7 +81,11 @@ export const AppRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
             </Switch>
 
             {/* Render routes from the FS */}
-            <ChildRoutes routes={routesFromFilesystem} {...{ libs }} />
+            <WithURLState>
+              {(URLProps: URLStateProps) => (
+                <ChildRoutes routes={routesFromFilesystem} {...URLProps} {...{ libs }} />
+              )}
+            </WithURLState>
           </React.Fragment>
         )}
       </Subscribe>

@@ -10,22 +10,19 @@ import { BeatTag } from '../../../common/domain_types';
 import { AssignmentActionType, Table, TagsTableType } from '../../components/table';
 import { tagListAssignmentOptions } from '../../components/table/assignment_schema';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
-import { URLStateProps } from '../../containers/with_url_state';
-import { AppURLState } from '../../frontend_types';
-import { FrontendLibs } from '../../lib/types';
+import { AppPageProps } from '../../frontend_types';
 
-interface TagsPageProps extends URLStateProps<AppURLState> {
-  libs: FrontendLibs;
+interface PageProps extends AppPageProps {
   renderAction: (area: JSX.Element) => void;
 }
 
-interface TagsPageState {
+interface PageState {
   tags: BeatTag[];
   tableRef: any;
 }
 
-export class TagsPage extends React.PureComponent<TagsPageProps, TagsPageState> {
-  constructor(props: TagsPageProps) {
+export class TagsPage extends React.PureComponent<PageProps, PageState> {
+  constructor(props: PageProps) {
     super(props);
 
     this.state = {

@@ -13,10 +13,13 @@ interface RouteConfig {
 }
 
 export const ChildRoutes: SFC<{
-  routes: RouteConfig[];
+  routes?: RouteConfig[];
   useSwitch?: boolean;
   [other: string]: any;
 }> = ({ routes, useSwitch = true, ...rest }) => {
+  if (!routes) {
+    return null;
+  }
   const Parent = useSwitch ? Switch : React.Fragment;
   return (
     <Parent>

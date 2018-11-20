@@ -10,21 +10,16 @@ import { NoDataLayout } from '../../../components/layouts/no_data';
 import { WalkthroughLayout } from '../../../components/layouts/walkthrough';
 import { ChildRoutes } from '../../../components/navigation/child_routes';
 import { ConnectedLink } from '../../../components/navigation/connected_link';
-import { RouteConfig } from '../../../utils/page_loader';
+import { AppPageProps } from '../../../frontend_types';
 
-interface PageProps {
-  routes: RouteConfig[];
-  location: any;
-}
-
-export class InitialWalkthroughPage extends Component<PageProps> {
+export class InitialWalkthroughPage extends Component<AppPageProps> {
   public render() {
     if (this.props.location.pathname === '/walkthrough/initial') {
       return (
         <NoDataLayout
           title="Beats central management"
           actionSection={
-            <ConnectedLink path="/overview/initial/beat">
+            <ConnectedLink path="/walkthrough/initial/beat">
               <EuiButton color="primary" fill>
                 Enroll Beat
               </EuiButton>
