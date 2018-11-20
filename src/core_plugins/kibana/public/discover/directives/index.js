@@ -19,6 +19,7 @@
 
 import 'ngreact';
 import { uiModules } from 'ui/modules';
+import { injectI18nProvider } from '@kbn/i18n/react';
 
 import {
   DiscoverNoResults,
@@ -32,9 +33,9 @@ import './timechart';
 
 const app = uiModules.get('apps/discover', ['react']);
 
-app.directive('discoverNoResults', reactDirective => reactDirective(DiscoverNoResults));
+app.directive('discoverNoResults', reactDirective => reactDirective(injectI18nProvider(DiscoverNoResults)));
 
 app.directive(
   'discoverUnsupportedIndexPattern',
-  reactDirective => reactDirective(DiscoverUnsupportedIndexPattern, ['unsupportedType'])
+  reactDirective => reactDirective(injectI18nProvider(DiscoverUnsupportedIndexPattern), ['unsupportedType'])
 );
