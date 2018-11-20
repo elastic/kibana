@@ -18,6 +18,10 @@ import fakeDeprecations from './fake_deprecations.json';
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
+  uiButton?: {
+    label: string;
+    url: string;
+  };
 }
 
 export interface UpgradeCheckupStatus {
@@ -28,7 +32,8 @@ export interface UpgradeCheckupStatus {
 
 export async function getUpgradeCheckupStatus(
   callWithRequest: CallClusterWithRequest,
-  req: Request
+  req: Request,
+  basePath: string
 ): Promise<UpgradeCheckupStatus> {
   // const migrationAssistanceReq = callWithRequest(req, 'transport.request', {
   //   path: '/_xpack/migration/assistance',
@@ -66,6 +71,10 @@ export async function getUpgradeCheckupStatus(
         level: 'critical',
         message: 'This index must be reindexed in order to upgrade the Elastic Stack.',
         details: 'Reindexing is irreversible, so always back up your index before proceeding.',
+        uiButton: {
+          label: 'Reindex in Console',
+          url: consoleTemplateUrl(basePath, indexName),
+        },
         url:
           'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
       });
@@ -88,3 +97,13 @@ export async function getUpgradeCheckupStatus(
     indices: combinedIndexInfo,
   };
 }
+
+const consoleTemplateUrl = (basePath: string, indexName: string) => {
+  const reindexTemplateUrl = `http://localhost:5601${basePath}/api/upgrade_checkup/reindex/command_template/${encodeURIComponent(
+    indexName
+  )}.json`;
+
+  return `${basePath}/app/kibana#/dev_tools/console?load_from=${encodeURIComponent(
+    reindexTemplateUrl
+  )}`;
+};

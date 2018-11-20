@@ -45,6 +45,7 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
+      uiButton={deprecation.uiButton}
       docUrl={deprecation.url}
       items={items}
     />
