@@ -264,7 +264,8 @@ module.controller('MlExplorerController', function (
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
     mlFieldFormatService.populateFormats(selectedIds, getIndexPatterns())
-      .finally(() => {
+      .catch((err) => { console.log('Error setting selected jobs:', err); })
+      .then(() => {
         // Load the data - if the FieldFormats failed to populate
         // the default formatting will be used for metric values.
         loadOverallData();
