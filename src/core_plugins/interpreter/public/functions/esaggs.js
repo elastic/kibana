@@ -46,12 +46,12 @@ export default () => ({
       types: ['string', 'null'],
       default: null,
     },
-    metricsOnAllLevels: {
-      types: ['bool', 'null'],
+    metricsAtAllLevels: {
+      types: ['boolean'],
       default: false,
     },
     partialRows: {
-      types: ['bool', 'null'],
+      types: ['boolean'],
       default: false,
     },
     aggConfigs: {
@@ -83,7 +83,7 @@ export default () => ({
         query: _.get(context, 'query', null),
         filters: _.get(context, 'filters', null),
         forceFetch: true,
-        isHierarchical: args.metricsOnAllLevels,
+        isHierarchical: args.metricsAtAllLevels,
         showPartial: args.partialRows,
         inspectorAdapters: handlers.inspectorAdapters,
         queryFilter,

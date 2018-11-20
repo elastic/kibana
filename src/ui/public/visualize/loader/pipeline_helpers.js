@@ -59,7 +59,7 @@ export const buildPipeline = (vis, params) => {
       schemas[schemaName].push(i);
     });
     pipeline += `
-    esaggs index='${indexPattern.id}' 
+    esaggs index='${indexPattern.id}' metricsAtAllLevels=${vis.isHierarchical()} partialRows=${vis.params.showPartialRows}
     aggConfigs='${JSON.stringify(visState.aggs)}' | 
     visualization type='${vis.type.name}' visConfig='${JSON.stringify(visState.params)}' schemas='${JSON.stringify(schemas)}'
     `;
