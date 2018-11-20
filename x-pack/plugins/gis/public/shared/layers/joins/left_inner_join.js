@@ -19,7 +19,7 @@ export class LeftInnerJoin {
   }
 
   hasCompleteConfig() {
-    if (this._rightSource) {
+    if (this._descriptor.leftField && this._rightSource) {
       return this._rightSource.hasCompleteConfig();
     }
 

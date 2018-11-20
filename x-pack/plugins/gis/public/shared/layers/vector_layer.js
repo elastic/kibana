@@ -116,6 +116,10 @@ export class VectorLayer extends ALayer {
     return await this._source.getStringFields();
   }
 
+  async getSourceName() {
+    return this._source.getDisplayName();
+  }
+
   async getOrdinalFields() {
 
     const numberFields = await this._source.getNumberFields();

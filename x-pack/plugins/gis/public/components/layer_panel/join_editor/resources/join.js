@@ -4,194 +4,215 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, {  } from 'react';
+import _ from 'lodash';
+import React, { Component } from 'react';
 
 import {
-  EuiSuperSelect,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiPopover,
-  EuiExpressionButton,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { DataSelector } from './data_selector';
 
-export class Join extends React.Component {
+import { FromExpression } from './from_expression';
+import { GroupByExpression } from './group_by_expression';
+import { JoinExpression } from './join_expression';
+import { OnExpression } from './on_expression';
+import { SelectExpression } from './select_expression';
 
-  constructor() {
-    super();
-    this.state = {
-      stringFields: null,
-      leftField: null,
-      right: null,
-      leftPopoverOpen: false,
-      rightPopoverOpen: false,
-    };
+import {
+  indexPatternService,
+} from '../../../../kibana_services';
+
+const getIndexPatternId = (props) => {
+  return _.get(props, 'join.right.indexPatternId');
+};
+
+/*
+ * SELECT <metric_agg>
+ * FROM <left_source (can not be changed)>
+ * LEFT JOIN <right_source (index-pattern)>
+ * ON <left_field>
+ * GROUP BY <right_field>
+ */
+export class Join extends Component {
+
+  state = {
+    leftFields: null,
+    leftSourceName: '',
+    rightFields: undefined,
+    loadError: undefined,
+    prevIndexPatternId: getIndexPatternId(this.props),
+  };
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadLeftFields();
+    this._loadLeftSourceName();
   }
 
-  async _loadStringFields() {
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
 
+  componentDidUpdate() {
+    if (!this.state.rigthFields && getIndexPatternId(this.props)) {
+      this._loadRightFields(getIndexPatternId(this.props));
+    }
+  }
 
-    if (this.state.stringFields) {
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const nextIndexPatternId = getIndexPatternId(nextProps);
+    if (nextIndexPatternId !== prevState.prevIndexPatternId) {
+      return {
+        rightFields: undefined,
+        loadError: undefined,
+        prevIndexPatternId: nextIndexPatternId,
+      };
+    }
+
+    return null;
+  }
+
+  async _loadRightFields(indexPatternId) {
+    if (!indexPatternId) {
       return;
     }
 
+    let indexPattern;
+    try {
+      indexPattern = await indexPatternService.get(indexPatternId);
+    } catch (err) {
+      if (this._isMounted) {
+        this.setState({
+          loadError: `Unable to find Index pattern ${indexPatternId}`
+        });
+      }
+      return;
+    }
+
+    if (indexPatternId !== this.state.prevIndexPatternId) {
+      // ignore out of order responses
+      return;
+    }
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.setState({ rightFields: indexPattern.fields });
+  }
+
+  async _loadLeftSourceName() {
+    const leftSourceName = await this.props.layer.getSourceName();
+    if (!this._isMounted) {
+      return;
+    }
+    this.setState({ leftSourceName });
+  }
+
+  async _loadLeftFields() {
     const stringFields = await this.props.layer.getStringFields();
-    this.setState({
-      stringFields: stringFields
-    });
-
-    if (!this.state.leftField) {
-      this.setState({
-        leftField: stringFields[0] ? stringFields[0].name : null
-      });
+    if (!this._isMounted) {
+      return;
     }
-
+    this.setState({ leftFields: stringFields });
   }
 
-  _renderJoinFields() {
-
-    if (!this.state.stringFields) {
-      return null;
-    }
-
-    if (!this.state.stringFields.length) {
-      return null;
-    }
-
-    const options = this.state.stringFields.map(field => {
-      return {
-        value: field.name,
-        inputDisplay: field.name,
-        dropdownDisplay: field.name + ': ' + field.label
-      };
+  _onLeftFieldChange = (leftField) => {
+    this.props.onJoinSelection({
+      leftField: leftField,
+      right: this.props.join.right,
     });
+  };
 
-    const onChange = (field) => {
-      this.setState({
-        leftField: field,
-        leftPopoverOpen: false,
-      });
-      this.props.onJoinSelection({
-        leftField: field,
-        right: this.state.right,
-      });
-
-    };
-
-    const selectedValue = this.state.leftField ? this.state.leftField : this.state.stringFields[0].name;
-    return (
-      <EuiSuperSelect
-        valueOfSelected={selectedValue}
-        options={options}
-        onChange={onChange}
-        placholder="Select join field"
-        aria-label="Select join field"
-      />
-    );
+  _onRightSourceChange = ({ indexPatternId, indexPatternTitle }) => {
+    this.props.onJoinSelection({
+      leftField: this.props.join.leftField,
+      right: {
+        indexPatternId,
+        indexPatternTitle,
+      },
+    });
   }
 
-  _renderDataSelector() {
-    if (!this.state.leftField) {
-      return null;
-    }
-
-    const onSelection = (rightDataSelection) => {
-      this.setState({
-        right: rightDataSelection,
-        rightPopoverOpen: false,
-      });
-      this.props.onJoinSelection({
-        leftField: this.state.leftField,
-        right: rightDataSelection
-      });
-    };
-
-    return (<DataSelector seedSelection={this.state.right} onSelection={onSelection}/>);
+  _onRightFieldChange = (term) => {
+    console.log('term', term);
+    this.props.onJoinSelection({
+      leftField: this.props.join.leftField,
+      right: {
+        ...this.props.join.right,
+        term
+      },
+    });
   }
-
-  toggleRightPopover = () => {
-    this.setState((prevState) => ({
-      rightPopoverOpen: !prevState.rightPopoverOpen,
-    }));
-  };
-
-  closeRightPopover = () => {
-    this.setState({
-      rightPopoverOpen: false,
-    });
-  };
-
-  toggleLeftPopover = () => {
-    this.setState((prevState) => ({
-      leftPopoverOpen: !prevState.leftPopoverOpen,
-    }));
-  };
-
-  closeLeftPopover = () => {
-    this.setState({
-      leftPopoverOpen: false,
-    });
-  };
-
 
   render() {
-    if (this.props.join) {//init with default
+    const {
+      join,
+      onRemoveJoin,
+    } = this.props;
+    const {
+      leftSourceName,
+      leftFields,
+      rightFields,
+    } = this.state;
+    const right = _.get(join, 'right', {});
+    const rightSourceName = right.indexPatternTitle ? right.indexPatternTitle : right.indexPatternId;
 
-      if (this.state.leftField === null) {
-        this.state.leftField = this.props.join.leftField;
-      }
+    let onExpression;
+    if (leftFields && rightFields) {
+      onExpression = (
+        <EuiFlexItem grow={false}>
+          <OnExpression
+            leftValue={join.leftField}
+            leftFields={leftFields}
+            onLeftChange={this._onLeftFieldChange}
 
-      if (this.state.right === null) {
-        this.state.right = this.props.join.right;
-      }
+            rightValue={right.term}
+            rightFields={rightFields}
+            onRightChange={this._onRightFieldChange}
+          />
+        </EuiFlexItem>
+      );
     }
 
-    this._loadStringFields();
-
+    let groupByExpression;
+    if (right.indexPatternId && right.term) {
+      groupByExpression = (
+        <EuiFlexItem grow={false}>
+          <GroupByExpression
+            rightSourceName={rightSourceName}
+            term={right.term}
+          />
+        </EuiFlexItem>
+      );
+    }
     return (
       <EuiFlexGroup className="gisJoinItem" responsive={false} wrap={true} gutterSize="s">
+
         <EuiFlexItem grow={false}>
-
-          <EuiPopover
-            id="JoinLeftPopover"
-            isOpen={this.state.leftPopoverOpen}
-            closePopover={this.closeLeftPopover}
-            ownFocus
-            button={
-              <EuiExpressionButton
-                onClick={this.toggleLeftPopover}
-                description="Join field"
-                buttonValue={this.state.leftField ? this.state.leftField : '-- select --'}
-              />
-            }
-          >
-            <div style={{ width: 300 }}>
-              {this._renderJoinFields()}
-            </div>
-          </EuiPopover>
-
+          <SelectExpression
+            rightFields={rightFields}
+          />
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
-
-          <EuiPopover
-            id="JoinRightPopover"
-            isOpen={this.state.rightPopoverOpen}
-            closePopover={this.closeRightPopover}
-            button={
-              <EuiExpressionButton
-                onClick={this.toggleRightPopover}
-                description="with"
-                buttonValue={this.state.right ? `${this.state.right.indexPatternTitle}: ${this.state.right.term}` : '-- select --'}
-              />
-            }
-          >
-            <div style={{ width: 300 }}>
-              {this._renderDataSelector()}
-            </div>
-          </EuiPopover>
-
+          <FromExpression
+            leftSourceName={leftSourceName}
+          />
         </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <JoinExpression
+            indexPatternId={right.indexPatternId}
+            rightSourceName={rightSourceName}
+            onChange={this._onRightSourceChange}
+          />
+        </EuiFlexItem>
+
+        {onExpression}
+
+        {groupByExpression}
 
         <EuiButtonIcon
           className="gisJoinItem__delete"
@@ -199,7 +220,7 @@ export class Join extends React.Component {
           color="danger"
           aria-label="Delete join"
           title="Delete join"
-          onClick={this.props.onRemoveJoin}
+          onClick={onRemoveJoin}
         />
       </EuiFlexGroup>
     );
