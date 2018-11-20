@@ -24,28 +24,35 @@ interface LogSearchInputState {
 
 export const LogSearchInput = injectI18n(
   class extends React.PureComponent<LogSearchInputProps, LogSearchInputState> {
-    public displayName = 'LogSearchInput';
+    public static displayName = 'LogSearchInput';
     public readonly state = {
       query: '',
     };
+
     public handleSubmit: React.FormEventHandler<HTMLFormElement> = evt => {
       evt.preventDefault();
+
       const { query } = this.state;
+
       if (query === '') {
         this.props.onClear();
       } else {
         this.props.onSearch(this.state.query);
       }
     };
+
     public handleChangeQuery: React.ChangeEventHandler<HTMLInputElement> = evt => {
       this.setState({
         query: evt.target.value,
       });
     };
+
     public render() {
       const { className, isLoading, intl } = this.props;
       const { query } = this.state;
+
       const classes = classNames('loggingSearchInput', className);
+
       return (
         <form onSubmit={this.handleSubmit}>
           <PlainSearchField

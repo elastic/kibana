@@ -22,6 +22,8 @@ interface HeaderProps {
 
 export const Header = injectI18n(
   class extends React.PureComponent<HeaderProps> {
+    public static displayName = 'Header';
+
     public render() {
       const { breadcrumbs = [], appendSections = null, intl } = this.props;
       const staticBreadcrumbs = [
@@ -33,6 +35,7 @@ export const Header = injectI18n(
           }),
         },
       ];
+
       return (
         <HeaderWrapper>
           <EuiHeaderSection>
