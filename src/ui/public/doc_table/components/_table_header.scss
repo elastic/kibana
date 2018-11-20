@@ -1,0 +1,9 @@
+.docTableHeader__move,
+.docTableHeader__sortChange {
+  opacity: 0;
+
+  th:hover &,
+  &:focus {
+    opacity: 1;
+  }
+}

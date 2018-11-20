@@ -225,7 +225,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     getDocTableIndex(index) {
       return getRemote()
-        .findByCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
+        .findByCssSelector('tr.docTable__row:nth-child(' + (index) + ')')
         .getVisibleText();
     }
 

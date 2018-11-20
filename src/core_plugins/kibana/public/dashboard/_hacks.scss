@@ -206,11 +206,8 @@ dashboard-listing {
     }
   }
 
-  // SASSTODO: WAIT FOR DISCOVER SASS
-  .discover-table-row {
-    .docTableRowFilterButton {
-      background-color: $euiColorEmptyShade;
-    }
+  .docTableRowFilterButton {
+    background-color: $euiColorEmptyShade;
   }
 
   // SASSTODO: Wait for EUI conversion to remove

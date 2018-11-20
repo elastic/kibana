@@ -1,3 +1,4 @@
+@import './doc_table/index';
 @import './query_bar/index';
 // Can't import vis folder here because of cascading issues, it's imported in core_plugins/kibana
 // @import './vis/index';

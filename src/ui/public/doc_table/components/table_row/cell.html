@@ -5,12 +5,12 @@ if (timefield) {
 } else if (sourcefield) {
   attributes='class="eui-textBreakAll eui-textBreakWord"';
 } else {
-  attributes='class="discover-table-datafield eui-textBreakAll eui-textBreakWord"';
+  attributes='class="docTableCell__dataField eui-textBreakAll eui-textBreakWord"';
 }
 %>
 <td <%= attributes %> data-test-subj="docTableField">
   <%= formatted %>
-  <span class="table-cell-filter">
+  <span class="docTableCell__filter">
     <% if (filterable) { %>
       <button
         ng-click="inlineFilter($event, '+')"

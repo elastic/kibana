@@ -205,8 +205,8 @@ describe('Doc Table', function () {
         expect($scope.headerClass).to.be.a(Function);
       });
 
-      it('should return list including table-header-sortchange for a sortable field not currently sorted by', function () {
-        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('table-header-sortchange');
+      it('should return list including docTableHeader__sortChange for a sortable field not currently sorted by', function () {
+        expect($scope.headerClass(SORTABLE_FIELDS[0])).to.contain('docTableHeader__sortChange');
       });
 
       it('should return undefined for an unsortable field', function () {
