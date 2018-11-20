@@ -7,13 +7,15 @@ import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } 
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../../server/lib/adapters/beats/adapter_types';
-import { withUrlState } from '../../../containers/with_url_state';
+import { BeatsContainer } from '../../../containers/beats';
+import { TagsContainer } from '../../../containers/tags';
 import { AppPageProps } from '../../../frontend_types';
-interface PageProps extends AppPageProps {
-  loadBeats: any;
+
+interface PageState {
+  assigned: boolean;
 }
-export class ReviewWalkthrough extends React.Component<PageProps, any> {
-  constructor(props: PageProps) {
+export class FinishWalkthroughPage extends React.Component<AppPageProps, PageState> {
+  constructor(props: AppPageProps) {
     super(props);
 
     this.state = {
@@ -23,8 +25,6 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
 
   public componentDidMount() {
     setTimeout(async () => {
-      await this.props.loadBeats();
-
       const done = await this.assignTagToBeat();
 
       if (done) {
@@ -60,7 +60,7 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
                   fill
                   disabled={!this.state.assigned}
                   onClick={async () => {
-                    goTo('/overview/beats');
+                    goTo('/overview/enrolled_beats');
                   }}
                 >
                   Done
@@ -99,5 +99,3 @@ export class ReviewWalkthrough extends React.Component<PageProps, any> {
     return true;
   };
 }
-
-export const ReviewWalkthroughPage = withUrlState<PageProps>(ReviewWalkthrough);

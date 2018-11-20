@@ -5,7 +5,7 @@
  */
 import { EuiButton } from '@elastic/eui';
 import React, { Component } from 'react';
-import { EnrollBeat } from '../../../components/page_fragments/enroll';
+import { EnrollBeat } from '../../../components/enroll_beats';
 import { AppPageProps } from '../../../frontend_types';
 
 interface ComponentState {

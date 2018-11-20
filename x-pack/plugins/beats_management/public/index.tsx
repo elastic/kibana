@@ -7,7 +7,7 @@
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { Provider as UnstatedProvider } from 'unstated';
+import { Provider as UnstatedProvider, Subscribe } from 'unstated';
 import { BASE_PATH } from '../common/constants';
 import { Background } from './components/layouts/background';
 import { BreadcrumbProvider } from './components/navigation/route_with_breadcrumb';
@@ -23,9 +23,13 @@ async function startApp(libs: FrontendLibs) {
     <ThemeProvider theme={{ eui: euiVars }}>
       <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
         <BreadcrumbProvider>
-          <Background>
-            <AppRouter libs={libs} />
-          </Background>
+          <Subscribe to={[BeatsContainer, TagsContainer]}>
+            {(beats: BeatsContainer, tags: TagsContainer) => (
+              <Background>
+                <AppRouter libs={libs} beatsContainer={beats} tagsContainer={tags} />
+              </Background>
+            )}
+          </Subscribe>
         </BreadcrumbProvider>
       </UnstatedProvider>
     </ThemeProvider>

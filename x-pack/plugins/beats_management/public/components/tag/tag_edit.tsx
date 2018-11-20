@@ -32,11 +32,10 @@ import { ConfigView } from './config_view';
 import { TagBadge } from './tag_badge';
 
 interface TagEditProps {
-  mode: 'edit' | 'create';
   tag: Pick<BeatTag, Exclude<keyof BeatTag, 'last_updated'>>;
-  onDetachBeat: (beatIds: string[]) => void;
+  onDetachBeat?: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
-  attachedBeats: CMBeat[] | null;
+  attachedBeats?: CMBeat[];
 }
 
 interface TagEditState {
@@ -84,12 +83,12 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   name="name"
                   isInvalid={!!this.getNameError(tag.id)}
                   onChange={this.updateTag('id')}
-                  disabled={this.props.mode === 'edit'}
+                  disabled={!!this.props.onDetachBeat}
                   value={tag.id}
                   placeholder="Tag name (required)"
                 />
               </EuiFormRow>
-              {this.props.mode === 'create' && (
+              {!this.props.onDetachBeat && (
                 <EuiFormRow label="Tag Color">
                   <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
                 </EuiFormRow>
@@ -209,7 +208,9 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
     switch (action) {
       case AssignmentActionType.Delete:
         const { selection } = this.state.tableRef.current.state;
-        this.props.onDetachBeat(selection.map((beat: any) => beat.id));
+        if (this.props.onDetachBeat) {
+          this.props.onDetachBeat(selection.map((beat: any) => beat.id));
+        }
     }
   };
 

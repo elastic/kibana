@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { CMBeat } from '../../../common/domain_types';
+import { CMBeat } from '../../common/domain_types';
 
 interface ComponentProps {
   /** Such as kibanas basePath, for use to generate command */

@@ -5,6 +5,7 @@
  */
 import { EuiButton } from '@elastic/eui';
 import React, { Component } from 'react';
+import { Subscribe } from 'unstated';
 import { NoDataLayout } from '../../../components/layouts/no_data';
 // import { Switch } from 'react-router-dom';
 import { WalkthroughLayout } from '../../../components/layouts/walkthrough';
