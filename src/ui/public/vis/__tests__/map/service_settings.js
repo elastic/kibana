@@ -134,10 +134,19 @@ describe('service_settings (FKA tilemaptest)', function () {
 
   describe('TMS', function () {
 
-    it('should get url', async function () {
+    it('should NOT get url from the config', async function () {
       const tmsServices = await serviceSettings.getTMSServices();
       const tmsService = tmsServices[0];
-      const mapUrl = tmsService.url;
+      expect(typeof tmsService.url === 'undefined').to.equal(true);
+    });
+
+    it('should get url by resolving dynamically', async function () {
+
+      const tmsServices = await serviceSettings.getTMSServices();
+      const tmsService = tmsServices[0];
+      expect(typeof tmsService.url === 'undefined').to.equal(true);
+
+      const mapUrl = await serviceSettings.getUrlTemplateForTMSLayer(tmsService);
       expect(mapUrl).to.contain('{x}');
       expect(mapUrl).to.contain('{y}');
       expect(mapUrl).to.contain('{z}');
@@ -161,9 +170,8 @@ describe('service_settings (FKA tilemaptest)', function () {
 
       let tilemapServices;
 
-      function assertQuery(expected) {
-
-        const mapUrl = tilemapServices[0].url;
+      async function assertQuery(expected) {
+        const mapUrl = await serviceSettings.getUrlTemplateForTMSLayer(tilemapServices[0]);
         const urlObject = url.parse(mapUrl, true);
         Object.keys(expected).forEach(key => {
           expect(urlObject.query).to.have.property(key, expected[key]);
@@ -173,7 +181,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       it('accepts an object', async () => {
         serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapServices = await serviceSettings.getTMSServices();
-        assertQuery({ foo: 'bar' });
+        await assertQuery({ foo: 'bar' });
       });
 
       it('merged additions with previous values', async () => {
@@ -181,7 +189,7 @@ describe('service_settings (FKA tilemaptest)', function () {
         serviceSettings.addQueryParams({ foo: 'bar' });
         serviceSettings.addQueryParams({ bar: 'stool' });
         tilemapServices = await serviceSettings.getTMSServices();
-        assertQuery({ foo: 'bar', bar: 'stool' });
+        await assertQuery({ foo: 'bar', bar: 'stool' });
       });
 
       it('overwrites conflicting previous values', async () => {
@@ -190,14 +198,14 @@ describe('service_settings (FKA tilemaptest)', function () {
         serviceSettings.addQueryParams({ bar: 'stool' });
         serviceSettings.addQueryParams({ foo: 'tstool' });
         tilemapServices = await serviceSettings.getTMSServices();
-        assertQuery({ foo: 'tstool', bar: 'stool' });
+        await assertQuery({ foo: 'tstool', bar: 'stool' });
       });
 
       it('when overridden, should continue to work', async () => {
         mapConfig.manifestServiceUrl = manifestUrl2;
         serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapServices = await serviceSettings.getTMSServices();
-        assertQuery({ foo: 'bar' });
+        await assertQuery({ foo: 'bar' });
       });
 
 
@@ -227,7 +235,17 @@ describe('service_settings (FKA tilemaptest)', function () {
             'subdomains': []
           }
         ];
-        expect(tilemapServices).to.eql(expected);
+
+
+        const assertions = tilemapServices.map(async (actualService, index) => {
+          const expectedService = expected[index];
+          expect(actualService.id).to.equal(expectedService.id);
+          expect(actualService.attribution).to.equal(expectedService.attribution);
+          const url = await serviceSettings.getUrlTemplateForTMSLayer(actualService);
+          expect(url).to.equal(expectedService.url);
+        });
+
+        return Promise.all(assertions);
 
       });
 
@@ -251,7 +269,11 @@ describe('service_settings (FKA tilemaptest)', function () {
             'id': 'TMS in config/kibana.yml'
           }
         ];
-        expect(tilemapServices).to.eql(expected);
+        expect(tilemapServices.length).to.eql(1);
+        expect(tilemapServices[0].attribution).to.eql(expected[0].attribution);
+        expect(tilemapServices[0].id).to.eql(expected[0].id);
+        const url = await serviceSettings.getUrlTemplateForTMSLayer(tilemapServices[0]);
+        expect(url).to.equal(expected[0].url);
 
       });
 

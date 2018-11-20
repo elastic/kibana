@@ -35,7 +35,7 @@ export const ORIGIN = {
 
 
 uiModules.get('kibana')
-  .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
+  .service('serviceSettings', function ($http, $sanitize, mapConfig, regionmapsConfig, tilemapsConfig, kbnVersion) {
 
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
@@ -104,7 +104,6 @@ uiModules.get('kibana')
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
           layers.forEach((layer) => {
-            // layer.url = ;
             layer.attribution = $sanitize(markdownIt.render(layer.attribution));
           });
           return layers;
@@ -152,14 +151,12 @@ uiModules.get('kibana')
       async getFileLayers() {
         const fileLayers = await this._loadFileLayers();
 
-        const strippedFileLayers = fileLayers.map(fileLayer => {
+        return fileLayers.map(fileLayer => {
           const strippedFileLayer = { ...fileLayer };
           //remove the properties that should not propagate and be used by clients.
           delete strippedFileLayer.url;
           return strippedFileLayer;
         });
-
-        return strippedFileLayers;
       }
 
 
@@ -173,7 +170,7 @@ uiModules.get('kibana')
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
           tmsService.id = TMS_IN_YML_ID;
-          tmsService.origin = 'yml';
+          tmsService.origin = ORIGIN.KIBANA_YML;
           allServices.push(tmsService);
         }
 
@@ -187,9 +184,7 @@ uiModules.get('kibana')
           return strippedService;
         });
 
-        const st = allServices.concat(strippedServiceFromManifest);
-        return st;
-
+        return allServices.concat(strippedServiceFromManifest);
       }
 
       /**
@@ -243,7 +238,6 @@ uiModules.get('kibana')
       }
 
       async getGeoJsonForRegionLayer(fileLayerConfig) {
-
         let url;
         if (fileLayerConfig.origin === ORIGIN.EMS) {
           const fileLayers = await this._loadFileLayers();
@@ -257,7 +251,8 @@ uiModules.get('kibana')
             throw new Error(`File  ${fileLayerConfig.name} not recognized`);
           }
         } else {
-          url = fileLayerConfig.url;//should dynamically resolve from regionmaps config too
+          //configuration is not from EMS. fallback.
+          url = fileLayerConfig.url;
         }
 
         const geojson = await $http({
