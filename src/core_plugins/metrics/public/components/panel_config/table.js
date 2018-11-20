@@ -176,7 +176,7 @@ class TablePanelConfig extends Component {
               helpText={
                 <span>
                   <FormattedMessage
-                    id="tsvb.table.optionsTab.itemUrlDescription"
+                    id="tsvb.table.optionsTab.itemUrlHelpText"
                     defaultMessage="This supports mustache templating. {key} is set to the term."
                     values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
                   />

@@ -105,7 +105,7 @@ const SplitByTermsUi = props => {
             />)}
           >
             <EuiFieldNumber
-              placeholder={intl.formatMessage({ id: 'tsvb.splits.terms.top.sizePlaceholder', defaultMessage: 'Size' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.splits.terms.sizePlaceholder', defaultMessage: 'Size' })}
               value={Number(model.terms_size)}
               onChange={handleTextChange('terms_size')}
             />

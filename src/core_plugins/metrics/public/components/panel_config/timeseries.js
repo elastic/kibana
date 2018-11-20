@@ -319,7 +319,7 @@ class TimeseriesPanelConfigUi extends Component {
               <EuiFlexItem grow={false}>
                 <EuiFormLabel style={{ marginBottom: 0 }}>
                   <FormattedMessage
-                    id="tsvb.timeseries.optionsTab.displayGridnLabel"
+                    id="tsvb.timeseries.optionsTab.displayGridLabel"
                     defaultMessage="Display grid"
                   />
                 </EuiFormLabel>

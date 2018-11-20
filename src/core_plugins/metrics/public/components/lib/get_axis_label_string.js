@@ -40,7 +40,7 @@ export function getAxisLabelString(interval) {
     if (Math.abs(as) > 1) {
       const unitValue = Math.round(Math.abs(as));
       const unitString = unitLookup[units[i]];
-      return i18n.translate('tsvb.axisLabel.axisStringText',
+      return i18n.translate('tsvb.axisLabelOptions.axisLabel',
         { defaultMessage: 'per {unitValue} {unitString}', values: { unitValue, unitString } });
     }
   }

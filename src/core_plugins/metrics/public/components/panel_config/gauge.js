@@ -236,7 +236,7 @@ class GaugePanelConfigUi extends Component {
                 <EuiFormRow
                   id={htmlId('gaugeLine')}
                   label={(<FormattedMessage
-                    id="tsvb.gauge.optionsTab.gaugerLineWidthLabel"
+                    id="tsvb.gauge.optionsTab.gaugeLineWidthLabel"
                     defaultMessage="Gauge line width"
                   />)}
                 >

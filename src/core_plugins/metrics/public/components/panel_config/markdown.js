@@ -238,7 +238,7 @@ class MarkdownPanelConfigUi extends Component {
             <EuiTitle size="xxs">
               <span>
                 <FormattedMessage
-                  id="tsvb.markdown.optionsTab.custoCSSLabel"
+                  id="tsvb.markdown.optionsTab.customCSSLabel"
                   defaultMessage="Custom CSS (supports Less)"
                 />
               </span>
