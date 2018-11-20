@@ -5,6 +5,8 @@ set -e
 # move to Kibana root
 cd "$(dirname "$0")/.."
 
+./src/dev/ci_setup/load_bootstrap_cache.sh;
+
 case "$JOB" in
 kibana-intake)
   ./test/scripts/jenkins_unit.sh
