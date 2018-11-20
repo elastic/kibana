@@ -18,7 +18,10 @@ export const mlChartTooltipService = {
 };
 
 mlChartTooltipService.show = function (contents, target, offset = { x: 0, y: 0 }) {
-  if (this.element === null) {
+  if (
+    this.element === null
+    || typeof target === 'undefined'
+  ) {
     return;
   }
 
