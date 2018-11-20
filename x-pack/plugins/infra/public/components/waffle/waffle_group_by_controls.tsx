@@ -27,7 +27,7 @@ let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; type: InfraPathType; 
 const getOptions = (
   nodeType: string,
   intl: InjectedIntl
-): Array<{ text: string; value: InfraMetricType }> => {
+): Array<{ text: string; type: InfraPathType; field: string }> => {
   if (!OPTIONS) {
     OPTIONS = {
       [InfraNodeType.pod]: [
