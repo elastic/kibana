@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { Popover } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
+import { KioskControls } from './kiosk_controls';
 
 const getRefreshInterval = (val = '') => {
   // if it's a number, just use it directly
@@ -68,6 +69,9 @@ export const ControlSettings = ({ setRefreshInterval, refreshInterval }) => {
                 closePopover();
               }}
             />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <KioskControls />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
