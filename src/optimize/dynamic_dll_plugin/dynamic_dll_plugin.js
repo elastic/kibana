@@ -22,6 +22,7 @@ import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
 import RawModule from 'webpack/lib/RawModule';
 import webpack from 'webpack';
 import path from 'path';
+import normalizePosixPath from 'normalize-path';
 import fs from 'fs';
 import { promisify } from 'util';
 import { parseSingleFileSync, dependenciesVisitorsGenerator } from '@kbn/babel-code-parser';
@@ -159,14 +160,16 @@ export class DynamicDllPlugin {
           if (module.delegateData) {
             const absoluteResource = path.resolve(dllContext, module.userRequest);
             if (absoluteResource.includes('node_modules') || absoluteResource.includes('webpackShims')) {
-              requiresMap[`require('${path.relative(dllOutputPath, absoluteResource)}');`] = true;
+              // NOTE: normalizePosixPath is been used as we only want to have posix
+              // paths inside our final dll entry file
+              requiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, absoluteResource))}');`] = true;
               requiredModulePath = absoluteResource;
             }
           }
 
           // include requires for modules that need to be added to the dll
           if (module.stubType === DLL_ENTRY_STUB_MODULE_TYPE) {
-            requiresMap[`require('${path.relative(dllOutputPath, module.stubResource)}');`] = true;
+            requiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, module.stubResource))}');`] = true;
             requiredModulePath = module.stubResource;
           }
 
@@ -342,8 +345,8 @@ export class DynamicDllPlugin {
           // after the webpack-loader char (!)
           const restImport = resolvedDep.substring(webpackLoaderFoundIdx + 1);
           // resolve the loader and the restImport parts separately
-          const resolvedDepToRequireFirstPart = path.relative(dllOutputPath, loader);
-          const resolvedDepToRequireSecondPart = path.relative(dllOutputPath, restImport);
+          const resolvedDepToRequireFirstPart = normalizePosixPath(path.relative(dllOutputPath, loader));
+          const resolvedDepToRequireSecondPart = normalizePosixPath(path.relative(dllOutputPath, restImport));
 
           // rebuild our final webpackShim entry path in the original
           // webpack loader format `webpack-loader!script_path`
@@ -353,7 +356,7 @@ export class DynamicDllPlugin {
           // in case we didn't have any webpack-loader in the require path
           // resolve the dependency path relative to the dllOutput path
           // to get our final entry path
-          internalRequiresMap[`require('${path.relative(dllOutputPath, resolvedDep)}');`] = true;
+          internalRequiresMap[`require('${normalizePosixPath(path.relative(dllOutputPath, resolvedDep))}');`] = true;
         }
       }
     });

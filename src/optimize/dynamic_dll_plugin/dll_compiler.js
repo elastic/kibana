@@ -183,18 +183,23 @@ export class DllCompiler {
       this.log(['info', 'optimize:dynamic_dll_plugin'], 'Client vendors dll compilation started');
 
       webpack(config, (err, stats) => {
-        // If a critical error occurs
-        // reject the promise
-        //
-        // NOTE: maybe this can be improved checking also
-        // for some hard errors on stats but for now
-        // it looks like not necessary
-        if (err) {
+        // If a critical error occurs or we have
+        // errors in the stats compilation,
+        // reject the promise and logs the errors
+        const webpackErrors = err || (stats.hasErrors() && stats.toString({
+          all: false,
+          colors: true,
+          errors: true,
+          errorDetails: true,
+          moduleTrace: true
+        }));
+
+        if (webpackErrors) {
           this.log(
             ['fatal', 'optimize:dynamic_dll_plugin'],
             `Client vendors dll compilation failed`
           );
-          return reject(err);
+          return reject(webpackErrors);
         }
 
         // Otherwise let it proceed
