@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
@@ -33,11 +34,19 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
           <EuiCallOut
             color="warning"
             iconType="iInCircle"
-            title={"Cannot customize a reserved role's space privileges"}
+            title={
+              <FormattedMessage
+                id="xpack.security.management.editRoles.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+                defaultMessage="Cannot customize a reserved role's space privileges"
+              />
+            }
           >
             <p>
-              This role always grants full access to all spaces. To customize privileges for
-              individual spaces, you must create a new role.
+              <FormattedMessage
+                id="xpack.security.management.editRoles.privilegeCalloutWarning.howToCustomizePrivilegesDescription"
+                defaultMessage="This role always grants full access to all spaces. To customize privileges for
+                individual spaces, you must create a new role."
+              />
             </p>
           </EuiCallOut>
         );
@@ -46,12 +55,46 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
           <EuiCallOut
             color="warning"
             iconType="iInCircle"
-            title={'Minimum privilege is too high to customize individual spaces'}
+            title={
+              <FormattedMessage
+                id="xpack.security.management.editRoles.privilegeCalloutWarning.minimumPrivilegeTitle"
+                defaultMessage="Minimum privilege is too high to customize individual spaces"
+              />
+            }
           >
             <p>
-              Setting the minimum privilege to <strong>all</strong> grants full access to all
-              spaces. To customize privileges for individual spaces, the minimum privilege must be
-              either <strong>read</strong> or <strong>none</strong>.
+              <FormattedMessage
+                id="xpack.security.management.editRoles.privilegeCalloutWarning.howToCustomizePrivilegesForIndividualSpacesDescription"
+                defaultMessage="Setting the minimum privilege to {allText} grants full access to all
+                spaces. To customize privileges for individual spaces, the minimum privilege must be
+                either {readText} or {noneText}."
+                values={{
+                  allText: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.security.management.editRoles.privilegeCalloutWarning.allText"
+                        defaultMessage="all"
+                      />
+                    </strong>
+                  ),
+                  readText: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.security.management.editRoles.privilegeCalloutWarning.readText"
+                        defaultMessage="read"
+                      />
+                    </strong>
+                  ),
+                  noneText: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.security.management.editRoles.privilegeCalloutWarning.noneText"
+                        defaultMessage="none"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
             </p>
           </EuiCallOut>
         );
@@ -64,11 +107,19 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
           <EuiCallOut
             color="warning"
             iconType="iInCircle"
-            title={"Cannot customize a reserved role's space privileges"}
+            title={
+              <FormattedMessage
+                id="xpack.security.management.editRoles.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+                defaultMessage="Cannot customize a reserved role's space privileges"
+              />
+            }
           >
             <p>
-              This role always grants read access to all spaces. To customize privileges for
-              individual spaces, you must create a new role.
+              <FormattedMessage
+                id="xpack.security.management.editRoles.privilegeCalloutWarning.alwaysGrantReadAccessToAllSpacesTitle"
+                defaultMessage="This role always grants read access to all spaces. To customize privileges for
+                individual spaces, you must create a new role."
+              />
             </p>
           </EuiCallOut>
         );
@@ -79,7 +130,20 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
             iconType="iInCircle"
             title={
               <span>
-                The minimal possible privilege is <strong>read</strong>.
+                <FormattedMessage
+                  id="xpack.security.management.editRoles.privilegeCalloutWarning.minimalPossiblePrivilageTitle"
+                  defaultMessage="The minimal possible privilege is {readText}."
+                  values={{
+                    readText: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.security.management.editRoles.privilegeCalloutWarning.readText"
+                          defaultMessage="read"
+                        />
+                      </strong>
+                    ),
+                  }}
+                />
               </span>
             }
           />
@@ -92,11 +156,19 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
         <EuiCallOut
           color="warning"
           iconType="iInCircle"
-          title={"Cannot customize a reserved role's space privileges"}
+          title={
+            <FormattedMessage
+              id="xpack.security.management.editRoles.privilegeCalloutWarning.notPossibleToCustomizeReservedRoleSpacePrivilegesTitle"
+              defaultMessage="Cannot customize a reserved role's space privileges"
+            />
+          }
         >
           <p>
-            This role never grants access to any spaces within Kibana. To customize privileges for
-            individual spaces, you must create a new role.
+            <FormattedMessage
+              id="xpack.security.management.editRoles.privilegeCalloutWarning.neverGrantReadAccessToAllSpacesTitle"
+              defaultMessage="This role never grants access to any spaces within Kibana. To customize privileges for
+              individual spaces, you must create a new role."
+            />
           </p>
         </EuiCallOut>
       );

@@ -63,7 +63,7 @@ VisTypesRegistryProvider.register((Private) => {
       showQueryBar: true,
       showFilterBar: true,
     },
-    stage: 'lab',
+    stage: 'experimental',
     feedbackMessage: defaultFeedbackMessage,
   });
 });

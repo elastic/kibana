@@ -39,7 +39,7 @@ function InputControlVisProvider(Private) {
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Create interactive controls for easy dashboard manipulation.'
     }),
-    stage: 'lab',
+    stage: 'experimental',
     requiresUpdateStatus: [Status.PARAMS, Status.TIME],
     feedbackMessage: defaultFeedbackMessage,
     visualization: VisController,
