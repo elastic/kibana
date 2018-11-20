@@ -190,7 +190,7 @@ export class TokenAuthenticationProvider {
   async _authenticateViaLoginAttempt(request) {
     this._options.log(['debug', 'security', 'token'], 'Trying to authenticate via login attempt.');
 
-    const credentials = request.loginAttempt(request).getCredentials();
+    const credentials = request.loginAttempt().getCredentials();
     if (!credentials) {
       this._options.log(['debug', 'security', 'token'], 'Username and password not found in payload.');
       return AuthenticationResult.notHandled();

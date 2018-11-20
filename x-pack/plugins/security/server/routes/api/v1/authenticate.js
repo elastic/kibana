@@ -46,7 +46,7 @@ export function initAuthenticateApi(server) {
       const { username, password } = request.payload;
 
       try {
-        request.loginAttempt(request).setCredentials(username, password);
+        request.loginAttempt().setCredentials(username, password);
         const authenticationResult = await server.plugins.security.authenticate(request);
 
         if (!authenticationResult.succeeded()) {
