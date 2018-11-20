@@ -77,7 +77,7 @@ export class DiscoverNoResults extends Component {
                     />
                   </strong>
                 ),
-                failureShard: '"' + failure.shard + '"',
+                failureShard: `&lsquo;${failure.shard}&rsquo;`,
               }}
             />
           </EuiText>
