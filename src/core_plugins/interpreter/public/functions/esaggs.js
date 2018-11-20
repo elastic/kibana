@@ -46,7 +46,7 @@ export default () => ({
       types: ['string', 'null'],
       default: null,
     },
-    hierarchical: {
+    metricsOnAllLevels: {
       types: ['bool', 'null'],
       default: false,
     },
@@ -83,7 +83,7 @@ export default () => ({
         query: _.get(context, 'query', null),
         filters: _.get(context, 'filters', null),
         forceFetch: true,
-        isHierarchical: args.hierarchical,
+        isHierarchical: args.metricsOnAllLevels,
         showPartial: args.partialRows,
         inspectorAdapters: handlers.inspectorAdapters,
         queryFilter,

@@ -31,7 +31,8 @@ uiModules
       scope: {
         savedObj: '=',
         uiState: '=?',
-        timeRange: '='
+        timeRange: '=',
+        filters: '=',
       },
       link: function ($scope, element) {
         const editorType = $scope.savedObj.vis.type.editor;
@@ -43,6 +44,7 @@ uiModules
           editor.render({
             uiState: $scope.uiState,
             timeRange: $scope.timeRange,
+            filters: $scope.filters,
             appState: getAppState(),
           });
         };
@@ -57,6 +59,7 @@ uiModules
         });
 
         $scope.$watch('timeRange', $scope.renderFunction);
+        $scope.$watch('filters', $scope.renderFunction);
 
       }
     };

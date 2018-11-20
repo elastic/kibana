@@ -31,9 +31,12 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
+import { FilterBarQueryFilterProvider } from '../../../filter_bar/query_filter';
 
 
-const defaultEditor = function ($rootScope, $compile, i18n) {
+const defaultEditor = function (Private, $rootScope, $compile, i18n) {
+  const queryFilter = Private(FilterBarQueryFilterProvider);
+
   return class DefaultEditor {
     static key = 'default';
 
@@ -53,7 +56,7 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
       }
     }
 
-    render({ uiState, timeRange, appState }) {
+    render({ uiState, timeRange, appState, filters }) {
       let $scope;
 
       const updateScope = () => {
@@ -166,12 +169,14 @@ const defaultEditor = function ($rootScope, $compile, i18n) {
               uiState: uiState,
               listenOnChange: false,
               timeRange: timeRange,
+              filters: filters,
               appState: appState,
             });
           });
         } else {
           this._handler.update({
-            timeRange: timeRange
+            timeRange: timeRange,
+            filters: filters,
           });
         }
 
