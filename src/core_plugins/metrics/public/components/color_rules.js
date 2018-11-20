@@ -31,6 +31,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 class ColorRules extends Component {
 
@@ -55,11 +57,15 @@ class ColorRules extends Component {
     const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
+    const { intl } = this.props;
     const operatorOptions = [
-      { label: '> greater than', value: 'gt' },
-      { label: '>= greater than or equal', value: 'gte' },
-      { label: '< less than', value: 'lt' },
-      { label: '<= less than or equal', value: 'lte' },
+      { label: intl.formatMessage({ id: 'tsvb.colorRules.greaterThanLabel', defaultMessage: '> greater than' }), value: 'gt' },
+      {
+        label: intl.formatMessage({ id: 'tsvb.colorRules.greaterThanOrEqualLabel', defaultMessage: '>= greater than or equal' }),
+        value: 'gte'
+      },
+      { label: intl.formatMessage({ id: 'tsvb.colorRules.lessThanLabel', defaultMessage: '< less than' }), value: 'lt' },
+      { label: intl.formatMessage({ id: 'tsvb.colorRules.lessThanOrEqualLabel', defaultMessage: '<= less than or equal' }), value: 'lte' },
     ];
     const handleColorChange = (part) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
@@ -77,7 +83,13 @@ class ColorRules extends Component {
       secondary = (
         <Fragment>
           <EuiFlexItem grow={false}>
-            <EuiFormLabel style={labelStyle}>and {this.props.secondaryName} to</EuiFormLabel>
+            <EuiFormLabel style={labelStyle}>
+              <FormattedMessage
+                id="tsvb.colorRules.setSecondaryColorLabel"
+                defaultMessage="and {secondaryName} to"
+                values={{ secondaryName: this.props.secondaryName }}
+              />
+            </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ColorPicker
@@ -92,7 +104,13 @@ class ColorRules extends Component {
     return (
       <EuiFlexGroup wrap={true} responsive={false} gutterSize="s" key={model.id} alignItems="center" className="tvbColorRules__rule">
         <EuiFlexItem grow={false}>
-          <EuiFormLabel style={labelStyle}>Set {this.props.primaryName} to</EuiFormLabel>
+          <EuiFormLabel style={labelStyle}>
+            <FormattedMessage
+              id="tsvb.colorRules.setPrimaryColorLabel"
+              defaultMessage="Set {primaryName} to"
+              values={{ primaryName: this.props.primaryName }}
+            />
+          </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ColorPicker
@@ -105,7 +123,12 @@ class ColorRules extends Component {
         { secondary }
 
         <EuiFlexItem grow={false}>
-          <EuiFormLabel style={labelStyle} htmlFor={htmlId('ifMetricIs')}>if metric is</EuiFormLabel>
+          <EuiFormLabel style={labelStyle} htmlFor={htmlId('ifMetricIs')}>
+            <FormattedMessage
+              id="tsvb.colorRules.ifMetricIsLabel"
+              defaultMessage="if metric is"
+            />
+          </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiComboBox
@@ -120,7 +143,7 @@ class ColorRules extends Component {
 
         <EuiFlexItem>
           <EuiFieldNumber
-            aria-label="Value"
+            aria-label={intl.formatMessage({ id: 'tsvb.colorRules.valueAriaLabel', defaultMessage: 'Value' })}
             value={model.value}
             onChange={this.handleChange(model, 'value', Number)}
             fullWidth
@@ -154,9 +177,9 @@ class ColorRules extends Component {
 
 ColorRules.defaultProps = {
   name: 'color_rules',
-  primaryName: 'background',
+  primaryName: i18n.translate('tsvb.colorRules.defaultPrimaryNameLabel', { defaultMessage: 'background' }),
   primaryVarName: 'background_color',
-  secondaryName: 'text',
+  secondaryName: i18n.translate('tsvb.colorRules.defaultSecondaryNameLabel', { defaultMessage: 'text' }),
   secondaryVarName: 'color',
   hideSecondary: false
 };
@@ -172,4 +195,4 @@ ColorRules.propTypes = {
   hideSecondary: PropTypes.bool
 };
 
-export default ColorRules;
+export default injectI18n(ColorRules);
