@@ -12,6 +12,7 @@ import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_ada
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
+// import { Hosts } from '../Hosts';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
 
 export function compose(server: Server): AppBackendLibs {
@@ -23,6 +24,7 @@ export function compose(server: Server): AppBackendLibs {
   const domainLibs: AppDomainLibs = {
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
+    // hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
   };
 
   const libs: AppBackendLibs = {

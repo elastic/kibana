@@ -39,6 +39,7 @@ export interface Source {
   configuration: SourceConfiguration /** The raw configuration of the source */;
   status: SourceStatus /** The status of the source */;
   getEvents?: EventsData | null /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+  Hosts?: HostsData | null /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
   whoAmI?: SayMyName | null /** Just a simple example to get the app name */;
 }
 /** A set of configuration options for a security data source */
@@ -135,6 +136,20 @@ export interface SuricataAlertData {
   signature_id?: number | null;
 }
 
+export interface HostsData {
+  hosts: HostItem[];
+}
+
+export interface HostItem {
+  _id?: string | null;
+  name?: string | null;
+  firstSeen?: string | null;
+  Version?: string | null;
+  mainPackages?: string | null;
+  openPorts?: string | null;
+  riskFactor?: number | null;
+}
+
 export interface SayMyName {
   appName: string /** The id of the source */;
 }
@@ -148,6 +163,10 @@ export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
 export interface GetEventsSourceArgs {
+  timerange: TimerangeInput;
+  filterQuery?: string | null;
+}
+export interface HostsSourceArgs {
   timerange: TimerangeInput;
   filterQuery?: string | null;
 }
@@ -202,6 +221,11 @@ export namespace SourceResolvers {
       any,
       Context
     > /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+    Hosts?: HostsResolver<
+      HostsData | null,
+      any,
+      Context
+    > /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
     whoAmI?: WhoAmIResolver<
       SayMyName | null,
       any,
@@ -227,6 +251,17 @@ export namespace SourceResolvers {
     GetEventsArgs
   >;
   export interface GetEventsArgs {
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  }
+
+  export type HostsResolver<R = HostsData | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context,
+    HostsArgs
+  >;
+  export interface HostsArgs {
     timerange: TimerangeInput;
     filterQuery?: string | null;
   }
@@ -638,6 +673,66 @@ export namespace SuricataAlertDataResolvers {
     Context
   >;
   export type SignatureIdResolver<R = number | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace HostsDataResolvers {
+  export interface Resolvers<Context = any> {
+    hosts?: HostsResolver<HostItem[], any, Context>;
+  }
+
+  export type HostsResolver<R = HostItem[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace HostItemResolvers {
+  export interface Resolvers<Context = any> {
+    _id?: IdResolver<string | null, any, Context>;
+    name?: NameResolver<string | null, any, Context>;
+    firstSeen?: FirstSeenResolver<string | null, any, Context>;
+    Version?: VersionResolver<string | null, any, Context>;
+    mainPackages?: MainPackagesResolver<string | null, any, Context>;
+    openPorts?: OpenPortsResolver<string | null, any, Context>;
+    riskFactor?: RiskFactorResolver<number | null, any, Context>;
+  }
+
+  export type IdResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type NameResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FirstSeenResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type VersionResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type MainPackagesResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type OpenPortsResolver<R = string | null, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type RiskFactorResolver<R = number | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context

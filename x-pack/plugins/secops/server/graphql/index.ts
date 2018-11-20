@@ -10,12 +10,14 @@ import { getSourceQueryMock } from '../graphql/sources/source.mock';
 import { getAllSourcesQueryMock } from '../graphql/sources/sources.mock';
 import { Logger } from '../utils/logger';
 import { eventsSchema } from './events/schema.gql';
+import { hostsSchema } from './hosts/schema.gql';
 import { sourceStatusSchema } from './source_status/schema.gql';
 import { sourcesSchema } from './sources/schema.gql';
 import { whoAmISchema } from './who_am_i/schema.gql';
 
 export const schemas = [
   eventsSchema,
+  hostsSchema,
   rootSchema,
   sourcesSchema,
   sourceStatusSchema,

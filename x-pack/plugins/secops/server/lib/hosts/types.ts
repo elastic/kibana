@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventsData, SourceConfiguration, TimerangeInput } from '../../../common/graphql/types';
+import { HostsData, SourceConfiguration, TimerangeInput } from '../../../common/graphql/types';
 import { JsonObject } from '../../../common/typed_json';
 import { FrameworkRequest } from '../framework';
 import { ESQuery, SearchHit } from '../types';
 
-export interface EventsAdapter {
-  getEvents(req: FrameworkRequest, options: EventsRequestOptions): Promise<EventsData>;
+export interface HostsAdapter {
+  getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;
 }
 
-export interface EventsRequestOptions {
+export interface HostsRequestOptions {
   sourceConfiguration: SourceConfiguration;
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
