@@ -28,7 +28,7 @@ const HistoryTabsWithoutRouter = ({
       <EuiTabs>
         {tabs.map(tab => (
           <EuiTab
-            onClick={() => history.push(tab.path)}
+            onClick={() => history.push({ ...location, pathname: tab.path })}
             isSelected={location.pathname === tab.path}
             key={`${tab.path}--${tab.name}`}
           >
