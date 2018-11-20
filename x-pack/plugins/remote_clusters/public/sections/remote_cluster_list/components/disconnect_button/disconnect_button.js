@@ -87,7 +87,7 @@ export class DisconnectButtonUi extends Component {
     if (isModalOpen) {
       const title = isSingleCluster ? intl.formatMessage({
         id: 'xpack.remoteClusters.disconnectButton.confirmModal.deleteSingleClusterTitle',
-        defaultMessage: 'Delete remote cluster \'{name}\'?',
+        defaultMessage: 'Disconnect remote cluster \'{name}\'?',
       }, { name: clusterNames[0] }) : intl.formatMessage({
         id: 'xpack.remoteClusters.disconnectButton.confirmModal.multipleDeletionTitle',
         defaultMessage: 'Disconnect {count} remote clusters?',
