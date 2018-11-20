@@ -46,12 +46,10 @@ export function initServicesApi(server: Server) {
       }
 
       // Store telemetry data derived from serviceBucketList
-      storeApmTelemetry(
-        server,
-        createApmTelementry(
-          serviceBucketList.map(({ agent_name }) => agent_name as AgentName)
-        )
+      const apmTelemetry = createApmTelementry(
+        serviceBucketList.map(({ agent_name }) => agent_name as AgentName)
       );
+      storeApmTelemetry(server, apmTelemetry);
 
       return serviceBucketList;
     }

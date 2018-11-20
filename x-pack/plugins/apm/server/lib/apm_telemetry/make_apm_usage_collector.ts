@@ -12,6 +12,7 @@ import {
   getSavedObjectsClient
 } from './apm_telemetry';
 
+// TODO this type should be defined by the platform
 interface KibanaHapiServer extends Server {
   usage: {
     collectorSet: {
@@ -25,17 +26,16 @@ export function makeApmUsageCollector(server: KibanaHapiServer): void {
   const apmUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'apm',
     fetch: async (): Promise<ApmTelemetry> => {
-      let apmTelemetrySavedObject;
       const savedObjectsClient = getSavedObjectsClient(server);
       try {
-        apmTelemetrySavedObject = await savedObjectsClient.get(
+        const apmTelemetrySavedObject = await savedObjectsClient.get(
           'apm-telemetry',
           APM_TELEMETRY_DOC_ID
         );
+        return apmTelemetrySavedObject.attributes;
       } catch (err) {
         return createApmTelementry();
       }
-      return apmTelemetrySavedObject.attributes;
     }
   });
   server.usage.collectorSet.register(apmUsageCollector);
