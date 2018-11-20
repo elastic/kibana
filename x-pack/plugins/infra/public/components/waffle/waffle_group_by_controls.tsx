@@ -27,7 +27,7 @@ let OPTIONS: { [P in InfraNodeType]: Array<{ text: any; type: InfraPathType; fie
 const getOptions = (nodeType: string, intl: any) => {
   if (!OPTIONS) {
     OPTIONS = {
-      [InfraNodeType.pod]: [
+      [InfraNodeType.pod as string]: [
         {
           text: intl.formatMessage({
             id: 'xpack.infra.waffle.podGroupByOptions.namespaceLabel',
@@ -45,7 +45,7 @@ const getOptions = (nodeType: string, intl: any) => {
           field: 'kubernetes.node.name',
         },
       ],
-      [InfraNodeType.container]: [
+      [InfraNodeType.container as string]: [
         {
           text: intl.formatMessage({
             id: 'xpack.infra.waffle.containerGroupByOptions.hostLabel',
@@ -87,7 +87,7 @@ const getOptions = (nodeType: string, intl: any) => {
           field: 'meta.cloud.provider',
         },
       ],
-      [InfraNodeType.host]: [
+      [InfraNodeType.host as string]: [
         {
           text: intl.formatMessage({
             id: 'xpack.infra.waffle.hostGroupByOptions.availabilityZoneLabel',

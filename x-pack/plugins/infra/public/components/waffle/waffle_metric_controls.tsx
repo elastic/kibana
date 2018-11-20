@@ -45,7 +45,7 @@ const getOptions = (nodeType: string, intl: any) => {
     });
 
     OPTIONS = {
-      [InfraNodeType.pod]: [
+      [InfraNodeType.pod as string]: [
         {
           text: CPUUsage,
           value: InfraMetricType.cpu,
@@ -63,7 +63,7 @@ const getOptions = (nodeType: string, intl: any) => {
           value: InfraMetricType.tx,
         },
       ],
-      [InfraNodeType.container]: [
+      [InfraNodeType.container as string]: [
         {
           text: CPUUsage,
           value: InfraMetricType.cpu,
@@ -81,7 +81,7 @@ const getOptions = (nodeType: string, intl: any) => {
           value: InfraMetricType.tx,
         },
       ],
-      [InfraNodeType.host]: [
+      [InfraNodeType.host as string]: [
         {
           text: CPUUsage,
           value: InfraMetricType.cpu,
