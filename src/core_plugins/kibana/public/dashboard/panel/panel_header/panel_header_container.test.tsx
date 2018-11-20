@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 // TODO: remove this when EUI supports types for this.
 // @ts-ignore: implicit any for JS file
@@ -77,7 +78,7 @@ afterAll(() => {
 });
 
 test('Panel header shows embeddable title when nothing is set on the panel', () => {
-  component = mount(
+  component = mountWithIntl(
     <Provider store={store}>
       <PanelHeaderContainer {...getProps()} />
     </Provider>
