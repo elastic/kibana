@@ -76,11 +76,15 @@ grunt.registerTask(
         '--test-stats'
       ]));
 
-      if (stats.excludedTests > 0) {
+      if (stats.excludedTests.length > 0) {
         grunt.fail.fatal(`
-          ${stats.excludedTests} tests are excluded by the ciGroup tags, make sure that
+          ${stats.excludedTests.length} tests are excluded by the ciGroup tags, make sure that
           all test suites have a "ciGroup{X}" tag and that "tasks/functional_test_groups.js"
           knows about the tag that you are using.
+
+          tags: ${JSON.stringify({ include: TEST_TAGS })}
+
+          - ${stats.excludedTests.join('\n          - ')}
         `);
         return;
       }
