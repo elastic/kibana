@@ -15,9 +15,6 @@ case "$JOB" in
 "x-pack")
   ./test/scripts/jenkins_xpack.sh
   ;;
-"x-pack-functional")
-  ./test/scripts/jenkins_xpack_functional.sh
-  ;;
 *)
   echo "JOB '$JOB' is not implemented."
   exit 1
