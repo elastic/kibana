@@ -34,7 +34,10 @@ export class LspRestClient implements LspClient {
       });
       return response as ResponseMessage;
     } catch (e) {
-      const error = e.body;
+      let error = e;
+      if (error.body && error.body.error) {
+        error = error.body.error;
+      }
       throw new ResponseError<any>(error.code, error.message, error.data);
     }
   }

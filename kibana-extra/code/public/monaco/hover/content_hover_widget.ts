@@ -7,20 +7,22 @@
 'use strict';
 
 import { editor as Editor, languages, Range as EditorRange } from 'monaco-editor';
-import DocumentHighlight = languages.DocumentHighlight;
-// @ts-ignore
-import { renderMarkdown } from 'monaco-editor/esm/vs/base/browser/htmlContentRenderer';
+import { monaco } from '../monaco';
+
 // @ts-ignore
 import { createCancelablePromise } from 'monaco-editor/esm/vs/base/common/async';
 // @ts-ignore
-import { tokenizeToString } from 'monaco-editor/esm/vs/editor/common/modes/textToHtmlTokenizer';
-// @ts-ignore
 import { getOccurrencesAtPosition } from 'monaco-editor/esm/vs/editor/contrib/wordHighlighter/wordHighlighter';
 
+import React from 'react';
+import ReactDom from 'react-dom';
+import DocumentHighlight = languages.DocumentHighlight;
+import { ErrorCodes } from 'vscode-jsonrpc/lib/messages';
 import { Hover, MarkedString, Range } from 'vscode-languageserver-types';
+import { HoverState, HoverWidget, HoverWidgetProps } from '../../components/hover/hover_widget';
 import { ContentWidget } from '../content_widget';
 import { Operation } from '../operation';
-import { HoverComputer, LOADING } from './hover_computer';
+import { HoverComputer } from './hover_computer';
 
 export class ContentHoverWidget extends ContentWidget {
   public static ID = 'editor.contrib.contentHoverWidget';
@@ -28,12 +30,12 @@ export class ContentHoverWidget extends ContentWidget {
     className: 'wordHighlightStrong', //  hoverHighlight wordHighlightStrong
   };
   private hoverOperation: Operation<Hover>;
-  private computer: HoverComputer;
+  private readonly computer: HoverComputer;
   private lastRange: EditorRange | null = null;
   private shouldFocus: boolean = false;
-  private eventsBound: boolean = false;
   private hoverResultAction?: (hover: Hover) => void = undefined;
   private highlightDecorations: string[] = [];
+  private hoverState: HoverState = HoverState.LOADING;
 
   constructor(editor: Editor.ICodeEditor) {
     super(ContentHoverWidget.ID, editor);
@@ -43,11 +45,19 @@ export class ContentHoverWidget extends ContentWidget {
     this.computer = new HoverComputer();
     this.hoverOperation = new Operation(
       this.computer,
-      result => this.result(result, true),
-      () => void 0,
-      result => this.result(result, false)
+      result => this.result(result),
+      error => {
+        // @ts-ignore
+        if (error.code === ErrorCodes.ServerNotInitialized) {
+          this.hoverState = HoverState.INITIALTING;
+          this.render(this.lastRange!);
+        }
+      },
+      () => {
+        this.hoverState = HoverState.LOADING;
+        this.render(this.lastRange!);
+      }
     );
-    this.renderButtons();
   }
 
   public startShowingAt(range: any, focus: boolean) {
@@ -65,11 +75,6 @@ export class ContentHoverWidget extends ContentWidget {
     this.shouldFocus = focus;
   }
 
-  public showAt(position: any, focus: boolean): void {
-    super.showAt(position, focus);
-    this.bindButtonEvents();
-  }
-
   public setHoverResultAction(hoverResultAction: (hover: Hover) => void) {
     this.hoverResultAction = hoverResultAction;
   }
@@ -79,32 +84,27 @@ export class ContentHoverWidget extends ContentWidget {
     this.highlightDecorations = this.editor.deltaDecorations(this.highlightDecorations, []);
   }
 
-  private result(result: Hover, complete: boolean) {
+  private result(result: Hover) {
     if (this.hoverResultAction) {
       // pass the result to redux
       this.hoverResultAction(result);
     }
     if (this.lastRange && result && result.contents) {
       this.render(this.lastRange, result);
-    } else if (complete) {
+    } else {
       this.hide();
     }
   }
-  private renderLoading(fragment: DocumentFragment) {
-    const el = document.createElement('div');
-    el.classList.add('hover-row');
-    el.innerHTML = `
-        <div class="text-placeholder gradient"></div>      
-        <div class="text-placeholder gradient" style="width: 90%"></div>      
-        <div class="text-placeholder gradient" style="width: 75%""></div>      
-    `;
-    fragment.appendChild(el);
-  }
-  private render(renderRange: EditorRange, result: Hover) {
+
+  private render(renderRange: EditorRange, result?: Hover) {
     const fragment = document.createDocumentFragment();
-    if (result.contents === LOADING) {
-      this.renderLoading(fragment);
-    } else {
+    let props: HoverWidgetProps = {
+      state: this.hoverState,
+      gotoDefinition: this.gotoDefinition.bind(this),
+      findReferences: this.findReferences.bind(this),
+    };
+    let startColumn = renderRange.startColumn;
+    if (result) {
       let contents: MarkedString[] = [];
       if (Array.isArray(result.contents)) {
         contents = result.contents;
@@ -122,50 +122,27 @@ export class ContentHoverWidget extends ContentWidget {
         this.hide();
         return;
       }
-      this.renderMessage(contents, fragment);
-    }
-    // show
-    const startColumn = Math.min(
-      renderRange.startColumn,
-      result.range ? result.range.start.character + 1 : Number.MAX_VALUE
-    );
-    this.showAt(
-      new window.monaco.Position(renderRange.startLineNumber, startColumn),
-      this.shouldFocus
-    );
-    if (result.range) {
-      this.lastRange = this.toMonacoRange(result.range);
-      this.highlightOccurrences(this.lastRange);
-    }
-    this.updateContents(fragment);
-  }
-
-  private renderMessage(contents: MarkedString[], fragment: DocumentFragment) {
-    contents.filter(content => !!content).forEach(markedString => {
-      let markdown: string;
-      if (typeof markedString === 'string') {
-        markdown = markedString;
-      } else if (markedString.language) {
-        markdown = '```' + markedString.language + '\n' + markedString.value + '\n```';
-      } else {
-        markdown = markedString.value;
+      props = {
+        ...props,
+        state: HoverState.READY,
+        contents,
+        fontFamily: this.editor.getConfiguration().fontInfo.fontFamily,
+      };
+      if (result.range) {
+        this.lastRange = this.toMonacoRange(result.range);
+        this.highlightOccurrences(this.lastRange);
       }
-      const renderedContents = renderMarkdown(
-        { value: markdown },
-        {
-          codeBlockRenderer: (language: string, value: string) => {
-            const code = tokenizeToString(value, language);
-            return `<span style="font-family: ${
-              this.editor.getConfiguration().fontInfo.fontFamily
-            }">${code}</span>`;
-          },
-        }
+      startColumn = Math.min(
+        renderRange.startColumn,
+        result.range ? result.range.start.character + 1 : Number.MAX_VALUE
       );
-      const el = document.createElement('div');
-      el.classList.add('hover-row');
-      el.appendChild(renderedContents);
-      fragment.appendChild(el);
-    });
+    }
+
+    this.showAt(new monaco.Position(renderRange.startLineNumber, startColumn), this.shouldFocus);
+    const element = React.createElement(HoverWidget, props, null);
+    // @ts-ignore
+    ReactDom.render(element, fragment);
+    this.updateContents(fragment);
   }
 
   private toMonacoRange(r: Range): EditorRange {
@@ -175,30 +152,6 @@ export class ContentHoverWidget extends ContentWidget {
       r.end.line + 1,
       r.end.character + 1
     );
-  }
-
-  private renderButtons() {
-    const buttonGroup = document.createElement('div');
-    buttonGroup.className =
-      'button-group euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive';
-    buttonGroup.innerHTML = `
-    <button id="btnDefinition" class="euiFlexItem euiButton euiButton--primary euiButton--small" type="button">
-      <span class="euiButton__content">
-        <span class="euiButton__text">Goto Definition</span>
-      </span>
-    </button>
-    <button id="btnReferences" class="euiFlexItem euiButton euiButton--primary euiButton--small" type="button">
-      <span class="euiButton__content">
-        <span class="euiButton__text">Find Reference</span>
-      </span>
-    </button>
-    <button class="euiFlexItem euiButton euiButton--primary euiButton--small" type="button">
-      <span class="euiButton__content">
-        <span class="euiButton__text">Go to Type</span>
-      </span>
-    </button>
-   `;
-    this.containerDomNode.appendChild(buttonGroup);
   }
 
   private gotoDefinition() {
@@ -220,26 +173,6 @@ export class ContentHoverWidget extends ContentWidget {
       });
       const action = this.editor.getAction('editor.action.referenceSearch.trigger');
       action.run().then(() => this.hide());
-    }
-  }
-
-  private bindButton(btnId: string, func: () => void) {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-      btn.addEventListener('click', func);
-      this.disposables.push({
-        dispose() {
-          btn.removeEventListener('click', func);
-        },
-      });
-    }
-  }
-
-  private bindButtonEvents() {
-    if (!this.eventsBound) {
-      this.bindButton('btnDefinition', this.gotoDefinition.bind(this));
-      this.bindButton('btnReferences', this.findReferences.bind(this));
-      this.eventsBound = true;
     }
   }
 
