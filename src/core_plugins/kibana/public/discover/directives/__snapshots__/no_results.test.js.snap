@@ -317,9 +317,9 @@ Array [
             class="euiText euiText--extraSmall"
           >
             <strong>
-              Index ‘A’
+              Index &lsquo;A&rsquo;
             </strong>
-            , shard ‘1’
+            , shard &lsquo;1&rsquo;
           </div>
           <div
             class="euiSpacer euiSpacer--s"
@@ -346,9 +346,9 @@ Array [
             class="euiText euiText--extraSmall"
           >
             <strong>
-              Index ‘B’
+              Index &lsquo;B&rsquo;
             </strong>
-            , shard ‘2’
+            , shard &lsquo;2&rsquo;
           </div>
           <div
             class="euiSpacer euiSpacer--s"

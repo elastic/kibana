@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Role } from '../../../../../common/model/role';
 import { isReservedRole } from '../../../../lib/role';
 
@@ -19,7 +20,14 @@ export const ReservedRoleBadge = (props: Props) => {
 
   if (isReservedRole(role)) {
     return (
-      <EuiToolTip content={'Reserved roles are built-in and cannot be removed or modified.'}>
+      <EuiToolTip
+        content={
+          <FormattedMessage
+            id="xpack.security.management.editRoles.reversedRoleBadget.reversedRolesCanNotBeRemovedTooltip"
+            defaultMessage="Reserved roles are built-in and cannot be removed or modified."
+          />
+        }
+      >
         <EuiIcon style={{ verticalAlign: 'super' }} type={'lock'} />
       </EuiToolTip>
     );
