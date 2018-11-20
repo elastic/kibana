@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSocket } from '@kbn/interpreter/public/socket';
-import { initialize as initializeInterpreter } from '@kbn/interpreter/public/interpreter';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { populateBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
@@ -46,13 +44,11 @@ const types = {
 
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
-  setAppReady: basePath => async () => {
+  setAppReady: () => async () => {
     try {
       // initialize the socket and interpreter
-      await createSocket(basePath);
       loadPrivateBrowserFunctions();
       await populateBrowserRegistries(types);
-      await initializeInterpreter();
 
       // set app state to ready
       dispatch(appReady());

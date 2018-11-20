@@ -17,10 +17,15 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { populateBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
 import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
 import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
+import { createSocket } from '@kbn/interpreter/public/socket';
+import { initialize } from '@kbn/interpreter/public/interpreter';
 import { functions } from './functions';
+
+const basePath = chrome.getBasePath();
 
 const types = {
   commonFunctions: functionsRegistry,
@@ -34,4 +39,7 @@ function addFunction(fnDef) {
 
 functions.forEach(addFunction);
 
-populateBrowserRegistries(types);
+createSocket(basePath).then(async () => {
+  await populateBrowserRegistries(types);
+  await initialize();
+});

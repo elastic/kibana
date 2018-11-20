@@ -18,8 +18,8 @@
  */
 
 
-import { fromExpression } from '../../../../../x-pack/plugins/canvas/common/lib/ast';
-import { interpretAst } from '../../../../../x-pack/plugins/canvas/public/lib/interpreter';
+import { fromExpression } from '@kbn/interpreter/common/lib/ast';
+import { interpretAst } from '@kbn/interpreter/public/interpreter';
 
 export const buildPipeline = (vis, params) => {
   const { searchSource } = params;
