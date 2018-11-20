@@ -11,6 +11,9 @@ export function PathProvider($window) {
   return {
     isLoginOrLogout() {
       return path === '/login' || path === '/logout';
+    },
+    isUnauthenticated() {
+      return path === '/login' || path === '/logout' || path === '/status';
     }
   };
 }
