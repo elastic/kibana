@@ -6,13 +6,13 @@
     "bucket_span": "1h",
     "detectors": [
       {
-        "detector_description": "high_count partitionfield=\"beat.hostname\"",
+        "detector_description": "high_count partitionfield=\"beat.name\"",
         "function": "high_count",
-        "partition_field_name": "beat.hostname"
+        "partition_field_name": "beat.name"
       }
     ],
     "influencers": [
-      "beat.hostname",
+      "beat.name",
       "process.exe"
     ]
   },
@@ -29,7 +29,7 @@
       {
         "url_name": "Host Events",
         "time_range": "1h",
-        "url_value": "kibana#/dashboard/ml_auditbeat_hosts_audit_events?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'beat.hostname:\"$beat.hostname$\"'))"
+        "url_value": "kibana#/dashboard/ml_auditbeat_hosts_audit_events?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'beat.name:\"$beat.name$\"'))"
       }
     ]
   }
