@@ -18,6 +18,7 @@
  */
 
 import { resolve } from 'path';
+import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
 const PKG_VERSION = require('../../package.json').version;
 const KIBANA_BIN_PATH = process.platform.startsWith('win')
@@ -222,18 +223,9 @@ module.exports = function (grunt) {
       ],
     },
 
-    functionalTestsRelease: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
-        '--esFrom', esFrom,
-        '--bail',
-        '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-        '--',
-        '--server.maxPayloadBytes=1648576',
-      ],
-    },
+    ...getFunctionalTestGroupRunConfigs({
+      esFrom,
+      kibanaInstallDir: `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`
+    })
   };
 };
