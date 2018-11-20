@@ -71,36 +71,36 @@ export class EditRolePage extends Component<Props, State> {
 
     return (
       <div className="editRolePage FIXME-restrictWidth">
-          <EuiForm {...this.state.formError}>
-            {this.getFormTitle()}
+        <EuiForm {...this.state.formError}>
+          {this.getFormTitle()}
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            <EuiText size="s">{description}</EuiText>
+          <EuiText size="s">{description}</EuiText>
 
-            {isReservedRole(this.props.role) && (
-              <Fragment>
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <p id="reservedRoleDescription" tabIndex={1}>
-                    Reserved roles are built-in and cannot be removed or modified.
-                  </p>
-                </EuiText>
-              </Fragment>
-            )}
+          {isReservedRole(this.props.role) && (
+            <Fragment>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <p id="reservedRoleDescription" tabIndex={1}>
+                  Reserved roles are built-in and cannot be removed or modified.
+                </p>
+              </EuiText>
+            </Fragment>
+          )}
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            {this.getRoleName()}
+          {this.getRoleName()}
 
-            {this.getElasticsearchPrivileges()}
+          {this.getElasticsearchPrivileges()}
 
-            {this.getKibanaPrivileges()}
+          {this.getKibanaPrivileges()}
 
-            <EuiSpacer />
+          <EuiSpacer />
 
-            {this.getFormButtons()}
-          </EuiForm>
+          {this.getFormButtons()}
+        </EuiForm>
       </div>
     );
   }
