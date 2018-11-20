@@ -19,65 +19,75 @@
 
 import { CATEGORY } from '../vis_category';
 import _ from 'lodash';
+import { VisFiltersProvider } from '../vis_filters';
 
-export class BaseVisType {
-  constructor(opts = {}) {
+export function BaseVisTypeProvider(Private) {
+  const visFilters = Private(VisFiltersProvider);
 
-    if (!opts.name) {
-      throw('vis_type must define its name');
-    }
-    if (!opts.title) {
-      throw('vis_type must define its title');
-    }
-    if (!opts.description) {
-      throw('vis_type must define its description');
-    }
-    if (!opts.icon && !opts.image && !opts.legacyIcon) {
-      throw('vis_type must define its icon or image');
-    }
-    if (!opts.visualization) {
-      throw('vis_type must define visualization controller');
+  class BaseVisType {
+    constructor(opts = {}) {
+
+      if (!opts.name) {
+        throw('vis_type must define its name');
+      }
+      if (!opts.title) {
+        throw('vis_type must define its title');
+      }
+      if (!opts.description) {
+        throw('vis_type must define its description');
+      }
+      if (!opts.icon && !opts.image && !opts.legacyIcon) {
+        throw('vis_type must define its icon or image');
+      }
+      if (!opts.visualization) {
+        throw('vis_type must define visualization controller');
+      }
+
+      const _defaults = {
+        // name, title, description, icon, image
+        category: CATEGORY.OTHER,
+        visualization: null,       // must be a class with render/resize/destroy methods
+        visConfig: {
+          defaults: {},            // default configuration
+        },
+        requestHandler: 'courier',    // select one from registry or pass a function
+        responseHandler: 'none',
+        editor: 'default',
+        editorConfig: {
+          collections: {},         // collections used for configuration (list of positions, ...)
+        },
+        options: {                // controls the visualize editor
+          showTimePicker: true,
+          showQueryBar: true,
+          showFilterBar: true,
+          showIndexSelection: true,
+          hierarchicalData: false  // we should get rid of this i guess ?
+        },
+        events: {
+          filterBucket: {
+            defaultAction: visFilters.addFilter,
+          }
+        },
+        stage: 'production',
+        feedbackMessage: ''
+      };
+
+      _.defaultsDeep(this, opts, _defaults);
+
+      this.requiresSearch = this.requestHandler !== 'none';
     }
 
-    const _defaults = {
-      // name, title, description, icon, image
-      category: CATEGORY.OTHER,
-      visualization: null,       // must be a class with render/resize/destroy methods
-      visConfig: {
-        defaults: {},            // default configuration
-      },
-      requestHandler: 'courier',    // select one from registry or pass a function
-      responseHandler: 'none',
-      editor: 'default',
-      editorConfig: {
-        collections: {},         // collections used for configuration (list of positions, ...)
-      },
-      options: {                // controls the visualize editor
-        showTimePicker: true,
-        showQueryBar: true,
-        showFilterBar: true,
-        showIndexSelection: true,
-        hierarchicalData: false  // we should get rid of this i guess ?
-      },
-      stage: 'production',
-      feedbackMessage: ''
-    };
+    shouldMarkAsExperimentalInUI() {
+      return this.stage === 'experimental';
+    }
 
-    _.defaultsDeep(this, opts, _defaults);
-
-    this.requiresSearch = this.requestHandler !== 'none';
+    get schemas() {
+      if (this.editorConfig && this.editorConfig.schemas) {
+        return this.editorConfig.schemas;
+      }
+      return [];
+    }
   }
 
-  shouldMarkAsExperimentalInUI() {
-    //we are not making a distinction in the UI if a plugin is experimental and/or labs.
-    //we just want to indicate it is special. the current flask icon is sufficient for that.
-    return this.stage === 'experimental' || this.stage === 'lab';
-  }
-
-  get schemas() {
-    if (this.editorConfig && this.editorConfig.schemas) {
-      return this.editorConfig.schemas;
-    }
-    return [];
-  }
+  return BaseVisType;
 }
