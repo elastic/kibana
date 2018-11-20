@@ -91,7 +91,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
             defaultMessage="Policy {policyName} is configured for rollover,
-             but index {indexName} does not have an alias, which is required for rollover."
+              but index {indexName} does not have an alias, which is required for rollover."
             values={{
               policyName: selectedPolicy.name,
               indexName: index.name

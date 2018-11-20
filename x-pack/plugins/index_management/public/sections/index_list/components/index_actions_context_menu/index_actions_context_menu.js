@@ -423,7 +423,18 @@ class IndexActionsContextMenuUi extends Component {
     return this.props.indexNames.length === 1;
   };
   getEntity = oneIndexSelected => {
-    return oneIndexSelected ? 'index' : 'indices';
+    const { intl } = this.props;
+    return oneIndexSelected ? (
+      intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.indexMessage',
+        defaultMessage: 'index'
+      })
+    ) : (
+      intl.formatMessage({
+        id: 'xpack.idxMgmt.indexActionsMenu.indicesMessage',
+        defaultMessage: 'indices'
+      })
+    );
   };
   render() {
     const { intl } = this.props;

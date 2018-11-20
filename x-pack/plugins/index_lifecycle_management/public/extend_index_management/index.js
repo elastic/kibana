@@ -6,10 +6,11 @@
 import React from 'react';
 import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
+import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
 import { get, every } from 'lodash';
 import { i18n }  from '@kbn/i18n';
 import { addSummaryExtension, addBannerExtension, addActionExtension } from '../../../index_management/public/index_management_extensions';
-import { retryLifecycleForIndex, removeLifecycleForIndex } from '../services/api';
+import { retryLifecycleForIndex } from '../services/api';
 
 const stepPath = 'ilm.step';
 
@@ -44,15 +45,19 @@ addActionExtension((indices) => {
   }
   const indexNames = indices.map(({ name }) => name);
   return {
-    requestMethod: removeLifecycleForIndex,
+    renderConfirmModal: (closeModal, httpClient) => {
+      return (
+        <RemoveLifecyclePolicyConfirmModal
+          indexNames={indexNames}
+          closeModal={closeModal}
+          httpClient={httpClient}
+        />
+      );
+    },
     icon: 'stopFilled',
     indexNames: [indexNames],
     buttonLabel: i18n.translate('xpack.idxMgmt.removeIndexLifecycleActionButtonLabel', {
       defaultMessage: 'Remove lifecycle policy',
-    }),
-    successMessage: i18n.translate('xpack.idxMgmt.retryIndexLifecycleAction.successfullyRemovedLifecycleMessage', {
-      defaultMessage: 'Successfully removed lifecycle policy for: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') }
     }),
   };
 });
