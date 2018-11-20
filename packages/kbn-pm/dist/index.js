@@ -11064,7 +11064,8 @@ let run = exports.run = (() => {
                 e: 'exclude',
                 h: 'help',
                 i: 'include'
-            }
+            },
+            boolean: ['prefer-offline', 'frozen-lockfile']
         });
         const args = options._;
         if (options.help || args.length === 0) {
@@ -12199,8 +12200,7 @@ const BootstrapCommand = exports.BootstrapCommand = {
                 batchByWorkspace: true
             });
             const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
-            const frozenLockfile = options['frozen-lockfile'] === true;
-            const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
+            const extraArgs = [...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []), ...(options['prefer-offline'] === true ? ['--prefer-offline'] : [])];
             _log.log.write(_chalk2.default.bold('\nRunning installs in topological order:'));
             for (const batch of batchedProjectsByWorkspace) {
                 for (const project of batch) {

@@ -8,6 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Overview } from 'plugins/monitoring/components/cluster/overview';
 import { uiModules } from 'ui/modules';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringClusterOverview', (kbnUrl, showLicenseExpiration) => {
@@ -24,11 +25,13 @@ uiModule.directive('monitoringClusterOverview', (kbnUrl, showLicenseExpiration) 
 
       scope.$watch('cluster', cluster => {
         ReactDOM.render((
-          <Overview
-            cluster={cluster}
-            changeUrl={changeUrl}
-            showLicenseExpiration={showLicenseExpiration}
-          />
+          <I18nProvider>
+            <Overview
+              cluster={cluster}
+              changeUrl={changeUrl}
+              showLicenseExpiration={showLicenseExpiration}
+            />
+          </I18nProvider>
         ), $el[0]);
       });
 

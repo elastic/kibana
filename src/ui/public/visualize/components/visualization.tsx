@@ -27,8 +27,6 @@ import { VisualizationChart } from './visualization_chart';
 import { VisualizationNoResults } from './visualization_noresults';
 import { VisualizationRequestError } from './visualization_requesterror';
 
-import './visualization.less';
-
 function shouldShowNoResultsMessage(vis: Vis, visData: any): boolean {
   const requiresSearch = get(vis, 'type.requiresSearch');
   const rows: object[] | undefined = get(visData, 'rows');

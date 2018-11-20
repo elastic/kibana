@@ -8,8 +8,9 @@ import React from 'react';
 import { SummaryStatus } from '../../summary_status';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { formatMetric } from '../../../lib/format_number';
+import { injectI18n } from '@kbn/i18n/react';
 
-export function ClusterStatus({ stats }) {
+function ClusterStatusUI({ stats, intl }) {
   const {
     dataSize,
     nodesCount,
@@ -24,37 +25,58 @@ export function ClusterStatus({ stats }) {
 
   const metrics = [
     {
-      label: 'Nodes',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.clusterStatus.nodesLabel',
+        defaultMessage: 'Nodes',
+      }),
       value: nodesCount,
       dataTestSubj: 'nodesCount'
     },
     {
-      label: 'Indices',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.clusterStatus.indicesLabel',
+        defaultMessage: 'Indices',
+      }),
       value: indicesCount,
       dataTestSubj: 'indicesCount'
     },
     {
-      label: 'Memory',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.clusterStatus.memoryLabel',
+        defaultMessage: 'Memory',
+      }),
       value: formatMetric(memUsed, 'byte') + ' / ' + formatMetric(memMax, 'byte'),
       dataTestSubj: 'memory'
     },
     {
-      label: 'Total Shards',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.clusterStatus.totalShardsLabel',
+        defaultMessage: 'Total Shards',
+      }),
       value: totalShards,
       dataTestSubj: 'totalShards'
     },
     {
-      label: 'Unassigned Shards',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.clusterStatus.unassignedShardsLabel',
+        defaultMessage: 'Unassigned Shards',
+      }),
       value: unassignedShards,
       dataTestSubj: 'unassignedShards'
     },
     {
-      label: 'Documents',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.clusterStatus.documentsLabel',
+        defaultMessage: 'Documents',
+      }),
       value: formatMetric(documentCount, 'int_commas'),
       dataTestSubj: 'documentCount'
     },
     {
-      label: 'Data',
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.clusterStatus.dataLabel',
+        defaultMessage: 'Data',
+      }),
       value: formatMetric(dataSize, 'byte'),
       dataTestSubj: 'dataSize'
     }
@@ -73,3 +95,5 @@ export function ClusterStatus({ stats }) {
     />
   );
 }
+
+export const ClusterStatus = injectI18n(ClusterStatusUI);

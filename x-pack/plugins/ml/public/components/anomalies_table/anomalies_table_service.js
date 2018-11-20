@@ -11,7 +11,7 @@
  * anomalies table component.
  */
 
-import { listenerFactoryProvider } from 'plugins/ml/factories/listener_factory';
+import { listenerFactoryProvider } from '../../factories/listener_factory';
 
 class AnomaliesTableService {
   constructor() {

@@ -458,7 +458,7 @@ Do **not** add the agent as a dependency to your application.',
      -jar my-application.jar`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.javaClient.startApplication.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for configuration options and advanced \
-usage.\n\n**Warning: The Java agent is currently in Beta and not meant for production use.**',
+usage.',
       values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/java/current/index.html' },
     }),
   },
