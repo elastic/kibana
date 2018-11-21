@@ -18,11 +18,13 @@
  */
 
 import { EventEmitter } from 'events';
+import React from 'react';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
 import { i18n } from '@kbn/i18n';
+import { toastNotifications } from 'ui/notify';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -484,11 +486,36 @@ export class KibanaMap extends EventEmitter {
   }
 
   _addMaxZoomMessage = (() => {
+    const maxZoomToast = {
+      title: 'Max Zoom Warning',
+      text: (
+        <div>
+          <p>
+            You&apos;ve reached the maximum number of zoom levels. To zoom
+            all the way in, upgrade to the&nbsp;
+            {
+              <a href="https://www.elastic.co/downloads/kibana">
+                {`default distribution `}
+              </a>
+            }
+            of Elasticsearch and Kibana. You&apos;ll get access to all 18
+            zoom levels for free through the&nbsp;
+            {
+              <a href="https://www.elastic.co/elastic-maps-service">
+                {`Elastic Maps Service`}
+              </a>
+            }
+            . Or, you can configure a custom WMS compliant server.
+          </p>
+        </div>
+      )
+    };
+
     const zoomMessage = () => {
       const zoomLevel = this.getZoomLevel();
       const maxMapZoom = this._leafletMap.getMaxZoom();
       if (zoomLevel === maxMapZoom) {
-        console.log('Zoom level at 10');
+        toastNotifications.addWarning(maxZoomToast);
       }
     };
 
