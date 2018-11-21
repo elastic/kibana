@@ -92,7 +92,6 @@
     "@kbn/pm": "1.0.0",
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
-    "@kbn/interpreter": "1.0.0",
     "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",
