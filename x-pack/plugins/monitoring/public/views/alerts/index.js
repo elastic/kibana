@@ -13,7 +13,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { timefilter } from 'ui/timefilter';
 import { Alerts } from '../../components/alerts';
-import { MonitoringViewBaseTableController } from '../base_table_controller';
+import { MonitoringViewBaseEuiTableController } from '../base_eui_table_controller';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiLink } from '@elastic/eui';
 
@@ -49,7 +49,7 @@ uiRoutes.when('/alerts', {
     alerts: getPageData
   },
   controllerAs: 'alerts',
-  controller: class AlertsView extends MonitoringViewBaseTableController {
+  controller: class AlertsView extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
