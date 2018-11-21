@@ -142,21 +142,11 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                   options={[
                     {
                       value: 'filebeat',
-                      text: (
-                        <FormattedMessage
-                          id="xpack.beatsManagement.enrollBeat.beatTypeFilebeatOptionText"
-                          defaultMessage="Filebeat"
-                        />
-                      ),
+                      text: 'Filebeat',
                     },
                     {
                       value: 'metricbeat',
-                      text: (
-                        <FormattedMessage
-                          id="xpack.beatsManagement.enrollBeat.beatTypeMetricbeatOptionText"
-                          defaultMessage="Metricbeat"
-                        />
-                      ),
+                      text: 'Metricbeat',
                     },
                   ]}
                   onChange={(e: any) => this.setState({ beatType: e.target.value })}

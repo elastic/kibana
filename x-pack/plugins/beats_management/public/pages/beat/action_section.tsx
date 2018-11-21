@@ -49,7 +49,7 @@ export const BeatDetailsActionSection = ({ beat }: BeatDetailsActionSectionProps
               <EuiText size="xs">
                 <FormattedMessage
                   id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
-                  defaultMessage="Last Config Update: {lastUpdateTime}"
+                  defaultMessage="Last Config Update: {lastUpdateTime}."
                   values={{
                     lastUpdateTime: (
                       <strong>

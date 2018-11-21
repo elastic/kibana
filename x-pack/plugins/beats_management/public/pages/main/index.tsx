@@ -129,7 +129,7 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
         id: '/overview/initial/finish',
         name: intl.formatMessage({
           id: 'xpack.beatsManagement.enrollBeat.finishStepLabel',
-          defaultMessage: 'finish',
+          defaultMessage: 'Finish',
         }),
         disabled: false,
         page: FinishWalkthroughPage,
