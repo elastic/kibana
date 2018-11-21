@@ -13,32 +13,26 @@ import { sample } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 
-import { BeatTag, CMPopulatedBeat } from '../../common/domain_types';
+import { BeatTag, CMBeat, CMPopulatedBeat } from '../../common/domain_types';
 import { PrimaryLayout } from '../components/layouts/primary';
 import { TagEdit } from '../components/tag';
-import { URLStateProps, withUrlState } from '../containers/with_url_state';
-import { AppURLState } from '../frontend_types';
-import { FrontendLibs } from '../lib/types';
-interface TagPageProps extends URLStateProps<AppURLState> {
-  libs: FrontendLibs;
-  match: any;
-}
+import { AppPageProps } from '../frontend_types';
 
 interface TagPageState {
   showFlyout: boolean;
   attachedBeats: CMPopulatedBeat[] | null;
   tag: BeatTag;
 }
-export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageState> {
+export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
   private mode: 'edit' | 'create' = 'create';
-  constructor(props: TagPageProps) {
+  constructor(props: AppPageProps) {
     super(props);
     const randomColor = sample(
       Object.keys(euiVars)
         .filter(key => key.startsWith('euiColorVis'))
         .map(key => (euiVars as any)[key])
     );
-
+    console.log(props.match.params);
     this.state = {
       showFlyout: false,
       attachedBeats: null,
@@ -64,21 +58,24 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
         <div>
           <TagEdit
             tag={this.state.tag}
-            mode={this.mode}
-            onDetachBeat={async (beatIds: string[]) => {
-              await this.props.libs.beats.removeTagsFromBeats(
-                beatIds.map(id => {
-                  return { beatId: id, tag: this.state.tag.id };
-                })
-              );
-              await this.loadAttachedBeats();
-            }}
+            onDetachBeat={
+              this.mode === 'edit'
+                ? async (beatIds: string[]) => {
+                    await this.props.libs.beats.removeTagsFromBeats(
+                      beatIds.map(id => {
+                        return { beatId: id, tag: this.state.tag.id };
+                      })
+                    );
+                    await this.loadAttachedBeats();
+                  }
+                : undefined
+            }
             onTagChange={(field: string, value: string | number) =>
               this.setState(oldState => ({
                 tag: { ...oldState.tag, [field]: value },
               }))
             }
-            attachedBeats={this.state.attachedBeats}
+            attachedBeats={this.state.attachedBeats as CMBeat[]}
           />
           <EuiSpacer size="m" />
           <EuiFlexGroup>
@@ -142,4 +139,3 @@ export class TagPageComponent extends React.PureComponent<TagPageProps, TagPageS
       .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }
-export const TagPage = withUrlState<TagPageProps>(TagPageComponent);

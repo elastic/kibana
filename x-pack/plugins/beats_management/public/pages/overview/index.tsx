@@ -5,10 +5,13 @@
  */
 
 import React from 'react';
+import { Subscribe } from 'unstated';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { ConnectedTabs } from '../../components/navigation/connected_tabs';
+import { BeatsContainer } from '../../containers/beats';
+import { TagsContainer } from '../../containers/tags';
 import { withUrlState } from '../../containers/with_url_state';
 import { AppPageProps } from '../../frontend_types';
 
@@ -36,10 +39,20 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
     return (
       <PrimaryLayout title="Beats">
         {(renderAction: any) => (
-          <React.Fragment>
-            <ConnectedTabs routes={this.props.routes} />
-            <ChildRoutes routes={this.props.routes} renderAction={renderAction} {...this.props} />
-          </React.Fragment>
+          <Subscribe to={[BeatsContainer, TagsContainer]}>
+            {(beats: BeatsContainer, tags: TagsContainer) => (
+              <React.Fragment>
+                <ConnectedTabs routes={this.props.routes} />
+                <ChildRoutes
+                  routes={this.props.routes}
+                  renderAction={renderAction}
+                  {...this.props}
+                  beatsContainer={beats}
+                  tagsContainer={tags}
+                />
+              </React.Fragment>
+            )}
+          </Subscribe>
         )}
       </PrimaryLayout>
     );

@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
-import { Subscribe } from 'unstated';
 import { Loading } from './components/loading';
 import { ChildRoutes } from './components/navigation/child_routes';
 import { BeatsContainer } from './containers/beats';
@@ -56,7 +55,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
       return <Loading />;
     }
     const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys(), {
-      '/beat/': '/beat/:beatId/',
+      '/tag': ['action', 'tagid?'],
     });
     return (
       <HashRouter basename="/management/beats_management">

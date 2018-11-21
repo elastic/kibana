@@ -30,8 +30,8 @@ import { WithKueryAutocompletion } from '../../containers/with_kuery_autocomplet
 import { AppPageProps } from '../../frontend_types';
 
 interface PageProps extends AppPageProps {
-  beats: CMPopulatedBeat[];
-  loadBeats: () => any;
+  beatsContainer: BeatsContainer;
+  tagsContainer: TagsContainer;
   renderAction: (area: JSX.Element) => void;
 }
 
@@ -97,11 +97,6 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
     </React.Fragment>
   );
 
-  public componentDidUpdate(prevProps: any) {
-    if (this.props.location !== prevProps.location) {
-      this.props.loadBeats();
-    }
-  }
   public render() {
     return (
       <Subscribe to={[BeatsContainer, TagsContainer]}>
@@ -199,7 +194,7 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
     const selectedIds = this.tableRef.current.state.selection.map((beat: any) => beat.id);
     const beats: CMPopulatedBeat[] = [];
     selectedIds.forEach((id: any) => {
-      const beat: CMPopulatedBeat | undefined = this.props.beats.find(b => b.id === id);
+      const beat = this.props.beatsContainer.state.list.find(b => b.id === id);
       if (beat) {
         beats.push(beat);
       }

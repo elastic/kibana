@@ -15,8 +15,8 @@ export interface RouteConfig {
   routes?: RouteConfig[];
 }
 
-interface RouteConfigOverideMap {
-  [path: string]: string;
+interface RouteParamsMap {
+  [path: string]: string[];
 }
 
 export class RouteTreeBuilder {
@@ -25,17 +25,14 @@ export class RouteTreeBuilder {
     private readonly pageComponentPattern: RegExp = /Page$/
   ) {}
 
-  public routeTreeFromPaths(
-    paths: string[],
-    overideMap: RouteConfigOverideMap = {}
-  ): RouteConfig[] {
+  public routeTreeFromPaths(paths: string[], mapParams: RouteParamsMap = {}): RouteConfig[] {
     const pathTree = this.buildTree('./', paths);
     const allRoutes = Object.keys(pathTree).reduce((routes: any[], filePath) => {
       if (pathTree[filePath].includes('index.tsx')) {
-        routes.push(this.buildRouteWithChildren(filePath, pathTree[filePath], overideMap));
+        routes.push(this.buildRouteWithChildren(filePath, pathTree[filePath], mapParams));
       } else {
         routes.concat(
-          pathTree[filePath].map(file => routes.push(this.buildRoute(filePath, file, overideMap)))
+          pathTree[filePath].map(file => routes.push(this.buildRoute(filePath, file, mapParams)))
         );
       }
 
@@ -65,19 +62,15 @@ export class RouteTreeBuilder {
     );
   }
 
-  private buildRouteWithChildren(
-    dir: string,
-    files: string[],
-    routeOverides: RouteConfigOverideMap
-  ) {
+  private buildRouteWithChildren(dir: string, files: string[], mapParams: RouteParamsMap) {
     const childFiles = files.filter(f => f !== 'index.tsx');
-    const parentConfig = this.buildRoute(dir, 'index.tsx', routeOverides);
-    parentConfig.routes = childFiles.map(cf => this.buildRoute(dir, cf, routeOverides));
+    const parentConfig = this.buildRoute(dir, 'index.tsx', mapParams);
+    parentConfig.routes = childFiles.map(cf => this.buildRoute(dir, cf, mapParams));
     return parentConfig;
   }
 
-  private buildRoute(dir: string, file: string, routeOverides: RouteConfigOverideMap): RouteConfig {
-    const filePath = `${routeOverides[dir] || dir}${file.replace('.tsx', '').replace('index', '')}`;
+  private buildRoute(dir: string, file: string, mapParams: RouteParamsMap): RouteConfig {
+    const filePath = `${mapParams[dir] || dir}${file.replace('.tsx', '').replace('index', '')}`;
     const page = this.requireWithContext(`.${dir}${file}`);
 
     // Make sure the expored variable name matches a pattern. By default it will choose the first
@@ -88,7 +81,7 @@ export class RouteTreeBuilder {
 
     if (componentExportName) {
       return {
-        path: routeOverides[filePath] || filePath,
+        path: mapParams[filePath] ? `${filePath}/:${mapParams[filePath].join('/:')}` : filePath,
         component: page[componentExportName],
       };
     } else {
