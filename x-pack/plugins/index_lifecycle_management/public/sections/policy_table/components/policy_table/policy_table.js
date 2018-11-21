@@ -276,9 +276,8 @@ export class PolicyTableUi extends Component {
     const { selectedPoliciesMap } = this.state;
     const numSelected = Object.keys(selectedPoliciesMap).length;
     let content;
-
-    if (totalNumberOfPolicies) {
-      let tableContent;
+    let tableContent;
+    if (totalNumberOfPolicies || !policyListLoaded) {
       if (!policyListLoaded) {
         tableContent = (<EuiLoadingSpinner size="m" />);
       } else if (policies.length > 0) {
