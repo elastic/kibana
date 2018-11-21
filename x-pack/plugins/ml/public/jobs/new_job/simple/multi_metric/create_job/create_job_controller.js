@@ -199,6 +199,7 @@ module
       query,
       filters,
       combinedQuery,
+      savedSearch,
       jobId: '',
       description: '',
       jobGroups: [],

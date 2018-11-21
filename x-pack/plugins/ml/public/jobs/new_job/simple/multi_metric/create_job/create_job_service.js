@@ -243,9 +243,13 @@ export function MultiMetricJobServiceProvider() {
         job.results_index_name = job.job_id;
       }
 
-      job.custom_settings = {
-        created_by: WIZARD_TYPE.MULTI_METRIC
-      };
+      if (_.get(formConfig, ['savedSearch', 'id']) === undefined) {
+        // Jobs created from saved searches cannot be cloned in the wizard as the
+        // ML job config holds no reference to the saved search ID.
+        job.custom_settings = {
+          created_by: WIZARD_TYPE.MULTI_METRIC
+        };
+      }
 
       return job;
     }
