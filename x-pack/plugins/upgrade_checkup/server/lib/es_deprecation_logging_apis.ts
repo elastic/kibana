@@ -42,12 +42,12 @@ export async function setDeprecationLogging(
   };
 }
 
-function isDeprecationLoggingEnabled(settings: any) {
+export function isDeprecationLoggingEnabled(settings: any) {
   const deprecationLogLevel = ['default', 'persistent', 'transient'].reduce(
     (currentLogLevel, settingsTier) =>
       get(settings, [settingsTier, 'logger', 'deprecation'], currentLogLevel),
     'WARN'
   );
 
-  return ['TRACE', 'DEBUG', 'INFO', 'WARN'].includes(deprecationLogLevel);
+  return ['ALL', 'TRACE', 'DEBUG', 'INFO', 'WARN'].includes(deprecationLogLevel);
 }
