@@ -9,7 +9,6 @@ import { TestInvoker } from './lib/types';
 export default function statusPage({ loadTestFile }: TestInvoker) {
   describe('Status page', function statusPageTestSuite() {
     this.tags('ciGroup4');
-    this.fullTitle();
 
     loadTestFile(require.resolve('./status_page'));
   });
