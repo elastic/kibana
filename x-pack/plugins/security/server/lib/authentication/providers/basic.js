@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -134,13 +133,7 @@ export class BasicAuthenticationProvider {
     const authenticationSchema = authorization.split(/\s+/)[0];
     if (authenticationSchema.toLowerCase() !== 'basic') {
       this._options.log(['debug', 'security', 'basic'], `Unsupported authentication schema: ${authenticationSchema}`);
-
-      // It's essential that we fail if non-empty, but unsupported authentication schema
-      // is provided to allow authenticator to consult other authentication providers
-      // that may support that schema.
-      return AuthenticationResult.failed(
-        Boom.badRequest(`Unsupported authentication schema: ${authenticationSchema}`)
-      );
+      return AuthenticationResult.notHandled();
     }
 
     try {

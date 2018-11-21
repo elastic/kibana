@@ -114,12 +114,7 @@ export class SAMLAuthenticationProvider {
     if (authenticationSchema.toLowerCase() !== 'bearer') {
       this._options.log(['debug', 'security', 'saml'], `Unsupported authentication schema: ${authenticationSchema}`);
 
-      // It's essential that we fail if non-empty, but unsupported authentication schema
-      // is provided to allow authenticator to consult other authentication providers
-      // that may support that schema.
-      return AuthenticationResult.failed(
-        Boom.badRequest(`Unsupported authentication schema: ${authenticationSchema}`)
-      );
+      return AuthenticationResult.notHandled();
     }
 
     try {
