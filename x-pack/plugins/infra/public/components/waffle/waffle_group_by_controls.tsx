@@ -23,7 +23,9 @@ interface Props {
   intl: InjectedIntl;
 }
 
-let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; type: InfraPathType; field: string }> };
+let OPTIONS: {
+  [P in keyof InfraNodeType]: Array<{ text: string; type: InfraPathType; field: string }>
+};
 const getOptions = (
   nodeType: string,
   intl: InjectedIntl
@@ -127,7 +129,7 @@ const getOptions = (
     };
   }
 
-  return OPTIONS[nodeType as string];
+  return OPTIONS[nodeType];
 };
 
 const initialState = {
