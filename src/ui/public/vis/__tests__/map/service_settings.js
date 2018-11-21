@@ -303,7 +303,7 @@ describe('service_settings (FKA tilemaptest)', function () {
         expect(expected.name).to.eql(fileLayer.name);
         expect(expected.created_at).to.eql(fileLayer.created_at);
 
-        const fileUrl = await serviceSettings._getUrlForRegionLayer(fileLayer);
+        const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
         const urlObject = url.parse(fileUrl, true);
         Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach(key => {
           expect(urlObject.query).to.have.property(key, expected[key]);

@@ -245,7 +245,7 @@ uiModules.get('kibana')
         }
       }
 
-      async _getUrlForRegionLayer(fileLayerConfig) {
+      async getUrlForRegionLayer(fileLayerConfig) {
         let url;
         if (fileLayerConfig.origin === ORIGIN.EMS) {
           url = this._getUrlFromEms(fileLayerConfig);
@@ -263,7 +263,7 @@ uiModules.get('kibana')
       }
 
       async getGeoJsonForRegionLayer(fileLayerConfig) {
-        const url = await this._getUrlForRegionLayer(fileLayerConfig);
+        const url = await this.getUrlForRegionLayer(fileLayerConfig);
         const geojson = await $http({
           url: url,
           method: 'GET'
