@@ -84,11 +84,13 @@ export default () => ({
         filters: _.get(context, 'filters', null),
         forceFetch: true,
         isHierarchical: args.metricsAtAllLevels,
-        showPartial: args.partialRows,
+        partialRows: args.partialRows,
         inspectorAdapters: handlers.inspectorAdapters,
         queryFilter,
       });
 
+
+      
       return {
         type: 'kibana_table',
         index: args.index,

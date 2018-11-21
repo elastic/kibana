@@ -52,14 +52,18 @@ export const buildPipeline = (vis, params) => {
     params='${JSON.stringify(visState.params).replace(/'/g, `\\'`)}'`;
   } else {
     const schemas = {};
+    let cnt = 0;
     vis.aggs.getResponseAggs().forEach((agg, i) => {
-      const schemaName = agg.schema ? agg.schema.name || agg.schema : null;
+      if (!agg.enabled) return;
+      let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
+      if (typeof schemaName === 'object') schemaName = null;
       if (!schemaName) return;
       if (!schemas[schemaName]) schemas[schemaName] = [];
-      schemas[schemaName].push(i);
+      schemas[schemaName].push(cnt++);
     });
     pipeline += `
-    esaggs index='${indexPattern.id}' metricsAtAllLevels=${vis.isHierarchical()} partialRows=${vis.params.showPartialRows}
+    esaggs index='${indexPattern.id}' metricsAtAllLevels=${vis.isHierarchical()} 
+    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'}
     aggConfigs='${JSON.stringify(visState.aggs)}' | 
     visualization type='${vis.type.name}' visConfig='${JSON.stringify(visState.params)}' schemas='${JSON.stringify(schemas)}'
     `;

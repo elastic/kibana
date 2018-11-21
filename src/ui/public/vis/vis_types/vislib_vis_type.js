@@ -99,13 +99,14 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
     }
 
     destroy() {
+      $(this.container).find('vislib-legend').remove();
+      $(this.vis.vislibVis.el.parentElement).find('vislib-legend').remove();
       if (this.vis.vislibVis) {
         this.vis.vislibVis.off('brush', this.vis.API.events.brush);
         this.vis.vislibVis.off('click', this.vis.API.events.filter);
         this.vis.vislibVis.destroy();
         delete this.vis.vislibVis;
       }
-      $(this.container).find('vislib-legend').remove();
       if (this.$scope) {
         this.$scope.$destroy();
         this.$scope = null;

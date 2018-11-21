@@ -346,6 +346,8 @@ export class EmbeddedVisualizeHandler {
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
+    this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
+
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
       this.dataSubject.next(data);
       return data;
