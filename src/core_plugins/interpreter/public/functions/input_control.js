@@ -17,34 +17,32 @@
  * under the License.
  */
 
-import { boolean } from './boolean';
-import { datatable } from './datatable';
-import { error } from './error';
-import { filter } from './filter';
-import { image } from './image';
-import { nullType } from './null';
-import { number } from './number';
-import { pointseries } from './pointseries';
-import { render } from './render';
-import { shape } from './shape';
-import { string } from './string';
-import { style } from './style';
-import { kibanaTable } from './kibana_table';
-import { kibanaContext } from './kibana_context';
-
-export const typeSpecs = [
-  boolean,
-  datatable,
-  error,
-  filter,
-  image,
-  number,
-  nullType,
-  pointseries,
-  render,
-  shape,
-  string,
-  style,
-  kibanaTable,
-  kibanaContext,
-];
+export default () => ({
+  name: 'input_control_vis',
+  type: 'render',
+  context: {
+    types: [],
+  },
+  help: 'A input control visualization.',
+  args: {
+    visConfig: {
+      types: ['string'],
+      default: '"{}"',
+      help: 'markdown configuration object',
+      multi: false,
+    }
+  },
+  fn(context, args) {
+    const params = args.visConfig ? JSON.parse(args.visConfig) : {};
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: {
+        visConfig: {
+          type: 'input_controls_vis',
+          params: params
+        },
+      }
+    };
+  }
+});
