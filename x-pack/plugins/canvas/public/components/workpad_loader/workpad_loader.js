@@ -179,7 +179,6 @@ export class WorkpadLoader extends React.PureComponent {
 
           return (
             <Link
-              data-test-subj="canvasWorkpadLoaderWorkpad"
               name="loadWorkpad"
               params={{ id: workpad.id }}
               aria-label={`Load workpad ${workpadName}`}
@@ -247,7 +246,6 @@ export class WorkpadLoader extends React.PureComponent {
             isSelectable
             selection={selection}
             className="canvasWorkpad__dropzoneTable"
-            data-test-subj="canvasWorkpadLoaderTable"
           />
           <EuiSpacer />
           <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">

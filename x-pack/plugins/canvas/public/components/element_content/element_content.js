@@ -51,7 +51,6 @@ export const ElementContent = compose(
       // TODO: 'canvas__element' was added for BWC, It can be removed after a while
       className={'canvas__element canvasElement'}
       style={{ ...renderable.containerStyle, ...size }}
-      data-test-subj="canvasWorkpadPageElementContent"
     >
       <ElementShareContainer
         className="canvasElement__content"
