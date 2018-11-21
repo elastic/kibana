@@ -116,6 +116,9 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
     // copy the generated pleaserun services for systemd and sysv into /etc/
     `${resolveWithTrailingSlash(__dirname, 'service_templates/sysv/etc')}=/etc/`,
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/etc')}=/etc/`,
+
+    // mkdir /var/run/kibana
+    `${resolveWithTrailingSlash(__dirname, 'service_templates/usr/lib/tmpfiles.d')}=/usr/lib/tmpfiles.d/`,
   ];
 
   log.debug('calling fpm with args:', args);

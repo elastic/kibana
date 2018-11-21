@@ -12,7 +12,7 @@ Group=kibana
 # exist, it continues onward.
 EnvironmentFile=-/etc/default/kibana
 EnvironmentFile=-/etc/sysconfig/kibana
-ExecStart=/usr/share/kibana/bin/kibana "-c /etc/kibana/kibana.yml"
+ExecStart=/usr/share/kibana/bin/kibana "-c /etc/kibana/kibana.yml" "--pid.file=/var/run/kibana/kibana.pid"
 Restart=always
 WorkingDirectory=/
 
