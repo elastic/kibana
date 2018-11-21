@@ -7,11 +7,8 @@
 import fs from 'fs';
 import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
-import {
-  DidChangeWorkspaceFoldersParams,
-  ErrorCodes,
-  InitializeResult,
-} from 'vscode-languageserver-protocol';
+import { DidChangeWorkspaceFoldersParams, InitializeResult } from 'vscode-languageserver-protocol';
+import { ServerNotInitialized } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
 import { ServerOptions } from '../server_options';
 import { promiseTimeout } from '../utils/timeout';
@@ -38,7 +35,7 @@ interface Workspace {
 const InitializingError = {
   id: -1,
   error: {
-    code: ErrorCodes.ServerNotInitialized,
+    code: ServerNotInitialized,
     message: 'Server is initializing',
   },
 };

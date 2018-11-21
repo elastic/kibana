@@ -17,8 +17,8 @@ import { getOccurrencesAtPosition } from 'monaco-editor/esm/vs/editor/contrib/wo
 import React from 'react';
 import ReactDom from 'react-dom';
 import DocumentHighlight = languages.DocumentHighlight;
-import { ErrorCodes } from 'vscode-jsonrpc/lib/messages';
 import { Hover, MarkedString, Range } from 'vscode-languageserver-types';
+import { ServerNotInitialized } from '../../../common/lsp_error_codes';
 import { HoverState, HoverWidget, HoverWidgetProps } from '../../components/hover/hover_widget';
 import { ContentWidget } from '../content_widget';
 import { Operation } from '../operation';
@@ -48,7 +48,7 @@ export class ContentHoverWidget extends ContentWidget {
       result => this.result(result),
       error => {
         // @ts-ignore
-        if (error.code === ErrorCodes.ServerNotInitialized) {
+        if (error.code === ServerNotInitialized) {
           this.hoverState = HoverState.INITIALTING;
           this.render(this.lastRange!);
         }

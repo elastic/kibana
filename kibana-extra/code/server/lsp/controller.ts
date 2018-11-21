@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import fs from 'fs';
-import { ErrorCodes, ResponseError } from 'vscode-jsonrpc';
+import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { UnknownErrorCode, UnknownFileLanguage } from '../../common/lsp_error_codes';
 import { LspRequest } from '../../model';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
@@ -83,7 +84,7 @@ export class LanguageServerController implements ILanguageServerHandler {
       return this.dispatchRequest(lang, request);
     } else {
       return Promise.reject(
-        new ResponseError(ErrorCodes.UnknownErrorCode, `can't detect language without a file`)
+        new ResponseError(UnknownErrorCode, `can't detect language without a file`)
       );
     }
   }
@@ -102,13 +103,13 @@ export class LanguageServerController implements ILanguageServerHandler {
         }
       } else {
         return Promise.reject(
-          new ResponseError(ErrorCodes.UnknownErrorCode, `unimplemented handler for ${lang}`)
+          new ResponseError(UnknownFileLanguage, `unimplemented handler for ${lang}`)
         );
       }
     } else {
       return Promise.reject(
         new ResponseError(
-          ErrorCodes.UnknownErrorCode,
+          UnknownFileLanguage,
           `can't detect language from file:${request.resolvedFilePath}`
         )
       );
@@ -175,7 +176,7 @@ export class LanguageServerController implements ILanguageServerHandler {
   ): Promise<ILanguageServerHandler> {
     const handlers = languageServer.languageServerHandlers as LanguageServerHandlerMap;
     if (!request.workspacePath) {
-      throw new ResponseError(ErrorCodes.UnknownErrorCode, `no workspace in request?`);
+      throw new ResponseError(UnknownErrorCode, `no workspace in request?`);
     }
     const realPath = fs.realpathSync(request.workspacePath);
     let handler = handlers[realPath];

@@ -10,6 +10,7 @@ import { entries, groupBy } from 'lodash';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location } from 'vscode-languageserver-types';
+import { UnknownFileLanguage } from '../../common/lsp_error_codes';
 import { parseLspUrl } from '../../common/uri_util';
 import { GitOperations } from '../git_operations';
 import { Log } from '../log';
@@ -47,9 +48,12 @@ export function lspRoute(
             );
             return result;
           } catch (error) {
-            const log = new Log(server);
-            log.error(error);
             if (error instanceof ResponseError) {
+              // hide some errors;
+              if (error.code !== UnknownFileLanguage) {
+                const log = new Log(server);
+                log.error(error);
+              }
               return h
                 .response(error.toJson())
                 .type('json')
