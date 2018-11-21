@@ -35,6 +35,12 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
       return table.findAllByTagName('tr');
     }
 
+    async tableGetRowsFromContainer(subj) {
+      const table = await testSubjects.find(subj);
+      const tbody = await table.findByTagName('tbody');
+      return tbody.findAllByTagName('tr');
+    }
+
     async tableSetFilter(subj, text) {
       return await testSubjects.setValue(subj, text);
     }
