@@ -10,7 +10,7 @@
       "must": [
         {
           "exists": {
-            "field": "auditd"
+            "field": "auditd.summary"
           }
         },
         {

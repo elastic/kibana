@@ -16,6 +16,7 @@ import '../../services/shield_user';
 import { ROLES_PATH, USERS_PATH } from './management_urls';
 
 import { management } from 'ui/management';
+import { i18n } from '@kbn/i18n';
 
 routes.defaults(/\/management/, {
   resolve: {
@@ -29,7 +30,10 @@ routes.defaults(/\/management/, {
 
       function ensureSecurityRegistered() {
         const registerSecurity = () => management.register('security', {
-          display: 'Security',
+          display: i18n.translate(
+            'xpack.security.management.securityTitle', {
+              defaultMessage: 'Security',
+            }),
           order: 10,
           icon: 'securityApp',
         });
@@ -41,7 +45,10 @@ routes.defaults(/\/management/, {
           security.register('users', {
             name: 'securityUsersLink',
             order: 10,
-            display: 'Users',
+            display: i18n.translate(
+              'xpack.security.management.usersTitle', {
+                defaultMessage: 'Users',
+              }),
             url: `#${USERS_PATH}`,
           });
         }
@@ -50,7 +57,10 @@ routes.defaults(/\/management/, {
           security.register('roles', {
             name: 'securityRolesLink',
             order: 20,
-            display: 'Roles',
+            display: i18n.translate(
+              'xpack.security.management.rolesTitle', {
+                defaultMessage: 'Roles',
+              }),
             url: `#${ROLES_PATH}`,
           });
         }
