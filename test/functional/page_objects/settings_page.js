@@ -40,6 +40,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await find.clickByDisplayedLinkText(text);
     }
     async clickKibanaSettings() {
+      // TODO fix me
       await find.clickByDisplayedLinkText('Advanced Settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // Verify navigation is successful.

@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('Can navigate to roles section', async () => {
-          await PageObjects.settings.clickLinkText('Roles');
+          await PageObjects.security.clickElasticsearchRoles();
           const currentUrl = await remote.getCurrentUrl();
           expect(currentUrl).to.contain(ROLES_PATH);
         });
