@@ -24,9 +24,16 @@ import {
 
 import { AnnotationDescriptionList } from './annotation_description_list';
 
-export function AnnotationFlyout({ closeFlyout, annotation }) {
+export function AnnotationFlyout({
+  annotation,
+  cancelAction,
+  controlFunc,
+  saveAction
+}) {
+  const saveActionWrapper = () => saveAction(annotation);
+
   return (
-    <EuiFlyout onClose={closeFlyout} size="s" aria-labelledby="Add annotation">
+    <EuiFlyout onClose={cancelAction} size="s" aria-labelledby="Add annotation">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id="mlAnnotationFlyoutTitle">Add annotation</h2>
@@ -36,18 +43,28 @@ export function AnnotationFlyout({ closeFlyout, annotation }) {
         <AnnotationDescriptionList annotation={annotation} />
         <EuiSpacer size="m" />
         <EuiFormRow label="Annotation text" fullWidth>
-          <EuiTextArea fullWidth placeholder="..." />
+          <EuiTextArea
+            fullWidth
+            isInvalid={annotation.annotation === ''}
+            onChange={controlFunc}
+            placeholder="..."
+            value={annotation.annotation}
+          />
         </EuiFormRow>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty iconType="cross" onClick={cancelAction} flush="left">
               Cancel
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={closeFlyout} fill>
+            <EuiButton
+              fill
+              isDisabled={annotation.annotation === ''}
+              onClick={saveActionWrapper}
+            >
               Save
             </EuiButton>
           </EuiFlexItem>

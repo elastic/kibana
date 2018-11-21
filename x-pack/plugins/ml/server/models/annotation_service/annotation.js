@@ -8,13 +8,18 @@
 export function annotationProvider(callWithRequest) {
 
   async function addAnnotation(d) {
-    console.log('body', d);
-    return callWithRequest('index', {
+    const addAnnotationResponse = await callWithRequest('index', {
       index: '.ml-annotations',
       type: 'annotation',
-      //id: '',
       body: d
     });
+
+    // refresh the annotations index so we can make sure the annotations show up right away.
+    await callWithRequest('indices.refresh', {
+      index: '.ml-annotations'
+    });
+
+    return addAnnotationResponse;
   }
 
 

@@ -88,6 +88,7 @@ export class TimeseriesChart extends React.Component {
     focusChartData: PropTypes.array,
     focusForecastData: PropTypes.array,
     modelPlotEnabled: PropTypes.bool,
+    refresh: PropTypes.func,
     renderFocusChartOnly: PropTypes.bool,
     selectedJob: PropTypes.object,
     showForecast: PropTypes.bool,
@@ -126,6 +127,31 @@ export class TimeseriesChart extends React.Component {
 
   showFlyout(annotation) {
     this.setState({ isFlyoutVisible: true, annotation });
+  }
+
+  handleAnnotationChange(e) {
+    // e is a React Syntethic Event, we need to cast it to
+    // a placeholder variable so it's still valid in the
+    // setState() asynchronous callback
+    const annotation = e.target.value;
+    this.setState((state) => {
+      state.annotation.annotation = annotation;
+      return state;
+    });
+  }
+
+  saveAnnotation(annotation) {
+    const {
+      addAnnotation,
+      refresh
+    } = this.props;
+
+    const closeFlyout = this.closeFlyout;
+
+    addAnnotation(annotation).then(() => {
+      closeFlyout();
+      refresh();
+    });
   }
 
   componentWillUnmount() {
@@ -184,7 +210,6 @@ export class TimeseriesChart extends React.Component {
     const that = this;
     function brushend() {
       const {
-        // addAnnotation,
         // focusChartData,
         // refresh,
         selectedJob
@@ -217,19 +242,12 @@ export class TimeseriesChart extends React.Component {
       const annotation = {
         timestamp,
         end_timestamp: endTimestamp,
-        annotation: '',
+        annotation: that.state.annotation.annotation || '',
         job_id: selectedJob.job_id,
         result_type: 'annotation',
       };
 
       that.showFlyout(annotation);
-      /*
-      addAnnotation(annotation).then(() => {
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      });
-      */
     }
 
     // brush for focus brushing
@@ -661,7 +679,6 @@ export class TimeseriesChart extends React.Component {
         const s = focusXScale(moment(d.timestamp)) + 1;
         const e = (typeof d.end_timestamp !== 'undefined') ? (focusXScale(moment(d.end_timestamp)) - 1) : (s + 2);
         const width = Math.max(2, (e - s));
-        console.warn('width', width);
         return width;
       })
       .on('mouseover', function (d) {
@@ -1388,11 +1405,20 @@ export class TimeseriesChart extends React.Component {
     const { annotation, isFlyoutVisible } = this.state;
 
     const closeFlyout = this.closeFlyout.bind(this);
+    const handleAnnotationChange = this.handleAnnotationChange.bind(this);
+    const saveAnnotation = this.saveAnnotation.bind(this);
 
     return (
       <React.Fragment>
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
-        {isFlyoutVisible && <AnnotationFlyout annotation={annotation} closeFlyout={closeFlyout} />}
+        {isFlyoutVisible &&
+          <AnnotationFlyout
+            annotation={annotation}
+            cancelAction={closeFlyout}
+            controlFunc={handleAnnotationChange}
+            saveAction={saveAnnotation}
+          />
+        }
       </React.Fragment>
     );
   }
