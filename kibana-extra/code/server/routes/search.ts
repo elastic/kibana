@@ -34,6 +34,27 @@ export function repositorySearchRoute(
       }
     },
   });
+
+  server.route({
+    path: '/api/code/suggestions/repo',
+    method: 'GET',
+    async handler(req) {
+      let page = 1;
+      if (req.query.p) {
+        page = parseInt(req.query.p, 10);
+      }
+      const searchReq: RepositorySearchRequest = {
+        query: req.query.q,
+        page,
+      };
+      try {
+        const res = await repoSearchClient.suggest(searchReq);
+        return res;
+      } catch (error) {
+        return Boom.internal(`Search Exception ${error}`);
+      }
+    },
+  });
 }
 
 export function documentSearchRoute(server: hapi.Server, docSearchClient: DocumentSearchClient) {
@@ -59,27 +80,56 @@ export function documentSearchRoute(server: hapi.Server, docSearchClient: Docume
       }
     },
   });
-}
 
-export function symbolSearchRoute(server: hapi.Server, symbolSearchClient: SymbolSearchClient) {
   server.route({
-    path: '/api/code/search/symbol',
+    path: '/api/code/suggestions/doc',
     method: 'GET',
-    async handler(req: hapi.Request) {
+    async handler(req) {
       let page = 1;
       if (req.query.p) {
         page = parseInt(req.query.p, 10);
       }
-      const searchReq: SymbolSearchRequest = {
+      const searchReq: DocumentSearchRequest = {
         query: req.query.q,
         page,
       };
       try {
-        const res = await symbolSearchClient.search(searchReq);
+        const res = await docSearchClient.suggest(searchReq);
         return res;
       } catch (error) {
         return Boom.internal(`Search Exception ${error}`);
       }
     },
+  });
+}
+
+export function symbolSearchRoute(server: hapi.Server, symbolSearchClient: SymbolSearchClient) {
+  const symbolSearchHandler = async (req: hapi.Request) => {
+    let page = 1;
+    if (req.query.p) {
+      page = parseInt(req.query.p, 10);
+    }
+    const searchReq: SymbolSearchRequest = {
+      query: req.query.q,
+      page,
+    };
+    try {
+      const res = await symbolSearchClient.suggest(searchReq);
+      return res;
+    } catch (error) {
+      return Boom.internal(`Search Exception ${error}`);
+    }
+  };
+
+  // Currently these 2 are the same.
+  server.route({
+    path: '/api/code/suggestions/symbol',
+    method: 'GET',
+    handler: symbolSearchHandler,
+  });
+  server.route({
+    path: '/api/code/search/symbol',
+    method: 'GET',
+    handler: symbolSearchHandler,
   });
 }

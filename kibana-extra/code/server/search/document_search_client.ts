@@ -225,6 +225,73 @@ export class DocumentSearchClient extends AbstractSearchClient {
     };
   }
 
+  public async suggest(req: DocumentSearchRequest): Promise<DocumentSearchResult> {
+    const resultsPerPage = this.getResultsPerPage(req);
+    const from = (req.page - 1) * resultsPerPage;
+    const size = resultsPerPage;
+
+    const rawRes = await this.client.search({
+      index: `${DocumentIndexNamePrefix}*`,
+      body: {
+        from,
+        size,
+        query: {
+          bool: {
+            should: [
+              {
+                prefix: {
+                  'path.hierarchy': {
+                    value: req.query,
+                    boost: 1.0,
+                  },
+                },
+              },
+              {
+                term: {
+                  'path.hierarchy': {
+                    value: req.query,
+                    boost: 10.0,
+                  },
+                },
+              },
+            ],
+            disable_coord: false,
+            adjust_pure_negative: true,
+            boost: 1.0,
+          },
+        },
+      },
+    });
+
+    const hits: any[] = rawRes.hits.hits;
+    const results: SearchResultItem[] = hits.map(hit => {
+      const doc: Document = hit._source;
+      const { repoUri, path, language } = doc;
+
+      const item: SearchResultItem = {
+        uri: repoUri,
+        filePath: path,
+        language: language!,
+        hits: 0,
+        compositeContent: {
+          content: '',
+          lineMapping: [],
+          ranges: [],
+        },
+      };
+      return item;
+    });
+    return {
+      query: req.query,
+      from,
+      page: req.page,
+      totalPage: Math.ceil(rawRes.hits.total / resultsPerPage),
+      results,
+      took: rawRes.took,
+      total: rawRes.hits.total,
+    };
+  }
+
   private getSourceContent(hitsContent: SourceHit[], doc: Document) {
     const slicedHighlights = hitsContent.slice(0, MAX_HIT_NUMBER);
     const slicedRanges: LineRange[] = slicedHighlights.map(hit => ({

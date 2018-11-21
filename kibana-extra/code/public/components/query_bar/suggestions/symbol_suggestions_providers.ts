@@ -14,7 +14,7 @@ import { RepositoryUtils } from '../../../../common/repository_utils';
 export class SymbolSuggestionsProvider implements SuggestionsProvider {
   public async getSuggestions(query: string): Promise<AutocompleteSuggestion[]> {
     const res = await kfetch({
-      pathname: `../api/code/search/symbol`,
+      pathname: `../api/code/suggestions/symbol`,
       method: 'get',
       query: { q: query },
     });

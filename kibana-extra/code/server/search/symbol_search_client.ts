@@ -34,7 +34,7 @@ export class SymbolSearchClient extends AbstractSearchClient {
     return this.handleResults(rawRes);
   }
 
-  public async search(req: SymbolSearchRequest): Promise<SymbolSearchResult> {
+  public async suggest(req: SymbolSearchRequest): Promise<SymbolSearchResult> {
     const resultsPerPage = this.getResultsPerPage(req);
     const from = (req.page - 1) * resultsPerPage;
     const size = resultsPerPage;

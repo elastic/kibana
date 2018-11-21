@@ -15,11 +15,19 @@ export abstract class AbstractSearchClient implements SearchClient {
 
   constructor(protected readonly client: EsClient, protected readonly log: Log) {}
 
+  // For the full search request.
   public async search(req: SearchRequest): Promise<SearchResult> {
     // This is the abstract implementation, you should override this function.
     return new Promise<SearchResult>((resolve, reject) => {
       resolve();
     });
+  }
+
+  // For the typeahead suggestions request.
+  public async suggest(req: SearchRequest): Promise<SearchResult> {
+    // This is the abstract implementation, you should override this function.
+    // By default, return the same result as search function above.
+    return this.search(req);
   }
 
   public getResultsPerPage(req: SearchRequest): number {
