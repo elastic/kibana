@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { Server } from 'src/server/kbn_server';
 
 export function registerReindexTemplateRoutes(server: Server) {
@@ -16,11 +17,10 @@ export function registerReindexTemplateRoutes(server: Server) {
       const { indexName } = request.params;
       const newIndexName = `${indexName}-updated`;
       const indexInfo = await callWithRequest(request, 'transport.request', {
-        path: `/${encodeURIComponent(indexName)}`,
+        path: `/${encodeURIComponent(indexName)}?flat_settings`,
       });
 
-      // TODO: need to exclude some settings from this blob. (eg. uuid, created_date)
-      const settings = indexInfo[indexName].settings;
+      const settings = removeUnsettableSettings(indexInfo[indexName].settings);
       const mappings = indexInfo[indexName].mappings;
 
       return `
@@ -81,3 +81,11 @@ const stringify = (data: any, extraSpaces: number) => {
     .join('\n')
     .trim();
 };
+
+const removeUnsettableSettings = (settings: object) =>
+  _.omit(settings, [
+    'index.uuid',
+    'index.creation_date',
+    'index.version.created',
+    'index.provided_name',
+  ]);
