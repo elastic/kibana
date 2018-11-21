@@ -82,21 +82,17 @@ describe('buildRequestBody(req)', () => {
   it('returns a valid body', () => {
     const panel = body.panels[0];
     const series = panel.series[0];
-    const doc = buildRequestBody({ payload: body }, panel, series);
+    const config = {
+      allowLeadingWildcards: true,
+      queryStringOptions: {},
+    };
+    const doc = buildRequestBody({ payload: body }, panel, series, config);
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
+          filter: [],
           must: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: 1485463055881,
-                  lte: 1485463955881,
-                  format: 'epoch_millis'
-                }
-              }
-            },
             {
               bool: {
                 must: [
@@ -109,8 +105,19 @@ describe('buildRequestBody(req)', () => {
                 ],
                 must_not: []
               }
-            }
-          ]
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: 1485463055881,
+                  lte: 1485463955881,
+                  format: 'epoch_millis'
+                }
+              }
+            },
+          ],
+          must_not: [],
+          should: [],
         }
       },
       aggs: {

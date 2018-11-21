@@ -26,6 +26,10 @@ describe('query(req, panel, series)', () => {
   let panel;
   let series;
   let req;
+  const config = {
+    allowLeadingWildcards: true,
+    queryStringOptions: {},
+  };
   beforeEach(() => {
     req = {
       payload: {
@@ -45,17 +49,18 @@ describe('query(req, panel, series)', () => {
 
   it('calls next when finished', () => {
     const next = sinon.spy();
-    query(req, panel, series)(next)({});
+    query(req, panel, series, config)(next)({});
     expect(next.calledOnce).to.equal(true);
   });
 
   it('returns doc with query for timerange', () => {
     const next = doc => doc;
-    const doc = query(req, panel, series)(next)({});
+    const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
+          filter: [],
           must: [
             {
               range: {
@@ -66,7 +71,9 @@ describe('query(req, panel, series)', () => {
                 }
               }
             }
-          ]
+          ],
+          must_not: [],
+          should: [],
         }
       }
     });
@@ -75,11 +82,12 @@ describe('query(req, panel, series)', () => {
   it('returns doc with query for timerange (offset by 1h)', () => {
     series.offset_time = '1h';
     const next = doc => doc;
-    const doc = query(req, panel, series)(next)({});
+    const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
+          filter: [],
           must: [
             {
               range: {
@@ -90,7 +98,9 @@ describe('query(req, panel, series)', () => {
                 }
               }
             }
-          ]
+          ],
+          must_not: [],
+          should: [],
         }
       }
     });
@@ -111,21 +121,13 @@ describe('query(req, panel, series)', () => {
       }
     ];
     const next = doc => doc;
-    const doc = query(req, panel, series)(next)({});
+    const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
+          filter: [],
           must: [
-            {
-              range: {
-                timestamp: {
-                  gte: 1483228800000,
-                  lte: 1483232400000,
-                  format: 'epoch_millis'
-                }
-              }
-            },
             {
               bool: {
                 must: [
@@ -136,8 +138,19 @@ describe('query(req, panel, series)', () => {
                   }
                 ]
               }
-            }
-          ]
+            },
+            {
+              range: {
+                timestamp: {
+                  gte: 1483228800000,
+                  lte: 1483232400000,
+                  format: 'epoch_millis'
+                }
+              }
+            },
+          ],
+          must_not: [],
+          should: [],
         }
       }
     });
@@ -146,11 +159,12 @@ describe('query(req, panel, series)', () => {
   it('returns doc with series filter', () => {
     series.filter = 'host:web-server';
     const next = doc => doc;
-    const doc = query(req, panel, series)(next)({});
+    const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
+          filter: [],
           must: [
             {
               range: {
@@ -166,8 +180,10 @@ describe('query(req, panel, series)', () => {
                 query: series.filter,
                 analyze_wildcard: true
               }
-            }
-          ]
+            },
+          ],
+          must_not: [],
+          should: [],
         }
       }
     });
@@ -188,21 +204,13 @@ describe('query(req, panel, series)', () => {
     ];
     panel.filter = 'host:web-server';
     const next = doc => doc;
-    const doc = query(req, panel, series)(next)({});
+    const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
+          filter: [],
           must: [
-            {
-              range: {
-                timestamp: {
-                  gte: 1483228800000,
-                  lte: 1483232400000,
-                  format: 'epoch_millis'
-                }
-              }
-            },
             {
               bool: {
                 must: [
@@ -215,12 +223,23 @@ describe('query(req, panel, series)', () => {
               }
             },
             {
+              range: {
+                timestamp: {
+                  gte: 1483228800000,
+                  lte: 1483232400000,
+                  format: 'epoch_millis'
+                }
+              }
+            },
+            {
               query_string: {
                 query: panel.filter,
                 analyze_wildcard: true
               }
             }
-          ]
+          ],
+          must_not: [],
+          should: [],
         }
       }
     });
@@ -243,11 +262,12 @@ describe('query(req, panel, series)', () => {
     panel.filter = 'host:web-server';
     panel.ignore_global_filter = true;
     const next = doc => doc;
-    const doc = query(req, panel, series)(next)({});
+    const doc = query(req, panel, series, config)(next)({});
     expect(doc).to.eql({
       size: 0,
       query: {
         bool: {
+          filter: [],
           must: [
             {
               range: {
@@ -263,8 +283,10 @@ describe('query(req, panel, series)', () => {
                 query: panel.filter,
                 analyze_wildcard: true
               }
-            }
-          ]
+            },
+          ],
+          must_not: [],
+          should: [],
         }
       }
     });
