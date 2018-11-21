@@ -1,4 +1,4 @@
-.ml-annotate-brush .extent {
+.ml-annotation-brush .extent {
   stroke: #999;
   stroke-width: 2px;
   stroke-dasharray: 2 5;
@@ -14,6 +14,12 @@
   shape-rendering: geometricPrecision;
 }
 
-.ml-annotation-rect-hidden {
+.ml-annotation-text {
+  text-anchor: middle;
+  font-size: 16px;
+  color: #333;
+}
+
+.ml-annotation-hidden {
   display: none;
 }

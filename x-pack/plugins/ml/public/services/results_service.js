@@ -342,8 +342,11 @@ function getAnnotations(
       }
     })
       .then((resp) => {
-        console.warn('raw resp', resp);
-        const docs = _.get(resp, ['hits', 'hits']).map(d => d._source);
+        const docs = _.get(resp, ['hits', 'hits']).map(d => {
+          // get the original source document and the document id, we need it
+          // to identify the annotation when editing/deleting it.
+          return { ...d._source, _id: d._id };
+        });
 
         docs.forEach((doc) => {
           const jobId = doc.job_id;

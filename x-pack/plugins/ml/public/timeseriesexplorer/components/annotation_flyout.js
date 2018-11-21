@@ -28,15 +28,19 @@ export function AnnotationFlyout({
   annotation,
   cancelAction,
   controlFunc,
+  deleteAction,
   saveAction
 }) {
   const saveActionWrapper = () => saveAction(annotation);
+  const deleteActionWrapper = () => deleteAction(annotation);
+  const isExistingAnnotation = typeof annotation._id !== 'undefined';
+  const titlePrefix = (isExistingAnnotation) ? 'Edit' : 'Add';
 
   return (
     <EuiFlyout onClose={cancelAction} size="s" aria-labelledby="Add annotation">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id="mlAnnotationFlyoutTitle">Add annotation</h2>
+          <h2 id="mlAnnotationFlyoutTitle">{titlePrefix} annotation</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -60,12 +64,22 @@ export function AnnotationFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            {isExistingAnnotation &&
+              <EuiButtonEmpty
+                color="danger"
+                onClick={deleteActionWrapper}
+              >
+                Delete
+              </EuiButtonEmpty>
+            }
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               isDisabled={annotation.annotation === ''}
               onClick={saveActionWrapper}
             >
-              Save
+              {isExistingAnnotation ? 'Update' : 'Create'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -18,6 +18,7 @@ import { TimeseriesChart } from './timeseries_chart';
 
 import angular from 'angular';
 import { timefilter } from 'ui/timefilter';
+import { toastNotifications } from 'ui/notify';
 
 import { ResizeChecker } from 'ui/resize_checker';
 
@@ -47,6 +48,7 @@ module.directive('mlTimeseriesChart', function () {
         contextChartData: scope.contextChartData,
         contextForecastData: scope.contextForecastData,
         contextChartSelected: contextChartSelected,
+        deleteAnnotation: ml.deleteAnnotation,
         detectorIndex: scope.detectorIndex,
         focusAnnotationData: scope.focusAnnotationData,
         focusChartData: scope.focusChartData,
@@ -62,6 +64,7 @@ module.directive('mlTimeseriesChart', function () {
         svgWidth,
         swimlaneData: scope.swimlaneData,
         timefilter,
+        toastNotifications,
         zoomFrom: scope.zoomFrom,
         zoomTo: scope.zoomTo
       };

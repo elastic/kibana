@@ -8,13 +8,44 @@
 export function annotationProvider(callWithRequest) {
 
   async function addAnnotation(d) {
-    const addAnnotationResponse = await callWithRequest('index', {
-      index: '.ml-annotations',
-      type: 'annotation',
-      body: d
+    let response;
+
+    // if d._id is not present, create new annotation
+    if (typeof d._id === 'undefined') {
+      response = await callWithRequest('index', {
+        index: '.ml-annotations',
+        type: 'annotation',
+        body: d
+      });
+    } else {
+      const id = d._id;
+      delete d._id;
+      response = await callWithRequest('update', {
+        index: '.ml-annotations',
+        type: 'annotation',
+        id,
+        body: {
+          doc: d
+        }
+      });
+    }
+
+    // refresh the annotations index so we can make sure the annotations up to date right away.
+    await callWithRequest('indices.refresh', {
+      index: '.ml-annotations'
     });
 
-    // refresh the annotations index so we can make sure the annotations show up right away.
+    return response;
+  }
+
+  async function deleteAnnotation(id) {
+    const addAnnotationResponse = await callWithRequest('delete', {
+      index: '.ml-annotations',
+      type: 'annotation',
+      id
+    });
+
+    // refresh the annotations index so we can make sure the annotations up to date right away.
     await callWithRequest('indices.refresh', {
       index: '.ml-annotations'
     });
@@ -22,8 +53,8 @@ export function annotationProvider(callWithRequest) {
     return addAnnotationResponse;
   }
 
-
   return {
-    addAnnotation
+    addAnnotation,
+    deleteAnnotation
   };
 }

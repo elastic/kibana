@@ -26,4 +26,21 @@ export function annotationRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'DELETE',
+    path: '/api/ml/annotation/delete/{annotationId}',
+    handler(request) {
+      console.log('annotation/add', request.payload);
+      const callWithRequest = callWithRequestFactory(server, request);
+      const annotationId = request.params.annotationId;
+
+      const { deleteAnnotation } = annotationServiceProvider(callWithRequest);
+      return deleteAnnotation(annotationId)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

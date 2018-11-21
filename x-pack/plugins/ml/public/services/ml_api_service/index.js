@@ -27,6 +27,13 @@ export const ml = {
     });
   },
 
+  deleteAnnotation(id) {
+    return http({
+      url: `${basePath}/annotation/delete/${id}`,
+      method: 'DELETE'
+    });
+  },
+
   getJobs(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
     return http({
