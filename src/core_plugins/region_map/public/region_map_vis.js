@@ -25,13 +25,14 @@ import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colorma
 import { mapToLayerWithId } from './util';
 import { RegionMapsVisualizationProvider } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
+import { ORIGIN } from 'ui/vis/map/origin';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config, i18n) {
 
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted', false));
+  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML, false));
 
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;

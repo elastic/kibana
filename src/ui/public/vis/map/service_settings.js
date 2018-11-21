@@ -21,6 +21,7 @@ import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
+import { ORIGIN } from './origin';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -28,10 +29,7 @@ const markdownIt = new MarkdownIt({
 });
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
-export const ORIGIN = {
-  EMS: 'ems',
-  KIBANA_YML: 'kibana_yml'
-};
+
 
 
 uiModules.get('kibana')
@@ -253,14 +251,14 @@ uiModules.get('kibana')
         let url;
         if (fileLayerConfig.origin === ORIGIN.EMS) {
           url = this._getUrlFromEms(fileLayerConfig);
-        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith('elastic_maps_service.')) {
+        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) {
           //fallback for older saved objects
           url = this._getUrlFromEms(fileLayerConfig);
-        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith('self_hosted.')) {
+        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.KIBANA_YML}.`)) {
           //fallback for older saved objects
           url = fileLayerConfig.url;
         } else {
-          //fallback
+          //generic fallback
           url = fileLayerConfig.url;
         }
         return url;
