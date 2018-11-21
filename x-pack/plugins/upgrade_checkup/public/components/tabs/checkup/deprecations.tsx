@@ -122,7 +122,7 @@ const DeprecationList: StatelessComponent<{
 interface GroupedDeprecationsProps {
   currentFilter: Set<LevelFilterOption>;
   currentGroupBy: GroupByOption;
-  deprecations?: EnrichedDeprecationInfo[];
+  allDeprecations?: EnrichedDeprecationInfo[];
 }
 
 /**
@@ -130,14 +130,21 @@ interface GroupedDeprecationsProps {
  */
 export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> = ({
   currentGroupBy,
-  deprecations,
+  allDeprecations = [],
   currentFilter,
 }) => {
-  deprecations = (deprecations || []).filter(filterDeps(currentFilter));
+  const deprecations = allDeprecations.filter(filterDeps(currentFilter));
+
+  // Display some text if no deprecations are going to be shown.
   if (deprecations.length === 0) {
+    const message =
+      allDeprecations.length === 0
+        ? `No deprecations.`
+        : `0 of ${allDeprecations.length} shown. Change filters to see more.`;
+
     return (
       <EuiText color="subdued">
-        <p>No deprecations.</p>
+        <p>{message}</p>
       </EuiText>
     );
   }

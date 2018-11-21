@@ -6,11 +6,13 @@
 import React, { StatelessComponent } from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { LevelFilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
 import { GroupByOption, LevelFilterOption, LoadingState } from './types';
 
 interface CheckupControlsProps {
+  allDeprecations?: DeprecationInfo[];
   loadingState: LoadingState;
   loadData: () => void;
   currentFilter: Set<LevelFilterOption>;
@@ -21,6 +23,7 @@ interface CheckupControlsProps {
 }
 
 export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
+  allDeprecations,
   loadingState,
   loadData,
   currentFilter,
@@ -45,7 +48,7 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
       <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <LevelFilterBar {...{ currentFilter, onFilterChange }} />
+      <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

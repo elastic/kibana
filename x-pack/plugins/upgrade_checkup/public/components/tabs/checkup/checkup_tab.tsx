@@ -47,7 +47,11 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
     this.state = {
       loadingState: LoadingState.Loading,
       // initialize to all filters
-      currentFilter: new Set([LevelFilterOption.warning, LevelFilterOption.critical]),
+      currentFilter: new Set([
+        LevelFilterOption.info,
+        LevelFilterOption.warning,
+        LevelFilterOption.critical,
+      ]),
       currentGroupBy: GroupByOption.message,
     };
   }
@@ -58,7 +62,7 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
 
   public render() {
     const { checkupType } = this.props;
-    const { currentFilter, currentGroupBy, loadingState } = this.state;
+    const { currentFilter, currentGroupBy, deprecations, loadingState } = this.state;
 
     return (
       <Fragment>
@@ -76,6 +80,7 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
         </EuiText>
         <EuiSpacer />
         <CheckupControls
+          allDeprecations={deprecations}
           loadingState={loadingState}
           loadData={this.loadData}
           currentFilter={currentFilter}
@@ -147,7 +152,7 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
         <GroupedDeprecations
           currentGroupBy={currentGroupBy}
           currentFilter={currentFilter}
-          deprecations={deprecations}
+          allDeprecations={deprecations}
         />
       </div>
     );

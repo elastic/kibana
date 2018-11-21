@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+
 import {
   AssistanceAPIResponse,
   CallClusterWithRequest,
@@ -114,7 +116,7 @@ export async function getUpgradeCheckupStatus(
 }
 
 const consoleTemplateUrl = (basePath: string, indexName: string) => {
-  const reindexTemplateUrl = `http://localhost:5601${basePath}/api/upgrade_checkup/reindex/command_template/${encodeURIComponent(
+  const reindexTemplateUrl = `${basePath}/api/upgrade_checkup/reindex/command_template/${encodeURIComponent(
     indexName
   )}.json`;
 
