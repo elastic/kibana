@@ -25,8 +25,6 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import './samples.less';
-
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class FormatEditorSamplesComponent extends PureComponent {
