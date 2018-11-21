@@ -5,20 +5,18 @@
  */
 
 import { SECTIONS } from '../../constants';
-import { loadAutoFollowPatterns as request } from '../../services/api';
+import { loadAutoFollowPatterns as loadAutoFollowPatternsRequest } from '../../services/api';
 import * as t from '../action_types';
 import { apiAction } from './api';
 
 const { AUTO_FOLLOW_PATTERN } = SECTIONS;
 
-export const loadAutoFollowPatterns = () =>
+export const loadAutoFollowPatterns = (inBackground = false) =>
   apiAction({
     label: t.AUTO_FOLLOW_PATTERN_LOAD,
     scope: AUTO_FOLLOW_PATTERN,
+    inBackground,
     handler: async () => {
-      const data = await request();
-
-      // We can manipulate any way we want the response
-      return { ...data, isModified: true };
+      return await loadAutoFollowPatternsRequest();
     },
   });

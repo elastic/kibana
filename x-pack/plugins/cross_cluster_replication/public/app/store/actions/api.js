@@ -6,7 +6,7 @@
 
 import * as t from '../action_types';
 
-export const apiAction = ({ label, scope, handler }) => ({ type: t.API, payload: { label, scope, handler } });
+export const apiAction = ({ label, scope, inBackground, handler }) => ({ type: t.API, payload: { label, scope, inBackground, handler } });
 
 export const apiStart = ({ label, scope }) => ({ type: t.API_START, payload: { label, scope } });
 

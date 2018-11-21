@@ -14,16 +14,23 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     return;
   }
 
-  const { label, scope, handler } = action.payload;
+  const { label, scope, inBackground, handler } = action.payload;
 
-  dispatch(apiStart({ label, scope }));
+  if (!inBackground) {
+    dispatch(apiStart({ label, scope }));
+  }
+
+  dispatch(apiError({ error: null, scope }));
 
   let response;
 
   try {
     response = await handler();
   } catch (error) {
-    dispatch(apiError({ error, scope }));
+    if (!inBackground) {
+      dispatch(apiError({ error, scope }));
+      dispatch(apiEnd({ label, scope }));
+    }
     dispatch({
       type: `${label}_FAILURE`,
       payload: error,
@@ -35,5 +42,8 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     type: `${label}_SUCCESS`,
     payload: response,
   });
-  dispatch(apiEnd({ label, scope }));
+
+  if (!inBackground) {
+    dispatch(apiEnd({ label, scope }));
+  }
 };

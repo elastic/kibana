@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const BASE_PATH = '/management/elasticsearch/cross_cluster_replication';
-export const API_BASE_PATH = '/api/cross_cluster_replication';
+export { AutoFollowPatternTable } from './auto_follow_pattern_table.container';
