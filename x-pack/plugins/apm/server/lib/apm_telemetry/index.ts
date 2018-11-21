@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('watcher app', function () {
-    this.tags('ciGroup1');
-
-    //loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./watcher_test'));
-  });
-}
+export {
+  ApmTelemetry,
+  AgentName,
+  storeApmTelemetry,
+  createApmTelementry,
+  APM_TELEMETRY_DOC_ID
+} from './apm_telemetry';
+export { makeApmUsageCollector } from './make_apm_usage_collector';

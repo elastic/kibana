@@ -22,6 +22,7 @@ import './dashboard_app';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
+import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
 import dashboardTemplate from './dashboard_app.html';
@@ -57,7 +58,7 @@ uiRoutes
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
-    controller($injector, $location, $scope, Private, config, breadcrumbState, i18n) {
+    controller($injector, $location, $scope, Private, config, i18n) {
       const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
       const dashboardConfig = $injector.get('dashboardConfig');
 
@@ -70,7 +71,7 @@ uiRoutes
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
       $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
-      breadcrumbState.set([{
+      chrome.breadcrumbs.set([{
         text: i18n('kbn.dashboard.dashboardBreadcrumbsTitle', {
           defaultMessage: 'Dashboards',
         }),
