@@ -23,7 +23,7 @@ interface Props {
 
 let OPTIONS: { [P in InfraNodeType]: Array<{ text: string; value: InfraMetricType }> };
 const getOptions = (
-  nodeType: string,
+  nodeType: InfraNodeType,
   intl: InjectedIntl
 ): Array<{ text: string; value: InfraMetricType }> => {
   if (!OPTIONS) {
