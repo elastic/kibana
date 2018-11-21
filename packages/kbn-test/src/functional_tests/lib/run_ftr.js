@@ -39,14 +39,15 @@ export async function assertNoneExcluded({ configPath, options }) {
   const ftr = createFtr({ configPath, options });
 
   const stats = await ftr.getTestStats();
-  if (stats.excludedTests > 0) {
+  if (stats.excludedTests.length > 0) {
     throw new CliError(`
-      ${stats.excludedTests} tests in the ${configPath} config
+      ${stats.excludedTests.length} tests in the ${configPath} config
       are excluded when filtering by the tags run on CI. Make sure that all suites are
       tagged with one of the following tags, or extend the list of tags in test/scripts/jenkins_xpack.sh
 
-      ${JSON.stringify(options.suiteTags)}
+      tags: ${JSON.stringify(options.suiteTags)}
 
+      - ${stats.excludedTests.join('\n      - ')}
     `);
   }
 }
@@ -65,5 +66,5 @@ export async function runFtr({ configPath, options }) {
 export async function hasTests({ configPath, options }) {
   const ftr = createFtr({ configPath, options });
   const stats = await ftr.getTestStats();
-  return stats.tests > 0;
+  return stats.testCount > 0;
 }
