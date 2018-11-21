@@ -77,13 +77,12 @@ export default function calculateLabel(metric, metrics) {
           defaultMessage: '{lookupMetricType} $of {targetLabel} ({additionalLabel})',
           values: { lookupMetricType: lookup[metric.type], targetLabel, additionalLabel: matches[1] }
         });
-      } else {
-        return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetLabel', {
-          defaultMessage: '{lookupMetricType} $of {targetLabel}',
-          values: { lookupMetricType: lookup[metric.type], targetLabel }
-        });
       }
     }
+    return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetLabel', {
+      defaultMessage: '{lookupMetricType} of {targetLabel}',
+      values: { lookupMetricType: lookup[metric.type], targetLabel }
+    });
   }
 
   return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
