@@ -53,7 +53,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
       .then(([loader, savedObject]) => {
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 
-        if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
+        if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
           return new Embeddable({
             metadata: {
               title: savedObject.title,

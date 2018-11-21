@@ -34,7 +34,7 @@ export async function getAvgResponseTimeAnomalies({
 
   if (!aggs) {
     return {
-      message: 'ml index does not exist'
+      message: 'Error reading machine learning index'
     };
   }
 

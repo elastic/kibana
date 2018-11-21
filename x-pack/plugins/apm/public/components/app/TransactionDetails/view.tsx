@@ -15,7 +15,7 @@ import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
 // @ts-ignore
 import TransactionCharts from '../../shared/charts/TransactionCharts';
-import EmptyMessage from '../../shared/EmptyMessage';
+import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 // @ts-ignore

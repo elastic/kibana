@@ -16,6 +16,7 @@
     "tagCloud": "src/core_plugins/tagcloud",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
+    "xpack.infra": "x-pack/plugins/infra",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
     "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.rollupJobs": "x-pack/plugins/rollup",
@@ -26,7 +27,8 @@
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",
     "src/ui/ui_render/ui_render_mixin.js",
-    "x-pack/plugins/monitoring/public/components/cluster/overview/alerts_panel.js",
-    "x-pack/plugins/monitoring/public/directives/alerts/index.js"
+    "x-pack/plugins/infra/public/utils/loading_state/loading_result.ts",
+    "x-pack/plugins/infra/server/lib/domains/log_entries_domain/log_entries_domain.ts"
+
   ]
 }

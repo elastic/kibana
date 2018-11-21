@@ -26,7 +26,7 @@ export function VislibLibAxisConfigProvider() {
   const defaults = {
     show: true,
     type: 'value',
-    elSelector: '.axis-wrapper-{pos} .axis-div',
+    elSelector: '.visAxis__column--{pos} .axis-div',
     position: 'left',
     scale: {
       type: 'linear',
@@ -61,7 +61,7 @@ export function VislibLibAxisConfigProvider() {
     },
     title: {
       text: '',
-      elSelector: '.axis-wrapper-{pos} .axis-div',
+      elSelector: '.visAxis__column--{pos} .axis-div',
     }
   };
 
