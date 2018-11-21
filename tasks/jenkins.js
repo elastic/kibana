@@ -41,12 +41,6 @@ module.exports = function (grunt) {
     'run:apiIntegrationTests',
   ]);
 
-  grunt.registerTask('jenkins:selenium', [
-    'checkPlugins',
-    'run:functionalTestsRelease',
-    'run:pluginFunctionalTestsRelease',
-  ]);
-
   grunt.registerTask(
     'jenkins:report',
     'Reports failed tests found in junit xml files to Github issues',

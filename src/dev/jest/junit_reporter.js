@@ -49,7 +49,7 @@ export default class JestJUnitReporter {
    * @return {undefined}
    */
   onRunComplete(contexts, results) {
-    if (!process.env.CI) {
+    if (!process.env.CI || !results.testResults.length) {
       return;
     }
 
