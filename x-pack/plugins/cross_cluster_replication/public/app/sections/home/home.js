@@ -6,7 +6,6 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { Route, Switch } from 'react-router-dom';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPage,
