@@ -73,7 +73,7 @@ export class WMSSource extends TMSSource {
   getUrlTemplate() {
     console.warn('should compose url using url formatter, not string formatting');
     // eslint-disable-next-line max-len
-    return `${this._descriptor.serviceUrl}?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=${this._descriptor.layers}&styles=`;
+    return `${this._descriptor.serviceUrl}?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=${this._descriptor.layers}&styles=${this._descriptor.styles}`;
   }
 }
 
@@ -84,7 +84,8 @@ class WMSEditor extends  React.Component {
     super();
     this.state = {
       serviceUrl: '',
-      layers: ''
+      layers: '',
+      styles: ''
     };
   }
 
@@ -94,7 +95,8 @@ class WMSEditor extends  React.Component {
       //todo: should really debounce this so we don't get a ton of changes during typing
       this.props.previewWMS({
         serviceUrl: this.state.serviceUrl,
-        layers: this.state.layers
+        layers: this.state.layers,
+        styles: this.state.styles
       });
     }
   }
@@ -113,6 +115,13 @@ class WMSEditor extends  React.Component {
     this._previewIfPossible();
   }
 
+  async _handleStylesChange(e) {
+    await this.setState({
+      styles: e.target.value
+    });
+    this._previewIfPossible();
+  }
+
 
   render() {
     return (
@@ -126,6 +135,11 @@ class WMSEditor extends  React.Component {
         <EuiFormRow label="Layers (comma-separated list)">
           <EuiFieldText
             onChange={(e) => this._handleLayersChange(e)}
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Layers (comma-separated list)">
+          <EuiFieldText
+            onChange={(e) => this._handleStylesChange(e)}
           />
         </EuiFormRow>
       </Fragment>
