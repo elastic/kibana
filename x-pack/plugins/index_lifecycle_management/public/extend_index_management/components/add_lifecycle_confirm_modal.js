@@ -14,7 +14,11 @@ import {
   EuiFormRow,
   EuiOverlayMask,
   EuiConfirmModal,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
   EuiCallOut,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { BASE_PATH } from '../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -68,10 +72,11 @@ export class AddLifecyclePolicyConfirmModal extends Component {
       );
     }
   };
-  renderAliasFormElement = (selectedPolicy) => {
+  renderAliasFormElement = selectedPolicy => {
     const { selectedAlias } = this.state;
     const { index } = this.props;
-    const showAliasSelect = selectedPolicy && get(selectedPolicy, 'policy.phases.hot.actions.rollover');
+    const showAliasSelect =
+      selectedPolicy && get(selectedPolicy, 'policy.phases.hot.actions.rollover');
     if (!showAliasSelect) {
       return null;
     }
@@ -94,7 +99,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
               but index {indexName} does not have an alias, which is required for rollover."
             values={{
               policyName: selectedPolicy.name,
-              indexName: index.name
+              indexName: index.name,
             }}
           />
         </EuiCallOut>
@@ -134,42 +139,13 @@ export class AddLifecyclePolicyConfirmModal extends Component {
         />
       </EuiFormRow>
     );
-  }
+  };
   renderForm() {
     const { policies, selectedPolicyName } = this.state;
     const selectedPolicy = selectedPolicyName
       ? policies.find(policy => policy.name === selectedPolicyName)
       : null;
 
-    if (!policies.length) {
-      return (
-        <EuiCallOut
-          style={{ maxWidth: 400 }}
-          title={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPoliciesWarningTitle"
-              defaultMessage="No index lifecycle policies defined"
-            />
-          }
-          color="warning"
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPoliciesWarningMessage"
-            defaultMessage="No index lifecycle policies are defined."
-          />
-          <p>
-            <EuiLink
-              href={`#${BASE_PATH}policies/edit`}
-            >
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
-                defaultMessage="Define lifecycle policy"
-              />
-            </EuiLink>
-          </p>
-        </EuiCallOut>
-      );
-    }
     const options = policies.map(({ name }) => {
       return {
         value: name,
@@ -226,19 +202,62 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     }
   }
   render() {
+    const { policies } = this.state;
     const { indexName, closeModal } = this.props;
+    const title = (
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
+        defaultMessage="Add lifecycle policy to {indexName}"
+        values={{
+          indexName,
+        }}
+      />
+    );
+    if (!policies.length) {
+      return (
+        <EuiOverlayMask>
+          <EuiModal
+            onClose={closeModal}
+          >
+            <EuiModalHeader>
+              <EuiModalHeaderTitle >
+                {title}
+              </EuiModalHeaderTitle >
+
+            </EuiModalHeader>
+            <EuiModalBody>
+              <EuiCallOut
+                style={{ maxWidth: 400 }}
+                title={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPoliciesWarningTitle"
+                    defaultMessage="No index lifecycle policies defined"
+                  />
+                }
+                color="warning"
+              >
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPoliciesWarningMessage"
+                  defaultMessage="No index lifecycle policies are defined."
+                />
+                <p>
+                  <EuiLink href={`#${BASE_PATH}policies/edit`}>
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.defineLifecyclePolicyLinkText"
+                      defaultMessage="Define lifecycle policy"
+                    />
+                  </EuiLink>
+                </p>
+              </EuiCallOut>
+            </EuiModalBody>
+          </EuiModal>
+        </EuiOverlayMask>
+      );
+    }
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
-              defaultMessage="Add lifecycle policy to {indexName}"
-              values={{
-                indexName
-              }}
-            />
-          }
+          title={title}
           onCancel={closeModal}
           onConfirm={this.addPolicy}
           cancelButtonText={
