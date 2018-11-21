@@ -87,7 +87,7 @@ export class Distribution extends Component<Props> {
       <div>
         <EuiTitle size="s">
           <h5>
-            Response time distribution{' '}
+            Transactions duration distribution{' '}
             <EuiToolTip
               content={
                 <div>
