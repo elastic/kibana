@@ -310,6 +310,53 @@ const metricbeatModuleConfig: YamlConfigSchema[] = [
   },
 ];
 
+const heartbeatConfig: YamlConfigSchema[] = [
+  {
+    id: 'type',
+    ui: {
+      label: 'Type',
+      type: 'select',
+    },
+    options: [
+      {
+        value: 'http',
+        text: 'http',
+      },
+      {
+        value: 'icmp',
+        text: 'icmp',
+      },
+      {
+        value: 'tcp',
+        text: 'tcp',
+      },
+    ],
+    error: 'Please select a monitor type',
+    required: true,
+  },
+  {
+    id: 'schedule',
+    ui: {
+      label: 'Schedule',
+      type: 'input',
+    },
+    defaultValue: '10s',
+    error: 'Please provide a valid schedule interval',
+    required: true,
+  },
+  {
+    id: 'hosts',
+    ui: {
+      label: 'Hosts',
+      type: 'multi-input',
+      helpText: 'Put each host on a separate line',
+      placeholder: 'http://localhost:80/',
+    },
+    error: 'One host per line',
+    required: true,
+  },
+];
+
 const outputConfig: YamlConfigSchema[] = [
   {
     id: 'output',
@@ -372,5 +419,6 @@ export const supportedConfigs = [
   { text: 'Filebeat Input', value: 'filebeat.inputs', config: filebeatInputConfig },
   { text: 'Filebeat Module', value: 'filebeat.modules', config: filebeatModuleConfig },
   { text: 'Metricbeat Module', value: 'metricbeat.modules', config: metricbeatModuleConfig },
+  { text: 'Heartbeat Monitors', value: 'heartbeat.monitors', config: heartbeatConfig },
   { text: 'Output', value: 'output', config: outputConfig },
 ];

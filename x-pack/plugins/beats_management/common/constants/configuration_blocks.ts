@@ -8,6 +8,7 @@ export enum ConfigurationBlockTypes {
   FilebeatInputs = 'filebeat.inputs',
   FilebeatModules = 'filebeat.modules',
   MetricbeatModules = 'metricbeat.modules',
+  HearbeatMonitors = 'heartbeat.monitors',
   Output = 'output',
   Processors = 'processors',
 }

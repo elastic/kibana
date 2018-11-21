@@ -126,6 +126,7 @@ export class EnrollBeat extends React.Component<BeatsProps, any> {
                   options={[
                     { value: 'filebeat', text: 'Filebeat' },
                     { value: 'metricbeat', text: 'Metricbeat' },
+                    { value: 'heartbeat', text: 'Heartbeat' },
                   ]}
                   onChange={(e: any) => this.setState({ beatType: e.target.value })}
                   fullWidth={true}
