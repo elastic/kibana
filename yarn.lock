@@ -746,31 +746,7 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.0.0.tgz#e6fe9e1aa8b00c93045178f78a6dd0d457d56fa8"
-  integrity sha512-WL6sp6u2Rt1O7a2exLU/RuDcRnpluPN6aQ2JexBl+G6mVyF8F5I3RGJKTJp3jOozOaODRY2ev+Nq57EydkjrKg==
-  dependencies:
-    classnames "^2.2.5"
-    core-js "^2.5.1"
-    focus-trap-react "^3.0.4"
-    highlight.js "^9.12.0"
-    html "^1.0.0"
-    keymirror "^0.1.1"
-    lodash "npm:@elastic/lodash@3.10.1-kibana1"
-    numeral "^2.0.6"
-    prop-types "^15.6.0"
-    react-ace "^5.5.0"
-    react-color "^2.13.8"
-    react-datepicker v1.5.0
-    react-input-autosize "^2.2.1"
-    react-virtualized "^9.18.5"
-    react-vis "1.10.2"
-    resize-observer-polyfill "^1.5.0"
-    tabbable "^1.1.0"
-    uuid "^3.1.0"
-
-"@elastic/eui@^5.1.0":
+"@elastic/eui@5.1.0":
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.1.0.tgz#fdc17af319567e500002f79404a2e33748501f6c"
   integrity sha512-ZVUQYO7uP1M1NyPmzal16SKbjA3PwxR393YpcKJ/Wytqi4kHEeJNLVGQoRGBSJ3Qw0ivU91i5+RuefkyPj67tw==
