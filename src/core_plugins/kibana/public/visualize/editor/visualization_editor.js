@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { debounce } from 'lodash';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
@@ -58,9 +59,9 @@ uiModules
           editor.destroy();
         });
 
-        $scope.$watch('timeRange', $scope.renderFunction);
-        $scope.$watch('filters', $scope.renderFunction);
-
+        $scope.$watchGroup(['timeRange', 'filters'], debounce(() => {
+          $scope.renderFunction();
+        }, 100));
       }
     };
   });

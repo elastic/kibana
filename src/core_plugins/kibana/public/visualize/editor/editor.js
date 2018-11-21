@@ -320,15 +320,13 @@ function VisEditor(
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
-      $scope.fetch();
+      savedVis.searchSource.setField('filter', $state.filters);
+      $scope.globalFilters = queryFilter.getGlobalFilters();
     });
 
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      savedVis.searchSource.setField('query', $state.query);
-      savedVis.searchSource.setField('filter', $state.filters);
-      $scope.globalFilters = queryFilter.getGlobalFilters();
       $scope.vis.forceReload();
     };
 
@@ -354,6 +352,7 @@ function VisEditor(
 
   $scope.updateQueryAndFetch = function (query) {
     $state.query = migrateLegacyQuery(query);
+    savedVis.searchSource.setField('query', $state.query);
     $scope.fetch();
   };
 
