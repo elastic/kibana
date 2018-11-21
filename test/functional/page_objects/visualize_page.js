@@ -951,29 +951,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * cell values into arrays. Please use this function for newer tests.
      */
     async getTableVisContent({ stripEmptyRows = true } = { }) {
-      const container = await testSubjects.find('tableVis');
-      const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
+      return await retry.try(async () => {
+        const container = await testSubjects.find('tableVis');
+        const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
 
-      if (allTables.length === 0) {
-        return [];
-      }
-
-      const allData = await Promise.all(allTables.map(async (t) => {
-        let data = await table.getDataFromElement(t);
-        if (stripEmptyRows) {
-          data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+        if (allTables.length === 0) {
+          return [];
         }
-        return data;
-      }));
 
-      if (allTables.length === 1) {
+        const allData = await Promise.all(allTables.map(async (t) => {
+          let data = await table.getDataFromElement(t);
+          if (stripEmptyRows) {
+            data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+          }
+          return data;
+        }));
+
+        if (allTables.length === 1) {
         // If there was only one table we return only the data for that table
         // This prevents an unnecessary array around that single table, which
         // is the case we have in most tests.
-        return allData[0];
-      }
+          return allData[0];
+        }
 
-      return allData;
+        return allData;
+      });
     }
 
     async getInspectorTableData() {
