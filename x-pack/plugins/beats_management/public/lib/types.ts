@@ -44,7 +44,7 @@ export interface FramworkAdapterConstructable {
   new (uiModule: IModule): FrameworkAdapter;
 }
 
-// TODO: replace AxiosRequestConfig with something more defined
+// FIXME: replace AxiosRequestConfig with something more defined
 export type RequestConfig = AxiosRequestConfig;
 
 export interface ApiAdapter {

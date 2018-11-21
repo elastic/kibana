@@ -60,7 +60,7 @@ export class CMBeatsDomain {
   public async update(userOrToken: UserOrToken, beatId: string, beatData: Partial<CMBeat>) {
     const beat = await this.adapter.get(this.framework.internalUser, beatId);
 
-    // TODO make return type enum
+    // FIXME make return type enum
     if (beat === null) {
       return 'beat-not-found';
     }
@@ -83,7 +83,6 @@ export class CMBeatsDomain {
     });
   }
 
-  // TODO more strongly type this
   public async enrollBeat(
     enrollmentToken: string,
     beatId: string,
@@ -148,7 +147,7 @@ export class CMBeatsDomain {
       'removals'
     );
 
-    // TODO abstract this
+    // FIXME abstract this
     const validRemovals = removals
       .map((removal, idxInRequest) => ({
         beatId: removal.beatId,
@@ -180,8 +179,8 @@ export class CMBeatsDomain {
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
     const nonExistentTags = findNonExistentItems(tags, tagIds);
 
-    // TODO break out back into route / function response
-    // TODO causes function to error if a beat or tag does not exist
+    // FIXME break out back into route / function response
+    // FIXME causes function to error if a beat or tag does not exist
     addNonExistentItemToResponse(
       response,
       assignments,
@@ -190,7 +189,7 @@ export class CMBeatsDomain {
       'assignments'
     );
 
-    // TODO abstract this
+    // FIXME abstract this
     const validAssignments = assignments
       .map((assignment, idxInRequest) => ({
         beatId: assignment.beatId,
@@ -209,7 +208,7 @@ export class CMBeatsDomain {
   }
 }
 
-// TODO abstract to the route, also the key arg is a temp fix
+// FIXME abstract to the route, also the key arg is a temp fix
 function addNonExistentItemToResponse(
   response: any,
   assignments: any,

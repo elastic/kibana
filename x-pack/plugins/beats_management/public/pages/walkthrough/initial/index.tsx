@@ -48,7 +48,7 @@ export class InitialWalkthroughPage extends Component<AppPageProps> {
           },
         ]}
         goTo={() => {
-          // TODO implament goto
+          // FIXME implament goto
         }}
         activePath={this.props.location.pathname}
       >

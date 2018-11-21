@@ -116,7 +116,7 @@ export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
   private loadTag = async () => {
     const tags = await this.props.libs.tags.getTagsWithIds([this.props.match.params.tagid]);
     if (tags.length === 0) {
-      // TODO do something to error
+      // TODO do something to error https://github.com/elastic/kibana/issues/26023
     }
     this.setState({
       tag: tags[0],

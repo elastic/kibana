@@ -84,7 +84,6 @@ export const BeatsTableType: TableType = {
       sortable: false,
     },
     {
-      // TODO: update to use actual metadata field
       field: 'config_status',
       name: 'Config Status',
       render: (value: string, beat: CMPopulatedBeat) => {

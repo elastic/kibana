@@ -12,7 +12,7 @@ import { REQUIRED_LICENSES } from 'x-pack/plugins/beats_management/common/consta
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: write to Kibana audit log file
+// TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
 export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agents_tags/assignments',

@@ -38,7 +38,7 @@ export class BeatsLib {
     return await this.mergeInTags(beats);
   };
 
-  // FIXME: This needs to be paginated
+  // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
   /** Get an array of all enrolled beats. */
   public getAll = async (ESQuery?: any): Promise<CMPopulatedBeat[]> => {
     const beats = await this.adapter.getAll(ESQuery);
@@ -70,7 +70,8 @@ export class BeatsLib {
     const tags = await this.libs.tags.getTagsWithIds(tagIds);
 
     // TODO the filter should not be needed, if the data gets into a bad state, we should error
-    // and inform the user they need to delte the tag, or else we should auto delete it
+    // and inform the user they need to delete the tag, or else we should auto delete it
+    // https://github.com/elastic/kibana/issues/26021
     const mergedBeats: CMPopulatedBeat[] = beats.map(
       b =>
         ({

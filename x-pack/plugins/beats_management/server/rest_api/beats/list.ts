@@ -58,7 +58,7 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
 
       return { beats };
     } catch (err) {
-      // TODO move this to kibana route thing in adapter
+      // FIXME move this to kibana route thing in adapter
       return wrapEsError(err);
     }
   },

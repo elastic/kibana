@@ -10,7 +10,7 @@ import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 import { wrapEsError } from '../../utils/error_wrappers';
 
-// TODO: write to Kibana audit log file
+// TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
 export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agents_tags/removals',

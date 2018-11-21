@@ -214,7 +214,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
     }
   };
 
-  // TODO this should disable save button on bad validations
   private updateTag = (key: keyof BeatTag, value?: any) =>
     value !== undefined
       ? this.props.onTagChange(key, value)
