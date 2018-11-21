@@ -12,9 +12,13 @@ import { setDocTitle } from '../../lib/doc_title';
 export const HomeApp = () => {
   setDocTitle('Canvas');
   return (
-    <EuiPage restrictWidth style={{ width: '100%' }}>
+    <EuiPage className="canvasHomeApp" restrictWidth>
       <EuiPageBody>
-        <EuiPageContent panelPaddingSize="none" horizontalPosition="center">
+        <EuiPageContent
+          className="canvasHomeApp__content"
+          panelPaddingSize="none"
+          horizontalPosition="center"
+        >
           <WorkpadManager onClose={() => {}} />
         </EuiPageContent>
       </EuiPageBody>
