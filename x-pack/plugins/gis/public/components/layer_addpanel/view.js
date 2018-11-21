@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 import { ALayer } from '../../shared/layers/layer';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
+import { WMSSource } from '../../shared/layers/sources/wms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
 import { ESGeohashGridSource } from '../../shared/layers/sources/es_geohashgrid_source';
 import { ESSearchSource } from '../../shared/layers/sources/es_search_source';
@@ -165,6 +166,21 @@ export class AddLayerPanel extends React.Component {
         ),
       },
       {
+        value: KibanaRegionmapSource.type,
+        inputDisplay: KibanaRegionmapSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{KibanaRegionmapSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">
+                Region map boundary layers configured in your config/kibana.yml file.
+              </p>
+            </EuiText>
+          </Fragment>
+        ),
+      },
+      {
         value: XYZTMSSource.type,
         inputDisplay: XYZTMSSource.typeDisplayName,
         dropdownDisplay: (
@@ -173,6 +189,19 @@ export class AddLayerPanel extends React.Component {
             <EuiSpacer size="xs" />
             <EuiText size="s" color="subdued">
               <p className="euiTextColor--subdued">Tile Map Service with XYZ url.</p>
+            </EuiText>
+          </Fragment>
+        ),
+      },
+      {
+        value: WMSSource.type,
+        inputDisplay: WMSSource.typeDisplayName,
+        dropdownDisplay: (
+          <Fragment>
+            <strong>{WMSSource.typeDisplayName}</strong>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p className="euiTextColor--subdued">Web Map Service (WMS)</p>
             </EuiText>
           </Fragment>
         ),
@@ -203,21 +232,6 @@ export class AddLayerPanel extends React.Component {
             <EuiText size="s" color="subdued">
               <p className="euiTextColor--subdued">
                 Vectors created from elasticsearch documents.
-              </p>
-            </EuiText>
-          </Fragment>
-        ),
-      },
-      {
-        value: KibanaRegionmapSource.type,
-        inputDisplay: KibanaRegionmapSource.typeDisplayName,
-        dropdownDisplay: (
-          <Fragment>
-            <strong>{KibanaRegionmapSource.typeDisplayName}</strong>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p className="euiTextColor--subdued">
-                Region map boundary layers configured in your config/kibana.yml file.
               </p>
             </EuiText>
           </Fragment>
@@ -260,6 +274,8 @@ export class AddLayerPanel extends React.Component {
         return ESSearchSource.renderEditor(editorProperties);
       case KibanaRegionmapSource.type:
         return KibanaRegionmapSource.renderEditor(editorProperties);
+      case WMSSource.type:
+        return WMSSource.renderEditor(editorProperties);
       default:
         throw new Error(`Unexepected source type: ${this.state.sourceType}`);
     }

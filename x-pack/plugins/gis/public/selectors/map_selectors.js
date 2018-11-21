@@ -13,6 +13,7 @@ import { EMSFileSource } from '../shared/layers/sources/ems_file_source';
 import { KibanaRegionmapSource } from '../shared/layers/sources/kibana_regionmap_source';
 import { XYZTMSSource } from '../shared/layers/sources/xyz_tms_source';
 import { EMSTMSSource } from '../shared/layers/sources/ems_tms_source';
+import { WMSSource } from '../shared/layers/sources/wms_source';
 import { KibanaTilemapSource } from '../shared/layers/sources/kibana_tilemap_source';
 import { ESGeohashGridSource } from '../shared/layers/sources/es_geohashgrid_source';
 import { ESSearchSource } from '../shared/layers/sources/es_search_source';
@@ -55,6 +56,8 @@ function createSourceInstance(sourceDescriptor, dataSources) {
       return new ESGeohashGridSource(sourceDescriptor);
     case ESSearchSource.type:
       return new ESSearchSource(sourceDescriptor);
+    case WMSSource.type:
+      return new WMSSource(sourceDescriptor);
     default:
       throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
