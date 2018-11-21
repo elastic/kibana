@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 import angular from 'angular';
+import chrome from 'ui/chrome';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import * as filterActions from 'ui/doc_table/actions/filter';
@@ -155,7 +156,6 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
-  breadcrumbState,
   i18n,
 ) {
   const Vis = Private(VisProvider);
@@ -320,12 +320,12 @@ function discoverController(
   });
 
   if (savedSearch.id && savedSearch.title) {
-    breadcrumbState.set([{
+    chrome.breadcrumbs.set([{
       text: discoverBreadcrumbsTitle,
       href: '#/discover'
     }, { text: savedSearch.title }]);
   } else {
-    breadcrumbState.set([{
+    chrome.breadcrumbs.set([{
       text: discoverBreadcrumbsTitle,
     }]);
   }
