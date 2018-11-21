@@ -17,18 +17,12 @@
  * under the License.
  */
 
-import buildRequestBody from './build_request_body';
-export default (req, panel, entities) => {
-  const bodies = [];
-  entities.forEach(entity => {
-    bodies.push({
-      index: panel.index_pattern,
-      ignore: [404],
-      timeout: '90s',
-      requestTimeout: 90000,
-      ignoreUnavailable: true,
-    });
-    bodies.push(buildRequestBody(req, panel, entity));
-  });
-  return bodies;
-};
+export async function getEsQueryConfig(req) {
+  const uiSettings = req.getUiSettingsService();
+  const allowLeadingWildcards = await uiSettings.get('query:allowLeadingWildcards');
+  const queryStringOptions = await uiSettings.get('query:queryString:options');
+  return {
+    allowLeadingWildcards,
+    queryStringOptions: JSON.parse(queryStringOptions),
+  };
+}

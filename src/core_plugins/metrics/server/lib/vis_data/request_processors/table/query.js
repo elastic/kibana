@@ -16,20 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { buildEsQuery } from '@kbn/es-query';
 import getTimerange from '../../helpers/get_timerange';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
-export default function query(req, panel) {
+
+export default function query(req, panel, esQueryConfig, indexPattern) {
   return next => doc => {
     const { timeField } = getIntervalAndTimefield(panel);
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
-    doc.query = {
-      bool: {
-        must: []
-      }
-    };
+
+    const queries = req.payload.query ? [req.payload.query] : [];
+    const filters = !panel.ignore_global_filter ? req.payload.filters : [];
+    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+
 
     const timerange = {
       range: {
@@ -41,11 +42,6 @@ export default function query(req, panel) {
       }
     };
     doc.query.bool.must.push(timerange);
-
-    const globalFilters = req.payload.filters;
-    if (globalFilters && !panel.ignore_global_filter) {
-      doc.query.bool.must = doc.query.bool.must.concat(globalFilters);
-    }
 
     if (panel.filter) {
       doc.query.bool.must.push({

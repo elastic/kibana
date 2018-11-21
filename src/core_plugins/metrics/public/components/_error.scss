@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
+  flex-direction: column;
   // Calculate colors similar to EuiCallout
   $tempBackgroundColor: tintOrShade($euiColorDanger, 90%, 70%);
   background-color: $tempBackgroundColor;

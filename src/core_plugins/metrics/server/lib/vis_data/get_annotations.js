@@ -19,6 +19,7 @@
 
 import buildAnnotationRequest from './build_annotation_request';
 import handleAnnotationResponse from './handle_annotation_response';
+import { getIndexPatternObject } from './helpers/get_index_pattern';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
@@ -28,28 +29,19 @@ function validAnnotation(annotation) {
     annotation.template;
 }
 
-export default async (req, panel) => {
+export default async (req, panel, esQueryConfig) => {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const bodies = panel.annotations
+  const bodiesPromises = panel.annotations
     .filter(validAnnotation)
     .map(annotation => {
-
-      const indexPattern = annotation.index_pattern;
-      const bodies = [];
-
-      bodies.push({
-        index: indexPattern,
-        ignore: [404],
-        timeout: '90s',
-        requestTimeout: 90000,
-        ignoreUnavailable: true,
-      });
-
-      bodies.push(buildAnnotationRequest(req, panel, annotation));
-      return bodies;
+      return getAnnotationBody(req, panel, annotation, esQueryConfig);
     });
-
-  if (!bodies.length) return { responses: [] };
+  const bodies = await Promise.all(bodiesPromises);
+  if (!bodies.length) {
+    return {
+      responses: [],
+    };
+  }
   try {
     const resp = await callWithRequest(req, 'msearch', {
       body: bodies.reduce((acc, item) => acc.concat(item), [])
@@ -66,6 +58,20 @@ export default async (req, panel) => {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;
   }
-
 };
 
+async function getAnnotationBody(req, panel, annotation, esQueryConfig) {
+  const indexPatternString = annotation.index_pattern;
+  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
+  const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject);
+  return [
+    {
+      index: indexPatternString,
+      ignore: [404],
+      timeout: '90s',
+      requestTimeout: 90000,
+      ignoreUnavailable: true,
+    },
+    request,
+  ];
+}

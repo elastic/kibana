@@ -19,21 +19,19 @@
 
 import getBucketSize from '../../helpers/get_bucket_size';
 import getTimerange from '../../helpers/get_timerange';
-export default function query(req, panel, annotation) {
+import { buildEsQuery } from '@kbn/es-query';
+
+export default function query(req, panel, annotation, esQueryConfig, indexPattern) {
   return next => doc => {
     const timeField = annotation.time_field;
-    const {
-      bucketSize
-    } = getBucketSize(req, 'auto');
+    const { bucketSize } = getBucketSize(req, 'auto');
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
-    doc.query = {
-      bool: {
-        must: []
-      }
-    };
-
+    const queries = req.payload.query ? [req.payload.query] : [];
+    console.log(JSON.stringify(annotation, null, 2));
+    const filters = !annotation.ignore_global_filters ? req.payload.filters : [];
+    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
     const timerange = {
       range: {
         [timeField]: {
@@ -54,11 +52,6 @@ export default function query(req, panel, annotation) {
       });
     }
 
-    const globalFilters = req.payload.filters;
-    if (!annotation.ignore_global_filters) {
-      doc.query.bool.must = doc.query.bool.must.concat(globalFilters);
-    }
-
     if (!annotation.ignore_panel_filters && panel.filter) {
       doc.query.bool.must.push({
         query_string: {
@@ -76,7 +69,5 @@ export default function query(req, panel, annotation) {
     }
 
     return next(doc);
-
   };
 }
-

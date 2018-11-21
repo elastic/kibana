@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import buildProcessorFunction from '../build_processor_function';
-import _ from 'lodash';
-import processors from '../response_processors/table';
+export async function getIndexPatternObject(req, indexPatternString) {
+  // getting the matching index pattern
+  const savedObjectClient = req.getSavedObjectsClient();
+  const indexPatternObjects = await savedObjectClient.find({
+    type: 'index-pattern',
+    fields: ['title', 'fields'],
+    search: `"${indexPatternString}"`,
+    search_fields: ['title'],
+  });
 
-export default function handleResponseBody(panel) {
-  return resp => {
-    if (resp.error) {
-      const err = new Error(resp.error.type);
-      err.response = JSON.stringify(resp);
-      throw err;
-    }
-    return panel.columns.map(column => {
-      const processor = buildProcessorFunction(processors, resp, panel, column);
-      return _.first(processor([]));
+  // getting the index pattern fields
+  const indexPatterns = indexPatternObjects.saved_objects
+    .filter(obj => obj.attributes.title === indexPatternString)
+    .map(indexPattern => {
+      const { title, fields } = indexPattern.attributes;
+      return {
+        title,
+        fields: JSON.parse(fields),
+      };
     });
-  };
+  return indexPatterns.length === 1 ? indexPatterns[0] : null;
 }

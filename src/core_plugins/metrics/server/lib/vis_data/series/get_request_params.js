@@ -18,19 +18,20 @@
  */
 
 import buildRequestBody from './build_request_body';
+import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
-export default (req, panel, series) => {
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
-  const bodies = [];
-
-  bodies.push({
-    index: indexPattern,
-    ignore: [404],
-    timeout: '90s',
-    requestTimeout: 90000,
-    ignoreUnavailable: true,
-  });
-
-  bodies.push(buildRequestBody(req, panel, series));
-  return bodies;
+export default async (req, panel, series, esQueryConfig) => {
+  const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
+  const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject);
+  return [
+    {
+      index: indexPatternString,
+      ignore: [404],
+      timeout: '90s',
+      requestTimeout: 90000,
+      ignoreUnavailable: true,
+    },
+    request,
+  ];
 };
