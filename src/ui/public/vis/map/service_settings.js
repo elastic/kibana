@@ -236,28 +236,37 @@ uiModules.get('kibana')
 
       }
 
+      async _getUrlFromEms(fileLayerConfig) {
+        const fileLayers = await this._loadFileLayers();
+        const layerConfig = fileLayers.find(fileLayer => {
+          return fileLayer.name === fileLayerConfig.name;//the id is the filename
+        });
+
+        if (layerConfig) {
+          return this._extendUrlWithParams(layerConfig.url);
+        } else {
+          throw new Error(`File  ${fileLayerConfig.name} not recognized`);
+        }
+      }
+
       async _getUrlForRegionLayer(fileLayerConfig) {
         let url;
         if (fileLayerConfig.origin === ORIGIN.EMS) {
-          const fileLayers = await this._loadFileLayers();
-          const layerConfig = fileLayers.find(fileLayer => {
-            return fileLayer.name === fileLayerConfig.name;//the id is the filename
-          });
-
-          if (layerConfig) {
-            url = this._extendUrlWithParams(layerConfig.url);
-          } else {
-            throw new Error(`File  ${fileLayerConfig.name} not recognized`);
-          }
+          url = this._getUrlFromEms(fileLayerConfig);
+        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith('elastic_maps_service.')) {
+          //fallback for older saved objects
+          url = this._getUrlFromEms(fileLayerConfig);
+        } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith('self_hosted.')) {
+          //fallback for older saved objects
+          url = fileLayerConfig.url;
         } else {
-          //configuration is not from EMS. fallback.
+          //fallback
           url = fileLayerConfig.url;
         }
         return url;
       }
 
       async getGeoJsonForRegionLayer(fileLayerConfig) {
-
         const url = await this._getUrlForRegionLayer(fileLayerConfig);
         const geojson = await $http({
           url: url,
