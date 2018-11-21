@@ -23,6 +23,7 @@ import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../common/util/anomaly_utils';
+import { AnnotationFlyout } from './components/annotation_flyout';
 import { formatValue } from '../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -96,6 +97,35 @@ export class TimeseriesChart extends React.Component {
     timefilter: PropTypes.object,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object
+  };
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      annotation: {},
+      isFlyoutVisible: false,
+      isSwitchChecked: true,
+    };
+
+    this.closeFlyout = this.closeFlyout.bind(this);
+    this.showFlyout = this.showFlyout.bind(this);
+  }
+
+  onSwitchChange = () => {
+    this.setState({
+      isSwitchChecked: !this.state.isSwitchChecked,
+    });
+  };
+
+  closeFlyout() {
+    const chartElement = d3.select(this.rootNode);
+    chartElement.select('g.ml-annotate-brush').call(this.annotateBrush.extent([0, 0]));
+    this.setState({ isFlyoutVisible: false, annotation: {} });
+  }
+
+  showFlyout(annotation) {
+    this.setState({ isFlyoutVisible: true, annotation });
   }
 
   componentWillUnmount() {
@@ -142,7 +172,7 @@ export class TimeseriesChart extends React.Component {
     // Annotations Brush
     this.annotateBrush = d3.svg.brush()
       .x(focusXScale)
-      .y(focusYScale)
+      //.y(focusYScale)
       .on('brush', brushmove)
       .on('brushend', brushend);
     const annotateBrush = this.annotateBrush;
@@ -176,15 +206,23 @@ export class TimeseriesChart extends React.Component {
       });
       */
 
+      const timestamp = extent[0].getTime();
+      const endTimestamp = extent[1].getTime();
+
+      if (timestamp === endTimestamp) {
+        that.closeFlyout();
+        return;
+      }
+
       const annotation = {
-        timestamp: extent[0][0].getTime(),
-        end_timestamp: extent[1][0].getTime(),
-        annotation: 'dummy text',
+        timestamp,
+        end_timestamp: endTimestamp,
+        annotation: '',
         job_id: selectedJob.job_id,
         result_type: 'annotation',
       };
 
-      console.warn('annotation', annotation);
+      that.showFlyout(annotation);
       /*
       addAnnotation(annotation).then(() => {
         setTimeout(() => {
@@ -413,6 +451,8 @@ export class TimeseriesChart extends React.Component {
       .attr('class', 'ml-annotate-brush')
       .call(annotateBrush)
       .selectAll('rect')
+      .attr('x', 0)
+      .attr('y', focusZoomPanelHeight)
       .attr('height', focusChartHeight);
 
     // Add border round plot area.
@@ -613,7 +653,6 @@ export class TimeseriesChart extends React.Component {
       .classed('ml-annotation-rect-hidden', !showAnnotations)
       .attr('x', (d) => {
         const date = moment(d.timestamp);
-        console.warn('x', focusXScale(date));
         return focusXScale(date);
       })
       .attr('y', focusZoomPanelHeight + 1)
@@ -1346,6 +1385,15 @@ export class TimeseriesChart extends React.Component {
   }
 
   render() {
-    return <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />;
+    const { annotation, isFlyoutVisible } = this.state;
+
+    const closeFlyout = this.closeFlyout.bind(this);
+
+    return (
+      <React.Fragment>
+        <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
+        {isFlyoutVisible && <AnnotationFlyout annotation={annotation} closeFlyout={closeFlyout} />}
+      </React.Fragment>
+    );
   }
 }
