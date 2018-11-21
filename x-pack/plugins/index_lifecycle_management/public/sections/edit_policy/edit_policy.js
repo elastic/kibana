@@ -83,6 +83,8 @@ class EditPolicyUi extends Component {
           this.selectPolicy(decodedPolicyName);
         });
       }
+    } else {
+      this.props.setSelectedPolicy(null);
     }
   }
   backToPolicyList = () => {
