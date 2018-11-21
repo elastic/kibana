@@ -7,7 +7,7 @@
 import isEqual from 'lodash/fp/isEqual';
 import React from 'react';
 
-import { Breadcrumb } from 'ui/chrome/directives/header_global_nav';
+import { Breadcrumb } from 'ui/chrome/api/breadcrumbs';
 
 interface ExternalHeaderProps {
   breadcrumbs?: Breadcrumb[];

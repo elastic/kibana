@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { Breadcrumb } from 'ui/chrome/directives/header_global_nav';
+import { Breadcrumb } from 'ui/chrome/api/breadcrumbs';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 import { ExternalHeader } from './external_header';
 import { LegacyHeader } from './legacy_header';

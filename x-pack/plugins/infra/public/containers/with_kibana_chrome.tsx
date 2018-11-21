@@ -6,10 +6,9 @@
 
 import React from 'react';
 import { Observable, Subscription } from 'rxjs';
-import chrome from 'ui/chrome';
-import { Breadcrumb } from 'ui/chrome/directives/header_global_nav';
-import { set as setBreadcrumbs } from 'ui/chrome/services/breadcrumb_state';
 
+import chrome from 'ui/chrome';
+import { Breadcrumb } from 'ui/chrome/api/breadcrumbs';
 import { RendererFunction } from '../utils/typed_react';
 
 // replace with import from platform core when available
@@ -79,7 +78,7 @@ export class WithKibanaChrome extends React.Component<
   public render() {
     return this.props.children({
       ...this.state,
-      setBreadcrumbs,
+      setBreadcrumbs: chrome.breadcrumbs.set,
     });
   }
 }

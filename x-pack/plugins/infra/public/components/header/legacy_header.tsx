@@ -8,7 +8,7 @@ import { EuiHeader, EuiHeaderBreadcrumbs, EuiHeaderSection } from '@elastic/eui'
 import React from 'react';
 import styled from 'styled-components';
 
-import { Breadcrumb } from 'ui/chrome/directives/header_global_nav';
+import { Breadcrumb } from 'ui/chrome/api/breadcrumbs';
 
 interface LegacyHeaderProps {
   breadcrumbs?: Breadcrumb[];
