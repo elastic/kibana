@@ -39,7 +39,7 @@ export function parseConfig(serverConfig = {}, { ignoreCertAndKey = false } = {}
   const httpURI = uri.protocol === 'http:';
   const protocolPort = httpsURI && '443' || httpURI && '80';
   config.host = {
-    host: uri.hostname,
+    host: '['+uri.hostname+']',
     port: uri.port || protocolPort,
     protocol: uri.protocol,
     path: uri.pathname,
