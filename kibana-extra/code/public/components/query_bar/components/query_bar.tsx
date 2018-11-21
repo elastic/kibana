@@ -21,7 +21,11 @@ import {
   EuiFlexItem,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { AutocompleteSuggestion, SuggestionsProvider } from '../suggestions';
+import {
+  AutocompleteSuggestion,
+  AutocompleteSuggestionGroup,
+  SuggestionsProvider,
+} from '../suggestions';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -41,16 +45,16 @@ interface Props {
   onSelect: (item: AutocompleteSuggestion) => void;
   disableAutoFocus?: boolean;
   appName: string;
-  suggestionsProvider: SuggestionsProvider;
+  suggestionProviders: SuggestionsProvider[];
 }
 
 interface State {
   query: string;
   inputIsPristine: boolean;
   isSuggestionsVisible: boolean;
-  index: number | null;
-  suggestions: AutocompleteSuggestion[];
-  suggestionLimit: number;
+  groupIndex: number | null;
+  itemIndex: number | null;
+  suggestionGroups: AutocompleteSuggestionGroup[];
   currentProps?: Props;
 }
 
@@ -85,15 +89,15 @@ export class QueryBar extends Component<Props, State> {
     query: this.props.query,
     inputIsPristine: true,
     isSuggestionsVisible: false,
-    index: null,
-    suggestions: [],
-    suggestionLimit: 50,
+    groupIndex: null,
+    itemIndex: null,
+    suggestionGroups: [],
   };
 
   public updateSuggestions = debounce(async () => {
-    const suggestions = (await this.getSuggestions()) || [];
+    const suggestionGroups = (await this.getSuggestions()) || [];
     if (!this.componentIsUnmounting) {
-      this.setState({ suggestions });
+      this.setState({ suggestionGroups });
     }
   }, 100);
 
@@ -105,27 +109,55 @@ export class QueryBar extends Component<Props, State> {
     return this.state.query !== this.props.query;
   };
 
-  public increaseLimit = () => {
+  public loadMore = () => {
+    // TODO(mengwei): Add action for load more.
+  };
+
+  public incrementIndex = (currGroupIndex: number, currItemIndex: number) => {
+    let nextItemIndex = currItemIndex + 1;
+
+    if (currGroupIndex === null) {
+      currGroupIndex = 0;
+    }
+    let nextGroupIndex = currGroupIndex;
+
+    if (
+      currItemIndex === null ||
+      nextItemIndex >= this.state.suggestionGroups[currGroupIndex].suggestions.length
+    ) {
+      nextItemIndex = 0;
+      nextGroupIndex = currGroupIndex + 1;
+      if (nextGroupIndex >= this.state.suggestionGroups.length) {
+        nextGroupIndex = 0;
+      }
+    }
+
     this.setState({
-      suggestionLimit: this.state.suggestionLimit + 50,
+      groupIndex: nextGroupIndex,
+      itemIndex: nextItemIndex,
     });
   };
 
-  public incrementIndex = (currentIndex: number) => {
-    let nextIndex = currentIndex + 1;
-    if (currentIndex === null || nextIndex >= this.state.suggestions.length) {
-      nextIndex = 0;
-    }
-    this.setState({ index: nextIndex });
-  };
+  public decrementIndex = (currGroupIndex: number, currItemIndex: number) => {
+    let prevItemIndex = currItemIndex - 1;
 
-  public decrementIndex = (currentIndex: number) => {
-    const previousIndex = currentIndex - 1;
-    if (previousIndex < 0) {
-      this.setState({ index: this.state.suggestions.length - 1 });
-    } else {
-      this.setState({ index: previousIndex });
+    if (currGroupIndex === null) {
+      currGroupIndex = this.state.suggestionGroups.length - 1;
     }
+    let prevGroupIndex = currGroupIndex;
+
+    if (currItemIndex === null || prevItemIndex < 0) {
+      prevGroupIndex = currGroupIndex - 1;
+      if (prevGroupIndex < 0) {
+        prevGroupIndex = this.state.suggestionGroups.length - 1;
+      }
+      prevItemIndex = this.state.suggestionGroups[prevGroupIndex].suggestions.length - 1;
+    }
+
+    this.setState({
+      groupIndex: prevGroupIndex,
+      itemIndex: prevItemIndex,
+    });
   };
 
   public getSuggestions = async () => {
@@ -134,8 +166,11 @@ export class QueryBar extends Component<Props, State> {
     }
 
     const { query } = this.state;
+    if (query.length === 0) {
+      return [];
+    }
 
-    if (!this.props.suggestionsProvider) {
+    if (!this.props.suggestionProviders || this.props.suggestionProviders.length === 0) {
       return [];
     }
 
@@ -144,42 +179,40 @@ export class QueryBar extends Component<Props, State> {
       return;
     }
 
-    return await this.props.suggestionsProvider.getSuggestions(query);
+    const res = await Promise.all(
+      this.props.suggestionProviders.map((provider: SuggestionsProvider) => {
+        return provider.getSuggestions(query.toLowerCase());
+      })
+    );
+
+    return res.filter((group: AutocompleteSuggestionGroup) => group.suggestions.length > 0);
   };
 
   public selectSuggestion = (item: AutocompleteSuggestion) => {
-    const { text, start, end } = item;
     if (!this.inputRef) {
       return;
     }
 
-    const query = this.state.query;
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
       return;
     }
 
-    const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
-
     this.setState(
       {
-        query: value.substr(0, start) + text + value.substr(end),
-        index: null,
+        query: '',
+        groupIndex: null,
+        itemIndex: null,
+        isSuggestionsVisible: false,
       },
       () => {
-        if (!this.inputRef) {
-          return;
-        }
-
-        this.inputRef.setSelectionRange(start + text.length, start + text.length);
-
         this.props.onSelect(item);
       }
     );
   };
 
   public onOutsideClick = () => {
-    this.setState({ isSuggestionsVisible: false, index: null });
+    this.setState({ isSuggestionsVisible: false, groupIndex: null, itemIndex: null });
   };
 
   public onClickInput = (event: React.MouseEvent<HTMLInputElement>) => {
@@ -200,8 +233,8 @@ export class QueryBar extends Component<Props, State> {
     this.inputRef.focus();
   };
 
-  public onMouseEnterSuggestion = (index: number) => {
-    this.setState({ index });
+  public onMouseEnterSuggestion = (groupIndex: number, itemIndex: number) => {
+    this.setState({ groupIndex, itemIndex });
   };
 
   public onInputChange = (value: string) => {
@@ -211,8 +244,8 @@ export class QueryBar extends Component<Props, State> {
       query: value,
       inputIsPristine: false,
       isSuggestionsVisible: hasValue,
-      index: null,
-      suggestionLimit: 50,
+      groupIndex: null,
+      itemIndex: null,
     });
   };
 
@@ -232,7 +265,7 @@ export class QueryBar extends Component<Props, State> {
 
   public onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.target instanceof HTMLInputElement) {
-      const { isSuggestionsVisible, index } = this.state;
+      const { isSuggestionsVisible, groupIndex, itemIndex } = this.state;
       const preventDefault = event.preventDefault.bind(event);
       const { target, key, metaKey } = event;
       const { value, selectionStart, selectionEnd } = target;
@@ -250,32 +283,46 @@ export class QueryBar extends Component<Props, State> {
       switch (event.keyCode) {
         case KEY_CODES.DOWN:
           event.preventDefault();
-          if (isSuggestionsVisible && index !== null) {
-            this.incrementIndex(index);
+          if (isSuggestionsVisible && groupIndex !== null && itemIndex !== null) {
+            this.incrementIndex(groupIndex, itemIndex);
           } else {
-            this.setState({ isSuggestionsVisible: true, index: 0 });
+            this.setState({ isSuggestionsVisible: true, groupIndex: 0, itemIndex: 0 });
           }
           break;
         case KEY_CODES.UP:
           event.preventDefault();
-          if (isSuggestionsVisible && index !== null) {
-            this.decrementIndex(index);
+          if (isSuggestionsVisible && groupIndex !== null && itemIndex !== null) {
+            this.decrementIndex(groupIndex, itemIndex);
+          } else {
+            const lastGroupIndex = this.state.suggestionGroups.length - 1;
+            const lastItemIndex =
+              this.state.suggestionGroups[lastGroupIndex].suggestions.length - 1;
+            this.setState({
+              isSuggestionsVisible: true,
+              groupIndex: lastGroupIndex,
+              itemIndex: lastItemIndex,
+            });
           }
           break;
         case KEY_CODES.ENTER:
           event.preventDefault();
-          if (isSuggestionsVisible && index !== null && this.state.suggestions[index]) {
-            this.selectSuggestion(this.state.suggestions[index]);
+          if (
+            isSuggestionsVisible &&
+            groupIndex !== null &&
+            itemIndex !== null &&
+            this.state.suggestionGroups[groupIndex]
+          ) {
+            this.selectSuggestion(this.state.suggestionGroups[groupIndex].suggestions[itemIndex]);
           } else {
             this.onSubmit(() => event.preventDefault());
           }
           break;
         case KEY_CODES.ESC:
           event.preventDefault();
-          this.setState({ isSuggestionsVisible: false, index: null });
+          this.setState({ isSuggestionsVisible: false, groupIndex: null, itemIndex: null });
           break;
         case KEY_CODES.TAB:
-          this.setState({ isSuggestionsVisible: false, index: null });
+          this.setState({ isSuggestionsVisible: false, groupIndex: null, itemIndex: null });
           break;
         default:
           if (selectionStart !== null && selectionEnd !== null) {
@@ -326,7 +373,7 @@ export class QueryBar extends Component<Props, State> {
       }
     };
     const activeDescendant = this.state.isSuggestionsVisible
-      ? 'suggestion-' + this.state.index
+      ? `suggestion-${this.state.groupIndex}-${this.state.itemIndex}`
       : '';
     return (
       <EuiFlexGroup responsive={false} gutterSize="s">
@@ -371,11 +418,12 @@ export class QueryBar extends Component<Props, State> {
 
               <SuggestionsComponent
                 show={this.state.isSuggestionsVisible}
-                suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-                index={this.state.index}
+                suggestionGroups={this.state.suggestionGroups}
+                groupIndex={this.state.groupIndex}
+                itemIndex={this.state.itemIndex}
                 onClick={this.onClickSuggestion}
                 onMouseEnter={this.onMouseEnterSuggestion}
-                loadMore={this.increaseLimit}
+                loadMore={this.loadMore}
               />
             </div>
           </EuiOutsideClickDetector>

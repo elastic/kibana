@@ -61,7 +61,7 @@ export class RepositorySearchClient extends AbstractSearchClient {
 
     const hits: any[] = rawRes.hits.hits;
     const repos: Repository[] = hits.map(hit => {
-      const repo: Repository = hit._source;
+      const repo: Repository = hit._source[RepositoryReservedField];
       return repo;
     });
     const result: RepositorySearchResult = {

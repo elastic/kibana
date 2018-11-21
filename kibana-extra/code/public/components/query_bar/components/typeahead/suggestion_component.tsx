@@ -4,29 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiToken } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { SFC } from 'react';
 
-import { AutocompleteSuggestion } from '../query_bar';
-
-function getEuiIconType(type: string) {
-  return 'kqlField';
-  // switch (type) {
-  //   case 'field':
-  //     return 'kqlField';
-  //   case 'value':
-  //     return 'kqlValue';
-  //   case 'recentSearch':
-  //     return 'search';
-  //   case 'conjunction':
-  //     return 'kqlSelector';
-  //   case 'operator':
-  //     return 'kqlOperand';
-  //   default:
-  //     throw new Error(`Unknown type: ${type}`);
-  // }
-}
+import { AutocompleteSuggestion } from '../..';
 
 interface Props {
   onClick: (suggestion: AutocompleteSuggestion) => void;
@@ -52,9 +34,10 @@ export const SuggestionComponent: SFC<Props> = props => {
       ref={props.innerRef}
       id={props.ariaId}
     >
-      <div className={'suggestionItem suggestionItem--' + props.suggestion.type}>
+      <div className={'suggestionItem suggestionItem--' + props.suggestion.tokenType}>
+        &nbsp;&nbsp;&nbsp;&nbsp;
         <div className="suggestionItem__type">
-          <EuiIcon type={getEuiIconType(props.suggestion.type)} />
+          <EuiToken iconType={props.suggestion.tokenType} />
         </div>
         <div className="suggestionItem__text">{props.suggestion.text}</div>
         <div

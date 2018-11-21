@@ -24,7 +24,6 @@ import { parse as parseQuery } from 'query-string';
 import { Link, match, withRouter } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
 import { Location } from 'vscode-languageserver';
-import { GitBlame } from '../../../common/git_blame';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { CloneProgress, FileTree as Tree, FileTreeItemType } from '../../../model';
 import {
@@ -39,7 +38,13 @@ import { Editor } from '../editor/editor';
 import { FileTree } from '../file_tree/file_tree';
 import { NotFound } from './not_found';
 
-import { AutocompleteSuggestion, QueryBar, SymbolSuggestionsProvider } from '../query_bar';
+import {
+  AutocompleteSuggestion,
+  FileSuggestionsProvider,
+  QueryBar,
+  RepositorySuggestionsProvider,
+  SymbolSuggestionsProvider,
+} from '../query_bar';
 import { PathTypes } from '../routes';
 import { SymbolTree } from '../symbol_tree/symbol_tree';
 import { CloneStatus } from './clone_status';
@@ -374,6 +379,12 @@ export class LayoutPage extends React.Component<Props, State> {
       history.push(item.selectUrl);
     };
 
+    const suggestionProviders = [
+      new SymbolSuggestionsProvider(),
+      new FileSuggestionsProvider(),
+      new RepositorySuggestionsProvider(),
+    ];
+
     const searchBox = (
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -387,7 +398,7 @@ export class LayoutPage extends React.Component<Props, State> {
             onSubmit={onSubmit}
             onSelect={onSelect}
             appName="code"
-            suggestionsProvider={new SymbolSuggestionsProvider()}
+            suggestionProviders={suggestionProviders}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -29,7 +29,13 @@ import { SearchScope } from '../../common/constants';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
-import { AutocompleteSuggestion, QueryBar, SymbolSuggestionsProvider } from '../query_bar';
+import {
+  AutocompleteSuggestion,
+  FileSuggestionsProvider,
+  QueryBar,
+  RepositorySuggestionsProvider,
+  SymbolSuggestionsProvider,
+} from '../query_bar';
 import { RepoItem, Repos, ScopeSelectorContainer } from './repository_item';
 
 interface Props {
@@ -152,7 +158,11 @@ class SearchPage extends React.PureComponent<Props, State> {
       history.push(item.selectUrl);
     };
 
-    const suggestionsProvider = new SymbolSuggestionsProvider();
+    const suggestionProviders = [
+      new SymbolSuggestionsProvider(),
+      new FileSuggestionsProvider(),
+      new RepositorySuggestionsProvider(),
+    ];
 
     const scopeSelector = (
       <ScopeSelectorContainer>
@@ -206,7 +216,7 @@ class SearchPage extends React.PureComponent<Props, State> {
                 onSubmit={onSubmit}
                 onSelect={onSelect}
                 appName="code"
-                suggestionsProvider={suggestionsProvider}
+                suggestionProviders={suggestionProviders}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -356,7 +366,7 @@ class SearchPage extends React.PureComponent<Props, State> {
                 onSubmit={onSubmit}
                 onSelect={onSelect}
                 appName="code"
-                suggestionsProvider={suggestionsProvider}
+                suggestionProviders={suggestionProviders}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -385,7 +395,7 @@ class SearchPage extends React.PureComponent<Props, State> {
                 onSubmit={onSubmit}
                 onSelect={onSelect}
                 appName="code"
-                suggestionsProvider={suggestionsProvider}
+                suggestionProviders={suggestionProviders}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
