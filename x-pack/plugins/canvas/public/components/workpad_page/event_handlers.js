@@ -96,6 +96,8 @@ const isNotTextInput = ({ tagName, type }) => {
   }
 };
 
+const modifierKey = key => ['KeyALT', 'KeyCONTROL'].indexOf(keyCode(key)) > -1;
+
 const handleKeyDown = (commit, e, isEditable, remove) => {
   const { key, target } = e;
 
@@ -103,7 +105,7 @@ const handleKeyDown = (commit, e, isEditable, remove) => {
     if (isNotTextInput(target) && (key === 'Backspace' || key === 'Delete')) {
       e.preventDefault();
       remove();
-    } else {
+    } else if (!modifierKey(key)) {
       commit('keyboardEvent', {
         event: 'keyDown',
         code: keyCode(key), // convert to standard event code
@@ -113,7 +115,7 @@ const handleKeyDown = (commit, e, isEditable, remove) => {
 };
 
 const handleKeyUp = (commit, { key }, isEditable) => {
-  if (isEditable) {
+  if (isEditable && !modifierKey(key)) {
     commit('keyboardEvent', {
       event: 'keyUp',
       code: keyCode(key), // convert to standard event code
