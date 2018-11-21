@@ -99,6 +99,7 @@ image::monitoring/images/monitoring-index-advanced.png["Elasticsearch Index Adva
 The Advanced index view can be used to diagnose issues that generally involve
 more advanced knowledge of {es}, such as wasteful index memory usage.
 
+[float]
 [[jobs-page]]
 ==== Jobs
 
