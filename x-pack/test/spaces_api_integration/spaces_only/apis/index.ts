@@ -9,7 +9,7 @@ import { TestInvoker } from '../../common/lib/types';
 // tslint:disable:no-default-export
 export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
   describe('spaces api without security', function() {
-    (this as any).tags('ciGroup5');
+    this.tags('ciGroup5');
 
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
