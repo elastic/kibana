@@ -16,7 +16,6 @@ async function addLifecyclePolicy(callWithRequest, indexName, policyName, alias)
       rollover_alias: alias
     }
   };
-  console.log(body);
 
   const params = {
     method: 'PUT',
