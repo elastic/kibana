@@ -199,7 +199,7 @@ module
       end: 0,
       timeField: indexPattern.timeFieldName,
       indexPattern: undefined,
-      savedSearch,
+      usesSavedSearch: (savedSearch.id !== undefined),
       query,
       filters,
       combinedQuery,
