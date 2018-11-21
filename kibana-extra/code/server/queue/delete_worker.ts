@@ -39,7 +39,7 @@ export class DeleteWorker extends AbstractWorker {
     const { uri, dataPath } = job.payload;
 
     // 1. Notify repo delete start through websocket.
-    this.socketService.boardcastDeleteProgress(uri, 0);
+    this.socketService.broadcastDeleteProgress(uri, 0);
 
     // 2. Cancel running workers
     // TODO: Add support for clone/update worker.
@@ -73,7 +73,7 @@ export class DeleteWorker extends AbstractWorker {
       ]);
 
       // 5. Notify repo delete end through websocket.
-      this.socketService.boardcastDeleteProgress(uri, 100);
+      this.socketService.broadcastDeleteProgress(uri, 100);
 
       // 6. Delete the document index and alias where the repository document and all status reside,
       // so that you won't be able to import the same repositories until they are
@@ -91,7 +91,7 @@ export class DeleteWorker extends AbstractWorker {
     } catch (error) {
       this.log.error(`Delete repository ${uri} error. ${error}`);
       // Notify repo delete failed through websocket.
-      this.socketService.boardcastDeleteProgress(uri, -100);
+      this.socketService.broadcastDeleteProgress(uri, -100);
       return {
         uri,
         res: false,

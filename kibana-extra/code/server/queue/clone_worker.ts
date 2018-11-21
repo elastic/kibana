@@ -36,7 +36,7 @@ export class CloneWorker extends AbstractGitWorker {
     return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
       this.updateProgress(repo.uri, progress, cloneProgress);
       if (this.socketService) {
-        this.socketService.boardcastCloneProgress(repo.uri, progress, cloneProgress);
+        this.socketService.broadcastCloneProgress(repo.uri, progress, cloneProgress);
       }
     });
   }
@@ -45,7 +45,7 @@ export class CloneWorker extends AbstractGitWorker {
     this.log.info(`Clone job done for ${res.repo.uri}`);
 
     if (this.socketService) {
-      this.socketService.boardcastCloneProgress(res.repo.uri, 100, undefined);
+      this.socketService.broadcastCloneProgress(res.repo.uri, 100, undefined);
     }
 
     // Throw out a repository index request.

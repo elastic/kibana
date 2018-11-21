@@ -47,8 +47,8 @@ import { CloneStatus } from './clone_status';
 import { LayoutBreadcrumbs } from './layout_breadcrumbs';
 
 import 'github-markdown-css/github-markdown.css';
-import { SearchScope } from '../../common/constants';
 import { GitBlame } from '../../../common/git_blame';
+import { SearchScope } from '../../common/constants';
 import { cloneProgressSelector, progressSelector, treeCommitsSelector } from '../../selectors';
 import { AlignCenterContainer } from '../../styled_components/align_center_container';
 import { Blame } from './blame';

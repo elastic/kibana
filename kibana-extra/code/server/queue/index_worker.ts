@@ -38,7 +38,7 @@ export class IndexWorker extends AbstractWorker {
     const { payload, cancellationToken } = job;
     const { uri, revision } = payload;
 
-    this.socketService.boardcastIndexProgress(uri, 0);
+    this.socketService.broadcastIndexProgress(uri, 0);
 
     const indexerNumber = this.indexerFactories.length;
 
@@ -59,7 +59,7 @@ export class IndexWorker extends AbstractWorker {
     );
     const stats: IndexStats[] = await Promise.all(indexPromises);
 
-    this.socketService.boardcastIndexProgress(uri, 100);
+    this.socketService.broadcastIndexProgress(uri, 100);
 
     const res: IndexWorkerResult = {
       uri,
@@ -111,7 +111,7 @@ export class IndexWorker extends AbstractWorker {
 
       const globalProgress = (index * 100 + progress.percentage) / total;
 
-      this.socketService.boardcastIndexProgress(repoUri, globalProgress);
+      this.socketService.broadcastIndexProgress(repoUri, globalProgress);
 
       return await this.objectClient.setRepositoryLspIndexStatus(repoUri, p);
     };

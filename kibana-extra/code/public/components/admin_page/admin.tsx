@@ -32,7 +32,6 @@ import {
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { RepositoryUtils } from '../../../common/repository_utils';
 import { RepoConfigs, Repository } from '../../../model';
 import { deleteRepo, importRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RootState } from '../../reducers';
@@ -116,7 +115,8 @@ const RepositoryItem = (props: RepositoryItemProps) => {
     : '';
 
   const progress = props.status &&
-    !RepositoryUtils.hasFullyCloned(props.status.cloneProgress) && (
+    props.status.progress &&
+    props.status.progress < 100 && (
       <Progress progress={props.status.progress}>{progressPrompt}</Progress>
     );
 

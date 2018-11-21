@@ -26,23 +26,23 @@ export class SocketService {
     this.sockets.delete(kind);
   }
 
-  public boardcastCloneProgress(
+  public broadcastCloneProgress(
     repoUri: RepositoryUri,
     progress: number,
     cloneProgress?: CloneProgress
   ) {
-    this.boardcastProgress(SocketKind.CLONE_PROGRESS, repoUri, progress, { cloneProgress });
+    this.broadcastProgress(SocketKind.CLONE_PROGRESS, repoUri, progress, { cloneProgress });
   }
 
-  public boardcastIndexProgress(repoUri: RepositoryUri, progress: number) {
-    this.boardcastProgress(SocketKind.INDEX_PROGRESS, repoUri, progress, {});
+  public broadcastIndexProgress(repoUri: RepositoryUri, progress: number) {
+    this.broadcastProgress(SocketKind.INDEX_PROGRESS, repoUri, progress, {});
   }
 
-  public boardcastDeleteProgress(repoUri: RepositoryUri, progress: number) {
-    this.boardcastProgress(SocketKind.DELETE_PROGRESS, repoUri, progress, {});
+  public broadcastDeleteProgress(repoUri: RepositoryUri, progress: number) {
+    this.broadcastProgress(SocketKind.DELETE_PROGRESS, repoUri, progress, {});
   }
 
-  private boardcastProgress(
+  private broadcastProgress(
     kind: SocketKind,
     repoUri: RepositoryUri,
     progress: number,
