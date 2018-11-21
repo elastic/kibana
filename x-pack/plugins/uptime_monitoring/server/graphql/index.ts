@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMonitorHistogramResolvers, monitorHistogramSchema } from './monitor_histogram';
 import { createSnapshotResolvers, snapshotSchema } from './monitor_snapshot';
 import { createMonitorsResolvers, monitorsSchema } from './monitors';
 import { createPingsResolvers, pingsSchema } from './pings';
@@ -16,13 +15,6 @@ export const resolvers: CreateUMGraphQLResolvers[] = [
   createPingsResolvers,
   createSnapshotResolvers,
   unsignedIntegerResolverFunctions,
-  createMonitorHistogramResolvers,
   createMonitorsResolvers,
 ];
-export const typeDefs: any[] = [
-  pingsSchema,
-  snapshotSchema,
-  unsignedIntegerSchema,
-  monitorHistogramSchema,
-  monitorsSchema,
-];
+export const typeDefs: any[] = [pingsSchema, snapshotSchema, unsignedIntegerSchema, monitorsSchema];
