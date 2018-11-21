@@ -100,7 +100,7 @@ class ImageUpload extends React.Component {
     const { loading, url, urlType } = this.state;
     const assets = Object.values(this.props.workpad.assets);
 
-    let selectedAsset;
+    let selectedAsset = {};
 
     const urlTypeOptions = [{ id: 'file', label: 'Import' }, { id: 'link', label: 'Link' }];
     if (assets.length) {

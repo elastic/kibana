@@ -7,11 +7,11 @@
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { set } from 'lodash';
+import { fromExpression, toExpression } from '@kbn/interpreter/common/lib/ast';
 import { notify } from '../../lib/notify';
 import { getAssets } from '../../state/selectors/assets';
 import { removeAsset } from '../../state/actions/assets';
 import { elementsRegistry } from '../../lib/elements_registry';
-import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { AssetManager as Component } from './asset_manager';
