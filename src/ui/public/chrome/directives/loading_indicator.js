@@ -24,8 +24,6 @@ import classNames from 'classnames';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
-import './loading_indicator.less';
-
 export class LoadingIndicator extends React.Component {
   state = {
     visible: false,

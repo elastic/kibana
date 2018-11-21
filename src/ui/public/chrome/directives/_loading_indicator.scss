@@ -1,10 +1,3 @@
-@import "~ui/styles/variables";
-
-@loadingIndicatorBackgroundSize: 400px;
-@loadingIndicatorHeight: 2px;
-@loadingIndicatorColor1: @kibanaPink1;
-@loadingIndicatorColor2: @kibanaPink2;
-
 /**
  * 1. Position this loader on top of the content.
  * 2. Make sure indicator isn't wider than the screen.
@@ -14,9 +7,9 @@
   top: 0; // 1
   left: 0; // 1
   right: 0; // 1
-  z-index: 20; // 1
+  z-index: $euiZLevel1; // 1
   overflow: hidden; // 2
-  height: @loadingIndicatorHeight;
+  height: $euiSizeXS / 2;
 
   &.hidden {
     visibility: hidden;
@@ -31,23 +24,23 @@
     right: 0;
     bottom: 0;
     position: absolute;
-    z-index: 21;
+    z-index: $euiZLevel1 + 1;
     visibility: visible;
     display: block;
     animation: animate-loading-indicator 2s linear infinite;
-    background-color: @kibanaPink2;
+    background-color: $kbnLoadingIndicatorColor2;
     background-image: linear-gradient(to right,
-      @loadingIndicatorColor1 0%,
-      @loadingIndicatorColor1 50%,
-      @loadingIndicatorColor2 50%,
-      @loadingIndicatorColor2 100%
+      $kbnLoadingIndicatorColor1 0%,
+      $kbnLoadingIndicatorColor1 50%,
+      $kbnLoadingIndicatorColor2 50%,
+      $kbnLoadingIndicatorColor2 100%
       );
     background-repeat: repeat-x;
-    background-size: @loadingIndicatorBackgroundSize @loadingIndicatorBackgroundSize;
+    background-size: $kbnLoadingIndicatorBackgroundSize $kbnLoadingIndicatorBackgroundSize;
     width: 200%;
   }
 
   @keyframes animate-loading-indicator {
     from { transform: translateX(0); }
-    to { transform: translateX(-@loadingIndicatorBackgroundSize); }
+    to { transform: translateX(-$kbnLoadingIndicatorBackgroundSize); }
   }

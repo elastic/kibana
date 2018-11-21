@@ -1,7 +1,3 @@
-
-@import (reference) "~ui/styles/mixins";
-@import (reference) "~ui/styles/variables";
-
 /**
  * stretch the root element of the Kibana application to set the base-size that
  * flexed children should keep. Only works when paired with root styles applied
@@ -16,13 +12,13 @@
   display: flex;
   flex-flow: column nowrap;
   position: absolute;
-  left: @global-nav-closed-width;
+  left: $kbnChromeGlobalNavClosedWidth;
   top: 0;
   right: 0;
   bottom: 0;
   z-index: 5;
   margin: 0 auto;
-  background-color: #fff;
+  background-color: $euiColorEmptyShade;
 
   /**
    * 1. Dirty, but we need to override the .is-global-nav-open state

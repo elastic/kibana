@@ -1,22 +1,23 @@
-@import (reference) "~ui/styles/variables";
-
-.global_nav_logo {
-  display: inline-block;
-
+.global_nav_logo,
+.global-nav-link {
   &:hover {
-    background-color: darken(@globalColorBlue, 15%);
+    background-color: darken($euiColorPrimary, 15%);
   }
 
   &.active {
-    background-color: @globalColorBlue;
+    background-color: $euiColorPrimary;
   }
+}
+
+.global_nav_logo {
+  display: inline-block;
 }
 
 .global-nav-link {
   position: relative;
-  width: @global-nav-closed-width;
-  height: @app-icon-height;
-  line-height: @app-line-height;
+  width: $kbnChromeGlobalNavClosedWidth;
+  height: $kbnGlobalNavAppIconHeight;
+  line-height: $euiSizeL;
 
   &.is-global-nav-link-disabled {
     opacity: 0.5;
@@ -26,15 +27,9 @@
     }
   }
 
-  &:hover {
-    background-color: darken(@globalColorBlue, 15%);
-  }
-
   &.active {
-    background-color: @globalColorBlue;
-
     .global-nav-link__anchor {
-      color: @white;
+      color: $euiColorEmptyShade;
       text-decoration: none;
     }
   }
@@ -42,26 +37,20 @@
 
 .is-global-nav-open {
   .global-nav-link {
-    width: @global-nav-open-width;
+    width: $kbnChromeGlobalNavOpenWidth;
   }
 }
 
   .global-nav-link__anchor {
     display: block;
     height: 100%;
-    width: 100%;
-    line-height: inherit;
-    color: @globalColorWhite;
-
-    &:focus, &:hover {
-      color: @globalColorWhite;
-    }
+    color: $euiColorEmptyShade;
   }
 
   .global-nav-link__icon {
     display: inline-block;
-    width: @global-nav-closed-width;
-    height: @app-icon-height;
+    width: $kbnChromeGlobalNavClosedWidth;
+    height: $kbnGlobalNavAppIconHeight;
     float: left;
     text-align: center;
     font-size: 1.7em;
@@ -72,32 +61,29 @@
      */
     .global-nav-link__icon-image {
       height: 18px;
-      margin-top: 8px;
+      margin-top: $euiSizeS;
     }
 
     /**
      * This placeholder text gets shown if there is no specified icon.
      */
     .global-nav-link__icon-placeholder {
-      line-height: @app-icon-height;
+      line-height: $kbnGlobalNavAppIconHeight;
       background-position: center;
       background-size: contain;
       background-repeat: no-repeat;
     }
 
   .global-nav-link__title {
+    @include euiTextTruncate;
     display: none;
-    width: calc(@global-nav-open-width - @global-nav-closed-width - 3px);
+    width: $kbnChromeGlobalNavOpenWidth - $kbnChromeGlobalNavClosedWidth - 3px;
     float: right;
     font-size: 0.9em;
     text-align: left;
     padding-left: 3px;
     padding-right: 3px;
-    line-height: @app-icon-height;
-    white-space: nowrap;
-    max-width: 100%;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    line-height: $kbnGlobalNavAppIconHeight;
 
     .is-global-nav-open & {
       display: inline-block;
