@@ -19,6 +19,7 @@
 
 export class Cluster {
   public callWithRequest: CallClusterWithRequest;
+  public callWithInternalUser: CallClusterWithInternalUser;
   public constructor(config: ClusterConfig);
 }
 
@@ -95,6 +96,8 @@ export interface CallClusterWithRequest {
     options?: {}
   ): Promise<DeprecationAPIResponse>;
 }
+
+export type CallClusterWithInternalUser = <T = any>(...restArgs: any[]) => Promise<T>;
 
 export interface ElasticsearchPlugin {
   ElasticsearchClientLogging: ElasticsearchClientLogging;
