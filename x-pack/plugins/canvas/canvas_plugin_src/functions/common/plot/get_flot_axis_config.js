@@ -5,7 +5,7 @@
  */
 
 import { get, map } from 'lodash';
-import { getType } from '@kbn/interpreter/common/lib/get_type';
+import { getType } from '../../../../common/lib/get_type';
 
 export const getFlotAxisConfig = (axis, argValue, { columns, ticks, font } = {}) => {
   if (!argValue || argValue.show === false) return { show: false };

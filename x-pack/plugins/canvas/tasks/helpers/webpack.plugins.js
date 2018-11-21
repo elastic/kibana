@@ -21,6 +21,7 @@ module.exports = {
     'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
     'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
     'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
+    'types/all': path.join(sourceDir, 'types/register.js'),
   },
 
   // there were problems with the node and web targets since this code is actually
