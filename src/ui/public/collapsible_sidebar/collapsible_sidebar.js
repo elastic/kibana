@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './collapsible_sidebar.less';
 import _ from 'lodash';
 import $ from 'jquery';
 import { uiModules } from '../modules';

@@ -1,13 +1,11 @@
-@import (reference) "~ui/styles/variables";
-
 .collapsible-sidebar {
   position: relative;
-  z-index: @discoverSidebarDepth;
+  z-index: $kbnDiscoverSidebarDepth;
 
   .sidebar-collapser {
     position: absolute;
     top: 0;
-    right: -(@collapser-width);
+    right: -21px;
     cursor: pointer;
     z-index: -1;
   }
@@ -30,7 +28,7 @@
   }
 }
 
-@media (max-width: 992px) {
+@include euiBreakpoint('xs', 's', 'm') {
   .collapsible-sidebar {
     &.closed {
       display: none;
