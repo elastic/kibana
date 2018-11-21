@@ -154,7 +154,7 @@ export class TimeseriesChart extends React.Component {
     const that = this;
     function brushend() {
       const {
-        addAnnotation,
+        // addAnnotation,
         // focusChartData,
         // refresh,
         selectedJob
@@ -184,11 +184,14 @@ export class TimeseriesChart extends React.Component {
         result_type: 'annotation',
       };
 
+      console.warn('annotation', annotation);
+      /*
       addAnnotation(annotation).then(() => {
         setTimeout(() => {
           window.location.reload();
         }, 500);
       });
+      */
     }
 
     // brush for focus brushing
@@ -407,7 +410,7 @@ export class TimeseriesChart extends React.Component {
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
     fcsGroup.append('g')
-      .attr('class', 'annotate-brush')
+      .attr('class', 'ml-annotate-brush')
       .call(annotateBrush)
       .selectAll('rect')
       .attr('height', focusChartHeight);

@@ -1,0 +1,20 @@
+.ml-annotate-brush .extent {
+  stroke: #999;
+  stroke-width: 2px;
+  stroke-dasharray: 2 5;
+  fill-opacity: .05;
+  shape-rendering: crispEdges;
+}
+
+.ml-annotation-rect {
+  fill: #32a7c2;
+  fill-opacity: 0.1;
+  stroke-width: 1;
+  /* stroke-dasharray: 2 5; */
+  stroke-opacity: 0.5;
+  stroke: #32a7c2;
+}
+
+.ml-annotation-rect-hidden {
+  display: none;
+}

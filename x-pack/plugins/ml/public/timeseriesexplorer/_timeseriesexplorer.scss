@@ -205,13 +205,6 @@
     }
 
     .focus-chart {
-      .annotate-brush .extent {
-        stroke: red;
-        stroke-width: 1.5px;
-        fill-opacity: .05;
-        shape-rendering: crispEdges;
-      }
-
       .x-axis-background {
         line {
           fill: none;
@@ -350,17 +343,4 @@
       opacity: 1;
     }
   }
-}
-
-.ml-annotation-rect {
-  fill: #32a7c2;
-  fill-opacity: 0.1;
-  stroke-width: 1;
-  /* stroke-dasharray: 2 5; */
-  stroke-opacity: 0.5;
-  stroke: #32a7c2;
-}
-
-.ml-annotation-rect-hidden {
-  display: none;
 }
