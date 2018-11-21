@@ -12,7 +12,7 @@ import { CALCULATE_DURATION_SINCE, SORT_DESCENDING } from '../../../common/const
 import { mapSeverity } from './map_severity';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
-import { MonitoringTable } from 'plugins/monitoring/components/table';
+import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { EuiHealth, EuiIcon } from '@elastic/eui';
 
 const linkToCategories = {
@@ -101,7 +101,7 @@ const getColumns = (kbnUrl, scope) => ([
 
 export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) => {
   return (
-    <MonitoringTable
+    <EuiMonitoringTable
       className="alertsTable"
       rows={alerts}
       columns={getColumns(angular.kbnUrl, angular.scope)}
