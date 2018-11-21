@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './adapter_types';
-export { ElasticsearchPingsAdapter } from './elasticsearch_pings_adapter';
-export { MemoryPingsAdapter } from './memory_pings_adapter';
+import gql from 'graphql-tag';
+
+export const unsignedIntegerSchema = gql`
+  scalar UnsignedInteger
+`;

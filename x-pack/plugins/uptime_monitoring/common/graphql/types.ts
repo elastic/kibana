@@ -8,8 +8,12 @@ type Resolver<Result, Args = any> = (
   info: GraphQLResolveInfo
 ) => Promise<Result> | Result;
 
+export type UnsignedInteger = any;
+
 export interface Query {
   allPings: Ping[] /** Get a list of all recorded pings for all monitors */;
+  getSnapshot?: Snapshot | null;
+  getMonitorHistogram?: (HistogramSeries | null)[] | null;
 }
 /** A request sent from a monitor to a host */
 export interface Ping {
@@ -161,6 +165,28 @@ export interface TLS {
   rtt?: RTT | null;
 }
 
+export interface Snapshot {
+  up?: number | null;
+  down?: number | null;
+  total?: number | null;
+  histogram?: SnapshotHistogram | null;
+}
+
+export interface SnapshotHistogram {
+  upSeries?: (HistogramDataPoint | null)[] | null;
+  downSeries?: (HistogramDataPoint | null)[] | null;
+}
+
+export interface HistogramDataPoint {
+  x?: UnsignedInteger | null;
+  x0?: UnsignedInteger | null;
+  y?: UnsignedInteger | null;
+}
+
+export interface HistogramSeries {
+  series?: (HistogramDataPoint | null)[] | null;
+}
+
 export interface TCP {
   port?: number | null;
   rtt?: RTT | null;
@@ -169,6 +195,8 @@ export interface TCP {
 export namespace QueryResolvers {
   export interface Resolvers {
     allPings?: AllPingsResolver /** Get a list of all recorded pings for all monitors */;
+    getSnapshot?: GetSnapshotResolver;
+    getMonitorHistogram?: GetMonitorHistogramResolver;
   }
 
   export type AllPingsResolver = Resolver<Ping[], AllPingsArgs>;
@@ -176,6 +204,9 @@ export namespace QueryResolvers {
     sort?: string | null;
     size?: number | null;
   }
+
+  export type GetSnapshotResolver = Resolver<Snapshot | null>;
+  export type GetMonitorHistogramResolver = Resolver<(HistogramSeries | null)[] | null>;
 }
 /** A request sent from a monitor to a host */
 export namespace PingResolvers {
@@ -474,6 +505,50 @@ export namespace TLSResolvers {
   export type Certificate_not_valid_beforeResolver = Resolver<string | null>;
   export type CertificatesResolver = Resolver<string | null>;
   export type RttResolver = Resolver<RTT | null>;
+}
+
+export namespace SnapshotResolvers {
+  export interface Resolvers {
+    up?: UpResolver;
+    down?: DownResolver;
+    total?: TotalResolver;
+    histogram?: HistogramResolver;
+  }
+
+  export type UpResolver = Resolver<number | null>;
+  export type DownResolver = Resolver<number | null>;
+  export type TotalResolver = Resolver<number | null>;
+  export type HistogramResolver = Resolver<SnapshotHistogram | null>;
+}
+
+export namespace SnapshotHistogramResolvers {
+  export interface Resolvers {
+    upSeries?: UpSeriesResolver;
+    downSeries?: DownSeriesResolver;
+  }
+
+  export type UpSeriesResolver = Resolver<(HistogramDataPoint | null)[] | null>;
+  export type DownSeriesResolver = Resolver<(HistogramDataPoint | null)[] | null>;
+}
+
+export namespace HistogramDataPointResolvers {
+  export interface Resolvers {
+    x?: XResolver;
+    x0?: X0Resolver;
+    y?: YResolver;
+  }
+
+  export type XResolver = Resolver<UnsignedInteger | null>;
+  export type X0Resolver = Resolver<UnsignedInteger | null>;
+  export type YResolver = Resolver<UnsignedInteger | null>;
+}
+
+export namespace HistogramSeriesResolvers {
+  export interface Resolvers {
+    series?: SeriesResolver;
+  }
+
+  export type SeriesResolver = Resolver<(HistogramDataPoint | null)[] | null>;
 }
 
 export namespace TCPResolvers {

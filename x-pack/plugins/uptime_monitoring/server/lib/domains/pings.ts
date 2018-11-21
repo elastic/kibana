@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMPingSortDirectionArg } from '../../../common/domain_types';
-import { Ping } from '../../../common/graphql/types';
+import { UMGqlRange, UMPingSortDirectionArg } from '../../../common/domain_types';
+import { Ping, SnapshotHistogram } from '../../../common/graphql/types';
 import { UMPingsAdapter } from '../adapters/pings';
 
 export class UMPingsDomain {
@@ -15,5 +15,9 @@ export class UMPingsDomain {
 
   public async getAll(request: any, sort?: UMPingSortDirectionArg, size?: number): Promise<Ping[]> {
     return this.adapter.getAll(request, sort, size);
+  }
+
+  public async getHist(request: any, range: UMGqlRange): Promise<SnapshotHistogram> {
+    return this.adapter.getPingHistogram(request, range);
   }
 }

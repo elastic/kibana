@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './adapter_types';
-export { ElasticsearchPingsAdapter } from './elasticsearch_pings_adapter';
-export { MemoryPingsAdapter } from './memory_pings_adapter';
+export interface DateSelection {
+  kind: 'relative' | 'absolute';
+  relativeSpanValue: number;
+  relativeSpanUnit: string;
+  absoluteStart: Date;
+  absoluteEnd: Date;
+}

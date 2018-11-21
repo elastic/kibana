@@ -23,10 +23,6 @@ export type UMAllPingsResolver = UMResolver<
   UMContext
 >;
 
-export interface UMPingResolver {
-  allPings: () => Ping[];
-}
-
 export const createPingsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {

@@ -7,9 +7,9 @@
 import { UMXPackAuthAdapter } from '../adapters/auth';
 import { UMKibanaDatabaseAdapter } from '../adapters/database/kibana_database_adapter';
 import { UMKibanaBackendFrameworkAdapter } from '../adapters/framework';
-import { ElasticsearchPingsAdapter } from '../adapters/pings/elasticsearch_pings_adapter';
-import { UMPingsDomain } from '../domains';
-import { UMAuthDomain } from '../domains/auth';
+import { ElasticsearchMonitorsAdapter } from '../adapters/monitors';
+import { ElasticsearchPingsAdapter } from '../adapters/pings';
+import { UMAuthDomain, UMMonitorsDomain, UMPingsDomain } from '../domains';
 import { UMDomainLibs, UMServerLibs } from '../lib';
 
 export function compose(hapiServer: any): UMServerLibs {
@@ -18,10 +18,13 @@ export function compose(hapiServer: any): UMServerLibs {
 
   const pingsDomain = new UMPingsDomain(new ElasticsearchPingsAdapter(database), {});
   const authDomain = new UMAuthDomain(new UMXPackAuthAdapter(hapiServer.plugins.xpack_main), {});
+  // @ts-ignore TODO fix and remove this comment
+  const monitorsDomain = new UMMonitorsDomain(new ElasticsearchMonitorsAdapter(database), {});
 
   const domainLibs: UMDomainLibs = {
-    pings: pingsDomain,
     auth: authDomain,
+    monitors: monitorsDomain,
+    pings: pingsDomain,
   };
 
   const libs: UMServerLibs = {

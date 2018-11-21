@@ -32,7 +32,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
         });
       },
       template:
-        '<uptime-monitoring-app section="kibana" class="ng-scope"><div id="uptimeMonitoringReactRoot"></div></uptime-monitoring-app>',
+        '<uptime-monitoring-app section="kibana" id="uptimeMonitoringReactRoot" class="app-wrapper-panel"></uptime-monitoring-app>',
     });
   };
 
