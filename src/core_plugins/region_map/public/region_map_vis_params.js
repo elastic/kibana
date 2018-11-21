@@ -39,7 +39,7 @@ uiModules.get('kibana/region_map')
           serviceSettings.getFileLayers()
             .then(function (layersFromService) {
 
-              layersFromService = layersFromService.map(mapToLayerWithId.bind(null, ORIGIN.EMS, true));
+              layersFromService = layersFromService.map(mapToLayerWithId.bind(null, ORIGIN.EMS));
               const newVectorLayers = $scope.collections.vectorLayers.slice();
               for (let i = 0; i < layersFromService.length; i += 1) {
                 const layerFromService = layersFromService[i];

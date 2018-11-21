@@ -30,8 +30,6 @@ const markdownIt = new MarkdownIt({
 
 const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
-
-
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, regionmapsConfig, tilemapsConfig, kbnVersion) {
 

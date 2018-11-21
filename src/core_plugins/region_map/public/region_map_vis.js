@@ -32,7 +32,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML, false));
+  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
 
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;

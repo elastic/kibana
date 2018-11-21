@@ -18,10 +18,11 @@
  */
 
 import _ from 'lodash';
+import { ORIGIN } from 'ui/vis/map/origin';
 
-export function mapToLayerWithId(prefix, isEMS, layer) {
+export function mapToLayerWithId(prefix, layer) {
   const clonedLayer = _.cloneDeep(layer);
   clonedLayer.layerId = prefix + '.' + layer.name;
-  clonedLayer.isEMS = isEMS;
+  clonedLayer.isEMS = ORIGIN.EMS === prefix ?  true : false;
   return clonedLayer;
 }
