@@ -31,35 +31,35 @@ const setupHandler = (commit, target) => {
   const canvasPage = ancestorElement(target);
   if (!canvasPage) return;
   const canvasOrigin = canvasPage.getBoundingClientRect();
-  window.onmousemove = ({ clientX, clientY, altKey, metaKey, shiftKey }) => {
+  window.onmousemove = ({ clientX, clientY, altKey, metaKey, shiftKey, ctrlKey }) => {
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
-    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey });
+    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
   };
   window.onmouseup = e => {
     e.stopPropagation();
-    const { clientX, clientY, altKey, metaKey, shiftKey } = e;
+    const { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey } = e;
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
-    commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey });
+    commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey, ctrlKey });
     resetHandler();
   };
 };
 
 const handleMouseMove = (
   commit,
-  { target, clientX, clientY, altKey, metaKey, shiftKey },
+  { target, clientX, clientY, altKey, metaKey, shiftKey, ctrlKey },
   isEditable
 ) => {
   // mouse move must be handled even before an initial click
   if (!window.onmousemove && isEditable) {
     const { x, y } = localMousePosition(target, clientX, clientY);
     setupHandler(commit, target);
-    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey });
+    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
   }
 };
 
 const handleMouseDown = (commit, e, isEditable) => {
   e.stopPropagation();
-  const { target, clientX, clientY, button, altKey, metaKey, shiftKey } = e;
+  const { target, clientX, clientY, button, altKey, metaKey, shiftKey, ctrlKey } = e;
   if (button !== 0 || !isEditable) {
     resetHandler();
     return; // left-click and edit mode only
@@ -68,7 +68,7 @@ const handleMouseDown = (commit, e, isEditable) => {
   if (!ancestor) return;
   const { x, y } = localMousePosition(ancestor, clientX, clientY);
   setupHandler(commit, ancestor);
-  commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey });
+  commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey, ctrlKey });
 };
 
 const keyCode = key => (key === 'Meta' ? 'MetaLeft' : 'Key' + key.toUpperCase());
@@ -97,6 +97,8 @@ const isNotTextInput = ({ tagName, type }) => {
   }
 };
 
+const modifierKey = key => ['KeyALT', 'KeyCONTROL'].indexOf(keyCode(key)) > -1;
+
 const handleKeyDown = (commit, e, isEditable, remove) => {
   const { key, target } = e;
 
@@ -104,7 +106,7 @@ const handleKeyDown = (commit, e, isEditable, remove) => {
     if (isNotTextInput(target) && (key === 'Backspace' || key === 'Delete')) {
       e.preventDefault();
       remove();
-    } else {
+    } else if (!modifierKey(key)) {
       commit('keyboardEvent', {
         event: 'keyDown',
         code: keyCode(key), // convert to standard event code
@@ -114,7 +116,7 @@ const handleKeyDown = (commit, e, isEditable, remove) => {
 };
 
 const handleKeyUp = (commit, { key }, isEditable) => {
-  if (isEditable) {
+  if (isEditable && !modifierKey(key)) {
     commit('keyboardEvent', {
       event: 'keyUp',
       code: keyCode(key), // convert to standard event code
