@@ -143,8 +143,8 @@ describe('No global chart settings', function () {
   });
 
   it('should render chart titles for all charts', function () {
-    expect($(chart1.el).find('.y-axis-chart-title').length).to.be(1);
-    expect($(chart2.el).find('.x-axis-chart-title').length).to.be(1);
+    expect($(chart1.el).find('.visAxis__splitTitles--y').length).to.be(1);
+    expect($(chart2.el).find('.visAxis__splitTitles--x').length).to.be(1);
   });
 
   describe('_validatePieData method', function () {

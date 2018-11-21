@@ -846,10 +846,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // 2). find and save the y-axis pixel size (the chart height)
       const rectangle = await find.byCssSelector('clipPath rect');
       const yAxisHeight = await rectangle.getAttribute('height');
-      // 3). get the chart-wrapper elements
+      // 3). get the visWrapper__chart elements
       const chartTypes = await retry.try(
         async () => await find
-          .allByCssSelector(`.chart-wrapper circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
+          .allByCssSelector(`.visWrapper__chart circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
 
       // 5). for each chart element, find the green circle, then the cy position
       async function getChartType(chart) {
@@ -868,7 +868,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
-      // 3). get the chart-wrapper elements
+      // 3). get the visWrapper__chart elements
       const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
 
       async function getChartType(chart) {
@@ -884,7 +884,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getChartYAxisRatio(axis = 'ValueAxis-1') {
       // 1). get the maximum chart Y-Axis marker value and Y position
       const maxYAxisChartMarker = await retry.try(
-        async () => await find.byCssSelector(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`)
+        async () => await find.byCssSelector(`div.visAxis__splitAxes--y > div > svg > g.${axis} > g:last-of-type.tick`)
       );
       const maxYLabel = (await maxYAxisChartMarker.getVisibleText()).replace(/,/g, '');
       const maxYLabelYPosition = (await maxYAxisChartMarker.getPosition()).y;
@@ -892,7 +892,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       // 2). get the minimum chart Y-Axis marker value and Y position
       const minYAxisChartMarker = await find.byCssSelector(
-        'div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'
+        'div.visAxis__column--y.visAxis__column--left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'
       );
       const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
       const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
@@ -942,8 +942,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
      */
     async getTableVisData() {
-      const dataTable = await testSubjects.find('paginated-table-body');
-      return await dataTable.getVisibleText();
+      return await testSubjects.getVisibleText('paginated-table-body');
     }
 
     /**
@@ -952,29 +951,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      * cell values into arrays. Please use this function for newer tests.
      */
     async getTableVisContent({ stripEmptyRows = true } = { }) {
-      const container = await testSubjects.find('tableVis');
-      const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
+      return await retry.try(async () => {
+        const container = await testSubjects.find('tableVis');
+        const allTables = await testSubjects.findAllDescendant('paginated-table-body', container);
 
-      if (allTables.length === 0) {
-        return [];
-      }
-
-      const allData = await Promise.all(allTables.map(async (t) => {
-        let data = await table.getDataFromElement(t);
-        if (stripEmptyRows) {
-          data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+        if (allTables.length === 0) {
+          return [];
         }
-        return data;
-      }));
 
-      if (allTables.length === 1) {
+        const allData = await Promise.all(allTables.map(async (t) => {
+          let data = await table.getDataFromElement(t);
+          if (stripEmptyRows) {
+            data = data.filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+          }
+          return data;
+        }));
+
+        if (allTables.length === 1) {
         // If there was only one table we return only the data for that table
         // This prevents an unnecessary array around that single table, which
         // is the case we have in most tests.
-        return allData[0];
-      }
+          return allData[0];
+        }
 
-      return allData;
+        return allData;
+      });
     }
 
     async getInspectorTableData() {
@@ -1126,7 +1127,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getLegendEntries() {
-      const legendEntries = await find.allByCssSelector('.legend-value-title', defaultFindTimeout * 2);
+      const legendEntries = await find.allByCssSelector('.visLegend__valueTitle', defaultFindTimeout * 2);
       return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
     }
 
@@ -1144,11 +1145,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async filterOnTableCell(column, row) {
-      const table = await testSubjects.find('tableVis');
-      const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-      await remote.moveMouseTo(cell);
-      const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
-      await filterBtn.click();
+      await retry.try(async () => {
+        const table = await testSubjects.find('tableVis');
+        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        await remote.moveMouseTo(cell);
+        const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
+        await filterBtn.click();
+      });
     }
 
     async toggleLegend(show = true) {

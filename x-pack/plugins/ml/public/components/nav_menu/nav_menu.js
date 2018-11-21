@@ -10,12 +10,13 @@ import _ from 'lodash';
 import $ from 'jquery';
 import template from './nav_menu.html';
 import uiRouter from 'ui/routes';
+import chrome from 'ui/chrome';
 import { isFullLicense } from '../../license/check_license';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlNavMenu', function (breadcrumbState, config) {
+module.directive('mlNavMenu', function (config) {
   return {
     restrict: 'E',
     transclude: true,
@@ -73,7 +74,7 @@ module.directive('mlNavMenu', function (breadcrumbState, config) {
       scope.breadcrumbs = breadcrumbs.filter(Boolean);
 
       config.watch('k7design', (val) => scope.showPluginBreadcrumbs = !val);
-      breadcrumbState.set(scope.breadcrumbs.map(b => ({ text: b.label, href: b.url })));
+      chrome.breadcrumbs.set(scope.breadcrumbs.map(b => ({ text: b.label, href: b.url })));
 
       // when the page loads, focus on the first breadcrumb
       el.ready(() => {

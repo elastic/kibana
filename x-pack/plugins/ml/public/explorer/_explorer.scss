@@ -3,8 +3,7 @@
   display: inline-block;
   color: $euiColorDarkShade;
 
-  .visualize-error {
-    // SASSTODO: Make a proper selector, use a proper calc
+  .visError {
     h4 {
       margin-top: 50px;
     }
@@ -132,7 +131,7 @@
     }
   }
 
-  // SASSTODO: This entire selector needs to be rewritten. 
+  // SASSTODO: This entire selector needs to be rewritten.
   // It looks extremely brittle with very specific sizing units
   .ml-explorer-swimlane {
     user-select: none;

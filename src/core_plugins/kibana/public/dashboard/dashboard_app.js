@@ -56,7 +56,6 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
-import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -86,11 +85,10 @@ app.directive('dashboardApp', function ($injector) {
       $rootScope,
       $route,
       $routeParams,
-      $location,
       getAppState,
       dashboardConfig,
       localStorage,
-      breadcrumbState
+      i18n,
     ) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
@@ -182,9 +180,9 @@ app.directive('dashboardApp', function ($injector) {
 
       // Push breadcrumbs to new header navigation
       const updateBreadcrumbs = () => {
-        breadcrumbState.set([
+        chrome.breadcrumbs.set([
           {
-            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+            text: i18n('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
               defaultMessage: 'Dashboard',
             }),
             href: $scope.landingPageUrl()
@@ -273,14 +271,22 @@ app.directive('dashboardApp', function ($injector) {
         }
 
         confirmModal(
-          `Once you discard your changes, there's no getting them back.`,
+          i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription',
+            { defaultMessage: `Once you discard your changes, there's no getting them back.` }
+          ),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
-            confirmButtonText: 'Discard changes',
-            cancelButtonText: 'Continue editing',
+            confirmButtonText: i18n('kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
+              { defaultMessage: 'Discard changes' }
+            ),
+            cancelButtonText: i18n('kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
+              { defaultMessage: 'Continue editing' }
+            ),
             defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-            title: 'Discard changes to dashboard?'
+            title: i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle',
+              { defaultMessage: 'Discard changes to dashboard?' }
+            )
           }
         );
       };
@@ -302,7 +308,12 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             if (id) {
               toastNotifications.addSuccess({
-                title: `Dashboard '${dash.title}' was saved`,
+                title: i18n('kbn.dashboard.dashboardWasSavedSuccessMessage',
+                  {
+                    defaultMessage: `Dashboard '{dashTitle}' was saved`,
+                    values: { dashTitle: dash.title },
+                  },
+                ),
                 'data-test-subj': 'saveDashboardSuccess',
               });
 
@@ -316,7 +327,15 @@ app.directive('dashboardApp', function ($injector) {
             return { id };
           }).catch((error) => {
             toastNotifications.addDanger({
-              title: `Dashboard '${dash.title}' was not saved. Error: ${error.message}`,
+              title: i18n('kbn.dashboard.dashboardWasNotSavedDangerMessage',
+                {
+                  defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
+                  values: {
+                    dashTitle: dash.title,
+                    errorMessage: error.message,
+                  },
+                },
+              ),
               'data-test-subj': 'saveDashboardFailure',
             });
             return { error };
