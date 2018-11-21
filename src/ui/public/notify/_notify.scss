@@ -1,5 +1,3 @@
-@import "~ui/styles/mixins";
-
 .toaster-container {
   visibility: visible;
   width: 100%;
@@ -20,7 +18,7 @@
   }
 
   .alert {
-    padding: 5px 15px;
+    padding: $euiSizeXS $euiSize;
     margin: 0;
     border-radius: 0;
     border: 0px;
@@ -32,25 +30,27 @@
 
     > * {
       flex: 0 0 auto;
+
       &:not(:last-child) {
-        margin-right: 4px;
+        margin-right: $euiSizeXS;
       }
     }
   }
 
   .toast-message {
+    @include euiTextTruncate;
+
     flex: 1 1 auto;
-    .ellipsis();
     line-height: normal;
   }
 
   .toast-stack {
-    padding-bottom: 10px;
+    padding-bottom: $euiSizeS;
 
     pre {
       display: inline-block;
       width: 100%;
-      margin: 10px 0;
+      margin: $euiSizeS 0;
       word-break: normal;
       word-wrap: normal;
       white-space: pre-wrap;
@@ -59,16 +59,6 @@
 
   .toast-controls {
     display: flex;
-  }
-
-  .alert-info .badge {
-    background: darken(@alert-info-bg, 25%);
-  }
-  .alert-warning .badge {
-    background: darken(@alert-warning-bg, 25%);
-  }
-  .alert-danger .badge {
-    background: darken(@alert-danger-bg, 25%);
   }
 
   .toast-message {

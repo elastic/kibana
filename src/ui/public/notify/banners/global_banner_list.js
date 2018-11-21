@@ -20,8 +20,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import './global_banner_list.less';
-
 /**
  * GlobalBannerList is a list of "banners". A banner something that is displayed at the top of Kibana that may or may not disappear.
  *
