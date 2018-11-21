@@ -113,12 +113,6 @@ class MainPagesComponent extends React.PureComponent<MainPagesProps, MainPagesSt
           id: 'xpack.beatsManagement.enrollBeat.enrollBeatStepLabel',
           defaultMessage: 'Enroll Beat',
         }),
-        // name: (
-        //   <FormattedMessage
-        //     id="xpack.beatsManagement.initialMainPages.enrollBeatName"
-        //     defaultMessage="Enroll Beat"
-        //   />
-        // ),
         disabled: false,
         page: EnrollBeatPage,
       },
