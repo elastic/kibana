@@ -62,7 +62,7 @@ export class PolicyTableUi extends Component {
 
     this.state = {
       selectedPoliciesMap: {},
-      showDeleteConfirmation: false,
+      renderConfirmModal: null,
     };
   }
   componentDidMount() {
@@ -94,7 +94,7 @@ export class PolicyTableUi extends Component {
       />
     );
   }
-  deleteConfirmation() {
+  renderDeleteConfirmModal = () => {
     const { policyToDelete } = this.state;
     if (!policyToDelete) {
       return null;
@@ -103,13 +103,13 @@ export class PolicyTableUi extends Component {
       <ConfirmDelete
         policyToDelete={policyToDelete}
         callback={this.handleDelete}
-        onCancel={() => this.setState({ policyToDelete: null })}
+        onCancel={() => this.setState({ renderDeleteConfirmModal: null, policyToDelete: null })}
       />
     );
   }
   handleDelete = () => {
     this.props.fetchPolicies(true);
-    this.setState({ policyToDelete: null });
+    this.setState({ renderDeleteConfirmModal: null, policyToDelete: null });
   };
   onSort = column => {
     const { sortField, isSortAscending, policySortChanged } = this.props;
@@ -181,6 +181,14 @@ export class PolicyTableUi extends Component {
       </EuiButton>
     );
   }
+  renderConfirmModal() {
+    const { renderConfirmModal } = this.state;
+    if (renderConfirmModal) {
+      return renderConfirmModal();
+    } else {
+      return null;
+    }
+  }
   buildRowCells(policy) {
     const hasCoveredIndices = policy.coveredIndices && policy.coveredIndices.length;
     const { intl } = this.props;
@@ -201,13 +209,15 @@ export class PolicyTableUi extends Component {
       id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
       defaultMessage: 'View indices',
     });
-    const deletePolicyLabel = hasCoveredIndices ? intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
-      defaultMessage: 'Cannot delete a policy that is used by an index',
-    }) : intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
-      defaultMessage: 'Delete policy',
-    });
+    const deletePolicyLabel = hasCoveredIndices
+      ? intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
+        defaultMessage: 'Cannot delete a policy that is used by an index',
+      })
+      : intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
+        defaultMessage: 'Delete policy',
+      });
     cells.push(
       <EuiTableRowCell
         key={`delete-${name}`}
@@ -215,23 +225,22 @@ export class PolicyTableUi extends Component {
         data-test-subj={`policyTableCell-delete-${name}`}
         style={{ width: 100 }}
       >
-        <EuiToolTip
-          position="bottom"
-          content={deletePolicyLabel}
-        >
+        <EuiToolTip position="bottom" content={deletePolicyLabel}>
           <EuiButtonIcon
             isDisabled={hasCoveredIndices}
             aria-label={deletePolicyLabel}
             color={hasCoveredIndices ? 'disabled' : 'danger'}
-            onClick={() => this.setState({ policyToDelete: policy })}
+            onClick={() =>
+              this.setState({
+                renderConfirmModal: this.renderDeleteConfirmModal,
+                policyToDelete: policy,
+              })
+            }
             iconType="trash"
           />
         </EuiToolTip>
-        { hasCoveredIndices ? (
-          <EuiToolTip
-            position="bottom"
-            content={viewIndicesLabel}
-          >
+        {hasCoveredIndices ? (
+          <EuiToolTip position="bottom" content={viewIndicesLabel}>
             <EuiButtonIcon
               color="primary"
               aria-label={viewIndicesLabel}
@@ -272,14 +281,21 @@ export class PolicyTableUi extends Component {
   };
 
   render() {
-    const { totalNumberOfPolicies, policyFilterChanged, filter, policies, intl, policyListLoaded } = this.props;
+    const {
+      totalNumberOfPolicies,
+      policyFilterChanged,
+      filter,
+      policies,
+      intl,
+      policyListLoaded,
+    } = this.props;
     const { selectedPoliciesMap } = this.state;
     const numSelected = Object.keys(selectedPoliciesMap).length;
     let content;
     let tableContent;
     if (totalNumberOfPolicies || !policyListLoaded) {
       if (!policyListLoaded) {
-        tableContent = (<EuiLoadingSpinner size="m" />);
+        tableContent = <EuiLoadingSpinner size="m" />;
       } else if (policies.length > 0) {
         tableContent = (
           <EuiTable>
@@ -288,7 +304,7 @@ export class PolicyTableUi extends Component {
           </EuiTable>
         );
       } else {
-        tableContent = (<NoMatch />);
+        tableContent = <NoMatch />;
       }
       content = (
         <Fragment>
@@ -300,7 +316,7 @@ export class PolicyTableUi extends Component {
                   color="danger"
                   onClick={() => this.setState({ showDeleteConfirmation: true })}
                 >
-                Delete {numSelected} polic
+                  Delete {numSelected} polic
                   {numSelected > 1 ? 'ies' : 'y'}
                 </EuiButton>
               </EuiFlexItem>
@@ -322,7 +338,7 @@ export class PolicyTableUi extends Component {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          { tableContent }
+          {tableContent}
         </Fragment>
       );
     } else {
@@ -333,7 +349,7 @@ export class PolicyTableUi extends Component {
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent>
-            {this.deleteConfirmation()}
+            {this.renderConfirmModal()}
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
@@ -345,12 +361,9 @@ export class PolicyTableUi extends Component {
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
-              { policies.length ? (
-                <EuiFlexItem grow={false}>
-                  {this.renderCreatePolicyButton()}
-                </EuiFlexItem>
+              {policies.length ? (
+                <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
               ) : null}
-
             </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiText>
