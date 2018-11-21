@@ -1,0 +1,11 @@
+.tvbSplitVis {
+  display: flex;
+  flex: 1 0 auto;
+}
+
+.tvbSplitVis__split {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  overflow: hidden;
+}

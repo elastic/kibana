@@ -26,7 +26,7 @@ import { SavedObjectProvider } from 'ui/courier';
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedDashboard', function (Private, config) {
+module.factory('SavedDashboard', function (Private, config, i18n) {
   // SavedDashboard constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
   const SavedObject = Private(SavedObjectProvider);
@@ -43,7 +43,7 @@ module.factory('SavedDashboard', function (Private, config) {
 
       // default values that will get assigned if the doc is new
       defaults: {
-        title: 'New Dashboard',
+        title: i18n('kbn.dashboard.savedDashboard.newDashboardTitle', { defaultMessage: 'New Dashboard' }),
         hits: 0,
         description: '',
         panelsJSON: '[]',

@@ -5,9 +5,11 @@
  */
 
 import { resolve } from 'path';
+import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
 import init from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP } from './common/lib/constants';
+import { pluginPaths } from './plugin_paths';
 
 export function canvas(kibana) {
   return new kibana.Plugin({
@@ -39,6 +41,9 @@ export function canvas(kibana) {
       }).default();
     },
 
+    preInit: () => {
+      pathsRegistry.registerAll(pluginPaths);
+    },
     init,
   });
 }
