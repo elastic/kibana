@@ -32,7 +32,7 @@ export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
         .filter(key => key.startsWith('euiColorVis'))
         .map(key => (euiVars as any)[key])
     );
-    console.log(props.match.params);
+
     this.state = {
       showFlyout: false,
       attachedBeats: null,
