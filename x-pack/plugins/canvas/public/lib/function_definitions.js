@@ -5,8 +5,8 @@
  */
 
 import uniqBy from 'lodash.uniqby';
-import { getBrowserRegistries } from '@kbn/interpreter/public/browser_registries';
 import { getServerFunctions } from '../state/selectors/app';
+import { getBrowserRegistries } from './browser_registries';
 
 export async function getFunctionDefinitions(state) {
   const { browserFunctions } = await getBrowserRegistries();
