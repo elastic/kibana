@@ -18,8 +18,22 @@
  */
 
 import * as Rx from 'rxjs';
-import { distinct, toArray, mergeMap, share, shareReplay, filter, last, map, tap } from 'rxjs/operators';
-import { realpathSync } from 'fs';
+import {
+  distinct,
+  toArray,
+  mergeMap,
+  share,
+  shareReplay,
+  filter,
+  last,
+  map,
+  tap,
+  combineLatest,
+} from 'rxjs/operators';
+import { realpathSync, existsSync, readdirSync } from 'fs';
+import { resolve } from 'path';
+import { i18nLoader } from '@kbn/i18n';
+
 
 import { transformDeprecations, Config } from '../server/config';
 
@@ -32,6 +46,7 @@ import {
   createPack$,
   createPackageJsonAtPath$,
   createPackageJsonsInDirectory$,
+  createChildDirectory$,
 } from './plugin_pack';
 
 import {
@@ -115,7 +130,43 @@ export function findPluginSpecs(settings, configToMutate) {
       ...config.get('plugins.scanDirs').map(createPackageJsonsInDirectory$)
     )),
     distinct(getDistinctKeyForFindResult),
-    share()
+  );
+
+  const translationPath$ = config$.pipe(
+    mergeMap(config =>
+      Rx.zip(
+        ...config.get('plugins.translations.paths').map(path => Rx.of([path])),
+        ...config.get('plugins.translations.scanDirs').map(
+          path => createChildDirectory$(path).pipe(
+            toArray()
+          )
+        )
+      )
+    ),
+    map(pathArrays => [].concat(...pathArrays)),
+    map(paths => {
+      const localeFiles = [];
+
+      for (const pluginPath of paths) {
+        const translationsDir = resolve(pluginPath, 'translations');
+
+        if (!existsSync(translationsDir)) {
+          continue;
+        }
+
+        const translations = (readdirSync(translationsDir) || [])
+          .filter(filePath => filePath.endsWith('.json'))
+          .map(filePath => resolve(translationsDir, filePath));
+
+        localeFiles.push(...translations);
+      }
+
+      return localeFiles;
+    }),
+    tap(i18nLoader.registerTranslationFiles),
+    tap(() => {
+      console.log(i18nLoader.getRegisteredLocales());
+    })
   );
 
   const pack$ = createPack$(packageJson$).pipe(
@@ -125,6 +176,7 @@ export function findPluginSpecs(settings, configToMutate) {
   const extendConfig$ = config$.pipe(
     mergeMap(config => (
       pack$.pipe(
+        combineLatest(translationPath$, pack => pack),
         // get the specs for each found plugin pack
         mergeMap(({ pack }) => (
           pack ? pack.getPluginSpecs() : []

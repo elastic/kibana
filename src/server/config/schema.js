@@ -196,7 +196,11 @@ export default () => Joi.object({
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
     scanDirs: Joi.array().items(Joi.string()).default([]),
-    initialize: Joi.boolean().default(true)
+    initialize: Joi.boolean().default(true),
+    translations: Joi.object({
+      scanDirs: Joi.array().items(Joi.string()).default([]),
+      paths: Joi.array().items(Joi.string()).default([])
+    }).default()
   }).default(),
 
   path: Joi.object({
