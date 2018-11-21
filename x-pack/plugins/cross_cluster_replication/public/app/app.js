@@ -42,8 +42,7 @@ export class App extends Component {
       <div>
         <Switch>
           <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/auto_follow_patterns`} />
-          <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={CrossClusterReplicationHome} />
-          <Redirect from={`${BASE_PATH}/:anything`} to={`${BASE_PATH}/auto_follow_patterns`} />
+          <Route path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
         </Switch>
       </div>
     );

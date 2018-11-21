@@ -123,6 +123,16 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
     }
   }
 
+  getSection() {
+    const { match: { params: { section } } } = this.props;
+
+    switch(section) {
+      default: {
+        return <AutoFollowPatternList />;
+      }
+    }
+  }
+
   render() {
     return (
       <EuiPage>
@@ -131,10 +141,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
             {this.getHeaderSection()}
             {this.getTabsNav()}
             {this.getUnauthorizedSection()}
-
-            <Switch>
-              <Route exact path={`${BASE_PATH}/auto_follow_patterns`} component={AutoFollowPatternList}/>
-            </Switch>
+            {this.getSection()}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>
