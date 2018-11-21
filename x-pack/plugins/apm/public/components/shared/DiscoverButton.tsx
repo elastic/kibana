@@ -6,16 +6,19 @@
 
 // @ts-ignore
 import { EuiButtonEmpty } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { KibanaLink } from '../../utils/url';
 
 interface Props {
   query: StringMap;
-  children: ReactNode;
 }
 
-export function DiscoverButton({ query, children, ...rest }: Props) {
+export const DiscoverButton: React.SFC<Props> = ({
+  query,
+  children,
+  ...rest
+}) => {
   return (
     <KibanaLink
       pathname={'/app/kibana'}
@@ -28,4 +31,4 @@ export function DiscoverButton({ query, children, ...rest }: Props) {
       </EuiButtonEmpty>
     </KibanaLink>
   );
-}
+};
