@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import {
   HistoryTabs,

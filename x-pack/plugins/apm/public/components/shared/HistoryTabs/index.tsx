@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTab'"
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
 import { Route, RouteComponentProps, withRouter } from 'react-router-dom';

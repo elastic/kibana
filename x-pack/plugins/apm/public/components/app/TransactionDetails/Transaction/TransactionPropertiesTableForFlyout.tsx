@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { capitalize, first, get } from 'lodash';
 import React from 'react';
