@@ -7,8 +7,6 @@ import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } 
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../../common/domain_types';
 import { BeatsTagAssignment } from '../../../../server/lib/adapters/beats/adapter_types';
-import { BeatsContainer } from '../../../containers/beats';
-import { TagsContainer } from '../../../containers/tags';
 import { AppPageProps } from '../../../frontend_types';
 
 interface PageState {

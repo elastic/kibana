@@ -77,11 +77,11 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
         Enroll Beats
       </EuiButton>
 
-      {this.props.location.pathname === '/overview/beats/enroll' && (
+      {this.props.location.pathname === '/overview/enrolled_beats/enroll' && (
         <EuiOverlayMask>
           <EuiModal
             onClose={() => {
-              this.props.goTo(`/overview/beats`);
+              this.props.goTo(`/overview/enrolled_beats`);
             }}
             style={{ width: '640px' }}
           >
@@ -89,7 +89,23 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
               <EuiModalHeaderTitle>Enroll a new Beat</EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>
-              <EnrollBeat {...this.props} />
+              <EnrollBeat
+                frameworkBasePath={this.props.libs.framework.info.basePath}
+                enrollmentToken={this.props.urlState.enrollmentToken}
+                getBeatWithToken={this.props.libs.beats.getBeatWithToken}
+                createEnrollmentToken={async () => {
+                  const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
+                  this.props.setUrlState({
+                    enrollmentToken,
+                  });
+                }}
+                onBeatEnrolled={() => {
+                  this.props.setUrlState({
+                    enrollmentToken: '',
+                  });
+                  this.props.goTo('/overview/enrolled_beats');
+                }}
+              />
             </EuiModalBody>
           </EuiModal>
         </EuiOverlayMask>

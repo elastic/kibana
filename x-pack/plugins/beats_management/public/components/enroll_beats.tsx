@@ -21,7 +21,7 @@ import { CMBeat } from '../../common/domain_types';
 interface ComponentProps {
   /** Such as kibanas basePath, for use to generate command */
   frameworkBasePath?: string;
-  enrollmentToken: string;
+  enrollmentToken?: string;
   getBeatWithToken(token: string): Promise<CMBeat | null>;
   createEnrollmentToken(): Promise<void>;
   onBeatEnrolled(enrolledBeat: CMBeat): void;
@@ -67,7 +67,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
     }
   }
   public waitForTokenToEnrollBeat = async () => {
-    if (this.pinging) {
+    if (this.pinging || !this.props.enrollmentToken) {
       return;
     }
     this.pinging = true;
