@@ -21,6 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import rison from 'rison-node';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiSpacer,
@@ -40,7 +41,10 @@ export class OpenSearchPanel extends React.Component {
         onClick={this.props.onClose}
         href={`#/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`}
       >
-          Manage searches
+        <FormattedMessage
+          id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+          defaultMessage="Manage searches"
+        />
       </EuiButton>
     );
   }
@@ -55,13 +59,23 @@ export class OpenSearchPanel extends React.Component {
         <EuiFlyoutBody>
 
           <EuiTitle size="s">
-            <h1>Open Search</h1>
+            <h1>
+              <FormattedMessage
+                id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
+                defaultMessage="Open Search"
+              />
+            </h1>
           </EuiTitle>
 
           <EuiSpacer size="m" />
 
           <SavedObjectFinder
-            noItemsMessage="No matching searches found."
+            noItemsMessage={
+              <FormattedMessage
+                id="kbn.discover.topNav.openSearchPanel.noSearchesFoundDescription"
+                defaultMessage="No matching searches found."
+              />
+            }
             savedObjectType={SEARCH_OBJECT_TYPE}
             makeUrl={this.props.makeUrl}
             onChoose={this.props.onClose}

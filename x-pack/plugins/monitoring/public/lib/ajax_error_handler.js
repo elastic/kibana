@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function formatMonitoringError(err) {
   // TODO: We should stop using Boom for errors and instead write a custom handler to return richer error objects
@@ -24,7 +25,11 @@ export function formatMonitoringError(err) {
           { err.data.message }
         </p>
         <EuiText size="xs">
-          HTTP { err.status }
+          <FormattedMessage
+            id="xpack.monitoring.ajaxErrorHandler.httpErrorMessage"
+            defaultMessage="HTTP {errStatus}"
+            values={{ errStatus: err.status }}
+          />
         </EuiText>
       </EuiText>
     );
@@ -43,7 +48,11 @@ export function ajaxErrorHandlersProvider($injector) {
       kbnUrl.redirect('access-denied');
     } else if (err.status === 404 && !contains($window.location.hash, 'no-data')) { // pass through if this is a 404 and we're already on the no-data page
       toastNotifications.addDanger({
-        title: 'Monitoring Request Failed',
+        title: (
+          <FormattedMessage
+            id="xpack.monitoring.ajaxErrorHandler.requestFailedNotificationTitle"
+            defaultMessage="Monitoring Request Failed"
+          />),
         text: (
           <div>
             { formatMonitoringError(err) }
@@ -53,14 +62,21 @@ export function ajaxErrorHandlersProvider($injector) {
               color="danger"
               onClick={() => $window.location.reload()}
             >
-              Retry
+              <FormattedMessage
+                id="xpack.monitoring.ajaxErrorHandler.requestFailedNotification.retryButtonLabel"
+                defaultMessage="Retry"
+              />
             </EuiButton>
           </div>
         )
       });
     } else {
       toastNotifications.addDanger({
-        title: 'Monitoring Request Error',
+        title: (
+          <FormattedMessage
+            id="xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle"
+            defaultMessage="Monitoring Request Error"
+          />),
         text: formatMonitoringError(err)
       });
     }

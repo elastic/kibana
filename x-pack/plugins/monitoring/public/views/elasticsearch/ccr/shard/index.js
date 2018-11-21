@@ -12,6 +12,7 @@ import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
 import { MonitoringViewBaseController } from '../../../base_controller';
 import { CcrShard } from '../../../../components/elasticsearch/ccr_shard';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   template,
@@ -24,16 +25,24 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
   },
   controllerAs: 'elasticsearchCcr',
   controller: class ElasticsearchCcrController extends MonitoringViewBaseController {
-    constructor($injector, $scope, pageData) {
+    constructor($injector, $scope, pageData, i18n) {
       super({
-        title: 'Elasticsearch - Ccr - Shard',
+        title: i18n('xpack.monitoring.elasticsearch.ccr.shard.routeTitle', {
+          defaultMessage: 'Elasticsearch - Ccr - Shard'
+        }),
         reactNodeId: 'elasticsearchCcrShardReact',
         getPageData,
         $scope,
         $injector
       });
 
-      $scope.instance = `Index: ${get(pageData, 'stat.follower_index')} Shard: ${get(pageData, 'stat.shard_id')}`;
+      $scope.instance = i18n('xpack.monitoring.elasticsearch.ccr.shard.instanceTitle', {
+        defaultMessage: 'Index: {followerIndex} Shard: {shardId}',
+        values: {
+          followerIndex: get(pageData, 'stat.follower_index'),
+          shardId: get(pageData, 'stat.shard_id')
+        }
+      });
 
       $scope.$watch(() => this.data, data => {
         this.renderReact(data);
@@ -41,7 +50,7 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
 
       this.renderReact = (props) => {
         super.renderReact(
-          <CcrShard {...props} />
+          <I18nProvider><CcrShard {...props} /> </I18nProvider>
         );
       };
     }

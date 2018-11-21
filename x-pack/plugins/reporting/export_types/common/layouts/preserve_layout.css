@@ -86,7 +86,7 @@ visualize-app .visEditor__canvas {
  */
 
 /* hide unusable controls */
-.visualize .legend-collapse-button,
+.visualize .visLegend__toggle,
 .visualize .agg-table-controls/* export raw, export formatted, etc. */ ,
 .visualize .leaflet-container .leaflet-top.leaflet-left/* tilemap controls */ ,
 .visualize paginate-controls /* page numbers */ {
@@ -94,7 +94,7 @@ visualize-app .visEditor__canvas {
 }
 
 /* slightly increate legend text size for readability */
-.visualize visualize-legend .legend-value-title {
+.visualize visualize-legend .visLegend__valueTitle {
   font-size: 1.2em;
 }
 

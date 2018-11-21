@@ -7,8 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
-
-// TODO: (clintandrewhall) This is a quick fix for #25342 -- we should figure out how to use the overall component.
 import { AssetPicker } from '../../../../public/components/asset_picker';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
