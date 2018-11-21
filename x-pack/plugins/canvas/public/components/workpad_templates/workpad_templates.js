@@ -10,43 +10,25 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBasicTable,
-  EuiButtonIcon,
   EuiPagination,
   EuiSpacer,
-  EuiToolTip,
   EuiHealth,
   EuiButtonEmpty,
   EuiSearchBar,
 } from '@elastic/eui';
 import { get, sortByOrder } from 'lodash';
-import { palettes } from '@elastic/eui/lib/services';
 import { getId } from '../../lib/get_id';
 import { Paginate } from '../paginate';
-import { templates } from './templates';
-
-const uniqueTags = templates
-  .reduce((acc, { tags = [] }) => {
-    tags.forEach(tag => {
-      if (acc.indexOf(tag) === -1) acc.push(tag);
-    });
-    return acc;
-  }, [])
-  .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-
-const { colors } = palettes.euiPaletteColorBlind;
-
-const tagColorMapping = uniqueTags.reduce((acc, tag, i) => {
-  acc[tag] = colors[i % Object.keys(colors).length];
-  return acc;
-}, {});
 
 export class WorkpadTemplates extends React.PureComponent {
   static propTypes = {
     cloneWorkpad: PropTypes.func.isRequired,
+    templates: PropTypes.object,
+    uniqueTags: PropTypes.object,
   };
 
   state = {
-    sortField: 'name',
+    sortField: 'displayName',
     sortDirection: 'asc',
     pageSize: 10,
     searchTerm: '',
@@ -81,31 +63,22 @@ export class WorkpadTemplates extends React.PureComponent {
   cloneTemplate = template => this.props.cloneWorkpad(template).then(() => this.props.onClose());
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
+    const { uniqueTags } = this.props;
     const { sortField, sortDirection } = this.state;
-
-    const actions = [
-      {
-        render: template => (
-          <EuiToolTip content="Clone">
-            <EuiButtonIcon
-              iconType="copy"
-              onClick={() => this.cloneTemplate(template)}
-              aria-label={`Clone Template "${template.name}"`}
-            />
-          </EuiToolTip>
-        ),
-      },
-    ];
 
     const columns = [
       {
-        field: 'name',
+        field: 'displayName',
         name: 'Template Name',
         sortable: true,
         width: '30%',
         dataType: 'string',
-        render: (name, template) => {
-          const templateName = template.name.length ? template.name : <em>{template.id}</em>;
+        render: (displayName, template) => {
+          const templateName = template.displayName.length ? (
+            template.displayName
+          ) : (
+            <em>{template.id}</em>
+          );
 
           return (
             <EuiButtonEmpty
@@ -119,7 +92,7 @@ export class WorkpadTemplates extends React.PureComponent {
         },
       },
       {
-        field: 'description',
+        field: 'help',
         name: 'Description',
         sortable: false,
         dataType: 'string',
@@ -134,13 +107,12 @@ export class WorkpadTemplates extends React.PureComponent {
         render: tags => {
           if (!tags) return 'No tags';
           return tags.map(tag => (
-            <EuiHealth key={getId('tag')} color={tagColorMapping[tag]}>
+            <EuiHealth key={getId('tag')} color={get(uniqueTags, `${tag}.color`, '#666666')}>
               {tag}
             </EuiHealth>
           ));
         },
       },
-      { name: '', actions, width: '10%' },
     ];
 
     const sorting = {
@@ -172,7 +144,10 @@ export class WorkpadTemplates extends React.PureComponent {
   };
 
   renderSearch = () => {
+    let { uniqueTags } = this.props;
     const { searchTerm } = this.state;
+
+    uniqueTags = Object.values(uniqueTags);
 
     const schema = {
       strict: true,
@@ -202,12 +177,12 @@ export class WorkpadTemplates extends React.PureComponent {
         field: 'tags',
         name: 'Tags',
         multiSelect: true,
-        options: uniqueTags.map(tag => ({
-          value: tag,
-          name: tag,
+        options: uniqueTags.map(({ name, color }) => ({
+          value: name,
+          name: name,
           view: (
-            <EuiHealth key={getId('tag')} color={tagColorMapping[tag]}>
-              {tag}
+            <EuiHealth key={getId('tag')} color={color}>
+              {name}
             </EuiHealth>
           ),
         })),
@@ -229,19 +204,24 @@ export class WorkpadTemplates extends React.PureComponent {
   };
 
   render() {
+    const { templates } = this.props;
     const { sortField, sortDirection, searchTerm, filterTags } = this.state;
-    const sortedTemplates = sortByOrder(templates, [sortField, 'name'], [sortDirection, 'asc']);
+    const sortedTemplates = sortByOrder(
+      templates,
+      [sortField, 'displayName'],
+      [sortDirection, 'asc']
+    );
 
     const filteredTemplates = sortedTemplates.filter(
-      ({ name = '', description = '', tags = [] }) => {
+      ({ displayName = '', help = '', tags = [] }) => {
         const tagMatch = filterTags.length
-          ? filterTags.some(filterTag => tags.indexOf(filterTag) > -1)
+          ? filterTags.every(filterTag => tags.indexOf(filterTag) > -1)
           : true;
 
         const lowercaseSearch = searchTerm.toLowerCase();
         const textMatch = lowercaseSearch
-          ? name.toLowerCase().indexOf(lowercaseSearch) > -1 ||
-            description.toLowerCase().indexOf(lowercaseSearch) > -1
+          ? displayName.toLowerCase().indexOf(lowercaseSearch) > -1 ||
+            help.toLowerCase().indexOf(lowercaseSearch) > -1
           : true;
 
         return tagMatch && textMatch;

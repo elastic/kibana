@@ -369,9 +369,10 @@ export class WorkpadLoader extends React.PureComponent {
 
             <EuiSpacer />
 
-            {createPending && <div>Creating Workpad...</div>}
+            {createPending && <div style={{ width: '100%' }}>Creating Workpad...</div>}
 
-            {!createPending && isLoading && <div>Fetching Workpads...</div>}
+            {!createPending &&
+              isLoading && <div style={{ width: '100%' }}>Fetching Workpads...</div>}
 
             {!createPending && !isLoading && this.renderWorkpadTable(pagination)}
 

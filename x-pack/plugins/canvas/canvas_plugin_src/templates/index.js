@@ -7,4 +7,5 @@
 const themeDark = require('./theme_dark.json');
 const themeLight = require('./theme_light.json');
 
-export const templates = [themeDark, themeLight];
+// Registry expects a function that returns a spec object
+export const templateSpecs = [themeDark, themeLight].map(template => () => template);

@@ -18,4 +18,6 @@ export const pluginPaths = {
   modelUIs: resolve(__dirname, 'canvas_plugin/uis/models'),
   viewUIs: resolve(__dirname, 'canvas_plugin/uis/views'),
   argumentUIs: resolve(__dirname, 'canvas_plugin/uis/arguments'),
+  templates: resolve(__dirname, 'canvas_plugin/templates'),
+  tags: resolve(__dirname, 'canvas_plugin/tags'),
 };
