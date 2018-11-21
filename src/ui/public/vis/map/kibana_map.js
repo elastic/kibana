@@ -483,6 +483,22 @@ export class KibanaMap extends EventEmitter {
     this._updateLegend();
   }
 
+  _addMaxZoomMessage = (() => {
+    const zoomMessage = () => {
+      const zoomLevel = this.getZoomLevel();
+      const maxMapZoom = this._leafletMap.getMaxZoom();
+      if (zoomLevel === maxMapZoom) {
+        console.log('Zoom level at 10');
+      }
+    };
+
+    return layer => {
+      this._leafletMap.on('zoomend', zoomMessage);
+      this._listeners.push(
+        { name: 'zoomMessage', handle: zoomMessage, layer: layer });
+    };
+  })();
+
   setLegendPosition(position) {
     if (this._legendPosition === position) {
       if (!this._leafletLegendControl) {
@@ -566,6 +582,9 @@ export class KibanaMap extends EventEmitter {
       this._leafletBaseLayer.bringToBack();
       if (settings.options.minZoom > this._leafletMap.getZoom()) {
         this._leafletMap.setZoom(settings.options.minZoom);
+      }
+      if (settings.options.showZoomMessage) {
+        this._addMaxZoomMessage(baseLayer);
       }
       this._addAttributions(settings.options.attribution);
       this.resize();
