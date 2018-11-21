@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
@@ -33,7 +34,9 @@ routes.when('/account', {
 
       $scope.user.$changePassword()
         .then(() => toastNotifications.addSuccess({
-          title: 'Updated password',
+          title: i18n.translate('xpack.security.account.updatePasswordTitle', {
+            defaultMessage: 'Updated password'
+          }),
           'data-test-subj': 'passwordUpdateSuccess',
         }))
         .then(onSuccess)
@@ -47,7 +50,9 @@ routes.when('/account', {
 
     this.getEmail = () => {
       if ($scope.user.email) return $scope.user.email;
-      return '(No email)';
+      return i18n.translate('xpack.security.account.emptyAccountDescription', {
+        defaultMessage: '(No email)'
+      });
     };
   }
 });
