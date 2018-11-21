@@ -8,7 +8,7 @@ import React from 'react';
 import { capitalize } from 'lodash';
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { formatTimestampToDuration } from '../../../common';
-import { CALCULATE_DURATION_SINCE, SORT_DESCENDING } from '../../../common/constants';
+import { CALCULATE_DURATION_SINCE, EUI_SORT_DESCENDING } from '../../../common/constants';
 import { mapSeverity } from './map_severity';
 import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { FormattedAlert } from 'plugins/monitoring/components/alerts/formatted_alert';
@@ -110,7 +110,7 @@ export const Alerts = ({ alerts, angular, sorting, pagination, onTableChange }) 
         sort: {
           ...sorting.sort,
           field: 'metadata.severity',
-          direction: SORT_DESCENDING,
+          direction: EUI_SORT_DESCENDING,
         }
       }}
       pagination={pagination}
