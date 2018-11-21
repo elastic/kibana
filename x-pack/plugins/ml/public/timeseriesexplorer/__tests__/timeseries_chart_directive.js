@@ -29,11 +29,11 @@ describe('ML - <ml-timeseries-chart>', () => {
   });
 
   it('Plain initialization doesn\'t throw an error', () => {
-    // this creates a dummy DOM element with class 'ml-timeseries-chart'
-    // so the directive can find it in the DOM to create the resizeChecker.
+    // this creates a dummy DOM element with class 'ml-timeseries-chart' as a direct child of
+    // the <body> tag so the directive can find it in the DOM to create the resizeChecker.
     const mockClassedElement = document.createElement('div');
     mockClassedElement.classList.add('ml-timeseries-chart');
-    document.getElementById('mocha').append(mockClassedElement);
+    document.getElementsByTagName('body')[0].append(mockClassedElement);
 
     // spy the TimeseriesChart component's unmount method to be able to test if it was called
     const componentWillUnmountSpy = sinon.spy(TimeseriesChart.prototype, 'componentWillUnmount');
