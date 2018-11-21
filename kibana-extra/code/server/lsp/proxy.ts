@@ -161,6 +161,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       });
     }
     this.closed = true; // stop the socket reconnect
+    this.eventEmitter.emit('exit');
   }
 
   public awaitServerConnection() {
@@ -196,6 +197,10 @@ export class LanguageServerProxy implements ILanguageServerHandler {
    */
   public onDisconnected(listener: () => void) {
     this.eventEmitter.on('close', listener);
+  }
+
+  public onExit(listener: () => void) {
+    this.eventEmitter.on('exit', listener);
   }
 
   /**

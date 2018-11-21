@@ -83,6 +83,11 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
           child.kill();
         }
       });
+      proxy.onExit(() => {
+        if (child) {
+          child.kill();
+        }
+      });
     }
     proxy.listen();
     await proxy.connect();

@@ -98,6 +98,11 @@ export class JavaLauncher implements ILanguageServerLauncher {
           child.kill();
         }
       });
+      proxy.onExit(() => {
+        if (child) {
+          child.kill();
+        }
+      });
     } else {
       proxy.onDisconnected(() => {
         if (!proxy.isClosed) {
