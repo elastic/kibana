@@ -29,8 +29,9 @@ import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
 import { RequestHandlerParams, Vis } from '../../vis';
+// import { VisualizeDataLoader } from './visualize_data_loader';
+import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
-import { VisualizeDataLoader } from './visualize_data_loader';
 
 import { DataAdapter, RequestAdapter } from '../../inspector/adapters';
 
@@ -78,7 +79,7 @@ export class EmbeddedVisualizeHandler {
   private dataLoaderParams: RequestHandlerParams;
   private readonly appState?: AppState;
   private uiState: PersistedState;
-  private dataLoader: VisualizeDataLoader;
+  private dataLoader: PipelineDataLoader;
   private dataSubject: Rx.Subject<any>;
   private readonly inspectorAdapters: Adapters = {};
   private actions: any = {};
@@ -91,7 +92,7 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const { appState, uiState, queryFilter, timeRange, filters, query, Private } = params;
+    const { appState, uiState, queryFilter, timeRange, filters, query } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -124,7 +125,7 @@ export class EmbeddedVisualizeHandler {
     this.uiState.on('change', this.onUiStateChange);
     timefilter.on('autoRefreshFetch', this.reload);
 
-    this.dataLoader = new VisualizeDataLoader(vis, Private);
+    this.dataLoader = new PipelineDataLoader(vis);
     this.renderCompleteHelper = new RenderCompleteHelper(element);
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
@@ -346,13 +347,23 @@ export class EmbeddedVisualizeHandler {
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
+    this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };
+
     return this.dataLoader.fetch(this.dataLoaderParams).then(data => {
       this.dataSubject.next(data);
       return data;
     });
   };
 
-  private render = (visData: any = null) => {
+  private render = (pipelineResponse: any = null) => {
+    let visData;
+    if (pipelineResponse) {
+      if (!pipelineResponse.value) {
+        throw new Error(pipelineResponse.error);
+        return;
+      }
+      visData = pipelineResponse.value.visData || pipelineResponse.value;
+    }
     return visualizationLoader
       .render(this.element, this.vis, visData, this.uiState, {
         listenOnChange: false,
