@@ -5,8 +5,8 @@
  */
 
 import ReactDOM from 'react-dom';
+import { unmountComponentAtNode } from 'react-dom';
 import { UMFrameworkAdapter } from '../../lib';
-import { manageAngularLifecycle } from '../../manage_angular_lifecycle';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
@@ -28,11 +28,26 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeMonitoringReactRoot');
           ReactDOM.render(rootComponent, elem);
-          manageAngularLifecycle($scope, $route, elem);
+          this.manageAngularLifecycle($scope, $route, elem);
         });
       },
       template:
         '<uptime-monitoring-app section="kibana" class="ng-scope"><div id="uptimeMonitoringReactRoot"></div></uptime-monitoring-app>',
+    });
+  };
+
+  // @ts-ignore angular params
+  private manageAngularLifecycle = ($scope, $route, elem) => {
+    const lastRoute = $route.current;
+    const deregister = $scope.$on('$locationChangeSuccess', () => {
+      const currentRoute = $route.current;
+      if (lastRoute.$$route.template === currentRoute.$$route.template) {
+        $route.current = lastRoute;
+      }
+    });
+    $scope.$on('$destroy', () => {
+      deregister();
+      unmountComponentAtNode(elem);
     });
   };
 }
