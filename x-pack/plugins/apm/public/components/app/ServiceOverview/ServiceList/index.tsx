@@ -21,9 +21,11 @@ interface Props {
 function formatNumber(value: number) {
   if (value === 0) {
     return '0';
+  } else if (value <= 0.1) {
+    return '< 0.1';
+  } else {
+    return asDecimal(value);
   }
-  const formatted = asDecimal(value);
-  return formatted <= 0.1 ? '< 0.1' : formatted;
 }
 
 function formatString(value?: string | null) {
