@@ -5,7 +5,7 @@
  */
 
 export default function canvasApp({ loadTestFile }) {
-  describe.skip('Canvas app', function canvasAppTestSuite() {
+  describe('Canvas app', function canvasAppTestSuite() {
     this.tags('ciGroup2'); // CI requires tags ヽ(゜Q。)ノ？
     loadTestFile(require.resolve('./smoke_test'));
   });

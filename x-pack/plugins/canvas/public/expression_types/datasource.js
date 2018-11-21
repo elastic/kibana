@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Registry } from '@kbn/interpreter/common/lib/registry';
+import { Registry } from '../../common/lib/registry';
 import { RenderToDom } from '../components/render_to_dom';
 import { ExpressionFormHandlers } from '../../common/lib/expression_form_handlers';
 import { BaseForm } from './base_form';
