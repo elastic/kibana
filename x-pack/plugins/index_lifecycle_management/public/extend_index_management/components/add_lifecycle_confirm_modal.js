@@ -35,7 +35,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     };
   }
   addPolicy = async () => {
-    const { indexName, httpClient, closeModal } = this.props;
+    const { indexName, httpClient, closeModal, reloadIndices } = this.props;
     const { selectedPolicyName, selectedAlias } = this.state;
     if (!selectedPolicyName) {
       return;
@@ -60,6 +60,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
           }
         )
       );
+      reloadIndices();
     } catch (err) {
       showApiError(
         err,

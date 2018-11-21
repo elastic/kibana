@@ -40,7 +40,7 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
     );
   };
   removePolicy = async () => {
-    const { indexNames, httpClient, closeModal } = this.props;
+    const { indexNames, httpClient, closeModal, reloadIndices } = this.props;
     const target = this. getTarget();
     try {
       await removeLifecycleForIndex(indexNames, httpClient);
@@ -56,6 +56,7 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
           }
         )
       );
+      reloadIndices();
     } catch (err) {
       showApiError(
         err,

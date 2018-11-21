@@ -53,7 +53,8 @@ class IndexActionsContextMenuUi extends Component {
       indexStatusByName,
       performExtensionAction,
       indices,
-      intl
+      intl,
+      reloadIndices
     } = this.props;
     const allOpen = all(indexNames, indexName => {
       return indexStatusByName[indexName] === INDEX_OPEN;
@@ -182,7 +183,7 @@ class IndexActionsContextMenuUi extends Component {
       }
     });
     getActionExtensions().forEach((actionExtension) => {
-      const actionExtensionDefinition = actionExtension(indices);
+      const actionExtensionDefinition = actionExtension(indices, reloadIndices);
       if (actionExtensionDefinition) {
         const { buttonLabel, requestMethod, successMessage, icon, renderConfirmModal } = actionExtensionDefinition;
         if (requestMethod) {
@@ -190,8 +191,10 @@ class IndexActionsContextMenuUi extends Component {
             name: buttonLabel,
             icon: <EuiIcon type={icon} />,
             onClick: () => {
-              this.closePopoverAndExecute(() => performExtensionAction(requestMethod, successMessage));
-            }
+              this.closePopoverAndExecute(async () => {
+                await performExtensionAction(requestMethod, successMessage);
+              });
+            },
           });
         } else {
           items.push({

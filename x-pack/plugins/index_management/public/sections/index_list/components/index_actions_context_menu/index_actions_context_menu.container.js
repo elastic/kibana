@@ -16,7 +16,8 @@ import {
   editIndexSettings,
   refreshIndices,
   openDetailPanel,
-  performExtensionAction
+  performExtensionAction,
+  reloadIndices
 } from '../../../../store/actions';
 
 import {
@@ -76,6 +77,9 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     },
     deleteIndices: () => {
       dispatch(deleteIndices({ indexNames }));
+    },
+    reloadIndices: () => {
+      dispatch(reloadIndices(indexNames));
     },
     performExtensionAction: (requestMethod, successMessage) => {
       dispatch(performExtensionAction({ requestMethod, successMessage, indexNames }));

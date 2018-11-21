@@ -36,7 +36,7 @@ addActionExtension((indices) => {
     }),
   };
 });
-addActionExtension((indices) => {
+addActionExtension((indices, reloadIndices) => {
   const allHaveIlm = every(indices, (index) => {
     return index.ilm && index.ilm.managed;
   });
@@ -51,6 +51,7 @@ addActionExtension((indices) => {
           indexNames={indexNames}
           closeModal={closeModal}
           httpClient={httpClient}
+          reloadIndices={reloadIndices}
         />
       );
     },
@@ -61,7 +62,7 @@ addActionExtension((indices) => {
     }),
   };
 });
-addActionExtension((indices) => {
+addActionExtension((indices, reloadIndices) => {
   if (indices.length !== 1) {
     return null;
   }
@@ -80,6 +81,7 @@ addActionExtension((indices) => {
           closeModal={closeModal}
           httpClient={httpClient}
           index={index}
+          reloadIndices={reloadIndices}
         />
       );
     },
