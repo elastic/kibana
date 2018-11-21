@@ -31,11 +31,8 @@ import { DefaultEditorSize } from '../../editor_size';
 
 import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
-import { FilterBarQueryFilterProvider } from '../../../filter_bar/query_filter';
-
 
 const defaultEditor = function (Private, $rootScope, $compile, i18n) {
-  const queryFilter = Private(FilterBarQueryFilterProvider);
 
   return class DefaultEditor {
     static key = 'default';

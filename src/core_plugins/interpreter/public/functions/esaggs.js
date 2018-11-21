@@ -89,8 +89,6 @@ export default () => ({
         queryFilter,
       });
 
-
-      
       return {
         type: 'kibana_table',
         index: args.index,

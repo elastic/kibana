@@ -25,8 +25,8 @@ import vega from './vega';
 import timelion from './timelion_vis';
 import tsvb from './tsvb';
 import markdown from './markdown';
-import input_control from './input_control';
+import inputControl from './input_control';
 
 export const functions = [
-  visualization, esaggs, kibana, kibanaContext, vega, timelion, tsvb, markdown, input_control
+  visualization, esaggs, kibana, kibanaContext, vega, timelion, tsvb, markdown, inputControl
 ];

@@ -53,7 +53,7 @@ export const buildPipeline = (vis, params) => {
   } else {
     const schemas = {};
     let cnt = 0;
-    vis.aggs.getResponseAggs().forEach((agg, i) => {
+    vis.aggs.getResponseAggs().forEach((agg) => {
       if (!agg.enabled) return;
       let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
       if (typeof schemaName === 'object') schemaName = null;
@@ -78,6 +78,7 @@ export const runPipeline = async (pipeline, context, handlers) => {
     const pipelineResponse = await interpretAst(ast, context, handlers);
     return pipelineResponse;
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.log(e, pipeline);
   }
 };
