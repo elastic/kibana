@@ -452,12 +452,12 @@ module.controller('MlTimeSeriesExplorerController', function (
       searchBounds.max.valueOf(),
       MAX_ANNOTATIONS
     ).then((resp) => {
-      console.warn('resp', resp);
       refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id];
-      console.warn('focusAnnotationData', refreshFocusData.focusAnnotationData);
       finish();
     }).catch((resp) => {
-      console.log('Time series explorer - error getting annotations from elasticsearch:', resp);
+      toastNotifications.addDanger(`Error fetching annotations: ${JSON.stringify(resp)}`);
+      // still call finish so the chart without annotations is able to load
+      finish();
     });
 
     // Plus query for forecast data if there is a forecastId stored in the appState.

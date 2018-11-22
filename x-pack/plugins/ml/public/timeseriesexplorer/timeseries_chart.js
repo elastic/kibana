@@ -167,15 +167,22 @@ export class TimeseriesChart extends React.Component {
 
     const closeFlyout = this.closeFlyout;
 
-    addAnnotation(annotation).then(() => {
-      closeFlyout();
-      refresh();
-      if (typeof annotation._id === 'undefined') {
-        toastNotifications.addSuccess(`Added an annotation for job with ID ${annotation.job_id}.`);
-      } else {
-        toastNotifications.addSuccess(`Updated annotation for job with ID ${annotation.job_id}.`);
-      }
-    });
+    addAnnotation(annotation)
+      .then(() => {
+        closeFlyout();
+        refresh();
+        const action = (typeof annotation._id === 'undefined') ? 'Added an' : 'Updated';
+        if (typeof annotation._id === 'undefined') {
+          toastNotifications.addSuccess(`${action} annotation for job with ID ${annotation.job_id}.`);
+        } else {
+          toastNotifications.addSuccess(`${action} annotation for job with ID ${annotation.job_id}.`);
+        }
+      })
+      .catch((resp) => {
+        const action = (typeof annotation._id === 'undefined') ? 'creating' : 'updating';
+        toastNotifications
+          .addDanger(`An error occured ${action} the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(resp)}`);
+      });
   }
 
   componentWillUnmount() {

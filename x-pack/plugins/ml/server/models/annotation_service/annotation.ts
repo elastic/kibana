@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Annotation, isAnnotation } from '../../../common/interfaces/annotations';
 
 export function annotationProvider(callWithRequest) {
+  async function addAnnotation(d: Annotation) {
+    if (isAnnotation(d) === false) {
+      return Promise.reject(new Error('invalid annotation format'));
+    }
 
-  async function addAnnotation(d) {
     let response;
 
     // if d._id is not present, create new annotation
@@ -15,7 +19,7 @@ export function annotationProvider(callWithRequest) {
       response = await callWithRequest('index', {
         index: '.ml-annotations',
         type: 'annotation',
-        body: d
+        body: d,
       });
     } else {
       const id = d._id;
@@ -25,29 +29,29 @@ export function annotationProvider(callWithRequest) {
         type: 'annotation',
         id,
         body: {
-          doc: d
-        }
+          doc: d,
+        },
       });
     }
 
     // refresh the annotations index so we can make sure the annotations up to date right away.
     await callWithRequest('indices.refresh', {
-      index: '.ml-annotations'
+      index: '.ml-annotations',
     });
 
     return response;
   }
 
-  async function deleteAnnotation(id) {
+  async function deleteAnnotation(id: string) {
     const addAnnotationResponse = await callWithRequest('delete', {
       index: '.ml-annotations',
       type: 'annotation',
-      id
+      id,
     });
 
     // refresh the annotations index so we can make sure the annotations up to date right away.
     await callWithRequest('indices.refresh', {
-      index: '.ml-annotations'
+      index: '.ml-annotations',
     });
 
     return addAnnotationResponse;
@@ -55,6 +59,6 @@ export function annotationProvider(callWithRequest) {
 
   return {
     addAnnotation,
-    deleteAnnotation
+    deleteAnnotation,
   };
 }

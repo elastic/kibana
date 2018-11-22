@@ -20,6 +20,7 @@ import {
 
 import { ml } from '../services/ml_api_service';
 
+import { isAnnotations } from '../../common/interfaces/annotations.ts';
 
 // Obtains the maximum bucket anomaly scores by job ID and time.
 // Pass an empty array or ['*'] to search over all job IDs.
@@ -347,6 +348,10 @@ function getAnnotations(
           // to identify the annotation when editing/deleting it.
           return { ...d._source, _id: d._id };
         });
+
+        if (isAnnotations(docs) === false) {
+          reject(`Annotations didn't pass TypeScript interface check.`);
+        }
 
         docs.forEach((doc) => {
           const jobId = doc.job_id;
