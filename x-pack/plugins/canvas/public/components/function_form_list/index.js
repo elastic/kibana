@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from '@kbn/interpreter/public/interpreter';
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
-import { toExpression } from '@kbn/interpreter/common/lib/ast';
 import { modelRegistry, viewRegistry, transformRegistry } from '../../expression_types';
+import { interpretAst } from '../../lib/interpreter';
+import { toExpression } from '../../../common/lib/ast';
 import { FunctionFormList as Component } from './function_form_list';
 
 function normalizeContext(chain) {

@@ -8,8 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
 import { EuiForm, EuiTextArea, EuiButton, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
-import { fromExpression, toExpression } from '@kbn/interpreter/common/lib/ast';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
+import { fromExpression, toExpression } from '../../../common/lib/ast';
 
 export const AdvancedFailureComponent = props => {
   const {

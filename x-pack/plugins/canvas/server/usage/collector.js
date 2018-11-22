@@ -5,8 +5,8 @@
  */
 
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common/lib/ast';
 import { CANVAS_USAGE_TYPE, CANVAS_TYPE } from '../../common/lib/constants';
+import { fromExpression } from '../../common/lib/ast';
 
 /*
  * @param ast: an ast that includes functions to track
