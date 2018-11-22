@@ -34,7 +34,7 @@ routes.when('/account', {
 
       $scope.user.$changePassword()
         .then(() => toastNotifications.addSuccess({
-          title: i18n.translate('xpack.security.account.updatePasswordTitle', {
+          title: i18n.translate('xpack.security.account.updatedPasswordTitle', {
             defaultMessage: 'Updated password'
           }),
           'data-test-subj': 'passwordUpdateSuccess',
@@ -50,7 +50,7 @@ routes.when('/account', {
 
     this.getEmail = () => {
       if ($scope.user.email) return $scope.user.email;
-      return i18n.translate('xpack.security.account.emptyAccountDescription', {
+      return i18n.translate('xpack.security.account.noEmailMessage', {
         defaultMessage: '(No email)'
       });
     };

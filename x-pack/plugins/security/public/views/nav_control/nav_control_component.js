@@ -94,7 +94,7 @@ export class SecurityNavControl extends Component {
                     <EuiFlexItem grow={false}>
                       <EuiLink href={route}>
                         <FormattedMessage
-                          id="xpack.security.navControlComponent.editProfileButtonLabel"
+                          id="xpack.security.navControlComponent.editProfileLinkText"
                           defaultMessage="Edit profile"
                         />
                       </EuiLink>
@@ -103,7 +103,7 @@ export class SecurityNavControl extends Component {
                     <EuiFlexItem grow={false}>
                       <EuiLink href="/logout">
                         <FormattedMessage
-                          id="xpack.security.navControlComponent.logOutButtonLabel"
+                          id="xpack.security.navControlComponent.logoutLinkText"
                           defaultMessage="Log out"
                         />
                       </EuiLink>
