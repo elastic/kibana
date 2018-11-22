@@ -99,8 +99,9 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem className="visNewVisDialog__description" grow={false}>
-              {highlightedType && <VisHelpText visType={highlightedType} />}
-              {!highlightedType && (
+              {highlightedType ? (
+                <VisHelpText visType={highlightedType} />
+              ) : (
                 <React.Fragment>
                   <EuiTitle size="s">
                     <h2>
