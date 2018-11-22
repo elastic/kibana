@@ -57,7 +57,11 @@ if (global.__BUILT_WITH_BABEL__) {
   // TODO: the plugin install process could transpile plugin server code...
   ignore.push(resolve(__dirname, '../../../src'));
 } else {
-  ignore.push(resolve(__dirname, '../../../packages'));
+  ignore.push(
+    // ignore any path in the packages, unless it is a file in a test,
+    // or __tests__ directory, or it ends with .test.js, .test.ts, or .test.tsx
+    /\/packages\/(eslint-|kbn-)[^\/]+\/(?!(.+\/)?(test|__tests__)\/.+|.+\.test\.(js|ts|tsx)$)(.+$)/
+  );
 }
 
 // modifies all future calls to require() to automatically
