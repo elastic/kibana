@@ -643,7 +643,7 @@ module
       ml.calculateModelMemoryLimit({
         indexPattern: formConfig.indexPattern.title,
         splitFieldName: formConfig.splitField.name,
-        query: formConfig.query,
+        query: formConfig.combinedQuery,
         fieldNames: Object.keys(formConfig.fields),
         influencerNames: formConfig.influencerFields.map(f => f.name),
         timeFieldName: formConfig.timeField,
