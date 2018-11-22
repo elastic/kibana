@@ -7,6 +7,8 @@
 
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { registerAutoFollowPatternRoutes } from './auto_follow_pattern';
+import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../fixtures/autofollow_pattern';
+import { deserializeAutofollowPattern, serializeAutofolloPattern } from '../../lib/autofollow_pattern_serialization';
 
 jest.mock('../../lib/call_with_request_factory', () => ({ callWithRequestFactory: jest.fn() }));
 jest.mock('../../lib/is_es_error_factory', () => ({ isEsErrorFactory: () => () => true }));
@@ -27,7 +29,8 @@ const registerHandlers = () => {
   let index = 0;
 
   const HANDLER_INDEX_TO_ACTION = {
-    0: 'list'
+    0: 'list',
+    1: 'create'
   };
 
   const server = {
@@ -69,21 +72,41 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       routeHandler = routeHandlers.list;
     });
 
-    it('should forward the response from Elasticsearch', async () => {
-      const mock = { foo: 'bar' };
-      setHttpRequestResponse(null, mock);
+    it('should deSerialize the response from Elasticsearch', async () => {
+      const deSerializedKeys = Object.keys(deserializeAutofollowPattern('random', getAutoFollowPatternMock()));
+      setHttpRequestResponse(null, getAutoFollowPatternListMock(2));
 
       const response = await routeHandler();
 
-      expect(response).toBe(mock);
+      const autoFollowPattern = Object.values(response)[0];
+      expect(Object.keys(response).length).toEqual(2);
+      expect(Object.keys(autoFollowPattern)).toEqual(deSerializedKeys);
+    });
+  });
+
+  describe('create()', () => {
+    beforeEach(() => {
+      routeHandler = routeHandlers.create;
     });
 
-    it('should prevent a 404 response on the route', async () => {
-      setHttpRequestResponse({ status: 404 });
+    it('should serialize the payload before sending it to Elasticsearch', async () => {
+      const spy = jest.fn();
+      callWithRequestFactory.mockReturnValueOnce(spy);
 
-      const response = await routeHandler();
+      const id = 'foo';
+      const autoFollowPattern = deserializeAutofollowPattern('random', getAutoFollowPatternMock());
+      delete autoFollowPattern.name;
 
-      expect(response).toEqual({});
+      const request = {
+        params: { id },
+        payload: autoFollowPattern
+      };
+
+      await routeHandler(request);
+
+      expect(spy.mock.calls.length).toBeGreaterThan(0);
+      const callWithRequestArg = spy.mock.calls[0][1];
+      expect(callWithRequestArg).toEqual({ id, body: serializeAutofolloPattern(autoFollowPattern) });
     });
   });
 });

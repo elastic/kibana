@@ -5,3 +5,4 @@
  */
 
 export const API_BASE_PATH = '/api/cross_cluster_replication';
+export const REMOTE_CLUSTERS_API_BASE_PATH = '/api/remote_clusters';

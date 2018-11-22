@@ -7,6 +7,7 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
+import { deserializeListAutofollowPatterns, serializeAutofolloPattern } from '../../lib/autofollow_pattern_serialization';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
 
@@ -32,19 +33,36 @@ export const registerAutoFollowPatternRoutes = (server) => {
         // throw wrapEsError(errors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
 
         const response = await callWithRequest('ccr.autoFollowPatterns');
-        return response;
+        return deserializeListAutofollowPatterns(response);
       } catch(err) {
         // throw wrapEsError(err);
 
         if (isEsError(err)) {
-          // Currently Elasticsearch throw a 404 when there are no Auto follow pattern
-          // It should instead return an empty object as the resource exists but does not have any result.
-          // We temporarly fix it here until the issue is resolved.
-          // ES issue: https://github.com/elastic/elasticsearch/issues/35371
-          if (err.status === 404) {
-            return {};
-          }
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
 
+  /**
+   * Returns a list of all Auto Follow patterns
+   */
+  server.route({
+    path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
+    method: 'PUT',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+      const body = serializeAutofolloPattern(request.payload);
+
+      try {
+        return await callWithRequest('ccr.createAutoFollowPattern', { id, body });
+      } catch(err) {
+        if (isEsError(err)) {
           throw wrapEsError(err);
         }
         throw wrapUnknownError(err);
