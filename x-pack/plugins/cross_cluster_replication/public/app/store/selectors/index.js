@@ -5,8 +5,28 @@
  */
 
 import { createSelector } from 'reselect';
+import { object as objectUtils } from '../../services/utils';
+
+const { toArray } = objectUtils;
 
 // Api
 export const getApiState = (state) => state.api;
-export const getApiStatus = (scope) => createSelector(getApiState, (api) => api.status[scope]);
-export const getApiError = (scope) => createSelector(getApiState, (api) => api.error[scope]);
+export const getApiStatus = (scope) => createSelector(getApiState, (apiState) => apiState.status[scope]);
+export const getApiError = (scope) => createSelector(getApiState, (apiState) => apiState.error[scope]);
+export const isApiAuthorized = (scope) => createSelector(getApiError(scope), (error) => {
+  if (!error) {
+    return true;
+  }
+  return error.status !== 403;
+});
+
+// Auto-follow pattern
+export const getAutoFollowPatternState = (state) => state.autoFollowPattern;
+export const getAutoFollowPatterns = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => autoFollowPatternsState.byId);
+export const getSelectedAutoFollowPattern = createSelector(getAutoFollowPatternState, (autoFollowPatternsState) => {
+  if(!autoFollowPatternsState.selectedId) {
+    return null;
+  }
+  return autoFollowPatternsState.byId[autoFollowPatternsState.selectedId];
+});
+export const getListAutoFollowPatterns = createSelector(getAutoFollowPatterns, (autoFollowPatterns) =>  toArray(autoFollowPatterns));

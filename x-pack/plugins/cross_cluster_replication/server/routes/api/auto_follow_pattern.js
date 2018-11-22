@@ -10,6 +10,8 @@ import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
 
+// import { errors } from '../../mock'; // Temp for development to test ES error in UI
+
 export const registerAutoFollowPatternRoutes = (server) => {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
@@ -27,9 +29,13 @@ export const registerAutoFollowPatternRoutes = (server) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
+        // throw wrapEsError(errors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
+
         const response = await callWithRequest('ccr.autoFollowPatterns');
         return response;
       } catch(err) {
+        // throw wrapEsError(err);
+
         if (isEsError(err)) {
           // Currently Elasticsearch throw a 404 when there are no Auto follow pattern
           // It should instead return an empty object as the resource exists but does not have any result.

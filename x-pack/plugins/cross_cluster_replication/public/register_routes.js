@@ -14,7 +14,7 @@ import { setHttpClient } from './app/services/api';
 
 const CCR_REACT_ROOT = 'ccrReactRoot';
 
-routes.when(`${BASE_PATH}:view?:id?`, {
+routes.when(`${BASE_PATH}/:view?/:id?`, {
   template: template,
   controllerAs: 'ccr',
   controller: class CrossClusterReplicationController {

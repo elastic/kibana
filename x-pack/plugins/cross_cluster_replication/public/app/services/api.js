@@ -19,6 +19,7 @@ export function setHttpClient(client) {
 
 // ---
 
+
 export const loadAutoFollowPatterns = async () => {
   return await httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(response => response.data);
 };

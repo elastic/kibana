@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const API_STATUS = {
-  IDLE: 'idle',
-  LOADING: 'loading',
-  UPDATING: 'updating',
-};
+export { CrossClusterReplicationHome } from './home';

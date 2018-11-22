@@ -4,23 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { Route, Switch, Redirect } from 'react-router-dom';
+
+import routing from './services/routing';
 import { BASE_PATH } from '../../common/constants';
 
-import { AutoFollowPatternList } from './sections/auto_follow_pattern';
+import { CrossClusterReplicationHome } from './sections';
 
-const MyComp = () => (
-  <div>
-    <h1>Cross Clusters Replication APP</h1>
-    <AutoFollowPatternList />
-  </div>
-);
+export class App extends Component {
+  static contextTypes = {
+    router: PropTypes.shape({
+      history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
+        createHref: PropTypes.func.isRequired
+      }).isRequired
+    }).isRequired
+  }
 
-export const App = () => (
-  <div>
-    <Switch>
-      <Route path={BASE_PATH} component={MyComp} />
-    </Switch>
-  </div>
-);
+  constructor(...args) {
+    super(...args);
+    this.registerRouter();
+  }
+
+  componentWillUnmount() {
+    routing.userHasLeftApp = true;
+  }
+
+  registerRouter() {
+    const { router } = this.context;
+    routing.reactRouter = router;
+  }
+
+  render() {
+    return (
+      <div>
+        <Switch>
+          <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/auto_follow_patterns`} />
+          <Route path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
+        </Switch>
+      </div>
+    );
+  }
+}

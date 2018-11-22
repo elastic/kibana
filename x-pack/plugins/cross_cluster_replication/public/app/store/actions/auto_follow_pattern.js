@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SECTIONS } from '../../constants';
-import { loadAutoFollowPatterns as request } from '../../services/api';
+import { SECTIONS, API_STATUS } from '../../constants';
+import { loadAutoFollowPatterns as loadAutoFollowPatternsRequest } from '../../services/api';
 import * as t from '../action_types';
 import { apiAction } from './api';
 
 const { AUTO_FOLLOW_PATTERN } = SECTIONS;
 
-export const loadAutoFollowPatterns = () =>
+export const loadAutoFollowPatterns = (isUpdating = false) =>
   apiAction({
     label: t.AUTO_FOLLOW_PATTERN_LOAD,
     scope: AUTO_FOLLOW_PATTERN,
+    status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
     handler: async () => {
-      const data = await request();
-
-      // We can manipulate any way we want the response
-      return { ...data, isModified: true };
+      return await loadAutoFollowPatternsRequest();
     },
   });

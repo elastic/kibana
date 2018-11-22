@@ -14,9 +14,12 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     return;
   }
 
-  const { label, scope, handler } = action.payload;
+  const { label, scope, status, handler } = action.payload;
 
-  dispatch(apiStart({ label, scope }));
+  dispatch(apiStart({ label, scope, status }));
+
+  // Reset Api errors
+  dispatch(apiError({ error: null, scope }));
 
   let response;
 
@@ -24,6 +27,8 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     response = await handler();
   } catch (error) {
     dispatch(apiError({ error, scope }));
+    dispatch(apiEnd({ label, scope }));
+
     dispatch({
       type: `${label}_FAILURE`,
       payload: error,
@@ -35,5 +40,6 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     type: `${label}_SUCCESS`,
     payload: response,
   });
+
   dispatch(apiEnd({ label, scope }));
 };

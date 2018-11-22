@@ -7,7 +7,7 @@
 import { SECTIONS, API_STATUS } from '../../constants';
 import * as t from '../action_types';
 
-const initialState = {
+export const initialState = {
   status: {
     [SECTIONS.AUTO_FOLLOW_PATTERN]: API_STATUS.IDLE,
     [SECTIONS.INDEX_FOLLOWER]: API_STATUS.IDLE,
@@ -19,15 +19,18 @@ const initialState = {
 };
 
 export const reducer = (state = initialState, action) => {
+  const payload = action.payload || {};
+  const { scope, status, error } = payload;
+
   switch (action.type) {
     case t.API_START: {
-      return { ...state, status: { ...state.status, [action.payload.scope]: API_STATUS.LOADING } };
+      return { ...state, status: { ...state.status, [scope]: status } };
     }
     case t.API_END: {
-      return { ...state, status: { ...state.status, [action.payload.scope]: API_STATUS.IDLE } };
+      return { ...state, status: { ...state.status, [scope]: API_STATUS.IDLE } };
     }
     case t.API_ERROR: {
-      return { ...state, error: { ...state.error, [action.payload.scope]: API_STATUS.IDLE } };
+      return { ...state, error: { ...state.error, [scope]: error } };
     }
     default:
       return state;

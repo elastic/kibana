@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AutoFollowPatternList } from './auto_follow_pattern_list';
+export { SectionLoading } from './section_loading';
+export { SectionError } from './section_error';
+export { SectionUnauthorized } from './section_unauthorized';

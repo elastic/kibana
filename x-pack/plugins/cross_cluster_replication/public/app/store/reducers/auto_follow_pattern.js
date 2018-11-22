@@ -16,7 +16,7 @@ const success = action => `${action}_SUCCESS`;
 export const reducer = (state = initialState, action) => {
   switch (action.type) {
     case success(t.AUTO_FOLLOW_PATTERN_LOAD): {
-      return state;
+      return { ...state, byId: action.payload };
     }
     default:
       return state;
