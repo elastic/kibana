@@ -74,7 +74,7 @@ export default function calculateLabel(metric, metrics) {
       const matches = metric.field.match(percentileValueMatch);
       if (matches) {
         return i18n.translate('tsvb.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel', {
-          defaultMessage: '{lookupMetricType} $of {targetLabel} ({additionalLabel})',
+          defaultMessage: '{lookupMetricType} of {targetLabel} ({additionalLabel})',
           values: { lookupMetricType: lookup[metric.type], targetLabel, additionalLabel: matches[1] }
         });
       }
