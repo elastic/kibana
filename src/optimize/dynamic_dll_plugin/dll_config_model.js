@@ -75,7 +75,7 @@ function generateDLL(config) {
             {
               test: /\.js$/,
               include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
-              exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\]node_modules[\/\\]/,
+              exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
             }
           ],
           use: {

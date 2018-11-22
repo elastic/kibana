@@ -13,4 +13,5 @@ tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
   packages/*/node_modules \
   x-pack/node_modules \
   x-pack/plugins/*/node_modules \
+  test/plugin_functional/plugins/*/node_modules \
   .es;
