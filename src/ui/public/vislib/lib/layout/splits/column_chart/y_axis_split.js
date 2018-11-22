@@ -21,7 +21,7 @@ import d3 from 'd3';
 
 export function VislibLibLayoutSplitsColumnChartYAxisSplitProvider() {
   /*
-   * Adds div DOM elements to the `.y-axis-div-wrapper` element based on the data layout.
+   * Adds div DOM elements to the `.visAxis__splitAxes--y` element based on the data layout.
    * For example, if the data has rows, it returns the same number of
    * `.y-axis-div` elements as row objects.
    */
@@ -44,10 +44,10 @@ export function VislibLibLayoutSplitsColumnChartYAxisSplitProvider() {
         .attr('class', (d, i) => {
           let divClass = '';
           if (i === 0) {
-            divClass += ' chart-first';
+            divClass += ' visWrapper__chart--first';
           }
           if (i === rows - 1) {
-            divClass += ' chart-last';
+            divClass += ' visWrapper__chart--last';
           }
           return 'y-axis-div axis-div' + divClass;
         });

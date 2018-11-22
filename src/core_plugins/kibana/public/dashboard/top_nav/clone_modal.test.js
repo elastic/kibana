@@ -19,7 +19,7 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount, shallow } from 'enzyme';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import {
   findTestSubject,
 } from '@elastic/eui/lib/test';
@@ -37,9 +37,9 @@ beforeEach(() => {
   onClose = sinon.spy();
 });
 
-function createComponent(creationMethod = mount) {
+function createComponent(creationMethod = mountWithIntl) {
   component = creationMethod(
-    <DashboardCloneModal
+    <DashboardCloneModal.WrappedComponent
       title="dash title"
       onClose={onClose}
       onClone={onClone}
@@ -48,7 +48,7 @@ function createComponent(creationMethod = mount) {
 }
 
 test('renders DashboardCloneModal', () => {
-  createComponent(shallow);
+  createComponent(shallowWithIntl);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 

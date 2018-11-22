@@ -199,6 +199,7 @@ module
       query,
       filters,
       combinedQuery,
+      usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',
       description: '',
       jobGroups: [],

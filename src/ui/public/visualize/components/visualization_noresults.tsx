@@ -29,7 +29,7 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
 
   public render() {
     return (
-      <div className="text-center visualize-error visualize-chart" ref={this.containerDiv}>
+      <div className="text-center visError visChart" ref={this.containerDiv}>
         <div className="item top" />
         <div className="item">
           <h2 aria-hidden="true">
