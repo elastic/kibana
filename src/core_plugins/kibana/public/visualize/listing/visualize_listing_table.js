@@ -275,8 +275,8 @@ class VisualizeListingTableUi extends Component {
     this.setState({ selectedRowIds: newSelectedIds });
   };
 
-  onCreate() {
-    window.location = '#/visualize/new';
+  onCreate = () => {
+    this.props.onCreateVis();
   }
 
   renderToolBarActions() {
@@ -290,6 +290,7 @@ class VisualizeListingTableUi extends Component {
       /> :
       <KuiListingTableCreateButton
         onCreate={this.onCreate}
+        data-test-subj="createNewVis"
         aria-label={this.props.intl.formatMessage({
           id: 'kbn.visualize.listing.createVisualizationButtonAriaLabel',
           defaultMessage: 'Create new visualization',
@@ -350,6 +351,7 @@ class VisualizeListingTableUi extends Component {
 VisualizeListingTableUi.propTypes = {
   deleteSelectedItems: PropTypes.func,
   fetchItems: PropTypes.func,
+  onCreateVis: PropTypes.func.isRequired,
 };
 
 export const VisualizeListingTable = injectI18n(VisualizeListingTableUi);

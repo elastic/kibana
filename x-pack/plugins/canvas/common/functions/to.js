@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { castProvider } from '@kbn/interpreter/common/interpreter/cast';
+import { castProvider } from '../interpreter/cast';
 
 export const to = () => ({
   name: 'to',
