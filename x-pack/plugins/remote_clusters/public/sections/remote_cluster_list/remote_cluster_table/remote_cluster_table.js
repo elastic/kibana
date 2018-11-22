@@ -55,8 +55,8 @@ export class RemoteClusterTableUi extends Component {
     };
   }
 
-  onSearch = (queryObject) => {
-    const { text } = queryObject.query;
+  onSearch = ({ query }) => {
+    const { text } = query;
     const normalizedSearchText = text.toLowerCase();
     this.setState({
       queryText: normalizedSearchText,

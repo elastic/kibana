@@ -56,7 +56,7 @@ export const disconnectClusters = (names) => async (dispatch, getState) => {
     }));
   }
 
-  // If we've just deleted a job we were looking at, we need to close the panel.
+  // If we've just deleted a cluster we were looking at, we need to close the panel.
   const detailPanelClusterName = getDetailPanelClusterName(getState());
   if (detailPanelClusterName && names.includes(detailPanelClusterName)) {
     dispatch(closeDetailPanel());
