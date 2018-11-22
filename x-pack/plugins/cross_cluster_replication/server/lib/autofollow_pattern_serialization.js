@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const deserializeAutofollowPattern = (
+export const deserializeAutoFollowPattern = (
   name,
   { remote_cluster, leader_index_patterns, follow_index_pattern } = {} // eslint-disable-line camelcase
 ) => ({
@@ -18,12 +18,12 @@ export const deserializeListAutofollowPatterns = autofollowPatterns =>
   Object.entries(autofollowPatterns).reduce(
     (deSerialized, [name, autofollowPattern]) => ({
       ...deSerialized,
-      [name]: deserializeAutofollowPattern(name, autofollowPattern),
+      [name]: deserializeAutoFollowPattern(name, autofollowPattern),
     }),
     {}
   );
 
-export const serializeAutofolloPattern = ({
+export const serializeAutoFollowPattern = ({
   remoteCluster,
   leaderIndexPatterns,
   followIndexPattern,
