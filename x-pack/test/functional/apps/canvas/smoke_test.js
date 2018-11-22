@@ -20,10 +20,8 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
 
     before(async () => {
       // init data
-      await Promise.all([
-        esArchiver.loadIfNeeded('logstash_functional'),
-        esArchiver.load('canvas/default'),
-      ]);
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('canvas/default');
 
       // load canvas
       // see also navigateToUrl(app, hash)
