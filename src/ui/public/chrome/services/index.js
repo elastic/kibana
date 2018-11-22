@@ -18,4 +18,3 @@
  */
 
 import './global_nav_state';
-import './breadcrumb_state';

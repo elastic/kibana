@@ -5,22 +5,22 @@
  */
 
 import expect from 'expect.js';
-import { CapabilitiesQuery } from '../../../../plugins/infra/common/graphql/types';
-import { capabilitiesQuery } from '../../../../plugins/infra/public/containers/capabilities/capabilities.gql_query';
+import { MetadataQuery } from '../../../../plugins/infra/common/graphql/types';
+import { metadataQuery } from '../../../../plugins/infra/public/containers/metadata/metadata.gql_query';
 import { KbnTestProvider } from './types';
 
-const capabilitiesTests: KbnTestProvider = ({ getService }) => {
+const metadataTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
   const client = getService('infraOpsGraphQLClient');
 
-  describe('capabilities', () => {
+  describe('metadata', () => {
     before(() => esArchiver.load('infra'));
     after(() => esArchiver.unload('infra'));
 
-    it('supports the capabilities container query', () => {
+    it('supports the metadata container query', () => {
       return client
-        .query<CapabilitiesQuery.Query>({
-          query: capabilitiesQuery,
+        .query<MetadataQuery.Query>({
+          query: metadataQuery,
           variables: {
             sourceId: 'default',
             nodeId: 'demo-stack-nginx-01',
@@ -28,12 +28,12 @@ const capabilitiesTests: KbnTestProvider = ({ getService }) => {
           },
         })
         .then(resp => {
-          const capabilities = resp.data.source.capabilitiesByNode;
-          expect(capabilities.length).to.be(14);
+          const metadata = resp.data.source.metadataByNode;
+          expect(metadata.length).to.be(14);
         });
     });
   });
 };
 
 // tslint:disable-next-line no-default-export
-export default capabilitiesTests;
+export default metadataTests;

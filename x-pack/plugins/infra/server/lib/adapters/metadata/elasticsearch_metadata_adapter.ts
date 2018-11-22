@@ -7,24 +7,24 @@
 import { InfraSourceConfiguration } from '../../sources';
 import {
   InfraBackendFrameworkAdapter,
-  InfraCapabilityAggregationBucket,
-  InfraCapabilityAggregationResponse,
   InfraFrameworkRequest,
+  InfraMetadataAggregationBucket,
+  InfraMetadataAggregationResponse,
 } from '../framework';
-import { InfraCapabilitiesAdapter } from './adapter_types';
+import { InfraMetadataAdapter } from './adapter_types';
 
-export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapter {
+export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   private framework: InfraBackendFrameworkAdapter;
   constructor(framework: InfraBackendFrameworkAdapter) {
     this.framework = framework;
   }
 
-  public async getMetricCapabilities(
+  public async getMetricMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string,
     nodeType: 'host' | 'container' | 'pod'
-  ): Promise<InfraCapabilityAggregationBucket[]> {
+  ): Promise<InfraMetadataAggregationBucket[]> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
     const metricQuery = {
       index: sourceConfiguration.metricAlias,
@@ -58,7 +58,7 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
 
     const response = await this.framework.callWithRequest<
       any,
-      { metrics?: InfraCapabilityAggregationResponse }
+      { metrics?: InfraMetadataAggregationResponse }
     >(req, 'search', metricQuery);
 
     return response.aggregations && response.aggregations.metrics
@@ -66,12 +66,12 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
       : [];
   }
 
-  public async getLogCapabilities(
+  public async getLogMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string,
     nodeType: 'host' | 'container' | 'pod'
-  ): Promise<InfraCapabilityAggregationBucket[]> {
+  ): Promise<InfraMetadataAggregationBucket[]> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
     const logQuery = {
       index: sourceConfiguration.logAlias,
@@ -105,7 +105,7 @@ export class ElasticsearchCapabilitiesAdapter implements InfraCapabilitiesAdapte
 
     const response = await this.framework.callWithRequest<
       any,
-      { metrics?: InfraCapabilityAggregationResponse }
+      { metrics?: InfraMetadataAggregationResponse }
     >(req, 'search', logQuery);
 
     return response.aggregations && response.aggregations.metrics
