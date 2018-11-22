@@ -8,6 +8,12 @@ Kibana currently has the following limitations.
 * <<nested-objects>>
 * <<export-data>>
 
+There are also limitations related to the 
+{stack-ov}/watcher-limitations.html[{alert-features}],
+<<graph-limitations,{graph-features}>>, 
+{stack-ov}/ml-limitations.html[{ml-features}], and 
+{stack-ov}/security-limitations.html[{security-features}].
+
 --
 
 include::limitations/nested-objects.asciidoc[]
