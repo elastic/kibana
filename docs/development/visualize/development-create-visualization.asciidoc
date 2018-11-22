@@ -18,7 +18,6 @@ source code and the existing visualizations provided with it.
 * <<development-default-response-handler>>
 * <<development-none-response-handler>>
 * <<development-custom-response-handler>>
-- <<development-vis-object>>
 * <<development-vis-timefilter>>
 - <<development-aggconfig>>
 
@@ -406,48 +405,6 @@ const MyNewVisType(Private) => {
 
 VisTypesRegistryProvider.register(MyNewVisType);
 -----------
-
-[[development-vis-object]]
-=== Vis object
-The `vis` object holds the visualization state and is the window into kibana:
-
-- *vis.params*: holds the visualization parameters
-- *vis.indexPattern*: selected index pattern object
-- *vis.getState()*: gets current visualization state 
-- *vis.updateState()*: updates current state with values from `vis.params`
-- *vis.resetState()*: resets `vis.params` to the values in the current state
-- *vis.forceReload()*: forces whole cycle (request handler gets called)
-- *vis.getUiState()*: gets UI state of visualization
-- *vis.uiStateVal(name, val)*: updates a property in UI state
-- *vis.isEditorMode()*: returns true if in editor mode
-- *vis.API.timeFilter*: allows you to access time picker
-- *vis.API.queryFilter*: gives you access to queryFilter
-- *vis.API.events.click*: default click handler
-- *vis.API.events.brush*: default brush handler
-
-The visualization gets all its parameters in `vis.params`, which are default values merged with the current state. 
-If the visualization needs to update the current state, it should update the `vis.params` and call `vis.updateState()` 
-which will inform <visualize> about the change, which will call request and response handler and then your 
-visualization's render method.
-
-For the parameters that should not be saved with the visualization you should use the UI state. 
-These hold viewer-specific state, such as popup open/closed, custom colors applied to the series etc.
-
-You can access filter bar and time picker through the objects defined on `vis.API`
-
-[[development-vis-timefilter]]
-==== timeFilter
-
-Update the timefilter time values and call update() method on it to update time picker
-
-["source","js"]
------------
-   timefilter.time.from = moment(ranges.xaxis.from);
-   timefilter.time.to = moment(ranges.xaxis.to);
-   timefilter.time.mode = 'absolute';
-   timefilter.update();
------------
-
 
 [[development-aggconfig]]
 === AggConfig object
