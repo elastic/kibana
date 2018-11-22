@@ -70,8 +70,12 @@ export class RouteTreeBuilder {
   }
 
   private buildRoute(dir: string, file: string, mapParams: RouteParamsMap): RouteConfig {
-    const filePath = `${mapParams[dir] || dir}${file.replace('.tsx', '').replace('index', '')}`;
+    // Remove the file extension as we dont want that in the URL... also index resolves to parent route
+    // so remove that... e.g. /beats/index is not the url we want, /beats should resolve to /beats/index
+    // just like how files resolve in node
+    const filePath = `${mapParams[dir] || dir}${file.replace('.tsx', '')}`.replace('/index', '');
     const page = this.requireWithContext(`.${dir}${file}`);
+    const cleanDir = dir.replace(/\/$/, '');
 
     // Make sure the expored variable name matches a pattern. By default it will choose the first
     // exported variable that matches *Page
@@ -79,16 +83,36 @@ export class RouteTreeBuilder {
       this.pageComponentPattern.test(varName)
     );
 
-    if (componentExportName) {
-      return {
-        path: mapParams[filePath] ? `${filePath}/:${mapParams[filePath].join('/:')}` : filePath,
-        component: page[componentExportName],
-      };
-    } else {
+    if (!componentExportName) {
       throw new Error(
         `${dir}${file} in the pages folder does not include an exported \`${this.pageComponentPattern.toString()}\` component`
       );
     }
+
+    // route has a parent with mapped params, so we map it here too
+    // e.g. /beat has a beatid param, so /beat/detail, a child of /beat
+    // should also have that param resulting in /beat/:beatid/detail
+    if (mapParams[filePath] && mapParams[cleanDir] && filePath !== cleanDir) {
+      const dirWithParams = `${cleanDir}/:${mapParams[cleanDir].join('/:')}`;
+      return {
+        path: `${dirWithParams}/${file.replace('.tsx', '')}/:${mapParams[filePath].join('/:')}`,
+        component: page[componentExportName],
+      };
+    }
+
+    // route matches a mapped param exactly
+    // e.g. /beat has a beatid param, so it becomes /beat/:beatid
+    if (mapParams[filePath]) {
+      return {
+        path: `${filePath}/:${mapParams[filePath].join('/:')}`,
+        component: page[componentExportName],
+      };
+    }
+
+    return {
+      path: filePath,
+      component: page[componentExportName],
+    };
   }
 
   // Build tree recursively

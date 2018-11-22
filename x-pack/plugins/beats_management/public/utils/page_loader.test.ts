@@ -89,9 +89,8 @@ describe('RouteTreeBuilder', () => {
       const treeBuilder = new RouteTreeBuilder(mockRequire);
       const tree = treeBuilder.routeTreeFromPaths(pages, {
         '/beat': ['beatId'],
-      }); /* ? */
+      });
       expect(tree[2].path).toEqual('/beat/:beatId');
-      expect(tree[2].routes![0]).toEqual('/beat/:beatId/detail');
     });
   });
   it('Should create a route tree, with a deep nested route having params', () => {
@@ -104,8 +103,8 @@ describe('RouteTreeBuilder', () => {
     const tree = treeBuilder.routeTreeFromPaths(pages, {
       '/beat': ['beatId'],
       '/beat/detail': ['other'],
-    }); /* ? */
+    });
     expect(tree[2].path).toEqual('/beat/:beatId');
-    expect(tree[2].routes![0]).toEqual('/beat/:beatId/detail/:other');
+    expect(tree[2].routes![0].path).toEqual('/beat/:beatId/detail/:other');
   });
 });
