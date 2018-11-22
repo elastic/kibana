@@ -98,3 +98,13 @@ image::monitoring/images/monitoring-index-advanced.png["Elasticsearch Index Adva
 
 The Advanced index view can be used to diagnose issues that generally involve
 more advanced knowledge of {es}, such as wasteful index memory usage.
+
+[float]
+[[jobs-page]]
+==== Jobs
+
+To view {ml} job metrics, click **Jobs**. For each job in your cluster, it shows
+information such as its status, the number of records processed, the size of the
+model, the number of forecasts, and the node that runs the job.
+
+image::monitoring/images/monitoring-jobs.png["Machine learning jobs",link="images/monitoring-jobs.png"]

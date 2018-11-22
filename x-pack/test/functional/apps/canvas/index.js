@@ -4,5 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createCapabilitiesResolvers } from './resolvers';
-export { capabilitiesSchema } from './schema.gql';
+export default function canvasApp({ loadTestFile }) {
+  describe('Canvas app', function canvasAppTestSuite() {
+    this.tags('ciGroup2'); // CI requires tags ヽ(゜Q。)ノ？
+    loadTestFile(require.resolve('./smoke_test'));
+  });
+}

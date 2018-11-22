@@ -24,6 +24,7 @@ import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
@@ -38,7 +39,6 @@ export function VisualizeListingController($injector, createNewVis) {
   const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const config = $injector.get('config');
-  const breadcrumbState = $injector.get('breadcrumbState');
 
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
 
@@ -81,7 +81,7 @@ export function VisualizeListingController($injector, createNewVis) {
       .catch(error => notify.error(error));
   };
 
-  breadcrumbState.set([{
+  chrome.breadcrumbs.set([{
     text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
       defaultMessage: 'Visualize',
     })

@@ -8,34 +8,34 @@ import _ from 'lodash';
 
 import React from 'react';
 import { Query } from 'react-apollo';
-import { CapabilitiesQuery, InfraNodeType } from '../../../common/graphql/types';
+import { InfraNodeType, MetadataQuery } from '../../../common/graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
-import { capabilitiesQuery } from './capabilities.gql_query';
+import { metadataQuery } from './metadata.gql_query';
 
-interface WithCapabilitiesProps {
-  children: (args: WithCapabilitiesArgs) => React.ReactNode;
+interface WithMetadataProps {
+  children: (args: WithMetadataArgs) => React.ReactNode;
   layouts: InfraMetricLayout[];
   nodeType: InfraNodeType;
   nodeId: string;
   sourceId: string;
 }
 
-interface WithCapabilitiesArgs {
+interface WithMetadataArgs {
   filteredLayouts: InfraMetricLayout[];
   error?: string | undefined;
   loading: boolean;
 }
 
-export const WithCapabilities = ({
+export const WithMetadata = ({
   children,
   layouts,
   nodeType,
   nodeId,
   sourceId,
-}: WithCapabilitiesProps) => {
+}: WithMetadataProps) => {
   return (
-    <Query<CapabilitiesQuery.Query, CapabilitiesQuery.Variables>
-      query={capabilitiesQuery}
+    <Query<MetadataQuery.Query, MetadataQuery.Variables>
+      query={metadataQuery}
       fetchPolicy="no-cache"
       variables={{
         sourceId,
@@ -44,8 +44,8 @@ export const WithCapabilities = ({
       }}
     >
       {({ data, error, loading }) => {
-        const capabilities = data && data.source && data.source.capabilitiesByNode;
-        const filteredLayouts = getFilteredLayouts(layouts, capabilities);
+        const metadata = data && data.source && data.source.metadataByNode;
+        const filteredLayouts = getFilteredLayouts(layouts, metadata);
         return children({
           filteredLayouts,
           error: error && error.message,
@@ -58,31 +58,31 @@ export const WithCapabilities = ({
 
 const getFilteredLayouts = (
   layouts: InfraMetricLayout[],
-  capabilities: Array<CapabilitiesQuery.CapabilitiesByNode | null> | undefined
+  metadata: Array<MetadataQuery.MetadataByNode | null> | undefined
 ): InfraMetricLayout[] => {
-  if (!capabilities) {
+  if (!metadata) {
     return layouts;
   }
 
-  const metricCapabilities: Array<string | null> = capabilities
-    .filter(cap => cap && cap.source === 'metrics')
-    .map(cap => cap && cap.name);
+  const metricMetadata: Array<string | null> = metadata
+    .filter(data => data && data.source === 'metrics')
+    .map(data => data && data.name);
 
   // After filtering out sections that can't be displayed, a layout may end up empty and can be removed.
   const filteredLayouts = layouts
-    .map(layout => getFilteredLayout(layout, metricCapabilities))
+    .map(layout => getFilteredLayout(layout, metricMetadata))
     .filter(layout => layout.sections.length > 0);
   return filteredLayouts;
 };
 
 const getFilteredLayout = (
   layout: InfraMetricLayout,
-  metricCapabilities: Array<string | null>
+  metricMetadata: Array<string | null>
 ): InfraMetricLayout => {
   // A section is only displayed if at least one of its requirements is met
   // All others are filtered out.
   const filteredSections = layout.sections.filter(
-    section => _.intersection(section.requires, metricCapabilities).length > 0
+    section => _.intersection(section.requires, metricMetadata).length > 0
   );
   return { ...layout, sections: filteredSections };
 };
