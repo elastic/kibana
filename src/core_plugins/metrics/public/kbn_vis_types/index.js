@@ -20,7 +20,6 @@
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { ReactEditorControllerProvider } from './editor_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 
 // register the provider with the visTypes registry so that other know it exists
@@ -37,7 +36,6 @@ export default function MetricsVisProvider(Private, i18n) {
     title: i18n('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'Visual Builder' }),
     description: i18n('tsvb.kbnVisTypes.metricsDescription',
       { defaultMessage: 'Build time-series using a visual pipeline interface' }),
-    category: CATEGORY.TIME,
     icon: 'visVisualBuilder',
     feedbackMessage: defaultFeedbackMessage,
     visConfig: {
