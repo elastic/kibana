@@ -6,11 +6,3 @@
 
 export { API_STATUS } from './api';
 export { SECTIONS } from './sections';
-
-/**
- * Flag to simulate latency in http requests in order to visualize
- * the loading spinners.
- *
- * Important: MUST always be set to "false" in code review
- */
-export const SIMULATE_HTTP_LATENCY = false;

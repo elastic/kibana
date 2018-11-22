@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SIMULATE_HTTP_LATENCY } from '../constants';
 
 /**
  * Utilty to add some latency in a Promise chain
  *
  * @param {number} time Time in millisecond to wait
- * @param {boolean} isOnlyForDevelopment Flag to indicate if it's only for devlopment purpose
  */
-export const wait = (time, onlyForDevelopment = true) => (data) => {
-  if (onlyForDevelopment && !SIMULATE_HTTP_LATENCY) {
-    return Promise.resolve(data);
-  }
-
+export const wait = (time = 1000) => (data) => {
   return new Promise((resolve) => {
     setTimeout(() => resolve(data), time);
   });

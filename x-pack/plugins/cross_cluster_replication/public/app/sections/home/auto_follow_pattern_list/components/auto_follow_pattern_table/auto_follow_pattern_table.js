@@ -63,7 +63,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       field: '__id__',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autoFollowPatternList.table.nameColumnTitle"
+          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.name_column_title"
           defaultMessage="Name"
         />
       ),
@@ -73,7 +73,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       field: 'remote_cluster',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autoFollowPatternList.table.clusterColumnTitle"
+          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.cluster_column_title"
           defaultMessage="Cluster"
         />
       ),
@@ -83,7 +83,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       field: 'leader_index_patterns',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autoFollowPatternList.table.leaderPatternsColumnTitle"
+          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.leader_patterns_column_title"
           defaultMessage="Leader patterns"
         />
       ),
@@ -92,7 +92,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       field: 'follow_index_pattern',
       name: (
         <FormattedMessage
-          id="xpack.cross_cluster_replication.autoFollowPatternList.table.connectedNodesColumnTitle"
+          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
           defaultMessage="Follower pattern"
         />
       ),
@@ -139,7 +139,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
           iconType="minusInCircle"
         >
           <FormattedMessage
-            id="xpack.cross_cluster_replication.deleteAutoFollowPatternButtonLabel"
+            id="xpack.cross_cluster_replication.delete_autofollow_pattern_button_label"
             defaultMessage="Delete auto-follow pattern"
           />
         </EuiButton>

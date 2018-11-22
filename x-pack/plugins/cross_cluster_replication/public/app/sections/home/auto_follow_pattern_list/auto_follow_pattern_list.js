@@ -43,7 +43,7 @@ export class AutoFollowPatternListUI extends PureComponent {
         title={(
           <h1>
             <FormattedMessage
-              id="xpack.cross_cluster_replication.autoFollowPatternList.emptyPromptTitle"
+              id="xpack.cross_cluster_replication.autofollow_pattern_list.empty_prompt_title"
               defaultMessage="Create your first auto-follow pattern"
             />
           </h1>
@@ -52,7 +52,7 @@ export class AutoFollowPatternListUI extends PureComponent {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.cross_cluster_replication.autoFollowPatternList.emptyPromptDescription"
+                id="xpack.cross_cluster_replication.autofollow_pattern_list.empty_prompt_description"
                 defaultMessage="Auto follow-patterns automatically create follower index to replicate indices from a leader cluster."
               />
             </p>
@@ -65,7 +65,7 @@ export class AutoFollowPatternListUI extends PureComponent {
             iconType="plusInCircle"
           >
             <FormattedMessage
-              id="xpack.cross_cluster_replication.addAutoFollowPatternButtonLabel"
+              id="xpack.cross_cluster_replication.add_autofollow_pattern_button_label"
               defaultMessage="Add auto-follow pattern"
             />
           </EuiButton>
@@ -81,7 +81,7 @@ export class AutoFollowPatternListUI extends PureComponent {
       return (
         <SectionLoading>
           <FormattedMessage
-            id="xpack.cross_cluster_replication.autoFollowPatternList.loadingTitle"
+            id="xpack.cross_cluster_replication.autofollow_pattern_list.loading_title"
             defaultMessage="Loading auto-follow patterns..."
           />
         </SectionLoading>
@@ -104,7 +104,7 @@ export class AutoFollowPatternListUI extends PureComponent {
 
     if (apiError) {
       const title = intl.formatMessage({
-        id: 'xpack.cross_cluster_replication.autoFollowPatternList.loadingErrorTitle',
+        id: 'xpack.cross_cluster_replication.autofollow_pattern_list.loading_error_title',
         defaultMessage: 'Error loading auto-follow patterns',
       });
       return <SectionError title={title} error={apiError} />;

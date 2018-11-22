@@ -28,12 +28,13 @@ export const registerAutoFollowPatternRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
-      // throw wrapEsError(errors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
-
       try {
+        // throw wrapEsError(errors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
+
         const response = await callWithRequest('ccr.autoFollowPatterns');
         return response;
       } catch(err) {
+        // throw wrapEsError(err);
 
         if (isEsError(err)) {
           // Currently Elasticsearch throw a 404 when there are no Auto follow pattern

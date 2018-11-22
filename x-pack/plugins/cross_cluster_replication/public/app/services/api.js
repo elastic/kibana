@@ -6,7 +6,6 @@
 
 import chrome from 'ui/chrome';
 import { API_BASE_PATH } from '../../../common/constants';
-import { wait } from '../services/utils';
 
 const apiPrefix = chrome.addBasePath(API_BASE_PATH);
 
@@ -22,7 +21,5 @@ export function setHttpClient(client) {
 
 
 export const loadAutoFollowPatterns = async () => {
-  return await httpClient.get(`${apiPrefix}/auto_follow_patterns`)
-    .then(wait(1000))
-    .then(response => response.data);
+  return await httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(response => response.data);
 };

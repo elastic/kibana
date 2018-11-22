@@ -32,36 +32,9 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
     sectionActive: 'auto-follow'
   }
 
-  /**
-   * Get the button in top right corner. In phase 1 we only have the auto-follow patterns
-   * but in phase 2 it can be either "Add Follower" or "Add auto-follow pattern"
-   */
-  getButtonHeader() {
-    const { autoFollowPatterns } = this.props;
-    const { sectionActive } = this.state;
-
-    switch(sectionActive) {
-      case 'auto-follow': {
-        return autoFollowPatterns.length ? (
-          <EuiButton
-            {...routing.getRouterLinkProps(`${BASE_PATH}/auto_follow_patterns/add`)}
-            fill
-          >
-            <FormattedMessage
-              id="xpack.cross_cluster_replication.addAutoFollowPatternButtonLabel"
-              defaultMessage="Add auto-follow pattern"
-            />
-          </EuiButton>
-        ) : null;
-      }
-      default: {
-        // We will render here the "Create Follower" in Phase 2.
-        return null;
-      }
-    }
-  }
-
   getHeaderSection() {
+    const { autoFollowPatterns } = this.props;
+
     return (
       <Fragment>
         <EuiPageContentHeader>
@@ -69,14 +42,26 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="xpack.cross_cluster_replication.crossClusterReplicationTitle"
+                  id="xpack.cross_cluster_replication.cross_cluster_replication_title"
                   defaultMessage="Cross Cluster Replication"
                 />
               </h1>
             </EuiTitle>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            {this.getButtonHeader()}
+            { autoFollowPatterns.length
+              ? (
+                <EuiButton
+                  {...routing.getRouterLinkProps(`${BASE_PATH}/auto_follow_patterns/add`)}
+                  fill
+                >
+                  <FormattedMessage
+                    id="xpack.cross_cluster_replication.add_autofollow_pattern_button_label"
+                    defaultMessage="Add auto-follow pattern"
+                  />
+                </EuiButton>
+              )
+              : null }
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiSpacer />
@@ -89,7 +74,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
    * the follower indices. We will render here the Tab navigation at that moment.
    * For now we simply render a Title
    */
-  getTabsNav() {
+  getTitleSection() {
     const { autoFollowPatterns, isAutoFollowApiAuthorized } = this.props;
     const showTitle = autoFollowPatterns.length || !isAutoFollowApiAuthorized;
 
@@ -98,7 +83,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="xpack.cross_cluster_replication.autoFollowPatternListTitle"
+              id="xpack.cross_cluster_replication.autofollow_pattern_list_title"
               defaultMessage="Auto-follow patterns"
             />
           </h2>
@@ -114,7 +99,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
       return (
         <SectionUnauthorized>
           <FormattedMessage
-            id="xpack.cross_cluster_replication.autoFollowPatternList.noPermissionText"
+            id="xpack.cross_cluster_replication.autofollow_pattern_list.no_permission_text"
             defaultMessage="You do not have permission to view or add auto-follow patterns."
           />
         </SectionUnauthorized>
@@ -138,7 +123,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
         <EuiPageBody>
           <EuiPageContent>
             {this.getHeaderSection()}
-            {this.getTabsNav()}
+            {this.getTitleSection()}
             {this.getUnauthorizedSection()}
             {this.getSection()}
           </EuiPageContent>
