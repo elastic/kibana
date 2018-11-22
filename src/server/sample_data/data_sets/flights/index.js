@@ -25,7 +25,7 @@ import { fieldMappings } from './field_mappings';
 export function flightsSpecProvider() {
   return {
     id: 'flights',
-    name: i18n.translate('server.sampleData.flightsSpecName', {
+    name: i18n.translate('server.sampleData.flightsSpecTitle', {
       defaultMessage: 'Sample flight data',
     }),
     description: i18n.translate('server.sampleData.flightsSpecDescription', {

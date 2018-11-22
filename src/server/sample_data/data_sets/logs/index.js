@@ -25,7 +25,7 @@ import { fieldMappings } from './field_mappings';
 export function logsSpecProvider() {
   return {
     id: 'logs',
-    name: i18n.translate('server.sampleData.logsSpecName', {
+    name: i18n.translate('server.sampleData.logsSpecTitle', {
       defaultMessage: 'Sample web logs',
     }),
     description: i18n.translate('server.sampleData.logsSpecDescription', {

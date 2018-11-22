@@ -25,7 +25,7 @@ import { fieldMappings } from './field_mappings';
 export function ecommerceSpecProvider() {
   return {
     id: 'ecommerce',
-    name: i18n.translate('server.sampleData.ecommerceSpecName', {
+    name: i18n.translate('server.sampleData.ecommerceSpecTitle', {
       defaultMessage: 'Sample eCommerce orders',
     }),
     description: i18n.translate('server.sampleData.ecommerceSpecDescription', {
