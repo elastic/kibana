@@ -5,6 +5,7 @@
  */
 
 import * as t from './action_types';
+import { API_STATUS } from '../constants';
 import { apiEnd, apiError, apiStart }  from './actions/api';
 
 export const apiMiddleware = ({ dispatch }) => next => async (action) => {
@@ -14,12 +15,11 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     return;
   }
 
-  const { label, scope, inBackground, handler } = action.payload;
+  const { label, scope, status = API_STATUS.LOADING, handler } = action.payload;
 
-  if (!inBackground) {
-    dispatch(apiStart({ label, scope }));
-  }
+  dispatch(apiStart({ label, scope, status }));
 
+  // Reset Api errors
   dispatch(apiError({ error: null, scope }));
 
   let response;
@@ -27,10 +27,9 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
   try {
     response = await handler();
   } catch (error) {
-    if (!inBackground) {
-      dispatch(apiError({ error, scope }));
-      dispatch(apiEnd({ label, scope }));
-    }
+    dispatch(apiError({ error, scope }));
+    dispatch(apiEnd({ label, scope }));
+
     dispatch({
       type: `${label}_FAILURE`,
       payload: error,
@@ -43,7 +42,5 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     payload: response,
   });
 
-  if (!inBackground) {
-    dispatch(apiEnd({ label, scope }));
-  }
+  dispatch(apiEnd({ label, scope }));
 };

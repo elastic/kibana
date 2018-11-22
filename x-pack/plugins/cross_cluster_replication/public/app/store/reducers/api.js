@@ -19,15 +19,18 @@ export const initialState = {
 };
 
 export const reducer = (state = initialState, action) => {
+  const payload = action.payload || {};
+  const { scope, status, error } = payload;
+
   switch (action.type) {
     case t.API_START: {
-      return { ...state, status: { ...state.status, [action.payload.scope]: API_STATUS.LOADING } };
+      return { ...state, status: { ...state.status, [scope]: status } };
     }
     case t.API_END: {
-      return { ...state, status: { ...state.status, [action.payload.scope]: API_STATUS.IDLE } };
+      return { ...state, status: { ...state.status, [scope]: API_STATUS.IDLE } };
     }
     case t.API_ERROR: {
-      return { ...state, error: { ...state.error, [action.payload.scope]: action.payload.error } };
+      return { ...state, error: { ...state.error, [scope]: error } };
     }
     default:
       return state;

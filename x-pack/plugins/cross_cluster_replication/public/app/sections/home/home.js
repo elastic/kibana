@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiPageContentHeader,
   EuiButton,
+  EuiText,
 } from '@elastic/eui';
 
 import routing from '../../services/routing';
@@ -88,6 +89,15 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
             />
           </h2>
         </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.cross_cluster_replication.autofolloPatternList.sectionDescription"
+              defaultMessage="Manage your auto-follow patterns"
+            />
+          </p>
+        </EuiText>
         <EuiSpacer />
       </Fragment>
     ) : null;
