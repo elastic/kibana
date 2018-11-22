@@ -41,8 +41,7 @@ var ignore = [
   // is `x-pack` and `b` is not `node_modules`
   /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
 
-  // ignore paths matching `/kbn-interpreter/{a}, unless `a`
-  // is common
+  // ignore paths matching `/kbn-interpreter`
   /\/kbn-interpreter\//,
 
   // ignore paths matching `/canvas/canvas_plugin/{a}/{b}` unless
