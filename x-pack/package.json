@@ -110,6 +110,7 @@
     "supertest-as-promised": "^4.0.2",
     "tmp": "0.0.31",
     "tree-kill": "^1.1.0",
+    "ts-loader": "^3.5.0",
     "typescript": "^3.0.3",
     "vinyl-fs": "^3.0.2",
     "xml-crypto": "^0.10.1",
