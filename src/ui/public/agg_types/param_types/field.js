@@ -69,7 +69,7 @@ FieldParamType.prototype.deserialize = function (fieldName, aggConfig) {
   const validField = this.getAvailableFields(aggConfig.getIndexPattern().fields).byName[fieldName];
   if (!validField) {
     toastNotifications.addDanger(
-      i18n.translate('common.ui.aggTypes.paramTypes.field.invalidFieldParameterErrorMessage', {
+      i18n.translate('common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage', {
         defaultMessage: 'Saved {fieldParameter} parameter is now invalid. Please select a new field.',
         values: {
           fieldParameter: '"field"'
