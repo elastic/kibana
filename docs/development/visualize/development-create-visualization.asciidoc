@@ -31,7 +31,6 @@ You should also register the visualization with `VisTypesRegistryProvider`.
 
 ["source","js"]
 -----------
-import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
@@ -43,7 +42,6 @@ const MyNewVisType = (Private) => {
     title: 'My New Vis',
     icon: 'my_icon',
     description: 'Cool new chart',
-    category: CATEGORY.OTHER
     ...
   });
 }
@@ -59,7 +57,7 @@ The list of common parameters:
 - *image*: instead of an icon you can provide a SVG image (imported)
 - *legacyIcon*: (DEPRECATED) <string> provide a class name (e.g. for a font awesome icon)
 - *description*: description of your visualization as shown in kibana
-- *category*: the category your visualization falls into (one of `ui/vis/vis_category` values)
+- *hidden*: <bool> if set to true, will hide the type from showing up in the visualization wizard
 - *visConfig*: object holding visualization parameters
 - *visConfig.defaults*: object holding default visualization configuration
 - *visualization*: A constructor function for a Visualization.
