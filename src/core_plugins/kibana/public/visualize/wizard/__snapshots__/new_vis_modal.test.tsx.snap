@@ -540,22 +540,28 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <EuiIcon
-                                                    aria-hidden="true"
-                                                    color="secondary"
-                                                    size="l"
+                                                  <Component
+                                                    visType={
+                                                      Object {
+                                                        "hidden": false,
+                                                        "highlighted": false,
+                                                        "name": "vis",
+                                                        "requestHandler": "none",
+                                                        "requiresSearch": false,
+                                                        "responseHandler": "none",
+                                                        "stage": "production",
+                                                        "title": "Vis Type 1",
+                                                        "visualization": [Function],
+                                                      }
+                                                    }
                                                   >
-                                                    <empty
+                                                    <EuiIcon
                                                       aria-hidden="true"
-                                                      className="euiIcon euiIcon--large euiIcon--secondary"
-                                                      focusable="false"
-                                                      height="16"
-                                                      style={null}
-                                                      viewBox="0 0 16 16"
-                                                      width="16"
-                                                      xmlns="http://www.w3.org/2000/svg"
+                                                      color="secondary"
+                                                      size="l"
+                                                      type="empty"
                                                     >
-                                                      <svg
+                                                      <empty
                                                         aria-hidden="true"
                                                         className="euiIcon euiIcon--large euiIcon--secondary"
                                                         focusable="false"
@@ -564,9 +570,20 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         viewBox="0 0 16 16"
                                                         width="16"
                                                         xmlns="http://www.w3.org/2000/svg"
-                                                      />
-                                                    </empty>
-                                                  </EuiIcon>
+                                                      >
+                                                        <svg
+                                                          aria-hidden="true"
+                                                          className="euiIcon euiIcon--large euiIcon--secondary"
+                                                          focusable="false"
+                                                          height="16"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width="16"
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        />
+                                                      </empty>
+                                                    </EuiIcon>
+                                                  </Component>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -617,22 +634,28 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <EuiIcon
-                                                    aria-hidden="true"
-                                                    color="secondary"
-                                                    size="l"
+                                                  <Component
+                                                    visType={
+                                                      Object {
+                                                        "hidden": false,
+                                                        "highlighted": false,
+                                                        "name": "visWithSearch",
+                                                        "requestHandler": "none",
+                                                        "requiresSearch": false,
+                                                        "responseHandler": "none",
+                                                        "stage": "production",
+                                                        "title": "Vis with search",
+                                                        "visualization": [Function],
+                                                      }
+                                                    }
                                                   >
-                                                    <empty
+                                                    <EuiIcon
                                                       aria-hidden="true"
-                                                      className="euiIcon euiIcon--large euiIcon--secondary"
-                                                      focusable="false"
-                                                      height="16"
-                                                      style={null}
-                                                      viewBox="0 0 16 16"
-                                                      width="16"
-                                                      xmlns="http://www.w3.org/2000/svg"
+                                                      color="secondary"
+                                                      size="l"
+                                                      type="empty"
                                                     >
-                                                      <svg
+                                                      <empty
                                                         aria-hidden="true"
                                                         className="euiIcon euiIcon--large euiIcon--secondary"
                                                         focusable="false"
@@ -641,9 +664,20 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         viewBox="0 0 16 16"
                                                         width="16"
                                                         xmlns="http://www.w3.org/2000/svg"
-                                                      />
-                                                    </empty>
-                                                  </EuiIcon>
+                                                      >
+                                                        <svg
+                                                          aria-hidden="true"
+                                                          className="euiIcon euiIcon--large euiIcon--secondary"
+                                                          focusable="false"
+                                                          height="16"
+                                                          style={null}
+                                                          viewBox="0 0 16 16"
+                                                          width="16"
+                                                          xmlns="http://www.w3.org/2000/svg"
+                                                        />
+                                                      </empty>
+                                                    </EuiIcon>
+                                                  </Component>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"

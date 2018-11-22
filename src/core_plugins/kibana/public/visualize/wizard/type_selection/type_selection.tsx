@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import classnames from 'classnames';
 import { sortByOrder } from 'lodash';
 import React, { ChangeEvent } from 'react';
 
@@ -27,7 +26,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItemButton,
   EuiModalHeader,
@@ -37,6 +35,7 @@ import {
 } from '@elastic/eui';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
+import { VisTypeIcon } from './vis_type_icon';
 
 import { memoizeLast } from 'ui/utils/memoize';
 import { VisType } from 'ui/vis';
@@ -167,11 +166,6 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       };
     }
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const legacyIconClass = classnames(
-      'kuiIcon',
-      'visNewVisDialog__typeLegacyIcon',
-      visType.legacyIcon
-    );
     return (
       <EuiKeyPadMenuItemButton
         key={visType.name}
@@ -187,14 +181,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         disabled={isDisabled}
         {...stage}
       >
-        {visType.image && (
-          <img src={visType.image} aria-hidden="true" className="visNewVisDialog__typeImage" />
-        )}
-        {!visType.image && visType.legacyIcon && <span className={legacyIconClass} />}
-        {!visType.image &&
-          !visType.legacyIcon && (
-            <EuiIcon type={visType.icon} size="l" color="secondary" aria-hidden="true" />
-          )}
+        <VisTypeIcon visType={visType} />
       </EuiKeyPadMenuItemButton>
     );
   };
