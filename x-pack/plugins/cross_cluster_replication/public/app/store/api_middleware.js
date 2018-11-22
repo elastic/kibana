@@ -5,7 +5,6 @@
  */
 
 import * as t from './action_types';
-import { API_STATUS } from '../constants';
 import { apiEnd, apiError, apiStart }  from './actions/api';
 
 export const apiMiddleware = ({ dispatch }) => next => async (action) => {
@@ -15,7 +14,7 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
     return;
   }
 
-  const { label, scope, status = API_STATUS.LOADING, handler } = action.payload;
+  const { label, scope, status, handler } = action.payload;
 
   dispatch(apiStart({ label, scope, status }));
 
