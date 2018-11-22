@@ -8,12 +8,16 @@ import { overrideDefaults, DEFAULT_LINES_TO_SAMPLE } from './overrides';
 import { isEqual } from 'lodash';
 import { ml } from '../../../services/ml_api_service';
 
-export function readFile(file) {
+export function readFile(file, encoding) {
   return new Promise((resolve, reject) => {
 
     if (file && file.size) {
       const reader = new FileReader();
-      reader.readAsText(file);
+      if (encoding === undefined) {
+        reader.readAsArrayBuffer(file);
+      } else {
+        reader.readAsText(file, encoding);
+      }
 
       reader.onload = (() => {
         return () => {

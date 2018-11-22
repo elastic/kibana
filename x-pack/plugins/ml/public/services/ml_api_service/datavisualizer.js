@@ -25,6 +25,7 @@ export const fileDatavisualizer = {
     return http({
       url: `${basePath}/file_data_visualizer/analyze_file${paramString}`,
       method: 'POST',
+      isBinary: true,
       data: obj
     });
   },

@@ -15,11 +15,13 @@ const writeFile = util.promisify(fs.writeFile);
 
 export function fileDataVisualizerProvider(callWithRequest) {
   async function analyzeFile(data, overrides) {
+    // debugger
     let cached = false;
     let results = [];
-
+    // const body = data;
+    const body = Buffer.from(data, 'utf16le').toString();
     try {
-      results = await callWithRequest('ml.fileStructure', { body: data, ...overrides });
+      results = await callWithRequest('ml.fileStructure', { body, ...overrides });
       if (false) {
         // disabling caching for now
         cached = await cacheData(data);

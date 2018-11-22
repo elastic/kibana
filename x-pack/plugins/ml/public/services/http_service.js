@@ -24,7 +24,16 @@ export function http(options) {
       });
 
       const allHeaders = (options.headers === undefined) ? headers : { ...options.headers, ...headers };
-      const body = (options.data === undefined) ? null : JSON.stringify(options.data);
+
+      let body = null;
+      if (options.data !== undefined) {
+        if (options.isBinary === true) {
+          body = options.data;
+          headers['Content-Type'] = 'application/octet-stream';
+        } else {
+          body = JSON.stringify(options.data);
+        }
+      }
 
       const payload = {
         method: (options.method || 'GET'),

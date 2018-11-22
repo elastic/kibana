@@ -28,7 +28,7 @@ import {
   readFile,
   createUrlOverrides,
   processResults,
-  reduceData,
+  // reduceData,
   hasImportPermission,
 } from '../utils';
 
@@ -37,7 +37,7 @@ export const MODE = {
   IMPORT: 1,
 };
 
-const UPLOAD_SIZE_MB = 5;
+// const UPLOAD_SIZE_MB = 5;
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -45,6 +45,7 @@ export class FileDataVisualizerView extends Component {
 
     this.state = {
       files: {},
+      fileContentsBinary: '',
       fileContents: '',
       fileSize: 0,
       fileTooLarge: false,
@@ -79,6 +80,7 @@ export class FileDataVisualizerView extends Component {
       loading: (files.length > 0),
       bottomBarVisible: (files.length > 0),
       loaded: false,
+      fileContentsBinary: '',
       fileContents: '',
       fileSize: 0,
       fileTooLarge: false,
@@ -95,14 +97,13 @@ export class FileDataVisualizerView extends Component {
   async loadFile(file) {
     if (file.size <= MAX_BYTES) {
       try {
-        const fileContents = await readFile(file);
-        const data = fileContents.data;
+        const { data: fileContentsBinary } = await readFile(file);
         this.setState({
-          fileContents: data,
+          fileContentsBinary,
           fileSize: file.size,
         });
 
-        await this.loadSettings(data);
+        await this.loadSettings(fileContentsBinary);
 
       } catch (error) {
         console.error(error);
@@ -128,11 +129,18 @@ export class FileDataVisualizerView extends Component {
     try {
       // reduce the amount of data being sent to the endpoint
       // 5MB should be enough to contain 1000 lines
-      const lessData = reduceData(data, UPLOAD_SIZE_MB);
+      // const lessData = reduceData(data, UPLOAD_SIZE_MB);
+      // const lessData = new DataView(data);
+      const lessData = data;
       console.log('overrides', overrides);
       const { analyzeFile } = ml.fileDatavisualizer;
       const resp = await analyzeFile(lessData, overrides);
       const serverSettings = processResults(resp.results);
+      const blob = new Blob([this.state.fileContentsBinary], { type: 'application/octet-stream' });
+      const { data: fileContents } = await readFile(blob, serverSettings.charset);
+      this.setState({
+        fileContents,
+      });
       const serverOverrides = resp.overrides;
 
       this.previousOverrides = this.overrides;
