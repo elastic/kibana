@@ -16,8 +16,9 @@ import {
 
 export class DisconnectButtonUi extends Component {
   static propTypes = {
-    disconnectRemoteClusters: PropTypes.func.isRequired,
+    disconnectClusters: PropTypes.func.isRequired,
     clusterNames: PropTypes.array.isRequired,
+    isSmallButton: PropTypes.bool,
   };
 
   constructor(props) {
@@ -40,35 +41,94 @@ export class DisconnectButtonUi extends Component {
     });
   };
 
+  onConfirm = () => {
+    const { disconnectClusters, clusterNames } = this.props;
+    disconnectClusters(clusterNames);
+    this.closeConfirmModal();
+  }
+
+  renderButtonText() {
+    const { clusterNames, isSmallButton } = this.props;
+    const isSingleCluster = clusterNames.length === 1;
+
+    if(isSmallButton) {
+      return (
+        <FormattedMessage
+          id="xpack.remoteClusters.disconnectButton.shortButtonLabel"
+          defaultMessage="Disconnect"
+        />
+      );
+    }
+
+    if(isSingleCluster) {
+      return (
+        <FormattedMessage
+          id="xpack.remoteClusters.disconnectButton.singleButtonLabel"
+          defaultMessage="Disconnect remote cluster"
+        />
+      );
+    }
+
+    return (
+      <FormattedMessage
+        id="xpack.remoteClusters.disconnectButton.multipleButtonLabel"
+        defaultMessage="Disconnect {count} remote clusters"
+        values={{ count: clusterNames.length }}
+      />
+    );
+  }
+
   render() {
-    const { disconnectRemoteClusters, clusterNames, intl } = this.props;
+    const { intl, clusterNames } = this.props;
     const { isModalOpen } = this.state;
+    const isSingleCluster = clusterNames.length === 1;
 
     let modal;
 
     if (isModalOpen) {
+      const title = isSingleCluster ? intl.formatMessage({
+        id: 'xpack.remoteClusters.disconnectButton.confirmModal.deleteSingleClusterTitle',
+        defaultMessage: 'Disconnect remote cluster \'{name}\'?',
+      }, { name: clusterNames[0] }) : intl.formatMessage({
+        id: 'xpack.remoteClusters.disconnectButton.confirmModal.multipleDeletionTitle',
+        defaultMessage: 'Disconnect {count} remote clusters?',
+      }, { count: clusterNames.length });
+
+      const content = isSingleCluster ? null : (
+        <Fragment>
+          <p>
+            <FormattedMessage
+              id="xpack.remoteClusters.disconnectButton.confirmModal.multipleDeletionDescription"
+              defaultMessage="You are about to disconnect from {isSingleCluster, plural, one {this cluster} other {these clusters}}"
+              values={{ isSingleCluster: isSingleCluster ? 1 : 0 }}
+            />
+          </p>
+          {<ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>}
+        </Fragment>
+      );
+
       modal = (
         <EuiOverlayMask>
           <EuiConfirmModal
-            title={intl.formatMessage({
-              id: 'xpack.remoteClusters.disconnectButton.confirmModal.modalTitle',
-              defaultMessage: 'Disconnect remote clusters?',
-            })}
+            title={title}
             onCancel={this.closeConfirmModal}
-            onConfirm={() => disconnectRemoteClusters(clusterNames)}
+            onConfirm={this.onConfirm}
             cancelButtonText={
               intl.formatMessage({
                 id: 'xpack.remoteClusters.disconnectButton.confirmModal.cancelButtonText',
                 defaultMessage: 'Cancel',
               })
             }
+            buttonColor="danger"
             confirmButtonText={
               intl.formatMessage({
                 id: 'xpack.remoteClusters.disconnectButton.confirmModal.confirmButtonText',
                 defaultMessage: 'Disconnect',
               })
             }
-          />
+          >
+            {content}
+          </EuiConfirmModal>
         </EuiOverlayMask>
       );
     }
@@ -76,12 +136,8 @@ export class DisconnectButtonUi extends Component {
     return (
       <Fragment>
         <EuiButton color="danger" onClick={this.showConfirmModal}>
-          <FormattedMessage
-            id="xpack.remoteClusters.disconnectButton.buttonLabel"
-            defaultMessage="Disconnect remote clusters"
-          />
+          {this.renderButtonText()}
         </EuiButton>
-
         {modal}
       </Fragment>
     );

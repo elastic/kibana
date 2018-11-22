@@ -10,11 +10,6 @@ export {
 } from './detail_panel';
 
 export {
-  startEditingCluster,
-  stopEditingCluster,
-} from './edit_cluster';
-
-export {
   loadClusters,
 } from './load_clusters';
 
@@ -26,3 +21,14 @@ export {
   addCluster,
   clearAddClusterErrors,
 } from './add_cluster';
+
+export {
+  editCluster,
+  startEditingCluster,
+  stopEditingCluster,
+  clearEditClusterErrors,
+} from './edit_cluster';
+
+export {
+  disconnectClusters,
+} from './disconnect_clusters';
