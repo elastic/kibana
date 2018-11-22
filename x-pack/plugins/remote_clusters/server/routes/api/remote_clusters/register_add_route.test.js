@@ -25,7 +25,7 @@ const setHttpRequestResponse = (err, response) => {
   callWithRequestFactory.mockReturnValueOnce(() => response);
 };
 
-describe('[API Routes] Remote Clusters Add', () => {
+describe.skip('[API Routes] Remote Clusters Add', () => {
   let server;
   let routeHandler;
 

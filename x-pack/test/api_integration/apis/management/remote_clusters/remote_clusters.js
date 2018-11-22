@@ -10,7 +10,7 @@ import { API_BASE_PATH } from './constants';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('Remote Clusters', () => {
+  describe.skip('Remote Clusters', () => {
     describe('Empty List', () => {
       it('should return an empty array when there are no remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
