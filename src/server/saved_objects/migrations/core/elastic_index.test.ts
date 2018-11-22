@@ -310,7 +310,7 @@ describe('ElasticIndex', () => {
       ]);
     });
 
-    test.only('throws error if re-index task fails', async () => {
+    test('throws error if re-index task fails', async () => {
       const callCluster = sinon.spy(async (path: string, arg: any) => {
         switch (path) {
           case 'indices.create':
