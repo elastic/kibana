@@ -11,6 +11,7 @@ import { wrapCustomError, wrapEsError, wrapUnknownError } from '../../../lib/err
 
 import { get } from 'lodash';
 import { doesClusterExist } from '../../../lib/does_cluster_exist';
+import { serializeCluster } from '../../../lib/cluster_serialization';
 
 export function registerDeleteRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -23,22 +24,6 @@ export function registerDeleteRoute(server) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { name } = request.params;
 
-      const deleteClusterPayload = {
-        persistent: {
-          cluster: {
-            remote: {
-              [name]: {
-                seeds: null,
-
-                // If this setting was set on the cluster, we're not able to delete it unless
-                // we also set the setting to null. Leave this here until ES is fixed.
-                skip_unavailable: null,
-              }
-            }
-          }
-        }
-      };
-
       // Check if cluster does exist
       try {
         const existingCluster = await doesClusterExist(callWithRequest, name);
@@ -50,11 +35,12 @@ export function registerDeleteRoute(server) {
       }
 
       try {
+        const deleteClusterPayload = serializeCluster({ name });
         const response = await callWithRequest('cluster.putSettings', { body: deleteClusterPayload });
         const acknowledged = get(response, 'acknowledged');
         const cluster = get(response, `persistent.cluster.remote.${name}`);
 
-        if(acknowledged && !cluster) {
+        if (acknowledged && !cluster) {
           return {};
         }
 

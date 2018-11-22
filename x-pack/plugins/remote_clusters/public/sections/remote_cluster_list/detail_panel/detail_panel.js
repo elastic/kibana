@@ -10,6 +10,7 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -17,8 +18,8 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -38,21 +39,126 @@ export class DetailPanelUi extends Component {
     cluster: PropTypes.object,
     closeDetailPanel: PropTypes.func.isRequired,
     clusterName: PropTypes.string,
+    copyCluster: PropTypes.func,
   }
 
-  constructor(props) {
-    super(props);
+  copyCluster = () => {
+    const { copyCluster, cluster } = this.props;
+    const {
+      name,
+      seeds,
+      skipUnavailable,
+    } = cluster;
+
+    const clusterConfig = {
+      name,
+      seeds,
+      skipUnavailable,
+    };
+
+    copyCluster(clusterConfig);
+  }
+
+  renderSkipUnavailableValue(skipUnavailable) {
+    if(skipUnavailable === true) {
+      return (
+        <FormattedMessage
+          id="xpack.remoteClusters.detailPanel.skipUnavailableTrueValue"
+          defaultMessage="Yes"
+        />
+      );
+    }
+
+    if(skipUnavailable === false) {
+      return (
+        <FormattedMessage
+          id="xpack.remoteClusters.detailPanel.skipUnavailableFalseValue"
+          defaultMessage="No"
+        />
+      );
+    }
+
+    return (
+      <FormattedMessage
+        id="xpack.remoteClusters.detailPanel.skipUnavailableNullValue"
+        defaultMessage="Default"
+      />
+    );
   }
 
   renderCluster() {
-    const { cluster } = this.props;
-    const { isConnected, seeds, connectedNodesCount } = cluster;
+    const {
+      cluster,
+    } = this.props;
 
-    const renderedSeeds = seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>);
+    const {
+      isConnected,
+      connectedNodesCount,
+      skipUnavailable,
+      seeds,
+      isConfiguredByNode,
+    } = cluster;
+
+    let configuredByNodeWarning;
+
+    if (isConfiguredByNode) {
+      configuredByNodeWarning = (
+        <Fragment>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.remoteClusters.detailPanel.configuredByNodeWarningTitle"
+                defaultMessage="This remote cluster is defined in a node's elasticsearch.yml
+                  configuration file"
+              />
+            }
+            color="warning"
+            iconType="help"
+          >
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.configuredByNodeWarningMessage"
+                  defaultMessage="This can result in unexpected behavior if nodes have defined
+                    different remote clusters in their configuration files. You can fix this by
+                    manually removing this remote cluster from the configuration file or by
+                    creating a persistent copy of it."
+                />
+              </p>
+
+              <EuiButton
+                onClick={this.copyCluster}
+                color="warning"
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.editButtonLabel"
+                  defaultMessage="Create persistent copy"
+                />
+              </EuiButton>
+            </Fragment>
+          </EuiCallOut>
+
+          <EuiSpacer size="l" />
+        </Fragment>
+      );
+    }
 
     return (
       <Fragment>
         <EuiFlyoutBody>
+          {configuredByNodeWarning}
+
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.remoteClusters.detailPanel.statusTitle"
+                defaultMessage="Status"
+              />
+            </h3>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
           <EuiDescriptionList>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -88,41 +194,50 @@ export class DetailPanelUi extends Component {
 
             <EuiSpacer size="s" />
 
-            <EuiDescriptionListTitle>
-              <EuiTitle size="xs">
-                <FormattedMessage
-                  id="xpack.remoteClusters.detailPanel.seedsLabel"
-                  defaultMessage="Seeds"
-                />
-              </EuiTitle>
-            </EuiDescriptionListTitle>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.seedsLabel"
+                      defaultMessage="Seeds"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
 
-            <EuiDescriptionListDescription>
-              {renderedSeeds}
-            </EuiDescriptionListDescription>
+                <EuiDescriptionListDescription>
+                  {seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>)}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.skipUnavailableLabel"
+                      defaultMessage="Skip unavailable"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {this.renderSkipUnavailableValue(skipUnavailable)}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiDescriptionList>
         </EuiFlyoutBody>
       </Fragment>
     );
   }
 
-  render() {
+  renderContent() {
     const {
-      isOpen,
       isLoading,
-      closeDetailPanel,
       cluster,
-      clusterName,
     } = this.props;
 
-    if (!isOpen) {
-      return null;
-    }
-
-    let content;
-
     if (isLoading) {
-      content = (
+      return (
         <EuiFlyoutBody>
           <EuiFlexGroup
             justifyContent="flexStart"
@@ -147,9 +262,9 @@ export class DetailPanelUi extends Component {
         </EuiFlyoutBody>
       );
     } else if (cluster) {
-      content = this.renderCluster();
+      return this.renderCluster();
     } else {
-      content = (
+      return (
         <EuiFlyoutBody>
           <EuiFlexGroup
             justifyContent="flexStart"
@@ -174,6 +289,56 @@ export class DetailPanelUi extends Component {
         </EuiFlyoutBody>
       );
     }
+  }
+
+  renderFooter() {
+    const {
+      cluster,
+      clusterName,
+    } = this.props;
+
+    // Remote clusters configured by a node's elasticsearch.yml file can't be edited or disconnected.
+    if (!cluster || cluster.isConfiguredByNode) {
+      return null;
+    }
+
+    return (
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <DisconnectButton
+              clusterNames={[clusterName]}
+              isSmallButton={true}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
+              fill
+              color="primary"
+            >
+              <FormattedMessage
+                id="xpack.remoteClusters.detailPanel.editButtonLabel"
+                defaultMessage="Edit"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    );
+  }
+
+  render() {
+    const {
+      isOpen,
+      closeDetailPanel,
+      clusterName,
+    } = this.props;
+
+    if (!isOpen) {
+      return null;
+    }
 
     return (
       <EuiFlyout
@@ -189,31 +354,9 @@ export class DetailPanelUi extends Component {
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        {content}
+        {this.renderContent()}
 
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <DisconnectButton
-                clusterNames={[clusterName]}
-                isSmallButton={true}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                href={`#${CRUD_APP_BASE_PATH}/edit/${clusterName}`}
-                fill
-                color="primary"
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.detailPanel.editButtonLabel"
-                  defaultMessage="Edit"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+        {this.renderFooter()}
       </EuiFlyout>
     );
   }

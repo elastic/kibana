@@ -5,11 +5,13 @@
  */
 
 export function deserializeCluster(name, esClusterObject) {
-  if(!name || !esClusterObject || typeof esClusterObject !== 'object') {
+  if (
+    !name
+    || !esClusterObject || typeof esClusterObject !== 'object'
+  ) {
     throw new Error('Unable to deserialize cluster');
   }
 
-  let deserializedClusterObject;
   const {
     seeds,
     connected: isConnected,
@@ -20,7 +22,7 @@ export function deserializeCluster(name, esClusterObject) {
     transport,
   } = esClusterObject;
 
-  deserializedClusterObject = {
+  let deserializedClusterObject = {
     name,
     seeds,
     isConnected,
@@ -30,7 +32,7 @@ export function deserializeCluster(name, esClusterObject) {
     skipUnavailable,
   };
 
-  if(transport) {
+  if (transport) {
     const {
       ping_schedule: transportPingSchedule,
       compress: transportCompress,
@@ -47,18 +49,26 @@ export function deserializeCluster(name, esClusterObject) {
 }
 
 export function serializeCluster(deserializedClusterObject) {
-  if(!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
+  if (!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
     throw new Error('Unable to serialize cluster');
   }
+
   const {
+    name,
     seeds,
     skipUnavailable,
   } = deserializedClusterObject;
 
-  const esClusterObject = {
-    seeds,
-    skip_unavailable: skipUnavailable,
+  return {
+    persistent: {
+      cluster: {
+        remote: {
+          [name]: {
+            seeds: seeds ? seeds : null,
+            skip_unavailable: skipUnavailable !== undefined ? skipUnavailable : null,
+          },
+        },
+      },
+    },
   };
-
-  return esClusterObject;
 }

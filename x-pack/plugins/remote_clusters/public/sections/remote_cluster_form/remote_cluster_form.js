@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import cloneDeep from 'lodash/lang/cloneDeep';
+import { merge } from 'lodash';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -23,6 +23,7 @@ import {
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
+  EuiRadioGroup,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -36,6 +37,37 @@ import {
 const defaultFields = {
   name: '',
   seeds: [],
+  skipUnavailable: false,
+};
+
+const skipUnavailableOptions = [
+  {
+    id: 'skipUnavailableOptionFalse',
+    label: (
+      <FormattedMessage
+        id="xpack.remoteClusters.remoteClusterForm.fieldSkipUnavailable.falseOptionLabel"
+        defaultMessage="No"
+      />
+    ),
+  }, {
+    id: 'skipUnavailableOptionTrue',
+    label: (
+      <FormattedMessage
+        id="xpack.remoteClusters.remoteClusterForm.fieldSkipUnavailable.trueOptionLabel"
+        defaultMessage="Yes"
+      />
+    ),
+  },
+];
+
+const skipUnavailableOptionIdToValueMap = {
+  skipUnavailableOptionFalse: false,
+  skipUnavailableOptionTrue: true,
+};
+
+const skipUnavailableOptionValueToIdMap = {
+  [false]: 'skipUnavailableOptionFalse',
+  [true]: 'skipUnavailableOptionTrue',
 };
 
 export class RemoteClusterFormUi extends Component {
@@ -49,7 +81,7 @@ export class RemoteClusterFormUi extends Component {
   }
 
   static defaultProps = {
-    fields: cloneDeep(defaultFields),
+    fields: merge({}, defaultFields),
     disabledFields: {},
   }
 
@@ -57,12 +89,13 @@ export class RemoteClusterFormUi extends Component {
     super(props);
 
     const { fields, disabledFields } = props;
+    const fieldsState = merge({}, defaultFields, fields);
 
     this.state = {
       localSeedErrors: [],
-      fields,
+      fields: fieldsState,
       disabledFields,
-      fieldsErrors: this.getFieldsErrors(fields),
+      fieldsErrors: this.getFieldsErrors(fieldsState),
       areErrorsVisible: false,
     };
   }
@@ -112,12 +145,14 @@ export class RemoteClusterFormUi extends Component {
       fields: {
         name,
         seeds,
+        skipUnavailable,
       },
     } = this.state;
 
     return {
-      name: name,
+      name,
       seeds,
+      skipUnavailable,
     };
   }
 
@@ -220,6 +255,24 @@ export class RemoteClusterFormUi extends Component {
     this.onFieldsChange({ seeds: seeds.map(({ label }) => label) });
   };
 
+  clearCurrentFields = () => {
+    const {
+      disabledFields,
+      fields,
+    } = this.props;
+
+    const newFields = Object.keys(fields).reduce((accumulator, fieldName) => {
+      // Only clear fields which the user can edit.
+      if (!disabledFields[fieldName]) {
+        accumulator[fieldName] = defaultFields[fieldName];
+      }
+
+      return accumulator;
+    }, {});
+
+    this.onFieldsChange(newFields);
+  }
+
   renderSeeds() {
     const {
       areErrorsVisible,
@@ -304,6 +357,61 @@ export class RemoteClusterFormUi extends Component {
     );
   }
 
+  onSkipUnavailableChange = (skipUnavailableOptionId) => {
+    const skipUnavailable = skipUnavailableOptionIdToValueMap[skipUnavailableOptionId];
+    this.onFieldsChange({ skipUnavailable });
+  }
+
+  renderSkipUnavailable() {
+    const {
+      fields: {
+        skipUnavailable,
+      },
+    } = this.state;
+
+    const selectedOptionId = skipUnavailableOptionValueToIdMap[skipUnavailable];
+
+    return (
+      <EuiDescribedFormGroup
+        title={(
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableTitle"
+                defaultMessage="Skip unavailable"
+              />
+            </h4>
+          </EuiTitle>
+        )}
+        description={(
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
+                defaultMessage="Per cluster boolean setting that allows to skip specific clusters
+                  when no nodes belonging to them are available and they are the target of a remote
+                  cluster request. Default is false, meaning that all clusters are mandatory by default,
+                  but they can selectively be made optional by setting this setting to true."
+              />
+            </p>
+          </Fragment>
+        )}
+        fullWidth
+      >
+        <EuiFormRow
+          hasEmptyLabelSpace
+          fullWidth
+        >
+          <EuiRadioGroup
+            options={skipUnavailableOptions}
+            idSelected={selectedOptionId}
+            onChange={this.onSkipUnavailableChange}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+
   renderActions() {
     const { isSaving, cancel } = this.props;
 
@@ -317,7 +425,7 @@ export class RemoteClusterFormUi extends Component {
           <EuiFlexItem grow={false}>
             <EuiText>
               <FormattedMessage
-                id="xpack.remoteClusters.form.actions.savingText"
+                id="xpack.remoteClusters.remoteClusterForm.actions.savingText"
                 defaultMessage="Saving"
               />
             </EuiText>
@@ -336,7 +444,7 @@ export class RemoteClusterFormUi extends Component {
             onClick={cancel}
           >
             <FormattedMessage
-              id="xpack.remoteClusters.form.cancelButtonLabel"
+              id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -345,22 +453,35 @@ export class RemoteClusterFormUi extends Component {
     }
 
     return (
-      <EuiFlexGroup gutterSize="m" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="secondary"
-            iconType="check"
-            onClick={this.save}
-            fill
-          >
-            <FormattedMessage
-              id="xpack.remoteClusters.form.saveButtonLabel"
-              defaultMessage="Save"
-            />
-          </EuiButton>
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="secondary"
+                iconType="check"
+                onClick={this.save}
+                fill
+              >
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+
+            {cancelButton}
+          </EuiFlexGroup>
         </EuiFlexItem>
 
-        {cancelButton}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty flush="right" onClick={this.clearCurrentFields}>
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.resetFormButton"
+              defaultMessage="Reset to defaults"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -415,6 +536,32 @@ export class RemoteClusterFormUi extends Component {
     }
 
     return null;
+  }
+
+  renderErrors = () => {
+    const { areErrorsVisible, fieldsErrors } = this.state;
+    const errorValues = Object.values(fieldsErrors);
+    const hasErrors = errorValues.some(error => error !== undefined);
+
+    if (!areErrorsVisible || !hasErrors) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={(
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.errorTitle"
+              defaultMessage="Fix errors before saving."
+            />
+          )}
+          color="danger"
+          iconType="cross"
+        />
+      </Fragment>
+    );
   }
 
   render() {
@@ -480,11 +627,16 @@ export class RemoteClusterFormUi extends Component {
           </EuiDescribedFormGroup>
 
           {this.renderSeeds()}
+
+          {this.renderSkipUnavailable()}
         </EuiForm>
+
+        {this.renderErrors()}
 
         <EuiSpacer size="l" />
 
         {this.renderActions()}
+
         {this.renderSavingFeedback()}
       </Fragment>
     );

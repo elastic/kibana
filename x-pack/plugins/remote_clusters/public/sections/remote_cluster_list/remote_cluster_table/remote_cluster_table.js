@@ -34,8 +34,8 @@ export class RemoteClusterTableUi extends Component {
     };
   }
 
-  onSearch = (queryObject) => {
-    const { text } = queryObject.query;
+  onSearch = ({ query }) => {
+    const { text } = query;
     const normalizedSearchText = text.toLowerCase();
     this.setState({
       queryText: normalizedSearchText,
@@ -145,7 +145,7 @@ export class RemoteClusterTableUi extends Component {
     };
 
     const selection = {
-      onSelectionChange: (selectedItems) => this.setState({ selectedItems })
+      onSelectionChange: (selectedItems) => this.setState({ selectedItems }),
     };
 
     const filteredClusters = this.getFilteredClusters();

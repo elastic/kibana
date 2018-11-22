@@ -13,7 +13,9 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingKibana,
   EuiLoadingSpinner,
+  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -46,6 +48,8 @@ export class RemoteClusterListUi extends Component {
     openDetailPanel: PropTypes.func,
     clusters: PropTypes.array,
     isLoading: PropTypes.bool,
+    isCopyingCluster: PropTypes.bool,
+    isDisconnectingCluster: PropTypes.bool,
   }
 
   static getDerivedStateFromProps(props) {
@@ -101,6 +105,20 @@ export class RemoteClusterListUi extends Component {
         </EuiTitle>
       </EuiPageContentHeaderSection>
     );
+  }
+
+  renderBlockingAction() {
+    const { isCopyingCluster, isDisconnectingCluster } = this.props;
+
+    if (isCopyingCluster || isDisconnectingCluster) {
+      return (
+        <EuiOverlayMask>
+          <EuiLoadingKibana size="xl"/>
+        </EuiOverlayMask>
+      );
+    }
+
+    return null;
   }
 
   renderNoPermission() {
@@ -272,6 +290,8 @@ export class RemoteClusterListUi extends Component {
         <EuiPageBody>
           <EuiPageContent>
             {content}
+
+            {this.renderBlockingAction()}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

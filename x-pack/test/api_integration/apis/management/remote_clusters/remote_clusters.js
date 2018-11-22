@@ -70,7 +70,7 @@ export default function ({ getService }) {
     });
 
     describe('Update', () => {
-      it('should allow us to update an existing remote cluster', async () => {
+      it.skip('should allow us to update an existing remote cluster', async () => {
         const uri = `${API_BASE_PATH}/test_cluster`;
 
         const { body } = await supertest
@@ -89,7 +89,7 @@ export default function ({ getService }) {
     });
 
     describe('List', () => {
-      it('should return an array of remote clusters', async () => {
+      it.skip('should return an array of remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
 
         const { body } = await supertest

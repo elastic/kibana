@@ -51,7 +51,7 @@ export class DisconnectButtonUi extends Component {
     const { clusterNames, isSmallButton } = this.props;
     const isSingleCluster = clusterNames.length === 1;
 
-    if(isSmallButton) {
+    if (isSmallButton) {
       return (
         <FormattedMessage
           id="xpack.remoteClusters.disconnectButton.shortButtonLabel"
@@ -60,7 +60,7 @@ export class DisconnectButtonUi extends Component {
       );
     }
 
-    if(isSingleCluster) {
+    if (isSingleCluster) {
       return (
         <FormattedMessage
           id="xpack.remoteClusters.disconnectButton.singleButtonLabel"
@@ -94,16 +94,17 @@ export class DisconnectButtonUi extends Component {
         defaultMessage: 'Disconnect {count} remote clusters?',
       }, { count: clusterNames.length });
 
-      const content = isSingleCluster ? null : (
+      const content = (
         <Fragment>
           <p>
             <FormattedMessage
               id="xpack.remoteClusters.disconnectButton.confirmModal.multipleDeletionDescription"
-              defaultMessage="You are about to disconnect from {isSingleCluster, plural, one {this cluster} other {these clusters}}"
+              defaultMessage="You are about to disconnect from {isSingleCluster, plural, one
+                {this cluster} other {these clusters}}"
               values={{ isSingleCluster: isSingleCluster ? 1 : 0 }}
             />
           </p>
-          {<ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>}
+          { isSingleCluster ? null : (<ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>)}
         </Fragment>
       );
 
@@ -135,7 +136,10 @@ export class DisconnectButtonUi extends Component {
 
     return (
       <Fragment>
-        <EuiButton color="danger" onClick={this.showConfirmModal}>
+        <EuiButton
+          color="danger"
+          onClick={this.showConfirmModal}
+        >
           {this.renderButtonText()}
         </EuiButton>
         {modal}
