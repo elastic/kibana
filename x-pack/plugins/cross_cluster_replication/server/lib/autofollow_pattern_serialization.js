@@ -20,6 +20,15 @@ export const deserializeAutofollowPattern = (
   };
 };
 
+export const deserializeListAutofollowPatterns = autofollowPatterns =>
+  Object.entries(autofollowPatterns).reduce(
+    (deSerialized, [name, autofollowPattern]) => ({
+      ...deSerialized,
+      [name]: deserializeAutofollowPattern(name, autofollowPattern),
+    }),
+    {}
+  );
+
 export const serializeAutofolloPattern = ({
   remoteCluster,
   leaderIndexPatterns,
@@ -30,11 +39,3 @@ export const serializeAutofolloPattern = ({
   follow_index_pattern: followIndexPattern,
 });
 
-export const deserializeListAutofollowPatterns = autofollowPatterns =>
-  Object.entries(autofollowPatterns).reduce(
-    (deSerialized, [name, autofollowPattern]) => ({
-      ...deSerialized,
-      [name]: deserializeAutofollowPattern(autofollowPattern),
-    }),
-    {}
-  );
