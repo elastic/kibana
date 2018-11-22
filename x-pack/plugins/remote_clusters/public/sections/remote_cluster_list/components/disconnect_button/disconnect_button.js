@@ -19,6 +19,8 @@ export class DisconnectButtonUi extends Component {
     disconnectClusters: PropTypes.func.isRequired,
     clusterNames: PropTypes.array.isRequired,
     isSmallButton: PropTypes.bool,
+    isDisabled: PropTypes.bool,
+    disabledReason: PropTypes.string,
   };
 
   constructor(props) {
@@ -79,7 +81,7 @@ export class DisconnectButtonUi extends Component {
   }
 
   render() {
-    const { intl, clusterNames } = this.props;
+    const { intl, clusterNames, isDisabled, disabledReason } = this.props;
     const { isModalOpen } = this.state;
     const isSingleCluster = clusterNames.length === 1;
 
@@ -94,16 +96,18 @@ export class DisconnectButtonUi extends Component {
         defaultMessage: 'Disconnect {count} remote clusters?',
       }, { count: clusterNames.length });
 
-      const content = isSingleCluster ? null : (
+      const content = (
         <Fragment>
           <p>
             <FormattedMessage
               id="xpack.remoteClusters.disconnectButton.confirmModal.multipleDeletionDescription"
-              defaultMessage="You are about to disconnect from {isSingleCluster, plural, one {this cluster} other {these clusters}}"
+              defaultMessage="You are about to remove transient and persistent settings from
+                {isSingleCluster, plural, one {this cluster} other {these clusters}}.
+                Settings from elasticsearch.yml configuration file will not be removed."
               values={{ isSingleCluster: isSingleCluster ? 1 : 0 }}
             />
           </p>
-          {<ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>}
+          { isSingleCluster ? null : (<ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>)}
         </Fragment>
       );
 
@@ -135,7 +139,7 @@ export class DisconnectButtonUi extends Component {
 
     return (
       <Fragment>
-        <EuiButton color="danger" onClick={this.showConfirmModal}>
+        <EuiButton color="danger" onClick={this.showConfirmModal} isDisabled={isDisabled} title={disabledReason}>
           {this.renderButtonText()}
         </EuiButton>
         {modal}

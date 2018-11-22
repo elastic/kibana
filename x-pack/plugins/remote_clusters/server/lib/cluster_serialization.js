@@ -9,7 +9,6 @@ export function deserializeCluster(name, esClusterObject) {
     throw new Error('Unable to deserialize cluster');
   }
 
-  let deserializedClusterObject;
   const {
     seeds,
     connected: isConnected,
@@ -18,9 +17,19 @@ export function deserializeCluster(name, esClusterObject) {
     initial_connect_timeout: initialConnectTimeout,
     skip_unavailable: skipUnavailable,
     transport,
+    isTransient,
+    isPersistent,
+    settings: {
+      transient: transientSettings,
+      persistent: persistentSettings,
+    } = {
+      transient: null,
+      persistent: null,
+      configuration: null,
+    },
   } = esClusterObject;
 
-  deserializedClusterObject = {
+  const deserializedClusterObject = {
     name,
     seeds,
     isConnected,
@@ -28,37 +37,125 @@ export function deserializeCluster(name, esClusterObject) {
     maxConnectionsPerCluster,
     initialConnectTimeout,
     skipUnavailable,
+    isTransient,
+    isPersistent,
+    ...deserializeTransport(transport),
+    transientSettings: deserializeSettings(transientSettings),
+    persistentSettings: deserializeSettings(persistentSettings),
   };
 
+  return deserializedClusterObject;
+}
+
+function deserializeTransport(transport) {
   if(transport) {
     const {
       ping_schedule: transportPingSchedule,
       compress: transportCompress,
     } = transport;
-
-    deserializedClusterObject = {
-      ...deserializedClusterObject,
+    return {
       transportPingSchedule,
       transportCompress,
     };
   }
 
-  return deserializedClusterObject;
+  return undefined;
 }
 
-export function serializeCluster(deserializedClusterObject) {
-  if(!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
+function deserializeSettings(settings) {
+  if(settings) {
+    const {
+      seeds,
+      skip_unavailable: skipUnavailable,
+      transport,
+    } = settings;
+
+    let skipUnavailableValue;
+
+    if(typeof skipUnavailable === 'string') {
+      skipUnavailableValue = (skipUnavailable === "true");
+    } else {
+      skipUnavailableValue = skipUnavailable;
+    }
+
+    return {
+      seeds,
+      skipUnavailable: skipUnavailableValue,
+      ...deserializeTransport(transport)
+    };
+  }
+
+  return undefined;
+}
+
+export function serializeCluster(name, deserializedClusterObject) {
+  if(!name || !deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
     throw new Error('Unable to serialize cluster');
   }
+
+  let transientSeeds;
+  let transientSkipUnavailable;
+  let persistentSeeds;
+  let persistentSkipUnavailable;
+
+  const esClusterObject = {};
+
   const {
-    seeds,
-    skipUnavailable,
+    transientSettings,
+    persistentSettings,
   } = deserializedClusterObject;
 
-  const esClusterObject = {
-    seeds,
-    skip_unavailable: skipUnavailable,
-  };
+  if(transientSettings) {
+    transientSeeds = transientSettings.seeds;
+    transientSkipUnavailable = transientSettings.skipUnavailable;
+    esClusterObject.transient = {
+      cluster: {
+        remote: {
+          [name]: {
+            seeds: transientSeeds && transientSeeds.length ? transientSeeds : null,
+            skip_unavailable: transientSkipUnavailable,
+          }
+        }
+      }
+    };
+  } else {
+    esClusterObject.transient = {
+      cluster: {
+        remote: {
+          [name]: {
+            seeds: null,
+            skip_unavailable: null,
+          }
+        }
+      }
+    };
+  }
+
+  if(persistentSettings) {
+    persistentSeeds = persistentSettings.seeds;
+    persistentSkipUnavailable = persistentSettings.skipUnavailable;
+    esClusterObject.persistent = {
+      cluster: {
+        remote: {
+          [name]: {
+            seeds: persistentSeeds && persistentSeeds.length ? persistentSeeds : null,
+            skip_unavailable: persistentSkipUnavailable,
+          }
+        }
+      }
+    };
+  } else {
+    esClusterObject.persistent = {
+      cluster: {
+        remote: {
+          [name]: {
+            seeds: null,
+            skip_unavailable: null,
+          }
+        }
+      }
+    };
+  }
 
   return esClusterObject;
 }

@@ -7,6 +7,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiLink,
@@ -14,6 +15,26 @@ import {
 } from '@elastic/eui';
 
 import { ConnectionStatus, DisconnectButton } from '../components';
+
+const unselectableMessage = i18n.translate(
+  'xpack.remoteClusters.remoteClusterList.table.unselectableMessage',
+  { defaultMessage: 'Settings from elasticsearch.yml cannot be deleted' }
+);
+
+const sourceValueTransient = i18n.translate(
+  'xpack.remoteClusters.remoteClusterList.table.sourceValueTransient',
+  { defaultMessage: 'Transient' }
+);
+
+const sourceValuePersistent = i18n.translate(
+  'xpack.remoteClusters.remoteClusterList.table.sourceValuePersistent',
+  { defaultMessage: 'Persistent' }
+);
+
+const sourceValueConfiguration = i18n.translate(
+  'xpack.remoteClusters.remoteClusterList.table.sourceValueConfiguration',
+  { defaultMessage: 'Config file' }
+);
 
 export class RemoteClusterTableUi extends Component {
   static propTypes = {
@@ -98,6 +119,25 @@ export class RemoteClusterTableUi extends Component {
       truncateText: true,
       render: (seeds) => seeds.join(', '),
     }, {
+      name: (
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterList.table.sourceColumnTitle"
+          defaultMessage="Source"
+        />
+      ),
+      truncateText: true,
+      render: (item) => {
+        if(item.isTransient) {
+          return sourceValueTransient;
+        }
+
+        if(item.isPersistent) {
+          return sourceValuePersistent;
+        }
+
+        return sourceValueConfiguration;
+      },
+    }, {
       field: 'isConnected',
       name: (
         <FormattedMessage
@@ -145,7 +185,9 @@ export class RemoteClusterTableUi extends Component {
     };
 
     const selection = {
-      onSelectionChange: (selectedItems) => this.setState({ selectedItems })
+      onSelectionChange: (selectedItems) => this.setState({ selectedItems }),
+      selectable: (item) => item.isTransient || item.isPersistent,
+      selectableMessage: (selectable) => !selectable ? unselectableMessage : null,
     };
 
     const filteredClusters = this.getFilteredClusters();

@@ -9,6 +9,7 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 
+import { get } from 'lodash';
 import { deserializeCluster } from '../../../lib/cluster_serialization';
 
 export function registerListRoute(server) {
@@ -22,10 +23,25 @@ export function registerListRoute(server) {
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
-        const clusterInfoByName = await callWithRequest('cluster.remoteInfo');
-        const clusterNames = (clusterInfoByName && Object.keys(clusterInfoByName)) || [];
-        return clusterNames.map(name => {
-          return deserializeCluster(name, clusterInfoByName[name]);
+        const clusterSettings = await callWithRequest('cluster.getSettings');
+        const transientClusterNames = Object.keys(get(clusterSettings, `transient.cluster.remote`) || {});
+        const persistentClusterNames = Object.keys(get(clusterSettings, `persistent.cluster.remote`) || {});
+
+        const allClustersByName = await callWithRequest('cluster.remoteInfo');
+        const allClusterNames = (allClustersByName && Object.keys(allClustersByName)) || [];
+
+        return allClusterNames.map(name => {
+          const isTransient = transientClusterNames.includes(name);
+          const isPersistent = persistentClusterNames.includes(name);
+          return deserializeCluster(name, {
+            ...allClustersByName[name],
+            isTransient,
+            isPersistent,
+            settings: {
+              transient: isTransient ? { ...get(clusterSettings, `transient.cluster.remote.${name}`) } : undefined,
+              persistent: isPersistent ? { ...get(clusterSettings, `persistent.cluster.remote.${name}`) } : undefined,
+            }
+          });
         });
       } catch (err) {
         if (isEsError(err)) {

@@ -7,8 +7,10 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -19,6 +21,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -30,6 +33,11 @@ import {
 import { CRUD_APP_BASE_PATH } from '../../../constants';
 
 import { ConnectionStatus, DisconnectButton } from '../components';
+
+const disconnectButtonDisabledReason = i18n.translate(
+  'xpack.remoteClusters.detailPanel.disconnectButtonDisabledReason',
+  { defaultMessage: 'Cannot disconnect from cluster configured in elasticsearch.yml' }
+);
 
 export class DetailPanelUi extends Component {
   static propTypes = {
@@ -44,15 +52,113 @@ export class DetailPanelUi extends Component {
     super(props);
   }
 
+  renderSkipUnavailableValue(value) {
+    if(value === true) {
+      return (
+        <FormattedMessage
+          id="xpack.remoteClusters.detailPanel.skipUnavailableTrueValue"
+          defaultMessage="Yes"
+        />
+      );
+    }
+
+    if(value === false) {
+      return (
+        <FormattedMessage
+          id="xpack.remoteClusters.detailPanel.skipUnavailableFalseValue"
+          defaultMessage="No"
+        />
+      );
+    }
+
+    return (
+      <FormattedMessage
+        id="xpack.remoteClusters.detailPanel.skipUnavailableNullValue"
+        defaultMessage="Default"
+      />
+    );
+  }
+
+  renderSettings(settings) {
+    const {
+      seeds,
+      skipUnavailable,
+    } = settings;
+
+    return (
+      <EuiDescriptionList>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.seedsLabel"
+                  defaultMessage="Seeds"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription>
+              {seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>)}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiDescriptionListTitle>
+              <EuiTitle size="xs">
+                <FormattedMessage
+                  id="xpack.remoteClusters.detailPanel.skipUnavailableLabel"
+                  defaultMessage="Skip unavailable"
+                />
+              </EuiTitle>
+            </EuiDescriptionListTitle>
+
+            <EuiDescriptionListDescription>
+              {this.renderSkipUnavailableValue(skipUnavailable)}
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiDescriptionList>
+    );
+  }
+
+  renderActiveSettingBadge(isActive) {
+    if(isActive) {
+      return (
+        <EuiBadge color="primary">
+          <FormattedMessage
+            id="xpack.remoteClusters.detailPanel.activeSettingBadge"
+            defaultMessage="Active"
+          />
+        </EuiBadge>
+      );
+    }
+    return (
+      <EuiBadge color="hollow">
+        <FormattedMessage
+          id="xpack.remoteClusters.detailPanel.fallbackSettingBadge"
+          defaultMessage="Fallback"
+        />
+      </EuiBadge>
+    );
+  }
+
   renderCluster() {
     const { cluster } = this.props;
-    const { isConnected, seeds, connectedNodesCount } = cluster;
-
-    const renderedSeeds = seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>);
+    const { isConnected, connectedNodesCount } = cluster;
 
     return (
       <Fragment>
         <EuiFlyoutBody>
+
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.remoteClusters.detailPanel.statusTitle"
+                defaultMessage="Status"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiDescriptionList>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -85,22 +191,60 @@ export class DetailPanelUi extends Component {
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             </EuiFlexGroup>
-
-            <EuiSpacer size="s" />
-
-            <EuiDescriptionListTitle>
-              <EuiTitle size="xs">
-                <FormattedMessage
-                  id="xpack.remoteClusters.detailPanel.seedsLabel"
-                  defaultMessage="Seeds"
-                />
-              </EuiTitle>
-            </EuiDescriptionListTitle>
-
-            <EuiDescriptionListDescription>
-              {renderedSeeds}
-            </EuiDescriptionListDescription>
           </EuiDescriptionList>
+          {this.renderSettings(cluster)}
+
+          <EuiHorizontalRule />
+
+          {cluster.transientSettings ? (
+            <Fragment>
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.remoteClusters.detailPanel.transientSettingsTitle"
+                    defaultMessage="Transient settings"
+                  />
+                  {' '}{this.renderActiveSettingBadge(true)}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {this.renderSettings(cluster.transientSettings)}
+              <EuiSpacer size="l" />
+            </Fragment>
+          ) : null}
+
+          {cluster.persistentSettings ? (
+            <Fragment>
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.remoteClusters.detailPanel.persistentSettingsTitle"
+                    defaultMessage="Persistent settings"
+                  />
+                  {' '}{this.renderActiveSettingBadge(!cluster.transientSettings)}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {this.renderSettings(cluster.persistentSettings)}
+              <EuiSpacer size="l" />
+            </Fragment>
+          ) : null}
+
+          {!cluster.transientSettings && !cluster.persistentSettings ? (
+            <Fragment>
+              <EuiTitle size="s">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.remoteClusters.detailPanel.configurationFileSettingsTitle"
+                    defaultMessage="Configuration file settings"
+                  />
+                  {' '}{this.renderActiveSettingBadge(true)}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {this.renderSettings(cluster)}
+            </Fragment>
+          ) : null}
         </EuiFlyoutBody>
       </Fragment>
     );
@@ -114,6 +258,8 @@ export class DetailPanelUi extends Component {
       cluster,
       clusterName,
     } = this.props;
+
+    const isDisconnectDisabled = !cluster || !(cluster.isTransient || cluster.isPersistent);
 
     if (!isOpen) {
       return null;
@@ -197,6 +343,8 @@ export class DetailPanelUi extends Component {
               <DisconnectButton
                 clusterNames={[clusterName]}
                 isSmallButton={true}
+                isDisabled={isDisconnectDisabled}
+                disabledReason={isDisconnectDisabled ? disconnectButtonDisabledReason : null}
               />
             </EuiFlexItem>
 

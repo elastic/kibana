@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import cloneDeep from 'lodash/lang/cloneDeep';
+import { merge } from 'lodash';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -20,10 +20,13 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
+  EuiRadioGroup,
   EuiSpacer,
+  EuiTabbedContent,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -36,7 +39,47 @@ import {
 const defaultFields = {
   name: '',
   seeds: [],
+  skipUnavailable: null,
+  transientSettings: {
+    seeds: [],
+    skipUnavailable: null,
+  },
+  persistentSettings: {
+    seeds: [],
+    skipUnavailable: null,
+  }
 };
+
+const skipUnavailableOptionIdPrefix = 'remoteClusterFormSkipUnavailableOption_';
+const skipUnavailableOptions = [
+  {
+    id: `${skipUnavailableOptionIdPrefix}null`,
+    label: (
+      <FormattedMessage
+        id="xpack.remoteClusters.remoteClusterForm.fieldSkipUnavailable.nullOptionLabel"
+        defaultMessage="Default (fallback to other settings or default value)"
+      />
+    )
+  },
+  {
+    id: `${skipUnavailableOptionIdPrefix}true`,
+    label: (
+      <FormattedMessage
+        id="xpack.remoteClusters.remoteClusterForm.fieldSkipUnavailable.trueOptionLabel"
+        defaultMessage="Yes"
+      />
+    )
+  },
+  {
+    id: `${skipUnavailableOptionIdPrefix}false`,
+    label: (
+      <FormattedMessage
+        id="xpack.remoteClusters.remoteClusterForm.fieldSkipUnavailable.falseOptionLabel"
+        defaultMessage="No"
+      />
+    )
+  }
+];
 
 export class RemoteClusterFormUi extends Component {
   static propTypes = {
@@ -49,7 +92,7 @@ export class RemoteClusterFormUi extends Component {
   }
 
   static defaultProps = {
-    fields: cloneDeep(defaultFields),
+    fields: merge({}, defaultFields),
     disabledFields: {},
   }
 
@@ -57,35 +100,65 @@ export class RemoteClusterFormUi extends Component {
     super(props);
 
     const { fields, disabledFields } = props;
+    const { isTransient } = fields;
+    const currentSettingType = isTransient ? 'transient' : 'persistent';
+    const fieldsState = merge({}, defaultFields, fields);
 
     this.state = {
       localSeedErrors: [],
-      fields,
+      fields: fieldsState,
       disabledFields,
-      fieldsErrors: this.getFieldsErrors(fields),
+      fieldsErrors: this.getFieldsErrors(fieldsState),
       areErrorsVisible: false,
+      currentSettingType,
     };
   }
 
   getFieldsErrors(fields) {
-    const { name, seeds } = fields;
+    const {
+      name,
+      transientSettings,
+      persistentSettings,
+    } = fields;
+
+    const hasTransientSeeds = transientSettings.seeds.some(seed => Boolean(seed.trim()));
+    const hasPersistentSeeds = persistentSettings.seeds.some(seed => Boolean(seed.trim()));
+
+    const hasOtherTransientSettings = typeof transientSettings.skipUnavailable === 'boolean';
+    const hasOtherPersistentSettings = typeof persistentSettings.skipUnavailable === 'boolean';
 
     const errors = {};
 
     if (!name || !name.trim()) {
       errors.name = (
         <FormattedMessage
-          id="xpack.remoteClusters.form.errors.nameMissing"
+          id="xpack.remoteClusters.remoteClusterForm.errors.nameMissing"
           defaultMessage="Name is required."
         />
       );
     }
 
-    if (!seeds.some(seed => Boolean(seed.trim()))) {
+    if(!hasTransientSeeds && !hasPersistentSeeds) {
       errors.seeds = (
         <FormattedMessage
-          id="xpack.remoteClusters.form.errors.seedMissing"
-          defaultMessage="At least one seed is required."
+          id="xpack.remoteClusters.remoteClusterForm.errors.allSeedMissing"
+          defaultMessage="At least one seed is required between transient and persistent settings."
+        />
+      );
+    }
+
+    if(!hasTransientSeeds && hasOtherTransientSettings) {
+      errors.settings = (
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterForm.errors.transientSeedMissing"
+          defaultMessage="At least one seed is required to define additional transient settings."
+        />
+      );
+    } else if (!hasPersistentSeeds && hasOtherPersistentSettings) {
+      errors.settings = (
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterForm.errors.persistentSeedMissing"
+          defaultMessage="At least one seed is required to define additional persistent settings."
         />
       );
     }
@@ -94,16 +167,42 @@ export class RemoteClusterFormUi extends Component {
   }
 
   onFieldsChange = (changedFields) => {
-    const { fields: prevFields } = this.state;
+    const {
+      fields,
+      currentSettingType,
+    } = this.state;
 
-    const newFields = {
-      ...prevFields,
-      ...changedFields,
+    const {
+      name,
+      ...rest
+    } = changedFields;
+
+    const hasNameChange = !!name;
+    const hasSettingChanges = rest && Object.keys(rest).length;
+    const prevFields = this.getCurrentFields();
+
+    const newFieldsState = {
+      ...fields,
     };
 
+    if(hasNameChange) {
+      Object.assign(newFieldsState, {
+        name
+      });
+    }
+
+    if(hasSettingChanges) {
+      Object.assign(newFieldsState, {
+        [`${currentSettingType}Settings`]: {
+          ...prevFields,
+          ...rest,
+        }
+      });
+    }
+
     this.setState({
-      fields: newFields,
-      fieldsErrors: this.getFieldsErrors(newFields),
+      fields: newFieldsState,
+      fieldsErrors: this.getFieldsErrors(newFieldsState),
     });
   };
 
@@ -111,13 +210,15 @@ export class RemoteClusterFormUi extends Component {
     const {
       fields: {
         name,
-        seeds,
+        transientSettings,
+        persistentSettings,
       },
     } = this.state;
 
     return {
-      name: name,
-      seeds,
+      name,
+      transientSettings,
+      persistentSettings,
     };
   }
 
@@ -176,13 +277,9 @@ export class RemoteClusterFormUi extends Component {
       return false;
     }
 
-    const {
-      fields: {
-        seeds,
-      },
-    } = this.state;
-
+    const { seeds } = this.getCurrentFields();
     const newSeeds = seeds.slice(0);
+
     newSeeds.push(newSeed.toLowerCase());
     this.onFieldsChange({ seeds: newSeeds });
   };
@@ -190,12 +287,8 @@ export class RemoteClusterFormUi extends Component {
   onSeedsInputChange = (seedInput) => {
     const { intl } = this.props;
 
-    const {
-      fields: {
-        seeds,
-      },
-      localSeedErrors,
-    } = this.state;
+    const { localSeedErrors } = this.state;
+    const { seeds } = this.getCurrentFields();
 
     // Allow typing to clear the errors, but not to add new ones.
     const errors = (!seedInput || this.getLocalSeedErrors(seedInput).length === 0) ? [] : localSeedErrors;
@@ -220,24 +313,33 @@ export class RemoteClusterFormUi extends Component {
     this.onFieldsChange({ seeds: seeds.map(({ label }) => label) });
   };
 
-  renderSeeds() {
+  getCurrentFields() {
     const {
-      areErrorsVisible,
       fields: {
-        seeds,
+        transientSettings,
+        persistentSettings,
       },
-      fieldsErrors: {
-        seeds: errorsSeeds,
-      },
-      localSeedErrors,
+      currentSettingType,
     } = this.state;
 
-    const { intl } = this.props;
+    return currentSettingType === 'transient' ? transientSettings : persistentSettings;
+  }
 
-    // Show errors if there is a general form error or local errors.
-    const areFormErrorsVisible = Boolean(areErrorsVisible && errorsSeeds);
-    const showErrors = areFormErrorsVisible || localSeedErrors.length !== 0;
-    const errors = areFormErrorsVisible ? localSeedErrors.concat(errorsSeeds) : localSeedErrors;
+  clearCurrentFields = () => {
+    this.onFieldsChange({
+      seeds: [],
+      skipUnavailable: null,
+    });
+  }
+
+  renderSeeds() {
+    const { localSeedErrors } = this.state;
+    const { intl } = this.props;
+    const { seeds } = this.getCurrentFields();
+
+    // Show local errors.
+    const showErrors = localSeedErrors.length !== 0;
+    const errors = localSeedErrors;
 
     const formattedSeeds = seeds.map(seed => ({ label: seed }));
 
@@ -304,6 +406,72 @@ export class RemoteClusterFormUi extends Component {
     );
   }
 
+  onSkipUnavailableChange = (skipUnavailableOptionId) => {
+    let skipUnavailableValue;
+    if(skipUnavailableOptionId === skipUnavailableOptions[1].id) {
+      skipUnavailableValue = true;
+    } else if(skipUnavailableOptionId === skipUnavailableOptions[2].id) {
+      skipUnavailableValue = false;
+    } else {
+      skipUnavailableValue = null;
+    }
+
+    this.onFieldsChange({ skipUnavailable: skipUnavailableValue });
+  }
+
+  renderSkipUnavailable() {
+    const { skipUnavailable } = this.getCurrentFields();
+
+    let selectedOptionId;
+    if(skipUnavailable === true) {
+      selectedOptionId = skipUnavailableOptions[1].id;
+    } else if(skipUnavailable === false) {
+      selectedOptionId = skipUnavailableOptions[2].id;
+    } else {
+      selectedOptionId = skipUnavailableOptions[0].id;
+    }
+
+    return (
+      <EuiDescribedFormGroup
+        title={(
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableTitle"
+                defaultMessage="Skip unavailable"
+              />
+            </h4>
+          </EuiTitle>
+        )}
+        description={(
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
+                defaultMessage="Per cluster boolean setting that allows to skip specific clusters
+                  when no nodes belonging to them are available and they are the target of a remote
+                  cluster request. Default is false, meaning that all clusters are mandatory by default,
+                  but they can selectively be made optional by setting this setting to true."
+              />
+            </p>
+          </Fragment>
+        )}
+        fullWidth
+      >
+        <EuiFormRow
+          hasEmptyLabelSpace
+          fullWidth
+        >
+          <EuiRadioGroup
+            options={skipUnavailableOptions}
+            idSelected={selectedOptionId}
+            onChange={this.onSkipUnavailableChange}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  }
+
   renderActions() {
     const { isSaving, cancel } = this.props;
 
@@ -317,7 +485,7 @@ export class RemoteClusterFormUi extends Component {
           <EuiFlexItem grow={false}>
             <EuiText>
               <FormattedMessage
-                id="xpack.remoteClusters.form.actions.savingText"
+                id="xpack.remoteClusters.remoteClusterForm.actions.savingText"
                 defaultMessage="Saving"
               />
             </EuiText>
@@ -336,7 +504,7 @@ export class RemoteClusterFormUi extends Component {
             onClick={cancel}
           >
             <FormattedMessage
-              id="xpack.remoteClusters.form.cancelButtonLabel"
+              id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -354,7 +522,7 @@ export class RemoteClusterFormUi extends Component {
             fill
           >
             <FormattedMessage
-              id="xpack.remoteClusters.form.saveButtonLabel"
+              id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
               defaultMessage="Save"
             />
           </EuiButton>
@@ -417,6 +585,44 @@ export class RemoteClusterFormUi extends Component {
     return null;
   }
 
+  renderFormErrors() {
+    const {
+      areErrorsVisible,
+      fieldsErrors: {
+        seeds: seedError,
+        settings: settingsError,
+      },
+    } = this.state;
+    const errors = [seedError, settingsError].filter(error => Boolean(error));
+    const areFormErrorsVisible = Boolean(areErrorsVisible && errors.length);
+
+    return areFormErrorsVisible ? (
+      <Fragment>
+        {errors.map((error, i) => {
+          return error ? (
+            <Fragment key={`remoteClusterFormError${i}`}>
+              <EuiCallOut
+                title={error}
+                icon="cross"
+                color="danger"
+              />
+              <EuiSpacer />
+            </Fragment>
+          ) : null;
+        })}
+      </Fragment>
+    ) : null;
+  }
+
+  renderForm() {
+    return (
+      <Fragment>
+        {this.renderSeeds()}
+        {this.renderSkipUnavailable()}
+      </Fragment>
+    );
+  }
+
   render() {
     const {
       disabledFields: {
@@ -432,7 +638,62 @@ export class RemoteClusterFormUi extends Component {
       fieldsErrors: {
         name: errorClusterName,
       },
+      currentSettingType,
     } = this.state;
+
+    const tabs = [
+      {
+        id: 'transient',
+        name: 'Transient',
+        content: (
+          <Fragment>
+            <EuiSpacer size="l" />
+            <EuiText>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.transientSettingsInfo"
+                defaultMessage="Transient settings take precedence over persistent and
+                  configuration file settings. They will not survive a
+                  full cluster restart."
+              />
+              {' '}
+              <EuiLink onClick={this.clearCurrentFields}>
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.transientSettingsClearButton"
+                  defaultMessage="Clear settings"
+                />
+              </EuiLink>
+            </EuiText>
+            <EuiSpacer size="m" />
+            {this.renderForm()}
+          </Fragment>
+        )
+      },
+      {
+        id: 'persistent',
+        name: 'Persistent',
+        content: (
+          <Fragment>
+            <EuiSpacer size="l" />
+            <EuiText>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.persistentSettingsInfo"
+                defaultMessage="Persistent settings take precedence over configuration
+                file settings. They will be applied across cluster restarts."
+              />
+              {' '}
+              <EuiLink onClick={this.clearCurrentFields}>
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.persistentSettingsClearButton"
+                  defaultMessage="Clear settings"
+                />
+              </EuiLink>
+            </EuiText>
+            <EuiSpacer size="m" />
+            {this.renderForm()}
+          </Fragment>
+        )
+      }
+    ];
 
     return (
       <Fragment>
@@ -479,7 +740,12 @@ export class RemoteClusterFormUi extends Component {
             </EuiFormRow>
           </EuiDescribedFormGroup>
 
-          {this.renderSeeds()}
+          {this.renderFormErrors()}
+          <EuiTabbedContent
+            tabs={tabs}
+            initialSelectedTab={currentSettingType === 'transient' ? tabs[0] : tabs[1]}
+            onTabClick={(tab) => this.setState({ currentSettingType: tab.id })}
+          />
         </EuiForm>
 
         <EuiSpacer size="l" />

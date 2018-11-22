@@ -10,8 +10,9 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapEsError, wrapCustomError, wrapUnknownError } from '../../../lib/error_wrappers';
 
 import { get } from 'lodash';
+import { areSettingsValid } from '../../../lib/are_settings_valid';
 import { doesClusterExist } from '../../../lib/does_cluster_exist';
-import { deserializeCluster, serializeCluster } from '../../../lib/cluster_serialization';
+import { serializeCluster } from '../../../lib/cluster_serialization';
 
 export function registerAddRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -22,19 +23,12 @@ export function registerAddRoute(server) {
     method: 'POST',
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { name, ...rest } = request.payload;
+      const { name, transientSettings, persistentSettings } = request.payload;
 
-      const addClusterPayload = {
-        persistent: {
-          cluster: {
-            remote: {
-              [name]: {
-                ...serializeCluster(rest),
-              }
-            }
-          }
-        }
-      };
+      // Check if settings are valid
+      if(!areSettingsValid(transientSettings, persistentSettings)) {
+        return wrapCustomError(new Error('Invalid cluster settings.'), 400);
+      }
 
       // Check if cluster already exists
       try {
@@ -47,17 +41,20 @@ export function registerAddRoute(server) {
       }
 
       try {
+        const addClusterPayload = serializeCluster(name, {
+          transientSettings,
+          persistentSettings,
+        });
         const response = await callWithRequest('cluster.putSettings', { body: addClusterPayload });
         const acknowledged = get(response, 'acknowledged');
-        const cluster = get(response, `persistent.cluster.remote.${name}`);
 
-        if(acknowledged && cluster) {
-          return deserializeCluster(name, cluster);
+        if(acknowledged) {
+          return {};
         }
 
-        // If for some reason the ES response does not have the updated cluster information,
+        // If for some reason the ES response did not acknowledge,
         // return an error. This shouldn't happen.
-        return wrapCustomError(new Error('Unable to add cluster, no information returned from ES.'), 400);
+        return wrapCustomError(new Error('Unable to add cluster, no response returned from ES.'), 400);
       } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
@@ -71,8 +68,14 @@ export function registerAddRoute(server) {
       validate: {
         payload: Joi.object({
           name: Joi.string().required(),
-          seeds: Joi.array().items(Joi.string()).required(),
-          skipUnavailable: Joi.boolean().optional(),
+          transientSettings: Joi.object({
+            seeds: Joi.array().items(Joi.string()).required(),
+            skipUnavailable: Joi.boolean().allow(null).optional(),
+          }),
+          persistentSettings: Joi.object({
+            seeds: Joi.array().items(Joi.string()).required(),
+            skipUnavailable: Joi.boolean().allow(null).optional(),
+          }),
         }).required()
       }
     }
