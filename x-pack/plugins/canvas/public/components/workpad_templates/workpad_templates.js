@@ -149,28 +149,6 @@ export class WorkpadTemplates extends React.PureComponent {
 
     uniqueTags = Object.values(uniqueTags);
 
-    const schema = {
-      strict: true,
-      fields: {
-        name: {
-          type: 'string',
-        },
-        description: {
-          type: 'string',
-        },
-        tag: {
-          type: 'string',
-          validate: value => {
-            if (!uniqueTags.some(tag => tag.name === value)) {
-              throw new Error(
-                `Unknown tag (possible values: ${uniqueTags.map(tag => tag.name).join(',')})`
-              );
-            }
-          },
-        },
-      },
-    };
-
     const filters = [
       {
         type: 'field_value_selection',
@@ -195,7 +173,6 @@ export class WorkpadTemplates extends React.PureComponent {
         box={{
           placeholder: 'Find template',
           incremental: true,
-          schema,
         }}
         filters={filters}
         onChange={this.onSearch}
