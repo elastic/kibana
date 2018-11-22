@@ -5,6 +5,7 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import { LoginState } from '../../../../../common/login_state';
 
@@ -39,7 +40,14 @@ export class BasicLoginForm extends Component<Props, State> {
         {this.renderMessage()}
         <EuiPanel>
           <form onSubmit={this.submit}>
-            <EuiFormRow label="Username">
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+                  defaultMessage="Username"
+                />
+              }
+            >
               <EuiFieldText
                 id="username"
                 name="username"
@@ -53,7 +61,14 @@ export class BasicLoginForm extends Component<Props, State> {
               />
             </EuiFormRow>
 
-            <EuiFormRow label="Password">
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+                  defaultMessage="Password"
+                />
+              }
+            >
               <EuiFieldText
                 id="password"
                 name="password"
@@ -75,7 +90,10 @@ export class BasicLoginForm extends Component<Props, State> {
               isLoading={this.state.isLoading}
               data-test-subj="loginSubmit"
             >
-              Log in
+              <FormattedMessage
+                id="xpack.security.login.basicLoginForm.logInButtonLabel"
+                defaultMessage="Log in"
+              />
             </EuiButton>
           </form>
         </EuiPanel>
@@ -161,9 +179,19 @@ export class BasicLoginForm extends Component<Props, State> {
       (error: any) => {
         const { statusCode = 500 } = error.data || {};
 
-        let message = 'Oops! Error. Try again.';
+        let message = (
+          <FormattedMessage
+            id="xpack.security.login.basicLoginForm.someErrorTryAgainErrorMessage"
+            defaultMessage="Oops! Error. Try again."
+          />
+        );
         if (statusCode === 401) {
-          message = 'Invalid username or password. Please try again.';
+          message = (
+            <FormattedMessage
+              id="xpack.security.login.basicLoginForm.invalidUsernamePasswordErrorMessage"
+              defaultMessage="Invalid username or password. Please try again."
+            />
+          );
         }
 
         this.setState({

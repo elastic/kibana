@@ -42,9 +42,16 @@ interface Props {
 
 class ElasticsearchPrivilegesUI extends Component<Props, {}> {
   public render() {
+    const { intl } = this.props;
     return (
       <I18nProvider>
-        <CollapsiblePanel iconType={'logoElasticsearch'} title={'Elasticsearch'}>
+        <CollapsiblePanel
+          iconType={'logoElasticsearch'}
+          title={intl.formatMessage({
+            id: 'xpack.security.management.editRoles.elasticSearchPrivileges.elasticSearchTitle',
+            defaultMessage: 'Elasticsearch',
+          })}
+        >
           {this.getForm()}
         </CollapsiblePanel>
       </I18nProvider>
@@ -127,7 +134,7 @@ class ElasticsearchPrivilegesUI extends Component<Props, {}> {
                   ? intl.formatMessage({
                       id:
                         'xpack.security.management.editRoles.elasticSearchPrivileges.addUserTitle',
-                      defaultMessage: 'Add a user...',
+                      defaultMessage: 'Add a user…',
                     })
                   : undefined
               }
