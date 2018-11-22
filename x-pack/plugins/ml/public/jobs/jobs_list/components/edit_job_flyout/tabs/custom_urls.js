@@ -37,8 +37,6 @@ import {
   loadIndexPatterns,
 } from '../edit_utils';
 
-import '../styles/main.less';
-
 const MAX_NUMBER_DASHBOARDS = 1000;
 const MAX_NUMBER_INDEX_PATTERNS = 1000;
 

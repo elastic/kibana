@@ -19,9 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { keyCodes } from '@elastic/eui';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 
 const MIN_CHART_HEIGHT = 250;
@@ -39,6 +37,7 @@ class VisEditorVisualization extends Component {
     this.onSizeHandleKeyDown = this.onSizeHandleKeyDown.bind(this);
 
     this._visEl = React.createRef();
+    this._subscription = null;
   }
 
   handleMouseDown() {
@@ -67,6 +66,9 @@ class VisEditorVisualization extends Component {
     if (this._handler) {
       this._handler.destroy();
     }
+    if(this._subscription) {
+      this._subscription.unsubscribe();
+    }
   }
 
   onUpdate = () => {
@@ -88,6 +90,10 @@ class VisEditorVisualization extends Component {
         listenOnChange: false,
         timeRange: this.props.timeRange,
         appState: this.props.appState,
+      });
+
+      this._subscription = this._handler.data$.subscribe((data) => {
+        this.props.onDataChange(data);
       });
 
       if (this._handlerUpdateHasAlreadyBeenTriggered) {
@@ -134,47 +140,41 @@ class VisEditorVisualization extends Component {
       style.userSelect = 'none';
     }
 
-    const applyButtonClassName = dirty ? 'thor__button-solid-default' : 'thor__button-outlined-grayLight';
     let applyMessage = 'The latest changes have been applied.';
     if (dirty) applyMessage = 'The changes to this visualization have not been applied.';
     if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
-      <div className="vis_editor__dirty_controls">
-        <label
-          className="vis_editor__dirty_controls-toggle-label"
-          id="tsvbAutoApply"
-          htmlFor="tsvbAutoApplyInput"
-        >
-          Auto Apply
-        </label>
-        <div className="vis_editor__dirty_controls-toggle">
-          <Toggle
+      <EuiFlexGroup className="tvbEditorVisualization__apply" alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiSwitch
             id="tsvbAutoApplyInput"
-            defaultChecked={autoApply}
-            icons={false}
+            label="Auto apply"
+            checked={autoApply}
             onChange={this.props.onToggleAutoApply}
           />
-        </div>
-        <div className="vis_editor__dirty_controls-button">
-          <button
-            disabled={!dirty}
-            onClick={this.props.onCommit}
-            className={`${applyButtonClassName} md`}
-          >
-            <i className="fa fa-play" /> Apply Changes
-          </button>
-        </div>
-        <div className={`vis_editor__dirty_controls-message${dirty ? '-dirty' : ''}`}>
-          {applyMessage}
-        </div>
-      </div>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color={dirty ? 'default' : 'subdued'} size="xs">
+            <p>
+              {applyMessage}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+
+        {!autoApply &&
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="play" fill size="s" onClick={this.props.onCommit} disabled={!dirty}>Apply changes</EuiButton>
+          </EuiFlexItem>
+        }
+      </EuiFlexGroup>
     );
 
     return (
       <div>
         <div
           style={style}
-          className="vis_editor__visualization"
+          className="tvbEditorVisualization"
           data-shared-items-container
           data-shared-item
           data-title={this.props.title}
@@ -182,10 +182,10 @@ class VisEditorVisualization extends Component {
           data-render-complete="disabled"
           ref={this._visEl}
         />
-        <div className="vis-editor-hide-for-reporting">
+        <div className="tvbEditor--hideForReporting">
           {applyButton}
           <button
-            className="vis_editor__visualization-draghandle"
+            className="tvbEditorVisualization__draghandle"
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
             onKeyDown={this.onSizeHandleKeyDown}

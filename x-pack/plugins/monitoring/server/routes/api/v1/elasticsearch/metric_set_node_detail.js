@@ -88,6 +88,10 @@ export const metricSets = {
     {
       keys: ['node_cgroup_periods', 'node_cgroup_throttled_count'],
       name: 'node_cgroup_stats'
+    },
+    {
+      keys: ['node_query_latency', 'node_index_latency'],
+      name: 'node_latency'
     }
   ],
   overview: [

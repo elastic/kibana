@@ -1,0 +1,66 @@
+// EUITODO: Use EuiTooltip or create a tooltip mixin
+.visTooltip,
+.visTooltip__sizingClone {
+  @include euiBottomShadow($color: $euiColorFullShade);
+  @include euiFontSizeXS;
+  visibility: hidden;
+  pointer-events: none;
+  position: fixed;
+  z-index: $euiZLevel9;
+  background-color: tintOrShade($euiColorFullShade, 25%, 90%);
+  color: $euiColorGhost;
+  border-radius: $euiBorderRadius;
+  max-width: $euiSizeXL * 10;
+  overflow: hidden;
+  overflow-wrap: break-word;
+
+  > :last-child {
+    margin-bottom: $euiSizeS;
+  }
+
+  > * {
+    margin: $euiSizeS $euiSizeS 0;
+  }
+
+  table {
+    td,
+    th {
+      padding: $euiSizeXS;
+    }
+  }
+}
+
+.visTooltip__header {
+  margin: 0 0 $euiSizeS 0;
+  padding: $euiSizeXS $euiSizeS;
+  display: flex;
+  align-items: center;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  + * {
+    margin-top: $euiSizeS;
+  }
+}
+
+.visTooltip__headerIcon {
+  flex: 0 0 auto;
+  padding-right: $euiSizeS;
+}
+
+.visTooltip__headerText {
+  flex: 1 1 100%;
+}
+
+.visTooltip__label {
+  // max-width: $euiSizeXL * 3;
+  font-weight: $euiFontWeightMedium;
+  color: shade($euiColorGhost, 20%);
+}
+
+.visTooltip__sizingClone {
+  top: -500px;
+  left: -500px;
+}

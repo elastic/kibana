@@ -10,8 +10,8 @@ import moment from 'moment';
 import { pdf } from './pdf';
 import { groupBy } from 'lodash';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
-import { screenshotsObservableFactory } from './screenshots';
-import { createLayout } from './layouts';
+import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
+import { createLayout } from '../../../common/layouts';
 
 const getTimeRange = (urlScreenshots) => {
   const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
@@ -32,9 +32,9 @@ function generatePdfObservableFn(server) {
   const screenshotsObservable = screenshotsObservableFactory(server);
   const captureConcurrency = 1;
 
-  const urlScreenshotsObservable = (urls, headers, layout, browserTimezone) => {
+  const urlScreenshotsObservable = (urls, conditionalHeaders, layout, browserTimezone) => {
     return Rx.from(urls).pipe(
-      mergeMap(url => screenshotsObservable(url, headers, layout, browserTimezone),
+      mergeMap(url => screenshotsObservable(url, conditionalHeaders, layout, browserTimezone),
         (outer, inner) => inner,
         captureConcurrency
       )
@@ -66,11 +66,11 @@ function generatePdfObservableFn(server) {
   };
 
 
-  return function generatePdfObservable(title, urls, browserTimezone, headers, layoutParams, logo) {
+  return function generatePdfObservable(title, urls, browserTimezone, conditionalHeaders, layoutParams, logo) {
 
     const layout = createLayout(server, layoutParams);
 
-    const screenshots$ = urlScreenshotsObservable(urls, headers, layout, browserTimezone);
+    const screenshots$ = urlScreenshotsObservable(urls, conditionalHeaders, layout, browserTimezone);
 
     return screenshots$.pipe(
       toArray(),

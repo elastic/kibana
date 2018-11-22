@@ -24,15 +24,14 @@
 .canvasTextArea--code {
   @include euiScrollBar;
   font-size: $euiFontSize;
-  font-family: monospace;
+  font-family: $euiCodeFontFamily;
   width: 100%;
   max-width: 100%;
 }
 
-#canvas-app body {
+#canvas-app {
   overflow-y: hidden;
 
-  // Todo: replace this with EuiToast
   .window-error {
     position: absolute;
     bottom: 10px;

@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
+import { setDocTitle } from '../../lib/doc_title';
 
 export const Workpad = props => {
   const {
@@ -48,6 +49,8 @@ export const Workpad = props => {
     if (action === 'PREV') return previousPage();
     if (action === 'NEXT') return nextPage();
   };
+
+  setDocTitle(workpad.name);
 
   return (
     <div className="canvasWorkpad__buffer" style={bufferStyle}>

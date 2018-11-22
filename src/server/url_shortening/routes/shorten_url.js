@@ -23,13 +23,13 @@ import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 export const createShortenUrlRoute = ({ shortUrlLookup }) => ({
   method: 'POST',
   path: '/api/shorten_url',
-  handler: async function (request, reply) {
+  handler: async function (request) {
     try {
       shortUrlAssertValid(request.payload.url);
       const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-      reply({ urlId });
+      return { urlId };
     } catch (err) {
-      reply(handleShortUrlError(err));
+      throw handleShortUrlError(err);
     }
   }
 });

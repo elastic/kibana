@@ -167,6 +167,7 @@ export interface InfraWaffleMapOptions {
   formatTemplate: string;
   metric: InfraMetricInput;
   path: InfraPathInput[];
+  groupBy: InfraPathInput[];
   legend: InfraWaffleMapLegend;
 }
 

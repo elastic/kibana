@@ -38,8 +38,3 @@ export interface NavLink {
   id: string;
   euiIconType: IconType;
 }
-
-export interface Breadcrumb {
-  text: string;
-  href?: string;
-}

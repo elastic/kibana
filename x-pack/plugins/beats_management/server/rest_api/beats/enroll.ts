@@ -31,7 +31,7 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest, reply: any) => {
+  handler: async (request: FrameworkRequest, h: any) => {
     const { beatId } = request.params;
     const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
 
@@ -45,20 +45,24 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
 
       switch (status) {
         case BeatEnrollmentStatus.ExpiredEnrollmentToken:
-          return reply({
-            message: BeatEnrollmentStatus.ExpiredEnrollmentToken,
-          }).code(400);
+          return h
+            .response({
+              message: BeatEnrollmentStatus.ExpiredEnrollmentToken,
+            })
+            .code(400);
         case BeatEnrollmentStatus.InvalidEnrollmentToken:
-          return reply({
-            message: BeatEnrollmentStatus.InvalidEnrollmentToken,
-          }).code(400);
+          return h
+            .response({
+              message: BeatEnrollmentStatus.InvalidEnrollmentToken,
+            })
+            .code(400);
         case BeatEnrollmentStatus.Success:
         default:
-          return reply({ access_token: accessToken }).code(201);
+          return h.response({ access_token: accessToken }).code(201);
       }
     } catch (err) {
       // TODO move this to kibana route thing in adapter
-      return reply(wrapEsError(err));
+      return wrapEsError(err);
     }
   },
 });

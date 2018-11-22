@@ -17,7 +17,6 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../job_message_icon';
-import './styles/main.less';
 
 import {
   EuiBasicTable,
@@ -159,7 +158,7 @@ export class JobsList extends Component {
       }, {
         name: 'Latest timestamp',
         truncateText: false,
-        field: 'latestTimeStampSortValue',
+        field: 'latestTimestampSortValue',
         sortable: true,
         render: (time, item) => (
           <span className="euiTableCellContent__text">

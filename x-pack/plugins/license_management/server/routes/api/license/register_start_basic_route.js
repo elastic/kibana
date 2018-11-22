@@ -12,9 +12,9 @@ export function registerStartBasicRoute(server) {
   server.route({
     path: '/api/license/start_basic',
     method: 'POST',
-    handler: (request, reply) => {
+    handler: (request) => {
       return startBasic(request, xpackInfo)
-        .then(reply, e => reply(wrapEsError(e)));
+        .catch(e => wrapEsError(e));
     }
   });
 }

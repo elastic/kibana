@@ -10,7 +10,6 @@ import { createSelector } from 'reselect';
 import { InfraMetricInput, InfraMetricType, InfraPathType } from '../../../common/graphql/types';
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
 import { State, waffleOptionsActions, waffleOptionsSelectors } from '../../store';
-import { initialWaffleOptionsState } from '../../store/local/waffle_options/reducer';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { UrlStateContainer } from '../../utils/url_state';
@@ -19,8 +18,8 @@ const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectMetric,
   waffleOptionsSelectors.selectGroupBy,
   waffleOptionsSelectors.selectNodeType,
-  (metrics, groupBy, nodeType) => ({
-    metrics,
+  (metric, groupBy, nodeType) => ({
+    metric,
     groupBy,
     nodeType,
   })
@@ -71,10 +70,14 @@ export const WithWaffleOptionsUrlState = () => (
           }
         }}
         onInitialize={initialUrlState => {
-          if (initialUrlState) {
-            changeMetric(initialUrlState.metric || initialWaffleOptionsState.metric);
-            changeGroupBy(initialUrlState.groupBy || initialWaffleOptionsState.groupBy);
-            changeNodeType(initialUrlState.nodeType || initialWaffleOptionsState.nodeType);
+          if (initialUrlState && initialUrlState.metric) {
+            changeMetric(initialUrlState.metric);
+          }
+          if (initialUrlState && initialUrlState.groupBy) {
+            changeGroupBy(initialUrlState.groupBy);
+          }
+          if (initialUrlState && initialUrlState.nodeType) {
+            changeNodeType(initialUrlState.nodeType);
           }
         }}
       />

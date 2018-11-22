@@ -22,6 +22,7 @@ export const axisConfig = () => ({
     position: {
       types: ['string'],
       help: 'Position of the axis labels - top, bottom, left, and right',
+      options: ['top', 'bottom', 'left', 'right'],
       default: '',
     },
     min: {

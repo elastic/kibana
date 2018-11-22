@@ -20,6 +20,7 @@
 import './core.css';
 
 import { BasePathService } from './base_path';
+import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
@@ -48,6 +49,7 @@ export class CoreSystem {
   private readonly loadingCount: LoadingCountService;
   private readonly uiSettings: UiSettingsService;
   private readonly basePath: BasePathService;
+  private readonly chrome: ChromeService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly notificationsTargetDomElement: HTMLDivElement;
@@ -78,6 +80,7 @@ export class CoreSystem {
     this.loadingCount = new LoadingCountService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
+    this.chrome = new ChromeService();
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
     this.legacyPlatform = new LegacyPlatformService({
@@ -106,6 +109,8 @@ export class CoreSystem {
         injectedMetadata,
         basePath,
       });
+      const chrome = this.chrome.start();
+
       this.legacyPlatform.start({
         injectedMetadata,
         fatalErrors,
@@ -113,6 +118,7 @@ export class CoreSystem {
         loadingCount,
         basePath,
         uiSettings,
+        chrome,
       });
     } catch (error) {
       this.fatalErrors.add(error);
@@ -123,6 +129,8 @@ export class CoreSystem {
     this.legacyPlatform.stop();
     this.notifications.stop();
     this.loadingCount.stop();
+    this.uiSettings.stop();
+    this.chrome.stop();
     this.rootDomElement.textContent = '';
   }
 }

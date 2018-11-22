@@ -24,7 +24,6 @@ import { Tray } from './tray';
 
 export const Toolbar = props => {
   const {
-    editing,
     selectedElement,
     tray,
     setTray,
@@ -63,7 +62,7 @@ export const Toolbar = props => {
     expression: !elementIsSelected ? null : <Expression done={done} />,
   };
 
-  return !editing ? null : (
+  return (
     <div className="canvasToolbar hide-for-sharing">
       {trays[tray] && <Tray done={done}>{trays[tray]}</Tray>}
       <Navbar>
@@ -122,7 +121,6 @@ export const Toolbar = props => {
 
 Toolbar.propTypes = {
   workpadName: PropTypes.string,
-  editing: PropTypes.bool,
   tray: PropTypes.node,
   setTray: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,

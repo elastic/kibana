@@ -22,6 +22,8 @@ import 'ui/pager_control';
 import 'ui/pager';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
+import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 
@@ -34,7 +36,6 @@ export function VisualizeListingController($injector) {
   const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const config = $injector.get('config');
-  const breadcrumbState = $injector.get('breadcrumbState');
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
@@ -51,7 +52,7 @@ export function VisualizeListingController($injector) {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'lab'));
+        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'experimental'));
       });
   };
 
@@ -60,6 +61,10 @@ export function VisualizeListingController($injector) {
       .catch(error => notify.error(error));
   };
 
-  breadcrumbState.set([{ text: 'Visualize' }]);
+  chrome.breadcrumbs.set([{
+    text: i18n.translate('kbn.visualize.visualizeListingBreadcrumbsTitle', {
+      defaultMessage: 'Visualize',
+    })
+  }]);
   config.watch('k7design', (val) => this.showPluginBreadcrumbs = !val);
 }

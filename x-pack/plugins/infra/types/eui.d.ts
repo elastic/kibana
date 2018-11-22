@@ -143,20 +143,6 @@ declare module '@elastic/eui' {
 
   export const EuiErrorBoundary: React.SFC<EuiErrorBoundaryProps>;
 
-  type EuiSelectProps = CommonProps & {
-    compressed?: boolean;
-    disabled?: boolean;
-    fullWidth?: boolean;
-    hasNoInitialSelection?: boolean;
-    inputRef?: Ref<HTMLSelectElement>;
-    isInvalid?: boolean;
-    isLoading?: boolean;
-    onChange?: (arg: any) => void;
-    options?: any[];
-    value: any;
-  };
-  export const EuiSelect: React.SFC<EuiSelectProps>;
-
   type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
   type EuiResponsiveProps = CommonProps & {
     children: React.ReactNode;
@@ -179,12 +165,12 @@ declare module '@elastic/eui' {
 
   export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
 
-  type EuiFieldNumberProps = CommonProps & {
-    defaultValue: string;
-    value?: number;
-    onChange?: (arg: any) => void;
-    step?: number;
+  export type EuiBetaBadgeProps = CommonProps & {
+    iconType?: IconType;
+    label: React.ReactNode;
+    title?: string;
+    tooltipContent?: React.ReactNode;
+    tooltipPosition?: EuiToolTipPosition;
   };
-
-  export const EuiFieldNumber: React.SFC<EuiFieldNumberProps>;
+  export const EuiBetaBadge: React.SFC<EuiBetaBadgeProps>;
 }

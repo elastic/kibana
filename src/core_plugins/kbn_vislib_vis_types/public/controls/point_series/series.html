@@ -1,8 +1,10 @@
 <div class="kuiSideBarSection kuiSideBarSection__main">
   <div class="kuiSideBarSectionTitle">
-    <div class="kuiSideBarSectionTitle__text">
-      Metrics
-    </div>
+    <div
+      class="kuiSideBarSectionTitle__text"
+      i18n-id="kbnVislibVisTypes.controls.pointSeries.series.metricsTitle"
+      i18n-default-message="Metrics"
+    ></div>
   </div>
 
   <div
@@ -35,9 +37,12 @@
       <div class="kuiSideBarSection">
 
         <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="{{ 'seriesType' + $index }}">
-            Chart Type
-          </label>
+          <label
+            class="kuiSideBarFormRow__label"
+            for="{{ 'seriesType' + $index }}"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.series.chartTypeLabel"
+            i18n-default-message="Chart Type"
+          ></label>
           <div class="kuiSideBarFormRow__control">
             <select
               id="{{ 'seriesType' + $index }}"
@@ -49,9 +54,12 @@
         </div>
 
         <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="{{ 'seriesMode' + $index }}">
-            Mode
-          </label>
+          <label
+            class="kuiSideBarFormRow__label"
+            for="{{ 'seriesMode' + $index }}"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.series.modeLabel"
+            i18n-default-message="Mode"
+          ></label>
           <div class="kuiSideBarFormRow__control">
             <select
               id="{{ 'seriesMode' + $index }}"
@@ -63,9 +71,12 @@
         </div>
 
         <div class="kuiSideBarFormRow">
-          <label class="kuiSideBarFormRow__label" for="{{ 'seriesValueAxis' + $index }}">
-            Value Axis
-          </label>
+          <label
+            class="kuiSideBarFormRow__label"
+            for="{{ 'seriesValueAxis' + $index }}"
+            i18n-id="kbnVislibVisTypes.controls.pointSeries.series.valueAxisLabel"
+            i18n-default-message="Value Axis"
+          ></label>
           <div class="kuiSideBarFormRow__control">
             <select
               id="{{ 'seriesValueAxis' + $index }}"
@@ -74,16 +85,23 @@
               ng-change="changeValueAxis($index)"
             >
               <option ng-repeat="axis in editorState.params.valueAxes track by axis.id" value="{{axis.id}}">{{axis.name}}</option>
-              <option value="new">New Axis ...</option>
+              <option
+                value="new"
+                i18n-id="kbnVislibVisTypes.controls.pointSeries.series.newAxisLabel"
+                i18n-default-message="New Axis…"
+              ></option>
             </select>
           </div>
         </div>
 
         <div ng-show="chart.type == 'line' || chart.type == 'area'">
           <div class="kuiSideBarFormRow">
-            <label class="kuiSideBarFormRow__label" for="{{ 'lineMode' + $index }}">
-              Line Mode
-            </label>
+            <label
+              class="kuiSideBarFormRow__label"
+              for="{{ 'lineMode' + $index }}"
+              i18n-id="kbnVislibVisTypes.controls.pointSeries.series.lineModeLabel"
+              i18n-default-message="Line Mode"
+            ></label>
             <div class="kuiSideBarFormRow__control">
               <select
                 id="{{ 'lineMode' + $index }}"
@@ -97,27 +115,35 @@
         </div>
         <div ng-show="chart.type == 'line'">
           <div class="kuiSideBarFormRow">
-            <label class="kuiSideBarFormRow__label" for="{{ 'drawLines' + $index }}">
-              Show Line
-            </label>
+            <label
+              class="kuiSideBarFormRow__label"
+              for="{{ 'drawLines' + $index }}"
+              i18n-id="kbnVislibVisTypes.controls.pointSeries.series.showLineLabel"
+              i18n-default-message="Show Line"
+            ></label>
             <div class="kuiSideBarFormRow__control">
               <input class="kuiCheckBox" id="{{ 'drawLines' + $index }}" type="checkbox" ng-model="chart.drawLinesBetweenPoints">
             </div>
           </div>
 
           <div class="kuiSideBarFormRow">
-            <label class="kuiSideBarFormRow__label" for="{{ 'showCircles' + $index }}">
-              Show Circles
-            </label>
+            <label
+              class="kuiSideBarFormRow__label"
+              for="{{ 'showCircles' + $index }}"
+              i18n-id="kbnVislibVisTypes.controls.pointSeries.series.showCirclesLabel"
+              i18n-default-message="Show Circles"
+            ></label>
             <div class="kuiSideBarFormRow__control">
               <input class="kuiCheckBox" id="{{ 'showCircles' + $index }}" type="checkbox" ng-model="chart.showCircles">
             </div>
           </div>
 
           <div class="kuiSideBarFormRow">
-            <label class="kuiSideBarFormRow__label">
-              Line Width
-            </label>
+            <label
+              class="kuiSideBarFormRow__label"
+              i18n-id="kbnVislibVisTypes.controls.pointSeries.series.lineWidthLabel"
+              i18n-default-message="Line Width"
+            ></label>
             <div class="kuiSideBarFormRow__control">
               <input name="lineWidth"
                      class="kuiInput kuiSideBarInput"

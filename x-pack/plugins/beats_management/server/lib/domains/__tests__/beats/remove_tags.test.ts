@@ -13,7 +13,7 @@ const internalUser: FrameworkInternalUser = { kind: 'internal' };
 
 describe('Beats Domain Lib', () => {
   let libs: CMServerLibs;
-  let beatsDB: CMBeat[] = [];
+  let beatsDB: Array<Partial<CMBeat>> = [];
   let tagsDB: BeatTag[] = [];
 
   describe('remove_tags_from_beats', () => {

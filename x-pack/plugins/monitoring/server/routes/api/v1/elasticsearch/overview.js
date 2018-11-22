@@ -32,7 +32,7 @@ export function esOverviewRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -46,13 +46,13 @@ export function esOverviewRoute(server) {
         ]);
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
 
-        reply({
+        return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           metrics,
           shardActivity
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

@@ -6,6 +6,7 @@
 
 
 import { capitalize, find, get, includes } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export function decorateShards(shards, nodes) {
   function getTooltipMessage(shard) {
@@ -15,10 +16,20 @@ export function decorateShards(shards, nodes) {
     // messages for relocating node
     if (nodeName) {
       if (shard.state === 'INITIALIZING') {
-        return `Relocating from ${nodeName}`;
+        return i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.decorateShards.relocatingFromTextMessage', {
+          defaultMessage: 'Relocating from {nodeName}',
+          values: {
+            nodeName
+          }
+        });
       }
       if (shard.state === 'RELOCATING') {
-        return `Relocating to ${nodeName}`;
+        return i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.decorateShards.relocatingToTextMessage', {
+          defaultMessage: 'Relocating to {nodeName}',
+          values: {
+            nodeName
+          }
+        });
       }
     }
     return capitalize(shard.state.toLowerCase());

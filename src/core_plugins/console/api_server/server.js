@@ -19,15 +19,19 @@
 
 import _ from 'lodash';
 
-export function resolveApi(senseVersion, apis, reply) {
+const KNOWN_APIS = ['es_6_0'];
+
+export function resolveApi(senseVersion, apis, h) {
   const result = {};
   _.each(apis, function (name) {
     {
-      // for now we ignore sense_version. might add it in the api name later
-      const api = require('./' + name);
-      result[name] = api.asJson();
+      if (KNOWN_APIS.includes(name)) {
+        // for now we ignore sense_version. might add it in the api name later
+        const api = require('./' + name);
+        result[name] = api.asJson();
+      }
     }
   });
 
-  return reply(result).type('application/json');
+  return h.response(result).type('application/json');
 }

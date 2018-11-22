@@ -97,7 +97,7 @@ describe('Vislib ChartTitle Class Test Suite', function () {
     persistedState = new ($injector.get('PersistedState'))();
 
     el = d3.select('body').append('div')
-      .attr('class', 'vis-wrapper')
+      .attr('class', 'visWrapper')
       .datum(data);
 
     el.append('div')

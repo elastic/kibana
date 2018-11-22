@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { includes } from 'lodash';
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 import { elasticLogo } from '../../lib/elastic_logo';
+
+const modes = ['contain', 'cover', 'stretch'];
 
 export const image = () => ({
   name: 'image',
@@ -31,11 +32,11 @@ export const image = () => ({
         '"cover" will fill the container with the image, cropping from the sides or bottom as needed.' +
         '"stretch" will resize the height and width of the image to 100% of the container',
       default: 'contain',
+      options: modes,
     },
   },
   fn: (context, { dataurl, mode }) => {
-    if (!includes(['contain', 'cover', 'stretch'], mode))
-      throw '"mode" must be "contain", "cover", or "stretch"';
+    if (!modes.includes(mode)) throw '"mode" must be "contain", "cover", or "stretch"';
 
     const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
 

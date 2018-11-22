@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize']);
 
   describe('discover tab', function describeIndexTests() {
@@ -45,7 +46,8 @@ export default function ({ getService, getPageObjects }) {
     describe('field data', function () {
       it('search php should show the correct hit count', async function () {
         const expectedHitCount = '445';
-        await PageObjects.discover.query('php');
+        await queryBar.setQuery('php');
+        await queryBar.submitQuery();
 
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
@@ -63,7 +65,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('search type:apache should show the correct hit count', async function () {
         const expectedHitCount = '11,156';
-        await PageObjects.discover.query('type:apache');
+        await queryBar.setQuery('type:apache');
+        await queryBar.submitQuery();
         await retry.try(async function tryingForTime() {
           const hitCount = await PageObjects.discover.getHitCount();
           expect(hitCount).to.be(expectedHitCount);
@@ -164,8 +167,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('a bad syntax query should show an error message', async function () {
-        const expectedError = 'Discover: Failed to parse query [xxx(yyy]';
-        await PageObjects.discover.query('xxx(yyy');
+        const expectedError = 'Discover: Failed to parse query [xxx(yyy))]';
+        await queryBar.setQuery('xxx(yyy))');
+        await queryBar.submitQuery();
         const toastMessage =  await PageObjects.header.getToastMessage();
         expect(toastMessage).to.contain(expectedError);
         await PageObjects.header.clickToastOK();

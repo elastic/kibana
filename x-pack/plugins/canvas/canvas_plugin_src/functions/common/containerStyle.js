@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isValid } from '../../../common/lib/url';
+import { isValidUrl } from '../../../common/lib/url';
 
 export const containerStyle = () => ({
   name: 'containerStyle',
@@ -41,11 +41,13 @@ export const containerStyle = () => ({
       types: ['string'],
       help: 'Valid CSS background size string',
       default: 'contain',
+      options: ['contain', 'cover', 'auto'],
     },
     backgroundRepeat: {
       types: ['string'],
       help: 'Valid CSS background repeat string',
       default: 'no-repeat',
+      options: ['repeat-x', 'repeat', 'space', 'round', 'no-repeat', 'space'],
     },
     opacity: {
       types: ['number', 'null'],
@@ -53,7 +55,8 @@ export const containerStyle = () => ({
     },
     overflow: {
       types: ['string'],
-      help: `Sets overflow of the container`,
+      help: 'Sets overflow of the container',
+      options: ['visible', 'hidden', 'scroll', 'auto'],
     },
   },
   fn: (context, args) => {
@@ -64,7 +67,7 @@ export const containerStyle = () => ({
     };
 
     if (backgroundImage) {
-      if (!isValid(backgroundImage))
+      if (!isValidUrl(backgroundImage))
         throw new Error('Invalid backgroundImage. Please provide an asset or a URL.');
       style.backgroundImage = `url(${backgroundImage})`;
       style.backgroundSize = backgroundSize;

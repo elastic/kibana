@@ -104,6 +104,11 @@ export const geoHashBucketAgg = new BucketAggType({
       write: _.noop
     },
     {
+      name: 'mapBounds',
+      default: null,
+      write: _.noop
+    },
+    {
       name: 'precision',
       editor: precisionTemplate,
       default: defaultPrecision,
