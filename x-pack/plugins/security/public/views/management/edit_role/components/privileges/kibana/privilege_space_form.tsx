@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injecti18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
@@ -110,4 +110,4 @@ class PrivilegeSpaceFormUI extends Component<Props, {}> {
   };
 }
 
-export const PrivilegeSpaceForm = injecti18n(PrivilegeSpaceFormUI);
+export const PrivilegeSpaceForm = injectI18n(PrivilegeSpaceFormUI);
