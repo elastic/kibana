@@ -25,7 +25,7 @@ import {
 } from './server/queue';
 import { fileRoute } from './server/routes/file';
 import { lspRoute, symbolByQnameRoute } from './server/routes/lsp';
-import { monacoRoute } from './server/routes/monaco';
+import { redirectRoute } from './server/routes/redirect';
 import { repositoryRoute } from './server/routes/repository';
 import {
   documentSearchRoute,
@@ -77,6 +77,7 @@ export default (kibana: any) =>
         isAdmin: Joi.boolean().default(true), // If we show the admin buttons
         disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
+        multiNode: Joi.object().default({ enable: false }),
       }).default();
     },
 
@@ -87,6 +88,19 @@ export default (kibana: any) =>
       const dataCluster = server.plugins.elasticsearch.getCluster('data');
       const log = new Log(server);
       const serverOptions = new ServerOptions(options, server.config());
+
+      if (serverOptions.multiNode && serverOptions.multiNode.enable) {
+        if (serverOptions.multiNode.mainNode) {
+          log.info(
+            `multi node enabled, will redirect all requests to main node ${
+              serverOptions.multiNode.mainNode
+            }`
+          );
+          redirectRoute(server, options, log);
+          // todo handle websockets
+          return;
+        }
+      }
 
       const socketService = new SocketService(log);
 
@@ -161,7 +175,6 @@ export default (kibana: any) =>
       symbolSearchRoute(server, symbolSearchClient);
       fileRoute(server, serverOptions);
       workspaceRoute(server, serverOptions, esClient);
-      monacoRoute(server);
       symbolByQnameRoute(server, symbolSearchClient);
       socketRoute(server, socketService, log);
       userRoute(server, serverOptions);

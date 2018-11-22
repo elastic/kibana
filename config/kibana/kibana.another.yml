@@ -1,0 +1,16 @@
+optimize:
+  unsafeCache: true
+  sourceMaps: false
+#  sourceMaps: '#cheap-source-map'
+
+code:
+  multiNode:
+    enable: true
+    mainNode: http://localhost:5601
+    noBasePath: false
+  enableGlobalReference: false
+#  repos:
+#  - repo: 'github.com/Microsoft/TypeScript-Node-Starter'
+#    init:
+#      - 'yarn'
+#      - 'install'
