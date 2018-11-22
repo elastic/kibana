@@ -2,7 +2,6 @@
   "name": "@kbn/interpreter",
   "version": "1.0.0",
   "license": "Apache-2.0",
-  "main": "./index.js",
   "scripts": {
     "build": "babel src --out-dir . --ignore 'src/plugin/**/*' && node tasks/build.js",
     "canvas:peg": "pegjs common/lib/grammar.peg",

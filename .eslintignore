@@ -27,6 +27,10 @@ bower_components
 /x-pack/coverage
 /x-pack/build
 /x-pack/plugins/**/__tests__/fixtures/**
+/packages/kbn-interpreter/common
+/packages/kbn-interpreter/plugin
+/packages/kbn-interpreter/public
+/packages/kbn-interpreter/server
 /packages/kbn-interpreter/src/common/lib/grammar.js
 /x-pack/plugins/canvas/canvas_plugin
 /x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts
