@@ -423,6 +423,7 @@ function VisEditor(
     const searchSourceGrandparent = searchSourceParent.getParent();
 
     delete savedVis.savedSearchId;
+    delete vis.savedSearchId;
     searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
     $state.query = searchSourceParent.getField('query');
