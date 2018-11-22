@@ -14,6 +14,7 @@
     "tileMap": "src/core_plugins/tile_map",
     "timelion": "src/core_plugins/timelion",
     "tagCloud": "src/core_plugins/tagcloud",
+    "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.infra": "x-pack/plugins/infra",
