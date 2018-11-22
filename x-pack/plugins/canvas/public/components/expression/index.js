@@ -15,9 +15,9 @@ import {
   branch,
   renderComponent,
 } from 'recompose';
-import { fromExpression } from '@kbn/interpreter/common/lib/ast';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
+import { fromExpression } from '../../../common/lib/ast';
 import { getFunctionDefinitions } from '../../lib/function_definitions';
 import { getWindow } from '../../lib/get_window';
 import { ElementNotSelected } from './element_not_selected';
