@@ -8,9 +8,10 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { migrateFilter } from '@kbn/es-query';
+import { migrateFilter, BuildESQueryProvider } from '@kbn/es-query';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
+
 
 export function getQueryFromSavedSearch(formConfig) {
   const must = [];
@@ -40,53 +41,58 @@ export function getQueryFromSavedSearch(formConfig) {
   };
 }
 
-// create items used for searching and job creation.
-// takes the $route object to retrieve the indexPattern and savedSearch from the url
-export function createSearchItems($route) {
-  let indexPattern = $route.current.locals.indexPattern;
-  const query = {
-    query_string: {
-      analyze_wildcard: true,
-      query: '*'
-    }
-  };
+// Provider for creating the items used for searching and job creation.
+// Takes the $route object to retrieve the indexPattern and savedSearch from the url
+export function SearchItemsProvider(Private) {
 
-  let filters = [];
-  const savedSearch = $route.current.locals.savedSearch;
-  const searchSource = savedSearch.searchSource;
+  const buildESQuery = Private(BuildESQueryProvider);
 
-  if (indexPattern.id === undefined &&
-    savedSearch.id !== undefined) {
-    indexPattern = searchSource.getField('index');
+  function createSearchItemsFromRoute($route) {
+    let indexPattern = $route.current.locals.indexPattern;
 
-    // Extract the query from the searchSource
-    // Might be as a String in q.query, or
-    // nested inside q.query.query_string
-    const q = searchSource.getField('query');
-    if (q !== undefined && q.language === 'lucene' && q.query !== undefined) {
-      if (typeof q.query === 'string' && q.query !== '') {
-        query.query_string.query = q.query;
-      } else if (typeof q.query === 'object' &&
-          typeof q.query.query_string === 'object' && q.query.query_string.query !== '') {
-        query.query_string.query = q.query.query_string.query;
+    let query = {
+      query: '*',
+      language: 'lucene'
+    };
+
+    let combinedQuery = {
+      bool: {
+        must: [{
+          query_string: {
+            analyze_wildcard: true,
+            query: '*'
+          }
+        }]
       }
+    };
+
+    let filters = [];
+
+    const savedSearch = $route.current.locals.savedSearch;
+    if (indexPattern.id === undefined && savedSearch.id !== undefined) {
+      const searchSource = savedSearch.searchSource;
+      indexPattern = searchSource.getField('index');
+
+      query = searchSource.getField('query');
+      const fs = searchSource.getField('filter');
+
+      if (fs.length) {
+        filters = fs;
+      }
+
+      combinedQuery = buildESQuery(indexPattern, [query], filters);
     }
 
-    const fs = searchSource.getField('filter');
-    if (fs.length) {
-      filters = fs;
-    }
-
+    return {
+      indexPattern,
+      savedSearch,
+      filters,
+      query,
+      combinedQuery
+    };
   }
-  const combinedQuery = getQueryFromSavedSearch({ query, filters });
 
-  return {
-    indexPattern,
-    savedSearch,
-    filters,
-    query,
-    combinedQuery
-  };
+  return createSearchItemsFromRoute;
 }
 
 export function createJobForSaving(job) {

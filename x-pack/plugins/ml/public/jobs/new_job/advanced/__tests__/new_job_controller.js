@@ -7,10 +7,6 @@
 
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'sinon';
-
-// Import this way to be able to stub/mock `createSearchItems` later on in the test using sinon.
-import * as newJobUtils from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 
 describe('ML - Advanced Job Wizard - New Job Controller', () => {
   beforeEach(() => {
@@ -18,21 +14,26 @@ describe('ML - Advanced Job Wizard - New Job Controller', () => {
   });
 
   it('Initialize New Job Controller', (done) => {
-    const stub = sinon.stub(newJobUtils, 'createSearchItems').callsFake(() => ({
-      indexPattern: {},
-      savedSearch: {},
-      combinedQuery: {}
-    }));
-
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlNewJob', { $scope: scope });
+
+      // Provide minimal set of locals props required by the controller.
+      $controller('MlNewJob', {
+        $route: {
+          current: {
+            locals: {
+              indexPattern: {},
+              savedSearch: {}
+            }
+          }
+        },
+        $scope: scope
+      });
 
       // This is just about initializing the controller and making sure
       // all angularjs based dependencies get loaded without error.
       // This simple scope test is just a final sanity check.
       expect(scope.ui.pageTitle).to.be('Create a new job');
-      stub.restore();
       done();
     });
   });
