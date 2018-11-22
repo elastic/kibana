@@ -19,6 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import {
@@ -27,7 +28,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-export class DashboardSaveModal extends React.Component {
+class DashboardSaveModalUi extends React.Component {
   constructor(props) {
     super(props);
 
@@ -64,7 +65,10 @@ export class DashboardSaveModal extends React.Component {
     return (
       <Fragment>
         <EuiFormRow
-          label="Description"
+          label={<FormattedMessage
+            id="kbn.dashboard.topNav.saveModal.descriptionFormRowLabel"
+            defaultMessage="Description"
+          />}
         >
           <EuiTextArea
             data-test-subj="dashboardDescription"
@@ -75,8 +79,14 @@ export class DashboardSaveModal extends React.Component {
         </EuiFormRow>
 
         <EuiFormRow
-          label="Store time with dashboard"
-          helpText="This changes the time filter to the currently selected time each time this dashboard is loaded."
+          label={<FormattedMessage
+            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+            defaultMessage="Store time with dashboard"
+          />}
+          helpText={<FormattedMessage
+            id="kbn.dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+            defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+          />}
         >
           <EuiSwitch
             data-test-subj="storeTimeWithDashboard"
@@ -102,7 +112,7 @@ export class DashboardSaveModal extends React.Component {
   }
 }
 
-DashboardSaveModal.propTypes = {
+DashboardSaveModalUi.propTypes = {
   onSave: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
@@ -110,3 +120,5 @@ DashboardSaveModal.propTypes = {
   timeRestore: PropTypes.bool.isRequired,
   showCopyOnSave: PropTypes.bool.isRequired,
 };
+
+export const DashboardSaveModal = injectI18n(DashboardSaveModalUi);
