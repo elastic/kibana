@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { UMServerLibs } from '../lib/lib';
 import { UMRestApiRouteCreator, UMServerRoute } from './types';
 
@@ -13,14 +14,11 @@ export const createRouteWithAuth = (
 ): UMServerRoute => {
   const restRoute = routeCreator(libs);
   const { handler, method, path, options } = restRoute;
-  const authHandler = (request: any, h: any) => {
-    try {
-      if (libs.auth.requestIsValid(request)) {
-        return handler(request, h);
-      }
-    } catch (err) {
-      throw err;
+  const authHandler = async (request: any, h: any) => {
+    if (libs.auth.requestIsValid(request)) {
+      return await handler(request, h);
     }
+    return Boom.badRequest();
   };
   return {
     method,

@@ -11,10 +11,8 @@ export class UMMemoryAuthAdapter implements UMAuthAdapter {
   constructor(private readonly xpack: any) {
     this.xpack = xpack;
   }
-  public getLicenseType(): string | null {
-    return get(this.xpack, 'info.license.type', null);
-  }
-  public licenseIsActive(): boolean {
-    return this.xpack.info.license.isActive;
-  }
+
+  public getLicenseType = (): string | null => get(this.xpack, 'info.license.type', null);
+
+  public licenseIsActive = (): boolean => this.xpack.info.license.isActive;
 }

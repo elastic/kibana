@@ -4,31 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMAuthContainer, UMXPackLicenseInfo } from '../adapter_types';
+import { UMAuthContainer, UMXPackLicenseStatus } from '../adapter_types';
 import { UMXPackAuthAdapter } from '../xpack_auth_adapter';
+
+const setupXPack = (licenseStatus: UMXPackLicenseStatus) => ({
+  info: {
+    feature: (pluginId: string) => ({
+      registerLicenseCheckResultsGenerator: (
+        licenseCheckResultsHandler: (status: UMXPackLicenseStatus) => void
+      ) => {
+        licenseCheckResultsHandler(licenseStatus);
+      },
+    }),
+  },
+  status: {
+    once: (status: string, registerLicenseCheck: () => void) => {
+      registerLicenseCheck();
+    },
+  },
+});
 
 describe('X-PackAuthAdapter class', () => {
   let xpack: UMAuthContainer;
-  const setupXPack = (licenseInfo: UMXPackLicenseInfo) => {
-    xpack = {
-      info: {
-        feature: (pluginId: string) => ({
-          registerLicenseCheckResultsGenerator: (
-            licenseCheckResultsHandler: (info: UMXPackLicenseInfo) => void
-          ) => {
-            licenseCheckResultsHandler(licenseInfo);
-          },
-        }),
-      },
-      status: {
-        once: (status: string, registerLicenseCheck: () => void) => {
-          registerLicenseCheck();
-        },
-      },
-    };
-  };
+
   beforeEach(() => {
-    setupXPack({
+    xpack = setupXPack({
       license: {
         isActive: () => true,
         getType: () => 'platinum',
@@ -43,7 +43,7 @@ describe('X-PackAuthAdapter class', () => {
   });
 
   it('returns null and false for undefined license values', () => {
-    setupXPack({
+    xpack = setupXPack({
       license: {
         getType: () => undefined,
         isActive: () => undefined,

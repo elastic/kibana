@@ -10,7 +10,7 @@ export interface UMAuthContainer {
       pluginId: string
     ) => {
       registerLicenseCheckResultsGenerator: (
-        licenseCheckResultsHandler: (info: UMXPackLicenseInfo) => void
+        licenseCheckResultsHandler: (info: UMXPackLicenseStatus) => void
       ) => void;
     };
   };
@@ -19,7 +19,7 @@ export interface UMAuthContainer {
   };
 }
 
-export interface UMXPackLicenseInfo {
+export interface UMXPackLicenseStatus {
   license: {
     isActive: () => boolean | undefined;
     getType: () => string | undefined;
