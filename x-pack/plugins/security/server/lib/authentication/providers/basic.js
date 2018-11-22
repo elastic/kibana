@@ -55,7 +55,7 @@ export class BasicAuthenticationProvider {
       authenticationResult = await this._authenticateViaState(request, state);
     } else if (authenticationResult.notHandled() && canRedirectRequest(request)) {
       // If we couldn't handle authentication let's redirect user to the login page.
-      const nextURL = encodeURIComponent(`${this._options.basePath}${request.url.path}`);
+      const nextURL = encodeURIComponent(`${request.getBasePath()}${request.url.path}`);
       authenticationResult = AuthenticationResult.redirectTo(
         `${this._options.basePath}/login?next=${nextURL}`
       );

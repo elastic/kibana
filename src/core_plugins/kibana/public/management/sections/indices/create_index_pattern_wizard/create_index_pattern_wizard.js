@@ -20,7 +20,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { ensureMinimumTime } from './lib';
+import {
+  EuiGlobalToastList
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
@@ -28,7 +32,11 @@ import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
 import { MAX_SEARCH_SIZE } from './constants';
-import { getIndices } from './lib/get_indices';
+import {
+  ensureMinimumTime,
+  getIndices,
+  getRemoteClusters
+} from './lib';
 
 export class CreateIndexPatternWizard extends Component {
   static propTypes = {
@@ -37,6 +45,7 @@ export class CreateIndexPatternWizard extends Component {
       es: PropTypes.object.isRequired,
       indexPatterns: PropTypes.object.isRequired,
       savedObjectsClient: PropTypes.object.isRequired,
+      indexPatternCreationType: PropTypes.object.isRequired,
       config: PropTypes.object.isRequired,
       changeUrl: PropTypes.func.isRequired,
     }).isRequired,
@@ -44,24 +53,67 @@ export class CreateIndexPatternWizard extends Component {
 
   constructor(props) {
     super(props);
+    this.indexPatternCreationType = this.props.services.indexPatternCreationType;
     this.state = {
       step: 1,
       indexPattern: '',
       allIndices: [],
+      remoteClustersExist: false,
       isInitiallyLoadingIndices: true,
       isIncludingSystemIndices: false,
+      toasts: []
     };
   }
 
   async componentWillMount() {
-    this.fetchIndices();
+    this.fetchData();
   }
 
-  fetchIndices = async () => {
-    this.setState({ allIndices: [], isInitiallyLoadingIndices: true });
+  catchAndWarn = async (asyncFn, errorValue, errorMsg) => {
+    try {
+      return await asyncFn;
+    } catch (errors) {
+      this.setState(prevState => ({
+        toasts: prevState.toasts.concat([{
+          title: errorMsg,
+          id: errorMsg,
+          color: 'warning',
+          iconType: 'alert',
+        }])
+      }));
+      return errorValue;
+    }
+  };
+
+  fetchData = async () => {
     const { services } = this.props;
-    const allIndices = await ensureMinimumTime(getIndices(services.es, `*`, MAX_SEARCH_SIZE));
-    this.setState({ allIndices, isInitiallyLoadingIndices: false });
+
+    this.setState({
+      allIndices: [],
+      isInitiallyLoadingIndices: true,
+      remoteClustersExist: false
+    });
+
+    const indicesFailMsg = (<FormattedMessage
+      id="kbn.management.createIndexPattern.loadIndicesFailMsg"
+      defaultMessage="Failed to load indices"
+    />);
+
+    const clustersFailMsg = (<FormattedMessage
+      id="kbn.management.createIndexPattern.loadClustersFailMsg"
+      defaultMessage="Failed to load remote clusters"
+    />);
+
+    const [allIndices, remoteClusters] = await ensureMinimumTime([
+      this.catchAndWarn(getIndices(services.es, this.indexPatternCreationType, `*`, MAX_SEARCH_SIZE), [], indicesFailMsg),
+      this.catchAndWarn(getRemoteClusters(services.$http), [], clustersFailMsg)
+    ]);
+
+    this.setState({
+      allIndices,
+      isInitiallyLoadingIndices: false,
+      remoteClustersExist: remoteClusters.length !== 0
+    });
   }
 
   createIndexPattern = async (timeFieldName, indexPatternId) => {
@@ -74,6 +126,7 @@ export class CreateIndexPatternWizard extends Component {
       id: indexPatternId,
       title: indexPattern,
       timeFieldName,
+      ...this.indexPatternCreationType.getIndexPatternMappings()
     });
 
     const createdId = await emptyPattern.create();
@@ -105,8 +158,12 @@ export class CreateIndexPatternWizard extends Component {
 
     return (
       <Header
+        prompt={this.indexPatternCreationType.renderPrompt()}
+        showSystemIndices={this.indexPatternCreationType.getShowSystemIndices()}
         isIncludingSystemIndices={isIncludingSystemIndices}
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
+        indexPatternName={this.indexPatternCreationType.getIndexPatternName()}
+        isBeta={this.indexPatternCreationType.getIsBeta()}
       />
     );
   }
@@ -118,6 +175,7 @@ export class CreateIndexPatternWizard extends Component {
       isIncludingSystemIndices,
       step,
       indexPattern,
+      remoteClustersExist
     } = this.state;
 
     if (isInitiallyLoadingIndices) {
@@ -125,8 +183,10 @@ export class CreateIndexPatternWizard extends Component {
     }
 
     const hasDataIndices = allIndices.some(({ name }) => !name.startsWith('.'));
-    if (!hasDataIndices && !isIncludingSystemIndices) {
-      return <EmptyState onRefresh={this.fetchIndices} />;
+    if (!hasDataIndices &&
+      !isIncludingSystemIndices &&
+      !remoteClustersExist) {
+      return <EmptyState onRefresh={this.fetchData} />;
     }
 
     if (step === 1) {
@@ -138,6 +198,7 @@ export class CreateIndexPatternWizard extends Component {
           isIncludingSystemIndices={isIncludingSystemIndices}
           esService={services.es}
           savedObjectsClient={services.savedObjectsClient}
+          indexPatternCreationType={this.indexPatternCreationType}
           goToNextStep={this.goToTimeFieldStep}
         />
       );
@@ -151,6 +212,7 @@ export class CreateIndexPatternWizard extends Component {
           indexPatternsService={services.indexPatterns}
           goToPreviousStep={this.goToIndexPatternStep}
           createIndexPattern={this.createIndexPattern}
+          indexPatternCreationType={this.indexPatternCreationType}
         />
       );
     }
@@ -158,15 +220,28 @@ export class CreateIndexPatternWizard extends Component {
     return null;
   }
 
+  removeToast = (removedToast) => {
+    this.setState(prevState => ({
+      toasts: prevState.toasts.filter(toast => toast.id !== removedToast.id),
+    }));
+  };
+
   render() {
     const header = this.renderHeader();
     const content = this.renderContent();
 
     return (
-      <div>
-        {header}
-        {content}
-      </div>
+      <React.Fragment>
+        <div>
+          {header}
+          {content}
+        </div>
+        <EuiGlobalToastList
+          toasts={this.state.toasts}
+          dismissToast={this.removeToast}
+          toastLifeTimeMs={6000}
+        />
+      </React.Fragment>
     );
   }
 }

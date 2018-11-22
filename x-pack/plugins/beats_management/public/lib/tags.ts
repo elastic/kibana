@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import yaml from 'js-yaml';
-import { omit, pick } from 'lodash';
+import { get } from 'lodash';
+import { omit, set } from 'lodash';
+import _ from 'lodash';
 import { BeatTag, ConfigurationBlock } from '../../common/domain_types';
 import { ConfigContent } from '../../common/domain_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
@@ -23,7 +25,6 @@ export class TagsLib {
   }
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
     tag.id = tag.id.replace(' ', '-');
-
     return await this.adapter.upsertTag(this.userConfigsToJson([tag])[0]);
   }
 
@@ -42,14 +43,24 @@ export class TagsLib {
         const { type, description, configs } = block;
         const activeConfig = configs[0];
         const thisConfig = this.tagConfigs.find((conf: any) => conf.value === type).config;
+
         const knownConfigIds = thisConfig.map((config: any) => config.id);
+        const hydratedIds = this.hydrateTokenArray(knownConfigIds, activeConfig);
+        const convertedConfig = knownConfigIds.reduce(
+          (blockObj: any, id: keyof ConfigContent, index: number) => {
+            const unhydratedKey = hydratedIds[index];
+            set(
+              blockObj,
+              id,
+              id === 'other'
+                ? yaml.dump(omit(activeConfig, knownConfigIds))
+                : get(activeConfig, unhydratedKey)
+            );
 
-        const convertedConfig = knownConfigIds.reduce((blockObj: any, id: keyof ConfigContent) => {
-          blockObj[id] =
-            id === 'other' ? yaml.dump(omit(activeConfig, knownConfigIds)) : activeConfig[id];
-
-          return blockObj;
-        }, {});
+            return blockObj;
+          },
+          {}
+        );
 
         // Workaround to empty object passed into dump resulting in this odd output
         if (convertedConfig.other && convertedConfig.other === '{}\n') {
@@ -80,19 +91,66 @@ export class TagsLib {
           .map((config: any) => config.id)
           .filter((id: string) => id !== 'other');
 
+        const picked = this.pickDeep(activeConfig, knownConfigIds);
+
         const convertedConfig = {
-          ...yaml.safeLoad(activeConfig.other),
-          ...pick(activeConfig, knownConfigIds),
+          ...yaml.safeLoad(activeConfig.other || '{}'),
+          ...picked,
         };
 
         return {
           type,
           description,
-          configs: [convertedConfig],
+          configs: [this.hydrateTokenizedObject(convertedConfig)],
         } as ConfigurationBlock;
       });
 
       return transformedTag;
     });
+  }
+
+  /**
+   * This function takes an object that contains keys in the pattern of {{keyname}}, and replaces the key with the value of a matching key.
+   * Example input:
+   * { foo: 'here', '{{foo}}': 'there' }
+   * Would return:
+   * { foo: 'here', here: 'there' }
+   */
+  private hydrateTokenizedObject(model: any) {
+    return JSON.parse(JSON.stringify(model), (key, value) => {
+      return _.isObject(value) && !_.isArray(value)
+        ? _.mapKeys(value, (v, k: string) => {
+            return k.replace(/{{[^{}]+}}/g, (token: string) => {
+              return model[token.replace(/[{}]+/g, '')];
+            });
+          })
+        : value;
+    });
+  }
+
+  /**
+   * This function takes an array of strings and object and replaces strings in the array patching the patten of {{key}} with the matching value from the object.
+   * Example input:
+   * [ '{{key}}', 'other' ], and  { key: 'here', foo: 'there' }
+   * Would return:
+   * [ 'here', 'other' ]
+   */
+  private hydrateTokenArray(keys: string[], data: any) {
+    return keys.map(key => {
+      return key.replace(/{{[^{}]+}}/g, (token: string) => {
+        return data[token.replace(/[{}]+/g, '')];
+      });
+    });
+  }
+
+  private pickDeep(obj: any, keys: string[]) {
+    const copy = {};
+    _.forEach(keys, key => {
+      if (_.has(obj, key)) {
+        const val = _.get(obj, key);
+        _.set(copy, key, val);
+      }
+    });
+    return copy;
   }
 }

@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAvatar, EuiPopover } from '@elastic/eui';
-import React, { Component } from 'react';
+import { EuiAvatar, EuiPopover, PopoverAnchorPosition } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
+import React, { Component, ComponentClass } from 'react';
 import { UserProfile } from '../../../../xpack_main/public/services/user_profile';
 import { Space } from '../../../common/model/space';
 import { SpaceAvatar } from '../../components';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
+import { ButtonProps } from './types';
 
 interface Props {
   spacesManager: SpacesManager;
@@ -21,6 +23,8 @@ interface Props {
     space: Space;
   };
   userProfile: UserProfile;
+  anchorPosition: PopoverAnchorPosition;
+  buttonClass: ComponentClass<ButtonProps>;
 }
 
 interface State {
@@ -67,26 +71,29 @@ export class NavControlPopover extends Component<Props, State> {
       );
     } else {
       element = (
-        <SpacesMenu
-          spaces={this.state.spaces}
-          onSelectSpace={this.onSelectSpace}
-          userProfile={this.props.userProfile}
-          onManageSpacesClick={this.toggleSpaceSelector}
-        />
+        <I18nProvider>
+          <SpacesMenu
+            spaces={this.state.spaces}
+            onSelectSpace={this.onSelectSpace}
+            userProfile={this.props.userProfile}
+            onManageSpacesClick={this.toggleSpaceSelector}
+          />
+        </I18nProvider>
       );
     }
 
     return (
       <EuiPopover
-        id={'spacesMenuPopover'}
+        id={'spcMenuPopover'}
         data-test-subj={`spacesNavSelector`}
         button={button}
         isOpen={this.state.showSpaceSelector}
         closePopover={this.closeSpaceSelector}
-        anchorPosition={'rightCenter'}
+        anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
         // @ts-ignore
         repositionOnScroll={true}
+        withTitle={this.props.anchorPosition.includes('down')}
         ownFocus
       >
         {element}
@@ -134,14 +141,14 @@ export class NavControlPopover extends Component<Props, State> {
   };
 
   private getButton = (linkIcon: JSX.Element, linkTitle: string) => {
-    // Mimics the current angular-based navigation link
+    const Button = this.props.buttonClass;
     return (
-      <div className="global-nav-link">
-        <a className="global-nav-link__anchor" onClick={this.toggleSpaceSelector}>
-          <div className="global-nav-link__icon"> {linkIcon} </div>
-          <div className="global-nav-link__title"> {linkTitle} </div>
-        </a>
-      </div>
+      <Button
+        linkTitle={linkTitle}
+        linkIcon={linkIcon}
+        toggleSpaceSelector={this.toggleSpaceSelector}
+        spaceSelectorShown={this.state.showSpaceSelector}
+      />
     );
   };
 

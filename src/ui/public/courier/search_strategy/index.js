@@ -25,4 +25,4 @@ export {
 
 export { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
 
-export { SearchError } from './search_error';
+export { SearchError, getSearchErrorType } from './search_error';

@@ -6,13 +6,16 @@
 
 // @ts-ignore
 import Boom from 'boom';
+import { difference } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
 import { PLUGIN } from '../../../../common/constants/plugin';
 import { wrapRequest } from '../../../utils/wrap_request';
+import { FrameworkRequest } from './adapter_types';
 import {
   BackendFrameworkAdapter,
   FrameworkInternalUser,
+  FrameworkResponse,
   FrameworkRouteOptions,
   FrameworkWrappableRequest,
 } from './adapter_types';
@@ -44,10 +47,10 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
       // to re-compute the license check results for this plugin
       xpackMainPlugin.info
         .feature(PLUGIN.ID)
-        .registerLicenseCheckResultsGenerator(this.checkLicense);
+        .registerLicenseCheckResultsGenerator((xPackInfo: any) => this.checkLicense(xPackInfo));
     });
   }
-
+  // TODO make base path a constructor level param
   public getSetting(settingPath: string) {
     // TODO type check server properly
     if (settingPath === 'xpack.beats.encryptionKey') {
@@ -70,26 +73,61 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     });
   }
 
-  public registerRoute<RouteRequest extends FrameworkWrappableRequest, RouteResponse>(
-    route: FrameworkRouteOptions<RouteRequest, RouteResponse>
-  ) {
-    const wrappedHandler = (licenseRequired: boolean) => (request: any, reply: any) => {
+  public registerRoute<
+    RouteRequest extends FrameworkWrappableRequest,
+    RouteResponse extends FrameworkResponse
+  >(route: FrameworkRouteOptions<RouteRequest, RouteResponse>) {
+    const hasAny = (roles: string[], requiredRoles: string[]) =>
+      requiredRoles.some(r => roles.includes(r));
+
+    const wrappedHandler = (licenseRequired: boolean, requiredRoles?: string[]) => async (
+      request: any,
+      h: any
+    ) => {
       const xpackMainPlugin = this.server.plugins.xpack_main;
       const licenseCheckResults = xpackMainPlugin.info.feature(PLUGIN.ID).getLicenseCheckResults();
       if (licenseRequired && !licenseCheckResults.licenseValid) {
-        reply(Boom.forbidden(licenseCheckResults.message));
+        return Boom.forbidden(licenseCheckResults.message);
       }
-      return route.handler(wrapRequest(request), reply);
+      const wrappedRequest = wrapRequest(request);
+      if (requiredRoles) {
+        if (wrappedRequest.user.kind !== 'authenticated') {
+          return h.response().code(403);
+        }
+        wrappedRequest.user = {
+          ...wrappedRequest.user,
+          ...(await this.getUser(request)),
+        };
+
+        if (
+          wrappedRequest.user.kind === 'authenticated' &&
+          (!hasAny(wrappedRequest.user.roles, this.getSetting('xpack.beats.defaultUserRoles')) ||
+            !wrappedRequest.user.roles) &&
+          difference(requiredRoles, wrappedRequest.user.roles).length !== 0
+        ) {
+          return h.response().code(403);
+        }
+      }
+      return route.handler(wrappedRequest, h);
     };
 
     this.server.route({
-      handler: wrappedHandler(route.licenseRequired || false),
+      handler: wrappedHandler(route.licenseRequired || false, route.requiredRoles),
       method: route.method,
       path: route.path,
       config: route.config,
     });
   }
 
+  private async getUser(request: FrameworkRequest) {
+    try {
+      return await this.server.plugins.security.getUser(request);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // TODO make key a param
   private validateConfig() {
     // @ts-ignore
     const config = this.server.config();
@@ -103,6 +141,7 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
     }
   }
 
+  // TODO this should NOT be in an adapter, break up and move validation to a lib
   private checkLicense(xPackInfo: any) {
     // If, for some reason, we cannot get the license information
     // from Elasticsearch, assume worst case and disable the Logstash pipeline UI
@@ -111,51 +150,60 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         securityEnabled: false,
         licenseValid: false,
         message:
-          'You cannot manage Beats centeral management because license information is not available at this time.',
+          'You cannot manage Beats central management because license information is not available at this time.',
       };
     }
 
-    const VALID_LICENSE_MODES = ['trial', 'gold', 'platinum'];
+    const VALID_LICENSE_MODES = ['trial', 'standard', 'gold', 'platinum'];
 
     const isLicenseValid = xPackInfo.license.isOneOf(VALID_LICENSE_MODES);
     const isLicenseActive = xPackInfo.license.isActive();
     const licenseType = xPackInfo.license.getType();
     const isSecurityEnabled = xPackInfo.feature('security').isEnabled();
 
-    // Security is not enabled in ES
-    if (!isSecurityEnabled) {
-      const message =
-        'Security must be enabled in order to use Beats centeral management features.' +
-        ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
-      return {
-        securityEnabled: false,
-        licenseValid: true,
-        message,
-      };
-    }
-
     // License is not valid
     if (!isLicenseValid) {
       return {
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
         securityEnabled: true,
         licenseValid: false,
-        message: `Your ${licenseType} license does not support Beats centeral management features. Please upgrade your license.`,
+        licenseExpired: false,
+        message: `Your ${licenseType} license does not support Beats central management features. Please upgrade your license.`,
       };
     }
 
     // License is valid but not active, we go into a read-only mode.
     if (!isLicenseActive) {
       return {
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
         securityEnabled: true,
-        licenseValid: false,
-        message: `You cannot edit, create, or delete your Beats centeral management configurations because your ${licenseType} license has expired.`,
+        licenseValid: true,
+        licenseExpired: true,
+        message: `You cannot edit, create, or delete your Beats central management configurations because your ${licenseType} license has expired.`,
+      };
+    }
+
+    // Security is not enabled in ES
+    if (!isSecurityEnabled) {
+      const message =
+        'Security must be enabled in order to use Beats central management features.' +
+        ' Please set xpack.security.enabled: true in your elasticsearch.yml.';
+      return {
+        defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
+        securityEnabled: false,
+        licenseValid: true,
+        licenseExpired: false,
+
+        message,
       };
     }
 
     // License is valid and active
     return {
+      defaultUserRoles: this.getSetting('xpack.beats.defaultUserRoles'),
       securityEnabled: true,
       licenseValid: true,
+      licenseExpired: false,
     };
   }
 }

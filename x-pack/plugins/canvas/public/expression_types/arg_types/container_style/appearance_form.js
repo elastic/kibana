@@ -37,16 +37,12 @@ export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiFormRow label="Opacity" compressed>
-          <EuiSelect defaultValue={opacity} options={opacities} onChange={namedChange('opacity')} />
+          <EuiSelect value={opacity} options={opacities} onChange={namedChange('opacity')} />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiFormRow label="Overflow" compressed>
-          <EuiSelect
-            defaultValue={overflow}
-            options={overflows}
-            onChange={namedChange('overflow')}
-          />
+          <EuiSelect value={overflow} options={overflows} onChange={namedChange('overflow')} />
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -58,4 +54,9 @@ AppearanceForm.propTypes = {
   opacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   overflow: PropTypes.oneOf(['hidden', 'visible']),
   onChange: PropTypes.func.isRequired,
+};
+
+AppearanceForm.defaultProps = {
+  opacity: 1,
+  overflow: 'hidden',
 };

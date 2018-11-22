@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { jstz as tzDetect } from 'jstimezonedetect';
 import _ from 'lodash';
 import chrome from '../../chrome';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import '../../filters/field_type';
 import '../../validate_date_interval';
 import { BucketAggType } from './_bucket_agg_type';
@@ -32,7 +31,7 @@ import { timefilter } from '../../timefilter';
 import dropPartialTemplate from '../controls/drop_partials.html';
 
 const config = chrome.getUiSettingsClient();
-const detectedTimezone = tzDetect.determine().name();
+const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
 function getInterval(agg) {
@@ -105,6 +104,11 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: _.noop,
     },
     {
+      name: 'useNormalizedEsInterval',
+      default: true,
+      write: _.noop,
+    },
+    {
       name: 'interval',
       type: 'optioned',
       deserialize: function (state) {
@@ -124,8 +128,8 @@ export const dateHistogramBucketAgg = new BucketAggType({
       write: function (agg, output, aggs) {
         setBounds(agg, true);
         agg.buckets.setInterval(getInterval(agg));
-
-        const interval = agg.buckets.getInterval();
+        const { useNormalizedEsInterval } = agg.params;
+        const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
         output.params.interval = interval.expression;
 

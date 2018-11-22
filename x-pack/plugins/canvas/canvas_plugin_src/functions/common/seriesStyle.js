@@ -45,6 +45,8 @@ export const seriesStyle = () => ({
       types: ['number', 'boolean'],
       displayName: 'Fill points',
       help: 'Should we fill points?',
+      default: false,
+      options: [true, false],
     },
     stack: {
       types: ['number', 'null'],
@@ -56,6 +58,7 @@ export const seriesStyle = () => ({
       types: ['boolean'],
       displayName: 'Horizontal bars orientation',
       help: 'Sets the orientation of bars in the chart to horizontal',
+      options: [true, false],
     },
   },
   fn: (context, args) => ({ type: name, ...args }),

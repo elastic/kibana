@@ -40,6 +40,7 @@ interface ScrollableLogTextStreamViewProps {
       endKey: TimeKey | null;
     }
   ) => any;
+  loadNewerItems: () => void;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -138,6 +139,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                 hasMore={hasMoreAfterEnd}
                 isStreaming={isStreaming}
                 lastStreamingUpdate={isStreaming ? lastLoadedTime : null}
+                onLoadMore={this.handleLoadNewerItems}
               />
             </>
           )}
@@ -151,6 +153,14 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
 
     if (target) {
       jumpToTarget(target);
+    }
+  };
+
+  private handleLoadNewerItems = () => {
+    const { loadNewerItems } = this.props;
+
+    if (loadNewerItems) {
+      loadNewerItems();
     }
   };
 

@@ -27,6 +27,7 @@ export {
   decorateQuery,
   buildQueryFromFilters,
   luceneStringToDsl,
+  BuildESQueryProvider
 } from './search_source';
 
 export {
@@ -34,4 +35,5 @@ export {
   hasSearchStategyForIndexPattern,
   isDefaultTypeIndexPattern,
   SearchError,
+  getSearchErrorType,
 } from './search_strategy';

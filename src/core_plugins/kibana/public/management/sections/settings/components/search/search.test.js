@@ -18,7 +18,9 @@
  */
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
+
 
 import { Query } from '@elastic/eui';
 import { Search } from './search';
@@ -29,8 +31,8 @@ const categories = ['general', 'dashboard', 'hiddenCategory', 'x-pack'];
 describe('Search', () => {
   it('should render normally', async () => {
     const onQueryChange = () => {};
-    const component = shallow(
-      <Search
+    const component = shallowWithIntl(
+      <Search.WrappedComponent
         query={query}
         categories={categories}
         onQueryChange={onQueryChange}
@@ -44,14 +46,39 @@ describe('Search', () => {
     //This test is brittle as it knows about implementation details
     // (EuiFieldSearch uses onKeyup instead of onChange to handle input)
     const onQueryChange = jest.fn();
-    const component = mount(
-      <Search
+    const component = mountWithIntl(
+      <Search.WrappedComponent
         query={query}
         categories={categories}
         onQueryChange={onQueryChange}
       />
     );
-    component.find('input').simulate('keyup', { target: { value: 'new filter' } });
+    findTestSubject(component, 'settingsSearchBar').simulate('keyup', { target: { value: 'new filter' } });
     expect(onQueryChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle query parse error', async () => {
+    const onQueryChangeMock = jest.fn();
+    const component = mountWithIntl(
+      <Search.WrappedComponent
+        query={query}
+        categories={categories}
+        onQueryChange={onQueryChangeMock}
+      />
+    );
+
+    const searchBar = findTestSubject(component, 'settingsSearchBar');
+
+    // Send invalid query
+    searchBar.simulate('keyup', { target: { value: '?' } });
+    expect(onQueryChangeMock).toHaveBeenCalledTimes(0);
+    expect(component.state().isSearchTextValid).toBe(false);
+
+    onQueryChangeMock.mockReset();
+
+    // Send valid query to ensure component can recover from invalid query
+    searchBar.simulate('keyup', { target: { value: 'dateFormat' } });
+    expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
+    expect(component.state().isSearchTextValid).toBe(true);
   });
 });

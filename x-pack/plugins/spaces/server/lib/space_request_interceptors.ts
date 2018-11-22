@@ -12,7 +12,7 @@ import { addSpaceIdToPath, getSpaceIdFromPath } from './spaces_url_parser';
 export function initSpacesRequestInterceptors(server: any) {
   const serverBasePath = server.config().get('server.basePath');
 
-  server.ext('onRequest', async function spacesOnRequestHandler(request: any, reply: any) {
+  server.ext('onRequest', async function spacesOnRequestHandler(request: any, h: any) {
     const path = request.path;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
@@ -35,10 +35,10 @@ export function initSpacesRequestInterceptors(server: any) {
       request.setUrl(newUrl);
     }
 
-    return reply.continue();
+    return h.continue;
   });
 
-  server.ext('onPostAuth', async function spacesOnRequestHandler(request: any, reply: any) {
+  server.ext('onPostAuth', async function spacesOnRequestHandler(request: any, h: any) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
@@ -62,18 +62,16 @@ export function initSpacesRequestInterceptors(server: any) {
           const space = spaces[0];
 
           const destination = addSpaceIdToPath(basePath, space.id, defaultRoute);
-          return reply.redirect(destination);
+          return h.redirect(destination).takeover();
         }
 
         if (spaces.length > 0) {
           // render spaces selector instead of home page
           const app = server.getHiddenUiAppById('space_selector');
-          return reply.renderApp(app, {
-            spaces,
-          });
+          return (await h.renderApp(app, { spaces })).takeover();
         }
       } catch (error) {
-        return reply(wrapError(error));
+        return wrapError(error);
       }
     }
 
@@ -94,9 +92,9 @@ export function initSpacesRequestInterceptors(server: any) {
           `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
         );
         // Space doesn't exist, or user not authorized for space, or some other issue retrieving the active space.
-        return reply.redirect(getSpaceSelectorUrl(server.config()));
+        return h.redirect(getSpaceSelectorUrl(server.config())).takeover();
       }
     }
-    return reply.continue();
+    return h.continue;
   });
 }

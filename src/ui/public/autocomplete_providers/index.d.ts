@@ -28,7 +28,7 @@ export type AutocompleteProvider = (
       get(configKey: string): any;
     };
     indexPatterns: StaticIndexPattern[];
-    boolFilter: any;
+    boolFilter?: any;
   }
 ) => GetSuggestions;
 
@@ -40,10 +40,15 @@ export type GetSuggestions = (
   }
 ) => Promise<AutocompleteSuggestion[]>;
 
-export type AutocompleteSuggestionType = 'field' | 'value' | 'operator' | 'conjunction';
+export type AutocompleteSuggestionType =
+  | 'field'
+  | 'value'
+  | 'operator'
+  | 'conjunction'
+  | 'recentSearch';
 
 export interface AutocompleteSuggestion {
-  description: string;
+  description?: string;
   end: number;
   start: number;
   text: string;

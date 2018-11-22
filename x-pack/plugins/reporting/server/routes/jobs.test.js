@@ -10,12 +10,12 @@ import { jobs } from './jobs';
 import { ExportTypesRegistry } from '../../common/export_types_registry';
 jest.mock('../lib/authorized_user_pre_routing', () => {
   return {
-    authorizedUserPreRoutingFactory: () => (request, reply) => reply({})
+    authorizedUserPreRoutingFactory: () => () => ({})
   };
 });
 jest.mock('../lib/reporting_feature_pre_routing', () => {
   return {
-    reportingFeaturePreRoutingFactory: () => () => (request, reply) => reply({ jobTypes: ['unencodedJobType', 'base64EncodedJobType'] })
+    reportingFeaturePreRoutingFactory: () => () => () => ({ jobTypes: ['unencodedJobType', 'base64EncodedJobType'] })
   };
 });
 
@@ -23,8 +23,7 @@ jest.mock('../lib/reporting_feature_pre_routing', () => {
 let mockServer;
 
 beforeEach(() => {
-  mockServer = new Hapi.Server({ debug: false });
-  mockServer.connection({ port: 8080 });
+  mockServer = new Hapi.Server({ debug: false, port: 8080, routes: { log: { collect: true } } });
   mockServer.config = memoize(() => ({ get: jest.fn() }));
   const exportTypesRegistry = new ExportTypesRegistry();
   exportTypesRegistry.register({
@@ -71,7 +70,8 @@ test(`returns 404 if job not found`, async () => {
     url: '/api/reporting/jobs/download/1'
   };
 
-  const { statusCode } = await mockServer.inject(request);
+  const response = await mockServer.inject(request);
+  const { statusCode } = response;
   expect(statusCode).toBe(404);
 });
 
@@ -240,12 +240,11 @@ describe(`when job is completed`, () => {
     });
 
     test(`logs error message about invalid content type`, async () => {
-      const { request } = await getCompletedResponse({ outputContentType: 'application/html' });
-      const logs = request.getLog();
+      const { request: { logs } } = await getCompletedResponse({ outputContentType: 'application/html' });
       const errorLogs = logs.filter(log => difference(['internal', 'implementation', 'error'], log.tags).length === 0);
       expect(errorLogs).toHaveLength(1);
-      expect(errorLogs[0].data).toBeInstanceOf(Error);
-      expect(errorLogs[0].data.message).toMatch(/Unsupported content-type of application\/html/);
+      expect(errorLogs[0].error).toBeInstanceOf(Error);
+      expect(errorLogs[0].error.message).toMatch(/Unsupported content-type of application\/html/);
     });
   });
 });

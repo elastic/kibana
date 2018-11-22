@@ -19,7 +19,7 @@ const app = uiModules.get('xpack/watcher');
 
 const VALID_NORMALIZED_TYPES = ['date'];
 
-app.directive('watchEditTitlePanel', function ($injector) {
+app.directive('watchEditTitlePanel', function ($injector, i18n) {
   const htmlIdGeneratorFactory = $injector.get('xpackWatcherHtmlIdGeneratorFactory');
 
   return {
@@ -90,7 +90,10 @@ app.directive('watchEditTitlePanel', function ($injector) {
       get title() {
         if (this.watch.isNew) {
           const typeName = this.watch.typeName.toLowerCase();
-          return `Create a new ${typeName}`;
+          return i18n('xpack.watcher.sections.watchEdit.titlePanel.createNewTypeOfWatchTitle', {
+            defaultMessage: 'Create a new {typeName}',
+            values: { typeName },
+          });
         } else {
           return this.watch.name;
         }

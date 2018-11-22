@@ -112,8 +112,8 @@
             <i class="fa fa-danger text-danger"></i>
             <span
               i18n-id="metricVis.params.ranges.warning.specifyRangeDescription"
-              i18n-default-message="{strongRequiredDescripion} You must specify at least one range."
-              i18n-values="{ strongRequiredDescripion: '<strong>' + editorState.requiredDescription + '</strong>' }"
+              i18n-default-message="{requiredDescription} You must specify at least one range."
+              i18n-values="{ requiredDescription: '<strong>' + editorState.requiredDescription + '</strong>' }"
             >
             </span>
           </p>
@@ -187,7 +187,7 @@
               id="colorSchema"
               class="kuiSelect kuiSideBarSelect"
               ng-model="editorState.params.metric.colorSchema"
-              ng-options="mode for mode in collections.colorSchemas"
+              ng-options="mode.id as mode.label for mode in collections.colorSchemas"
             ></select>
           </div>
           <div class="text-info text-center" ng-show="customColors" ng-click="resetColors()"

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import _ from 'lodash';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DashboardPanelContainer } from './dashboard_panel_container';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelError } from '../panel/panel_error';
@@ -52,7 +52,7 @@ test('renders an error when embeddableFactory.create throws an error', (done) =>
       throw new Error('simulated error');
     });
   };
-  const component = mount(<Provider store={store}><DashboardPanelContainer {...props} /></Provider>);
+  const component = mountWithIntl(<Provider store={store}><DashboardPanelContainer {...props} /></Provider>);
   setTimeout(() => {
     component.update();
     const panelError = component.find(PanelError);

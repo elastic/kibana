@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 export const sourceQuery = gql`
   query SourceQuery($sourceId: ID = "default") {
     source(id: $sourceId) {
+      id
       configuration {
         metricAlias
         logAlias

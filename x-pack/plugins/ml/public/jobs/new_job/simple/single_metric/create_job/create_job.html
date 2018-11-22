@@ -269,8 +269,9 @@
 
       <a
         href='{{resultsUrl}}'
+        id="job_running_view_results_link"
         ng-click="addNewJobToRecentlyAccessed(formConfig.jobId, resultsUrl)"
-        aria-label="View Results"
+        aria-label="View results of running job"
         ng-show="jobState === JOB_STATE.RUNNING || jobState === JOB_STATE.STOPPING"
         class="euiButton euiButton--primary euiButton--small euiButton--fill">
         <span class="euiButton__content">
@@ -281,7 +282,7 @@
     </div>
     <div ng-show="jobState === JOB_STATE.FINISHED">
       <h3 class="euiTitle euiTitle--large">Job {{formConfig.jobId }} created
-        <i style="color:green;" class="fa fa-check" aria-label="Saved"></i>
+        <i style="color:green;" class="fa fa-check" aria-label="Job finished"></i>
       </h3>
       <div class="euiSpacer euiSpacer--m"></div>
 
@@ -296,8 +297,9 @@
       </button>
       <a
         href='{{resultsUrl}}'
+        id="job_finished_view_results_link"
         ng-click="addNewJobToRecentlyAccessed(formConfig.jobId, resultsUrl)"
-        aria-label="View Results"
+        aria-label="View results of finished job"
         class="euiButton euiButton--primary euiButton--small euiButton--fill">
         <span class="euiButton__content">
           View Results

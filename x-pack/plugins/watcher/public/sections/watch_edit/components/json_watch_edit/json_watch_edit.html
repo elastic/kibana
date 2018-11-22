@@ -22,22 +22,22 @@
       >
         <kbn-tab
           tab-id="edit-watch"
-          title="Edit Watch"
+          title="{{ 'xpack.watcher.sections.watchEdit.json.editTabTitle' | i18n: { defaultMessage: 'Edit Watch' } }}"
         >
-          Edit
+          {{ 'xpack.watcher.sections.watchEdit.json.editTabLabel' | i18n: { defaultMessage: 'Edit' } }}
         </kbn-tab>
         <kbn-tab
           tab-id="watch-simulate"
-          title="Simulate Watch"
+          title="{{ 'xpack.watcher.sections.watchEdit.json.simulateTabTitle' | i18n: { defaultMessage: 'Simulate Watch' } }}"
         >
-          Simulate
+          {{ 'xpack.watcher.sections.watchEdit.json.simulateTabLabel' | i18n: { defaultMessage: 'Simulate' } }}
         </kbn-tab>
         <kbn-tab
           tab-id="simulate-results"
-          title="Simulate Results"
+          title="{{ 'xpack.watcher.sections.watchEdit.json.simulateResultsTabTitle' | i18n: { defaultMessage: 'Simulate Results' } }}"
           ng-if="jsonWatchEdit.simulateResults"
         >
-          Simulation Results
+          {{ 'xpack.watcher.sections.watchEdit.json.simulateResultsTabLabel' | i18n: { defaultMessage: 'Simulation Results' } }}
         </kbn-tab>
       </kbn-tabs>
     </div>
@@ -79,8 +79,11 @@
           ng-click="jsonWatchEdit.onWatchExecute()"
           data-test-subj="btnSimulateWatch"
         >
-          <span class="kuiButton__icon kuiIcon fa-play"></span>
-          Simulate Watch
+          <span
+            class="kuiButton__icon kuiIcon fa-play"
+            i18n-id="xpack.watcher.sections.watchEdit.json.simulateWatchButtonLabel"
+            i18n-default-message="Simulate Watch"
+          ></span>
         </button>
       </div>
     </div>
@@ -104,7 +107,10 @@
       </div>
 
       <div class="kuiVerticalRhythm">
-        <label>Simulation Output:</label>
+        <label
+          i18n-id="xpack.watcher.sections.watchEdit.json.simulationOutputLabel"
+          i18n-default-message="Simulation Output:"
+        ></label>
         <watch-history-item-detail
           watch-history-item="jsonWatchEdit.simulateResults"
         ></watch-history-item-detail>

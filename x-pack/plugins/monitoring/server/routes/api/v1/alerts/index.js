@@ -31,7 +31,7 @@ export function clusterAlertsRoute(server) {
         })
       }
     },
-    handler(req, reply) {
+    handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -43,8 +43,7 @@ export function clusterAlertsRoute(server) {
       };
 
       return getClusterLicense(req, esIndexPattern, clusterUuid)
-        .then(license => alertsClusterSearch(req, alertsIndex, { cluster_uuid: clusterUuid, license }, checkLicense, options))
-        .then(reply);
+        .then(license => alertsClusterSearch(req, alertsIndex, { cluster_uuid: clusterUuid, license }, checkLicense, options));
     }
   });
 }

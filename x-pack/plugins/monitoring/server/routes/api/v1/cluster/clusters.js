@@ -28,7 +28,7 @@ export function clustersRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req) => {
       let clusters = [];
 
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
@@ -50,10 +50,10 @@ export function clustersRoute(server) {
 
         clusters = await getClustersFromRequest(req, indexPatterns);
       } catch (err) {
-        return reply(handleError(err, req));
+        throw handleError(err, req);
       }
 
-      return reply(clusters);
+      return clusters;
     }
   });
 }

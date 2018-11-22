@@ -22,7 +22,7 @@ import { createFindRoute } from './find';
 import { MockServer } from './_mock_server';
 
 describe('GET /api/saved_objects/_find', () => {
-  const savedObjectsClient = { find: sinon.stub() };
+  const savedObjectsClient = { find: sinon.stub().returns('') };
   let server;
 
   beforeEach(() => {
@@ -31,8 +31,8 @@ describe('GET /api/saved_objects/_find', () => {
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
-        method(request, reply) {
-          reply(savedObjectsClient);
+        method() {
+          return savedObjectsClient;
         }
       },
     };

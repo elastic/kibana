@@ -62,8 +62,8 @@ export interface DatabaseSearchParams extends DatabaseGenericParams {
   size?: number;
   sort?: DatabaseNameList;
   _source?: DatabaseNameList;
-  _sourceExclude?: DatabaseNameList;
-  _sourceInclude?: DatabaseNameList;
+  _sourceExcludes?: DatabaseNameList;
+  _sourceIncludes?: DatabaseNameList;
   terminateAfter?: number;
   stats?: DatabaseNameList;
   suggestField?: string;
@@ -141,8 +141,8 @@ export interface DatabaseBulkIndexDocumentsParams extends DatabaseGenericParams 
   type?: string;
   fields?: DatabaseNameList;
   _source?: DatabaseNameList;
-  _sourceExclude?: DatabaseNameList;
-  _sourceInclude?: DatabaseNameList;
+  _sourceExcludes?: DatabaseNameList;
+  _sourceIncludes?: DatabaseNameList;
   pipeline?: string;
   index?: string;
 }
@@ -153,8 +153,8 @@ export interface DatabaseMGetParams extends DatabaseGenericParams {
   realtime?: boolean;
   refresh?: boolean;
   _source?: DatabaseNameList;
-  _sourceExclude?: DatabaseNameList;
-  _sourceInclude?: DatabaseNameList;
+  _sourceExcludes?: DatabaseNameList;
+  _sourceIncludes?: DatabaseNameList;
   index: string;
   type?: string;
 }
@@ -272,8 +272,8 @@ export interface DatabaseGetParams extends DatabaseGenericParams {
   refresh?: boolean;
   routing?: string;
   _source?: DatabaseNameList;
-  _sourceExclude?: DatabaseNameList;
-  _sourceInclude?: DatabaseNameList;
+  _sourceExcludes?: DatabaseNameList;
+  _sourceIncludes?: DatabaseNameList;
   version?: number;
   versionType?: DatabaseVersionType;
   id: string;

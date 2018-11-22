@@ -23,27 +23,11 @@ import { inspect } from 'util';
 
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
-import stripAnsi from 'strip-ansi';
-import regenerate from 'regenerate';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
+import { escapeCdata } from '../xml';
 
-// create a regular expression using regenerate() that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
-const validXmlCharsRE = new RegExp(
-  `(?:${
-    regenerate()
-      .add(0x9, 0xA, 0xD)
-      .addRange(0x20, 0xD7FF)
-      .addRange(0xE000, 0xFFFD)
-      .addRange(0x10000, 0x10FFFF)
-      .toString()
-  })*`,
-  'g'
-);
-
-function escapeCdata(string) {
-  return stripAnsi(string).match(validXmlCharsRE).join('');
-}
+const dateNow = Date.now.bind(Date);
 
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
@@ -65,11 +49,11 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   );
 
   const setStartTime = (node) => {
-    node.startTime = Date.now();
+    node.startTime = dateNow();
   };
 
   const setEndTime = node => {
-    node.endTime = Date.now();
+    node.endTime = dateNow();
   };
 
   const getFullTitle = node => {
@@ -103,6 +87,9 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   runner.on('end', () => {
     // crawl the test graph to collect all defined tests
     const allTests = findAllTests(runner.suite);
+    if (!allTests.length) {
+      return;
+    }
 
     // filter out just the failures
     const failures = results.filter(result => result.failed);

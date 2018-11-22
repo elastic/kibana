@@ -219,7 +219,7 @@ export class AnomalyDetails extends Component {
     return (
       <React.Fragment>
         <EuiText size="xs">
-          <h5>Description</h5>
+          <h4>Description</h4>
           {anomalyDescription}
         </EuiText>
         {(mvDescription !== undefined) &&
@@ -236,11 +236,11 @@ export class AnomalyDetails extends Component {
     const isInterimResult = _.get(this.props.anomaly, 'source.is_interim', false);
     return (
       <React.Fragment>
-        <EuiText>
+        <EuiText size="xs">
           {this.props.isAggregatedData === true ? (
-            <h5>Details on highest severity anomaly</h5>
+            <h4>Details on highest severity anomaly</h4>
           ) : (
-            <h5>Anomaly details</h5>
+            <h4>Anomaly details</h4>
           )}
           {isInterimResult === true &&
             <React.Fragment>
@@ -287,8 +287,8 @@ export class AnomalyDetails extends Component {
       return (
         <React.Fragment>
           <EuiSpacer size="m" />
-          <EuiText>
-            <h5>Influencers</h5>
+          <EuiText size="xs">
+            <h4>Influencers</h4>
           </EuiText>
           <EuiDescriptionList
             type="column"

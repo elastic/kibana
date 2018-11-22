@@ -196,6 +196,14 @@ export function PopulationJobServiceProvider(Private) {
       const job = mlJobService.getBlankJob();
       job.data_description.time_field = formConfig.timeField;
 
+      if (formConfig.enableModelPlot === true) {
+        job.model_plot_config = {
+          enabled: true
+        };
+      } else if (formConfig.enableModelPlot === false) {
+        delete job.model_plot_config;
+      }
+
       formConfig.fields.forEach(field => {
         let func = field.agg.type.mlName;
         if (formConfig.isSparseData) {
@@ -268,9 +276,13 @@ export function PopulationJobServiceProvider(Private) {
         job.results_index_name = job.job_id;
       }
 
-      job.custom_settings = {
-        created_by: WIZARD_TYPE.POPULATION
-      };
+      if (formConfig.usesSavedSearch === false) {
+        // Jobs created from saved searches cannot be cloned in the wizard as the
+        // ML job config holds no reference to the saved search ID.
+        job.custom_settings = {
+          created_by: WIZARD_TYPE.POPULATION
+        };
+      }
 
       return job;
     }

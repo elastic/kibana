@@ -31,7 +31,7 @@ export const createFieldsForTimePatternRoute = pre => ({
         meta_fields: Joi.array().items(Joi.string()).default([]),
       }).default()
     },
-    handler(req, reply) {
+    async handler(req) {
       const { indexPatterns } = req.pre;
       const {
         pattern,
@@ -40,15 +40,14 @@ export const createFieldsForTimePatternRoute = pre => ({
         meta_fields: metaFields,
       } = req.query;
 
-      reply(
-        indexPatterns.getFieldsForTimePattern({
-          pattern,
-          interval,
-          lookBack,
-          metaFields
-        })
-          .then(fields => ({ fields }))
-      );
+      const fields = await indexPatterns.getFieldsForTimePattern({
+        pattern,
+        interval,
+        lookBack,
+        metaFields
+      });
+
+      return { fields };
     }
   }
 });

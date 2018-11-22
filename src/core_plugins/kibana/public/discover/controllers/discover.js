@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import React from 'react';
 import angular from 'angular';
+import chrome from 'ui/chrome';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import * as filterActions from 'ui/doc_table/actions/filter';
@@ -46,7 +47,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from '../index.html';
 import { StateProvider } from 'ui/state_management/state';
-import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
@@ -155,7 +156,7 @@ function discoverController(
   courier,
   kbnUrl,
   localStorage,
-  breadcrumbState
+  i18n,
 ) {
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
@@ -190,13 +191,21 @@ function discoverController(
   };
 
   $scope.topNavMenu = [{
-    key: 'new',
-    description: 'New Search',
+    key: i18n('kbn.discover.localMenu.localMenu.newSearchTitle', {
+      defaultMessage: 'new',
+    }),
+    description: i18n('kbn.discover.localMenu.newSearchDescription', {
+      defaultMessage: 'New Search',
+    }),
     run: function () { kbnUrl.change('/discover'); },
     testId: 'discoverNewButton',
   }, {
-    key: 'save',
-    description: 'Save Search',
+    key: i18n('kbn.discover.localMenu.saveTitle', {
+      defaultMessage: 'save',
+    }),
+    description: i18n('kbn.discover.localMenu.saveSearchDescription', {
+      defaultMessage: 'Save Search',
+    }),
     testId: 'discoverSaveButton',
     run: async () => {
       const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
@@ -228,8 +237,12 @@ function discoverController(
       showSaveModal(saveModal);
     }
   }, {
-    key: 'open',
-    description: 'Open Saved Search',
+    key: i18n('kbn.discover.localMenu.openTitle', {
+      defaultMessage: 'open',
+    }),
+    description: i18n('kbn.discover.localMenu.openSavedSearchDescription', {
+      defaultMessage: 'Open Saved Search',
+    }),
     testId: 'discoverOpenButton',
     run: () => {
       showOpenSearchPanel({
@@ -239,8 +252,12 @@ function discoverController(
       });
     }
   }, {
-    key: 'share',
-    description: 'Share Search',
+    key: i18n('kbn.discover.localMenu.shareTitle', {
+      defaultMessage: 'share',
+    }),
+    description: i18n('kbn.discover.localMenu.shareSearchDescription', {
+      defaultMessage: 'Share Search',
+    }),
     testId: 'shareTopNavButton',
     run: async (menuItem, navController, anchorElement) => {
       const sharingData = await this.getSharingData();
@@ -259,8 +276,12 @@ function discoverController(
       });
     }
   }, {
-    key: 'inspect',
-    description: 'Open Inspector for search',
+    key: i18n('kbn.discover.localMenu.inspectTitle', {
+      defaultMessage: 'inspect',
+    }),
+    description: i18n('kbn.discover.localMenu.openInspectorForSearchDescription', {
+      defaultMessage: 'Open Inspector for search',
+    }),
     testId: 'openInspectorButton',
     run() {
       Inspector.open(inspectorAdapters, {
@@ -278,21 +299,35 @@ function discoverController(
     .setField('highlightAll', true)
     .setField('version', true);
 
+  // Even when searching rollups, we want to use the default strategy so that we get back a
+  // document-like response.
+  $scope.searchSource.setPreferredSearchStrategyId('default');
+
   // searchSource which applies time range
   const timeRangeSearchSource = savedSearch.searchSource.create();
-  timeRangeSearchSource.setField('filter', () => {
-    return timefilter.createFilter($scope.indexPattern);
-  });
+  if(isDefaultTypeIndexPattern($scope.indexPattern)) {
+    timeRangeSearchSource.setField('filter', () => {
+      return timefilter.createFilter($scope.indexPattern);
+    });
+  }
 
   $scope.searchSource.setParent(timeRangeSearchSource);
 
   const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
   docTitle.change(`Discover${pageTitleSuffix}`);
+  const discoverBreadcrumbsTitle = i18n('kbn.discover.discoverBreadcrumbTitle', {
+    defaultMessage: 'Discover',
+  });
 
   if (savedSearch.id && savedSearch.title) {
-    breadcrumbState.set([{ text: 'Discover', href: '#/discover' }, { text: savedSearch.title }]);
+    chrome.breadcrumbs.set([{
+      text: discoverBreadcrumbsTitle,
+      href: '#/discover'
+    }, { text: savedSearch.title }]);
   } else {
-    breadcrumbState.set([{ text: 'Discover' }]);
+    chrome.breadcrumbs.set([{
+      text: discoverBreadcrumbsTitle,
+    }]);
   }
 
   let stateMonitor;
@@ -381,8 +416,20 @@ function discoverController(
 
   $scope.getBucketIntervalToolTipText = () => {
     return (
-      `This interval creates ${$scope.bucketInterval.scale > 1 ? 'buckets that are too large' : 'too many buckets'}
-      to show in the selected time range, so it has been scaled to ${$scope.bucketInterval.description }`
+      i18n('kbn.discover.bucketIntervalTooltip', {
+        // eslint-disable-next-line max-len
+        defaultMessage: 'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
+        values: {
+          bucketsDescription: $scope.bucketInterval.scale > 1
+            ? i18n('kbn.discover.bucketIntervalTooltip.tooLargeBucketsText', {
+              defaultMessage: 'buckets that are too large',
+            })
+            : i18n('kbn.discover.bucketIntervalTooltip.tooManyBucketsText', {
+              defaultMessage: 'too many buckets',
+            }),
+          bucketIntervalDescription: $scope.bucketInterval.description,
+        },
+      })
     );
   };
 
@@ -393,7 +440,7 @@ function discoverController(
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get('discover:sampleSize'),
-    timefield: $scope.indexPattern.timeFieldName,
+    timefield: isDefaultTypeIndexPattern($scope.indexPattern) && $scope.indexPattern.timeFieldName,
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.ip.list,
   };
@@ -528,7 +575,12 @@ function discoverController(
         stateMonitor.setInitialState($state.toJSON());
         if (id) {
           toastNotifications.addSuccess({
-            title: `Search '${savedSearch.title}' was saved`,
+            title: i18n('kbn.discover.notifications.savedSearchTitle', {
+              defaultMessage: `Search '{savedSearchTitle}' was saved`,
+              values: {
+                savedSearchTitle: savedSearch.title,
+              }
+            }),
             'data-test-subj': 'saveSearchSuccess',
           });
 
@@ -544,7 +596,12 @@ function discoverController(
       return { id };
     } catch(saveError) {
       toastNotifications.addDanger({
-        title: `Search '${savedSearch.title}' was not saved.`,
+        title: i18n('kbn.discover.notifications.notSavedSearchTitle', {
+          defaultMessage: `Search '{savedSearchTitle}' was not saved.`,
+          values: {
+            savedSearchTitle: savedSearch.title,
+          }
+        }),
         text: saveError.message
       });
       return { error: saveError };
@@ -641,9 +698,16 @@ function discoverController(
 
       if (status.remaining > 0) {
         const inspectorRequest = inspectorAdapters.requests.start(
-          `Segment ${$scope.fetchStatus.complete}`,
+          i18n('kbn.discover.inspectorRequest.segmentFetchCompleteStatusTitle', {
+            defaultMessage: 'Segment {fetchCompleteStatus}',
+            values: {
+              fetchCompleteStatus: $scope.fetchStatus.complete,
+            }
+          }),
           {
-            description: `This request queries Elasticsearch to fetch the data for the search.`,
+            description: i18n('kbn.discover.inspectorRequest.segmentFetchCompleteStatusDescription', {
+              defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
+            }),
           });
         inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
         $scope.searchSource.getSearchRequestBody().then(body => {
@@ -871,19 +935,36 @@ function discoverController(
     }
 
     if (stateVal && !stateValFound) {
-      const warningTitle = `"${stateVal}" is not a configured index pattern ID`;
+      const warningTitle = i18n('kbn.discover.valueIsNotConfiguredIndexPatternIDWarningTitle', {
+        defaultMessage: '{stateVal} is not a configured index pattern ID',
+        values: {
+          stateVal: `"${stateVal}"`,
+        },
+      });
 
       if (ownIndexPattern) {
         toastNotifications.addWarning({
           title: warningTitle,
-          text: `Showing the saved index pattern: "${ownIndexPattern.title}" (${ownIndexPattern.id})`,
+          text: i18n('kbn.discover.showingSavedIndexPatternWarningDescription', {
+            defaultMessage: 'Showing the saved index pattern: "{ownIndexPatternTitle}" ({ownIndexPatternId})',
+            values: {
+              ownIndexPatternTitle: ownIndexPattern.title,
+              ownIndexPatternId: ownIndexPattern.id,
+            },
+          }),
         });
         return ownIndexPattern;
       }
 
       toastNotifications.addWarning({
         title: warningTitle,
-        text: `Showing the default index pattern: "${loadedIndexPattern.title}" (${loadedIndexPattern.id})`,
+        text: i18n('kbn.discover.showingDefaultIndexPatternWarningDescription', {
+          defaultMessage: 'Showing the default index pattern: "{loadedIndexPatternTitle}" ({loadedIndexPatternId})',
+          values: {
+            loadedIndexPatternTitle: loadedIndexPattern.title,
+            loadedIndexPatternId: loadedIndexPattern.id,
+          },
+        }),
       });
     }
 
