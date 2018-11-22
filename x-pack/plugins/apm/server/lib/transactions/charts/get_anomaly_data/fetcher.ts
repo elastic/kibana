@@ -5,21 +5,11 @@
  */
 
 import { AggregationSearchResponse } from 'elasticsearch';
-import { TopHits } from 'x-pack/plugins/apm/typings/elasticsearch';
-import { ESClient } from '../../../../helpers/setup_request';
+import { Setup } from '../../../helpers/setup_request';
 
-export interface IOptions {
-  serviceName: string;
-  transactionType: string;
-  intervalString: string;
-  client: ESClient;
-  start: number;
-  end: number;
-}
-
-interface Bucket {
-  key_as_string: string;
-  key: number;
+export interface ESBucket {
+  key_as_string: string; // timestamp as string
+  key: number; // timestamp
   doc_count: number;
   anomaly_score: {
     value: number | null;
@@ -34,34 +24,47 @@ interface Bucket {
 
 interface Aggs {
   ml_avg_response_times: {
-    buckets: Bucket[];
+    buckets: ESBucket[];
   };
-  top_hits: TopHits<{
-    bucket_span: number;
-  }>;
 }
 
-export type ESResponse = AggregationSearchResponse<void, Aggs> | null;
+export type ESResponse = AggregationSearchResponse<void, Aggs>;
 
-export async function anomalyAggsFetcher({
+export async function anomalySeriesFetcher({
   serviceName,
   transactionType,
   intervalString,
-  client,
-  start,
-  end
-}: IOptions): Promise<ESResponse> {
+  mlBucketSize,
+  setup
+}: {
+  serviceName: string;
+  transactionType: string;
+  intervalString: string;
+  mlBucketSize: number;
+  setup: Setup;
+}) {
+  const { client, start, end } = setup;
+
+  // move the start back with one bucket size, to ensure to get anomaly data in the beginning
+  // this is required because ML has a minimum bucket size (default is 900s) so if our buckets are smaller, we might have several null buckets in the beginning
+  const newStart = start - mlBucketSize * 1000;
+
   const params = {
     index: `.ml-anomalies-${serviceName}-${transactionType}-high_mean_response_time`.toLowerCase(),
     body: {
       size: 0,
       query: {
         bool: {
+          must: {
+            exists: {
+              field: 'bucket_span'
+            }
+          },
           filter: [
             {
               range: {
                 timestamp: {
-                  gte: start,
+                  gte: newStart,
                   lte: end,
                   format: 'epoch_millis'
                 }
@@ -71,20 +74,13 @@ export async function anomalyAggsFetcher({
         }
       },
       aggs: {
-        top_hits: {
-          top_hits: {
-            sort: ['bucket_span'],
-            _source: { includes: ['bucket_span'] },
-            size: 1
-          }
-        },
         ml_avg_response_times: {
           date_histogram: {
             field: 'timestamp',
             interval: intervalString,
             min_doc_count: 0,
             extended_bounds: {
-              min: start,
+              min: newStart,
               max: end
             }
           },
@@ -103,7 +99,7 @@ export async function anomalyAggsFetcher({
   } catch (err) {
     const isHttpError = 'statusCode' in err;
     if (isHttpError) {
-      return null;
+      return;
     }
     throw err;
   }

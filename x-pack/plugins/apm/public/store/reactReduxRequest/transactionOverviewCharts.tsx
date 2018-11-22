@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { loadCharts } from '../../services/rest/apm';
 import { IReduxState } from '../rootReducer';
 import { getCharts } from '../selectors/chartSelectors';
@@ -39,11 +39,8 @@ export const getTransactionOverviewCharts = createSelector(
 );
 
 export function hasDynamicBaseline(state: IReduxState) {
-  return !isEmpty(
-    get(
-      state,
-      `reactReduxRequest[${ID}].data.responseTimes.avgAnomalies.buckets`
-    )
+  return (
+    get(state, `reactReduxRequest[${ID}].data.anomalyTimeSeries`) !== undefined
   );
 }
 
