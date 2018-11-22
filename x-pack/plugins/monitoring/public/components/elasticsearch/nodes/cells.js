@@ -8,12 +8,16 @@ import React from 'react';
 import { get } from 'lodash';
 import { formatMetric } from '../../../lib/format_number';
 import { KuiTableRowCell } from '@kbn/ui-framework/components';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function OfflineCell() {
   return (
     <KuiTableRowCell>
       <div className="monTableCell__number monTableCell__offline">
-        N/A
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.nodes.noDataInCellLabel"
+          defaultMessage="N/A"
+        />
       </div>
     </KuiTableRowCell>
   );

@@ -6,5 +6,4 @@
 
 
 
-import './styles/main.less';
 import './events_list_directive';
