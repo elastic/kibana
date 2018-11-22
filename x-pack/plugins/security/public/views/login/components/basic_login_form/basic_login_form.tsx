@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, FormEvent, Fragment, MouseEvent } from 'react';
 import { LoginState } from '../../../../../common/login_state';
 
@@ -15,6 +15,7 @@ interface Props {
   infoMessage?: string;
   loginState: LoginState;
   next: string;
+  intl: InjectedIntl;
 }
 
 interface State {
@@ -25,7 +26,7 @@ interface State {
   message: string;
 }
 
-export class BasicLoginForm extends Component<Props, State> {
+class BasicLoginFormUI extends Component<Props, State> {
   public state = {
     hasError: false,
     isLoading: false,
@@ -170,7 +171,7 @@ export class BasicLoginForm extends Component<Props, State> {
       message: '',
     });
 
-    const { http, window, next } = this.props;
+    const { http, window, next, intl } = this.props;
 
     const { username, password } = this.state;
 
@@ -179,19 +180,15 @@ export class BasicLoginForm extends Component<Props, State> {
       (error: any) => {
         const { statusCode = 500 } = error.data || {};
 
-        let message = (
-          <FormattedMessage
-            id="xpack.security.login.basicLoginForm.someErrorTryAgainErrorMessage"
-            defaultMessage="Oops! Error. Try again."
-          />
-        );
+        let message = intl.formatMessage({
+          id: 'xpack.security.login.basicLoginForm.someErrorTryAgainErrorMessage',
+          defaultMessage: 'Oops! Error. Try again.',
+        });
         if (statusCode === 401) {
-          message = (
-            <FormattedMessage
-              id="xpack.security.login.basicLoginForm.invalidUsernamePasswordErrorMessage"
-              defaultMessage="Invalid username or password. Please try again."
-            />
-          );
+          message = intl.formatMessage({
+            id: 'xpack.security.login.basicLoginForm.invalidUsernamePasswordErrorMessage',
+            defaultMessage: 'Invalid username or password. Please try again.',
+          });
         }
 
         this.setState({
@@ -203,3 +200,5 @@ export class BasicLoginForm extends Component<Props, State> {
     );
   };
 }
+
+export const BasicLoginForm = injectI18n(BasicLoginFormUI);
