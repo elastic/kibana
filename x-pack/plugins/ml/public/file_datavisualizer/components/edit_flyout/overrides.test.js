@@ -5,27 +5,50 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { Overrides } from './overrides';
 
+function getProps() {
+  return {
+    setOverrides: () => { },
+    overrides: {},
+    originalSettings: {},
+    defaultSettings: {},
+    setApplyOverrides: () => { },
+    fields: [],
+  };
+}
+
 describe('Overrides', () => {
 
   test('render overrides', () => {
-    const props = {
-      setOverrides: () => {},
-      overrides: {},
-      originalSettings: {},
-      defaultSettings: {},
-      setApplyOverrides: () => {},
-      fields: [],
-    };
+    const props = getProps();
 
     const component = shallow(
       <Overrides {...props} />
     );
 
     expect(component).toMatchSnapshot();
+  });
+
+  test('render overrides and trigger a state change', () => {
+    const FORMAT_1 = 'delimited';
+    const FORMAT_2 = 'ndjson';
+
+    const props = getProps();
+    props.overrides.format = FORMAT_1;
+
+    const component = mount(
+      <Overrides {...props} />
+    );
+
+    expect(component.state('format')).toEqual(FORMAT_1);
+
+    component.instance().onFormatChange(FORMAT_2);
+
+    expect(component.state('format')).toEqual(FORMAT_2);
+
   });
 });

@@ -17,7 +17,7 @@ export interface InfraSource {
   id: string /** The id of the source */;
   configuration: InfraSourceConfiguration /** The raw configuration of the source */;
   status: InfraSourceStatus /** The status of the source */;
-  capabilitiesByNode: (InfraNodeCapability | null)[] /** A hierarchy of capabilities available on nodes */;
+  metadataByNode: (InfraNodeMetadata | null)[] /** A hierarchy of metadata entries by node */;
   logEntriesAround: InfraLogEntryInterval /** A consecutive span of log entries surrounding a point in time */;
   logEntriesBetween: InfraLogEntryInterval /** A consecutive span of log entries within an interval */;
   logSummaryBetween: InfraLogSummaryInterval /** A consecutive span of summary buckets within an interval */;
@@ -56,8 +56,8 @@ export interface InfraIndexField {
   searchable: boolean /** Whether the field's values can be efficiently searched for */;
   aggregatable: boolean /** Whether the field's values can be aggregated */;
 }
-/** One specific capability available on a node. A capability corresponds to a fileset or metricset */
-export interface InfraNodeCapability {
+/** One metadata entry for a node. */
+export interface InfraNodeMetadata {
   name: string;
   source: string;
 }
@@ -163,7 +163,7 @@ export namespace InfraSourceResolvers {
     id?: IdResolver /** The id of the source */;
     configuration?: ConfigurationResolver /** The raw configuration of the source */;
     status?: StatusResolver /** The status of the source */;
-    capabilitiesByNode?: CapabilitiesByNodeResolver /** A hierarchy of capabilities available on nodes */;
+    metadataByNode?: MetadataByNodeResolver /** A hierarchy of metadata entries by node */;
     logEntriesAround?: LogEntriesAroundResolver /** A consecutive span of log entries surrounding a point in time */;
     logEntriesBetween?: LogEntriesBetweenResolver /** A consecutive span of log entries within an interval */;
     logSummaryBetween?: LogSummaryBetweenResolver /** A consecutive span of summary buckets within an interval */;
@@ -174,11 +174,8 @@ export namespace InfraSourceResolvers {
   export type IdResolver = Resolver<string>;
   export type ConfigurationResolver = Resolver<InfraSourceConfiguration>;
   export type StatusResolver = Resolver<InfraSourceStatus>;
-  export type CapabilitiesByNodeResolver = Resolver<
-    (InfraNodeCapability | null)[],
-    CapabilitiesByNodeArgs
-  >;
-  export interface CapabilitiesByNodeArgs {
+  export type MetadataByNodeResolver = Resolver<(InfraNodeMetadata | null)[], MetadataByNodeArgs>;
+  export interface MetadataByNodeArgs {
     nodeName: string;
     nodeType: InfraNodeType;
   }
@@ -289,8 +286,8 @@ export namespace InfraIndexFieldResolvers {
   export type SearchableResolver = Resolver<boolean>;
   export type AggregatableResolver = Resolver<boolean>;
 }
-/** One specific capability available on a node. A capability corresponds to a fileset or metricset */
-export namespace InfraNodeCapabilityResolvers {
+/** One metadata entry for a node. */
+export namespace InfraNodeMetadataResolvers {
   export interface Resolvers {
     name?: NameResolver;
     source?: SourceResolver;
@@ -493,7 +490,7 @@ export interface InfraMetricInput {
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
-export interface CapabilitiesByNodeInfraSourceArgs {
+export interface MetadataByNodeInfraSourceArgs {
   nodeName: string;
   nodeType: InfraNodeType;
 }
@@ -604,7 +601,7 @@ export enum InfraOperator {
 /** A segment of the log entry message */
 export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessageConstantSegment;
 
-export namespace CapabilitiesQuery {
+export namespace MetadataQuery {
   export type Variables = {
     sourceId: string;
     nodeId: string;
@@ -619,11 +616,11 @@ export namespace CapabilitiesQuery {
   export type Source = {
     __typename?: 'InfraSource';
     id: string;
-    capabilitiesByNode: (CapabilitiesByNode | null)[];
+    metadataByNode: (MetadataByNode | null)[];
   };
 
-  export type CapabilitiesByNode = {
-    __typename?: 'InfraNodeCapability';
+  export type MetadataByNode = {
+    __typename?: 'InfraNodeMetadata';
     name: string;
     source: string;
   };
@@ -815,6 +812,7 @@ export namespace SourceQuery {
 
   export type Source = {
     __typename?: 'InfraSource';
+    id: string;
     configuration: Configuration;
     status: Status;
   };

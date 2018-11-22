@@ -31,7 +31,7 @@ import { uiModules } from 'ui/modules';
 import fieldChooserTemplate from './field_chooser.html';
 const app = uiModules.get('apps/discover');
 
-app.directive('discFieldChooser', function ($location, globalState, config, $route) {
+app.directive('discFieldChooser', function ($location, globalState, config, $route, i18n) {
   return {
     restrict: 'E',
     scope: {
@@ -47,6 +47,16 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
+      $scope.$parent.$watch('showFilter', () =>{
+        $scope.toggleFieldFilterButtonAriaLabel = $scope.$parent.showFilter
+          ? i18n('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
+            defaultMessage: 'Hide field settings',
+          })
+          : i18n('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
+            defaultMessage: 'Show field settings',
+          });
+      });
+
       $scope.selectedIndexPattern = $scope.indexPatternList.find(
         (pattern) => pattern.id === $scope.indexPattern.id
       );
