@@ -56,6 +56,8 @@ if (global.__BUILT_WITH_BABEL__) {
   // building their server code at require-time since version 4.2
   // TODO: the plugin install process could transpile plugin server code...
   ignore.push(resolve(__dirname, '../../../src'));
+} else {
+  ignore.push(resolve(__dirname, '../../../packages'));
 }
 
 // modifies all future calls to require() to automatically
