@@ -381,8 +381,8 @@ export const RangeDatePicker = injectI18n(
             quickSelectTime: this.state.quickSelectTime,
             quickSelectUnit:
               this.state.quickSelectTime === 1
-                ? find(singleLastOptions, { value: this.state.quickSelectUnit })!.text
-                : find(pluralLastOptions, { value: this.state.quickSelectUnit })!.text,
+                ? get(find(singleLastOptions, { value: this.state.quickSelectUnit }), 'text')
+                : get(find(pluralLastOptions, { value: this.state.quickSelectUnit }), 'text'),
           }
         );
         startDate = moment().subtract(this.state.quickSelectTime, this.state
@@ -570,6 +570,7 @@ export const RangeDatePicker = injectI18n(
             </EuiLink>
           );
         }
+
         return (
           <EuiFlexItem grow={false} key={`${dateRange || date.type}`}>
             {dateLink}
