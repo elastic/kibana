@@ -19,7 +19,6 @@ source code and the existing visualizations provided with it.
 * <<development-none-response-handler>>
 * <<development-custom-response-handler>>
 * <<development-vis-timefilter>>
-- <<development-aggconfig>>
 
 [[development-visualization-factory]]
 === Visualization Factory
@@ -405,23 +404,3 @@ const MyNewVisType(Private) => {
 
 VisTypesRegistryProvider.register(MyNewVisType);
 -----------
-
-[[development-aggconfig]]
-=== AggConfig object
- 
-The AggConfig object represents an aggregation search to Elasticsearch, 
-plus some additional functionality to manage data-values that belong to this aggregation. 
-This is primarily used internally in Kibana, but you may find you have a need for it 
-when writing your own visualization. Here we provide short description of some of the methods on it, 
-however the best reference would be to actually check the source code.
- 
-  
-- *fieldFormatter(<type>)* : returns a function which will format your value according to field formatters defined on
-the field. The type can be either 'text' or 'html'.
-- *makeLabel()* : gets the label for the aggregation
-- *isFilterable()* : return true if aggregation is filterable (you can then call createFilter)
-- *createFilter(bucketKey)* : creates a filter for specific bucket key
-- *getValue(bucket)* : gets value for a specific bucket
-- *getField()* : gets the field used for this aggregation
-- *getFieldDisplayName()* : gets field display name
-- *getAggParams()* : gets the arguments to the aggregation
