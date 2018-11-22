@@ -12,6 +12,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
   const retry = getService('retry');
+  const log = getService('log');
   const PageObjects = getPageObjects(['common']);
 
   describe('smoke test', async () => {
@@ -20,12 +21,16 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
 
     before(async () => {
       // init data
+      log.debug('canvas smoke test: start beforeAll');
       await esArchiver.loadIfNeeded('logstash_functional');
+      log.debug('canvas smoke test: logstash data loaded');
       await esArchiver.load('canvas/default');
+      log.debug('canvas smoke test: canvas data loaded');
 
       // load canvas
       // see also navigateToUrl(app, hash)
       await PageObjects.common.navigateToApp('canvas');
+      log.debug('canvas smoke test: app navigation success');
     });
 
     it('loads workpad list', async () => {
