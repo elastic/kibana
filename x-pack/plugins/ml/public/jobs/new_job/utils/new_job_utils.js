@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { migrateFilter } from 'ui/courier';
+import { migrateFilter } from '@kbn/es-query';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
