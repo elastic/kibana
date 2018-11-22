@@ -6,5 +6,4 @@
 
 
 
-import './styles/main.less';
 import './controls_select_directive.js';

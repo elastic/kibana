@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { TopNavIds } from './top_nav_ids';
 
@@ -57,8 +58,12 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
 
 function getFullScreenConfig(action) {
   return {
-    key: 'full screen',
-    description: 'Full Screen Mode',
+    key: i18n.translate('kbn.dashboard.topNave.fullScreenButtonAriaLabel', {
+      defaultMessage: 'full screen',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.fullScreenConfigDescription', {
+      defaultMessage: 'Full Screen Mode',
+    }),
     testId: 'dashboardFullScreenMode',
     run: action
   };
@@ -69,8 +74,12 @@ function getFullScreenConfig(action) {
  */
 function getEditConfig(action) {
   return {
-    key: 'edit',
-    description: 'Switch to edit mode',
+    key: i18n.translate('kbn.dashboard.topNave.editButtonAriaLabel', {
+      defaultMessage: 'edit',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.editConfigDescription', {
+      defaultMessage: 'Switch to edit mode',
+    }),
     testId: 'dashboardEditMode',
     run: action
   };
@@ -81,8 +90,12 @@ function getEditConfig(action) {
  */
 function getSaveConfig(action) {
   return {
-    key: TopNavIds.SAVE,
-    description: 'Save your dashboard',
+    key: i18n.translate('kbn.dashboard.topNave.saveButtonAriaLabel', {
+      defaultMessage: 'save',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.saveConfigDescription', {
+      defaultMessage: 'Save your dashboard',
+    }),
     testId: 'dashboardSaveMenuItem',
     run: action
   };
@@ -93,8 +106,12 @@ function getSaveConfig(action) {
  */
 function getViewConfig(action) {
   return {
-    key: 'cancel',
-    description: 'Cancel editing and switch to view-only mode',
+    key: i18n.translate('kbn.dashboard.topNave.cancelButtonAriaLabel', {
+      defaultMessage: 'cancel',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.viewConfigDescription', {
+      defaultMessage: 'Cancel editing and switch to view-only mode',
+    }),
     testId: 'dashboardViewOnlyMode',
     run: action
   };
@@ -105,8 +122,12 @@ function getViewConfig(action) {
  */
 function getCloneConfig(action) {
   return {
-    key: TopNavIds.CLONE,
-    description: 'Create a copy of your dashboard',
+    key: i18n.translate('kbn.dashboard.topNave.cloneButtonAriaLabel', {
+      defaultMessage: 'clone',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.cloneConfigDescription', {
+      defaultMessage: 'Create a copy of your dashboard',
+    }),
     testId: 'dashboardClone',
     run: action
   };
@@ -117,8 +138,12 @@ function getCloneConfig(action) {
  */
 function getAddConfig(action) {
   return {
-    key: TopNavIds.ADD,
-    description: 'Add a panel to the dashboard',
+    key: i18n.translate('kbn.dashboard.topNave.addButtonAriaLabel', {
+      defaultMessage: 'add',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.addConfigDescription', {
+      defaultMessage: 'Add a panel to the dashboard',
+    }),
     testId: 'dashboardAddPanelButton',
     run: action
   };
@@ -129,8 +154,12 @@ function getAddConfig(action) {
  */
 function getShareConfig(action) {
   return {
-    key: TopNavIds.SHARE,
-    description: 'Share Dashboard',
+    key: i18n.translate('kbn.dashboard.topNave.shareButtonAriaLabel', {
+      defaultMessage: 'share',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.shareConfigDescription', {
+      defaultMessage: 'Share Dashboard',
+    }),
     testId: 'shareTopNavButton',
     run: action,
   };
@@ -141,8 +170,12 @@ function getShareConfig(action) {
  */
 function getOptionsConfig(action) {
   return {
-    key: TopNavIds.OPTIONS,
-    description: 'Options',
+    key: i18n.translate('kbn.dashboard.topNave.optionsButtonAriaLabel', {
+      defaultMessage: 'options',
+    }),
+    description: i18n.translate('kbn.dashboard.topNave.optionsConfigDescription', {
+      defaultMessage: 'Options',
+    }),
     testId: 'dashboardOptionsButton',
     run: action,
   };
