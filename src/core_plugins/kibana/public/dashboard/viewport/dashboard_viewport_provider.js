@@ -19,6 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { I18nProvider } from '@kbn/i18n/react';
 import { store } from '../../store';
 import { Provider } from 'react-redux';
 import { DashboardViewportContainer } from './dashboard_viewport_container';
@@ -26,7 +27,9 @@ import { DashboardViewportContainer } from './dashboard_viewport_container';
 export function DashboardViewportProvider(props) {
   return (
     <Provider store={store}>
-      <DashboardViewportContainer {...props} />
+      <I18nProvider>
+        <DashboardViewportContainer {...props} />
+      </I18nProvider>
     </Provider>
   );
 }

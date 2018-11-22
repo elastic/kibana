@@ -31,7 +31,11 @@ exports[`SpacesGridPage renders as expected 1`] = `
               size="m"
             >
               <h1>
-                Spaces
+                <FormattedMessage
+                  defaultMessage="Spaces"
+                  id="xpack.spaces.management.spacesGridPage.spacesTitle"
+                  values={Object {}}
+                />
               </h1>
             </EuiText>
           </EuiFlexItem>
@@ -46,7 +50,11 @@ exports[`SpacesGridPage renders as expected 1`] = `
               onClick={[Function]}
               type="button"
             >
-              Create space
+              <FormattedMessage
+                defaultMessage="Create space"
+                id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
+                values={Object {}}
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -107,7 +115,13 @@ exports[`SpacesGridPage renders as expected 1`] = `
           itemId="id"
           items={Array []}
           loading={true}
-          message="loading..."
+          message={
+            <FormattedMessage
+              defaultMessage="loading…"
+              id="xpack.spaces.management.spacesGridPage.loadingTitle"
+              values={Object {}}
+            />
+          }
           pagination={true}
           responsive={true}
           search={

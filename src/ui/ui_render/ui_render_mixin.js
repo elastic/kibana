@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { defaults } from 'lodash';
 import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
+import { mergeVariables } from './lib';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -40,7 +40,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
     defaultInjectedVars = defaultInjectedVarProviders
       .reduce((allDefaults, { fn, pluginSpec }) => (
-        defaults(
+        mergeVariables(
           allDefaults,
           fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
         )
@@ -145,7 +145,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         basePath,
         vars: await replaceInjectedVars(
           request,
-          defaults(
+          mergeVariables(
             injectedVarsOverrides,
             await server.getInjectedUiAppVars(app.getId()),
             defaultInjectedVars,
