@@ -9,14 +9,19 @@
  * rules are being edited.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiDescriptionList } from '@elastic/eui';
 
+// @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
+import { Annotation } from '../../../common/interfaces/annotations';
 
-export function AnnotationDescriptionList({ annotation }) {
+interface Props {
+  annotation: Annotation;
+}
+
+export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
   const listItems = [
     {
       title: 'Job ID',
@@ -39,7 +44,4 @@ export function AnnotationDescriptionList({ annotation }) {
       listItems={listItems}
     />
   );
-}
-AnnotationDescriptionList.propTypes = {
-  annotation: PropTypes.object.isRequired,
 };

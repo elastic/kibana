@@ -24,17 +24,27 @@ import {
 
 import { AnnotationDescriptionList } from './annotation_description_list';
 
-export function AnnotationFlyout({
+import { Annotation } from '../../../common/interfaces/annotations';
+
+interface Props {
+  annotation: Annotation;
+  cancelAction: () => {};
+  controlFunc: () => {};
+  deleteAction: (annotation: Annotation) => {};
+  saveAction: (annotation: Annotation) => {};
+}
+
+export const AnnotationFlyout: React.SFC<Props> = ({
   annotation,
   cancelAction,
   controlFunc,
   deleteAction,
-  saveAction
-}) {
+  saveAction,
+}) => {
   const saveActionWrapper = () => saveAction(annotation);
   const deleteActionWrapper = () => deleteAction(annotation);
   const isExistingAnnotation = typeof annotation._id !== 'undefined';
-  const titlePrefix = (isExistingAnnotation) ? 'Edit' : 'Add';
+  const titlePrefix = isExistingAnnotation ? 'Edit' : 'Add';
 
   return (
     <EuiFlyout onClose={cancelAction} size="s" aria-labelledby="Add annotation">
@@ -64,21 +74,14 @@ export function AnnotationFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isExistingAnnotation &&
-              <EuiButtonEmpty
-                color="danger"
-                onClick={deleteActionWrapper}
-              >
+            {isExistingAnnotation && (
+              <EuiButtonEmpty color="danger" onClick={deleteActionWrapper}>
                 Delete
               </EuiButtonEmpty>
-            }
+            )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isDisabled={annotation.annotation === ''}
-              onClick={saveActionWrapper}
-            >
+            <EuiButton fill isDisabled={annotation.annotation === ''} onClick={saveActionWrapper}>
               {isExistingAnnotation ? 'Update' : 'Create'}
             </EuiButton>
           </EuiFlexItem>
@@ -86,4 +89,4 @@ export function AnnotationFlyout({
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
-}
+};
