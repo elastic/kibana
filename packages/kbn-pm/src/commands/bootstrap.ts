@@ -30,15 +30,25 @@ export const BootstrapCommand: ICommand = {
   name: 'bootstrap',
 
   async run(projects, projectGraph, { options }) {
+    const batchedProjectsByWorkspace = topologicallyBatchProjects(projects, projectGraph, {
+      batchByWorkspace: true,
+    });
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
-    const frozenLockfile = options['frozen-lockfile'] === true;
-    const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
+    const extraArgs = [
+      ...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []),
+      ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
+    ];
 
     log.write(chalk.bold('\nRunning installs in topological order:'));
 
-    for (const batch of batchedProjects) {
+    for (const batch of batchedProjectsByWorkspace) {
       for (const project of batch) {
+        if (project.isWorkspaceProject) {
+          log.write(`Skipping workspace project: ${project.name}`);
+          continue;
+        }
+
         if (project.hasDependencies()) {
           await project.installDependencies({ extraArgs });
         }

@@ -23,7 +23,15 @@ import FieldSelect from './aggs/field_select';
 import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
 import YesNo from './yes_no';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+} from '@elastic/eui';
 
 export const IndexPattern = props => {
   const { fields, prefix } = props;
@@ -45,48 +53,63 @@ export const IndexPattern = props => {
   const model = { ...defaults, ...props.model };
   return (
     <div className={props.className}>
-      <label className="vis_editor__label" htmlFor={htmlId('indexPattern')}>
-        Index Pattern
-      </label>
-      <input
-        id={htmlId('indexPattern')}
-        className="vis_editor__input"
-        disabled={props.disabled}
-        onChange={handleTextChange(indexPatternName, '*')}
-        value={model[indexPatternName]}
-        data-test-subj="metricsIndexPatternInput"
-      />
-      <label className="vis_editor__label" htmlFor={htmlId('timeField')}>
-        Time Field
-      </label>
-      <div className="vis_editor__index_pattern-fields">
-        <FieldSelect
-          id={htmlId('timeField')}
-          restrict="date"
-          value={model[timeFieldName]}
-          disabled={props.disabled}
-          onChange={handleSelectChange(timeFieldName)}
-          indexPattern={model[indexPatternName]}
-          fields={fields}
-          data-test-subj="metricsIndexPatternFieldsSelect"
-        />
-      </div>
-      <label className="vis_editor__label" htmlFor={htmlId('interval')}>
-        Interval (auto, 1m, 1d, 7d, 1y, &gt;=1m)
-      </label>
-      <input
-        id={htmlId('interval')}
-        className="vis_editor__input"
-        disabled={props.disabled}
-        onChange={handleTextChange(intervalName, 'auto')}
-        value={model[intervalName]}
-      />
-      <div className="vis_editor__label">Drop Last Bucket</div>
-      <YesNo
-        value={model[dropBucketName]}
-        name={dropBucketName}
-        onChange={props.onChange}
-      />
+      <EuiFlexGroup responsive={false} wrap={true}>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('indexPattern')}
+            label="Index pattern"
+            fullWidth
+          >
+            <EuiFieldText
+              data-test-subj="metricsIndexPatternInput"
+              disabled={props.disabled}
+              onChange={handleTextChange(indexPatternName, '*')}
+              value={model[indexPatternName]}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('timeField')}
+            label="Time field"
+            fullWidth
+          >
+            <FieldSelect
+              data-test-subj="metricsIndexPatternFieldsSelect"
+              restrict="date"
+              value={model[timeFieldName]}
+              disabled={props.disabled}
+              onChange={handleSelectChange(timeFieldName)}
+              indexPattern={model[indexPatternName]}
+              fields={fields}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('interval')}
+            label="Interval"
+            helpText="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
+          >
+            <EuiFieldText
+              disabled={props.disabled}
+              onChange={handleTextChange(intervalName, 'auto')}
+              value={model[intervalName]}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel>Drop last bucket?</EuiFormLabel>
+          <EuiSpacer size="s" />
+          <YesNo
+            value={model[dropBucketName]}
+            name={dropBucketName}
+            onChange={props.onChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
@@ -94,7 +117,6 @@ export const IndexPattern = props => {
 IndexPattern.defaultProps = {
   prefix: '',
   disabled: false,
-  className: 'vis_editor__row'
 };
 
 IndexPattern.propTypes = {

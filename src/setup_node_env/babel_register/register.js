@@ -38,8 +38,12 @@ var ignore = [
   // https://github.com/elastic/kibana/issues/14800#issuecomment-366130268
 
   // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
+  // is `x-pack` or `b` is not `node_modules`
+  /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
+
+  // ignore paths matching `/canvas/canvas_plugin/{a}/{b}` unless
   // is `x-pack` and `b` is not `node_modules`
-  /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/
+  /\/canvas\/canvas_plugin\/(?!functions\/server)([^\/]+\/[^\/]+)/,
 ];
 
 if (global.__BUILT_WITH_BABEL__) {
