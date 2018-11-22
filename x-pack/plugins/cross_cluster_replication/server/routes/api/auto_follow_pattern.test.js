@@ -8,7 +8,7 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { registerAutoFollowPatternRoutes } from './auto_follow_pattern';
 import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../fixtures/autofollow_pattern';
-import { deserializeAutofollowPattern, serializeAutofolloPattern } from '../../lib/autofollow_pattern_serialization';
+import { deserializeAutofollowPattern } from '../../lib/autofollow_pattern_serialization';
 
 jest.mock('../../lib/call_with_request_factory', () => ({ callWithRequestFactory: jest.fn() }));
 jest.mock('../../lib/is_es_error_factory', () => ({ isEsErrorFactory: () => () => true }));
@@ -90,23 +90,20 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
     });
 
     it('should serialize the payload before sending it to Elasticsearch', async () => {
-      const spy = jest.fn();
-      callWithRequestFactory.mockReturnValueOnce(spy);
-
-      const id = 'foo';
-      const autoFollowPattern = deserializeAutofollowPattern('random', getAutoFollowPatternMock());
-      delete autoFollowPattern.name;
+      callWithRequestFactory.mockReturnValueOnce((_, payload = {}) => {
+        if (payload.body.remote_cluster !== 'bar') {
+          return `Error: body (${JSON.stringify(payload)})`;
+        }
+        return 'OK';
+      });
 
       const request = {
-        params: { id },
-        payload: autoFollowPattern
+        params: { id: 'foo' },
+        payload: { remoteCluster: 'bar' }
       };
 
-      await routeHandler(request);
-
-      expect(spy.mock.calls.length).toBeGreaterThan(0);
-      const callWithRequestArg = spy.mock.calls[0][1];
-      expect(callWithRequestArg).toEqual({ id, body: serializeAutofolloPattern(autoFollowPattern) });
+      const response = await routeHandler(request);
+      expect(response).toEqual('OK');
     });
   });
 });
