@@ -18,6 +18,9 @@
  */
 
 import { displayHelp, processOptions } from './args';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+
+expect.addSnapshotSerializer(createAbsolutePathSerializer(process.cwd()));
 
 describe('display help for run tests CLI', () => {
   it('displays as expected', () => {

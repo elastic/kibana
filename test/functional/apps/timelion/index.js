@@ -24,6 +24,8 @@ export default function ({ getService, loadTestFile }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('timelion app', function () {
+    this.tags('ciGroup1');
+
     before(async function () {
       log.debug('Starting timelion before method');
       remote.setWindowSize(1280, 800);
