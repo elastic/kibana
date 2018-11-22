@@ -40,7 +40,6 @@ export const getServerRegistries = () => {
 
 export const populateServerRegistries = types => {
   if (called) {
-    console.log('function should only be called once per process');
     return populatePromise;
   }
   called = true;
