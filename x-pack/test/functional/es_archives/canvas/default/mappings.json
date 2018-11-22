@@ -1,17 +1,53 @@
 {
   "type": "index",
   "value": {
-    "index": ".kibana_1",
+    "index": ".kibana",
     "settings": {
       "index": {
         "number_of_shards": "1",
-        "number_of_replicas": "1"
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0"
       }
     },
     "mappings": {
       "doc": {
         "dynamic": "strict",
         "properties": {
+          "apm-telemetry": {
+            "properties": {
+              "has_any_services": {
+                "type": "boolean"
+              },
+              "services_per_agent": {
+                "properties": {
+                  "go": {
+                    "type": "long",
+                    "null_value": 0
+                  },
+                  "java": {
+                    "type": "long",
+                    "null_value": 0
+                  },
+                  "js-base": {
+                    "type": "long",
+                    "null_value": 0
+                  },
+                  "nodejs": {
+                    "type": "long",
+                    "null_value": 0
+                  },
+                  "python": {
+                    "type": "long",
+                    "null_value": 0
+                  },
+                  "ruby": {
+                    "type": "long",
+                    "null_value": 0
+                  }
+                }
+              }
+            }
+          },
           "canvas-workpad": {
             "dynamic": "false",
             "properties": {
@@ -346,8 +382,6 @@
         }
       }
     },
-    "aliases": {
-      ".kibana": {}
-    }
+    "aliases": {}
   }
 }
