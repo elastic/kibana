@@ -7,7 +7,7 @@
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { px, unit } from '../../../../../style/variables';
+import { px, unit } from 'x-pack/plugins/apm/common/variables';
 // @ts-ignore
 import Legend from '../../../../shared/charts/Legend';
 import { IServiceColors } from './Waterfall/waterfall_helpers/waterfall_helpers';

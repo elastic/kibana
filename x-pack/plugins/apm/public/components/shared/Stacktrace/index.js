@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { isEmpty, get } from 'lodash';
 import CodePreview from '../../shared/CodePreview';
 import { Ellipsis } from '../../shared/Icons';
-import { units, px } from '../../../style/variables';
+import { units, px } from 'x-pack/plugins/apm/common/variables';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { EuiLink, EuiTitle } from '@elastic/eui';
 

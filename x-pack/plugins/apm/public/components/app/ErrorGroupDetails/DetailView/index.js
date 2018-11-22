@@ -13,7 +13,7 @@ import {
   px,
   colors,
   borderRadius
-} from '../../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 import { get, capitalize, isEmpty } from 'lodash';
 import { STATUS } from '../../../../constants';
 import { StickyProperties } from '../../../shared/StickyProperties';

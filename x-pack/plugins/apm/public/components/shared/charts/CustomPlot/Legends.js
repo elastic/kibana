@@ -15,7 +15,7 @@ import {
   px,
   colors,
   truncate
-} from '../../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 
 const Container = styled.div`
   display: flex;

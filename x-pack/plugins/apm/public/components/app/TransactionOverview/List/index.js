@@ -11,7 +11,7 @@ import { RelativeLink, legacyEncodeURIComponent } from '../../../../utils/url';
 import { asMillis, asDecimal, tpmUnit } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 
-import { fontFamilyCode, truncate } from '../../../../style/variables';
+import { fontFamilyCode, truncate } from 'x-pack/plugins/apm/common/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
 
 function tpmLabel(type) {

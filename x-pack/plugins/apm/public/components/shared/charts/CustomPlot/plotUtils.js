@@ -11,7 +11,7 @@ import d3 from 'd3';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { unit } from '../../../../style/variables';
+import { unit } from 'x-pack/plugins/apm/common/variables';
 
 const XY_HEIGHT = unit * 16;
 const XY_MARGIN = {

@@ -16,7 +16,7 @@ import {
   px,
   colors,
   borderRadius
-} from '../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 
 const ContextContainer = styled.div`
   position: relative;

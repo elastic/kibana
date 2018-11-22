@@ -6,7 +6,12 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { units, borderRadius, px, colors } from '../../../../style/variables';
+import {
+  units,
+  borderRadius,
+  px,
+  colors
+} from 'x-pack/plugins/apm/common/variables';
 
 const ImpactBarBackground = styled.div`
   height: ${px(units.minus)};

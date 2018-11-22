@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import CustomPlot from '../CustomPlot';
 import { asMillis, tpmUnit, asInteger } from '../../../../utils/formatters';
 import styled from 'styled-components';
-import { units, unit, px } from '../../../../style/variables';
+import { units, unit, px } from 'x-pack/plugins/apm/common/variables';
 import { timefilter } from 'ui/timefilter';
 import moment from 'moment';
 

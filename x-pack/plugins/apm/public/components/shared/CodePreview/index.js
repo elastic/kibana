@@ -12,7 +12,7 @@ import {
   colors,
   fontFamilyCode,
   borderRadius
-} from '../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 
 import { isEmpty } from 'lodash';
 

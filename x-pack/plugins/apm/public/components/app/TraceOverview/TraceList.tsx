@@ -6,8 +6,8 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import { fontSizes, truncate } from 'x-pack/plugins/apm/common/variables';
 import { ITransactionGroup } from 'x-pack/plugins/apm/server/lib/transaction_groups/transform';
-import { fontSizes, truncate } from '../../../style/variables';
 import { asMillis } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';

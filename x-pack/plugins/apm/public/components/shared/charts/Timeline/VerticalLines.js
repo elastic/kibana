@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { XYPlot, VerticalGridLines } from 'react-vis';
-import { colors } from '../../../../style/variables';
+import { colors } from 'x-pack/plugins/apm/common/variables';
 
 class VerticalLines extends PureComponent {
   render() {

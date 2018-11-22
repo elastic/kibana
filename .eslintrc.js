@@ -278,6 +278,7 @@ module.exports = {
       rules: {
         'no-unused-vars': ['error', { ignoreRestSiblings: true }],
         'no-console': ['warn', { allow: ['error'] }],
+        'import/no-extraneous-dependencies': 'off',
       },
     },
 

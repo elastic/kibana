@@ -7,8 +7,8 @@
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { fontSizes, truncate } from 'x-pack/plugins/apm/common/variables';
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
-import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { RelativeLink } from '../../../../utils/url';
 import { ManagedTable } from '../../../shared/ManagedTable';

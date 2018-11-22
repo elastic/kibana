@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { units, px } from '../../../../style/variables';
+import { units, px } from 'x-pack/plugins/apm/common/variables';
 import { EuiIcon } from '@elastic/eui';
 import { Tooltip } from 'pivotal-ui/react/tooltip';
 import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';

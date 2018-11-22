@@ -14,9 +14,9 @@ import {
 import { capitalize, first, get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { px, units } from 'x-pack/plugins/apm/common/variables';
 import { Transaction } from '../../../../../typings/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import { px, units } from '../../../../style/variables';
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 import {
   getPropertyTabNames,

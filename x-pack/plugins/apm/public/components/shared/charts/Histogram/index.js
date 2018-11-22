@@ -21,7 +21,7 @@ import {
   makeWidthFlexible,
   VerticalGridLines
 } from 'react-vis';
-import { unit, colors } from '../../../../style/variables';
+import { unit, colors } from 'x-pack/plugins/apm/common/variables';
 import Tooltip from '../Tooltip';
 
 const XY_HEIGHT = unit * 10;

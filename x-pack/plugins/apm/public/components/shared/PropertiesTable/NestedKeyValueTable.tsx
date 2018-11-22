@@ -8,14 +8,14 @@ import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
-import { StringMap } from '../../../../typings/common';
 import {
   colors,
   fontFamilyCode,
   fontSizes,
   px,
   units
-} from '../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
+import { StringMap } from '../../../../typings/common';
 
 export type KeySorter = (data: StringMap, parentKey?: string) => string[];
 

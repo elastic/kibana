@@ -15,7 +15,7 @@ import {
   units,
   fontSizes,
   unit
-} from '../../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 import { tint } from 'polished';
 
 function getIconColor(type) {

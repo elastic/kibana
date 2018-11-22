@@ -23,7 +23,7 @@ import {
   fontFamilyCode,
   fontSizes,
   truncate
-} from '../../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 
 function paginateItems({ items, pageIndex, pageSize }) {
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);

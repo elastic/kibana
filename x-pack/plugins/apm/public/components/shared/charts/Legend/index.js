@@ -6,7 +6,12 @@
 
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { units, px, colors, fontSizes } from '../../../../style/variables';
+import {
+  units,
+  px,
+  colors,
+  fontSizes
+} from 'x-pack/plugins/apm/common/variables';
 
 const Container = styled.div`
   display: flex;

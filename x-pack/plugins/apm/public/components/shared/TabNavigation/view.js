@@ -15,7 +15,7 @@ import {
   colors,
   fontSizes,
   truncate
-} from '../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 import { isEmpty } from 'lodash';
 
 import TooltipOverlay from '../../shared/TooltipOverlay';

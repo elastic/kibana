@@ -18,7 +18,7 @@ import {
   borderRadius,
   fontSize,
   fontSizes
-} from '../../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 import Legend from '../Legend';
 
 const TooltipElm = styled.div`

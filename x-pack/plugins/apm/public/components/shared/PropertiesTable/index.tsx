@@ -9,7 +9,6 @@ import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
-import { StringMap } from '../../../../typings/common';
 import {
   colors,
   fontSize,
@@ -17,7 +16,8 @@ import {
   px,
   unit,
   units
-} from '../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
+import { StringMap } from '../../../../typings/common';
 import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
 // @ts-ignore
 import { ExternalLink } from '../../../utils/url';

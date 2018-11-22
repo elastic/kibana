@@ -11,7 +11,7 @@ import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
 import AgentMarker from './AgentMarker';
-import { colors, px } from '../../../../style/variables';
+import { colors, px } from 'x-pack/plugins/apm/common/variables';
 import { getTimeFormatter } from '../../../../utils/formatters';
 
 // Remove any tick that is too close to traceRootDuration

@@ -15,7 +15,7 @@ import TabNavigation from '../../shared/TabNavigation';
 import TransactionCharts from '../../shared/charts/TransactionCharts';
 import { ViewMLJob } from '../../../utils/url';
 import List from './List';
-import { units, px, fontSizes } from '../../../style/variables';
+import { units, px, fontSizes } from 'x-pack/plugins/apm/common/variables';
 import { TransactionOverviewChartsRequest } from '../../../store/reactReduxRequest/transactionOverviewCharts';
 import { TransactionListRequest } from '../../../store/reactReduxRequest/transactionList';
 import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';

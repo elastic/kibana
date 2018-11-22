@@ -7,10 +7,10 @@
 import d3 from 'd3';
 import { difference, last, memoize, zipObject } from 'lodash';
 import { rgba } from 'polished';
+import { colors } from 'x-pack/plugins/apm/common/variables';
 import { AvgAnomalyBucket } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_avg_response_time_anomalies/get_anomaly_aggs/transform';
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { colors } from '../../style/variables';
 import { asDecimal, asMillis, tpmUnit } from '../../utils/formatters';
 import { IUrlParams } from '../urlParams';
 

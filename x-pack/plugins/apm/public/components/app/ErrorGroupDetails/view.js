@@ -21,7 +21,7 @@ import {
   colors,
   fontFamilyCode,
   fontSizes
-} from '../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 import {
   ERROR_CULPRIT,
   ERROR_LOG_MESSAGE,

@@ -13,7 +13,7 @@ import {
   px,
   unit,
   units
-} from '../../../../../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 
 import SyntaxHighlighter, {
   registerLanguage

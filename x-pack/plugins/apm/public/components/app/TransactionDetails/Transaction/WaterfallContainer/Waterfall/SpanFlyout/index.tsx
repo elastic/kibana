@@ -19,12 +19,12 @@ import React from 'react';
 import styled from 'styled-components';
 
 // @ts-ignore
+import { px, unit } from 'x-pack/plugins/apm/common/variables';
 import {
   SERVICE_LANGUAGE_NAME,
   SPAN_HEX_ID,
   SPAN_ID
 } from '../../../../../../../../common/constants';
-import { px, unit } from '../../../../../../../style/variables';
 
 // @ts-ignore
 import Stacktrace from '../../../../../../shared/Stacktrace';

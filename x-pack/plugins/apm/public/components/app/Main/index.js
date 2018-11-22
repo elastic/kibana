@@ -9,7 +9,12 @@ import styled from 'styled-components';
 import { Route, Switch } from 'react-router-dom';
 import { routes } from './routeConfig';
 import ScrollToTopOnPathChange from './ScrollToTopOnPathChange';
-import { px, units, unit, topNavHeight } from '../../../style/variables';
+import {
+  px,
+  units,
+  unit,
+  topNavHeight
+} from 'x-pack/plugins/apm/common/variables';
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
 
 const MainContainer = styled.div`

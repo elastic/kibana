@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiToolTip } from '@elastic/eui';
 import Legend from '../Legend';
-import { colors, units, px } from '../../../../style/variables';
+import { colors, units, px } from 'x-pack/plugins/apm/common/variables';
 import styled from 'styled-components';
 import { asTime } from '../../../../utils/formatters';
 

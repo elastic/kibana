@@ -5,7 +5,13 @@
  */
 
 import styled from 'styled-components';
-import { unit, units, px, fontSizes, colors } from '../../style/variables';
+import {
+  unit,
+  units,
+  px,
+  fontSizes,
+  colors
+} from 'x-pack/plugins/apm/common/variables';
 import { RelativeLink } from '../../utils/url';
 
 export const HeaderContainer = styled.div`

@@ -13,7 +13,7 @@ import {
   units,
   fontFamily,
   unit
-} from '../../../style/variables';
+} from 'x-pack/plugins/apm/common/variables';
 
 import { Ellipsis } from '../../shared/Icons';
 import { PropertiesTable } from '../../shared/PropertiesTable';
