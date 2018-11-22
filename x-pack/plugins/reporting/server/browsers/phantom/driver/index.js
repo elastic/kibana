@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
 import { randomBytes } from 'crypto';
 import { fromCallback } from 'bluebird';
 import { transformFn } from './transform_fn';
@@ -125,7 +124,24 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
         randomBytes(6).toString('base64'),
       ].join('-');
 
-      return _injectPromise(page)
+      const intlPath = require.resolve('intl/dist/Intl.min.js');
+      const promisePath = require.resolve('bluebird/js/browser/bluebird.js');
+
+      return injectPolyfill(
+        page,
+        intlPath,
+        function hasIntl() {
+          return (window.Intl !== undefined);
+        }
+      )
+        .then(() =>
+          injectPolyfill(
+            page,
+            promisePath,
+            function hasPromise() {
+              return (window.Promise !== undefined);
+            }
+          ))
         .then(() => {
           return fromCallback(cb => {
             page.evaluate(transformFn(evaluateWrapper), transformFn(fn).toString(), uniqId, args, cb);
@@ -315,35 +331,26 @@ export function PhantomDriver({ page, browser, zoom, logger }) {
   };
 }
 
+async function injectPolyfill(page, pathToPolyfillFile, checkFunction) {
+  const hasPolyfill = await fromCallback(cb => {
+    page.evaluate(checkFunction, cb);
+  });
 
-function _injectPromise(page) {
-  function checkForPromise() {
-    return fromCallback(cb => {
-      page.evaluate(function hasPromise() {
-        return (typeof window.Promise !== 'undefined');
-      }, cb);
-    });
+  if (hasPolyfill) {
+    return;
   }
 
-  return checkForPromise()
-    .then(hasPromise => {
-      if (hasPromise) return;
+  const status = await fromCallback(cb => page.injectJs(pathToPolyfillFile, cb));
 
-      const nodeModules = path.resolve(__dirname, '..', '..', '..', '..', '..', '..', 'node_modules');
-      const promisePath = path.join(nodeModules, 'bluebird', 'js', 'browser', 'bluebird.js');
-      return fromCallback(cb => page.injectJs(promisePath, cb))
-        .then(status => {
-          if (status !== true) {
-            return Promise.reject('Failed to load Promise library');
-          }
-        })
-        .then(checkForPromise)
-        .then(hasPromiseLoaded => {
-          if (hasPromiseLoaded !== true) {
-            return Promise.reject('Failed to inject Promise');
-          }
-        });
-    });
+  if (!status) {
+    return Promise.reject(`Failed to load ${pathToPolyfillFile} library`);
+  }
+
+  const hasPolyfillLoaded = await fromCallback(cb => {
+    page.evaluate(checkFunction, cb);
+  });
+
+  if (!hasPolyfillLoaded) {
+    return Promise.reject(`Failed to inject ${pathToPolyfillFile}`);
+  }
 }
-
-
