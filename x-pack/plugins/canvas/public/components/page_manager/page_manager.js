@@ -53,6 +53,10 @@ export class PageManager extends React.PureComponent {
 
   scrollToActivePage = () => {
     if (this.activePageRef && this.pageListRef) {
+      // not all target browsers support element.scrollTo
+      // TODO: replace this with something more cross-browser, maybe scrollIntoView
+      if (!this.pageListRef.scrollTo) return;
+
       const pageOffset = this.activePageRef.offsetLeft;
       const {
         left: pageLeft,

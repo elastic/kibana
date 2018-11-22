@@ -16,8 +16,7 @@ const ROOT = '/api/apm/traces';
 const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
-  // @ts-ignore
-  return Boom.boomify(err, { statusCode: 400 });
+  throw Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initTracesApi(server: Server) {

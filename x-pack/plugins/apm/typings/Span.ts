@@ -21,7 +21,7 @@ interface Processor {
 interface Context {
   db?: DbContext;
   service: ContextService;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SpanV1 extends APMDocV1 {

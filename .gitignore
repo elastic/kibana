@@ -43,3 +43,4 @@ package-lock.json
 npm-debug.log*
 .tern-project
 **/public/index.css
+/packages/kbn-interpreter/plugin
