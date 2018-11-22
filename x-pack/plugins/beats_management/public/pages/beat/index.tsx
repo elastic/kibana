@@ -20,43 +20,21 @@ import { CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { ConnectedTabs } from '../../components/navigation/connected_tabs';
-import { URLStateProps, withUrlState } from '../../containers/with_url_state';
-import { AppURLState } from '../../frontend_types';
-import { FrontendLibs } from '../../lib/types';
+import { AppPageProps } from '../../frontend_types';
 
-interface RouteConfig {
-  path: string;
-  component: React.ComponentType<any>;
-  routes?: RouteConfig[];
-}
-interface Match {
-  params: any;
-}
-
-interface BeatDetailsPageProps extends URLStateProps<AppURLState> {
-  location: any;
-  history: any;
-  libs: FrontendLibs;
-  match: Match;
-  routes: RouteConfig[];
-}
-
-interface BeatDetailsPageState {
+interface PageState {
   beat: CMPopulatedBeat | undefined;
   beatId: string;
   isLoading: boolean;
 }
 
-class BeatDetailsPageComponent extends React.PureComponent<
-  BeatDetailsPageProps,
-  BeatDetailsPageState
-> {
-  constructor(props: BeatDetailsPageProps) {
+class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageState> {
+  constructor(props: AppPageProps) {
     super(props);
 
     this.state = {
       beat: undefined,
-      beatId: this.props.match.params.beatId,
+      beatId: props.match.params.beatId,
       isLoading: true,
     };
     this.loadBeat();
@@ -141,4 +119,4 @@ class BeatDetailsPageComponent extends React.PureComponent<
     this.setState({ beat, isLoading: false });
   }
 }
-export const BeatDetailsPage = withUrlState<BeatDetailsPageProps>(BeatDetailsPageComponent);
+export const BeatDetailsPage = BeatDetailsPageComponent;

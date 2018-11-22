@@ -56,6 +56,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
     }
     const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys(), {
       '/tag': ['action', 'tagid?'],
+      '/beat': ['beatId'],
     });
     return (
       <HashRouter basename="/management/beats_management">

@@ -86,7 +86,7 @@ export class RouteTreeBuilder {
       };
     } else {
       throw new Error(
-        `${dir}${file} in the pages folder does not include an exported \`*Page\` component`
+        `${dir}${file} in the pages folder does not include an exported \`${this.pageComponentPattern.toString()}\` component`
       );
     }
   }
