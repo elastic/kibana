@@ -7,7 +7,7 @@
       ></span>
       <icon-tip
         position="'right'"
-        content="{{ 'common.ui.aggTypes.controls.extendedBoundsTooltip' | i18n: { defaultMessage: '\'Min and Max do not filter the results, but rather extend the bounds of the result set\' } }}"
+        content="{{ ::'common.ui.aggTypes.controls.extendedBoundsTooltip' | i18n: { defaultMessage: '&quot;Min and Max do not filter the results, but rather extend the bounds of the result set&quot;' } }}"
       ></icon-tip>
     </label>
   </div>
@@ -39,7 +39,14 @@
         id="extendedBoundsMaxLabel{{agg.id}}"
         for="extendedBoundsMaxInput{{agg.id}}"
       >
-        Max <small>(optional)</small>
+      <span
+        i18n-id="common.ui.aggTypes.controls.extendedBounds.maxLabel"
+        i18n-default-message="Max "
+      ></span>
+      <small
+        i18n-id="common.ui.aggTypes.controls.extendedBounds.maxLabel.optionalText"
+        i18n-default-message="(optional)"
+      ></small>
       </label>
       <input
         id="extendedBoundsMaxInput{{agg.id}}"

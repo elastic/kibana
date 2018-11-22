@@ -1,7 +1,9 @@
 <div class="form-group">
-  <label for="visEditorInterval{{agg.id}}">
-    Interval
-    <icon-tip
+  <label
+    for="visEditorInterval{{agg.id}}"
+    i18n-id="common.ui.aggTypes.controls.timeIntervalLabel"
+    i18n-default-message="Interval"
+  ><icon-tip
       ng-show="agg.buckets.getInterval().scaled"
       type="'alert'"
       position="'right'"
@@ -17,10 +19,14 @@
     ng-options="opt as opt.display for opt in aggParam.options.raw | filter: optionEnabled"
     class="form-control"
     name="interval">
-    <option value="">-- select a valid interval --</option>
+    <option
+      value=""
+      i18n-id="common.ui.aggTypes.controls.selectTimeIntervalLabel"
+      i18n-default-message="-- select a valid interval --"
+    ></option>
   </select>
   <input
-    aria-label="Custom interval"
+    aria-label="{{ ::'common.ui.aggTypes.controls.customTimeIntervalAriaLabel' | i18n: { defaultMessage: 'Custom interval' } }}"
     type="text"
     name="customInterval"
     ng-model="agg.params.customInterval"

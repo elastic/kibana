@@ -1,10 +1,11 @@
 <div class="form-group">
-  <label>
-    Field
-  </label>
+  <label
+    i18n-id="common.ui.aggTypes.controls.field.fieldLabel"
+    i18n-default-message="Field"
+  ></label>
 
   <ui-select
-    title="Aggregation Field"
+    title="{{ ::'common.ui.aggTypes.controls.field.aggregationFieldTitle' | i18n: { defaultMessage: 'Aggregation Field' } }}"
     name="field"
     required
     class="visEditorAggSelect__select field-select"
@@ -13,7 +14,9 @@
     on-select="aggParam.onChange(agg)"
     uis-open-close="limit = 100"
   >
-    <ui-select-match placeholder="Select a field">
+    <ui-select-match
+      placeholder="{{ ::'common.ui.aggTypes.controls.field.selectFieldPlaceholder' | i18n: { defaultMessage: 'Select a field' } }}"
+    >
       {{$select.selected.displayName}}
     </ui-select-match>
     <ui-select-choices
