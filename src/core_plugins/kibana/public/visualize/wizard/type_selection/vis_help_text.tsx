@@ -41,7 +41,8 @@ export const VisHelpText = ({ visType }: VisHelpTextProps) => {
             <em>
               <FormattedMessage
                 id="kbn.visualize.newVisWizard.experimentalDescription"
-                defaultMessage="This visualization is experimental."
+                defaultMessage={`This visualization is experimental. The design and implementation
+                  are less mature than stable visualizations and might be subject to change.`}
               />
             </em>
           </EuiText>
