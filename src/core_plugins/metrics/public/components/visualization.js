@@ -29,7 +29,6 @@ import gauge from './vis_types/gauge/vis';
 import markdown from './vis_types/markdown/vis';
 import Error from './error';
 import NoData from './no_data';
-import { I18nProvider } from '@kbn/i18n/react';
 
 const types = {
   timeseries,
@@ -65,20 +64,18 @@ function Visualization(props) {
   const component = types[model.type];
   if (component) {
     return (
-      <I18nProvider>{
-        React.createElement(component, {
-          dateFormat: props.dateFormat,
-          reversed: props.reversed,
-          backgroundColor: props.backgroundColor,
-          model: props.model,
-          onBrush: props.onBrush,
-          onChange: props.onChange,
-          onUiState: props.onUiState,
-          uiState: props.uiState,
-          visData: visData.type === model.type ? visData : {},
-          getConfig: props.getConfig
-        })}
-      </I18nProvider>
+      React.createElement(component, {
+        dateFormat: props.dateFormat,
+        reversed: props.reversed,
+        backgroundColor: props.backgroundColor,
+        model: props.model,
+        onBrush: props.onBrush,
+        onChange: props.onChange,
+        onUiState: props.onUiState,
+        uiState: props.uiState,
+        visData: visData.type === model.type ? visData : {},
+        getConfig: props.getConfig
+      })
     );
   }
   return <div className={props.className} />;

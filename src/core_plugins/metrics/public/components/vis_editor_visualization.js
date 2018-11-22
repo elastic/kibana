@@ -142,18 +142,18 @@ class VisEditorVisualization extends Component {
     }
 
     let applyMessage = (<FormattedMessage
-      id="tsvb.visEditorVisualization.applyMessageDescription"
+      id="tsvb.visEditorVisualization.changesSuccessfullyAppliedMessage"
       defaultMessage="The latest changes have been applied."
     />);
     if (dirty) {
       applyMessage = (<FormattedMessage
-        id="tsvb.visEditorVisualization.dirtyApplyMessageDescription"
+        id="tsvb.visEditorVisualization.changesHaveNotBeenAppliedMessage"
         defaultMessage="The changes to this visualization have not been applied."
       />);
     }
     if (autoApply) {
       applyMessage = (<FormattedMessage
-        id="tsvb.visEditorVisualization.autoApplyMessageDescription"
+        id="tsvb.visEditorVisualization.changesWillBeAutomaticallyAppliedMessage"
         defaultMessage="The changes will be automatically applied."
       />);
     }

@@ -95,7 +95,7 @@ class TableSeriesConfig extends Component {
               helpText={
                 <span>
                   <FormattedMessage
-                    id="tsvb.table.templateDescription"
+                    id="tsvb.table.templateHelpText"
                     defaultMessage="eg.{templateExample}"
                     values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
                   />

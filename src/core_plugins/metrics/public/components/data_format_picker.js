@@ -199,7 +199,7 @@ class DataFormatPicker extends Component {
             helpText={
               <span>
                 <FormattedMessage
-                  id="tsvb.dataFormatPicker.formatStringDescription"
+                  id="tsvb.dataFormatPicker.formatStringHelpText"
                   defaultMessage="See {numeralJsLink}"
                   values={{ numeralJsLink: (<EuiLink href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</EuiLink>) }}
                 />

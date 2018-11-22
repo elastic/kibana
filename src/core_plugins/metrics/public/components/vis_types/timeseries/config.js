@@ -282,7 +282,7 @@ const TimeseriesConfig = injectI18n(function (props) {
             helpText={(
               <span>
                 <FormattedMessage
-                  id="tsvb.timeSeries.templateDescription"
+                  id="tsvb.timeSeries.templateHelpText"
                   defaultMessage="eg.{templateExample}"
                   values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
                 />

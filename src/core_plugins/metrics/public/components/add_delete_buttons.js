@@ -87,9 +87,9 @@ function AddDeleteButtons(props) {
 
 AddDeleteButtons.defaultProps = {
   testSubj: 'Add',
-  addTooltip: i18n.translate('tsvb.defaultAddButtonTooltip', { defaultMessage: 'Add' }),
-  deleteTooltip: i18n.translate('tsvb.defaultDeleteButtonTooltip', { defaultMessage: 'Delete' }),
-  cloneTooltip: i18n.translate('tsvb.defaultCloneButtonTooltip', { defaultMessage: 'Clone' })
+  addTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', { defaultMessage: 'Add' }),
+  deleteTooltip: i18n.translate('tsvb.addDeleteButtons.deleteButtonDefaultTooltip', { defaultMessage: 'Delete' }),
+  cloneTooltip: i18n.translate('tsvb.addDeleteButtons.cloneButtonDefaultTooltip', { defaultMessage: 'Clone' })
 };
 
 AddDeleteButtons.propTypes = {

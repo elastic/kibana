@@ -102,7 +102,7 @@ export const IndexPattern = props => {
               defaultMessage="Interval"
             />)}
             helpText={(<FormattedMessage
-              id="tsvb.indexPattern.intervalDescription"
+              id="tsvb.indexPattern.intervalHelpText"
               defaultMessage="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
               description="auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated."
             />)}

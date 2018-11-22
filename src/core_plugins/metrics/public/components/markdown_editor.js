@@ -153,14 +153,14 @@ class MarkdownEditor extends Component {
           <EuiText>
             <p>
               <FormattedMessage
-                id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription"
+                id="tsvb.markdownEditor.howToUseVariablesInMarkdownDescription"
                 defaultMessage="The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.
                 {handlebarLink} on the available expressions."
                 values={{
                   handlebarLink: (
                     <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
                       <FormattedMessage
-                        id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription.linkText"
+                        id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription.documentationLinkText"
                         defaultMessage="Click here for documentation"
                       />
                     </a>
@@ -205,7 +205,7 @@ class MarkdownEditor extends Component {
           <EuiText>
             <p>
               <FormattedMessage
-                id="tsvb.markdownEditor.specialVariableAllDescription"
+                id="tsvb.markdownEditor.howToAccessEntireTreeDescription"
                 defaultMessage="There is also a special variable named {all} which you can use to access the entire tree. This is useful for
                 creating lists with data from a group by…"
                 values={{ all: (<code>_all</code>) }}

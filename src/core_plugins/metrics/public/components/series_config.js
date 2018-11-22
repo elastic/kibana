@@ -82,7 +82,7 @@ export const SeriesConfig = props => {
             helpText={(
               <span>
                 <FormattedMessage
-                  id="tsvb.seriesConfig.templateDescription"
+                  id="tsvb.seriesConfig.templateHelpText"
                   defaultMessage="eg. {templateExample}"
                   values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
                 />

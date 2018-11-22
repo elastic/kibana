@@ -226,7 +226,7 @@ class AnnotationsEditor extends Component {
                   helpText={
                     <span>
                       <FormattedMessage
-                        id="tsvb.annotationsEditor.rowTemplateDescription"
+                        id="tsvb.annotationsEditor.rowTemplateHelpText"
                         defaultMessage="eg.{rowTemplateExample}"
                         values={{ rowTemplateExample: (<EuiCode>{'{{field}}'}</EuiCode>) }}
                       />
@@ -266,7 +266,7 @@ class AnnotationsEditor extends Component {
         <EuiText textAlign="center">
           <p>
             <FormattedMessage
-              id="tsvb.annotationsEditor.addDataSourceDescription"
+              id="tsvb.annotationsEditor.howToCreateAnnotationDataSourceDescription"
               defaultMessage="Click the button below to create an annotation data source."
             />
           </p>
@@ -285,7 +285,7 @@ class AnnotationsEditor extends Component {
           <EuiTitle size="s">
             <span>
               <FormattedMessage
-                id="tsvb.annotationsEditor.dataSourceLabel"
+                id="tsvb.annotationsEditor.dataSourcesLabel"
                 defaultMessage="Data sources"
               />
             </span>

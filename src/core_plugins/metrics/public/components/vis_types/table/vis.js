@@ -121,7 +121,7 @@ class TableVis extends Component {
       let headerContent = (
         <span>{label} {sortComponent}</span>
       );
-      if (isSortable(metric)) {
+      if (!isSortable(metric)) {
         headerContent = (
           <EuiToolTip
             content={(<FormattedMessage
@@ -184,13 +184,15 @@ class TableVis extends Component {
     if (_.isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
     } else {
-      const message = (<FormattedMessage
-        id="tsvb.table.noResultsAvailableMessage"
-        defaultMessage="No results available.{chooseGroupByField}"
-        values={{
-          chooseGroupByField: !model.pivot_id ? ' You must choose a group by field for this visualization.' : ''
-        }}
-      />);
+      const message = model.pivot_id ?
+        (<FormattedMessage
+          id="tsvb.table.noResultsAvailableMessage"
+          defaultMessage="No results available."
+        />)
+        : (<FormattedMessage
+          id="tsvb.table.noResultsAvailableWithDescriptionMessage"
+          defaultMessage="No results available. You must choose a group by field for this visualization."
+        />);
       rows = (
         <tr>
           <td

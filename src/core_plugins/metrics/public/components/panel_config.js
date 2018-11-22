@@ -45,7 +45,7 @@ function PanelConfig(props) {
   return (
     <div>
       <FormattedMessage
-        id="tsvb.missingConfigPanelDescription"
+        id="tsvb.missingPanelConfigDescription"
         defaultMessage="Missing panel config for &ldquo;{modelType}&rdquo;"
         values={{ modelType: model.type }}
       />
