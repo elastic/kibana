@@ -181,12 +181,12 @@ class BasicLoginFormUI extends Component<Props, State> {
         const { statusCode = 500 } = error.data || {};
 
         let message = intl.formatMessage({
-          id: 'xpack.security.login.basicLoginForm.someErrorTryAgainErrorMessage',
+          id: 'xpack.security.login.basicLoginForm.unknownErrorMessage',
           defaultMessage: 'Oops! Error. Try again.',
         });
         if (statusCode === 401) {
           message = intl.formatMessage({
-            id: 'xpack.security.login.basicLoginForm.invalidUsernamePasswordErrorMessage',
+            id: 'xpack.security.login.basicLoginForm.invalidUsernameOrPasswordErrorMessage',
             defaultMessage: 'Invalid username or password. Please try again.',
           });
         }

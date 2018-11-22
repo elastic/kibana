@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { UserProfile } from '../../../../../../../../xpack_main/public/services/user_profile';
@@ -24,21 +24,13 @@ interface Props {
   kibanaAppPrivileges: KibanaPrivilege[];
   onChange: (role: Role) => void;
   validator: RoleValidator;
-  intl: InjectedIntl;
 }
 
-class KibanaPrivilegesUI extends Component<Props, {}> {
+export class KibanaPrivileges extends Component<Props, {}> {
   public render() {
-    const { intl } = this.props;
     return (
       <I18nProvider>
-        <CollapsiblePanel
-          iconType={'logoKibana'}
-          title={intl.formatMessage({
-            id: 'xpack.security.management.editRoles.kibanaPrivileges.kibanaTitle',
-            defaultMessage: 'Kibana',
-          })}
-        >
+        <CollapsiblePanel iconType={'logoKibana'} title={'Kibana'}>
           {this.getForm()}
         </CollapsiblePanel>
       </I18nProvider>
@@ -81,5 +73,3 @@ class KibanaPrivilegesUI extends Component<Props, {}> {
     }
   };
 }
-
-export const KibanaPrivileges = injectI18n(KibanaPrivilegesUI);

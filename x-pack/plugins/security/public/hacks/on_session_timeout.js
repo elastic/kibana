@@ -26,7 +26,7 @@ module.config(($httpProvider) => {
     const notificationLifetime = 60 * 1000;
     const notificationOptions = {
       type: 'warning',
-      content: i18n('xpack.security.hacks.logoutNotificationDescription', {
+      content: i18n('xpack.security.hacks.logoutNotification', {
         defaultMessage: 'You will soon be logged out due to inactivity. Click OK to resume.'
       }),
       icon: 'warning',

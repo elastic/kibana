@@ -135,7 +135,7 @@ class EditUserUI extends Component {
     const { username } = this.state.user;
     if (username !== null && !username) {
       return this.props.intl.formatMessage({
-        id: "xpack.security.management.users.editUser.requireUsernameErrorMessage",
+        id: "xpack.security.management.users.editUser.requiredUsernameErrorMessage",
         defaultMessage: "Username is required"
       });
     } else if (username && !username.match(validUsernameRegex)) {
