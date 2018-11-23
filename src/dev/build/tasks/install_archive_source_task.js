@@ -24,7 +24,7 @@ export const InstallArchiveSourceTask = {
   async run(config, _, build) {
     const platform = config.getPlatformForThisOs();
 
-    // copy all files from generic build source directory into platform-specific build directory
+    // copy all files from archive source for this platform into install directory
     await scanCopy({
       source: build.resolvePathForPlatform(platform),
       destination: config.resolveFromInstallDir(),
