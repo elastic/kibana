@@ -17,19 +17,11 @@
  * under the License.
  */
 
-export { getConfig } from './config';
-export { createRunner } from './runner';
-export { isErrorLogged } from './errors';
-export { exec } from './exec';
-export {
-  read,
-  write,
-  mkdirp,
-  copy,
-  copyAll,
-  getFileHash,
-  untar,
-  deleteAll,
-} from './fs';
-export { scanDelete } from './scan_delete';
-export { scanCopy } from './scan_copy';
+// TODO: Remove once typescript definitions are in EUI
+
+declare module '@elastic/eui' {
+  export const EuiWrappingPopover: React.SFC<any>;
+  export const EuiCopy: React.SFC<any>;
+  export const EuiPopoverTitle: React.SFC<any>;
+  export const EuiOutsideClickDetector: React.SFC<any>;
+}
