@@ -80,32 +80,36 @@ class ListControlUi extends Component {
       );
     }
 
+    const options = this.props.options
+      .map(option => {
+        return {
+          label: this.props.formatOptionLabel(option).toString(),
+          value: option,
+          ['data-test-subj']: `option_${option.toString().replace(' ', '_')}`
+        };
+      })
+      .sort((a, b) => {
+        return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+      });
+
+    const selectedOptions = this.props.selectedOptions.map(selectedOption => {
+      return {
+        label: this.props.formatOptionLabel(selectedOption).toString(),
+        value: selectedOption,
+      };
+    });
+
     return (
       <EuiComboBox
         placeholder={intl.formatMessage({
           id: 'inputControl.vis.listControl.selectPlaceholder',
           defaultMessage: 'Select...'
         })}
-        options={this.props.options.map(option => {
-          return {
-            label: this.props.formatOptionLabel(option).toString(),
-            value: option,
-            ['data-test-subj']: `option_${option.toString().replace(' ', '_')}`
-          };
-        })
-          .sort((a, b) => {
-            return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
-          })
-        }
+        options={options}
         isLoading={this.state.isLoading}
         async={this.props.dynamicOptions}
         onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
-        selectedOptions={this.props.selectedOptions.map(selectedOption => {
-          return {
-            label: this.props.formatOptionLabel(selectedOption).toString(),
-            value: selectedOption,
-          };
-        })}
+        selectedOptions={selectedOptions}
         onChange={this.handleOnChange}
         singleSelection={!this.props.multiselect}
         data-test-subj={`listControlSelect${this.props.controlIndex}`}
