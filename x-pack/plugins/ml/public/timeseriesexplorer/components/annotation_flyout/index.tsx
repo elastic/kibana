@@ -22,9 +22,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AnnotationDescriptionList } from './annotation_description_list';
+import { AnnotationDescriptionList } from '../annotation_description_list';
 
-import { Annotation } from '../../../common/interfaces/annotations';
+import { Annotation } from '../../../../common/interfaces/annotations';
 
 interface Props {
   annotation: Annotation;

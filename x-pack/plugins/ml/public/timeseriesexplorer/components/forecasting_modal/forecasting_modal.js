@@ -24,10 +24,10 @@ import {
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
-import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../common/constants/states';
-import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
-import { isJobVersionGte } from '../../../common/util/job_utils';
-import { parseInterval } from '../../../common/util/parse_interval';
+import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../common/constants/states';
+import { MESSAGE_LEVEL } from '../../../../common/constants/message_levels';
+import { isJobVersionGte } from '../../../../common/util/job_utils';
+import { parseInterval } from '../../../../common/util/parse_interval';
 import { Modal } from './modal';
 import { PROGRESS_STATES } from './progress_states';
 import { ml } from 'plugins/ml/services/ml_api_service';

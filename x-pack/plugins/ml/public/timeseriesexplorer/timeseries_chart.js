@@ -37,7 +37,7 @@ import {
 } from '../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
 import { mlAnomaliesTableService } from '../components/anomalies_table/anomalies_table_service';
-import ContextChartMask from './context_chart_mask';
+import { ContextChartMask } from './components/context_chart_mask';
 import { findChartPointForAnomalyTime } from './timeseriesexplorer_utils';
 import { mlEscape } from '../util/string_utils';
 import { mlFieldFormatService } from '../services/field_format_service';

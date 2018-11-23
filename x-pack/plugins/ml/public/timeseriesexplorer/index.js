@@ -5,8 +5,7 @@
  */
 
 
-
-import './forecasting_modal';
+import './components/forecasting_modal';
 import './timeseriesexplorer_controller.js';
 import './timeseries_search_service.js';
 import './timeseries_chart_directive';
