@@ -77,7 +77,7 @@ export default (kibana: any) =>
         isAdmin: Joi.boolean().default(true), // If we show the admin buttons
         disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
-        multiNode: Joi.object().default({ enable: false }),
+        redirectToNode: Joi.string(),
       }).default();
     },
 
@@ -89,17 +89,13 @@ export default (kibana: any) =>
       const log = new Log(server);
       const serverOptions = new ServerOptions(options, server.config());
 
-      if (serverOptions.multiNode && serverOptions.multiNode.enable) {
-        if (serverOptions.multiNode.mainNode) {
-          log.info(
-            `multi node enabled, will redirect all requests to main node ${
-              serverOptions.multiNode.mainNode
-            }`
-          );
-          redirectRoute(server, options, log);
-          // todo handle websockets
-          return;
-        }
+      if (serverOptions.redirectToNode) {
+        log.info(
+          `redirect node enabled,all requests will be redirected to ${serverOptions.redirectToNode}`
+        );
+        redirectRoute(server, options, log);
+        // todo handle websockets
+        return;
       }
 
       const socketService = new SocketService(log);

@@ -5,20 +5,21 @@
  */
 
 import hapi from 'hapi';
+import url from 'url';
 // @ts-ignore
 import wreck from 'wreck';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 
-export async function redirectRoute(
-  server: hapi.Server,
-  serverOptions: ServerOptions,
-  log: Logger
-) {
-  const multiNode = serverOptions.multiNode;
+const BASE_PLACEHOLDER = '/{baseUrl}';
+
+export function redirectRoute(server: hapi.Server, serverOptions: ServerOptions, log: Logger) {
+  let redirectUrl = serverOptions.redirectToNode;
+  const hasBaseUrl = redirectUrl.includes(BASE_PLACEHOLDER);
   const mainNodeBaseUrl = async () => {
+    const u = url.parse(redirectUrl);
     const res = await wreck.request('HEAD', '/', {
-      baseUrl: multiNode.mainNode,
+      baseUrl: `${u.protocol}//${u.host}`,
     });
     if (res.statusCode === 302) {
       return res.headers.location;
@@ -32,13 +33,12 @@ export async function redirectRoute(
       passThrough: true,
       async mapUri(request: hapi.Request) {
         let uri;
-        if (multiNode.noBasePath) {
-          uri = `${multiNode.mainNode}${request.path}`;
-        } else {
+        if (hasBaseUrl) {
           // send a head request to find main node's base url;
           const baseUrl = await mainNodeBaseUrl();
-          uri = `${multiNode.mainNode}${baseUrl}${request.path}`;
+          redirectUrl = redirectUrl.replace(BASE_PLACEHOLDER, baseUrl);
         }
+        uri = `${redirectUrl}${request.path}`;
         if (request.url.search) {
           uri += request.url.search;
         }

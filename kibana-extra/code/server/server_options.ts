@@ -40,13 +40,7 @@ export class ServerOptions {
     {} as RepoConfigs
   );
 
-  public readonly multiNode: MultiNodeConfig = this.options.multiNode;
+  public readonly redirectToNode: string = this.options.redirectToNode;
 
   constructor(private options: any, private config: any) {}
-}
-
-export interface MultiNodeConfig {
-  enabled: boolean;
-  mainNode?: string;
-  noBasePath: boolean;
 }
