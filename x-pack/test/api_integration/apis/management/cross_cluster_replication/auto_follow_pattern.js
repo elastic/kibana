@@ -9,20 +9,30 @@ import { API_BASE_PATH, REMOTE_CLUSTERS_API_BASE_PATH } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
+  const clusterName = 'test_cluster';
 
-  const addCluster = async (clusterName) => {
+  const addCluster = async (name = clusterName) => {
     const uri = `${REMOTE_CLUSTERS_API_BASE_PATH}`;
 
     return await supertest
       .post(uri)
       .set('kbn-xsrf', 'xxx')
       .send({
-        "name": clusterName,
+        "name": name,
         "seeds": [
           "localhost:9300"
         ],
         "skipUnavailable": true,
       });
+  };
+
+  const deleteCluster = async (name = clusterName) => {
+    const uri = `${REMOTE_CLUSTERS_API_BASE_PATH}/${name}`;
+
+    return await supertest
+      .delete(uri)
+      .set('kbn-xsrf', 'xxx')
+      .expect(200);
   };
 
   describe('auto follow patterns', () => {
@@ -41,8 +51,6 @@ export default function ({ getService }) {
     });
 
     describe('create()', () => {
-      const clusterName = 'my-test-cluster';
-
       let payload;
       let autoFollowId;
 
@@ -74,7 +82,7 @@ export default function ({ getService }) {
       });
 
       it('should create an auto-follow pattern', async () => {
-        await addCluster(clusterName);
+        await addCluster();
 
         const { body } = await supertest
           .put(getUriPath())
@@ -83,6 +91,8 @@ export default function ({ getService }) {
           .expect(200);
 
         expect(body.acknowledged).to.eql(true);
+
+        await deleteCluster();
       });
     });
   });

@@ -73,13 +73,14 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
     });
 
     it('should deSerialize the response from Elasticsearch', async () => {
+      const totalResult = 2;
       const deSerializedKeys = Object.keys(deserializeAutofollowPattern('random', getAutoFollowPatternMock()));
-      setHttpRequestResponse(null, getAutoFollowPatternListMock(2));
+      setHttpRequestResponse(null, getAutoFollowPatternListMock(totalResult));
 
       const response = await routeHandler();
-
       const autoFollowPattern = Object.values(response)[0];
-      expect(Object.keys(response).length).toEqual(2);
+
+      expect(Object.keys(response).length).toEqual(totalResult);
       expect(Object.keys(autoFollowPattern)).toEqual(deSerializedKeys);
     });
   });
