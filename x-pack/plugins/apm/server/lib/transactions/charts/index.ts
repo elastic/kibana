@@ -7,7 +7,7 @@
 import { Setup } from '../../helpers/setup_request';
 import { getAnomalySeries } from './get_anomaly_data';
 import { AnomalyTimeSeriesResponse } from './get_anomaly_data/transform';
-import { getTimeseriesData } from './get_timeseries_data';
+import { getApmTimeseriesData } from './get_timeseries_data';
 import { ApmTimeSeriesResponse } from './get_timeseries_data/transform';
 
 export interface TimeSeriesAPIResponse {
@@ -25,7 +25,7 @@ export async function getChartsData(options: {
   transactionName?: string;
   setup: Setup;
 }): Promise<TimeSeriesAPIResponse> {
-  const apmTimeseries = await getTimeseriesData(options);
+  const apmTimeseries = await getApmTimeseriesData(options);
   const anomalyTimeseries = await getAnomalySeries({
     ...options,
     timeSeriesDates: getDates(apmTimeseries)

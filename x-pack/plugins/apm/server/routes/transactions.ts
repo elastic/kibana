@@ -9,7 +9,7 @@ import { Server } from 'hapi';
 import Joi from 'joi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getTimeseriesData } from '../lib/transactions/charts/get_timeseries_data';
+import { getChartsData } from '../lib/transactions/charts';
 import { getDistribution } from '../lib/transactions/distribution';
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
 import { getTransaction } from '../lib/transactions/get_transaction';
@@ -111,7 +111,7 @@ export function initTransactionsApi(server: Server) {
         transaction_name: string;
       };
 
-      return getTimeseriesData({
+      return getChartsData({
         serviceName,
         transactionType,
         transactionName,

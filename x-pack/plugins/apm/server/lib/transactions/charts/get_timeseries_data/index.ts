@@ -9,7 +9,7 @@ import { Setup } from '../../../helpers/setup_request';
 import { timeseriesFetcher } from './fetcher';
 import { timeseriesTransformer } from './transform';
 
-export async function getTimeseriesData(options: {
+export async function getApmTimeseriesData(options: {
   serviceName: string;
   transactionType: string;
   transactionName?: string;

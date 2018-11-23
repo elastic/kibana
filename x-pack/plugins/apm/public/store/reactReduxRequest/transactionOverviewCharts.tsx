@@ -15,16 +15,18 @@ import { getCharts } from '../selectors/chartSelectors';
 import { getUrlParams, IUrlParams } from '../urlParams';
 
 const ID = 'transactionOverviewCharts';
-const INITIAL_DATA = {
-  totalHits: 0,
-  dates: [],
-  responseTimes: {
-    avg: [],
-    p95: [],
-    p99: []
+const INITIAL_DATA: TimeSeriesAPIResponse = {
+  apmTimeseries: {
+    totalHits: 0,
+    responseTimes: {
+      avg: [],
+      p95: [],
+      p99: []
+    },
+    tpmBuckets: [],
+    overallAvgDuration: undefined
   },
-  tpmBuckets: [],
-  overallAvgDuration: undefined
+  anomalyTimeseries: undefined
 };
 
 export const getTransactionOverviewCharts = createSelector(
@@ -40,7 +42,7 @@ export const getTransactionOverviewCharts = createSelector(
 
 export function hasDynamicBaseline(state: IReduxState) {
   return (
-    get(state, `reactReduxRequest[${ID}].data.anomalyTimeSeries`) !== undefined
+    get(state, `reactReduxRequest[${ID}].data.anomalyTimeseries`) !== undefined
   );
 }
 
