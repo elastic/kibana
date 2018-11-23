@@ -52,6 +52,10 @@ export const setPosition = createAction('setPosition', (elementId, pageId, posit
   position,
 }));
 
+export const setMultiplePositions = createAction('setMultiplePosition', repositionedElements => ({
+  repositionedElements,
+}));
+
 export const flushContext = createAction('flushContext');
 export const flushContextAfterIndex = createAction('flushContextAfterIndex');
 
