@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 
-import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import '../../validate_date_interval';
 import chrome from '../../chrome';
