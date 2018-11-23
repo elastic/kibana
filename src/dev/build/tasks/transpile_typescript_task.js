@@ -41,7 +41,8 @@ export const TranspileTypescriptTask = {
       ...browserProject.config,
       include: [
         ...browserProject.config.include,
-        'src/**/public/**/*'
+        'src/**/public/**/*',
+        'typings/**/*'
       ]
     }));
 
