@@ -37,15 +37,10 @@ export class AutoFollowPatternTableUI extends PureComponent {
       return autoFollowPatterns.filter(autoFollowPattern => {
         const { name, remoteCluster } = autoFollowPattern;
 
-        if (name.toLowerCase().toLowerCase().includes(queryText)) {
-          return true;
-        }
+        const inName = name.toLowerCase().includes(queryText);
+        const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
 
-        if (remoteCluster.toLowerCase().toLowerCase().includes(queryText)) {
-          return true;
-        }
-
-        return false;
+        return inName || inRemoteCluster;
       });
     }
 
