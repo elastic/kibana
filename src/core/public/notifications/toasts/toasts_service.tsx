@@ -21,6 +21,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { Toast } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n/react';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsStartContract } from './toasts_start_contract';
 

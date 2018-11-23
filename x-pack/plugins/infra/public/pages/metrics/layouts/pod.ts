@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { InfraMetric } from '../../../../common/graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 import { nginxLayoutCreator } from './nginx';
@@ -16,35 +17,62 @@ import {
 export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
   {
     id: 'podOverview',
-    label: 'Pod Overview',
+    label: i18n.translate('xpack.infra.metricDetailPage.podMetricsLayout.layoutLabel', {
+      defaultMessage: 'Pod',
+    }),
     sections: [
       {
         id: InfraMetric.podOverview,
-        label: 'Pod Overview',
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.podMetricsLayout.overviewSection.sectionLabel',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
         requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.gauges,
         visConfig: {
           seriesOverrides: {
             cpu: {
-              name: 'CPU Usage',
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.podMetricsLayout.overviewSection.cpuUsageSeriesLabel',
+                {
+                  defaultMessage: 'CPU Usage',
+                }
+              ),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
             },
             memory: {
-              name: 'Memory Usage',
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.podMetricsLayout.overviewSection.memoryUsageSeriesLabel',
+                {
+                  defaultMessage: 'Memory Usage',
+                }
+              ),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.percent,
               gaugeMax: 1,
             },
             rx: {
-              name: 'Inbound (RX)',
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.podMetricsLayout.overviewSection.inboundRXSeriesLabel',
+                {
+                  defaultMessage: 'Inbound (RX)',
+                }
+              ),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.bits,
               formatterTemplate: '{{value}}/s',
             },
             tx: {
-              name: 'Outbound (TX)',
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.podMetricsLayout.overviewSection.outboundTXSeriesLabel',
+                {
+                  defaultMessage: 'Outbound (TX)',
+                }
+              ),
               color: theme.eui.euiColorFullShade,
               formatter: InfraFormatterType.bits,
               formatterTemplate: '{{value}}/s',
@@ -54,7 +82,12 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.podCpuUsage,
-        label: 'CPU Usage',
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.podMetricsLayout.cpuUsageSection.sectionLabel',
+          {
+            defaultMessage: 'CPU Usage',
+          }
+        ),
         requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -66,7 +99,12 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.podMemoryUsage,
-        label: 'Memory Usage',
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.podMetricsLayout.memoryUsageSection.sectionLabel',
+          {
+            defaultMessage: 'Memory Usage',
+          }
+        ),
         requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -81,7 +119,12 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
       },
       {
         id: InfraMetric.podNetworkTraffic,
-        label: 'Network Traffic',
+        label: i18n.translate(
+          'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.sectionLabel',
+          {
+            defaultMessage: 'Network Traffic',
+          }
+        ),
         requires: ['kubernetes.pod'],
         type: InfraMetricLayoutSectionType.chart,
         visConfig: {
@@ -89,8 +132,24 @@ export const podLayoutCreator: InfraMetricLayoutCreator = theme => [
           formatterTemplate: '{{value}}/s',
           type: InfraMetricLayoutVisualizationType.area,
           seriesOverrides: {
-            rx: { color: theme.eui.euiColorVis1, name: 'in' },
-            tx: { color: theme.eui.euiColorVis2, name: 'out' },
+            rx: {
+              color: theme.eui.euiColorVis1,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.networkRxRateSeriesLabel',
+                {
+                  defaultMessage: 'in',
+                }
+              ),
+            },
+            tx: {
+              color: theme.eui.euiColorVis2,
+              name: i18n.translate(
+                'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.networkTxRateSeriesLabel',
+                {
+                  defaultMessage: 'out',
+                }
+              ),
+            },
           },
         },
       },

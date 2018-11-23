@@ -47,9 +47,9 @@ export class TagCloudVisualization {
       if (!this._bucketAgg) {
         return;
       }
-      this._vis.API.events.addFilter(
-        event.meta.data, 0, event.meta.rowIndex
-      );
+      this._vis.API.events.filter({
+        table: event.meta.data, column: 0, row: event.meta.rowIndex
+      });
     });
     this._renderComplete$ = Rx.fromEvent(this._tagCloud, 'renderComplete');
 

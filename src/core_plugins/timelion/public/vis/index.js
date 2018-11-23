@@ -18,7 +18,6 @@
  */
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
@@ -46,7 +45,6 @@ export default function TimelionVisProvider(Private, i18n) {
     description: i18n('timelion.timelionDescription', {
       defaultMessage: 'Build time-series using functional expressions',
     }),
-    category: CATEGORY.TIME,
     visConfig: {
       defaults: {
         expression: '.es(*)',
