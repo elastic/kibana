@@ -2,7 +2,7 @@
   <div class="form-group">
     <label
       for="visEditorSubAggMetric{{agg.id}}"
-      i18n-id="common.ui.aggTypes.controls.metricLabel"
+      i18n-id="common.ui.aggTypes.metricLabel"
       i18n-default-message="Metric"
     ></label>
     <select
@@ -19,14 +19,14 @@
         ng-if="respAgg.type.name !== agg.type.name"
         ng-disabled="isDisabledAgg(respAgg)"
         ng-selected="agg.params.metricAgg === respAgg.id"
-        i18n-id="common.ui.aggTypes.controls.definiteMetricLabel"
+        i18n-id="common.ui.aggTypes.definiteMetricLabel"
         i18n-default-message="metric: {safeMakeLabel}"
         i18n-values="{ safeMakeLabel: safeMakeLabel(respAgg) }"
       ></option>
       <option
         value="custom"
         ng-selected="agg.params.metricAgg === 'custom'"
-        i18n-id="common.ui.aggTypes.controls.customMetricLabel"
+        i18n-id="common.ui.aggTypes.customMetricLabel"
         i18n-default-message="Custom Metric"
       ></option>
     </select>

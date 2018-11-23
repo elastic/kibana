@@ -2,7 +2,7 @@
   <div ng-if="!agg.params.autoPrecision" class="form-group">
     <label
       for="visEditorMapPrecision{{agg.id}}"
-      i18n-id="common.ui.aggTypes.controls.precisionLabel"
+      i18n-id="common.ui.aggTypes.precisionLabel"
       i18n-default-message="Precision"
     ></label>
     <div class="visEditorAgg__formRow--flex">
@@ -31,7 +31,7 @@
       ng-model="agg.params.autoPrecision"
     >
     <span
-      i18n-id="common.ui.aggTypes.controls.changePrecisionLabel"
+      i18n-id="common.ui.aggTypes.changePrecisionLabel"
       i18n-default-message="Change precision on map zoom"
     ></span>
   </label>
@@ -45,7 +45,7 @@
       ng-model="agg.params.useGeocentroid"
     >
     <span
-      i18n-id="common.ui.aggTypes.controls.placeMarkersOffGridLabel"
+      i18n-id="common.ui.aggTypes.placeMarkersOffGridLabel"
       i18n-default-message="Place markers off grid (use geocentroid)"
     ></span>
   </label>
@@ -60,12 +60,12 @@
       ng-model="agg.params.isFilteredByCollar"
     >
     <span
-      i18n-id="common.ui.aggTypes.controls.onlyRequestDataAroundMapExtentLabel"
+      i18n-id="common.ui.aggTypes.onlyRequestDataAroundMapExtentLabel"
       i18n-default-message="Only request data around map extent"
     ></span>
     <icon-tip
       position="'right'"
-      content="{{ ::'common.ui.aggTypes.controls.onlyRequestDataAroundMapExtentTooltip' | i18n: { defaultMessage: '&quot;Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar&quot;' } }}"
+      content="{{ ::'common.ui.aggTypes.onlyRequestDataAroundMapExtentTooltip' | i18n: { defaultMessage: '&quot;Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar&quot;' } }}"
     ></icon-tip>
   </label>
 </div>

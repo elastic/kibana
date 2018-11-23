@@ -1,13 +1,13 @@
 <div class="form-group">
   <label
-    i18n-id="common.ui.aggTypes.controls.sortOnLabel"
+    i18n-id="common.ui.aggTypes.sortOnLabel"
     i18n-default-message="Sort On"
     ></label>
 
   <ui-select
     name="field"
     sortField
-    title="{{ ::'common.ui.aggTypes.controls.sortOnTooltip' | i18n: { defaultMessage: 'Sort on' } }}"
+    title="{{ ::'common.ui.aggTypes.sortOnTooltip' | i18n: { defaultMessage: 'Sort on' } }}"
     class="visEditorAggSelect__select"
     ng-show="sortFieldOptions.length"
     ng-model="agg.params.sortField"
@@ -15,7 +15,7 @@
     auto-select-if-only-one="sortFieldOptions"
   >
     <ui-select-match
-      placeholder="{{ ::'common.ui.aggTypes.controls.sortOnPlaceholder' | i18n: { defaultMessage: 'Select a field' } }}"
+      placeholder="{{ ::'common.ui.aggTypes.sortOnPlaceholder' | i18n: { defaultMessage: 'Select a field' } }}"
     >
       {{$select.selected.displayName}}
     </ui-select-match>
@@ -32,7 +32,7 @@
 <div class="form-group">
   <label
     for="visEditorTopSort{{agg.id}}"
-    i18n-id="common.ui.aggTypes.controls.orderLabel"
+    i18n-id="common.ui.aggTypes.orderLabel"
     i18n-default-message="Order"
   ></label>
 

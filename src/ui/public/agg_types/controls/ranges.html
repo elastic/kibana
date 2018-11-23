@@ -3,14 +3,14 @@
     <th scope="col">
       <label
         id="visEditorRangeFrom{{agg.id}}"
-        i18n-id="common.ui.aggTypes.controls.ranges.fromColumnLabel"
+        i18n-id="common.ui.aggTypes.ranges.fromColumnLabel"
         i18n-default-message="From"
       ></label>
     </th>
     <th scope="col" colspan="2">
       <label
         id="visEditorRangeTo{{agg.id}}"
-        i18n-id="common.ui.aggTypes.controls.ranges.toColumnLabel"
+        i18n-id="common.ui.aggTypes.ranges.toColumnLabel"
         i18n-default-message="To"
       ></label>
     </th>
@@ -53,11 +53,11 @@
   <p>
     <i class="fa fa-danger text-danger"></i>
     <strong
-      i18n-id="common.ui.aggTypes.controls.ranges.requiredRangeTitle"
+      i18n-id="common.ui.aggTypes.ranges.requiredRangeTitle"
       i18n-default-message="Required:"
     ></strong>
     <span
-      i18n-id="common.ui.aggTypes.controls.ranges.requiredRangeDescription"
+      i18n-id="common.ui.aggTypes.ranges.requiredRangeDescription"
       i18n-default-message=" You must specify at least one range."
     ></span>
   </p>
@@ -66,6 +66,6 @@
 <button
   ng-click="agg.params.ranges.push({})"
   class="kuiButton kuiButton--primary kuiButton--fullWidth"
-  i18n-id="common.ui.aggTypes.controls.ranges.addRangeButtonLabel"
+  i18n-id="common.ui.aggTypes.ranges.addRangeButtonLabel"
   i18n-default-message="Add Range"
 ></button>
