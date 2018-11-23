@@ -116,6 +116,11 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await PageObjects.share.openShareMenuItem('PDF Reports');
     }
 
+    async openPngReportingPanel() {
+      log.debug('openPngReportingPanel');
+      await PageObjects.share.openShareMenuItem('PNG Reports');
+    }
+
     async clickDownloadReportButton(timeout) {
       await testSubjects.click('downloadCompletedReportButton', timeout);
     }
@@ -134,7 +139,11 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async checkUsePrintLayout() {
-      await retry.try(() => testSubjects.click('usePrintLayout'));
+      // The print layout checkbox slides in as part of an animation, and tests can
+      // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
+      // the animation to complete before we attempt a click.
+      const menuAnimationDelay = 500;
+      await retry.tryForTime(menuAnimationDelay, () => testSubjects.click('usePrintLayout'));
     }
 
     async clickGenerateReportButton() {

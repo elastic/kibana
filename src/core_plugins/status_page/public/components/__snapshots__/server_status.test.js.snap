@@ -21,6 +21,7 @@ exports[`render 1`] = `
   >
     <EuiTitle
       size="m"
+      textTransform="none"
     >
       <h2>
         <FormattedMessage
@@ -46,6 +47,7 @@ exports[`render 1`] = `
   >
     <EuiText
       grow={true}
+      size="m"
     >
       <p>
         My Computer

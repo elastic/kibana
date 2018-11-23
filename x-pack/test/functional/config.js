@@ -18,6 +18,7 @@ import {
   ReportingPageProvider,
   SpaceSelectorPageProvider,
   InfraHomePageProvider,
+  StatusPagePageProvider,
 } from './page_objects';
 
 import {
@@ -61,6 +62,7 @@ export default async function ({ readConfigFile }) {
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
+      resolve(__dirname, './apps/canvas'),
       resolve(__dirname, './apps/graph'),
       resolve(__dirname, './apps/monitoring'),
       resolve(__dirname, './apps/watcher'),
@@ -70,6 +72,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
+      resolve(__dirname, './apps/status_page'),
     ],
 
     // define the name and providers for services that should be
@@ -119,6 +122,7 @@ export default async function ({ readConfigFile }) {
       reporting: ReportingPageProvider,
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
+      statusPage: StatusPagePageProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -136,12 +140,17 @@ export default async function ({ readConfigFile }) {
       ...kibanaCommonConfig.get('kbnTestServer'),
       serverArgs: [
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
+        '--status.allowAnonymous=true',
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       ],
     },
-
+    uiSettings: {
+      defaults: {
+        'accessibility:disableAnimations': true,
+      },
+    },
     // the apps section defines the urls that
     // `PageObjects.common.navigateTo(appKey)` will use.
     // Merge urls for your plugin with the urls defined in
@@ -170,6 +179,10 @@ export default async function ({ readConfigFile }) {
       },
       infraOps: {
         pathname: '/app/infra'
+      },
+      canvas: {
+        pathname: '/app/canvas',
+        hash: '/',
       }
     },
 

@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import './editors/tile_map_vis_params';
 import { supports } from 'ui/utils/supports';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { Schemas } from 'ui/vis/editors/default/schemas';
@@ -44,7 +43,6 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     description: i18n.translate('tileMap.vis.mapDescription', {
       defaultMessage: 'Plot latitude and longitude coordinates on a map',
     }),
-    category: CATEGORY.MAP,
     visConfig: {
       canDesaturate: !!supports.cssFilters,
       defaults: {
@@ -65,7 +63,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
-        colorSchemas: Object.keys(truncatedColorMaps),
+        colorSchemas: Object.values(truncatedColorMaps).map(value => ({ id: value.id, label: value.label })),
         legendPositions: [{
           value: 'bottomleft',
           text: i18n.translate('tileMap.vis.map.editorConfig.legendPositions.bottomLeftText', {

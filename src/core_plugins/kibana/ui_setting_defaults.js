@@ -23,9 +23,11 @@ import numeralLanguages from '@elastic/numeral/languages';
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
-  const numeralLanguageIds = numeralLanguages.map(function (numeralLanguage) {
+  // We add the `en` key manually here, since that's not a real numeral locale, but the
+  // default fallback in case the locale is not found.
+  const numeralLanguageIds = ['en', ...numeralLanguages.map(function (numeralLanguage) {
     return numeralLanguage.id;
-  });
+  })];
 
   // wrapped in provider so that a new instance is given to each app/test
   return {
@@ -217,9 +219,10 @@ export function getUiSettingDefaults() {
       description: `Never show more than this many bars in date histograms, scale values if needed`,
     },
     'visualize:enableLabs': {
-      name: 'Enable labs',
+      name: 'Enable experimental visualizations',
       value: true,
-      description: `Enable lab visualizations in Visualize.`,
+      description: `Allows users to create, view, and edit experimental visualizations. If disabled,
+        only visualizations that are considered production-ready are available to the user.`,
       category: ['visualization'],
     },
     'visualization:tileMap:maxPrecision': {
@@ -532,6 +535,15 @@ export function getUiSettingDefaults() {
         Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.
       `,
       category: ['accessibility'],
+    },
+    'rollups:enableIndexPatterns': {
+      name: 'Enable rollup index patterns',
+      value: true,
+      description: `
+        Enable the creation of index patterns which capture rollup indices, which in turn enable
+        visualizations based on rollup data. Refresh the page to apply the changes.
+      `,
+      category: ['rollups'],
     },
   };
 }

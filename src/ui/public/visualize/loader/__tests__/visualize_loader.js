@@ -34,6 +34,8 @@ import { Inspector } from '../../../inspector/inspector';
 import { dispatchRenderComplete } from '../../../render_complete';
 import { VisualizeDataLoader } from '../visualize_data_loader';
 import { PersistedState } from '../../../persisted_state';
+import { DataAdapter } from '../../../inspector/adapters/data';
+import { RequestAdapter } from '../../../inspector/adapters/request';
 
 describe('visualize loader', () => {
 
@@ -79,6 +81,7 @@ describe('visualize loader', () => {
     const Vis = Private(VisProvider);
     vis = new Vis(indexPattern, {
       type: 'pie',
+      title: 'testVis',
       params: {},
       aggs: [
         { type: 'count', schema: 'metric' },
@@ -95,7 +98,7 @@ describe('visualize loader', () => {
         }
       ]
     });
-    vis.type.requestHandler = 'none';
+    vis.type.requestHandler = 'courier';
     vis.type.responseHandler = 'none';
     vis.type.requiresSearch = false;
 
@@ -237,6 +240,116 @@ describe('visualize loader', () => {
         expect(Inspector.open.calledOnce).to.be(true);
         expect(inspectorSession.close).to.be.a('function');
         inspectorSession.close();
+      });
+
+      describe('inspector', () => {
+
+        describe('hasInspector()', () => {
+          it('should forward to inspectors hasInspector', () => {
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
+            sinon.spy(Inspector, 'isAvailable');
+            handler.hasInspector();
+            expect(Inspector.isAvailable.calledOnce).to.be(true);
+            const adapters = Inspector.isAvailable.lastCall.args[0];
+            expect(adapters.data).to.be.a(DataAdapter);
+            expect(adapters.requests).to.be.a(RequestAdapter);
+          });
+
+          it('should return hasInspectors result', () => {
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
+            const stub = sinon.stub(Inspector, 'isAvailable');
+            stub.returns(true);
+            expect(handler.hasInspector()).to.be(true);
+            stub.returns(false);
+            expect(handler.hasInspector()).to.be(false);
+          });
+
+          afterEach(() => {
+            Inspector.isAvailable.restore();
+          });
+        });
+
+        describe('openInspector()', () => {
+
+          beforeEach(() => {
+            sinon.stub(Inspector, 'open');
+          });
+
+          it('should call openInspector with all attached inspectors', () => {
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
+            handler.openInspector();
+            expect(Inspector.open.calledOnce).to.be(true);
+            const adapters = Inspector.open.lastCall.args[0];
+            expect(adapters).to.be(handler.inspectorAdapters);
+          });
+
+          it('should pass the vis title to the openInspector call', () => {
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
+            handler.openInspector();
+            expect(Inspector.open.calledOnce).to.be(true);
+            const params = Inspector.open.lastCall.args[1];
+            expect(params.title).to.be('testVis');
+          });
+
+          afterEach(() => {
+            Inspector.open.restore();
+          });
+        });
+
+        describe('inspectorAdapters', () => {
+
+          it('should register none for none requestHandler', () => {
+            const savedObj = createSavedObject();
+            savedObj.vis.type.requestHandler = 'none';
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], savedObj, {});
+            expect(handler.inspectorAdapters).to.eql({});
+          });
+
+          it('should attach data and request handler for courier', () => {
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
+            expect(handler.inspectorAdapters.data).to.be.a(DataAdapter);
+            expect(handler.inspectorAdapters.requests).to.be.a(RequestAdapter);
+          });
+
+          it('should allow enabling data adapter manually', () => {
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
+            expect(handler.inspectorAdapters.data).to.be.a(DataAdapter);
+          });
+
+          it('should allow enabling requests adapter manually', () => {
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], createSavedObject(), {});
+            expect(handler.inspectorAdapters.requests).to.be.a(RequestAdapter);
+          });
+
+          it('should allow adding custom inspector adapters via the custom key', () => {
+            const Foodapter =  class {};
+            const Bardapter = class {};
+            const savedObj = createSavedObject();
+            savedObj.vis.type.inspectorAdapters = {
+              custom: { foo: Foodapter, bar: Bardapter }
+            };
+            const handler = loader.embedVisualizationWithSavedObject(newContainer()[0], savedObj, {});
+            expect(handler.inspectorAdapters.foo).to.be.a(Foodapter);
+            expect(handler.inspectorAdapters.bar).to.be.a(Bardapter);
+          });
+
+          it('should not share adapter instances between vis instances', () => {
+            const Foodapter = class {};
+            const savedObj1 = createSavedObject();
+            const savedObj2 = createSavedObject();
+            savedObj1.vis.type.inspectorAdapters = { custom: { foo: Foodapter } };
+            savedObj2.vis.type.inspectorAdapters = { custom: { foo: Foodapter } };
+            const handler1 = loader.embedVisualizationWithSavedObject(newContainer()[0], savedObj1, {});
+            const handler2 = loader.embedVisualizationWithSavedObject(newContainer()[0], savedObj2, {});
+            expect(handler1.inspectorAdapters.foo).to.be.a(Foodapter);
+            expect(handler2.inspectorAdapters.foo).to.be.a(Foodapter);
+            expect(handler1.inspectorAdapters.foo).not.to.be(handler2.inspectorAdapters.foo);
+            expect(handler1.inspectorAdapters.data).to.be.a(DataAdapter);
+            expect(handler2.inspectorAdapters.data).to.be.a(DataAdapter);
+            expect(handler1.inspectorAdapters.data).not.to.be(handler2.inspectorAdapters.data);
+          });
+        });
+
       });
 
       it('should have whenFirstRenderComplete returns a promise resolving on first renderComplete event', async () => {

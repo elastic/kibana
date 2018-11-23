@@ -42,6 +42,7 @@ import {
   InstallDependenciesTask,
   OptimizeBuildTask,
   RemovePackageJsonDepsTask,
+  RemoveWorkspacesTask,
   TranspileBabelTask,
   TranspileTypescriptTask,
   TranspileScssTask,
@@ -105,6 +106,7 @@ export async function buildDistributables(options) {
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
+  await run(RemoveWorkspacesTask);
   await run(CleanTypescriptTask);
   await run(CleanPackagesTask);
   await run(CreateNoticeFileTask);

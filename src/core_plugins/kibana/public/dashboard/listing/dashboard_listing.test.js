@@ -36,7 +36,7 @@ jest.mock('lodash',
   }), { virtual: true });
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   DashboardListing,
@@ -58,7 +58,7 @@ const find = (num) => {
 };
 
 test('renders empty page in before initial fetch to avoid flickering', () => {
-  const component = shallow(<DashboardListing
+  const component = shallowWithIntl(<DashboardListing.WrappedComponent
     find={find.bind(null, 2)}
     delete={() => {}}
     listingLimit={1000}
@@ -69,7 +69,7 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
 
 describe('after fetch', () => {
   test('initialFilter', async () => {
-    const component = shallow(<DashboardListing
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 2)}
       delete={() => {}}
       listingLimit={1000}
@@ -86,7 +86,7 @@ describe('after fetch', () => {
   });
 
   test('renders table rows', async () => {
-    const component = shallow(<DashboardListing
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 2)}
       delete={() => {}}
       listingLimit={1000}
@@ -102,7 +102,7 @@ describe('after fetch', () => {
   });
 
   test('renders call to action when no dashboards exist', async () => {
-    const component = shallow(<DashboardListing
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 0)}
       delete={() => {}}
       listingLimit={1}
@@ -118,7 +118,7 @@ describe('after fetch', () => {
   });
 
   test('hideWriteControls', async () => {
-    const component = shallow(<DashboardListing
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 0)}
       delete={() => {}}
       listingLimit={1}
@@ -134,7 +134,7 @@ describe('after fetch', () => {
   });
 
   test('renders warning when listingLimit is exceeded', async () => {
-    const component = shallow(<DashboardListing
+    const component = shallowWithIntl(<DashboardListing.WrappedComponent
       find={find.bind(null, 2)}
       delete={() => {}}
       listingLimit={1}

@@ -83,7 +83,7 @@ export async function getInstalledPackages(options = {}) {
       const version = keyParts[keyParts.length - 1];
 
       const licenses = resolveLicense(licenseInfo, key, licenseOverrides);
-      const { realPath, repository } = licenseInfo[key];
+      const { realPath, repository, isDevOnly } = licenseInfo[key];
 
       return {
         name,
@@ -91,7 +91,8 @@ export async function getInstalledPackages(options = {}) {
         repository,
         licenses,
         directory: realPath,
-        relative: relative(directory, realPath)
+        relative: relative(directory, realPath),
+        isDevOnly
       };
     })
     .filter(pkg => pkg.directory !== directory);

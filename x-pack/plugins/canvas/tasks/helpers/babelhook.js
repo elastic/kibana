@@ -6,8 +6,9 @@
 
 const { resolve } = require('path');
 const register = require('babel-register');
-
 const options = {
+  babelrc: false,
+  presets: [require.resolve('@kbn/babel-preset/node_preset')],
   sourceMaps: false,
   plugins: [
     [

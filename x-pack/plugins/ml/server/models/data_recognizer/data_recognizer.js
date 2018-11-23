@@ -197,6 +197,7 @@ export class DataRecognizer {
     groups,
     indexPatternName,
     query,
+    useDedicatedIndex,
     startDatafeed,
     start,
     end,
@@ -233,6 +234,11 @@ export class DataRecognizer {
       if (Array.isArray(groups)) {
         // update groups list for each job
         moduleConfig.jobs.forEach(job => job.config.groups = groups);
+      }
+
+      // Set the results_index_name property for each job if useDedicatedIndex is true
+      if (useDedicatedIndex === true) {
+        moduleConfig.jobs.forEach(job => job.config.results_index_name = job.id);
       }
       saveResults.jobs = await this.saveJobs(moduleConfig.jobs);
     }
@@ -361,7 +367,7 @@ export class DataRecognizer {
 
   // save the savedObjects if they do not exist already
   async saveKibanaObjects(objectExistResults) {
-    let results = [];
+    let results = { saved_objects: [] };
     const filteredSavedObjects = objectExistResults.filter(o => o.exists === false).map(o => o.savedObject);
     if (filteredSavedObjects.length) {
       results = await this.savedObjectsClient.bulkCreate(filteredSavedObjects);

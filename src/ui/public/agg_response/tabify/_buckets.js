@@ -68,7 +68,9 @@ TabifyBuckets.prototype._isRangeEqual = function (range1, range2) {
 TabifyBuckets.prototype._orderBucketsAccordingToParams = function (params) {
   if (params.filters && this.objectMode) {
     this._keys = params.filters.map(filter => {
-      return filter.label || filter.input.query || '*';
+      const query = _.get(filter, 'input.query.query_string.query', filter.input.query);
+      const queryString = typeof query === 'string' ? query : JSON.stringify(query);
+      return filter.label || queryString || '*';
     });
   } else if (params.ranges && this.objectMode) {
     this._keys = params.ranges.map(range => {

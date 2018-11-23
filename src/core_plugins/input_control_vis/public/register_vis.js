@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
@@ -40,8 +39,7 @@ function InputControlVisProvider(Private) {
     description: i18n.translate('inputControl.register.controlsDescription', {
       defaultMessage: 'Create interactive controls for easy dashboard manipulation.'
     }),
-    category: CATEGORY.OTHER,
-    stage: 'lab',
+    stage: 'experimental',
     requiresUpdateStatus: [Status.PARAMS, Status.TIME],
     feedbackMessage: defaultFeedbackMessage,
     visualization: VisController,

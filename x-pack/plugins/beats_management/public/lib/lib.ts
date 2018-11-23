@@ -45,6 +45,7 @@ export interface FrameworkAdapter {
   kbnVersion?: string;
   baseURLPath: string;
   registerManagementSection(pluginId: string, displayName: string, basePath: string): void;
+  getDefaultUserRoles(): string[];
   // Methods
   getCurrentUser(): {
     email: string | null;
@@ -55,6 +56,9 @@ export interface FrameworkAdapter {
     scope: string[];
     username: string;
   };
+  licenseExpired(): boolean;
+  securityEnabled(): boolean;
+  hasValidLicense(): boolean;
   setUISettings(key: string, value: any): void;
   render(component: React.ReactElement<any>): void;
 }

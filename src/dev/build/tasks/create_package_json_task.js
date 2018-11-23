@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { transformDependencies } from '@kbn/pm';
+import { copyWorkspacePackages } from '@kbn/pm';
 
 import { read, write } from '../lib';
 
@@ -29,8 +29,10 @@ export const CreatePackageJsonTask = {
 
     const newPkg = {
       name: pkg.name,
+      private: true,
       description: pkg.description,
       keywords: pkg.keywords,
+      license: pkg.license,
       version: config.getBuildVersion(),
       branch: pkg.branch,
       build: {
@@ -42,11 +44,13 @@ export const CreatePackageJsonTask = {
       engines: {
         node: pkg.engines.node,
       },
-      dependencies: transformDependencies(pkg.dependencies),
+      workspaces: pkg.workspaces,
+      dependencies: pkg.dependencies
     };
 
     if (build.isOss()) {
       delete newPkg.dependencies['x-pack'];
+      newPkg.workspaces.packages = newPkg.workspaces.packages.filter(p => p !== 'x-pack');
     }
 
     await write(
@@ -64,10 +68,29 @@ export const RemovePackageJsonDepsTask = {
     const pkg = JSON.parse(await read(path));
 
     delete pkg.dependencies;
+    delete pkg.private;
 
     await write(
       build.resolvePath('package.json'),
       JSON.stringify(pkg, null, '  ')
     );
   },
+};
+
+export const RemoveWorkspacesTask = {
+  description: 'Remove workspace artifacts',
+
+  async run(config, log, build) {
+    await copyWorkspacePackages(build.resolvePath());
+
+    const path = build.resolvePath('package.json');
+    const pkg = JSON.parse(await read(path));
+
+    delete pkg.workspaces;
+
+    await write(
+      build.resolvePath('package.json'),
+      JSON.stringify(pkg, null, '  ')
+    );
+  }
 };

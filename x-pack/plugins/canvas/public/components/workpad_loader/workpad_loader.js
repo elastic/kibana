@@ -10,7 +10,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBasicTable,
+  EuiBetaBadge,
   EuiButtonIcon,
+  EuiLink,
   EuiPagination,
   EuiSpacer,
   EuiButton,
@@ -177,6 +179,7 @@ export class WorkpadLoader extends React.PureComponent {
 
           return (
             <Link
+              data-test-subj="canvasWorkpadLoaderWorkpad"
               name="loadWorkpad"
               params={{ id: workpad.id }}
               aria-label={`Load workpad ${workpadName}`}
@@ -244,6 +247,7 @@ export class WorkpadLoader extends React.PureComponent {
             isSelectable
             selection={selection}
             className="canvasWorkpad__dropzoneTable"
+            data-test-subj="canvasWorkpadLoaderTable"
           />
           <EuiSpacer />
           <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
@@ -344,7 +348,22 @@ export class WorkpadLoader extends React.PureComponent {
           <Fragment>
             <EuiModalHeader className="canvasHomeApp__modalHeader">
               <div style={{ width: '100%' }}>
-                <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
+                <EuiFlexGroup alignItems="center" gutterSize="m">
+                  <EuiFlexItem grow={false}>
+                    <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label="Beta"
+                      tooltipContent="Canvas is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiLink href="https://canvas.elastic.co" target="_blank">
+                      Docs
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
                 <EuiSpacer size="l" />
                 <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem grow={2}>
