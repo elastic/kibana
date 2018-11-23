@@ -12,7 +12,7 @@ import {
 
 describe('[CCR] auto-follow_serialization', () => {
   describe('deserializeAutofollowPattern()', () => {
-    it('should return empty object if name is not provided', () => {
+    it('should return empty object if name or esObject are not provided', () => {
       expect(deserializeAutofollowPattern()).toEqual({});
     });
 
