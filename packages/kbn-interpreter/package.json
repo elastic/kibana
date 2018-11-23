@@ -7,6 +7,16 @@
     "canvas:peg": "pegjs common/lib/grammar.peg",
     "kbn:bootstrap": "yarn build"
   },
+  "kibana": {
+    "clean": {
+      "extraPaths": [
+        "common",
+        "public",
+        "server",
+        "plugin"
+      ]
+    }
+  },
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lodash.clone": "^4.5.0",
