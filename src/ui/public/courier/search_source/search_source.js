@@ -71,9 +71,9 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import { BuildESQueryProvider } from '@kbn/es-query';
 
 import '../../promises';
-
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
@@ -82,7 +82,7 @@ import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
-import { BuildESQueryProvider } from './build_query';
+import { KbnError, OutdatedKuerySyntaxError } from '../../errors';
 
 const FIELDS = [
   'type',
@@ -610,7 +610,14 @@ export function SearchSourceProvider(Promise, Private, config) {
             _.set(flatData.body, '_source.includes', remainingFields);
           }
 
-          flatData.body.query = buildESQuery(flatData.index, flatData.query, flatData.filters);
+          try {
+            flatData.body.query = buildESQuery(flatData.index, flatData.query, flatData.filters);
+          } catch (e) {
+            if (e.message === 'OutdatedKuerySyntaxError') {
+              throw new OutdatedKuerySyntaxError();
+            }
+            throw new KbnError(e.message, KbnError);
+          }
 
           if (flatData.highlightAll != null) {
             if (flatData.highlightAll && flatData.body.query) {
