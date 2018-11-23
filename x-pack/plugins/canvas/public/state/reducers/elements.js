@@ -66,10 +66,6 @@ export const elementsReducer = handleActions(
       const { filter, pageId, elementId } = payload;
       return assignElementProperties(workpadState, pageId, elementId, { filter });
     },
-    [actions.setPosition]: (workpadState, { payload }) => {
-      const { position, pageId, elementId } = payload;
-      return assignElementProperties(workpadState, pageId, elementId, { position });
-    },
     [actions.setMultiplePositions]: (workpadState, { payload }) =>
       payload.repositionedElements.reduce(
         (previousWorkpadState, { position, pageId, elementId }) =>

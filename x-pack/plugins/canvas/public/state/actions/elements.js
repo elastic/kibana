@@ -46,12 +46,6 @@ function getBareElement(el, includeId = false) {
 
 export const elementLayer = createAction('elementLayer');
 
-export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({
-  pageId,
-  elementId,
-  position,
-}));
-
 export const setMultiplePositions = createAction('setMultiplePosition', repositionedElements => ({
   repositionedElements,
 }));

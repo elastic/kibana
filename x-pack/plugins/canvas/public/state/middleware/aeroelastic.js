@@ -13,7 +13,6 @@ import {
   removeElements,
   duplicateElement,
   elementLayer,
-  setPosition,
   setMultiplePositions,
   fetchAllRenderables,
 } from '../actions/elements';
@@ -229,7 +228,6 @@ export const aeroelastic = ({ dispatch, getState }) => {
       case addElement.toString():
       case duplicateElement.toString():
       case elementLayer.toString():
-      case setPosition.toString():
       case setMultiplePositions.toString():
         const page = getSelectedPage(getState());
         const elements = getElements(getState(), page);
@@ -239,11 +237,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
           prevPage !== page || !shallowEqual(prevElements.map(id), elements.map(id));
         if (shouldResetState) populateWithElements(page);
 
-        if (
-          action.type !== setPosition.toString() &&
-          action.type !== setMultiplePositions.toString()
-        )
-          unselectShape(prevPage);
+        if (action.type !== setMultiplePositions.toString()) unselectShape(prevPage);
 
         break;
     }
