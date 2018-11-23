@@ -6,7 +6,7 @@
 
 declare interface CanvasElementConfig {
   name: string;
-  image: any;
+  image: string;
   expression: string;
   displayName?: string;
   help?: string;
