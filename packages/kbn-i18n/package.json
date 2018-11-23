@@ -8,9 +8,8 @@
   "private": true,
   "scripts": {
     "build": "run-p build:**",
-    "kbn:bootstrap": "run-p 'build:babel:** --quiet' build:tsc",
-    "kbn:watch": "run-p 'build:** --watch'",
-
+    "kbn:bootstrap": "run-p \"build:babel:** --quiet\" build:tsc",
+    "kbn:watch": "run-p \"build:** --watch\"",
     "build:tsc": "tsc --emitDeclarationOnly",
     "build:babel:web": "cross-env BABEL_ENV=web babel src --config-file ./babel.config.js --out-dir target/web --extensions \".ts,.js,.tsx\"",
     "build:babel:node": "cross-env BABEL_ENV=node babel src --config-file ./babel.config.js --out-dir target/node --extensions \".ts,.js,.tsx\""
