@@ -17,24 +17,4 @@
  * under the License.
  */
 
-const webpack = require('webpack');
-const webpackConfig = require('./webpack.plugins');
-
-const devtool = 'inline-cheap-module-source-map';
-
-const onComplete = function (done) {
-  return function (err, stats) {
-    if (err) {
-      done && done(err);
-    } else {
-      const seconds = ((stats.endTime - stats.startTime) / 1000).toFixed(2);
-      console.log(`Plugins built in ${seconds} seconds`);
-      done && done();
-    }
-  };
-};
-
-webpack({ ...webpackConfig, devtool }, onComplete(function () {
-  console.log('all done');
-}));
-
+require('../tasks/build/cli');

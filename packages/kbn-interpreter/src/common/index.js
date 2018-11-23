@@ -17,32 +17,16 @@
  * under the License.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
-
-export function translate(server) {
-  /*
-    Get AST from expression
-  */
-  server.route({
-    method: 'GET',
-    path: '/api/canvas/ast',
-    handler: function (request, h) {
-      if (!request.query.expression) {
-        return h.response({ error: '"expression" query is required' }).code(400);
-      }
-      return fromExpression(request.query.expression);
-    },
-  });
-
-  server.route({
-    method: 'POST',
-    path: '/api/canvas/expression',
-    handler: function (request, h) {
-      try {
-        return toExpression(request.payload);
-      } catch (e) {
-        return h.response({ error: e.message }).code(400);
-      }
-    },
-  });
-}
+export { pathsRegistry } from './lib/paths_registry';
+export { functionsRegistry } from './lib/functions_registry';
+export { typesRegistry } from './lib/types_registry';
+export { createError } from './interpreter/create_error';
+export { interpretProvider } from './interpreter/interpret';
+export { serializeProvider } from './lib/serialize';
+export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
+export { Fn } from './lib/fn';
+export { getType } from './lib/get_type';
+export { castProvider } from './interpreter/cast';
+export { parse } from './lib/grammar';
+export { getByAlias } from './lib/get_by_alias';
+export { Registry } from './lib/registry';
