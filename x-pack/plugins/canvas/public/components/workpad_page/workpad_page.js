@@ -72,6 +72,7 @@ export class WorkpadPage extends PureComponent {
       <div
         key={page.id}
         id={page.id}
+        data-test-subj="canvasWorkpadPage"
         className={`canvasPage ${className} ${isEditable ? 'canvasPage--isEditable' : ''}`}
         data-shared-items-container
         style={{

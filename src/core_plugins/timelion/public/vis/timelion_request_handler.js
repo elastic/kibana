@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { BuildESQueryProvider } from 'ui/courier';
+import { BuildESQueryProvider } from '@kbn/es-query';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
@@ -31,7 +31,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
 
   return {
     name: 'timelion',
-    handler: function ({ aggs, timeRange, filters, query, visParams }) {
+    handler: function ({ timeRange, filters, query, visParams }) {
 
       return new Promise((resolve, reject) => {
         const expression = visParams.expression;
@@ -41,7 +41,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
           sheet: [expression],
           extended: {
             es: {
-              filter: buildEsQuery(aggs.indexPattern, [query], filters)
+              filter: buildEsQuery(undefined, [query], filters)
             }
           },
           time: _.extend(timeRange, {

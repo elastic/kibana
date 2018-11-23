@@ -6,6 +6,18 @@
 
 const { select, selectReduce } = require('./state');
 
+// Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
+// so it's OK that user agent strings are not reliable; in case it's spoofed, it'll just work with a slightly
+// different modifier key map (also, there aren't a lot of alternatives for OS / hw / keyboard detection).
+// It shouldn't fail in testing environments (node.js) either, where it can just return false, no need for
+// actually getting the OS on the server side.
+const appleKeyboard = Boolean(
+  window &&
+    window.navigator &&
+    window.navigator.userAgent &&
+    window.navigator.userAgent.match('Macintosh|iPhone|iPad')
+);
+
 /**
  * Selectors directly from a state object
  *
@@ -27,81 +39,18 @@ const mouseButtonEvent = select(action => (action.type === 'mouseEvent' ? action
   primaryUpdate
 );
 
-const keyboardEvent = select(action => (action.type === 'keyboardEvent' ? action.payload : null))(
-  primaryUpdate
-);
-
-const keyInfoFromMouseEvents = select(
-  ({ type, payload: { altKey, metaKey, shiftKey } }) =>
-    type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey } : null
+const keyFromMouse = select(
+  ({ type, payload: { altKey, metaKey, shiftKey, ctrlKey } }) =>
+    type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey, ctrlKey } : {}
 )(primaryUpdate);
 
-const altTest = key => key.slice(0, 3).toLowerCase() === 'alt' || key === 'KeyALT';
-const metaTest = key => key.slice(0, 4).toLowerCase() === 'meta';
-const shiftTest = key => key === 'KeySHIFT' || key.slice(0, 5) === 'Shift';
-const deadKey1 = 'KeyDEAD';
-const deadKey2 = 'Key†';
+const metaHeld = select(appleKeyboard ? e => e.metaKey : e => e.altKey)(keyFromMouse);
+const optionHeld = select(appleKeyboard ? e => e.altKey : e => e.ctrlKey)(keyFromMouse);
+const shiftHeld = select(e => e.shiftKey)(keyFromMouse);
 
-// Key states (up vs down) from keyboard events are trivially only captured if there's a keyboard event, and that only
-// happens if the user is interacting with the browser, and specifically, with the DOM subset that captures the keyboard
-// event. It's also clear that all keys, and importantly, modifier keys (alt, meta etc.) can alter state while the user
-// is not sending keyboard DOM events to the browser, eg. while using another tab or application. Similarly, an alt-tab
-// switch away from the browser will cause the registration of an `Alt down`, but not an `Alt up`, because that happens
-// in the switched-to application (https://github.com/elastic/kibana-canvas/issues/901).
-//
-// The solution is to also harvest modifier key (and in the future, maybe other key) statuses from mouse events, as these
-// modifier keys typically alter behavior while a pointer gesture is going on, in this case now, relaxing or tightening
-// snapping behavior. So we simply toggle the current key set up/down status (`lookup`) opportunistically.
-//
-// This function destructively modifies lookup, but could be made to work on immutable structures in the future.
-const updateKeyLookupFromMouseEvent = (lookup, keyInfoFromMouseEvent) => {
-  Object.entries(keyInfoFromMouseEvent).forEach(([key, value]) => {
-    if (metaTest(key)) {
-      if (value) lookup.meta = true;
-      else delete lookup.meta;
-    }
-    if (altTest(key)) {
-      if (value) lookup.alt = true;
-      else delete lookup.alt;
-    }
-    if (shiftTest(key)) {
-      if (value) lookup.shift = true;
-      else delete lookup.shift;
-    }
-  });
-  return lookup;
-};
-
-const pressedKeys = selectReduce((prevLookup, next, keyInfoFromMouseEvent) => {
-  const lookup = keyInfoFromMouseEvent
-    ? updateKeyLookupFromMouseEvent(prevLookup, keyInfoFromMouseEvent)
-    : prevLookup;
-  // these weird things get in when we alt-tab (or similar) etc. away and get back later:
-  delete lookup[deadKey1];
-  delete lookup[deadKey2];
-  if (!next) return { ...lookup };
-
-  let code = next.code;
-  if (altTest(next.code)) code = 'alt';
-
-  if (metaTest(next.code)) code = 'meta';
-
-  if (shiftTest(next.code)) code = 'shift';
-
-  if (next.event === 'keyDown') {
-    return { ...lookup, [code]: true };
-  } else {
-    /*eslint no-unused-vars: ["error", { "ignoreRestSiblings": true }]*/
-    const { [code]: ignore, ...rest } = lookup;
-    return rest;
-  }
-}, {})(keyboardEvent, keyInfoFromMouseEvents);
-
-const keyUp = select(keys => Object.keys(keys).length === 0)(pressedKeys);
-
-const metaHeld = select(lookup => Boolean(lookup.meta))(pressedKeys);
-const optionHeld = select(lookup => Boolean(lookup.alt))(pressedKeys);
-const shiftHeld = select(lookup => Boolean(lookup.shift))(pressedKeys);
+// retaining this for now to avoid removing dependent inactive code `keyTransformGesture` from layout.js
+// todo remove this, and `keyTransformGesture` from layout.js and do accessibility outside the layout engine
+const pressedKeys = () => ({});
 
 const cursorPosition = selectReduce((previous, position) => position || previous, { x: 0, y: 0 })(
   rawCursorPosition
@@ -122,18 +71,7 @@ const mouseIsDown = selectReduce(
   false
 )(mouseButtonEvent);
 
-const gestureEnd = selectReduce(
-  (prev, keyUp, mouseIsDown) => {
-    const inAction = !keyUp || mouseIsDown;
-    const ended = !inAction && prev.inAction;
-    return { ended, inAction };
-  },
-  {
-    ended: false,
-    inAction: false,
-  },
-  d => d.ended
-)(keyUp, mouseIsDown);
+const gestureEnd = select(next => next && next.event === 'mouseUp')(mouseButtonEvent);
 
 /**
  * mouseButtonStateTransitions

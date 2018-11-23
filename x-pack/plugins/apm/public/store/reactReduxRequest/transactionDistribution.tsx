@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
-import { IDistributionResponse } from '../../../server/lib/transactions/distribution/get_distribution';
+import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
 import { loadTransactionDistribution } from '../../services/rest/apm';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
@@ -19,7 +19,7 @@ const withInitialData = createInitialDataSelector(INITIAL_DATA);
 
 export function getTransactionDistribution(
   state: IReduxState
-): RRRRenderResponse<IDistributionResponse> {
+): RRRRenderResponse<ITransactionDistributionAPIResponse> {
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
@@ -37,7 +37,7 @@ export function TransactionDistributionRequest({
   render
 }: {
   urlParams: IUrlParams;
-  render: RRRRender<IDistributionResponse>;
+  render: RRRRender<ITransactionDistributionAPIResponse>;
 }) {
   const { serviceName, start, end, transactionName, kuery } = urlParams;
 
