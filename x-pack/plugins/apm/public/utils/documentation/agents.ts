@@ -11,8 +11,8 @@ interface AgentNamedValues {
 }
 
 export const APM_AGENT_DROPPED_SPANS_DOCS: AgentNamedValues = {
-  nodejs: `${AGENT_URL_ROOT}/nodejs/1.x/agent-api.html#transaction-max-spans`,
-  python: `${AGENT_URL_ROOT}/python/2.x/configuration.html#config-transaction-max-spans`
+  nodejs: `${AGENT_URL_ROOT}/nodejs/current/configuration.html#transaction-max-spans`,
+  python: `${AGENT_URL_ROOT}/python/current/configuration.html#config-transaction-max-spans`
 };
 
 const APM_AGENT_FEATURE_DOCS: {
