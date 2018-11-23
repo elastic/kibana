@@ -19,7 +19,6 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
 import gaugeTemplate from './editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
@@ -33,7 +32,6 @@ export default function GoalVisType(Private, i18n) {
     description: i18n('kbnVislibVisTypes.goal.goalDescription', {
       defaultMessage: 'A goal chart indicates how close you are to your final goal.'
     }),
-    category: CATEGORY.DATA,
     visConfig: {
       defaults: {
         addTooltip: true,

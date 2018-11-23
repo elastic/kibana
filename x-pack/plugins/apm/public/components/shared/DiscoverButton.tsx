@@ -12,10 +12,13 @@ import { KibanaLink } from '../../utils/url';
 
 interface Props {
   query: StringMap;
-  children: any;
 }
 
-export function DiscoverButton({ query, children, ...rest }: Props) {
+export const DiscoverButton: React.SFC<Props> = ({
+  query,
+  children,
+  ...rest
+}) => {
   return (
     <KibanaLink
       pathname={'/app/kibana'}
@@ -28,4 +31,4 @@ export function DiscoverButton({ query, children, ...rest }: Props) {
       </EuiButtonEmpty>
     </KibanaLink>
   );
-}
+};

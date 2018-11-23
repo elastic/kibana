@@ -21,7 +21,7 @@ import { VegaParser } from './data_model/vega_parser';
 import { SearchCache } from './data_model/search_cache';
 import { TimeCache } from './data_model/time_cache';
 import { timefilter } from 'ui/timefilter';
-import { BuildESQueryProvider } from 'ui/courier';
+import { BuildESQueryProvider } from '@kbn/es-query';
 
 export function VegaRequestHandlerProvider(Private, es, serviceSettings) {
   const buildEsQuery = Private(BuildESQueryProvider);
@@ -33,9 +33,9 @@ export function VegaRequestHandlerProvider(Private, es, serviceSettings) {
 
     name: 'vega',
 
-    handler({ aggs, timeRange, filters, query, visParams }) {
+    handler({ timeRange, filters, query, visParams }) {
       timeCache.setTimeRange(timeRange);
-      const filtersDsl = buildEsQuery(aggs.indexPattern, [query], filters);
+      const filtersDsl = buildEsQuery(undefined, [query], filters);
       const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
       return vp.parseAsync();
     }

@@ -10,7 +10,6 @@ require('dotenv').config({ silent: true });
 const path = require('path');
 const gulp = require('gulp');
 const mocha = require('gulp-mocha');
-const pegjs = require('gulp-pegjs');
 const multiProcess = require('gulp-multi-process');
 const fancyLog = require('fancy-log');
 const ansiColors = require('ansi-colors');
@@ -30,7 +29,6 @@ const gulpHelpers = {
   mocha,
   multiProcess,
   packageDir,
-  pegjs,
   pkg,
 };
 
