@@ -41,12 +41,16 @@ describe('anomalySeriesTransform', () => {
         {
           key: 15000,
           anomaly_score: { value: 0 }
+        },
+        {
+          key: 20000,
+          anomaly_score: { value: 90 }
         }
       ] as ESBucket[]);
 
-      const getMlBucketSize = 10;
+      const getMlBucketSize = 5;
       const bucketSize = 5;
-      const timeSeriesDates = [5000, 10000];
+      const timeSeriesDates = [5000, 15000];
       const anomalySeries = anomalySeriesTransform(
         esResponse,
         getMlBucketSize,
@@ -55,7 +59,33 @@ describe('anomalySeriesTransform', () => {
       );
 
       const buckets = anomalySeries!.anomalyScore;
-      expect(buckets).toEqual([{ x: 20000, x0: 10000 }]);
+      expect(buckets).toEqual([{ x0: 10000, x: 15000 }]);
+    });
+
+    it('should decrease the x-value to avoid going beyond last date', () => {
+      const esResponse = getESResponse([
+        {
+          key: 0,
+          anomaly_score: { value: 0 }
+        },
+        {
+          key: 5000,
+          anomaly_score: { value: 90 }
+        }
+      ] as ESBucket[]);
+
+      const getMlBucketSize = 10;
+      const bucketSize = 5;
+      const timeSeriesDates = [0, 10000];
+      const anomalySeries = anomalySeriesTransform(
+        esResponse,
+        getMlBucketSize,
+        bucketSize,
+        timeSeriesDates
+      );
+
+      const buckets = anomalySeries!.anomalyScore;
+      expect(buckets).toEqual([{ x0: 5000, x: 10000 }]);
     });
   });
 

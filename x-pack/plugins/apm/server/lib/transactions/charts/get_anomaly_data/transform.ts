@@ -75,7 +75,7 @@ export function getAnomalyScoreDataPoints(
     .map(bucket => {
       return {
         x0: bucket.x,
-        x: bucket.x + bucketSizeInMillis
+        x: Math.min(bucket.x + bucketSizeInMillis, lastDate) // don't go beyond last date
       };
     });
 }
