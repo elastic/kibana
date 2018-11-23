@@ -20,7 +20,7 @@
 import { validateInterval } from '../lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
-import { BuildESQueryProvider } from 'ui/courier';
+import { BuildESQueryProvider } from '@kbn/es-query';
 
 const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http) {
   const notify = new Notifier({ location: 'Metrics' });

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import {
   PROCESSOR_EVENT,
@@ -14,11 +13,16 @@ import {
 } from '../../../../common/constants';
 import { Setup } from '../../helpers/setup_request';
 
-export async function getSpans(transactionId: string, setup: Setup) {
+export type SpanListAPIResponse = Span[];
+
+export async function getSpans(
+  transactionId: string,
+  setup: Setup
+): Promise<SpanListAPIResponse> {
   const { start, end, client, config } = setup;
 
   const params = {
-    index: config.get('apm_oss.spanIndices'),
+    index: config.get<string>('apm_oss.spanIndices'),
     body: {
       size: 500,
       query: {
@@ -50,6 +54,6 @@ export async function getSpans(transactionId: string, setup: Setup) {
     }
   };
 
-  const resp: SearchResponse<Span> = await client('search', params);
+  const resp = await client<Span>('search', params);
   return resp.hits.hits.map(hit => hit._source);
 }
