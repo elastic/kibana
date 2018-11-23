@@ -60,7 +60,7 @@ export const PageRouter: React.SFC<{ libs: FrontendLibs }> = ({ libs }) => {
           <Route path="/overview" render={(props: any) => <MainPages {...props} libs={libs} />} />
           <RouteWithBreadcrumb
             title={params => {
-              return i18n.translate('xpack.beatsManagement.router.beatsTitle', {
+              return i18n.translate('xpack.beatsManagement.router.beatTitle', {
                 defaultMessage: 'Beats: {beatId}',
                 values: { beatId: params.beatId },
               });
