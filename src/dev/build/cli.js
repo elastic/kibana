@@ -122,7 +122,7 @@ buildDistributables({
   createRpmPackage: isOsPackageDesired('rpm'),
   createDebPackage: isOsPackageDesired('deb'),
   targetAllPlatforms: Boolean(flags['all-platforms']),
-  installDir: flags.installDir ? resolve(flags.installDir) : undefined
+  installDir: flags['install-dir'] ? resolve(flags['install-dir']) : undefined
 }).catch(error => {
   if (!isErrorLogged(error)) {
     log.error('Uncaught error');
