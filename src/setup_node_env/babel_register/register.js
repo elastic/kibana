@@ -42,7 +42,7 @@ var ignore = [
   /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
 
   // ignore paths matching `/canvas/canvas_plugin/{a}/{b}` unless
-  // is `x-pack` and `b` is not `node_modules`
+  // `a` is `functions` and `b` is `server`
   /\/canvas\/canvas_plugin\/(?!functions\/server)([^\/]+\/[^\/]+)/,
 ];
 
@@ -58,9 +58,10 @@ if (global.__BUILT_WITH_BABEL__) {
   ignore.push(resolve(__dirname, '../../../src'));
 } else {
   ignore.push(
-    // ignore any path in the packages, unless it is a file in a test,
-    // or __tests__ directory, or it ends with .test.js, .test.ts, or .test.tsx
-    /\/packages\/(eslint-|kbn-)[^\/]+\/(?!(.+\/)?(test|__tests__)\/.+|.+\.test\.(js|ts|tsx)$)(.+$)/
+    // ignore any path in the packages, unless it is a file in the packages
+    // root `src` directory, in any test or __tests__ directory, or it ends
+    // with .test.js, .test.ts, or .test.tsx
+    /\/packages\/(eslint-|kbn-)[^\/]+\/(?!src\/.*|(.+\/)?(test|__tests__)\/.+|.+\.test\.(js|ts|tsx)$)(.+$)/
   );
 }
 
