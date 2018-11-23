@@ -7,7 +7,9 @@ source "$(dirname "$0")/../../src/dev/ci_setup/java_setup.sh"
 
 "$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
 
-node scripts/build --debug --oss;
+export KBN_INSTALL_DIR="$PARENT_DIR/install/kibana"
+
+node scripts/build --debug --oss --skip-archives --install-dir "$KBN_INSTALL_DIR";
 
 export TEST_BROWSER_HEADLESS=1
 export TEST_ES_FROM=${TEST_ES_FROM:-source}

@@ -51,7 +51,8 @@ const flags = getopts(process.argv.slice(0), {
   },
   default: {
     debug: true,
-    'version-qualifier': ''
+    'version-qualifier': '',
+    'install-dir': undefined
   },
   unknown: (flag) => {
     unknownFlags.push(flag);
@@ -76,6 +77,7 @@ if (flags.help) {
         --no-oss                {dim Only produce the default distributable of Kibana}
         --skip-archives         {dim Don't produce tar/zip archives}
         --skip-os-packages      {dim Don't produce rpm/deb packages}
+        --install-dir           {dim Install the build for this platform to a directory}
         --all-platforms         {dim Produce archives for all platforms, not just this one}
         --rpm                   {dim Only build the rpm package}
         --deb                   {dim Only build the deb package}
@@ -120,6 +122,7 @@ buildDistributables({
   createRpmPackage: isOsPackageDesired('rpm'),
   createDebPackage: isOsPackageDesired('deb'),
   targetAllPlatforms: Boolean(flags['all-platforms']),
+  installDir: flags.installDir ? resolve(flags.installDir) : undefined
 }).catch(error => {
   if (!isErrorLogged(error)) {
     log.error('Uncaught error');

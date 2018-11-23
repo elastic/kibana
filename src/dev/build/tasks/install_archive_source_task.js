@@ -17,23 +17,17 @@
  * under the License.
  */
 
-export * from './build_packages_task';
-export * from './clean_tasks';
-export * from './copy_source_task';
-export * from './create_archives_sources_task';
-export * from './create_archives_task';
-export * from './create_empty_dirs_and_files_task';
-export * from './create_package_json_task';
-export * from './create_readme_task';
-export * from './install_dependencies_task';
-export * from './install_archive_source_task';
-export * from './license_file_task';
-export * from './nodejs';
-export * from './notice_file_task';
-export * from './optimize_task';
-export * from './os_packages';
-export * from './transpile_babel_task';
-export * from './transpile_typescript_task';
-export * from './transpile_scss_task';
-export * from './verify_env_task';
-export * from './write_sha_sums_task';
+import { scanCopy } from '../lib';
+
+export const InstallArchiveSourceTask = {
+  description: 'Installing platform-specific archive source',
+  async run(config, _, build) {
+    const platform = config.getPlatformForThisOs();
+
+    // copy all files from generic build source directory into platform-specific build directory
+    await scanCopy({
+      source: build.resolvePathForPlatform(platform),
+      destination: config.resolveFromInstallDir(),
+    });
+  }
+};

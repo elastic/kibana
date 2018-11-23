@@ -39,6 +39,7 @@ import {
   CreateRpmPackageTask,
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
+  InstallArchiveSourceTask,
   InstallDependenciesTask,
   OptimizeBuildTask,
   RemovePackageJsonDepsTask,
@@ -64,6 +65,7 @@ export async function buildDistributables(options) {
     createDebPackage,
     versionQualifier,
     targetAllPlatforms,
+    installDir,
   } = options;
 
   log.verbose('building distributables with options:', {
@@ -80,7 +82,8 @@ export async function buildDistributables(options) {
   const config = await getConfig({
     isRelease,
     versionQualifier,
-    targetAllPlatforms
+    targetAllPlatforms,
+    installDir
   });
 
   const run = createRunner({
@@ -140,6 +143,9 @@ export async function buildDistributables(options) {
   }
   if (createRpmPackage) { // control w/ --rpm or --skip-os-packages
     await run(CreateRpmPackageTask);
+  }
+  if (installDir) { // control w/ --install-dir
+    await run(InstallArchiveSourceTask);
   }
 
   /**
