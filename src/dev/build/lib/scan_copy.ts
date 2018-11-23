@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* tslint:disable max-classes-per-file, no-bitwise */
-
 import Fs from 'fs';
 import { basename, join } from 'path';
 import { promisify } from 'util';
@@ -33,9 +31,21 @@ const copyFileAsync = promisify(Fs.copyFile);
 const readdirAsync = promisify(Fs.readdir);
 
 interface Options {
+  /**
+   * directory to copy from
+   */
   source: string;
+  /**
+   * path to copy to
+   */
   destination: string;
+  /**
+   * function that is called with each Record
+   */
   filter?: (record: Record) => boolean;
+  /**
+   * Date to use for atime/mtime
+   */
   time?: Date;
 }
 
@@ -49,14 +59,8 @@ class Record {
 }
 
 /**
- * Scan the files in a directory and delete the directories/files that
- * are matched by an array of regular expressions.
- *
- * @param options.source the directory to copy, all files including dot files will be copied
- * @param options.destination the destination to write the copy to
- * @param options.filter optional test function that is called with each Record, if false is
- *  returned the whole tree from that point is excluded
- * @param options.time optional Date to set as the mtime and atime of each file/directory
+ * Copy all of the files from one directory to another, optionally filtered with a
+ * function or modifying mtime/atime for each file.
  */
 export async function scanCopy(options: Options) {
   const { source, destination, filter, time } = options;
