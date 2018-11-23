@@ -5,6 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
@@ -41,7 +42,12 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiFormRow
-            label={'Spaces'}
+            label={
+              <FormattedMessage
+                id="xpack.security.management.editRoles.privilegeSpaceForm.spacesFormRowLabel"
+                defaultMessage="Spaces"
+              />
+            }
             {...validator.validateSelectedSpaces(selectedSpaceIds, selectedPrivilege)}
           >
             <SpaceSelector
@@ -53,7 +59,12 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
-            label={'Privilege'}
+            label={
+              <FormattedMessage
+                id="xpack.security.management.editRoles.privilegeSpaceForm.privilegeFormRowLabel"
+                defaultMessage="Privilege"
+              />
+            }
             {...validator.validateSelectedPrivilege(selectedSpaceIds, selectedPrivilege)}
           >
             <PrivilegeSelector

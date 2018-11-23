@@ -5,7 +5,7 @@
  */
 
 interface Numeral {
-  (value?: any): Numeral;
+  (value?: unknown): Numeral;
   format: (pattern: string) => string;
 }
 

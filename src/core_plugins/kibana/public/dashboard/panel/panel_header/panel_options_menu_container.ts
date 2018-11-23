@@ -18,6 +18,7 @@
  */
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import {
   buildEuiContextMenuPanels,
@@ -167,7 +168,9 @@ const mergeProps = (
   // every panel, every time any state changes.
   if (isPopoverOpen) {
     const contextMenuPanel = new ContextMenuPanel({
-      title: 'Options',
+      title: i18n.translate('kbn.dashboard.panel.optionsMenu.optionsContextMenuTitle', {
+        defaultMessage: 'Options',
+      }),
       id: 'mainMenu',
     });
 
