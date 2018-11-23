@@ -6,10 +6,10 @@
 /* tslint:disable */
 
 import fs from 'fs';
-import Git, { Transport } from 'nodegit';
+import Git from 'nodegit';
 import rimraf from 'rimraf';
-import { TestConfig, Repo } from '../../model/test_config';
 
+import { TestConfig, Repo } from '../../model/test_config';
 
 export class TestRepoManager {
   private repos: Repo[];
@@ -19,12 +19,12 @@ export class TestRepoManager {
   }
 
   public async importAllRepos() {
-    this.repos.forEach(repo => {
-      this.importRepo(repo.url, repo.path);
-    });
+    for (let repo of this.repos) {
+      await this.importRepo(repo.url, repo.path);
+    }
   }
 
-  public async importRepo(url: string, path: string) {
+  public importRepo(url: string, path: string) {
     return new Promise(resolve => {
       if (!fs.existsSync(path)) {
         rimraf(path, error => {
@@ -49,11 +49,7 @@ export class TestRepoManager {
   public async cleanRepo(path: string) {
     return new Promise(resolve => {
       if (fs.existsSync(path)) {
-        rimraf(path, error => {
-          console.error(`clone path: ${path} failed!`);
-          resolve(false);
-        });
-        resolve(true);
+        rimraf(path, resolve);
       } else {
         resolve(true);
       }

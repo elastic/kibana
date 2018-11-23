@@ -24,7 +24,8 @@
     "start-cache-deps": "node ../../kibana/scripts/es.js archive ../../kibana/.es/cache/elasticsearch-7.0.0-alpha1-SNAPSHOT.tar.gz -E path.data=../../data",
     "debug": "node --inspect ../../kibana/scripts/kibana.js --config ../../config/kibana/kibana.yml --env.name=development --optimize.enabled=false --plugin-path=.",
     "type-check": "tsc --project tsconfig.json --noEmit --pretty",
-    "test": "jest"
+    "test": "jest",
+    "lsp:benchmark": "cd ./server/lsp && jest --testRegex lsp_benchmark.ts"
   },
   "jest": {
     "transform": {
@@ -57,8 +58,10 @@
     "@types/glob": "^5.0.35",
     "@types/hapi": "^17.6.2",
     "@types/jest": "^23.3.1",
+    "@types/js-yaml": "^3.11.2",
     "@types/node": "^10.5.3",
     "@types/nodegit": "^0.22.1",
+    "@types/papaparse": "^4.5.5",
     "@types/proper-lockfile": "^3.0.0",
     "@types/query-string": "^6.1.0",
     "@types/react": "^16.3.16",
@@ -83,7 +86,6 @@
   "dependencies": {
     "@code/esqueue": "link:packages/code-esqueue",
     "@code/lsp-extension": "link:../../lsp/javascript-typescript-langserver/packages/lsp-extension",
-    "@types/js-yaml": "^3.11.2",
     "boom": "7.2.0",
     "del": "^3.0.0",
     "elasticsearch": "^15.1.1",
@@ -98,6 +100,7 @@
     "moment": "^2.22.2",
     "monaco-editor": "^0.14.3",
     "nodegit": "git+https://github.com/elastic/nodegit.git#fafce4a",
+    "papaparse": "^4.6.2",
     "path-to-regexp": "^2.2.1",
     "popper.js": "^1.14.3",
     "prop-types": "15.5.8",
@@ -115,6 +118,7 @@
     "reselect": "^3.0.1",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
+    "stats-lite": "^2.2.0",
     "styled-components": "^3.4.5",
     "vscode-jsonrpc": "^3.6.2",
     "vscode-languageserver": "^4.2.1",
