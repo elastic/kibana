@@ -191,7 +191,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -211,7 +211,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -231,7 +231,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -251,7 +251,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -313,7 +313,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -333,7 +333,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -353,7 +353,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -373,7 +373,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
