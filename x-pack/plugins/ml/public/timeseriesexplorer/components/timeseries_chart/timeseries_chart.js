@@ -43,6 +43,7 @@ import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
 import { getAnnotationBrush, renderAnnotations } from './annotation';
+import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../common/constants/feature_flags';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -228,7 +229,9 @@ export class TimeseriesChart extends React.Component {
     this.fieldFormat = undefined;
 
     // Annotations Brush
-    this.annotateBrush = getAnnotationBrush.call(this);
+    if (FEATURE_ANNOTATIONS_ENABLED) {
+      this.annotateBrush = getAnnotationBrush.call(this);
+    }
 
     // brush for focus brushing
     this.brush = d3.svg.brush();
@@ -431,8 +434,6 @@ export class TimeseriesChart extends React.Component {
       contextForecastData
     } = this.props;
 
-    const annotateBrush = this.annotateBrush.bind(this);
-
     // Add a group at the top to display info on the chart aggregation interval
     // and links to set the brush span to 1h, 1d, 1w etc.
     const zoomGroup = fcsGroup.append('g')
@@ -445,13 +446,17 @@ export class TimeseriesChart extends React.Component {
       .attr('class', 'chart-border');
     this.createZoomInfoElements(zoomGroup, fcsWidth);
 
-    fcsGroup.append('g')
-      .attr('class', 'ml-annotation-brush')
-      .call(annotateBrush)
-      .selectAll('rect')
-      .attr('x', 0)
-      .attr('y', focusZoomPanelHeight)
-      .attr('height', focusChartHeight);
+    if (FEATURE_ANNOTATIONS_ENABLED) {
+      const annotateBrush = this.annotateBrush.bind(this);
+
+      fcsGroup.append('g')
+        .attr('class', 'ml-annotation-brush')
+        .call(annotateBrush)
+        .selectAll('rect')
+        .attr('x', 0)
+        .attr('y', focusZoomPanelHeight)
+        .attr('height', focusChartHeight);
+    }
 
     // Add border round plot area.
     fcsGroup.append('rect')
@@ -512,7 +517,9 @@ export class TimeseriesChart extends React.Component {
     }
 
     // Create the elements for annotations
-    fcsGroup.append('g').classed('ml-annotations', true);
+    if (FEATURE_ANNOTATIONS_ENABLED) {
+      fcsGroup.append('g').classed('ml-annotations', true);
+    }
 
     fcsGroup.append('rect')
       .attr('x', 0)
@@ -611,7 +618,7 @@ export class TimeseriesChart extends React.Component {
 
       // if annotations are present, we extend yMax to avoid overlap
       // between annotation labels, chart lines and anomalies.
-      if (focusAnnotationData && focusAnnotationData.length > 0) {
+      if (FEATURE_ANNOTATIONS_ENABLED && focusAnnotationData && focusAnnotationData.length > 0) {
         yMax = yMax * 1.15;
       }
       this.focusYScale.domain([yMin, yMax]);
@@ -644,16 +651,18 @@ export class TimeseriesChart extends React.Component {
         .classed('hidden', !showModelBounds);
     }
 
-    renderAnnotations(
-      focusChart,
-      focusAnnotationData,
-      focusZoomPanelHeight,
-      focusChartHeight,
-      this.focusXScale,
-      showAnnotations,
-      showFocusChartTooltip,
-      showFlyout
-    );
+    if (FEATURE_ANNOTATIONS_ENABLED) {
+      renderAnnotations(
+        focusChart,
+        focusAnnotationData,
+        focusZoomPanelHeight,
+        focusChartHeight,
+        this.focusXScale,
+        showAnnotations,
+        showFocusChartTooltip,
+        showFlyout
+      );
+    }
 
     focusChart.select('.values-line')
       .attr('d', this.focusValuesLine(data));
@@ -1293,7 +1302,7 @@ export class TimeseriesChart extends React.Component {
       contents += `<br/><hr/>Scheduled events:<br/>${marker.scheduledEvents.map(mlEscape).join('<br/>')}`;
     }
 
-    if (_.has(marker, 'annotation')) {
+    if (FEATURE_ANNOTATIONS_ENABLED && _.has(marker, 'annotation')) {
       contents = marker.annotation;
       contents += `<br />${moment(marker.timestamp).format('MMMM Do YYYY, HH:mm')}`;
 
@@ -1379,7 +1388,7 @@ export class TimeseriesChart extends React.Component {
     return (
       <React.Fragment>
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
-        {isFlyoutVisible &&
+        {FEATURE_ANNOTATIONS_ENABLED && isFlyoutVisible &&
           <AnnotationFlyout
             annotation={annotation}
             cancelAction={closeFlyout}

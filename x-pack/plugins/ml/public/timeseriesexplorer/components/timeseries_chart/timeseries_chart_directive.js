@@ -27,6 +27,8 @@ const module = uiModules.get('apps/ml');
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 
+import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../common/constants/feature_flags';
+
 module.directive('mlTimeseriesChart', function () {
 
   function link(scope, element) {
@@ -87,11 +89,11 @@ module.directive('mlTimeseriesChart', function () {
 
     scope.$watchCollection('focusForecastData', renderFocusChart);
     scope.$watchCollection('focusChartData', renderFocusChart);
-    scope.$watchGroup([
-      'showAnnotations',
-      'showModelBounds',
-      'showForecast'
-    ], renderFocusChart);
+    scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
+    if (FEATURE_ANNOTATIONS_ENABLED) {
+      scope.$watchCollection('focusAnnotationData', renderFocusChart);
+      scope.$watch('showAnnotations', renderFocusChart);
+    }
 
     // Redraw the charts when the container is resize.
     const resizeChecker = new ResizeChecker(angular.element('.ml-timeseries-chart'));

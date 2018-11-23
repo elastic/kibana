@@ -49,6 +49,7 @@ import { JobSelectServiceProvider } from 'plugins/ml/components/job_select_list/
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import { initPromise } from 'plugins/ml/util/promise';
+import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -67,7 +68,6 @@ const module = uiModules.get('apps/ml');
 
 module.controller('MlTimeSeriesExplorerController', function (
   $scope,
-  $route,
   $timeout,
   Private,
   AppState,
@@ -96,8 +96,8 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.modelPlotEnabled = false;
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
-  $scope.showAnnotations = true;            // Toggles display of annotations in the focus chart
-  $scope.showAnnotationsCheckbox = true;
+  $scope.showAnnotations = FEATURE_ANNOTATIONS_ENABLED;            // Toggles display of annotations in the focus chart
+  $scope.showAnnotationsCheckbox = FEATURE_ANNOTATIONS_ENABLED;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
 
@@ -106,7 +106,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
   };
-
 
   $scope.initializeVis = function () {
     // Initialize the AppState in which to store the zoom range.
@@ -446,19 +445,23 @@ module.controller('MlTimeSeriesExplorerController', function (
     });
 
     // Query 4 - load any annotations for the selected job.
-    mlResultsService.getAnnotations(
-      [$scope.selectedJob.job_id],
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      MAX_ANNOTATIONS
-    ).then((resp) => {
-      refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id];
+    if (FEATURE_ANNOTATIONS_ENABLED) {
+      mlResultsService.getAnnotations(
+        [$scope.selectedJob.job_id],
+        searchBounds.min.valueOf(),
+        searchBounds.max.valueOf(),
+        MAX_ANNOTATIONS
+      ).then((resp) => {
+        refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id];
+        finish();
+      }).catch((resp) => {
+        toastNotifications.addDanger(`Error fetching annotations: ${JSON.stringify(resp)}`);
+        // still call finish so the chart without annotations is able to load
+        finish();
+      });
+    } else {
       finish();
-    }).catch((resp) => {
-      toastNotifications.addDanger(`Error fetching annotations: ${JSON.stringify(resp)}`);
-      // still call finish so the chart without annotations is able to load
-      finish();
-    });
+    }
 
     // Plus query for forecast data if there is a forecastId stored in the appState.
     const forecastId = _.get($scope, 'appState.mlTimeSeriesExplorer.forecastId');
@@ -573,11 +576,13 @@ module.controller('MlTimeSeriesExplorerController', function (
     }, 0);
   };
 
-  $scope.toggleShowAnnotations = function () {
-    $timeout(() => {
-      $scope.showAnnotations = !$scope.showAnnotations;
-    }, 0);
-  };
+  if (FEATURE_ANNOTATIONS_ENABLED) {
+    $scope.toggleShowAnnotations = function () {
+      $timeout(() => {
+        $scope.showAnnotations = !$scope.showAnnotations;
+      }, 0);
+    };
+  }
 
   $scope.toggleShowForecast = function () {
     $timeout(() => {
