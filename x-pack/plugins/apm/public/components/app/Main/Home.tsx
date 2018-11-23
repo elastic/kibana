@@ -5,8 +5,12 @@
  */
 
 // @ts-ignore
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
+import {
+  HistoryTabs,
+  IHistoryTab
+} from 'x-pack/plugins/apm/public/components/shared/HistoryTabs';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
@@ -16,6 +20,19 @@ import { HeaderContainer } from '../../shared/UIComponents';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
 
+const homeTabs: IHistoryTab[] = [
+  {
+    path: '/services',
+    name: 'Services',
+    component: ServiceOverview
+  },
+  {
+    path: '/traces',
+    name: 'Traces',
+    component: TraceOverview
+  }
+];
+
 export function Home() {
   return (
     <div>
@@ -24,17 +41,7 @@ export function Home() {
         <SetupInstructionsLink />
       </HeaderContainer>
       <KueryBar />
-      <EuiTabbedContent
-        className="k6Tab--large"
-        tabs={[
-          {
-            id: 'services_overview',
-            name: 'Services',
-            content: <ServiceOverview />
-          },
-          { id: 'traces_overview', name: 'Traces', content: <TraceOverview /> }
-        ]}
-      />
+      <HistoryTabs tabs={homeTabs} />
     </div>
   );
 }
