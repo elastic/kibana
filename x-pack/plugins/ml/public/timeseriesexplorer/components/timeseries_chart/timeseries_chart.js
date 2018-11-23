@@ -42,6 +42,7 @@ import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
 import { mlEscape } from '../../../util/string_utils';
 import { mlFieldFormatService } from '../../../services/field_format_service';
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
+import { getAnnotationBrush } from './annotation';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -227,59 +228,7 @@ export class TimeseriesChart extends React.Component {
     this.fieldFormat = undefined;
 
     // Annotations Brush
-    this.annotateBrush = d3.svg.brush()
-      .x(focusXScale)
-      //.y(focusYScale)
-      .on('brush', brushmove)
-      .on('brushend', brushend);
-    const annotateBrush = this.annotateBrush;
-
-    function brushmove() {
-      //const extent = annotateBrush.extent();
-    }
-
-    const that = this;
-    function brushend() {
-      const {
-        // focusChartData,
-        // refresh,
-        selectedJob
-      } = that.props;
-
-      const extent = annotateBrush.extent();
-      /*
-      const data = focusChartData.filter((d) => {
-        let match = false;
-        if (
-          (d.value >= extent[0][1] && d.value <= extent[1][1]) &&
-          (d.date.getTime() >= extent[0][0].getTime() && d.date.getTime() <= extent[1][0].getTime())
-        ) {
-          match = true;
-        }
-        return match;
-      }).map((d) => {
-        return d.value;
-      });
-      */
-
-      const timestamp = extent[0].getTime();
-      const endTimestamp = extent[1].getTime();
-
-      if (timestamp === endTimestamp) {
-        that.closeFlyout();
-        return;
-      }
-
-      const annotation = {
-        timestamp,
-        end_timestamp: endTimestamp,
-        annotation: that.state.annotation.annotation || '',
-        job_id: selectedJob.job_id,
-        result_type: 'annotation',
-      };
-
-      that.showFlyout(annotation);
-    }
+    this.annotateBrush = getAnnotationBrush.call(this);
 
     // brush for focus brushing
     this.brush = d3.svg.brush();
