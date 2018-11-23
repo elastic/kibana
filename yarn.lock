@@ -3322,14 +3322,6 @@ babel-plugin-mock-imports@^0.0.5:
   resolved "https://registry.yarnpkg.com/babel-plugin-mock-imports/-/babel-plugin-mock-imports-0.0.5.tgz#caa865f017d8972fe47772e0fb57f2924e5ce3c5"
   integrity sha1-yqhl8BfYly/kd3Lg+1fykk5c48U=
 
-babel-plugin-pegjs-inline-precompile@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-pegjs-inline-precompile/-/babel-plugin-pegjs-inline-precompile-0.1.0.tgz#3307f2b373a844296385311a7c528c53414dc57e"
-  integrity sha1-Mwfys3OoRCljhTEafFKMU0FNxX4=
-  dependencies:
-    babylon "^6.18.0"
-    pegjs "^0.10.0"
-
 babel-plugin-syntax-async-functions@^6.8.0:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-async-functions/-/babel-plugin-syntax-async-functions-6.13.0.tgz#cad9cad1191b5ad634bf30ae0872391e0647be95"
@@ -3664,6 +3656,13 @@ babel-plugin-transform-regenerator@^6.22.0, babel-plugin-transform-regenerator@^
   integrity sha1-4HA2lvveJ/Cj78rPi03KL3s6jy8=
   dependencies:
     regenerator-transform "^0.10.0"
+
+babel-plugin-transform-runtime@^6.23.0:
+  version "6.23.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-transform-runtime/-/babel-plugin-transform-runtime-6.23.0.tgz#88490d446502ea9b8e7efb0fe09ec4d99479b1ee"
+  integrity sha1-iEkNRGUC6puOfvsP4J7E2ZR5se4=
+  dependencies:
+    babel-runtime "^6.22.0"
 
 babel-plugin-transform-strict-mode@^6.24.1:
   version "6.24.1"
@@ -10149,16 +10148,6 @@ gulp-multi-process@^1.3.1:
   dependencies:
     async.queue "^0.5.2"
 
-gulp-pegjs@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/gulp-pegjs/-/gulp-pegjs-0.1.0.tgz#830158eeae8e730171d44dcdeb1ca20c7f3714ea"
-  integrity sha1-gwFY7q6OcwFx1E3N6xyiDH83FOo=
-  dependencies:
-    gulp-util "^3.0.6"
-    object-assign "^4.0.1"
-    pegjs "^0.10.0"
-    through2 "^2.0.1"
-
 gulp-rename@1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/gulp-rename/-/gulp-rename-1.2.2.tgz#3ad4428763f05e2764dec1c67d868db275687817"
@@ -10180,7 +10169,7 @@ gulp-sourcemaps@1.7.3:
     through2 "2.X"
     vinyl "1.X"
 
-gulp-util@^3.0.0, gulp-util@^3.0.6:
+gulp-util@^3.0.0:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/gulp-util/-/gulp-util-3.0.8.tgz#0054e1e744502e27c04c187c3ecc505dd54bbb4f"
   integrity sha1-AFTh50RQLifATBh8PsxQXdVLu08=
@@ -16075,11 +16064,6 @@ pegjs@0.9.0, pegjs@~0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.9.0.tgz#f6aefa2e3ce56169208e52179dfe41f89141a369"
   integrity sha1-9q76LjzlYWkgjlIXnf5B+JFBo2k=
-
-pegjs@^0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
-  integrity sha1-z4uvrm7d/0tafvsYUmnqr0YQ3b0=
 
 pend@~1.2.0:
   version "1.2.0"
