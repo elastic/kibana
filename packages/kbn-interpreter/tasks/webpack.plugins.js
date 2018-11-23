@@ -19,7 +19,7 @@
 
 const path = require('path');
 
-const sourceDir = path.resolve(__dirname, '../plugin_src');
+const sourceDir = path.resolve(__dirname, '../src/plugin');
 const buildDir = path.resolve(__dirname, '../plugin');
 
 module.exports = {
