@@ -58,9 +58,9 @@ if (global.__BUILT_WITH_BABEL__) {
   ignore.push(resolve(__dirname, '../../../src'));
 } else {
   ignore.push(
-    // ignore any path in the packages, unless it is a file in the packages
-    // root `src` directory, in any test or __tests__ directory, or it ends
-    // with .test.js, .test.ts, or .test.tsx
+    // ignore any path in the packages, unless it is in the package's
+    // root `src` directory, in any test or __tests__ directory, or it
+    // ends with .test.js, .test.ts, or .test.tsx
     /\/packages\/(eslint-|kbn-)[^\/]+\/(?!src\/.*|(.+\/)?(test|__tests__)\/.+|.+\.test\.(js|ts|tsx)$)(.+$)/
   );
 }
