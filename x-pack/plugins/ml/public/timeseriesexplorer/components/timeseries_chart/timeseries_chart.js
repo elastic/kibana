@@ -22,9 +22,9 @@ import moment from 'moment';
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
-} from '../../common/util/anomaly_utils';
-import { AnnotationFlyout } from './components/annotation_flyout';
-import { formatValue } from '../formatters/format_value';
+} from '../../../../common/util/anomaly_utils';
+import { AnnotationFlyout } from '../annotation_flyout';
+import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
@@ -34,14 +34,14 @@ import {
   numTicksForDateFormat,
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
-} from '../util/chart_utils';
+} from '../../../util/chart_utils';
 import { TimeBuckets } from 'ui/time_buckets';
-import { mlAnomaliesTableService } from '../components/anomalies_table/anomalies_table_service';
-import { ContextChartMask } from './components/context_chart_mask';
-import { findChartPointForAnomalyTime } from './timeseriesexplorer_utils';
-import { mlEscape } from '../util/string_utils';
-import { mlFieldFormatService } from '../services/field_format_service';
-import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
+import { mlAnomaliesTableService } from '../../../components/anomalies_table/anomalies_table_service';
+import { ContextChartMask } from '../context_chart_mask';
+import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
+import { mlEscape } from '../../../util/string_utils';
+import { mlFieldFormatService } from '../../../services/field_format_service';
+import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
