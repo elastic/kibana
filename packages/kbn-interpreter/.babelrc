@@ -1,3 +1,9 @@
 {
-  "presets": ["@kbn/babel-preset/webpack_preset"]
+  "presets": ["@kbn/babel-preset/webpack_preset"],
+  "plugins": [
+    ["transform-runtime", {
+      "polyfill": false,
+      "regenerator": true
+    }]
+  ]
 }
