@@ -8,7 +8,7 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChart } from '../components/timeseries_chart/timeseries_chart';
 
 describe('ML - <ml-timeseries-chart>', () => {
   let $scope;

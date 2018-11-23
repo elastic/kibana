@@ -19,9 +19,9 @@ import { fileDatavisualizer } from './datavisualizer';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const ml = {
-  addAnnotation(obj) {
+  indexAnnotation(obj) {
     return http({
-      url: `${basePath}/annotation/add`,
+      url: `${basePath}/annotation/index`,
       method: 'PUT',
       data: obj
     });

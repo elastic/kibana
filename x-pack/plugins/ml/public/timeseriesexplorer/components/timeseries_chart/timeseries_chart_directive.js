@@ -44,7 +44,7 @@ module.directive('mlTimeseriesChart', function () {
       svgWidth = Math.max(angular.element('.results-container').width(), 0);
 
       const props = {
-        addAnnotation: ml.addAnnotation,
+        indexAnnotation: ml.indexAnnotation,
         autoZoomDuration: scope.autoZoomDuration,
         contextAggregationInterval: scope.contextAggregationInterval,
         contextChartData: scope.contextChartData,

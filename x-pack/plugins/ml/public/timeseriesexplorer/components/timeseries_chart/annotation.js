@@ -80,25 +80,32 @@ export function renderAnnotations(
   showFocusChartTooltip,
   showFlyout
 ) {
-  const annotations = focusChart.select('.ml-annotations').selectAll('g.ml-annotation').data(focusAnnotationData || []);
-
-  const annotationGroupEnter = annotations.enter()
-    .append('g')
-    .classed('ml-annotation', true);
-
-  annotationGroupEnter
-    .append('rect')
-    .classed('ml-annotation-rect', true);
-
-  annotationGroupEnter
-    .append('text')
-    .classed('ml-annotation-text', true)
-    .text(d => d.annotation);
-
   const upperRectMargin = 25;
   const upperTextMargin = 18;
 
-  annotations.selectAll('.ml-annotation-rect')
+  const annotations = focusChart
+    .select('.ml-annotations')
+    .selectAll('g.ml-annotation')
+    .data(focusAnnotationData || [], d => d._id);
+
+  annotations.enter()
+    .append('g')
+    .classed('ml-annotation', true);
+
+  const rects = annotations.selectAll('.ml-annotation-rect').data(d => [d]);
+
+  rects.enter()
+    .append('rect')
+    .classed('ml-annotation-rect', true)
+    .on('mouseover', function (d) {
+      showFocusChartTooltip(d, this);
+    })
+    .on('mouseout', () => mlChartTooltipService.hide())
+    .on('click', function (d) {
+      showFlyout(d);
+    });
+
+  rects
     .attr('x', (d) => {
       const date = moment(d.timestamp);
       return focusXScale(date);
@@ -110,17 +117,17 @@ export function renderAnnotations(
       const e = (typeof d.end_timestamp !== 'undefined') ? (focusXScale(moment(d.end_timestamp)) - 1) : (s + 2);
       const width = Math.max(2, (e - s));
       return width;
-    })
-    .on('mouseover', function (d) {
-      showFocusChartTooltip(d, this);
-    })
-    .on('mouseout', () => mlChartTooltipService.hide())
-    .on('click', function (d) {
-      console.warn('click', d);
-      showFlyout(d);
     });
 
-  annotations.selectAll('.ml-annotation-text')
+  rects.exit().remove();
+
+  const texts = annotations.selectAll('.ml-annotation-text').data(d => [d]);
+
+  texts.enter()
+    .append('text')
+    .classed('ml-annotation-text', true);
+
+  texts
     .attr('x', (d) => {
       const date = moment(d.timestamp);
       const x = focusXScale(date);
@@ -129,10 +136,11 @@ export function renderAnnotations(
       const width = Math.max(2, (e - s));
       return x + (width / 2);
     })
-    .attr('y', focusZoomPanelHeight + upperTextMargin);
+    .attr('y', focusZoomPanelHeight + upperTextMargin)
+    .text(d => d.annotation);
+
+  texts.exit().remove();
 
   annotations.classed('ml-annotation-hidden', !showAnnotations);
-
-
   annotations.exit().remove();
 }

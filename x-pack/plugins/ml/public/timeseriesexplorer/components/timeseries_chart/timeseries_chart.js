@@ -78,7 +78,7 @@ function getSvgHeight() {
 
 export class TimeseriesChart extends React.Component {
   static propTypes = {
-    addAnnotation: PropTypes.func,
+    indexAnnotation: PropTypes.func,
     autoZoomDuration: PropTypes.number,
     contextAggregationInterval: PropTypes.object,
     contextChartData: PropTypes.array,
@@ -151,27 +151,30 @@ export class TimeseriesChart extends React.Component {
       toastNotifications
     } = this.props;
 
-    const closeFlyout = this.closeFlyout;
+    this.closeFlyout();
 
-    deleteAnnotation(annotation._id).then(() => {
-      closeFlyout();
-      refresh();
-      toastNotifications.addSuccess(`Deleted annotation for job with ID ${annotation.job_id}.`);
-    });
+    deleteAnnotation(annotation._id)
+      .then(() => {
+        refresh();
+        toastNotifications.addSuccess(`Deleted annotation for job with ID ${annotation.job_id}.`);
+      })
+      .catch((resp) => {
+        toastNotifications
+          .addDanger(`An error occured deleting the annotation for job with ID ${annotation.job_id}: ${JSON.stringify(resp)}`);
+      });
   }
 
-  saveAnnotation(annotation) {
+  indexAnnotation(annotation) {
     const {
-      addAnnotation,
+      indexAnnotation,
       refresh,
       toastNotifications
     } = this.props;
 
-    const closeFlyout = this.closeFlyout;
+    this.closeFlyout();
 
-    addAnnotation(annotation)
+    indexAnnotation(annotation)
       .then(() => {
-        closeFlyout();
         refresh();
         const action = (typeof annotation._id === 'undefined') ? 'Added an' : 'Updated';
         if (typeof annotation._id === 'undefined') {
@@ -1383,7 +1386,7 @@ export class TimeseriesChart extends React.Component {
     const closeFlyout = this.closeFlyout.bind(this);
     const deleteAnnotation = this.deleteAnnotation.bind(this);
     const handleAnnotationChange = this.handleAnnotationChange.bind(this);
-    const saveAnnotation = this.saveAnnotation.bind(this);
+    const indexAnnotation = this.indexAnnotation.bind(this);
 
     return (
       <React.Fragment>
@@ -1394,7 +1397,7 @@ export class TimeseriesChart extends React.Component {
             cancelAction={closeFlyout}
             controlFunc={handleAnnotationChange}
             deleteAction={deleteAnnotation}
-            saveAction={saveAnnotation}
+            saveAction={indexAnnotation}
           />
         }
       </React.Fragment>

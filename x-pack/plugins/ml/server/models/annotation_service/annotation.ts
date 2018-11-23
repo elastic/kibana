@@ -6,59 +6,57 @@
 
 import { Annotation, isAnnotation } from '../../../common/interfaces/annotations';
 
-export function annotationProvider(callWithRequest) {
-  async function addAnnotation(d: Annotation) {
-    if (isAnnotation(d) === false) {
+interface IndexParams {
+  index: string;
+  type: string;
+  body: Annotation;
+  refresh?: string;
+  id?: string;
+}
+
+interface DeleteParams {
+  index: string;
+  type: string;
+  refresh?: string;
+  id: string;
+}
+
+export function annotationProvider(
+  callWithRequest: (action: string, params: IndexParams | DeleteParams) => {}
+) {
+  async function indexAnnotation(annotation: Annotation) {
+    if (isAnnotation(annotation) === false) {
       return Promise.reject(new Error('invalid annotation format'));
     }
 
-    let response;
+    const params: IndexParams = {
+      index: '.ml-annotations',
+      type: 'annotation',
+      body: annotation,
+      refresh: 'wait_for',
+    };
 
-    // if d._id is not present, create new annotation
-    if (typeof d._id === 'undefined') {
-      response = await callWithRequest('index', {
-        index: '.ml-annotations',
-        type: 'annotation',
-        body: d,
-      });
-    } else {
-      const id = d._id;
-      delete d._id;
-      response = await callWithRequest('update', {
-        index: '.ml-annotations',
-        type: 'annotation',
-        id,
-        body: {
-          doc: d,
-        },
-      });
+    if (typeof annotation._id !== 'undefined') {
+      params.id = annotation._id;
+      delete params.body._id;
     }
 
-    // refresh the annotations index so we can make sure the annotations up to date right away.
-    await callWithRequest('indices.refresh', {
-      index: '.ml-annotations',
-    });
-
-    return response;
+    return await callWithRequest('index', params);
   }
 
   async function deleteAnnotation(id: string) {
-    const addAnnotationResponse = await callWithRequest('delete', {
+    const param: DeleteParams = {
       index: '.ml-annotations',
       type: 'annotation',
       id,
-    });
+      refresh: 'wait_for',
+    };
 
-    // refresh the annotations index so we can make sure the annotations up to date right away.
-    await callWithRequest('indices.refresh', {
-      index: '.ml-annotations',
-    });
-
-    return addAnnotationResponse;
+    return await callWithRequest('delete', param);
   }
 
   return {
-    addAnnotation,
+    indexAnnotation,
     deleteAnnotation,
   };
 }
