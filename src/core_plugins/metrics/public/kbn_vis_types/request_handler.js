@@ -20,7 +20,7 @@
 import { validateInterval } from '../lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
-import { BuildESQueryProvider } from 'ui/courier';
+import { BuildESQueryProvider } from '@kbn/es-query';
 
 const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http) {
   const notify = new Notifier({ location: 'Metrics' });
@@ -28,7 +28,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
 
   return {
     name: 'metrics',
-    handler: function ({ aggs, uiState, timeRange, filters, query, visParams }) {
+    handler: function ({ uiState, timeRange, filters, query, visParams }) {
       const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
         const panel = visParams;
@@ -39,7 +39,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            filters: [buildEsQuery(aggs.indexPattern, [query], filters)],
+            filters: [buildEsQuery(undefined, [query], filters)],
             panels: [panel],
             state: uiStateObj
           };

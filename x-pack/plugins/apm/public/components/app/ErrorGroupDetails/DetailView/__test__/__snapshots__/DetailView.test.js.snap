@@ -12,7 +12,7 @@ exports[`DetailView should render with data 1`] = `
     >
       Error occurrence
     </styled.h2>
-    <DiscoverButton
+    <Component
       query={
         Object {
           "_a": Object {
@@ -29,7 +29,7 @@ exports[`DetailView should render with data 1`] = `
       }
     >
       View 18 occurences in Discover
-    </DiscoverButton>
+    </Component>
   </styled.div>
   <styled.div>
     <StickyProperties
