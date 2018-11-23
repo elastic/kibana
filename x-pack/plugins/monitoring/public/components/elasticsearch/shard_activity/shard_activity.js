@@ -6,13 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiText, EuiTitle, EuiLink, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import {
-  KuiTableRowCell,
-  KuiTableRow,
-  KuiToolBarSection,
-  KuiToolBarText
-} from '@kbn/ui-framework/components';
-import { MonitoringTable } from 'plugins/monitoring/components/table';
+import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
 import { RecoveryIndex } from './recovery_index';
 import { TotalTime } from './total_time';
 import { SourceDestination } from './source_destination';
@@ -23,89 +17,55 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const columns = [
   {
-    title: i18n.translate('xpack.monitoring.kibana.shardActivity.indexTitle', {
+    name: i18n.translate('xpack.monitoring.kibana.shardActivity.indexTitle', {
       defaultMessage: 'Index'
     }),
-    sortKey: null
+    field: 'name',
+    render: (_name, shard) => <RecoveryIndex {...shard} />
   },
   {
-    title: i18n.translate('xpack.monitoring.kibana.shardActivity.stageTitle', {
+    name: i18n.translate('xpack.monitoring.kibana.shardActivity.stageTitle', {
       defaultMessage: 'Stage'
     }),
-    sortKey: null
+    field: 'stage'
   },
   {
-    title: i18n.translate('xpack.monitoring.kibana.shardActivity.totalTimeTitle', {
+    name: i18n.translate('xpack.monitoring.kibana.shardActivity.totalTimeTitle', {
       defaultMessage: 'Total Time'
     }),
-    sortKey: null
+    field: null,
+    render: shard => <TotalTime {...shard} />
   },
   {
-    title: i18n.translate('xpack.monitoring.kibana.shardActivity.sourceDestinationTitle', {
+    name: i18n.translate('xpack.monitoring.kibana.shardActivity.sourceDestinationTitle', {
       defaultMessage: 'Source / Destination'
     }),
-    sortKey: null
+    field: null,
+    render: shard => <SourceDestination {...shard} />
   },
   {
-    title: i18n.translate('xpack.monitoring.kibana.shardActivity.filesTitle', {
+    name: i18n.translate('xpack.monitoring.kibana.shardActivity.filesTitle', {
       defaultMessage: 'Files'
     }),
-    sortKey: null
+    field: null,
+    render: shard => <FilesProgress {...shard} />
   },
   {
-    title: i18n.translate('xpack.monitoring.kibana.shardActivity.bytesTitle', {
+    name: i18n.translate('xpack.monitoring.kibana.shardActivity.bytesTitle', {
       defaultMessage: 'Bytes'
     }),
-    sortKey: null
+    field: null,
+    render: shard => <BytesProgress {...shard} />
   },
   {
-    title: i18n.translate('xpack.monitoring.kibana.shardActivity.translogTitle', {
+    name: i18n.translate('xpack.monitoring.kibana.shardActivity.translogTitle', {
       defaultMessage: 'Translog'
     }),
-    sortKey: null
+    field: null,
+    render: shard => <TranslogProgress {...shard} />
   }
 ];
-const ActivityRow = props => (
-  <KuiTableRow>
-    <KuiTableRowCell>
-      <RecoveryIndex {...props} />
-    </KuiTableRowCell>
-    <KuiTableRowCell>{props.stage}</KuiTableRowCell>
-    <KuiTableRowCell>
-      <TotalTime {...props} />
-    </KuiTableRowCell>
-    <KuiTableRowCell>
-      <SourceDestination {...props} />
-    </KuiTableRowCell>
-    <KuiTableRowCell>
-      <FilesProgress {...props} />
-    </KuiTableRowCell>
-    <KuiTableRowCell>
-      <BytesProgress {...props} />
-    </KuiTableRowCell>
-    <KuiTableRowCell>
-      <TranslogProgress {...props} />
-    </KuiTableRowCell>
-  </KuiTableRow>
-);
 
-const ToggleCompletedSwitch = ({ toggleHistory, showHistory }) => (
-  <KuiToolBarSection>
-    <KuiToolBarText>
-      <EuiSwitch
-        id="monitoring_completed_recoveries"
-        label={(
-          <FormattedMessage
-            id="xpack.monitoring.elasticsearch.shardActivity.completedRecoveriesLabel"
-            defaultMessage="Completed recoveries"
-          />
-        )}
-        onChange={toggleHistory}
-        checked={showHistory}
-      />
-    </KuiToolBarText>
-  </KuiToolBarSection>
-);
 
 class ShardActivityUI extends React.Component {
   constructor(props) {
@@ -146,18 +106,20 @@ class ShardActivityUI extends React.Component {
 
   render() {
     // data prop is an array of table row data, or null (which triggers no data message)
-    const { data: rawData } = this.props;
+    const {
+      data: rawData,
+      sorting,
+      pagination,
+      onTableChange,
+      toggleShardActivityHistory,
+      showShardActivityHistory
+    } = this.props;
+
     if (rawData === null) {
       return null;
     }
-    const rows = rawData.map(parseProps);
 
-    const renderToolBarSection = props => (
-      <ToggleCompletedSwitch
-        toggleHistory={props.toggleShardActivityHistory}
-        showHistory={props.showShardActivityHistory}
-      />
-    );
+    const rows = rawData.map(parseProps);
 
     return (
       <Fragment>
@@ -172,15 +134,27 @@ class ShardActivityUI extends React.Component {
           </EuiTitle>
         </EuiText>
         <EuiSpacer />
-        <MonitoringTable
+        <EuiSwitch
+          id="monitoring_completed_recoveries"
+          label={(
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.shardActivity.completedRecoveriesLabel"
+              defaultMessage="Completed recoveries"
+            />
+          )}
+          onChange={toggleShardActivityHistory}
+          checked={showShardActivityHistory}
+        />
+        <EuiSpacer/>
+        <EuiMonitoringTable
           className="esShardActivityTable"
           rows={rows}
-          renderToolBarSections={renderToolBarSection}
           columns={columns}
-          rowComponent={ActivityRow}
-          getNoDataMessage={this.getNoDataMessage}
-          alwaysShowPageControls={true}
-          {...this.props}
+          message={this.getNoDataMessage()}
+          sorting={sorting}
+          search={false}
+          pagination={pagination}
+          onTableChange={onTableChange}
         />
       </Fragment>
     );

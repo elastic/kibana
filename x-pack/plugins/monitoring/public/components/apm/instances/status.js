@@ -24,17 +24,17 @@ export function Status({ stats }) {
     {
       label: 'Servers',
       value: total,
-      dataTestSubj: 'total'
+      'data-test-subj': 'total'
     },
     {
       label: 'Total Events',
       value: formatMetric(totalEvents, '0.[0]a'),
-      dataTestSubj: 'totalEvents'
+      'data-test-subj': 'totalEvents'
     },
     {
       label: 'Last Event',
       value: formatTimestampToDuration(+moment(timeOfLastEvent), 'since') + ' ago',
-      dataTestSubj: 'timeOfLastEvent',
+      'data-test-subj': 'timeOfLastEvent',
     }
   ];
 

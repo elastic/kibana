@@ -24,27 +24,27 @@ export function Status({ stats }) {
     {
       label: 'Name',
       value: name,
-      dataTestSubj: 'name'
+      'data-test-subj': 'name'
     },
     {
       label: 'Output',
       value: output,
-      dataTestSubj: 'output'
+      'data-test-subj': 'output'
     },
     {
       label: 'Version',
       value: version,
-      dataTestSubj: 'version'
+      'data-test-subj': 'version'
     },
     {
       label: 'Uptime',
       value: formatMetric(uptime, 'time_since'),
-      dataTestSubj: 'uptime'
+      'data-test-subj': 'uptime'
     },
     {
       label: 'Last Event',
       value: formatTimestampToDuration(+moment(timeOfLastEvent), 'since') + ' ago',
-      dataTestSubj: 'timeOfLastEvent',
+      'data-test-subj': 'timeOfLastEvent',
     }
   ];
 
