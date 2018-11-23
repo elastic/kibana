@@ -5,6 +5,9 @@
  */
 
 import d3 from 'd3';
+import moment from 'moment';
+
+import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
 
 // getAnnotationBrush() is expected to be called like getAnnotationBrush.call(this)
 // so it gets passed on the context of the component it gets called from.
@@ -65,4 +68,71 @@ export function getAnnotationBrush() {
   }
 
   return annotateBrush;
+}
+
+export function renderAnnotations(
+  focusChart,
+  focusAnnotationData,
+  focusZoomPanelHeight,
+  focusChartHeight,
+  focusXScale,
+  showAnnotations,
+  showFocusChartTooltip,
+  showFlyout
+) {
+  const annotations = focusChart.select('.ml-annotations').selectAll('g.ml-annotation').data(focusAnnotationData || []);
+
+  const annotationGroupEnter = annotations.enter()
+    .append('g')
+    .classed('ml-annotation', true);
+
+  annotationGroupEnter
+    .append('rect')
+    .classed('ml-annotation-rect', true);
+
+  annotationGroupEnter
+    .append('text')
+    .classed('ml-annotation-text', true)
+    .text(d => d.annotation);
+
+  const upperRectMargin = 25;
+  const upperTextMargin = 18;
+
+  annotations.selectAll('.ml-annotation-rect')
+    .attr('x', (d) => {
+      const date = moment(d.timestamp);
+      return focusXScale(date);
+    })
+    .attr('y', focusZoomPanelHeight + 1 + upperRectMargin)
+    .attr('height', focusChartHeight - 2 - upperRectMargin)
+    .attr('width', (d) => {
+      const s = focusXScale(moment(d.timestamp)) + 1;
+      const e = (typeof d.end_timestamp !== 'undefined') ? (focusXScale(moment(d.end_timestamp)) - 1) : (s + 2);
+      const width = Math.max(2, (e - s));
+      return width;
+    })
+    .on('mouseover', function (d) {
+      showFocusChartTooltip(d, this);
+    })
+    .on('mouseout', () => mlChartTooltipService.hide())
+    .on('click', function (d) {
+      console.warn('click', d);
+      showFlyout(d);
+    });
+
+  annotations.selectAll('.ml-annotation-text')
+    .attr('x', (d) => {
+      const date = moment(d.timestamp);
+      const x = focusXScale(date);
+      const s = focusXScale(moment(d.timestamp)) + 1;
+      const e = (typeof d.end_timestamp !== 'undefined') ? (focusXScale(moment(d.end_timestamp)) - 1) : (s + 2);
+      const width = Math.max(2, (e - s));
+      return x + (width / 2);
+    })
+    .attr('y', focusZoomPanelHeight + upperTextMargin);
+
+  annotations.classed('ml-annotation-hidden', !showAnnotations);
+
+
+  annotations.exit().remove();
 }
