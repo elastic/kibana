@@ -19,7 +19,6 @@
 
 import './region_map_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
@@ -40,7 +39,6 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
     title: i18n('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
     description: i18n('regionMap.mapVis.regionMapDescription', { defaultMessage: 'Show metrics on a thematic map. Use one of the \
 provided base maps, or add your own. Darker colors represent higher values.' }),
-    category: CATEGORY.MAP,
     icon: 'visMapRegion',
     visConfig: {
       defaults: {
