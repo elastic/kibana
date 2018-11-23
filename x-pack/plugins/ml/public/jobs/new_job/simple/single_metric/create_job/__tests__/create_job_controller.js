@@ -20,15 +20,19 @@ describe('ML - Single Metric Wizard - Create Job Controller', () => {
 
   it('Initialize Create Job Controller', (done) => {
     const stub = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
-    ngMock.inject(function ($rootScope, $controller) {
+    ngMock.inject(function ($rootScope, $controller, $route) {
+      // Set up the $route current props required for the tests.
+      $route.current = {
+        locals: {
+          indexPattern: {},
+          savedSearch: {}
+        }
+      };
+
       const scope = $rootScope.$new();
       $controller('MlCreateSingleMetricJob', {
         $route: {
           current: {
-            locals: {
-              indexPattern: {},
-              savedSearch: {}
-            },
             params: {}
           }
         },

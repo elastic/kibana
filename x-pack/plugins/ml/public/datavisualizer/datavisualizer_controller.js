@@ -53,7 +53,6 @@ const module = uiModules.get('apps/ml');
 module
   .controller('MlDataVisualizerViewFields', function (
     $scope,
-    $route,
     $timeout,
     $window,
     Private,
@@ -63,10 +62,10 @@ module
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
-    const createSearchItemsFromRoute = Private(SearchItemsProvider);
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
-      query } = createSearchItemsFromRoute($route);
+      query } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 

@@ -8,46 +8,18 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { migrateFilter, BuildESQueryProvider } from '@kbn/es-query';
+import { BuildESQueryProvider } from '@kbn/es-query';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
 
-export function getQueryFromSavedSearch(formConfig) {
-  const must = [];
-  const mustNot = [];
-
-  must.push(formConfig.query);
-
-  formConfig.filters.forEach((f) => {
-    let query = (f.query || f);
-    query = _.omit(query, ['meta', '$state']);
-    query = migrateFilter(query);
-
-    if(f.meta.disabled === false) {
-      if(f.meta.negate) {
-        mustNot.push(query);
-      } else {
-        must.push(query);
-      }
-    }
-  });
-
-  return {
-    bool: {
-      must,
-      must_not: mustNot
-    }
-  };
-}
-
 // Provider for creating the items used for searching and job creation.
-// Takes the $route object to retrieve the indexPattern and savedSearch from the url
-export function SearchItemsProvider(Private) {
+// Uses the $route object to retrieve the indexPattern and savedSearch from the url
+export function SearchItemsProvider(Private, $route) {
 
   const buildESQuery = Private(BuildESQueryProvider);
 
-  function createSearchItemsFromRoute($route) {
+  function createSearchItems() {
     let indexPattern = $route.current.locals.indexPattern;
 
     let query = {
@@ -92,7 +64,7 @@ export function SearchItemsProvider(Private) {
     };
   }
 
-  return createSearchItemsFromRoute;
+  return createSearchItems;
 }
 
 export function createJobForSaving(job) {

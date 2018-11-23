@@ -114,13 +114,13 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
-    const createSearchItemsFromRoute = Private(SearchItemsProvider);
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItemsFromRoute($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 

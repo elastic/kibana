@@ -81,12 +81,12 @@ module
     const moduleId = $route.current.params.id;
     $scope.moduleId = moduleId;
 
-    const createSearchItemsFromRoute = Private(SearchItemsProvider);
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
-      combinedQuery } = createSearchItemsFromRoute($route);
+      combinedQuery } = createSearchItems();
 
     const pageTitle = (savedSearch.id !== undefined) ?
       `saved search ${savedSearch.title}` : `index pattern ${indexPattern.title}`;

@@ -22,21 +22,17 @@ describe('ML - Multi Metric Wizard - Create Job Controller', () => {
   it('Initialize Create Job Controller', (done) => {
     const stub1 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
     const stub2 = sinon.stub(utils, 'createFields').callsFake(() => false);
-    ngMock.inject(function ($rootScope, $controller) {
-      const scope = $rootScope.$new();
+    ngMock.inject(function ($rootScope, $controller, $route) {
+      // Set up the $route current props required for the tests.
+      $route.current = {
+        locals: {
+          indexPattern: {},
+          savedSearch: {}
+        }
+      };
 
-      // Provide minimal set of locals props required by the controller.
-      $controller('MlCreateMultiMetricJob', {
-        $route: {
-          current: {
-            locals: {
-              indexPattern: {},
-              savedSearch: {}
-            }
-          }
-        },
-        $scope: scope
-      });
+      const scope = $rootScope.$new();
+      $controller('MlCreateMultiMetricJob', { $scope: scope });
 
       expect(typeof scope.ui).to.eql('object');
       stub1.restore();

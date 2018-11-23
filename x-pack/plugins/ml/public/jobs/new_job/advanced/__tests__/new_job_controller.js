@@ -14,21 +14,17 @@ describe('ML - Advanced Job Wizard - New Job Controller', () => {
   });
 
   it('Initialize New Job Controller', (done) => {
-    ngMock.inject(function ($rootScope, $controller) {
-      const scope = $rootScope.$new();
+    ngMock.inject(function ($rootScope, $controller, $route) {
+      // Set up the $route current props required for the tests.
+      $route.current = {
+        locals: {
+          indexPattern: {},
+          savedSearch: {}
+        }
+      };
 
-      // Provide minimal set of locals props required by the controller.
-      $controller('MlNewJob', {
-        $route: {
-          current: {
-            locals: {
-              indexPattern: {},
-              savedSearch: {}
-            }
-          }
-        },
-        $scope: scope
-      });
+      const scope = $rootScope.$new();
+      $controller('MlNewJob', { $scope: scope });
 
       // This is just about initializing the controller and making sure
       // all angularjs based dependencies get loaded without error.

@@ -42,16 +42,15 @@ const module = uiModules.get('apps/ml');
 module.controller('MlNewJobStepJobType',
   function (
     $scope,
-    $route,
     Private) {
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
 
-    const createSearchItemsFromRoute = Private(SearchItemsProvider);
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
-      savedSearch } = createSearchItemsFromRoute($route);
+      savedSearch } = createSearchItems();
 
     // check to see that the index pattern is time based.
     // if it isn't, display a warning and disable all links

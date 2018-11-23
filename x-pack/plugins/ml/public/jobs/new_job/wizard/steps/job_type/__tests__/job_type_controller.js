@@ -20,24 +20,20 @@ describe('ML - Job Type Controller', () => {
 
   it('Initialize Job Type Controller', (done) => {
     const stub = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
-    ngMock.inject(function ($rootScope, $controller) {
-      const scope = $rootScope.$new();
+    ngMock.inject(function ($rootScope, $controller, $route) {
+      // Set up the $route current props required for the tests.
+      $route.current = {
+        locals: {
+          indexPattern: {
+            id: 'test_id',
+            title: 'test_pattern'
+          },
+          savedSearch: {}
+        }
+      };
 
-      // Provide minimal set of locals props required by the controller.
-      $controller('MlNewJobStepJobType', {
-        $route: {
-          current: {
-            locals: {
-              indexPattern: {
-                id: 'test_id',
-                title: 'test_pattern'
-              },
-              savedSearch: {}
-            }
-          }
-        },
-        $scope: scope
-      });
+      const scope = $rootScope.$new();
+      $controller('MlNewJobStepJobType', { $scope: scope });
 
       expect(scope.indexWarningTitle).to.eql('Index pattern test_pattern is not time based');
       stub.restore();

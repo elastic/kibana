@@ -16,15 +16,19 @@ describe('ML - Recognize Wizard - Create Job Controller', () => {
   });
 
   it('Initialize Create Job Controller', (done) => {
-    ngMock.inject(function ($rootScope, $controller) {
+    ngMock.inject(function ($rootScope, $controller, $route) {
+      // Set up the $route current props required for the tests.
+      $route.current = {
+        locals: {
+          indexPattern: {},
+          savedSearch: {}
+        }
+      };
+
       const scope = $rootScope.$new();
       $controller('MlCreateRecognizerJobs', {
         $route: {
           current: {
-            locals: {
-              indexPattern: {},
-              savedSearch: {}
-            },
             params: {}
           }
         },

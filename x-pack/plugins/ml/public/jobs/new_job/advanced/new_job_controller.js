@@ -615,11 +615,11 @@ module.controller('MlNewJob',
     // if an index pattern or saved search has been added to the url
     // populate those items in the form and datafeed config
     function populateFormFromUrl() {
-      const createSearchItemsFromRoute = Private(SearchItemsProvider);
+      const createSearchItems = Private(SearchItemsProvider);
       const {
         indexPattern,
         savedSearch,
-        combinedQuery } = createSearchItemsFromRoute($route);
+        combinedQuery } = createSearchItems();
 
       if (indexPattern.id !== undefined) {
         timeBasedIndexCheck(indexPattern, true);

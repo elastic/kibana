@@ -14,31 +14,29 @@ import sinon from 'sinon';
 import * as indexUtils from 'plugins/ml/util/index_utils';
 
 describe('ML - Data Visualizer View Fields Controller', () => {
+
+
   beforeEach(() => {
     ngMock.module('kibana');
   });
 
   it('Initialize Data Visualizer View Fields Controller', (done) => {
     const stub = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
-    ngMock.inject(function ($rootScope, $controller) {
-      const scope = $rootScope.$new();
-
-      // Provide minimal set of locals props required by the controller.
-      $controller('MlDataVisualizerViewFields', {
-        $route: {
-          current: {
-            locals: {
-              indexPattern: {
-                id: ''
-              },
-              savedSearch: {
-                id: ''
-              }
-            }
+    ngMock.inject(function ($rootScope, $controller, $route) {
+      // Set up the $route current props required for the tests.
+      $route.current = {
+        locals: {
+          indexPattern: {
+            id: ''
+          },
+          savedSearch: {
+            id: ''
           }
-        },
-        $scope: scope
-      });
+        }
+      };
+
+      const scope = $rootScope.$new();
+      $controller('MlDataVisualizerViewFields', { $scope: scope });
 
       expect(scope.metricCards).to.eql([]);
       stub.restore();
