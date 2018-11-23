@@ -42,9 +42,10 @@
       ></strong>
       <span
         i18n-id="common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription"
-        i18n-default-message="{indexPatternTitle} index pattern does not contain any of the following field types: {fieldTypes}"
-        i18n-values="{ indexPatternTitle: agg.getIndexPattern().title, fieldTypes: (agg.type.params.byName.field.filterFieldTypes | commaList:false) }"
+        i18n-default-message="{indexPatternTitle} index pattern does not contain any of the following field types: "
+        i18n-values="{ indexPatternTitle: agg.getIndexPattern().title }"
       ></span>
+      {{ agg.type.params.byName.field.filterFieldTypes | commaList:false }}
     </p>
   </div>
 
