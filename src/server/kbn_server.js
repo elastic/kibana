@@ -41,7 +41,6 @@ import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
 import { sassMixin } from './sass';
-import { i18nMixin } from './i18n';
 
 const rootDir = fromRoot('.');
 
@@ -83,7 +82,6 @@ export default class KbnServer {
 
       // setup this.uiExports and this.uiBundles
       uiMixin,
-      i18nMixin,
       indexPatternsMixin,
 
       // setup saved object routes
