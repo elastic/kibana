@@ -26,6 +26,7 @@ import { IndexedArray } from '../../indexed_array';
 import { toastNotifications } from '../../notify';
 import { createLegacyClass } from '../../utils/legacy_class';
 import { propFilter } from '../../filters/_prop_filter';
+import { i18n } from '@kbn/i18n';
 
 const filterByType = propFilter('type');
 
@@ -67,7 +68,12 @@ FieldParamType.prototype.deserialize = function (fieldName, aggConfig) {
 
   const validField = this.getAvailableFields(aggConfig.getIndexPattern().fields).byName[fieldName];
   if (!validField) {
-    toastNotifications.addDanger(`Saved "field" parameter is now invalid. Please select a new field.`);
+    toastNotifications.addDanger(
+      i18n.translate('common.ui.aggTypes.selectNewFieldNotificationMessage', {
+        defaultMessage: 'Saved "{field}" parameter is now invalid. Please select a new field.',
+        values: { field: 'field' }
+      })
+    );
   }
 
   return validField;
@@ -112,7 +118,12 @@ FieldParamType.prototype.write = function (aggConfig, output) {
   const field = aggConfig.getField();
 
   if (!field) {
-    throw new TypeError('"field" is a required parameter');
+    throw new TypeError(
+      i18n.translate('common.ui.aggTypes.fieldIsRequiredErrorMessage', {
+        defaultMessage: '"{field}" is a required parameter',
+        values: { field: 'field' }
+      })
+    );
   }
 
   if (field.scripted) {
