@@ -8,7 +8,7 @@
 
 import d3 from 'd3';
 
-import { drawLineChartDots } from 'plugins/ml/util/chart_utils';
+import { drawLineChartDots } from '../util/chart_utils';
 
 /*
  * Creates a mask over sections of the context chart and swimlane

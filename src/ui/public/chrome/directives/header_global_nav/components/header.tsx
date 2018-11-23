@@ -18,7 +18,7 @@
  */
 
 import React, { Component } from 'react';
-import { Subscribable } from 'rxjs';
+import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
@@ -36,26 +36,38 @@ import { HeaderAppMenu } from './header_app_menu';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderNavControls } from './header_nav_controls';
 
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
-import { Breadcrumb, NavControlSide, NavLink } from '../';
+import { NavControlSide, NavLink } from '../';
+import { Breadcrumb } from '../../../../../../core/public/chrome';
 
 interface Props {
   appTitle?: string;
-  breadcrumbs: Subscribable<Breadcrumb[]>;
+  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
   navLinks: NavLink[];
   navControls: ChromeHeaderNavControlsRegistry;
+  intl: InjectedIntl;
 }
 
-export class Header extends Component<Props> {
+class HeaderUI extends Component<Props> {
   public renderLogo() {
-    const { homeHref } = this.props;
-    return <EuiHeaderLogo iconType="logoKibana" href={homeHref} aria-label="Go to home page" />;
+    const { homeHref, intl } = this.props;
+    return (
+      <EuiHeaderLogo
+        iconType="logoKibana"
+        href={homeHref}
+        aria-label={intl.formatMessage({
+          id: 'common.ui.chrome.headerGlobalNav.goHomePageIconAriaLabel',
+          defaultMessage: 'Go to home page',
+        })}
+      />
+    );
   }
 
   public render() {
-    const { appTitle, breadcrumbs, isVisible, navControls, navLinks } = this.props;
+    const { appTitle, breadcrumbs$, isVisible, navControls, navLinks } = this.props;
 
     if (!isVisible) {
       return null;
@@ -71,7 +83,7 @@ export class Header extends Component<Props> {
 
           <HeaderNavControls navControls={leftNavControls} />
 
-          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs={breadcrumbs} />
+          <HeaderBreadcrumbs appTitle={appTitle} breadcrumbs$={breadcrumbs$} />
         </EuiHeaderSection>
 
         <EuiHeaderSection side="right">
@@ -85,3 +97,5 @@ export class Header extends Component<Props> {
     );
   }
 }
+
+export const Header = injectI18n(HeaderUI);

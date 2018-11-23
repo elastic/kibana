@@ -19,18 +19,18 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from './editors/point_series.html';
 
-export default function PointSeriesVisType(Private) {
+export default function PointSeriesVisType(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createVislibVisualization({
     name: 'histogram',
-    title: 'Vertical Bar',
+    title: i18n('kbnVislibVisTypes.histogram.histogramTitle', { defaultMessage: 'Vertical Bar' }),
     icon: 'visBarVertical',
-    description: 'Assign a continuous variable to each axis',
-    category: CATEGORY.BASIC,
+    description: i18n('kbnVislibVisTypes.histogram.histogramDescription',
+      { defaultMessage: 'Assign a continuous variable to each axis' }
+    ),
     visConfig: {
       defaults: {
         type: 'histogram',
@@ -141,7 +141,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'metrics',
           name: 'metric',
-          title: 'Y-Axis',
+          title: i18n('kbnVislibVisTypes.histogram.metricTitle', { defaultMessage: 'Y-Axis' }),
           min: 1,
           aggFilter: ['!geo_centroid', '!geo_bounds'],
           defaults: [
@@ -151,7 +151,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'metrics',
           name: 'radius',
-          title: 'Dot Size',
+          title: i18n('kbnVislibVisTypes.histogram.radiusTitle', { defaultMessage: 'Dot Size' }),
           min: 0,
           max: 1,
           aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
@@ -159,7 +159,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'buckets',
           name: 'segment',
-          title: 'X-Axis',
+          title: i18n('kbnVislibVisTypes.histogram.segmentTitle', { defaultMessage: 'X-Axis' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']
@@ -167,7 +167,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'buckets',
           name: 'group',
-          title: 'Split Series',
+          title: i18n('kbnVislibVisTypes.histogram.groupTitle', { defaultMessage: 'Split Series' }),
           min: 0,
           max: 3,
           aggFilter: ['!geohash_grid', '!filter']
@@ -175,7 +175,7 @@ export default function PointSeriesVisType(Private) {
         {
           group: 'buckets',
           name: 'split',
-          title: 'Split Chart',
+          title: i18n('kbnVislibVisTypes.histogram.splitTitle', { defaultMessage: 'Split Chart' }),
           min: 0,
           max: 1,
           aggFilter: ['!geohash_grid', '!filter']

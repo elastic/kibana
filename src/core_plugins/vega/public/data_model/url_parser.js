@@ -18,6 +18,7 @@
  */
 
 import $ from 'jquery';
+import { i18n }  from '@kbn/i18n';
 
 /**
  * This class processes all Vega spec customizations,
@@ -36,12 +37,25 @@ export class UrlParser {
   parseUrl(obj, urlObj) {
     let url = urlObj.url;
     if (!url) {
-      throw new Error(`data.url requires a url parameter in a form 'https://example.org/path/subpath'`);
+      throw new Error(i18n.translate('vega.urlParser.dataUrlRequiresUrlParameterInFormErrorMessage', {
+        defaultMessage: '{dataUrlParam} requires a {urlParam} parameter in a form "{formLink}"',
+        values: {
+          dataUrlParam: '"data.url"',
+          urlParam: '"url"',
+          formLink: 'https://example.org/path/subpath',
+        },
+      }));
     }
 
     const query = urlObj.query;
     if (!query) {
-      this._onWarning(`Using a "url": {"%type%": "url", "url": ...} should have a "query" sub-object`);
+      this._onWarning(i18n.translate('vega.urlParser.urlShouldHaveQuerySubObjectWarningMessage', {
+        defaultMessage: 'Using a {urlObject} should have a {subObjectName} sub-object',
+        values: {
+          urlObject: '"url": {"%type%": "url", "url": ...}',
+          subObjectName: '"query"',
+        },
+      }));
     } else {
       url += (url.includes('?') ? '&' : '?') + $.param(query);
     }

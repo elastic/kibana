@@ -9,7 +9,8 @@ export class SpacesAuditLogger {
   private readonly auditLogger: any;
 
   constructor(config: any, auditLogger: any) {
-    this.enabled = config.get('xpack.security.audit.enabled');
+    this.enabled =
+      config.get('xpack.security.enabled') && config.get('xpack.security.audit.enabled');
     this.auditLogger = auditLogger;
   }
   public spacesAuthorizationFailure(username: string, action: string, spaceIds?: string[]) {

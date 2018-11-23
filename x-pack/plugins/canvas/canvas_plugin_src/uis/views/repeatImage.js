@@ -6,7 +6,7 @@
 
 export const repeatImage = () => ({
   name: 'repeatImage',
-  displayName: 'Repeating Image',
+  displayName: 'Repeating image',
   help: '',
   modelArgs: [['_', { label: 'Value' }]],
   args: [
@@ -18,7 +18,7 @@ export const repeatImage = () => ({
     },
     {
       name: 'emptyImage',
-      displayName: 'Empty Image',
+      displayName: 'Empty image',
       help: 'An image to fill up the difference between the value and the max count',
       argType: 'imageUpload',
     },

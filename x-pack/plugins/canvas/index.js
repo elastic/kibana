@@ -5,9 +5,11 @@
  */
 
 import { resolve } from 'path';
+import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
 import init from './init';
 import { mappings } from './server/mappings';
-import { CANVAS_APP } from './common/lib/constants';
+import { CANVAS_APP } from './common/lib';
+import { pluginPaths } from './plugin_paths';
 
 export function canvas(kibana) {
   return new kibana.Plugin({
@@ -27,11 +29,8 @@ export function canvas(kibana) {
       hacks: [
         // window.onerror override
         'plugins/canvas/lib/window_error_handler.js',
-
-        // Client side plugins go here
-        'plugins/canvas/lib/load_expression_types.js',
-        'plugins/canvas/lib/load_transitions.js',
       ],
+      home: ['plugins/canvas/register_feature'],
       mappings,
     },
 
@@ -42,6 +41,9 @@ export function canvas(kibana) {
       }).default();
     },
 
+    preInit: () => {
+      pathsRegistry.registerAll(pluginPaths);
+    },
     init,
   });
 }

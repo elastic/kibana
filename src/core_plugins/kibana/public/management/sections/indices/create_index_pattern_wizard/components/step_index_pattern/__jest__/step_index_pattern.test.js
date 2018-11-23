@@ -19,13 +19,18 @@
 
 import React from 'react';
 import { StepIndexPatternComponent } from '../step_index_pattern';
-import { shallowWithIntl, intl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { Header } from '../components/header';
 
 jest.mock('../../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises) => Array.isArray(promises) ? await Promise.all(promises) : await promises
 }));
-
+const mockIndexPatternCreationType = {
+  getIndexPatternType: () => 'default',
+  getIndexPatternName: () => 'name',
+  checkIndicesForErrors: () => false,
+  getShowSystemIndices: () => false
+};
 // If we don't mock this, Jest fails with the error `TypeError: Cannot redefine property: prototype
 // at Function.defineProperties`.
 jest.mock('ui/index_patterns', () => ({
@@ -36,10 +41,11 @@ jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: () => '',
   }),
+  addBasePath: () => { },
 }));
 
 jest.mock('../../../lib/get_indices', () => ({
-  getIndices: (service, query) => {
+  getIndices: (service, indexPatternCreationType, query) => {
     if (query.startsWith('e')) {
       return [
         { name: 'es' },
@@ -57,7 +63,7 @@ const esService = {};
 const savedObjectsClient = {
   find: () => ({ savedObjects: [] })
 };
-const goToNextStep = () => {};
+const goToNextStep = () => { };
 
 const createComponent = props => {
   return shallowWithIntl(
@@ -67,14 +73,13 @@ const createComponent = props => {
       esService={esService}
       savedObjectsClient={savedObjectsClient}
       goToNextStep={goToNextStep}
+      indexPatternCreationType={mockIndexPatternCreationType}
       {...props}
     />
   );
 };
 
 describe('StepIndexPattern', () => {
-  afterEach(() => intl.formatMessage.mockClear());
-
   it('renders the loading state', () => {
     const component = createComponent();
     component.setState({ isLoadingIndices: true });
@@ -103,7 +108,6 @@ describe('StepIndexPattern', () => {
     component.update();
     expect({
       component: component.find('[data-test-subj="createIndexPatternStep1Header"]'),
-      i18n: intl.formatMessage.mock.calls,
     }).toMatchSnapshot();
   });
 

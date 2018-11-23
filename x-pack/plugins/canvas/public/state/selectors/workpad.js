@@ -5,7 +5,7 @@
  */
 
 import { get, omit } from 'lodash';
-import { safeElementFromExpression } from '../../../common/lib/ast';
+import { safeElementFromExpression } from '@kbn/interpreter/common/lib/ast';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 
@@ -27,8 +27,13 @@ export function getWorkpadPersisted(state) {
     assets: getAssets(state),
   };
 }
+
 export function getWorkpadInfo(state) {
   return omit(getWorkpad(state), ['pages']);
+}
+
+export function isWriteable(state) {
+  return get(state, append(workpadRoot, 'isWriteable'), true);
 }
 
 // page getters

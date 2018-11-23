@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n }  from '@kbn/i18n';
 import { toastNotifications, Notifier } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
@@ -43,10 +44,19 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
       let idxObj;
       if (index) {
         idxObj = await findObjectByTitle(savedObjectsClient, 'index-pattern', index);
-        if (!idxObj) throw new Error(`Index "${index}" not found`);
+        if (!idxObj) {
+          throw new Error(i18n.translate('vega.visualization.indexNotFoundErrorMessage', {
+            defaultMessage: 'Index {index} not found',
+            values: { index: `"${index}"` },
+          }));
+        }
       } else {
         idxObj = await this._vis.API.indexPatterns.getDefault();
-        if (!idxObj) throw new Error('Unable to find default index');
+        if (!idxObj) {
+          throw new Error(i18n.translate('vega.visualization.unableToFindDefaultIndexErrorMessage', {
+            defaultMessage: 'Unable to find default index',
+          }));
+        }
       }
       return idxObj.id;
     }
@@ -59,7 +69,9 @@ export function VegaVisualizationProvider(Private, vegaConfig, serviceSettings, 
      */
     async render(visData, status) {
       if (!visData && !this._vegaView) {
-        toastNotifications.addWarning('Unable to render without data');
+        toastNotifications.addWarning(i18n.translate('vega.visualization.unableToRenderWithoutDataWarningMessage', {
+          defaultMessage: 'Unable to render without data',
+        }));
         return;
       }
 

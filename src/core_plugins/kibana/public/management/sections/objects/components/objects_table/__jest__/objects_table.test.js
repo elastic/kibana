@@ -18,9 +18,11 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { ObjectsTable, INCLUDED_TYPES } from '../objects_table';
+import { Flyout } from '../components/flyout/';
+import { Relationships } from '../components/relationships/';
 
 jest.mock('../components/header', () => ({
   Header: () => 'Header',
@@ -41,15 +43,6 @@ jest.mock('ui/errors', () => ({
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => ''
-}));
-
-jest.mock('../../../../indices/create_index_pattern_wizard/lib/ensure_minimum_time', () => ({
-  ensureMinimumTime: async promises => {
-    if (Array.isArray(promises)) {
-      return await Promise.all(promises);
-    }
-    return await promises;
-  },
 }));
 
 jest.mock('../../../lib/retrieve_and_export_docs', () => ({
@@ -78,6 +71,8 @@ jest.mock('../../../lib/save_to_file', () => ({
 jest.mock('../../../lib/get_relationships', () => ({
   getRelationships: jest.fn(),
 }));
+
+jest.mock('ui/notify', () => ({}));
 
 const allSavedObjects = [
   {
@@ -151,14 +146,27 @@ const defaultProps = {
   goInApp: () => {},
 };
 
+let addDangerMock;
+
 describe('ObjectsTable', () => {
   beforeEach(() => {
     defaultProps.savedObjectsClient.find.mockClear();
+    // mock _.debounce to fire immediately with no internal timer
+    require('lodash').debounce = function (func) {
+      function debounced(...args) {
+        return func.apply(this, args);
+      }
+      return debounced;
+    };
+    addDangerMock = jest.fn();
+    require('ui/notify').toastNotifications = {
+      addDanger: addDangerMock,
+    };
   });
 
   it('should render normally', async () => {
-    const component = shallow(
-      <ObjectsTable
+    const component = shallowWithIntl(
+      <ObjectsTable.WrappedComponent
         {...defaultProps}
         perPageConfig={15}
       />
@@ -170,6 +178,28 @@ describe('ObjectsTable', () => {
     component.update();
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should add danger toast when find fails', async () => {
+    const savedObjectsClientWithFindError = {
+      find: () => {
+        throw new Error('Simulated find error');
+      }
+    };
+    const customizedProps = { ...defaultProps, savedObjectsClient: savedObjectsClientWithFindError };
+    const component = shallowWithIntl(
+      <ObjectsTable.WrappedComponent
+        {...customizedProps}
+        perPageConfig={15}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(addDangerMock).toHaveBeenCalled();
   });
 
   describe('export', () => {
@@ -194,8 +224,8 @@ describe('ObjectsTable', () => {
 
       const { retrieveAndExportDocs } = require('../../../lib/retrieve_and_export_docs');
 
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
           savedObjectsClient={mockSavedObjectsClient}
         />
@@ -216,8 +246,8 @@ describe('ObjectsTable', () => {
     });
 
     it('should allow the user to choose when exporting all', async () => {
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
         />
       );
@@ -236,8 +266,8 @@ describe('ObjectsTable', () => {
     it('should export all', async () => {
       const { scanAllTypes } = require('../../../lib/scan_all_types');
       const { saveToFile } = require('../../../lib/save_to_file');
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
         />
       );
@@ -259,8 +289,8 @@ describe('ObjectsTable', () => {
 
   describe('import', () => {
     it('should show the flyout', async () => {
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
         />
       );
@@ -273,12 +303,12 @@ describe('ObjectsTable', () => {
       component.instance().showImportFlyout();
       component.update();
 
-      expect(component.find('Flyout')).toMatchSnapshot();
+      expect(component.find(Flyout)).toMatchSnapshot();
     });
 
     it('should hide the flyout', async () => {
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
         />
       );
@@ -291,7 +321,7 @@ describe('ObjectsTable', () => {
       component.instance().hideImportFlyout();
       component.update();
 
-      expect(component.find('Flyout').length).toBe(0);
+      expect(component.find(Flyout).length).toBe(0);
     });
   });
 
@@ -299,8 +329,8 @@ describe('ObjectsTable', () => {
     it('should fetch relationships', async () => {
       const { getRelationships } = require('../../../lib/get_relationships');
 
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
         />
       );
@@ -315,8 +345,8 @@ describe('ObjectsTable', () => {
     });
 
     it('should show the flyout', async () => {
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
         />
       );
@@ -329,15 +359,15 @@ describe('ObjectsTable', () => {
       component.instance().onShowRelationships('1', 'search', 'MySearch');
       component.update();
 
-      expect(component.find('Relationships')).toMatchSnapshot();
+      expect(component.find(Relationships)).toMatchSnapshot();
       expect(component.state('relationshipId')).toBe('1');
       expect(component.state('relationshipType')).toBe('search');
       expect(component.state('relationshipTitle')).toBe('MySearch');
     });
 
     it('should hide the flyout', async () => {
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
         />
       );
@@ -350,7 +380,7 @@ describe('ObjectsTable', () => {
       component.instance().onHideRelationships();
       component.update();
 
-      expect(component.find('Relationships').length).toBe(0);
+      expect(component.find(Relationships).length).toBe(0);
       expect(component.state('relationshipId')).toBe(undefined);
       expect(component.state('relationshipType')).toBe(undefined);
       expect(component.state('relationshipTitle')).toBe(undefined);
@@ -359,8 +389,8 @@ describe('ObjectsTable', () => {
 
   describe('delete', () => {
     it('should show a confirm modal', async () => {
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
         />
       );
@@ -403,8 +433,8 @@ describe('ObjectsTable', () => {
         delete: jest.fn(),
       };
 
-      const component = shallow(
-        <ObjectsTable
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
           {...defaultProps}
           savedObjectsClient={mockSavedObjectsClient}
         />

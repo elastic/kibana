@@ -33,24 +33,23 @@ function getAllFetchParams(searchRequests, Promise) {
 }
 
 async function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
-  const searcRequestsWithFetchParams = [];
+  const searchRequestsWithFetchParams = [];
   const failedSearchRequests = [];
 
   // Gather the fetch param responses from all the successful requests.
   fetchParams.forEach((result, index) => {
     if (result.resolved) {
-      searcRequestsWithFetchParams.push(result.resolved);
+      searchRequestsWithFetchParams.push(result.resolved);
     } else {
       const searchRequest = searchRequests[index];
 
-      // TODO: All strategies will need to implement this.
       searchRequest.handleFailure(result.rejected);
       failedSearchRequests.push(searchRequest);
     }
   });
 
   return {
-    serializedFetchParams: await serializeFetchParams(searcRequestsWithFetchParams),
+    serializedFetchParams: await serializeFetchParams(searchRequestsWithFetchParams),
     failedSearchRequests,
   };
 }

@@ -6,6 +6,8 @@
 
 export default function ({ loadTestFile }) {
   describe('dashboard mode', function () {
+    this.tags('ciGroup3');
+
     loadTestFile(require.resolve('./dashboard_view_mode'));
   });
 }

@@ -40,7 +40,7 @@ export function postgresqlMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-postgresql.html',
       },
     }),
-    //euiIconType: 'logoPostgreSQL',
+    euiIconType: 'logoPostgres',
     artifacts: {
       dashboards: [
       /*

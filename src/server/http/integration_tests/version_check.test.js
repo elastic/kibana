@@ -35,8 +35,8 @@ describe('version_check request filter', function () {
     kbnTestServer.getKbnServer(root).server.route({
       path: '/version_check/test/route',
       method: 'GET',
-      handler: function (req, reply) {
-        reply(null, 'ok');
+      handler: function () {
+        return 'ok';
       }
     });
   }, 30000);

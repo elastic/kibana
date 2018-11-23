@@ -30,11 +30,11 @@ export const createGetRoute = (prereqs) => ({
         id: Joi.string().required(),
       }).required()
     },
-    handler(request, reply) {
+    handler(request) {
       const { savedObjectsClient } = request.pre;
       const { type, id } = request.params;
 
-      reply(savedObjectsClient.get(type, id));
+      return savedObjectsClient.get(type, id);
     }
   }
 });

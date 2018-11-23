@@ -2,7 +2,7 @@
 
 exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div
-  className="inputControlVis"
+  className="icvContainer"
 >
   <EuiFlexGroup
     alignItems="stretch"
@@ -141,7 +141,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 
 exports[`Clear btns enabled when there are values 1`] = `
 <div
-  className="inputControlVis"
+  className="icvContainer"
 >
   <EuiFlexGroup
     alignItems="stretch"
@@ -280,7 +280,7 @@ exports[`Clear btns enabled when there are values 1`] = `
 
 exports[`Renders list control 1`] = `
 <div
-  className="inputControlVis"
+  className="icvContainer"
 >
   <EuiFlexGroup
     alignItems="stretch"
@@ -419,7 +419,7 @@ exports[`Renders list control 1`] = `
 
 exports[`Renders range control 1`] = `
 <div
-  className="inputControlVis"
+  className="icvContainer"
 >
   <EuiFlexGroup
     alignItems="stretch"

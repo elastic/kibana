@@ -7,7 +7,8 @@
 
 
 import _ from 'lodash';
-import { migrateFilter } from 'ui/courier';
+import $ from 'jquery';
+import { migrateFilter } from '@kbn/es-query';
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { mlJobService } from 'plugins/ml/services/job_service';
 
@@ -103,5 +104,55 @@ export function moveToAdvancedJobCreationProvider($location) {
   return function moveToAdvancedJobCreation(job) {
     mlJobService.currentJob = job;
     $location.path('jobs/new_job/advanced');
+  };
+}
+
+export function focusOnResultsLink(linkId, $timeout) {
+  // Set focus to the View Results button, which also provides
+  // accessibility feedback that the job has finished.
+  // Run inside $timeout to ensure model has been updated with job state
+  $timeout(() => {
+    $(`#${linkId}`).focus();
+  }, 0);
+}
+
+// Only model plot cardinality relevant
+// format:[{id:"cardinality_model_plot_high",modelPlotCardinality:11405}, {id:"cardinality_partition_field",fieldName:"clientip"}]
+export function checkCardinalitySuccess(data) {
+  const response = {
+    success: true,
+  };
+  // There were no fields to run cardinality on.
+  if (Array.isArray(data) && data.length === 0) {
+    return response;
+  }
+
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].id === 'success_cardinality') {
+      break;
+    }
+
+    if (data[i].id === 'cardinality_model_plot_high') {
+      response.success = false;
+      response.highCardinality = data[i].modelPlotCardinality;
+      break;
+    }
+  }
+
+  return response;
+}
+
+// Ensure validation endpoints are given job with expected minimum fields
+export function getMinimalValidJob() {
+  return {
+    analysis_config: {
+      bucket_span: '15m',
+      detectors: [],
+      influencers: []
+    },
+    data_description: { time_field: '@timestamp' },
+    datafeed_config: {
+      indices: []
+    }
   };
 }

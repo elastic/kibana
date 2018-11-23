@@ -100,8 +100,10 @@ describe('I18n loader', () => {
 
       expect(await i18nLoader.getTranslationsByLocale('en')).toEqual({
         locale: 'en',
-        ['a.b.c']: 'foo',
-        ['d.e.f']: 'bar',
+        messages: {
+          ['a.b.c']: 'foo',
+          ['d.e.f']: 'bar',
+        },
       });
     });
 
@@ -110,7 +112,7 @@ describe('I18n loader', () => {
         join(__dirname, './__fixtures__/test_plugin_1/translations/en.json')
       );
 
-      expect(await i18nLoader.getTranslationsByLocale('ru')).toEqual({});
+      expect(await i18nLoader.getTranslationsByLocale('ru')).toEqual({ messages: {} });
     });
 
     test('should return translation messages from a couple of files by specified locale', async () => {
@@ -121,10 +123,12 @@ describe('I18n loader', () => {
 
       expect(await i18nLoader.getTranslationsByLocale('en')).toEqual({
         locale: 'en',
-        ['a.b.c']: 'foo',
-        ['d.e.f']: 'bar',
-        ['a.b.c.custom']: 'foo.custom',
-        ['d.e.f.custom']: 'bar.custom',
+        messages: {
+          ['a.b.c']: 'foo',
+          ['d.e.f']: 'bar',
+          ['a.b.c.custom']: 'foo.custom',
+          ['d.e.f.custom']: 'bar.custom',
+        },
       });
     });
 
@@ -138,21 +142,27 @@ describe('I18n loader', () => {
 
       expect(await i18nLoader.getTranslationsByLocale('en')).toEqual({
         locale: 'en',
-        ['a.b.c']: 'foo',
-        ['d.e.f']: 'bar',
-        ['a.b.c.custom']: 'foo.custom',
-        ['d.e.f.custom']: 'bar.custom',
+        messages: {
+          ['a.b.c']: 'foo',
+          ['d.e.f']: 'bar',
+          ['a.b.c.custom']: 'foo.custom',
+          ['d.e.f.custom']: 'bar.custom',
+        },
       });
 
       expect(await i18nLoader.getTranslationsByLocale('en-US')).toEqual({
         locale: 'en-US',
-        ['a.b.c']: 'bar',
-        ['d.e.f']: 'foo',
+        messages: {
+          ['a.b.c']: 'bar',
+          ['d.e.f']: 'foo',
+        },
       });
 
       expect(await i18nLoader.getTranslationsByLocale('ru')).toEqual({
         locale: 'ru',
-        test: 'test',
+        messages: {
+          test: 'test',
+        },
       });
     });
 
@@ -163,7 +173,9 @@ describe('I18n loader', () => {
 
       expect(await i18nLoader.getTranslationsByLocale('fr')).toEqual({
         locale: 'fr',
-        test: 'test',
+        messages: {
+          test: 'test',
+        },
       });
     });
   });
@@ -180,19 +192,25 @@ describe('I18n loader', () => {
       expect(await i18nLoader.getAllTranslations()).toEqual({
         en: {
           locale: 'en',
-          ['a.b.c']: 'foo',
-          ['d.e.f']: 'bar',
-          ['a.b.c.custom']: 'foo.custom',
-          ['d.e.f.custom']: 'bar.custom',
+          messages: {
+            ['a.b.c']: 'foo',
+            ['d.e.f']: 'bar',
+            ['a.b.c.custom']: 'foo.custom',
+            ['d.e.f.custom']: 'bar.custom',
+          },
         },
         ['en-US']: {
           locale: 'en-US',
-          ['a.b.c']: 'bar',
-          ['d.e.f']: 'foo',
+          messages: {
+            ['a.b.c']: 'bar',
+            ['d.e.f']: 'foo',
+          },
         },
         ru: {
           locale: 'ru',
-          test: 'test',
+          messages: {
+            test: 'test',
+          },
         },
       });
     });
@@ -214,19 +232,25 @@ describe('I18n loader', () => {
       ).toEqual({
         en: {
           locale: 'en',
-          ['a.b.c']: 'foo',
-          ['d.e.f']: 'bar',
-          ['a.b.c.custom']: 'foo.custom',
-          ['d.e.f.custom']: 'bar.custom',
+          messages: {
+            ['a.b.c']: 'foo',
+            ['d.e.f']: 'bar',
+            ['a.b.c.custom']: 'foo.custom',
+            ['d.e.f.custom']: 'bar.custom',
+          },
         },
         ['en-US']: {
           locale: 'en-US',
-          ['a.b.c']: 'bar',
-          ['d.e.f']: 'foo',
+          messages: {
+            ['a.b.c']: 'bar',
+            ['d.e.f']: 'foo',
+          },
         },
         ru: {
           locale: 'ru',
-          test: 'test',
+          messages: {
+            test: 'test',
+          },
         },
       });
     });

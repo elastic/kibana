@@ -39,7 +39,7 @@ import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
-import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
+import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
 import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
@@ -128,18 +128,6 @@ function VisEditor(
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
 
-  // adds top level search source to the stack to which global filters are applied
-  const getTopLevelSearchSource = (searchSource) => {
-    if (searchSource.getParent()) return getTopLevelSearchSource(searchSource.getParent());
-    return searchSource;
-  };
-
-  const topLevelSearchSource =  getTopLevelSearchSource(searchSource);
-  const globalFiltersSearchSource = searchSource.create();
-  globalFiltersSearchSource.setField('index', searchSource.getField('index'));
-  topLevelSearchSource.setParent(globalFiltersSearchSource);
-
-
   $scope.vis = vis;
 
   const $appStatus = this.appStatus = {
@@ -212,13 +200,13 @@ function VisEditor(
     description: 'Open Inspector for visualization',
     testId: 'openInspectorButton',
     disableButton() {
-      return !vis.hasInspector();
+      return !vis.hasInspector || !vis.hasInspector();
     },
     run() {
       vis.openInspector().bindToAngularScope($scope);
     },
     tooltip() {
-      if (!vis.hasInspector()) {
+      if (!vis.hasInspector || !vis.hasInspector()) {
         return 'This visualization doesn\'t support any inspectors.';
       }
     }
@@ -338,10 +326,9 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      const globalFilters = queryFilter.getGlobalFilters();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
-      globalFiltersSearchSource.setField('filter', globalFilters);
+      $scope.globalFilters = queryFilter.getGlobalFilters();
       $scope.vis.forceReload();
     };
 
@@ -416,13 +403,15 @@ function VisEditor(
           }
         });
         return { id };
-      }, (err) => {
+      }, (error) => {
+        // eslint-disable-next-line
+        console.error(error);
         toastNotifications.addDanger({
           title: `Error on saving '${savedVis.title}'`,
-          text: err.message,
+          text: error.message,
           'data-test-subj': 'saveVisualizationError',
         });
-        return { error: err };
+        return { error };
       });
   }
 
@@ -434,6 +423,7 @@ function VisEditor(
     const searchSourceGrandparent = searchSourceParent.getParent();
 
     delete savedVis.savedSearchId;
+    delete vis.savedSearchId;
     searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
     $state.query = searchSourceParent.getField('query');

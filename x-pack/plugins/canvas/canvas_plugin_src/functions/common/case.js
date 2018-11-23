@@ -7,7 +7,7 @@
 export const caseFn = () => ({
   name: 'case',
   type: 'case',
-  help: 'Build a case (including a condition/result) to pass to the switch function.',
+  help: 'Build a case (including a condition/result) to pass to the switch function',
   args: {
     when: {
       aliases: ['_'],

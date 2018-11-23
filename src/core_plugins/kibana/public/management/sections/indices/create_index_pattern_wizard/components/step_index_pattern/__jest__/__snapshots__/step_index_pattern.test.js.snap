@@ -7,7 +7,7 @@ Object {
     data-test-subj="createIndexPatternStep1Header"
     errors={
       Array [
-        "An index pattern cannot contain spaces or the characters: {characterList}",
+        "A name cannot contain spaces or the characters: \\\\, /, ?, \\", <, >, |",
       ]
     }
     goToNextStep={[Function]}
@@ -16,44 +16,6 @@ Object {
     onQueryChanged={[Function]}
     query="?"
   />,
-  "i18n": Array [
-    Array [
-      Object {
-        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
-        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
-      },
-      Object {
-        "characterList": "\\\\, /, ?, \\", <, >, |",
-      },
-    ],
-    Array [
-      Object {
-        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
-        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
-      },
-      Object {
-        "characterList": "\\\\, /, ?, \\", <, >, |",
-      },
-    ],
-    Array [
-      Object {
-        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
-        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
-      },
-      Object {
-        "characterList": "\\\\, /, ?, \\", <, >, |",
-      },
-    ],
-    Array [
-      Object {
-        "defaultMessage": "An index pattern cannot contain spaces or the characters: {characterList}",
-        "id": "kbn.management.createIndexPattern.step.invalidCharactersErrorMessage",
-      },
-      Object {
-        "characterList": "\\\\, /, ?, \\", <, >, |",
-      },
-    ],
-  ],
 }
 `;
 

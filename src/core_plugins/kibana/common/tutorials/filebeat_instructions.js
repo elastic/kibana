@@ -159,7 +159,7 @@ export const createFilebeatInstructions = context => ({
         defaultMessage: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, omit this command.',
       }),
       commands: [
-        'PS C:\\Program Files\\Filebeat> filebeat.exe setup',
+        'PS C:\\Program Files\\Filebeat> .\\filebeat.exe setup',
         'PS C:\\Program Files\\Filebeat> Start-Service filebeat',
       ],
     },

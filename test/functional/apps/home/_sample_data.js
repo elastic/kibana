@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it.skip('vega chart renders', async () => {
-        const tsvb = await find.existsByCssSelector('.vega-view-container');
+        const tsvb = await find.existsByCssSelector('.vgaVis__view');
         expect(tsvb).to.be(true);
       });
 

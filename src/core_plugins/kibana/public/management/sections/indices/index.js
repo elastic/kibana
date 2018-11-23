@@ -18,6 +18,8 @@
  */
 
 import { management } from 'ui/management';
+import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
+import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
@@ -26,6 +28,41 @@ import indexTemplate from './index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
+
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { IndexPatternList } from './index_pattern_list';
+
+const INDEX_PATTERN_LIST_DOM_ELEMENT_ID = 'indexPatternListReact';
+
+export function updateIndexPatternList(
+  $scope,
+  indexPatternCreationOptions,
+  defaultIndex,
+  indexPatterns,
+) {
+  const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
+  if (!node) {
+    return;
+  }
+
+  render(
+    <I18nProvider>
+      <IndexPatternList
+        indexPatternCreationOptions={indexPatternCreationOptions}
+        defaultIndex={defaultIndex}
+        indexPatterns={indexPatterns}
+      />
+    </I18nProvider>,
+    node,
+  );
+}
+
+export const destroyIndexPatternList = () => {
+  const node = document.getElementById(INDEX_PATTERN_LIST_DOM_ELEMENT_ID);
+  node && unmountComponentAtNode(node);
+};
 
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
@@ -33,7 +70,7 @@ const indexPatternsResolutions = {
 
     return savedObjectsClient.find({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'type'],
       perPage: 10000
     }).then(response => response.savedObjects);
   }
@@ -52,28 +89,55 @@ uiRoutes
 
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules.get('apps/management')
-  .directive('kbnManagementIndices', function ($route, config, kbnUrl) {
+  .directive('kbnManagementIndices', function ($route, config, kbnUrl, Private) {
     return {
       restrict: 'E',
       transclude: true,
       template: indexTemplate,
-      link: function ($scope) {
-        $scope.editingId = $route.current.params.indexPatternId;
-        config.bindToScope($scope, 'defaultIndex');
+      link: async function ($scope) {
+        const indexPatternListProvider = Private(IndexPatternListFactory)();
+        const indexPatternCreationProvider = Private(IndexPatternCreationFactory)();
+        const indexPatternCreationOptions = await indexPatternCreationProvider.getIndexPatternCreationOptions((url) => {
+          $scope.$evalAsync(() => kbnUrl.change(url));
+        });
 
-        $scope.$watch('defaultIndex', function () {
+        const renderList = () => {
           $scope.indexPatternList = $route.current.locals.indexPatterns.map(pattern => {
             const id = pattern.id;
+            const tags = indexPatternListProvider.getIndexPatternTags(pattern, $scope.defaultIndex === id);
 
             return {
               id: id,
               title: pattern.get('title'),
               url: kbnUrl.eval('#/management/kibana/indices/{{id}}', { id: id }),
-              class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
-              default: $scope.defaultIndex === id
+              active: $scope.editingId === id,
+              default: $scope.defaultIndex === id,
+              tag: tags && tags.length ? tags[0] : null,
             };
-          });
-        });
+          }).sort((a, b) => {
+            if(a.default) {
+              return -1;
+            }
+            if(b.default) {
+              return 1;
+            }
+            if(a.title < b.title) {
+              return -1;
+            }
+            if(a.title > b.title) {
+              return 1;
+            }
+            return 0;
+          }) || [];
+
+          updateIndexPatternList($scope, indexPatternCreationOptions, $scope.defaultIndex, $scope.indexPatternList);
+        };
+
+        $scope.$on('$destroy', destroyIndexPatternList);
+        $scope.editingId = $route.current.params.indexPatternId;
+        $scope.$watch('defaultIndex', () => renderList());
+        config.bindToScope($scope, 'defaultIndex');
+        $scope.$apply();
       }
     };
   });

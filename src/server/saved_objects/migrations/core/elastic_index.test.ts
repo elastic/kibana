@@ -98,7 +98,10 @@ describe('ElasticIndex', () => {
     test('calls indices.create', async () => {
       const callCluster = sinon.spy(async (path: string, { body, index }: any) => {
         expect(path).toEqual('indices.create');
-        expect(body).toEqual({ mappings: { foo: 'bar' } });
+        expect(body).toEqual({
+          mappings: { foo: 'bar' },
+          settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
+        });
         expect(index).toEqual('.abcd');
       });
 
@@ -248,6 +251,7 @@ describe('ElasticIndex', () => {
                   properties: { foo: 'bar' },
                 },
               },
+              settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
             expect(arg.index).toEqual('.ze-index');
             return true;

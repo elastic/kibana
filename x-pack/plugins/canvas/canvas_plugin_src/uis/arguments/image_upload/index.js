@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+  EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -19,8 +20,8 @@ import { Loading } from '../../../../public/components/loading';
 import { FileUpload } from '../../../../public/components/file_upload';
 import { elasticOutline } from '../../../lib/elastic_outline';
 import { resolveFromArgs } from '../../../../common/lib/resolve_dataurl';
-import { isValid as isValidHttpUrl } from '../../../../common/lib/httpurl';
-import { encode, isValid as isValidDataUrl } from '../../../../common/lib/dataurl';
+import { isValidHttpUrl } from '../../../../common/lib/httpurl';
+import { encode, isValidDataUrl } from '../../../../common/lib/dataurl';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import './image_upload.scss';
 
@@ -108,7 +109,7 @@ class ImageUpload extends React.Component {
       <EuiSelect
         compressed
         options={this.urlTypeOptions}
-        defaultValue={urlType}
+        value={urlType}
         onChange={this.changeUrlType}
       />
     );
@@ -123,7 +124,7 @@ class ImageUpload extends React.Component {
     }
 
     const pasteImageUrl = urlTypeSrc ? (
-      <form onSubmit={this.setSrcUrl} className="eui-textRight">
+      <EuiForm onSubmit={this.setSrcUrl} className="eui-textRight">
         <EuiFieldText
           compressed
           defaultValue={this.state.url}
@@ -131,10 +132,11 @@ class ImageUpload extends React.Component {
           placeholder="Image URL"
           aria-label="Image URL"
         />
+        <EuiSpacer size="m" />
         <EuiButton type="submit" size="s" onClick={this.setSrcUrl}>
           Set
         </EuiButton>
-      </form>
+      </EuiForm>
     ) : null;
 
     const shouldPreview =
@@ -168,7 +170,7 @@ class ImageUpload extends React.Component {
 
 export const imageUpload = () => ({
   name: 'imageUpload',
-  displayName: 'Image Upload',
+  displayName: 'Image upload',
   help: 'Select or upload an image',
   resolveArgValue: true,
   template: templateFromReactComponent(ImageUpload),

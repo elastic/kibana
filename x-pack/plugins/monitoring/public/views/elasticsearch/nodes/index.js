@@ -11,6 +11,7 @@ import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
+import { I18nProvider } from '@kbn/i18n/react';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -22,7 +23,7 @@ uiRoutes.when('/elasticsearch/nodes', {
   },
   controllerAs: 'elasticsearchNodes',
   controller: class ElasticsearchNodesController extends MonitoringViewBaseTableController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       const showCgroupMetricsElasticsearch = $injector.get('showCgroupMetricsElasticsearch');
@@ -32,7 +33,9 @@ uiRoutes.when('/elasticsearch/nodes', {
       });
 
       super({
-        title: 'Elasticsearch - Nodes',
+        title: i18n('xpack.monitoring.elasticsearch.nodes.routeTitle', {
+          defaultMessage: 'Elasticsearch - Nodes'
+        }),
         storageKey: 'elasticsearch.nodes',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/elasticsearch/nodes`,
         reactNodeId: 'elasticsearchNodesReact',
@@ -47,11 +50,13 @@ uiRoutes.when('/elasticsearch/nodes', {
 
       this.renderReact = ({ clusterStatus, nodes }) => {
         super.renderReact(
-          <ElasticsearchNodes
-            clusterStatus={clusterStatus}
-            nodes={nodes}
-            showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
-          />
+          <I18nProvider>
+            <ElasticsearchNodes
+              clusterStatus={clusterStatus}
+              nodes={nodes}
+              showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+            />
+          </I18nProvider>
         );
       };
     }

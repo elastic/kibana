@@ -42,7 +42,7 @@ export function osqueryLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
       },
     }),
-    //euiIconType: 'logoOsquery',
+    euiIconType: 'logoOsquery',
     artifacts: {
       dashboards: [
         {

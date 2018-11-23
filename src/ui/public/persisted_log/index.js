@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import './persisted_log';
+import './directive';
 
 export { PersistedLog } from './persisted_log';
 export { recentlyAccessed } from './recently_accessed';

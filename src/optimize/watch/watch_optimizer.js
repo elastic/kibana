@@ -24,7 +24,7 @@ import BaseOptimizer from '../base_optimizer';
 
 import { createBundlesRoute } from '../bundles_route';
 
-const STATUS = {
+export const STATUS = {
   RUNNING: 'optimizer running',
   SUCCESS: 'optimizer completed successfully',
   FAILURE: 'optimizer failed with stats',
@@ -63,10 +63,9 @@ export default class WatchOptimizer extends BaseOptimizer {
     // pause all requests received while the compiler is running
     // and continue once an outcome is reached (aborting the request
     // with an error if it was a failure).
-    server.ext('onRequest', (request, reply) => {
-      this.onceBuildOutcome()
-        .then(() => reply.continue())
-        .catch(reply);
+    server.ext('onRequest', async (request, h) => {
+      await this.onceBuildOutcome();
+      return h.continue;
     });
 
     server.route(createBundlesRoute({

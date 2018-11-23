@@ -21,7 +21,15 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { CreateIndexPatternWizard } from '../create_index_pattern_wizard';
-
+const mockIndexPatternCreationType = {
+  getIndexPatternType: () => 'default',
+  getIndexPatternName: () => 'name',
+  getIsBeta: () => false,
+  checkIndicesForErrors: () => false,
+  getShowSystemIndices: () => false,
+  renderPrompt: () => {},
+  getIndexPatternMappings: () => { return {}; }
+};
 jest.mock('../components/step_index_pattern', () => ({ StepIndexPattern: 'StepIndexPattern' }));
 jest.mock('../components/step_time_field', () => ({ StepTimeField: 'StepTimeField' }));
 jest.mock('../components/header', () => ({ Header: 'Header' }));
@@ -34,6 +42,9 @@ jest.mock('../lib/get_indices', () => ({
     ];
   },
 }));
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => { },
+}));
 
 const loadingDataDocUrl = '';
 const initialQuery = '';
@@ -44,6 +55,7 @@ const services = {
   config: {},
   changeUrl: () => {},
   scopeApply: () => {},
+  indexPatternCreationType: mockIndexPatternCreationType,
 };
 
 describe('CreateIndexPatternWizard', () => {
@@ -71,6 +83,26 @@ describe('CreateIndexPatternWizard', () => {
     component.setState({
       isInitiallyLoadingIndices: false,
       allIndices: [],
+      remoteClustersExist: false
+    });
+
+    await component.update();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('renders when there are no indices but there are remote clusters', async () => {
+    const component = shallow(
+      <CreateIndexPatternWizard
+        loadingDataDocUrl={loadingDataDocUrl}
+        initialQuery={initialQuery}
+        services={services}
+      />
+    );
+
+    component.setState({
+      isInitiallyLoadingIndices: false,
+      allIndices: [],
+      remoteClustersExist: true
     });
 
     await component.update();
@@ -154,6 +186,7 @@ describe('CreateIndexPatternWizard', () => {
             cache: { clear }
           },
           changeUrl,
+          indexPatternCreationType: mockIndexPatternCreationType
         }}
       />
     );

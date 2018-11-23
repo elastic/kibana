@@ -14,6 +14,7 @@ import { PagePreview } from '../page_preview';
 
 export class PageManager extends React.PureComponent {
   static propTypes = {
+    isWriteable: PropTypes.bool.isRequired,
     pages: PropTypes.array.isRequired,
     workpadId: PropTypes.string.isRequired,
     addPage: PropTypes.func.isRequired,
@@ -52,6 +53,10 @@ export class PageManager extends React.PureComponent {
 
   scrollToActivePage = () => {
     if (this.activePageRef && this.pageListRef) {
+      // not all target browsers support element.scrollTo
+      // TODO: replace this with something more cross-browser, maybe scrollIntoView
+      if (!this.pageListRef.scrollTo) return;
+
       const pageOffset = this.activePageRef.offsetLeft;
       const {
         left: pageLeft,
@@ -102,11 +107,11 @@ export class PageManager extends React.PureComponent {
   };
 
   renderPage = (page, i) => {
-    const { selectedPage, workpadId, movePage, duplicatePage } = this.props;
+    const { isWriteable, selectedPage, workpadId, movePage, duplicatePage } = this.props;
     const pageNumber = i + 1;
 
     return (
-      <Draggable key={page.id} draggableId={page.id} index={i}>
+      <Draggable key={page.id} draggableId={page.id} index={i} isDragDisabled={!isWriteable}>
         {provided => (
           <div
             key={page.id}
@@ -133,6 +138,7 @@ export class PageManager extends React.PureComponent {
                   aria-label={`Load page number ${pageNumber}`}
                 >
                   <PagePreview
+                    isWriteable={isWriteable}
                     page={page}
                     height={100}
                     pageNumber={pageNumber}
@@ -151,7 +157,7 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId } = this.props;
+    const { pages, addPage, deleteId, isWriteable } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -178,17 +184,19 @@ export class PageManager extends React.PureComponent {
               </Droppable>
             </DragDropContext>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              anchorClassName="canvasPageManager__addPageTip"
-              content="Add a new page to this workpad"
-              position="left"
-            >
-              <button onClick={addPage} className="canvasPageManager__addPage">
-                <EuiIcon color="ghost" type="plusInCircle" size="l" />
-              </button>
-            </EuiToolTip>
-          </EuiFlexItem>
+          {isWriteable && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                anchorClassName="canvasPageManager__addPageTip"
+                content="Add a new page to this workpad"
+                position="left"
+              >
+                <button onClick={addPage} className="canvasPageManager__addPage">
+                  <EuiIcon color="ghost" type="plusInCircle" size="l" />
+                </button>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <ConfirmModal
           isOpen={deleteId != null}

@@ -8,11 +8,20 @@ import { EuiIcon } from '@elastic/eui';
 import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { colors, fontSize, px, unit, units } from '../../../style/variables';
-import { getFeatureDocs } from '../../../utils/documentation';
+
+import { StringMap } from '../../../../typings/common';
+import {
+  colors,
+  fontSize,
+  fontSizes,
+  px,
+  unit,
+  units
+} from '../../../style/variables';
+import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
 // @ts-ignore
 import { ExternalLink } from '../../../utils/url';
-import { NestedKeyValueTable } from './NestedKeyValueTable';
+import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
 import PROPERTY_CONFIG from './propertyConfig.json';
 
 const indexedPropertyConfig = _.indexBy(PROPERTY_CONFIG, 'key');
@@ -29,6 +38,15 @@ const TableInfo = styled.div`
   line-height: 1.5;
 `;
 
+const TableInfoHeader = styled(TableInfo)`
+  font-size: ${fontSizes.large};
+  color: ${colors.black2};
+`;
+
+const EuiIconWithSpace = styled(EuiIcon)`
+  margin-right: ${px(units.half)};
+`;
+
 export function getPropertyTabNames(selected: string[]): string[] {
   return PROPERTY_CONFIG.filter(
     ({ key, required }: { key: string; required: boolean }) =>
@@ -36,28 +54,36 @@ export function getPropertyTabNames(selected: string[]): string[] {
   ).map(({ key }: { key: string }) => key);
 }
 
+function getAgentFeatureText(featureName: string) {
+  switch (featureName) {
+    case 'user':
+      return 'You can configure your agent to add contextual information about your users.';
+    case 'tags':
+      return 'You can configure your agent to add filterable tags on transactions.';
+    case 'custom':
+      return 'You can configure your agent to add custom contextual information on transactions.';
+  }
+}
+
 export function AgentFeatureTipMessage({
   featureName,
   agentName
 }: {
   featureName: string;
-  agentName: string;
-}): JSX.Element | null {
-  const docs = getFeatureDocs(featureName, agentName);
-
-  if (!docs) {
+  agentName?: string;
+}) {
+  const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
+  if (!docsUrl) {
     return null;
   }
 
   return (
     <TableInfo>
-      <EuiIcon type="iInCircle" />
-      {docs.text}{' '}
-      {docs.url && (
-        <ExternalLink href={docs.url}>
-          Learn more in the documentation.
-        </ExternalLink>
-      )}
+      <EuiIconWithSpace type="iInCircle" />
+      {getAgentFeatureText(featureName)}{' '}
+      <ExternalLink href={docsUrl}>
+        Learn more in the documentation.
+      </ExternalLink>
     </TableInfo>
   );
 }
@@ -78,30 +104,23 @@ export function PropertiesTable({
 }: {
   propData: StringMap<any>;
   propKey: string;
-  agentName: string;
+  agentName?: string;
 }) {
-  if (_.isEmpty(propData)) {
-    return (
-      <TableContainer>
-        <TableInfo>
-          <EuiIcon type="iInCircle" /> No data available
-        </TableInfo>
-      </TableContainer>
-    );
-  }
+  const hasPropData = !_.isEmpty(propData);
 
   return (
     <TableContainer>
-      <NestedKeyValueTable
-        data={propData}
-        parentKey={propKey}
-        keySorter={sortKeysByConfig}
-        depth={1}
-      />
-      <AgentFeatureTipMessage
-        featureName={`context-${propKey}`}
-        agentName={agentName}
-      />
+      {hasPropData ? (
+        <NestedKeyValueTable
+          data={propData}
+          parentKey={propKey}
+          keySorter={sortKeysByConfig}
+          depth={1}
+        />
+      ) : (
+        <TableInfoHeader>No data available</TableInfoHeader>
+      )}
+      <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
     </TableContainer>
   );
 }

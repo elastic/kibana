@@ -22,7 +22,7 @@ import gaugeOptionsTemplate from './gauge_options.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
 
-module.directive('gaugeOptions', function () {
+module.directive('gaugeOptions', function (i18n) {
   return {
     restrict: 'E',
     template: gaugeOptionsTemplate,
@@ -105,6 +105,10 @@ module.directive('gaugeOptions', function () {
 
       $scope.uiState.on('colorChanged', () => {
         $scope.customColors = true;
+      });
+
+      $scope.requiredText = i18n('kbnVislibVisTypes.controls.gaugeOptions.requiredText', {
+        defaultMessage: 'Required:'
       });
 
     }
