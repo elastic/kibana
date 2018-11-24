@@ -102,11 +102,12 @@ class RequestsViewComponent extends Component {
       && this.state.request.esIndex
       && this.state.request.json) {
       const searchRequest = rison.encode(this.state.request.json);
+      const index = rison.encode(this.state.request.esIndex);
       showInConsole = (
         <Fragment>
           <EuiSpacer size="xs"/>
           <EuiButton
-            href={chrome.addBasePath(`/app/kibana#/dev_tools/console?search_request=${searchRequest}&index=${this.state.request.esIndex}`)}
+            href={chrome.addBasePath(`/app/kibana#/dev_tools/console?search_request=${searchRequest}&index=${index}`)}
             iconType="console"
           >
             open in console

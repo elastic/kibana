@@ -57,8 +57,9 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     } else if (urlParams.search_request && urlParams.index) {
       try {
         const searchRequest = rison.decode(urlParams.search_request);
+        const index = rison.decode(urlParams.index);
         sourceLocation = 'inline';
-        source = `POST /${urlParams.index}/_search\n${JSON.stringify(searchRequest, null, 2)}`;
+        source = `POST /${index}/_search\n${JSON.stringify(searchRequest, null, 2)}`;
       } catch (e) {
         toastNotifications.addWarning({
           title: 'Unable to decode search request'
