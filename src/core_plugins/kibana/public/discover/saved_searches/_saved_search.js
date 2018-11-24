@@ -27,7 +27,7 @@ const module = uiModules.get('discover/saved_searches', [
   'kibana/courier'
 ]);
 
-module.factory('SavedSearch', function (Private) {
+module.factory('SavedSearch', function (Private, i18n) {
   const SavedObject = Private(SavedObjectProvider);
   createLegacyClass(SavedSearch).inherits(SavedObject);
   function SavedSearch(id) {
@@ -38,7 +38,9 @@ module.factory('SavedSearch', function (Private) {
 
       id: id,
       defaults: {
-        title: 'New Saved Search',
+        title: i18n('kbn.discover.savedSearch.newSavedSearchTitle', {
+          defaultMessage: 'New Saved Search',
+        }),
         description: '',
         columns: [],
         hits: 0,

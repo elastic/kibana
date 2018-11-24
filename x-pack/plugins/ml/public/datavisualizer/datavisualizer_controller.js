@@ -18,15 +18,15 @@ import 'plugins/ml/components/form_filter_input';
 
 import chrome from 'ui/chrome';
 import uiRoutes from 'ui/routes';
-import { notify } from 'ui/notify';
-import { decorateQuery, luceneStringToDsl } from 'ui/courier';
+import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
+import { notify, toastNotifications } from 'ui/notify';
 
 import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
 import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
 import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { checkBasicLicense, isFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { createSearchItems } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+import { SearchItemsProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } from 'plugins/ml/util/index_utils';
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -53,17 +53,20 @@ const module = uiModules.get('apps/ml');
 module
   .controller('MlDataVisualizerViewFields', function (
     $scope,
-    $route,
     $timeout,
     $window,
     Private,
-    AppState) {
+    AppState,
+    config) {
 
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
+
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
-      query } = createSearchItems($route);
+      query } = createSearchItems();
+
     timeBasedIndexCheck(indexPattern, true);
 
     // List of system fields we don't want to display.
@@ -96,20 +99,16 @@ module
     $scope.showSidebar = isFullLicense();
 
     // Check for a saved query in the AppState or via a savedSearchId in the URL.
+    // TODO - add in support for lucene queries with filters and Kuery.
     $scope.searchQueryText = '';
-    if (_.has($scope.appState, 'query')) {
-    // Currently only support lucene syntax.
-      if (_.get($scope.appState, 'query.language') === 'lucene') {
-        $scope.searchQueryText = _.get($scope.appState, 'query.query', '');
-      }
+    const queryBarQry = ($scope.appState.query !== undefined) ? ($scope.appState.query) : query;
+    if (queryBarQry.language === 'lucene') {
+      $scope.searchQueryText = _.get(queryBarQry, 'query', '');
     } else {
-    // Use the query built from the savedSearchId supplied in the URL.
-    // If no savedSearchId, the query will default to '*'.
-    // TODO - when filtering is supported, use the filters part too.
-      const queryString = _.get(query, 'query_string.query', '');
-      if (queryString !== '*') {
-        $scope.searchQueryText = queryString;
-      }
+      toastNotifications.addWarning({
+        title: `${(queryBarQry.language !== undefined) ? queryBarQry.language : ''} syntax not supported`,
+        text: 'The Data Visualizer currently only supports queries using the lucene query syntax.',
+      });
     }
 
     $scope.searchQuery = buildSearchQuery();
@@ -260,7 +259,7 @@ module
 
     function buildSearchQuery() {
       const searchQuery = luceneStringToDsl($scope.searchQueryText);
-      decorateQuery(searchQuery);
+      decorateQuery(searchQuery, config);
       return searchQuery;
     }
 
