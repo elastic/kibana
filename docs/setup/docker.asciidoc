@@ -63,8 +63,14 @@ version: '2'
 services:
   kibana:
     image: {docker-image}
+    ports:
+      - 5601:5601
     volumes:
-      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ./kibana.yml:/config/kibana.yml
+    ports:
+      - 5601:5601
+    environment:
+      - "ELASTICSEARCH_URL=http://elasticsearch:9200/"
 --------------------------------------------
 
 [float]
