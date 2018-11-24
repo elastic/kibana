@@ -132,12 +132,7 @@ export function SingleMetricJobServiceProvider() {
         function: func
       };
 
-      let query = {
-        match_all: {}
-      };
-      if (formConfig.query.query_string.query !== '*' || formConfig.filters.length) {
-        query = formConfig.combinedQuery;
-      }
+      const query = formConfig.combinedQuery;
 
       if (formConfig.field && formConfig.field.id) {
         dtr.field_name = formConfig.field.id;
