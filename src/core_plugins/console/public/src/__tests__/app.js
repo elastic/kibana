@@ -57,7 +57,7 @@ describe('app initialization', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    init(inputMock, outputMock, 'https://state.link.com/content');
+    init(inputMock, outputMock, 'http', 'https://state.link.com/content');
 
     sinon.assert.calledOnce($.ajax);
     sinon.assert.calledWithExactly($.ajax, {
@@ -81,7 +81,7 @@ describe('app initialization', () => {
     const mockContent = {};
     ajaxDoneStub.yields(mockContent);
 
-    init(inputMock, outputMock, 'https://api.github.com/content');
+    init(inputMock, outputMock, 'http', 'https://api.github.com/content');
 
     sinon.assert.calledOnce($.ajax);
     sinon.assert.calledWithExactly($.ajax, {
