@@ -38,7 +38,7 @@ export function alertService(kibana: any) {
           .default({}),
       }).default();
     },
-    preInit(server: any) {
+    init(server: any) {
       const alerts = new AlertService(this.kbnServer);
       server.decorate('server', 'alertService', alerts);
     },

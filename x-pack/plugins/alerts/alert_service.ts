@@ -4,15 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { RunContext } from '../task_manager/task';
 import { TaskManager } from '../task_manager/task_manager';
+
+interface CheckResult {
+  notify?: boolean;
+  history?: boolean;
+  state?: object;
+}
+
+// we are resorting to this method of validation because we refuse to encapsulate
+// thinking that it is an abstraction. Which it is not!
+const CheckResultType = Joi.object({
+  notify: Joi.boolean().optional(),
+  history: Joi.boolean().optional(),
+  state: Joi.boolean().optional(),
+});
+
+interface TemplateCheckContext {
+  state?: any;
+  params?: any;
+}
+
+interface TemplateNotifyContext {
+  state?: any;
+  params?: any;
+  checkResults?: CheckResult;
+}
 
 interface AlertTemplate {
   id: string;
 
   description?: string;
 
-  runnable: (context: any) => void;
+  check: (context: TemplateCheckContext) => CheckResult;
+
+  notify: (context: TemplateNotifyContext) => void;
 }
 
 export class AlertService {
@@ -27,8 +55,8 @@ export class AlertService {
     server.route({
       method: 'GET',
       path: '/api/alerts',
-      handler: (_: any) => {
-        return 'Hello World!';
+      handler: async () => {
+        return await this.getAlerts();
       },
     });
     this.taskManager = server.taskManager;
@@ -39,57 +67,82 @@ export class AlertService {
     return Object.keys(this.templatesMap);
   }
 
+  public async getAlerts() {
+    const { docs } = await this.taskManager.fetch({
+      query: {
+        match: {
+          ['task.scope']: 'alert',
+        },
+      },
+    });
+
+    return docs.map(t => t.id);
+  }
+
   public registerAlertTemplate(template: AlertTemplate) {
     if (!this.templatesMap.has(template.id)) {
       this.templatesMap.set(template.id, template);
-      this.taskManager.registerTaskDefinitions({
-        // clusterMonitoring is the task type, and must be unique across the entire system
-        [template.id]: {
-          type: template.id,
-          title: template.id,
-          description: template.description,
-          timeOut: '5m',
-          numWorkers: 2,
+      const defs = {};
+      defs[`${template.id}`] = {
+        type: template.id,
+        title: template.id,
+        description: template.description,
+        timeOut: '500m',
+        numWorkers: 1,
+        static: [
+          {
+            id: 'someTaskId',
+            type: template.id,
+            scope: 'alert',
+          },
+        ],
+        createTaskRunner(context: RunContext) {
+          return {
+            async run() {
+              return new Promise((resolve, reject) => {
+                try {
+                  const results = template.check({
+                    state: context.taskInstance.state,
+                    params: context.taskInstance.params,
+                  });
 
-          // The createTaskRunner function / method returns an object that is responsible for
-          // performing the work of the task. context: { taskInstance, kbnServer }, is documented below.
-          createTaskRunner(context: RunContext) {
-            return {
-              async run() {
-                return new Promise((resolve, reject) => {
-                  try {
-                    template.runnable({
+                  CheckResultType.validate(results);
+
+                  if (results.notify) {
+                    template.notify({
+                      checkResults: results,
                       state: context.taskInstance.state,
-                    });
-                    resolve();
-                  } catch (e) {
-                    reject({
-                      alert: template,
-                      exception: e,
+                      params: context.taskInstance.params,
                     });
                   }
-                });
-              },
 
-              // Optional, will be called if a running instance of this task times out, allowing the task
-              // to attempt to clean itself up.
-              async cancel() {
-                // Do whatever is required to cancel this task, such as killing any spawned processes
-              },
-            };
-          },
+                  resolve();
+                } catch (e) {
+                  reject({
+                    alert: template,
+                    exception: e,
+                  });
+                }
+              });
+            },
+
+            async cancel() {
+              // Do whatever is required to cancel this task, such as killing any spawned processes
+            },
+          };
         },
-      });
+      };
+      this.taskManager.registerTaskDefinitions(defs);
     } else {
-      throw new Error('Condition name already taken');
+      throw new Error(`Alert Id name ${template.id} already taken`);
     }
   }
 
   public async registerAlert(templateId: string, params: any): Promise<string> {
     const task = await this.taskManager.schedule({
       id: templateId,
-      taskType: 'alert',
-      scope: templateId,
+      taskType: 'alert:' + templateId,
+      scope: 'alert',
       params,
     });
     return task.id;
@@ -106,21 +159,10 @@ export class AlertService {
   }
 
   private async initAfterPlugins() {
-    const tasks = await this.taskManager.fetch({
-      query: {
-        match: {
-          type: 'my-fanci-app',
-        },
-      },
-    });
+    const tasks = await this.getAlerts();
 
     if (tasks !== undefined) {
-      this.info(`We got ${tasks.docs.length} tasks from task manager.`);
-      tasks.docs.map((task: any) => {
-        this.info(`Destroying task ${task.id}`);
-        this.taskManager.remove(task.id);
-        return {};
-      });
+      this.info(`We got ${tasks.length} tasks from task manager.`);
     }
   }
 }

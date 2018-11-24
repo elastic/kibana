@@ -19,11 +19,16 @@ describe('Alerting Service', () => {
   expect(mockTaskManager.registerTaskDefinitions.mock.calls.length).toBe(0);
 
   it('should forward registration on to task manager', () => {
+    const testType = 'my-test-template';
     alertService.registerAlertTemplate({
-      id: 'my-test-template',
-      runnable: () => ({}),
+      id: testType,
+      check: () => ({}),
+      notify: () => ({}),
     });
     expect(mockTaskManager.registerTaskDefinitions.mock.calls.length).toBe(1);
+    expect(mockTaskManager.registerTaskDefinitions.mock.calls[0][0][testType].type).toEqual(
+      testType
+    );
   });
 
   it('should have a register function', () => {
