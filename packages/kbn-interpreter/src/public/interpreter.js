@@ -29,7 +29,7 @@ let socket;
 let resolve;
 const functionList = new Promise(_resolve => (resolve = _resolve));
 
-export async function initialize() {
+export async function initializeInterpreter() {
   socket = getSocket();
 
   // Listen for interpreter runs
