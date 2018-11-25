@@ -44,6 +44,7 @@ export interface FrameworkAdapter {
   appState?: object;
   kbnVersion?: string;
   baseURLPath: string;
+  management?: any;
   registerManagementSection(pluginId: string, displayName: string, basePath: string): void;
   getDefaultUserRoles(): string[];
   // Methods

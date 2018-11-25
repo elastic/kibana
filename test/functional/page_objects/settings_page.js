@@ -42,9 +42,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async clickKibanaSettings() {
       // TODO fix me
       await find.clickByDisplayedLinkText('Advanced Settings');
+      console.log('find.clickByDisplayedLinkText');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      console.log('PageObjects.header.waitUntilLoadingHasFinished');
       // Verify navigation is successful.
       await testSubjects.existOrFail('managementSettingsTitle');
+      console.log('testSubjects.existOrFail');
     }
 
     async clickKibanaSavedObjects() {
