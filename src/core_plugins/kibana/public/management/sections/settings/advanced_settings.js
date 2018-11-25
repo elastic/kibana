@@ -25,7 +25,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiPage,
   Query,
 } from '@elastic/eui';
 

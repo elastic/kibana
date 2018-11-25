@@ -346,8 +346,8 @@ export class IndexTableUi extends Component {
             <EuiTableBody>{this.buildRows()}</EuiTableBody>
           </EuiTable>
         ) : (
-            <NoMatch />
-          )}
+          <NoMatch />
+        )}
         <EuiSpacer size="m" />
         {indices.length > 0 ? this.renderPager() : null}
       </EuiPageContent>

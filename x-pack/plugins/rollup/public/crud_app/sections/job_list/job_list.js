@@ -263,11 +263,7 @@ export class JobListUi extends Component {
       content = this.renderList();
     }
 
-    return (
-          <EuiPageContent>
-            {content}
-          </EuiPageContent>
-    );
+    return (<EuiPageContent>{content}</EuiPageContent>);
   }
 }
 
