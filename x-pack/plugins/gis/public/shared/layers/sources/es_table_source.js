@@ -174,8 +174,8 @@ export class ESTableSource extends ASource {
       const metricLabel = metric.type !== 'count' ? `${metric.type}(${metric.field})` : 'count(*)';
       return {
         ...metric,
-        property_key: `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
-        property_label: `${metricLabel} group by ${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
+        propertyKey: `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
+        propertyLabel: `${metricLabel} group by ${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
       };
     });
   }
@@ -183,7 +183,7 @@ export class ESTableSource extends ASource {
   _makeAggConfigs() {
     const metricAggConfigs = this.getMetricFields().map(metric => {
       const metricAggConfig = {
-        id: metric.property_key,
+        id: metric.propertyKey,
         enabled: true,
         type: metric.type,
         schema: 'metric',

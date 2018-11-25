@@ -43,12 +43,12 @@ describe('getMetricFields', () => {
     expect(metrics.length).toBe(1);
     expect(metrics[0]).toEqual({
       type: 'count',
-      property_key: '__kbnjoin__count_groupby_myIndex.myTermField',
-      property_label: 'count(*) group by myIndex.myTermField',
+      propertyKey: '__kbnjoin__count_groupby_myIndex.myTermField',
+      propertyLabel: 'count(*) group by myIndex.myTermField',
     });
   });
 
-  it('should include remove incomplete metric configurations', () => {
+  it('should remove incomplete metric configurations', () => {
     const source = new ESTableSource({
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
@@ -59,13 +59,13 @@ describe('getMetricFields', () => {
     expect(metrics[0]).toEqual({
       type: 'sum',
       field: sumFieldName,
-      property_key: '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField',
-      property_label: 'sum(myFieldGettingSummed) group by myIndex.myTermField',
+      propertyKey: '__kbnjoin__sum_of_myFieldGettingSummed_groupby_myIndex.myTermField',
+      propertyLabel: 'sum(myFieldGettingSummed) group by myIndex.myTermField',
     });
     expect(metrics[1]).toEqual({
       type: 'count',
-      property_key: '__kbnjoin__count_groupby_myIndex.myTermField',
-      property_label: 'count(*) group by myIndex.myTermField',
+      propertyKey: '__kbnjoin__count_groupby_myIndex.myTermField',
+      propertyLabel: 'count(*) group by myIndex.myTermField',
     });
   });
 });
