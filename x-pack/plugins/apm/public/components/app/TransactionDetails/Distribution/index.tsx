@@ -14,7 +14,7 @@ import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
-import EmptyMessage from '../../../shared/EmptyMessage';
+import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 interface IChartPoint {
   sample?: IBucket['sample'];

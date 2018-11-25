@@ -18,7 +18,7 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
-import EmptyMessage from '../../../shared/EmptyMessage';
+import { EmptyMessage } from '../../../shared/EmptyMessage';
 import { TransactionLink } from '../../../shared/TransactionLink';
 import { DiscoverTransactionLink } from './ActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
