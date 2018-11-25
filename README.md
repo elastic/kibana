@@ -7,7 +7,6 @@ browser-based analytics and search dashboard for Elasticsearch.
 - [Getting Started](#getting-started)
   - [Using a Kibana Release](#using-a-kibana-release)
   - [Building and Running Kibana, and/or Contributing Code](#building-and-running-kibana-andor-contributing-code)
-  - [Snapshot Builds](#snapshot-builds)
 - [Documentation](#documentation)
 - [Version Compatibility with Elasticsearch](#version-compatibility-with-elasticsearch)
 - [Questions? Problems? Suggestions?](#questions-problems-suggestions)
