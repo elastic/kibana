@@ -36,10 +36,6 @@ export class VectorLayer extends ALayer {
 
   static tooltipContainer = document.createElement('div');
 
-  static getJoinFieldName(name) {
-    return `__kbn__join__${name}__`;
-  }
-
   static createDescriptor(options) {
     // Colors must be state-aware to reduce unnecessary incrementation
     const DEFAULT_ALPHA_VALUE = 0.5;
@@ -130,13 +126,15 @@ export class VectorLayer extends ALayer {
         origin: 'source'
       };
     });
-    const joinFields = this.getValidJoins().map(join => {
-      return {
-        label: join.getHumanReadableName(),
-        name: join.getJoinFieldName(),
-        origin: 'join',
-        join: join
-      };
+    const joinFields = [];
+    this.getValidJoins().forEach(join => {
+      const fields = join.getJoinFields().map(joinField => {
+        return {
+          ...joinField,
+          origin: 'join',
+        };
+      });
+      joinFields.push(...fields);
     });
 
     return [...numberFieldOptions, ...joinFields];
@@ -198,12 +196,15 @@ export class VectorLayer extends ALayer {
         };
       }
       startLoading(sourceDataId, requestToken, { timeFilters: dataFilters.timeFilters });
-      const data = await tableSource.getTable(dataFilters);
-      stopLoading(sourceDataId, requestToken, data);
+      const {
+        rawData,
+        propertiesMap
+      } = await tableSource.getTable(dataFilters);
+      stopLoading(sourceDataId, requestToken, rawData);
       return {
         shouldJoin: true,
         join: join,
-        table: data
+        propertiesMap: propertiesMap,
       };
     } catch(e) {
       console.error(e);
@@ -273,7 +274,9 @@ export class VectorLayer extends ALayer {
     if (!sourceResult.featureCollection) {
       return false;
     }
-    joinState.join.joinTableToFeatureCollection(sourceResult.featureCollection, joinState.table);
+    joinState.join.joinPropertiesToFeatureCollection(
+      sourceResult.featureCollection,
+      joinState.propertiesMap);
     return true;
   }
 

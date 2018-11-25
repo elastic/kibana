@@ -26,36 +26,30 @@ export class LeftInnerJoin {
     return false;
   }
 
-  getSourceId() {
-    return LeftInnerJoin.toHash(this._descriptor);
+  getJoinFields() {
+    return this._rightSource.getMetricFields().map(({ property_key: name, property_label: label }) => {
+      return { label, name };
+    });
   }
 
-  getHumanReadableName() {
-    return `count of ${this._descriptor.right.indexPatternTitle} by ${this._descriptor.right.term}`;
+  getSourceId() {
+    return LeftInnerJoin.toHash(this._descriptor);
   }
 
   getLeftFieldName() {
     return this._descriptor.leftField;
   }
 
-  // Name of key added to the geoJson properties that contains the results of the join
-  getJoinFieldName() {
-    return `__kbn__join(${this.getSourceId()})`;
-  }
-
-  joinTableToFeatureCollection(featureCollection, table) {
-    const newField = this.getJoinFieldName();
-    //todo: poor man's join with nested loop
-    for (let i = 0; i < featureCollection.features.length; i++) {
-      const feature = featureCollection.features[i];
-      feature.properties[newField] = null;//wipe
-      const joinfield = feature.properties[this._descriptor.leftField];
-      for (let j = 0; j < table.length; j++) {
-        if (table[j].key === joinfield) {
-          feature.properties[newField] = table[j].value;
-        }
+  joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
+    featureCollection.features.forEach(feature => {
+      const joinKey = feature.properties[this._descriptor.leftField];
+      if (propertiesMap.has(joinKey)) {
+        feature.properties = {
+          ...feature.properties,
+          ...propertiesMap.get(joinKey),
+        };
       }
-    }
+    });
   }
 
   getTableSource() {
