@@ -18,18 +18,18 @@
  */
 
 import React, { Component } from 'react';
-import { Subscribable, Unsubscribable } from 'rxjs';
+import * as Rx from 'rxjs';
 
 import {
   // @ts-ignore
   EuiHeaderBreadcrumbs,
 } from '@elastic/eui';
 
-import { Breadcrumb } from '../';
+import { Breadcrumb } from '../../../../../../core/public/chrome';
 
 interface Props {
   appTitle?: string;
-  breadcrumbs: Subscribable<Breadcrumb[]>;
+  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
 }
 
 interface State {
@@ -37,7 +37,7 @@ interface State {
 }
 
 export class HeaderBreadcrumbs extends Component<Props, State> {
-  private unsubscribable?: Unsubscribable;
+  private subscription?: Rx.Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -50,7 +50,7 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
-    if (prevProps.breadcrumbs === this.props.breadcrumbs) {
+    if (prevProps.breadcrumbs$ === this.props.breadcrumbs$) {
       return;
     }
 
@@ -73,15 +73,17 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   private subscribe() {
-    this.unsubscribable = this.props.breadcrumbs.subscribe(breadcrumbs => {
-      this.setState({ breadcrumbs });
+    this.subscription = this.props.breadcrumbs$.subscribe(breadcrumbs => {
+      this.setState({
+        breadcrumbs,
+      });
     });
   }
 
   private unsubscribe() {
-    if (this.unsubscribable) {
-      this.unsubscribable.unsubscribe();
-      delete this.unsubscribable;
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      delete this.subscription;
     }
   }
 }

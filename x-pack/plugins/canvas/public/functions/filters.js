@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from '@kbn/interpreter/public/interpreter';
-import { fromExpression } from '@kbn/interpreter/common/lib/ast';
-import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
+import { interpretAst } from '@kbn/interpreter/public';
+import { fromExpression, typesRegistry } from '@kbn/interpreter/common';
 import { getState } from '../state/store';
 import { getGlobalFilterExpression } from '../state/selectors/workpad';
 

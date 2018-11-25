@@ -32,3 +32,4 @@ export {
   deleteAll,
 } from './fs';
 export { scanDelete } from './scan_delete';
+export { scanCopy } from './scan_copy';

@@ -19,8 +19,8 @@
 
 import { resolve } from 'path';
 import init from './init';
-import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
-import { pluginPaths } from './plugin_paths';
+import { pathsRegistry } from '@kbn/interpreter/common';
+import { pluginPaths } from '@kbn/interpreter/plugin_paths';
 
 export default function (kibana) {
   return new kibana.Plugin({
