@@ -7,7 +7,6 @@
 import './main';
 import './chart';
 import './sparkline';
-import './alerts';
 import './cluster/overview';
 import './cluster/listing';
 import './elasticsearch/cluster_status';

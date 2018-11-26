@@ -50,7 +50,9 @@ uiRoutes.when('/elasticsearch/ccr/:index/shard/:shardId', {
 
       this.renderReact = (props) => {
         super.renderReact(
-          <I18nProvider><CcrShard {...props} /> </I18nProvider>
+          <I18nProvider>
+            <CcrShard {...props} />
+          </I18nProvider>
         );
       };
     }
