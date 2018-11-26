@@ -53,6 +53,9 @@
               "color": {
                 "type": "keyword"
               },
+              "disabledFeatures": {
+                "type": "keyword"
+              },
               "_reserved": {
                 "type": "boolean"
               }
