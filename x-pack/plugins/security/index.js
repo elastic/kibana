@@ -43,6 +43,9 @@ export const security = (kibana) => new kibana.Plugin({
         hostname: Joi.string().hostname(),
         port: Joi.number().integer().min(0).max(65535)
       }).default(),
+      saml: Joi.object({
+        realm: Joi.string().optional().allow('').default('')
+      }).default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true)

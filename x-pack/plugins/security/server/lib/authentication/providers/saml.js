@@ -15,6 +15,7 @@ import { DeauthenticationResult } from '../deauthentication_result';
  *  protocol: string,
  *  hostname: string,
  *  port: string,
+ *  samlRealm: string,
  *  basePath: string,
  *  client: Client,
  *  log: Function
@@ -349,7 +350,7 @@ export class SAMLAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       const { id: requestId, redirect } = await this._options.client.callWithInternalUser(
         'shield.samlPrepare',
-        { body: { acs: this._getACS() } }
+        { body: { acs: this._getACS(), realm: this._getSamlRealm() } }
       );
 
       this._options.log(['debug', 'security', 'saml'], 'Redirecting to Identity Provider with SAML request.');
@@ -385,7 +386,7 @@ export class SAMLAuthenticationProvider {
       logoutArgs = [
         'shield.samlInvalidate',
         // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
-        { body: { queryString: request.url.search.slice(1), acs: this._getACS() } }
+        { body: { queryString: request.url.search.slice(1), acs: this._getACS(), realm: this._getSamlRealm() } }
       ];
     } else {
       this._options.log(['debug', 'security', 'saml'], 'Logout has been initiated by the user.');
@@ -425,5 +426,13 @@ export class SAMLAuthenticationProvider {
   _getACS() {
     return `${this._options.protocol}://${this._options.hostname}:${this._options.port}` +
       `${this._options.basePath}/api/security/v1/saml`;
+  }
+
+  /**
+   * Gets the Elasticsearch SAML Realm name if configured in kibana configuration
+   *
+   */
+  _getSamlRealm() {
+    return `${this._options.samlRealm}`;
   }
 }

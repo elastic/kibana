@@ -41,8 +41,9 @@ function getProviderOptions(server) {
     hostname: config.get('server.host'),
     port: config.get('server.port'),
     basePath: config.get('server.basePath'),
+    samlRealm: config.get('xpack.security.saml.realm'),
 
-    ...config.get('xpack.security.public')
+    ...config.get('xpack.security.public'),
   };
 }
 

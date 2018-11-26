@@ -274,10 +274,13 @@
     /**
      * Asks Elasticsearch to prepare SAML authentication request to be sent to
      * the 3rd-party SAML identity provider.
+     * @param {string} realm The name of the SAML Realm that is configured in Elasticsearch that
+     * this request is for.
      *
      * @param {string} acs Assertion consumer service URL to use for SAML request or URL in the
-     * Kibana to which identity provider will post SAML response. Based on the ACS Elasticsearch
-     * will choose the right SAML realm.
+     * Kibana to which identity provider will post SAML response. If the realm parameter is not
+     * provided, Elasticsearch will choose the right SAML realm to invalidate session based on
+     * the acs URL.
      *
      * @returns {{realm: string, id: string, redirect: string}} Object that includes identifier
      * of the SAML realm used to prepare authentication request, encrypted request token to be
@@ -345,9 +348,14 @@
      * Invalidates SAML session based on Logout Request received from the Identity Provider.
      *
      * @param {string} queryString URL encoded query string provided by Identity Provider.
+     *
+     * @param {string} realm The name of the SAML Realm that is configured in Elasticsearch that
+     * this request is for.
+     *
      * @param {string} acs Assertion consumer service URL to use for SAML request or URL in the
-     * Kibana to which identity provider will post SAML response. Based on the ACS Elasticsearch
-     * will choose the right SAML realm to invalidate session.
+     * Kibana to which identity provider will post SAML response. If the realm parameter is not
+     * provided, Elasticsearch will choose the right SAML realm to invalidate session based on
+     * the acs URL.
      *
      * @returns {{redirect?: string}}
      */
