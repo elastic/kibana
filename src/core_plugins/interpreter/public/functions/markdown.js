@@ -25,8 +25,9 @@ export default () => ({
   },
   help: 'A markdown visualization.',
   args: {
-    spec: {
+    md: {
       types: ['string'],
+      aliases: [ '_' ],
       default: '',
       help: 'markdown',
       multi: false,

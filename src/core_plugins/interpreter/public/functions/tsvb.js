@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
+import { get } from 'lodash';
 import { MetricsRequestHandlerProvider } from '../../../metrics/public/kbn_vis_types/request_handler';
 import { PersistedState } from 'ui/persisted_state';
 
@@ -36,10 +35,6 @@ export default () => ({
   },
   help: 'Run tsvb request.',
   args: {
-    index: {
-      types: ['string', 'null'],
-      default: null,
-    },
     params: {
       types: ['string'],
       default: '""',
@@ -63,9 +58,9 @@ export default () => ({
       const uiState = new PersistedState(uiStateParams);
 
       const response = await metricsRequestHandler({
-        timeRange: _.get(context, 'timeRange', null),
-        query: _.get(context, 'query', null),
-        filters: _.get(context, 'filters', null),
+        timeRange: get(context, 'timeRange', null),
+        query: get(context, 'query', null),
+        filters: get(context, 'filters', null),
         visParams: params,
         uiState: uiState,
       });

@@ -18,8 +18,8 @@
  */
 
 
-import { fromExpression } from '@kbn/interpreter/common/lib/ast';
-import { interpretAst } from '@kbn/interpreter/public/interpreter';
+import { fromExpression } from '@kbn/interpreter/common';
+import { interpretAst } from '@kbn/interpreter/public';
 
 const getSchemas = (vis) => {
   let cnt = 0;
@@ -47,6 +47,14 @@ const getSchemas = (vis) => {
   return schemas;
 };
 
+const prepareJson = (variable, data) => {
+  return `${variable}='${JSON.stringify(data).replace(/'/g, `\\'`)}' `;
+};
+
+const prepareString = (variable, data) => {
+  return `${variable}='${data.replace(/'/g, `\\'`)}' `;
+};
+
 const vislibCharts = ['histogram', 'line', 'area', 'gauge', 'goal', 'heatmap', 'horizontal_bar'];
 
 export const buildPipeline = (vis, params) => {
@@ -56,79 +64,86 @@ export const buildPipeline = (vis, params) => {
   const filters = searchSource.getField('filter');
   const visState = vis.getCurrentState();
 
+  // context
   let pipeline = `kibana | kibana_context `;
   if (query) {
-    pipeline += `q='${JSON.stringify(query).replace(/'/g, `\\'`)}' `;
+    pipeline += prepareJson('query', query);
   }
   if (filters) {
-    pipeline += `filters='${JSON.stringify(filters).replace(/'/g, `\\'`)}' `;
+    pipeline += prepareJson('filters', filters);
   }
   if (vis.savedSearchId) {
-    pipeline += `savedSearchId='${vis.savedSearchId}' `;
+    pipeline += prepareString('savedSearchId', vis.savedSearchId);
   }
   pipeline += '| ';
+
+  // request handler
   if (vis.type.requestHandler === 'courier') {
-    pipeline += `
-    esaggs index='${indexPattern.id}' metricsAtAllLevels=${vis.isHierarchical()} 
+    pipeline += `esaggs 
+    ${prepareString('index', indexPattern.id)} 
+    metricsAtAllLevels=${vis.isHierarchical()} 
     partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'}
-    aggConfigs='${JSON.stringify(visState.aggs)}' | `;
+    ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
+
+  // response handler/visualization
   if (vis.type.name === 'vega') {
-    pipeline += `vega spec='${visState.params.spec.replace(/'/g, `\\'`)}'`;
+    pipeline += `vega ${prepareString('spec', visState.params.spec)}`;
   } else if (vis.type.name === 'input_control_vis') {
-    pipeline += `input_control_vis visConfig='${JSON.stringify(visState.params)}'`;
+    pipeline += `input_control_vis ${prepareJson('visConfig', visState.params)}`;
   } else if (vis.type.name === 'metrics') {
-    pipeline += `tsvb params='${JSON.stringify(visState.params)}'`;
+    pipeline += `tsvb ${prepareJson('params', visState.params)}`;
   } else if (vis.type.name === 'timelion') {
-    pipeline += `timelion_vis expression='${visState.params.expression}' interval='${visState.params.interval}'`;
+    pipeline += `timelion_vis 
+      ${prepareString('expression', visState.params.expression)} 
+      interval='${visState.params.interval}'`;
   } else if (vis.type.name === 'markdown') {
-    pipeline += `markdown spec='${visState.params.markdown.replace(/'/g, `\\'`)}' 
-    params='${JSON.stringify(visState.params).replace(/'/g, `\\'`)}'`;
+    pipeline += `markdown 
+      ${prepareString('md', visState.params.markdown)} 
+      ${prepareJson('visConfig', visState.params)}`;
   } else if (vis.type.name === 'table') {
     const schemas = getSchemas(vis);
-    pipeline += `kibana_table visConfig='${JSON.stringify(visState.params)}' `;
+    pipeline += `kibana_table ${prepareJson('visConfig', visState.params)} `;
     if (schemas.split) schemas.split.forEach(split => pipeline += `split='${split}' `);
     if (schemas.bucket) schemas.bucket.forEach(bucket => pipeline += `bucket='${bucket}' `);
     schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
   } else if (vis.type.name === 'metric') {
     const schemas = getSchemas(vis);
-    pipeline += `kibana_metric visConfig='${JSON.stringify(visState.params)}' `;
+    pipeline += `kibana_metric ${prepareJson('visConfig', visState.params)} `;
     if (schemas.bucket) schemas.bucket.forEach(bucket => pipeline += `bucket='${bucket}' `);
     schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
   } else if (vis.type.name === 'tagcloud') {
     const schemas = getSchemas(vis);
-    pipeline += `tagcloud visConfig='${JSON.stringify(visState.params)}' `;
+    pipeline += `tagcloud ${prepareJson('visConfig', visState.params)} `;
     schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
     schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
   } else if (vis.type.name === 'region_map') {
     const schemas = getSchemas(vis);
-    pipeline += `regionmap visConfig='${JSON.stringify(visState.params)}' `;
+    pipeline += `regionmap ${prepareJson('visConfig', visState.params)} `;
     schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
     schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
   } else if (vis.type.name === 'pie') {
-    pipeline += `kibana_pie visConfig='${JSON.stringify(visState.params)}' schemas='${JSON.stringify(getSchemas(vis))}'`;
+    pipeline += `kibana_pie 
+      ${prepareJson('visConfig', visState.params)} 
+      ${prepareJson('schemas', getSchemas(vis))}`;
   } else if (vis.type.name === 'tile_map') {
     const schemas = getSchemas(vis);
-    pipeline += `tilemap visConfig='${JSON.stringify(visState.params)}' `;
+    pipeline += `tilemap ${prepareJson('visConfig', visState.params)} `;
     if (schemas.segment) schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
     schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
   } else if (vislibCharts.includes(vis.type.name)) {
     pipeline += `vislib type='${vis.type.name}' 
-      visConfig='${JSON.stringify(visState.params)}' schemas='${JSON.stringify(getSchemas(vis))}'`;
+      ${prepareJson('visConfig', visState.params)} 
+      ${prepareJson('schemas', getSchemas(vis))}`;
   } else {
-    pipeline += `visualization type='${vis.type.name}' visConfig='${JSON.stringify(visState.params)}'`;
+    pipeline += `visualization type='${vis.type.name}' ${prepareJson('visConfig', visState.params)}`;
   }
 
   return pipeline;
 };
 
 export const runPipeline = async (pipeline, context, handlers) => {
-  try {
-    const ast = fromExpression(pipeline);
-    const pipelineResponse = await interpretAst(ast, context, handlers);
-    return pipelineResponse;
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(e, pipeline);
-  }
+  const ast = fromExpression(pipeline);
+  const pipelineResponse = await interpretAst(ast, context, handlers);
+  return pipelineResponse;
 };

@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
+import { get } from 'lodash';
 import { TimelionRequestHandlerProvider } from '../../../timelion/public/vis/timelion_request_handler';
 
 
 import chrome from 'ui/chrome';
-
 
 export default () => ({
   name: 'timelion_vis',
@@ -34,10 +32,11 @@ export default () => ({
       'null',
     ],
   },
-  help: 'Run tsvb request.',
+  help: 'Timelion visualization.',
   args: {
     expression: {
       types: ['string'],
+      aliases: ['_'],
       default: '".es(*)"',
       help: 'timelion expression definition',
       multi: false,
@@ -55,9 +54,9 @@ export default () => ({
       const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
 
       const response = await timelionRequestHandler({
-        timeRange: _.get(context, 'timeRange', null),
-        query: _.get(context, 'query', null),
-        filters: _.get(context, 'filters', null),
+        timeRange: get(context, 'timeRange', null),
+        query: get(context, 'query', null),
+        filters: get(context, 'filters', null),
         forceFetch: true,
         visParams: { expression: args.expression, interval: args.interval }
       });

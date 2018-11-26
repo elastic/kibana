@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { map, each } from 'lodash';
 
 export const kibanaTable = () => ({
   name: 'kibana_table',
@@ -76,7 +76,7 @@ export const kibanaTable = () => ({
     pointseries: context => {
       const converted = {
         tables: [{
-          columns: _.map(context.columns, (column, name) => {
+          columns: map(context.columns, (column, name) => {
             return {
               title: column.name || name,
               ...column
@@ -84,7 +84,7 @@ export const kibanaTable = () => ({
           }),
           rows: context.rows.map(row => {
             const crow = [];
-            _.each(context.columns, (column, i) => {
+            each(context.columns, (column, i) => {
               crow.push(row[i]);
             });
             return crow;

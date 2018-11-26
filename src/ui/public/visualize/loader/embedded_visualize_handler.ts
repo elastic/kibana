@@ -360,7 +360,6 @@ export class EmbeddedVisualizeHandler {
     if (pipelineResponse) {
       if (!pipelineResponse.value) {
         throw new Error(pipelineResponse.error);
-        return;
       }
       visData = pipelineResponse.value.visData || pipelineResponse.value;
     }

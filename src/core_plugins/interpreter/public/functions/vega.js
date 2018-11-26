@@ -17,16 +17,18 @@
  * under the License.
  */
 
+import { get } from 'lodash';
 import chrome from 'ui/chrome';
-
 import { VegaRequestHandlerProvider } from '../../../vega/public/vega_request_handler';
-import _ from 'lodash';
 
 export default () => ({
   name: 'vega',
   type: 'render',
   context: {
-    types: [],
+    types: [
+      'kibana_context',
+      'null',
+    ],
   },
   help: 'A vega visualization.',
   args: {
@@ -43,9 +45,9 @@ export default () => ({
       const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
 
       const response = await vegaRequestHandler({
-        timeRange: _.get(context, 'timeRange', null),
-        query: _.get(context, 'q', null),
-        filters: _.get(context, 'filters', null),
+        timeRange: get(context, 'timeRange', null),
+        query: get(context, 'q', null),
+        filters: get(context, 'filters', null),
         visParams: { spec: args.spec },
         forceFetch: true
       });

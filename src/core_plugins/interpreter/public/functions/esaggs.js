@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 import { AggConfigs } from 'ui/vis/agg_configs';
 
@@ -79,9 +79,9 @@ export default () => ({
       const response = await courierRequestHandler({
         searchSource: searchSource,
         aggs: aggs,
-        timeRange: _.get(context, 'timeRange', null),
-        query: _.get(context, 'query', null),
-        filters: _.get(context, 'filters', null),
+        timeRange: get(context, 'timeRange', null),
+        query: get(context, 'query', null),
+        filters: get(context, 'filters', null),
         forceFetch: true,
         isHierarchical: args.metricsAtAllLevels,
         partialRows: args.partialRows,

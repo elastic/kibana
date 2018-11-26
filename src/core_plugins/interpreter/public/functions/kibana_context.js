@@ -32,7 +32,7 @@ export default () => ({
   args: {
     q: {
       types: ['string', 'null'],
-      aliases: ['query'],
+      aliases: ['query', '_'],
       help: 'A Lucene query string',
       default: null,
     },
