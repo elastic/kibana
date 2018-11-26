@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
+import { mountWithIntl, shallowWithIntl } from 'enzyme';
 import React from 'react';
 import { LoginState } from '../../../../../common/login_state';
 import { BasicLoginForm } from './basic_login_form';
@@ -43,7 +43,7 @@ describe('BasicLoginForm', () => {
     const mockWindow = {};
     const loginState = createLoginState();
     expect(
-      shallow(
+      shallowWithIntl(
         <BasicLoginForm http={mockHttp} window={mockWindow} loginState={loginState} next={''} />
       )
     ).toMatchSnapshot();
@@ -54,7 +54,7 @@ describe('BasicLoginForm', () => {
     const mockWindow = {};
     const loginState = createLoginState();
 
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <BasicLoginForm
         http={mockHttp}
         window={mockWindow}
@@ -72,7 +72,7 @@ describe('BasicLoginForm', () => {
     const mockWindow = {};
     const loginState = createLoginState();
 
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <BasicLoginForm http={mockHttp} window={mockWindow} loginState={loginState} next={''} />
     );
 
