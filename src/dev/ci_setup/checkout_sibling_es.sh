@@ -1,29 +1,5 @@
 #!/bin/bash
 
-# Turn on semi-strict mode
-set -e
-set -o pipefail
-
-SCRIPT=${BASH_SOURCE[0]}
-# SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
-while [ -h "$SCRIPT" ] ; do
-  ls=$(ls -ld "$SCRIPT")
-  # Drop everything prior to ->
-  link=$(expr "$ls" : '.*-> \(.*\)$')
-  if expr "$link" : '/.*' > /dev/null; then
-    SCRIPT="$link"
-  else
-    SCRIPT=$(dirname "$SCRIPT")/"$link"
-  fi
-  echo $SCRIPT
-done
-
-# kibana directory is the parent of x-pack
-export KIBANA_DIR="$(cd "$(dirname "$SCRIPT")/../../.."; pwd)"
-
-# PARENT_DIR is the directory where we will checkout es and x-pack-es
-export PARENT_DIR="$(cd "$KIBANA_DIR"/..; pwd)"
-
 function checkout_sibling {
   project=$1
   targetDir=$2
@@ -108,3 +84,27 @@ function checkout_sibling {
 }
 
 checkout_sibling "elasticsearch" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
+
+# Set the JAVA_HOME based on the Java property file in the ES repo
+# This assumes the naming convention used on CI (ex: ~/.java/java10)
+ES_DIR="$PARENT_DIR/elasticsearch"
+ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
+
+
+if [ ! -f $ES_JAVA_PROP_PATH ]; then
+  echo "Unable to set JAVA_HOME, $ES_JAVA_PROP_PATH does not exist"
+  exit 1
+fi
+
+# While sourcing the property file would currently work, we want
+# to support the case where whitespace surrounds the equals.
+# This has the added benefit of explicitly exporting property values
+export ES_BUILD_JAVA="$(cat "$ES_JAVA_PROP_PATH" | grep "^ES_BUILD_JAVA" | cut -d'=' -f2 | tr -d '[:space:]')"
+
+if [ -z "$ES_BUILD_JAVA" ]; then
+  echo "Unable to set JAVA_HOME, ES_BUILD_JAVA not present in $ES_JAVA_PROP_PATH"
+  exit 1
+fi
+
+echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
+export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA

@@ -1,20 +1,12 @@
 #!/usr/bin/env bash
 
 set -e
+set -o pipefail
 
 dir="$(pwd)"
-cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
-
-###
-### Since the Jenkins logging output collector doesn't look like a TTY
-### Node/Chalk and other color libs disable their color output. But Jenkins
-### can handle color fine, so this forces https://github.com/chalk/supports-color
-### to enable color support in Chalk and other related modules.
-###
-export FORCE_COLOR=1
 
 ###
 ### check that we seem to be in a kibana project
@@ -26,6 +18,30 @@ else
   exit 1
 fi
 
+export KIBANA_DIR="$dir"
+export XPACK_DIR="$KIBANA_DIR/x-pack"
+export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
+
+###
+### Extract the bootstrap cache that we create in the packer_cache.sh script
+###
+cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
+bootstrapCache="$CACHE_DIR/bootstrap_cache/master.tar"
+if [ -f "$bootstrapCache" ]; then
+  echo "extracting bootstrap_cache from $bootstrapCache";
+  tar -xf "$bootstrapCache";
+else
+  echo "bootstrap_cache missing";
+  exit 1;
+fi
+
+###
+### Since the Jenkins logging output collector doesn't look like a TTY
+### Node/Chalk and other color libs disable their color output. But Jenkins
+### can handle color fine, so this forces https://github.com/chalk/supports-color
+### to enable color support in Chalk and other related modules.
+###
+export FORCE_COLOR=1
 
 ###
 ### download node
