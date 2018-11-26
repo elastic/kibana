@@ -24,10 +24,10 @@ import { createGotoRoute } from './goto';
 import { createShortenUrlRoute } from './shorten_url';
 
 
-export function createRoutes(server, config) {
+export function createRoutes(server) {
   const shortUrlLookup = shortUrlLookupProvider(server);
 
-  server.route(createGotoRoute({ server, config, shortUrlLookup }));
+  server.route(createGotoRoute({ server, shortUrlLookup }));
   server.route(createShortenUrlRoute({ shortUrlLookup }));
 
   // TODO remove deprecated '/shorten' API in master (7.0)
