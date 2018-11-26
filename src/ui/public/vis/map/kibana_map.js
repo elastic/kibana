@@ -498,7 +498,7 @@ export class KibanaMap extends EventEmitter {
                 {`default distribution `}
               </a>
             }
-            of Elasticsearch and Kibana. You&apos;ll get access to all 18
+            of Elasticsearch and Kibana. You&apos;ll get access to additional
             zoom levels for free through the&nbsp;
             {
               <a href="https://www.elastic.co/elastic-maps-service">
@@ -510,7 +510,6 @@ export class KibanaMap extends EventEmitter {
         </div>
       )
     };
-
     const zoomMessage = () => {
       const zoomLevel = this.getZoomLevel();
       const maxMapZoom = this._leafletMap.getMaxZoom();
@@ -521,8 +520,9 @@ export class KibanaMap extends EventEmitter {
 
     return layer => {
       this._leafletMap.on('zoomend', zoomMessage);
-      this._listeners.push(
-        { name: 'zoomMessage', handle: zoomMessage, layer: layer });
+      layer.on('remove', () => {
+        this._leafletMap.off('zoomend', zoomMessage);
+      });
     };
   })();
 
@@ -605,13 +605,15 @@ export class KibanaMap extends EventEmitter {
       });
 
       this._leafletBaseLayer = baseLayer;
+      if (settings.options.showZoomMessage) {
+        baseLayer.on('add', () => {
+          this._addMaxZoomMessage(baseLayer);
+        });
+      }
       this._leafletBaseLayer.addTo(this._leafletMap);
       this._leafletBaseLayer.bringToBack();
       if (settings.options.minZoom > this._leafletMap.getZoom()) {
         this._leafletMap.setZoom(settings.options.minZoom);
-      }
-      if (settings.options.showZoomMessage) {
-        this._addMaxZoomMessage(baseLayer);
       }
       this._addAttributions(settings.options.attribution);
       this.resize();
