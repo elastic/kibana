@@ -16,7 +16,7 @@ function getJobIds() {
   return new Promise((resolve, reject) => {
     jobs.jobsSummary()
       .then((resp) => {
-        resolve(resp.map((job) => ({ label: job.id })));
+        resolve(resp.map((job) => job.id));
       })
       .catch((err) => {
         const errorMessage = `Error fetching job summaries: ${err}`;
@@ -30,7 +30,7 @@ function getGroupIds() {
   return new Promise((resolve, reject) => {
     jobs.groups()
       .then((resp) => {
-        resolve(resp.map((group) => ({ label: group.id })));
+        resolve(resp.map((group) => group.id));
       })
       .catch((err) => {
         const errorMessage = `Error loading groups: ${err}`;
