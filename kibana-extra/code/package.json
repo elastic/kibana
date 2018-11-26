@@ -99,7 +99,7 @@
     "language-detect": "^1.1.0",
     "moment": "^2.22.2",
     "monaco-editor": "^0.14.3",
-    "nodegit": "git+https://github.com/elastic/nodegit.git#fafce4a",
+    "nodegit": "git+https://github.com/elastic/nodegit.git",
     "papaparse": "^4.6.2",
     "path-to-regexp": "^2.2.1",
     "popper.js": "^1.14.3",
