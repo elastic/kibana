@@ -38,6 +38,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 class MarkdownEditor extends Component {
   state = {
     visData: null,
@@ -150,18 +152,38 @@ class MarkdownEditor extends Component {
         <div className="tvbMarkdownEditor__variables">
           <EuiText>
             <p>
-              The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.{' '}
-              <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
-                Click here for documentation
-              </a>{' '}
-              on the available expressions.
+              <FormattedMessage
+                id="tsvb.markdownEditor.howToUseVariablesInMarkdownDescription"
+                defaultMessage="The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.
+                {handlebarLink} on the available expressions."
+                values={{
+                  handlebarLink: (
+                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
+                      <FormattedMessage
+                        id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription.documentationLinkText"
+                        defaultMessage="Click here for documentation"
+                      />
+                    </a>
+                  )
+                }}
+              />
             </p>
           </EuiText>
           <table className="table">
             <thead>
               <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Value</th>
+                <th scope="col">
+                  <FormattedMessage
+                    id="tsvb.markdownEditor.nameLabel"
+                    defaultMessage="Name"
+                  />
+                </th>
+                <th scope="col">
+                  <FormattedMessage
+                    id="tsvb.markdownEditor.valueLabel"
+                    defaultMessage="Value"
+                  />
+                </th>
               </tr>
             </thead>
             <tbody>{rows}</tbody>
@@ -169,7 +191,12 @@ class MarkdownEditor extends Component {
 
           {rows.length === 0 && (
             <EuiTitle size="xxs" className="tvbMarkdownEditor__noVariables">
-              <span>No variables available for the selected data metrics.</span>
+              <span>
+                <FormattedMessage
+                  id="tsvb.markdownEditor.noVariablesAvailableDescription"
+                  defaultMessage="No variables available for the selected data metrics."
+                />
+              </span>
             </EuiTitle>
           )}
 
@@ -177,8 +204,12 @@ class MarkdownEditor extends Component {
 
           <EuiText>
             <p>
-              There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
-              creating lists with data from a group by...
+              <FormattedMessage
+                id="tsvb.markdownEditor.howToAccessEntireTreeDescription"
+                defaultMessage="There is also a special variable named {all} which you can use to access the entire tree. This is useful for
+                creating lists with data from a group by…"
+                values={{ all: (<code>_all</code>) }}
+              />
             </p>
           </EuiText>
 

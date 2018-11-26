@@ -42,9 +42,7 @@ function ReactEditorControllerProvider(Private, config) {
             isEditorMode={true}
             appState={params.appState}
           />
-        </I18nProvider>,
-        this.el
-      );
+        </I18nProvider>, this.el);
     }
 
     resize() {
