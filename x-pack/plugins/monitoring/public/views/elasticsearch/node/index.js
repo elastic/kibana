@@ -19,6 +19,7 @@ import { Node } from '../../../components/elasticsearch/node/node';
 import { I18nProvider } from '@kbn/i18n/react';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
+import moment from 'moment';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -73,6 +74,14 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
 
     $scope.$on('$destroy', $executor.destroy);
 
+    function onBrush({ xaxis }) {
+      timefilter.setTime({
+        from: moment(xaxis.from),
+        to: moment(xaxis.to),
+        mode: 'absolute',
+      });
+    }
+
     const transformer = nodesByIndices();
     this.renderReact = () => {
       const shards = $scope.pageData.shards;
@@ -85,6 +94,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
           <Node
             scope={$scope}
             kbnUrl={kbnUrl}
+            onBrush={onBrush}
             {...$scope.pageData}
           />
         </I18nProvider>,

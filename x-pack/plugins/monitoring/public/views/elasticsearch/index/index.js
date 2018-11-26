@@ -10,6 +10,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { find } from 'lodash';
+import moment from 'moment';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
@@ -83,6 +84,14 @@ uiRoutes.when('/elasticsearch/indices/:index', {
 
     $scope.$on('$destroy', $executor.destroy);
 
+    function onBrush({ xaxis }) {
+      timefilter.setTime({
+        from: moment(xaxis.from),
+        to: moment(xaxis.to),
+        mode: 'absolute',
+      });
+    }
+
     const transformer = indicesByNodes();
     this.renderReact = () => {
       const shards = $scope.pageData.shards;
@@ -99,6 +108,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
           <Index
             scope={$scope}
             kbnUrl={kbnUrl}
+            onBrush={onBrush}
             {...$scope.pageData}
           />
         </I18nProvider>,

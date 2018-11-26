@@ -17,6 +17,7 @@ import template from './index.html';
 import { timefilter } from 'ui/timefilter';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AdvancedNode } from '../../../../components/elasticsearch/node/advanced';
+import moment from 'moment';
 
 function getPageData($injector) {
   const $http = $injector.get('$http');
@@ -81,12 +82,21 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
 
     $scope.$on('$destroy', $executor.destroy);
 
+    function onBrush({ xaxis }) {
+      timefilter.setTime({
+        from: moment(xaxis.from),
+        to: moment(xaxis.to),
+        mode: 'absolute',
+      });
+    }
+
     this.renderReact = () => {
       render(
         <I18nProvider>
           <AdvancedNode
             nodeSummary={$scope.pageData.nodeSummary}
             metrics={$scope.pageData.metrics}
+            onBrush={onBrush}
           />
         </I18nProvider>,
         document.getElementById('monitoringElasticsearchAdvancedNodeApp')
