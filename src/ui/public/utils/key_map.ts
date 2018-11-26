@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const keyMap = {
+export const keyMap: { [key: number]: string } = {
   8: 'backspace',
   9: 'tab',
   13: 'enter',
@@ -117,5 +117,5 @@ export const keyMap = {
   220: 'backSlash',
   221: 'closeBracket',
   222: 'singleQuote',
-  224: 'meta'
+  224: 'meta',
 };
