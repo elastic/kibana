@@ -7,10 +7,9 @@
 
 {monitoring} in {kib} serves two separate purposes:
 
-. To visualize monitoring data from across the Elastic Stack. You can view
-health and performance data for {es}, Logstash, and Beats in real time, as well
-as analyze past performance. For more information, see {xpack-ref}/xpack-monitoring.html[Monitoring the Elastic Stack].
-
+. To visualize monitoring data from across the {stack}. You can view health and 
+performance data for {es}, {ls}, and Beats in real time, as well as analyze past 
+performance. 
 . To monitor {kib} itself and route that data to the monitoring cluster.
 
 If you enable {monitoring} across the Elastic Stack, a monitoring agent runs on
@@ -19,8 +18,8 @@ metrics. Each node and instance is considered unique based on its persistent
 UUID, which is written to the <<settings,`path.data`>> directory when the node
 or instance starts.
 
-* <<monitoring-kibana>>
-* <<monitoring-data>>
+For more information, see <<monitoring-kibana>> and 
+{stack-ov}/xpack-monitoring.html[Monitoring the {stack}].  
 
 --
 
