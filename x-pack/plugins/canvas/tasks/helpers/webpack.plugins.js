@@ -25,7 +25,6 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       'uis/arguments/all': path.join(sourceDir, 'uis/arguments/register.js'),
       'functions/browser/all': path.join(sourceDir, 'functions/browser/register.js'),
       'functions/common/all': path.join(sourceDir, 'functions/common/register.js'),
-      'types/all': path.join(sourceDir, 'types/register.js'),
     },
 
     // there were problems with the node and web targets since this code is actually
@@ -48,17 +47,10 @@ export function getWebpackConfig({ devtool, watch } = {}) {
       function loaderFailHandler() {
         // bails on error, including loader errors
         // see https://github.com/webpack/webpack/issues/708, which does not fix loader errors
-        let isWatch = true;
-
-        this.plugin('run', function(compiler, callback) {
-          isWatch = false;
-          callback.call(compiler);
-        });
-
         this.plugin('done', function(stats) {
           if (!stats.hasErrors()) return;
           const errorMessage = stats.toString('errors-only');
-          if (isWatch) console.error(errorMessage);
+          if (watch) console.error(errorMessage);
           else throw new Error(errorMessage);
         });
       },
