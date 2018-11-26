@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
+import CronParser from 'cron-parser';
 import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
 import yaml from 'js-yaml';
 import { get } from 'lodash';
@@ -52,6 +53,38 @@ addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
   } catch (e) {
     return false;
   }
+});
+
+const fEvery = (token: string) => new RegExp(/([1-9][0-9]*['h' | 'm' | 's'])$/).test(token);
+const tokenize = (value: string) =>
+  value.split(' ').reduce((acc: string[], cur: string) => {
+    if (cur !== '') {
+      return acc.concat(cur);
+    }
+    return acc;
+  }, []);
+
+addValidationRule('isInterval', (values: FormData, value: FieldValue) => {
+  if (value) {
+    if (value.lastIndexOf('@every') !== -1) {
+      const tokens = tokenize(value);
+      if (tokens.length === 2 && tokens[0] === '@every' && fEvery(tokens[1])) {
+        return true;
+      }
+    }
+    const ttt = tokenize(value);
+    if (ttt.length === 1 && fEvery(ttt[0])) {
+      return true;
+    }
+    try {
+      if (CronParser.parseExpression(value)) {
+        return true;
+      }
+    } catch (err) {
+      return false;
+    }
+  }
+  return false;
 });
 
 interface ComponentProps {

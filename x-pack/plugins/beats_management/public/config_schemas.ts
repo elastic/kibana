@@ -335,6 +335,15 @@ const heartbeatConfig: YamlConfigSchema[] = [
     required: true,
   },
   {
+    id: 'name',
+    ui: {
+      label: 'Monitor Name',
+      type: 'input',
+    },
+    error: 'Please specify a valid monitor name',
+    required: false,
+  },
+  {
     id: 'schedule',
     ui: {
       label: 'Schedule',
@@ -343,6 +352,7 @@ const heartbeatConfig: YamlConfigSchema[] = [
     defaultValue: '10s',
     error: 'Please provide a valid schedule interval',
     required: true,
+    validations: 'isInterval',
   },
   {
     id: 'hosts',
@@ -354,6 +364,17 @@ const heartbeatConfig: YamlConfigSchema[] = [
     },
     error: 'One host per line',
     required: true,
+  },
+  {
+    id: 'check.response.status',
+    ui: {
+      label: 'Check Response Status',
+      type: 'input',
+      helpText: 'Optionally specify a response status code check',
+      placeholder: 'e.g. 200',
+    },
+    error: 'Please provide a valid response status',
+    required: false,
   },
 ];
 
