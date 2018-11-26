@@ -29,8 +29,8 @@ const valueProps = {
   makeLabel: function () {
     const label = this.params.customLabel || this.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.metrics.percentiles.valuePropsLabel', {
-      defaultMessage: '{suffix} percentile of {label}',
-      values: { suffix: ordinalSuffix(this.key), label }
+      defaultMessage: '{percentile} percentile of {label}',
+      values: { percentile: ordinalSuffix(this.key), label }
     });
   }
 };
