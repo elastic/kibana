@@ -38,12 +38,13 @@ import {
   EuiFieldNumber,
   EuiFormRow,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
 
-class Percentiles extends Component {
+class PercentilesUi extends Component {
 
   constructor(props) {
     super(props);
@@ -64,9 +65,16 @@ class Percentiles extends Component {
     const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newPercentile);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
+    const { intl } = this.props;
     const modeOptions = [
-      { label: 'Line', value: 'line' },
-      { label: 'Band', value: 'band' }
+      {
+        label: intl.formatMessage({ id: 'tsvb.percentile.modeOptions.lineLabel', defaultMessage: 'Line' }),
+        value: 'line'
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.percentile.modeOptions.bandLabel', defaultMessage: 'Band' }),
+        value: 'band'
+      }
     ];
     const optionsStyle = {};
     if (model.mode === 'line') {
@@ -82,8 +90,8 @@ class Percentiles extends Component {
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiFieldNumber
-              aria-label="Percentile"
-              placeholder="Percentile"
+              aria-label={intl.formatMessage({ id: 'tsvb.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
+              placeholder={intl.formatMessage({ id: 'tsvb.percentile.percentilePlaceholder', defaultMessage: 'Percentile' })}
               step={1}
               onChange={this.handleTextChange(model, 'value')}
               value={Number(model.value)}
@@ -91,7 +99,12 @@ class Percentiles extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>Mode:</EuiFormLabel>
+            <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>
+              <FormattedMessage
+                id="tsvb.percentile.modeLabel"
+                defaultMessage="Mode:"
+              />
+            </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiComboBox
@@ -105,7 +118,12 @@ class Percentiles extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem style={optionsStyle} grow={false}>
-            <EuiFormLabel style={labelStyle} htmlFor={htmlId('fillTo')}>Fill to:</EuiFormLabel>
+            <EuiFormLabel style={labelStyle} htmlFor={htmlId('fillTo')}>
+              <FormattedMessage
+                id="tsvb.percentile.fillToLabel"
+                defaultMessage="Fill to:"
+              />
+            </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem style={optionsStyle} grow={false}>
             <EuiFieldNumber
@@ -117,7 +135,12 @@ class Percentiles extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem style={optionsStyle} grow={false}>
-            <EuiFormLabel style={labelStyle} htmlFor={htmlId('shade')}>Shade (0 to 1):</EuiFormLabel>
+            <EuiFormLabel style={labelStyle} htmlFor={htmlId('shade')}>
+              <FormattedMessage
+                id="tsvb.percentile.shadeLabel"
+                defaultMessage="Shade (0 to 1):"
+              />
+            </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem style={optionsStyle} grow={false}>
             <EuiFieldNumber
@@ -156,16 +179,17 @@ class Percentiles extends Component {
   }
 }
 
-Percentiles.defaultProps = {
+PercentilesUi.defaultProps = {
   name: 'percentile'
 };
 
-Percentiles.propTypes = {
+PercentilesUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   onChange: PropTypes.func
 };
 
+const Percentiles = injectI18n(PercentilesUi);
 
 class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
 
@@ -195,7 +219,12 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+            <EuiFormLabel htmlFor={htmlId('aggregation')}>
+              <FormattedMessage
+                id="tsvb.percentile.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
+            </EuiFormLabel>
             <AggSelect
               id={htmlId('aggregation')}
               panelType={this.props.panel.type}
@@ -205,7 +234,13 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow id={htmlId('field')} label="Field">
+            <EuiFormRow
+              id={htmlId('field')}
+              label={(<FormattedMessage
+                id="tsvb.percentile.fieldLabel"
+                defaultMessage="Field"
+              />)}
+            >
               <FieldSelect
                 fields={fields}
                 type={model.type}

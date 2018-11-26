@@ -23,9 +23,10 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import generateByTypeFilter from '../lib/generate_by_type_filter';
+import { injectI18n } from '@kbn/i18n/react';
 
-function FieldSelect(props) {
-  const { type, fields, indexPattern, value, onChange, disabled, restrict, ...rest } = props;
+function FieldSelectUi(props) {
+  const { type, fields, indexPattern, value, onChange, disabled, restrict, intl, ...rest } = props;
   if (type === 'count') {
     return null;
   }
@@ -42,7 +43,7 @@ function FieldSelect(props) {
 
   return (
     <EuiComboBox
-      placeholder="Select field..."
+      placeholder={intl.formatMessage({ id: 'tsvb.fieldSelect.selectFieldPlaceholder', defaultMessage: 'Select field…' })}
       isDisabled={disabled}
       options={options}
       selectedOptions={selectedOptions}
@@ -53,13 +54,13 @@ function FieldSelect(props) {
   );
 }
 
-FieldSelect.defaultProps = {
+FieldSelectUi.defaultProps = {
   indexPattern: '*',
   disabled: false,
   restrict: 'none'
 };
 
-FieldSelect.propTypes = {
+FieldSelectUi.propTypes = {
   disabled: PropTypes.bool,
   fields: PropTypes.object,
   id: PropTypes.string,
@@ -70,4 +71,5 @@ FieldSelect.propTypes = {
   value: PropTypes.string
 };
 
+const FieldSelect = injectI18n(FieldSelectUi);
 export default FieldSelect;
