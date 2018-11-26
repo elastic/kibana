@@ -344,13 +344,18 @@ export class SAMLAuthenticationProvider {
       this._options.log(['debug', 'security', 'saml'], 'SAML handshake can not be initiated by AJAX requests.');
       return AuthenticationResult.notHandled();
     }
-
     try {
+      let samlPrepareBody;
+      if (this._getSamlRealm()) {
+        samlPrepareBody = { realm: this._getSamlRealm() };
+      } else {
+        samlPrepareBody = { acs: this._getACS() };
+      }
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/prepare`.
       const { id: requestId, redirect } = await this._options.client.callWithInternalUser(
         'shield.samlPrepare',
-        { body: { acs: this._getACS(), realm: this._getSamlRealm() } }
+        { body: samlPrepareBody }
       );
 
       this._options.log(['debug', 'security', 'saml'], 'Redirecting to Identity Provider with SAML request.');
@@ -382,11 +387,17 @@ export class SAMLAuthenticationProvider {
 
     let logoutArgs;
     if (request.query.SAMLRequest) {
+      let samlLogoutBody;
+      if (this._getSamlRealm()) {
+        samlLogoutBody = { queryString: request.url.search.slice(1), realm: this._getSamlRealm() };
+      } else {
+        samlLogoutBody = { queryString: request.url.search.slice(1), acs: this._getACS() };
+      }
       this._options.log(['debug', 'security', 'saml'], 'Logout has been initiated by the Identity Provider.');
       logoutArgs = [
         'shield.samlInvalidate',
         // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
-        { body: { queryString: request.url.search.slice(1), acs: this._getACS(), realm: this._getSamlRealm() } }
+        { body: samlLogoutBody }
       ];
     } else {
       this._options.log(['debug', 'security', 'saml'], 'Logout has been initiated by the user.');

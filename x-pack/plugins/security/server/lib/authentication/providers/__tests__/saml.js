@@ -26,7 +26,8 @@ describe('SAMLAuthenticationProvider', () => {
       protocol: 'test-protocol',
       hostname: 'test-hostname',
       port: 1234,
-      basePath: '/test-base-path'
+      basePath: '/test-base-path',
+      samlRealm: 'saml1'
     });
   });
 
@@ -54,7 +55,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(
         callWithInternalUser,
         'shield.samlPrepare',
-        { body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` } }
+        { body: { realm: `saml1` } }
       );
 
       expect(authenticationResult.redirected()).to.be(true);
@@ -78,7 +79,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(
         callWithInternalUser,
         'shield.samlPrepare',
-        { body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` } }
+        { body: { realm: `saml1` } }
       );
 
       expect(authenticationResult.failed()).to.be(true);
@@ -365,7 +366,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(
         callWithInternalUser,
         'shield.samlPrepare',
-        { body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` } }
+        { body: { realm: `saml1` } }
       );
 
       expect(authenticationResult.redirected()).to.be(true);
@@ -435,7 +436,7 @@ describe('SAMLAuthenticationProvider', () => {
       sinon.assert.calledWithExactly(
         callWithInternalUser,
         'shield.samlPrepare',
-        { body: { acs: `test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml` } }
+        { body: { realm: `saml1` } }
       );
 
       expect(authenticationResult.redirected()).to.be(true);
@@ -555,7 +556,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml'
+            realm: 'saml1'
           }
         }
       );
@@ -649,7 +650,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml'
+            realm: 'saml1'
           }
         }
       );
@@ -674,7 +675,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml'
+            realm: 'saml1'
           }
         }
       );
@@ -699,7 +700,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/test-base-path/api/security/v1/saml'
+            realm: 'saml1'
           }
         }
       );
