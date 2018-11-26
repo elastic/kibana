@@ -20,10 +20,10 @@
 import { validateInterval } from '../lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
-import { BuildESQueryProvider } from 'ui/courier';
+import { BuildESQueryProvider } from '@kbn/es-query';
 
-const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http) {
-  const notify = new Notifier({ location: 'Metrics' });
+const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http, i18n) {
+  const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
   const buildEsQuery = Private(BuildESQueryProvider);
 
   return {
