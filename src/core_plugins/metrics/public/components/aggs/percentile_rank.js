@@ -33,6 +33,7 @@ import {
   EuiFieldText,
   EuiFormRow,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
@@ -56,7 +57,12 @@ export const PercentileRankAgg = props => {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.percentileRank.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -66,7 +72,13 @@ export const PercentileRankAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('field')} label="Field">
+          <EuiFormRow
+            id={htmlId('field')}
+            label={(<FormattedMessage
+              id="tsvb.percentileRank.fieldLabel"
+              defaultMessage="Field"
+            />)}
+          >
             <FieldSelect
               fields={fields}
               type={model.type}
@@ -78,7 +90,13 @@ export const PercentileRankAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('value')} label="Value">
+          <EuiFormRow
+            id={htmlId('value')}
+            label={(<FormattedMessage
+              id="tsvb.percentileRank.valueLabel"
+              defaultMessage="Value"
+            />)}
+          >
             <EuiFieldText
               value={model.value}
               onChange={handleTextChange('value')}
