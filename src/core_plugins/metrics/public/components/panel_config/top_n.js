@@ -26,7 +26,22 @@ import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiCode,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class TopNPanelConfig extends Component {
 
@@ -67,52 +82,125 @@ class TopNPanelConfig extends Component {
       );
     } else {
       view = (
-        <div className="vis_editor__container">
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('itemUrl')}>
-              Item Url (This supports mustache templating.
-              <code>{'{{key}}'}</code> is set to the term)
-            </label>
-            <input
+        <div className="tvbPanelConfig__container">
+          <EuiPanel>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiFormRow
               id={htmlId('itemUrl')}
-              className="vis_editor__input-grows"
-              onChange={handleTextChange('drilldown_url')}
-              value={model.drilldown_url}
-            />
-          </div>
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
-          <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              Panel Filter
-            </label>
-            <input
-              id={htmlId('panelFilter')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <div className="vis_editor__label">Ignore Global Filter</div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
+              label={(<FormattedMessage
+                id="tsvb.topN.optionsTab.itemUrlLabel"
+                defaultMessage="Item url"
+              />)}
+              helpText={
+                <span>
+                  <FormattedMessage
+                    id="tsvb.topN.optionsTab.itemUrlDescription"
+                    defaultMessage="This supports mustache templating. {key} is set to the term."
+                    values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
+                  />
+                </span>
+              }
+            >
+              <EuiFieldText
+                onChange={handleTextChange('drilldown_url')}
+                value={model.drilldown_url}
+              />
+            </EuiFormRow>
+
+            <EuiHorizontalRule />
+
+            <IndexPattern
+              fields={this.props.fields}
+              model={this.props.model}
               onChange={this.props.onChange}
             />
-          </div>
-          <div>
-            <div className="vis_editor__label">Color Rules</div>
-          </div>
-          <div className="vis_editor__vis_config-row">
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('panelFilter')}
+                  label={(<FormattedMessage
+                    id="tsvb.topN.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('filter')}
+                    value={model.filter}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="tsvb.topN.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_global_filter}
+                  name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          <EuiSpacer />
+
+          <EuiPanel>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.styleLabel"
+                  defaultMessage="Style"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="tsvb.topN.optionsTab.backgroundColorLabel"
+                    defaultMessage="Background color:"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ColorPicker
+                  onChange={this.props.onChange}
+                  name="background_color"
+                  value={model.background_color}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+
+            <EuiTitle size="xxs">
+              <span>
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.colorRulesLabel"
+                  defaultMessage="Color rules"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="s" />
             <ColorRules
               model={model}
               primaryVarName="bar_color"
@@ -121,28 +209,32 @@ class TopNPanelConfig extends Component {
               onChange={this.props.onChange}
               name="bar_color_rules"
             />
-          </div>
+          </EuiPanel>
         </div>
       );
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
-          >Data
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          >
+            <FormattedMessage
+              id="tsvb.topN.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
-          >Panel Options
-          </button>
-        </div>
+          >
+            <FormattedMessage
+              id="tsvb.topN.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel options"
+            />
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );

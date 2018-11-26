@@ -9,9 +9,8 @@ import { Server } from 'hapi';
 import Joi from 'joi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-// @ts-ignore
 import { getTimeseriesData } from '../lib/transactions/charts/get_timeseries_data';
-import { getDistribution } from '../lib/transactions/distribution/get_distribution';
+import { getDistribution } from '../lib/transactions/distribution';
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
 import { getTransaction } from '../lib/transactions/get_transaction';
 import { getSpans } from '../lib/transactions/spans/get_spans';
@@ -21,8 +20,7 @@ const ROOT = '/api/apm/services/{serviceName}/transactions';
 const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
   console.error(err.stack);
-  // @ts-ignore
-  Boom.boomify(err, { statusCode: err.statusCode || 400 });
+  throw Boom.boomify(err, { statusCode: 400 });
 };
 
 export function initTransactionsApi(server: Server) {

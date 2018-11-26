@@ -44,7 +44,7 @@ uiRoutes.when('/logstash', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -54,7 +54,9 @@ uiRoutes.when('/logstash', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, 'Logstash');
+    title($scope.cluster, i18n('xpack.monitoring.logstash.overview.routeTitle', {
+      defaultMessage: 'Logstash'
+    }));
 
     const $executor = $injector.get('$executor');
     $executor.register({

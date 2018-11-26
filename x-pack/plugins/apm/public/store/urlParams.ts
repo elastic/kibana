@@ -157,13 +157,13 @@ export const getUrlParams = createSelector(
 );
 
 export interface IUrlParams {
-  end?: string;
+  end?: number;
   errorGroupId?: string;
   flyoutDetailTab?: string;
   detailTab?: string;
   kuery?: string;
   serviceName?: string;
-  start?: string;
+  start?: number;
   traceId?: string;
   transactionId?: string;
   transactionName?: string;

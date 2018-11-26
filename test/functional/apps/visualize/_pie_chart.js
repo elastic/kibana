@@ -259,7 +259,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('Set the 1st filter value');
         await PageObjects.visualize.setFilterAggregationValue('geo.dest:"US"');
         log.debug('Toggle previous editor');
-        await PageObjects.visualize.toggleAggegationEditor(2);
+        await PageObjects.visualize.toggleAggregationEditor(2);
         log.debug('Add a new series');
         await PageObjects.visualize.clickAddBucket();
         log.debug('select bucket Split Slices');

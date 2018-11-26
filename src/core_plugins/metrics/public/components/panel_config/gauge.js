@@ -30,9 +30,22 @@ import YesNo from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiFieldText,
+  EuiFieldNumber,
+  EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-class GaugePanelConfig extends Component {
+class GaugePanelConfigUi extends Component {
 
   constructor(props) {
     super(props);
@@ -58,6 +71,7 @@ class GaugePanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
+    const { intl } = this.props;
     const defaults = {
       gauge_max: '',
       filter: '',
@@ -69,8 +83,16 @@ class GaugePanelConfig extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const styleOptions = [
-      { label: 'Circle', value: 'circle' },
-      { label: 'Half Circle', value: 'half' }
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.gauge.styleOptions.circleLabel', defaultMessage: 'Circle' }),
+        value: 'circle'
+      },
+      {
+        label: intl.formatMessage({
+          id: 'tsvb.gauge.styleOptions.halfCircleLabel', defaultMessage: 'Half Circle' }),
+        value: 'half'
+      }
     ];
     const htmlId = htmlIdGenerator();
     const selectedGaugeStyleOption = styleOptions.find(option => {
@@ -90,92 +112,188 @@ class GaugePanelConfig extends Component {
       );
     } else {
       view = (
-        <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
-          <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
-              Panel Filter
-            </label>
-            <input
-              id={htmlId('panelFilter')}
-              className="vis_editor__input-grows"
-              type="text"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <div className="vis_editor__label">Ignore Global Filter</div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
+        <div className="tvbPanelConfig__container">
+          <EuiPanel>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.gauge.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+
+            <IndexPattern
+              fields={this.props.fields}
+              model={this.props.model}
               onChange={this.props.onChange}
-            />
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Background Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('gaugeMax')}>
-              Gauge Max (empty for auto)
-            </label>
-            <input
-              id={htmlId('gaugeMax')}
-              className="vis_editor__input-grows"
-              type="number"
-              onChange={handleTextChange('gauge_max')}
-              value={model.gauge_max}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('gaugeStyle')}>
-              Gauge Style
-            </label>
-            <EuiComboBox
-              isClearable={false}
-              id={htmlId('gaugeStyle')}
-              options={styleOptions}
-              selectedOptions={selectedGaugeStyleOption ? [selectedGaugeStyleOption] : []}
-              onChange={handleSelectChange('gauge_style')}
-              singleSelection={true}
             />
 
-          </div>
-          <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Inner Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="gauge_inner_color"
-              value={model.gauge_inner_color}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('innerLine')}>
-              Inner Line Width
-            </label>
-            <input
-              id={htmlId('innerLine')}
-              className="vis_editor__input-grows"
-              type="number"
-              onChange={handleTextChange('gauge_inner_width')}
-              value={model.gauge_inner_width}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('gaugeLine')}>
-              Gauge Line Width
-            </label>
-            <input
-              id={htmlId('gaugeLine')}
-              className="vis_editor__input-grows"
-              type="number"
-              onChange={handleTextChange('gauge_width')}
-              value={model.gauge_width}
-            />
-          </div>
-          <div>
-            <div className="vis_editor__label">Color Rules</div>
-          </div>
-          <div className="vis_editor__vis_config-row">
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('panelFilter')}
+                  label={(<FormattedMessage
+                    id="tsvb.gauge.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    onChange={handleTextChange('filter')}
+                    value={model.filter}
+                    fullWidth
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="tsvb.gauge.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_global_filter}
+                  name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+
+          <EuiSpacer />
+
+          <EuiPanel>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.gauge.optionsTab.styleLabel"
+                  defaultMessage="Style"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('gaugeMax')}
+                  label={(<FormattedMessage
+                    id="tsvb.gauge.optionsTab.gaugeMaxLabel"
+                    defaultMessage="Gauge max (empty for auto)"
+                  />)}
+                >
+                  {/*
+                    EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                    It accepts a null value, but is passed a empty string.
+                  */}
+                  <input
+                    id={htmlId('gaugeMax')}
+                    className="tvbAgg__input"
+                    type="number"
+                    onChange={handleTextChange('gauge_max')}
+                    value={model.gauge_max}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('gaugeStyle')}
+                  label={(<FormattedMessage
+                    id="tsvb.gauge.optionsTab.gaugeStyleLabel"
+                    defaultMessage="Gauge style"
+                  />)}
+                >
+                  <EuiComboBox
+                    isClearable={false}
+                    options={styleOptions}
+                    selectedOptions={selectedGaugeStyleOption ? [selectedGaugeStyleOption] : []}
+                    onChange={handleSelectChange('gauge_style')}
+                    singleSelection={{ asPlainText: true }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('innerLine')}
+                  label={(<FormattedMessage
+                    id="tsvb.gauge.optionsTab.innerLineWidthLabel"
+                    defaultMessage="Inner line width"
+                  />)}
+                >
+                  <EuiFieldNumber
+                    onChange={handleTextChange('gauge_inner_width')}
+                    value={Number(model.gauge_inner_width)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('gaugeLine')}
+                  label={(<FormattedMessage
+                    id="tsvb.gauge.optionsTab.gaugeLineWidthLabel"
+                    defaultMessage="Gauge line width"
+                  />)}
+                >
+                  <EuiFieldNumber
+                    onChange={handleTextChange('gauge_width')}
+                    value={Number(model.gauge_width)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+
+            <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="tsvb.gauge.optionsTab.backgroundColorLabel"
+                    defaultMessage="Background color:"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ColorPicker
+                  onChange={this.props.onChange}
+                  name="background_color"
+                  value={model.background_color}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="tsvb.gauge.optionsTab.innerColorLabel"
+                    defaultMessage="Inner color:"
+                  />
+                </EuiFormLabel>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ColorPicker
+                  onChange={this.props.onChange}
+                  name="gauge_inner_color"
+                  value={model.gauge_inner_color}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule />
+
+            <EuiTitle size="xxs">
+              <span>
+                <FormattedMessage
+                  id="tsvb.gauge.optionsTab.colorRulesLabel"
+                  defaultMessage="Color rules"
+                />
+              </span>
+            </EuiTitle>
+            <EuiSpacer size="s" />
             <ColorRules
               primaryName="gauge color"
               primaryVarName="gauge"
@@ -185,28 +303,32 @@ class GaugePanelConfig extends Component {
               onChange={this.props.onChange}
               name="gauge_color_rules"
             />
-          </div>
+          </EuiPanel>
         </div>
       );
     }
     return (
       <div>
-        <div className="kbnTabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
-          >Data
-          </button>
-          <button
-            role="tab"
-            aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+          >
+            <FormattedMessage
+              id="tsvb.gauge.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
-          >Panel Options
-          </button>
-        </div>
+          >
+            <FormattedMessage
+              id="tsvb.gauge.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel options"
+            />
+          </EuiTab>
+        </EuiTabs>
         {view}
       </div>
     );
@@ -214,10 +336,11 @@ class GaugePanelConfig extends Component {
 
 }
 
-GaugePanelConfig.propTypes = {
+GaugePanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
 };
 
+const GaugePanelConfig = injectI18n(GaugePanelConfigUi);
 export default GaugePanelConfig;
