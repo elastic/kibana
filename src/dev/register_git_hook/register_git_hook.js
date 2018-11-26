@@ -101,6 +101,11 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
   has_node || { 
     echo "Can't found node bin in the PATH. Please update the PATH to proceed."
     echo "If your PATH already has the node bin, maybe you are using some git GUI app."
+    echo "Can't found node bin in the PATH. Please update the PATH to proceed."
+    echo "If your PATH already has the node bin, maybe you are using some git GUI app not launched from the shell."
+    echo "In order to proceed, you need to config the PATH used by the application that are launching your git GUI app."
+    echo "If you are running macOS, you can do that using:"
+    echo "'sudo launchctl config user path /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'"
      
     exit 1
   }
