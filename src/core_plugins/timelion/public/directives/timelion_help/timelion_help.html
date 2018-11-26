@@ -123,24 +123,24 @@
               statsMin: '<strong>' + es.stats.min + '</strong>',
               statsMax: '<strong>' + es.stats.max + '</strong>',
             }"
-            i18n-context="Part of composite text timelion.help.configuration.valid.paragraph1Part1 +
-                          timelion.help.configuration.firstTimeConfigurationLinkText +
-                          timelion.help.configuration.valid.paragraph1Part2"
+            i18n-description="Part of composite text timelion.help.configuration.valid.paragraph1Part1 +
+                              timelion.help.configuration.firstTimeConfigurationLinkText +
+                              timelion.help.configuration.valid.paragraph1Part2"
           ></span>
           <a
             ng-click="es.valid = false"
             i18n-id="timelion.help.configuration.firstTimeConfigurationLinkText"
             i18n-default-message="First time configuration"
-            i18n-context="Part of composite text timelion.help.configuration.valid.paragraph1Part1 +
-                          timelion.help.configuration.firstTimeConfigurationLinkText +
-                          timelion.help.configuration.valid.paragraph1Part2"
+            i18n-description="Part of composite text timelion.help.configuration.valid.paragraph1Part1 +
+                              timelion.help.configuration.firstTimeConfigurationLinkText +
+                              timelion.help.configuration.valid.paragraph1Part2"
           ></a>
           <span
             i18n-id="timelion.help.configuration.valid.paragraph1Part2"
             i18n-default-message="for information about configuring the Elasticsearch datasource."
-            i18n-context="Part of composite text timelion.help.configuration.valid.paragraph1Part1 +
-                          timelion.help.configuration.firstTimeConfigurationLinkText +
-                          timelion.help.configuration.valid.paragraph1Part2"
+            i18n-description="Part of composite text timelion.help.configuration.valid.paragraph1Part1 +
+                              timelion.help.configuration.firstTimeConfigurationLinkText +
+                              timelion.help.configuration.valid.paragraph1Part2"
           ></span>
         </p>
         <p
@@ -160,32 +160,32 @@
                 i18n-default-message="The interval selector at the right of the input bar lets you
                                       control the sampling frequency. It's currently set to {interval}."
                 i18n-values="{ interval: '<code>' + state.interval + '</code>' }"
-                i18n-context="Part of composite text
-                              timelion.help.configuration.valid.intervalsTextPart1 +
-                              (timelion.help.configuration.valid.intervalIsAutoText ||
-                              timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) +
-                              timelion.help.configuration.valid.intervalsTextPart2"
+                i18n-description="Part of composite text
+                                  timelion.help.configuration.valid.intervalsTextPart1 +
+                                  (timelion.help.configuration.valid.intervalIsAutoText ||
+                                  timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) +
+                                  timelion.help.configuration.valid.intervalsTextPart2"
               ></span>
               <span ng-show="state.interval == 'auto'">
                 <strong
                   i18n-id="timelion.help.configuration.valid.intervalIsAutoText"
                   i18n-default-message="You're all set!"
-                  i18n-context="Part of composite text
-                                timelion.help.configuration.valid.intervalsTextPart1 +
-                                (timelion.help.configuration.valid.intervalIsAutoText ||
-                                timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) +
-                                timelion.help.configuration.valid.intervalsTextPart2"
+                  i18n-description="Part of composite text
+                                    timelion.help.configuration.valid.intervalsTextPart1 +
+                                    (timelion.help.configuration.valid.intervalIsAutoText ||
+                                    timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) +
+                                    timelion.help.configuration.valid.intervalsTextPart2"
                 ></strong>
               </span>
               <span
                 ng-show="state.interval != 'auto'"
                 i18n-id="timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText"
                 i18n-default-message="Set it to {auto} to let Timelion choose an appropriate interval."
-                i18n-context="Part of composite text
-                              timelion.help.configuration.valid.intervalsTextPart1 +
-                              (timelion.help.configuration.valid.intervalIsAutoText ||
-                              timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) +
-                              timelion.help.configuration.valid.intervalsTextPart2"
+                i18n-description="Part of composite text
+                                  timelion.help.configuration.valid.intervalsTextPart1 +
+                                  (timelion.help.configuration.valid.intervalIsAutoText ||
+                                  timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) +
+                                  timelion.help.configuration.valid.intervalsTextPart2"
                 i18n-values="{ auto: '<code>auto </code>' }"
               ></span>
               <span
@@ -270,10 +270,10 @@
             user: '<code>user</code>',
             bytes: '<code>bytes</code>',
           }"
-          i18n-context="Part of composite text
-                        timelion.help.querying.paragraph2Part1 +
-                        timelion.help.querying.luceneQueryLinkText +
-                        timelion.help.querying.paragraph2Part2"
+          i18n-description="Part of composite text
+                            timelion.help.querying.paragraph2Part1 +
+                            timelion.help.querying.luceneQueryLinkText +
+                            timelion.help.querying.paragraph2Part2"
         ></span>
         <a
           href="https://www.elastic.co/guide/en/elasticsearch/reference/5.1/query-dsl-query-string-query.html#query-string-syntax"
@@ -281,10 +281,10 @@
           rel="noopener noreferrer"
           i18n-id="timelion.help.querying.luceneQueryLinkText"
           i18n-default-message="Lucene query string"
-          i18n-context="Part of composite text
-                        timelion.help.querying.paragraph2Part1 +
-                        timelion.help.querying.luceneQueryLinkText +
-                        timelion.help.querying.paragraph2Part2"
+          i18n-description="Part of composite text
+                            timelion.help.querying.paragraph2Part1 +
+                            timelion.help.querying.luceneQueryLinkText +
+                            timelion.help.querying.paragraph2Part2"
         ></a>
         <span
           i18n-id="timelion.help.querying.paragraph2Part2"
@@ -292,10 +292,10 @@
           i18n-values="{
             esQuery: '<code>.es()</code>',
           }"
-          i18n-context="Part of composite text
-                        timelion.help.querying.paragraph2Part1 +
-                        timelion.help.querying.luceneQueryLinkText +
-                        timelion.help.querying.paragraph2Part2"
+          i18n-description="Part of composite text
+                            timelion.help.querying.paragraph2Part1 +
+                            timelion.help.querying.luceneQueryLinkText +
+                            timelion.help.querying.paragraph2Part2"
         ></span>
       </p>
       <h4
@@ -326,10 +326,10 @@
         <span
           i18n-id="timelion.help.querying.countTextPart1"
           i18n-default-message="Counting events is all well and good, but the Elasticsearch datasource also supports any"
-          i18n-context="Part of composite text
-                        timelion.help.querying.countTextPart1 +
-                        timelion.help.querying.countMetricAggregationLinkText +
-                        timelion.help.querying.countTextPart2"
+          i18n-description="Part of composite text
+                            timelion.help.querying.countTextPart1 +
+                            timelion.help.querying.countMetricAggregationLinkText +
+                            timelion.help.querying.countTextPart2"
         ></span>
         <a
           href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics.html"
@@ -337,10 +337,10 @@
           rel="noopener noreferrer"
           i18n-id="timelion.help.querying.countMetricAggregationLinkText"
           i18n-default-message="Elasticsearch metric aggregation"
-          i18n-context="Part of composite text
-                        timelion.help.querying.countTextPart1 +
-                        timelion.help.querying.countMetricAggregationLinkText +
-                        timelion.help.querying.countTextPart2"
+          i18n-description="Part of composite text
+                            timelion.help.querying.countTextPart1 +
+                            timelion.help.querying.countMetricAggregationLinkText +
+                            timelion.help.querying.countTextPart2"
         ></a>
         <span
           i18n-id="timelion.help.querying.countTextPart2"
@@ -360,10 +360,10 @@
             esCardinalityQuery: '<code>.es(*, metric=\'cardinality:src_ip\')</code>',
             esAvgQuery: '<code>.es(metric=\'avg:bytes\')</code>',
           }"
-          i18n-context="Part of composite text
-                        timelion.help.querying.countTextPart1 +
-                        timelion.help.querying.countMetricAggregationLinkText +
-                        timelion.help.querying.countTextPart2"
+          i18n-description="Part of composite text
+                            timelion.help.querying.countTextPart1 +
+                            timelion.help.querying.countMetricAggregationLinkText +
+                            timelion.help.querying.countTextPart2"
         ></span>
       </p>
     </div>
@@ -466,17 +466,17 @@
           i18n-id="timelion.help.expressions.paragraph4"
           i18n-default-message="Timelion provides additional view transformation functions you can use
                                 to customize the appearance of your charts. For the complete list, see the"
-          i18n-context="Part of composite text
-                        timelion.help.expressions.paragraph4 +
-                        timelion.help.expressions.functionReferenceLinkText"
+          i18n-description="Part of composite text
+                            timelion.help.expressions.paragraph4 +
+                            timelion.help.expressions.functionReferenceLinkText"
         ></span>
         <a
           ng-click="setPage(0)"
           i18n-id="timelion.help.expressions.functionReferenceLinkText"
           i18n-default-message="Function reference"
-          i18n-context="Part of composite text
-                        timelion.help.expressions.paragraph4 +
-                        timelion.help.expressions.functionReferenceLinkText"
+          i18n-description="Part of composite text
+                            timelion.help.expressions.paragraph4 +
+                            timelion.help.expressions.functionReferenceLinkText"
         ></a>.
       </p>
     </div>
@@ -556,19 +556,19 @@
         <span
           i18n-id="timelion.help.dataTransforming.paragraph6Part1"
           i18n-default-message="Now that you're familiar with the syntax, refer to the"
-          i18n-context="Part of composite text
-                        timelion.help.dataTransforming.paragraph6Part1 +
-                        timelion.help.dataTransforming.functionReferenceLinkText +
-                        timelion.help.dataTransforming.paragraph6Part2"
+          i18n-description="Part of composite text
+                            timelion.help.dataTransforming.paragraph6Part1 +
+                            timelion.help.dataTransforming.functionReferenceLinkText +
+                            timelion.help.dataTransforming.paragraph6Part2"
         ></span>
         <a
           ng-click="setPage(0)"
           i18n-id="timelion.help.dataTransforming.functionReferenceLinkText"
           i18n-default-message="Function reference"
-          i18n-context="Part of composite text
-                        timelion.help.dataTransforming.paragraph6Part1 +
-                        timelion.help.dataTransforming.functionReferenceLinkText +
-                        timelion.help.dataTransforming.paragraph6Part2"
+          i18n-description="Part of composite text
+                            timelion.help.dataTransforming.paragraph6Part1 +
+                            timelion.help.dataTransforming.functionReferenceLinkText +
+                            timelion.help.dataTransforming.paragraph6Part2"
         ></a>
         <span
           i18n-id="timelion.help.dataTransforming.paragraph6Part2"
@@ -576,10 +576,10 @@
                                 You can view the reference at any time by clicking \{Docs\}
                                 in the Kibana toolbar. To get back to this tutorial, click the
                                 \{Tutorial\} link at the top of the reference."
-          i18n-context="Part of composite text
-                        timelion.help.dataTransforming.paragraph6Part1 +
-                        timelion.help.dataTransforming.functionReferenceLinkText +
-                        timelion.help.dataTransforming.paragraph6Part2"
+          i18n-description="Part of composite text
+                            timelion.help.dataTransforming.paragraph6Part1 +
+                            timelion.help.dataTransforming.functionReferenceLinkText +
+                            timelion.help.dataTransforming.paragraph6Part2"
         ></span>
       </p>
     </div>

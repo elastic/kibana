@@ -673,9 +673,10 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
     mlFieldFormatService.populateFormats([jobId], getIndexPatterns())
-      .finally(() => {
-        // Load the data - if the FieldFormats failed to populate
-        // the default formatting will be used for metric values.
+      .catch((err) => { console.log('Error populating field formats:', err); })
+      // Load the data - if the FieldFormats failed to populate
+      // the default formatting will be used for metric values.
+      .then(() => {
         $scope.refresh();
       });
   }
