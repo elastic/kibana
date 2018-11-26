@@ -39,20 +39,21 @@ export class CalendarForm extends Component {
     };
   }
 
+  // Validate and save - NOTE: can we validate calendar id with just the form on the front-end?
+  // TODO: add error handling - toast to show some try again message
   onCreate = () => {
     const calendar = this.setUpCalendarForApi();
-    // Validate and save - NOTE: can we validate calendar id with just the form on the front-end?
+
     if (validateCalendarId(calendar.calendarId, { calendarId: { valid: true } })) {
       this.setState({ saving: true });
 
       ml.addCalendar(calendar)
         .then(() => {
-          // redirect to settings/calendars_list
-          // $location.path('settings/calendars_list');
+          window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
         })
         .catch((error) => {
           console.log('Error saving calendar', error);
-          this.setState({ saving: true });
+          this.setState({ saving: false });
         });
     } else {
       // Trigger toast or something with validation error message
@@ -64,7 +65,7 @@ export class CalendarForm extends Component {
     // hit update api
     // ml.updateCalendar(calendar).then().catch()
   }
-  // TODO: If no events, pass empty array? Double-check
+  // TODO: Ability to create new group
   setUpCalendarForApi = () => {
     const {
       calendarId,
@@ -91,7 +92,6 @@ export class CalendarForm extends Component {
       calendarId,
       description,
       events,
-      // grab from selectedJobIds and selectedGroupIds? Ability to create new group?
       job_ids: [...jobIds, ...groupIds]
     };
 
@@ -124,7 +124,9 @@ export class CalendarForm extends Component {
 
   render() {
     const { jobIds, groupIds, calendar } = this.props;
+    const { saving } = this.state;
     const isEdit = calendar !== undefined;
+
     return (
       <EuiForm>
         <EuiFlexGroup>
@@ -132,12 +134,14 @@ export class CalendarForm extends Component {
             <EuiButton
               fill
               onClick={isEdit ? this.onEdit : this.onCreate}
+              disabled={saving}
             >
-              {isEdit ? 'Save' : 'Create'}
+              {saving ? 'Saving...' : 'Save'}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              disabled={saving}
               href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
             >
               Cancel
@@ -156,7 +160,7 @@ export class CalendarForm extends Component {
             fullWidth
             value={isEdit ? calendar.calendar_id : this.state.calendarId}
             onChange={this.onCalendarIdChange}
-            disabled={isEdit === true}
+            disabled={isEdit === true || saving === true}
           />
         </EuiFormRow>
 
@@ -169,7 +173,7 @@ export class CalendarForm extends Component {
             fullWidth
             value={this.state.description}
             onChange={this.onDescriptionChange}
-            disabled={isEdit === true}
+            disabled={isEdit === true || saving === true}
           />
         </EuiFormRow>
 
@@ -182,6 +186,7 @@ export class CalendarForm extends Component {
             options={jobIds}
             selectedOptions={this.state.selectedJobOptions}
             onChange={this.onJobSelection}
+            disabled={saving === true}
           />
         </EuiFormRow>
 
@@ -194,6 +199,7 @@ export class CalendarForm extends Component {
             options={groupIds}
             selectedOptions={this.state.selectedGroupOptions}
             onChange={this.onGroupSelection}
+            disabled={saving === true}
           />
         </EuiFormRow>
         {/* <EventsTable /> */}
