@@ -74,10 +74,8 @@ class AnnotationsTable extends Component {
     // Creates the link to the Single Metric Viewer.
     // Set the total time range from the start of the job data to the end of the forecast,
     const dataCounts = this.props.job.data_counts;
-    const from = annotation !== undefined ? new Date(annotation.timestamp).toISOString() :
-      new Date(dataCounts.latest_record_timestamp).toISOString();
-    const to = annotation !== undefined ? new Date(annotation.end_timestamp).toISOString() :
-      new Date(dataCounts.latest_record_timestamp).toISOString();
+    const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
+    const to = new Date(dataCounts.latest_record_timestamp).toISOString();
 
     const _g = rison.encode({
       ml: {
@@ -104,6 +102,15 @@ class AnnotationsTable extends Component {
         }
       }
     };
+
+    if (annotation !== undefined) {
+      appState.mlTimeSeriesExplorer = {
+        zoom: {
+          from: new Date(annotation.timestamp).toISOString(),
+          to: new Date(annotation.end_timestamp).toISOString()
+        }
+      };
+    }
 
     const _a = rison.encode(appState);
 
