@@ -4,6 +4,7 @@ set -e
 set -o pipefail
 
 dir="$(pwd)"
+cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
@@ -29,11 +30,13 @@ fi
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
+echo "-> KIBANA_DIR $KIBANA_DIR"
+echo "-> XPACK_DIR $XPACK_DIR"
+echo "-> PARENT_DIR $PARENT_DIR"
 
 ###
 ### Extract the bootstrap cache that we create in the packer_cache.sh script
 ###
-cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
 bootstrapCache="$cacheDir/bootstrap_cache/master.tar"
 if [ -f "$bootstrapCache" ]; then
   echo "extracting bootstrap_cache from $bootstrapCache";

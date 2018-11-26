@@ -3,7 +3,6 @@
 source src/dev/ci_setup/checkout_sibling_es.sh
 
 export TEST_BROWSER_HEADLESS=1
-echo "-> XPACK_DIR ${XPACK_DIR}"
 
 echo " -> Ensuring all functional tests are in a ciGroup"
 cd "$XPACK_DIR"
