@@ -29,7 +29,7 @@ jest.mock('ui/time_buckets', () => ({
   }
 }));
 
-jest.mock('../services/field_format_service', () => ({
+jest.mock('../../../services/field_format_service', () => ({
   mlFieldFormatService: {}
 }));
 
