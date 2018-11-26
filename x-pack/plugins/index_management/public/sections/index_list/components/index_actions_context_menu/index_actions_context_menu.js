@@ -35,7 +35,10 @@ class IndexActionsContextMenuUi extends Component {
     };
   }
   closeConfirmModal = () => {
-    this.setState({ renderConfirmModal: null });
+    this.setState({
+      renderConfirmModal: null
+    });
+    this.props.resetSelection && this.props.resetSelection();
   }
   panels() {
     const {
@@ -201,7 +204,8 @@ class IndexActionsContextMenuUi extends Component {
             name: buttonLabel,
             icon: <EuiIcon type={icon} />,
             onClick: () => {
-              this.closePopoverAndExecute(() => this.setState({ renderConfirmModal }));
+              this.closePopover();
+              this.setState({ renderConfirmModal });
             }
           });
         }
