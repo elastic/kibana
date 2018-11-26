@@ -417,6 +417,7 @@ export class QueryBar extends Component<Props, State> {
               </form>
 
               <SuggestionsComponent
+                query={this.state.query}
                 show={this.state.isSuggestionsVisible}
                 suggestionGroups={this.state.suggestionGroups}
                 groupIndex={this.state.groupIndex}

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseLspUrl, toCanonicalUrl } from './uri_util';
+import { RepositoryUri } from '../model';
+import { parseLspUrl, toCanonicalUrl, toRepoName, toRepoNameWithOrg } from './uri_util';
 
 test('parse a complete uri', () => {
   const fullUrl =
@@ -62,4 +63,24 @@ test('touri', () => {
   });
   const convertBack = toCanonicalUrl(result!);
   expect(convertBack).toEqual(uri);
+});
+
+test('toRepoName', () => {
+  const uri: RepositoryUri = 'github.com/elastic/elasticsearch';
+  expect(toRepoName(uri)).toEqual('elasticsearch');
+
+  const invalidUri: RepositoryUri = 'github.com/elastic/elasticsearch/invalid';
+  expect(() => {
+    toRepoName(invalidUri);
+  }).toThrow();
+});
+
+test('toRepoNameWithOrg', () => {
+  const uri: RepositoryUri = 'github.com/elastic/elasticsearch';
+  expect(toRepoNameWithOrg(uri)).toEqual('elastic/elasticsearch');
+
+  const invalidUri: RepositoryUri = 'github.com/elastic/elasticsearch/invalid';
+  expect(() => {
+    toRepoNameWithOrg(invalidUri);
+  }).toThrow();
 });

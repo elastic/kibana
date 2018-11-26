@@ -7,6 +7,8 @@
 import { Uri } from 'monaco-editor';
 import pathToRegexp from 'path-to-regexp';
 import { Position } from 'vscode-languageserver-types';
+
+import { RepositoryUri } from '../model';
 import { MAIN, MAIN_ROOT } from '../public/components/routes';
 
 const mainRe = pathToRegexp(MAIN);
@@ -86,6 +88,30 @@ export function parseLspUrl(url: Uri | string): CompleteParsedUrl {
   } else {
     throw new Error('invalid url ' + url);
   }
+}
+
+/*
+ * From RepositoryUri to repository name.
+ * e.g. github.com/elastic/elasticsearch -> elasticsearch
+ */
+export function toRepoName(uri: RepositoryUri): string {
+  const segs = uri.split('/');
+  if (segs.length !== 3) {
+    throw new Error(`Invalid repository uri ${uri}`);
+  }
+  return segs[2];
+}
+
+/*
+ * From RepositoryUri to repository name with organization prefix.
+ * e.g. github.com/elastic/elasticsearch -> elastic/elasticsearch
+ */
+export function toRepoNameWithOrg(uri: RepositoryUri): string {
+  const segs = uri.split('/');
+  if (segs.length !== 3) {
+    throw new Error(`Invalid repository uri ${uri}`);
+  }
+  return `${segs[1]}/${segs[2]}`;
 }
 
 const compiled = pathToRegexp.compile(MAIN);

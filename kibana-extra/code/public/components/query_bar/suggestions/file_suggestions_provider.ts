@@ -24,17 +24,18 @@ export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
       .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
       .map((doc: SearchResultItem) => {
         return {
-          description: doc.filePath,
+          description: '',
           end: 10,
           start: 1,
           text: doc.filePath,
-          tokenType: 'tokenFile',
+          tokenType: '',
           selectUrl: `/${doc.uri}/blob/HEAD/${doc.filePath}`,
         };
       });
     return {
       type: AutocompleteSuggestionType.FILE,
       total: res.total,
+      hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
       suggestions,
     };
   }

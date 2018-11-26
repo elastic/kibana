@@ -27,5 +27,6 @@ export interface AutocompleteSuggestion {
 export interface AutocompleteSuggestionGroup {
   type: AutocompleteSuggestionType;
   total: number;
+  hasMore: boolean;
   suggestions: AutocompleteSuggestion[];
 }

@@ -7,6 +7,10 @@
 /*
  * This QueryBar component is forked from the QueryBar implemented in kibana/ui/public/query_bar
  * with simplifications to fulfill Code's feature request.
+ *
+ * The styles has been migrated to styled-components instead of css for any new components brought
+ * by Code. For shared components/styles, you can find the classes in the scss files in
+ * kibana/ui/public/query_bar
  */
 
 export * from './components';

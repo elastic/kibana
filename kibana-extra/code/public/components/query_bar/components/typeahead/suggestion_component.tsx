@@ -5,12 +5,25 @@
  */
 
 import { EuiToken } from '@elastic/eui';
-import classNames from 'classnames';
+import {
+  euiCodeFontFamily,
+  euiColorDarkShade,
+  euiColorFullShade,
+  euiColorLightShade,
+  euiFontSizeS,
+  euiFontSizeXs,
+  euiSize,
+  euiSizeS,
+  euiSizeXl,
+  euiSizeXs,
+} from '@elastic/eui/dist/eui_theme_light.json';
 import React, { SFC } from 'react';
+import styled from 'styled-components';
 
 import { AutocompleteSuggestion } from '../..';
 
 interface Props {
+  query: string;
   onClick: (suggestion: AutocompleteSuggestion) => void;
   onMouseEnter: () => void;
   selected: boolean;
@@ -19,36 +32,107 @@ interface Props {
   ariaId: string;
 }
 
+const SuggestionItem = styled.div`
+  background: ${props => (props.active ? euiColorLightShade : 'white')};
+  height: 48px;
+  margin: 0 ${euiSize};
+  border-radius: ${euiSizeXs} ${euiSizeXs} ${euiSizeXs} ${euiSizeXs};
+`;
+
+const SuggestionItemInner = styled.div`
+  display: flex;
+  align-items: stretch;
+  flex-grow: 1;
+  align-items: center;
+  white-space: nowrap;
+`;
+
+const SuggestionItemBase = styled.div`
+  flex-grow: 1;
+  flex-basis: 0%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const SuggestionItemToken = styled(SuggestionItemBase)`
+  color: ${euiColorFullShade};
+  flex-grow: 0;
+  flex-basis: auto;
+  width: ${euiSizeXl};
+  height: ${euiSizeXl};
+  text-align: center;
+  overflow: hidden;
+  padding: ${euiSizeXs};
+  justify-content: center;
+  align-items: center;
+`;
+
+const SuggestionItemText = styled(SuggestionItemBase)`
+  color: ${euiColorFullShade};
+  flex-grow: 0;
+  flex-basis: auto;
+  font-family: ${euiCodeFontFamily};
+  margin-right: ${euiSizeXl};
+  width: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: ${euiSizeXs} ${euiSizeS};
+  color: #111;
+  font-size: ${euiFontSizeS};
+`;
+
+const SuggestionItemDescription = styled(SuggestionItemBase)`
+  color: ${euiColorDarkShade};
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: ${euiFontSizeXs};
+  padding: ${euiSizeXs} ${euiSizeS};
+`;
+
 export const SuggestionComponent: SFC<Props> = props => {
-  const cls = classNames({
-    'typeahead-item': true,
-    active: props.selected,
-  });
   const click = () => props.onClick(props.suggestion);
+
+  // An util function to help highlight the substring which matches the query.
+  const renderMatchingText = (text: string) => {
+    const index = text.toLowerCase().indexOf(props.query.toLowerCase());
+    if (index >= 0) {
+      const prefix = text.substring(0, index);
+      const highlight = text.substring(index, index + props.query.length);
+      const surfix = text.substring(index + props.query.length);
+      return (
+        <span>
+          {prefix}
+          <strong>{highlight}</strong>
+          {surfix}
+        </span>
+      );
+    } else {
+      return text;
+    }
+  };
+
+  const icon = props.suggestion.tokenType ? (
+    <SuggestionItemToken>
+      <EuiToken iconType={props.suggestion.tokenType} />
+    </SuggestionItemToken>
+  ) : null;
+
   return (
-    <div
-      className={cls}
+    <SuggestionItem
       role="option"
       onClick={click}
+      active={props.selected}
       onMouseEnter={props.onMouseEnter}
       ref={props.innerRef}
       id={props.ariaId}
     >
-      <div className={'suggestionItem suggestionItem--' + props.suggestion.tokenType}>
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <div className="suggestionItem__type">
-          <EuiToken iconType={props.suggestion.tokenType} />
+      <SuggestionItemInner>
+        {icon}
+        <div>
+          <SuggestionItemText>{renderMatchingText(props.suggestion.text)}</SuggestionItemText>
+          <SuggestionItemDescription>{props.suggestion.description}</SuggestionItemDescription>
         </div>
-        <div className="suggestionItem__text">{props.suggestion.text}</div>
-        <div
-          className="suggestionItem__description"
-          // Description currently always comes from us and we escape any potential user input
-          // at the time we're generating the description text
-          // eslint-disable-next-line react/no-danger
-          // @ts-ignore
-          dangerouslySetInnerHTML={{ __html: props.suggestion.description }}
-        />
-      </div>
-    </div>
+      </SuggestionItemInner>
+    </SuggestionItem>
   );
 };

@@ -11,6 +11,7 @@ import {
   AutocompleteSuggestionGroup,
   AutocompleteSuggestionType,
 } from '.';
+import { toRepoNameWithOrg } from '../../../../common/uri_util';
 import { Repository } from '../../../../model';
 
 export class RepositorySuggestionsProvider extends AbstractSuggestionsProvider {
@@ -24,17 +25,18 @@ export class RepositorySuggestionsProvider extends AbstractSuggestionsProvider {
       .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
       .map((repo: Repository) => {
         return {
-          description: repo.url,
+          description: '',
           end: 10,
           start: 1,
-          text: repo.uri,
-          tokenType: 'tokenRepo',
+          text: toRepoNameWithOrg(repo.uri),
+          tokenType: '',
           selectUrl: `/${repo.uri}`,
         };
       });
     return {
       type: AutocompleteSuggestionType.REPOSITORY,
       total: res.total,
+      hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
       suggestions,
     };
   }

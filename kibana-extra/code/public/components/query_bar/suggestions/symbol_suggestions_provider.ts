@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DetailSymbolInformation, SymbolKind } from '@code/lsp-extension';
+import { DetailSymbolInformation } from '@code/lsp-extension';
 import { kfetch } from 'ui/kfetch';
 import { Location } from 'vscode-languageserver';
 
@@ -15,6 +15,7 @@ import {
   AutocompleteSuggestionType,
 } from '.';
 import { RepositoryUtils } from '../../../../common/repository_utils';
+import { parseLspUrl, toRepoNameWithOrg } from '../../../../common/uri_util';
 
 export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
   public async getSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
@@ -27,10 +28,10 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
       .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
       .map((symbol: DetailSymbolInformation) => {
         return {
-          description: symbol.qname,
+          description: this.getSymbolDescription(symbol.symbolInformation.location),
           end: 10,
           start: 1,
-          text: symbol.symbolInformation.name,
+          text: symbol.qname,
           tokenType: this.symbolKindToTokenClass(symbol.symbolInformation.kind),
           selectUrl: this.getSymbolLinkUrl(symbol.symbolInformation.location),
         };
@@ -38,12 +39,22 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
     return {
       type: AutocompleteSuggestionType.SYMBOL,
       total: res.total,
+      hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
       suggestions,
     };
   }
 
+  private getSymbolDescription(location: Location) {
+    try {
+      const { repoUri, file } = parseLspUrl(location.uri);
+      const repoName = toRepoNameWithOrg(repoUri);
+      return `${repoName} > ${file}`;
+    } catch (error) {
+      return '';
+    }
+  }
+
   private getSymbolLinkUrl(location: Location) {
-    // TODO(mengwei): pending on #604;
     try {
       return RepositoryUtils.locationToUrl(location);
     } catch (error) {

@@ -19,6 +19,7 @@ export abstract class AbstractSuggestionsProvider implements SuggestionsProvider
       resolve({
         type: AutocompleteSuggestionType.SYMBOL,
         total: 0,
+        hasMore: false,
         suggestions: [],
       });
     });

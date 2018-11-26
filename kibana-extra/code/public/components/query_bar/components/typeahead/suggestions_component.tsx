@@ -5,8 +5,21 @@
  */
 
 import { EuiToken } from '@elastic/eui';
+import {
+  euiBorderColor,
+  euiBorderWidthThin,
+  euiColorDarkShade,
+  euiColorLightShade,
+  euiFontSizeXs,
+  euiSize,
+  euiSizeS,
+  euiSizeXl,
+} from '@elastic/eui/dist/eui_theme_light.json';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import Url from 'url';
 
 import {
   AutocompleteSuggestion,
@@ -16,6 +29,7 @@ import {
 import { SuggestionComponent } from './suggestion_component';
 
 interface Props {
+  query: string;
   groupIndex: number | null;
   itemIndex: number | null;
   onClick: (suggestion: AutocompleteSuggestion) => void;
@@ -25,6 +39,45 @@ interface Props {
   loadMore: () => void;
 }
 
+const SuggestionGroupHeader = styled.div`
+  border-top: ${euiBorderWidthThin} solid ${euiBorderColor};
+  display: flex;
+  justify-content: space-between;
+  padding: ${euiSize};
+`;
+
+const SuggestionGroupHeaderTitle = styled.div`
+  display: flex;
+`;
+
+const SuggestionGroupHeaderTitleText = styled.span`
+  margin-left: ${euiSizeS};
+`;
+
+const SuggestionGroupHeaderResult = styled.div`
+  color: ${euiColorDarkShade};
+`;
+
+const ViewMore = styled.div`
+  height: ${euiSize};
+  line-height: ${euiSize};
+  text-align: center;
+  font-size: ${euiFontSizeXs};
+  margin: ${euiSizeS};
+`;
+
+const PressReturn = styled.div`
+  border-top: ${euiBorderWidthThin} solid ${euiBorderColor};
+  height: ${euiSizeXl};
+  text-align: center;
+  font-weight: bold;
+`;
+
+const PressReturnText = styled.div`
+  background: ${euiColorLightShade};
+  margin: ${euiSizeS};
+`;
+
 export class SuggestionsComponent extends Component<Props> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
@@ -33,10 +86,35 @@ export class SuggestionsComponent extends Component<Props> {
     if (!this.props.show || isEmpty(this.props.suggestionGroups)) {
       return null;
     }
-    const suggestionGroups = this.props.suggestionGroups
+
+    return (
+      <div className="reactSuggestionTypeahead">
+        <div className="typeahead">
+          <div className="typeahead-popover">
+            {this.renderSuggestionGroups()}
+            <PressReturn>
+              <PressReturnText>Press ⮐ Return for Full Text Search</PressReturnText>
+            </PressReturn>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  public componentDidUpdate(prevProps: Props) {
+    if (
+      prevProps.groupIndex !== this.props.groupIndex ||
+      prevProps.itemIndex !== this.props.itemIndex
+    ) {
+      this.scrollIntoView();
+    }
+  }
+
+  private renderSuggestionGroups() {
+    return this.props.suggestionGroups
       .filter((group: AutocompleteSuggestionGroup) => group.suggestions.length > 0)
       .map((group: AutocompleteSuggestionGroup, groupIndex: number) => {
-        const { suggestions, total, type } = group;
+        const { suggestions, total, type, hasMore } = group;
         const suggestionComps = suggestions.map(
           (suggestion: AutocompleteSuggestion, itemIndex: number) => {
             const innerRef = (node: any) => (this.childNodes[itemIndex] = node);
@@ -45,6 +123,7 @@ export class SuggestionsComponent extends Component<Props> {
               groupIndex === this.props.groupIndex && itemIndex === this.props.itemIndex;
             return (
               <SuggestionComponent
+                query={this.props.query}
                 innerRef={innerRef}
                 selected={isSelected}
                 suggestion={suggestion}
@@ -58,13 +137,30 @@ export class SuggestionsComponent extends Component<Props> {
         );
 
         const groupHeader = (
-          <div>
-            <span>
+          <SuggestionGroupHeader>
+            <SuggestionGroupHeaderTitle>
               <EuiToken iconType={this.getGroupTokenType(group.type)} />
-              <strong>{this.getGroupTitle(group.type)}</strong>
-            </span>
-            <span> {group.total} results </span>
-          </div>
+              <SuggestionGroupHeaderTitleText>
+                {this.getGroupTitle(group.type)}
+              </SuggestionGroupHeaderTitleText>
+            </SuggestionGroupHeaderTitle>
+            <SuggestionGroupHeaderResult>
+              {total} Result
+              {total === 1 ? '' : 's'}
+            </SuggestionGroupHeaderResult>
+          </SuggestionGroupHeader>
+        );
+
+        const viewMoreUrl = Url.format({
+          pathname: '/search',
+          query: {
+            q: this.props.query,
+          },
+        });
+        const viewMore = (
+          <ViewMore>
+            <Link to={viewMoreUrl}>View More</Link>
+          </ViewMore>
         );
 
         return (
@@ -78,26 +174,10 @@ export class SuggestionsComponent extends Component<Props> {
           >
             {groupHeader}
             {suggestionComps}
+            {hasMore ? viewMore : null}
           </div>
         );
       });
-
-    return (
-      <div className="reactSuggestionTypeahead">
-        <div className="typeahead">
-          <div className="typeahead-popover">{suggestionGroups}</div>
-        </div>
-      </div>
-    );
-  }
-
-  public componentDidUpdate(prevProps: Props) {
-    if (
-      prevProps.groupIndex !== this.props.groupIndex ||
-      prevProps.itemIndex !== this.props.itemIndex
-    ) {
-      this.scrollIntoView();
-    }
   }
 
   private getGroupTokenType(type: AutocompleteSuggestionType): string {

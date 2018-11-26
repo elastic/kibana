@@ -18,7 +18,7 @@ import {
 } from '../query_bar';
 
 const SearchBarContainer = styled.div`
-  width: ${pxToRem(400)};
+  width: ${pxToRem(600)};
 `;
 
 export class CodeSearchBar extends React.Component<RouteComponentProps<MainRouteParams>> {
