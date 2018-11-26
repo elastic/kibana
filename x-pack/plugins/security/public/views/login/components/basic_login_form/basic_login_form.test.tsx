@@ -5,7 +5,7 @@
  */
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { mountWithIntl, shallowWithIntl } from 'enzyme';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { LoginState } from '../../../../../common/login_state';
 import { BasicLoginForm } from './basic_login_form';
