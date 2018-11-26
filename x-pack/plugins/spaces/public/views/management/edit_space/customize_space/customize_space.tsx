@@ -135,7 +135,7 @@ export class CustomizeSpace extends Component<Props, State> {
             })}
             helpText={intl.formatMessage({
               id: 'xpack.spaces.management.manageSpacePage.spaceDescriptionHelpText',
-              defaultMessage: 'Displayed alongside the space avatar on the space selection scree',
+              defaultMessage: 'The description appears on the Space selection screen.',
             })}
             {...validator.validateSpaceDescription(this.props.space)}
             fullWidth
@@ -171,7 +171,7 @@ export class CustomizeSpace extends Component<Props, State> {
         <p>
           <FormattedMessage
             id="xpack.spaces.management.manageSpacePage.customizeSpacePanelDescription"
-            defaultMessage="Give your space a meaningful name, and customize its avatar to your liking."
+            defaultMessage="Name your space and customize its avatar."
           />
         </p>
         {this.props.editingExistingSpace ? (
@@ -185,7 +185,7 @@ export class CustomizeSpace extends Component<Props, State> {
           <p>
             <FormattedMessage
               id="xpack.spaces.management.manageSpacePage.customizeSpacePanelUrlIdentifierEditable"
-              defaultMessage="Take note of the url identifier. It cannot be changed after the space is created."
+              defaultMessage="Note the URL identifier. You cannot change it after you create the space."
             />
           </p>
         )}

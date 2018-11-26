@@ -29,7 +29,7 @@ export class EnabledFeatures extends Component<Props, {}> {
               <h3>
                 <FormattedMessage
                   id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
-                  defaultMessage="Enable features within this space"
+                  defaultMessage="Control which features are visible in this space."
                 />
               </h3>
             </EuiTitle>
@@ -63,7 +63,7 @@ export class EnabledFeatures extends Component<Props, {}> {
           <em>
             <FormattedMessage
               id="xpack.spaces.management.enabledSpaceFeatures.allFeaturesEnabledMessage"
-              defaultMessage="(all features enabled)"
+              defaultMessage="(all features visible)"
             />
           </em>
         </EuiText>
@@ -74,7 +74,7 @@ export class EnabledFeatures extends Component<Props, {}> {
           <em>
             <FormattedMessage
               id="xpack.spaces.management.enabledSpaceFeatures.noFeaturesEnabledMessage"
-              defaultMessage="(no features enabled)"
+              defaultMessage="(no features visible)"
             />
           </em>
         </EuiText>
@@ -85,7 +85,7 @@ export class EnabledFeatures extends Component<Props, {}> {
           <em>
             <FormattedMessage
               id="xpack.spaces.management.enabledSpaceFeatures.someFeaturesEnabledMessage"
-              defaultMessage="({enabledCount} / {featureCount} feature enabled"
+              defaultMessage="({enabledCount} / {featureCount} features visible"
               values={{
                 enabledCount,
                 featureCount,
@@ -100,7 +100,7 @@ export class EnabledFeatures extends Component<Props, {}> {
       <span>
         <FormattedMessage
           id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
-          defaultMessage="Enabled features"
+          defaultMessage="Change feature display"
         />{' '}
         {details}
       </span>
@@ -123,14 +123,8 @@ export class EnabledFeatures extends Component<Props, {}> {
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.spaces.management.enabledSpaceFeatures.chooseEnabledFeaturesMessage"
-              defaultMessage="Choose which features are enabled within this space."
-            />
-          </p>
-          <p>
-            <FormattedMessage
               id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
-              defaultMessage="Note: this is not a security mechanism"
+              defaultMessage="This is not a security mechanism."
             />
           </p>
         </EuiText>
@@ -141,7 +135,7 @@ export class EnabledFeatures extends Component<Props, {}> {
               color="danger"
               title={this.props.intl.formatMessage({
                 id: 'xpack.spaces.management.enabledSpaceFeatures.enableAtLeastOneFeatureMessage',
-                defaultMessage: 'At least one feature must be enabled',
+                defaultMessage: 'At least one feature must be visible',
               })}
               iconType="alert"
               size="s"

@@ -34,6 +34,7 @@ export async function createDefaultSpace(server: any) {
         name: 'Default',
         description: 'This is your default space!',
         color: '#00bfb3',
+        disabledFeatures: [],
         _reserved: true,
       },
       options

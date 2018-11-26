@@ -70,7 +70,7 @@ export class FeatureTable extends Component<Props, {}> {
       align: 'right',
       name: this.props.intl.formatMessage({
         id: 'xpack.spaces.management.enabledSpaceFeaturesEnabledColumnTitle',
-        defaultMessage: 'Enabled?',
+        defaultMessage: 'Show?',
       }),
       render: (spaceEntry: Space, record: Record<string, any>) => {
         const checked = !(
@@ -83,7 +83,7 @@ export class FeatureTable extends Component<Props, {}> {
             checked={checked}
             onChange={this.onChange(record.feature.id) as any}
             aria-label={
-              checked ? `${record.feature.name} enabled` : `${record.feature.name} disabled`
+              checked ? `${record.feature.name} visible` : `${record.feature.name} disabled`
             }
           />
         );

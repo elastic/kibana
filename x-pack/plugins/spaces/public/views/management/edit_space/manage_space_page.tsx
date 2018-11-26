@@ -139,7 +139,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EuiText size="s">
           <FormattedMessage
             id="xpack.spaces.management.manageSpacePage.manageDescription"
-            defaultMessage={'Use spaces to organize your saved objects into meaningful categories.'}
+            defaultMessage={'Organize your saved objects into meaningful categories.'}
           />
         </EuiText>
 
