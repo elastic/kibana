@@ -88,6 +88,8 @@ class ColorRules extends Component {
                 id="tsvb.colorRules.setSecondaryColorLabel"
                 defaultMessage="and {secondaryName} to"
                 values={{ secondaryName: this.props.secondaryName }}
+                description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
+                metric is {greaterOrLessThan} {value}."
               />
             </EuiFormLabel>
           </EuiFlexItem>
@@ -109,6 +111,8 @@ class ColorRules extends Component {
               id="tsvb.colorRules.setPrimaryColorLabel"
               defaultMessage="Set {primaryName} to"
               values={{ primaryName: this.props.primaryName }}
+              description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
+              metric is {greaterOrLessThan} {value}."
             />
           </EuiFormLabel>
         </EuiFlexItem>
@@ -127,6 +131,8 @@ class ColorRules extends Component {
             <FormattedMessage
               id="tsvb.colorRules.ifMetricIsLabel"
               defaultMessage="if metric is"
+              description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
+              metric is {greaterOrLessThan} {value}."
             />
           </EuiFormLabel>
         </EuiFlexItem>
