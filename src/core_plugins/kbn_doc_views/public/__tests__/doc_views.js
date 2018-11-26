@@ -142,23 +142,23 @@ describe('docViews', function () {
     describe('warnings', function () {
       it('displays a warning about field name starting with underscore', function () {
         const cells = $elem.find('td[title="_underscore"]').siblings();
-        expect(cells.find('.kbnDocViewer--underscore').length).to.be(1);
-        expect(cells.find('.kbnDocViewer--no-mapping').length).to.be(0);
-        expect(cells.find('.kbnDocViewer--object-array').length).to.be(0);
+        expect(cells.find('.kbnDocViewer__underscore').length).to.be(1);
+        expect(cells.find('.kbnDocViewer__noMapping').length).to.be(0);
+        expect(cells.find('.kbnDocViewer__objectArray').length).to.be(0);
       });
 
       it('displays a warning about missing mappings', function () {
         const cells = $elem.find('td[title="noMapping"]').siblings();
-        expect(cells.find('.kbnDocViewer--underscore').length).to.be(0);
-        expect(cells.find('.kbnDocViewer--no-mapping').length).to.be(1);
-        expect(cells.find('.kbnDocViewer--object-array').length).to.be(0);
+        expect(cells.find('.kbnDocViewer__underscore').length).to.be(0);
+        expect(cells.find('.kbnDocViewer__noMapping').length).to.be(1);
+        expect(cells.find('.kbnDocViewer__objectArray').length).to.be(0);
       });
 
       it('displays a warning about objects in arrays', function () {
         const cells = $elem.find('td[title="objectArray"]').siblings();
-        expect(cells.find('.kbnDocViewer--underscore').length).to.be(0);
-        expect(cells.find('.kbnDocViewer--no-mapping').length).to.be(0);
-        expect(cells.find('.kbnDocViewer--object-array').length).to.be(1);
+        expect(cells.find('.kbnDocViewer__underscore').length).to.be(0);
+        expect(cells.find('.kbnDocViewer__noMapping').length).to.be(0);
+        expect(cells.find('.kbnDocViewer__objectArray').length).to.be(1);
       });
     });
 
