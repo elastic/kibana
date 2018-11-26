@@ -25,7 +25,6 @@ import { JobMessagesPane } from './job_messages_pane';
 
 import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../../common/constants/feature_flags';
 
-
 export class JobDetails extends Component {
   constructor(props) {
     super(props);

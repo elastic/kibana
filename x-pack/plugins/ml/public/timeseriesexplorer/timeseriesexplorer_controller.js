@@ -39,6 +39,7 @@ import {
   processScheduledEventsForChart } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { IntervalHelperProvider, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
+import { mlAnnotationsService } from 'plugins/ml/services/annotations_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
 import template from './timeseriesexplorer.html';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
@@ -446,7 +447,7 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Query 4 - load any annotations for the selected job.
     if (FEATURE_ANNOTATIONS_ENABLED) {
-      mlResultsService.getAnnotations(
+      mlAnnotationsService.getAnnotations(
         [$scope.selectedJob.job_id],
         searchBounds.min.valueOf(),
         searchBounds.max.valueOf(),

@@ -26,7 +26,7 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 import chrome from 'ui/chrome';
 
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
-import { mlResultsService } from 'plugins/ml/services/results_service';
+import { mlAnnotationsService } from 'plugins/ml/services/annotations_service';
 
 
 const MAX_ANNOTATIONS = 500;
@@ -48,7 +48,7 @@ class AnnotationsTable extends Component {
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
-      mlResultsService.getAnnotations(
+      mlAnnotationsService.getAnnotations(
         [this.props.job.job_id],
         dataCounts.earliest_record_timestamp,
         dataCounts.latest_record_timestamp,
