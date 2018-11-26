@@ -60,9 +60,20 @@ uiModules.get('kibana')
         this._loadCatalogue = null;
         this._loadFileLayers = null;
         this._loadTMSServices = null;
+        this._showZoomMessage = true;
 
         this._invalidateSettings();
       }
+
+      // TODO: Test
+      shouldShowZoomMessage() {
+        return this._showZoomMessage;
+      }
+
+      disableZoomMessage() {
+        this._showZoomMessage = false;
+      }
+
       _invalidateSettings() {
 
         this._loadCatalogue = _.once(async () => {

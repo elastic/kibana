@@ -20,14 +20,14 @@
 import _ from 'lodash';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import * as Rx from 'rxjs';
+import $ from 'jquery';
 import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
-const OSS_TMS_ZOOM = 10;
-const EMS_TMS_URL = 'https://tiles.maps.elastic.co';
+const EMS_TMS_URL = 'https://tiles.maps.elastic.co';  // TODO: Remove in favor of new EMS logic
 
 export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
@@ -184,10 +184,12 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       }
     }
 
+    // TODO: Replace w/ logic from new PR
     _isConstrainedZoomBaseLayer(options) {
-      const { url, maxZoom } = options;
+      const { url } = options;
+
       return url.startsWith(EMS_TMS_URL)
-        && maxZoom === OSS_TMS_ZOOM;
+        && serviceSettings.shouldShowZoomMessage();
     }
 
     _setTmsLayer(tmsLayer) {
