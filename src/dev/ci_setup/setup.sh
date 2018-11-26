@@ -26,7 +26,7 @@ export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 ### Extract the bootstrap cache that we create in the packer_cache.sh script
 ###
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
-bootstrapCache="$CACHE_DIR/bootstrap_cache/master.tar"
+bootstrapCache="$cacheDir/bootstrap_cache/master.tar"
 if [ -f "$bootstrapCache" ]; then
   echo "extracting bootstrap_cache from $bootstrapCache";
   tar -xf "$bootstrapCache";
