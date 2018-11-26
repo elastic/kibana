@@ -17,10 +17,6 @@
  * under the License.
  */
 
-declare module '@elastic/eui' {
-  export const EuiPopoverTitle: React.SFC<any>;
-}
-
 import {
   EuiButtonEmpty,
   EuiForm,
