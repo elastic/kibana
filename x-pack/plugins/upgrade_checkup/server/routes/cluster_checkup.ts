@@ -31,6 +31,7 @@ export function registerClusterCheckupRoutes(server: Server) {
     },
   });
 
+  // TODO: add this back once it has been implemented in ES?
   // server.route({
   //   path: '/api/upgrade_checkup/index_upgrade/{indexName}',
   //   method: 'POST',

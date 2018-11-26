@@ -116,7 +116,7 @@ export async function getUpgradeCheckupStatus(
 }
 
 const consoleTemplateUrl = (basePath: string, indexName: string) => {
-  const reindexTemplateUrl = `${basePath}/api/upgrade_checkup/reindex/command_template/${encodeURIComponent(
+  const reindexTemplateUrl = `${basePath}/api/upgrade_checkup/reindex/console_template/${encodeURIComponent(
     indexName
   )}.json`;
 
