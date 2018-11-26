@@ -28,25 +28,12 @@ describe('reindex template API', () => {
       callWithRequest.mockResolvedValue({
         myIndex: {
           settings: {
-            // These settings should get preserved.
             'index.number_of_replicas': '0',
-            'index.number_of_shards': '1',
-            // These settings will be removed in the snapshot.
-            'index.uuid': '123123',
-            'index.creation_date': '123123123',
-            'index.version.created': '7000',
-            'index.provided_name': 'myIndex',
           },
           mappings: {
             properties: {
               '@message': {
                 type: 'text',
-                fields: {
-                  keyword: {
-                    type: 'keyword',
-                    ignore_above: 256,
-                  },
-                },
               },
             },
           },

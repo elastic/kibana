@@ -7,19 +7,12 @@ exports[`reindex template API GET /api/upgrade_checkup/reindex/{indexName}.json 
 PUT /myIndex-updated
 {
   \\"settings\\": {
-    \\"index.number_of_replicas\\": \\"0\\",
-    \\"index.number_of_shards\\": \\"1\\"
+    \\"index.number_of_replicas\\": \\"0\\"
   },
   \\"mappings\\": {
     \\"properties\\": {
       \\"@message\\": {
-        \\"type\\": \\"text\\",
-        \\"fields\\": {
-          \\"keyword\\": {
-            \\"type\\": \\"keyword\\",
-            \\"ignore_above\\": 256
-          }
-        }
+        \\"type\\": \\"text\\"
       }
     }
   }
