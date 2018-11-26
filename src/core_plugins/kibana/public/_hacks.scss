@@ -1,0 +1,7 @@
+/**
+ *  1. TEMP EUI/FIREFOX FIX (6.5 only)
+ */
+
+ .euiComboBox .euiComboBox__inputWrap {
+  display: flex; /* 1 */
+}
