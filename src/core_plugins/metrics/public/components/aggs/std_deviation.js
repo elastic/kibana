@@ -34,20 +34,33 @@ import {
   EuiFieldText,
   EuiFormRow,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const StandardDeviationAgg = props => {
-  const { series, panel, fields } = props;
+const StandardDeviationAggUi = props => {
+  const { series, panel, fields, intl } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
 
   const modeOptions = [
-    { label: 'Raw', value: 'raw' },
-    { label: 'Upper Bound', value: 'upper' },
-    { label: 'Lower Bound', value: 'lower' },
+    {
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.rawLabel', defaultMessage: 'Raw' }),
+      value: 'raw'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
+      value: 'upper'
+    },
+    {
+      дabel: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
+      value: 'lower'
+    },
   ];
 
   if (panel.type !== 'table') {
-    modeOptions.push({ label: 'Bounds Band', value: 'band' });
+    modeOptions.push({
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
+      value: 'band'
+    });
   }
 
   const handleChange = createChangeHandler(props.onChange, model);
@@ -70,7 +83,12 @@ export const StandardDeviationAgg = props => {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.stdDeviation.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -80,7 +98,13 @@ export const StandardDeviationAgg = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('field')} label="Field">
+          <EuiFormRow
+            id={htmlId('field')}
+            label={(<FormattedMessage
+              id="tsvb.stdDeviation.fieldLabel"
+              defaultMessage="Field"
+            />)}
+          >
             <FieldSelect
               fields={fields}
               type={model.type}
@@ -92,7 +116,13 @@ export const StandardDeviationAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow id={htmlId('sigma')} label="Sigma">
+          <EuiFormRow
+            id={htmlId('sigma')}
+            label={(<FormattedMessage
+              id="tsvb.stdDeviation.sigmaLabel"
+              defaultMessage="Sigma"
+            />)}
+          >
             <EuiFieldText
               value={model.sigma}
               onChange={handleTextChange('sigma')}
@@ -100,7 +130,13 @@ export const StandardDeviationAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('mode')} label="Mode">
+          <EuiFormRow
+            id={htmlId('mode')}
+            label={(<FormattedMessage
+              id="tsvb.stdDeviation.modeLabel"
+              defaultMessage="Mode"
+            />)}
+          >
             <EuiComboBox
               options={modeOptions}
               selectedOptions={selectedModeOption ? [selectedModeOption] : []}
@@ -114,7 +150,7 @@ export const StandardDeviationAgg = props => {
   );
 };
 
-StandardDeviationAgg.propTypes = {
+StandardDeviationAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -125,3 +161,5 @@ StandardDeviationAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
+
+export const StandardDeviationAgg = injectI18n(StandardDeviationAggUi);
