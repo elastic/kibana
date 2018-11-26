@@ -122,7 +122,7 @@ export function findPluginSpecs(settings, configToMutate) {
   const translationPath$ = config$.pipe(
     mergeMap(config =>
       Rx.zip(
-        ...config.get('plugins.translations.paths').map(path => Rx.of([path])),
+        Rx.of(config.get('plugins.translations.paths')),
         ...config.get('plugins.translations.scanDirs').map(
           path => createChildDirectory$(path).pipe(
             toArray()
