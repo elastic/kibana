@@ -17,6 +17,7 @@
     "timelion": "src/core_plugins/timelion",
     "tsvb": "src/core_plugins/metrics",
     "tagCloud": "src/core_plugins/tagcloud",
+    "tsvb": "src/core_plugins/metrics",
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
