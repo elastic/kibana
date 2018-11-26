@@ -57,7 +57,9 @@ export class UMDateRangePicker extends React.Component<
         button={
           <EuiButton onClick={this.togglePopover}>
             {kind === 'absolute'
-              ? `${absoluteStart} - ${absoluteEnd}`
+              ? `${moment(absoluteStart).format('MMM-DD-YYYY HH:mm')} - ${moment(
+                  absoluteEnd
+                ).format('MMM-DD-YYYY HH:mm')}`
               : `${relativeSpanValue}${relativeSpanUnit} - now`}
           </EuiButton>
         }

@@ -55,12 +55,11 @@ export const MonitorList = ({ start, end }: MonitorListProps) => (
               {
                 field: 'ping.timestamp',
                 name: 'Last updated',
-                render: (timestamp: string) =>
-                  moment(timestamp).format('YYYY-MM-DD HH:mm:ss.SSS Z'),
+                render: (timestamp: string) => moment(timestamp).format('YYYY-MM-DD HH:mm:SS'),
               },
               {
-                field: 'key.id',
-                name: 'Id',
+                field: 'ping.monitor.host',
+                name: 'Host',
               },
               {
                 field: 'key.port',
@@ -69,10 +68,6 @@ export const MonitorList = ({ start, end }: MonitorListProps) => (
               {
                 field: 'ping.monitor.type',
                 name: 'Type',
-              },
-              {
-                field: 'ping.monitor.host',
-                name: 'Host',
               },
               { field: 'ping.monitor.ip', name: 'IP' },
               {

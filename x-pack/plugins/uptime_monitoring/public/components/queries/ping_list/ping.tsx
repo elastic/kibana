@@ -12,7 +12,7 @@ import { Query } from 'react-apollo';
 import { createGetPingsQuery } from './get_pings';
 
 export const Pings = () => (
-  <Query query={createGetPingsQuery()}>
+  <Query pollInterval={1000} query={createGetPingsQuery()}>
     {({ loading, error, data }) => {
       if (loading) {
         return 'Loading...';
