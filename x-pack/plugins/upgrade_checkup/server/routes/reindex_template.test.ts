@@ -10,7 +10,7 @@ import { registerReindexTemplateRoutes } from './reindex_templates';
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
- * more thoroughly in the es_deprecation_logging_apis test.
+ * more thoroughly in the reindex_console_template test.
  */
 describe('reindex template API', () => {
   const callWithRequest = jest.fn();

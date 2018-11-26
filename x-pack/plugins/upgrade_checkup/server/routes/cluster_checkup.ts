@@ -18,7 +18,7 @@ export function registerClusterCheckupRoutes(server: Server) {
     method: 'GET',
     async handler(request) {
       try {
-        return await getUpgradeCheckupStatus(callWithRequest, request, basePath);
+        return await getUpgradeCheckupStatus(callWithRequest, request, basePath, true);
       } catch (e) {
         if (e.status === 403) {
           return Boom.forbidden(e.message);
@@ -30,34 +30,4 @@ export function registerClusterCheckupRoutes(server: Server) {
       }
     },
   });
-
-  // TODO: add this back once it has been implemented in ES?
-  // server.route({
-  //   path: '/api/upgrade_checkup/index_upgrade/{indexName}',
-  //   method: 'POST',
-  //   options: {
-  //     validate: {
-  //       params: {
-  //         // TODO: make this more specific
-  //         indexName: Joi.string().required(),
-  //       },
-  //     },
-  //   },
-  //   async handler(request) {
-  //     try {
-  //       const index = request.params.indexName;
-  //       const response = await callWithRequest(request, 'transport.request', {
-  //         path: `/_xpack/migration/upgrade/${index}`,
-  //         method: 'POST',
-  //         query: {
-  //           wait_for_completion: false,
-  //         },
-  //       });
-
-  //       return response;
-  //     } catch (e) {
-  //       return Boom.boomify(e);
-  //     }
-  //   },
-  // });
 }

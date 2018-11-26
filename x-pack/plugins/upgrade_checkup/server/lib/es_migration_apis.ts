@@ -14,13 +14,13 @@ import {
   Request,
 } from 'src/core_plugins/elasticsearch';
 
-import fakeAssistance from './fake_assistance.json';
-import fakeDeprecations from './fake_deprecations.json';
+import fakeAssistance from './__fixtures__/fake_assistance.json';
+import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
-  uiButtons: Array<{
+  uiButtons?: Array<{
     label: string;
     url: string;
   }>;
@@ -35,27 +35,65 @@ export interface UpgradeCheckupStatus {
 export async function getUpgradeCheckupStatus(
   callWithRequest: CallClusterWithRequest,
   req: Request,
-  basePath: string
+  basePath: string,
+  useFakeData = false // TODO: remove
 ): Promise<UpgradeCheckupStatus> {
-  // const migrationAssistanceReq = callWithRequest(req, 'transport.request', {
-  //   path: '/_xpack/migration/assistance',
-  //   method: 'GET',
-  // });
+  let migrationAssistance: AssistanceAPIResponse;
+  let deprecations: DeprecationAPIResponse;
 
-  // const deprecationsReq = callWithRequest(req, 'transport.request', {
-  //   path: '/_xpack/migration/deprecations',
-  //   method: 'GET',
-  // });
+  // Fake data for now. TODO: remove this before merging.
+  if (useFakeData) {
+    migrationAssistance = _.cloneDeep(fakeAssistance) as AssistanceAPIResponse;
+    deprecations = _.cloneDeep(fakeDeprecations) as DeprecationAPIResponse;
+  } else {
+    const migrationAssistanceReq = callWithRequest(req, 'transport.request', {
+      path: '/_xpack/migration/assistance',
+      method: 'GET',
+    });
 
-  // const [migrationAssistance, deprecations] = await Promise.all([
-  //   migrationAssistanceReq,
-  //   deprecationsReq,
-  // ]);
+    const deprecationsReq = callWithRequest(req, 'transport.request', {
+      path: '/_xpack/migration/deprecations',
+      method: 'GET',
+    });
 
-  // Fake data for now. TODO: Uncomment above and remove fake data
-  const migrationAssistance = _.cloneDeep(fakeAssistance) as AssistanceAPIResponse;
-  const deprecations = _.cloneDeep(fakeDeprecations) as DeprecationAPIResponse;
+    [migrationAssistance, deprecations] = await Promise.all([
+      migrationAssistanceReq,
+      deprecationsReq,
+    ]);
+  }
 
+  return {
+    cluster: deprecations.cluster_settings.map(addUiButtonForDocs),
+    nodes: deprecations.node_settings.map(addUiButtonForDocs),
+    indices: getCombinedIndexInfos(migrationAssistance, deprecations, basePath).map(
+      addUiButtonForDocs
+    ),
+  };
+}
+
+// Adds a uiButton item pointing the Elasticsearch docs for the given warning.
+const addUiButtonForDocs = (dep: EnrichedDeprecationInfo): EnrichedDeprecationInfo => {
+  const uiButtons = (dep.uiButtons || []).concat([
+    {
+      label: 'Read Documentation',
+      url: dep.url,
+    },
+  ]);
+
+  return {
+    uiButtons,
+    ...dep,
+  };
+};
+
+// Combines the information from the migration assistance api and the deprecation api into a single array.
+// Enhances with information about which index the deprecation applies to and adds buttons for accessing the
+// reindex UI.
+const getCombinedIndexInfos = (
+  migrationAssistance: AssistanceAPIResponse,
+  deprecations: DeprecationAPIResponse,
+  basePath: string
+) => {
   const combinedIndexInfo: EnrichedDeprecationInfo[] = [];
   Object.keys(deprecations.index_settings).forEach(indexName => {
     deprecations.index_settings[indexName]
@@ -79,14 +117,8 @@ export async function getUpgradeCheckupStatus(
             label: 'Reindex in Console',
             url: consoleTemplateUrl(basePath, indexName),
           },
-          {
-            label: 'Read Documentation',
-            url:
-              'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
-          },
         ],
-        url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
+        url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html',
       });
     } else if (actionRequired === 'upgrade') {
       combinedIndexInfo.push({
@@ -94,27 +126,16 @@ export async function getUpgradeCheckupStatus(
         level: 'critical',
         message: 'This index must be upgraded in order to upgrade the Elastic Stack.',
         details: 'Upgrading is irreversible, so always back up your index before proceeding.',
-        // TODO: not sure what URL to put here?
-        uiButtons: [
-          {
-            label: 'Read Documentation',
-            url:
-              'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
-          },
-        ],
         url:
-          'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html',
+          'https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-upgrade.html',
       });
     }
   }
 
-  return {
-    cluster: deprecations.cluster_settings.map(addUiButtonForDocs),
-    nodes: deprecations.node_settings.map(addUiButtonForDocs),
-    indices: combinedIndexInfo,
-  };
-}
+  return combinedIndexInfo;
+};
 
+// Returns a URL to open Console up with the reindex commands for the given index.
 const consoleTemplateUrl = (basePath: string, indexName: string) => {
   const reindexTemplateUrl = `${basePath}/api/upgrade_checkup/reindex/console_template/${encodeURIComponent(
     indexName
@@ -123,16 +144,4 @@ const consoleTemplateUrl = (basePath: string, indexName: string) => {
   return `${basePath}/app/kibana#/dev_tools/console?load_from=${encodeURIComponent(
     reindexTemplateUrl
   )}`;
-};
-
-const addUiButtonForDocs = (dep: DeprecationInfo): EnrichedDeprecationInfo => {
-  return {
-    uiButtons: [
-      {
-        label: 'Read Documentation',
-        url: dep.url,
-      },
-    ],
-    ...dep,
-  };
 };
