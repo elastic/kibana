@@ -21,7 +21,7 @@ import { spawn } from 'child_process';
 import { writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
-import es from 'event-stream';
+import { split, map } from '../../../utils/streams/array_stream';
 import { getConfigFromFiles } from '../../../core/server/config/read_config';
 
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
@@ -88,11 +88,11 @@ describe('Server logging configuration', function () {
       });
 
       child.stdout
-        .pipe(es.split())
-        .pipe(es.mapSync(line => {
+        .pipe(split())
+        .pipe(map((line, callback) => {
           if (!line) {
             // skip empty lines
-            return;
+            return callback();
           }
 
           if (isJson) {
@@ -113,6 +113,7 @@ describe('Server logging configuration', function () {
             child.kill();
             child = undefined;
           }
+          callback();
         }));
 
       function switchToPlainTextLog() {

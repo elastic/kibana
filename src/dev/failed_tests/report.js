@@ -19,7 +19,7 @@
 
 import xml2js from 'xml2js';
 import vfs from 'vinyl-fs';
-import es from 'event-stream';
+import { map } from '../../utils/streams/array_stream';
 import { getGithubClient, markdownMetadata, paginate } from '../github_utils';
 import { find } from 'lodash';
 import stripAnsi from 'strip-ansi';
@@ -32,7 +32,7 @@ const BUILD_URL = process.env.BUILD_URL;
 /**
  * Parses junit XML files into JSON
  */
-const mapXml = es.map((file, cb) => {
+const mapXml = map((file, cb) => {
   xml2js.parseString(file.contents.toString(), (err, result) => {
     cb(null, result);
   });
@@ -41,7 +41,7 @@ const mapXml = es.map((file, cb) => {
 /**
  * Filters all testsuites to find failed testcases
  */
-const filterFailures = es.map((testSuite, cb) => {
+const filterFailures = map((testSuite, cb) => {
   // Grab the failures. Reporters may report multiple testsuites in a single file.
   const testFiles = testSuite.testsuites
     ? testSuite.testsuites.testsuite
@@ -71,7 +71,7 @@ const filterFailures = es.map((testSuite, cb) => {
  * Creates and updates github issues for the given testcase failures.
  */
 const updateGithubIssues = (githubClient, issues) => {
-  return es.map(async (failureCases, cb) => {
+  return map(async (failureCases, cb) => {
 
     const issueOps = failureCases.map(async (failureCase) => {
       const existingIssue = find(issues, (issue) => {
