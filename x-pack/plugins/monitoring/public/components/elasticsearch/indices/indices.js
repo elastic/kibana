@@ -4,133 +4,119 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { capitalize, get } from 'lodash';
-import { SORT_ASCENDING, SORT_DESCENDING } from '../../../../common/constants';
+import React from 'react';
+import { capitalize } from 'lodash';
 import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/formatting';
 import { formatMetric } from '../../../lib/format_number';
 import { ElasticsearchStatusIcon } from '../status_icon';
 import { ClusterStatus } from '../cluster_status';
-import { MonitoringTable } from '../../table';
-import { EuiLink } from '@elastic/eui';
-import { KuiTableRowCell, KuiTableRow } from '@kbn/ui-framework/components';
-import { SystemIndicesCheckbox } from './system_indices_checkbox';
+import { EuiMonitoringTable } from '../../table';
+import {
+  EuiLink,
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiSwitch,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-const filterFields = ['name', 'status'];
 const columns = [
   {
-    title: i18n.translate('xpack.monitoring.elasticsearch.indices.nameTitle', {
+    name: i18n.translate('xpack.monitoring.elasticsearch.indices.nameTitle', {
       defaultMessage: 'Name',
     }),
-    sortKey: 'name',
-    secondarySortOrder: SORT_ASCENDING
+    field: 'name',
+    width: '350px',
+    sortable: true,
+    render: (value) => (
+      <div data-test-subj="name">
+        <EuiLink
+          href={`#/elasticsearch/indices/${value}`}
+          data-test-subj={`indexLink-${value}`}
+        >
+          {value}
+        </EuiLink>
+      </div>
+    ),
   },
   {
-    title: i18n.translate('xpack.monitoring.elasticsearch.indices.statusTitle', {
+    name: i18n.translate('xpack.monitoring.elasticsearch.indices.statusTitle', {
       defaultMessage: 'Status',
     }),
-    sortKey: 'status_sort',
-    sortOrder: SORT_DESCENDING // default sort: red, then yellow, then green
+    field: 'status',
+    sortable: true,
+    render: (value) => (
+      <div title={`Index status: ${value}`}>
+        <ElasticsearchStatusIcon status={value} />&nbsp;
+        {capitalize(value)}
+      </div>
+    )
   },
   {
-    title: i18n.translate('xpack.monitoring.elasticsearch.indices.documentCountTitle', {
+    name: i18n.translate('xpack.monitoring.elasticsearch.indices.documentCountTitle', {
       defaultMessage: 'Document Count',
     }),
-    sortKey: 'doc_count'
+    field: 'doc_count',
+    sortable: true,
+    render: value => (
+      <div data-test-subj="documentCount">
+        {formatMetric(value, LARGE_ABBREVIATED)}
+      </div>
+    )
   },
   {
-    title: i18n.translate('xpack.monitoring.elasticsearch.indices.dataTitle', {
+    name: i18n.translate('xpack.monitoring.elasticsearch.indices.dataTitle', {
       defaultMessage: 'Data',
     }),
-    sortKey: 'data_size'
+    field: 'data_size',
+    sortable: true,
+    render: value => (
+      <div data-test-subj="dataSize">
+        {formatMetric(value, LARGE_BYTES)}
+      </div>
+    )
   },
   {
-    title: i18n.translate('xpack.monitoring.elasticsearch.indices.indexRateTitle', {
+    name: i18n.translate('xpack.monitoring.elasticsearch.indices.indexRateTitle', {
       defaultMessage: 'Index Rate',
     }),
-    sortKey: 'index_rate'
+    field: 'index_rate',
+    sortable: true,
+    render: value => (
+      <div data-test-subj="indexRate">
+        {formatMetric(value, LARGE_FLOAT, '/s')}
+      </div>
+    )
   },
   {
-    title: i18n.translate('xpack.monitoring.elasticsearch.indices.searchRateTitle', {
+    name: i18n.translate('xpack.monitoring.elasticsearch.indices.searchRateTitle', {
       defaultMessage: 'Search Rate',
     }),
-    sortKey: 'search_rate'
+    field: 'search_rate',
+    sortable: true,
+    render: value => (
+      <div data-test-subj="searchRate">
+        {formatMetric(value, LARGE_FLOAT, '/s')}
+      </div>
+    )
   },
   {
-    title: i18n.translate('xpack.monitoring.elasticsearch.indices.unassignedShardsTitle', {
+    name: i18n.translate('xpack.monitoring.elasticsearch.indices.unassignedShardsTitle', {
       defaultMessage: 'Unassigned Shards',
     }),
-    sortKey: 'unassigned_shards'
+    field: 'unassigned_shards',
+    sortable: true,
+    render: value => (
+      <div data-test-subj="unassignedShards">
+        {formatMetric(value, '0')}
+      </div>
+    )
   }
 ];
-const IndexRow = injectI18n(({ status, ...props }) => (
-  <KuiTableRow>
-    <KuiTableRowCell data-test-subj="name">
-      <EuiLink
-        href={`#/elasticsearch/indices/${props.name}`}
-        data-test-subj={`indexLink-${props.name}`}
-      >
-        {props.name}
-      </EuiLink>
-    </KuiTableRowCell>
-    <KuiTableRowCell>
-      <div
-        title={props.intl.formatMessage({
-          id: 'xpack.monitoring.elasticsearch.indices.indexStatusTitle',
-          defaultMessage: 'Index status: {status}' }, {
-          status
-        })}
-      >
-        <ElasticsearchStatusIcon status={status} />&nbsp;
-        {capitalize(status)}
-      </div>
-    </KuiTableRowCell>
-    <KuiTableRowCell data-test-subj="documentCount">
-      {formatMetric(get(props, 'doc_count'), LARGE_ABBREVIATED)}
-    </KuiTableRowCell>
-    <KuiTableRowCell data-test-subj="dataSize">
-      {formatMetric(get(props, 'data_size'), LARGE_BYTES)}
-    </KuiTableRowCell>
-    <KuiTableRowCell data-test-subj="indexRate">
-      {formatMetric(get(props, 'index_rate'), LARGE_FLOAT, '/s')}
-    </KuiTableRowCell>
-    <KuiTableRowCell data-test-subj="searchRate">
-      {formatMetric(get(props, 'search_rate'), LARGE_FLOAT, '/s')}
-    </KuiTableRowCell>
-    <KuiTableRowCell data-test-subj="unassignedShards">
-      {formatMetric(get(props, 'unassigned_shards'), '0')}
-    </KuiTableRowCell>
-  </KuiTableRow>
-));
 
-const getNoDataMessage = filterText => {
-  const howToShowSystemIndicesDescription = (
-    <FormattedMessage
-      id="xpack.monitoring.elasticsearch.indices.howToShowSystemIndicesDescription"
-      defaultMessage="If you are looking for system indices (e.g., .kibana), try checking &lsquo;Show system indices&rsquo;."
-    />
-  );
-  if (filterText) {
-    return (
-      <div>
-        <p>
-          <FormattedMessage
-            id="xpack.monitoring.elasticsearch.indices.noFilteredIndicesDescription"
-            defaultMessage="There are no indices that match your selection with the filter [{filterText}].
-            Try changing the filter or the time range selection."
-            values={{
-              filterText: filterText.trim()
-            }}
-          />
-        </p>
-        <p>
-          {howToShowSystemIndicesDescription}
-        </p>
-      </div>
-    );
-  }
+const getNoDataMessage = () => {
   return (
     <div>
       <p>
@@ -140,46 +126,64 @@ const getNoDataMessage = filterText => {
         />
       </p>
       <p>
-        {howToShowSystemIndicesDescription}
+        <FormattedMessage
+          id="xpack.monitoring.elasticsearch.indices.howToShowSystemIndicesDescription"
+          defaultMessage="If you are looking for system indices (e.g., .kibana), try checking &lsquo;Show system indices&rsquo;."
+        />
       </p>
     </div>
   );
 };
 
-const renderToolBarSection = ({ showSystemIndices, toggleShowSystemIndices, ...props }) => (
-  <SystemIndicesCheckbox
-    showSystemIndices={showSystemIndices}
-    toggleShowSystemIndices={toggleShowSystemIndices}
-    {...props}
-  />
-);
-
-function ElasticsearchIndicesUI({ clusterStatus, indices, intl, ...props }) {
+const ElasticsearchIndicesUI = ({
+  clusterStatus,
+  indices,
+  intl,
+  sorting,
+  pagination,
+  onTableChange,
+  toggleShowSystemIndices,
+  showSystemIndices,
+}) => {
   return (
-    <Fragment>
-      <ClusterStatus stats={clusterStatus} />
-      <MonitoringTable
-        className="elasticsearchIndicesTable"
-        rows={indices}
-        pageIndex={props.pageIndex}
-        filterText={props.filterText}
-        sortKey={props.sortKey}
-        sortOrder={props.sortOrder}
-        onNewState={props.onNewState}
-        placeholder={intl.formatMessage({
-          id: 'xpack.monitoring.elasticsearch.indices.monitoringTablePlaceholder',
-          defaultMessage: 'Filter Indices…',
-        })}
-        filterFields={filterFields}
-        renderToolBarSections={renderToolBarSection}
-        columns={columns}
-        rowComponent={IndexRow}
-        getNoDataMessage={getNoDataMessage}
-        showSystemIndices={props.showSystemIndices}
-        toggleShowSystemIndices={props.toggleShowSystemIndices}
-      />
-    </Fragment>
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageContent>
+          <ClusterStatus stats={clusterStatus} />
+          <EuiSpacer size="xs"/>
+          <EuiSwitch
+            label={(
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.indices.systemIndicesLabel"
+                defaultMessage="System indices"
+              />
+            )}
+            checked={showSystemIndices}
+            onChange={e => toggleShowSystemIndices(e.target.checked)}
+          />
+          <EuiSpacer size="m"/>
+          <EuiMonitoringTable
+            className="elasticsearchIndicesTable"
+            rows={indices}
+            columns={columns}
+            sorting={sorting}
+            pagination={pagination}
+            message={getNoDataMessage()}
+            search={{
+              box: {
+                incremental: true,
+                placeholder: intl.formatMessage({
+                  id: 'xpack.monitoring.elasticsearch.indices.monitoringTablePlaceholder',
+                  defaultMessage: 'Filter Indices…',
+                })
+              },
+            }}
+            onTableChange={onTableChange}
+          />
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
-}
+};
 
 export const ElasticsearchIndices = injectI18n(ElasticsearchIndicesUI);

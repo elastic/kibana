@@ -8,7 +8,7 @@ import React from 'react';
 import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { MonitoringViewBaseTableController } from '../../';
+import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchIndices } from '../../../components';
 import template from './index.html';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -22,7 +22,7 @@ uiRoutes.when('/elasticsearch/indices', {
     }
   },
   controllerAs: 'elasticsearchIndices',
-  controller: class ElasticsearchIndicesController extends MonitoringViewBaseTableController {
+  controller: class ElasticsearchIndicesController extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
@@ -69,6 +69,9 @@ uiRoutes.when('/elasticsearch/indices', {
               indices={indices}
               showSystemIndices={showSystemIndices}
               toggleShowSystemIndices={toggleShowSystemIndices}
+              sorting={this.sorting}
+              pagination={this.pagination}
+              onTableChange={this.onTableChange}
             />
           </I18nProvider>
         );
