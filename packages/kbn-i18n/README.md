@@ -199,7 +199,7 @@ export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
 }),
 ```
 
-One more example with a placeholder:
+One more example with a parameter:
 
 ```js
 import { i18n } from '@kbn/i18n';
@@ -207,7 +207,7 @@ import { i18n } from '@kbn/i18n';
 export function getGreetingMessage(userName) {
   return i18n.translate('hello.wonderful.world', {
     defaultMessage: 'Greetings, {name}!',
-    values: { name: <b>userName</b> },
+    values: { name: userName },
     context: 'This is greeting message for main screen.'
   });
 }
@@ -287,7 +287,7 @@ Optionally we can pass `description` prop into `FormattedMessage` component.
 This prop is optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
-In case when ReactJS component is converted to AngularJS directive using `reactDirective` AngularJS service, it's necessary to use React HOC `injectI18nProvider` to pass `intl` object to `FormattedMessage` component via context.
+In case when ReactJS component is rendered with the help of `reactDirective` AngularJS service, it's necessary to use React HOC `injectI18nProvider` to pass `intl` object to `FormattedMessage` component via context.
 
 ```js
 import { injectI18nProvider } from '@kbn/i18n/react';
@@ -298,6 +298,8 @@ module.directive('headerGlobalNav', (reactDirective) => {
 });
 
 ```
+
+**NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `injectI18nProvider` or `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
 
 ### Attributes translation in React
 

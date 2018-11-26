@@ -16,7 +16,7 @@ Ids should end with:
 - Placeholder (if it's a placeholder),
 - Tooltip (if it's a tootltip),
 - AriaLabel (if it's `aria-label` tag attribute),
-- ErrorMessage (if it'a an error message),
+- ErrorMessage (if it's an error message),
 - LinkText (if it's `<a>` tag),
 - ToggleSwitch and etc.
 
@@ -84,27 +84,27 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 
 #### In ReactJS
 
-- Mostly use `<FormattedMessage>` wherever it's possible.
-- Use `intl.formatmessage()` where the string is expected (`aria-label`, `placeholder`).
-- Use `i18n.translate()` in other cases (static field in class).
+- You should use `<FormattedMessage>` most of the time.
+- In case when the string is expected (`aria-label`, `placeholder`), use `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
+- In case if none of the above can not be applied (e.g. it's needed to translate any code that doesn't have access to the component props), you can call JS function `i18n.translate()` from `@kbn/i18n` package.
 
 #### In AngularJS
 
 - Use `i18n` service in controllers, directives, services by injected it.
 - Use `i18nId` directive in template.
 - Use `i18n` filter in template for attribute translation.
-- Use `i18n.translate()` in other cases (in plain JS).
+- In case if none of the above can not be applied, you can call JS function `i18n.translate()` from `@kbn/i18n` package.
 
-Note: Use bind once in filters wherever it's possible to prevent watcher creation.
+Note: Use one-time binding ("{{:: ... }}") in filters wherever it's possible to prevent unnecessary expression re-evaluation.
 
 #### In JavaScript
 
-- Use `i18n.translate()` in NodeJS.
+- Use `i18n.translate()` in NodeJS or any other framework agnostic code, where `i18n` is the I18n engine from `@kbn/i18n` package.
 
 ### Naming convention
 
 The message ids chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a message id, adding a progressive number to the existing key should always be used as a last resort.
-Here's a rule id maning:
+Here's a rule of id maning:
 
 `{plugin}.{area}.[{sub-area}].{element}`
 
@@ -303,6 +303,19 @@ For example:
     i18n-values="{ indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
   ```
 
+  -----------------------------------------------------------
+  **BUT** we can not use tags that should be compiled:
+
+  ```html
+  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+    i18n-default-message="This page lists every field in the {indexPatternTitle} index"
+    i18n-values="{ indexPatternTitle: '<div my-directive>' + indexPattern.title + '</div>' }"></span>
+  ```
+
+  To void injections vulnerability, `i18nId` directive doesn't compile its values.
+
+  -----------------------------------------------------------
+
   ```html
   <FormattedMessage
     id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
@@ -328,7 +341,7 @@ For example:
   />
   ```
 
-- Nontranslatable text such as property name.
+- Non-translatable text such as property name.
 
   ```html
   <FormattedMessage
@@ -421,22 +434,23 @@ it('should render normally', async () => {
 
 ## Development steps
 
-1. Apply appropriate `i18n` component.
+1. Localize label with the suitable i18n component.
 
-2. Check UI that nothing is broken.
+2. Make sure that UI still looks correct and is functioning properly (e.g. click handler is processed, checkbox is checked/unchecked, etc.).
 
 3. Check functionality of an element (button is clicked, checkbox is checked/unchecked, etc.).
 
-4. Run validation tool:
+4. Run i18n validation tool and skim through created `en.json`:
     ```js
       node scripts/i18n_check --output ./
     ```
-    and look through created `en.json`.
 
-5. Run eslint, tslint rules.
+5. Run linters and type checker as you normally do.
 
 6. Run tests.
 
-7. Check with pseudo-locale by setting `i18n.locale` to `en-xa` in `./config/kibana.yml`.
+7. Run Kibana with enabled pseudo-locale (either pass `--i18n.locale=en-xa` as a command-line argument or add it to the `kibana.yml`) and observe the text you've just localized.
 
-8. Check that CI green
+    If you did everything correctly, it should turn into something like this `Ĥéļļļô ŴŴôŕļļð!` assuming your text was `Hello World!`.
+
+8. Check that CI is green.
