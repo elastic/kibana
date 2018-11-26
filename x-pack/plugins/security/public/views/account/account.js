@@ -25,7 +25,7 @@ routes.when('/account', {
 
     const notifier = new Notifier();
 
-    $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword) => {
+    $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword, i18n) => {
       $scope.user.newPassword = newPassword;
       if (currentPassword) {
         // If the currentPassword is null, we shouldn't send it.
@@ -34,7 +34,7 @@ routes.when('/account', {
 
       $scope.user.$changePassword()
         .then(() => toastNotifications.addSuccess({
-          title: i18n.translate('xpack.security.account.updatedPasswordTitle', {
+          title: i18n('xpack.security.account.updatedPasswordTitle', {
             defaultMessage: 'Updated password'
           }),
           'data-test-subj': 'passwordUpdateSuccess',
