@@ -17,15 +17,15 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
   const SUBJ_TABLE_NO_DATA = `${SUBJ_TABLE_CONTAINER} monitoringTableNoData`;
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} monitoringTableToolBar`;
 
-  const SUBJ_TABLE_SORT_NAME_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-name`;
-  const SUBJ_TABLE_SORT_STATUS_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-status`;
-  const SUBJ_TABLE_SORT_CPU_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-cpuUsage`;
-  const SUBJ_TABLE_SORT_LOAD_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-loadAverage`;
-  const SUBJ_TABLE_SORT_MEM_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-jvmMemory`;
-  const SUBJ_TABLE_SORT_DISK_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-diskFreeSpace`;
-  const SUBJ_TABLE_SORT_SHARDS_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell-shards`;
+  const SUBJ_TABLE_SORT_NAME_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_name_0`;
+  const SUBJ_TABLE_SORT_STATUS_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_isOnline_1`;
+  const SUBJ_TABLE_SORT_CPU_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_cpu_utilization_2`;
+  const SUBJ_TABLE_SORT_LOAD_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_load_average_3`;
+  const SUBJ_TABLE_SORT_MEM_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_jvm_mem_percent_4`;
+  const SUBJ_TABLE_SORT_DISK_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_node_free_space_5`;
+  const SUBJ_TABLE_SORT_SHARDS_COL = `${SUBJ_TABLE_CONTAINER} tableHeaderCell_shardCount_6`;
 
-  const SUBJ_TABLE_BODY = 'elasticsearchNodesTableBody';
+  const SUBJ_TABLE_BODY = 'elasticsearchNodesTableContainer';
   const SUBJ_NODES_NAMES = `${SUBJ_TABLE_BODY} name`;
   const SUBJ_NODES_STATUSES = `${SUBJ_TABLE_BODY} statusIcon`;
   const SUBJ_NODES_CPUS = `${SUBJ_TABLE_BODY} cpuUsage`;
@@ -89,7 +89,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     }
 
     getRows() {
-      return PageObjects.monitoring.tableGetRows(SUBJ_TABLE_BODY);
+      return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_BODY);
     }
 
     setFilter(text) {
@@ -101,7 +101,7 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     }
 
     assertNoData() {
-      return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
+      return PageObjects.monitoring.assertEuiTableNoData(SUBJ_TABLE_NO_DATA);
     }
 
     async getNodesAll() {

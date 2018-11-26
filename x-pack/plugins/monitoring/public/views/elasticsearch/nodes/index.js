@@ -9,7 +9,7 @@ import { find } from 'lodash';
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
-import { MonitoringViewBaseTableController } from '../../';
+import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
 import { I18nProvider } from '@kbn/i18n/react';
 
@@ -22,7 +22,7 @@ uiRoutes.when('/elasticsearch/nodes', {
     }
   },
   controllerAs: 'elasticsearchNodes',
-  controller: class ElasticsearchNodesController extends MonitoringViewBaseTableController {
+  controller: class ElasticsearchNodesController extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
@@ -55,6 +55,9 @@ uiRoutes.when('/elasticsearch/nodes', {
               clusterStatus={clusterStatus}
               nodes={nodes}
               showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+              sorting={this.sorting}
+              pagination={this.pagination}
+              onTableChange={this.onTableChange}
             />
           </I18nProvider>
         );
