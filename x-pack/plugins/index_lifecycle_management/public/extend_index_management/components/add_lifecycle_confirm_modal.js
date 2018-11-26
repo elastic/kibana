@@ -30,8 +30,8 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     super(props);
     this.state = {
       policies: [],
-      selectedPolicyName: null,
-      selectedAlias: null,
+      selectedPolicyName: '',
+      selectedAlias: '',
     };
   }
   addPolicy = async () => {
