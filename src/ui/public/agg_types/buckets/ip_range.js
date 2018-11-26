@@ -39,9 +39,9 @@ export const ipRangeBucketAgg = new BucketAggType({
   },
   makeLabel: function (aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.ipRangeLabel', {
-      defaultMessage: '{aggConfigGetFieldDisplayName} IP ranges',
+      defaultMessage: '{fieldName} IP ranges',
       values: {
-        aggConfigGetFieldDisplayName: aggConfig.getFieldDisplayName()
+        fieldName: aggConfig.getFieldDisplayName()
       }
     });
   },

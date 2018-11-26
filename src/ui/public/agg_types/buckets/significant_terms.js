@@ -29,10 +29,10 @@ export const significantTermsBucketAgg = new BucketAggType({
   }),
   makeLabel: function (aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.significantTermsLabel', {
-      defaultMessage: 'Top {aggConfigParamsSize} unusual terms in { aggConfigGetFieldDisplayName}',
+      defaultMessage: 'Top {size} unusual terms in {fieldName}',
       values: {
-        aggConfigParamsSize: aggConfig.params.size,
-        aggConfigGetFieldDisplayName: aggConfig.getFieldDisplayName(),
+        size: aggConfig.params.size,
+        fieldName: aggConfig.getFieldDisplayName(),
       }
     });
   },

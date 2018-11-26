@@ -63,10 +63,10 @@ export const dateHistogramBucketAgg = new BucketAggType({
     const output = this.params.write(agg);
     const field = agg.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
-      defaultMessage: '{fieldName} per {outputDescription}',
+      defaultMessage: '{fieldName} per {intervalDescription}',
       values: {
         fieldName: field,
-        outputDescription: output.metricScaleText || output.bucketInterval.description,
+        intervalDescription: output.metricScaleText || output.bucketInterval.description,
       }
     });
   },

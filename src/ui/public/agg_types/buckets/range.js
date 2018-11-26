@@ -35,9 +35,9 @@ export const rangeBucketAgg = new BucketAggType({
   createFilter: createFilterRange,
   makeLabel: function (aggConfig) {
     return i18n.translate('common.ui.aggTypes.buckets.rangesLabel', {
-      defaultMessage: '{aggConfigGetFieldDisplayName} ranges',
+      defaultMessage: '{fieldName} ranges',
       values: {
-        aggConfigGetFieldDisplayName: aggConfig.getFieldDisplayName()
+        fieldName: aggConfig.getFieldDisplayName()
       }
     });
   },
@@ -66,10 +66,10 @@ export const rangeBucketAgg = new BucketAggType({
     const RangeFormat = FieldFormat.from(function (range) {
       const format = agg.fieldOwnFormatter();
       return i18n.translate('common.ui.aggTypes.buckets.ranges.rangesFormatMessage', {
-        defaultMessage: '{rangeFormatGte} to {rangeFormatLt}',
+        defaultMessage: '{from} to {to}',
         values: {
-          rangeFormatGte: format(range.gte),
-          rangeFormatLt: format(range.lt)
+          from: format(range.gte),
+          to: format(range.lt)
         }
       });
     });
