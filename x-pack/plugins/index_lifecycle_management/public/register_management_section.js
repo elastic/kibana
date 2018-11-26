@@ -8,7 +8,7 @@ import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
 import { BASE_PATH } from '../common/constants';
 const esSection = management.getSection('elasticsearch');
-esSection.register('index_lifecycle_management', {
+esSection.register('index_lifecycle_policies', {
   visible: true,
   display: i18n.translate('xpack.indexLifecycleMgmt.appTitle', {
     defaultMessage: 'Index Lifecycle Policies',

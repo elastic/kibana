@@ -12,6 +12,7 @@ import { BASE_PATH } from '../../../../../common/constants';
 import { NoMatch } from '../no_match';
 import { getPolicyPath } from '../../../../services/navigation';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiLink,
   EuiButtonIcon,
@@ -385,15 +386,18 @@ export class PolicyTableUi extends Component {
                   <h1>
                     <FormattedMessage
                       id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                      defaultMessage="Index lifecycle policy management"
+                      defaultMessage="Index lifecycle policies"
                     />
                   </h1>
+
                 </EuiTitle>
+
               </EuiFlexItem>
               {policies.length ? (
                 <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
+            <EuiBetaBadge label="Beta" />
             <EuiSpacer size="s" />
             <EuiText>
               <p>
