@@ -15,6 +15,7 @@
     "plugins/reporting/.chromium/*",
     "common/**/*",
     "plugins/**/*",
+    "public/**/*",
     "server/**/*",
     "webpackShims/*",
     "!**/README.md",
