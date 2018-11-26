@@ -22,11 +22,11 @@
   }
 
   /**
-   * 1. We want the docTable__container to scroll only when embedded in a dashboard panel
+   * 1. We want the kbnDocTable__container to scroll only when embedded in a dashboard panel
    * 2. Fix overflow of vis's specifically for inside dashboard panels, lets the panel decide the overflow
    * 3. Force a better looking scrollbar
    */
-  .docTable__container {
+  .kbnDocTable__container {
     flex: 1 1 0; /* 1 */
     overflow: auto; /* 1 */
   }

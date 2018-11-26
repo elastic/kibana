@@ -1,8 +1,8 @@
-.docTableCell__dataField {
+.kbnDocTableCell__dataField {
   white-space: pre-wrap;
 }
 
-.docTableCell__filter {
+.kbnDocTableCell__filter {
   position: absolute;
   white-space: nowrap;
   right: 0;
@@ -14,7 +14,7 @@
  * 3. Show on focus to enable keyboard accessibility.
  */
 
-.docTableRowFilterButton {
+.kbnDocTableRowFilterButton {
   appearance: none;
   background-color: $euiColorEmptyShade;
   border: none;
@@ -32,7 +32,7 @@
 .theme-dark {
   @import '@elastic/eui/src/themes/k6/k6_colors_dark';
 
-  .docTableRowFilterButton {
+  .kbnDocTableRowFilterButton {
     background-color: $euiColorEmptyShade;
   }
 }

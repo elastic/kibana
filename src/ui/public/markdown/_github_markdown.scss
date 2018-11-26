@@ -21,7 +21,7 @@
 // THE SOFTWARE.
 
 
-.markdown-body {
+.kbnMarkdown__body {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
   line-height: 1.5;
@@ -402,7 +402,7 @@
 .theme-dark {
   @import '@elastic/eui/src/themes/k6/k6_colors_dark';
 
-  .markdown-body {
+  .kbnMarkdown__body {
     color: $euiTextColor;
 
     a {

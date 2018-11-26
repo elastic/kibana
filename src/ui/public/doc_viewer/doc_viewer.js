@@ -37,10 +37,10 @@ uiModules.get('kibana')
         onRemoveColumn: '=?',
       },
       template: function ($el) {
-        const $viewer = $('<div class="docViewer">');
+        const $viewer = $('<div class="kbnDocViewer">');
         $el.append($viewer);
         const $tabs = $('<ul class="nav nav-tabs" role="tablist">');
-        const $content = $('<div class="docViewer__content" role="tabpanel">');
+        const $content = $('<div class="kbnDocViewer__content" role="tabpanel">');
         $viewer.append($tabs);
         $viewer.append($content);
         docViews.inOrder.forEach(view => {

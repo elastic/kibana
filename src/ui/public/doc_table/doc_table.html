@@ -1,10 +1,10 @@
 <div
-  class="docTable__container"
+  class="kbnDocTable__container"
   ng-if="hits.length"
   ng-class="{ loading: searchSource.activeFetchCount > 0 }"
 >
   <div ng-if="!infiniteScroll">
-    <div class="kuiBar docTable__bar">
+    <div class="kuiBar kbnDocTable__bar">
       <div class="kuiBarSection">
         <div
           ng-if="shouldShowLimitedResultsWarning()"
@@ -44,7 +44,7 @@
           index-pattern="indexPattern"
           filter="filter"
           filters="filters"
-          class="docTable__row"
+          class="kbnDocTable__row"
           on-add-column="onAddColumn"
           on-change-sort-order="onChangeSortOrder"
           on-remove-column="onRemoveColumn"
@@ -52,7 +52,7 @@
       </tbody>
     </table>
     <!-- ToolBarFooter -->
-    <div class="kuiBar docTable__bar">
+    <div class="kuiBar kbnDocTable__bar">
       <div class="kuiBarSection">
         <div
           ng-if="shouldShowLimitedResultsWarning()"
@@ -94,8 +94,8 @@
         index-pattern="indexPattern"
         filter="filter"
         filters="filters"
-        class="docTable__row"
-        ng-class="{'docTable__row--highlight': row['$$_isAnchor']}"
+        class="kbnDocTable__row"
+        ng-class="{'kbnDocTable__row--highlight': row['$$_isAnchor']}"
         data-test-subj="docTableRow{{ row['$$_isAnchor'] ? ' docTableAnchorRow' : ''}}"
         on-add-column="onAddColumn"
         on-change-sort-order="onChangeSortOrder"
@@ -106,7 +106,7 @@
   <kbn-infinite-scroll ng-if="infiniteScroll" more="addRows"></kbn-infinite-scroll>
 </div>
 
-<div ng-if="hits != null && !hits.length" class="docTable__error">
+<div ng-if="hits != null && !hits.length" class="kbnDocTable__error">
   <h2><i class="fa fa-meh-o"></i></h2>
   <h4>No results found</h4>
 </div>

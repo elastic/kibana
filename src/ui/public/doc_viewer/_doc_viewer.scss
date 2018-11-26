@@ -1,6 +1,6 @@
-.docViewer {
+.kbnDocViewer {
   pre,
-  .docViewer__value {
+  .kbnDocViewer__value {
     display: inline-block;
     word-break: break-all;
     word-wrap: break-word;
@@ -17,11 +17,11 @@
   }
 }
 
-.docViewer__content {
+.kbnDocViewer__content {
   margin: $euiSizeS 0 0 0;
 }
 
-.docViewer__buttons,
-.docViewer__field {
+.kbnDocViewer__buttons,
+.kbnDocViewer__field {
   white-space: nowrap;
 }

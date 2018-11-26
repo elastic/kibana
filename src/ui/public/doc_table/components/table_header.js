@@ -75,7 +75,7 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
         if (!$scope.isSortableColumn(column)) return;
 
         const sortOrder = $scope.sortOrder;
-        const defaultClass = ['fa', 'fa-sort-up', 'docTableHeader__sortChange'];
+        const defaultClass = ['fa', 'fa-sort-up', 'kbnDocTableHeader__sortChange'];
 
         if (!sortOrder || column !== sortOrder[0]) return defaultClass;
         return ['fa', sortOrder[1] === 'asc' ? 'fa-sort-up' : 'fa-sort-down'];

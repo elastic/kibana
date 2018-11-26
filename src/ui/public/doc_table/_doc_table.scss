@@ -21,34 +21,34 @@ doc-table {
   }
 }
 
-.docTable__container.loading {
+.kbnDocTable__container.loading {
   opacity: 0.5;
 }
 
-.docTable__row {
+.kbnDocTable__row {
   td {
     position: relative;
 
     &:hover {
-      .docTableRowFilterButton {
+      .kbnDocTableRowFilterButton {
         opacity: 1;
       }
     }
   }
 }
 
-.docTable__row--highlight {
+.kbnDocTable__row--highlight {
   td,
-  .docTableRowFilterButton {
+  .kbnDocTableRowFilterButton {
     background-color: tintOrShade($euiColorPrimary, 90%, 70%);
   }
 }
 
-.docTable__bar {
+.kbnDocTable__bar {
   margin: $euiSizeXS $euiSizeXS 0;
 }
 
-.docTable__error {
+.kbnDocTable__error {
   display: flex;
   flex-direction: column;
   justify-content: center;
