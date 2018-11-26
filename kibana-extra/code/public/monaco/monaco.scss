@@ -8,6 +8,13 @@
 	width: 5px;
 }
 
+.monaco-editor .margin-view-overlays .line-numbers {
+  text-align: center;
+  border-right: solid 1px rgba(188, 188, 188, 1);
+}
+
+
+
 .monaco-editor-hover {
   border: 1px solid #c8c8c8;
   cursor: default;
@@ -42,6 +49,7 @@
 .monaco-editor-hover .button-group button:not(:first-child) {
   border-left: 1px solid #D8D8D8;
 }
+
 .monaco-editor-hover .button-group button{
   font-size: 13px;
   font-weight: normal;

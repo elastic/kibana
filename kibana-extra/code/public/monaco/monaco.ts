@@ -114,4 +114,44 @@ import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution'
   },
 };*/
 
+import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+function rgb2hex(rgb: string): string {
+  const regex = /rgb\(\s*(\d*),\s*(\d*),\s*(\d*)\)/g;
+  const m = regex.exec(rgb);
+  if (m) {
+    return (
+      '#' +
+      [m[1], m[2], m[3]]
+        .map(s =>
+          parseInt(s, 10)
+            .toString(16)
+            .padStart(2, '0')
+        )
+        .join('')
+    );
+  }
+  return rgb;
+}
+monaco.editor.defineTheme('k6-colors-light', {
+  base: 'vs',
+  inherit: true,
+  rules: [
+    { token: 'keyword', foreground: rgb2hex(euiVars.euiCodeBlockKeywordColor), fontStyle: 'bold' },
+    { token: 'comment', foreground: rgb2hex(euiVars.euiCodeBlockCommentColor) },
+    { token: 'string', foreground: rgb2hex(euiVars.euiCodeBlockStringColor) },
+    { token: 'number', foreground: rgb2hex(euiVars.euiCodeBlockNumberColor) },
+    { token: 'regexp', foreground: rgb2hex(euiVars.euiCodeBlockRegexpColor) },
+    { token: 'type', foreground: rgb2hex(euiVars.euiCodeBlockTypeColor) },
+    { token: 'annotation', foreground: rgb2hex(euiVars.euiCodeBlockMetaColor) },
+    { token: 'tag', foreground: rgb2hex(euiVars.euiCodeBlockTagColor) },
+    { token: 'symbol', foreground: rgb2hex(euiVars.euiCodeBlockSymbolColor) },
+  ],
+  colors: {
+    'editor.foreground': rgb2hex(euiVars.euiCodeBlockColor),
+    'editor.background': rgb2hex(euiVars.euiCodeBlockBackgroundColor),
+    'editorLineNumber.foreground': rgb2hex(euiVars.euiColorMediumShade),
+  },
+});
+monaco.editor.setTheme('k6-colors-light');
+
 export { monaco };
