@@ -264,8 +264,6 @@ function getScheduledEventsByBucket(
 
 // Obtains a list of annotations by job ID and time.
 // Pass an empty array or ['*'] to search over all job IDs.
-// Returned response contains a annotations property, which will only
-// contains keys for jobs which have annotations for the specified time range.
 function getAnnotations(
   jobIds,
   earliestMs,
@@ -279,31 +277,63 @@ function getAnnotations(
 
     // Build the criteria to use in the bool filter part of the request.
     // Adds criteria for the time range plus any specified job IDs.
+    // The nested must_not time range filter queries make sure that we fetch:
+    // - annotations with start and end within the time range
+    // - annotations that either start or end within the time range
+    // - annotations that start before and end after the given time range
+    // - but skip annotation that are completely outside the time range
+    //   (the ones that start and end before or after the time range)
     const boolCriteria = [
-      /*{
+      {
         bool: {
-          should: [
+          must_not: [
             {
-              range: {
-                timestamp: {
-                  gte: earliestMs,
-                  lte: latestMs,
-                  format: 'epoch_millis'
-                }
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timestamp: {
+                        lte: earliestMs,
+                        format: 'epoch_millis'
+                      }
+                    }
+                  },
+                  {
+                    range: {
+                      end_timestamp: {
+                        lte: earliestMs,
+                        format: 'epoch_millis'
+                      }
+                    }
+                  }
+                ]
               }
             },
             {
-              range: {
-                end_timestamp: {
-                  gte: earliestMs,
-                  lte: latestMs,
-                  format: 'epoch_millis'
-                }
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      timestamp: {
+                        gte: latestMs,
+                        format: 'epoch_millis'
+                      }
+                    }
+                  },
+                  {
+                    range: {
+                      end_timestamp: {
+                        gte: latestMs,
+                        format: 'epoch_millis'
+                      }
+                    }
+                  }
+                ]
               }
-            }
+            },
           ]
         }
-      },*/
+      },
       {
         exists: { field: 'annotation' }
       }
