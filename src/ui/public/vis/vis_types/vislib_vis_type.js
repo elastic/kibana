@@ -38,10 +38,10 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
   const BaseVisType = Private(BaseVisTypeProvider);
 
   const legendClassName = {
-    top: 'vislib-container--legend-top',
-    bottom: 'vislib-container--legend-bottom',
-    left: 'vislib-container--legend-left',
-    right: 'vislib-container--legend-right',
+    top: 'visLib--legend-top',
+    bottom: 'visLib--legend-bottom',
+    left: 'visLib--legend-left',
+    right: 'visLib--legend-right',
   };
 
   class VislibVisController {
@@ -51,11 +51,11 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
       this.$scope = null;
 
       this.container = document.createElement('div');
-      this.container.className = 'vislib-container';
+      this.container.className = 'visLib';
       this.el.appendChild(this.container);
 
       this.chartEl = document.createElement('div');
-      this.chartEl.className = 'vislib-chart';
+      this.chartEl.className = 'visLib__chart';
       this.container.appendChild(this.chartEl);
 
     }
@@ -72,7 +72,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
 
         if (this.vis.params.addLegend) {
           $(this.container).attr('class', (i, cls) => {
-            return cls.replace(/vislib-container--legend-\S+/g, '');
+            return cls.replace(/visLib--legend-\S+/g, '');
           }).addClass(legendClassName[this.vis.params.legendPosition]);
 
           this.$scope = $rootScope.$new();

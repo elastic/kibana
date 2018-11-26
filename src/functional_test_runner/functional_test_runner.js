@@ -89,8 +89,8 @@ export function createFunctionalTestRunner({ log, configFile, configOverrides })
         );
 
         return {
-          tests: countTests(mocha.suite),
-          excludedTests: mocha.excludedTests.length
+          testCount: countTests(mocha.suite),
+          excludedTests: mocha.excludedTests.map(t => t.fullTitle())
         };
       });
     }
