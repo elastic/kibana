@@ -19,7 +19,7 @@
 
 import xml2js from 'xml2js';
 import vfs from 'vinyl-fs';
-import { map } from '../../utils/streams/array_stream';
+import { createMapStream } from '../../utils/streams';
 import { getGithubClient, markdownMetadata, paginate } from '../github_utils';
 import { find } from 'lodash';
 import stripAnsi from 'strip-ansi';
@@ -32,16 +32,19 @@ const BUILD_URL = process.env.BUILD_URL;
 /**
  * Parses junit XML files into JSON
  */
-const mapXml = map((file, cb) => {
+const mapXml = createMapStream((file) => new Promise((resolve, reject) => {
   xml2js.parseString(file.contents.toString(), (err, result) => {
-    cb(null, result);
+    if (err) {
+      return reject(err);
+    }
+    resolve(result);
   });
-});
+}));
 
 /**
  * Filters all testsuites to find failed testcases
  */
-const filterFailures = map((testSuite, cb) => {
+const filterFailures = createMapStream((testSuite) => {
   // Grab the failures. Reporters may report multiple testsuites in a single file.
   const testFiles = testSuite.testsuites
     ? testSuite.testsuites.testsuite
@@ -64,14 +67,14 @@ const filterFailures = map((testSuite, cb) => {
 
   console.log(`Found ${failures.length} test failures`);
 
-  cb(null, failures);
+  return failures;
 });
 
 /**
  * Creates and updates github issues for the given testcase failures.
  */
 const updateGithubIssues = (githubClient, issues) => {
-  return map(async (failureCases, cb) => {
+  return createMapStream(async (failureCases) => {
 
     const issueOps = failureCases.map(async (failureCase) => {
       const existingIssue = find(issues, (issue) => {
@@ -123,10 +126,10 @@ const updateGithubIssues = (githubClient, issues) => {
       }
     });
 
-    Promise
+    return Promise
       .all(issueOps)
-      .then(() => cb(null, failureCases))
-      .catch(e => cb(e));
+      .then(() => failureCases)
+      .catch(e => e);
   });
 };
 
