@@ -35,6 +35,7 @@ module.constant('shieldPrivileges', {
     'create_index',
     'view_index_metadata',
     'read_cross_cluster',
+    'manage_follow_index',
   ],
   applications: []
 });
