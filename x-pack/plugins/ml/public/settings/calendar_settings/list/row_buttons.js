@@ -33,14 +33,14 @@ function DeleteButton({ onClick }) {
   );
 }
 
-function EditButton({ onClick }) {
+function EditButton({ editUrl }) {
   return (
     <Fragment>
       <EuiButtonEmpty
         size="xs"
         color="text"
         iconType="pencil"
-        onClick={onClick}
+        href={editUrl}
       >
         Edit
       </EuiButtonEmpty>
@@ -48,11 +48,11 @@ function EditButton({ onClick }) {
   );
 }
 
-export function RowButtons({ onDeleteClick, onEditClick }) {
+export function RowButtons({ onDeleteClick, editUrl }) {
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
-        <EditButton onClick={onEditClick} />
+        <EditButton editUrl={editUrl} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <DeleteButton onClick={onDeleteClick} />
@@ -63,5 +63,5 @@ export function RowButtons({ onDeleteClick, onEditClick }) {
 
 RowButtons.propTypes = {
   onDeleteClick: PropTypes.func.isRequired,
-  onEditClick: PropTypes.func.isRequired,
+  editUrl: PropTypes.string.isRequired,
 };

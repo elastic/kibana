@@ -55,7 +55,7 @@ export class CalendarsList extends Component {
     this.setState({ isDestroyModalVisible: true, calendarId });
   }
 
-  // TODO: handle error of calendar delete
+  // TODO: handle error of calendar delete - toast with message
   deleteCalendar = () => {
     const { calendarId } = this.state;
 
@@ -116,7 +116,6 @@ export class CalendarsList extends Component {
           <CalendarsListTable
             calendarsList={this.addRequiredFieldsToList(calendars)}
             onDeleteClick={this.showDestroyModal}
-            onEditClick={() => {}}
           />
         </EuiPageContent>
         {destroyModal}

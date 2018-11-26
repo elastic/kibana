@@ -51,7 +51,6 @@ function renderToolsRight() {
 export function CalendarsListTable({
   calendarsList,
   onDeleteClick,
-  onEditClick,
 }) {
 
   const sorting = {
@@ -90,7 +89,7 @@ export function CalendarsListTable({
       render: (calendar) => (
         <RowButtons
           onDeleteClick={() => { onDeleteClick(calendar.calendar_id); }}
-          onEditClick={() => { onEditClick(calendar); }}
+          editUrl={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/edit_calendar/${calendar.calendar_id}`}
         />
       )
     },
@@ -121,5 +120,4 @@ export function CalendarsListTable({
 CalendarsListTable.propTypes = {
   calendarsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
-  onEditClick: PropTypes.func.isRequired,
 };

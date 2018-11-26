@@ -35,21 +35,31 @@ uiRoutes
       checkMlNodesAvailable,
       initPromise: initPromise(true)
     }
+  })
+  .when('/settings/calendars_list/edit_calendar/:calendarId', {
+    template,
+    resolve: {
+      CheckLicense: checkFullLicense,
+      privileges: checkGetJobsPrivilege,
+      checkMlNodesAvailable,
+      initPromise: initPromise(true)
+    }
   });
 
 import { NewCalendar } from './new_calendar.js';
 
-module.directive('mlNewCalendar', function () {
+module.directive('mlNewCalendar', function ($route) {
   return {
     restrict: 'E',
     replace: false,
     scope: {},
     link: function (scope, element) {
-      // const props = {
-      //   calendarId: $route.current.params.calendarId
-      // };
+      const props = {
+        calendarId: $route.current.params.calendarId
+      };
+
       ReactDOM.render(
-        React.createElement(NewCalendar), // pass props here as second arg
+        React.createElement(NewCalendar, props),
         element[0]
       );
     }

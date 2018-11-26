@@ -15,7 +15,7 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
-// import { ml } from '../../../services/ml_api_service';
+import { getCalendarSettingsData } from './utils';
 import { CalendarForm } from './calendar_form';
 // import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 
@@ -24,22 +24,48 @@ export class NewCalendar extends Component {
     super(props);
     this.state = {
       loading: true,
+      jobIds: [],
+      groupIds: [],
+      calendars: []
     };
   }
 
-  createCalendar = () => {
-    // TODO hit ml endpoint to create/update calendar? or separate?
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  // TODO: add some error handling - toast on error with try again message
+  fetchData() {
+    getCalendarSettingsData()
+      .then(({ jobIds, groupIds, calendars }) => {
+        this.setState({ jobIds, groupIds, calendars, loading: false });
+      })
+      .catch((err) => {
+        console.log(err);
+        this.setState({ loading: false });
+      });
   }
 
   render() {
+    const { jobIds, groupIds, calendars } = this.state;
+    let calendar;
+    // Better to build a map with calendar id as keys for constant lookup time?
+    if (this.props.calendarId !== undefined) {
+      calendar = calendars.find((cal) => cal.calendar_id === this.props.calendarId);
+    }
+
     return (
       <EuiPage className="ml-list-filter-lists">
         <EuiPageContent
           className="ml-list-filter-lists-content"
           verticalPosition="center"
-          horizontalPosition="center"
+          // horizontalPosition="center"
         >
-          <CalendarForm />
+          <CalendarForm
+            calendar={calendar}
+            jobIds={jobIds}
+            groupIds={groupIds}
+          />
         </EuiPageContent>
       </EuiPage>
     );

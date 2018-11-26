@@ -21,27 +21,81 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-// import { ml } from '../../../services/ml_api_service';
+import chrome from 'ui/chrome';
+import { ml } from 'plugins/ml/services/ml_api_service';
+import { validateCalendarId } from './utils';
 // import { EventsTable } from './events_table.js'
 
 export class CalendarForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      calendarId: '',
-      description: '',
+      calendarId: props.calendar ? props.calendar.calendar_id : '',
+      description: props.calendar ? props.calendar.description : '',
       selectedJobOptions: [],
       selectedGroupOptions: [],
+      events: [],
+      saving: false,
     };
   }
 
-  onSave = () => {
-    // grab the values from the state and send to
-    // ml endpoint
+  onCreate = () => {
+    const calendar = this.setUpCalendarForApi();
+    // Validate and save - NOTE: can we validate calendar id with just the form on the front-end?
+    if (validateCalendarId(calendar.calendarId, { calendarId: { valid: true } })) {
+      this.setState({ saving: true });
+
+      ml.addCalendar(calendar)
+        .then(() => {
+          // redirect to settings/calendars_list
+          // $location.path('settings/calendars_list');
+        })
+        .catch((error) => {
+          console.log('Error saving calendar', error);
+          this.setState({ saving: true });
+        });
+    } else {
+      // Trigger toast or something with validation error message
+    }
   }
 
-  onCancel = () => {
-    // go back to calendar_list view
+  onEdit = () => {
+    // const calendar = this.setUpCalendarForApi();
+    // hit update api
+    // ml.updateCalendar(calendar).then().catch()
+  }
+  // TODO: If no events, pass empty array? Double-check
+  setUpCalendarForApi = () => {
+    const {
+      calendarId,
+      description,
+      events,
+      selectedGroupOptions,
+      selectedJobOptions,
+    } = this.state;
+
+    const jobIds = selectedJobOptions.map((option) => option.label);
+    const groupIds = selectedGroupOptions.map((option) => option.label);
+
+    // set up event
+    // const events = events.map((event) => {
+    //   return {
+    //     description: event.description,
+    //     start_time: event.start_time,
+    //     end_time: event.end_time
+    //   };
+    // });
+
+    // set up calendar
+    const calendar = {
+      calendarId,
+      description,
+      events,
+      // grab from selectedJobIds and selectedGroupIds? Ability to create new group?
+      job_ids: [...jobIds, ...groupIds]
+    };
+
+    return calendar;
   }
 
   onJobSelection = (selectedJobOptions) => {
@@ -56,35 +110,35 @@ export class CalendarForm extends Component {
     });
   };
 
-  onCalendarIdChange = e => {
+  onCalendarIdChange = (e) => {
     this.setState({
       calendarId: e.target.value,
     });
   };
 
-  onDescriptionChange = e => {
+  onDescriptionChange = (e) => {
     this.setState({
       description: e.target.value,
     });
   };
 
-  // job and group options to be passed in via props.
-  // new_calendar.js does call to api for data
   render() {
+    const { jobIds, groupIds, calendar } = this.props;
+    const isEdit = calendar !== undefined;
     return (
       <EuiForm>
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              onClick={this.onSave}
+              onClick={isEdit ? this.onEdit : this.onCreate}
             >
-              Save
+              {isEdit ? 'Save' : 'Create'}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={this.onCancel}
+              href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
             >
               Cancel
             </EuiButton>
@@ -100,8 +154,9 @@ export class CalendarForm extends Component {
           <EuiFieldText
             name="calendarId"
             fullWidth
-            value={this.state.calendarId}
+            value={isEdit ? calendar.calendar_id : this.state.calendarId}
             onChange={this.onCalendarIdChange}
+            disabled={isEdit === true}
           />
         </EuiFormRow>
 
@@ -114,6 +169,7 @@ export class CalendarForm extends Component {
             fullWidth
             value={this.state.description}
             onChange={this.onDescriptionChange}
+            disabled={isEdit === true}
           />
         </EuiFormRow>
 
@@ -123,11 +179,7 @@ export class CalendarForm extends Component {
         >
           <EuiComboBox
             fullWidth
-            options={[
-              { label: 'Job one' },
-              { label: 'Job two' },
-              { label: 'Job three' },
-            ]}
+            options={jobIds}
             selectedOptions={this.state.selectedJobOptions}
             onChange={this.onJobSelection}
           />
@@ -138,11 +190,8 @@ export class CalendarForm extends Component {
           fullWidth
         >
           <EuiComboBox
-            options={[
-              { label: 'Group one' },
-              { label: 'Group two' },
-              { label: 'Group three' },
-            ]}
+            fullWidth
+            options={groupIds}
             selectedOptions={this.state.selectedGroupOptions}
             onChange={this.onGroupSelection}
           />

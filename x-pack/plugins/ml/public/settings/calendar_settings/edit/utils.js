@@ -4,102 +4,95 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toastNotifications } from 'ui/notify';
-import { isJobIdValid } from 'plugins/ml/../common/util/job_utils';
-import { ml } from 'plugins/ml/services/ml_api_service';
 
-export function isValidFilterListId(id) {
-  //  Filter List ID requires the same format as a Job ID, therefore isJobIdValid can be used
-  return (id !== undefined) && (id.length > 0) && isJobIdValid(id);
+
+import _ from 'lodash';
+import { ml } from 'plugins/ml/services/ml_api_service';
+import { jobs } from 'plugins/ml/services/ml_api_service/jobs';
+import { isJobIdValid } from 'plugins/ml/../common/util/job_utils';
+
+
+function getJobIds() {
+  return new Promise((resolve, reject) => {
+    jobs.jobsSummary()
+      .then((resp) => {
+        resolve(resp.map((job) => ({ label: job.id })));
+      })
+      .catch((err) => {
+        const errorMessage = `Error fetching job summaries: ${err}`;
+        console.log(errorMessage);
+        reject(errorMessage);
+      });
+  });
 }
 
-
-// Saves a filter list, running an update if the supplied loadedFilterList, holding the
-// original filter list to which edits are being applied, is defined with a filter_id property.
-export function saveFilterList(filterId, description, items, loadedFilterList)  {
+function getGroupIds() {
   return new Promise((resolve, reject) => {
-    if (loadedFilterList === undefined || loadedFilterList.filter_id === undefined) {
-      // Create a new filter.
-      addFilterList(filterId,
-        description,
-        items
-      )
-        .then((newFilter) => {
-          resolve(newFilter);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    } else {
-      // Edit to existing filter.
-      updateFilterList(
-        loadedFilterList,
-        description,
-        items)
-        .then((updatedFilter) => {
-          resolve(updatedFilter);
-        })
-        .catch((error) => {
-          reject(error);
-        });
+    jobs.groups()
+      .then((resp) => {
+        resolve(resp.map((group) => ({ label: group.id })));
+      })
+      .catch((err) => {
+        const errorMessage = `Error loading groups: ${err}`;
+        console.log(errorMessage);
+        reject(errorMessage);
+      });
+  });
+}
 
+function getCalendars() {
+  return new Promise((resolve, reject) => {
+    ml.calendars()
+      .then((resp) => {
+        resolve(resp);
+      })
+      .catch((err) => {
+        const errorMessage = `Error loading calendars: ${err}`;
+        console.log(errorMessage);
+        reject(errorMessage);
+      });
+  });
+}
+
+export function getCalendarSettingsData() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const data = await Promise.all([getJobIds(), getGroupIds(), getCalendars()]);
+
+      const formattedData = {
+        jobIds: data[0],
+        groupIds: data[1],
+        calendars: data[2]
+      };
+      resolve(formattedData);
+    } catch (error) {
+      console.log(error);
+      reject(error);
     }
   });
 }
 
-export function addFilterList(filterId, description, items) {
-  return new Promise((resolve, reject) => {
+//  Calendar ID requires the same format as a Job ID, therefore isJobIdValid can be used
+// TODO: rewrite this so we can use toast for our error messages
+export function validateCalendarId(calendarId, checks) {
+  let valid = true;
 
-    // First check the filterId isn't already in use by loading the current list of filters.
-    ml.filters.filtersStats()
-      .then((filterLists) => {
-        const savedFilterIds = filterLists.map(filterList => filterList.filter_id);
-        if (savedFilterIds.indexOf(filterId) === -1) {
-          // Save the new filter.
-          ml.filters.addFilter(
-            filterId,
-            description,
-            items
-          )
-            .then((newFilter) => {
-              resolve(newFilter);
-            })
-            .catch((error) => {
-              reject(error);
-            });
-        } else {
-          toastNotifications.addDanger(`A filter with id ${filterId} already exists`);
-          reject(new Error(`A filter with id ${filterId} already exists`));
-        }
-      })
-      .catch((error) => {
-        reject(error);
-      });
+  _.each(checks, item => item.valid = true);
 
+  if (calendarId === '' || calendarId === undefined) {
+    checks.calendarId.valid = false;
+  } else if (isJobIdValid(calendarId) === false) {
+    checks.calendarId.valid = false;
+    let msg = 'Calendar ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
+    msg += 'must start and end with an alphanumeric character';
+    checks.calendarId.message = msg;
+  }
+
+  _.each(checks, (item) => {
+    if (item.valid === false) {
+      valid = false;
+    }
   });
 
-}
-
-export function updateFilterList(loadedFilterList, description, items) {
-
-  return new Promise((resolve, reject) => {
-
-    // Get items added and removed from loaded filter.
-    const loadedItems = loadedFilterList.items;
-    const addItems = items.filter(item => (loadedItems.includes(item) === false));
-    const removeItems = loadedItems.filter(item => (items.includes(item) === false));
-
-    ml.filters.updateFilter(
-      loadedFilterList.filter_id,
-      description,
-      addItems,
-      removeItems
-    )
-      .then((updatedFilter) => {
-        resolve(updatedFilter);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
+  return valid;
 }
