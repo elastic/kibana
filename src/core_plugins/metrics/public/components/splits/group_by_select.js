@@ -22,12 +22,27 @@ import React from 'react';
 import {
   EuiComboBox,
 } from '@elastic/eui';
-function GroupBySelect(props) {
+import { injectI18n } from '@kbn/i18n/react';
+
+function GroupBySelectUi(props) {
+  const { intl } = props;
   const modeOptions = [
-    { label: 'Everything', value: 'everything' },
-    { label: 'Filter', value: 'filter' },
-    { label: 'Filters', value: 'filters' },
-    { label: 'Terms', value: 'terms' }
+    {
+      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.everythingLabel', defaultMessage: 'Everything' }),
+      value: 'everything'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.filterLabel', defaultMessage: 'Filter' }),
+      value: 'filter'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.filtersLabel', defaultMessage: 'Filters' }),
+      value: 'filters'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.termsLabel', defaultMessage: 'Terms' }),
+      value: 'terms'
+    }
   ];
   const selectedValue = props.value || 'everything';
   const selectedOption = modeOptions.find(option => {
@@ -46,9 +61,10 @@ function GroupBySelect(props) {
 
 }
 
-GroupBySelect.propTypes = {
+GroupBySelectUi.propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.string
 };
 
+const GroupBySelect = injectI18n(GroupBySelectUi);
 export default GroupBySelect;

@@ -5,10 +5,10 @@
  */
 
 import { resolve } from 'path';
-import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
+import { pathsRegistry } from '@kbn/interpreter/common';
 import init from './init';
 import { mappings } from './server/mappings';
-import { CANVAS_APP } from './common/lib/constants';
+import { CANVAS_APP } from './common/lib';
 import { pluginPaths } from './plugin_paths';
 
 export function canvas(kibana) {

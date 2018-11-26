@@ -5,7 +5,7 @@
  */
 
 /* tslint:disable no-console */
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
 import moment from 'moment';
 import { KibanaConfig, Request } from 'src/server/kbn_server';
 
@@ -13,13 +13,16 @@ function decodeEsQuery(esQuery?: string): object {
   return esQuery ? JSON.parse(decodeURIComponent(esQuery)) : null;
 }
 
-type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
+export type ESClient = <T = void, U = void>(
+  type: string,
+  params: SearchParams
+) => Promise<AggregationSearchResponse<T, U>>;
 
-export interface Setup<T = any> {
+export interface Setup {
   start: number;
   end: number;
-  esFilterQuery: any;
-  client: Client<T>;
+  esFilterQuery?: any;
+  client: ESClient;
   config: KibanaConfig;
 }
 
@@ -34,10 +37,10 @@ export function setupRequest(req: Request) {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
-  function client<T>(
+  function client<T, U>(
     type: string,
     params: SearchParams
-  ): Promise<SearchResponse<T>> {
+  ): Promise<AggregationSearchResponse<T, U>> {
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
       console.log(
@@ -48,7 +51,11 @@ export function setupRequest(req: Request) {
       console.log(`GET ${params.index}/_search`);
       console.log(JSON.stringify(params.body, null, 4));
     }
-    return cluster.callWithRequest<SearchResponse<T>>(req, type, params);
+    return cluster.callWithRequest<AggregationSearchResponse<T, U>>(
+      req,
+      type,
+      params
+    );
   }
 
   return {
