@@ -18,9 +18,13 @@ import {
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
+import { AnnotationsTable } from './annotations_table';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
+
+import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../../common/constants/feature_flags';
+
 
 export class JobDetails extends Component {
   constructor(props) {
@@ -98,6 +102,14 @@ export class JobDetails extends Component {
         content: <ForecastsTable job={job} />,
       }
       ];
+
+      if (FEATURE_ANNOTATIONS_ENABLED) {
+        tabs.push({
+          id: 'annotations',
+          name: 'Annotations',
+          content: <AnnotationsTable job={job} />,
+        });
+      }
 
       return (
         <div className="tab-contents">
