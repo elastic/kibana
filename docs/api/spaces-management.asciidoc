@@ -6,6 +6,8 @@ experimental[This API is *experimental* and may be changed or removed completely
 
 The spaces API allows people to manage their spaces within {kib}.
 
+NOTE: These endpoints are not accessible via the Console plugin in Kibana.
+
 * <<spaces-api-post>>
 * <<spaces-api-put>>
 * <<spaces-api-get>>

@@ -9,6 +9,8 @@ It is *not* supported to do so using the
 {ref}/security-api.html#security-role-apis[{es} role management APIs], and doing 
 so will likely cause {kib}'s authorization to behave unexpectedly. 
 
+NOTE: These endpoints are not accessible via the Console plugin in Kibana.
+
 * <<role-management-api-put>>
 * <<role-management-api-get>>
 * <<role-management-api-delete>>
