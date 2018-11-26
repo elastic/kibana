@@ -17,11 +17,15 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export default () => ({
   name: 'kibana',
   type: 'kibana_context',
   context: {},
-  help: 'Gets kibana global context.',
+  help: i18n('common.core_plugins.interpreter.public.functions.kibana.help', {
+    defaultMessage: 'Gets kibana global context'
+  }),
   args: {},
   fn(context) {
     return {

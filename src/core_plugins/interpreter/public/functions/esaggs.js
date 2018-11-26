@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { CourierRequestHandlerProvider } from 'ui/vis/request_handlers/courier';
 import { AggConfigs } from 'ui/vis/agg_configs';
 
@@ -40,7 +41,7 @@ export default () => ({
       'null',
     ],
   },
-  help: 'Run AggConfig aggregation.',
+  help: i18n('common.core_plugins.interpreter.public.functions.esaggs.help', { defaultMessage: 'Run AggConfig aggregation' }),
   args: {
     index: {
       types: ['string', 'null'],
@@ -57,7 +58,6 @@ export default () => ({
     aggConfigs: {
       types: ['string'],
       default: '""',
-      help: 'AggConfig definition',
       multi: false,
     },
   },

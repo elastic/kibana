@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import chrome from 'ui/chrome';
@@ -29,24 +30,23 @@ export default () => ({
       'kibana_table', 'null'
     ],
   },
-  help: 'A vislib visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.vislib.help', {
+    defaultMessage: 'Vislib visualization'
+  }),
   args: {
     type: {
       types: ['string'],
       default: 'metric',
-      help: 'visualization type',
       multi: false,
     },
     schemas: {
       types: ['string'],
       default: '"{}"',
-      help: 'schemas configuration object',
       multi: false,
     },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
-      help: 'config of the visualization',
       multi: false,
     },
   },

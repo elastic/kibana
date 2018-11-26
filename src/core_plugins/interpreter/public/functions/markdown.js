@@ -17,13 +17,17 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export default () => ({
   name: 'markdown',
   type: 'render',
   context: {
     types: [],
   },
-  help: 'A markdown visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.markdown.help', {
+    defaultMessage: 'Markdown visualization'
+  }),
   args: {
     md: {
       types: ['string'],
@@ -35,7 +39,6 @@ export default () => ({
     params: {
       types: ['string'],
       default: '"{}"',
-      help: 'markdown configuration object',
       multi: false,
     }
   },

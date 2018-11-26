@@ -18,6 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 
 export default () => ({
   name: 'kibana_context',
@@ -28,27 +29,25 @@ export default () => ({
       'null',
     ],
   },
-  help: 'Gets kibana global context.',
+  help: i18n('common.core_plugins.interpreter.public.functions.kibana_context.help', {
+    defaultMessage: 'Updates kibana global context'
+  }),
   args: {
     q: {
       types: ['string', 'null'],
       aliases: ['query', '_'],
-      help: 'A Lucene query string',
       default: null,
     },
     filters: {
       types: ['string', 'null'],
-      help: 'Filters object',
       default: '"[]"',
     },
     timeRange: {
       types: ['string', 'null'],
-      help: 'Sets date range to query',
       default: null,
     },
     savedSearchId: {
       types: ['string', 'null'],
-      help: 'Sets date range to query',
       default: null,
     }
   },

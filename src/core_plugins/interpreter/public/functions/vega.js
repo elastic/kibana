@@ -18,8 +18,9 @@
  */
 
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
-import { VegaRequestHandlerProvider } from '../../../vega/public/vega_request_handler';
+import { VegaRequestHandlerProvider } from 'plugins/vega/vega_request_handler';
 
 export default () => ({
   name: 'vega',
@@ -30,12 +31,13 @@ export default () => ({
       'null',
     ],
   },
-  help: 'A vega visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.vega.help', {
+    defaultMessage: 'Vega visualization'
+  }),
   args: {
     spec: {
       types: ['string'],
       default: '{}',
-      help: 'config of the visualization',
       multi: false,
     },
   },

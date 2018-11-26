@@ -20,6 +20,7 @@
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import chrome from 'ui/chrome';
+import { i18n } from '@kbn/i18n';
 
 export default () => ({
   name: 'kibana_pie',
@@ -29,18 +30,18 @@ export default () => ({
       'kibana_table', 'null'
     ],
   },
-  help: 'A vislib pie visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.pie.help', {
+    defaultMessage: 'Pie visualization'
+  }),
   args: {
     schemas: {
       types: ['string'],
       default: '"{}"',
-      help: 'schemas configuration object',
       multi: false,
     },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
-      help: 'config of the visualization',
       multi: false,
     },
   },

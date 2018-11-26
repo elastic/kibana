@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export default () => ({
   name: 'tagcloud',
   type: 'render',
@@ -25,24 +27,23 @@ export default () => ({
       'kibana_table'
     ],
   },
-  help: 'A simple tagcloud visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.tagcloud.help', {
+    defaultMessage: 'Tagcloud visualization'
+  }),
   args: {
     bucket: {
       types: ['string'],
       default: '0',
-      help: 'bucket column index id or name',
       multi: false,
     },
     metric: {
       types: ['string'],
       default: '1',
-      help: 'metric column index id or name',
       multi: false,
     },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
-      help: 'config of the visualization',
       multi: false,
     },
   },

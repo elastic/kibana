@@ -17,18 +17,21 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export default () => ({
   name: 'input_control_vis',
   type: 'render',
   context: {
     types: [],
   },
-  help: 'A input control visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.input_control.help', {
+    defaultMessage: 'Input control visualization'
+  }),
   args: {
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: 'markdown configuration object',
       multi: false,
     }
   },

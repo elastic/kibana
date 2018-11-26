@@ -18,7 +18,8 @@
  */
 
 import { get } from 'lodash';
-import { MetricsRequestHandlerProvider } from '../../../metrics/public/kbn_vis_types/request_handler';
+import { i18n } from '@kbn/i18n';
+import { MetricsRequestHandlerProvider } from 'plugins/metrics/kbn_vis_types/request_handler';
 import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';
@@ -33,18 +34,18 @@ export default () => ({
       'null',
     ],
   },
-  help: 'Run tsvb request.',
+  help: i18n('common.core_plugins.interpreter.public.functions.tsvb.help', {
+    defaultMessage: 'TSVB visualization'
+  }),
   args: {
     params: {
       types: ['string'],
       default: '""',
-      help: 'tsvb params definition',
       multi: false,
     },
     uiState: {
       types: ['string'],
       default: '""',
-      help: 'tsvb uiState',
       multi: false
     }
   },

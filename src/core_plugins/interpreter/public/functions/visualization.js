@@ -17,24 +17,26 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export default () => ({
   name: 'visualization',
   type: 'render',
   context: {
     types: [],
   },
-  help: 'A simple visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.visualization.help', {
+    defaultMessage: 'A simple visualization'
+  }),
   args: {
     type: {
       types: ['string'],
       default: '',
-      help: 'visualization type',
       multi: false,
     },
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: 'markdown configuration object',
       multi: false,
     }
   },

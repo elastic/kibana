@@ -18,7 +18,8 @@
  */
 
 import { get } from 'lodash';
-import { TimelionRequestHandlerProvider } from '../../../timelion/public/vis/timelion_request_handler';
+import { i18n } from '@kbn/i18n';
+import { TimelionRequestHandlerProvider } from 'plugins/timelion/vis/timelion_request_handler';
 
 
 import chrome from 'ui/chrome';
@@ -32,19 +33,19 @@ export default () => ({
       'null',
     ],
   },
-  help: 'Timelion visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.timelion.help', {
+    defaultMessage: 'Timelion visualization'
+  }),
   args: {
     expression: {
       types: ['string'],
       aliases: ['_'],
       default: '".es(*)"',
-      help: 'timelion expression definition',
       multi: false,
     },
     interval: {
       types: ['string', 'null'],
       default: 'auto',
-      help: 'timelion interval',
       multi: false,
     }
   },

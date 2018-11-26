@@ -18,6 +18,7 @@
  */
 
 import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { i18n } from '@kbn/i18n';
 
 // eslint-disable-next-line new-cap
 const responseHandler = LegacyResponseHandlerProvider().handler;
@@ -30,28 +31,26 @@ export default () => ({
       'kibana_table'
     ],
   },
-  help: 'A simple metric visualization.',
+  help: i18n('common.core_plugins.interpreter.public.functions.table.help', {
+    defaultMessage: 'Table visualization'
+  }),
   args: {
     bucket: {
       types: ['string'],
-      help: 'bucket column index id or name',
       multi: true,
     },
     split: {
       types: ['string'],
-      help: 'chart split column index id or name',
       multi: true,
     },
     metric: {
       types: ['string'],
       default: '1',
-      help: 'metric column index id or name',
       multi: true,
     },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
-      help: 'config of the visualization',
       multi: false,
     },
   },
