@@ -9,8 +9,10 @@
 
 import { registerFetchRoute } from './register_fetch_route';
 import { registerGetRoute } from './register_get_route';
+import { registerAddPolicyRoute } from './register_add_policy_route';
 
 export function registerTemplatesRoutes(server) {
   registerFetchRoute(server);
   registerGetRoute(server);
+  registerAddPolicyRoute(server);
 }

@@ -72,3 +72,7 @@ export const addLifecyclePolicyToIndex = async (body, httpClient = getHttpClient
   const response = await httpClient.post(`${apiPrefix}/index/add`, body);
   return response.data;
 };
+export const addLifecyclePolicyToTemplate = async (body, httpClient = getHttpClient()) => {
+  const response = await httpClient.post(`${apiPrefix}/template`, body);
+  return response.data;
+};

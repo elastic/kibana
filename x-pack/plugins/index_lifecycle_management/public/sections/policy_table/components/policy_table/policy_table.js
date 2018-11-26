@@ -37,6 +37,7 @@ import {
 } from '@elastic/eui';
 
 import { ConfirmDelete } from './confirm_delete';
+import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
 import { getFilteredIndicesUri } from '../../../../../../index_management/public/services/navigation';
 const HEADERS = {
   name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
@@ -103,10 +104,22 @@ export class PolicyTableUi extends Component {
       <ConfirmDelete
         policyToDelete={policyToDelete}
         callback={this.handleDelete}
-        onCancel={() => this.setState({ renderDeleteConfirmModal: null, policyToDelete: null })}
+        onCancel={() => this.setState({ renderConfirmModal: null, policyToDelete: null })}
       />
     );
-  }
+  };
+  renderAddPolicyToTemplateConfirmModal = () => {
+    const { policyToAddToTemplate } = this.state;
+    if (!policyToAddToTemplate) {
+      return null;
+    }
+    return (
+      <AddPolicyToTemplateConfirmModal
+        policy={policyToAddToTemplate}
+        onCancel={() => this.setState({ renderConfirmModal: null, policyToAddToTemplate: null })}
+      />
+    );
+  };
   handleDelete = () => {
     this.props.fetchPolicies(true);
     this.setState({ renderDeleteConfirmModal: null, policyToDelete: null });
@@ -209,6 +222,10 @@ export class PolicyTableUi extends Component {
       id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
       defaultMessage: 'View indices',
     });
+    const addPolicyToTemplateLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText',
+      defaultMessage: 'Add policy to index template',
+    });
     const deletePolicyLabel = hasCoveredIndices
       ? intl.formatMessage({
         id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
@@ -249,6 +266,18 @@ export class PolicyTableUi extends Component {
             />
           </EuiToolTip>
         ) : null}
+        <EuiToolTip position="bottom" content={addPolicyToTemplateLabel}>
+          <EuiButtonIcon
+            aria-label={addPolicyToTemplateLabel}
+            onClick={() =>
+              this.setState({
+                renderConfirmModal: this.renderAddPolicyToTemplateConfirmModal,
+                policyToAddToTemplate: policy,
+              })
+            }
+            iconType="plusInCircle"
+          />
+        </EuiToolTip>
       </EuiTableRowCell>
     );
     return cells;
