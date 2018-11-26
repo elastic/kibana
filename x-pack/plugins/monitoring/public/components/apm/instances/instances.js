@@ -16,18 +16,62 @@ import { Status } from './status';
 import { SORT_ASCENDING, SORT_DESCENDING, TABLE_ACTION_UPDATE_FILTER } from '../../../../common/constants';
 import { formatMetric } from '../../../lib/format_number';
 import { formatTimestampToDuration } from '../../../../common';
+import { i18n } from '@kbn/i18n';
+import { injectI18n } from '@kbn/i18n/react';
 
 
 const filterFields = [ 'name', 'type', 'version', 'output' ];
 const columns = [
-  { title: 'Name', sortKey: 'name', sortOrder: SORT_ASCENDING },
-  { title: 'Output Enabled', sortKey: 'output' },
-  { title: 'Total Events Rate', sortKey: 'total_events_rate', secondarySortOrder: SORT_DESCENDING },
-  { title: 'Bytes Sent Rate', sortKey: 'bytes_sent_rate' },
-  { title: 'Output Errors', sortKey: 'errors' },
-  { title: 'Last Event', sortKey: 'time_of_last_event' },
-  { title: 'Allocated Memory', sortKey: 'memory' },
-  { title: 'Version', sortKey: 'version' },
+  {
+    title: i18n.translate('xpack.monitoring.apm.instances.nameTitle', {
+      defaultMessage: 'Name'
+    }),
+    sortKey: 'name',
+    sortOrder: SORT_ASCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.apm.instances.outputEnabledTitle', {
+      defaultMessage: 'Output Enabled'
+    }),
+    sortKey: 'output'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.apm.instances.totalEventsRateTitle', {
+      defaultMessage: 'Total Events Rate'
+    }),
+    sortKey: 'total_events_rate',
+    secondarySortOrder: SORT_DESCENDING
+  },
+  {
+    title: i18n.translate('xpack.monitoring.apm.instances.bytesSentRateTitle', {
+      defaultMessage: 'Bytes Sent Rate'
+    }),
+    sortKey: 'bytes_sent_rate'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.apm.instances.outputErrorsTitle', {
+      defaultMessage: 'Output Errors'
+    }),
+    sortKey: 'errors'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.apm.instances.lastEventTitle', {
+      defaultMessage: 'Last Event'
+    }),
+    sortKey: 'time_of_last_event'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
+      defaultMessage: 'Allocated Memory'
+    }),
+    sortKey: 'memory'
+  },
+  {
+    title: i18n.translate('xpack.monitoring.apm.instances.versionTitle', {
+      defaultMessage: 'Version'
+    }),
+    sortKey: 'version'
+  },
 ];
 const instanceRowFactory = () => {
   return function KibanaRow(props) {
@@ -77,7 +121,7 @@ const instanceRowFactory = () => {
   };
 };
 
-export function ApmServerInstances({ apms }) {
+function ApmServerInstancesUI({ apms, intl }) {
   const {
     pageIndex,
     filterText,
@@ -97,7 +141,10 @@ export function ApmServerInstances({ apms }) {
         sortKey={sortKey}
         sortOrder={sortOrder}
         onNewState={onNewState}
-        placeholder="Filter Instances..."
+        placeholder={intl.formatMessage({
+          id: 'xpack.monitoring.apm.instances.filterInstancesPlaceholder',
+          defaultMessage: 'Filter Instances…'
+        })}
         filterFields={filterFields}
         columns={columns}
         rowComponent={instanceRowFactory()}
@@ -105,3 +152,5 @@ export function ApmServerInstances({ apms }) {
     </div>
   );
 }
+
+export const ApmServerInstances = injectI18n(ApmServerInstancesUI);

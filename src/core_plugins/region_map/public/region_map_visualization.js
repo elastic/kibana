@@ -101,7 +101,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
         this._vis.params.showAllShapes
       );
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
-      this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema]);
+      this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
       this._setTooltipFormatter();
 
@@ -154,7 +154,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
         }
 
         const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
-        this._vis.API.events.addFilter(this._chartData, 0, rowIndex, event);
+        this._vis.API.events.filter({ table: this._chartData, column: 0, row: rowIndex, value: event });
       });
 
       this._choroplethLayer.on('styleChanged', (event) => {

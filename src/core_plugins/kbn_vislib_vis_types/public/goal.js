@@ -19,7 +19,6 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
 import gaugeTemplate from './editors/gauge.html';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 
@@ -33,7 +32,6 @@ export default function GoalVisType(Private, i18n) {
     description: i18n('kbnVislibVisTypes.goal.goalDescription', {
       defaultMessage: 'A goal chart indicates how close you are to your final goal.'
     }),
-    category: CATEGORY.DATA,
     visConfig: {
       defaults: {
         addTooltip: true,
@@ -76,12 +74,15 @@ export default function GoalVisType(Private, i18n) {
         }
       },
     },
+    events: {
+      brush: { disabled: true },
+    },
     editorConfig: {
       collections: {
         gaugeTypes: ['Arc', 'Circle'],
         gaugeColorMode: ['None', 'Labels', 'Background'],
         scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.keys(vislibColorMaps),
+        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
       },
       optionsTemplate: gaugeTemplate,
       schemas: new Schemas([

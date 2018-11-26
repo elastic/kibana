@@ -17,12 +17,6 @@
  * under the License.
  */
 
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  export const EuiCopy: React.SFC<any>;
-  export const EuiForm: React.SFC<any>;
-}
-
 import React, { Component } from 'react';
 
 import {

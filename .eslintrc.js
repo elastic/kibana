@@ -102,7 +102,7 @@ module.exports = {
      * Files that ARE NOT allowed to use devDependencies
      */
     {
-      files: ['packages/kbn-ui-framework/**/*', 'x-pack/**/*'],
+      files: ['packages/kbn-ui-framework/**/*', 'x-pack/**/*', 'packages/kbn-interpreter/**/*'],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
@@ -124,6 +124,8 @@ module.exports = {
         'packages/kbn-ui-framework/generator-kui/**/*',
         'packages/kbn-ui-framework/Gruntfile.js',
         'packages/kbn-es/src/**/*',
+        'packages/kbn-interpreter/tasks/**/*',
+        'packages/kbn-interpreter/src/plugin/**/*',
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',
@@ -349,17 +351,6 @@ module.exports = {
      * Canvas overrides
      */
     {
-      files: ['x-pack/plugins/canvas/*', 'x-pack/plugins/canvas/**/*'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: resolve(__dirname, 'x-pack'),
-          },
-        ],
-      },
-    },
-    {
       files: ['x-pack/plugins/canvas/**/*'],
       plugins: ['prettier'],
       rules: {
@@ -420,6 +411,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/scripts/*.js',
         'x-pack/plugins/canvas/tasks/*.js',
         'x-pack/plugins/canvas/tasks/**/*.js',
         'x-pack/plugins/canvas/__tests__/**/*',
@@ -445,6 +437,18 @@ module.exports = {
             ignore: ['!!raw-loader.+.svg$'],
           },
         ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/public/**/*'],
+      env: {
+        browser: true,
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*'],
+      env: {
+        jquery: true,
       },
     },
   ],

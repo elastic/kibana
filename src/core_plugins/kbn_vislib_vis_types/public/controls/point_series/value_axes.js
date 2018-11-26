@@ -136,10 +136,13 @@ module.directive('vislibValueAxes', function () {
         }, 1);
       };
 
-      const lastAxisTitles = {};
+      const lastCustomLabels = {};
+      // We track these so we can know when the agg is changed
+      let lastMatchingSeriesAggType = '';
+      let lastMatchingSeriesAggField = '';
       $scope.updateAxisTitle = function () {
         $scope.editorState.params.valueAxes.forEach((axis, axisNumber) => {
-          let label = '';
+          let newCustomLabel = '';
           const isFirst = axisNumber === 0;
           const matchingSeries = [];
           $scope.editorState.params.seriesParams.forEach((series, i) => {
@@ -154,13 +157,31 @@ module.directive('vislibValueAxes', function () {
               });
             }
           });
+
           if (matchingSeries.length === 1) {
-            label = matchingSeries[0].makeLabel();
+            newCustomLabel = matchingSeries[0].makeLabel();
           }
-          if (lastAxisTitles[axis.id] !== label && label !== '') {
-            lastAxisTitles[axis.id] = label;
-            axis.title.text = label;
+
+          const matchingSeriesAggType = _.get(matchingSeries, '[0]type.name', '');
+          const matchingSeriesAggField = _.get(matchingSeries, '[0]params.field.name', '');
+
+          if (lastCustomLabels[axis.id] !== newCustomLabel && newCustomLabel !== '') {
+            const isFirstRender = Object.keys(lastCustomLabels).length === 0;
+            const aggTypeIsChanged = lastMatchingSeriesAggType !== matchingSeriesAggType;
+            const aggFieldIsChanged = lastMatchingSeriesAggField !== matchingSeriesAggField;
+            const aggIsChanged = aggTypeIsChanged || aggFieldIsChanged;
+            const axisTitleIsEmpty = axis.title.text === '';
+            const lastCustomLabelMatchesAxisTitle = lastCustomLabels[axis.id] === axis.title.text;
+
+            if (!isFirstRender && (aggIsChanged || axisTitleIsEmpty || lastCustomLabelMatchesAxisTitle)) {
+              axis.title.text = newCustomLabel; // Override axis title with new custom label
+            }
+
+            lastCustomLabels[axis.id] = newCustomLabel;
           }
+
+          lastMatchingSeriesAggType = matchingSeriesAggType;
+          lastMatchingSeriesAggField = matchingSeriesAggField;
         });
       };
 

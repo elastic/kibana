@@ -6,17 +6,14 @@
 
 const { resolve } = require('path');
 const register = require('babel-register');
-
 const options = {
+  babelrc: false,
+  presets: [require.resolve('@kbn/babel-preset/node_preset')],
   sourceMaps: false,
   plugins: [
     [
       'mock-imports',
       [
-        {
-          pattern: 'scriptjs',
-          location: resolve(__dirname, '..', 'mocks', 'noop'),
-        },
         {
           pattern: 'ui/chrome',
           location: resolve(__dirname, '..', 'mocks', 'uiChrome'),
@@ -28,10 +25,6 @@ const options = {
         {
           pattern: 'ui/url/absolute_to_parsed_url',
           location: resolve(__dirname, '..', 'mocks', 'absoluteToParsedUrl'),
-        },
-        {
-          pattern: 'socket.io-client',
-          location: resolve(__dirname, '..', 'mocks', 'socketClient'),
         },
         {
           // ugly hack so that importing non-js files works, required for the function docs

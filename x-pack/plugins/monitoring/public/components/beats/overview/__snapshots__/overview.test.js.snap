@@ -32,15 +32,20 @@ exports[`Overview that overview page renders normally 1`] = `
         >
           <EuiTitle
             size="s"
+            textTransform="none"
           >
             <h3>
-              Active Beats in Last Day
+              <FormattedMessage
+                defaultMessage="Active Beats in Last Day"
+                id="xpack.monitoring.beats.overview.activeBeatsInLastDayTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
             size="s"
           />
-          <LatestActive
+          <InjectIntl(LatestActiveUi)
             latestActive={
               Array [
                 Object {
@@ -79,9 +84,14 @@ exports[`Overview that overview page renders normally 1`] = `
         >
           <EuiTitle
             size="s"
+            textTransform="none"
           >
             <h3>
-              Top 5 Beat Types in Last Day
+              <FormattedMessage
+                defaultMessage="Top 5 Beat Types in Last Day"
+                id="xpack.monitoring.beats.overview.top5BeatTypesInLastDayTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -118,9 +128,14 @@ exports[`Overview that overview page renders normally 1`] = `
         >
           <EuiTitle
             size="s"
+            textTransform="none"
           >
             <h3>
-              Top 5 Versions in Last Day
+              <FormattedMessage
+                defaultMessage="Top 5 Versions in Last Day"
+                id="xpack.monitoring.beats.overview.top5VersionsInLastDayTitle"
+                values={Object {}}
+              />
             </h3>
           </EuiTitle>
           <EuiSpacer
@@ -176,7 +191,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -196,7 +211,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -216,7 +231,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -236,7 +251,7 @@ exports[`Overview that overview page renders normally 1`] = `
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -263,8 +278,7 @@ exports[`Overview that overview page shows a message if there is no beats data 1
       data-test-subj="noRecentActivityMessage"
       iconType="gear"
       size="m"
-      title="Hi there! This area is where your latest Beats activity would show
-up, but you don't seem to have any activity within the last day."
+      title="Hi there! This area is where your latest Beats activity would show up, but you don't seem to have any activity within the last day."
     />
     <EuiSpacer
       size="s"
@@ -299,7 +313,7 @@ up, but you don't seem to have any activity within the last day."
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -319,7 +333,7 @@ up, but you don't seem to have any activity within the last day."
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -339,7 +353,7 @@ up, but you don't seem to have any activity within the last day."
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
@@ -359,7 +373,7 @@ up, but you don't seem to have any activity within the last day."
           hasShadow={false}
           paddingSize="m"
         >
-          <MonitoringTimeseriesContainer
+          <InjectIntl(MonitoringTimeseriesContainerUI)
             series={1}
           />
         </EuiPanel>
