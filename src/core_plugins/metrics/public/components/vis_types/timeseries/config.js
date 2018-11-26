@@ -37,8 +37,9 @@ import {
   EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-function TimeseriesConfig(props) {
+const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
 
@@ -56,35 +57,36 @@ function TimeseriesConfig(props) {
   };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
+  const { intl } = props;
 
   const stackedOptions = [
-    { label: 'None', value: 'none' },
-    { label: 'Stacked', value: 'stacked' },
-    { label: 'Percent', value: 'percent' }
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }), value: 'none' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }), value: 'stacked' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }), value: 'percent' }
   ];
   const selectedStackedOption = stackedOptions.find(option => {
     return model.stacked === option.value;
   });
 
   const positionOptions = [
-    { label: 'Right', value: 'right' },
-    { label: 'Left', value: 'left' }
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.rightLabel', defaultMessage: 'Right' }), value: 'right' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.leftLabel', defaultMessage: 'Left' }), value: 'left' }
   ];
   const selectedAxisPosOption = positionOptions.find(option => {
     return model.axis_position === option.value;
   });
 
   const chartTypeOptions = [
-    { label: 'Bar', value: 'bar' },
-    { label: 'Line', value: 'line' }
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.barLabel', defaultMessage: 'Bar' }), value: 'bar' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.lineLabel', defaultMessage: 'Line' }), value: 'line' }
   ];
   const selectedChartTypeOption = chartTypeOptions.find(option => {
     return model.chart_type === option.value;
   });
 
   const splitColorOptions = [
-    { label: 'Gradient', value: 'gradient' },
-    { label: 'Rainbow', value: 'rainbow' }
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.gradientLabel', defaultMessage: 'Gradient' }), value: 'gradient' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.rainbowLabel', defaultMessage: 'Rainbow' }), value: 'rainbow' }
   ];
   const selectedSplitColorOption = splitColorOptions.find(option => {
     return model.split_color_mode === option.value;
@@ -97,7 +99,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('chartType')}
-            label="Chart type"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.chartTypeLabel"
+              defaultMessage="Chart type"
+            />)}
           >
             <EuiComboBox
               isClearable={false}
@@ -111,7 +116,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('stacked')}
-            label="Stacked"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.stackedLabel"
+              defaultMessage="Stacked"
+            />)}
           >
             <EuiComboBox
               isClearable={false}
@@ -125,7 +133,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('fill')}
-            label="Fill (0 to 1)"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.fillLabel"
+              defaultMessage="Fill (0 to 1)"
+            />)}
           >
             <EuiFieldNumber
               step={0.1}
@@ -137,7 +148,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('lineWidth')}
-            label="Line width"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.lineWidthLabel"
+              defaultMessage="Line width"
+            />)}
           >
             <EuiFieldNumber
               onChange={handleTextChange('line_width')}
@@ -148,7 +162,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('pointSize')}
-            label="Point size"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.pointSizeLabel"
+              defaultMessage="Point size"
+            />)}
           >
             <EuiFieldNumber
               onChange={handleTextChange('point_size')}
@@ -157,7 +174,12 @@ function TimeseriesConfig(props) {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>Steps</EuiFormLabel>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.timeSeries.chartLine.stepsLabel"
+              defaultMessage="Steps"
+            />
+          </EuiFormLabel>
           <EuiSpacer size="s" />
           <YesNo
             value={model.steps}
@@ -174,7 +196,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('chartType')}
-            label="Chart type"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartBar.chartTypeLabel"
+              defaultMessage="Chart type"
+            />)}
           >
             <EuiComboBox
               isClearable={false}
@@ -188,7 +213,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('stacked')}
-            label="Stacked"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartBar.stackedLabel"
+              defaultMessage="Stacked"
+            />)}
           >
             <EuiComboBox
               isClearable={false}
@@ -202,7 +230,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('fill')}
-            label="Fill (0 to 1)"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartBar.fillLabel"
+              defaultMessage="Fill (0 to 1)"
+            />)}
           >
             <EuiFieldNumber
               step={0.5}
@@ -214,7 +245,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('lineWidth')}
-            label="Line width"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartBar.lineWidthLabel"
+              defaultMessage="Line width"
+            />)}
           >
             <EuiFieldNumber
               onChange={handleTextChange('line_width')}
@@ -241,8 +275,19 @@ function TimeseriesConfig(props) {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('template')}
-            label="Template"
-            helpText={<span>eg.<EuiCode>{'{{value}}/s'}</EuiCode></span>}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.templateLabel"
+              defaultMessage="Template"
+            />)}
+            helpText={(
+              <span>
+                <FormattedMessage
+                  id="tsvb.timeSeries.templateHelpText"
+                  defaultMessage="eg.{templateExample}"
+                  values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
+                />
+              </span>
+            )}
             fullWidth
           >
             <EuiFieldText
@@ -258,7 +303,10 @@ function TimeseriesConfig(props) {
 
       <EuiFormRow
         id={htmlId('series_filter')}
-        label="Filter"
+        label={(<FormattedMessage
+          id="tsvb.timeSeries.filterLabel"
+          defaultMessage="Filter"
+        />)}
         fullWidth
       >
         <EuiFieldText
@@ -278,7 +326,11 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={true}>
           <EuiFormRow
             id={htmlId('offset')}
-            label="Offset series time by (1m, 1h, 1w, 1d)"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.offsetSeriesTimeLabel"
+              defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
+              description="1m, 1h, 1w, 1d are required values and must not be translated."
+            />)}
           >
             <EuiFieldText
               data-test-subj="offsetTimeSeries"
@@ -288,7 +340,12 @@ function TimeseriesConfig(props) {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiFormLabel>Hide in legend</EuiFormLabel>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.timeSeries.hideInLegendLabel"
+              defaultMessage="Hide in legend"
+            />
+          </EuiFormLabel>
           <EuiSpacer size="s" />
           <YesNo
             value={model.hide_in_legend}
@@ -299,7 +356,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={true}>
           <EuiFormRow
             id={htmlId('splitColor')}
-            label="Split color theme"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.splitColorThemeLabel"
+              defaultMessage="Split color theme"
+            />)}
           >
             <EuiComboBox
               isClearable={false}
@@ -316,7 +376,12 @@ function TimeseriesConfig(props) {
 
       <EuiFlexGroup responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>Separate axis?</EuiFormLabel>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.timeSeries.separateAxisLabel"
+              defaultMessage="Separate axis?"
+            />
+          </EuiFormLabel>
           <EuiSpacer size="s" />
           <YesNo
             value={model.separate_axis}
@@ -327,7 +392,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('axisMin')}
-            label="Axis min"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.axisMinLabel"
+              defaultMessage="Axis min"
+            />)}
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -345,7 +413,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('axisMax')}
-            label="Axis max"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.axisMaxLabel"
+              defaultMessage="Axis max"
+            />)}
           >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
@@ -362,7 +433,10 @@ function TimeseriesConfig(props) {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('axisPos')}
-            label="Axis position"
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.axisPositionLabel"
+              defaultMessage="Axis position"
+            />)}
           >
             <EuiComboBox
               isClearable={false}
@@ -380,7 +454,12 @@ function TimeseriesConfig(props) {
 
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>Override Index Pattern?</EuiFormLabel>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.timeSeries.overrideIndexPatternLabel"
+              defaultMessage="Override Index Pattern?"
+            />
+          </EuiFormLabel>
           <EuiSpacer size="s" />
           <YesNo
             value={model.override_index_pattern}
@@ -401,7 +480,7 @@ function TimeseriesConfig(props) {
     </div>
   );
 
-}
+});
 
 TimeseriesConfig.propTypes = {
   fields: PropTypes.object,

@@ -25,6 +25,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFormLabel } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function StandardAgg(props) {
   const { model, panel, series, fields } = props;
@@ -49,7 +50,12 @@ function StandardAgg(props) {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.stdAgg.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -64,7 +70,14 @@ function StandardAgg(props) {
           model.type !== 'count'
             ? (
               <EuiFlexItem>
-                <EuiFormRow id={htmlId('field')} label="Field" fullWidth>
+                <EuiFormRow
+                  id={htmlId('field')}
+                  label={(<FormattedMessage
+                    id="tsvb.stdAgg.fieldLabel"
+                    defaultMessage="Field"
+                  />)}
+                  fullWidth
+                >
                   <FieldSelect
                     fields={fields}
                     type={model.type}

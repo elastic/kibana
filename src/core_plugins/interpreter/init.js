@@ -18,10 +18,10 @@
  */
 
 import { routes } from './server/routes';
-import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { populateServerRegistries } from '@kbn/interpreter/server/server_registries';
+import { functionsRegistry } from '@kbn/interpreter/common';
+import { populateServerRegistries } from '@kbn/interpreter/server';
 
-export default function (server /*options*/) {
+export default async function (server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
@@ -37,5 +37,6 @@ export default function (server /*options*/) {
     };
   });
 
-  populateServerRegistries(['serverFunctions', 'types']).then(() => routes(server));
+  await populateServerRegistries(['serverFunctions', 'types']);
+  routes(server);
 }
