@@ -39,6 +39,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class TableSeriesConfig extends Component {
 
@@ -57,17 +58,18 @@ class TableSeriesConfig extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
+    const { intl } = this.props;
 
     const functionOptions = [
-      { label: 'Sum', value: 'sum' },
-      { label: 'Max', value: 'max' },
-      { label: 'Min', value: 'min' },
-      { label: 'Avg', value: 'mean' },
-      { label: 'Overall Sum', value: 'overall_sum' },
-      { label: 'Overall Max', value: 'overall_max' },
-      { label: 'Overall Min', value: 'overall_min' },
-      { label: 'Overall Avg', value: 'overall_avg' },
-      { label: 'Cumulative Sum', value: 'cumulative_sum' },
+      { label: intl.formatMessage({ id: 'tsvb.table.sumLabel', defaultMessage: 'Sum' }), value: 'sum' },
+      { label: intl.formatMessage({ id: 'tsvb.table.maxLabel', defaultMessage: 'Max' }), value: 'max' },
+      { label: intl.formatMessage({ id: 'tsvb.table.minLabel', defaultMessage: 'Min' }), value: 'min' },
+      { label: intl.formatMessage({ id: 'tsvb.table.avgLabel', defaultMessage: 'Avg' }), value: 'mean' },
+      { label: intl.formatMessage({ id: 'tsvb.table.overallSumLabel', defaultMessage: 'Overall Sum' }), value: 'overall_sum' },
+      { label: intl.formatMessage({ id: 'tsvb.table.overallMaxLabel', defaultMessage: 'Overall Max' }), value: 'overall_max' },
+      { label: intl.formatMessage({ id: 'tsvb.table.overallMinLabel', defaultMessage: 'Overall Min' }), value: 'overall_min' },
+      { label: intl.formatMessage({ id: 'tsvb.table.overallAvgLabel', defaultMessage: 'Overall Avg' }), value: 'overall_avg' },
+      { label: intl.formatMessage({ id: 'tsvb.table.cumulativeSumLabel', defaultMessage: 'Cumulative Sum' }), value: 'cumulative_sum' },
     ];
     const selectedAggFuncOption = functionOptions.find(option => {
       return model.aggregate_function === option.value;
@@ -86,8 +88,19 @@ class TableSeriesConfig extends Component {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('template')}
-              label="Template"
-              helpText={<span>eg.<EuiCode>{'{{value}}/s'}</EuiCode></span>}
+              label={(<FormattedMessage
+                id="tsvb.table.templateLabel"
+                defaultMessage="Template"
+              />)}
+              helpText={
+                <span>
+                  <FormattedMessage
+                    id="tsvb.table.templateHelpText"
+                    defaultMessage="eg.{templateExample}"
+                    values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
+                  />
+                </span>
+              }
               fullWidth
             >
               <EuiFieldText
@@ -105,7 +118,10 @@ class TableSeriesConfig extends Component {
           <EuiFlexItem grow={true}>
             <EuiFormRow
               id={htmlId('filterInput')}
-              label="Filter"
+              label={(<FormattedMessage
+                id="tsvb.table.filterLabel"
+                defaultMessage="Filter"
+              />)}
               fullWidth
             >
               <EuiFieldText
@@ -116,7 +132,12 @@ class TableSeriesConfig extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormLabel>Show trend arrows?</EuiFormLabel>
+            <EuiFormLabel>
+              <FormattedMessage
+                id="tsvb.table.showTrendArrowsLabel"
+                defaultMessage="Show trend arrows?"
+              />
+            </EuiFormLabel>
             <EuiSpacer size="s" />
             <YesNo
               value={model.trend_arrows}
@@ -130,7 +151,13 @@ class TableSeriesConfig extends Component {
 
         <EuiFlexGroup responsive={false} wrap={true}>
           <EuiFlexItem grow={true}>
-            <EuiFormRow id={htmlId('field')} label="Field">
+            <EuiFormRow
+              id={htmlId('field')}
+              label={(<FormattedMessage
+                id="tsvb.table.fieldLabel"
+                defaultMessage="Field"
+              />)}
+            >
               <FieldSelect
                 fields={this.props.fields}
                 indexPattern={this.props.panel.index_pattern}
@@ -143,7 +170,10 @@ class TableSeriesConfig extends Component {
           <EuiFlexItem grow={true}>
             <EuiFormRow
               id={htmlId('aggregateFunctionInput')}
-              label="Aggregate function"
+              label={(<FormattedMessage
+                id="tsvb.table.aggregateFunctionLabel"
+                defaultMessage="Aggregate function"
+              />)}
               fullWidth
             >
               <EuiComboBox
@@ -159,7 +189,14 @@ class TableSeriesConfig extends Component {
 
         <EuiHorizontalRule margin="s" />
 
-        <EuiTitle size="xxs"><span>Color rules</span></EuiTitle>
+        <EuiTitle size="xxs">
+          <span>
+            <FormattedMessage
+              id="tsvb.table.colorRulesLabel"
+              defaultMessage="Color rules"
+            />
+          </span>
+        </EuiTitle>
         <EuiSpacer size="s" />
 
         <ColorRules
@@ -182,6 +219,6 @@ TableSeriesConfig.propTypes = {
   onChange: PropTypes.func
 };
 
-export default TableSeriesConfig;
+export default injectI18n(TableSeriesConfig);
 
 

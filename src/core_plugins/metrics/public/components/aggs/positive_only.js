@@ -25,6 +25,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PositiveOnlyAgg = props => {
   const { siblings } = props;
@@ -46,7 +47,12 @@ export const PositiveOnlyAgg = props => {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.positiveOnly.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -58,7 +64,10 @@ export const PositiveOnlyAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label="Metric"
+            label={(<FormattedMessage
+              id="tsvb.positiveOnly.metricLabel"
+              defaultMessage="Metric"
+            />)}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
