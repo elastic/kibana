@@ -21,7 +21,7 @@ import { Server } from 'hapi';
 import { ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
 export interface KibanaConfig {
-  get: (key: string) => any;
+  get<T = any>(key: string): T;
 }
 
 // Extend the defaults with the plugins and server methods we need.
