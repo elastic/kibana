@@ -26,6 +26,10 @@ function NodeDetailStatusUI({ stats, intl }) {
 
   const metrics = [
     {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.transportAddress',
+        defaultMessage: 'Transport Address',
+      }),
       value: transportAddress,
       'data-test-subj': 'transportAddress'
     },

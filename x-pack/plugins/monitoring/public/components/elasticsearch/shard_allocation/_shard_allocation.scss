@@ -80,43 +80,17 @@ monitoring-shard-allocation {
   .shard {
     align-self: center;
     padding: 5px 7px;
-    background-color: $euiColorPrimary;
     font: 10px sans-serif;
     border-left: 1px solid $euiColorEmptyShade;
     position: relative;
-    color: $euiColorGhost;
 
     .shard-tooltip {
       padding: 5px;
       bottom: 25px;
       left: 0;
-      background-color: $euiColorLightShade;
       position: absolute;
-      color: $euiColorDarkShade;
       border: 1px solid $euiColorLightShade;
       white-space: nowrap;
-    }
-
-    &.replica {
-      background-color: tintOrShade($euiColorPrimary, 15%, 15%);
-    }
-
-    &.unassigned {
-      background-color: $euiColorMediumShade !important;
-      color: $euiColorFullShade;
-    }
-
-    &.emergency {
-      background-color: $euiColorDanger !important;
-      color: $euiColorFullShade;
-    }
-
-    &.relocating {
-      background-color: $euiColorVis3;
-    }
-
-    &.initializing {
-      background-color: tintOrShade($euiColorVis3, 15%, 15%);
     }
   }
 

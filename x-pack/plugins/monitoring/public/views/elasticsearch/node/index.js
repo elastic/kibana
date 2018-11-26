@@ -7,12 +7,18 @@
 /**
  * Controller for Node Detail
  */
+import React from 'react';
+import { render } from 'react-dom';
 import { find, partial } from 'lodash';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { getPageData } from './get_page_data';
 import template from './index.html';
 import { timefilter } from 'ui/timefilter';
+import { Node } from '../../../components/elasticsearch/node/node';
+import { I18nProvider } from '@kbn/i18n/react';
+import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
+import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
 
 uiRoutes.when('/elasticsearch/nodes/:node', {
   template,
@@ -28,6 +34,7 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
     timefilter.enableAutoRefreshSelector();
 
     const $route = $injector.get('$route');
+    const kbnUrl = $injector.get('kbnUrl');
     const globalState = $injector.get('globalState');
     $scope.cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
     $scope.pageData = $route.current.locals.pageData;
@@ -65,5 +72,26 @@ uiRoutes.when('/elasticsearch/nodes/:node', {
     $executor.start($scope);
 
     $scope.$on('$destroy', $executor.destroy);
+
+    const transformer = nodesByIndices();
+    this.renderReact = () => {
+      const shards = $scope.pageData.shards;
+      $scope.totalCount = shards.length;
+      $scope.showing = transformer(shards, $scope.pageData.nodes);
+      $scope.labels = labels.node;
+
+      render(
+        <I18nProvider>
+          <Node
+            scope={$scope}
+            kbnUrl={kbnUrl}
+            {...$scope.pageData}
+          />
+        </I18nProvider>,
+        document.getElementById('monitoringElasticsearchNodeApp')
+      );
+    };
+
+    $scope.$watch('pageData', this.renderReact);
   }
 });
