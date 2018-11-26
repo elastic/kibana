@@ -9224,6 +9224,11 @@ getopts@^2.0.6:
   resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.0.6.tgz#4788d533a977527e79efd57b5e742ffa0dd33105"
   integrity sha512-LauKhe3IAHTAlefQNg1I4rZRE6uPrCWwtVh/rMwHAvqY0PaEkRxOzhgyam0+ZBGdh0K6vybD81KeaS6v6H9+Ww==
 
+getopts@^2.2.3:
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.2.3.tgz#11d229775e2ec2067ed8be6fcc39d9b4bf39cf7d"
+  integrity sha512-viEcb8TpgeG05+Nqo5EzZ8QR0hxdyrYDp6ZSTZqe2M/h53Bk036NmqG38Vhf5RGirC/Of9Xql+v66B2gp256SQ==
+
 getos@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/getos/-/getos-3.1.0.tgz#db3aa4df15a3295557ce5e81aa9e3e5cdfaa6567"
@@ -20114,7 +20119,7 @@ supports-color@^5.2.0, supports-color@^5.3.0:
   dependencies:
     has-flag "^3.0.0"
 
-supports-color@^5.4.0:
+supports-color@^5.4.0, supports-color@^5.5.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.5.0.tgz#e2e69a44ac8772f78a1ec0b35b689df6530efc8f"
   integrity sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==

@@ -17,24 +17,11 @@
  * under the License.
  */
 
-const webpack = require('webpack');
-const webpackConfig = require('./webpack.plugins');
+// TODO: Remove once typescript definitions are in EUI
 
-const devtool = 'inline-cheap-module-source-map';
-
-const onComplete = function (done) {
-  return function (err, stats) {
-    if (err) {
-      done && done(err);
-    } else {
-      const seconds = ((stats.endTime - stats.startTime) / 1000).toFixed(2);
-      console.log(`Plugins built in ${seconds} seconds`);
-      done && done();
-    }
-  };
-};
-
-webpack({ ...webpackConfig, devtool }, onComplete(function () {
-  console.log('all done');
-}));
-
+declare module '@elastic/eui' {
+  export const EuiWrappingPopover: React.SFC<any>;
+  export const EuiCopy: React.SFC<any>;
+  export const EuiPopoverTitle: React.SFC<any>;
+  export const EuiOutsideClickDetector: React.SFC<any>;
+}

@@ -11,6 +11,11 @@ import {
   LARGE_BYTES
 } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+
+const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.beats.perSecondUnitLabel', {
+  defaultMessage: '/s'
+});
 
 export class BeatsClusterMetric extends ClusterMetric {
   constructor(opts) {
@@ -36,7 +41,7 @@ export class BeatsEventsRateClusterMetric extends BeatsClusterMetric {
       derivative: true,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: '/s'
+      units: perSecondUnitLabel
     });
 
     this.aggs = {
@@ -102,7 +107,7 @@ export class BeatsEventsRateMetric extends BeatsMetric {
       ...opts,
       format: LARGE_FLOAT,
       metricAgg: 'max',
-      units: '/s',
+      units: perSecondUnitLabel,
       derivative: true
     });
   }
@@ -114,7 +119,7 @@ export class BeatsByteRateMetric extends BeatsMetric {
       ...opts,
       format: LARGE_BYTES,
       metricAgg: 'max',
-      units: '/s',
+      units: perSecondUnitLabel,
       derivative: true
     });
   }

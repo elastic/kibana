@@ -13,6 +13,7 @@
     "statusPage": "src/core_plugins/status_page",
     "tileMap": "src/core_plugins/tile_map",
     "timelion": "src/core_plugins/timelion",
+    "tsvb": "src/core_plugins/metrics",
     "tagCloud": "src/core_plugins/tagcloud",
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",

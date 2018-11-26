@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 
 function ReactEditorControllerProvider(Private, config) {
   class ReactEditorController {
@@ -30,15 +31,19 @@ function ReactEditorControllerProvider(Private, config) {
 
     async render(params) {
       const Component = this.vis.type.editorConfig.component;
-      render(<Component
-        config={config}
-        vis={this.vis}
-        savedObj={this.savedObj}
-        timeRange={params.timeRange}
-        renderComplete={() => {}}
-        isEditorMode={true}
-        appState={params.appState}
-      />, this.el);
+      render(
+        <I18nProvider>
+          <Component
+            config={config}
+            vis={this.vis}
+            savedObj={this.savedObj}
+            timeRange={params.timeRange}
+            renderComplete={() => {}}
+            isEditorMode={true}
+            appState={params.appState}
+          />
+        </I18nProvider>,
+        this.el);
     }
 
     resize() {
