@@ -20,8 +20,7 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
 import expect from 'expect.js';
-import { By } from 'selenium-webdriver';
-import Keys from 'leadfoot/keys';
+import { By, Key } from 'selenium-webdriver';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -53,12 +52,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualizationSelectPage() {
-      await retry.try(async () => {
-        const visualizeSelectTypePage = await testSubjects.find('visualizeSelectTypePage');
-        if (!visualizeSelectTypePage.isDisplayed()) {
-          throw new Error('wait for visualization select page');
-        }
-      });
+      await remote.waitForElementPresent(By.css('[data-test-subj="visualizeSelectTypePage"]'));
     }
 
     async clickVisType(type) {
@@ -229,8 +223,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getMarkdownBodyDescendentText(selector) {
       const markdownContainer = await testSubjects.find('markdownBody');
-      const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
-      return element.getText();
+      const element = await markdownContainer.findElement(By.css(selector));
+      return await element.getText();
     }
 
     async getVegaSpec() {
@@ -428,7 +422,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      */
     async setFilterAggregationValue(filterValue, filterIndex = 0, aggregationId = 2) {
       const inputField = await testSubjects.find(`visEditorFilterInput_${aggregationId}_${filterIndex}`);
-      await inputField.type(filterValue);
+      await remote.setValue(inputField, filterValue);
     }
 
     async addNewFilterAggregation() {
@@ -541,7 +535,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getInputTypeParam(paramName) {
       const input = await remote.findElement(By.css(`input[ng-model="agg.params.${paramName}"]`));
-      return await input.getProperty('value');
+      return await input.getAttribute('value');
     }
 
     async getInterval() {
@@ -616,8 +610,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async sizeUpEditor() {
-      await testSubjects.click('visualizeEditorResizer');
-      await remote.pressKeys(Keys.ARROW_RIGHT);
+      const resizer = await testSubjects.find('visualizeEditorResizer');
+      await resizer.sendKeys(Key.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -653,13 +647,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async addCustomRange(from, to) {
       const table = await testSubjects.find('heatmapCustomRangesTable');
-      const lastRow = await table.findByCssSelector('tr:last-child');
-      const fromCell = await lastRow.findByCssSelector('td:first-child input');
-      fromCell.clearValue();
-      fromCell.sendKeys(`${from}`);
-      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
-      toCell.clearValue();
-      toCell.sendKeys(`${to}`);
+      const lastRow = await table.findElement(By.css('tr:last-child'));
+      const fromCell = await lastRow.findElement(By.css('td:first-child input'));
+      await remote.setValue(fromCell, `${from}`);
+      const toCell = await lastRow.findElement(By.css('td:nth-child(2) input'));
+      await remote.setValue(toCell, `${to}`);
     }
 
     async clickYAxisOptions(axisId) {
@@ -869,8 +861,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       // 2). get the minimum chart Y-Axis marker value and Y position
       const minYAxisChartMarker = await
-      remote.findElement(By.css(
-        'div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'));
+      remote.findElement(By.css('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'));
       const minYLabel = (await minYAxisChartMarker.getText()).replace(',', '');
       const minYLabelYPosition = (await minYAxisChartMarker.getRect()).y;
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
@@ -1160,7 +1151,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async toggleLegend(show = true) {
-      const isVisible = remote.findByCssSelector('vislib-legend .legend-ul');
+      const isVisible = await remote.isElementVisible(By.css('vislib-legend .legend-ul'));
       if ((show && !isVisible) || (!show && isVisible)) {
         await testSubjects.click('vislibToggleLegend');
       }
@@ -1197,8 +1188,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async filterPieSlice(name) {
       const slice = await this.getPieSlice(name);
       // Since slice is an SVG element we can't simply use .click() for it
-      await remote.moveMouseTo(slice);
-      await remote.clickMouseButton();
+      await remote.moveMouseToAndClick(slice);
     }
 
     async getPieSlice(name) {

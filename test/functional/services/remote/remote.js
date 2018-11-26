@@ -174,6 +174,12 @@ export async function RemoteProvider({ getService }) {
         }
       },
 
+      async setValue(element, value) {
+        await this.waitForElementEnabled(element);
+        await element.clear();
+        await element.sendKeys(value);
+      },
+
       async slowType(element, text, interval) {
         const textArray = text.split('');
         for (let i = 0; i < textArray.length; i++) {
@@ -185,6 +191,11 @@ export async function RemoteProvider({ getService }) {
       async moveMouseTo(element) {
         const actions = driver.actions({ bridge: true });
         await actions.pause(mouse).move({ origin: element }).perform();
+      },
+
+      async moveMouseToAndClick(element) {
+        const actions = driver.actions({ bridge: true });
+        await actions.pause(mouse).move({ origin: element }).click().perform();
       },
 
       async getActiveElement() {

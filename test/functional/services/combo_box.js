@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { By, Key } from 'selenium-webdriver';
+
 
 export function ComboBoxProvider({ getService }) {
   const testSubjects = getService('testSubjects');
+  const remote = getService('remote');
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
@@ -35,8 +38,6 @@ export function ComboBoxProvider({ getService }) {
     async setElement(comboBoxElement, value) {
       log.debug(`comboBox.setElement, value: ${value}`);
       await this._filterOptionsList(comboBoxElement, value);
-      await find.clickByCssSelector('.euiComboBoxOption');
-      await this.closeOptionsList(comboBoxElement);
     }
 
     async filterOptionsList(comboBoxSelector, filterValue) {
@@ -47,23 +48,21 @@ export function ComboBoxProvider({ getService }) {
     }
 
     async _filterOptionsList(comboBoxElement, filterValue) {
-      const input = await comboBoxElement.findByTagName('input');
-      await input.clearValue();
-      // await input.type(filterValue);
-      // await remote.type(comboBoxElement, filterValue);
-      await find.setValueElement(comboBoxElement, filterValue);
-      await this._waitForOptionsListLoading(comboBoxElement);
+      const input = await comboBoxElement.findElement(By.css('[data-test-subj=comboBoxSearchInput]'));
+      // type value & select top suggestion
+      await input.sendKeys(filterValue, Key.DOWN, Key.ENTER);
+      await this._waitForOptionsListLoading();
     }
 
-    async _waitForOptionsListLoading(comboBoxElement) {
-      await comboBoxElement.waitForDeletedByClassName('euiLoadingSpinner');
+    async _waitForOptionsListLoading() {
+      await remote.waitForElementNotPresent(By.css('.euiLoadingSpinner'));
     }
 
     async getOptionsList(comboBoxSelector) {
       log.debug(`comboBox.getOptionsList, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
       await testSubjects.click(comboBoxSelector);
-      await this._waitForOptionsListLoading(comboBox);
+      await this._waitForOptionsListLoading();
       const menu = await retry.try(
         async () => await testSubjects.find('comboBoxOptionsList'));
       const optionsText = await menu.getVisibleText();

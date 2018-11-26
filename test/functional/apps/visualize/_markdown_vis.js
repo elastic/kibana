@@ -65,9 +65,9 @@ export default function ({ getPageObjects, getService }) {
 
       it('should resize the editor', async function () {
         const editorSidebar = await find.byCssSelector('.visEditor__sidebar');
-        const initialSize = await editorSidebar.getSize();
+        const initialSize = await editorSidebar.getRect();
         await PageObjects.visualize.sizeUpEditor();
-        const afterSize = await editorSidebar.getSize();
+        const afterSize = await editorSidebar.getRect();
         expect(afterSize.width).to.be.greaterThan(initialSize.width);
       });
     });
