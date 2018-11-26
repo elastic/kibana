@@ -9,6 +9,14 @@ RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
 ###
+### Since the Jenkins logging output collector doesn't look like a TTY
+### Node/Chalk and other color libs disable their color output. But Jenkins
+### can handle color fine, so this forces https://github.com/chalk/supports-color
+### to enable color support in Chalk and other related modules.
+###
+export FORCE_COLOR=1
+
+###
 ### check that we seem to be in a kibana project
 ###
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
@@ -34,14 +42,6 @@ else
   echo "bootstrap_cache missing";
   exit 1;
 fi
-
-###
-### Since the Jenkins logging output collector doesn't look like a TTY
-### Node/Chalk and other color libs disable their color output. But Jenkins
-### can handle color fine, so this forces https://github.com/chalk/supports-color
-### to enable color support in Chalk and other related modules.
-###
-export FORCE_COLOR=1
 
 ###
 ### download node
