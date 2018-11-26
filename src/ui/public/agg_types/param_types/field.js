@@ -69,9 +69,11 @@ FieldParamType.prototype.deserialize = function (fieldName, aggConfig) {
   const validField = this.getAvailableFields(aggConfig.getIndexPattern().fields).byName[fieldName];
   if (!validField) {
     toastNotifications.addDanger(
-      i18n.translate('common.ui.aggTypes.selectNewFieldNotificationMessage', {
-        defaultMessage: 'Saved "{field}" parameter is now invalid. Please select a new field.',
-        values: { field: 'field' }
+      i18n.translate('common.ui.aggTypes.paramTypes.field.invalidSavedFieldParameterErrorMessage', {
+        defaultMessage: 'Saved {fieldParameter} parameter is now invalid. Please select a new field.',
+        values: {
+          fieldParameter: '"field"'
+        }
       })
     );
   }
@@ -119,9 +121,11 @@ FieldParamType.prototype.write = function (aggConfig, output) {
 
   if (!field) {
     throw new TypeError(
-      i18n.translate('common.ui.aggTypes.fieldIsRequiredErrorMessage', {
-        defaultMessage: '"{field}" is a required parameter',
-        values: { field: 'field' }
+      i18n.translate('common.ui.aggTypes.paramTypes.field.requiredFieldParameterErrorMessage', {
+        defaultMessage: '{fieldParameter} is a required parameter',
+        values: {
+          fieldParameter: '"field"'
+        }
       })
     );
   }
