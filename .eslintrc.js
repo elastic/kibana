@@ -102,7 +102,7 @@ module.exports = {
      * Files that ARE NOT allowed to use devDependencies
      */
     {
-      files: ['packages/kbn-ui-framework/**/*', 'x-pack/**/*'],
+      files: ['packages/kbn-ui-framework/**/*', 'x-pack/**/*', 'packages/kbn-interpreter/**/*'],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
@@ -124,6 +124,8 @@ module.exports = {
         'packages/kbn-ui-framework/generator-kui/**/*',
         'packages/kbn-ui-framework/Gruntfile.js',
         'packages/kbn-es/src/**/*',
+        'packages/kbn-interpreter/tasks/**/*',
+        'packages/kbn-interpreter/src/plugin/**/*',
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',

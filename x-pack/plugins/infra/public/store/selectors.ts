@@ -6,7 +6,7 @@
 
 import { createSelector } from 'reselect';
 
-import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { getLogEntryAtTime } from '../utils/log_entry';
 import { globalizeSelectors } from '../utils/typed_redux';
