@@ -212,12 +212,7 @@ export function MultiMetricJobServiceProvider() {
         job.analysis_config.influencers = influencerFields;
       }
 
-      let query = {
-        match_all: {}
-      };
-      if (formConfig.query.query_string.query !== '*' || formConfig.filters.length) {
-        query = formConfig.combinedQuery;
-      }
+      const query = formConfig.combinedQuery;
 
       job.analysis_config.bucket_span = formConfig.bucketSpan;
 
