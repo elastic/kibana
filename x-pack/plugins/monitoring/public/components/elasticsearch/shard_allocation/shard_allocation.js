@@ -13,6 +13,7 @@ import { ClusterView } from './components/cluster_view';
 export const ShardAllocation = ({
   scope,
   kbnUrl,
+  type,
   shardStats,
 }) => {
   const types = [
@@ -83,6 +84,7 @@ export const ShardAllocation = ({
         kbnUrl={kbnUrl}
         showSystemIndices={scope.showSystemIndices}
         toggleShowSystemIndices={scope.toggleShowSystemIndices}
+        type={type}
       />
     </div>
   );
