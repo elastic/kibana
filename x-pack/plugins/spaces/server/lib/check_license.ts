@@ -21,7 +21,7 @@ export function checkLicense(xPackInfo: any): LicenseCheckResult {
     };
   }
 
-  const isAnyXpackLicense = xPackInfo.license.isOneOf(['basic', 'platinum', 'trial']);
+  const isAnyXpackLicense = xPackInfo.license.isOneOf(['basic', 'gold', 'platinum', 'trial']);
 
   if (!isAnyXpackLicense) {
     return {
