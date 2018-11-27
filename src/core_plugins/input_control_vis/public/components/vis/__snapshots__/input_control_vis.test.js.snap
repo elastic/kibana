@@ -28,19 +28,14 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         controlIndex={0}
         disableMsg={null}
         fetchOptions={[Function]}
+        formatOptionLabel={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
         options={
           Array [
-            Object {
-              "label": "choice1",
-              "value": "choice1",
-            },
-            Object {
-              "label": "choice2",
-              "value": "choice2",
-            },
+            "choice1",
+            "choice2",
           ]
         }
         selectedOptions={Array []}
@@ -167,19 +162,14 @@ exports[`Clear btns enabled when there are values 1`] = `
         controlIndex={0}
         disableMsg={null}
         fetchOptions={[Function]}
+        formatOptionLabel={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
         options={
           Array [
-            Object {
-              "label": "choice1",
-              "value": "choice1",
-            },
-            Object {
-              "label": "choice2",
-              "value": "choice2",
-            },
+            "choice1",
+            "choice2",
           ]
         }
         selectedOptions={Array []}
@@ -306,19 +296,14 @@ exports[`Renders list control 1`] = `
         controlIndex={0}
         disableMsg={null}
         fetchOptions={[Function]}
+        formatOptionLabel={[Function]}
         id="mock-list-control"
         label="list control"
         multiselect={true}
         options={
           Array [
-            Object {
-              "label": "choice1",
-              "value": "choice1",
-            },
-            Object {
-              "label": "choice2",
-              "value": "choice2",
-            },
+            "choice1",
+            "choice2",
           ]
         }
         selectedOptions={Array []}
@@ -444,6 +429,7 @@ exports[`Renders range control 1`] = `
       <InjectIntl(RangeControlUi)
         control={
           Object {
+            "format": [Function],
             "id": "mock-range-control",
             "isEnabled": [Function],
             "label": "range control",

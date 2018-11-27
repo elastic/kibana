@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { pure, compose, branch, renderComponent } from 'recompose';
 import Style from 'style-it';
-import { getType } from '@kbn/interpreter/common/lib/get_type';
+import { getType } from '@kbn/interpreter/common';
 import { Loading } from '../loading';
 import { RenderWithFn } from '../render_with_fn';
 import { ElementShareContainer } from '../element_share_container';
@@ -51,6 +51,7 @@ export const ElementContent = compose(
       // TODO: 'canvas__element' was added for BWC, It can be removed after a while
       className={'canvas__element canvasElement'}
       style={{ ...renderable.containerStyle, ...size }}
+      data-test-subj="canvasWorkpadPageElementContent"
     >
       <ElementShareContainer
         className="canvasElement__content"
