@@ -73,7 +73,6 @@ export class ReportInfoButton extends Component<Props, State> {
       return null;
     }
 
-    // TODO browser type
     // TODO queue method (clicked UI, watcher, etc)
     const jobInfoParts = {
       datetimes: [
@@ -144,6 +143,10 @@ export class ReportInfoButton extends Component<Props, State> {
         {
           title: 'Status',
           description: get(info, 'status', NA),
+        },
+        {
+          title: 'Browser Type',
+          description: get(info, 'browser_type', NA),
         },
       ],
     };

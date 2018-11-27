@@ -11,6 +11,7 @@ import { oncePerServer } from './once_per_server';
 function enqueueJobFn(server) {
   const jobQueue = server.plugins.reporting.queue;
   const queueConfig = server.config().get('xpack.reporting.queue');
+  const browserType = server.config().get('xpack.reporting.capture.browser.type');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
 
   return async function enqueueJob(exportTypeId, jobParams, user, headers, request) {
@@ -21,6 +22,7 @@ function enqueueJobFn(server) {
     const options = {
       timeout: queueConfig.timeout,
       created_by: get(user, 'username', false),
+      browser_type: browserType,
     };
 
     return new Promise((resolve, reject) => {
