@@ -32,15 +32,14 @@ The *Monitoring* page in {kib} is empty.
 
 *Resolution:*
 
-. Confirm that {kib} is seeking monitoring data from the appropriate URL. By 
-default, data is retrieved from the cluster specified in the `elasticsearch.url`
-setting in the `kibana.yml` file. If you want to retrieve it from a different 
-monitoring cluster, set `xpack.monitoring.elasticsearch.url`. See
-<<monitoring-settings-kb>>.
+. Confirm that {kib} is seeking monitoring data from the appropriate {es} URL.
+By default, data is retrieved from the cluster specified in the 
+`elasticsearch.url` setting in the `kibana.yml` file. If you want to retrieve it
+from a different monitoring cluster, set `xpack.monitoring.elasticsearch.url`.
+See <<monitoring-settings-kb>>.
 
-. Confirm that there is monitoring data available at that URL. Depending on 
-which method you use to collect it and which product version you're using, it is
-stored in either `.monitoring-*` or `metricbeat-*` indices. At a minimum, you
+. Confirm that there is monitoring data available at that URL. It is stored in
+indices such as `.monitoring-kibana-*` and `.monitoring-es-*`. At a minimum, you
 must have monitoring data for the {es} production cluster. Once that data exists,
 {kib} can display monitoring data for other products in the cluster.
 
