@@ -24,7 +24,15 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFieldNumber,
+  EuiFormRow,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Static = props => {
   const handleChange = createChangeHandler(props.onChange, props.model);
@@ -48,32 +56,38 @@ export const Static = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div style={{ flex: '1 0 auto' }}>
-        <div style={{ flex: '1 0 auto', display: 'flex' }}>
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.static.aggregationLabel"
+              defaultMessage="Aggregation"
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('staticValue')}>
-              Static Value
-            </label>
-            <input
-              id={htmlId('staticValue')}
-              className="vis_editor__input-grows-100"
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('staticValue')}
+            label={(<FormattedMessage
+              id="tsvb.static.staticValuesLabel"
+              defaultMessage="Static Value"
+            />)}
+          >
+            <EuiFieldNumber
               onChange={handleTextChange('value')}
-              value={model.value}
-              step="0.1"
-              type="number"
+              value={Number(model.value)}
+              step={0.1}
             />
-          </div>
-        </div>
-      </div>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

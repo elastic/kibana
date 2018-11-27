@@ -44,13 +44,13 @@ describe('BasicAuthenticationProvider', () => {
 
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
       const authenticationResult = await provider.authenticate(
-        requestFixture({ path: '/some-path # that needs to be encoded' }),
+        requestFixture({ path: '/some-path # that needs to be encoded', basePath: '/s/foo' }),
         null
       );
 
       expect(authenticationResult.redirected()).to.be(true);
       expect(authenticationResult.redirectURL).to.be(
-        '/base-path/login?next=%2Fbase-path%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+        '/base-path/login?next=%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
       );
     });
 

@@ -30,7 +30,7 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import { loadNewJobDefaults, newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
-  createSearchItems,
+  SearchItemsProvider,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider,
   focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
@@ -63,7 +63,6 @@ const module = uiModules.get('apps/ml');
 module
   .controller('MlCreatePopulationJob', function (
     $scope,
-    $route,
     $timeout,
     Private,
     AppState) {
@@ -109,12 +108,13 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 
@@ -197,13 +197,13 @@ module
       end: 0,
       overField: undefined,
       timeField: indexPattern.timeFieldName,
-      // splitField: undefined,
       influencerFields: [],
       firstSplitFieldName: undefined,
       indexPattern: indexPattern,
       query,
       filters,
       combinedQuery,
+      usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',
       description: '',
       jobGroups: [],

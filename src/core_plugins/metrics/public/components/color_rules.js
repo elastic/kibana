@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from './add_delete_buttons';
 import * as collectionActions from './lib/collection_actions';
@@ -26,7 +26,13 @@ import ColorPicker from './color_picker';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiFieldNumber,
+  EuiFormLabel,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 class ColorRules extends Component {
 
@@ -51,11 +57,15 @@ class ColorRules extends Component {
     const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
+    const { intl } = this.props;
     const operatorOptions = [
-      { label: '> greater than', value: 'gt' },
-      { label: '>= greater than or equal', value: 'gte' },
-      { label: '< less than', value: 'lt' },
-      { label: '<= less than or equal', value: 'lte' },
+      { label: intl.formatMessage({ id: 'tsvb.colorRules.greaterThanLabel', defaultMessage: '> greater than' }), value: 'gt' },
+      {
+        label: intl.formatMessage({ id: 'tsvb.colorRules.greaterThanOrEqualLabel', defaultMessage: '>= greater than or equal' }),
+        value: 'gte'
+      },
+      { label: intl.formatMessage({ id: 'tsvb.colorRules.lessThanLabel', defaultMessage: '< less than' }), value: 'lt' },
+      { label: intl.formatMessage({ id: 'tsvb.colorRules.lessThanOrEqualLabel', defaultMessage: '<= less than or equal' }), value: 'lte' },
     ];
     const handleColorChange = (part) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
@@ -66,55 +76,95 @@ class ColorRules extends Component {
       return model.operator === option.value;
     });
 
+    const labelStyle = { marginBottom: 0 };
+
     let secondary;
     if (!this.props.hideSecondary) {
       secondary = (
-        <div className="color_rules__secondary">
-          <div className="color_rules__label">and {this.props.secondaryName} to</div>
-          <ColorPicker
-            onChange={handleColorChange}
-            name={this.props.secondaryVarName}
-            value={model[this.props.secondaryVarName]}
-          />
-        </div>
+        <Fragment>
+          <EuiFlexItem grow={false}>
+            <EuiFormLabel style={labelStyle}>
+              <FormattedMessage
+                id="tsvb.colorRules.setSecondaryColorLabel"
+                defaultMessage="and {secondaryName} to"
+                values={{ secondaryName: this.props.secondaryName }}
+                description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
+                metric is {greaterOrLessThan} {value}."
+              />
+            </EuiFormLabel>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ColorPicker
+              onChange={handleColorChange}
+              name={this.props.secondaryVarName}
+              value={model[this.props.secondaryVarName]}
+            />
+          </EuiFlexItem>
+        </Fragment>
       );
     }
     return (
-      <div key={model.id} className="color_rules__rule">
-        <div className="color_rules__label">Set {this.props.primaryName} to</div>
-        <ColorPicker
-          onChange={handleColorChange}
-          name={this.props.primaryVarName}
-          value={model[this.props.primaryVarName]}
-        />
+      <EuiFlexGroup wrap={true} responsive={false} gutterSize="s" key={model.id} alignItems="center" className="tvbColorRules__rule">
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel style={labelStyle}>
+            <FormattedMessage
+              id="tsvb.colorRules.setPrimaryColorLabel"
+              defaultMessage="Set {primaryName} to"
+              values={{ primaryName: this.props.primaryName }}
+              description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
+              metric is {greaterOrLessThan} {value}."
+            />
+          </EuiFormLabel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ColorPicker
+            onChange={handleColorChange}
+            name={this.props.primaryVarName}
+            value={model[this.props.primaryVarName]}
+          />
+        </EuiFlexItem>
+
         { secondary }
-        <label className="color_rules__label" htmlFor={htmlId('ifMetricIs')}>
-          if metric is
-        </label>
-        <div className="color_rules__item">
+
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel style={labelStyle} htmlFor={htmlId('ifMetricIs')}>
+            <FormattedMessage
+              id="tsvb.colorRules.ifMetricIsLabel"
+              defaultMessage="if metric is"
+              description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
+              metric is {greaterOrLessThan} {value}."
+            />
+          </EuiFormLabel>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <EuiComboBox
             id={htmlId('ifMetricIs')}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
             onChange={this.handleChange(model, 'operator')}
             singleSelection={true}
+            fullWidth
           />
-        </div>
-        <input
-          aria-label="Value"
-          className="color_rules__input"
-          type="number"
-          value={model.value}
-          onChange={this.handleChange(model, 'value', Number)}
-        />
-        <div className="color_rules__control">
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFieldNumber
+            aria-label={intl.formatMessage({ id: 'tsvb.colorRules.valueAriaLabel', defaultMessage: 'Value' })}
+            value={model.value}
+            onChange={this.handleChange(model, 'value', Number)}
+            fullWidth
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <AddDeleteButtons
             onAdd={handleAdd}
             onDelete={handleDelete}
             disableDelete={items.length < 2}
+            responsive={false}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -123,7 +173,7 @@ class ColorRules extends Component {
     if (!model[name]) return (<div/>);
     const rows = model[name].map(this.renderRow);
     return (
-      <div className="color_rules">
+      <div>
         { rows }
       </div>
     );
@@ -133,9 +183,9 @@ class ColorRules extends Component {
 
 ColorRules.defaultProps = {
   name: 'color_rules',
-  primaryName: 'background',
+  primaryName: i18n.translate('tsvb.colorRules.defaultPrimaryNameLabel', { defaultMessage: 'background' }),
   primaryVarName: 'background_color',
-  secondaryName: 'text',
+  secondaryName: i18n.translate('tsvb.colorRules.defaultSecondaryNameLabel', { defaultMessage: 'text' }),
   secondaryVarName: 'color',
   hideSecondary: false
 };
@@ -151,4 +201,4 @@ ColorRules.propTypes = {
   hideSecondary: PropTypes.bool
 };
 
-export default ColorRules;
+export default injectI18n(ColorRules);

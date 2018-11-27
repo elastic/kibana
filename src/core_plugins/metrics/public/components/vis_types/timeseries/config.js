@@ -27,9 +27,19 @@ import { IndexPattern } from '../../index_pattern';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiFormRow,
+  EuiCode,
+  EuiHorizontalRule,
+  EuiFieldNumber,
+  EuiFormLabel,
+  EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-function TimeseriesConfig(props) {
+const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
 
@@ -47,35 +57,36 @@ function TimeseriesConfig(props) {
   };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
+  const { intl } = props;
 
   const stackedOptions = [
-    { label: 'None', value: 'none' },
-    { label: 'Stacked', value: 'stacked' },
-    { label: 'Percent', value: 'percent' }
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }), value: 'none' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }), value: 'stacked' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.percentLabel', defaultMessage: 'Percent' }), value: 'percent' }
   ];
   const selectedStackedOption = stackedOptions.find(option => {
     return model.stacked === option.value;
   });
 
   const positionOptions = [
-    { label: 'Right', value: 'right' },
-    { label: 'Left', value: 'left' }
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.rightLabel', defaultMessage: 'Right' }), value: 'right' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.leftLabel', defaultMessage: 'Left' }), value: 'left' }
   ];
   const selectedAxisPosOption = positionOptions.find(option => {
     return model.axis_position === option.value;
   });
 
   const chartTypeOptions = [
-    { label: 'Bar', value: 'bar' },
-    { label: 'Line', value: 'line' }
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.barLabel', defaultMessage: 'Bar' }), value: 'bar' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.lineLabel', defaultMessage: 'Line' }), value: 'line' }
   ];
   const selectedChartTypeOption = chartTypeOptions.find(option => {
     return model.chart_type === option.value;
   });
 
   const splitColorOptions = [
-    { label: 'Gradient', value: 'gradient' },
-    { label: 'Rainbow', value: 'rainbow' }
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.gradientLabel', defaultMessage: 'Gradient' }), value: 'gradient' },
+    { label: intl.formatMessage({ id: 'tsvb.timeSeries.rainbowLabel', defaultMessage: 'Rainbow' }), value: 'rainbow' }
   ];
   const selectedSplitColorOption = splitColorOptions.find(option => {
     return model.split_color_mode === option.value;
@@ -84,256 +95,392 @@ function TimeseriesConfig(props) {
   let type;
   if (model.chart_type === 'line') {
     type = (
-      <div className="vis_editor__series_config-row">
-        <label className="vis_editor__label" htmlFor={htmlId('chartType')}>
-          Chart Type
-        </label>
-        <div className="vis_editor__item">
-          <EuiComboBox
-            isClearable={false}
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
             id={htmlId('chartType')}
-            options={chartTypeOptions}
-            selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
-            onChange={handleSelectChange('chart_type')}
-            singleSelection={true}
-          />
-        </div>
-        <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
-          Stacked
-        </label>
-        <div className="vis_editor__item">
-          <EuiComboBox
-            isClearable={false}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.chartTypeLabel"
+              defaultMessage="Chart type"
+            />)}
+          >
+            <EuiComboBox
+              isClearable={false}
+              options={chartTypeOptions}
+              selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
+              onChange={handleSelectChange('chart_type')}
+              singleSelection={true}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
             id={htmlId('stacked')}
-            options={stackedOptions}
-            selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
-            onChange={handleSelectChange('stacked')}
-            singleSelection={true}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.stackedLabel"
+              defaultMessage="Stacked"
+            />)}
+          >
+            <EuiComboBox
+              isClearable={false}
+              options={stackedOptions}
+              selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
+              onChange={handleSelectChange('stacked')}
+              singleSelection={true}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('fill')}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.fillLabel"
+              defaultMessage="Fill (0 to 1)"
+            />)}
+          >
+            <EuiFieldNumber
+              step={0.1}
+              onChange={handleTextChange('fill')}
+              value={Number(model.fill)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('lineWidth')}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.lineWidthLabel"
+              defaultMessage="Line width"
+            />)}
+          >
+            <EuiFieldNumber
+              onChange={handleTextChange('line_width')}
+              value={Number(model.line_width)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('pointSize')}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartLine.pointSizeLabel"
+              defaultMessage="Point size"
+            />)}
+          >
+            <EuiFieldNumber
+              onChange={handleTextChange('point_size')}
+              value={Number(model.point_size)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.timeSeries.chartLine.stepsLabel"
+              defaultMessage="Steps"
+            />
+          </EuiFormLabel>
+          <EuiSpacer size="s" />
+          <YesNo
+            value={model.steps}
+            name="steps"
+            onChange={props.onChange}
           />
-        </div>
-        <label className="vis_editor__label" htmlFor={htmlId('fill')}>
-          Fill (0 to 1)
-        </label>
-        <input
-          id={htmlId('fill')}
-          className="vis_editor__input-grows"
-          type="number"
-          step="0.1"
-          onChange={handleTextChange('fill')}
-          value={model.fill}
-        />
-        <label className="vis_editor__label" htmlFor={htmlId('lineWidth')}>
-          Line Width
-        </label>
-        <input
-          id={htmlId('lineWidth')}
-          className="vis_editor__input-grows"
-          type="number"
-          onChange={handleTextChange('line_width')}
-          value={model.line_width}
-        />
-        <label className="vis_editor__label" htmlFor={htmlId('pointSize')}>
-          Point Size
-        </label>
-        <input
-          id={htmlId('pointSize')}
-          className="vis_editor__input-grows"
-          type="number"
-          onChange={handleTextChange('point_size')}
-          value={model.point_size}
-        />
-        <div className="vis_editor__label">Steps</div>
-        <YesNo
-          value={model.steps}
-          name="steps"
-          onChange={props.onChange}
-        />
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
   if (model.chart_type === 'bar') {
     type = (
-      <div className="vis_editor__series_config-row">
-        <label className="vis_editor__label" htmlFor={htmlId('chartType')}>
-          Chart Type
-        </label>
-        <div className="vis_editor__item">
-          <EuiComboBox
-            isClearable={false}
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
             id={htmlId('chartType')}
-            options={chartTypeOptions}
-            selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
-            onChange={handleSelectChange('chart_type')}
-            singleSelection={true}
-          />
-        </div>
-        <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
-          Stacked
-        </label>
-        <div className="vis_editor__item">
-          <EuiComboBox
-            isClearable={false}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartBar.chartTypeLabel"
+              defaultMessage="Chart type"
+            />)}
+          >
+            <EuiComboBox
+              isClearable={false}
+              options={chartTypeOptions}
+              selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
+              onChange={handleSelectChange('chart_type')}
+              singleSelection={true}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
             id={htmlId('stacked')}
-            options={stackedOptions}
-            selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
-            onChange={handleSelectChange('stacked')}
-            singleSelection={true}
-          />
-        </div>
-        <label className="vis_editor__label" htmlFor={htmlId('fill')}>
-          Fill (0 to 1)
-        </label>
-        <input
-          id={htmlId('fill')}
-          className="vis_editor__input-grows"
-          type="number"
-          step="0.5"
-          onChange={handleTextChange('fill')}
-          value={model.fill}
-        />
-        <label className="vis_editor__label" htmlFor={htmlId('lineWidth')}>
-          Line Width
-        </label>
-        <input
-          id={htmlId('lineWidth')}
-          className="vis_editor__input-grows"
-          type="number"
-          onChange={handleTextChange('line_width')}
-          value={model.line_width}
-        />
-      </div>
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartBar.stackedLabel"
+              defaultMessage="Stacked"
+            />)}
+          >
+            <EuiComboBox
+              isClearable={false}
+              options={stackedOptions}
+              selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
+              onChange={handleSelectChange('stacked')}
+              singleSelection={true}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('fill')}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartBar.fillLabel"
+              defaultMessage="Fill (0 to 1)"
+            />)}
+          >
+            <EuiFieldNumber
+              step={0.5}
+              onChange={handleTextChange('fill')}
+              value={Number(model.fill)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('lineWidth')}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.chartBar.lineWidthLabel"
+              defaultMessage="Line width"
+            />)}
+          >
+            <EuiFieldNumber
+              onChange={handleTextChange('line_width')}
+              value={Number(model.line_width)}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   const disableSeparateYaxis = model.separate_axis ? false : true;
 
   return (
-    <div>
-      <div className="vis_editor__series_config-container">
-        <div className="vis_editor__series_config-row">
+    <div className="tvbAggRow">
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
           <DataFormatPicker
             onChange={handleSelectChange('formatter')}
             value={model.formatter}
           />
-          <label className="vis_editor__label" htmlFor={htmlId('template')}>
-            Template (eg.<code>{'{{value}}/s'}</code>)
-          </label>
-          <input
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
             id={htmlId('template')}
-            className="vis_editor__input-grows"
-            onChange={handleTextChange('value_template')}
-            value={model.value_template}
-          />
-        </div>
-        { type }
-        <div className="vis_editor__series_config-row">
-          <label className="vis_editor__label" htmlFor={htmlId('offset')}>
-            Offset series time by (1m, 1h, 1w, 1d)
-          </label>
-          <input
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.templateLabel"
+              defaultMessage="Template"
+            />)}
+            helpText={(
+              <span>
+                <FormattedMessage
+                  id="tsvb.timeSeries.templateHelpText"
+                  defaultMessage="eg.{templateExample}"
+                  values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
+                />
+              </span>
+            )}
+            fullWidth
+          >
+            <EuiFieldText
+              onChange={handleTextChange('value_template')}
+              value={model.value_template}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFormRow
+        id={htmlId('series_filter')}
+        label={(<FormattedMessage
+          id="tsvb.timeSeries.filterLabel"
+          defaultMessage="Filter"
+        />)}
+        fullWidth
+      >
+        <EuiFieldText
+          onChange={handleTextChange('filter')}
+          value={model.filter}
+          fullWidth
+        />
+      </EuiFormRow>
+
+      <EuiHorizontalRule margin="s" />
+
+      { type }
+
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFlexGroup responsive={false} wrap={true}>
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
             id={htmlId('offset')}
-            data-test-subj="offsetTimeSeries"
-            className="vis_editor__input-grows"
-            type="text"
-            onChange={handleTextChange('offset_time')}
-            value={model.offset_time}
-          />
-          <div className="vis_editor__label">Hide in Legend</div>
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.offsetSeriesTimeLabel"
+              defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
+              description="1m, 1h, 1w, 1d are required values and must not be translated."
+            />)}
+          >
+            <EuiFieldText
+              data-test-subj="offsetTimeSeries"
+              onChange={handleTextChange('offset_time')}
+              value={model.offset_time}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.timeSeries.hideInLegendLabel"
+              defaultMessage="Hide in legend"
+            />
+          </EuiFormLabel>
+          <EuiSpacer size="s" />
           <YesNo
             value={model.hide_in_legend}
             name="hide_in_legend"
             onChange={props.onChange}
           />
-          <label className="vis_editor__label" htmlFor={htmlId('splitColor')}>
-            Split Color Theme
-          </label>
-          <div className="vis_editor__row_item">
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiFormRow
+            id={htmlId('splitColor')}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.splitColorThemeLabel"
+              defaultMessage="Split color theme"
+            />)}
+          >
             <EuiComboBox
               isClearable={false}
-              id={htmlId('splitColor')}
               options={splitColorOptions}
               selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
               onChange={handleSelectChange('split_color_mode')}
               singleSelection={true}
             />
-          </div>
-        </div>
-        <div className="vis_editor__series_config-row">
-          <div className="vis_editor__label">Separate Axis</div>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFlexGroup responsive={false} wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.timeSeries.separateAxisLabel"
+              defaultMessage="Separate axis?"
+            />
+          </EuiFormLabel>
+          <EuiSpacer size="s" />
           <YesNo
             value={model.separate_axis}
             name="separate_axis"
             onChange={props.onChange}
           />
-          <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>
-            Axis Min
-          </label>
-          <input
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
             id={htmlId('axisMin')}
-            className="vis_editor__input-grows"
-            type="number"
-            disabled={disableSeparateYaxis}
-            onChange={handleTextChange('axis_min')}
-            value={model.axis_min}
-          />
-          <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>
-            Axis Max
-          </label>
-          <input
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.axisMinLabel"
+              defaultMessage="Axis min"
+            />)}
+          >
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              It accepts a null value, but is passed a empty string.
+            */}
+            <input
+              className="tvbAgg__input"
+              type="number"
+              disabled={disableSeparateYaxis}
+              onChange={handleTextChange('axis_min')}
+              value={model.axis_min}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
             id={htmlId('axisMax')}
-            className="vis_editor__input-grows"
-            type="number"
-            disabled={disableSeparateYaxis}
-            onChange={handleTextChange('axis_max')}
-            value={model.axis_max}
-          />
-          <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>
-            Axis Position
-          </label>
-          <div className="vis_editor__row_item">
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.axisMaxLabel"
+              defaultMessage="Axis max"
+            />)}
+          >
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              It accepts a null value, but is passed a empty string.
+            */}
+            <input
+              className="tvbAgg__input"
+              disabled={disableSeparateYaxis}
+              onChange={handleTextChange('axis_max')}
+              value={model.axis_max}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('axisPos')}
+            label={(<FormattedMessage
+              id="tsvb.timeSeries.axisPositionLabel"
+              defaultMessage="Axis position"
+            />)}
+          >
             <EuiComboBox
               isClearable={false}
               isDisabled={disableSeparateYaxis}
-              id={htmlId('axisPos')}
               options={positionOptions}
               selectedOptions={selectedAxisPosOption ? [selectedAxisPosOption] : []}
               onChange={handleSelectChange('axis_position')}
               singleSelection={true}
             />
-          </div>
-        </div>
-        <div className="vis_editor__series_config-row">
-          <div className="vis_editor__label">Override Index Pattern</div>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule margin="s" />
+
+      <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.timeSeries.overrideIndexPatternLabel"
+              defaultMessage="Override Index Pattern?"
+            />
+          </EuiFormLabel>
+          <EuiSpacer size="s" />
           <YesNo
             value={model.override_index_pattern}
             name="override_index_pattern"
             onChange={props.onChange}
           />
+        </EuiFlexItem>
+        <EuiFlexItem>
           <IndexPattern
             {...props}
             prefix="series_"
-            className="vis_editor__row_item vis_editor__row"
             disabled={!model.override_index_pattern}
             with-interval={true}
           />
-        </div>
-        <div className="vis_editor__series_config-row">
-          <label className="vis_editor__label" htmlFor={htmlId('series_filter')}>
-            Filter
-          </label>
-          <input
-            id={htmlId('series_filter')}
-            className="vis_editor__input-grows"
-            type="text"
-            onChange={handleTextChange('filter')}
-            value={model.filter}
-          />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
     </div>
   );
 
-}
+});
 
 TimeseriesConfig.propTypes = {
   fields: PropTypes.object,
