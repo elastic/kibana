@@ -70,8 +70,8 @@ jest.doMock('lodash', () => ({
 }));
 
 import { EuiFieldText } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryBar } from 'ui/query_bar';
 import { QueryLanguageSwitcher } from 'ui/query_bar/components/language_switcher';
 
@@ -126,8 +126,8 @@ describe('QueryBar', () => {
   });
 
   it('Should render the given query', () => {
-    const component = shallow(
-      <QueryBar
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -140,8 +140,8 @@ describe('QueryBar', () => {
   });
 
   it('Should pass the query language to the language switcher', () => {
-    const component = shallow(
-      <QueryBar
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
         query={luceneQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -154,8 +154,8 @@ describe('QueryBar', () => {
   });
 
   it('Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true', () => {
-    const component = shallow(
-      <QueryBar
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -169,8 +169,8 @@ describe('QueryBar', () => {
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
-    shallow(
-      <QueryBar
+    shallowWithIntl(
+      <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -187,8 +187,8 @@ describe('QueryBar', () => {
     const mockStorage = createMockStorage();
     const mockCallback = jest.fn();
 
-    const component = shallow(
-      <QueryBar
+    const component = shallowWithIntl(
+      <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={mockCallback}
         appName={'discover'}
@@ -209,8 +209,8 @@ describe('QueryBar', () => {
   it('Should call onSubmit with the current query when the user hits enter inside the query bar', () => {
     const mockCallback = jest.fn();
 
-    const component = mount(
-      <QueryBar
+    const component = mountWithIntl(
+      <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={mockCallback}
         appName={'discover'}
@@ -234,8 +234,8 @@ describe('QueryBar', () => {
   });
 
   it('Should use PersistedLog for recent search suggestions', async () => {
-    const component = mount(
-      <QueryBar
+    const component = mountWithIntl(
+      <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
@@ -259,8 +259,8 @@ describe('QueryBar', () => {
   });
 
   it('Should get suggestions from the autocomplete provider for the current language', () => {
-    mount(
-      <QueryBar
+    mountWithIntl(
+      <QueryBar.WrappedComponent
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}

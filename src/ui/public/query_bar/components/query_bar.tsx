@@ -44,6 +44,8 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 const KEY_CODES = {
   LEFT: 37,
   UP: 38,
@@ -83,7 +85,7 @@ interface State {
   currentProps?: Props;
 }
 
-export class QueryBar extends Component<Props, State> {
+class QueryBarUI extends Component<Props, State> {
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
@@ -471,7 +473,10 @@ export class QueryBar extends Component<Props, State> {
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
                       className="kuiLocalSearchAssistedInput__input"
-                      placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                      placeholder={this.props.intl.formatMessage({
+                        id: 'common.ui.queryBar.searchInputPlaceholder',
+                        defaultMessage: 'Search… (e.g. status:200 AND extension:PHP)',
+                      })}
                       value={this.state.query.query}
                       onKeyDown={this.onKeyDown}
                       onKeyUp={this.onKeyUp}
@@ -487,7 +492,10 @@ export class QueryBar extends Component<Props, State> {
                       autoComplete="off"
                       spellCheck={false}
                       icon="console"
-                      aria-label="Search input"
+                      aria-label={this.props.intl.formatMessage({
+                        id: 'common.ui.queryBar.searchInputAriaLabel',
+                        defaultMessage: 'Search input',
+                      })}
                       type="text"
                       data-test-subj="queryInput"
                       aria-autocomplete="list"
@@ -520,16 +528,25 @@ export class QueryBar extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            aria-label="Search"
+            aria-label={this.props.intl.formatMessage({
+              id: 'common.ui.queryBar.searchButtonAriaLabel',
+              defaultMessage: 'Search',
+            })}
             data-test-subj="querySubmitButton"
             color={this.isDirty() ? 'secondary' : 'primary'}
             fill
             onClick={this.onClickSubmitButton}
           >
-            {this.isDirty() ? 'Update' : 'Refresh'}
+            {this.isDirty() ? (
+              <FormattedMessage id="common.ui.queryBar.updateLabel" defaultMessage="Update" />
+            ) : (
+              <FormattedMessage id="common.ui.queryBar.refreshLabel" defaultMessage="Refresh" />
+            )}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 }
+
+export const QueryBar = injectI18n(QueryBarUI);
