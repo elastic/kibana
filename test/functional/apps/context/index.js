@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const kibanaServer = getService('kibanaServer');
 
   describe('context app', function () {
+    this.tags('ciGroup1');
+
     before(async function () {
       await remote.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
