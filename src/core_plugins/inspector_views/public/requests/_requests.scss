@@ -18,3 +18,11 @@
 .insRequestSelector__menuSpinner {
   margin-left: $euiSizeS;
 }
+
+.insRequestDetailsRequest__parent {
+  position: relative; }
+
+.insRequestDetailsRequest__devToolButton {
+  position: absolute;
+  z-index: 10;
+  right: 6px; }

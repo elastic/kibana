@@ -20,17 +20,41 @@
 import React from 'react';
 import {
   EuiCodeBlock,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
-function RequestDetailsRequest(props) {
+import chrome from 'ui/chrome';
+import rison from 'rison-node';
+
+function RequestDetailsRequest({ request }) {
+  let devToolsButton;
+  if (request
+    && request.isEsSearchRequest
+    && request.esIndex
+    && request.json) {
+    const searchRequest = rison.encode(request.json);
+    const index = rison.encode(request.esIndex);
+    devToolsButton = (
+      <EuiButtonEmpty
+        className="insRequestDetailsRequest__devToolButton"
+        href={chrome.addBasePath(`/app/kibana#/dev_tools/console?search_request=${searchRequest}&index=${index}`)}
+      >
+        Copy to Dev Tools
+      </EuiButtonEmpty>
+    );
+  }
+
   return (
-    <EuiCodeBlock
-      language="json"
-      paddingSize="s"
-      data-test-subj="inspectorRequestBody"
-    >
-      { JSON.stringify(props.request.json, null, 2) }
-    </EuiCodeBlock>
+    <div className="insRequestDetailsRequest__parent">
+      {devToolsButton}
+      <EuiCodeBlock
+        language="json"
+        paddingSize="s"
+        data-test-subj="inspectorRequestBody"
+      >
+        { JSON.stringify(request.json, null, 2) }
+      </EuiCodeBlock>
+    </div>
   );
 }
 
