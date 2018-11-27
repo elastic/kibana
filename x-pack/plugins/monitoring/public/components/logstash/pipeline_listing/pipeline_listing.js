@@ -60,7 +60,7 @@ export class PipelineListing extends Component {
                   series={throughput.data}
                   onBrush={onBrush}
                   tooltip={{
-                    xValueFormatter: this.tooltipXValueFormatter,
+                    xValueFormatter: value => this.tooltipXValueFormatter(value),
                     yValueFormatter: partialRight(this.tooltipYValueFormatter, throughput.metric.format, throughput.metric.units)
                   }}
                   options={{ xaxis: throughput.timeRange }}
