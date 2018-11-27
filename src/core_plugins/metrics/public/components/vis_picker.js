@@ -20,6 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
 function VisPickerItem(props) {
   const { label, type, selected } = props;
@@ -44,19 +45,19 @@ VisPickerItem.propTypes = {
   selected: PropTypes.bool
 };
 
-function VisPicker(props) {
+const VisPicker = injectI18n(function (props) {
   const handleChange = (type) => {
     props.onChange({ type });
   };
 
-  const { model } = props;
+  const { model, intl } = props;
   const tabs = [
-    { type: 'timeseries', label: 'Time Series' },
-    { type: 'metric', label: 'Metric' },
-    { type: 'top_n', label: 'Top N' },
-    { type: 'gauge', label: 'Gauge' },
-    { type: 'markdown', label: 'Markdown' },
-    { type: 'table', label: 'Table' }
+    { type: 'timeseries', label: intl.formatMessage({ id: 'tsvb.visPicker.timeSeriesLabel', defaultMessage: 'Time Series' }) },
+    { type: 'metric', label: intl.formatMessage({ id: 'tsvb.visPicker.metricLabel', defaultMessage: 'Metric' }) },
+    { type: 'top_n', label: intl.formatMessage({ id: 'tsvb.visPicker.topNLabel', defaultMessage: 'Top N' }) },
+    { type: 'gauge', label: intl.formatMessage({ id: 'tsvb.visPicker.gaugeLabel', defaultMessage: 'Gauge' }) },
+    { type: 'markdown', label: intl.formatMessage({ id: 'tsvb.visPicker.markdownLabel', defaultMessage: 'Markdown' }) },
+    { type: 'table', label: intl.formatMessage({ id: 'tsvb.visPicker.tableLabel', defaultMessage: 'Table' }) }
   ].map(item => {
     return (
       <VisPickerItem
@@ -74,7 +75,7 @@ function VisPicker(props) {
     </EuiTabs>
   );
 
-}
+});
 
 VisPicker.propTypes = {
   model: PropTypes.object,

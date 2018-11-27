@@ -53,7 +53,7 @@ const mapDispatchToProps = dispatch => ({
       // initialize the socket and interpreter
       await createSocket(basePath);
       loadPrivateBrowserFunctions();
-      await populateBrowserRegistries(types);
+      await populateBrowserRegistries(types, basePath);
       await initializeInterpreter();
 
       // set app state to ready

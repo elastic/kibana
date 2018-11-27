@@ -26,15 +26,16 @@ import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 VisTypesRegistryProvider.register(MetricsVisProvider);
 
-export default function MetricsVisProvider(Private) {
+export default function MetricsVisProvider(Private, i18n) {
   const VisFactory = Private(VisFactoryProvider);
   const ReactEditorController = Private(ReactEditorControllerProvider).handler;
   const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
 
   return VisFactory.createReactVisualization({
     name: 'metrics',
-    title: 'Visual Builder',
-    description: 'Build time-series using a visual pipeline interface',
+    title: i18n('tsvb.kbnVisTypes.metricsTitle', { defaultMessage: 'Visual Builder' }),
+    description: i18n('tsvb.kbnVisTypes.metricsDescription',
+      { defaultMessage: 'Build time-series using a visual pipeline interface' }),
     icon: 'visVisualBuilder',
     feedbackMessage: defaultFeedbackMessage,
     visConfig: {
