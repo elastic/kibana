@@ -21,9 +21,9 @@
       visibility: hidden;
     }
 
-    .sidebar-collapser {
     .kbnCollapsibleSidebar__collapseButton {
       visibility: visible;
+
       .chevron-cont:before {
         content: "\F138";
       }
@@ -36,6 +36,7 @@
     &.closed {
       display: none;
     }
+
     .kbnCollapsibleSidebar__collapseButton {
       display: none;
     }
