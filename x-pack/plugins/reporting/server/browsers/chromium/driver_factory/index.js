@@ -63,6 +63,9 @@ export class HeadlessChromiumDriverFactory {
         }
       }, observer);
 
+      // Register with a few useful puppeteer event handlers:
+      // https://pptr.dev/#?product=Puppeteer&version=v1.10.0&show=api-event-error
+
       const stderr$ = Rx.fromEvent(page, 'console').pipe(
         filter(line => line._type === 'error'),
         map(line => line._text),
@@ -78,7 +81,6 @@ export class HeadlessChromiumDriverFactory {
         logger: this.logger
       }));
 
-      // FIXME: not sure this event type actually exists
       const processError$ = Rx.fromEvent(page, 'error').pipe(
         mergeMap((err) => Rx.throwError(new Error(`Unable to spawn Chromium: ${err}`))),
       );
