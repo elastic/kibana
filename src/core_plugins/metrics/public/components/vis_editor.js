@@ -30,6 +30,7 @@ import { get } from 'lodash';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
 import { fetchFields } from '../lib/fetch_fields';
 import chrome from 'ui/chrome';
+import { I18nProvider } from '@kbn/i18n/react';
 
 class VisEditor extends Component {
   constructor(props) {
@@ -131,17 +132,19 @@ class VisEditor extends Component {
       }
       const reversed = this.state.reversed;
       return (
-        <Visualization
-          dateFormat={this.props.config.get('dateFormat')}
-          reversed={reversed}
-          onBrush={this.onBrush}
-          onUiState={this.handleUiState}
-          uiState={this.props.vis.getUiState()}
-          fields={this.state.visFields}
-          model={this.props.vis.params}
-          visData={this.props.visData}
-          getConfig={this.getConfig}
-        />
+        <I18nProvider>
+          <Visualization
+            dateFormat={this.props.config.get('dateFormat')}
+            reversed={reversed}
+            onBrush={this.onBrush}
+            onUiState={this.handleUiState}
+            uiState={this.props.vis.getUiState()}
+            fields={this.state.visFields}
+            model={this.props.vis.params}
+            visData={this.props.visData}
+            getConfig={this.getConfig}
+          />
+        </I18nProvider>
       );
     }
 
@@ -149,8 +152,8 @@ class VisEditor extends Component {
 
     if (model) {
       return (
-        <div className="vis_editor">
-          <div className="vis-editor-hide-for-reporting">
+        <div className="tvbEditor">
+          <div className="tvbEditor--hideForReporting">
             <VisPicker model={model} onChange={this.handleChange} />
           </div>
           <VisEditorVisualization
@@ -171,7 +174,7 @@ class VisEditor extends Component {
             dateFormat={this.props.config.get('dateFormat')}
             onDataChange={this.onDataChange}
           />
-          <div className="vis-editor-hide-for-reporting">
+          <div className="tvbEditor--hideForReporting">
             <PanelConfig
               fields={this.state.visFields}
               model={model}

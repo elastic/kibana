@@ -20,16 +20,18 @@
 import cmdShimCb from 'cmd-shim';
 import fs from 'fs';
 import mkdirpCb from 'mkdirp';
+import { ncp } from 'ncp';
 import { dirname, relative } from 'path';
 import { promisify } from 'util';
 
 const stat = promisify(fs.stat);
 const readFile = promisify(fs.readFile);
-const unlink = promisify(fs.unlink);
 const symlink = promisify(fs.symlink);
 const chmod = promisify(fs.chmod);
 const cmdShim = promisify<string, string>(cmdShimCb);
 const mkdirp = promisify(mkdirpCb);
+export const unlink = promisify(fs.unlink);
+export const copyDirectory = promisify(ncp);
 
 export { chmod, readFile, mkdirp };
 

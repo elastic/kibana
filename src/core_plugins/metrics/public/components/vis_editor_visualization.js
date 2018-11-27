@@ -19,10 +19,9 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { keyCodes } from '@elastic/eui';
-import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
+import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const MIN_CHART_HEIGHT = 250;
 
@@ -142,47 +141,62 @@ class VisEditorVisualization extends Component {
       style.userSelect = 'none';
     }
 
-    const applyButtonClassName = dirty ? 'thor__button-solid-default' : 'thor__button-outlined-grayLight';
-    let applyMessage = 'The latest changes have been applied.';
-    if (dirty) applyMessage = 'The changes to this visualization have not been applied.';
-    if (autoApply) applyMessage = 'The changes will be automatically applied.';
+    let applyMessage = (<FormattedMessage
+      id="tsvb.visEditorVisualization.changesSuccessfullyAppliedMessage"
+      defaultMessage="The latest changes have been applied."
+    />);
+    if (dirty) {
+      applyMessage = (<FormattedMessage
+        id="tsvb.visEditorVisualization.changesHaveNotBeenAppliedMessage"
+        defaultMessage="The changes to this visualization have not been applied."
+      />);
+    }
+    if (autoApply) {
+      applyMessage = (<FormattedMessage
+        id="tsvb.visEditorVisualization.changesWillBeAutomaticallyAppliedMessage"
+        defaultMessage="The changes will be automatically applied."
+      />);
+    }
     const applyButton = (
-      <div className="vis_editor__dirty_controls">
-        <label
-          className="vis_editor__dirty_controls-toggle-label"
-          id="tsvbAutoApply"
-          htmlFor="tsvbAutoApplyInput"
-        >
-          Auto Apply
-        </label>
-        <div className="vis_editor__dirty_controls-toggle">
-          <Toggle
+      <EuiFlexGroup className="tvbEditorVisualization__apply" alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiSwitch
             id="tsvbAutoApplyInput"
-            defaultChecked={autoApply}
-            icons={false}
+            label={(<FormattedMessage
+              id="tsvb.visEditorVisualization.autoApplyLabel"
+              defaultMessage="Auto apply"
+            />)}
+            checked={autoApply}
             onChange={this.props.onToggleAutoApply}
           />
-        </div>
-        <div className="vis_editor__dirty_controls-button">
-          <button
-            disabled={!dirty}
-            onClick={this.props.onCommit}
-            className={`${applyButtonClassName} md`}
-          >
-            <i className="fa fa-play" /> Apply Changes
-          </button>
-        </div>
-        <div className={`vis_editor__dirty_controls-message${dirty ? '-dirty' : ''}`}>
-          {applyMessage}
-        </div>
-      </div>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color={dirty ? 'default' : 'subdued'} size="xs">
+            <p>
+              {applyMessage}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+
+        {!autoApply &&
+          <EuiFlexItem grow={false}>
+            <EuiButton iconType="play" fill size="s" onClick={this.props.onCommit} disabled={!dirty}>
+              <FormattedMessage
+                id="tsvb.visEditorVisualization.applyChangesLabel"
+                defaultMessage="Apply changes"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        }
+      </EuiFlexGroup>
     );
 
     return (
       <div>
         <div
           style={style}
-          className="vis_editor__visualization"
+          className="tvbEditorVisualization"
           data-shared-items-container
           data-shared-item
           data-title={this.props.title}
@@ -190,14 +204,17 @@ class VisEditorVisualization extends Component {
           data-render-complete="disabled"
           ref={this._visEl}
         />
-        <div className="vis-editor-hide-for-reporting">
+        <div className="tvbEditor--hideForReporting">
           {applyButton}
           <button
-            className="vis_editor__visualization-draghandle"
+            className="tvbEditorVisualization__draghandle"
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
             onKeyDown={this.onSizeHandleKeyDown}
-            aria-label="Press up/down to adjust the chart size"
+            aria-label={this.props.intl.formatMessage({
+              id: 'tsvb.colorRules.adjustChartSizeAriaLabel',
+              defaultMessage: 'Press up/down to adjust the chart size'
+            })}
           >
             <i className="fa fa-ellipsis-h" />
           </button>
@@ -223,4 +240,4 @@ VisEditorVisualization.propTypes = {
   appState: PropTypes.object,
 };
 
-export default VisEditorVisualization;
+export default injectI18n(VisEditorVisualization);

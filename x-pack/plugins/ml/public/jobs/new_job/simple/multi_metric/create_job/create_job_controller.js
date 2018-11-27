@@ -30,7 +30,7 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
-  createSearchItems,
+  SearchItemsProvider,
   addNewJobToRecentlyAccessed,
   moveToAdvancedJobCreationProvider,
   focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
@@ -64,7 +64,6 @@ const module = uiModules.get('apps/ml');
 module
   .controller('MlCreateMultiMetricJob', function (
     $scope,
-    $route,
     $timeout,
     Private,
     AppState) {
@@ -109,12 +108,13 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 
@@ -199,6 +199,7 @@ module
       query,
       filters,
       combinedQuery,
+      usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',
       description: '',
       jobGroups: [],
@@ -641,7 +642,7 @@ module
       ml.calculateModelMemoryLimit({
         indexPattern: formConfig.indexPattern.title,
         splitFieldName: formConfig.splitField.name,
-        query: formConfig.query,
+        query: formConfig.combinedQuery,
         fieldNames: Object.keys(formConfig.fields),
         influencerNames: formConfig.influencerFields.map(f => f.name),
         timeFieldName: formConfig.timeField,

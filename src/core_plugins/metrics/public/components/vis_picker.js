@@ -19,55 +19,45 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { EuiTabs, EuiTab } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
 function VisPickerItem(props) {
-  const { label, icon, type } = props;
-  let itemClassName = 'vis_editor__vis_picker-item';
-  let iconClassName = 'vis_editor__vis_picker-icon';
-  let labelClassName = 'vis_editor__vis_picker-label';
-  if (props.selected) {
-    itemClassName += ' selected';
-    iconClassName += ' selected';
-    labelClassName += ' selected';
-  }
+  const { label, type, selected } = props;
+  const itemClassName = 'tvbVisPickerItem';
+
   return (
-    <button
-      role="tab"
+    <EuiTab
       className={itemClassName}
+      isSelected={selected}
       onClick={() => props.onClick(type)}
       data-test-subj={`${type}TsvbTypeBtn`}
     >
-      <div className={iconClassName}>
-        <i className={`fa ${icon}`} />
-      </div>
-      <div className={labelClassName}>
-        { label }
-      </div>
-    </button>
+      { label }
+    </EuiTab>
   );
 }
 
 VisPickerItem.propTypes = {
-  icon: PropTypes.string,
   label: PropTypes.string,
   onClick: PropTypes.func,
   type: PropTypes.string,
   selected: PropTypes.bool
 };
 
-function VisPicker(props) {
+const VisPicker = injectI18n(function (props) {
   const handleChange = (type) => {
     props.onChange({ type });
   };
 
-  const { model } = props;
-  const icons = [
-    { type: 'timeseries', icon: 'fa-line-chart', label: 'Time Series' },
-    { type: 'metric', icon: 'fa-superscript', label: 'Metric' },
-    { type: 'top_n', icon: 'fa-bar-chart fa-rotate-90', label: 'Top N' },
-    { type: 'gauge', icon: 'fa-circle-o-notch', label: 'Gauge' },
-    { type: 'markdown', icon: 'fa-paragraph', label: 'Markdown' },
-    { type: 'table', icon: 'fa-paragraph', label: 'Table' }
+  const { model, intl } = props;
+  const tabs = [
+    { type: 'timeseries', label: intl.formatMessage({ id: 'tsvb.visPicker.timeSeriesLabel', defaultMessage: 'Time Series' }) },
+    { type: 'metric', label: intl.formatMessage({ id: 'tsvb.visPicker.metricLabel', defaultMessage: 'Metric' }) },
+    { type: 'top_n', label: intl.formatMessage({ id: 'tsvb.visPicker.topNLabel', defaultMessage: 'Top N' }) },
+    { type: 'gauge', label: intl.formatMessage({ id: 'tsvb.visPicker.gaugeLabel', defaultMessage: 'Gauge' }) },
+    { type: 'markdown', label: intl.formatMessage({ id: 'tsvb.visPicker.markdownLabel', defaultMessage: 'Markdown' }) },
+    { type: 'table', label: intl.formatMessage({ id: 'tsvb.visPicker.tableLabel', defaultMessage: 'Table' }) }
   ].map(item => {
     return (
       <VisPickerItem
@@ -80,12 +70,12 @@ function VisPicker(props) {
   });
 
   return (
-    <div className="vis_editor__vis_picker-container" role="tablist">
-      { icons }
-    </div>
+    <EuiTabs>
+      { tabs }
+    </EuiTabs>
   );
 
-}
+});
 
 VisPicker.propTypes = {
   model: PropTypes.object,

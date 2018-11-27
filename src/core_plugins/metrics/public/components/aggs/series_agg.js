@@ -25,11 +25,17 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiTitle,
+  EuiFormRow,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-function SeriesAgg(props) {
-  const { panel, model } = props;
+function SeriesAggUi(props) {
+  const { panel, model, intl } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -37,15 +43,42 @@ function SeriesAgg(props) {
   const htmlId = htmlIdGenerator();
 
   const functionOptions = [
-    { label: 'Sum', value: 'sum' },
-    { label: 'Max', value: 'max' },
-    { label: 'Min', value: 'min' },
-    { label: 'Avg', value: 'mean' },
-    { label: 'Overall Sum', value: 'overall_sum' },
-    { label: 'Overall Max', value: 'overall_max' },
-    { label: 'Overall Min', value: 'overall_min' },
-    { label: 'Overall Avg', value: 'overall_avg' },
-    { label: 'Cumulative Sum', value: 'cumulative_sum' },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.sumLabel', defaultMessage: 'Sum' }),
+      value: 'sum'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.maxLabel', defaultMessage: 'Max' }),
+      value: 'max'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.minLabel', defaultMessage: 'Min' }),
+      value: 'min'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.avgLabel', defaultMessage: 'Avg' }),
+      value: 'mean'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallSumLabel', defaultMessage: 'Overall Sum' }),
+      value: 'overall_sum'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallMaxLabel', defaultMessage: 'Overall Max' }),
+      value: 'overall_max'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallMinLabel', defaultMessage: 'Overall Min' }),
+      value: 'overall_min'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallAvgLabel', defaultMessage: 'Overall Avg' }),
+      value: 'overall_avg'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.cumulativeSumLabel', defaultMessage: 'Cumulative Sum' }),
+      value: 'cumulative_sum'
+    },
   ];
   const selectedFunctionOption = functionOptions.find(option => {
     return model.function === option.value;
@@ -60,11 +93,14 @@ function SeriesAgg(props) {
         onDelete={props.onDelete}
         siblings={props.siblings}
       >
-        <div className="vis_editor__item">
-          <div className="vis_editor__label">
-            Series Agg is not compatible with the table visualization.
-          </div>
-        </div>
+        <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
+          <span>
+            <FormattedMessage
+              id="tsvb.seriesAgg.seriesAggIsNotCompatibleLabel"
+              defaultMessage="Series Agg is not compatible with the table visualization."
+            />
+          </span>
+        </EuiTitle>
       </AggRow>
     );
   }
@@ -77,31 +113,45 @@ function SeriesAgg(props) {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__item">
-        <label className="vis_editor__label" htmlFor={htmlId('function')}>Function</label>
-        <EuiComboBox
-          id={htmlId('function')}
-          options={functionOptions}
-          selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
-          onChange={handleSelectChange('function')}
-          singleSelection={true}
-        />
-      </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.seriesAgg.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('function')}
+            label={(<FormattedMessage
+              id="tsvb.seriesAgg.functionLabel"
+              defaultMessage="Function"
+            />)}
+          >
+            <EuiComboBox
+              options={functionOptions}
+              selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
+              onChange={handleSelectChange('function')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 
 }
 
-SeriesAgg.propTypes = {
+SeriesAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -113,4 +163,5 @@ SeriesAgg.propTypes = {
   siblings: PropTypes.array,
 };
 
+const SeriesAgg = injectI18n(SeriesAggUi);
 export default SeriesAgg;
