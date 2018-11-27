@@ -1,5 +1,7 @@
 @import 'ui/public/styles/_styling_constants';
 
+@import './components/tabs/checkup/index';
+
 upgrade-checkup {
   flex-grow: 1;
   background-color: $euiColorLightestShade;

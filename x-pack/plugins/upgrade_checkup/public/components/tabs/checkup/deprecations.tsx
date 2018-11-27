@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { StatelessComponent } from 'react';
+import React, { Fragment, StatelessComponent } from 'react';
 
 import { EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -135,38 +135,41 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
 }) => {
   const deprecations = allDeprecations.filter(filterDeps(currentFilter));
 
-  // Display some text if no deprecations are going to be shown.
-  if (deprecations.length === 0) {
-    const message =
-      allDeprecations.length === 0
-        ? `No deprecations.`
-        : `0 of ${allDeprecations.length} shown. Change filters to see more.`;
+  // Display number of results shown
+  const showMoreMessage = deprecations.length === 0 ? '. Change filters to show more.' : '';
 
-    return (
-      <EuiText color="subdued">
-        <p>{message}</p>
-      </EuiText>
-    );
-  }
+  const message =
+    allDeprecations.length === 0
+      ? `No deprecations`
+      : `Showing ${deprecations.length} of ${allDeprecations.length}${showMoreMessage}`;
 
   const groups = _.groupBy(deprecations, currentGroupBy);
 
   return (
     <div>
-      {Object.keys(groups)
-        .sort()
-        .map(groupName => [
-          <EuiAccordion
-            key={`acc-${groupName}`}
-            id={`depgroup-${groupName}`}
-            buttonContent={groupName}
-            extraAction={<DeprecationHealth deprecations={groups[groupName]} />}
-          >
-            <EuiSpacer />
-            <DeprecationList deprecations={groups[groupName]} currentGroupBy={currentGroupBy} />
-          </EuiAccordion>,
-          <EuiSpacer key={`spc-${groupName}`} />,
-        ])}
+      <EuiText size="s">
+        <p>{message}</p>
+      </EuiText>
+
+      <EuiSpacer size="s" />
+
+      <div className="upgDeprecations">
+        {Object.keys(groups)
+          .sort()
+          .map(groupName => [
+            <EuiAccordion
+              className="upgDeprecations__item"
+              key={`acc-${groupName}`}
+              id={`depgroup-${groupName}`}
+              buttonContent={<span className="upgDeprecations__itemName">{groupName}</span>}
+              extraAction={<DeprecationHealth deprecations={groups[groupName]} />}
+            >
+              <EuiSpacer />
+              <DeprecationList deprecations={groups[groupName]} currentGroupBy={currentGroupBy} />
+            </EuiAccordion>,
+            // <EuiSpacer key={`spc-${groupName}`} />,
+          ])}
+      </div>
     </div>
   );
 };

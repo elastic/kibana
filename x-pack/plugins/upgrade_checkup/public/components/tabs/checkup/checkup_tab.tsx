@@ -149,13 +149,11 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
     }
 
     return (
-      <div>
-        <GroupedDeprecations
-          currentGroupBy={currentGroupBy}
-          currentFilter={currentFilter}
-          allDeprecations={deprecations}
-        />
-      </div>
+      <GroupedDeprecations
+        currentGroupBy={currentGroupBy}
+        currentFilter={currentFilter}
+        allDeprecations={deprecations}
+      />
     );
   }
 }
