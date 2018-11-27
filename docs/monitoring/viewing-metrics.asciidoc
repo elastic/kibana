@@ -7,7 +7,11 @@
 
 After you collect monitoring data for one or more products in the {stack}, you 
 can configure {kib} to retrieve that information and display it in on the 
-*Monitoring* page. 
+*Monitoring* page.
+
+At a minimum, you must have monitoring data for the {es} production cluster.
+Once that data exists, {kib} can display monitoring data for other products in
+the cluster.
 
 . Identify where to retrieve monitoring data from. 
 +
@@ -91,15 +95,4 @@ Overview, Nodes, Indices, or Instances links.  See <<xpack-monitoring>>.
 [role="screenshot"]
 image::images/monitoring-dashboard.png[Monitoring dashboard]
 
-If {kib} can't activate monitoring, here are some things to do:
-
-* If you don't have permission to activate monitoring,
-contact your system administrator.
-
-* If {kib} can't find monitoring data, set the time filter to
-“Last 1 hour”.  When monitoring data appears in your cluster, the page
-automatically refreshes with the monitoring summary.
-
-* Check your `xpack.monitoring.elasticsearch.url` setting.
-See <<monitoring-settings-kb, Monitoring Settings in Kibana>>.
-
+If you encounter problems, see <<monitor-troubleshooting,Troubleshooting monitoring>>.
