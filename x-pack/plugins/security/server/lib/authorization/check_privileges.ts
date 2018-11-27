@@ -43,7 +43,7 @@ export interface CheckPrivilegesAtSpacesResponse {
   };
 }
 
-export type CheckPrivilegesWithRequest = (request: any) => CheckPrivileges;
+export type CheckPrivilegesWithRequest = (request: Record<string, any>) => CheckPrivileges;
 
 export interface CheckPrivileges {
   atSpace(
