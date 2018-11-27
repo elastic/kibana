@@ -18,9 +18,8 @@
  */
 
 import socket from 'socket.io';
-import { serializeProvider } from '@kbn/interpreter/common/lib/serialize';
-import { typesRegistry } from '@kbn/interpreter/common/lib/types_registry';
-import { getServerRegistries } from '@kbn/interpreter/server/server_registries';
+import { serializeProvider, typesRegistry } from '@kbn/interpreter/common';
+import { getServerRegistries } from '@kbn/interpreter/server';
 import { routeExpressionProvider } from '../lib/route_expression/index';
 import { browser } from '../lib/route_expression/browser';
 import { thread } from '../lib/route_expression/thread/index';

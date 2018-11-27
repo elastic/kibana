@@ -41,6 +41,7 @@ import {
   EuiCode,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function newAnnotation() {
   return {
@@ -99,7 +100,10 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('indexPattern')}
-                  label="Index pattern (required)"
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.indexPatternLabel"
+                    defaultMessage="Index pattern (required)"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -110,7 +114,14 @@ class AnnotationsEditor extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow id={htmlId('timeField')} label="Time field (required)" fullWidth>
+                <EuiFormRow
+                  id={htmlId('timeField')}
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.timeFieldLabel"
+                    defaultMessage="Time field (required)"
+                  />)}
+                  fullWidth
+                >
                   <FieldSelect
                     restrict="date"
                     value={model.time_field}
@@ -129,7 +140,10 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('queryString')}
-                  label="Query string"
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.queryStringLabel"
+                    defaultMessage="Query string"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -140,7 +154,12 @@ class AnnotationsEditor extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>Ignore global filters?</EuiFormLabel>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="tsvb.annotationsEditor.ignoreGlobalFiltersLabel"
+                    defaultMessage="Ignore global filters?"
+                  />
+                </EuiFormLabel>
                 <EuiSpacer size="s" />
                 <YesNo
                   value={model.ignore_global_filters}
@@ -149,7 +168,12 @@ class AnnotationsEditor extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>Ignore panel filters?</EuiFormLabel>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="tsvb.annotationsEditor.ignorePanelFiltersLabel"
+                    defaultMessage="Ignore panel filters?"
+                  />
+                </EuiFormLabel>
                 <EuiSpacer size="s" />
                 <YesNo
                   value={model.ignore_panel_filters}
@@ -163,7 +187,13 @@ class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow id={htmlId('icon')} label="Icon (required)">
+                <EuiFormRow
+                  id={htmlId('icon')}
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.iconLabel"
+                    defaultMessage="Icon (required)"
+                  />)}
+                >
                   <IconSelect
                     value={model.icon}
                     onChange={this.handleChange(model, 'icon')}
@@ -173,7 +203,10 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('fields')}
-                  label="Fields (required - comma separated paths)"
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.fieldsLabel"
+                    defaultMessage="Fields (required - comma separated paths)"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -186,9 +219,18 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('rowTemplate')}
-                  label="Row template (required)"
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.rowTemplateLabel"
+                    defaultMessage="Row template (required)"
+                  />)}
                   helpText={
-                    <span>eg. <EuiCode>{'{{field}}'}</EuiCode></span>
+                    <span>
+                      <FormattedMessage
+                        id="tsvb.annotationsEditor.rowTemplateHelpText"
+                        defaultMessage="eg.{rowTemplateExample}"
+                        values={{ rowTemplateExample: (<EuiCode>{'{{field}}'}</EuiCode>) }}
+                      />
+                    </span>
                   }
                   fullWidth
                 >
@@ -222,8 +264,18 @@ class AnnotationsEditor extends Component {
         .bind(null, this.props, newAnnotation);
       content = (
         <EuiText textAlign="center">
-          <p>Click the button below to create an annotation data source.</p>
-          <EuiButton fill onClick={handleAdd}>Add data source</EuiButton>
+          <p>
+            <FormattedMessage
+              id="tsvb.annotationsEditor.howToCreateAnnotationDataSourceDescription"
+              defaultMessage="Click the button below to create an annotation data source."
+            />
+          </p>
+          <EuiButton fill onClick={handleAdd}>
+            <FormattedMessage
+              id="tsvb.annotationsEditor.addDataSourceButtonLabel"
+              defaultMessage="Add data source"
+            />
+          </EuiButton>
         </EuiText>
       );
     } else {
@@ -231,7 +283,12 @@ class AnnotationsEditor extends Component {
       content = (
         <div>
           <EuiTitle size="s">
-            <span>Data sources</span>
+            <span>
+              <FormattedMessage
+                id="tsvb.annotationsEditor.dataSourcesLabel"
+                defaultMessage="Data sources"
+              />
+            </span>
           </EuiTitle>
           <EuiSpacer size="m" />
 

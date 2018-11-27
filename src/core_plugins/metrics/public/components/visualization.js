@@ -63,18 +63,20 @@ function Visualization(props) {
 
   const component = types[model.type];
   if (component) {
-    return React.createElement(component, {
-      dateFormat: props.dateFormat,
-      reversed: props.reversed,
-      backgroundColor: props.backgroundColor,
-      model: props.model,
-      onBrush: props.onBrush,
-      onChange: props.onChange,
-      onUiState: props.onUiState,
-      uiState: props.uiState,
-      visData: visData.type === model.type ? visData : {},
-      getConfig: props.getConfig
-    });
+    return (
+      React.createElement(component, {
+        dateFormat: props.dateFormat,
+        reversed: props.reversed,
+        backgroundColor: props.backgroundColor,
+        model: props.model,
+        onBrush: props.onBrush,
+        onChange: props.onChange,
+        onUiState: props.onUiState,
+        uiState: props.uiState,
+        visData: visData.type === model.type ? visData : {},
+        getConfig: props.getConfig
+      })
+    );
   }
   return <div className={props.className} />;
 }

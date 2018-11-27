@@ -26,6 +26,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createNumberHandler from '../lib/create_number_handler';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SerialDiffAgg = props => {
   const { siblings } = props;
@@ -48,7 +49,12 @@ export const SerialDiffAgg = props => {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.serialDiff.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -60,7 +66,10 @@ export const SerialDiffAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label="Metric"
+            label={(<FormattedMessage
+              id="tsvb.serialDiff.metricLabel"
+              defaultMessage="Metric"
+            />)}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
@@ -71,7 +80,13 @@ export const SerialDiffAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('lag')} label="Lag">
+          <EuiFormRow
+            id={htmlId('lag')}
+            label={(<FormattedMessage
+              id="tsvb.serialDiff.lagLabel"
+              defaultMessage="Lag"
+            />)}
+          >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
               Should it be text or number?
