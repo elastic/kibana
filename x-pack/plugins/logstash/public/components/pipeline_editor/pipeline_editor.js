@@ -253,6 +253,8 @@ class PipelineEditorUi extends React.Component {
   };
 
   render() {
+    const { intl } = this.props;
+
     return (
       <EuiPage data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}>
         <EuiPageContent
@@ -326,10 +328,10 @@ class PipelineEditorUi extends React.Component {
             <EuiFormRow
               label={
                 <FormLabelWithIconTip
-                  formRowLabelText={(<FormattedMessage
-                    id="xpack.logstash.pipelineEditor.pipelineWorkersFormRowLabel"
-                    defaultMessage="Pipeline workers"
-                  />)}
+                  formRowLabelText={intl.formatMessage({
+                    id: 'xpack.logstash.pipelineEditor.pipelineWorkersFormRowLabel',
+                    defaultMessage: 'Pipeline workers'
+                  })}
                   formRowTooltipText={TOOLTIPS.settings['pipeline.workers']}
                 />
               }
@@ -342,10 +344,10 @@ class PipelineEditorUi extends React.Component {
             </EuiFormRow>
             <EuiFlexGroup>
               <FlexItemSetting
-                formRowLabelText={(<FormattedMessage
-                  id="xpack.logstash.pipelineEditor.pipelineBatchSizeFormRowLabel"
-                  defaultMessage="Pipeline batch size"
-                />)}
+                formRowLabelText={intl.formatMessage({
+                  id: 'xpack.logstash.pipelineEditor.pipelineBatchSizeFormRowLabel',
+                  defaultMessage: 'Pipeline batch size'
+                })}
                 formRowTooltipText={TOOLTIPS.settings['pipeline.batch.size']}
               >
                 <EuiFieldNumber
@@ -355,10 +357,10 @@ class PipelineEditorUi extends React.Component {
                 />
               </FlexItemSetting>
               <FlexItemSetting
-                formRowLabelText={(<FormattedMessage
-                  id="xpack.logstash.pipelineEditor.pipelineBatchDelayFormRowLabel"
-                  defaultMessage="Pipeline batch delay"
-                />)}
+                formRowLabelText={intl.formatMessage({
+                  id: 'xpack.logstash.pipelineEditor.pipelineBatchDelayFormRowLabel',
+                  defaultMessage: 'Pipeline batch delay'
+                })}
                 formRowTooltipText={TOOLTIPS.settings['pipeline.batch.delay']}
               >
                 <EuiFieldNumber
@@ -370,10 +372,10 @@ class PipelineEditorUi extends React.Component {
             </EuiFlexGroup>
             <EuiFlexGroup>
               <FlexItemSetting
-                formRowLabelText={(<FormattedMessage
-                  id="xpack.logstash.pipelineEditor.queueTypeFormRowLabel"
-                  defaultMessage="Queue type"
-                />)}
+                formRowLabelText={intl.formatMessage({
+                  id: 'xpack.logstash.pipelineEditor.queueTypeFormRowLabel',
+                  defaultMessage: 'Queue type'
+                })}
                 formRowTooltipText={TOOLTIPS.settings['queue.type']}
               >
                 <EuiSelect
@@ -384,10 +386,10 @@ class PipelineEditorUi extends React.Component {
                 />
               </FlexItemSetting>
               <FlexItemSetting
-                formRowLabelText={(<FormattedMessage
-                  id="xpack.logstash.pipelineEditor.queueMaxBytesFormRowLabel"
-                  defaultMessage="Queue max bytes"
-                />)}
+                formRowLabelText={intl.formatMessage({
+                  id: 'xpack.logstash.pipelineEditor.queueMaxBytesFormRowLabel',
+                  defaultMessage: 'Queue max bytes'
+                })}
                 formRowTooltipText={TOOLTIPS.settings['queue.max_bytes']}
               >
                 <EuiFieldNumber
@@ -405,10 +407,10 @@ class PipelineEditorUi extends React.Component {
                 />
               </FlexItemSetting>
               <FlexItemSetting
-                formRowLabelText={(<FormattedMessage
-                  id="xpack.logstash.pipelineEditor.queueCheckpointWritesFormRowLabel"
-                  defaultMessage="Queue checkpoint writes"
-                />)}
+                formRowLabelText={intl.formatMessage({
+                  id: 'xpack.logstash.pipelineEditor.queueCheckpointWritesFormRowLabel',
+                  defaultMessage: 'Queue checkpoint writes'
+                })}
                 formRowTooltipText={TOOLTIPS.settings['queue.checkpoint.writes']}
               >
                 <EuiFieldNumber
