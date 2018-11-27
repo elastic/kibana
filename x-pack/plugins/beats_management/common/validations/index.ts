@@ -5,7 +5,14 @@
  */
 
 import { FieldValue, FormData } from 'formsy-react';
+import { validateHosts } from './hosts';
 import { validateInterval } from './interval';
+import { validateNumeric } from './numeric';
+import { validatePath } from './path';
+import { validatePaths } from './paths';
+import { validatePeriod } from './period';
+import { validateString } from './string';
+import { validateYaml } from './yaml';
 
 export interface ValidationRule {
   id: string;
@@ -14,4 +21,13 @@ export interface ValidationRule {
 
 export type ValidationFunc = (values?: FormData, value?: FieldValue) => boolean;
 
-export const validationRules: ValidationRule[] = [validateInterval];
+export const validationRules: ValidationRule[] = [
+  validateHosts,
+  validateInterval,
+  validateNumeric,
+  validatePath,
+  validatePaths,
+  validatePeriod,
+  validateString,
+  validateYaml,
+];
