@@ -32,6 +32,7 @@ import {
   EuiFieldNumber,
   EuiFormRow,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Static = props => {
   const handleChange = createChangeHandler(props.onChange, props.model);
@@ -57,7 +58,12 @@ export const Static = props => {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.static.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -67,7 +73,13 @@ export const Static = props => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('staticValue')} label="Static value">
+          <EuiFormRow
+            id={htmlId('staticValue')}
+            label={(<FormattedMessage
+              id="tsvb.static.staticValuesLabel"
+              defaultMessage="Static Value"
+            />)}
+          >
             <EuiFieldNumber
               onChange={handleTextChange('value')}
               value={Number(model.value)}

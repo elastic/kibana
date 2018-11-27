@@ -34,6 +34,7 @@ import {
   EuiSpacer,
   EuiFormRow,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const FilterRatioAgg = props => {
   const {
@@ -69,7 +70,12 @@ export const FilterRatioAgg = props => {
       <EuiFlexGroup gutterSize="s">
 
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.filterRatio.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -80,7 +86,13 @@ export const FilterRatioAgg = props => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('numerator')} label="Numerator">
+          <EuiFormRow
+            id={htmlId('numerator')}
+            label={(<FormattedMessage
+              id="tsvb.filterRatio.numeratorLabel"
+              defaultMessage="Numerator"
+            />)}
+          >
             <EuiFieldText
               onChange={handleTextChange('numerator')}
               value={model.numerator}
@@ -89,7 +101,13 @@ export const FilterRatioAgg = props => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('denominator')} label="Denominator">
+          <EuiFormRow
+            id={htmlId('denominator')}
+            label={(<FormattedMessage
+              id="tsvb.filterRatio.denominatorLabel"
+              defaultMessage="Denominator"
+            />)}
+          >
             <EuiFieldText
               onChange={handleTextChange('denominator')}
               value={model.denominator}
@@ -104,7 +122,12 @@ export const FilterRatioAgg = props => {
       <EuiFlexGroup gutterSize="s">
 
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('metric')}>Metric Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('metric')}>
+            <FormattedMessage
+              id="tsvb.filterRatio.metricAggregationLabel"
+              defaultMessage="Metric Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('metric')}
             siblings={props.siblings}
@@ -116,7 +139,13 @@ export const FilterRatioAgg = props => {
 
         { model.metric_agg !== 'count' ? (
           <EuiFlexItem>
-            <EuiFormRow id={htmlId('aggField')} label="Field">
+            <EuiFormRow
+              id={htmlId('aggField')}
+              label={(<FormattedMessage
+                id="tsvb.filterRatio.fieldLabel"
+                defaultMessage="Field"
+              />)}
+            >
               <FieldSelect
                 fields={fields}
                 type={model.metric_agg}
