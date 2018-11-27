@@ -35,6 +35,7 @@ import {
   EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };
@@ -55,7 +56,10 @@ export const SeriesConfig = props => {
 
       <EuiFormRow
         id={htmlId('series_filter')}
-        label="Filter"
+        label={(<FormattedMessage
+          id="tsvb.seriesConfig.filterLabel"
+          defaultMessage="Filter"
+        />)}
         fullWidth
       >
         <EuiFieldText
@@ -71,8 +75,19 @@ export const SeriesConfig = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('template')}
-            label="Template"
-            helpText={<span>eg.<EuiCode>{'{{value}}/s'}</EuiCode></span>}
+            label={(<FormattedMessage
+              id="tsvb.seriesConfig.templateLabel"
+              defaultMessage="Template"
+            />)}
+            helpText={(
+              <span>
+                <FormattedMessage
+                  id="tsvb.seriesConfig.templateHelpText"
+                  defaultMessage="eg. {templateExample}"
+                  values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
+                />
+              </span>
+            )}
             fullWidth
           >
             <EuiFieldText
@@ -85,7 +100,11 @@ export const SeriesConfig = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('offsetSeries')}
-            label="Offset series time by (1m, 1h, 1w, 1d)"
+            label={(<FormattedMessage
+              id="tsvb.seriesConfig.offsetSeriesTimeLabel"
+              defaultMessage="Offset series time by (1m, 1h, 1w, 1d)"
+              description="1m, 1h, 1w and 1d are required values and must not be translated."
+            />)}
           >
             <EuiFieldText
               data-test-subj="offsetTimeSeries"
@@ -100,7 +119,12 @@ export const SeriesConfig = props => {
 
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>Override Index Pattern?</EuiFormLabel>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.seriesConfig.overrideIndexPatternLabel"
+              defaultMessage="Override Index Pattern?"
+            />
+          </EuiFormLabel>
           <EuiSpacer size="s" />
           <YesNo
             value={model.override_index_pattern}

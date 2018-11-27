@@ -28,8 +28,9 @@ import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, E
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 import { createUpDownHandler } from '../../lib/sort_keyhandler';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-function GaugeSeries(props) {
+function GaugeSeriesUi(props) {
   const {
     panel,
     fields,
@@ -39,7 +40,8 @@ function GaugeSeries(props) {
     disableDelete,
     disableAdd,
     selectedTab,
-    visible
+    visible,
+    intl
   } = props;
 
   const defaults = { label: '' };
@@ -96,14 +98,20 @@ function GaugeSeries(props) {
             isSelected={selectedTab === 'metrics'}
             onClick={() => props.switchTab('metrics')}
           >
-            Metrics
+            <FormattedMessage
+              id="tsvb.gauge.dataTab.metricsButtonLabel"
+              defaultMessage="Metrics"
+            />
           </EuiTab>
           <EuiTab
             data-test-subj="seriesOptions"
             isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
           >
-            Options
+            <FormattedMessage
+              id="tsvb.gauge.optionsTab.optionsButtonLabel"
+              defaultMessage="Options"
+            />
           </EuiTab>
         </EuiTabs>
         {seriesBody}
@@ -124,11 +132,16 @@ function GaugeSeries(props) {
   if (!props.disableDelete) {
     dragHandle = (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Drag to sort">
+        <EuiToolTip
+          content={(<FormattedMessage
+            id="tsvb.gauge.sort.dragToSortTooltip"
+            defaultMessage="Drag to sort"
+          />)}
+        >
           <EuiButtonIcon
             className="tvbSeries__sortHandle"
             iconType="grab"
-            aria-label="Sort series by pressing up/down"
+            aria-label={intl.formatMessage({ id: 'tsvb.gauge.sort.sortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
             onKeyDown={createUpDownHandler(props.onShouldSortItem)}
           />
         </EuiToolTip>
@@ -150,7 +163,7 @@ function GaugeSeries(props) {
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
-            aria-label="Toggle series editor"
+            aria-label={intl.formatMessage({ id: 'tsvb.gauge.editor.toggleEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
             aria-expanded={props.visible}
           />
         </EuiFlexItem>
@@ -163,7 +176,7 @@ function GaugeSeries(props) {
           <EuiFieldText
             fullWidth
             onChange={handleChange('label')}
-            placeholder="Label"
+            placeholder={intl.formatMessage({ id: 'tsvb.gauge.editor.labelPlaceholder', defaultMessage: 'Label' })}
             value={model.label}
           />
         </EuiFlexItem>
@@ -172,9 +185,9 @@ function GaugeSeries(props) {
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip="Add Series"
-            deleteTooltip="Delete Series"
-            cloneTooltip="Clone Series"
+            addTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.addSeriesTooltip', defaultMessage: 'Add Series' })}
+            deleteTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
+            cloneTooltip={intl.formatMessage({ id: 'tsvb.gauge.editor.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
@@ -191,7 +204,7 @@ function GaugeSeries(props) {
 
 }
 
-GaugeSeries.propTypes = {
+GaugeSeriesUi.propTypes = {
   className: PropTypes.string,
   colorPicker: PropTypes.bool,
   disableAdd: PropTypes.bool,
@@ -216,4 +229,5 @@ GaugeSeries.propTypes = {
   visible: PropTypes.bool
 };
 
+const GaugeSeries = injectI18n(GaugeSeriesUi);
 export default GaugeSeries;

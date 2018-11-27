@@ -35,6 +35,7 @@ export function resultsServiceProvider(callWithRequest) {
     threshold,
     earliestMs,
     latestMs,
+    dateFormatTz,
     maxRecords = DEFAULT_QUERY_SIZE,
     maxExamples = DEFAULT_MAX_EXAMPLES) {
 
@@ -163,7 +164,7 @@ export function resultsServiceProvider(callWithRequest) {
         tableData.interval = (daysDiff < 2 ? 'hour' : 'day');
       }
 
-      tableData.anomalies = buildAnomalyTableItems(records, tableData.interval);
+      tableData.anomalies = buildAnomalyTableItems(records, tableData.interval, dateFormatTz);
 
       // Load examples for any categorization anomalies.
       const categoryAnomalies = tableData.anomalies.filter(item => item.entityName === 'mlcategory');
