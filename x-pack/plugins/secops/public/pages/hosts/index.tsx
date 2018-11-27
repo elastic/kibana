@@ -14,10 +14,13 @@ import styled from 'styled-components';
 
 import { EventItem, KpiItem } from '../../../common/graphql/types';
 import { BasicTable } from '../../components/basic_table';
+import { EmptyPage } from '../../components/empty_page';
 import { HorizontalBarChart, HorizontalBarChartData } from '../../components/horizontal_bar_chart';
 import { Pane1FlexContent } from '../../components/page';
 import { Placeholders, VisualizationPlaceholder } from '../../components/visualization_placeholder';
 import { EventsQuery } from '../../containers/events';
+import { WithKibanaChrome } from '../../containers/kibana_chrome';
+import { WithSource } from '../../containers/source';
 import { timelineActions } from '../../store';
 
 // start/end date to show good alert in the timeline
@@ -34,36 +37,53 @@ interface Props {
 
 export const Hosts = connect()(
   pure<Props>(({ dispatch }) => (
-    <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
-      {({ events, kpiEventType, loading }) => (
-        <Pane1FlexContent data-test-subj="pane1FlexContent">
-          <VisualizationPlaceholder>
-            <HorizontalBarChart
-              loading={loading}
-              title="KPI event types"
-              width={490}
-              height={279}
-              barChartdata={
-                kpiEventType.map((i: KpiItem) => ({
-                  x: i.count,
-                  y: i.value,
-                })) as HorizontalBarChartData[]
-              }
-            />
-          </VisualizationPlaceholder>
-          <VisualizationPlaceholder>
-            <BasicTable
-              columns={getEventsColumns(dispatch)}
-              loading={loading}
-              pageOfItems={events}
-              sortField="host.hostname"
-              title="Events"
-            />
-          </VisualizationPlaceholder>
-          <Placeholders timelineId="pane2-timeline" count={8} myRoute="Hosts" />
-        </Pane1FlexContent>
-      )}
-    </EventsQuery>
+    <WithSource sourceId="default">
+      {({ auditbeatIndicesExist }) =>
+        auditbeatIndicesExist || auditbeatIndicesExist === null ? (
+          <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
+            {({ events, kpiEventType, loading }) => (
+              <Pane1FlexContent data-test-subj="pane1FlexContent">
+                <VisualizationPlaceholder>
+                  <HorizontalBarChart
+                    loading={loading}
+                    title="KPI event types"
+                    width={490}
+                    height={279}
+                    barChartdata={
+                      kpiEventType.map((i: KpiItem) => ({
+                        x: i.count,
+                        y: i.value,
+                      })) as HorizontalBarChartData[]
+                    }
+                  />
+                </VisualizationPlaceholder>
+                <VisualizationPlaceholder>
+                  <BasicTable
+                    columns={getEventsColumns(dispatch)}
+                    loading={loading}
+                    pageOfItems={events}
+                    sortField="host.hostname"
+                    title="Events"
+                  />
+                </VisualizationPlaceholder>
+                <Placeholders timelineId="pane2-timeline" count={8} myRoute="Hosts" />
+              </Pane1FlexContent>
+            )}
+          </EventsQuery>
+        ) : (
+          <WithKibanaChrome>
+            {({ basePath }) => (
+              <EmptyPage
+                title="Looks like you don't have any auditbeat indices."
+                message="Let's add some!"
+                actionLabel="Setup Instructions"
+                actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+              />
+            )}
+          </WithKibanaChrome>
+        )
+      }
+    </WithSource>
   ))
 );
 
