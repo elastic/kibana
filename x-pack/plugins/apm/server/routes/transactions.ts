@@ -127,19 +127,27 @@ export function initTransactionsApi(server: Server) {
       pre,
       validate: {
         query: withDefaultValidators({
-          transaction_name: Joi.string().required()
+          transaction_name: Joi.string().required(),
+          transaction_id: Joi.string().default('')
         })
       }
     },
     handler: req => {
       const { setup } = req.pre;
       const { serviceName } = req.params;
-      const { transaction_name: transactionName } = req.query as {
+      const {
+        transaction_name: transactionName,
+        transaction_id: transactionId
+      } = req.query as {
         transaction_name: string;
+        transaction_id: string;
       };
-      return getDistribution(serviceName, transactionName, setup).catch(
-        defaultErrorHandler
-      );
+      return getDistribution(
+        serviceName,
+        transactionName,
+        transactionId,
+        setup
+      ).catch(defaultErrorHandler);
     }
   });
 }
