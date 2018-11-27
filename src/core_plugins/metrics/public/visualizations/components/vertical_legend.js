@@ -22,8 +22,9 @@ import React from 'react';
 import createLegendSeries from '../lib/create_legend_series';
 import reactcss from 'reactcss';
 import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
-function VerticalLegend(props) {
+const VerticalLegend = injectI18n(function (props) {
   const rows = props.series.map(createLegendSeries(props));
   const htmlId = htmlIdGenerator();
   const hideLegend = !props.showLegend;
@@ -56,7 +57,7 @@ function VerticalLegend(props) {
         color="text"
         iconSize="s"
         onClick={props.onClick}
-        aria-label="Toggle chart legend"
+        aria-label={props.intl.formatMessage({ id: 'tsvb.verticalLegend.toggleChartAriaLabel', defaultMessage: 'Toggle chart legend' })}
         aria-expanded={!!props.showLegend}
         aria-controls={htmlId('legend')}
       />
@@ -67,7 +68,7 @@ function VerticalLegend(props) {
     </div>
   );
 
-}
+});
 
 VerticalLegend.propTypes = {
   legendPosition: PropTypes.string,
