@@ -15,8 +15,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
   const client = getService('secOpsGraphQLClient');
 
   describe('sources', () => {
-    before(() => esArchiver.load('auditbeat_test_data'));
-    after(() => esArchiver.unload('auditbeat_test_data'));
+    before(() => esArchiver.load('auditbeat/default'));
+    after(() => esArchiver.unload('auditbeat/default'));
 
     it('Make sure that we get source information when auditbeat indices is there', () => {
       return client
