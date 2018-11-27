@@ -342,6 +342,7 @@ const heartbeatConfig: YamlConfigSchema[] = [
     },
     error: 'Please specify a valid monitor name',
     required: false,
+    validations: 'isString',
   },
   {
     id: 'schedule',
@@ -363,6 +364,7 @@ const heartbeatConfig: YamlConfigSchema[] = [
       helpText: 'Put each host on a separate line',
       placeholder: 'https://www.elastic.co/\nhttp://localhost:80/',
     },
+    // TODO: we should add multi-list host validation
     error: 'One host per line',
     required: true,
   },

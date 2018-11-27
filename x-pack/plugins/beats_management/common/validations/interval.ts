@@ -19,28 +19,19 @@ const tokenize = (value: string): string[] =>
 
 const parseInterval = (input: string): boolean => {
   const tokens = tokenize(input);
-  if (tokens.length === 2 && tokens[0] === '@every' && isIntervalSuffix(tokens[1])) {
-    return true;
-  }
-  return false;
+  return tokens.length === 2 && tokens[0] === '@every' && isIntervalSuffix(tokens[1]);
 };
 
 export const validateInterval = {
   id: 'isInterval',
   validationFunction: (values?: FormData, value?: FieldValue): boolean => {
-    if (!value) {
+    if (!value || value === '') {
       return false;
     }
-    if (parseInterval(value)) {
-      return true;
-    }
     try {
-      if (CronParser.parseExpression(value)) {
-        return true;
-      }
+      return parseInterval(value) || !!CronParser.parseExpression(value);
     } catch (err) {
       return false;
     }
-    return false;
   },
 };

@@ -18,8 +18,8 @@ import {
   FormsyEuiSelect,
 } from '../../inputs';
 
-validationRules.forEach((rule: ValidationRule) =>
-  addValidationRule(rule.id, rule.validationFunction)
+validationRules.forEach(({ id, validationFunction }: ValidationRule) =>
+  addValidationRule(id, validationFunction)
 );
 
 interface ComponentProps {
