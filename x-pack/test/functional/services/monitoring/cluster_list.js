@@ -26,7 +26,7 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
     }
 
     assertNoData() {
-      return PageObjects.monitoring.assertTableNoData(SUBJ_TABLE_NO_DATA);
+      return PageObjects.monitoring.assertEuiTableNoData(SUBJ_TABLE_NO_DATA);
     }
 
     getRows() {
