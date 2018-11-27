@@ -169,12 +169,8 @@ export class WorkspaceHandler {
         for (const full of result) {
           if (full.symbols) {
             for (const symbol of full.symbols) {
-              // TODO why this is still here?
-              // const parsedLocation = this.convertLocation(symbol.symbolInformation.location);
-              // if (parsedLocation) {
-              //   symbol.repoUri = parsedLocation.repoUri;
-              //   symbol.revision = parsedLocation.revision;
-              // }
+              this.convertLocation(symbol.symbolInformation.location);
+
               if (symbol.contents !== null || symbol.contents !== undefined) {
                 this.handleHoverContents(symbol);
               }
