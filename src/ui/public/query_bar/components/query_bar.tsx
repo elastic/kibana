@@ -19,12 +19,8 @@
 
 import { IndexPattern } from 'ui/index_patterns';
 
-declare module '@elastic/eui' {
-  export const EuiOutsideClickDetector: SFC<any>;
-}
-
-import { compact, debounce, uniq, isEqual } from 'lodash';
-import React, { Component, SFC } from 'react';
+import { compact, debounce, isEqual } from 'lodash';
+import React, { Component } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
 import { PersistedLog } from 'ui/persisted_log';
