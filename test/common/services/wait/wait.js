@@ -17,37 +17,34 @@
  * under the License.
  */
 
-export function MonitoringPageProvider({ getService }) {
-  const testSubjects = getService('testSubjects');
 
-  const getRemote = (timeout) =>
-    getService('remote')
-      .setFindTimeout(
-        timeout || getService('config').get('timeouts.find')
-      );
-
-  class MonitoringPage {
-    getWelcome() {
-      return getRemote()
-        .findDisplayedByCssSelector('render-directive')
-        .getText();
+export function WaitProvider({ getService }) {
+  const remote = getService('remote');
+  return new class Wait {
+    async forCondition(conditionFunc) {
+      await remote.waitForCondition(conditionFunc);
     }
 
-    dismissWelcome() {
-      return testSubjects.click('notifierDismissButton');
+    async forElementPresent(selector) {
+      return await remote.waitForElementPresent(selector);
     }
 
-    getToasterContents() {
-      return getRemote()
-        .findByCssSelector('div.toaster-container')
-        .getText();
+    async forElementEnabled(selector) {
+      return await remote.waitForElementEnabled(selector);
     }
 
-    clickOptOut() {
-      return getRemote().findByLinkText('Opt out here').click();
+    async forElementToContainText(selector, substring) {
+      await remote.waitForElementToContainText(selector, substring);
     }
 
-  }
+    async forElementTextEquals(selector, text) {
+      await remote.waitForElementTextEquals(selector, text);
+    }
 
-  return new MonitoringPage();
+    async forElementVisible(selector) {
+      await remote.waitForElementVisible(selector);
+    }
+  };
+
+
 }

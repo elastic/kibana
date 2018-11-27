@@ -113,6 +113,7 @@ export default async function ({ readConfigFile }) {
       embedding: EmbeddingProvider,
       renderable: RenderableProvider,
       table: TableProvider,
+      wait: commonConfig.get('services.wait')
     },
     servers: commonConfig.get('servers'),
 

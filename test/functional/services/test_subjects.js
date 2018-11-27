@@ -23,21 +23,22 @@ import {
   filter as filterAsync,
   map as mapAsync,
 } from 'bluebird';
+import { By } from 'selenium-webdriver';
 
 import { WAIT_FOR_EXISTS_TIME } from './find';
 
 export function TestSubjectsProvider({ getService }) {
+  const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
   const remote = getService('remote');
-  const find = getService('find');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
     async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
-      log.debug(`TestSubjects.exists(${selector})`);
-      return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
+      log.debug(`TestSubjects.exists(${selector}) with timeout ${timeout}`);
+      return await find.existsByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
@@ -61,7 +62,7 @@ export function TestSubjectsProvider({ getService }) {
       return await retry.try(async () => {
         const input = await this.find(selector);
         await input.click();
-        await input.type(text);
+        await remote.type(input, text);
       });
     }
 
@@ -85,38 +86,38 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async descendantExists(selector, parentElement) {
-      return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
+      const descendants = await parentElement.findElements(By.css(testSubjSelector(selector)));
+      return descendants.length > 0;
     }
 
     async findDescendant(selector, parentElement) {
-      return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
-    }
-
-    async findAllDescendant(selector, parentElement) {
-      return await find.allDescendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
+      log.debug(`--------------------- findDescendant selector = ${selector} and parentElement = ${parentElement}`);
+      return await parentElement.findElement(By.css(testSubjSelector(selector)));
     }
 
     async find(selector, timeout = 1000) {
       log.debug(`TestSubjects.find(${selector})`);
-      return await find.byCssSelector(testSubjSelector(selector), timeout);
+      const dataTestSubj = testSubjSelector(selector);
+      return await remote.findElement(By.css(dataTestSubj), timeout);
     }
 
     async findAll(selector, timeout) {
       log.debug(`TestSubjects.findAll(${selector})`);
-      const all = await find.allByCssSelector(testSubjSelector(selector), timeout);
+      const dataTestSubj = testSubjSelector(selector);
+      const all = await remote.findElements(By.css(dataTestSubj), timeout);
       return await filterAsync(all, el => el.isDisplayed());
     }
 
     async getPropertyAll(selector, property) {
       return await this._mapAll(selector, async (element) => {
-        return await element.getProperty(property);
+        return await element.getAttribute(property);
       });
     }
 
     async getProperty(selector, property) {
       return await retry.try(async () => {
         const element = await this.find(selector);
-        return await element.getProperty(property);
+        return await element.getAttribute(property);
       });
     }
 
@@ -140,8 +141,8 @@ export function TestSubjectsProvider({ getService }) {
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await remote.getActiveElement();
-        await input.clearValue();
-        await input.type(text);
+        await input.clear();
+        await remote.type(input, text);
       });
     }
 
@@ -175,13 +176,13 @@ export function TestSubjectsProvider({ getService }) {
     async getVisibleText(selector) {
       return await retry.try(async () => {
         const element = await this.find(selector);
-        return await element.getVisibleText();
+        return await element.getText();
       });
     }
 
     async getVisibleTextAll(selectorAll) {
       return await this._mapAll(selectorAll, async (element) => {
-        return await element.getVisibleText();
+        return await element.getText();
       });
     }
 
@@ -203,7 +204,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async waitForDeleted(selector) {
-      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
+      await remote.waitForElementNotPresent(By.css(testSubjSelector(selector)));
     }
   }
 

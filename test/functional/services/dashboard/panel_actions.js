@@ -85,7 +85,9 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async customizePanel(parent) {
       await this.openContextMenu(parent);
+      await PageObjects.common.sleep(1111);
       await testSubjects.click(CUSTOMIZE_PANEL_DATA_TEST_SUBJ);
+      await PageObjects.common.sleep(1112);
     }
 
     async openInspector(parent) {
@@ -101,6 +103,11 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
     async expectMissingRemovePanelAction() {
       log.debug('expectMissingRemovePanelAction');
       await testSubjects.missingOrFail(REMOVE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async toggleExpandActionExists() {
+      log.debug('toggleExpandActionExists');
+      return await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ, 2000);
     }
 
     async expectExistsEditPanelAction() {
@@ -135,6 +142,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
         panelOptions = await this.getPanelHeading(originalTitle);
       }
       await this.customizePanel(panelOptions);
+      await PageObjects.common.sleep(1113);
       await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
       await this.toggleContextMenu(panelOptions);
     }

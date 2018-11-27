@@ -18,36 +18,29 @@
  */
 
 import expect from 'expect.js';
+import { By } from 'selenium-webdriver';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
-  const config = getService('config');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const remote = getService('remote');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
-  const getRemote = () => (
-    getService('remote')
-      .setFindTimeout(config.get('timeouts.find'))
-  );
-
   class DiscoverPage {
-    getQueryField() {
-      return getRemote()
-        .findByCssSelector('input[ng-model=\'state.query\']');
+    async getQueryField() {
+      return await remote.findElement(By.css('input[ng-model=\'state.query\']'));
     }
 
-    getQuerySearchButton() {
-      return getRemote()
-        .findByCssSelector('button[aria-label=\'Search\']');
+    async getQuerySearchButton() {
+      return await remote.findElement(By.css('button[aria-label=\'Search\']'));
     }
 
-    getChartTimespan() {
-      return getRemote()
-        .findByCssSelector('.small > span:nth-child(1)')
-        .getVisibleText();
+    async getChartTimespan() {
+      const chartTimespan = await remote.findElement(By.css('.small > span:nth-child(1)'));
+      return chartTimespan.getText();
     }
 
     async saveSearch(searchName) {
@@ -69,7 +62,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(el => el.getVisibleText()));
+      return await Promise.all(headerElements.map(el => el.getText()));
     }
 
     async openLoadSavedSearchPanel() {
@@ -125,74 +118,41 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverCurrentQuery');
     }
 
-    async getBarChartXTicks() {
-      return getRemote()
-        .findAllByCssSelector('.x.axis.CategoryAxis-1 > .tick > text')
-        .getVisibleText();
-    }
+    async getBarChartData() {
 
-    getBarChartData() {
-      let yAxisLabel = 0;
-      let yAxisHeight;
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const y = await remote.findElement(By.css('div.y-axis-div-wrapper > div > svg > g > g:last-of-type'));
+      const yLabel = await y.getText();
+      const yAxisLabel = yLabel.replace(',', '');
+      log.debug('yAxisLabel = ' + yAxisLabel);
 
-      return PageObjects.header.waitUntilLoadingHasFinished()
-        .then(() => {
-          return getRemote()
-            .findByCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
-        })
-        .then(function setYAxisLabel(y) {
-          return y
-            .getVisibleText()
-            .then(function (yLabel) {
-              yAxisLabel = yLabel.replace(',', '');
-              log.debug('yAxisLabel = ' + yAxisLabel);
-              return yLabel;
-            });
-        })
-      // 2). find and save the y-axis pixel size (the chart height)
-        .then(function getRect() {
-          return getRemote()
-            .findByCssSelector('rect.background')
-            .then(function getRectHeight(chartAreaObj) {
-              return chartAreaObj
-                .getAttribute('height')
-                .then(function (theHeight) {
-                  yAxisHeight = theHeight; // - 5; // MAGIC NUMBER - clipPath extends a bit above the top of the y-axis and below x-axis
-                  log.debug('theHeight = ' + theHeight);
-                  return theHeight;
-                });
-            });
-        })
-      // 3). get the visWrapper__chart elements
-        .then(function () {
-          return getRemote()
-          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
-            .findAllByCssSelector('svg > g > g.series > rect') // rect
-            .then(function (chartTypes) {
-              function getChartType(chart) {
-                return chart
-                  .getAttribute('height')
-                  .then(function (barHeight) {
-                    return Math.round(barHeight / yAxisHeight * yAxisLabel);
-                  });
-              }
-              const getChartTypesPromises = chartTypes.map(getChartType);
-              return Promise.all(getChartTypesPromises);
-            })
-            .then(function (bars) {
-              return bars;
-            });
-        });
+      const chartAreaObj = await remote.findElement(By.css('rect.background'));
+      const theHeight = await chartAreaObj.getAttribute('height');
+      const yAxisHeight = theHeight;
+      log.debug('theHeight = ' + theHeight);
+
+      const chartTypes = await remote.findElements(By.css('svg > g > g.series > rect'));
+
+      async function getChartType(chart) {
+        return await chart
+          .getAttribute('height')
+          .then(function (barHeight) {
+            return Math.round(barHeight / yAxisHeight * yAxisLabel);
+          });
+      }
+
+      const getChartTypesPromises = chartTypes.map(getChartType);
+      return Promise.all(getChartTypesPromises);
     }
 
     async getChartInterval() {
       const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
-      const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');
-      return selectedOption.getVisibleText();
+      const selectedOption = await remote.findElement(By.css('option[value="' + selectedValue + '"]'));
+      return selectedOption.getText();
     }
 
     async setChartInterval(interval) {
-      const optionElement = await find.byCssSelector('option[label="' + interval + '"]', 5000);
+      const optionElement = await remote.findElement(By.css('option[label="' + interval + '"]'), 5000);
       await optionElement.click();
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -202,71 +162,55 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverQueryHits');
     }
 
-    query(queryString) {
-      return getRemote()
-        .findByCssSelector('input[aria-label="Search input"]')
-        .clearValue()
-        .type(queryString)
-        .then(() => {
-          return getRemote()
-            .findByCssSelector('button[aria-label="Search"]')
-            .click();
-        })
-        .then(() => {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        });
+    async query(queryString) {
+      const searchInput = await remote.findElement(By.css('input[aria-label="Search input"]'));
+      await searchInput.clear();
+      await remote.type(searchInput, queryString);
+      const searchButton = await remote.findElement(By.css('button[aria-label="Search"]'));
+      await searchButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    getDocHeader() {
-      return getRemote()
-        .findByCssSelector('thead > tr:nth-child(1)')
-        .getVisibleText();
+    async getDocHeader() {
+      const docHeader = await remote.findElement(By.css('thead > tr:nth-child(1)'));
+      return await docHeader.getText();
     }
 
-    getDocTableIndex(index) {
-      return getRemote()
-        .findByCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
-        .getVisibleText();
+    async getDocTableIndex(index) {
+      const docTableIndex = await remote.findElement(By.css(`tr.discover-table-row:nth-child(${index})`));
+      return await docTableIndex.getText();
     }
 
-    clickDocSortDown() {
-      return getRemote()
-        .findByCssSelector('.fa-sort-down')
-        .click();
+    async clickDocSortDown() {
+      const docSortDown = await remote.findElement(By.css('.fa-sort-down'));
+      await docSortDown.click();
     }
 
-    clickDocSortUp() {
-      return getRemote()
-        .findByCssSelector('.fa-sort-up')
-        .click();
+    async clickDocSortUp() {
+      const docSortUp = await remote.findElement(By.css('.fa-sort-up'));
+      await docSortUp.click();
     }
 
-    getMarks() {
-      return getRemote()
-        .findAllByCssSelector('mark')
-        .getVisibleText();
+    async getMarks() {
+      return await remote.findElements(By.css('mark'));
     }
 
     async toggleSidebarCollapse() {
       return await testSubjects.click('collapseSideBarButton');
     }
 
-    getAllFieldNames() {
-      return getRemote()
-        .findAllByClassName('sidebar-item')
-        .then((items) => {
-          return Promise.all(items.map((item) => item.getVisibleText()));
-        });
+    async getAllFieldNames() {
+      const items = await remote.findElements(By.className('sidebar-item'));
+      return Promise.all(items.map((item) => item.getText()));
     }
 
-    getSidebarWidth() {
-      return getRemote()
-        .findByClassName('sidebar-list')
-        .getProperty('clientWidth');
+    async getSidebarWidth() {
+      const sidebar = await remote.findElement(By.className('sidebar-list'));
+      return await sidebar.getAttribute('clientWidth');
     }
 
     async hasNoResults() {
-      return await testSubjects.exists('discoverNoResults');
+      return await remote.isElementVisible(By.css('div[data-test-subj="discoverNoResults"]'));
     }
 
     async getNoResultsTimepicker() {
@@ -298,25 +242,22 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await getRemote()
-        .findByCssSelector(`[data-test-subj="plus-${field}-${value}"]`)
-        .click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      const fieldListPlusFilter = await remote.findElement(By.css(`[data-test-subj="plus-${field}-${value}"]`));
+      await fieldListPlusFilter.click();
     }
 
     async clickFieldListMinusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await getRemote()
-        .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
-        .click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      const fieldListMinusFilter = await remote.findElement(By.css('[data-test-subj="minus-' + field + '-' + value + '"]'));
+      await fieldListMinusFilter.click();
     }
 
     async selectIndexPattern(indexPattern) {
-      await getRemote().findByClassName('index-pattern-selection').click();
-      await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      const indexPatternSelection = await remote.findElement(By.css('index-pattern-selection'));
+      await indexPatternSelection.click();
+
+      await remote.type(By.css('ui-select-search'), indexPattern + '\n');
     }
 
     async removeAllFilters() {
@@ -332,18 +273,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (!fieldFilterFormExists) {
+      const isFilterExpanded = await remote.isElementVisible(By.css('div[data-test-subj="discoverFieldFilter"]'));
+      if (!isFilterExpanded) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.existOrFail('discoverFieldFilter');
+        await remote.waitForElementPresent(By.css('div[data-test-subj="discoverFieldFilter"]'));
       }
     }
 
     async closeSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (fieldFilterFormExists) {
+      const isFilterExpanded = await remote.isElementVisible(By.css('div[data-test-subj="discoverFieldFilter"]'));
+      if (!isFilterExpanded) {
         await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter');
+        await remote.waitForElementNotPresent(By.css('div[data-test-subj="discoverFieldFilter"]'));
       }
     }
 

@@ -95,8 +95,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should put secondary axis on the right', async function () {
-        const length = await pointSeriesVis.getRightValueAxes();
-        expect(length).to.be(1);
+        const axes = await pointSeriesVis.getRightValueAxes();
+        expect(axes.length).to.be(1);
       });
     });
 
@@ -105,8 +105,8 @@ export default function ({ getService, getPageObjects }) {
         await pointSeriesVis.toggleCollapsibleTitle('RightAxis-1');
         await pointSeriesVis.setSeriesType(1, 'bar');
         await PageObjects.visualize.clickGo();
-        const length = await pointSeriesVis.getHistogramSeries();
-        expect(length).to.be(1);
+        const series = await pointSeriesVis.getHistogramSeries();
+        expect(series.length).to.be(1);
       });
     });
 

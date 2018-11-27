@@ -46,7 +46,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     async getErrorMessage() {
       return await retry.try(async () => {
         const errorMessageContainer = await retry.try(() => testSubjects.find('loginErrorMessage'));
-        const errorMessageText = await errorMessageContainer.getVisibleText();
+        const errorMessageText = await errorMessageContainer.getText();
 
         if (!errorMessageText) {
           throw new Error('Login Error Message not present yet');
@@ -240,7 +240,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const isReservedElementVisible = await role.findByCssSelector('td:nth-child(3)');
 
         return {
-          rolename: await rolenameElement.getVisibleText(),
+          rolename: await rolenameElement.getText(),
           reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('roleRowReserved')
         };
       });
@@ -386,7 +386,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     deleteUser(username) {
       let alertText;
       log.debug('Delete user ' + username);
-      return remote.findDisplayedByLinkText(username).click()
+      return remote.findByLinkText(username).click()
         .then(() => {
           return PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         })
@@ -413,7 +413,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     getPermissionDeniedMessage() {
       return remote.setFindTimeout(defaultFindTimeout)
         .findDisplayedByCssSelector('span.kuiInfoPanelHeader__title')
-        .getVisibleText();
+        .getText();
     }
   }
   return new SecurityPage();

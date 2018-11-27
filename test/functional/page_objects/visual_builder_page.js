@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import Keys from 'leadfoot/keys';
+import { By, Key } from 'selenium-webdriver';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
+  const remote = getService('remote');
   const retry = getService('retry');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -55,7 +56,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getMetricValue() {
       const metricValue = await find.byCssSelector('.tvbVisMetric__value--primary');
-      return metricValue.getVisibleText();
+      return metricValue.getText();
     }
 
     async enterMarkdown(markdown) {
@@ -64,19 +65,19 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
       if (process.platform === 'darwin') {
-        await input.session.pressKeys([Keys.COMMAND, 'a']); // Select all Mac
+        await input.sendKeys(Key.chord(Key.COMMAND, 'a')); // Select all Mac
       } else {
-        await input.session.pressKeys([Keys.CONTROL, 'a']); // Select all for everything else
+        await input.sendKeys(Key.chord(Key.CONTROL, 'a')); // Select all for everything else
       }
-      await input.session.pressKeys(Keys.NULL); // Release modifier keys
-      await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
-      await input.type(markdown);
+
+      await input.sendKeys(Key.BACK_SPACE); // Delete all content
+      await input.sendKeys(markdown);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getMarkdownText() {
       const el = await find.byCssSelector('.tvbEditorVisualization');
-      return await el.getVisibleText();
+      return await el.getText();
     }
 
     async clickMarkdownData() {
@@ -91,21 +92,20 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async clearOffsetSeries() {
       const el = await testSubjects.find('offsetTimeSeries');
-      await el.clearValue();
+      await el.clear();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async enterOffsetSeries(value) {
       const el = await testSubjects.find('offsetTimeSeries');
-      await el.clearValue();
-      await el.type(value);
+      await remote.setValue(el, value);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getRhythmChartLegendValue() {
       const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
-      await metricValue.session.moveMouseTo(metricValue);
-      return await metricValue.getVisibleText();
+      await remote.moveMouseTo(metricValue);
+      return await metricValue.getText();
     }
 
     async clickGauge() {
@@ -115,12 +115,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getGaugeLabel() {
       const gaugeLabel = await find.byCssSelector('.tvbVisGauge__label');
-      return await gaugeLabel.getVisibleText();
+      return await gaugeLabel.getText();
     }
 
     async getGaugeCount() {
       const gaugeCount = await find.byCssSelector('.tvbVisGauge__value');
-      return await gaugeCount.getVisibleText();
+      return await gaugeCount.getText();
     }
 
     async clickTopN() {
@@ -130,12 +130,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async getTopNLabel() {
       const topNLabel = await find.byCssSelector('.tvbVisTopN__label');
-      return await topNLabel.getVisibleText();
+      return await topNLabel.getText();
     }
 
     async getTopNCount() {
       const gaugeCount = await find.byCssSelector('.tvbVisTopN__value');
-      return await gaugeCount.getVisibleText();
+      return await gaugeCount.getText();
     }
 
     async clickTable() {
@@ -157,21 +157,22 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async selectAggType(value, nth = 0) {
       const elements = await testSubjects.findAll('aggSelector');
+      await remote.moveMouseTo(elements[nth]);
       await comboBox.setElement(elements[nth], value);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async fillInExpression(expression, nth = 0) {
       const expressions = await testSubjects.findAll('mathExpression');
-      await expressions[nth].type(expression);
+      await expressions[nth].sendKeys(expression);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async fillInVariable(name = 'test', metric = 'count', nth = 0) {
       const elements = await testSubjects.findAll('varRow');
-      const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
-      await varNameInput.type(name);
-      const metricSelectWrapper = await elements[nth].findByCssSelector('.tvbAggs__varMetricWrapper');
+      const varNameInput = await elements[nth].findElement(By.css('.tvbAggs__varName'));
+      await varNameInput.sendKeys(name);
+      const metricSelectWrapper = await elements[nth].findElement(By.css('.tvbAggs__varMetricWrapper'));
       await comboBox.setElement(metricSelectWrapper, metric);
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -183,14 +184,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
 
     async setLabelValue(value) {
       const el = await testSubjects.find('columnLabelName');
-      await el.clearValue();
-      await el.type(value);
+      await remote.setValue(el, value);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getViewTable() {
       const tableView = await testSubjects.find('tableView');
-      return await tableView.getVisibleText();
+      return await tableView.getText();
     }
     async clickMetricPanelOptions() {
       const button = await testSubjects.find('metricEditorPanelOptionsBtn');
@@ -199,15 +199,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
     async setIndexPatternValue(value) {
       const el = await testSubjects.find('metricsIndexPatternInput');
-      await el.clearValue();
-      await el.type(value);
+      await remote.setValue(el, value);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
     async selectIndexPatternTimeField(timeField) {
       const el = await testSubjects.find('comboBoxSearchInput');
-      await el.clearValue();
-      await el.type(timeField);
-      await el.session.pressKeys(Keys.RETURN);
+      await remote.setValue(el, timeField);
+      await el.sendKeys(Key.RETURN);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
   }

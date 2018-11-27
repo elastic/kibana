@@ -20,7 +20,7 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
 import expect from 'expect.js';
-import Keys from 'leadfoot/keys';
+import { By, Key } from 'selenium-webdriver';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -52,73 +52,81 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async waitForVisualizationSelectPage() {
-      await retry.try(async () => {
-        const visualizeSelectTypePage = await testSubjects.find('visNewDialogTypes');
-        if (!visualizeSelectTypePage.isDisplayed()) {
-          throw new Error('wait for visualization select page');
-        }
-      });
+      await remote.waitForElementPresent(By.css('[data-test-subj="visualizeSelectTypePage"]'));
     }
 
+    //TODO: Make sure to preserve this new behavior https://github.com/elastic/kibana/pull/23833/files#diff-b2c46095f182a4835e5778b9ef0d9132R69
     async clickVisType(type) {
       await testSubjects.click(`visType-${type}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickAreaChart() {
-      await this.clickVisType('area');
+      await remote.waitAndClick(By.partialLinkText('Area'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickDataTable() {
-      await this.clickVisType('table');
+      await remote.waitAndClick(By.partialLinkText('Data Table'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickLineChart() {
-      await this.clickVisType('line');
+      await remote.waitAndClick(By.partialLinkText('Line'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickRegionMap() {
-      await this.clickVisType('region_map');
+      await remote.waitAndClick(By.partialLinkText('Region Map'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickMarkdownWidget() {
-      await this.clickVisType('markdown');
+      await remote.waitAndClick(By.partialLinkText('Markdown'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickAddMetric() {
-      await find.clickByCssSelector('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+      await remote.waitAndClick(By.css('[group-name="metrics"] [data-test-subj="visualizeEditorAddAggregationButton"]'));
     }
 
     async clickAddBucket() {
-      await find.clickByCssSelector('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]');
+      await remote.waitAndClick(By.css('[group-name="buckets"] [data-test-subj="visualizeEditorAddAggregationButton"]'));
     }
 
     async clickMetric() {
-      await this.clickVisType('metric');
+      await remote.waitAndClick(By.partialLinkText('Metric'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickGauge() {
-      await this.clickVisType('gauge');
+      await remote.waitAndClick(By.partialLinkText('Gauge'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickPieChart() {
-      await this.clickVisType('pie');
+      await remote.waitAndClick(By.partialLinkText('Pie'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTileMap() {
-      await this.clickVisType('tile_map');
+      await remote.waitAndClick(By.partialLinkText('Coordinate Map'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickTagCloud() {
-      await this.clickVisType('tagcloud');
+      await remote.waitAndClick(By.partialLinkText('Tag Cloud'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVega() {
-      await this.clickVisType('vega');
+      await remote.waitAndClick(By.partialLinkText('Vega'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualBuilder() {
-      await this.clickVisType('metrics');
+      await remote.waitAndClick(By.partialLinkText('Visual Builder'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickEditorSidebarCollapse() {
@@ -131,12 +139,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getTextTag() {
-      const elements = await find.allByCssSelector('text');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      const elements = await remote.findElements(By.css('text'));
+      return await Promise.all(elements.map(async element => await element.getText()));
     }
 
     async getTextSizes() {
-      const tags = await find.allByCssSelector('text');
+      const tags = await remote.findElements(By.css('text'));
       async function returnTagSize(tag) {
         const style = await tag.getAttribute('style');
         return style.match(/font-size: ([^;]*);/)[1];
@@ -145,15 +153,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickVerticalBarChart() {
-      await this.clickVisType('histogram');
+      const vertBar = await remote.findElement(By.partialLinkText('Vertical Bar'));
+      await vertBar.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickHeatmapChart() {
-      await this.clickVisType('heatmap');
+      await remote.click(By.partialLinkText('Heat Map'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickInputControlVis() {
-      await this.clickVisType('input_control_vis');
+      await remote.click(By.partialLinkText('Controls'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getChartTypes() {
@@ -176,8 +188,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async getLabTypeLinks() {
+      return await remote.findElements(By.partialLinkText('(Lab)'));
+    }
+
     async getExperimentalTypeLinks() {
-      return await remote.findAllByCssSelector('[data-vis-stage="experimental"]');
+      return await remote.findElements(By.css('[data-vis-stage="experimental"]'));
     }
 
     async isExperimentalInfoShown() {
@@ -189,8 +205,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickAbsoluteButton() {
-      await find.clickByCssSelector(
-        'ul.nav.nav-pills.nav-stacked.kbn-timepicker-modes:contains("absolute")',
+      await remote.click(
+        By.css('ul.nav.nav-pills.nav-stacked.kbn-timepicker-modes:contains("absolute")'),
         defaultFindTimeout * 2);
     }
 
@@ -199,27 +215,25 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setMarkdownTxt(markdownTxt) {
-      const input = await testSubjects.find('markdownTextarea');
-      await input.clearValue();
-      await input.type(markdownTxt);
+      await testSubjects.setValue('markdownTextarea', markdownTxt);
     }
 
     async getMarkdownText() {
       const markdownContainer = await testSubjects.find('markdownBody');
-      return markdownContainer.getVisibleText();
+      return markdownContainer.getText();
     }
 
     async getMarkdownBodyDescendentText(selector) {
       const markdownContainer = await testSubjects.find('markdownBody');
-      const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
-      return element.getVisibleText();
+      const element = await markdownContainer.findElement(By.css(selector));
+      return await element.getText();
     }
 
     async getVegaSpec() {
-      // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
+      // Adapted from console_page.js:getTextFromAceEditor(). Is there a common utilities file?
       const editor = await testSubjects.find('vega-editor');
-      const lines = await editor.findAllByClassName('ace_line_group');
-      const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+      const lines = await editor.findElements(By.className('ace_line_group'));
+      const linesText = await Bluebird.map(lines, l => l.getText());
       return linesText.join('\n');
     }
 
@@ -232,15 +246,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setFromTime(timeString) {
-      const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
-      await input.clearValue();
-      await input.type(timeString);
+      const input = await remote.findElement(By.css('input[ng-model="absolute.from"]', defaultFindTimeout * 2));
+      await input.clear();
+      await input.sendKeys(timeString);
     }
 
     async setToTime(timeString) {
-      const input = await find.byCssSelector('input[ng-model="absolute.to"]', defaultFindTimeout * 2);
-      await input.clearValue();
-      await input.type(timeString);
+      const input = await remote.findElement(By.css('input[ng-model="absolute.to"]', defaultFindTimeout * 2));
+      await input.clear();
+      await input.sendKeys(timeString);
     }
 
     async addInputControl() {
@@ -279,7 +293,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setSelectByOptionText(selectId, optionText) {
       const options = await find.allByCssSelector(`#${selectId} > option`);
       const optionsTextPromises = options.map(async (optionElement) => {
-        return await optionElement.getVisibleText();
+        return await optionElement.getText();
       });
       const optionsText = await Promise.all(optionsTextPromises);
 
@@ -331,22 +345,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // The buttons for setting table page size are in a popover element. This popover
       // element appears as if it's part of the inspectorPanel but it's really attached
       // to the body element by a portal.
-      const tableSizesPopover = await find.byCssSelector('.euiPanel');
+      const tableSizesPopover = await remote.findElement(By.css('.euiPanel'));
       await find.clickByButtonText(`${size} rows`, tableSizesPopover);
     }
 
     async getMetric() {
-      const metricElement = await find.byCssSelector('div[ng-controller="KbnMetricVisController"]');
-      return await metricElement.getVisibleText();
+      const metricElement = await remote.findElement(By.css('div[ng-controller="KbnMetricVisController"]'));
+      return await metricElement.getText();
     }
 
     async getGaugeValue() {
       const elements = await find.allByCssSelector('[data-test-subj="visualizationLoader"] .chart svg');
-      return await Promise.all(elements.map(async element => await element.getVisibleText()));
+      return await Promise.all(elements.map(async element => await element.getText()));
     }
 
     async clickMetricEditor() {
-      await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
+      await remote.click(By.css('button[data-test-subj="toggleEditor"]'));
     }
 
     async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
@@ -355,7 +369,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickSavedSearch(savedSearchName) {
-      await find.clickByPartialLinkText(savedSearchName);
+      await remote.click(By.partialLinkText(savedSearchName));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -365,10 +379,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setValue(newValue) {
-      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]', defaultFindTimeout * 2);
-      const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
-      await input.clearValue();
-      await input.type(newValue);
+      await remote.click(By.css('button[ng-click="numberListCntr.add()"]'), defaultFindTimeout * 2);
+      const input = await remote.findElement(By.css('input[ng-model="numberListCntr.getList())[$index]"]'));
+      await input.clear();
+      await input.sendKeys(newValue);
     }
 
     async selectSearch(searchName) {
@@ -376,13 +390,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getErrorMessage() {
-      const element = await find.byCssSelector('.item>h4');
-      return await element.getVisibleText();
+      const element = await remote.findElement(By.css('.item>h4'));
+      return await element.getText();
     }
 
     // clickBucket(bucketType) 'X-Axis', 'Split Area', 'Split Chart'
-    async clickBucket(bucketName, type = 'bucket') {
-      const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
+    async clickBucket(bucketName) {
       await retry.try(async () => {
         const chartTypes = await retry.try(
           async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`));
@@ -403,7 +416,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
+    async selectAggregation(aggName, groupName = 'buckets', childAggregationType = null) {
       const selector = `
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
@@ -412,10 +425,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       `;
 
       await retry.try(async () => {
-        await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(myString);
-        await remote.pressKeys('\uE006');
+        await remote.click(By.css(selector));
+        await remote.click(By.css(`[data-test-subj="${aggName}"]`));
       });
       await PageObjects.common.sleep(500);
     }
@@ -428,7 +439,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
      */
     async setFilterAggregationValue(filterValue, filterIndex = 0, aggregationId = 2) {
       const inputField = await testSubjects.find(`visEditorFilterInput_${aggregationId}_${filterIndex}`);
-      await inputField.type(filterValue);
+      await remote.setValue(inputField, filterValue);
     }
 
     async addNewFilterAggregation() {
@@ -437,7 +448,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
-      const toggle = await find.byCssSelector(`button[aria-controls="visAggEditorParams${index}"]`);
+      const toggle = await remote.findElement(By.css(`button[aria-controls="visAggEditorParams${index}"]`));
       const toggleOpen = await toggle.getAttribute('aria-expanded');
       log.debug(`toggle ${index} expand = ${toggleOpen}`);
       if (toggleOpen !== toState) {
@@ -452,15 +463,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // So to modify a metric or aggregation tests need to keep track of the
       // order they are added.
       await this.toggleOpenEditor(index);
-      const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`);
+      const aggSelect = await remote
+        .findElement(By.css(
+          `#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`));
       // open agg selection list
       await aggSelect.click();
       // select our agg
-      const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
+      const aggItem = await remote.findElement(By.css(`[data-test-subj="${agg}"]`));
       await aggItem.click();
-      const fieldSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
+      const fieldSelect = await remote
+        .findElement(By.css(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`));
       // open field selection list
       await fieldSelect.click();
       // select our field
@@ -470,12 +482,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setCustomLabel(label, index = 1) {
-      const customLabel = await find.byCssSelector(`#visEditorStringInput${index}customLabel`);
-      customLabel.type(label);
+      const customLabel = await remote.findElement(By.css(`#visEditorStringInput${index}customLabel`));
+      customLabel.sendKeys(label);
     }
 
     async setAxisExtents(min, max, axis = 'LeftAxis-1') {
-      const axisOptions = await find.byCssSelector(`div[aria-label="Toggle ${axis} options"]`);
+      const axisOptions = await remote.findElement(By.css(`div[aria-label="Toggle ${axis} options"]`));
       const isOpen = await axisOptions.getAttribute('aria-expanded');
       if (isOpen === 'false') {
         log.debug(`click to open ${axis} options`);
@@ -484,31 +496,29 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // it would be nice to get the correct axis by name like "LeftAxis-1"
       // instead of an incremented index, but this link isn't under the div above
       const advancedLink =
-        await find.byCssSelector(`#axisOptionsValueAxis-1 .kuiSideBarOptionsLink .kuiSideBarOptionsLink__caret`);
+        await remote.findElement(By.css(`#axisOptionsValueAxis-1 .kuiSideBarOptionsLink .kuiSideBarOptionsLink__caret`));
 
       const advancedLinkState = await advancedLink.getAttribute('class');
       if (advancedLinkState.includes('fa-caret-right')) {
-        await advancedLink.session.moveMouseTo(advancedLink);
         log.debug('click advancedLink');
         await advancedLink.click();
       }
-      const checkbox = await find.byCssSelector('input[ng-model="axis.scale.setYExtents"]');
+      const checkbox = await remote.findElement(By.css('input[ng-model="axis.scale.setYExtents"]'));
       const checkboxState = await checkbox.getAttribute('class');
       if (checkboxState.includes('ng-empty')) {
-        await checkbox.session.moveMouseTo(checkbox);
         await checkbox.click();
       }
-      const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
-      await maxField.type(max);
-      const minField = await find.byCssSelector('[ng-model="axis.scale.min"]');
-      await minField.type(min);
+      const maxField = await remote.findElement(By.css('[ng-model="axis.scale.max"]'));
+      await maxField.sendKeys(max);
+      const minField = await remote.findElement(By.css('[ng-model="axis.scale.min"]'));
+      await minField.sendKeys(min);
 
     }
 
     async getField() {
       const field = await retry.try(
-        async () => await find.byCssSelector('.ng-valid-required[name="field"] .ui-select-match-text'));
-      return await field.getVisibleText();
+        async () => await remote.findElement(By.css('.ng-valid-required[name="field"] .ui-select-match-text')));
+      return await field.getText();
     }
 
     async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
@@ -520,71 +530,65 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       `;
 
       await retry.try(async () => {
-        await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(fieldValue);
-        await remote.pressKeys('\uE006');
+        await remote.click(By.css(selector));
+        await remote.click(By.css(`[data-test-subj="${fieldValue}"]`));
       });
       await PageObjects.common.sleep(500);
     }
 
     async selectFieldById(fieldValue, id) {
-      await find.clickByCssSelector(`#${id} > option[label="${fieldValue}"]`);
+      await remote.click(By.css(`#${id} > option[label="${fieldValue}"]`));
     }
 
     async orderBy(fieldValue) {
-      await find.clickByCssSelector(
+      await remote.click(By.css(
         'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"]'
-        + `option:contains("${fieldValue}")`);
+        + `option:contains("${fieldValue}")`));
     }
 
     async selectOrderBy(fieldValue) {
-      await find.clickByCssSelector(`select[name="orderBy"] > option[value="${fieldValue}"]`);
+      await remote.click(By.css(`select[name="orderBy"] > option[value="${fieldValue}"]`));
     }
 
     async getInputTypeParam(paramName) {
-      const input = await find.byCssSelector(`input[ng-model="agg.params.${paramName}"]`);
-      return await input.getProperty('value');
+      const input = await remote.findElement(By.css(`input[ng-model="agg.params.${paramName}"]`));
+      return await input.getAttribute('value');
     }
 
     async getInterval() {
-      const select = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      const selectedIndex = await select.getProperty('selectedIndex');
-      const intervalElement = await find.byCssSelector(
-        `select[ng-model="agg.params.interval"] option:nth-child(${(selectedIndex + 1)})`);
-      return await intervalElement.getProperty('label');
+      const select = await remote.findElement(By.css('select[ng-model="agg.params.interval"]'));
+      const option = await select.findElement(By.css('option[selected="selected"]'));
+      return await option.getAttribute('label');
     }
 
     async setInterval(newValue) {
-      const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      await input.type(newValue);
-      await remote.pressKeys(Keys.RETURN);
-    }
-
-    async setCustomInterval(newValue) {
-      await this.setInterval('Custom');
-      const input = await find.byCssSelector('input[name="customInterval"]');
-      await input.clearValue();
-      await input.type(newValue);
+      const input = await remote.findElement(By.css('select[ng-model="agg.params.interval"]'));
+      await input.sendKeys(newValue);
     }
 
     async setNumericInterval(newValue, { append } = {}) {
-      const input = await find.byCssSelector('input[name="interval"]');
+      const input = await remote.findElement(By.css('input[name="interval"]'));
       if (!append) {
-        await input.clearValue();
+        await input.clear();
       }
-      await input.type(newValue + '');
+      // await input.type(newValue + '');
+      // await remote.type(input, newValue + '');
+      await find.setValueElement(input, newValue);
       await PageObjects.common.sleep(1000);
     }
 
     async setSize(newValue) {
       const input = await find.byCssSelector(`vis-editor-agg-params[aria-hidden="false"] input[name="size"]`);
-      await input.clearValue();
-      await input.type(String(newValue));
+      await input.clear();
+      await input.sendKeys(String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
       await testSubjects.click(`aggregationEditor${agg} disableAggregationBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+    async toggleAggegationEditor(agg) {
+      await testSubjects.click(`aggregationEditor${agg} toggleEditor`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -623,19 +627,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async sizeUpEditor() {
-      await testSubjects.click('visualizeEditorResizer');
-      await remote.pressKeys(Keys.ARROW_RIGHT);
+      const resizer = await testSubjects.find('visualizeEditorResizer');
+      await resizer.sendKeys(Key.ARROW_RIGHT);
     }
 
     async clickOptions() {
-      await find.clickByPartialLinkText('Options');
+      await remote.click(By.partialLinkText('Options'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async changeHeatmapColorNumbers(value = 6) {
       const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
-      await input.clearValue();
-      await input.type(`${value}`);
+      await input.clear();
+      await input.sendKeys(`${value}`);
     }
 
     async clickMetricsAndAxes() {
@@ -660,13 +664,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async addCustomRange(from, to) {
       const table = await testSubjects.find('heatmapCustomRangesTable');
-      const lastRow = await table.findByCssSelector('tr:last-child');
-      const fromCell = await lastRow.findByCssSelector('td:first-child input');
-      fromCell.clearValue();
-      fromCell.type(`${from}`);
-      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
-      toCell.clearValue();
-      toCell.type(`${to}`);
+      const lastRow = await table.findElement(By.css('tr:last-child'));
+      const fromCell = await lastRow.findElement(By.css('td:first-child input'));
+      await remote.setValue(fromCell, `${from}`);
+      const toCell = await lastRow.findElement(By.css('td:nth-child(2) input'));
+      await remote.setValue(toCell, `${to}`);
     }
 
     async clickYAxisOptions(axisId) {
@@ -683,13 +685,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectChartMode(mode) {
-      const selector = await find.byCssSelector(`#seriesMode0 > option[label="${mode}"]`);
+      const selector = await remote.findElement(By.css(`#seriesMode0 > option[label="${mode}"]`));
       await selector.click();
     }
 
     async selectYAxisScaleType(axisId, scaleType) {
       const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[label="${scaleType}"]`);
+      const selector = await selectElement.findElement(By.css(`option[label="${scaleType}"]`));
       await selector.click();
     }
 
@@ -703,7 +705,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectWMS() {
-      await find.clickByCssSelector('input[name="wms.enabled"]');
+      await remote.findElement(By.css('input[name="wms.enabled"]'));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -744,27 +746,25 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickLoadSavedVisButton() {
       // TODO: Use a test subject selector once we rewrite breadcrumbs to accept each breadcrumb
       // element as a child instead of building the breadcrumbs dynamically.
-      await find.clickByCssSelector('[href="#/visualize"]');
+      await remote.click(By.css('[href="#/visualize"]'));
     }
 
     async filterVisByName(vizName) {
-      const input = await find.byCssSelector('input[name="filter"]');
+      const input = await remote.findElement(By.css('input[name="filter"]'));
       await input.click();
       // can't uses dashes in saved visualizations when filtering
       // or extended character sets
       // https://github.com/elastic/kibana/issues/6300
-      await input.type(vizName.replace('-', ' '));
+      await input.sendKeys(vizName.replace('-', ' '));
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
 
-      return retry.try(function tryingForTime() {
-        return remote
-          .setFindTimeout(defaultFindTimeout)
-          .findByPartialLinkText(vizName)
-          .click();
+      return retry.try(async function tryingForTime() {
+        const link = await remote.findElement(By.partialLinkText(vizName), defaultFindTimeout);
+        await link.click();
       });
     }
 
@@ -783,7 +783,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getXAxisLabels() {
       const chartTypes = await find.allByCssSelector('.x > g');
       async function getChartType(chart) {
-        return await chart.getVisibleText();
+        return await chart.getText();
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
@@ -791,7 +791,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async getYAxisLabels() {
       const chartTypes = await find.allByCssSelector('.y > g');
-      const getChartTypesPromises = chartTypes.map(async chart => await chart.getVisibleText());
+      const getChartTypesPromises = chartTypes.map(async chart => await chart.getText());
       return await Promise.all(getChartTypesPromises);
     }
 
@@ -802,12 +802,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getAreaChartData(dataLabel, axis = 'ValueAxis-1') {
       const yAxisRatio = await this.getChartYAxisRatio(axis);
 
-      const rectangle = await find.byCssSelector('rect.background');
+      const rectangle = await remote.findElement(By.css('rect.background'));
       const yAxisHeight = await rectangle.getAttribute('height');
       log.debug(`height --------- ${yAxisHeight}`);
 
       const path = await retry.try(
-        async () => await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2));
+        async () => await remote.findElement(By.css(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2)));
       const data = await path.getAttribute('d');
       log.debug(data);
       // This area chart data starts with a 'M'ove to a x,y location, followed
@@ -830,12 +830,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 2). find and save the y-axis pixel size (the chart height)
-      const rectangle = await find.byCssSelector('clipPath rect');
+      const rectangle = await remote.findElement(By.css('clipPath rect'));
       const yAxisHeight = await rectangle.getAttribute('height');
       // 3). get the visWrapper__chart elements
       const chartTypes = await retry.try(
-        async () => await find
-          .allByCssSelector(`.visWrapper__chart circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
+        async () => await remote
+          .findElements(By.css(`.chart-wrapper circle[data-label="${dataLabel}"][fill-opacity="1"]`), defaultFindTimeout * 2));
 
       // 5). for each chart element, find the green circle, then the cy position
       async function getChartType(chart) {
@@ -854,8 +854,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getBarChartData(dataLabel = 'Count', axis = 'ValueAxis-1') {
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
-      // 3). get the visWrapper__chart elements
-      const chartTypes = await find.allByCssSelector(`svg > g > g.series > rect[data-label="${dataLabel}"]`);
+      // 3). get the chart-wrapper elements
+      const chartTypes = await remote.findElements(By.css(`svg > g > g.series > rect[data-label="${dataLabel}"]`));
 
       async function getChartType(chart) {
         const barHeight = await chart.getAttribute('height');
@@ -870,25 +870,24 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getChartYAxisRatio(axis = 'ValueAxis-1') {
       // 1). get the maximum chart Y-Axis marker value and Y position
       const maxYAxisChartMarker = await retry.try(
-        async () => await find.byCssSelector(`div.visAxis__splitAxes--y > div > svg > g.${axis} > g:last-of-type.tick`)
+        async () => await remote.findElement(By.css(`div.y-axis-div-wrapper > div > svg > g.${axis} > g:last-of-type.tick`))
       );
-      const maxYLabel = (await maxYAxisChartMarker.getVisibleText()).replace(/,/g, '');
-      const maxYLabelYPosition = (await maxYAxisChartMarker.getPosition()).y;
+      const maxYLabel = (await maxYAxisChartMarker.getText()).replace(/,/g, '');
+      const maxYLabelYPosition = (await maxYAxisChartMarker.getRect()).y;
       log.debug(`maxYLabel = ${maxYLabel}, maxYLabelYPosition = ${maxYLabelYPosition}`);
 
       // 2). get the minimum chart Y-Axis marker value and Y position
-      const minYAxisChartMarker = await find.byCssSelector(
-        'div.visAxis__column--y.visAxis__column--left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'
-      );
-      const minYLabel = (await minYAxisChartMarker.getVisibleText()).replace(',', '');
-      const minYLabelYPosition = (await minYAxisChartMarker.getPosition()).y;
+      const minYAxisChartMarker = await
+      remote.findElement(By.css('div.y-axis-col.axis-wrapper-left  > div > div > svg:nth-child(2) > g > g:nth-child(1).tick'));
+      const minYLabel = (await minYAxisChartMarker.getText()).replace(',', '');
+      const minYLabelYPosition = (await minYAxisChartMarker.getRect()).y;
       return ((maxYLabel - minYLabel) / (minYLabelYPosition - maxYLabelYPosition));
     }
 
 
     async getHeatmapData() {
       const chartTypes = await retry.try(
-        async () => await find.allByCssSelector('svg > g > g.series rect', defaultFindTimeout * 2));
+        async () => await remote.findElements(By.css('svg > g > g.series rect'), defaultFindTimeout * 2));
       log.debug('rects=' + chartTypes);
       async function getChartType(chart) {
         return await chart.getAttribute('data-label');
@@ -898,14 +897,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getPieChartData() {
-      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+      const chartTypes = await remote.findElements(By.css('path.slice'), defaultFindTimeout * 2);
 
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('d'));
       return await Promise.all(getChartTypesPromises);
     }
 
     async getPieChartLabels() {
-      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+      const chartTypes = await remote.findElements(By.css('path.slice'), defaultFindTimeout * 2);
 
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
       return await Promise.all(getChartTypesPromises);
@@ -915,12 +914,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getChartAreaWidth() {
-      const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
+      const rect = await retry.try(async () => remote.findElement(By.css('clipPath rect')));
       return await rect.getAttribute('width');
     }
 
     async getChartAreaHeight() {
-      const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
+      const rect = await retry.try(async () => remote.findElement(By.css('clipPath rect')));
       return await rect.getAttribute('height');
     }
 
@@ -967,13 +966,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getInspectorTableData() {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const inspectorPanel = await testSubjects.find('inspectorPanel');
-      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
+      const tableBody = await retry.try(async () => inspectorPanel.findElement(By.css('tbody')));
       // Convert the data into a nested array format:
       // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-      const rows = await tableBody.findAllByTagName('tr');
+      const rows = await tableBody.findElements(By.tagName('tr'));
       return await Promise.all(rows.map(async row => {
-        const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => cell.getVisibleText()));
+        const cells = await row.findElements(By.tagName('td'));
+        return await Promise.all(cells.map(async cell => cell.getText()));
       }));
     }
 
@@ -981,11 +980,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const dataTableHeader = await retry.try(async () => {
         const inspectorPanel = await testSubjects.find('inspectorPanel');
-        return await inspectorPanel.findByTagName('thead');
+        return await inspectorPanel.findElement(By.tagName('thead'));
       });
-      const cells = await dataTableHeader.findAllByTagName('th');
+      const cells = await dataTableHeader.findElements(By.tagName('th'));
       return await Promise.all(cells.map(async (cell) => {
-        const untrimmed = await cell.getVisibleText();
+        const untrimmed = await cell.getText();
         return untrimmed.trim();
       }));
     }
@@ -995,24 +994,24 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getMarkdownData() {
-      const markdown = await retry.try(async () => find.byCssSelector('visualize'));
-      return await markdown.getVisibleText();
+      const markdown = await retry.try(async () => remote.findElement(By.css('visualize')));
+      return await markdown.getText();
     }
 
     async clickColumns() {
-      await find.clickByCssSelector('div.schemaEditors > div > div > button:nth-child(2)');
+      await remote.findElements(By.css('div.schemaEditors > div > div > button:nth-child(2)'));
     }
 
     async waitForVisualization() {
-      return await find.byCssSelector('.visualization');
+      return await remote.findElement(By.css('.visualization'));
     }
 
     async waitForVisualizationSavedToastGone() {
-      return await testSubjects.waitForDeleted('saveVisualizationSuccess');
+      return await remote.waitForElementNotPresent(By.css('[data-test-subj="saveVisualizationSuccess"]'));
     }
 
     async getZoomSelectors(zoomSelector) {
-      return await find.allByCssSelector(zoomSelector);
+      return await remote.findElements(By.css(zoomSelector));
     }
 
     async clickMapButton(zoomSelector) {
@@ -1087,7 +1086,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickLandingPageBreadcrumbLink() {
       log.debug('clickLandingPageBreadcrumbLink');
-      await find.clickByCssSelector(`a[href="#${VisualizeConstants.LANDING_PAGE_PATH}"]`);
+      await remote.findElement(By.css(`a[href="#${VisualizeConstants.LANDING_PAGE_PATH}"]`));
     }
 
     /**
@@ -1113,7 +1112,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getLegendEntries() {
-      const legendEntries = await find.allByCssSelector('.visLegend__valueTitle', defaultFindTimeout * 2);
+      const legendEntries = await remote.findElements(By.css('.legend-value-title'), defaultFindTimeout * 2);
       return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
     }
 
@@ -1133,7 +1132,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async filterOnTableCell(column, row) {
       await retry.try(async () => {
         const table = await testSubjects.find('tableVis');
-        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        const cell = await table.findElement(By.css(`tbody tr:nth-child(${row}) td:nth-child(${column})`));
         await remote.moveMouseTo(cell);
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
@@ -1141,7 +1140,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async toggleLegend(show = true) {
-      const isVisible = remote.findByCssSelector('vislib-legend .legend-ul');
+      const isVisible = await remote.isElementVisible(By.css('vislib-legend .legend-ul'));
       if ((show && !isVisible) || (!show && isVisible)) {
         await testSubjects.click('vislibToggleLegend');
       }
@@ -1166,20 +1165,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getYAxisTitle() {
-      const title = await find.byCssSelector('.y-axis-div .y-axis-title text');
-      return await title.getVisibleText();
+      const title = await remote.findElement(By.css('.y-axis-div .y-axis-title text'));
+      return await title.getText();
     }
 
     async selectBucketType(type) {
-      const bucketType = await find.byCssSelector(`[data-test-subj="${type}"]`);
+      const bucketType = await remote.findElement(By.css(`[data-test-subj="${type}"]`));
       return await bucketType.click();
     }
 
     async filterPieSlice(name) {
       const slice = await this.getPieSlice(name);
       // Since slice is an SVG element we can't simply use .click() for it
-      await remote.moveMouseTo(slice);
-      await remote.clickMouseButton();
+      await remote.moveMouseToAndClick(slice);
     }
 
     async getPieSlice(name) {
@@ -1203,14 +1201,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getBucketErrorMessage() {
-      const error = await find.byCssSelector('.visEditorAggParam__error');
+      const error = await remote.findElement(By.css('.vis-editor-agg-error'));
       const errorMessage = await error.getProperty('innerText');
       log.debug(errorMessage);
       return errorMessage;
     }
 
     async selectSortMetric(agg, metric) {
-      const sortMetric = await find.byCssSelector(`[data-test-subj="visEditorOrder${agg}-${metric}"]`);
+      const sortMetric = await remote.findElement(By.css(`[data-test-subj="visEditorOrder${agg}-${metric}"]`));
       return await sortMetric.click();
     }
 

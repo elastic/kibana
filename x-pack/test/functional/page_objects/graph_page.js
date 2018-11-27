@@ -54,7 +54,7 @@ export function GraphPageProvider({ getService, getPageObjects }) {
         .findAllByCssSelector('text.gphNode__label');
 
       async function getCircleText(circle) {
-        return circle.getVisibleText();
+        return circle.getText();
       }
 
       const getChartTypesPromises = chartTypes.map(getCircleText);
@@ -85,7 +85,7 @@ export function GraphPageProvider({ getService, getPageObjects }) {
         .findByCssSelector('[aria-label="New Workspace"]').click();
       await PageObjects.common.sleep(1000);
       const modal = await remote.setFindTimeout(defaultFindTimeout).findByCssSelector('#kibana-body');
-      const page = await modal.getVisibleText();
+      const page = await modal.getText();
       if (page.includes('This will clear the workspace - are you sure?')) {
         return testSubjects.click('confirmModalConfirmButton');
       }
@@ -123,27 +123,27 @@ export function GraphPageProvider({ getService, getPageObjects }) {
 
     getVennTerm1() {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('span.vennTerm1').getVisibleText();
+        .findByCssSelector('span.vennTerm1').getText();
     }
 
     getVennTerm2() {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('span.vennTerm2').getVisibleText();
+        .findByCssSelector('span.vennTerm2').getText();
     }
 
     getSmallVennTerm1() {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('small.vennTerm1').getVisibleText();
+        .findByCssSelector('small.vennTerm1').getText();
     }
 
     getSmallVennTerm12() {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('small.vennTerm12').getVisibleText();
+        .findByCssSelector('small.vennTerm12').getText();
     }
 
     getSmallVennTerm2() {
       return remote.setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('small.vennTerm2').getVisibleText();
+        .findByCssSelector('small.vennTerm2').getText();
     }
 
     async getVennEllipse1() {

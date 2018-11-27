@@ -24,6 +24,7 @@ import {
   EsProvider,
   EsArchiverProvider,
   RetryProvider,
+  WaitProvider
 } from './services';
 
 export default function () {
@@ -67,6 +68,7 @@ export default function () {
       retry: RetryProvider,
       es: EsProvider,
       esArchiver: EsArchiverProvider,
+      wait: WaitProvider
     }
   };
 }

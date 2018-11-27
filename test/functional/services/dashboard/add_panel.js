@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { By } from 'selenium-webdriver';
 
 export function DashboardAddPanelProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -43,7 +44,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     async addEveryEmbeddableOnCurrentPage() {
       log.debug('addEveryEmbeddableOnCurrentPage');
       const addPanel = await testSubjects.find('dashboardAddPanel');
-      const embeddableRows = await addPanel.findAllByClassName('euiLink');
+      const embeddableRows = await addPanel.findElements(By.className('euiLink'));
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
       }
@@ -55,12 +56,12 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await PageObjects.common.clearAllToasts();
 
       const addPanel = await testSubjects.find('dashboardAddPanel');
-      const pagination = await addPanel.findAllByClassName('euiPagination');
+      const pagination = await addPanel.findElements(By.className('euiPagination'));
       if (pagination.length === 0) {
         return false;
       }
 
-      const pagerNextButton = await pagination[0].findByCssSelector('button[aria-label="Next page"]');
+      const pagerNextButton = await pagination[0].findElement(By.css('button[aria-label="Next page"]'));
       if (!pagerNextButton) {
         return false;
       }

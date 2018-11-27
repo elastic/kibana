@@ -44,15 +44,18 @@ export default function ({ getService, getPageObjects }) {
 
       const table = await docTable.getTable();
       await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(2 * TEST_DEFAULT_CONTEXT_SIZE + 1);
+        const tableRows = await docTable.getBodyRows(table);
+        expect(tableRows).to.have.length(2 * TEST_DEFAULT_CONTEXT_SIZE + 1);
       });
       await retry.try(async function () {
         const predecessorCountPicker = await PageObjects.context.getPredecessorCountPicker();
-        expect(await predecessorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
+        const value = await predecessorCountPicker.getAttribute('value');
+        expect(value).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
       });
       await retry.try(async function () {
         const successorCountPicker = await PageObjects.context.getSuccessorCountPicker();
-        expect(await successorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
+        const value = await successorCountPicker.getAttribute('value');
+        expect(value).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
       });
     });
 
@@ -63,7 +66,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.clickPredecessorLoadMoreButton();
 
       await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(
+        const tableRows = await docTable.getBodyRows(table);
+        expect(tableRows).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
         );
       });
@@ -76,7 +80,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.context.clickSuccessorLoadMoreButton();
 
       await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(
+        const tableRows = await docTable.getBodyRows(table);
+        expect(tableRows).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
         );
       });

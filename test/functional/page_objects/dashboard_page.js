@@ -19,14 +19,15 @@
 
 import _ from 'lodash';
 
+import { By } from 'selenium-webdriver';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
-  const log = getService('log');
   const find = getService('find');
+  const log = getService('log');
   const retry = getService('retry');
   const config = getService('config');
   const remote = getService('remote');
@@ -266,7 +267,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('isDarkThemeOn');
       await this.openOptions();
       const darkThemeCheckbox = await testSubjects.find('dashboardDarkThemeCheckbox');
-      return await darkThemeCheckbox.getProperty('checked');
+      return await darkThemeCheckbox.getCssValue('checked');
     }
 
     async useDarkTheme(on) {
@@ -282,7 +283,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('isMarginsOn');
       await this.openOptions();
       const marginsCheckbox = await testSubjects.find('dashboardMarginsCheckbox');
-      return await marginsCheckbox.getProperty('checked');
+      return await marginsCheckbox.getCssValue('checked');
     }
 
     async useMargins(on = true) {
@@ -393,7 +394,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getSearchFilterValue() {
       const searchFilter = await testSubjects.find('searchFilter');
-      return await searchFilter.getProperty('value');
+      return await searchFilter.getAttribute('value');
     }
 
     async searchForDashboardWithName(dashName) {
@@ -403,10 +404,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
-        await searchFilter.clearValue();
+        await searchFilter.clear();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(dashName.replace('-', ' '));
+        await searchFilter.sendKeys(dashName.replace('-', ' '));
         await PageObjects.common.pressEnterKey();
       });
 
@@ -414,7 +415,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await find.allByCssSelector('[data-test-subj^="dashboardListingTitleLink"]');
+      const dashboardTitles = await remote.findElements(By.css('[data-test-subj^="dashboardListingTitleLink"]'));
       return dashboardTitles.length;
     }
 
@@ -422,7 +423,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug(`getDashboardCountWithName: ${dashName}`);
 
       await this.searchForDashboardWithName(dashName);
-      const links = await find.allByLinkText(dashName);
+      const links = await remote.findElements(By.linkText(dashName));
       return links.length;
     }
 
@@ -444,14 +445,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const titleObjects = await testSubjects.findAll('dashboardPanelTitle');
 
       function getTitles(chart) {
-        return chart.getVisibleText();
+        return chart.getText();
       }
       const getTitlePromises = _.map(titleObjects, getTitles);
       return Promise.all(getTitlePromises);
     }
 
     async getPanelDimensions() {
-      const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+      const panels = await remote.findElements(By.css('.react-grid-item')); // These are gridster-defined elements and classes
       async function getPanelDimensions(panel) {
         const size = await panel.getSize();
         return {
@@ -519,7 +520,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setSaveAsNewCheckBox(checked) {
       log.debug('saveAsNewCheckbox: ' + checked);
       const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-      const isAlreadyChecked = await saveAsNewCheckbox.getProperty('checked');
+      const isAlreadyChecked = await saveAsNewCheckbox.getAttribute('checked');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping save as new checkbox');
         await retry.try(() => saveAsNewCheckbox.click());
@@ -529,7 +530,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async setStoreTimeWithDashboard(checked) {
       log.debug('Storing time with dashboard: ' + checked);
       const storeTimeCheckbox = await testSubjects.find('storeTimeWithDashboard');
-      const isAlreadyChecked = await storeTimeCheckbox.getProperty('checked');
+      const isAlreadyChecked = await storeTimeCheckbox.getAttribute('checked');
       if (isAlreadyChecked !== checked) {
         log.debug('Flipping store time checkbox');
         await retry.try(() => storeTimeCheckbox.click());
@@ -537,20 +538,20 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getFilters(timeout = defaultFindTimeout) {
-      return await find.allByCssSelector('.filter-bar .filter', timeout);
+      return await remote.findElements(By.css('.filter-bar .filter'), timeout);
     }
 
     async getFilterDescriptions(timeout = defaultFindTimeout) {
-      const filters = await find.allByCssSelector(
-        '.filter-bar > .filter > .filter-description',
-        timeout);
-      return _.map(filters, async (filter) => await filter.getVisibleText());
+      const filters = await remote.findElements(By.css(
+        '.filter-bar > .filter > .filter-description'),
+      timeout);
+      return _.map(filters, async (filter) => await filter.getText());
     }
 
     async getPieSliceCount(timeout) {
       log.debug('getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice', timeout);
+        const slices = await remote.findElements(By.css('svg > g > g.arcs > path.slice'), timeout);
         return slices.length;
       });
     }
@@ -562,7 +563,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       } else {
         // If no pie slice has been provided, find the first one available.
         await retry.try(async () => {
-          const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+          const slices = await remote.findElements(By.css('svg > g > g.arcs > path.slice'));
           log.debug('Slices found:' + slices.length);
           return slices[0].click();
         });
@@ -572,7 +573,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getSharedItemsCount() {
       log.debug('in getSharedItemsCount');
       const attributeName = 'data-shared-items-count';
-      const element = await find.byCssSelector(`[${attributeName}]`);
+      const element = await remote.findElement(By.css(`[${attributeName}]`));
       if (element) {
         return await element.getAttribute(attributeName);
       }
@@ -588,7 +589,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getSharedContainerData() {
       log.debug('getSharedContainerData');
-      const sharedContainer = await find.byCssSelector('[data-shared-items-container]');
+      const sharedContainer = await remote.findElement(By.css('[data-shared-items-container]'));
       return {
         title: await sharedContainer.getAttribute('data-title'),
         description: await sharedContainer.getAttribute('data-description'),
@@ -598,7 +599,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getPanelSharedItemData() {
       log.debug('in getPanelSharedItemData');
-      const sharedItems = await find.allByCssSelector('[data-shared-item]');
+      const sharedItems = await remote.findElements(By.css('[data-shared-item]'));
       return await Promise.all(sharedItems.map(async sharedItem => {
         return {
           title: await sharedItem.getAttribute('data-title'),

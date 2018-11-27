@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { By } from 'selenium-webdriver';
+
 export function DocTableProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -29,43 +31,43 @@ export function DocTableProvider({ getService, getPageObjects }) {
     }
 
     async getBodyRows(table) {
-      return await table.findAllByCssSelector('[data-test-subj~="docTableRow"]');
+      return await table.findElements(By.css('[data-test-subj~="docTableRow"]'));
     }
 
     async getAnchorRow(table) {
-      return await table.findByCssSelector('[data-test-subj~="docTableAnchorRow"]');
+      return await table.findElement(By.css('[data-test-subj~="docTableAnchorRow"]'));
     }
 
     async getAnchorDetailsRow(table) {
-      return await table.findByCssSelector('[data-test-subj~="docTableAnchorRow"] + [data-test-subj~="docTableDetailsRow"]');
+      return await table.findElement(By.css('[data-test-subj~="docTableAnchorRow"] + [data-test-subj~="docTableDetailsRow"]'));
     }
 
     async getRowExpandToggle(row) {
-      return await row.findByCssSelector('[data-test-subj~="docTableExpandToggleColumn"]');
+      return await row.findElement(By.css('[data-test-subj~="docTableExpandToggleColumn"]'));
     }
 
     async getDetailsRows(table) {
-      return await table.findAllByCssSelector('[data-test-subj~="docTableRow"] + [data-test-subj~="docTableDetailsRow"]');
+      return await table.findElements(By.css('[data-test-subj~="docTableRow"] + [data-test-subj~="docTableDetailsRow"]'));
     }
 
     async getRowActions(row) {
-      return await row.findAllByCssSelector('[data-test-subj~="docTableRowAction"]');
+      return await row.findElements(By.css('[data-test-subj~="docTableRowAction"]'));
     }
 
     async getFields(row) {
-      return await row.findAllByCssSelector('[data-test-subj~="docTableField"]');
+      return await row.findElements(By.css('[data-test-subj~="docTableField"]'));
     }
 
     async getHeaderFields(table) {
-      return await table.findAllByCssSelector('[data-test-subj~="docTableHeaderField"]');
+      return await table.findElements(By.css('[data-test-subj~="docTableHeaderField"]'));
     }
 
     async getTableDocViewRow(detailsRow, fieldName) {
-      return await detailsRow.findByCssSelector(`[data-test-subj~="tableDocViewRow-${fieldName}"]`);
+      return await detailsRow.findElement(By.css(`[data-test-subj~="tableDocViewRow-${fieldName}"]`));
     }
 
     async getAddInclusiveFilterButton(tableDocViewRow) {
-      return await tableDocViewRow.findByCssSelector(`[data-test-subj~="addInclusiveFilterButton"]`);
+      return await tableDocViewRow.findElement(By.css(`[data-test-subj~="addInclusiveFilterButton"]`));
     }
 
     async addInclusiveFilter(detailsRow, fieldName) {
@@ -80,9 +82,9 @@ export function DocTableProvider({ getService, getPageObjects }) {
       await rowExpandToggle.click();
       await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
 
-      const detailsRow = await row.findByXpath('./following-sibling::*[@data-test-subj="docTableDetailsRow"]');
+      const detailsRow = await row.findElement(By.xpath('./following-sibling::*[@data-test-subj="docTableDetailsRow"]'));
       return await retry.try(async () => {
-        return detailsRow.findByCssSelector('[data-test-subj~="docViewer"]');
+        return detailsRow.findElement(By.css('[data-test-subj~="docViewer"]'));
       });
     }
   }

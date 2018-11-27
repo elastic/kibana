@@ -17,6 +17,10 @@
  * under the License.
  */
 
+//import { is } from 'bluebird';
+import { By } from 'selenium-webdriver';
+
+
 export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const remote = getService('remote');
@@ -24,7 +28,11 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const wait = getService('wait');
   const PageObjects = getPageObjects(['common']);
+
+  const quickButtonSelector = By.css('[data-test-subj="timepicker-quick-button"');
+  const absoluteFromInputSelector = By.css('[data-test-subj="absolute-datetime-input-from"]');
 
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -84,7 +92,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async clickTimepicker() {
+      const timePicker = await remote.waitForElementPresent(By.css('[data-test-subj="globalTimepickerButton"]'));
+      await remote.waitForElementEnabled(timePicker);
       await testSubjects.click('globalTimepickerButton');
+      await wait.forElementPresent(quickButtonSelector);
+      const quickButton = await remote.findElement(quickButtonSelector);
+      await remote.waitForElementEnabled(quickButton);
     }
 
     async clickQuickButton() {
@@ -98,67 +111,47 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await testSubjects.exists('timePicker');
     }
 
-    async isAbsoluteSectionShowing() {
-      log.debug('isAbsoluteSectionShowing');
-      return await PageObjects.common.doesCssSelectorExist('input[ng-model=\'absolute.from\']');
-    }
 
     async showAbsoluteSection() {
       log.debug('showAbsoluteSection');
-      const isAbsoluteSectionShowing = await this.isAbsoluteSectionShowing();
-      if (!isAbsoluteSectionShowing) {
-        await retry.try(async () => {
-          await remote.setFindTimeout(defaultFindTimeout);
-          await testSubjects.click('timepicker-absolute-button');
-          // Check to make sure one of the elements on the absolute section is showing.
-          await this.getFromTime();
-        });
-      }
+      await testSubjects.click('timepicker-absolute-button');
+      await wait.forElementPresent(absoluteFromInputSelector);
+      const absoluteFromInput = await remote.findElement(absoluteFromInputSelector);
+      await wait.forElementVisible(absoluteFromInput);
     }
 
     async getFromTime() {
       log.debug('getFromTime');
       return await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
-        return await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
-          .getProperty('value');
+        const absoluteFrom = await testSubjects.find('absolute-datetime-input-from');
+        return await absoluteFrom.getAttribute('value');
       });
     }
 
     async getToTime() {
       log.debug('getToTime');
       return await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
-        return await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
-          .getProperty('value');
+        const absoluteTo = await testSubjects.find('absolute-datetime-input-to');
+        return await absoluteTo.getAttribute('value');
       });
     }
 
     async setFromTime(timeString) {
       log.debug(`setFromTime: ${timeString}`);
       await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
-          .clearValue()
-          .type(timeString);
+        log.debug('typing into the thang: ' + timeString);
+        await testSubjects.setValue('absolute-datetime-input-from', timeString);
       });
     }
 
     async setToTime(timeString) {
       log.debug(`setToTime: ${timeString}`);
       await retry.try(async () => {
-        await this.ensureTimePickerIsOpen();
-        await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
-          .clearValue()
-          .type(timeString);
+        await testSubjects.setValue('absolute-datetime-input-to', timeString);
       });
     }
 
@@ -185,7 +178,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async setAbsoluteRange(fromTime, toTime) {
       log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
-      await this.ensureTimePickerIsOpen();
+      await this.clickTimepicker();
       log.debug('--Clicking Absolute button');
       await this.showAbsoluteSection();
       log.debug('--Setting From Time : ' + fromTime);
@@ -229,9 +222,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async getToastMessage(findTimeout = defaultFindTimeout) {
-      const toastMessage =
-        await find.displayedByCssSelector('kbn-truncated.toast-message', findTimeout);
-      const messageText = await toastMessage.getVisibleText();
+      const toastMessage = await remote.findElement(By.css('kbn-truncated.toast-message'), findTimeout);
+      const messageText = await toastMessage.getText();
       log.debug(`getToastMessage: ${messageText}`);
       return messageText;
     }
@@ -240,8 +232,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('clickToastOK');
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('button[ng-if="notif.accept"]')
-          .click();
+        const toastOK =  await remote.findElement(By.css('button[ng-if="notif.accept"]'));
+        await toastOK.click();
       });
     }
 
@@ -252,6 +244,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         if (exception.name === 'ElementNotVisible') {
           // selenium might just have been too slow to catch it
         } else {
+          log.debug(exception.name);
           throw exception;
         }
       }
@@ -265,7 +258,14 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async awaitGlobalLoadingIndicatorHidden() {
       log.debug('awaitGlobalLoadingIndicatorHidden');
-      await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10);
+      wait.forCondition(async () => {
+        return await testSubjects.find('globalLoadingIndicator-hidden', defaultFindTimeout * 10) !== null;
+      });
+    }
+
+    async awaitKibanaChrome() {
+      log.debug('awaitKibanaChrome');
+      await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
     }
 
     async awaitKibanaChrome() {

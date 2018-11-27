@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
     it('should prompt user to check to see if you can override a watch with a sameID', async () => {
       await PageObjects.watcher.createWatch(watchID, updatedName);
       const modal = await testSubjects.find("confirmModalBodyText");
-      const modalText =  await modal.getVisibleText();
+      const modalText =  await modal.getText();
       expect(modalText).to.be(`Watch with ID "${watchID}" (name: "${watchName}") already exists. Do you want to overwrite it?`);
       await testSubjects.click('confirmModalConfirmButton');
       const watch = await PageObjects.watcher.getWatch(watchID);
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       expect(watchList.watchID.name).to.eql([updatedName]);
       await PageObjects.watcher.deleteWatch(watchID);
       const modal = await testSubjects.find("confirmModalBodyText");
-      const modalText =  await modal.getVisibleText();
+      const modalText =  await modal.getText();
       expect(modalText).to.be('This will permanently delete 1 Watch. Are you sure?');
       await testSubjects.click('confirmModalConfirmButton');
       await PageObjects.header.waitUntilLoadingHasFinished();

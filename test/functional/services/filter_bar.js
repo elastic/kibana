@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Keys from 'leadfoot/keys';
+import { By, Key } from 'selenium-webdriver';
 
 export function FilterBarProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -27,9 +27,10 @@ export function FilterBarProvider({ getService, getPageObjects }) {
 
   async function typeIntoReactSelect(testSubj, value) {
     const select = await testSubjects.find(testSubj);
-    const input = await select.findByClassName('ui-select-search');
-    await input.type(value);
-    const activeSelection = await select.findByClassName('active');
+    const input = await select.findElement(By.className('ui-select-search'));
+    // await input.type(value);
+    await remote.type(input, value);
+    const activeSelection = await select.findElement(By.className('active'));
     await activeSelection.click();
   }
 
@@ -84,15 +85,16 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       await typeIntoReactSelect('filterfieldSuggestionList', field);
       await typeIntoReactSelect('filterOperatorList', operator);
       const params = await testSubjects.find('filterParams');
-      const paramFields = await params.findAllByTagName('input');
+
+      const paramFields = await params.findElements(By.css('input'));
       for (let i = 0; i < values.length; i++) {
         let fieldValues = values[i];
         if (!Array.isArray(fieldValues)) {
           fieldValues = [fieldValues];
         }
         for (let j = 0; j < fieldValues.length; j++) {
-          await paramFields[i].type(fieldValues[j]);
-          await remote.pressKeys(Keys.RETURN);
+          await find.setValueElement(paramFields[i], fieldValues[j]);
+          await paramFields[i].sendKeys(Key.RETURN);
         }
       }
       await testSubjects.click('saveFilter');
@@ -107,7 +109,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
 
     async getFilterEditorPhrases() {
       const spans = await testSubjects.findAll('filterEditorPhrases');
-      return await Promise.all(spans.map(el => el.getVisibleText()));
+      return await Promise.all(spans.map(el => el.getText()));
     }
 
     async ensureFieldEditorModalIsClosed() {
@@ -121,7 +123,7 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       const indexPatterns = [];
       const groups = await find.allByCssSelector('.ui-select-choices-group-label');
       for (let i = 0; i < groups.length; i++) {
-        indexPatterns.push(await groups[i].getVisibleText());
+        indexPatterns.push(await groups[i].getText());
       }
       return indexPatterns;
     }
