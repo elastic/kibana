@@ -90,7 +90,7 @@ module.controller('MlExplorerController', function (
 
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = config.get('dateFormat:tz');
-  $scope.dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
   const TimeBuckets = Private(IntervalHelperProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -951,7 +951,7 @@ module.controller('MlExplorerController', function (
       mlSelectSeverityService.state.get('threshold').val,
       timeRange.earliestMs,
       timeRange.latestMs,
-      $scope.dateFormatTz,
+      dateFormatTz,
       500,
       MAX_CATEGORY_EXAMPLES
     ).then((resp) => {

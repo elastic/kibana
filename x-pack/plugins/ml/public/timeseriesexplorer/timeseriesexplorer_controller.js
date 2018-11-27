@@ -101,7 +101,7 @@ module.controller('MlTimeSeriesExplorerController', function (
 
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = config.get('dateFormat:tz');
-  $scope.dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
@@ -696,7 +696,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       mlSelectSeverityService.state.get('threshold').val,
       earliestMs,
       latestMs,
-      $scope.dateFormatTz,
+      dateFormatTz,
       ANOMALIES_MAX_RESULTS
     ).then((resp) => {
       const anomalies = resp.anomalies;
