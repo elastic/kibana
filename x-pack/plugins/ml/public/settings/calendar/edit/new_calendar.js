@@ -14,11 +14,13 @@ import { PropTypes } from 'prop-types';
 import {
   EuiPage,
   EuiPageContent,
+  EuiOverlayMask,
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
 import { getCalendarSettingsData, validateCalendarId } from './utils';
 import { CalendarForm } from './calendar_form';
+import { NewEventModal } from './new_event_modal';
 import { ml } from 'plugins/ml/services/ml_api_service';
 // import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 
@@ -26,6 +28,7 @@ export class NewCalendar extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isNewEventModalVisible: false,
       loading: true,
       jobIds: [],
       jobIdOptions: [],
@@ -57,12 +60,14 @@ export class NewCalendar extends Component {
         let formCalendarId = '';
         const selectedJobOptions = [];
         const selectedGroupOptions = [];
+        let eventsList = [];
         // Better to build a map with calendar id as keys for constant lookup time?
         if (this.props.calendarId !== undefined) {
           selectedCalendar = calendars.find((cal) => cal.calendar_id === this.props.calendarId);
 
           if (selectedCalendar) {
             formCalendarId = selectedCalendar.calendar_id;
+            eventsList = selectedCalendar.events;
             selectedCalendar.job_ids.forEach(id => {
               if (jobIds.find((jobId) => jobId === id)) {
                 selectedJobOptions.push({ label: id });
@@ -74,6 +79,7 @@ export class NewCalendar extends Component {
         }
 
         this.setState({
+          events: eventsList,
           formCalendarId,
           jobIds,
           jobIdOptions,
@@ -127,7 +133,6 @@ export class NewCalendar extends Component {
       });
   }
 
-  // TODO: Ability to create new group
   setUpCalendarForApi = () => {
     const {
       formCalendarId,
@@ -194,8 +199,31 @@ export class NewCalendar extends Component {
     });
   };
 
+  onEventDelete = (eventId) => {
+    this.setState(prevState => ({
+      events: prevState.events.filter(event => event.event_id !== eventId)
+    }));
+  }
+
+  closeNewEventModal = () => {
+    this.setState({ isNewEventModalVisible: false });
+  }
+
+  showNewEventModal = () => {
+    this.setState({ isNewEventModalVisible: true });
+  }
+
+  addEvent = (event) => {
+    this.setState(prevState => ({
+      events: [...prevState.events, event],
+      isNewEventModalVisible: false
+    }));
+  }
+
   render() {
     const {
+      events,
+      isNewEventModalVisible,
       formCalendarId,
       description,
       groupIdOptions,
@@ -205,6 +233,19 @@ export class NewCalendar extends Component {
       selectedJobOptions,
       selectedGroupOptions
     } = this.state;
+
+    let newEventModal = '';
+
+    if (isNewEventModalVisible) {
+      newEventModal = (
+        <EuiOverlayMask>
+          <NewEventModal
+            addEvent={this.addEvent}
+            closeModal={this.closeNewEventModal}
+          />
+        </EuiOverlayMask>
+      );
+    }
 
     return (
       <EuiPage className="ml-calendar-form">
@@ -216,6 +257,7 @@ export class NewCalendar extends Component {
           <CalendarForm
             calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
             description={selectedCalendar ? selectedCalendar.description : description}
+            eventsList={events}
             groupIds={groupIdOptions}
             isEdit={selectedCalendar !== undefined}
             jobIds={jobIdOptions}
@@ -223,14 +265,17 @@ export class NewCalendar extends Component {
             onCreate={this.onCreate}
             onDescriptionChange={this.onDescriptionChange}
             onEdit={this.onEdit}
+            onEventDelete={this.onEventDelete}
             onGroupSelection={this.onGroupSelection}
             onJobSelection={this.onJobSelection}
             saving={saving}
             selectedGroupOptions={selectedGroupOptions}
             selectedJobOptions={selectedJobOptions}
             onCreateGroupOption={this.onCreateGroupOption}
+            showNewEventModal={this.showNewEventModal}
           />
         </EuiPageContent>
+        {newEventModal}
       </EuiPage>
     );
   }
@@ -239,7 +284,3 @@ export class NewCalendar extends Component {
 NewCalendar.propTypes = {
   calendarId: PropTypes.string,
 };
-
-// NewCalendar.defaultProps = {
-//   calendarId: undefined
-// };

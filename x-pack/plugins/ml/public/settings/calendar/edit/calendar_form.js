@@ -21,10 +21,12 @@ import {
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
+import { EventsTable } from './events_table';
 
 export function CalendarForm({
   calendarId,
   description,
+  eventsList,
   groupIds,
   isEdit,
   jobIds,
@@ -33,11 +35,13 @@ export function CalendarForm({
   onCreateGroupOption,
   onDescriptionChange,
   onEdit,
+  onEventDelete,
   onGroupSelection,
   onJobSelection,
   saving,
   selectedGroupOptions,
-  selectedJobOptions
+  selectedJobOptions,
+  showNewEventModal
 }) {
   return (
     <EuiForm>
@@ -117,7 +121,19 @@ export function CalendarForm({
           disabled={saving === true}
         />
       </EuiFormRow>
-      {/* <EventsTable /> */}
+
+      <EuiSpacer size="xl" />
+
+      <EuiFormRow
+        label="Events"
+        fullWidth
+      >
+        <EventsTable
+          eventsList={eventsList}
+          onDeleteClick={onEventDelete}
+          showNewEventModal={showNewEventModal}
+        />
+      </EuiFormRow>
     </EuiForm>
   );
 }
@@ -133,9 +149,11 @@ CalendarForm.propTypes = {
   onCreateGroupOption: PropTypes.func.isRequired,
   onDescriptionChange: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
+  onEventDelete: PropTypes.func.isRequired,
   onGroupSelection: PropTypes.func.isRequired,
   onJobSelection: PropTypes.func.isRequired,
   saving: PropTypes.bool.isRequired,
   selectedGroupOptions: PropTypes.array.isRequired,
-  selectedJobOptions: PropTypes.array.isRequired
+  selectedJobOptions: PropTypes.array.isRequired,
+  showNewEventModal: PropTypes.func.isRequired,
 };
