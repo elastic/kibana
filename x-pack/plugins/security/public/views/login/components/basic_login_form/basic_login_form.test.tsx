@@ -5,8 +5,8 @@
  */
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { LoginState } from '../../../../../common/login_state';
 import { BasicLoginForm } from './basic_login_form';
 
@@ -55,7 +55,7 @@ describe('BasicLoginForm', () => {
     const loginState = createLoginState();
 
     const wrapper = shallowWithIntl(
-      <BasicLoginForm
+      <BasicLoginForm.WrappedComponent
         http={mockHttp}
         window={mockWindow}
         loginState={loginState}
