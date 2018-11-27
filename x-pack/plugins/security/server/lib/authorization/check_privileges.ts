@@ -72,7 +72,7 @@ export function checkPrivilegesWithRequestFactory(
     );
   };
 
-  return function checkPrivilegesWithRequest(request: any): CheckPrivileges {
+  return function checkPrivilegesWithRequest(request: Record<string, any>): CheckPrivileges {
     const checkPrivilegesAtResources = async (
       resources: string[],
       privilegeOrPrivileges: string | string[]
