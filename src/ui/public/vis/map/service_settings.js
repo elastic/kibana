@@ -52,6 +52,7 @@ uiModules.get('kibana')
     };
 
 
+
     class ServiceSettings {
 
       constructor() {
