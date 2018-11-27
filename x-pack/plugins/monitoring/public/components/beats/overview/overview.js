@@ -10,7 +10,6 @@ import { LatestVersions } from './latest_versions';
 import { LatestTypes } from './latest_types';
 import { Stats } from '../';
 import { MonitoringTimeseriesContainer } from '../../chart';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import {
   EuiCallOut,
   EuiTitle,
@@ -19,8 +18,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
-  EuiPanel
+  EuiPanel,
+  EuiPageContent
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function renderLatestActive(latestActive, latestTypes, latestVersions, intl) {
   if (latestTypes && latestTypes.length > 0) {
@@ -78,6 +79,7 @@ function renderLatestActive(latestActive, latestTypes, latestVersions, intl) {
     defaultMessage: `Hi there! This area is where your latest Beats activity would show up, but you don't seem to have any activity within the last day.`
   });
 
+
   return (
     <EuiCallOut
       title={calloutMsg}
@@ -87,7 +89,7 @@ function renderLatestActive(latestActive, latestTypes, latestVersions, intl) {
   );
 }
 
-function BeatsOverviewUi({
+export function BeatsOverviewUI({
   latestActive,
   latestTypes,
   latestVersions,
@@ -115,18 +117,19 @@ function BeatsOverviewUi({
   ));
 
   return (
-    <EuiPage style={{ backgroundColor: 'white' }}>
+    <EuiPage>
       <EuiPageBody>
-        {renderLatestActive(latestActive, latestTypes, latestVersions, intl)}
-        <EuiSpacer size="s"/>
-        <Stats stats={stats} />
-        <EuiSpacer size="s"/>
-        <EuiFlexGroup wrap>
-          {charts}
-        </EuiFlexGroup>
+        <EuiPageContent>
+          <Stats stats={stats} />
+          {renderLatestActive(latestActive, latestTypes, latestVersions, intl)}
+          <EuiSpacer size="s"/>
+          <EuiFlexGroup wrap>
+            {charts}
+          </EuiFlexGroup>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
 }
 
-export const BeatsOverview = injectI18n(BeatsOverviewUi);
+export const BeatsOverview = injectI18n(BeatsOverviewUI);
