@@ -53,6 +53,3 @@ export function buildEsQuery(
     }
   };
 }
-
-//const allowLeadingWildcards = config.get('query:allowLeadingWildcards');
-//const queryOptions = config.get('query:queryString:options');
