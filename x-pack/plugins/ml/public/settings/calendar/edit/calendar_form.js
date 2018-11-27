@@ -30,6 +30,7 @@ export function CalendarForm({
   jobIds,
   onCalendarIdChange,
   onCreate,
+  onCreateGroupOption,
   onDescriptionChange,
   onEdit,
   onGroupSelection,
@@ -109,6 +110,7 @@ export function CalendarForm({
         <EuiComboBox
           className="ml-calendar-combo-box"
           fullWidth
+          onCreateOption={onCreateGroupOption}
           options={groupIds}
           selectedOptions={selectedGroupOptions}
           onChange={onGroupSelection}
@@ -128,6 +130,7 @@ CalendarForm.propTypes = {
   jobIds: PropTypes.array.isRequired,
   onCalendarIdChange: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
+  onCreateGroupOption: PropTypes.func.isRequired,
   onDescriptionChange: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
   onGroupSelection: PropTypes.func.isRequired,

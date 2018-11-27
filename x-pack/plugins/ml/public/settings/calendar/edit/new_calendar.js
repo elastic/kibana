@@ -160,6 +160,16 @@ export class NewCalendar extends Component {
     return calendar;
   }
 
+  onCreateGroupOption = (newGroup) => {
+    const newOption = {
+      label: newGroup,
+    };
+    // Select the option.
+    this.setState(prevState => ({
+      selectedGroupOptions: prevState.selectedGroupOptions.concat(newOption),
+    }));
+  };
+
   onJobSelection = (selectedJobOptions) => {
     this.setState({
       selectedJobOptions,
@@ -218,6 +228,7 @@ export class NewCalendar extends Component {
             saving={saving}
             selectedGroupOptions={selectedGroupOptions}
             selectedJobOptions={selectedJobOptions}
+            onCreateGroupOption={this.onCreateGroupOption}
           />
         </EuiPageContent>
       </EuiPage>
