@@ -179,6 +179,9 @@ export class WorkspaceHandler {
           if (full.references) {
             for (const reference of full.references) {
               this.convertLocation(reference.location);
+              if (reference.target.location) {
+                this.convertLocation(reference.target.location);
+              }
             }
           }
         }
