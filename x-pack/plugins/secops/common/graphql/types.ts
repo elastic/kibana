@@ -749,6 +749,46 @@ export namespace GetEventsQuery {
   };
 }
 
+export namespace SourceQuery {
+  export type Variables = {
+    sourceId?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+    id: string;
+    configuration: Configuration;
+    status: Status;
+  };
+
+  export type Configuration = {
+    __typename?: 'SourceConfiguration';
+    auditbeatAlias: string;
+    logAlias: string;
+  };
+
+  export type Status = {
+    __typename?: 'SourceStatus';
+    auditbeatIndicesExist: boolean;
+    auditbeatAliasExists: boolean;
+    auditbeatIndices: string[];
+    indexFields: IndexFields[];
+  };
+
+  export type IndexFields = {
+    __typename?: 'IndexField';
+    name: string;
+    searchable: boolean;
+    type: string;
+    aggregatable: boolean;
+  };
+}
+
 export namespace WhoAmIQuery {
   export type Variables = {
     sourceId: string;
