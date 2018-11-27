@@ -44,7 +44,13 @@ describe('BasicLoginForm', () => {
     const loginState = createLoginState();
     expect(
       shallowWithIntl(
-        <BasicLoginForm http={mockHttp} window={mockWindow} loginState={loginState} next={''} />
+        <BasicLoginForm.WrappedComponent
+          http={mockHttp}
+          window={mockWindow}
+          loginState={loginState}
+          next={''}
+          intl={null as any}
+        />
       )
     ).toMatchSnapshot();
   });
@@ -61,6 +67,7 @@ describe('BasicLoginForm', () => {
         loginState={loginState}
         next={''}
         infoMessage={'Hey this is an info message'}
+        intl={null as any}
       />
     );
 
@@ -73,7 +80,13 @@ describe('BasicLoginForm', () => {
     const loginState = createLoginState();
 
     const wrapper = mountWithIntl(
-      <BasicLoginForm http={mockHttp} window={mockWindow} loginState={loginState} next={''} />
+      <BasicLoginForm.WrappedComponent
+        http={mockHttp}
+        window={mockWindow}
+        loginState={loginState}
+        next={''}
+        intl={null as any}
+      />
     );
 
     wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username' } });
