@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
-import CronParser from 'cron-parser';
 import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
 import yaml from 'js-yaml';
 import { get } from 'lodash';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
+import { ValidationRule, validationRules } from '../../../../common/validations';
 import { YamlConfigSchema } from '../../../lib/lib';
-import { parseInterval } from '../../../utils';
 import {
   FormsyEuiCodeEditor,
   FormsyEuiFieldText,
@@ -19,6 +18,10 @@ import {
   FormsyEuiPasswordText,
   FormsyEuiSelect,
 } from '../../inputs';
+
+validationRules.forEach((rule: ValidationRule) =>
+  addValidationRule(rule.id, rule.validationFunction)
+);
 
 addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
   // TODO add more validation
@@ -56,26 +59,12 @@ addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
   }
 });
 
-addValidationRule('isNumeric', (values: FormData, value: FieldValue) => {
-  return /^[0-9]*$/.test(value || '');
-});
-
-addValidationRule('isInterval', (values: FormData, value: FieldValue) => {
-  if (!value) {
-    return false;
+addValidationRule(
+  'isNumeric',
+  (values: FormData, value: FieldValue): boolean => {
+    return /^[0-9]*$/.test(value || '');
   }
-  if (parseInterval(value)) {
-    return true;
-  }
-  try {
-    if (CronParser.parseExpression(value)) {
-      return true;
-    }
-  } catch (err) {
-    return false;
-  }
-  return false;
-});
+);
 
 interface ComponentProps {
   values: ConfigurationBlock;

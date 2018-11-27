@@ -356,9 +356,9 @@ const heartbeatConfig: YamlConfigSchema[] = [
     validations: 'isInterval',
   },
   {
-    id: 'hosts',
+    id: 'urls',
     ui: {
-      label: 'Hosts',
+      label: 'Urls',
       type: 'multi-input',
       helpText: 'Put each host on a separate line',
       placeholder: 'https://www.elastic.co/\nhttp://localhost:80/',
