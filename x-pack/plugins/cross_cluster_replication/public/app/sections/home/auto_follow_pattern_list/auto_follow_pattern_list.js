@@ -43,8 +43,8 @@ export class AutoFollowPatternListUI extends PureComponent {
         title={(
           <h1>
             <FormattedMessage
-              id="xpack.cross_cluster_replication.autofollow_pattern_list.empty_prompt_title"
-              defaultMessage="Create your first auto-follow pattern"
+              id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptTitle"
+              defaultMessage="Cross cluster replication"
             />
           </h1>
         )}
@@ -52,8 +52,8 @@ export class AutoFollowPatternListUI extends PureComponent {
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.cross_cluster_replication.autofollow_pattern_list.empty_prompt_description"
-                defaultMessage="Auto follow-patterns automatically create follower index to replicate indices from a leader cluster."
+                id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptDescription"
+                defaultMessage="Auto-follow patterns replicate leader indices from a remote cluster to follower indices on the local cluster." //eslint-disable-line max-len
               />
             </p>
           </Fragment>
@@ -65,7 +65,7 @@ export class AutoFollowPatternListUI extends PureComponent {
             iconType="plusInCircle"
           >
             <FormattedMessage
-              id="xpack.cross_cluster_replication.add_autofollow_pattern_button_label"
+              id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
               defaultMessage="Add auto-follow pattern"
             />
           </EuiButton>
@@ -81,7 +81,7 @@ export class AutoFollowPatternListUI extends PureComponent {
       return (
         <SectionLoading>
           <FormattedMessage
-            id="xpack.cross_cluster_replication.autofollow_pattern_list.loading_title"
+            id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
             defaultMessage="Loading auto-follow patterns..."
           />
         </SectionLoading>
@@ -104,7 +104,7 @@ export class AutoFollowPatternListUI extends PureComponent {
 
     if (apiError) {
       const title = intl.formatMessage({
-        id: 'xpack.cross_cluster_replication.autofollow_pattern_list.loading_error_title',
+        id: 'xpack.crossClusterReplication.autoFollowPatternList.loadingErrorTitle',
         defaultMessage: 'Error loading auto-follow patterns',
       });
       return <SectionError title={title} error={apiError} />;

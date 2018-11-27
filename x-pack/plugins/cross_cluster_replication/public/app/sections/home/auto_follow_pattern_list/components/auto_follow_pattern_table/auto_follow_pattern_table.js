@@ -35,17 +35,12 @@ export class AutoFollowPatternTableUI extends PureComponent {
 
     if(queryText) {
       return autoFollowPatterns.filter(autoFollowPattern => {
-        const { __id__, remote_cluster } = autoFollowPattern; // eslint-disable-line camelcase
+        const { name, remoteCluster } = autoFollowPattern;
 
-        if (__id__.toLowerCase().toLowerCase().includes(queryText)) {
-          return true;
-        }
+        const inName = name.toLowerCase().includes(queryText);
+        const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
 
-        if (remote_cluster.toLowerCase().toLowerCase().includes(queryText)) {
-          return true;
-        }
-
-        return false;
+        return inName || inRemoteCluster;
       });
     }
 
@@ -60,7 +55,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
     const { intl } = this.props;
 
     return [{
-      field: '__id__',
+      field: 'name',
       name: (
         <FormattedMessage
           id="xpack.cross_cluster_replication.autofollow_pattern_list.table.name_column_title"
@@ -70,7 +65,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       sortable: true,
       truncateText: false,
     }, {
-      field: 'remote_cluster',
+      field: 'remoteCluster',
       name: (
         <FormattedMessage
           id="xpack.cross_cluster_replication.autofollow_pattern_list.table.cluster_column_title"
@@ -80,7 +75,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       truncateText: true,
       sortable: true,
     }, {
-      field: 'leader_index_patterns',
+      field: 'leaderIndexPatterns',
       name: (
         <FormattedMessage
           id="xpack.cross_cluster_replication.autofollow_pattern_list.table.leader_patterns_column_title"
@@ -89,7 +84,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
       ),
       render: (leaderPatterns) => leaderPatterns.join(', '),
     }, {
-      field: 'follow_index_pattern',
+      field: 'followIndexPattern',
       name: (
         <FormattedMessage
           id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
@@ -119,7 +114,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
 
     const sorting = {
       sort: {
-        field: '__id__',
+        field: 'name',
         direction: 'asc',
       }
     };
@@ -153,7 +148,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
     return (
       <EuiInMemoryTable
         items={this.getFilteredPatterns()}
-        itemId="__id__"
+        itemId="name"
         columns={this.getTableColumns()}
         search={search}
         pagination={pagination}
