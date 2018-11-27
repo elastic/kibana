@@ -128,8 +128,7 @@ const updateGithubIssues = (githubClient, issues) => {
 
     return Promise
       .all(issueOps)
-      .then(() => failureCases)
-      .catch(e => e);
+      .then(() => failureCases);
   });
 };
 
