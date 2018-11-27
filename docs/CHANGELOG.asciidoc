@@ -172,6 +172,10 @@ shows data in your browser's local timezone instead of the configured timezone.
 Refreshing the page usually corrects the issue.
 This will be fixed in a future bug fix release.
 
+* {kib} errors when setting `logging.useUTC` in kibana.yml.
++
+The setting is meant to be deprecated, and using the replacement setting `logging.timezone` can be used as a workaround.
+
 [float]
 [[deprecation-6.5.0]]
 === Deprecations
