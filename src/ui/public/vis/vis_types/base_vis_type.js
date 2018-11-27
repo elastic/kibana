@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { CATEGORY } from '../vis_category';
 import _ from 'lodash';
 import { VisFiltersProvider } from '../vis_filters';
 
@@ -45,7 +44,6 @@ export function BaseVisTypeProvider(Private) {
 
       const _defaults = {
         // name, title, description, icon, image
-        category: CATEGORY.OTHER,
         visualization: null,       // must be a class with render/resize/destroy methods
         visConfig: {
           defaults: {},            // default configuration
@@ -69,7 +67,8 @@ export function BaseVisTypeProvider(Private) {
           }
         },
         stage: 'production',
-        feedbackMessage: ''
+        feedbackMessage: '',
+        hidden: false,
       };
 
       _.defaultsDeep(this, opts, _defaults);
@@ -78,9 +77,7 @@ export function BaseVisTypeProvider(Private) {
     }
 
     shouldMarkAsExperimentalInUI() {
-      //we are not making a distinction in the UI if a plugin is experimental and/or labs.
-      //we just want to indicate it is special. the current flask icon is sufficient for that.
-      return this.stage === 'experimental' || this.stage === 'lab';
+      return this.stage === 'experimental';
     }
 
     get schemas() {

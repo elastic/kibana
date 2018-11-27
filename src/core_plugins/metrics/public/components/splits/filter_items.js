@@ -25,7 +25,8 @@ import AddDeleteButtons from '../add_delete_buttons';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-class FilterItems extends Component {
+import { injectI18n } from '@kbn/i18n/react';
+class FilterItemsUi extends Component {
 
   constructor(props) {
     super(props);
@@ -53,6 +54,8 @@ class FilterItems extends Component {
       .bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete
       .bind(null, this.props, model);
+    const { intl } = this.props;
+
     return  (
       <EuiFlexGroup gutterSize="s" className="tvbAggRow" alignItems="center" key={model.id}>
         <EuiFlexItem grow={false}>
@@ -65,8 +68,8 @@ class FilterItems extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            placeholder="Filter"
-            aria-label="Filter"
+            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
             onChange={this.handleChange(model, 'filter')}
             value={model.filter}
             fullWidth
@@ -74,8 +77,8 @@ class FilterItems extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
-            placeholder="Label"
-            aria-label="Label"
+            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelPlaceholder', defaultMessage: 'Label' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelAriaLabel', defaultMessage: 'Label' })}
             onChange={this.handleChange(model, 'label')}
             value={model.label}
             fullWidth
@@ -106,10 +109,11 @@ class FilterItems extends Component {
 
 }
 
-FilterItems.propTypes = {
+FilterItemsUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   onChange: PropTypes.func
 };
 
+const FilterItems = injectI18n(FilterItemsUi);
 export default FilterItems;

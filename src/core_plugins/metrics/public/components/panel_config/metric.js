@@ -39,6 +39,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class MetricPanelConfig extends Component {
 
@@ -82,7 +83,14 @@ class MetricPanelConfig extends Component {
       view = (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
-            <EuiTitle size="s"><span>Data</span></EuiTitle>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.metric.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="m" />
 
             <IndexPattern
@@ -97,7 +105,10 @@ class MetricPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label="Panel filter"
+                  label={(<FormattedMessage
+                    id="tsvb.metric.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -108,7 +119,12 @@ class MetricPanelConfig extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>Ignore global filter?</EuiFormLabel>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="tsvb.metric.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
                 <EuiSpacer size="s" />
                 <YesNo
                   value={model.ignore_global_filter}
@@ -122,7 +138,14 @@ class MetricPanelConfig extends Component {
           <EuiSpacer />
 
           <EuiPanel>
-            <EuiTitle size="s"><span>Color rules</span></EuiTitle>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.metric.optionsTab.colorRulesLabel"
+                  defaultMessage="Color rules"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="m" />
 
             <ColorRules
@@ -141,14 +164,20 @@ class MetricPanelConfig extends Component {
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
-            Data
+            <FormattedMessage
+              id="tsvb.metric.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
             data-test-subj="metricEditorPanelOptionsBtn"
           >
-            Panel options
+            <FormattedMessage
+              id="tsvb.metric.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel options"
+            />
           </EuiTab>
         </EuiTabs>
         {view}

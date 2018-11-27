@@ -163,19 +163,19 @@
     }
 
     .anomaly-marker.critical {
-      fill: $mchColorCritical;
+      fill: $mlColorCritical;
     }
 
     .anomaly-marker.major {
-      fill: $mchColorMajor;
+      fill: $mlColorMajor;
     }
 
-    .anomaly-marker-value.minor {
-      fill: $mchColorMinor;
+    .anomaly-marker.minor {
+      fill: $mlColorMinor;
     }
 
     .anomaly-marker.warning {
-      fill: $mchColorWarning;
+      fill: $mlColorWarning;
     }
 
     .anomaly-marker.low {
