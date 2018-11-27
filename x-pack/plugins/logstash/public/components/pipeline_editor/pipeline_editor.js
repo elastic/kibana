@@ -516,5 +516,4 @@ PipelineEditorUi.propTypes = {
   username: PropTypes.string,
 };
 
-
 export const PipelineEditor = injectI18n(PipelineEditorUi);

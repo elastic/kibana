@@ -27,7 +27,7 @@ export function ConfirmDeletePipelineModal({ id, cancelDeleteModal, confirmDelet
         onCancel={cancelDeleteModal}
         onConfirm={confirmDeletePipeline}
         title={(<FormattedMessage
-          id="xpack.logstash.confirmDeletePipelineModal.title"
+          id="xpack.logstash.confirmDeletePipelineModal.deletePipelineTitle"
           defaultMessage="Delete pipeline {id}"
           values={{ id }}
         />)}
