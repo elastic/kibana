@@ -37,7 +37,6 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { VisualizeConstants } from '../visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
@@ -45,6 +44,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { DashboardSaveModal } from './top_nav/save_modal';
 import { showAddPanel } from './top_nav/show_add_panel';
 import { showOptionsPopover } from './top_nav/show_options_popover';
+import { showNewVisModal } from '../visualize/wizard';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import * as filterActions from 'ui/doc_table/actions/filter';
@@ -56,7 +56,6 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
-import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -86,11 +85,10 @@ app.directive('dashboardApp', function ($injector) {
       $rootScope,
       $route,
       $routeParams,
-      $location,
       getAppState,
       dashboardConfig,
       localStorage,
-      breadcrumbState,
+      i18n,
     ) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
@@ -182,9 +180,9 @@ app.directive('dashboardApp', function ($injector) {
 
       // Push breadcrumbs to new header navigation
       const updateBreadcrumbs = () => {
-        breadcrumbState.set([
+        chrome.breadcrumbs.set([
           {
-            text: i18n.translate('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
+            text: i18n('kbn.dashboard.dashboardAppBreadcrumbsTitle', {
               defaultMessage: 'Dashboard',
             }),
             href: $scope.landingPageUrl()
@@ -273,14 +271,22 @@ app.directive('dashboardApp', function ($injector) {
         }
 
         confirmModal(
-          `Once you discard your changes, there's no getting them back.`,
+          i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesDescription',
+            { defaultMessage: `Once you discard your changes, there's no getting them back.` }
+          ),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
-            confirmButtonText: 'Discard changes',
-            cancelButtonText: 'Continue editing',
+            confirmButtonText: i18n('kbn.dashboard.changeViewModeConfirmModal.confirmButtonLabel',
+              { defaultMessage: 'Discard changes' }
+            ),
+            cancelButtonText: i18n('kbn.dashboard.changeViewModeConfirmModal.cancelButtonLabel',
+              { defaultMessage: 'Continue editing' }
+            ),
             defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
-            title: 'Discard changes to dashboard?'
+            title: i18n('kbn.dashboard.changeViewModeConfirmModal.discardChangesTitle',
+              { defaultMessage: 'Discard changes to dashboard?' }
+            )
           }
         );
       };
@@ -302,7 +308,12 @@ app.directive('dashboardApp', function ($injector) {
           .then(function (id) {
             if (id) {
               toastNotifications.addSuccess({
-                title: `Dashboard '${dash.title}' was saved`,
+                title: i18n('kbn.dashboard.dashboardWasSavedSuccessMessage',
+                  {
+                    defaultMessage: `Dashboard '{dashTitle}' was saved`,
+                    values: { dashTitle: dash.title },
+                  },
+                ),
                 'data-test-subj': 'saveDashboardSuccess',
               });
 
@@ -316,7 +327,15 @@ app.directive('dashboardApp', function ($injector) {
             return { id };
           }).catch((error) => {
             toastNotifications.addDanger({
-              title: `Dashboard '${dash.title}' was not saved. Error: ${error.message}`,
+              title: i18n('kbn.dashboard.dashboardWasNotSavedDangerMessage',
+                {
+                  defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
+                  values: {
+                    dashTitle: dash.title,
+                    errorMessage: error.message,
+                  },
+                },
+              ),
               'data-test-subj': 'saveDashboardFailure',
             });
             return { error };
@@ -398,10 +417,7 @@ app.directive('dashboardApp', function ($injector) {
       };
       navActions[TopNavIds.ADD] = () => {
         const addNewVis = () => {
-          kbnUrl.change(
-            `${VisualizeConstants.WIZARD_STEP_1_PAGE_PATH}?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`);
-          // Function is called outside of angular. Must apply digest cycle to trigger URL update
-          $scope.$apply();
+          showNewVisModal(visTypes, { editorParams: [DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM] });
         };
 
         showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);

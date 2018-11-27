@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { RoleValidator } from '../../../lib/validate_role';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
 import { PrivilegeSpaceForm } from './privilege_space_form';
@@ -53,7 +53,9 @@ const buildProps = (customProps: any = {}) => {
 
 describe('<SpaceAwarePrivilegeForm>', () => {
   it('renders without crashing', () => {
-    expect(shallow(<SpaceAwarePrivilegeForm {...buildProps()} />)).toMatchSnapshot();
+    expect(
+      shallowWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...buildProps()} />)
+    ).toMatchSnapshot();
   });
 
   it('shows the space table if exisitng space privileges are declared', () => {
@@ -71,7 +73,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
       },
     });
 
-    const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toHaveLength(1);
@@ -80,7 +82,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
   it('hides the space table if there are no existing space privileges', () => {
     const props = buildProps();
 
-    const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
 
     const table = wrapper.find(PrivilegeSpaceTable);
     expect(table).toMatchSnapshot();
@@ -101,7 +103,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
       },
     });
 
-    const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
     expect(wrapper.find(PrivilegeSpaceForm)).toHaveLength(0);
 
     wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]').simulate('click');
@@ -125,7 +127,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
 
       const warning = wrapper.find(PrivilegeCalloutWarning);
       expect(warning.props()).toMatchObject({
@@ -156,7 +158,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
 
       const warning = wrapper.find(PrivilegeCalloutWarning);
       expect(warning.props()).toMatchObject({
@@ -179,7 +181,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
 
       const table = wrapper.find(PrivilegeSpaceTable);
       expect(table).toHaveLength(1);
@@ -205,7 +207,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
 
       const warning = wrapper.find(PrivilegeCalloutWarning);
       expect(warning).toHaveLength(0);
@@ -226,7 +228,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = mount(<SpaceAwarePrivilegeForm {...props} />);
+      const wrapper = mountWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
 
       const table = wrapper.find(PrivilegeSpaceTable);
       expect(table).toHaveLength(1);
@@ -245,7 +247,7 @@ describe('<SpaceAwarePrivilegeForm>', () => {
         },
       });
 
-      const wrapper = shallow(<SpaceAwarePrivilegeForm {...props} />);
+      const wrapper = shallowWithIntl(<SpaceAwarePrivilegeForm.WrappedComponent {...props} />);
       expect(wrapper).toMatchSnapshot();
     });
   });

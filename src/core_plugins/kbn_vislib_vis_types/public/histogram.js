@@ -19,7 +19,6 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from './editors/point_series.html';
 
 export default function PointSeriesVisType(Private, i18n) {
@@ -32,7 +31,6 @@ export default function PointSeriesVisType(Private, i18n) {
     description: i18n('kbnVislibVisTypes.histogram.histogramDescription',
       { defaultMessage: 'Assign a continuous variable to each axis' }
     ),
-    category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
         type: 'histogram',

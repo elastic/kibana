@@ -22,6 +22,7 @@ import React from 'react';
 import {
   EuiComboBox,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 function renderOption(option) {
   const icon = option.value;
@@ -53,21 +54,27 @@ function IconSelect(props) {
 
 IconSelect.defaultProps = {
   icons: [
-    { value: 'fa-asterisk', label: 'Asterisk' },
-    { value: 'fa-bell', label: 'Bell' },
-    { value: 'fa-bolt', label: 'Bolt' },
-    { value: 'fa-bomb', label: 'Bomb' },
-    { value: 'fa-bug', label: 'Bug' },
-    { value: 'fa-comment', label: 'Comment' },
-    { value: 'fa-exclamation-circle', label: 'Exclamation Circle' },
-    { value: 'fa-exclamation-triangle', label: 'Exclamation Triangle' },
-    { value: 'fa-fire', label: 'Fire' },
-    { value: 'fa-flag', label: 'Flag' },
-    { value: 'fa-heart', label: 'Heart' },
-    { value: 'fa-map-marker', label: 'Map Marker' },
-    { value: 'fa-map-pin', label: 'Map Pin' },
-    { value: 'fa-star', label: 'Star' },
-    { value: 'fa-tag', label: 'Tag' },
+    { value: 'fa-asterisk', label: i18n.translate('tsvb.iconSelect.asteriskLabel', { defaultMessage: 'Asterisk' }) },
+    { value: 'fa-bell', label: i18n.translate('tsvb.iconSelect.bellLabel', { defaultMessage: 'Bell' }) },
+    { value: 'fa-bolt', label: i18n.translate('tsvb.iconSelect.boltLabel', { defaultMessage: 'Bolt' }) },
+    { value: 'fa-bomb', label: i18n.translate('tsvb.iconSelect.bombLabel', { defaultMessage: 'Bomb' }) },
+    { value: 'fa-bug', label: i18n.translate('tsvb.iconSelect.bugLabel', { defaultMessage: 'Bug' }) },
+    { value: 'fa-comment', label: i18n.translate('tsvb.iconSelect.commentLabel', { defaultMessage: 'Comment' }) },
+    {
+      value: 'fa-exclamation-circle',
+      label: i18n.translate('tsvb.iconSelect.exclamationCircleLabel', { defaultMessage: 'Exclamation Circle' })
+    },
+    {
+      value: 'fa-exclamation-triangle',
+      label: i18n.translate('tsvb.iconSelect.exclamationTriangleLabel', { defaultMessage: 'Exclamation Triangle' })
+    },
+    { value: 'fa-fire', label: i18n.translate('tsvb.iconSelect.fireLabel', { defaultMessage: 'Fire' }) },
+    { value: 'fa-flag', label: i18n.translate('tsvb.iconSelect.flagLabel', { defaultMessage: 'Flag' }) },
+    { value: 'fa-heart', label: i18n.translate('tsvb.iconSelect.heartLabel', { defaultMessage: 'Heart' }) },
+    { value: 'fa-map-marker', label: i18n.translate('tsvb.iconSelect.mapMarkerLabel', { defaultMessage: 'Map Marker' }) },
+    { value: 'fa-map-pin', label: i18n.translate('tsvb.iconSelect.mapPinLabel', { defaultMessage: 'Map Pin' }) },
+    { value: 'fa-star', label: i18n.translate('tsvb.iconSelect.starLabel', { defaultMessage: 'Star' }) },
+    { value: 'fa-tag', label: i18n.translate('tsvb.iconSelect.tagLabel', { defaultMessage: 'Tag' }) },
   ]
 };
 

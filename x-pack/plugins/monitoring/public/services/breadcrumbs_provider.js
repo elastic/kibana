@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set as setBreadcrumbs } from 'ui/chrome/services/breadcrumb_state';
+import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 
 // Helper for making objects to use in a link element
@@ -147,7 +147,7 @@ export function breadcrumbsProvider() {
       breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
     }
 
-    setBreadcrumbs(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
+    chrome.breadcrumbs.set(breadcrumbs.map(b => ({ text: b.label, href: b.url })));
 
     return breadcrumbs;
   };
