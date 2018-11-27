@@ -5,19 +5,24 @@
 <titleabbrev>Viewing monitoring data</titleabbrev>
 ++++
 
-You can use {kib} to monitor the health and performance of {es}, {ls}, {kib}, 
-and Beats. 
+After you collect monitoring data for one or more products in the {stack}, you 
+can configure {kib} to retrieve that information and display it in on the 
+*Monitoring* page.
+
+At a minimum, you must have monitoring data for the {es} production cluster.
+Once that data exists, {kib} can display monitoring data for other products in
+the cluster.
 
 TIP: If you have a dedicated monitoring cluster, the information is accessible
 even if the {es} cluster you're monitoring is not. You can send data from
 multiple clusters to the same monitoring cluster and view them all through the
 same instance of {kib}. To learn more about typical monitoring architectures 
 with separate production and monitoring clusters, see
-{xpack-ref}/how-monitoring-works.html[How monitoring works].
+{stack-ov}/how-monitoring-works.html[How monitoring works].
 
-. Optional: {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
+. {ref}/configuring-monitoring.html[Configure monitoring in {es}]. If you want
 to use a separate monitoring cluster, see
-{xpack-ref}/monitoring-production.html[Monitoring in a production environment].
+{stack-ov}/monitoring-production.html[Monitoring in a production environment].
 
 . Optional: <<monitoring-kibana,Configure monitoring in {kib}>>.
 
@@ -41,20 +46,20 @@ separate _monitoring cluster_, set `xpack.monitoring.elasticsearch.url` in the
 cluster.
 +
 --
-TIP: If {security} is enabled on the monitoring cluster, use an HTTPS URL such
-as `https://<your_monitoring_cluster>:9200` in this setting.
+TIP: If {security-features} are enabled on the monitoring cluster, use an HTTPS
+URL such as `https://<your_monitoring_cluster>:9200` in this setting.
 
 --
 
-.. If {security} is enabled on the monitoring cluster, identify a user ID and 
-password that {kib} can use to retrieve monitoring data. Specify these values in 
-the `xpack.monitoring.elasticsearch.username` and 
+.. If {security-features} are enabled on the monitoring cluster, identify a user
+ID and password that {kib} can use to retrieve monitoring data. Specify these
+values in the `xpack.monitoring.elasticsearch.username` and 
 `xpack.monitoring.elasticsearch.password` settings in the `kibana.yml` file.
 If these settings are omitted, {kib} uses the `elasticsearch.username` and
 `elasticsearch.password` setting values.
 
-.. If {security} is enabled on the monitoring cluster, configure {kib} to 
-encrypt communications between the {kib} server and the monitoring cluster. 
+.. If {security-features} are enabled on the monitoring cluster, configure {kib}
+to encrypt communications between the {kib} server and the monitoring cluster. 
 Specify the `xpack.monitoring.elasticsearch.ssl.*` settings in the `kibana.yml` 
 file on the {kib} server.
 +
@@ -74,7 +79,7 @@ xpack.monitoring.elasticsearch.ssl.certificateAuthorities: /path/to/your/cacert.
 --
 If you are running {kib} locally, go to `http://localhost:5601/`. 
 
-If {security} is enabled on the {kib} server, to access {kib} and view the 
+If {security-features} are enabled on the {kib} server, to access {kib} and view the 
 monitoring dashboards, you must log in as a user who has the `kibana_user` and 
 `monitoring_user` roles. These roles have the necessary privileges to view the 
 monitoring dashboards. For more information, see 
@@ -97,20 +102,8 @@ Overview, Nodes, Indices, or Instances links.
 +
 [role="screenshot"]
 image::images/monitoring-dashboard.png[Monitoring dashboard]
-+
-If {kib} can't activate monitoring, here are some things to do:
-+
-* If you don't have permission to activate monitoring,
-contact your system administrator.
-+
-* If {kib} can't find monitoring data, set the time filter to
-“Last 1 hour”.  When monitoring data appears in your cluster, the page
-automatically refreshes with the monitoring summary.
-+
-* Check your `xpack.monitoring.elasticsearch.url` setting.
-See <<monitoring-settings-kb, Monitoring Settings in Kibana>>.
 
-
+If you encounter problems, see <<monitor-troubleshooting,Troubleshooting monitoring>>.
 
 include::cluster-alerts-license.asciidoc[]
 include::beats-details.asciidoc[]
