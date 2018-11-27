@@ -23,7 +23,7 @@ import { uiModules } from '../../modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('filterPill', function () {
+module.directive('filterPill', function (i18n) {
   return {
     template,
     restrict: 'E',
@@ -37,7 +37,7 @@ module.directive('filterPill', function () {
     },
     bindToController: true,
     controllerAs: 'pill',
-    controller: function filterPillController() {
+    controller: function filterPillController($scope) {
 
       this.activateActions = () => {
         this.areActionsActivated = true;
@@ -51,6 +51,20 @@ module.directive('filterPill', function () {
         return _.has(this.filter, 'meta.controlledBy');
       };
 
+      $scope.enableFilterAriaLabel = i18n('common.ui.filterBar.filterPill.enableFilterAriaLabel', { defaultMessage: 'Enable filter' });
+      $scope.enableFilterTooltip = i18n('common.ui.filterBar.filterPill.enableFilterTooltip', { defaultMessage: 'Enable filter' });
+      $scope.disableFilterAriaLabel = i18n('common.ui.filterBar.filterPill.disableFilterAriaLabel', { defaultMessage: 'Disable filter' });
+      $scope.disableFilterTooltip = i18n('common.ui.filterBar.filterPill.disableFilterTooltip', { defaultMessage: 'Disable filter' });
+      $scope.pinFilterAriaLabel = i18n('common.ui.filterBar.filterPill.pinFilterAriaLabel', { defaultMessage: 'Pin filter' });
+      $scope.pinFilterTooltip = i18n('common.ui.filterBar.filterPill.pinFilterTooltip', { defaultMessage: 'Pin filter' });
+      $scope.unpinFilterAriaLabel = i18n('common.ui.filterBar.filterPill.unpinFilterAriaLabel', { defaultMessage: 'Unpin filter' });
+      $scope.unpinFilterTooltip = i18n('common.ui.filterBar.filterPill.unpinFilterTooltip', { defaultMessage: 'Unpin filter' });
+      $scope.includeMatchesAriaLabel =
+        i18n('common.ui.filterBar.filterPill.includeMatchesAriaLabel', { defaultMessage: 'Include matches' });
+      $scope.includeMatchesTooltip = i18n('common.ui.filterBar.filterPill.includeMatchesTooltip', { defaultMessage: 'Include matches' });
+      $scope.excludeMatchesAriaLabel =
+        i18n('common.ui.filterBar.filterPill.excludeMatchesAriaLabel', { defaultMessage: 'Exclude matches' });
+      $scope.excludeMatchesTooltip = i18n('common.ui.filterBar.filterPill.excludeMatchesTooltip', { defaultMessage: 'Exclude matches' });
     }
   };
 });
