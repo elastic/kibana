@@ -32,23 +32,22 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
   currentGroupBy,
   onGroupByChange,
 }) => (
-  <EuiFlexGroup alignItems="center">
-    <EuiFlexItem grow>
-      <div>
-        <EuiButton
-          onClick={loadData}
-          iconType="refresh"
-          isLoading={loadingState === LoadingState.Loading}
-        >
-          {loadingState === LoadingState.Loading ? 'Loading…' : 'Rerun Checkup'}
-        </EuiButton>
-      </div>
+  <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
+    <EuiFlexItem grow={false}>
+      <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
     </EuiFlexItem>
+    <EuiFlexItem />
     <EuiFlexItem grow={false}>
       <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
+      <EuiButton
+        onClick={loadData}
+        iconType="refresh"
+        isLoading={loadingState === LoadingState.Loading}
+      >
+        {loadingState === LoadingState.Loading ? 'Loading…' : 'Refresh'}
+      </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

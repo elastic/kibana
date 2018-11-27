@@ -11,9 +11,10 @@ import {
   // @ts-ignore
   EuiAccordion,
   EuiCallOut,
+  EuiPageContent,
+  EuiPageContentBody,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
@@ -67,30 +68,30 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
     return (
       <Fragment>
         <EuiSpacer />
-        <EuiTitle>
-          <h3 style={{ textTransform: 'capitalize' }}>{checkupType} Checkup</h3>
-        </EuiTitle>
-        <EuiSpacer />
-        <EuiText>
+        <EuiText grow={false}>
           <p>
-            This tool runs a series of checks against your Elasticsearch {checkupType} to determine
-            whether you can upgrade directly to Elasticsearch 7.0, or whether you need to make
-            changes to your data before doing so.
+            This tool runs a series of checks against your Elasticsearch{' '}
+            <strong>{checkupType}</strong> to determine whether you can upgrade directly to
+            Elasticsearch 7.0, or whether you need to make changes to your data before doing so.
           </p>
         </EuiText>
         <EuiSpacer />
-        <CheckupControls
-          allDeprecations={deprecations}
-          loadingState={loadingState}
-          loadData={this.loadData}
-          currentFilter={currentFilter}
-          onFilterChange={this.changeFilter}
-          availableGroupByOptions={this.availableGroupByOptions()}
-          currentGroupBy={currentGroupBy}
-          onGroupByChange={this.changeGroupBy}
-        />
-        <EuiSpacer />
-        {this.renderCheckupData()}
+        <EuiPageContent>
+          <EuiPageContentBody>
+            <CheckupControls
+              allDeprecations={deprecations}
+              loadingState={loadingState}
+              loadData={this.loadData}
+              currentFilter={currentFilter}
+              onFilterChange={this.changeFilter}
+              availableGroupByOptions={this.availableGroupByOptions()}
+              currentGroupBy={currentGroupBy}
+              onGroupByChange={this.changeGroupBy}
+            />
+            <EuiSpacer />
+            {this.renderCheckupData()}
+          </EuiPageContentBody>
+        </EuiPageContent>
       </Fragment>
     );
   }

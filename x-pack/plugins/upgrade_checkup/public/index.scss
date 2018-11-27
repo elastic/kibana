@@ -1,8 +1,8 @@
 @import 'ui/public/styles/_styling_constants';
 
 upgrade-checkup {
-  background-color: $euiColorLightestShade;
   flex-grow: 1;
+  background-color: $euiColorLightestShade;
 }
 
 .upgrade-checkup__deprecation-cell {

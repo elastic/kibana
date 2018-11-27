@@ -7,7 +7,7 @@
 import axios from 'axios';
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
 import { LoadingState } from '../checkup/types';
@@ -34,21 +34,12 @@ export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLog
     const { loggingEnabled, loadingState } = this.state;
 
     return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow>
-          <div>
-            <EuiSwitch
-              label="Deprecation Logging"
-              checked={loggingEnabled}
-              onChange={this.toggleLogging}
-              disabled={
-                loadingState === LoadingState.Loading || loadingState === LoadingState.Error
-              }
-            />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{this.renderLoggingState()}</EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiSwitch
+        label={this.renderLoggingState()}
+        checked={loggingEnabled}
+        onChange={this.toggleLogging}
+        disabled={loadingState === LoadingState.Loading || loadingState === LoadingState.Error}
+      />
     );
   }
 
@@ -56,13 +47,13 @@ export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLog
     const { loggingEnabled, loadingState } = this.state;
 
     if (loadingState === LoadingState.Error) {
-      return <EuiText color="danger">Could not load logging state.</EuiText>;
+      return 'Could not load logging state';
     } else if (loggingEnabled === undefined) {
-      return null;
+      return null; // TODO: Something better to put here than nothing?
     } else if (loggingEnabled) {
-      return <EuiHealth color="success">Enabled</EuiHealth>;
+      return 'On';
     } else {
-      return <EuiHealth color="danger">Disabled</EuiHealth>;
+      return 'Off';
     }
   }
 

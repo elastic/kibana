@@ -11,17 +11,14 @@ import {
   EuiFilterButton,
   // @ts-ignore
   EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
 } from '@elastic/eui';
 import { GroupByOption } from './types';
 
 // UI labels for the enum type
 const GroupByOptionLabel: { [I in GroupByOption]: string } = {
-  [GroupByOption.message]: 'issue',
-  [GroupByOption.index]: 'index',
-  [GroupByOption.node]: 'node',
+  [GroupByOption.message]: 'by issue',
+  [GroupByOption.index]: 'by index',
+  [GroupByOption.node]: 'by node',
 };
 
 interface GroupByBarProps {
@@ -39,24 +36,17 @@ export class GroupByBar extends React.Component<GroupByBarProps> {
     }
 
     return (
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiText color="subdued">Group By</EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFilterGroup>
-            {availableGroupByOptions.map(option => (
-              <EuiFilterButton
-                key={option}
-                onClick={this.filterClicked.bind(this, option)}
-                hasActiveFilters={currentGroupBy === option}
-              >
-                {GroupByOptionLabel[option]}
-              </EuiFilterButton>
-            ))}
-          </EuiFilterGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFilterGroup>
+        {availableGroupByOptions.map(option => (
+          <EuiFilterButton
+            key={option}
+            onClick={this.filterClicked.bind(this, option)}
+            hasActiveFilters={currentGroupBy === option}
+          >
+            {GroupByOptionLabel[option]}
+          </EuiFilterButton>
+        ))}
+      </EuiFilterGroup>
     );
   }
 
