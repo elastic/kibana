@@ -11,7 +11,7 @@
       <li ng-repeat="filter in newFilters track by $index" class="filter" ng-click="filter.meta.apply = !filter.meta.apply"><input type="checkbox" ng-checked="filter.meta.apply"/>
         <span
           ng-if="filter.meta.negate"
-          i18n-id="common.ui.filterBar.negateLabel"
+          i18n-id="common.ui.filterBar.notFilterLabel"
           i18n-default-message="NOT "
         ></span>
         {{ filter.meta.key }}: {{ filter.meta.value }}
