@@ -47,7 +47,8 @@
     "importHelpers": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "typings/**/*"
   ],
   "exclude": [
     "src/**/__fixtures__/**/*",

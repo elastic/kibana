@@ -33,6 +33,7 @@ const indexPrivileges = [
   'create_index',
   'view_index_metadata',
   'read_cross_cluster',
+  'manage_follow_index',
 ];
 
 export function getClusterPrivileges() {

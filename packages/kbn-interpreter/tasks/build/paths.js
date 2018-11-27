@@ -17,11 +17,15 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+const { resolve } = require('path');
 
-const dir = resolve(__dirname, '..', '..', '..');
+exports.ROOT_DIR = resolve(__dirname, '../../');
+exports.SOURCE_DIR = resolve(exports.ROOT_DIR, 'src');
+exports.BUILD_DIR = resolve(exports.ROOT_DIR, 'target');
 
-export const pluginPaths = {
-  commonFunctions: resolve(dir, 'node_modules/@kbn/interpreter/plugin/functions/common'),
-  types: resolve(dir, 'node_modules/@kbn/interpreter/plugin/types'),
-};
+exports.PLUGIN_SOURCE_DIR = resolve(exports.SOURCE_DIR, 'plugin');
+exports.PLUGIN_BUILD_DIR = resolve(exports.BUILD_DIR, 'plugin');
+
+exports.WEBPACK_CONFIG_PATH = require.resolve('./webpack.config');
+exports.BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+
