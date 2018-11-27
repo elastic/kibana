@@ -25,6 +25,7 @@ interface I18nScope extends IScope {
   values?: Record<string, any>;
   defaultMessage: string;
   id: string;
+  bindValuesAsHtml: boolean;
 }
 
 export function i18nDirective(
@@ -37,6 +38,7 @@ export function i18nDirective(
       id: '@i18nId',
       defaultMessage: '@i18nDefaultMessage',
       values: '<?i18nValues',
+      bindValuesAsHtml: '=i18nBindValuesAsHtml',
     },
     link($scope, $element) {
       if ($scope.values) {
@@ -56,12 +58,21 @@ function setHtmlContent(
   $sanitize: (html: string) => string,
   i18n: I18nServiceType
 ) {
-  $element.html(
-    $sanitize(
+  if ($scope.bindValuesAsHtml) {
+    $element.html(
+      $sanitize(
+        i18n($scope.id, {
+          values: $scope.values,
+          defaultMessage: $scope.defaultMessage,
+        })
+      )
+    );
+  } else {
+    $element.text(
       i18n($scope.id, {
         values: $scope.values,
         defaultMessage: $scope.defaultMessage,
       })
-    )
-  );
+    );
+  }
 }

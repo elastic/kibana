@@ -90,6 +90,7 @@ describe('i18nDirective', () => {
         i18n-id="id"
         i18n-default-message="Default message, {value}"
         i18n-values="{ value: '<div ng-click=&quot;dangerousAction()&quot;></div>' }"
+        i18n-bind-values-as-html="true"
        />`
     );
 
@@ -105,6 +106,7 @@ describe('i18nDirective', () => {
         i18n-id="id"
         i18n-default-message="Default {one} onclick=alert(1) {two} message"
         i18n-values="{ one: '<span', two: '>Press</span>' }"
+        i18n-bind-values-as-html="true"
        />`
     );
 
@@ -120,6 +122,22 @@ describe('i18nDirective', () => {
         i18n-id="id"
         i18n-default-message="Default {value} message"
         i18n-values="{ value: '<span onmouseover=&quot;alert(1)&quot;>Press</span>' }"
+        i18n-bind-values-as-html="true"
+       />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
+  });
+
+  test(`doesn't render html in text-only message`, () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Default {value}"
+        i18n-values="{ value: '<strong>message</strong>' }"
        />`
     );
 

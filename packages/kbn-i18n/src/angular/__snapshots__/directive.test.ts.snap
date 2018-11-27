@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`i18nDirective doesn't render html in text-only message 1`] = `
+<div
+  class="ng-scope ng-isolate-scope"
+  i18n-default-message="Default {value}"
+  i18n-id="id"
+  i18n-values="{ value: '<strong>message</strong>' }"
+>
+  Default &lt;strong&gt;message&lt;/strong&gt;
+</div>
+`;
+
 exports[`i18nDirective inserts correct translation html content with values 1`] = `"default-message word"`;
 
 exports[`i18nDirective inserts correct translation html content with values 2`] = `"default-message anotherWord"`;
@@ -7,6 +18,7 @@ exports[`i18nDirective inserts correct translation html content with values 2`] 
 exports[`i18nDirective sanitizes message before inserting it to DOM 1`] = `
 <div
   class="ng-scope ng-isolate-scope"
+  i18n-bind-values-as-html="true"
   i18n-default-message="Default message, {value}"
   i18n-id="id"
   i18n-values="{ value: '<div ng-click=\\"dangerousAction()\\"></div>' }"
@@ -19,6 +31,7 @@ exports[`i18nDirective sanitizes message before inserting it to DOM 1`] = `
 exports[`i18nDirective sanitizes onclick attribute 1`] = `
 <div
   class="ng-scope ng-isolate-scope"
+  i18n-bind-values-as-html="true"
   i18n-default-message="Default {one} onclick=alert(1) {two} message"
   i18n-id="id"
   i18n-values="{ one: '<span', two: '>Press</span>' }"
@@ -34,6 +47,7 @@ exports[`i18nDirective sanitizes onclick attribute 1`] = `
 exports[`i18nDirective sanitizes onmouseover attribute 1`] = `
 <div
   class="ng-scope ng-isolate-scope"
+  i18n-bind-values-as-html="true"
   i18n-default-message="Default {value} message"
   i18n-id="id"
   i18n-values="{ value: '<span onmouseover=\\"alert(1)\\">Press</span>' }"
