@@ -11,6 +11,7 @@ import { get } from 'lodash';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
 import { YamlConfigSchema } from '../../../lib/lib';
+import { parseInterval } from '../../../utils';
 import {
   FormsyEuiCodeEditor,
   FormsyEuiFieldText,
@@ -55,34 +56,23 @@ addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
   }
 });
 
-const fEvery = (token: string) => new RegExp(/([1-9][0-9]*['h' | 'm' | 's'])$/).test(token);
-const tokenize = (value: string) =>
-  value.split(' ').reduce((acc: string[], cur: string) => {
-    if (cur !== '') {
-      return acc.concat(cur);
-    }
-    return acc;
-  }, []);
+addValidationRule('isNumeric', (values: FormData, value: FieldValue) => {
+  return /^[0-9]*$/.test(value || '');
+});
 
 addValidationRule('isInterval', (values: FormData, value: FieldValue) => {
-  if (value) {
-    if (value.lastIndexOf('@every') !== -1) {
-      const tokens = tokenize(value);
-      if (tokens.length === 2 && tokens[0] === '@every' && fEvery(tokens[1])) {
-        return true;
-      }
-    }
-    const ttt = tokenize(value);
-    if (ttt.length === 1 && fEvery(ttt[0])) {
+  if (!value) {
+    return false;
+  }
+  if (parseInterval(value)) {
+    return true;
+  }
+  try {
+    if (CronParser.parseExpression(value)) {
       return true;
     }
-    try {
-      if (CronParser.parseExpression(value)) {
-        return true;
-      }
-    } catch (err) {
-      return false;
-    }
+  } catch (err) {
+    return false;
   }
   return false;
 });

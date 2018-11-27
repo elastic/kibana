@@ -36,6 +36,7 @@ export interface YamlConfigSchema {
     | 'isHosts'
     | 'isInterval'
     | 'isString'
+    | 'isNumeric'
     | 'isPeriod'
     | 'isPath'
     | 'isPaths'

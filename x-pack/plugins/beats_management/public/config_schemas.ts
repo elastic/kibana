@@ -348,8 +348,9 @@ const heartbeatConfig: YamlConfigSchema[] = [
     ui: {
       label: 'Schedule',
       type: 'input',
+      helpText: 'cron interval or "@every 10s", "@every 5m", etc.',
     },
-    defaultValue: '10s',
+    defaultValue: '@every 5s',
     error: 'Please provide a valid schedule interval',
     required: true,
     validations: 'isInterval',
@@ -360,7 +361,7 @@ const heartbeatConfig: YamlConfigSchema[] = [
       label: 'Hosts',
       type: 'multi-input',
       helpText: 'Put each host on a separate line',
-      placeholder: 'http://localhost:80/',
+      placeholder: 'https://www.elastic.co/\nhttp://localhost:80/',
     },
     error: 'One host per line',
     required: true,
@@ -375,6 +376,7 @@ const heartbeatConfig: YamlConfigSchema[] = [
     },
     error: 'Please provide a valid response status',
     required: false,
+    validations: 'isNumeric',
   },
 ];
 
