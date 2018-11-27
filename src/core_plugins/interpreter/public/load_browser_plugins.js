@@ -18,7 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initialize } from '@kbn/interpreter/public';
+import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
 import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
 import { functions } from './functions';
 
@@ -38,5 +38,5 @@ functions.forEach(addFunction);
 
 createSocket(basePath).then(async () => {
   await populateBrowserRegistries(types);
-  await initialize();
+  await initializeInterpreter();
 });
