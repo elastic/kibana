@@ -8,16 +8,6 @@
     "kbn:bootstrap": "node scripts/build --dev",
     "kbn:watch": "node scripts/build --dev --watch"
   },
-  "kibana": {
-    "clean": {
-      "extraPaths": [
-        "common",
-        "public",
-        "server",
-        "plugin"
-      ]
-    }
-  },
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lodash.clone": "^4.5.0",
