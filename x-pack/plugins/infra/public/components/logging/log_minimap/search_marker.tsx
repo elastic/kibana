@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import styled, { keyframes } from 'styled-components';
 
@@ -70,7 +71,13 @@ export class SearchMarker extends React.PureComponent<SearchMarkerProps, SearchM
       <>
         {hoveredPosition ? (
           <SearchMarkerTooltip markerPosition={hoveredPosition}>
-            {bucket.count} {bucket.count === 1 ? 'search result' : 'search results'}
+            <FormattedMessage
+              id="xpack.infra.logs.searchResultTooltip"
+              defaultMessage="{bucketCount, plural, one {# search result} other {# search results}}"
+              values={{
+                bucketCount: bucket.count,
+              }}
+            />
           </SearchMarkerTooltip>
         ) : null}
         <SearchMarkerGroup
