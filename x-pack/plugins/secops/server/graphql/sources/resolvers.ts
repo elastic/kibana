@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { QueryResolvers } from '../../../common/graphql/types';
-import { AppResolverWithFields } from '../../lib/framework';
+import { QueryResolvers, SourceResolvers } from '../../../common/graphql/types';
+import { AppResolvedResult, AppResolverWithFields } from '../../lib/framework';
+import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
 import { Context } from '../../lib/types';
 
@@ -23,8 +24,16 @@ export type QueryAllSourcesResolver = AppResolverWithFields<
   'id' | 'configuration'
 >;
 
+export type SourceStatusResolver = AppResolverWithFields<
+  SourceResolvers.StatusResolver,
+  AppResolvedResult<QuerySourceResolver>,
+  Context,
+  never
+>;
+
 export interface SourcesResolversDeps {
   sources: Sources;
+  sourceStatus: SourceStatus;
 }
 
 export const createSourcesResolvers = (
@@ -33,6 +42,9 @@ export const createSourcesResolvers = (
   Query: {
     source: QuerySourceResolver;
     allSources: QueryAllSourcesResolver;
+  };
+  Source: {
+    status: SourceStatusResolver;
   };
 } => ({
   Query: {
@@ -51,6 +63,11 @@ export const createSourcesResolvers = (
         id: sourceName,
         configuration: sourceConfiguration,
       }));
+    },
+  },
+  Source: {
+    async status(source) {
+      return source;
     },
   },
 });

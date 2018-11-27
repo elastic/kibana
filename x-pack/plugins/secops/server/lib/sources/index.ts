@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ConfigurationSourcesAdapter } from './configuration_sources_adapter';
+export { ConfigurationSourcesAdapter } from './configuration';
 
 export class Sources {
   constructor(private readonly adapter: SourcesAdapter) {}
 
-  public async getConfiguration(sourceId: string) {
+  public async getConfiguration(sourceId: string): Promise<SourceConfiguration> {
     const sourceConfigurations = await this.getAllConfigurations();
     const requestedSourceConfiguration = sourceConfigurations[sourceId];
-
     if (!requestedSourceConfiguration) {
       throw new Error(`Failed to find source '${sourceId}'`);
     }
@@ -33,8 +32,13 @@ export interface SourceConfigurations {
   [sourceId: string]: SourceConfiguration;
 }
 
-export interface SourceConfiguration {
-  fileAlias: string;
+export interface AliasConfiguration {
+  // metricAlias: string;
+  logAlias: string;
+  auditbeatAlias: string;
+}
+
+export interface SourceConfiguration extends AliasConfiguration {
   fields: {
     container: string;
     host: string;

@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './types';
+import gql from 'graphql-tag';
+
+export const sharedSchema = gql`
+  enum IndexType {
+    ANY
+    LOGS
+    AUDITBEAT
+  }
+`;

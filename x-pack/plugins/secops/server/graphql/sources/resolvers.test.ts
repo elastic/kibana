@@ -5,6 +5,7 @@
  */
 import { GraphQLResolveInfo } from 'graphql';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
+import { SourceStatus, SourceStatusAdapter } from '../../lib/source_status';
 import { Sources, SourcesAdapter } from '../../lib/sources';
 import { createSourcesResolvers, SourcesResolversDeps } from './resolvers';
 import { mockSourceData } from './source.mock';
@@ -18,8 +19,22 @@ mockGetAll.mockResolvedValue({
 const mockSourcesAdapter: SourcesAdapter = {
   getAll: mockGetAll,
 };
+
+const mockGetIndexNames = jest.fn();
+mockGetIndexNames.mockResolvedValue([]);
+const mockHasAlias = jest.fn();
+mockHasAlias.mockResolvedValue(false);
+const mockHasIndices = jest.fn();
+mockHasIndices.mockResolvedValue(false);
+const mockSourceStatusAdapter: SourceStatusAdapter = {
+  getIndexNames: mockGetIndexNames,
+  hasAlias: mockHasAlias,
+  hasIndices: mockHasIndices,
+};
+
 const mockLibs: SourcesResolversDeps = {
   sources: new Sources(mockSourcesAdapter),
+  sourceStatus: new SourceStatus(mockSourceStatusAdapter, new Sources(mockSourcesAdapter)),
 };
 
 const req: FrameworkRequest = {
@@ -48,6 +63,8 @@ describe('Test Source Resolvers', () => {
       {} as GraphQLResolveInfo
     );
     expect(mockSourcesAdapter.getAll).toHaveBeenCalled();
-    expect(data).toEqual(mockSourceData);
+    const expectedData = Object.assign({}, mockSourceData);
+    delete expectedData.status;
+    expect(data).toEqual(expectedData);
   });
 });

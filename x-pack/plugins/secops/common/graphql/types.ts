@@ -37,12 +37,14 @@ export interface Query {
 export interface Source {
   id: string /** The id of the source */;
   configuration: SourceConfiguration /** The raw configuration of the source */;
+  status: SourceStatus /** The status of the source */;
   getEvents?: EventsData | null /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
   whoAmI?: SayMyName | null /** Just a simple example to get the app name */;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
-  fileAlias: string /** The alias to read file data from */;
+  logAlias: string /** The alias to read file data from */;
+  auditbeatAlias: string /** The alias to read auditbeat data from */;
   fields: SourceFields /** The field mapping to use for this source */;
 }
 /** A mapping of semantic fields to their document counterparts */
@@ -53,6 +55,20 @@ export interface SourceFields {
   pod: string /** The field to identify a pod by */;
   tiebreaker: string /** The field to use as a tiebreaker for log events that have identical timestamps */;
   timestamp: string /** The field to use as a timestamp for metrics and logs */;
+}
+/** The status of an infrastructure data source */
+export interface SourceStatus {
+  auditbeatAliasExists: boolean /** Whether the configured auditbeat alias exists */;
+  auditbeatIndicesExist: boolean /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */;
+  auditbeatIndices: string[] /** The list of indices in the auditbeat alias */;
+  indexFields: IndexField[] /** The list of fields defined in the index mappings */;
+}
+/** A descriptor of a field in an index */
+export interface IndexField {
+  name: string /** The name of the field */;
+  type: string /** The type of the field's values as recognized by Kibana */;
+  searchable: boolean /** Whether the field's values can be efficiently searched for */;
+  aggregatable: boolean /** Whether the field's values can be aggregated */;
 }
 
 export interface EventsData {
@@ -135,6 +151,15 @@ export interface GetEventsSourceArgs {
   timerange: TimerangeInput;
   filterQuery?: string | null;
 }
+export interface IndexFieldsSourceStatusArgs {
+  indexType?: IndexType | null;
+}
+
+export enum IndexType {
+  ANY = 'ANY',
+  LOGS = 'LOGS',
+  AUDITBEAT = 'AUDITBEAT',
+}
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = any> {
@@ -171,6 +196,7 @@ export namespace SourceResolvers {
       any,
       Context
     > /** The raw configuration of the source */;
+    status?: StatusResolver<SourceStatus, any, Context> /** The status of the source */;
     getEvents?: GetEventsResolver<
       EventsData | null,
       any,
@@ -189,6 +215,11 @@ export namespace SourceResolvers {
     Parent = any,
     Context = any
   > = Resolver<R, Parent, Context>;
+  export type StatusResolver<R = SourceStatus, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
   export type GetEventsResolver<R = EventsData | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
@@ -209,7 +240,12 @@ export namespace SourceResolvers {
 /** A set of configuration options for a security data source */
 export namespace SourceConfigurationResolvers {
   export interface Resolvers<Context = any> {
-    fileAlias?: FileAliasResolver<string, any, Context> /** The alias to read file data from */;
+    logAlias?: LogAliasResolver<string, any, Context> /** The alias to read file data from */;
+    auditbeatAlias?: AuditbeatAliasResolver<
+      string,
+      any,
+      Context
+    > /** The alias to read auditbeat data from */;
     fields?: FieldsResolver<
       SourceFields,
       any,
@@ -217,7 +253,12 @@ export namespace SourceConfigurationResolvers {
     > /** The field mapping to use for this source */;
   }
 
-  export type FileAliasResolver<R = string, Parent = any, Context = any> = Resolver<
+  export type LogAliasResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type AuditbeatAliasResolver<R = string, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
@@ -269,6 +310,90 @@ export namespace SourceFieldsResolvers {
     Context
   >;
   export type TimestampResolver<R = string, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+/** The status of an infrastructure data source */
+export namespace SourceStatusResolvers {
+  export interface Resolvers<Context = any> {
+    auditbeatAliasExists?: AuditbeatAliasExistsResolver<
+      boolean,
+      any,
+      Context
+    > /** Whether the configured auditbeat alias exists */;
+    auditbeatIndicesExist?: AuditbeatIndicesExistResolver<
+      boolean,
+      any,
+      Context
+    > /** Whether the configured alias or wildcard pattern resolve to any auditbeat indices */;
+    auditbeatIndices?: AuditbeatIndicesResolver<
+      string[],
+      any,
+      Context
+    > /** The list of indices in the auditbeat alias */;
+    indexFields?: IndexFieldsResolver<
+      IndexField[],
+      any,
+      Context
+    > /** The list of fields defined in the index mappings */;
+  }
+
+  export type AuditbeatAliasExistsResolver<R = boolean, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type AuditbeatIndicesExistResolver<R = boolean, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type AuditbeatIndicesResolver<R = string[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IndexFieldsResolver<R = IndexField[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context,
+    IndexFieldsArgs
+  >;
+  export interface IndexFieldsArgs {
+    indexType?: IndexType | null;
+  }
+}
+/** A descriptor of a field in an index */
+export namespace IndexFieldResolvers {
+  export interface Resolvers<Context = any> {
+    name?: NameResolver<string, any, Context> /** The name of the field */;
+    type?: TypeResolver<
+      string,
+      any,
+      Context
+    > /** The type of the field's values as recognized by Kibana */;
+    searchable?: SearchableResolver<
+      boolean,
+      any,
+      Context
+    > /** Whether the field's values can be efficiently searched for */;
+    aggregatable?: AggregatableResolver<
+      boolean,
+      any,
+      Context
+    > /** Whether the field's values can be aggregated */;
+  }
+
+  export type NameResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type TypeResolver<R = string, Parent = any, Context = any> = Resolver<R, Parent, Context>;
+  export type SearchableResolver<R = boolean, Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type AggregatableResolver<R = boolean, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
