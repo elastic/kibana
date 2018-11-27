@@ -144,7 +144,7 @@ export class SavedObjectSaveModal extends React.Component {
     return (
       <EuiFormRow
         label={(<FormattedMessage
-          id="common.ui.savedObjects.saveModal.saveAsNewObjectLabel"
+          id="common.ui.savedObjects.saveModal.saveAsNewLabel"
           defaultMessage="Save as a new {objectType}"
           values={{ objectType: this.props.objectType }}
         />)}
@@ -169,7 +169,7 @@ export class SavedObjectSaveModal extends React.Component {
           <EuiModalHeader>
             <EuiModalHeaderTitle>
               <FormattedMessage
-                id="common.ui.savedObjects.saveModal.saveObjectTitle"
+                id="common.ui.savedObjects.saveModal.saveTitle"
                 defaultMessage="Save {objectType}"
                 values={{ objectType: this.props.objectType }}
               />
