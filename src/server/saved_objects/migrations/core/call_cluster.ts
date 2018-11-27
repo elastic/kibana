@@ -41,7 +41,10 @@ export interface CallCluster {
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;
-  (path: 'tasks.get', opts: { taskId: string }): Promise<{ completed: boolean }>;
+  (path: 'tasks.get', opts: { taskId: string }): Promise<{
+    completed: boolean;
+    error?: ErrorResponse;
+  }>;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -171,8 +174,13 @@ export interface SearchResults {
   _scroll_id?: string;
 }
 
+export interface ErrorResponse {
+  type: string;
+  reason: string;
+}
+
 export interface BulkResult {
-  items: Array<{ index: { error?: { type: string; reason: string } } }>;
+  items: Array<{ index: { error?: ErrorResponse } }>;
 }
 
 export interface IndexInfo {

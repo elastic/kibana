@@ -32,7 +32,10 @@ describe('ML - Multi Metric Wizard - Create Job Controller', () => {
       };
 
       const scope = $rootScope.$new();
-      $controller('MlCreateMultiMetricJob', { $scope: scope });
+
+      expect(() => {
+        $controller('MlCreateMultiMetricJob', { $scope: scope });
+      }).to.not.throwError();
 
       expect(typeof scope.ui).to.eql('object');
       stub1.restore();

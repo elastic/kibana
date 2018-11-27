@@ -5,6 +5,7 @@
  */
 
 import { EuiDatePicker, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import styled from 'styled-components';
@@ -37,7 +38,10 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
             iconSide="left"
             onClick={this.stopLiveStreaming}
           >
-            Stop streaming
+            <FormattedMessage
+              id="xpack.infra.logs.stopStreamingButtonLabel"
+              defaultMessage="Stop streaming"
+            />
           </EuiFilterButton>
         </EuiFilterGroup>
       );
@@ -57,7 +61,10 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
             />
           </InlineWrapper>
           <EuiFilterButton iconType="play" iconSide="left" onClick={this.startLiveStreaming}>
-            Stream live
+            <FormattedMessage
+              id="xpack.infra.logs.startStreamingButtonLabel"
+              defaultMessage="Stream live"
+            />
           </EuiFilterButton>
         </EuiFilterGroup>
       );
