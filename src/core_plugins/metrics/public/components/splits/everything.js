@@ -22,6 +22,7 @@ import GroupBySelect from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function SplitByEverything(props) {
   const { onChange, model } = props;
@@ -30,7 +31,13 @@ function SplitByEverything(props) {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiFormRow id={htmlId('group')} label="Group by">
+        <EuiFormRow
+          id={htmlId('group')}
+          label={(<FormattedMessage
+            id="tsvb.splits.everything.groupByLabel"
+            defaultMessage="Group by"
+          />)}
+        >
           <GroupBySelect
             value={model.split_mode}
             onChange={handleSelectChange('split_mode')}

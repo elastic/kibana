@@ -17,11 +17,16 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
-const dir = resolve(__dirname, '..', '..', '..');
-
-export const pluginPaths = {
-  commonFunctions: resolve(dir, 'node_modules/@kbn/interpreter/plugin/functions/common'),
-  types: resolve(dir, 'node_modules/@kbn/interpreter/plugin/types'),
-};
+export { pathsRegistry } from './lib/paths_registry';
+export { functionsRegistry } from './lib/functions_registry';
+export { typesRegistry } from './lib/types_registry';
+export { createError } from './interpreter/create_error';
+export { interpretProvider } from './interpreter/interpret';
+export { serializeProvider } from './lib/serialize';
+export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
+export { Fn } from './lib/fn';
+export { getType } from './lib/get_type';
+export { castProvider } from './interpreter/cast';
+export { parse } from './lib/grammar';
+export { getByAlias } from './lib/get_by_alias';
+export { Registry } from './lib/registry';

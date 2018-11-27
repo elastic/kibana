@@ -30,6 +30,7 @@ import { get } from 'lodash';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
 import { fetchFields } from '../lib/fetch_fields';
 import chrome from 'ui/chrome';
+import { I18nProvider } from '@kbn/i18n/react';
 
 class VisEditor extends Component {
   constructor(props) {
@@ -131,17 +132,19 @@ class VisEditor extends Component {
       }
       const reversed = this.state.reversed;
       return (
-        <Visualization
-          dateFormat={this.props.config.get('dateFormat')}
-          reversed={reversed}
-          onBrush={this.onBrush}
-          onUiState={this.handleUiState}
-          uiState={this.props.vis.getUiState()}
-          fields={this.state.visFields}
-          model={this.props.vis.params}
-          visData={this.props.visData}
-          getConfig={this.getConfig}
-        />
+        <I18nProvider>
+          <Visualization
+            dateFormat={this.props.config.get('dateFormat')}
+            reversed={reversed}
+            onBrush={this.onBrush}
+            onUiState={this.handleUiState}
+            uiState={this.props.vis.getUiState()}
+            fields={this.state.visFields}
+            model={this.props.vis.params}
+            visData={this.props.visData}
+            getConfig={this.getConfig}
+          />
+        </I18nProvider>
       );
     }
 

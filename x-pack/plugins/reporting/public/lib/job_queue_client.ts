@@ -20,6 +20,33 @@ export interface JobContent {
   content_type: boolean;
 }
 
+export interface JobInfo {
+  created_at: string;
+  priority: number;
+  jobtype: string;
+  created_by: string;
+  timeout: number;
+  output: { content_type: string };
+  process_expiration: string;
+  completed_at: string;
+  payload: {
+    layout: { id: string; dimensions: { width: number; height: number } };
+    objects: Array<{ relativeUrl: string }>;
+    type: string;
+    title: string;
+    forceNow: string;
+    browserTimezone: string;
+  };
+  meta: {
+    layout: string;
+    objectType: string;
+  };
+  max_attempts: number;
+  started_at: string;
+  attempts: number;
+  status: string;
+}
+
 class JobQueueClient {
   public list = (page = 0, jobIds?: string[]): Promise<JobQueueEntry[]> => {
     const query = { page } as any;
@@ -47,6 +74,14 @@ class JobQueueClient {
     return kfetch({
       method: 'GET',
       pathname: `${API_BASE_URL}/output/${jobId}`,
+      headers: addSystemApiHeader({}),
+    });
+  }
+
+  public getInfo(jobId: string): Promise<JobInfo> {
+    return kfetch({
+      method: 'GET',
+      pathname: `${API_BASE_URL}/info/${jobId}`,
       headers: addSystemApiHeader({}),
     });
   }
