@@ -5,15 +5,15 @@
  */
 
 import {
-  deserializeAutofollowPattern,
-  deserializeListAutofollowPatterns,
-  serializeAutofolloPattern,
-} from './autofollow_pattern_serialization';
+  deserializeAutoFollowPattern,
+  deserializeListAutoFollowPatterns,
+  serializeAutoFollowPattern,
+} from './auto_follow_pattern_serialization';
 
 describe('[CCR] auto-follow_serialization', () => {
-  describe('deserializeAutofollowPattern()', () => {
+  describe('deserializeAutoFollowPattern()', () => {
     it('should return empty object if name or esObject are not provided', () => {
-      expect(deserializeAutofollowPattern()).toEqual({});
+      expect(deserializeAutoFollowPattern()).toEqual({});
     });
 
     it('should deserialize Elasticsearch object', () => {
@@ -30,12 +30,12 @@ describe('[CCR] auto-follow_serialization', () => {
         follow_index_pattern: expected.followIndexPattern
       };
 
-      expect(deserializeAutofollowPattern('some-name', esObject)).toEqual(expected);
+      expect(deserializeAutoFollowPattern('some-name', esObject)).toEqual(expected);
     });
   });
 
-  describe('deserializeListAutofollowPatterns()', () => {
-    it('should deSerialize list of Elasticsearch objects', () => {
+  describe('deserializeListAutoFollowPatterns()', () => {
+    it('should deserialize list of Elasticsearch objects', () => {
       const name1 = 'foo1';
       const name2 = 'foo2';
 
@@ -67,11 +67,11 @@ describe('[CCR] auto-follow_serialization', () => {
         }
       };
 
-      expect(deserializeListAutofollowPatterns(esObjects)).toEqual(expected);
+      expect(deserializeListAutoFollowPatterns(esObjects)).toEqual(expected);
     });
   });
 
-  describe('serializeAutofollowPattern()', () => {
+  describe('serializeAutoFollowPattern()', () => {
     it('should serialize object to Elasticsearch object', () => {
       const expected = {
         remote_cluster: 'foo',
@@ -85,7 +85,7 @@ describe('[CCR] auto-follow_serialization', () => {
         followIndexPattern: expected.follow_index_pattern
       };
 
-      expect(serializeAutofolloPattern(object)).toEqual(expected);
+      expect(serializeAutoFollowPattern(object)).toEqual(expected);
     });
   });
 });

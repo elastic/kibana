@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const Chance = require('chance'); // eslint-disable-line
+const Chance = require('chance'); // eslint-disable-line import/no-extraneous-dependencies
 const chance = new Chance();
 
 export const getAutoFollowPatternMock = (
   remoteCluster = chance.string(),
   leaderIndexPatterns = [chance.string()],
-  followIndexPattern = chance.string()) => ({
+  followIndexPattern = chance.string()
+) => ({
   remote_cluster: remoteCluster,
   leader_index_patterns: leaderIndexPatterns,
   follow_index_pattern: followIndexPattern

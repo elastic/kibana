@@ -7,8 +7,8 @@
 
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { registerAutoFollowPatternRoutes } from './auto_follow_pattern';
-import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../fixtures/autofollow_pattern';
-import { deserializeAutofollowPattern } from '../../lib/autofollow_pattern_serialization';
+import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../fixtures/auto_follow_pattern';
+import { deserializeAutoFollowPattern } from '../../lib/auto_follow_pattern_serialization';
 
 jest.mock('../../lib/call_with_request_factory', () => ({ callWithRequestFactory: jest.fn() }));
 jest.mock('../../lib/is_es_error_factory', () => ({ isEsErrorFactory: () => () => true }));
@@ -72,16 +72,16 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
       routeHandler = routeHandlers.list;
     });
 
-    it('should deSerialize the response from Elasticsearch', async () => {
+    it('should deserialize the response from Elasticsearch', async () => {
       const totalResult = 2;
-      const deSerializedKeys = Object.keys(deserializeAutofollowPattern('random', getAutoFollowPatternMock()));
+      const deserializedKeys = Object.keys(deserializeAutoFollowPattern('random', getAutoFollowPatternMock()));
       setHttpRequestResponse(null, getAutoFollowPatternListMock(totalResult));
 
       const response = await routeHandler();
       const autoFollowPattern = Object.values(response)[0];
 
       expect(Object.keys(response).length).toEqual(totalResult);
-      expect(Object.keys(autoFollowPattern)).toEqual(deSerializedKeys);
+      expect(Object.keys(autoFollowPattern)).toEqual(deserializedKeys);
     });
   });
 
@@ -91,20 +91,27 @@ describe('[CCR API Routes] Auto Follow Pattern', () => {
     });
 
     it('should serialize the payload before sending it to Elasticsearch', async () => {
-      callWithRequestFactory.mockReturnValueOnce((_, payload = {}) => {
-        if (payload.body.remote_cluster !== 'bar') {
-          return `Error: body (${JSON.stringify(payload)})`;
-        }
-        return 'OK';
-      });
+      callWithRequestFactory.mockReturnValueOnce((_, payload) => payload);
 
       const request = {
         params: { id: 'foo' },
-        payload: { remoteCluster: 'bar' }
+        payload: {
+          remoteCluster: 'bar1',
+          leaderIndexPatterns: [ 'bar2' ],
+          followIndexPattern: 'bar3',
+        },
       };
 
       const response = await routeHandler(request);
-      expect(response).toEqual('OK');
+
+      expect(response).toEqual({
+        id: 'foo',
+        body: {
+          remote_cluster: 'bar1',
+          leader_index_patterns: [ 'bar2' ],
+          follow_index_pattern: 'bar3',
+        },
+      });
     });
   });
 });

@@ -7,7 +7,7 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
-import { deserializeListAutofollowPatterns, serializeAutofolloPattern } from '../../lib/autofollow_pattern_serialization';
+import { deserializeListAutoFollowPatterns, serializeAutoFollowPattern } from '../../lib/auto_follow_pattern_serialization';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
 
@@ -29,14 +29,12 @@ export const registerAutoFollowPatternRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
+      // throw wrapEsError(errors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
+
       try {
-        // throw wrapEsError(errors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
-
         const response = await callWithRequest('ccr.autoFollowPatterns');
-        return deserializeListAutofollowPatterns(response);
+        return deserializeListAutoFollowPatterns(response);
       } catch(err) {
-        // throw wrapEsError(err);
-
         if (isEsError(err)) {
           throw wrapEsError(err);
         }
@@ -57,7 +55,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.params;
-      const body = serializeAutofolloPattern(request.payload);
+      const body = serializeAutoFollowPattern(request.payload);
 
       try {
         return await callWithRequest('ccr.createAutoFollowPattern', { id, body });

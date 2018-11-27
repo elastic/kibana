@@ -81,7 +81,7 @@ export default function ({ getService }) {
         expect(body.cause[0]).to.contain('unknown cluster');
       });
 
-      it('should create an auto-follow pattern', async () => {
+      it('should create an auto-follow pattern when cluster is known', async () => {
         await addCluster();
 
         const { body } = await supertest
