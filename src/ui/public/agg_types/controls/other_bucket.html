@@ -14,7 +14,7 @@
         ></span>
         <icon-tip
           position="'right'"
-          content="{{ ::'common.ui.aggTypes.otherBucket.groupValuesTooltip' | i18n: { defaultMessage: '&quot;Values not in the top N are grouped in this bucket. To include documents with missing values, enable \'Show missing values\'.&quot;' } }}"
+          content="::'common.ui.aggTypes.otherBucket.groupValuesTooltip' | i18n: { defaultMessage: 'Values not in the top N are grouped in this bucket. To include documents with missing values, enable \'Show missing values\'.' }"
         ></icon-tip>
       </label>
     </div>
@@ -50,7 +50,7 @@
         ></span>
         <icon-tip
           position="'right'"
-          content="{{ ::'common.ui.aggTypes.otherBucket.showMissingValuesTooltip' | i18n: { defaultMessage: '&quot;Only works for fields of type \'string\'. When enabled, include documents with missing values in the search. If this bucket is in the top N, it appears in the chart. If not in the top N, and you enable \'Group other values in separate bucket\', Elasticsearch adds the missing values to the \'other\' bucket.&quot;' } }}"
+          content="::'common.ui.aggTypes.otherBucket.showMissingValuesTooltip' | i18n: { defaultMessage: 'Only works for fields of type \'string\'. When enabled, include documents with missing values in the search. If this bucket is in the top N, it appears in the chart. If not in the top N, and you enable \'Group other values in separate bucket\', Elasticsearch adds the missing values to the \'other\' bucket.' }"
         ></icon-tip>
       </label>
     </div>

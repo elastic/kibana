@@ -4,10 +4,12 @@
       <label
         class="visEditorAggHeader__title visEditorAggHeader__title--grow"
         for="visEditorFilterInput{{agg.id}}"
-        i18n-id="common.ui.aggTypes.filters.filterLabel"
-        i18n-default-message="Filter {index}"
-        i18n-values="{ index: $index + 1 }"
       >
+        <span
+          i18n-id="common.ui.aggTypes.filters.filterLabel"
+          i18n-default-message="Filter {index}"
+          i18n-values="{ index: $index + 1 }"
+        ></span>
         <span ng-if="filter.label">- {{ filter.label }}</span>
       </label>
 
