@@ -28,7 +28,10 @@ describe('ML - Data Visualizer View Fields Controller', () => {
     const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlDataVisualizerViewFields', { $scope: scope });
+
+      expect(() => {
+        $controller('MlDataVisualizerViewFields', { $scope: scope });
+      }).to.not.throwError();
 
       expect(scope.metricCards).to.eql([]);
       stub1.restore();

@@ -26,14 +26,17 @@ describe('ML - Recognize Wizard - Create Job Controller', () => {
     }));
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlCreateRecognizerJobs', {
-        $route: {
-          current: {
-            params: {}
-          }
-        },
-        $scope: scope
-      });
+
+      expect(() => {
+        $controller('MlCreateRecognizerJobs', {
+          $route: {
+            current: {
+              params: {}
+            }
+          },
+          $scope: scope
+        });
+      }).to.not.throwError();
 
       expect(scope.ui.formValid).to.eql(true);
       stub.restore();

@@ -28,7 +28,10 @@ describe('ML - Job Type Controller', () => {
     const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlNewJobStepJobType', { $scope: scope });
+
+      expect(() => {
+        $controller('MlNewJobStepJobType', { $scope: scope });
+      }).to.not.throwError();
 
       expect(scope.indexWarningTitle).to.eql('Index pattern undefined is not time based');
       stub1.restore();

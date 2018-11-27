@@ -30,7 +30,10 @@ describe('ML - Multi Metric Wizard - Create Job Controller', () => {
     const stub3 = sinon.stub(utils, 'createFields').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlCreateMultiMetricJob', { $scope: scope });
+
+      expect(() => {
+        $controller('MlCreateMultiMetricJob', { $scope: scope });
+      }).to.not.throwError();
 
       expect(typeof scope.ui).to.eql('object');
       stub1.restore();

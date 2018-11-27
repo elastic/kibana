@@ -28,14 +28,17 @@ describe('ML - Single Metric Wizard - Create Job Controller', () => {
     const stub2 = sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlCreateSingleMetricJob', {
-        $route: {
-          current: {
-            params: {}
-          }
-        },
-        $scope: scope
-      });
+
+      expect(() => {
+        $controller('MlCreateSingleMetricJob', {
+          $route: {
+            current: {
+              params: {}
+            }
+          },
+          $scope: scope
+        });
+      }).to.not.throwError();
 
       expect(scope.ui.showJobInput).to.eql(false);
       stub1.restore();
