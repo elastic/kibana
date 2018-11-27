@@ -18,11 +18,11 @@ import {
   EuiHealth,
   EuiLink,
   EuiCheckbox,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiSpacer,
+  EuiSearchBar,
   EuiSwitch,
   EuiTable,
   EuiTableBody,
@@ -40,7 +40,7 @@ import {
 } from '@elastic/eui';
 
 import { IndexActionsContextMenu } from '../../components';
-import { getBannerExtensions } from '../../../../index_management_extensions';
+import { getBannerExtensions, getFilterExtensions } from '../../../../index_management_extensions';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -99,7 +99,7 @@ export class IndexTableUi extends Component {
     } = this.props;
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
-      filterChanged(decodedFilter);
+      filterChanged(EuiSearchBar.Query.parse(decodedFilter));
     }
   }
   onSort = column => {
@@ -108,7 +108,37 @@ export class IndexTableUi extends Component {
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
     sortChanged(column, newIsSortAscending);
   };
-
+  renderFilterError() {
+    const { filterError } = this.state;
+    if (!filterError) {
+      return;
+    }
+    return (
+      <Fragment>
+        <EuiCallOut
+          iconType="faceSad"
+          color="danger"
+          title={`Invalid search: ${filterError.message}`}
+        />
+        <EuiSpacer size="l"/>
+      </Fragment>
+    );
+  }
+  onFilterChanged = ({ query, error }) => {
+    if (error) {
+      this.setState({ filterError: error });
+    } else {
+      this.props.filterChanged(query);
+      this.setState({ filterError: null });
+    }
+  }
+  getFilters = () => {
+    const { allIndices } = this.props;
+    return getFilterExtensions().reduce((accum, filterExtension) => {
+      const filtersToAdd = filterExtension(allIndices);
+      return [...accum, ...filtersToAdd];
+    }, []);
+  }
   toggleAll = () => {
     const allSelected = this.areAllItemsSelected();
     if (allSelected) {
@@ -285,7 +315,6 @@ export class IndexTableUi extends Component {
 
   render() {
     const {
-      filterChanged,
       filter,
       showSystemIndices,
       showSystemIndicesChanged,
@@ -294,7 +323,6 @@ export class IndexTableUi extends Component {
     } = this.props;
     const { selectedIndicesMap } = this.state;
     const atLeastOneItemSelected = Object.keys(selectedIndicesMap).length > 0;
-
     return (
       <EuiPage>
         <EuiPageBody>
@@ -352,25 +380,27 @@ export class IndexTableUi extends Component {
                 </EuiFlexItem>
               ) : null}
               <EuiFlexItem>
-                <EuiFieldSearch
-                  fullWidth
-                  value={filter}
-                  onChange={event => {
-                    filterChanged(event.target.value);
-                  }}
-                  data-test-subj="indexTableFilterInput"
-                  placeholder={intl.formatMessage({
-                    id: 'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
-                    defaultMessage: 'Search',
-                  })}
+                <EuiSearchBar
+                  filters={this.getFilters()}
+                  defaultQuery={filter}
+                  query={filter}
+                  box={{
+                    placeholder: intl.formatMessage({
+                      id: 'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
+                      defaultMessage: 'Search',
+                    }) }
+                  }
                   aria-label={intl.formatMessage({
                     id: 'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
                     defaultMessage: 'Search indices',
                   })}
+                  data-test-subj="indexTableFilterInput"
+
+                  onChange={this.onFilterChanged}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-
+            {this.renderFilterError()}
             <EuiSpacer size="m" />
 
             {indices.length > 0 ? (

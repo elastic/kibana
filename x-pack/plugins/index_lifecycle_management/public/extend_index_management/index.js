@@ -7,17 +7,22 @@ import React from 'react';
 import { IndexLifecycleSummary } from './components/index_lifecycle_summary';
 import { AddLifecyclePolicyConfirmModal } from './components/add_lifecycle_confirm_modal';
 import { RemoveLifecyclePolicyConfirmModal } from './components/remove_lifecycle_confirm_modal';
-import { get, every } from 'lodash';
-import { i18n }  from '@kbn/i18n';
-import { addSummaryExtension, addBannerExtension, addActionExtension } from '../../../index_management/public/index_management_extensions';
+import { get, every, any } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import {
+  addSummaryExtension,
+  addBannerExtension,
+  addActionExtension,
+  addFilterExtension,
+} from '../../../index_management/public/index_management_extensions';
 import { retryLifecycleForIndex } from '../services/api';
+import { EuiSearchBar } from '@elastic/eui';
 
 const stepPath = 'ilm.step';
 
-
-addActionExtension((indices) => {
-  const allHaveErrors = every(indices, (index) => {
-    return (index.ilm && index.ilm.failed_step);
+addActionExtension(indices => {
+  const allHaveErrors = every(indices, index => {
+    return index.ilm && index.ilm.failed_step;
   });
   if (!allHaveErrors) {
     return null;
@@ -30,14 +35,17 @@ addActionExtension((indices) => {
     buttonLabel: i18n.translate('xpack.idxMgmt.retryIndexLifecycleActionButtonLabel', {
       defaultMessage: 'Retry lifecycle step',
     }),
-    successMessage: i18n.translate('xpack.idxMgmt.retryIndexLifecycleAction.successfullyRetriedLifecycleMessage', {
-      defaultMessage: 'Successfully called retry lifecycle step for: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') }
-    }),
+    successMessage: i18n.translate(
+      'xpack.idxMgmt.retryIndexLifecycleAction.successfullyRetriedLifecycleMessage',
+      {
+        defaultMessage: 'Successfully called retry lifecycle step for: [{indexNames}]',
+        values: { indexNames: indexNames.join(', ') },
+      }
+    ),
   };
 });
 addActionExtension((indices, reloadIndices) => {
-  const allHaveIlm = every(indices, (index) => {
+  const allHaveIlm = every(indices, index => {
     return index.ilm && index.ilm.managed;
   });
   if (!allHaveIlm) {
@@ -91,11 +99,12 @@ addActionExtension((indices, reloadIndices) => {
     }),
   };
 });
-addBannerExtension((indices) =>{
+addBannerExtension(indices => {
+  const { Query } = EuiSearchBar;
   if (!indices.length) {
     return null;
   }
-  const indicesWithLifecycleErrors = indices.filter((index) => {
+  const indicesWithLifecycleErrors = indices.filter(index => {
     return get(index, stepPath) === 'ERROR';
   });
   const numIndicesWithLifecycleErrors = indicesWithLifecycleErrors.length;
@@ -104,7 +113,7 @@ addBannerExtension((indices) =>{
   }
   return {
     type: 'warning',
-    filter: `${stepPath}:ERROR`,
+    filter: Query.parse(`${stepPath}:ERROR`),
     filterLabel: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtBanner.filterLabel', {
       defaultMessage: 'Show errors',
     }),
@@ -112,12 +121,67 @@ addBannerExtension((indices) =>{
       defaultMessage: `{ numIndicesWithLifecycleErrors, number}
           {numIndicesWithLifecycleErrors, plural, one {index has} other {indices have} }
           lifecycle errors`,
-      values: { numIndicesWithLifecycleErrors }
+      values: { numIndicesWithLifecycleErrors },
     }),
   };
 });
-addSummaryExtension((index) => {
+addSummaryExtension(index => {
   return <IndexLifecycleSummary index={index} />;
 });
-
-
+addFilterExtension(indices => {
+  const hasIlm = any(indices, index => index.ilm && index.ilm.managed);
+  if (!hasIlm) {
+    return [];
+  } else {
+    return [
+      {
+        type: 'field_value_toggle_group',
+        field: 'ilm.managed',
+        items: [
+          {
+            value: true,
+            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
+              defaultMessage: 'Managed',
+            }),
+          },
+          {
+            value: false,
+            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
+              defaultMessage: 'Unmanaged',
+            }),
+          },
+        ],
+      },
+      {
+        type: 'field_value_selection',
+        field: 'ilm.phase',
+        name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.lifecyclePhaseLabel', {
+          defaultMessage: 'Lifecycle phase',
+        }),
+        multiSelect: 'or',
+        options: [
+          {
+            value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
+              defaultMessage: 'hot',
+            }),
+          },
+          {
+            value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
+              defaultMessage: 'warm',
+            }),
+          },
+          {
+            value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
+              defaultMessage: 'cold',
+            }),
+          },
+          {
+            value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
+              defaultMessage: 'delete',
+            }),
+          },
+        ],
+      },
+    ];
+  }
+});

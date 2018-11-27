@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Pager } from '@elastic/eui';
+import { Pager, EuiSearchBar } from '@elastic/eui';
 
 import { createSelector } from 'reselect';
 import { indexStatusLabels } from '../../lib/index_status_labels';
-import { filterItems, sortTable } from '../../services';
+import { sortTable } from '../../services';
 
 export const getDetailPanelData = (state) => state.detailPanel.data;
 export const getDetailPanelError = (state) => state.detailPanel.error;
@@ -40,14 +40,8 @@ const getFilteredIndices = createSelector(
     const systemFilteredIndexes = tableState.showSystemIndices
       ? indexArray
       : indexArray.filter(index => !(index.name + '').startsWith('.'));
-    let filter = tableState.filter;
-    let fields = defaultFilterFields;
-    if (filter.includes(':')) {
-      const splitFilter = filter.split(':');
-      fields = [ splitFilter[0]];
-      filter = splitFilter[1];
-    }
-    return filterItems(fields, filter, systemFilteredIndexes);
+    const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
+    return EuiSearchBar.Query.execute(filter, systemFilteredIndexes, defaultFilterFields);
   }
 );
 export const getTotalItems = createSelector(

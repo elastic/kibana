@@ -25,5 +25,12 @@ export const addBannerExtension = (actionExtension)=> {
 export const getBannerExtensions = () => {
   return bannerExtensions;
 };
+const filterExtensions = [];
+export const addFilterExtension = (filterExtension)=> {
+  filterExtensions.push(filterExtension);
+};
+export const getFilterExtensions = () => {
+  return filterExtensions;
+};
 
 
