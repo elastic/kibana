@@ -1,0 +1,441 @@
+[[canvas-common-functions]]
+=== Canvas common functions
+
+beta[]The common functions can run anywhere, 
+which means they'll execute wherever the expression is currently executing. For example,
+if the engine is currently running on the server, the functions will run on the server.
+
+A * denotes a required argument.
+
+
+[float]
+=== all
+
+Returns true if all of the conditions are true.
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed_*::  (boolean) The conditions to check.
+
+
+[float]
+=== alterColumn
+
+Converts between core types, for example, string, number, null, boolean, date 
+and rename columns.
+
+-  *Accepts:* datatable
+-  *Returns:* datatable
+-  *Arguments*
++
+column*:: (string) The name of the column to alter.
++
+type:: (string) The type to convert the column to. Leave blank to not change type. 
+The default is `null`.
++
+name:: (string) The resultant column name. Leave blank to not rename. The default is `null`.
+
+[float]
+=== any
+
+Returns true if any of the conditions are true.
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed_*::  (boolean) The conditions to check.
+
+
+[float]
+=== as
+
+Creates a datatable with a single value.
+
+-  *Accepts:* string, boolean, number, null
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed_*::  (string) A name to give the column. The default value is `value`.
+Alias: name
+
+
+[float]
+=== axisConfig
+
+Configures axis of a visualization.
+
+- *Accepts:* datatable
+- *Returns:* axisConfig
+- *Arguments*
++
+show:: (boolean) Show the axis labels? The default is `true.`
+ +
+position:: (string) The position of the axis labels, for example, top, bottom, left, and right.
+The default is ```
+   
+   
+[float]
+=== clog
+
+Outputs the context to the console.
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
+
+
+[float]
+=== columns
+
+Includes or excludes columns from a data table. If you specify both, this will exclude first.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+- *Arguments*
++
+include:: (string) A comma separated list of column names to keep in the table. 
+The default is `null.`
++
+exclude:: (string) A comma separated list of column names to remove from the table.
+The default is `null.`
+   
+[float]
+=== compare
+
+Compares the input to something else to determine true or false. 
+Usually used in combination with `if`. This only works with primitive types, 
+such as number, string, and boolean.
+
+- *Accepts:* null, string, number, boolean
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed_:: (string) The operator to use in the comparison: 
+`eq` (equal), `ne` (not equal), `lt` (less than), `gt` (greater than), `lte ``(less than equal), 
+  `gte` (greater than eq). The default is `eq`. Alias: op.
++ 
+to:: (any) The value to compare the context to, usually returned by a subexpression.  
+Aliases: this, b
+
+[float]
+=== containerStyle
+
+Creates an object used for describing the properties of a series on a chart. 
+You would usually use this inside of a charting function.
+
+- *Accepts:* null
+- *Returns:* containerStyle
+- *Arguments*
++
+border::  (string) Valid CSS border string.
++
+borderRadius::  (string) Number of pixels to use when rounding the border.
++
+padding::  (string) Content distance in pixels from border.
++
+backgroundColor::  (string) Valid CSS background color string.
++
+backgroundImage::  (string) Valid CSS background image string.
++
+backgroundSize::  (string) Valid CSS background size string. The default is `contain`.
++
+backgroundRepeat::  (string) Valid CSS background repeat string.  The default is `no-repeat`.
++
+opacity::  (number) A number between 0 and 1 representing the degree of transparency of the element.
+
+[float]
+=== context
+
+Returns whatever you pass into it. This can be useful when you need to use 
+context as argument to a function as a sub-expression.
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
+
+[float]
+=== csv
+
+Creates a datatable from CSV input.
+
+- *Accepts:* null
+- *Returns:* containerStyle
+- *Arguments*
++
+_Unnamed*_::  (string) CSV data to use.
++
+delimiter*::  (string) Data separation character.
++
+newline*::  (string) Row separation character.
+
+[float]
+=== date
+
+Returns the current time, or a time parsed from a string, as milliseconds since epoch.
+
+- *Accepts:* null
+- *Returns:* number
+- *Arguments*
++
+_Unnamed_::  (string) An optional date string to parse into milliseconds 
+since epoch. Can be either a valid JavaScript Date input or a string to parse 
+using the format argument. Must be an ISO 8601 string or you must provide the format.
++
+format*::  (string) The `momentJS` format for parsing the optional date 
+string. See the https://momentjs.com/docs/#/displaying/[moment.js documentation].
+
+[float]
+=== do
+
+Runs multiple sub-expressions. Returns the passed in context. Nice for running 
+actions producing functions.
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
+- *Arguments*
++
+_Unnamed_::  (any) One or more sub-expressions. The value of these is not 
+available in the root pipeline as this function simply returns the passed in context.
+
+[float]
+=== dropdownControl
+
+Configures a dropdown filter control element.
+
+- *Accepts:* datatable
+- *Returns:* render
+- *Arguments*
++
+filterColumn:: (any) The column or field to which to attach the filter.
++
+valueColumn:: (any) The datatable column from which to extract the unique values 
+for the dropdown.
+
+[float]
+=== eq
+
+Returns whether the context is equal to the argument.
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed*_:: (boolean, number, string) The value to which to compare the context.
+
+[float]
+=== exactly
+
+Creates a filter that matches a given column for a perfectly exact value.
+
+- *Accepts:* filter
+- *Returns:* filter
+- *Arguments*
++
+column*:: (string) The column or field to attach the filter to. Aliases: field, c
++
+value*:: (string) The value to match exactly, including white space and 
+capitalization. Aliases: v, val
+
+[float]
+=== filterrows
+
+Filters rows in a datatable based on the return value of a subexpression.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed*_::  (boolean) An expression to pass into each row in the datatable.
+The expression should return a boolean. A true value preserves the row, 
+and a false value removes it.  Alias: fn
+
+[float]
+=== font
+
+Creates font style.
+
+- *Accepts:* null
+- *Returns:* style
+- *Arguments*
++
+size::  (number) The font size in pixels.  The default is `14`.
++
+lHeight*::  (number) The line height in pixels. Alias: lineHeight
++
+family::  (string) An acceptable CSS web font string. The default is `"'Open Sans', Helvetica, Arial, sans-serif"`
++
+color::  (string) The text color
++
+weight::  (string) The font weight, for example, `normal`, `bold`, `bolder`, `lighter`, 
+`100`, `200`, `300`, `400`, `500`, `600`, `700`, `800`, `900`.  The default is `normal.`
++
+underline::  (boolean) Underline the text, `true` or `false`. The default is `false`.
++
+italic::  (boolean) Italicize the text, `true` or `false`. The default is `false`.
++
+align::  (string) The horizontal alignment of text.  The default is `left`.
+
+[float]
+=== formatdate
+
+Outputs a ms since epoch number as a formatted string.
+
+- *Accepts:* number
+- *Returns:* string
+- *Arguments*
++
+_Unnamed*_:: (string) MomentJS Format with which to bucket. See the https://momentjs.com/docs/#/displaying/[Moment.js documentation].
+
+[float]
+=== formatnumber
+
+Turns a number into a string using a NumberJS format.
+
+- *Accepts:* number
+- *Returns:* string
+- *Arguments*
++
+_Unnamed*_:: (string) NumeralJS format string. See the http://numeraljs.com/#format[Numeral.js documentation]
+
+[float]
+=== getCell
+
+Fetches a single cell in a table.
+
+- *Accepts:* datatable
+- *Returns:* Depends on your input and arguments
+- *Arguments*
++
+_Unnamed*_:: (string) The name of the column value to fetch. Aliases: column, c
++
+row:: (number) The row number, starting at 0.  The default is `0`. Alias: r
+
+[float]
+=== gt
+
+Returns whether the context is greater than the argument.
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed*_:: (boolean, number, string) The value to compare the context to.
+
+[float]
+=== gte
+
+Returns whether the context is greater than or equal to the argument.
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed*_:: (boolean, number, string) The value to compare the context to.
+
+[float]
+=== head
+
+Gets the first N rows from the datatable. Also see `tail`.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed_:: (number) Return this number of rows from the beginning of the datatable.
+The default is `1`.
+
+[float]
+=== if
+
+Performs conditional logic.
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
+- *Arguments*
++
+_Unnamed_:: (boolean) A boolean true or false, usually returned by a subexpression. 
+If this is not supplied, then the input context will be used. Alias: condition
++
+then:: (any) The return value if true.
++
+else:: (any) The return value if false. If else is not specified, and the condition is false,
+then the input context to the function will be returned.
+
+[float]
+=== image
+
+Displays an image.
+
+- *Accepts:* null
+- *Returns:* image
+- *Arguments*
++
+dataurl:: (string) Alias: _, url
++
+mode:: (string)
+
+[float]
+=== lt
+
+Returns whether the context is less than the argument.
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed*_:: (boolean, number, string) The value to compare the context to.
+
+[float]
+=== lte
+
+Returns whether the context is less than or equal to the argument.
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed*_:: (boolean, number, string) The value to compare the context to.
+
+[float]
+=== mapColumn
+
+Adds a column calculated as the result of other columns, or not.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed*_:: (string) The name of the resulting column. Alias: column
++
+expression:: (boolean, number, string) A Canvas expression that will be passed 
+to each row as a single row datatable.  Aliases: exp, fn
+
+[float]
+=== markdown
+
+Adds an element for rendering Markdown text. Great for single numbers, metrics, or paragraphs of text.
+
+- *Accepts:* datatable, null
+- *Returns:* render
+- *Arguments*
++
+_Unnamed*_:: (string) A string containing Markdown. You can pass this multiple 
+times to achieve concatenation.  The default is `""`.
++
+font:: (style) Font settings. Technically, you can stick other styles in here too.
+The default is `{font}`.
+
+[float]
+=== math
+
+Interprets a math expression, with a number or datatable as context. Datatable 
+columns are available by their column name. If you pass in a number, it is 
+available as "value" (without the quotes).
+
+- *Accepts:* number, datatable
+- *Returns:* number
+- *Arguments*
++
+_Unnamed*_:: (string) An evaluated TinyMath expression. See <<canvas-tinymath-functions>>.
+

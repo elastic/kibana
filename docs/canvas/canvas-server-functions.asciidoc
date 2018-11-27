@@ -1,0 +1,21 @@
+[[canvas-server-functions]]
+=== Canvas server functions
+
+beta[]These functions can only execute on the server. This may be for performance
+or security reasons, or because the function uses an API only available on the 
+{kib} server. If the expression is executing in the browser it will transfer to 
+the server when it hits one of these functions.
+
+A * denotes a required argument.
+
+[float]
+=== demodata
+
+A mock data set that includes project CI times with usernames, countries, and run phases.
+
+- *Accepts:* filter
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed_::  (string) The name of the demo data set to use.  The defaults is` ci`.
+Alias:  type
