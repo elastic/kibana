@@ -20,7 +20,7 @@ import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
-  uiButtons?: Array<{
+  uiButtons: Array<{
     label: string;
     url: string;
   }>;
@@ -72,8 +72,10 @@ export async function getUpgradeCheckupStatus(
 }
 
 // Adds a uiButton item pointing the Elasticsearch docs for the given warning.
-const addUiButtonForDocs = (dep: EnrichedDeprecationInfo): EnrichedDeprecationInfo => {
-  const uiButtons = (dep.uiButtons || []).concat([
+const addUiButtonForDocs = (
+  dep: DeprecationInfo | EnrichedDeprecationInfo
+): EnrichedDeprecationInfo => {
+  const uiButtons = ((dep as any).uiButtons || []).concat([
     {
       label: 'Read Documentation',
       url: dep.url,
@@ -126,6 +128,7 @@ const getCombinedIndexInfos = (
         level: 'critical',
         message: 'This index must be upgraded in order to upgrade the Elastic Stack.',
         details: 'Upgrading is irreversible, so always back up your index before proceeding.',
+        uiButtons: [],
         url:
           'https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-upgrade.html',
       });
