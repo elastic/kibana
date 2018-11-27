@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import chrome from 'ui/chrome';
 import { populateBrowserRegistries } from '@kbn/interpreter/public';
 import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
 
@@ -26,4 +27,4 @@ const types = {
   types: typesRegistry
 };
 
-populateBrowserRegistries(types);
+populateBrowserRegistries(types, chrome.getBasePath());

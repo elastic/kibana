@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import $script from 'scriptjs';
 
 let resolvePromise = null;
@@ -31,7 +30,7 @@ export const getBrowserRegistries = () => {
   return populatePromise;
 };
 
-const loadBrowserRegistries = (registries) => {
+const loadBrowserRegistries = (registries, basePath) => {
   const remainingTypes = Object.keys(registries);
   const populatedTypes = {};
 
@@ -47,7 +46,7 @@ const loadBrowserRegistries = (registries) => {
 
       // Load plugins one at a time because each needs a different loader function
       // $script will only load each of these once, we so can call this as many times as we need?
-      const pluginPath = chrome.addBasePath(`/api/canvas/plugins?type=${type}`);
+      const pluginPath = `${basePath}/api/canvas/plugins?type=${type}`;
       $script(pluginPath, () => {
         populatedTypes[type] = registries[type];
         loadType();
@@ -58,7 +57,7 @@ const loadBrowserRegistries = (registries) => {
   });
 };
 
-export const populateBrowserRegistries = (registries) => {
+export const populateBrowserRegistries = (registries, basePath) => {
   if (called) {
     const oldPromise = populatePromise;
     let newResolve;
@@ -66,7 +65,7 @@ export const populateBrowserRegistries = (registries) => {
       newResolve = _resolve;
     });
     oldPromise.then(oldTypes => {
-      loadBrowserRegistries(registries).then(newTypes => {
+      loadBrowserRegistries(registries, basePath).then(newTypes => {
         newResolve({
           ...oldTypes,
           ...newTypes,
@@ -76,7 +75,7 @@ export const populateBrowserRegistries = (registries) => {
     return populatePromise;
   }
   called = true;
-  loadBrowserRegistries(registries).then(registries => {
+  loadBrowserRegistries(registries, basePath).then(registries => {
     resolvePromise(registries);
   });
   return populatePromise;
