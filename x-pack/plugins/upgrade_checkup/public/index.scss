@@ -1,5 +1,10 @@
 @import 'ui/public/styles/_styling_constants';
 
+upgrade-checkup {
+  background-color: $euiColorLightestShade;
+  flex-grow: 1;
+}
+
 .upgrade-checkup__deprecation-cell {
   border: 1px solid #D9D9D9;
   padding: 10px;
