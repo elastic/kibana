@@ -131,9 +131,7 @@ class ListControl extends Control {
     }
 
     const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-      return { label: this.format(bucket.key), value: bucket.key.toString() };
-    }).sort((a, b) => {
-      return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+      return bucket.key;
     });
 
     if(selectOptions.length === 0 && !query) {

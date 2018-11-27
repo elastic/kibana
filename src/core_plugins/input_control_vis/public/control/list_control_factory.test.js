@@ -119,16 +119,7 @@ describe('fetch', () => {
 
   test('should set selectOptions to results of terms aggregation', async () => {
     await listControl.fetch();
-    expect(listControl.selectOptions).toEqual([
-      {
-        'label': 'Xi an Xianyang International Airport',
-        'value': 'Xi an Xianyang International Airport',
-      },
-      {
-        'label': 'Zurich Airport',
-        'value': 'Zurich Airport',
-      }
-    ]);
+    expect(listControl.selectOptions).toEqual(['Zurich Airport', 'Xi an Xianyang International Airport']);
   });
 });
 
