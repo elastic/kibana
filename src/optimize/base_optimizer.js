@@ -25,6 +25,7 @@ import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 import { defaults } from 'lodash';
 
@@ -214,6 +215,12 @@ export default class BaseOptimizer {
             // what require() calls it will execute within the bundle
             JSON.stringify({ type, modules: extensions[type] || [] })
           ].join('');
+        }),
+
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          openAnalyzer: false,
+          generateStatsFile: true,
         }),
 
         ...this.uiBundles.getWebpackPluginProviders()
