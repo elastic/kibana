@@ -34,12 +34,12 @@ exports[`renders ListControl 1`] = `
       Array [
         Object {
           "data-test-subj": "option_choice1",
-          "label": "choice1",
+          "label": "choice1 + formatting",
           "value": "choice1",
         },
         Object {
           "data-test-subj": "option_choice2",
-          "label": "choice2",
+          "label": "choice2 + formatting",
           "value": "choice2",
         },
       ]

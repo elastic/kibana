@@ -21,11 +21,17 @@ import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
 import { parseInterval } from './parse_interval';
 import { set } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 function checkMetric(metric, fields) {
   fields.forEach(field => {
     if (!metric[field]) {
-      throw new Error(`Metric missing ${field}`);
+      throw new Error(
+        i18n.translate('tsvb.metricMissingErrorMessage', {
+          defaultMessage: 'Metric missing {field}',
+          values: { field }
+        })
+      );
     }
   });
 }

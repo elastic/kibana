@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const MIN_CHART_HEIGHT = 250;
 
@@ -140,15 +141,31 @@ class VisEditorVisualization extends Component {
       style.userSelect = 'none';
     }
 
-    let applyMessage = 'The latest changes have been applied.';
-    if (dirty) applyMessage = 'The changes to this visualization have not been applied.';
-    if (autoApply) applyMessage = 'The changes will be automatically applied.';
+    let applyMessage = (<FormattedMessage
+      id="tsvb.visEditorVisualization.changesSuccessfullyAppliedMessage"
+      defaultMessage="The latest changes have been applied."
+    />);
+    if (dirty) {
+      applyMessage = (<FormattedMessage
+        id="tsvb.visEditorVisualization.changesHaveNotBeenAppliedMessage"
+        defaultMessage="The changes to this visualization have not been applied."
+      />);
+    }
+    if (autoApply) {
+      applyMessage = (<FormattedMessage
+        id="tsvb.visEditorVisualization.changesWillBeAutomaticallyAppliedMessage"
+        defaultMessage="The changes will be automatically applied."
+      />);
+    }
     const applyButton = (
       <EuiFlexGroup className="tvbEditorVisualization__apply" alignItems="center">
         <EuiFlexItem grow={true}>
           <EuiSwitch
             id="tsvbAutoApplyInput"
-            label="Auto apply"
+            label={(<FormattedMessage
+              id="tsvb.visEditorVisualization.autoApplyLabel"
+              defaultMessage="Auto apply"
+            />)}
             checked={autoApply}
             onChange={this.props.onToggleAutoApply}
           />
@@ -164,7 +181,12 @@ class VisEditorVisualization extends Component {
 
         {!autoApply &&
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="play" fill size="s" onClick={this.props.onCommit} disabled={!dirty}>Apply changes</EuiButton>
+            <EuiButton iconType="play" fill size="s" onClick={this.props.onCommit} disabled={!dirty}>
+              <FormattedMessage
+                id="tsvb.visEditorVisualization.applyChangesLabel"
+                defaultMessage="Apply changes"
+              />
+            </EuiButton>
           </EuiFlexItem>
         }
       </EuiFlexGroup>
@@ -189,7 +211,10 @@ class VisEditorVisualization extends Component {
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
             onKeyDown={this.onSizeHandleKeyDown}
-            aria-label="Press up/down to adjust the chart size"
+            aria-label={this.props.intl.formatMessage({
+              id: 'tsvb.colorRules.adjustChartSizeAriaLabel',
+              defaultMessage: 'Press up/down to adjust the chart size'
+            })}
           >
             <i className="fa fa-ellipsis-h" />
           </button>
@@ -215,4 +240,4 @@ VisEditorVisualization.propTypes = {
   appState: PropTypes.object,
 };
 
-export default VisEditorVisualization;
+export default injectI18n(VisEditorVisualization);

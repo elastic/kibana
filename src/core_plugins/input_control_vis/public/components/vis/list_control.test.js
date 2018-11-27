@@ -25,10 +25,11 @@ import {
   ListControl,
 } from './list_control';
 
-const options = [
-  { label: 'choice1', value: 'choice1' },
-  { label: 'choice2', value: 'choice2' }
-];
+const options = ['choice1', 'choice2'];
+
+const formatOptionLabel = (value) => {
+  return `${value} + formatting`;
+};
 
 let stageFilter;
 
@@ -45,6 +46,7 @@ test('renders ListControl', () => {
     multiselect={true}
     controlIndex={0}
     stageFilter={stageFilter}
+    formatOptionLabel={formatOptionLabel}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -56,6 +58,7 @@ test('disableMsg', () => {
     multiselect={true}
     controlIndex={0}
     stageFilter={stageFilter}
+    formatOptionLabel={formatOptionLabel}
     disableMsg={'control is disabled to test rendering when disabled'}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line

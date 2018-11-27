@@ -194,6 +194,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         defaultFindTimeout * 2);
     }
 
+    async clickDropPartialBuckets() {
+      return await testSubjects.click('dropPartialBucketsCheckbox');
+    }
+
     async setMarkdownTxt(markdownTxt) {
       const input = await testSubjects.find('markdownTextarea');
       await input.clearValue();

@@ -43,7 +43,10 @@ class ListControlUi extends Component {
   }
 
   handleOnChange = (selectedOptions) => {
-    this.props.stageFilter(this.props.controlIndex, selectedOptions);
+    const selectedValues = selectedOptions.map(({ value }) => {
+      return value;
+    });
+    this.props.stageFilter(this.props.controlIndex, selectedValues);
   }
 
   debouncedFetch = _.debounce(async (searchValue) => {
@@ -77,11 +80,22 @@ class ListControlUi extends Component {
       );
     }
 
-    const options = this.props.options.map(option => {
+    const options = this.props.options
+      .map(option => {
+        return {
+          label: this.props.formatOptionLabel(option).toString(),
+          value: option,
+          ['data-test-subj']: `option_${option.toString().replace(' ', '_')}`
+        };
+      })
+      .sort((a, b) => {
+        return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+      });
+
+    const selectedOptions = this.props.selectedOptions.map(selectedOption => {
       return {
-        label: option.label,
-        value: option.value,
-        ['data-test-subj']: `option_${option.value.replace(' ', '_')}`
+        label: this.props.formatOptionLabel(selectedOption).toString(),
+        value: selectedOption,
       };
     });
 
@@ -95,7 +109,7 @@ class ListControlUi extends Component {
         isLoading={this.state.isLoading}
         async={this.props.dynamicOptions}
         onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
-        selectedOptions={this.props.selectedOptions}
+        selectedOptions={selectedOptions}
         onChange={this.handleOnChange}
         singleSelection={!this.props.multiselect}
         data-test-subj={`listControlSelect${this.props.controlIndex}`}
@@ -117,16 +131,12 @@ class ListControlUi extends Component {
   }
 }
 
-const comboBoxOptionShape = PropTypes.shape({
-  label: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
-});
-
 ListControlUi.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  selectedOptions: PropTypes.arrayOf(comboBoxOptionShape).isRequired,
-  options: PropTypes.arrayOf(comboBoxOptionShape),
+  selectedOptions: PropTypes.array.isRequired,
+  options: PropTypes.array,
+  formatOptionLabel: PropTypes.func.isRequired,
   disableMsg: PropTypes.string,
   multiselect: PropTypes.bool,
   dynamicOptions: PropTypes.bool,
