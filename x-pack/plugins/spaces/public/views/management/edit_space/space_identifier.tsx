@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFieldText,
-  EuiFormRow,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { Space } from '../../../../common/model/space';
@@ -27,7 +23,6 @@ interface State {
 }
 
 class SpaceIdentifierUI extends Component<Props, State> {
-
   private textFieldRef: HTMLInputElement | null = null;
 
   constructor(props: Props) {
@@ -39,9 +34,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
 
   public render() {
     const { intl } = this.props;
-    const {
-      id = ''
-    } = this.props.space;
+    const { id = '' } = this.props.space;
 
     return (
       <Fragment>
@@ -64,7 +57,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
             }
             value={id}
             onChange={this.onChange}
-            inputRef={(ref) => this.textFieldRef = ref}
+            inputRef={ref => (this.textFieldRef = ref)}
             fullWidth
           />
         </EuiFormRow>
@@ -75,12 +68,13 @@ class SpaceIdentifierUI extends Component<Props, State> {
   public getLabel = () => {
     if (!this.props.editable) {
       return (
-      <p>
-        <FormattedMessage
-          id="xpack.spaces.management.spaceIdentifier.urlIdentifierTitle"
-          defaultMessage="URL identifier"
-        />
-      </p>);
+        <p>
+          <FormattedMessage
+            id="xpack.spaces.management.spaceIdentifier.urlIdentifierTitle"
+            defaultMessage="URL identifier"
+          />
+        </p>
+      );
     }
 
     const editLinkText = this.state.editing ? (
@@ -124,7 +118,9 @@ class SpaceIdentifierUI extends Component<Props, State> {
             nextLine: <br />,
             engineeringKibanaUrl: (
               <React.Fragment>
-                https://my-kibana.example<strong>/s/engineering/</strong>app/kibana
+                {`https://my-kibana.example`}
+                <strong>/s/engineering/</strong>
+                app/kibana
               </React.Fragment>
             ),
           }}
@@ -134,17 +130,22 @@ class SpaceIdentifierUI extends Component<Props, State> {
   };
 
   public onEditClick = () => {
-    this.setState({
-      editing: !this.state.editing
-    }, () => {
-      if (this.textFieldRef && this.state.editing) {
-        this.textFieldRef.focus();
+    this.setState(
+      {
+        editing: !this.state.editing,
+      },
+      () => {
+        if (this.textFieldRef && this.state.editing) {
+          this.textFieldRef.focus();
+        }
       }
-    });
+    );
   };
 
   public onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!this.state.editing) { return; }
+    if (!this.state.editing) {
+      return;
+    }
     this.props.onChange(e);
   };
 }
