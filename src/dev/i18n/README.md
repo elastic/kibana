@@ -7,11 +7,12 @@
 The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, handlebars, hbs, pug}` files in provided plugins directories to a JSON file.\
 The tool uses Babel to parse code and build an AST for each file or JS expression if whole file parsing is impossible. So only static parsing is available for messages extraction. It means that no variables, function calls or dynamic expressions can be used for ids, messages and description, only strings.
 
-### I18n examples and restrictions of the syntax
+### I18n examples and syntax restrictions
 
 **Global restrictions**:
 
-Values of `id`, `defaultMessage` and `description` properties must be string literals, template literals w/o expressions or string-only concatenation expressions. Identifiers and any other expressions are disallowed.
+Values of `defaultMessage` and `description` properties must be string literals, template literals w/o expressions or string-only concatenation expressions. Identifiers and any other expressions are disallowed.\
+Value of `id` can be only a string literal.
 
 `defaultMessage` value must contain ICU references to all keys in `values` property and vice versa.
 
@@ -92,7 +93,7 @@ Values of `id`, `defaultMessage` and `description` properties must be string lit
 #### JavaScript (primarily server-side) (.js, .ts, .jsx, .tsx)
 
 ```js
-intl('plugin_namespace.message_id', {
+i18n('plugin_namespace.message_id', {
   values: {
     key: 'value',
   },
@@ -104,7 +105,7 @@ intl('plugin_namespace.message_id', {
 or
 
 ```js
-intl.translate('plugin_namespace.message_id', {
+i18n.translate('plugin_namespace.message_id', {
   values: {
     key: 'value',
   },
@@ -114,7 +115,7 @@ intl.translate('plugin_namespace.message_id', {
 ```
 
 `values` and `description` properties are optional.\
- Expression can be parsed only if it is located in syntactically valid JS/TS code. Do not use type assertions in TypeScript for `defaultMessage` or `description` properties, id argument or the second argument of `intl*` call expression. It is never needed for i18n engine use cases.
+ Expression can be parsed only if it is located in syntactically valid JS/TS code. Do not use type assertions in TypeScript for `defaultMessage` or `description` properties, id argument or the second argument of `i18n*` call expression. It is never needed for i18n engine use cases.
 
 #### Pug (.pug)
 
@@ -135,18 +136,18 @@ Expression in `#{...}` is parsed as a JS expression.
 {{i18n 'plugin_namespace.message_id' '{"defaultMessage": "Default message string literal", "description": "Message context or description"}'}}
 ```
 
-`values` and `description` properties are optional.`
+`values` and `description` properties are optional.\
 The third token (the second argument of i18n function call) should be a string literal that contains a valid JSON.
 
 ### Usage
 
 ```bash
-node scripts/extract_default_translations --path path/to/plugin --path path/to/another/plugin --output ./translations --output-format json5
+node scripts/i18n_check --path path/to/plugin --path path/to/another/plugin --output ./translations --output-format json5
 ```
 
 `path/to/plugin` is an example of path to a directory(-es) where messages searching should start. By default `--path` is `.`, it means that messages from all paths in `.i18nrc.json` will be parsed. Each specified path should start with any path in `.i18nrc.json` or be a part of it.\
 `--output` specifies a path to a directory, where `en.json` will be created, if `--output` is not provided, `en.json` generation will be skipped. It is useful if you want to validate i18n engine usage.\
-In case of parsing issues, exception with the necessary information will be thrown to console and extraction will be aborted.
+In case of parsing issues, exception with the necessary information will be thrown to console and extraction will be aborted.\
 `--output-format` specifies format of generated `en.json` (if `--output` is provided). By default it is `json`. Use it only if you need a JSON5 file.
 
 ### Output
