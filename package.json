@@ -41,6 +41,15 @@
     "Tim Sullivan <tim@elastic.co>",
     "Yuri Astrakhan <yuri@elastic.co>"
   ],
+  "kibana": {
+    "clean": {
+      "extraPatterns": [
+        "build",
+        "optimize",
+        ".eslintcache"
+      ]
+    }
+  },
   "scripts": {
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
