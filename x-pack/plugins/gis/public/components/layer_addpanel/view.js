@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment } from 'react';
-import { ALayer } from '../../shared/layers/layer';
 import { XYZTMSSource } from '../../shared/layers/sources/xyz_tms_source';
 import { WMSSource } from '../../shared/layers/sources/wms_source';
 import { EMSFileSource } from '../../shared/layers/sources/ems_file_source';
@@ -329,21 +328,8 @@ export class AddLayerPanel extends React.Component {
   }
 
   _renderAddLayerForm() {
-
-    const globalLayerSettings = ALayer.renderGlobalSettings({
-      label: this.state.label,
-      onLabelChange: this._onLabelChange,
-      minZoom: this.state.minZoom,
-      maxZoom: this.state.maxZoom,
-      alphaValue: this.state.alphaValue,
-      onMinZoomChange: this._onMinZoomChange,
-      onMaxZoomChange: this._onMaxZoomChange,
-      onAlphaValueChange: this._onAlphaValueChange
-    });
-
     return (
       <EuiForm>
-        {globalLayerSettings}
         {this._renderSourceSelect()}
         {this._renderSourceEditor()}
       </EuiForm>
