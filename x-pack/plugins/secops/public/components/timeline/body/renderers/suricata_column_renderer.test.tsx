@@ -9,7 +9,7 @@ import { cloneDeep, omit, set } from 'lodash/fp';
 import React from 'react';
 
 import { EMPTY_VALUE, suricataColumnRenderer } from '.';
-import { mockECSData } from '../../../../pages/mock/mock_ecs';
+import { mockECSData } from '../../../../mock/mock_ecs';
 import { ECS } from '../../ecs';
 
 describe('suricata_column_renderer', () => {
