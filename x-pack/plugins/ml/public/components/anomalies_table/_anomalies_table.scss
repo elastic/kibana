@@ -103,6 +103,11 @@
         font-size: inherit;
       }
 
+      .filter-button {
+        -webkit-transform: translateY(-1px);
+        transform: translateY(-1px);
+      }
+
     }
   }
 
