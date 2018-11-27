@@ -19,11 +19,14 @@ describe('ML - Import Events Modal Controller', () => {
   it('Initialize Import Events Modal Controller', (done) => {
     ngMock.inject(function ($rootScope, $controller) {
       const scope = $rootScope.$new();
-      $controller('MlImportEventsModal', {
-        $scope: scope,
-        $modalInstance: mockModalInstance,
-        params: {}
-      });
+
+      expect(() => {
+        $controller('MlImportEventsModal', {
+          $scope: scope,
+          $modalInstance: mockModalInstance,
+          params: {}
+        });
+      }).to.not.throwError();
 
       expect(scope.loadingLock).to.be(false);
       done();
