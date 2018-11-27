@@ -40,7 +40,7 @@ export function CalendarForm({
 }) {
   return (
     <EuiForm>
-      <EuiFlexGroup>
+      <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
@@ -93,6 +93,7 @@ export function CalendarForm({
         fullWidth
       >
         <EuiComboBox
+          className="ml-calendar-combo-box"
           fullWidth
           options={jobIds}
           selectedOptions={selectedJobOptions}
@@ -106,6 +107,7 @@ export function CalendarForm({
         fullWidth
       >
         <EuiComboBox
+          className="ml-calendar-combo-box"
           fullWidth
           options={groupIds}
           selectedOptions={selectedGroupOptions}

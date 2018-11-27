@@ -197,10 +197,11 @@ export class NewCalendar extends Component {
     } = this.state;
 
     return (
-      <EuiPage className="ml-list-filter-lists">
+      <EuiPage className="ml-calendar-form">
         <EuiPageContent
-          className="ml-list-filter-lists-content"
+          className="ml-calendar-form-content"
           verticalPosition="center"
+          horizontalPosition="center"
         >
           <CalendarForm
             calendarId={selectedCalendar ? selectedCalendar.calendar_id : formCalendarId}
