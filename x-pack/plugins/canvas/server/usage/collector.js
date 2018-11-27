@@ -5,7 +5,7 @@
  */
 
 import { sum as arraySum, min as arrayMin, max as arrayMax, get } from 'lodash';
-import { fromExpression } from '@kbn/interpreter/common/lib/ast';
+import { fromExpression } from '@kbn/interpreter/common';
 import { CANVAS_USAGE_TYPE, CANVAS_TYPE } from '../../common/lib/constants';
 
 /*
