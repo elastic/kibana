@@ -90,7 +90,7 @@ describe('RouteTreeBuilder', () => {
       const tree = treeBuilder.routeTreeFromPaths(pages, {
         '/beat': ['beatId'],
       });
-      expect(tree[2].path).toEqual('/beat/:beatId');
+      expect(tree[1].path).toEqual('/beat/:beatId');
     });
   });
   it('Should create a route tree, with a deep nested route having params', () => {
@@ -104,7 +104,34 @@ describe('RouteTreeBuilder', () => {
       '/beat': ['beatId'],
       '/beat/detail': ['other'],
     });
-    expect(tree[2].path).toEqual('/beat/:beatId');
-    expect(tree[2].routes![0].path).toEqual('/beat/:beatId/detail/:other');
+    expect(tree[1].path).toEqual('/beat/:beatId');
+    expect(tree[1].routes![0].path).toEqual('/beat/:beatId/detail/:other');
+  });
+  it('Should throw an error on invalid mapped path', () => {
+    const mockRequire = jest.fn(path => ({
+      path,
+      testPage: null,
+    }));
+
+    const treeBuilder = new RouteTreeBuilder(mockRequire);
+    expect(() => {
+      treeBuilder.routeTreeFromPaths(pages, {
+        '/non-existant-path': ['beatId'],
+      });
+    }).toThrowError(/Invalid overideMap provided to 'routeTreeFromPaths', \/non-existant-path /);
+  });
+  it('Should rended 404.tsx as a 404 route not /404', () => {
+    const mockRequire = jest.fn(path => ({
+      path,
+      testPage: null,
+    }));
+
+    const treeBuilder = new RouteTreeBuilder(mockRequire);
+    const tree = treeBuilder.routeTreeFromPaths(pages);
+    const firstPath = tree[0].path;
+    const lastPath = tree[tree.length - 1].path;
+
+    expect(firstPath).not.toBe('/_404');
+    expect(lastPath).toBe('*');
   });
 });

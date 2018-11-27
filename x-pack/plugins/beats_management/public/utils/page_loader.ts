@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last } from 'lodash';
+import { difference, flatten, last } from 'lodash';
 
 interface PathTree {
   [path: string]: string[];
@@ -38,27 +38,47 @@ export class RouteTreeBuilder {
 
       return routes;
     }, []);
-    // FIXME check for errors better...
-    // const flatRoutes = this.flatpackRoutes(allRoutes);
-    // const invalidOverides = difference(Object.keys(overideMap), flatRoutes);
-    // if (invalidOverides.length > 0) {
-    //   throw new Error(
-    //     `Invalid overideMap provided to 'routeTreeFromPaths', ${
-    //       invalidOverides[0]
-    //     } is not a valid route. Only the following are: ${flatRoutes.join(', ')}`
-    //   );
-    // }
-    return allRoutes;
+    // Check that no overide maps are ignored due to being invalid
+    const flatRoutes = this.flatpackRoutes(allRoutes);
+    const mappedPaths = Object.keys(mapParams);
+    const invalidOverides = difference(mappedPaths, flatRoutes);
+    if (invalidOverides.length > 0) {
+      throw new Error(
+        `Invalid overideMap provided to 'routeTreeFromPaths', ${
+          invalidOverides[0]
+        } is not a valid route. Only the following are: ${flatRoutes.join(', ')}`
+      );
+    }
+
+    // 404 route MUST be last or it gets used first in a switch
+    return allRoutes.sort((a: RouteConfig, b: RouteConfig) => {
+      if (a.path === '*') {
+        return 1;
+      } else if (b.path === '*') {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
   }
 
   private flatpackRoutes(arr: RouteConfig[], pre: string = ''): string[] {
-    return [].concat.apply(
-      [],
-      arr.map(item => {
-        const path = (pre + item.path).trim();
+    return flatten(
+      [].concat.apply(
+        [],
+        arr.map(item => {
+          const path = (pre + item.path).trim();
 
-        return item.routes ? this.flatpackRoutes(item.routes, path) : path;
-      })
+          // The flattened route based on files without params added
+          const route = item.path.includes('/:')
+            ? item.path
+                .split('/')
+                .filter(s => s.charAt(0) !== ':')
+                .join('/')
+            : item.path;
+          return item.routes ? [route, this.flatpackRoutes(item.routes, path)] : route;
+        })
+      )
     );
   }
 
@@ -87,6 +107,14 @@ export class RouteTreeBuilder {
       throw new Error(
         `${dir}${file} in the pages folder does not include an exported \`${this.pageComponentPattern.toString()}\` component`
       );
+    }
+
+    // _404 route is special and maps to a 404 page
+    if (filePath === '/_404') {
+      return {
+        path: '*',
+        component: page[componentExportName],
+      };
     }
 
     // route has a parent with mapped params, so we map it here too
