@@ -11,6 +11,7 @@ import chrome from 'ui/chrome';
 
 import { http } from '../../services/http_service';
 
+import { annotations } from './annotations';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
@@ -19,21 +20,6 @@ import { fileDatavisualizer } from './datavisualizer';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const ml = {
-  indexAnnotation(obj) {
-    return http({
-      url: `${basePath}/annotation/index`,
-      method: 'PUT',
-      data: obj
-    });
-  },
-
-  deleteAnnotation(id) {
-    return http({
-      url: `${basePath}/annotation/delete/${id}`,
-      method: 'DELETE'
-    });
-  },
-
   getJobs(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
     return http({
@@ -434,6 +420,7 @@ export const ml = {
     });
   },
 
+  annotations,
   filters,
   results,
   jobs,

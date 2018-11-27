@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
+import './components/annotation_table/annotation_table_directive';
 import './components/forecasting_modal';
 import './components/timeseries_chart/timeseries_chart_directive';
 import './timeseriesexplorer_controller.js';

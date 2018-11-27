@@ -26,7 +26,7 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 import chrome from 'ui/chrome';
 
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
-import { mlAnnotationsService } from 'plugins/ml/services/annotations_service';
+import { ml } from 'plugins/ml/services/ml_api_service';
 
 
 const MAX_ANNOTATIONS = 500;
@@ -44,11 +44,12 @@ class AnnotationsTable extends Component {
     };
   }
 
-  componentDidMount() {
+  getAnnotations() {
+    console.warn('job', this.props.job);
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
-      mlAnnotationsService.getAnnotations(
+      ml.annotations.getAnnotations(
         [this.props.job.job_id],
         dataCounts.earliest_record_timestamp,
         dataCounts.latest_record_timestamp,
@@ -66,8 +67,15 @@ class AnnotationsTable extends Component {
           annotations: []
         });
       });
-
     }
+  }
+
+  componentDidMount() {
+    this.getAnnotations();
+  }
+
+  componentWillUpdate() {
+    this.getAnnotations();
   }
 
   openSingleMetricView(annotation) {
@@ -140,7 +148,7 @@ class AnnotationsTable extends Component {
 
     const annotations = this.state.annotations;
 
-    if (annotations.length === 0) {
+    if (annotations.length === 0 && this.props.renderEmptyMessage) {
       return (
         <EuiCallOut
           title="No annotations created for this job"
@@ -154,7 +162,16 @@ class AnnotationsTable extends Component {
       );
     }
 
+    if (annotations.length === 0 && !this.props.renderEmptyMessage) {
+      return null;
+    }
+
     const columns = [
+      {
+        field: 'annotation',
+        name: 'Annotation text',
+        sortable: true
+      },
       {
         field: 'timestamp',
         name: 'From',
@@ -167,11 +184,6 @@ class AnnotationsTable extends Component {
         name: 'To',
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
-        sortable: true
-      },
-      {
-        field: 'annotation',
-        name: 'Annotation text',
         sortable: true
       },
       {
@@ -202,6 +214,7 @@ class AnnotationsTable extends Component {
 }
 AnnotationsTable.propTypes = {
   job: PropTypes.object.isRequired,
+  renderEmptyMessage: PropTypes.bool
 };
 
 export { AnnotationsTable };

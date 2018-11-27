@@ -12,8 +12,22 @@ import { annotationServiceProvider } from '../models/annotation_service';
 
 export function annotationRoutes(server, commonRouteConfig) {
   server.route({
+    method: 'GET',
+    path: '/api/ml/annotations',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { getAnnotations } = annotationServiceProvider(callWithRequest);
+      return getAnnotations(request.payload)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  server.route({
     method: 'PUT',
-    path: '/api/ml/annotation/index',
+    path: '/api/ml/annotations/index',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexAnnotation } = annotationServiceProvider(callWithRequest);
@@ -27,7 +41,7 @@ export function annotationRoutes(server, commonRouteConfig) {
 
   server.route({
     method: 'DELETE',
-    path: '/api/ml/annotation/delete/{annotationId}',
+    path: '/api/ml/annotations/delete/{annotationId}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const annotationId = request.params.annotationId;
