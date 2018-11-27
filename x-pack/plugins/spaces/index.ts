@@ -123,6 +123,9 @@ export const spaces = (kibana: any) =>
             : null;
           return new SpacesClient(
             spacesAuditLogger,
+            (message: string) => {
+              server.log(['spaces', 'debug'], message);
+            },
             authorization,
             callWithRequestRepository,
             server.config(),
