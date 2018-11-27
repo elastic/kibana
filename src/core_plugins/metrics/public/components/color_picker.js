@@ -24,6 +24,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { EuiIconTip, } from '@elastic/eui';
 import Picker from './custom_color_picker';
+import { injectI18n } from '@kbn/i18n/react';
 
 class ColorPicker extends Component {
 
@@ -65,7 +66,10 @@ class ColorPicker extends Component {
     if (!this.props.value) {
       return (
         <button
-          aria-label="Color picker, not accessible"
+          aria-label={this.props.intl.formatMessage({
+            id: 'tsvb.colorPicker.notAccessibleAriaLabel',
+            defaultMessage: 'Color picker, not accessible'
+          })}
           className="tvbColorPicker__swatch-empty"
           onClick={this.handleClick}
         />
@@ -73,7 +77,11 @@ class ColorPicker extends Component {
     }
     return (
       <button
-        aria-label={`Color picker ({this.props.value}), not accessible`}
+        aria-label={this.props.intl.formatMessage({
+          id: 'tsvb.colorPicker.notAccessibleWithValueAriaLabel',
+          defaultMessage: 'Color picker ({value}), not accessible' }, {
+          value: this.props.value
+        })}
         style={{ backgroundColor: this.props.value }}
         className="tvbColorPicker__swatch"
         onClick={this.handleClick}
@@ -88,7 +96,15 @@ class ColorPicker extends Component {
     if (!this.props.disableTrash) {
       clear = (
         <div className="tvbColorPicker__clear" onClick={this.handleClear}>
-          <EuiIconTip size="s" type="cross" color="danger" content="Clear" />
+          <EuiIconTip
+            size="s"
+            type="cross"
+            color="danger"
+            content={this.props.intl.formatMessage({
+              id: 'tsvb.colorPicker.clearIconLabel',
+              defaultMessage: 'Clear'
+            })}
+          />
         </div>
       );
     }
@@ -124,4 +140,4 @@ ColorPicker.propTypes = {
   onChange: PropTypes.func
 };
 
-export default ColorPicker;
+export default injectI18n(ColorPicker);

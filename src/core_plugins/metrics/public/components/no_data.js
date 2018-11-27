@@ -18,11 +18,17 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function NoDataComponent() {
   return (
     <div className="tvbNoData" data-test-subj="noTSVBDataMessage">
-      <div className="tvbNoData__title">No data to display for the selected metrics</div>
+      <div className="tvbNoData__title">
+        <FormattedMessage
+          id="tsvb.noDataDescription"
+          defaultMessage="No data to display for the selected metrics"
+        />
+      </div>
     </div>
   );
 }
