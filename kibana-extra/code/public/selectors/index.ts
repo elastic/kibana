@@ -7,7 +7,8 @@ import { RootState } from '../reducers';
 
 export const getTree = (state: RootState) => state.file.tree;
 
-export const lastRequestPathSelector = (state: RootState) => state.symbol.lastRequestPath;
+export const lastRequestPathSelector: (state: RootState) => string = (state: RootState) =>
+  state.symbol.lastRequestPath || '';
 
 export const structureSelector = (state: RootState) => {
   const pathname = lastRequestPathSelector(state);
@@ -26,7 +27,7 @@ export const refUrlSelector = (state: RootState) => {
 
 export const fileSelector = (state: RootState) => state.file.file;
 
-export const repoUriSelector = state => {
+export const repoUriSelector = (state: RootState) => {
   const { resource, org, repo } = state.route.match.params;
   return `${resource}/${org}/${repo}`;
 };

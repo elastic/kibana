@@ -3,10 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export enum PathTypes {
-  blob = 'blob',
-  tree = 'tree',
-}
+
+import { PathTypes } from '../common/types';
 
 export const ROOT = '/';
 export const MAIN = `/:resource/:org/:repo/:pathType(${PathTypes.blob}|${

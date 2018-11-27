@@ -26,7 +26,7 @@ const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
     return lineDiff;
   }
 };
-class CodeSymbolTree extends React.PureComponent<Props> {
+class SymbolTree extends React.PureComponent<Props> {
   public getStructureTreeItemRenderer = (location: Location, name: string) => () => (
     <div className="symbolLinkContainer">
       <Link to={RepositoryUtils.locationToUrl(location)}>{name}</Link>
@@ -63,4 +63,4 @@ const mapStateToProps = (state: RootState) => {
   return { structureTree: structureSelector(state) };
 };
 
-export const SymbolTree = connect(mapStateToProps)(CodeSymbolTree);
+export const StructureTree = connect(mapStateToProps)(SymbolTree);

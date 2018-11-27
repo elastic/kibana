@@ -21,7 +21,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   openedPaths: string[];
 }
 
-class CodeFileTree extends React.Component<Props> {
+class CodeFileTree extends React.PureComponent<Props> {
   public fetchTree(path = '') {
     const { resource, org, repo, revision } = this.props.match.params;
     this.props.fetchRepoTree({
@@ -101,7 +101,11 @@ class CodeFileTree extends React.Component<Props> {
         items: (this.props.node!.children || []).map(this.treeToItems),
       },
     ];
-    return this.props.node && <EuiSideNav items={items} />;
+    return (
+      this.props.node && (
+        <EuiSideNav items={items} className="sideNavTree" style={{ overflow: 'auto' }} />
+      )
+    );
   }
 }
 

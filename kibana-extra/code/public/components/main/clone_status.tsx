@@ -6,9 +6,19 @@
 
 import { EuiProgress } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 import { CloneProgress } from '../../../model';
-import { Caption } from './caption';
-import { ProgressContainer } from './progress_container';
+
+export const Caption = styled.div`
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+`;
+
+export const ProgressContainer = styled.div`
+  width: 40rem;
+  padding: 2px;
+  border: 1px solid;
+`;
 
 interface Props {
   progress: number;

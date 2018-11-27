@@ -17,7 +17,7 @@ import {
   Match,
   repositorySearch,
 } from '../actions';
-import { SearchScope } from '../common/constants';
+import { SearchScope } from '../common/types';
 import { searchRoutePattern } from './patterns';
 
 function requestDocumentSearch(payload: DocumentSearchPayload) {

@@ -5,6 +5,7 @@
  */
 import { Action } from 'redux-actions';
 import { Match, routeChange } from '../actions';
+import { PathTypes } from '../common/types';
 import * as ROUTES from '../components/routes';
 
 export const generatePattern = (path: string) => (action: Action<Match>) =>
@@ -19,4 +20,4 @@ export const searchRoutePattern = generatePattern(ROUTES.SEARCH);
 export const commitRoutePattern = generatePattern(ROUTES.DIFF);
 
 export const sourceFilePattern = (action: Action<Match>) =>
-  mainRoutePattern(action) && action.payload!.params.pathType === ROUTES.PathTypes.blob;
+  mainRoutePattern(action) && action.payload!.params.pathType === PathTypes.blob;

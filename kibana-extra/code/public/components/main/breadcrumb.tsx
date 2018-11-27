@@ -6,13 +6,14 @@
 
 import { EuiBreadcrumbs } from '@elastic/eui';
 import React from 'react';
+import { MainRouteParams } from '../../common/types';
 import { FileListDropdown } from './filelist_dropdown';
 import { VersionDropDown } from './version_dropdown';
 
 interface Props {
-  routeParams: { [key: string]: string };
+  routeParams: MainRouteParams;
 }
-export class LayoutBreadcrumbs extends React.PureComponent<Props> {
+export class Breadcrumb extends React.PureComponent<Props> {
   public render() {
     const { resource, org, repo, revision, path, pathType } = this.props.routeParams;
     const repoUri = `${resource}/${org}/${repo}`;

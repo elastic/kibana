@@ -9,3 +9,17 @@ export enum SearchScope {
   default = 'default',
   symbol = 'symbol',
 }
+
+export enum PathTypes {
+  blob = 'blob',
+  tree = 'tree',
+}
+
+export interface MainRouteParams {
+  path: string;
+  repo: string;
+  resource: string;
+  org: string;
+  revision: string;
+  pathType: PathTypes;
+}

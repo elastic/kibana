@@ -25,7 +25,7 @@ import Url from 'url';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { DocumentSearchResult } from '../../../model';
 import { documentSearch } from '../../actions';
-import { SearchScope } from '../../common/constants';
+import { SearchScope } from '../../common/types';
 import { RootState } from '../../reducers';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';

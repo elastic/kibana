@@ -85,13 +85,8 @@ export class EditorComponent extends React.Component<Props> {
   }
   public render() {
     return (
-      <EuiFlexItem className="noOverflow">
-        <EuiFlexItem
-          tabIndex={0}
-          grow={true}
-          className="editorContainer noOverflow"
-          id="mainEditor"
-        />
+      <EuiFlexItem className="noOverflow" grow={1}>
+        <EuiFlexItem tabIndex={0} grow={1} className="editorContainer noOverflow" id="mainEditor" />
         {this.renderReferences()}
       </EuiFlexItem>
     );

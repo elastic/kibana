@@ -27,7 +27,7 @@ import {
   revealPosition,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
-import * as ROUTES from '../components/routes';
+import { PathTypes } from '../common/types';
 import { RootState } from '../reducers';
 import { fileSelector, getTree, lastRequestPathSelector, refUrlSelector } from '../selectors';
 import { history } from '../utils/url';
@@ -142,7 +142,7 @@ function* handleMainRouteChange(action: Action<Match>) {
   }
   yield put(loadRepo(repoUri));
   if (file) {
-    if (pathType === ROUTES.PathTypes.blob) {
+    if (pathType === PathTypes.blob) {
       yield call(handleFile, repoUri, file, revision);
       if (position) {
         yield put(revealPosition(position));
@@ -151,7 +151,7 @@ function* handleMainRouteChange(action: Action<Match>) {
       if (tab === 'references' && refUrl) {
         yield call(handleReference, decodeURIComponent(refUrl as string));
       }
-    } else if (pathType === ROUTES.PathTypes.tree) {
+    } else if (pathType === PathTypes.tree) {
       const commits = yield select((state: RootState) => state.file.treeCommits[file]);
       if (commits === undefined) {
         yield put(fetchTreeCommits({ revision, uri: repoUri, path: file }));
@@ -171,7 +171,7 @@ function* handleMainRouteChange(action: Action<Match>) {
       path: file || '',
     })
   );
-  if (file && pathType === ROUTES.PathTypes.blob) {
+  if (file && pathType === PathTypes.blob) {
     const uri = toCanonicalUrl({
       repoUri,
       file,

@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import styled from 'styled-components';
+import { fontSizes } from '../../style/variables';
 
-export const Caption = styled.div`
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
+const Container = styled.div`
+  margin: auto;
+  fontsize: ${fontSizes.xlarge};
 `;
+export const NotFound = () => <Container>404, Not Found</Container>;
