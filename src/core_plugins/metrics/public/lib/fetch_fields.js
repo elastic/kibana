@@ -18,6 +18,7 @@
  */
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 
 async function fetchFields(indexPatterns = ['*']) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
@@ -40,7 +41,9 @@ async function fetchFields(indexPatterns = ['*']) {
     return fields;
   } catch(error) {
     toastNotifications.addDanger({
-      title: 'Unable to load index_pattern fields',
+      title: i18n.translate('tsvb.fetchFields.loadIndexPatternFieldsErrorMessage', {
+        defaultMessage: 'Unable to load index_pattern fields'
+      }),
       text: error.message,
     });
   }

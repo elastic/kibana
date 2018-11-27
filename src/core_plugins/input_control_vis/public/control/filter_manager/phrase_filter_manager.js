@@ -29,15 +29,12 @@ export class PhraseFilterManager extends FilterManager {
   /**
    * Convert phrases into filter
    *
-   * @param {array}
+   * @param {array} phrases
    * @return {object} query filter
    *   single phrase: match query
    *   multiple phrases: bool query with should containing list of match_phrase queries
    */
-  createFilter(selectedOptions) {
-    const phrases = selectedOptions.map(phrase => {
-      return phrase.value;
-    });
+  createFilter(phrases) {
     let newFilter;
     if (phrases.length === 1) {
       newFilter = buildPhraseFilter(
@@ -73,10 +70,7 @@ export class PhraseFilterManager extends FilterManager {
     return values
       .reduce((accumulator, currentValue) => {
         return accumulator.concat(currentValue);
-      }, [])
-      .map(value => {
-        return { value, label: value };
-      });
+      }, []);
   }
 
   /**

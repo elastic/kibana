@@ -28,6 +28,7 @@ import table from './vis_types/table/series';
 import gauge from './vis_types/gauge/series';
 import markdown from './vis_types/markdown/series';
 import { sortable } from 'react-anything-sortable';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const lookup = {
   top_n: topN,
@@ -98,7 +99,15 @@ class Series extends Component {
       };
       return (<Component {...params}/>);
     }
-    return (<div>Missing Series component for panel type: {panel.type}</div>);
+    return (
+      <div>
+        <FormattedMessage
+          id="tsvb.seriesConfig.missingSeriesComponentDescription"
+          defaultMessage="Missing Series component for panel type: {panelType}"
+          values={{ panelType: panel.type }}
+        />
+      </div>
+    );
   }
 
 }

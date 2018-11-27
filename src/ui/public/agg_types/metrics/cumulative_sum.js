@@ -20,12 +20,19 @@
 import { MetricAggType } from './metric_agg_type';
 import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
+import { i18n } from '@kbn/i18n';
+
+const cumulativeSumLabel = i18n.translate('common.ui.aggTypes.metrics.cumulativeSumLabel', {
+  defaultMessage: 'cumulative sum'
+});
 
 export const cumulativeSumMetricAgg = new MetricAggType({
   name: 'cumulative_sum',
-  title: 'Cumulative Sum',
+  title: i18n.translate('common.ui.aggTypes.metrics.cumulativeSumTitle', {
+    defaultMessage: 'Cumulative Sum'
+  }),
   subtype: parentPipelineAggHelper.subtype,
-  makeLabel: agg => makeNestedLabel(agg, 'cumulative sum'),
+  makeLabel: agg => makeNestedLabel(agg, cumulativeSumLabel),
   params: [
     ...parentPipelineAggHelper.params()
   ],
