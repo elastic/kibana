@@ -56,8 +56,6 @@ export async function getSeriesData(req, panel) {
       })
       .catch(handleErrorResponse(panel));
   } catch(e) {
-    console.error(e);
-    // TODO handle kql query errors
     return handleErrorResponse(e);
   }
 }
