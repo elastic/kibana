@@ -20,6 +20,7 @@
 import buildProcessorFunction from '../build_processor_function';
 import processors from '../response_processors/series';
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export default function handleResponseBody(panel) {
   return resp => {
@@ -30,12 +31,19 @@ export default function handleResponseBody(panel) {
     }
     const aggregations = get(resp, 'aggregations');
     if (!aggregations) {
-      const message = `The aggregations key is missing from the response,
-        check your permissions for this request.`;
+      const message = i18n.translate('tsvb.series.missingAggregationKeyErrorMessage', {
+        defaultMessage: 'The aggregations key is missing from the response, check your permissions for this request.'
+      });
       throw Error(message);
     }
     const keys = Object.keys(aggregations);
-    if (keys.length !== 1) throw Error('There should only be one series per request.');
+    if (keys.length !== 1) {
+      throw Error(
+        i18n.translate('tsvb.series.shouldOneSeriesPerRequestErrorMessage', {
+          defaultMessage: 'There should only be one series per request.'
+        })
+      );
+    }
     const seriesId = keys[0];
     const series = panel.series.find(s => s.id === seriesId);
     const processor = buildProcessorFunction(processors, resp, panel, series);

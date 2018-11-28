@@ -28,6 +28,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   htmlIdGenerator,
@@ -71,7 +72,12 @@ class CalculationAgg extends Component {
       >
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem>
-            <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+            <EuiFormLabel htmlFor={htmlId('aggregation')}>
+              <FormattedMessage
+                id="tsvb.calculation.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
+            </EuiFormLabel>
             <AggSelect
               id={htmlId('aggregation')}
               panelType={this.props.panel.type}
@@ -82,7 +88,12 @@ class CalculationAgg extends Component {
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiFormLabel htmlFor={htmlId('variables')}>Variables</EuiFormLabel>
+            <EuiFormLabel htmlFor={htmlId('variables')}>
+              <FormattedMessage
+                id="tsvb.calculation.variablesLabel"
+                defaultMessage="Variables"
+              />
+            </EuiFormLabel>
             <Vars
               id={htmlId('variables')}
               metrics={siblings}
@@ -95,12 +106,23 @@ class CalculationAgg extends Component {
           <EuiFlexItem>
             <EuiFormRow
               id={htmlId('painless')}
-              label="Painless Script"
+              label={(<FormattedMessage
+                id="tsvb.calculation.painlessScriptLabel"
+                defaultMessage="Painless Script"
+              />)}
               fullWidth
               helpText={
                 <div>
-                  Variables are keys on the <EuiCode>params</EuiCode> object, i.e. <EuiCode>params.&lt;name&gt;</EuiCode>.
-                  To access the bucket interval (in milliseconds) use <EuiCode>params._interval</EuiCode>.
+                  <FormattedMessage
+                    id="tsvb.calculation.painlessScriptDescription"
+                    defaultMessage="Variables are keys on the {params} object, i.e. {paramsName}. To access the bucket
+                    interval (in milliseconds) use {paramsInterval}."
+                    values={{
+                      params: (<EuiCode>params</EuiCode>),
+                      paramsName: (<EuiCode>params.&lt;name&gt;</EuiCode>),
+                      paramsInterval: (<EuiCode>params._interval</EuiCode>)
+                    }}
+                  />
                 </div>
               }
             >

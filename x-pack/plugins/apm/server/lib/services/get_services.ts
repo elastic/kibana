@@ -22,13 +22,17 @@ export interface IServiceListItem {
   avgResponseTime: number;
 }
 
-export async function getServices(setup: Setup): Promise<IServiceListItem[]> {
+export type ServiceListAPIResponse = IServiceListItem[];
+
+export async function getServices(
+  setup: Setup
+): Promise<ServiceListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: [
-      config.get('apm_oss.errorIndices'),
-      config.get('apm_oss.transactionIndices')
+      config.get<string>('apm_oss.errorIndices'),
+      config.get<string>('apm_oss.transactionIndices')
     ],
     body: {
       size: 0,
@@ -99,8 +103,8 @@ export async function getServices(setup: Setup): Promise<IServiceListItem[]> {
     };
   }
 
-  const resp = await client('search', params);
-  const aggs: Aggs = resp.aggregations;
+  const resp = await client<void, Aggs>('search', params);
+  const aggs = resp.aggregations;
   const serviceBuckets = oc(aggs).services.buckets([]);
 
   return serviceBuckets.map(bucket => {

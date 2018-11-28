@@ -32,6 +32,7 @@ import {
   EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const IndexPattern = props => {
   const { fields, prefix } = props;
@@ -57,7 +58,10 @@ export const IndexPattern = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
-            label="Index pattern"
+            label={(<FormattedMessage
+              id="tsvb.indexPatternLabel"
+              defaultMessage="Index pattern"
+            />)}
             fullWidth
           >
             <EuiFieldText
@@ -72,7 +76,10 @@ export const IndexPattern = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('timeField')}
-            label="Time field"
+            label={(<FormattedMessage
+              id="tsvb.indexPattern.timeFieldLabel"
+              defaultMessage="Time field"
+            />)}
             fullWidth
           >
             <FieldSelect
@@ -90,8 +97,15 @@ export const IndexPattern = props => {
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id={htmlId('interval')}
-            label="Interval"
-            helpText="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
+            label={(<FormattedMessage
+              id="tsvb.indexPattern.intervalLabel"
+              defaultMessage="Interval"
+            />)}
+            helpText={(<FormattedMessage
+              id="tsvb.indexPattern.intervalHelpText"
+              defaultMessage="Examples: auto, 1m, 1d, 7d, 1y, >=1m"
+              description="auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated."
+            />)}
           >
             <EuiFieldText
               disabled={props.disabled}
@@ -101,7 +115,12 @@ export const IndexPattern = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormLabel>Drop last bucket?</EuiFormLabel>
+          <EuiFormLabel>
+            <FormattedMessage
+              id="tsvb.indexPattern.dropLastBucketLabel"
+              defaultMessage="Drop last bucket?"
+            />
+          </EuiFormLabel>
           <EuiSpacer size="s" />
           <YesNo
             value={model[dropBucketName]}
