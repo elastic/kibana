@@ -5,6 +5,7 @@
  */
 
 import { getId } from '../lib/get_id';
+import { DEFAULT_WORKPAD_CSS } from '../../common/lib/constants';
 
 export const getDefaultElement = () => {
   return {
@@ -43,7 +44,7 @@ export const getDefaultWorkpad = () => {
     id: getId('workpad'),
     width: 1080,
     height: 720,
-    css: '',
+    css: DEFAULT_WORKPAD_CSS,
     page: 0,
     pages: [page],
     colors: [

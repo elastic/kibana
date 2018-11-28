@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiButton,
 } from '@elastic/eui';
+import { DEFAULT_WORKPAD_CSS } from '../../../common/lib/constants';
 
 export class WorkpadConfig extends PureComponent {
   static propTypes = {
@@ -146,17 +147,7 @@ export class WorkpadConfig extends PureComponent {
               rows={10}
             />
             <EuiSpacer size="s" />
-            <EuiButton
-              size="s"
-              onClick={() =>
-                setWorkpadCSS(
-                  css ||
-                    `.canvasPage {
-
-}`
-                )
-              }
-            >
+            <EuiButton size="s" onClick={() => setWorkpadCSS(css || DEFAULT_WORKPAD_CSS)}>
               Apply stylesheet
             </EuiButton>
             <EuiSpacer size="xs" />
