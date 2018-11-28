@@ -9,7 +9,7 @@ import { pathsRegistry } from '@kbn/interpreter/common';
 import init from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP } from './common/lib';
-import { pluginPaths } from './plugin_paths';
+import { pluginPaths, registerPluginPaths } from './plugin_paths';
 
 export function canvas(kibana) {
   return new kibana.Plugin({
@@ -41,8 +41,9 @@ export function canvas(kibana) {
       }).default();
     },
 
-    preInit: () => {
+    preInit: async () => {
       pathsRegistry.registerAll(pluginPaths);
+      await registerPluginPaths();
     },
     init,
   });
