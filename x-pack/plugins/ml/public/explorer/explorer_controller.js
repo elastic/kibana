@@ -15,7 +15,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import DragSelect from 'dragselect';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
@@ -76,6 +76,7 @@ module.controller('MlExplorerController', function (
   $timeout,
   AppState,
   Private,
+  config,
   mlCheckboxShowChartsService,
   mlSelectLimitService,
   mlSelectIntervalService,
@@ -86,6 +87,10 @@ module.controller('MlExplorerController', function (
   $scope.loading = true;
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
+
+  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+  const tzConfig = config.get('dateFormat:tz');
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
   const TimeBuckets = Private(IntervalHelperProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
@@ -946,6 +951,7 @@ module.controller('MlExplorerController', function (
       mlSelectSeverityService.state.get('threshold').val,
       timeRange.earliestMs,
       timeRange.latestMs,
+      dateFormatTz,
       500,
       MAX_CATEGORY_EXAMPLES
     ).then((resp) => {
