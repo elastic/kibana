@@ -13,13 +13,18 @@ import { ACTION_MAP, COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from './constants
 
 interface DeprecationHealthProps {
   deprecations: DeprecationInfo[];
+  single?: boolean;
 }
 
 /**
  * Displays a summary health for a list of deprecations that shows the number and level of highest severity
  * deprecations in the list.
+ * TODO: Allow showing all severity levels
  */
-export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({ deprecations }) => {
+export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({
+  deprecations,
+  single,
+}) => {
   if (deprecations.length === 0) {
     return <span />;
   }
@@ -33,7 +38,7 @@ export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({ 
 
   return (
     <EuiToolTip content={tooltip}>
-      <EuiBadge color={color}>{`${numHighest} ${highestLevel}`}</EuiBadge>
+      <EuiBadge color={color}>{`${single ? '' : numHighest} ${highestLevel}`}</EuiBadge>
     </EuiToolTip>
   );
 };

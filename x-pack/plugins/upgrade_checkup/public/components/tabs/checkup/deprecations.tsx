@@ -6,7 +6,16 @@
 
 import React, { Fragment, StatelessComponent } from 'react';
 
-import { EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../server/lib/es_migration_apis';
@@ -46,6 +55,21 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
   );
 };
 
+/**
+ * Used to show a single (simple) deprecation message with any detailed information.
+ */
+const SimpleMessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationInfo }> = ({
+  deprecation,
+}) => {
+  const items = [];
+
+  if (deprecation.details) {
+    items.push({ body: deprecation.details });
+  }
+
+  return <DeprecationCell items={items} />;
+};
+
 interface DeprecationSummary {
   message: string;
   url: string;
@@ -68,13 +92,14 @@ const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecati
   const items = [];
 
   // Only show the last uiButton which should be the documentation link.
-  const uiButtons = [deprecation.uiButtons[deprecation.uiButtons.length - 1]];
+  // const uiButtons = [deprecation.uiButtons[deprecation.uiButtons.length - 1]];
 
   return (
     <DeprecationCell
-      headline={deprecation.message}
-      healthColor={COLOR_MAP[deprecation.level]}
-      uiButtons={uiButtons}
+      // TODO: Do not repeat the message or health (and move button up to accordion header)
+      // headline={deprecation.message}
+      // healthColor={COLOR_MAP[deprecation.level]}
+      // uiButtons={uiButtons}
       items={items}
     >
       <IndexDeprecationTable indices={indices} />
@@ -98,11 +123,20 @@ const DeprecationList: StatelessComponent<{
     const indices = deprecations.map(dep => ({ index: dep.index!, details: dep.details }));
 
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
-  } else {
+  } else if (currentGroupBy === GroupByOption.index) {
+    // If we're grouping by index show all info for each message
     return (
       <div>
         {deprecations.sort(sortByLevelDesc).map(dep => (
           <MessageDeprecation deprecation={dep} key={dep.message} />
+        ))}
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        {deprecations.sort(sortByLevelDesc).map(dep => (
+          <SimpleMessageDeprecation deprecation={dep} key={dep.message} />
         ))}
       </div>
     );
@@ -139,10 +173,14 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
     <div>
       <EuiFlexGroup responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s">Expand all</EuiButtonEmpty>
+          <EuiButtonEmpty flush="left" size="s">
+            Expand all
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s">Collapse all</EuiButtonEmpty>
+          <EuiButtonEmpty flush="left" size="s">
+            Collapse all
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
@@ -163,9 +201,30 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
               key={`acc-${groupName}`}
               id={`depgroup-${groupName}`}
               buttonContent={<span className="upgDeprecations__itemName">{groupName}</span>}
-              extraAction={<DeprecationHealth deprecations={groups[groupName]} />}
+              extraAction={
+                <div>
+                  {currentGroupBy === GroupByOption.message &&
+                    groups[groupName][0].index !== undefined && (
+                      <Fragment>
+                        <EuiBadge color="hollow">
+                          {groups[groupName].filter(g => g.index).length} indices
+                        </EuiBadge>
+                        &emsp;
+                      </Fragment>
+                    )}
+                  <DeprecationHealth
+                    single={currentGroupBy === GroupByOption.message}
+                    deprecations={groups[groupName]}
+                  />
+                  {currentGroupBy === GroupByOption.message && (
+                    <Fragment>
+                      &emsp;
+                      <EuiButton size="s">Move button here</EuiButton>
+                    </Fragment>
+                  )}
+                </div>
+              }
             >
-              <EuiSpacer />
               <DeprecationList deprecations={groups[groupName]} currentGroupBy={currentGroupBy} />
             </EuiAccordion>,
           ])}

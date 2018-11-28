@@ -44,11 +44,12 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiButton
+        fill
         onClick={loadData}
         iconType="refresh"
         isLoading={loadingState === LoadingState.Loading}
       >
-        {loadingState === LoadingState.Loading ? 'Loading…' : 'Refresh'}
+        Refresh
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>

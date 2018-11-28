@@ -6,12 +6,12 @@
 
 import React, { ReactNode, StatelessComponent } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 
 interface DeprecationCellProps {
   headline?: string;
   healthColor?: string;
-  uiButtons: Array<{
+  uiButtons?: Array<{
     label: string;
     url: string;
   }>;
@@ -29,41 +29,41 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
   items,
   children,
 }) => (
-  <div className="upgCell">
-    <EuiFlexGroup alignItems="center">
+  <div className="upgDeprecationCell">
+    <EuiFlexGroup responsive={false} wrap alignItems="baseline">
+      {healthColor && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="dot" color={healthColor} />
+        </EuiFlexItem>
+      )}
+
       <EuiFlexItem grow>
         {headline && (
-          <EuiText>
-            <h4>
-              {healthColor && <EuiIcon type="dot" color={healthColor} />} {headline}
-            </h4>
-          </EuiText>
+          <EuiTitle size="xxs">
+            <h2>{headline}</h2>
+          </EuiTitle>
         )}
+
+        {items.map(item => (
+          <div key={item.title}>
+            <EuiText>
+              {item.title && <h6>{item.title}</h6>}
+              <p>{item.body}</p>
+            </EuiText>
+          </div>
+        ))}
       </EuiFlexItem>
-      {uiButtons.map(button => (
-        <EuiFlexItem key={button.url} grow={false}>
-          <EuiButton size="s" href={button.url} target="_blank">
-            {button.label}
-          </EuiButton>
-        </EuiFlexItem>
-      ))}
+
+      {uiButtons &&
+        uiButtons.map(button => (
+          <EuiFlexItem key={button.url} grow={false}>
+            <EuiButton size="s" href={button.url} target="_blank">
+              {button.label}
+            </EuiButton>
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
 
-    {items.map(item => (
-      <div key={item.title}>
-        <EuiSpacer size="m" />
-        <EuiText>
-          {item.title && <h6>{item.title}</h6>}
-          <p>{item.body}</p>
-        </EuiText>
-      </div>
-    ))}
-
-    {children && (
-      <div>
-        <EuiSpacer size="m" />
-        {children}
-      </div>
-    )}
+    {children}
   </div>
 );
