@@ -76,7 +76,7 @@ const filterFailures = createMapStream((testSuite) => {
 const updateGithubIssues = (githubClient, issues) => {
   return createMapStream(async (failureCases) => {
 
-    const issueOps = failureCases.map(async (failureCase) => {
+    await Promise.all(failureCases.map(async (failureCase) => {
       const existingIssue = find(issues, (issue) => {
         return markdownMetadata.get(issue.body, 'test.class') === failureCase.classname &&
           markdownMetadata.get(issue.body, 'test.name') === failureCase.name;
@@ -124,11 +124,9 @@ const updateGithubIssues = (githubClient, issues) => {
 
         console.log(`Created issue ${newIssue.data.html_url}`);
       }
-    });
+    }));
 
-    return Promise
-      .all(issueOps)
-      .then(() => failureCases);
+    return failureCases;
   });
 };
 
