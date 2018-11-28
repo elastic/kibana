@@ -20,6 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { EuiToolTip, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 function AddDeleteButtons(props) {
   const { testSubj } = props;
@@ -86,9 +87,9 @@ function AddDeleteButtons(props) {
 
 AddDeleteButtons.defaultProps = {
   testSubj: 'Add',
-  addTooltip: 'Add',
-  deleteTooltip: 'Delete',
-  cloneTooltip: 'Clone'
+  addTooltip: i18n.translate('tsvb.addDeleteButtons.addButtonDefaultTooltip', { defaultMessage: 'Add' }),
+  deleteTooltip: i18n.translate('tsvb.addDeleteButtons.deleteButtonDefaultTooltip', { defaultMessage: 'Delete' }),
+  cloneTooltip: i18n.translate('tsvb.addDeleteButtons.cloneButtonDefaultTooltip', { defaultMessage: 'Clone' })
 };
 
 AddDeleteButtons.propTypes = {

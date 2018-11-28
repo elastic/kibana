@@ -24,6 +24,7 @@ import { Schemas } from '../../../vis/editors/default/schemas';
 import { parentPipelineAggController } from './parent_pipeline_agg_controller';
 import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
+import { i18n } from '@kbn/i18n';
 
 
 const metricAggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
@@ -31,14 +32,18 @@ const metricAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'metricAgg',
-    title: 'Metric Agg',
+    title: i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
+      defaultMessage: 'Metric Agg'
+    }),
     hideCustomLabel: true,
     aggFilter: metricAggFilter
   }
 ])).all[0];
 
 const parentPipelineAggHelper = {
-  subtype: 'Parent Pipeline Aggregations',
+  subtype: i18n.translate('common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle', {
+    defaultMessage: 'Parent Pipeline Aggregations'
+  }),
   params: function () {
     return [
       {

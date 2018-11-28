@@ -25,6 +25,7 @@ import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import replaceVars from '../../lib/replace_vars';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -122,7 +123,14 @@ class TableVis extends Component {
       );
       if (!isSortable(metric)) {
         headerContent = (
-          <EuiToolTip content="This column is not sortable">{headerContent}</EuiToolTip>
+          <EuiToolTip
+            content={(<FormattedMessage
+              id="tsvb.table.columnNotSortableTooltip"
+              defaultMessage="This column is not sortable"
+            />)}
+          >
+            {headerContent}
+          </EuiToolTip>
         );
       }
 
@@ -176,10 +184,15 @@ class TableVis extends Component {
     if (_.isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
     } else {
-      let message = 'No results available.';
-      if (!model.pivot_id) {
-        message += ' You must choose a group by field for this visualization.';
-      }
+      const message = model.pivot_id ?
+        (<FormattedMessage
+          id="tsvb.table.noResultsAvailableMessage"
+          defaultMessage="No results available."
+        />)
+        : (<FormattedMessage
+          id="tsvb.table.noResultsAvailableWithDescriptionMessage"
+          defaultMessage="No results available. You must choose a group by field for this visualization."
+        />);
       rows = (
         <tr>
           <td

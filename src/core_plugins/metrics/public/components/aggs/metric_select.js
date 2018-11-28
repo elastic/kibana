@@ -26,6 +26,7 @@ import {
 import calculateSiblings from '../lib/calculate_siblings';
 import calculateLabel from '../../../common/calculate_label';
 import basicAggs from '../../../common/basic_aggs';
+import { injectI18n } from '@kbn/i18n/react';
 
 function createTypeFilter(restrict, exclude) {
   return metric => {
@@ -58,8 +59,8 @@ export function filterRows(includeSiblings) {
   };
 }
 
-function MetricSelect(props) {
-  const { additionalOptions, restrict, metric, metrics, onChange, value, exclude, includeSiblings, clearable, ...rest } = props;
+function MetricSelectUi(props) {
+  const { additionalOptions, restrict, metric, metrics, onChange, value, exclude, includeSiblings, clearable, intl, ...rest } = props;
 
   const calculatedMetrics = metrics.filter(createTypeFilter(restrict, exclude));
 
@@ -97,7 +98,7 @@ function MetricSelect(props) {
 
   return (
     <EuiComboBox
-      placeholder="Select metric..."
+      placeholder={intl.formatMessage({ id: 'tsvb.metricSelect.selectMetricPlaceholder', defaultMessage: 'Select metric…' })}
       options={allOptions}
       selectedOptions={selectedOptions}
       onChange={onChange}
@@ -108,7 +109,7 @@ function MetricSelect(props) {
   );
 }
 
-MetricSelect.defaultProps = {
+MetricSelectUi.defaultProps = {
   additionalOptions: [],
   exclude: [],
   metric: {},
@@ -116,7 +117,7 @@ MetricSelect.defaultProps = {
   includeSiblings: false,
 };
 
-MetricSelect.propTypes = {
+MetricSelectUi.propTypes = {
   additionalOptions: PropTypes.array,
   exclude: PropTypes.array,
   metric: PropTypes.object,
@@ -126,4 +127,5 @@ MetricSelect.propTypes = {
   includeSiblings: PropTypes.bool,
 };
 
+const MetricSelect = injectI18n(MetricSelectUi);
 export default MetricSelect;

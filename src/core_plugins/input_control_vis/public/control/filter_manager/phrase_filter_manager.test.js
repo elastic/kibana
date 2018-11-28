@@ -47,7 +47,7 @@ describe('PhraseFilterManager', function () {
     });
 
     test('should create match phrase filter from single value', function () {
-      const newFilter = filterManager.createFilter([{ value: 'ios' }]);
+      const newFilter = filterManager.createFilter(['ios']);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
@@ -56,7 +56,7 @@ describe('PhraseFilterManager', function () {
     });
 
     test('should create bool filter from multiple values', function () {
-      const newFilter = filterManager.createFilter([{ value: 'ios' }, { value: 'win xp' }]);
+      const newFilter = filterManager.createFilter(['ios', 'win xp']);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
@@ -102,7 +102,7 @@ describe('PhraseFilterManager', function () {
           }
         }
       ]);
-      expect(filterManager.getValueFromFilterBar()).to.eql([{ value: 'ios', label: 'ios' }]);
+      expect(filterManager.getValueFromFilterBar()).to.eql(['ios']);
     });
 
     test('should extract value from multiple filters', function () {
@@ -128,7 +128,7 @@ describe('PhraseFilterManager', function () {
           }
         },
       ]);
-      expect(filterManager.getValueFromFilterBar()).to.eql([{ value: 'ios', label: 'ios' }, { value: 'win xp', label: 'win xp' }]);
+      expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
     test('should extract value from bool filter', function () {
@@ -152,7 +152,7 @@ describe('PhraseFilterManager', function () {
           }
         }
       ]);
-      expect(filterManager.getValueFromFilterBar()).to.eql([{ value: 'ios', label: 'ios' }, { value: 'win xp', label: 'win xp' }]);
+      expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
     test('should return undefined when filter value can not be extracted from Kibana filter', function () {

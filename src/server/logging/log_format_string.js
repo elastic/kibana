@@ -49,6 +49,7 @@ const typeColors = {
   optmzr: 'white',
   manager: 'green',
   optimize: 'magentaBright',
+  'optimize:watch_cache': 'magentaBright',
   listening: 'magentaBright',
   scss: 'magentaBright',
 };
