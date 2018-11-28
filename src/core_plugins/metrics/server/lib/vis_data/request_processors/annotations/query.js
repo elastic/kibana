@@ -29,7 +29,6 @@ export default function query(req, panel, annotation, esQueryConfig, indexPatter
 
     doc.size = 0;
     const queries = req.payload.query ? [req.payload.query] : [];
-    console.log(JSON.stringify(annotation, null, 2));
     const filters = !annotation.ignore_global_filters ? req.payload.filters : [];
     doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
     const timerange = {
