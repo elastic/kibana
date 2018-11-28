@@ -34,7 +34,7 @@ import { SavedObjectProvider } from 'ui/courier';
 
 uiModules
   .get('app/visualize')
-  .factory('SavedVis', function (config, $injector, Promise, savedSearches, Private) {
+  .factory('SavedVis', function (config, $injector, Promise, savedSearches, Private, i18n) {
     const Vis = Private(VisProvider);
     const SavedObject = Private(SavedObjectProvider);
     createLegacyClass(SavedVis).inherits(SavedObject);
@@ -51,7 +51,9 @@ uiModules
         id: opts.id,
         indexPattern: opts.indexPattern,
         defaults: {
-          title: 'New Visualization',
+          title: i18n('kbn.visualize.defaultVisualizationTitle', {
+            defaultMessage: 'New Visualization',
+          }),
           visState: (function () {
             if (!opts.type) return null;
             const def = {};

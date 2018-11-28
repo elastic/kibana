@@ -59,7 +59,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   }
 });
 
-module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl) {
+module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl, i18n) {
   const type = $route.current.params.type;
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
@@ -98,5 +98,11 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl) {
     }
 
     return `#${VisualizeConstants.CREATE_PATH}?type=${type}&indexPattern=${pattern.id}`;
+  };
+
+  $scope.translations = {
+    pageTitle: i18n('kbn.visualize.newVisWizard.pageTitle', {
+      defaultMessage: 'Choose search source',
+    }),
   };
 });
