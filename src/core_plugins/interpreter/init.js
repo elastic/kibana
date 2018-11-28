@@ -18,8 +18,8 @@
  */
 
 import { routes } from './server/routes';
-import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { populateServerRegistries } from '@kbn/interpreter/server/server_registries';
+import { functionsRegistry } from '@kbn/interpreter/common';
+import { populateServerRegistries } from '@kbn/interpreter/server';
 
 export default async function (server /*options*/) {
   server.injectUiAppVars('canvas', () => {

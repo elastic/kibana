@@ -20,6 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function ErrorComponent(props) {
   const { error } = props;
@@ -51,7 +52,13 @@ function ErrorComponent(props) {
 
   return (
     <div className="tvbError">
-      <div className="tvbError__title">{title || 'The request for this panel failed'}</div>
+      <div className="tvbError__title">
+        {title ||
+        <FormattedMessage
+          id="tsvb.error.requestForPanelFailedErrorMessage"
+          defaultMessage="The request for this panel failed"
+        />}
+      </div>
       {additionalInfo}
     </div>
   );

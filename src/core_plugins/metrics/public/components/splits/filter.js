@@ -23,6 +23,7 @@ import GroupBySelect from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SplitByFilter = props => {
   const { onChange } = props;
@@ -34,7 +35,13 @@ export const SplitByFilter = props => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiFormRow id={htmlId('group')} label="Group by">
+        <EuiFormRow
+          id={htmlId('group')}
+          label={(<FormattedMessage
+            id="tsvb.splits.filter.groupByLabel"
+            defaultMessage="Group by"
+          />)}
+        >
           <GroupBySelect
             value={model.split_mode}
             onChange={handleSelectChange('split_mode')}
@@ -42,7 +49,13 @@ export const SplitByFilter = props => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow id={htmlId('query')} label="Query string">
+        <EuiFormRow
+          id={htmlId('query')}
+          label={(<FormattedMessage
+            id="tsvb.splits.filter.queryStringLabel"
+            defaultMessage="Query string"
+          />)}
+        >
           <EuiFieldText
             value={model.filter}
             onChange={handleTextChange('filter')}

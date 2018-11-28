@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionsRegistry } from '@kbn/interpreter/common/lib/functions_registry';
-import { populateServerRegistries } from '@kbn/interpreter/server/server_registries';
+import { functionsRegistry } from '@kbn/interpreter/common';
+import { populateServerRegistries } from '@kbn/interpreter/server';
 import { routes } from './server/routes';
 import { commonFunctions } from './common/functions';
 import { registerCanvasUsageCollector } from './server/usage';

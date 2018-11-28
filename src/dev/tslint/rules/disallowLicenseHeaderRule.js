@@ -17,24 +17,35 @@
  * under the License.
  */
 
-const webpack = require('webpack');
-const webpackConfig = require('./webpack.plugins');
+const Lint = require('tslint');
 
-const devtool = 'inline-cheap-module-source-map';
+const FAILURE_STRING = 'This license header is not allowed in this file.';
+const RULE_NAME = 'disallow-license-header';
 
-const onComplete = function (done) {
-  return function (err, stats) {
-    if (err) {
-      done && done(err);
-    } else {
-      const seconds = ((stats.endTime - stats.startTime) / 1000).toFixed(2);
-      console.log(`Plugins built in ${seconds} seconds`);
-      done && done();
+exports.Rule = class extends Lint.Rules.AbstractRule {
+  apply(sourceFile) {
+    const [headerText] = this.getOptions().ruleArguments;
+
+    if (!headerText) {
+      throw new Error(`${RULE_NAME} requires a single argument containing the header text`);
     }
-  };
+
+    if (!sourceFile.text.includes(headerText)) {
+      return [];
+    }
+
+    const start = sourceFile.text.indexOf(headerText);
+    const end = start + headerText.length;
+
+    return [
+      new Lint.RuleFailure(
+        sourceFile,
+        start,
+        end,
+        FAILURE_STRING,
+        RULE_NAME,
+        new Lint.Replacement(start, headerText.length, '')
+      )
+    ];
+  }
 };
-
-webpack({ ...webpackConfig, devtool }, onComplete(function () {
-  console.log('all done');
-}));
-

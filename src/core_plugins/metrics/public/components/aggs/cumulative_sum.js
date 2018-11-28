@@ -24,6 +24,7 @@ import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 
 function CumulativeSumAgg(props) {
@@ -41,7 +42,12 @@ function CumulativeSumAgg(props) {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.cumulativeSum.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -53,7 +59,10 @@ function CumulativeSumAgg(props) {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label="Metric"
+            label={(<FormattedMessage
+              id="tsvb.cumulativeSum.metricLabel"
+              defaultMessage="Metric"
+            />)}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}

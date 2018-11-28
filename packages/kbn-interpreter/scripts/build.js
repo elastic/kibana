@@ -17,11 +17,4 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
-const dir = resolve(__dirname, '..', '..', '..');
-
-export const pluginPaths = {
-  commonFunctions: resolve(dir, 'node_modules/@kbn/interpreter/plugin/functions/common'),
-  types: resolve(dir, 'node_modules/@kbn/interpreter/plugin/types'),
-};
+require('../tasks/build/cli');

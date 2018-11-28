@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createError } from '@kbn/interpreter/common/interpreter/create_error';
+import { createError } from '@kbn/interpreter/common';
 
 export const routeExpressionProvider = environments => {
   async function routeExpression(ast, context = null) {
