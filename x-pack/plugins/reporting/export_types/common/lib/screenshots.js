@@ -60,7 +60,7 @@ export function screenshotsObservableFactory(server) {
   };
 
   const checkForToastMessage = async (browser, layout) => {
-    await browser.waitForSelector(layout.selectors.toastHeader);
+    await browser.waitForSelector(layout.selectors.toastHeader, { silent: true });
     const toastHeaderText = await browser.evaluate({
       fn: function (selector) {
         const nodeList = document.querySelectorAll(selector);
