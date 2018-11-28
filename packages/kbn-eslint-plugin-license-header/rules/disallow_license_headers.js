@@ -40,7 +40,7 @@ module.exports = {
   create: context => {
     return {
       Program(program) {
-        const nodeValues = init(context, program, () => {
+        const licenses = init(context, program, () => {
           const options = context.options[0] || {};
           const licenses = options.licenses;
 
@@ -56,21 +56,17 @@ module.exports = {
           });
         });
 
-        if (!nodeValues) return;
+        if (!licenses || !licenses.length) return;
 
         const sourceCode = context.getSourceCode();
 
         sourceCode
           .getAllComments()
-          .filter(node => (
-            nodeValues.find(nodeValue => (
-              normalizeWhitespace(node.value) === nodeValue
-            ))
-          ))
+          .filter(node => licenses.includes(normalizeWhitespace(node.value)))
           .forEach(node => {
             context.report({
               node,
-              message: 'Remove outdated license header.',
+              message: 'This license header is not allowed in this file.',
               fix(fixer) {
                 return fixer.remove(node);
               }
