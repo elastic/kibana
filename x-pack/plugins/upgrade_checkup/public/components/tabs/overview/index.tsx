@@ -8,6 +8,9 @@ import React, { Fragment } from 'react';
 
 import {
   EuiCallOut,
+  EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiHorizontalRule,
   EuiLink,
   EuiPageContent,
   EuiPageContentBody,
@@ -45,7 +48,7 @@ export class OverviewTab extends React.Component {
               </p>
             </EuiCallOut>
             <EuiSpacer />
-            <EuiText>
+            <EuiText grow={false}>
               <p>
                 Read more about important changes in the{' '}
                 <EuiLink
@@ -58,15 +61,30 @@ export class OverviewTab extends React.Component {
                 nodes, and indices and find out about any known problems that need to be addressed
                 before upgrading.
               </p>
-              <h2>Deprecation Logging</h2>
-              <p>
-                Elasticsearch comes with a deprecation logger which will log a message whenever
-                deprecated functionality is used. Enable or disable deprecation logging on your
-                cluster here. This is enabled by default, beginning in Elasticsearch 5.0.
-              </p>
             </EuiText>
-            <EuiSpacer />
-            <DeprecationLoggingToggle />
+
+            <EuiHorizontalRule />
+
+            <EuiDescribedFormGroup
+              idAria="deprecation-logging"
+              title={<h3>Deprecation logging</h3>}
+              titleSize="xxs"
+              fullWidth
+              description={
+                <Fragment>
+                  Elasticsearch comes with a deprecation logger which will log a message whenever
+                  deprecated functionality is used. Enable or disable deprecation logging on your
+                  cluster here. This is enabled by default, beginning in Elasticsearch 5.0.
+                </Fragment>
+              }
+            >
+              <EuiFormRow
+                label="Enable deprecation logging?"
+                describedByIds={['deprecation-logging']}
+              >
+                <DeprecationLoggingToggle />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
           </EuiPageContentBody>
         </EuiPageContent>
       </Fragment>

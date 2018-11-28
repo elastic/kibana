@@ -5,7 +5,7 @@
 }
 
 .upgDeprecations__item {
-  padding: $euiSizeL;
+  padding: $euiSize $euiSizeL;
   border-top: $euiBorderThin;
 
   &:last-of-type {
