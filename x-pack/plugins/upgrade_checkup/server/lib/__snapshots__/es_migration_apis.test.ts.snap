@@ -39,6 +39,10 @@ Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
         },
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
+        },
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
     },
@@ -52,6 +56,10 @@ Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
         },
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
+        },
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
     },
@@ -61,6 +69,10 @@ Object {
       "level": "critical",
       "message": "Index created before 5.0",
       "uiButtons": Array [
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking-changes-6.0.html#_indices_created_before_6_0",
+        },
         Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking-changes-6.0.html#_indices_created_before_6_0",
@@ -78,6 +90,10 @@ Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
         },
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
+        },
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
     },
@@ -87,6 +103,10 @@ Object {
       "level": "info",
       "message": "Coercion of boolean fields",
       "uiButtons": Array [
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
+        },
         Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
@@ -104,6 +124,10 @@ Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
         },
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
+        },
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
     },
@@ -113,6 +137,10 @@ Object {
       "level": "critical",
       "message": "Index created before 5.0",
       "uiButtons": Array [
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking-changes-6.0.html#_indices_created_before_6_0",
+        },
         Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking-changes-6.0.html#_indices_created_before_6_0",
@@ -130,6 +158,10 @@ Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
         },
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
+        },
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_fields",
     },
@@ -139,6 +171,10 @@ Object {
       "level": "critical",
       "message": "Index created before 5.0",
       "uiButtons": Array [
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking-changes-6.0.html#_indices_created_before_6_0",
+        },
         Object {
           "label": "Read Documentation",
           "url": "https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking-changes-6.0.html#_indices_created_before_6_0",
@@ -155,6 +191,10 @@ Object {
         Object {
           "label": "Reindex in Console",
           "url": "//app/kibana#/dev_tools/console?load_from=%2F%2Fapi%2Fupgrade_checkup%2Freindex%2Fconsole_template%2Ftwitter.json",
+        },
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html",
         },
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html",
@@ -182,6 +222,10 @@ Object {
           "label": "Reindex in Console",
           "url": "//app/kibana#/dev_tools/console?load_from=%2F%2Fapi%2Fupgrade_checkup%2Freindex%2Fconsole_template%2F.reindex-status.json",
         },
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html",
+        },
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html",
     },
@@ -194,6 +238,10 @@ Object {
         Object {
           "label": "Reindex in Console",
           "url": "//app/kibana#/dev_tools/console?load_from=%2F%2Fapi%2Fupgrade_checkup%2Freindex%2Fconsole_template%2Ftwitter2.json",
+        },
+        Object {
+          "label": "Read Documentation",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html",
         },
       ],
       "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reindex-upgrade.html",

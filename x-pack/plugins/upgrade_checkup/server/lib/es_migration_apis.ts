@@ -83,8 +83,8 @@ const addUiButtonForDocs = (
   ]);
 
   return {
-    uiButtons,
     ...dep,
+    uiButtons,
   };
 };
 
