@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiText } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, isUndefined } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -41,7 +41,7 @@ export const Hosts = connect()(
   pure<Props>(({ dispatch }) => (
     <WithSource sourceId="default">
       {({ auditbeatIndicesExist }) =>
-        auditbeatIndicesExist || auditbeatIndicesExist === null ? (
+        auditbeatIndicesExist || isUndefined(auditbeatIndicesExist) ? (
           <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
             {({ events, kpiEventType, loading }) => (
               <Pane1FlexContent data-test-subj="pane1FlexContent">
