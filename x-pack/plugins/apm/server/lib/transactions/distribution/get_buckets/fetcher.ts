@@ -38,6 +38,7 @@ export type ESResponse = AggregationSearchResponse<void, Aggs>;
 export function bucketFetcher(
   serviceName: string,
   transactionName: string,
+  transactionId: string,
   bucketSize: number,
   setup: Setup
 ): Promise<ESResponse> {
@@ -62,7 +63,10 @@ export function bucketFetcher(
               }
             }
           ],
-          should: [{ term: { [TRANSACTION_SAMPLED]: true } }]
+          should: [
+            { term: { [TRANSACTION_ID]: transactionId } },
+            { term: { [TRANSACTION_SAMPLED]: true } }
+          ]
         }
       },
       aggs: {

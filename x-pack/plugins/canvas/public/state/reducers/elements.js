@@ -66,10 +66,12 @@ export const elementsReducer = handleActions(
       const { filter, pageId, elementId } = payload;
       return assignElementProperties(workpadState, pageId, elementId, { filter });
     },
-    [actions.setPosition]: (workpadState, { payload }) => {
-      const { position, pageId, elementId } = payload;
-      return assignElementProperties(workpadState, pageId, elementId, { position });
-    },
+    [actions.setMultiplePositions]: (workpadState, { payload }) =>
+      payload.repositionedElements.reduce(
+        (previousWorkpadState, { position, pageId, elementId }) =>
+          assignElementProperties(previousWorkpadState, pageId, elementId, { position }),
+        workpadState
+      ),
     [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
       return moveElementLayer(workpadState, pageId, elementId, movement);
     },
