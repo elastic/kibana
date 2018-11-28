@@ -4,22 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { anomalyAggsFetcher, ESResponse } from './fetcher';
+import { anomalySeriesFetcher, ESResponse } from './fetcher';
 
 describe('anomalyAggsFetcher', () => {
   describe('when ES returns valid response', () => {
-    let response: ESResponse;
+    let response: ESResponse | undefined;
     let clientSpy: jest.Mock;
 
     beforeEach(async () => {
       clientSpy = jest.fn().mockReturnValue('ES Response');
-      response = await anomalyAggsFetcher({
+      response = await anomalySeriesFetcher({
         serviceName: 'myServiceName',
         transactionType: 'myTransactionType',
         intervalString: 'myInterval',
-        client: clientSpy,
-        start: 0,
-        end: 1
+        mlBucketSize: 10,
+        setup: { client: clientSpy, start: 100000, end: 200000 } as any
       });
     });
 
@@ -38,8 +37,8 @@ describe('anomalyAggsFetcher', () => {
     const failClient = jest.fn(() => Promise.reject(httpError));
 
     return expect(
-      anomalyAggsFetcher({ client: failClient } as any)
-    ).resolves.toEqual(null);
+      anomalySeriesFetcher({ setup: { client: failClient } } as any)
+    ).resolves.toEqual(undefined);
   });
 
   it('should throw other errors', () => {
@@ -47,8 +46,8 @@ describe('anomalyAggsFetcher', () => {
     const failClient = jest.fn(() => Promise.reject(otherError));
 
     return expect(
-      anomalyAggsFetcher({
-        client: failClient
+      anomalySeriesFetcher({
+        setup: { client: failClient }
       } as any)
     ).rejects.toThrow(otherError);
   });
