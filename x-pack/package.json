@@ -21,7 +21,7 @@
     }
   },
   "resolutions": {
-    "**/@types/node": "8.10.21",
+    "**/@types/node": "8.10.38",
     "@types/react": "16.3.14"
   },
   "devDependencies": {

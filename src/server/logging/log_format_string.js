@@ -50,6 +50,7 @@ const typeColors = {
   manager: 'green',
   optimize: 'magentaBright',
   'optimize:dynamic_dll_plugin': 'magentaBright',
+  'optimize:watch_cache': 'magentaBright',
   listening: 'magentaBright',
   scss: 'magentaBright',
 };

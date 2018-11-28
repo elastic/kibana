@@ -72,7 +72,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "8.10.21",
+    "**/@types/node": "8.10.38",
     "@types/react": "16.3.14"
   },
   "workspaces": {
@@ -262,6 +262,7 @@
     "@types/d3": "^3.5.41",
     "@types/dedent": "^0.7.0",
     "@types/del": "^3.0.1",
+    "@types/delete-empty": "^2.0.0",
     "@types/elasticsearch": "^5.0.26",
     "@types/enzyme": "^3.1.12",
     "@types/eslint": "^4.16.2",
@@ -269,6 +270,7 @@
     "@types/fetch-mock": "^5.12.2",
     "@types/getopts": "^2.0.0",
     "@types/glob": "^5.0.35",
+    "@types/globby": "^8.0.0",
     "@types/graphql": "^0.13.1",
     "@types/hapi": "^17.0.18",
     "@types/has-ansi": "^3.0.0",
@@ -283,7 +285,7 @@
     "@types/minimatch": "^2.0.29",
     "@types/moment-timezone": "^0.5.8",
     "@types/mustache": "^0.8.31",
-    "@types/node": "^8.10.20",
+    "@types/node": "^8.10.38",
     "@types/opn": "^5.1.0",
     "@types/podium": "^1.0.0",
     "@types/prop-types": "^15.5.3",
