@@ -18,11 +18,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, I18nProvider, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
-import { CollapsiblePanel } from 'x-pack/public/components';
 import { Role } from '../../../../../../../common/model/role';
 // @ts-ignore
 import { documentationLinks } from '../../../../../../documentation_links';
 import { RoleValidator } from '../../../lib/validate_role';
+import { CollapsiblePanel } from '../../collapsible_panel';
 import { ClusterPrivileges } from './cluster_privileges';
 
 import { IndexPrivileges } from './index_privileges';

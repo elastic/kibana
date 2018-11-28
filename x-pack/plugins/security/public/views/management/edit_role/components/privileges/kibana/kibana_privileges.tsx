@@ -7,11 +7,11 @@
 import { I18nProvider } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { UICapabilities } from 'ui/capabilities';
-import { CollapsiblePanel } from 'x-pack/public/components';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { RoleValidator } from '../../../lib/validate_role';
+import { CollapsiblePanel } from '../../collapsible_panel';
 import { SimplePrivilegeForm } from './simple_privilege_form';
 import { SpaceAwarePrivilegeForm } from './space_aware_privilege_form';
 

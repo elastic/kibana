@@ -9,7 +9,7 @@ import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component, Fragment, ReactNode } from 'react';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { CollapsiblePanel } from 'x-pack/public/components';
+import { CollapsiblePanel } from '../../components';
 import { FeatureTable } from './feature_table';
 
 interface Props {
