@@ -8,12 +8,11 @@ but because you’ve come to the function reference, you must be interested in
 how these functions work.
 
 For the purpose of this documentation, 
-these functions are divided by the environment they run in:
+the Canvas functions are divided by the environment they run in:
 
-* <<canvas-common-functions>> run on the {kib} server, in the browser, or wherever is 
-best for performance.
+* <<canvas-common-functions>> can run anywhere.
 * <<canvas-server-functions>> can only execute on the server.
 * <<canvas-client-functions>> must execute in a browser.
 
 The Canvas expression language also supports <<canvas-tinymath-functions>>, which
-you can use to perform complex math calculations.
+perform complex math calculations.

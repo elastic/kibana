@@ -74,7 +74,23 @@ Configures axis of a visualization.
 show:: (boolean) Show the axis labels? The default is `true.`
  +
 position:: (string) The position of the axis labels, for example, top, bottom, left, and right.
-The default is ``.
+
+[float]
+=== case
+
+Builds a case (including a condition/result) to pass to the switch function.
+
+- *Accepts:* Anything or nothing
+- *Returns:* case
+- *Arguments*
++
+_Unnamed_::	 (any) This value is compared to the context to see if the condition 
+is met. It is overridden by the "if" argument if both are provided.
++
+if*::	(boolean)	This value determines whether or not the condition is met. 
+It overrides the unnamed argument if both are provided.
++
+then:: (any) The value to return if the condition is met.
    
    
 [float]
@@ -182,8 +198,8 @@ _Unnamed_::  (string) An optional date string to parse into milliseconds
 since epoch. Can be either a valid JavaScript Date input or a string to parse 
 using the format argument. Must be an ISO 8601 string or you must provide the format.
 +
-format*::  (string) The `momentJS` format for parsing the optional date 
-string. See the https://momentjs.com/docs/#/displaying/[moment.js documentation].
+format*::  (string) The Moment.js format for parsing the optional date 
+string. See the https://momentjs.com/docs/#/displaying/[Moment.js documentation].
 
 [float]
 === do
@@ -423,7 +439,7 @@ Adds an element for rendering Markdown text. Great for single numbers, metrics, 
 _Unnamed*_:: (string) A string containing Markdown. You can pass this multiple 
 times to achieve concatenation.  The default is `""`.
 +
-font:: (style) Font settings. Technically, you can stick other styles in here too.
+font:: (style) Font settings. Technically, you can put other styles in here too.
 The default is `{font}`.
 
 [float]
@@ -439,3 +455,396 @@ available as "value" (without the quotes).
 +
 _Unnamed*_:: (string) An evaluated TinyMath expression. See <<canvas-tinymath-functions>>.
 
+[float]
+=== metric
+
+A number with a label.
+
+- *Accepts:* string, null
+- *Returns:* render
+- *Arguments*
++
+_Unnamed_:: (string) Text describing the metric.  The default is `""`.
++
+metricFont:: (style) Font settings for the metric. Technically, you can put other styles in here too.
+The default is `{font size=48 family="'Open Sans', Helvetica, Arial, 
+sans-serif" color="#000000" align=center lHeight=48}`.
++
+labelFont::	(style)	Font settings for the label. Technically you can put other styles in here too.
+The default is `{font size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`.
+
+[float]
+=== neq
+
+Returns whether the context is not equal to the argument.
+
+- *Accepts:* Anything or nothing
+- *Returns:* boolean
+- *Arguments*
++
+_Unnamed*_:: (boolean, number, string)	The value to compare the context to.
+
+[float]
+=== palette
+
+Creates a color palette.
+
+- *Accepts:* null
+- *Returns:* palette
+- *Arguments*
++
+_Unnamed*_:: (string) Palette colors, rgba, hex, or HTML color string. Pass this multiple times.
++
+gradient:: (boolean) Prefer to make a gradient where supported and useful? 
+The default is `false`.
++
+reverse::	(any)	Reverse the palette. The default is `false`.
+
+[float]
+=== pie
+
+Configures a pie chart element.
+
+- *Accepts:* pointseries
+- *Returns:* render
+- *Arguments*
++
+palette:: (palette)	A palette object for describing the colors to use on this pie.
+The default is `{palette}`.
++
+seriesStyle::	(seriesStyle)	A style of a specific series.
++
+radius:: (any) Radius of the pie as a percentage (between 0 and 1) of the 
+available space. Set to `auto` to automatically set radius. The default is `auto`.
++
+hole:: (number)	Draw a hole in the pie, 0-100, as a percentage of the pie radius.
+The default is `0`.
++
+labels:: (boolean) Show pie labels. The default is `true`.
++
+labelRadius::	(number) The percentage of the area of container to use as a radius for 
+the label circle. The default is `100`.
++
+font:: (style) The label font.  The default is `{font}`.
++
+legend:: (string, boolean) The legend position, `nw`, `sw`, `ne`, `se`, or `false`. The default
+is `false`.
++
+tilt:: (number)	The percentage of tilt, where 1 is fully vertical and 0 is 
+completely flat. The default is `1`.
+
+[float]
+=== plot
+
+Configures a plot element.
+
+- *Accepts:* pointseries
+- *Returns:* render
+- *Arguments*
++
+seriesStyle:: (seriesStyle)	A style of a specific series.
++
+defaultStyle:: (seriesStyle) The default style to use for every series. 
+The default is `{seriesStyle points=5}`.
++
+palette::	(palette)	A palette object for describing the colors to use on this plot.
+The default is `{palette}`.
++
+font:: (style) The legend and tick mark fonts. The default is	`{font}`.
++
+legend:: (string, boolean) The legend position, `nw`, `sw`, `ne`, `se`, or `false`. 
+The default is `ne`.
++
+yaxis::	(boolean, axisConfig)	Axis configuration, or false to disable. The
+default is `true`.
++
+xaxis::	(boolean, axisConfig) Axis configuration, or false to disable.  
+The default is `true`.	
+
+[float]
+=== ply
+
+Subdivides a datatable and passes the resulting tables into an expression, 
+then merges the output.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+- *Arguments*
+
+by*::	(string) The column to subdivide.
++
+expression*::	(datatable)	An expression to pass into each resulting data table.
+Expressions must return a datatable. Use `as` to turn literals into datatables.				
+Multiple expressions must return the same number of rows. If you need to return 
+a differing row count, pipe into another instance of `ply`.				
+If multiple expressions return the same columns, the last one wins. Alias: fn, function	
+
+[float]
+=== render
+
+Renders an input as a specific element and sets element level options,
+such as styling.
+
+- *Accepts:* render
+- *Returns:* render
+- *Arguments*
++
+as:: (string)	The element type to use in rendering. You might want to use 
+specialized function instead, such as plot or grid.
++
+css:: (string) Any block of custom CSS to be scoped to this element. 
+The default is `"* > * {}"`.	
++
+containerStyle:: (containerStyle)	Style for the container, including background, 
+border, and opacity.
+
+[float]
+=== repeatImage
+
+Configures a repeating image element.
+
+- *Accepts:* number
+- *Returns:* render
+- *Arguments*
++
+image:: (string) The data image
++
+size:: (number) The default is `100`.
++
+max:: (number) The default is `1000`.
++
+emptyImage:: (string) The default is `null`.
+
+[float]
+=== replace
+
+Uses a regular expression to replace parts of a string.
+
+- *Accepts:* string
+- *Returns:* string
+- *Arguments*
++
+_Unnamed*_:: (string)	The text or pattern of a JavaScript regular
+expression, for example, "[aeiou]". You can use capture groups here. Aliases: pattern, regex
++
+flags::	(string) Specify flags. See the
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp[RegExp documentation]
+for reference. The default is `g`. Alias: modifiers
++
+replacement:: (string) The replacement for the matching parts of string. Capture 
+groups can be accessed by their index, for example $1. The default is `""`.
+
+[float]
+=== revealImage
+
+Configures an image reveal element.
+
+- *Accepts:* number
+- *Returns:* render
+- *Arguments*
++
+image:: (string)
++
+emptyImage:: (string) The default is `null`.
++
+origin:: (string) The default is `bottom`.
+
+[float]
+=== rounddate
+
+Rounds ms since epoch using a moment formatting string. Returns ms since epoch.
+
+- *Accepts:* number
+- *Returns:* number
+- *Arguments*
++
+_Unnamed*_:: (string) Moment.js Format with which to bucket. See the 
+https://momentjs.com/docs/#/displaying/[MomentJS documentation]. 
+For example "YYYY-MM" rounds to the month.
+
+[float]
+=== rowCount
+
+Returns the number of rows. Pairs with `ply` to get the count of unique column 
+values, or combinations of unique column values.
+
+- *Accepts:* datatable
+- *Returns:* number
+
+[float]
+=== seriesStyle
+
+Creates an object used for describing the properties of a series on a chart. 
+You typically use this inside of a charting function.
+
+- *Accepts:* null
+- *Returns:*  Depends on your input and arguments
+- *Arguments*
++
+label*:: (string)	The label of the line this style applies to, not the name 
+you would like to give the line.
++
+color::	(string) The color to assign the line.
++
+lines::	(number) The width of the line.  The default is `0`.
++
+bars:: (number)	The width of bars. The default is `0`.
++
+points:: (number)	The size of points on line.  The default is `5`.
++
+fill:: (number, boolean) Should points be filled? The default is `false`.
++
+stack::	(number) Should the serires be stacked? This is the stack "id". 
+Series with the same stack id are stacked together.
++
+horizontalBars:: (boolean) Sets the orientation of bars in the chart to horizontal.
+The default is `false`.
+
+[float]
+=== shape
+
+Creates a shape.
+
+- *Accepts:* null
+- *Returns:* shape
+- *Arguments*
++
+_Unnamed*_:: (string) Pick a shape.  The default is `square`. Alias: shape
++
+fill:: (string)	Valid CSS color string. The default is `black`.
++
+border:: (string)	Valid CSS color string. Alias: stroke
++		
+borderWidth::	(number) Thickness of the border. The default is `0`. Alias: strokeWidth	
++
+maintainAspect:: (boolean) Select `true` to maintain aspect ratio.  
+The default is `false`.
+
+[float]
+=== sort
+
+Sorts a datatable on a column.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed*_:: (string) The column to sort on. If column is not specified, 
+the datatable is sorted on the first column. Alias: column
++
+reverse*:: (boolean) Reverse the sort order. If reverse is not specified, 
+the datatable is sorted in ascending order.	
+
+[float]
+=== staticColumn
+
+Adds a column with a static value.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed*_:: (string) The name of the new column. Alias: column
++
+value::	(string, number, boolean)	The value to insert in each column. 
+Tip: Use a sub-expression to rollup other columns into a static value.
+The default is `null`.
+
+[float]
+=== string
+
+Outputs a string made of other strings. Mostly useful when combined with 
+sub-expressions that output a string, or something castable to a string.
+
+- *Accepts:* Anything or nothing
+- *Returns:* string
+- *Arguments*
++
+_Unnamed*_:: (string)	One or more strings to join together. Don't forget spaces 
+where needed.
+
+[float]
+=== switch
+
+Performs conditional logic with multiple conditions. See also the case function,
+which builds a case to pass to the switch function.
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
+- *Arguments*
++
+_Unnamed*_:: (case)	The list of conditions to check. Alias: case
++
+default:: (any)	The default case, if no cases match. Alias: finally	 
+
+[float]
+=== table
+
+Configures a data table element.
+
+- *Accepts:* datatable
+- *Returns:* render
+- *Arguments*
++
+font:: (style) Font style. The default is `{font}`.
++
+paginate:: (boolean) Show pagination controls. If set to `false` only the first 
+page is displayed. The default is `true`.
++
+perPage:: (number) Show this many rows per page. The default is `10`.
++
+showHeader:: (boolean) Show or hide the header row with titles for each column.
+The default is `true`.
+
+[float]
+=== tail
+
+Gets the last N rows from the end of a datatable. See also head.
+
+- *Accepts:* datatable
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed*_:: (number)	Return this many rows from the end of the datatable.
+
+[float]
+=== timefilter
+
+Creates a time filter for querying a source.
+
+- *Accepts:* filter
+- *Returns:* filter
+- *Arguments*
++
+column:: (any) The column or field to attach the filter to. The default is `@timestamp`.
+Alias: field, c
++
+from:: (string)	Beginning of the range, in ISO8601 or {es} datemath format. Alias: f, start	
++
+to:: (string)	End of the range, in ISO8601 or {es} datemath format. Alias: t, end	
+
+
+[float]
+=== timefilterControl
+
+Configures a time filter control element.
+
+- *Accepts:* null
+- *Returns:* render
+- *Arguments*
++
+column:: (any) The column or field to attach the filter to.  Aliases: field, c
++			
+compact:: (any)	Show the time filter as a button that triggers a popover. 
+The default is `true`.
+
+[float]
+=== to
+
+Explicitly casts from one type to another.
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
+- *Arguments*
++
+_Unnamed*_:: (string)	A known type. Alias: type
