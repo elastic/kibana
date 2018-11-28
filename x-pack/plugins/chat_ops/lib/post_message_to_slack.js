@@ -5,18 +5,10 @@
  */
 import slack from './slack';
 
-export default (server, to, text, params = {}) => {
+export default (server, to, text) => {
 
-  const config = server.config();
-  const chattoken = config.get('xpack.chatops.chattoken');
-  const name = config.get('xpack.chatops.chatname');
+  // The RTM client can send simple string messages
+  slack(server).sendMessage(text, to)
+    .catch(console.error);
 
-  return slack(server).chat.postMessage({
-    chattoken,
-    text,
-    username: name,
-    as_user: true,
-    channel: to,
-    ...params,
-  });
 };
