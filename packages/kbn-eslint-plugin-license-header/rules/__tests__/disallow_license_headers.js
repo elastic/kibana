@@ -18,10 +18,10 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('../remove_outdated_license_header');
+const rule = require('../disallow_license_headers');
 const dedent = require('dedent');
 
-const RULE_NAME = '@kbn/license-header/remove-outdated-license-header';
+const RULE_NAME = '@kbn/license-header/disallow-license-headers';
 
 const ruleTester = new RuleTester({
   parser: 'babel-eslint',

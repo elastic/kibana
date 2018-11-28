@@ -5,7 +5,6 @@
  */
 
 import { AggregationSearchResponse } from 'elasticsearch';
-import { IOptions } from '.';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -14,6 +13,7 @@ import {
   TRANSACTION_TYPE
 } from '../../../../../common/constants';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
+import { Setup } from '../../../helpers/setup_request';
 
 interface ResponseTimeBucket {
   key_as_string: string;
@@ -31,11 +31,17 @@ interface ResponseTimeBucket {
 }
 
 interface TransactionResultBucket {
+  /**
+   * transaction result eg. 2xx
+   */
   key: string;
   doc_count: number;
   timeseries: {
     buckets: Array<{
       key_as_string: string;
+      /**
+       * timestamp in ms
+       */
       key: number;
       doc_count: number;
     }>;
@@ -63,7 +69,12 @@ export function timeseriesFetcher({
   transactionType,
   transactionName,
   setup
-}: IOptions): Promise<ESResponse> {
+}: {
+  serviceName: string;
+  transactionType: string;
+  transactionName?: string;
+  setup: Setup;
+}): Promise<ESResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 

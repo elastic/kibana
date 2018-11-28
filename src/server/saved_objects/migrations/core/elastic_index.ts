@@ -322,6 +322,13 @@ async function reindex(callCluster: CallCluster, source: string, dest: string, b
 
     completed = await callCluster('tasks.get', {
       taskId: task,
-    }).then(result => result.completed);
+    }).then(result => {
+      if (result.error) {
+        const e = result.error;
+        throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
+      }
+
+      return result.completed;
+    });
   }
 }
