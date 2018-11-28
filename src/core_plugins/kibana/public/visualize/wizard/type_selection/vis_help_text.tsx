@@ -35,21 +35,23 @@ export const VisHelpText = ({ visType }: VisHelpTextProps) => {
         <h2>{visType.title}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {visType.stage === 'experimental' && (
-        <React.Fragment>
-          <EuiText>
-            <em>
-              <FormattedMessage
-                id="kbn.visualize.newVisWizard.experimentalDescription"
-                defaultMessage="This visualization is experimental. The design and implementation
-                  are less mature than stable visualizations and might be subject to change."
-              />
-            </em>
-          </EuiText>
-          <EuiSpacer size="s" />
-        </React.Fragment>
-      )}
-      <EuiText>{visType.description}</EuiText>
+      <div id={`visTypeDescription-${visType.name}`}>
+        {visType.stage === 'experimental' && (
+          <React.Fragment>
+            <EuiText>
+              <em>
+                <FormattedMessage
+                  id="kbn.visualize.newVisWizard.experimentalDescription"
+                  defaultMessage="This visualization is experimental. The design and implementation
+                    are less mature than stable visualizations and might be subject to change."
+                />
+              </em>
+            </EuiText>
+            <EuiSpacer size="s" />
+          </React.Fragment>
+        )}
+        <EuiText>{visType.description}</EuiText>
+      </div>
     </React.Fragment>
   );
 };

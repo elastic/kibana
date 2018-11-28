@@ -180,6 +180,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         data-test-subj={`visType-${visType.name}`}
         data-vis-stage={visType.stage}
         disabled={isDisabled}
+        aria-describedby={`visTypeDescription-${visType.name}`}
         {...stage}
       >
         <VisTypeIcon visType={visType} />
