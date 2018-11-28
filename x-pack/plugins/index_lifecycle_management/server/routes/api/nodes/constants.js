@@ -8,10 +8,6 @@ export const NODE_ATTRS_KEYS_TO_IGNORE = [
   'ml.enabled',
   'ml.machine_memory',
   'ml.max_open_jobs',
-  'availability_zone',
-  'logical_availability_zone',
-  'region',
-  'instance_configuration',
   'testattr',
   'xpack.installed',
 ];

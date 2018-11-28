@@ -21,6 +21,7 @@ export function indexLifecycleManagement(kibana) {
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
         }).default(),
+        filteredNodeAttributes: Joi.array().items(Joi.string()).default([])
       }).default();
     },
     id: PLUGIN_ID,
