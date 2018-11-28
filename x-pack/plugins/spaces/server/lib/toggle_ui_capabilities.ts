@@ -8,7 +8,7 @@ import { UICapabilities } from 'ui/capabilities';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../common/model/space';
 
-export function toggleUiCapabilities(
+export function toggleUICapabilities(
   features: Feature[],
   uiCapabilities: UICapabilities,
   activeSpace: Space

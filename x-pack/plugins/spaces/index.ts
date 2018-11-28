@@ -23,7 +23,7 @@ import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objec
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { SpacesClient } from './server/lib/spaces_client';
 import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
-import { toggleUiCapabilities } from './server/lib/toggle_ui_capabilities';
+import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
 import { initPublicSpacesApi } from './server/routes/api/public';
 import { initPrivateApis } from './server/routes/api/v1';
 
@@ -103,7 +103,7 @@ export const spaces = (kibana: any) =>
 
         if (vars.activeSpace.space) {
           const features = server.plugins.xpack_main.getFeatures();
-          vars.uiCapabilities = toggleUiCapabilities(
+          vars.uiCapabilities = toggleUICapabilities(
             features,
             vars.uiCapabilities,
             vars.activeSpace.space

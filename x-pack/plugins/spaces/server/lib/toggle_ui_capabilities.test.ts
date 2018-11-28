@@ -7,7 +7,7 @@
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../common/model/space';
-import { toggleUiCapabilities } from './toggle_ui_capabilities';
+import { toggleUICapabilities } from './toggle_ui_capabilities';
 
 const features: Feature[] = [
   {
@@ -59,7 +59,7 @@ describe('toggleUiCapabilities', () => {
     };
 
     const uiCapabilities: UICapabilities = buildUiCapabilities();
-    const result = toggleUiCapabilities(features, uiCapabilities, space);
+    const result = toggleUICapabilities(features, uiCapabilities, space);
     expect(result).toEqual(buildUiCapabilities());
   });
 
@@ -71,7 +71,7 @@ describe('toggleUiCapabilities', () => {
     };
 
     const uiCapabilities: UICapabilities = buildUiCapabilities();
-    const result = toggleUiCapabilities(features, uiCapabilities, space);
+    const result = toggleUICapabilities(features, uiCapabilities, space);
     expect(result).toEqual(buildUiCapabilities());
   });
 
@@ -83,7 +83,7 @@ describe('toggleUiCapabilities', () => {
     };
 
     const uiCapabilities: UICapabilities = buildUiCapabilities();
-    const result = toggleUiCapabilities(features, uiCapabilities, space);
+    const result = toggleUICapabilities(features, uiCapabilities, space);
 
     const expectedCapabilities = buildUiCapabilities();
 
@@ -102,7 +102,7 @@ describe('toggleUiCapabilities', () => {
     };
 
     const uiCapabilities: UICapabilities = buildUiCapabilities();
-    const result = toggleUiCapabilities(features, uiCapabilities, space);
+    const result = toggleUICapabilities(features, uiCapabilities, space);
 
     const expectedCapabilities = buildUiCapabilities();
 
