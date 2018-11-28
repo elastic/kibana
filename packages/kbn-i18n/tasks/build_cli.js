@@ -32,7 +32,7 @@ const padRight = (width, str) =>
 
 const unknownFlags = [];
 const flags = getopts(process.argv, {
-  boolean: ['watch', 'help'],
+  boolean: ['watch', 'help', 'source-maps'],
   unknown(name) {
     unknownFlags.push(name);
   },
@@ -53,8 +53,9 @@ if (flags.help) {
   log.info(`
     Simple build tool for @kbn/i18n package
 
-    --watch    Run in watch mode
-    --help     Show this message
+    --watch       Run in watch mode
+    --source-maps Include sourcemaps
+    --help        Show this message
   `);
   process.exit();
 }
@@ -83,6 +84,7 @@ withProcRunner(log, async proc => {
           '--extensions',
           '.ts,.js,.tsx',
           ...(flags.watch ? ['--watch'] : ['--quiet']),
+          ...(flags['source-maps'] ? ['--source-map', 'inline'] : []),
         ],
         wait: true,
         env: {
@@ -98,6 +100,7 @@ withProcRunner(log, async proc => {
       args: [
         '--emitDeclarationOnly',
         ...(flags.watch ? ['--watch', '--preserveWatchOutput', 'true'] : []),
+        ...(flags['source-maps'] ? ['--declarationMap', 'true'] : []),
       ],
       wait: true,
       env,
