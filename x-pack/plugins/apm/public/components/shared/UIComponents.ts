@@ -5,8 +5,7 @@
  */
 
 import styled from 'styled-components';
-import { unit, units, px, fontSizes, colors } from '../../style/variables';
-import { RelativeLink } from '../../utils/url';
+import { colors, fontSizes, px, unit, units } from '../../style/variables';
 
 export const HeaderContainer = styled.div`
   display: flex;
@@ -28,19 +27,19 @@ export const HeaderLarge = styled.h1`
   }
 `;
 
-export const HeaderMedium = styled.h2`
+export const HeaderMedium = styled<{ css: string }, 'h2'>('h2')`
   margin: ${px(units.plus)} 0;
   font-size: ${fontSizes.xlarge};
   ${props => props.css};
 `;
 
-export const HeaderSmall = styled.h3`
+export const HeaderSmall = styled<{ css: string }, 'h3'>('h3')`
   margin: ${px(units.plus)} 0;
   font-size: ${fontSizes.large};
   ${props => props.css};
 `;
 
-export const Tab = styled.div`
+export const Tab = styled<{ selected: boolean }, 'div'>('div')`
   display: inline-block;
   font-size: ${fontSizes.large};
   padding: ${px(unit)} ${px(unit + units.quarter)};
@@ -51,5 +50,3 @@ export const Tab = styled.div`
   border-bottom: ${props =>
     props.selected && `${units.quarter / 2}px solid ${colors.blue1}`};
 `;
-
-export const TabLink = Tab.withComponent(RelativeLink);

@@ -13,6 +13,7 @@ import { legacyDecodeURIComponent } from '../../../utils/url';
 import ErrorGroupDetails from '../ErrorGroupDetails';
 // @ts-ignore
 import ErrorGroupOverview from '../ErrorGroupOverview';
+import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';
 // @ts-ignore
 import TransactionOverview from '../TransactionOverview';
@@ -58,7 +59,7 @@ export const routes = [
   {
     exact: true,
     path: '/:serviceName/errors',
-    component: ErrorGroupOverview,
+    component: ServiceDetails,
     breadcrumb: 'Errors'
   },
   {
@@ -76,12 +77,7 @@ export const routes = [
         component: Home,
         breadcrumb: 'Services'
       },
-      {
-        exact: true,
-        path: '/traces',
-        component: Home,
-        breadcrumb: 'Traces'
-      },
+      { exact: true, path: '/traces', component: Home, breadcrumb: 'Traces' },
       {
         exact: true,
         path: '/:serviceName',
@@ -96,16 +92,22 @@ export const routes = [
   {
     exact: true,
     path: '/:serviceName/transactions',
-    component: TransactionOverview,
+    component: ServiceDetails,
     breadcrumb: 'Transactions'
   },
   {
     exact: true,
-    path: '/:serviceName/transactions/:transactionType',
-    component: TransactionOverview,
-    breadcrumb: ({ match }: BreadcrumbArgs) =>
-      legacyDecodeURIComponent(match.params.transactionType)
+    path: '/:serviceName/metrics',
+    component: ServiceDetails,
+    breadcrumb: 'Metrics'
   },
+  // {
+  //   exact: true,
+  //   path: '/:serviceName/transactions/:transactionType',
+  //   component: ServiceDetails,
+  //   breadcrumb: ({ match }: BreadcrumbArgs) =>
+  //     legacyDecodeURIComponent(match.params.transactionType)
+  // },
   {
     exact: true,
     path: '/:serviceName/transactions/:transactionType/:transactionName',

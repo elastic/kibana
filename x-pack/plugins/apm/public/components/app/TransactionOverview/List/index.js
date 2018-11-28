@@ -8,19 +8,10 @@ import React from 'react';
 import styled from 'styled-components';
 import TooltipOverlay from '../../../shared/TooltipOverlay';
 import { RelativeLink, legacyEncodeURIComponent } from '../../../../utils/url';
-import { asMillis, asDecimal, tpmUnit } from '../../../../utils/formatters';
+import { asMillis, asDecimal } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
-
 import { fontFamilyCode, truncate } from '../../../../style/variables';
 import { ManagedTable } from '../../../shared/ManagedTable';
-
-function tpmLabel(type) {
-  return type === 'request' ? 'Req. per minute' : 'Trans. per minute';
-}
-
-function avgLabel(agentName) {
-  return agentName === 'js-base' ? 'Page load time' : 'Avg. duration';
-}
 
 const TransactionNameLink = styled(RelativeLink)`
   ${truncate('100%')};
@@ -31,7 +22,6 @@ export default function TransactionList({
   items,
   agentName,
   serviceName,
-  type,
   ...rest
 }) {
   const columns = [
@@ -40,14 +30,16 @@ export default function TransactionList({
       name: 'Name',
       width: '50%',
       sortable: true,
-      render: transactionName => {
-        const transactionUrl = `${serviceName}/transactions/${legacyEncodeURIComponent(
-          type
-        )}/${legacyEncodeURIComponent(transactionName)}`;
+      render: (transactionName, data) => {
+        const encodedType = legacyEncodeURIComponent(
+          data.sample.transaction.type
+        );
+        const encodedName = legacyEncodeURIComponent(transactionName);
+        const transactionPath = `/${serviceName}/transactions/${encodedType}/${encodedName}`;
 
         return (
           <TooltipOverlay content={transactionName || 'N/A'}>
-            <TransactionNameLink path={`/${transactionUrl}`}>
+            <TransactionNameLink path={transactionPath}>
               {transactionName || 'N/A'}
             </TransactionNameLink>
           </TooltipOverlay>
@@ -55,8 +47,15 @@ export default function TransactionList({
       }
     },
     {
+      field: 'transactionType',
+      name: 'Type',
+      sortable: true,
+      dataType: 'string',
+      render: (_, data) => data.sample.transaction.type
+    },
+    {
       field: 'averageResponseTime',
-      name: avgLabel(agentName),
+      name: 'Avg. duration',
       sortable: true,
       dataType: 'number',
       render: value => asMillis(value)
@@ -70,10 +69,10 @@ export default function TransactionList({
     },
     {
       field: 'transactionsPerMinute',
-      name: tpmLabel(type),
+      name: 'Trans. per minute',
       sortable: true,
       dataType: 'number',
-      render: value => `${asDecimal(value)} ${tpmUnit(type)}`
+      render: value => `${asDecimal(value)} tpm`
     },
     {
       field: 'impact',

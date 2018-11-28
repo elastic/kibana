@@ -39,6 +39,27 @@ export const getEmptySerie = memoize(
   (start: number, end: number) => [start, end].join('_')
 );
 
+export interface IEmptySeries {
+  data: Array<{
+    x: number;
+    y: number;
+  }>;
+}
+
+export interface ITpmBucket {
+  title: string;
+  data: any;
+  legendValue: string;
+  type: string;
+  color: string;
+}
+
+export interface ITransactionChartData {
+  noHits: boolean;
+  tpmSeries: ITpmBucket[] | IEmptySeries[];
+  responseTimeSeries: TimeSerie[] | IEmptySeries[];
+}
+
 export function getCharts(
   urlParams: IUrlParams,
   timeseriesResponse: TimeSeriesAPIResponse
@@ -54,11 +75,13 @@ export function getCharts(
     ? getEmptySerie(start, end)
     : getResponseTimeSeries(apmTimeseries, anomalyTimeseries);
 
-  return {
+  const chartsResult: ITransactionChartData = {
     noHits,
     tpmSeries,
     responseTimeSeries
   };
+
+  return chartsResult;
 }
 
 interface TimeSerie {

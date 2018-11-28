@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
-import { createInitialDataSelector } from './helpers';
+import React from 'react';
 import { Request } from 'react-redux-request';
-import { loadServiceDetails } from '../../services/rest/apm/services';
+import { loadServiceDetails } from '../../services/rest/apm';
+import { createInitialDataSelector } from './helpers';
 
 const ID = 'serviceDetails';
 const INITIAL_DATA = { types: [] };

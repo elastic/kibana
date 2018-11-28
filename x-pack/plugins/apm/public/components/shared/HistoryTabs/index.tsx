@@ -11,35 +11,42 @@ import { Route, RouteComponentProps, withRouter } from 'react-router-dom';
 
 export interface IHistoryTab {
   path: string;
-  name: string;
-  component: React.SFC | React.ComponentClass;
+  name: React.ReactNode;
+  component?: React.SFC | React.ComponentClass;
 }
 
 export interface HistoryTabsProps extends RouteComponentProps {
   tabs: IHistoryTab[];
+  contentWrapper?: React.SFC | React.ComponentClass;
 }
 
 const HistoryTabsWithoutRouter = ({
   tabs,
+  contentWrapper: ContentWrapper = React.Fragment,
   history,
   location
 }: HistoryTabsProps) => {
   return (
     <React.Fragment>
       <EuiTabs>
-        {tabs.map(tab => (
+        {tabs.map((tab, i) => (
           <EuiTab
             onClick={() => history.push({ ...location, pathname: tab.path })}
             isSelected={location.pathname === tab.path}
-            key={`${tab.path}--${tab.name}`}
+            key={`${tab.path}--${i}`}
           >
             {tab.name}
           </EuiTab>
         ))}
       </EuiTabs>
-      {tabs.map(tab => (
-        <Route path={tab.path} component={tab.component} key={tab.path} />
-      ))}
+      <ContentWrapper>
+        {tabs.map(
+          tab =>
+            tab.component ? (
+              <Route path={tab.path} component={tab.component} key={tab.path} />
+            ) : null
+        )}
+      </ContentWrapper>
     </React.Fragment>
   );
 };

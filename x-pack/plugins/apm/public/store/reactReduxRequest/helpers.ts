@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createSelector } from 'reselect';
 import { get } from 'lodash';
+import { createSelector } from 'reselect';
 
-export const createInitialDataSelector = initialData => {
+export function createInitialDataSelector<T>(initialData: T) {
   return createSelector(
     state => state,
     state => {
-      return {
-        ...state,
-        data: get(state, 'data') || initialData
-      };
+      const data: T = get(state, 'data') || initialData;
+      return { ...state, data };
     }
   );
-};
+}

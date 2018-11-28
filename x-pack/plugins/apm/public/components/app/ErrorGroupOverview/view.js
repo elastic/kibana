@@ -8,12 +8,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { HeaderContainer } from '../../shared/UIComponents';
-import TabNavigation from '../../shared/TabNavigation';
+import { TransactionErrorTabs } from '../../shared/TransactionErrorTabs';
 import List from './List';
 import WatcherFlyout from './Watcher/WatcherFlyOut';
 import WatcherButton from './Watcher/WatcherButton';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroupList';
 import { KueryBar } from '../../shared/KueryBar';
+import { ServiceDetailsRequest } from '../../../store/reactReduxRequest/serviceDetails';
 
 class ErrorGroupOverview extends Component {
   state = {
@@ -43,7 +44,15 @@ class ErrorGroupOverview extends Component {
 
         <KueryBar />
 
-        <TabNavigation />
+        <ServiceDetailsRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <TransactionErrorTabs
+              serviceName={serviceName}
+              transactionTypes={data.types}
+            />
+          )}
+        />
 
         <ErrorGroupDetailsRequest
           urlParams={urlParams}

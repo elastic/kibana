@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { HeaderContainer, HeaderMedium } from '../../shared/UIComponents';
-import TabNavigation from '../../shared/TabNavigation';
+import { TransactionErrorTabs } from '../../shared/TransactionErrorTabs';
 import TransactionCharts from '../../shared/charts/TransactionCharts';
 import { ViewMLJob } from '../../../utils/url';
 import List from './List';
@@ -63,9 +63,24 @@ class TransactionOverview extends Component {
   onOpenFlyout = () => this.setState({ isFlyoutOpen: true });
   onCloseFlyout = () => this.setState({ isFlyoutOpen: false });
 
+  componentDidUpdate() {
+    // if transactionType is undefined from urlParams, we are on the '/transactions' path
+    // and we should redirect to the first transaction type
+    const { urlParams, match, location } = this.props;
+
+    if (
+      match.path === '/:serviceName/transactions' &&
+      urlParams.transactionType
+    ) {
+      this.props.history.replace({
+        ...location,
+        pathname: `${match.url}/${urlParams.transactionType}`
+      });
+    }
+  }
+
   render() {
     const { hasDynamicBaseline, license, location, urlParams } = this.props;
-
     const { serviceName, transactionType } = urlParams;
     const mlEnabled = chrome.getInjected('mlEnabled', false);
 
@@ -106,32 +121,39 @@ class TransactionOverview extends Component {
           transactionType={transactionType}
         />
 
-        <TabNavigation />
-
-        <TransactionOverviewChartsRequest
-          urlParams={urlParams}
-          render={({ data }) => (
-            <TransactionCharts
-              charts={data}
-              urlParams={urlParams}
-              location={location}
-              ChartHeaderContent={ChartHeaderContent}
-            />
-          )}
-        />
-
-        <HeaderMedium>{transactionTypeLabel(transactionType)}</HeaderMedium>
-
         <ServiceDetailsAndTransactionList
           urlParams={urlParams}
           render={({ serviceDetails, transactionList }) => {
             return (
-              <List
-                agentName={serviceDetails.agentName}
-                items={transactionList}
-                serviceName={serviceName}
-                type={transactionType}
-              />
+              <React.Fragment>
+                <TransactionErrorTabs
+                  serviceName={serviceName}
+                  transactionTypes={serviceDetails.types}
+                />
+
+                <TransactionOverviewChartsRequest
+                  urlParams={urlParams}
+                  render={({ data }) => (
+                    <TransactionCharts
+                      charts={data}
+                      urlParams={urlParams}
+                      location={location}
+                      ChartHeaderContent={ChartHeaderContent}
+                    />
+                  )}
+                />
+
+                <HeaderMedium>
+                  {transactionTypeLabel(transactionType)}
+                </HeaderMedium>
+
+                <List
+                  agentName={serviceDetails.agentName}
+                  items={transactionList}
+                  serviceName={serviceName}
+                  type={transactionType}
+                />
+              </React.Fragment>
             );
           }}
         />

@@ -7,6 +7,7 @@
 import React from 'react';
 import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
+import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { loadDetailsCharts } from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
@@ -41,7 +42,7 @@ export const getTransactionDetailsCharts = createSelector(
 
 interface Props {
   urlParams: IUrlParams;
-  render: RRRRender<TimeSeriesAPIResponse>;
+  render: RRRRender<ITransactionChartData>;
 }
 
 export function TransactionDetailsChartsRequest({ urlParams, render }: Props) {

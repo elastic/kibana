@@ -11,8 +11,7 @@ import { TransactionDetailsChartsRequest } from '../../../store/reactReduxReques
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
-// @ts-ignore
-import TransactionCharts from '../../shared/charts/TransactionCharts';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
@@ -45,6 +44,8 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
           />
         )}
       />
+
+      <EuiSpacer />
 
       <TransactionDistributionRequest
         urlParams={urlParams}

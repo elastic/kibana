@@ -128,15 +128,6 @@ export class InnerCustomPlot extends PureComponent {
 
     return (
       <Fragment>
-        <Legends
-          noHits={noHits}
-          truncateLegends={truncateLegends}
-          series={visibleSeries}
-          hiddenSeriesCount={hiddenSeriesCount}
-          clickLegend={this.clickLegend}
-          seriesEnabledState={this.state.seriesEnabledState}
-        />
-
         <div style={{ position: 'relative', height: plotValues.XY_HEIGHT }}>
           <StaticPlot
             noHits={noHits}
@@ -166,6 +157,14 @@ export class InnerCustomPlot extends PureComponent {
             onMouseUp={this.onMouseUp}
           />
         </div>
+        <Legends
+          noHits={noHits}
+          truncateLegends={truncateLegends}
+          series={visibleSeries}
+          hiddenSeriesCount={hiddenSeriesCount}
+          clickLegend={this.clickLegend}
+          seriesEnabledState={this.state.seriesEnabledState}
+        />
       </Fragment>
     );
   }

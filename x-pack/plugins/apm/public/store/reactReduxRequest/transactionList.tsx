@@ -5,22 +5,31 @@
  */
 
 import React from 'react';
+import { Request, RRRRender } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import { Request } from 'react-redux-request';
+import { TransactionListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_top_transactions';
 import { loadTransactionList } from '../../services/rest/apm/transaction_groups';
+import { IReduxState } from '../rootReducer';
+import { IUrlParams } from '../urlParams';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionList';
-const INITIAL_DATA = [];
-const withInitialData = createInitialDataSelector(INITIAL_DATA);
+const INITIAL_DATA: TransactionListAPIResponse = [];
+const withInitialData = createInitialDataSelector<TransactionListAPIResponse>(
+  INITIAL_DATA
+);
 
-const getRelativeImpact = (impact, impactMin, impactMax) =>
+const getRelativeImpact = (
+  impact: number,
+  impactMin: number,
+  impactMax: number
+) =>
   Math.max(
     ((impact - impactMin) / Math.max(impactMax - impactMin, 1)) * 100,
     1
   );
 
-function getWithRelativeImpact(items) {
+function getWithRelativeImpact(items: TransactionListAPIResponse) {
   const impacts = items.map(({ impact }) => impact);
   const impactMin = Math.min(...impacts);
   const impactMax = Math.max(...impacts);
@@ -34,7 +43,7 @@ function getWithRelativeImpact(items) {
 }
 
 export const getTransactionList = createSelector(
-  state => withInitialData(state.reactReduxRequest[ID]),
+  (state: IReduxState) => withInitialData(state.reactReduxRequest[ID]),
   transactionList => {
     return {
       ...transactionList,
@@ -43,18 +52,16 @@ export const getTransactionList = createSelector(
   }
 );
 
-// export function getTransactionList(state) {
-//   const transactionList = withInitialData(state.reactReduxRequest[ID]);
-//   return {
-//     ...transactionList,
-
-//   };
-// }
-
-export function TransactionListRequest({ urlParams, render }) {
+export function TransactionListRequest({
+  urlParams,
+  render
+}: {
+  urlParams: IUrlParams;
+  render: RRRRender<TransactionListAPIResponse>;
+}) {
   const { serviceName, start, end, transactionType, kuery } = urlParams;
 
-  if (!(serviceName && start && end && transactionType)) {
+  if (!(serviceName && start && end)) {
     return null;
   }
 

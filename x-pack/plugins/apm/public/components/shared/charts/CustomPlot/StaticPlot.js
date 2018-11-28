@@ -89,7 +89,14 @@ class StaticPlot extends PureComponent {
       <SharedPlot plotValues={plotValues}>
         <HorizontalGridLines tickValues={yTickValues} />
         <XAxis tickSize={0} tickTotal={X_TICK_TOTAL} tickFormat={tickFormatX} />
-        <YAxis tickSize={0} tickValues={yTickValues} tickFormat={tickFormatY} />
+        <YAxis
+          tickSize={0}
+          tickValues={yTickValues}
+          tickFormat={tickFormatY}
+          style={{
+            line: { stroke: 'none', fill: 'none' }
+          }}
+        />
 
         {noHits ? (
           <StatusText text="No data within this time range." />

@@ -14,7 +14,6 @@ import {
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 import { SetupInstructionsLink } from '../../shared/SetupInstructionsLink';
-// @ts-ignore
 import { HeaderContainer } from '../../shared/UIComponents';
 // @ts-ignore
 import { ServiceOverview } from '../ServiceOverview';
