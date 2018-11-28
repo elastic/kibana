@@ -12,7 +12,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
-  EuiPanel
+  EuiPanel,
+  EuiPageContent
 } from '@elastic/eui';
 import { Status } from '../instances/status';
 
@@ -50,13 +51,15 @@ export function ApmOverview({
   ));
 
   return (
-    <EuiPage style={{ backgroundColor: 'white' }}>
+    <EuiPage>
       <EuiPageBody>
-        <Status stats={stats}/>
-        <EuiSpacer size="s"/>
-        <EuiFlexGroup wrap>
-          {charts}
-        </EuiFlexGroup>
+        <EuiPageContent>
+          <Status stats={stats}/>
+          <EuiSpacer size="s"/>
+          <EuiFlexGroup wrap>
+            {charts}
+          </EuiFlexGroup>
+        </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
