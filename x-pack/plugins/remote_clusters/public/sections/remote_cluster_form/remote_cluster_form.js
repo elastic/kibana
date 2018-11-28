@@ -137,6 +137,7 @@ export class RemoteClusterFormUi extends Component {
     this.setState({
       fields: newFields,
       fieldsErrors: this.getFieldsErrors(newFields),
+      areErrorsVisible: false,
     });
   };
 

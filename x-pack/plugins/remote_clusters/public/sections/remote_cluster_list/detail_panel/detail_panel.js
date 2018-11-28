@@ -39,7 +39,7 @@ export class DetailPanelUi extends Component {
     cluster: PropTypes.object,
     closeDetailPanel: PropTypes.func.isRequired,
     clusterName: PropTypes.string,
-    copyCluster: PropTypes.func,
+    copyCluster: PropTypes.func.isRequired,
   }
 
   copyCluster = () => {
@@ -261,9 +261,9 @@ export class DetailPanelUi extends Component {
           </EuiFlexGroup>
         </EuiFlyoutBody>
       );
-    } else if (cluster) {
-      return this.renderCluster();
-    } else {
+    }
+
+    if (!cluster) {
       return (
         <EuiFlyoutBody>
           <EuiFlexGroup
@@ -289,6 +289,8 @@ export class DetailPanelUi extends Component {
         </EuiFlyoutBody>
       );
     }
+
+    return this.renderCluster();
   }
 
   renderFooter() {
