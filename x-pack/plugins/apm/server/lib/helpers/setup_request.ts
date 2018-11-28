@@ -48,14 +48,11 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
-export function setupRequest(req: Request) {
+export function setupRequest(req: Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
-  function client<T, U>(
-    type: string,
-    params: SearchParams
-  ): AggregationSearchResponse<T, U> {
+  const client: ESClient = (type, params) => {
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
       console.log(
@@ -67,7 +64,7 @@ export function setupRequest(req: Request) {
       console.log(JSON.stringify(params.body, null, 4));
     }
     return cluster.callWithRequest(req, type, params);
-  }
+  };
 
   return {
     start: moment.utc(query.start).valueOf(),

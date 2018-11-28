@@ -25,6 +25,7 @@ import topN from './panel_config/top_n';
 import table from './panel_config/table';
 import gauge from './panel_config/gauge';
 import markdown from './panel_config/markdown';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const types = {
   timeseries,
@@ -41,7 +42,14 @@ function PanelConfig(props) {
   if (component) {
     return React.createElement(component, props);
   }
-  return (<div>Missing panel config for &ldquo;{model.type}&rdquo;</div>);
+  return (
+    <div>
+      <FormattedMessage
+        id="tsvb.missingPanelConfigDescription"
+        defaultMessage="Missing panel config for &ldquo;{modelType}&rdquo;"
+        values={{ modelType: model.type }}
+      />
+    </div>);
 }
 
 PanelConfig.propTypes = {

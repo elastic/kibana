@@ -13,7 +13,7 @@
  */
 
 import _ from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
@@ -71,6 +71,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $timeout,
   Private,
   AppState,
+  config,
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
@@ -97,6 +98,10 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.showModelBoundsCheckbox = false;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
+
+  // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
+  const tzConfig = config.get('dateFormat:tz');
+  const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
   $scope.permissions = {
     canForecastJob: checkPermission('canForecastJob')
@@ -682,6 +687,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   }
 
   function loadAnomaliesTableData(earliestMs, latestMs) {
+
     ml.results.getAnomaliesTableData(
       [$scope.selectedJob.job_id],
       $scope.criteriaFields,
@@ -690,6 +696,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       mlSelectSeverityService.state.get('threshold').val,
       earliestMs,
       latestMs,
+      dateFormatTz,
       ANOMALIES_MAX_RESULTS
     ).then((resp) => {
       const anomalies = resp.anomalies;

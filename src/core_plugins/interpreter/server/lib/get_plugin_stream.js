@@ -19,7 +19,7 @@
 
 import fs from 'fs';
 import ss from 'stream-stream';
-import { getPluginPaths } from '@kbn/interpreter/server/get_plugin_paths';
+import { getPluginPaths } from '@kbn/interpreter/server';
 
 export const getPluginStream = type => {
   const stream = ss({

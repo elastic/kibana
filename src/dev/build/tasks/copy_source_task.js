@@ -41,6 +41,7 @@ export const CopySourceTask = {
         '!src/functional_test_runner/**',
         '!src/dev/**',
         'bin/**',
+        'typings/**',
         'webpackShims/**',
         'config/kibana.yml',
         'tsconfig*.json',

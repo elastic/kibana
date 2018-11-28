@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import { pathsRegistry } from '@kbn/interpreter/common/lib/paths_registry';
+import { pathsRegistry } from '@kbn/interpreter/common';
 import init from './init';
 import { mappings } from './server/mappings';
 import { CANVAS_APP } from './common/lib';

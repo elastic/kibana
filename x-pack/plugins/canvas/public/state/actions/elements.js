@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from '@kbn/interpreter/public/interpreter';
+import { interpretAst } from '@kbn/interpreter/public';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { set, del } from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
-import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common/lib/ast';
+import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
 import { getPages, getElementById, getSelectedPageIndex } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
@@ -46,10 +46,8 @@ function getBareElement(el, includeId = false) {
 
 export const elementLayer = createAction('elementLayer');
 
-export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({
-  pageId,
-  elementId,
-  position,
+export const setMultiplePositions = createAction('setMultiplePosition', repositionedElements => ({
+  repositionedElements,
 }));
 
 export const flushContext = createAction('flushContext');

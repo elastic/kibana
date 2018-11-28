@@ -1,6 +1,7 @@
 {
   "paths": {
     "common.ui": "src/ui",
+    "server": "src/server",
     "console": "src/core_plugins/console",
     "inputControl": "src/core_plugins/input_control_vis",
     "kbn": "src/core_plugins/kibana",
@@ -14,6 +15,7 @@
     "tileMap": "src/core_plugins/tile_map",
     "timelion": "src/core_plugins/timelion",
     "tagCloud": "src/core_plugins/tagcloud",
+    "tsvb": "src/core_plugins/metrics",
     "xpack.beatsManagement": "x-pack/plugins/beats_management",
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
