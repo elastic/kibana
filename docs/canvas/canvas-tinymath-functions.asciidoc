@@ -830,7 +830,7 @@ s|Type
 s|Description
 
 |...args
-|number \| \\| Array.<number>
+|number \| Array.<number>
 <|one or more numbers or arrays of numbers
 |===
 
