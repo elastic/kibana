@@ -34,7 +34,6 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted', false));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
-  console.log(truncatedColorMaps);
 
   return VisFactory.createBaseVisualization({
     name: 'region_map',
