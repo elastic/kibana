@@ -15,16 +15,30 @@ import { PLUGIN_ID } from './common/constants';
 import { indexLifecycleDataEnricher } from './index_lifecycle_data';
 export function indexLifecycleManagement(kibana) {
   return new kibana.Plugin({
+    config: (Joi) => {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+        ui: Joi.object({
+          enabled: Joi.boolean().default(true),
+        }).default(),
+      }).default();
+    },
     id: PLUGIN_ID,
     publicDir: resolve(__dirname, 'public'),
-    configPrefix: 'xpack.index_lifecycle_management',
+    configPrefix: 'xpack.ilm',
     require: ['kibana', 'elasticsearch', 'xpack_main', 'index_management'],
     uiExports: {
       managementSections: ['plugins/index_lifecycle_management'],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          ilmUiEnabled: config.get('xpack.ilm.ui.enabled')
+        };
+      },
     },
     isEnabled(config) {
       return (
-        config.get('xpack.index_lifecycle_management.enabled') &&
+        config.get('xpack.ilm.enabled') &&
         config.has('index_management.enabled') &&
         config.get('index_management.enabled')
       );

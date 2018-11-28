@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { setHttpClient } from './services/api';
-
+import chrome from 'ui/chrome';
 import { App } from './app';
 import { BASE_PATH } from '../common/constants';
 import { indexLifecycleManagementStore } from './store';
@@ -30,24 +30,27 @@ const renderReact = async (elem) => {
     elem
   );
 };
-routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
-  template: template,
-  controllerAs: 'indexLifecycleManagement',
-  controller: class IndexLifecycleManagementController {
-    constructor($scope, $route, $http, kbnUrl, $rootScope) {
-      setHttpClient($http);
-      setUrlService({
-        change(url) {
-          kbnUrl.change(url);
-          $rootScope.$digest();
-        }
-      });
-      $scope.$$postDigest(() => {
-        const elem = document.getElementById('indexLifecycleManagementReactRoot');
-        renderReact(elem);
-        manageAngularLifecycle($scope, $route, elem);
-      });
+if (chrome.getInjected('ilmUiEnabled')) {
+  routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
+    template: template,
+    controllerAs: 'indexLifecycleManagement',
+    controller: class IndexLifecycleManagementController {
+      constructor($scope, $route, $http, kbnUrl, $rootScope) {
+        setHttpClient($http);
+        setUrlService({
+          change(url) {
+            kbnUrl.change(url);
+            $rootScope.$digest();
+          }
+        });
+        $scope.$$postDigest(() => {
+          const elem = document.getElementById('indexLifecycleManagementReactRoot');
+          renderReact(elem);
+          manageAngularLifecycle($scope, $route, elem);
+        });
+      }
     }
-  }
-});
+  });
+}
+
 
