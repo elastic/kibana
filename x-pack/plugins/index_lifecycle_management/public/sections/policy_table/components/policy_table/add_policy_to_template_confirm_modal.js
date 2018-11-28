@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { get } from 'lodash';
+import React, { Component, Fragment } from 'react';
+import { get, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import {
+  EuiCallOut,
   EuiSelect,
   EuiForm,
   EuiFormRow,
   EuiOverlayMask,
   EuiConfirmModal,
   EuiFieldText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../../services/api';
@@ -55,6 +57,41 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
       callback();
     }
   };
+  renderTemplateHasPolicyWarning() {
+    const selectedTemplate = this.getSelectedTemplate();
+    const existingPolicyName = get(selectedTemplate, 'settings.index.lifecycle.name');
+    if (!existingPolicyName) {
+      return;
+    }
+    return (
+      <Fragment>
+        <EuiCallOut
+          style={{ maxWidth: 400 }}
+          title={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.templateHasPolicyWarningTitle"
+              defaultMessage="Template already has policy"
+            />
+          }
+          color="warning"
+        >
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.indexHasNoAliasesWarningMessage"
+            defaultMessage="This index template already has the policy {existingPolicyName} attached to it.
+            Adding this policy will overwrite that configuration."
+            values={{
+              existingPolicyName
+            }}
+          />
+        </EuiCallOut>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
+  getSelectedTemplate() {
+    const { templates, templateName } = this.state;
+    return find(templates, template => template.name === templateName);
+  }
   renderForm() {
     const { templates, templateName } = this.state;
     const options = templates.map(({ name }) => {
@@ -74,6 +111,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     });
     return (
       <EuiForm>
+        {this.renderTemplateHasPolicyWarning()}
         <EuiFormRow
           label={
             <FormattedMessage
