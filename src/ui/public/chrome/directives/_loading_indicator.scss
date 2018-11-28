@@ -2,7 +2,7 @@
  * 1. Position this loader on top of the content.
  * 2. Make sure indicator isn't wider than the screen.
  */
-.loadingIndicator {
+.kbnLoadingIndicator {
   position: fixed; // 1
   top: 0; // 1
   left: 0; // 1
@@ -18,7 +18,7 @@
   }
 }
 
-  .loadingIndicator__bar {
+  .kbnLoadingIndicator__bar {
     top: 0;
     left: 0;
     right: 0;

@@ -3,6 +3,7 @@
  * flexed children should keep. Only works when paired with root styles applied
  * by core service from new platform
  */
+// SASSTODO: Naming here is too embedded and high up that changing them could cause major breaks
 #kibana-body {
   overflow-x: hidden;
   min-height: 100%;
@@ -21,7 +22,7 @@
   background-color: $euiColorEmptyShade;
 
   /**
-   * 1. Dirty, but we need to override the .is-global-nav-open state
+   * 1. Dirty, but we need to override the .kbnGlobalNav-isOpen state
    *    when we're looking at the log-in screen.
    */
   &.hidden-chrome {

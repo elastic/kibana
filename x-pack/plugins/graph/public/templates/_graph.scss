@@ -14,11 +14,11 @@
 .gphGraph__container {
   position: fixed;
   height: 100%;
-  width: calc(100% - 53px); /* 1 */
+  width: calc(100% - #{$kbnChromeGlobalNavClosedWidth}); /* 1 */
 }
 
-.global-nav.is-global-nav-open + .app-wrapper .gphGraph__container {
-  width: calc(100% - 180px); /* 1 */
+.kbnGlobalNav.kbnGlobalNav-isOpen + .app-wrapper .gphGraph__container {
+  width: calc(100% - #{$kbnChromeGlobalNavOpenWidth}); /* 1 */
 }
 
 .gphGraph {
@@ -49,7 +49,7 @@
 
 .gphNode__label {
   @include gphSvgText;
-  cursor:pointer;
+  cursor: pointer;
 }
 
 .gphNode__label--html {

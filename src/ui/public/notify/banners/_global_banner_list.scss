@@ -1,7 +1,7 @@
-.globalBanner__list {
+.kbnGlobalBannerList {
   padding: $euiSize;
 }
 
-.globalBanner__item + .globalBanner__item {
+.kbnGlobalBannerList__item + .kbnGlobalBannerList__item {
   margin-top: $euiSize;
 }

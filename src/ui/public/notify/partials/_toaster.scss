@@ -1,8 +1,8 @@
-.toaster-container {
+.kbnToaster__container {
   visibility: visible;
   width: 100%;
 
-  .toaster {
+  .kbnToaster {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -11,7 +11,7 @@
   /**
    * 1. Shouldn't look like a button.
    */
-  .toaster-countdown {
+  .kbnToaster__countdown {
     appearance: none;
     background: none;
     border: none;
@@ -24,7 +24,7 @@
     border: 0px;
   }
 
-  .toast {
+  .kbnToast {
     display: flex;
     align-items: center;
 
@@ -37,14 +37,15 @@
     }
   }
 
-  .toast-message {
+  .kbnToast__message {
     @include euiTextTruncate;
 
     flex: 1 1 auto;
     line-height: normal;
+    white-space: normal;
   }
 
-  .toast-stack {
+  .kbnToast__stack {
     padding-bottom: $euiSizeS;
 
     pre {
@@ -57,17 +58,7 @@
     }
   }
 
-  .toast-controls {
+  .kbnToast__controls {
     display: flex;
   }
-
-  .toast-message {
-    white-space: normal;
-  }
-}
-
-// toast message class for banner needs to be display:block because banner does
-// not have a flex layout, and the styled element could be any kind of element
-.toast-message-banner {
-  display: block;
 }

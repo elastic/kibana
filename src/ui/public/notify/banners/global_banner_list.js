@@ -31,7 +31,6 @@ import PropTypes from 'prop-types';
  * @param {Array} banners The array of banners represented by objects in the form of { id, component }.
  */
 export class GlobalBannerList extends Component {
-
   static propTypes = {
     banners: PropTypes.array,
     subscribe: PropTypes.func,
@@ -55,29 +54,15 @@ export class GlobalBannerList extends Component {
     }
 
     const flexBanners = this.props.banners.map(banner => {
-      const {
-        id,
-        component,
-        priority,
-        ...rest
-      } = banner;
+      const { id, component, priority, ...rest } = banner;
 
       return (
-        <div
-          key={id}
-          data-test-priority={priority}
-          className="globalBanner__item"
-          {...rest}
-        >
-          { component }
+        <div key={id} data-test-priority={priority} className="kbnGlobalBannerList__item" {...rest}>
+          {component}
         </div>
       );
     });
 
-    return (
-      <div className="globalBanner__list">
-        {flexBanners}
-      </div>
-    );
+    return <div className="kbnGlobalBannerList">{flexBanners}</div>;
   }
 }

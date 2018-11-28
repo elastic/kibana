@@ -1,5 +1,4 @@
-.global_nav_logo,
-.global-nav-link {
+.kbnGlobalNavLink {
   &:hover {
     background-color: darken($euiColorPrimary, 15%);
   }
@@ -9,92 +8,90 @@
   }
 }
 
-.global_nav_logo {
-  display: inline-block;
-}
-
-.global-nav-link {
+.kbnGlobalNavLink {
   position: relative;
   width: $kbnChromeGlobalNavClosedWidth;
   height: $kbnGlobalNavAppIconHeight;
   line-height: $euiSizeL;
 
-  &.is-global-nav-link-disabled {
+  &.kbnGlobalNavLink-isDisabled {
     opacity: 0.5;
 
-    .global-nav-link__anchor {
+    .kbnGlobalNavLink__anchor {
       cursor: default;
     }
   }
 
   &.active {
-    .global-nav-link__anchor {
+    .kbnGlobalNavLink__anchor {
       color: $euiColorEmptyShade;
       text-decoration: none;
     }
   }
 }
 
-.is-global-nav-open {
-  .global-nav-link {
+.kbnGlobalNav-isOpen {
+  .kbnGlobalNavLink {
     width: $kbnChromeGlobalNavOpenWidth;
   }
 }
 
-  .global-nav-link__anchor {
-    display: block;
-    height: 100%;
-    color: $euiColorEmptyShade;
-  }
+.kbnGlobalNavLink__anchor {
+  display: block;
+  height: 100%;
+  color: $euiColorEmptyShade;
+  width: 100%;
+  line-height: inherit;
+}
 
-  .global-nav-link__icon {
+.kbnGlobalNavLink__icon {
+  display: inline-block;
+  width: $kbnChromeGlobalNavClosedWidth;
+  height: $kbnGlobalNavAppIconHeight;
+  float: left;
+  text-align: center;
+  font-size: 1.7em;
+}
+
+/**
+  * This image is used to display the icon.
+  */
+.kbnGlobalNavLink__iconImage {
+  height: 18px;
+  margin-top: $euiSizeS;
+}
+
+/**
+  * This placeholder text gets shown if there is no specified icon.
+  */
+.kbnGlobalNavLink__iconPlaceholder {
+  line-height: $kbnGlobalNavAppIconHeight;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.kbnGlobalNavLink__title {
+  @include euiTextTruncate;
+  display: none;
+  width: $kbnChromeGlobalNavOpenWidth - $kbnChromeGlobalNavClosedWidth - 3px;
+  float: right;
+  font-size: 0.9em;
+  text-align: left;
+  padding-left: 3px;
+  padding-right: 3px;
+  line-height: $kbnGlobalNavAppIconHeight;
+
+  .kbnGlobalNav-isOpen & {
     display: inline-block;
-    width: $kbnChromeGlobalNavClosedWidth;
-    height: $kbnGlobalNavAppIconHeight;
-    float: left;
-    text-align: center;
-    font-size: 1.7em;
   }
+}
 
-    /**
-     * This image is used to display the icon.
-     */
-    .global-nav-link__icon-image {
-      height: 18px;
-      margin-top: $euiSizeS;
-    }
-
-    /**
-     * This placeholder text gets shown if there is no specified icon.
-     */
-    .global-nav-link__icon-placeholder {
-      line-height: $kbnGlobalNavAppIconHeight;
-      background-position: center;
-      background-size: contain;
-      background-repeat: no-repeat;
-    }
-
-  .global-nav-link__title {
-    @include euiTextTruncate;
-    display: none;
-    width: $kbnChromeGlobalNavOpenWidth - $kbnChromeGlobalNavClosedWidth - 3px;
-    float: right;
-    font-size: 0.9em;
-    text-align: left;
-    padding-left: 3px;
-    padding-right: 3px;
-    line-height: $kbnGlobalNavAppIconHeight;
-
-    .is-global-nav-open & {
-      display: inline-block;
-    }
-  }
-
-.global-nav-link--close {
+.kbnGlobalNavLink--close {
   /**
    * 1. Translation accounts for the icon image being slightly off-center.
    */
-  .global-nav-link__icon {
+  .kbnGlobalNavLink__icon {
     transform: translateX(1px) scaleX(-1); /* 1 */
   }
 }
