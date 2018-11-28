@@ -30,6 +30,7 @@ import { px, unit } from '../../../../../../../style/variables';
 import Stacktrace from '../../../../../../shared/Stacktrace';
 
 import { DatabaseContext } from './DatabaseContext';
+import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
@@ -75,6 +76,7 @@ export function SpanFlyout({
   const stackframes = span.span.stacktrace;
   const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
   const dbContext = span.context.db;
+  const httpContext = span.context.http;
 
   return (
     <EuiPortal>
@@ -99,6 +101,7 @@ export function SpanFlyout({
           <EuiHorizontalRule />
           <StickySpanProperties span={span} totalDuration={totalDuration} />
           <EuiHorizontalRule />
+          <HttpContext httpContext={httpContext} />
           <DatabaseContext dbContext={dbContext} />
           <StackTraceContainer>
             <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />

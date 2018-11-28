@@ -22,6 +22,15 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
+  "kibana": {
+    "clean": {
+      "extraPatterns": [
+        "build",
+        "optimize",
+        ".eslintcache"
+      ]
+    }
+  },
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
     "preinstall": "node ./preinstall_check",
