@@ -1,13 +1,13 @@
-@import (reference) "~ui/styles/variables";
-
+// SASSTODO: Can't rename main class
+// because it's also the name of the angular directive
 .collapsible-sidebar {
   position: relative;
-  z-index: @discoverSidebarDepth;
+  z-index: $kbnDiscoverSidebarDepth;
 
-  .sidebar-collapser {
+  .kbnCollapsibleSidebar__collapseButton {
     position: absolute;
     top: 0;
-    right: -(@collapser-width);
+    right: -21px;
     cursor: pointer;
     z-index: -1;
   }
@@ -21,8 +21,9 @@
       visibility: hidden;
     }
 
-    .sidebar-collapser {
+    .kbnCollapsibleSidebar__collapseButton {
       visibility: visible;
+
       .chevron-cont:before {
         content: "\F138";
       }
@@ -30,12 +31,13 @@
   }
 }
 
-@media (max-width: 992px) {
+@include euiBreakpoint('xs', 's', 'm') {
   .collapsible-sidebar {
     &.closed {
       display: none;
     }
-    .sidebar-collapser {
+
+    .kbnCollapsibleSidebar__collapseButton {
       display: none;
     }
   }
