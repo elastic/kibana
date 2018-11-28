@@ -27,25 +27,12 @@ Array [
             },
             "date_histogram": Object {
               "extended_bounds": Object {
-                "max": 1,
-                "min": 0,
+                "max": 200000,
+                "min": 90000,
               },
               "field": "timestamp",
               "interval": "myInterval",
               "min_doc_count": 0,
-            },
-          },
-          "top_hits": Object {
-            "top_hits": Object {
-              "_source": Object {
-                "includes": Array [
-                  "bucket_span",
-                ],
-              },
-              "size": 1,
-              "sort": Array [
-                "bucket_span",
-              ],
             },
           },
         },
@@ -56,12 +43,17 @@ Array [
                 "range": Object {
                   "timestamp": Object {
                     "format": "epoch_millis",
-                    "gte": 0,
-                    "lte": 1,
+                    "gte": 90000,
+                    "lte": 200000,
                   },
                 },
               },
             ],
+            "must": Object {
+              "exists": Object {
+                "field": "bucket_span",
+              },
+            },
           },
         },
         "size": 0,
