@@ -2,7 +2,7 @@
 == Canvas function reference
 
 beta[] Behind the scenes, Canvas is driven by a powerful expression language,
-with dozens of functions and many more capabilities including table transforms, 
+with dozens of functions and many more capabilities, including table transforms, 
 type casting, and sub-expressions. Most of the time, this functionality is hidden, 
 but because you’ve come to the function reference, you must be interested in
 how these functions work.

@@ -74,7 +74,7 @@ Configures axis of a visualization.
 show:: (boolean) Show the axis labels? The default is `true.`
  +
 position:: (string) The position of the axis labels, for example, top, bottom, left, and right.
-The default is ```
+The default is ``.
    
    
 [float]
