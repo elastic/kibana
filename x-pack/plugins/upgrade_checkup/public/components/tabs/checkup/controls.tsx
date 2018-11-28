@@ -5,7 +5,7 @@
  */
 import React, { StatelessComponent } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { LevelFilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
@@ -33,10 +33,12 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
   onGroupByChange,
 }) => (
   <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
+    <EuiFlexItem grow={true}>
+      <EuiFieldSearch placeholder="Filter list" />
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
     </EuiFlexItem>
-    <EuiFlexItem />
     <EuiFlexItem grow={false}>
       <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
     </EuiFlexItem>

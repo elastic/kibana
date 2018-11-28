@@ -137,9 +137,20 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
 
   return (
     <div>
-      <EuiText size="s">
-        <p>{message}</p>
-      </EuiText>
+      <EuiFlexGroup responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s">Expand all</EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s">Collapse all</EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <p>{message}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 
