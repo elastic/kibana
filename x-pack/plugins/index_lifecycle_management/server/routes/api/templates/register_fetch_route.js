@@ -11,12 +11,25 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { any } from 'lodash';
 
-async function formatTemplates(templates, callWithRequest) {
+function isReservedSystemTemplate(templateName, indexPattens) {
+  return templateName.startsWith('kibana_index_template') ||
+    (
+      templateName.startsWith('.') &&
+        !any(indexPattens, (pattern) => {
+          return pattern.includes('*');
+        })
+    );
+}
+async function filterAndFormatTemplates(templates) {
   const formattedTemplates = [];
   const templateNames = Object.keys(templates);
   for (const templateName of templateNames) {
     const { settings, index_patterns } = templates[templateName]; // eslint-disable-line camelcase
+    if (isReservedSystemTemplate(templateName, index_patterns)) {
+      continue;
+    }
     const formattedTemplate = {
       index_lifecycle_name: settings.index && settings.index.lifecycle ? settings.index.lifecycle.name : undefined,
       index_patterns,
@@ -24,9 +37,6 @@ async function formatTemplates(templates, callWithRequest) {
       settings,
       name: templateName,
     };
-
-    const { indices } = await fetchIndices(index_patterns, callWithRequest);
-    formattedTemplate.indices = indices ? Object.keys(indices) : [];
     formattedTemplates.push(formattedTemplate);
   }
   return formattedTemplates;
@@ -42,18 +52,6 @@ async function fetchTemplates(callWithRequest) {
 
   return await callWithRequest('transport.request', params);
 }
-
-async function fetchIndices(indexPatterns, callWithRequest) {
-  const params = {
-    method: 'GET',
-    path: `/${indexPatterns}/_stats`,
-    // we allow 404 incase the user shutdown security in-between the check and now
-    ignore: [ 404 ]
-  };
-
-  return await callWithRequest('transport.request', params);
-}
-
 export function registerFetchRoute(server) {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
@@ -66,7 +64,7 @@ export function registerFetchRoute(server) {
 
       try {
         const hits = await fetchTemplates(callWithRequest);
-        const templates = await formatTemplates(hits, callWithRequest);
+        const templates = await filterAndFormatTemplates(hits);
         return templates;
       } catch (err) {
         if (isEsError(err)) {
