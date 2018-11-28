@@ -300,29 +300,17 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
         all: {
           application,
           name: 'all',
-          actions: ['action:all'],
+          actions: ['action:foo'],
           metadata: {},
         },
         space_read: {
           application,
           name: 'space_read',
-          actions: ['action:read'],
-          metadata: {},
-        },
-        feature_foo_all: {
-          application,
-          name: 'feature_foo_all',
-          actions: ['action:foo_all'],
-          metadata: {},
-        },
-        feature_bar_read: {
-          application,
-          name: 'feature_bar_read',
-          actions: ['action:bar_read'],
+          actions: ['action:bar'],
           metadata: {},
         }
       }
-    }, [ 'quz', 'space_baz' ]);
+    }, ['read', 'space_baz']);
   }
 });
 
@@ -814,28 +802,6 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors getting pri
   throwErrorWhenGettingPrivileges: new Error('Error getting privileges'),
   assert: ({ expectErrorThrown }) => {
     expectErrorThrown('Error getting privileges');
-  }
-});
-
-registerPrivilegesWithClusterTest(`throws and logs error when errors deleting privileges`, {
-  privilegeMap: {
-    global: {},
-    space: {}
-  },
-  existingPrivileges: {
-    [application]: {
-      foo: {
-        application,
-        name: 'foo',
-        actions: ['action:not-foo'],
-        metadata: {},
-      }
-    }
-  },
-  throwErrorWhenDeletingPrivileges: new Error('Error deleting privileges'),
-  errorDeletingPrivilegeName: 'foo',
-  assert: ({ expectErrorThrown }) => {
-    expectErrorThrown('Error deleting privileges');
   }
 });
 
