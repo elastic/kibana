@@ -20,6 +20,7 @@ import React, { Component, Fragment, ReactNode } from 'react';
 interface Props {
   iconType?: IconType;
   title: string | ReactNode;
+  collapsible: boolean;
   initiallyCollapsed?: boolean;
 }
 
@@ -27,7 +28,7 @@ interface State {
   collapsed: boolean;
 }
 
-export class CollapsiblePanel extends Component<Props, State> {
+export class SectionPanel extends Component<Props, State> {
   public state = {
     collapsed: false,
   };
@@ -53,7 +54,7 @@ export class CollapsiblePanel extends Component<Props, State> {
       // @ts-ignore
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size={'xs'}>
+          <EuiTitle size="m">
             <h3>
               {this.props.iconType && (
                 <Fragment>
@@ -68,21 +69,23 @@ export class CollapsiblePanel extends Component<Props, State> {
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink onClick={this.toggleCollapsed}>
-            {this.state.collapsed ? (
-              <FormattedMessage
-                id="xpack.spaces.management.collapsiblePanel.showLinkText"
-                defaultMessage="show"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.spaces.management.collapsiblePanel.hideLinkText"
-                defaultMessage="hide"
-              />
-            )}
-          </EuiLink>
-        </EuiFlexItem>
+        {this.props.collapsible && (
+          <EuiFlexItem grow={false}>
+            <EuiLink onClick={this.toggleCollapsed}>
+              {this.state.collapsed ? (
+                <FormattedMessage
+                  id="xpack.spaces.management.collapsiblePanel.showLinkText"
+                  defaultMessage="show"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.spaces.management.collapsiblePanel.hideLinkText"
+                  defaultMessage="hide"
+                />
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   };

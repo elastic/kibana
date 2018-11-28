@@ -7,13 +7,13 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { CollapsiblePanel } from './collapsible_panel';
+import { SectionPanel } from './section_panel';
 
 test('it renders without blowing up', () => {
   const wrapper = shallowWithIntl(
-    <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
+    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch">
       <p>child</p>
-    </CollapsiblePanel>
+    </SectionPanel>
   );
 
   expect(wrapper).toMatchSnapshot();
@@ -21,25 +21,25 @@ test('it renders without blowing up', () => {
 
 test('it renders children by default', () => {
   const wrapper = mountWithIntl(
-    <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
+    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch">
       <p className="child">child 1</p>
       <p className="child">child 2</p>
-    </CollapsiblePanel>
+    </SectionPanel>
   );
 
-  expect(wrapper.find(CollapsiblePanel)).toHaveLength(1);
+  expect(wrapper.find(SectionPanel)).toHaveLength(1);
   expect(wrapper.find('.child')).toHaveLength(2);
 });
 
 test('it hides children when the "hide" link is clicked', () => {
   const wrapper = mountWithIntl(
-    <CollapsiblePanel iconType="logoElasticsearch" title="Elasticsearch">
+    <SectionPanel collapsible iconType="logoElasticsearch" title="Elasticsearch">
       <p className="child">child 1</p>
       <p className="child">child 2</p>
-    </CollapsiblePanel>
+    </SectionPanel>
   );
 
-  expect(wrapper.find(CollapsiblePanel)).toHaveLength(1);
+  expect(wrapper.find(SectionPanel)).toHaveLength(1);
   expect(wrapper.find('.child')).toHaveLength(2);
 
   wrapper.find(EuiLink).simulate('click');

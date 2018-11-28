@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CollapsiblePanel } from './collapsible_panel';
+export { SectionPanel } from './section_panel';

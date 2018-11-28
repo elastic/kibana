@@ -11,11 +11,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
@@ -23,6 +23,7 @@ import { isReservedSpace } from 'x-pack/plugins/spaces/common';
 import { Space } from 'x-pack/plugins/spaces/common/model/space';
 import { SpaceAvatar } from '../../../../components';
 import { SpaceValidator, toSpaceIdentifier } from '../../lib';
+import { SectionPanel } from '../section_panel';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { SpaceIdentifier } from './space_identifier';
 
@@ -49,15 +50,23 @@ export class CustomizeSpace extends Component<Props, State> {
     const { validator, editingExistingSpace, intl } = this.props;
     const { name = '', description = '' } = this.props.space;
     return (
-      <EuiPanel>
+      <SectionPanel
+        collapsible={false}
+        title={intl.formatMessage({
+          id: 'xpack.spaces.management.manageSpacePage.customizeSpaceTitle',
+          defaultMessage: 'Customize your space',
+        })}
+      >
         <EuiDescribedFormGroup
           title={
-            <h3>
-              <FormattedMessage
-                id="xpack.spaces.management.manageSpacePage.customizeSpaceTitle"
-                defaultMessage="Customize your space"
-              />
-            </h3>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.spaces.management.manageSpacePage.customizeSpacePanelDescription"
+                  defaultMessage="Name your space and customize its avatar."
+                />
+              </h3>
+            </EuiTitle>
           }
           description={this.getPanelDescription()}
           fullWidth
@@ -149,7 +158,7 @@ export class CustomizeSpace extends Component<Props, State> {
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
-      </EuiPanel>
+      </SectionPanel>
     );
   }
 
@@ -168,12 +177,6 @@ export class CustomizeSpace extends Component<Props, State> {
   public getPanelDescription = () => {
     return (
       <EuiText>
-        <p>
-          <FormattedMessage
-            id="xpack.spaces.management.manageSpacePage.customizeSpacePanelDescription"
-            defaultMessage="Name your space and customize its avatar."
-          />
-        </p>
         {this.props.editingExistingSpace ? (
           <p>
             <FormattedMessage
