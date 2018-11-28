@@ -9,7 +9,7 @@ import React from 'react';
 
 import { cloneDeep } from 'lodash';
 import { rowRenderers } from '.';
-import { mockECSData } from '../../../../pages/mock/mock_ecs';
+import { mockECSData } from '../../../../mock/mock_ecs';
 import { ECS } from '../../ecs';
 import { getRowRenderer } from './get_row_renderer';
 

@@ -15,6 +15,28 @@ export const mockSourceData = {
       host: 'beat.hostname',
     },
   },
+  status: {
+    auditbeatIndicesExist: true,
+    auditbeatAliasExists: true,
+    auditbeatIndices: [
+      "auditbeat-7.0.0-alpha1-2018.10.03",
+      "auditbeat-7.0.0-alpha1-2018.10.04",
+    ],
+    indexFields: [
+      {
+        name: "@timestamp",
+        searchable: true,
+        type: "date",
+        aggregatable: true,
+      },
+      {
+        name: "apache2.access.agent",
+        searchable: true,
+        type: "string",
+        aggregatable: false,
+      },
+    ],
+  },
 };
 /* tslint:enable */
 

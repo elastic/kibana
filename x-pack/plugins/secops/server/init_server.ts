@@ -8,6 +8,7 @@ import { addMockFunctionsToSchema, IResolvers, makeExecutableSchema } from 'grap
 
 import { createMocks, schemas } from './graphql';
 import { createEventsResolvers } from './graphql/events';
+import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
 import { AppBackendLibs } from './lib/types';
@@ -22,6 +23,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
   const { logger, mocking } = config;
   const schema = makeExecutableSchema({
     resolvers: [
+      createSourceStatusResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createEventsResolvers(libs) as IResolvers,
       createWhoAmIResolvers() as IResolvers,

@@ -15,13 +15,8 @@ export default function ({ loadTestFile }) {
     // loadTestFile(require.resolve('./kibana'));
     // loadTestFile(require.resolve('./infra'));
 
-    // TODO: I am only running infra at the moment
-    // but in reality I should not be running infra and
-    // should instead be running secops which still needs
-    // to be built. I kept this api integration test running for right now
-    // as an example. -- Frank H.
-    // See completion of issue: https://github.com/elastic/ingest-dev/issues/56
-    loadTestFile(require.resolve('./infra'));
+    //Only running our secops test for now since we are working in our own branch
+    loadTestFile(require.resolve('./secops'));
 
     // loadTestFile(require.resolve('./beats'));
   });

@@ -10,7 +10,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import { eventsQuery } from '../../containers/events/events.gql_query';
-import { mockECSData } from '../../pages/mock/mock_ecs';
+import { mockECSData } from '../../mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';

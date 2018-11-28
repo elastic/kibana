@@ -8,7 +8,9 @@ import { graphql } from 'graphql';
 import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
 
 import { rootSchema } from '../../../common/graphql/root/schema.gql';
+import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
+import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from './schema.gql';
 import { getSourceQueryMock, mockSourceData } from './source.mock';
 
@@ -22,7 +24,18 @@ const testCaseSource = {
 					fields {
 						host
 					}
-				}
+        }
+        status {
+          auditbeatIndicesExist
+          auditbeatAliasExists
+          auditbeatIndices
+          indexFields {
+            name
+            searchable
+            type
+            aggregatable
+          }
+        }
 			}
 		}
 	`,
@@ -46,7 +59,7 @@ const testCaseSource = {
 describe('Test Source Schema', () => {
   // Array of case types
   const cases = [testCaseSource];
-  const typeDefs = [rootSchema, sourcesSchema];
+  const typeDefs = [rootSchema, sharedSchema, sourcesSchema, sourceStatusSchema];
   const mockSchema = makeExecutableSchema({ typeDefs });
 
   // Here we specify the return payloads of mocked types
