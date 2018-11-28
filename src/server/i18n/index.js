@@ -26,12 +26,14 @@ const globAsync = promisify(glob);
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
-  const groupedEntries = await Promise.all(config.get('i18n.translationsScanDirs').map(path =>
-    globAsync('**/translations/*.json', {
-      cwd: path,
-      ignore: ['**/node_modules/**', '**/__tests__/**'],
-    })
-  ));
+  const groupedEntries = await Promise.all(
+    config.get('i18n.translationsScanDirs').map(path =>
+      globAsync('**/translations/*.json', {
+        cwd: path,
+        ignore: ['**/node_modules/**', '**/__tests__/**'],
+      })
+    )
+  );
 
   const translationPaths = [].concat(...groupedEntries);
 
