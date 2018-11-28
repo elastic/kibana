@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { resolve } from 'path';
 import glob from 'glob';
 import { promisify } from 'util';
 import { i18n, i18nLoader } from '@kbn/i18n';
@@ -27,12 +28,14 @@ export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
   const groupedEntries = await Promise.all(
-    config.get('i18n.translationsScanDirs').map(path =>
-      globAsync('**/translations/*.json', {
+    config.get('i18n.translationsScanDirs').map(async path => {
+      const entries = await globAsync('**/translations/*.json', {
         cwd: path,
         ignore: ['**/node_modules/**', '**/__tests__/**'],
-      })
-    )
+      });
+
+      return entries.map(entry => resolve(path, entry));
+    })
   );
 
   const translationPaths = [].concat(...groupedEntries);
