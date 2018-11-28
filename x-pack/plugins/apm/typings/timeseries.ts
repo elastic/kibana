@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module 'lodash.mean' {
-  function mean(numbers: Array<number | null | undefined>): number;
-  export = mean;
+export interface Coordinate {
+  x: number;
+  y: number | null;
+}
+
+export interface RectCoordinate {
+  x: number;
+  x0: number;
 }
