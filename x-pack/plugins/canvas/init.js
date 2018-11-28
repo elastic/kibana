@@ -16,11 +16,9 @@ export default async function(server /*options*/) {
     const config = server.config();
     const basePath = config.get('server.basePath');
     const reportingBrowserType = (() => {
-      try {
-        return config.get('xpack.reporting.capture.browser.type');
-      } catch (e) {
-        return null;
-      }
+      const configKey = 'xpack.reporting.capture.browser.type';
+      if (!config.has(configKey)) return null;
+      return config.get(configKey);
     })();
 
     return {
