@@ -23183,6 +23183,15 @@ const CleanCommand = exports.CleanCommand = {
                 _log.log.write(_chalk2.default.bold.green('\n\nNothing to delete'));
             } else {
                 _log.log.write(_chalk2.default.bold.red('\n\nDeleting:\n'));
+                /**
+                 * In order to avoid patterns like `/build` in packages from accidentally
+                 * impacting files outside the package we use `process.chdir()` to change
+                 * the cwd to the package and execute `del()` without the `force` option
+                 * so it will check that each file being deleted is within the package.
+                 *
+                 * `del()` does support a `cwd` option, but it's only for resolving the
+                 * patterns and does not impact the cwd check.
+                 */
                 const originalCwd = process.cwd();
                 try {
                     for (const _ref of toDelete) {
