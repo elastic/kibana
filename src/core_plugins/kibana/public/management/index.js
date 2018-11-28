@@ -28,11 +28,10 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management } from 'ui/management';
+import { management, SidebarNav } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import 'ui/kbn_top_nav';
-import { SideNav } from './sidenav';
 
 const SIDENAV_ID = 'management-sidenav';
 
@@ -61,7 +60,7 @@ export function updateHeader(
 
   render(
     <I18nProvider>
-      <SideNav
+      <SidebarNav
         sections={$scope.sections}
         selectedId={$scope.section.id}
         style={{ width: 192 }}
