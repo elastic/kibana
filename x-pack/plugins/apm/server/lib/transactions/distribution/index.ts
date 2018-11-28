@@ -19,6 +19,7 @@ export interface ITransactionDistributionAPIResponse {
 export async function getDistribution(
   serviceName: string,
   transactionName: string,
+  transactionId: string,
   setup: Setup
 ): Promise<ITransactionDistributionAPIResponse> {
   const bucketSize = await calculateBucketSize(
@@ -30,6 +31,7 @@ export async function getDistribution(
   const { defaultSample, buckets, totalHits } = await getBuckets(
     serviceName,
     transactionName,
+    transactionId,
     bucketSize,
     setup
   );
