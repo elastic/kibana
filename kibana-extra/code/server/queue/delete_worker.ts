@@ -89,7 +89,8 @@ export class DeleteWorker extends AbstractWorker {
         res: true,
       };
     } catch (error) {
-      this.log.error(`Delete repository ${uri} error. ${error}`);
+      this.log.error(`Delete repository ${uri} error.`);
+      this.log.error(error);
       // Notify repo delete failed through websocket.
       this.socketService.broadcastDeleteProgress(uri, -100);
       return {
@@ -139,7 +140,8 @@ export class DeleteWorker extends AbstractWorker {
         this.log.info(`Delete ${type} of repository ${repoUri} done.`);
       })
       .catch((error: Error) => {
-        this.log.error(`Delete ${type} of repository ${repoUri} error: ${error}`);
+        this.log.error(`Delete ${type} of repository ${repoUri} error.`);
+        this.log.error(error);
       });
   }
 }

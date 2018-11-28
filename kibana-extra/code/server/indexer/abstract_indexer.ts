@@ -56,6 +56,7 @@ export abstract class AbstractIndexer implements Indexer {
       totalCount = reqs.length;
     } catch (error) {
       this.log.error(`Prepare requests for ${this.repoUri} error.`);
+      this.log.error(error);
       throw error;
     }
 
@@ -70,7 +71,7 @@ export abstract class AbstractIndexer implements Indexer {
         statsBuffer.push(stats);
         successCount += 1;
       } catch (error) {
-        this.log.debug(`Process index request error. ${error}`);
+        this.log.error(`Process index request error. ${error}`);
         failCount += 1;
       }
 
@@ -139,7 +140,8 @@ export abstract class AbstractIndexer implements Indexer {
           return false;
         }
       } catch (error) {
-        this.log.error(`Index creation error: ${error}`);
+        this.log.error(`Index creation error.`);
+        this.log.error(error);
         return false;
       }
     }

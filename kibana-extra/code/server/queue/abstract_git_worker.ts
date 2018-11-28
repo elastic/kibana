@@ -51,7 +51,8 @@ export abstract class AbstractGitWorker extends AbstractWorker {
         },
       });
     } catch (error) {
-      this.log.debug(`Update revision of repo clone progress error: ${error}`);
+      this.log.error(`Update revision of repo clone progress error.`);
+      this.log.error(error);
     }
 
     return await super.onJobCompleted(job, res);
@@ -67,7 +68,8 @@ export abstract class AbstractGitWorker extends AbstractWorker {
     try {
       return await this.objectClient.updateRepositoryGitStatus(p.uri, p);
     } catch (error) {
-      this.log.debug(`Update git clone progress error: ${error}`);
+      this.log.error(`Update git clone progress error.`);
+      this.log.error(error);
     }
   }
 }

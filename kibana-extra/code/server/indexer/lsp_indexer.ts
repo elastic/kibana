@@ -112,9 +112,10 @@ export class LspIndexer extends AbstractIndexer {
           };
           return req;
         });
-    } catch (e) {
-      this.log.error(`Prepare lsp indexing requests error: ${e}`);
-      throw e;
+    } catch (error) {
+      this.log.error(`Prepare lsp indexing requests error.`);
+      this.log.error(error);
+      throw error;
     }
   }
 
@@ -131,7 +132,8 @@ export class LspIndexer extends AbstractIndexer {
       });
       this.log.info(`Clean up symbols for ${repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up symbols for ${repoUri} error: ${error}`);
+      this.log.error(`Clean up symbols for ${repoUri} error.`);
+      this.log.error(error);
     }
 
     // Clean up all the reference documents in the reference index
@@ -146,7 +148,8 @@ export class LspIndexer extends AbstractIndexer {
       });
       this.log.info(`Clean up references for ${repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up references for ${repoUri} error: ${error}`);
+      this.log.error(`Clean up references for ${repoUri} error.`);
+      this.log.error(error);
     }
 
     // Clean up all the document documents in the document index but keep the repository document.
@@ -184,7 +187,8 @@ export class LspIndexer extends AbstractIndexer {
       });
       this.log.info(`Clean up documents for ${repoUri} done.`);
     } catch (error) {
-      this.log.error(`Clean up documents for ${repoUri} error: ${error}`);
+      this.log.error(`Clean up documents for ${repoUri} error.`);
+      this.log.error(error);
     }
   }
 
@@ -221,7 +225,8 @@ export class LspIndexer extends AbstractIndexer {
         this.log.debug(`Empty response from lsp server. Skip symbols and references indexing.`);
       }
     } catch (error) {
-      this.log.info(`Index symbols or references error: ${error}. Skip to file indexing.`);
+      this.log.error(`Index symbols or references error. Skip to file indexing.`);
+      this.log.error(error);
     }
 
     const localFilePath = `${localRepoPath}${filePath}`;

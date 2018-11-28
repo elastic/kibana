@@ -75,7 +75,8 @@ export class IndexScheduler extends AbstractScheduler {
         await this.indexWorker.enqueueJob(payload, {});
       }
     } catch (error) {
-      this.log.info(`Schedule index job for ${repo.uri} error. ${error}`);
+      this.log.error(`Schedule index job for ${repo.uri} error.`);
+      this.log.error(error);
     }
   }
 }

@@ -51,7 +51,8 @@ export class IndexVersionController {
       const esIndexName = Object.keys(res)[0];
       return _.get(res, [esIndexName, 'mappings', typeName, '_meta', 'version'], 0);
     } catch (error) {
-      this.log.error(`Get index version error for ${indexName}: ${error}.`);
+      this.log.error(`Get index version error for ${indexName}.`);
+      this.log.error(error);
       return 0;
     }
   }

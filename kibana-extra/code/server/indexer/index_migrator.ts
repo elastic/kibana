@@ -60,7 +60,8 @@ export class IndexMigrator {
           body,
         });
       } catch (error) {
-        this.log.error(`Create new index ${newIndexName} for index migration error: ${error}`);
+        this.log.error(`Create new index ${newIndexName} for index migration error.`);
+        this.log.error(error);
         throw error;
       }
 
@@ -78,8 +79,9 @@ export class IndexMigrator {
         });
       } catch (error) {
         this.log.error(
-          `Migrate data from ${oldIndexName} to ${newIndexName} for index migration error: ${error}`
+          `Migrate data from ${oldIndexName} to ${newIndexName} for index migration error.`
         );
+        this.log.error(error);
         throw error;
       }
 
@@ -104,7 +106,8 @@ export class IndexMigrator {
           },
         });
       } catch (error) {
-        this.log.error(`Update the index alias for ${newIndexName} error: ${error}`);
+        this.log.error(`Update the index alias for ${newIndexName} error.`);
+        this.log.error(error);
         throw error;
       }
 
@@ -112,11 +115,13 @@ export class IndexMigrator {
         // Delete the old index
         await this.client.indices.delete({ index: oldIndexName });
       } catch (error) {
-        this.log.error(`Clean up the old index ${oldIndexName} error: ${error}`);
+        this.log.error(`Clean up the old index ${oldIndexName} error.`);
+        this.log.error(error);
         // This won't affect serving, so do not throw the error anymore.
       }
     } catch (error) {
-      this.log.error(`Index upgrade/migration to version ${this.version} failed: ${error}.`);
+      this.log.error(`Index upgrade/migration to version ${this.version} failed.`);
+      this.log.error(error);
     }
   }
 }

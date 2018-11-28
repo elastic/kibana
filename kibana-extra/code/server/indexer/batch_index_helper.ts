@@ -56,7 +56,8 @@ export class BatchIndexHelper {
       return await this.client.bulk({ body: this.batch });
     } catch (error) {
       // TODO(mengwei): should we throw this exception again?
-      this.log.error(`Batch index ${this.batch.length / 2} documents error: ${error}. Skip.`);
+      this.log.error(`Batch index ${this.batch.length / 2} documents error. Skip.`);
+      this.log.error(error);
     } finally {
       this.batch = [];
     }

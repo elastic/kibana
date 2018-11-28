@@ -79,7 +79,8 @@ export class UpdateScheduler extends AbstractScheduler {
         this.log.info(`Repo ${repo.uri} has not been fully cloned yet or in update. Skip update.`);
       }
     } catch (error) {
-      this.log.info(`Schedule update for ${repo.uri} error. ${error}`);
+      this.log.error(`Schedule update for ${repo.uri} error.`);
+      this.log.error(error);
     }
   }
 }

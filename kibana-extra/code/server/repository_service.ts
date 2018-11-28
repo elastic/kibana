@@ -96,8 +96,9 @@ export class RepositoryService {
           },
         };
       } catch (error) {
-        const msg = `Clone repository from ${repo.url} to ${localPath} error: ${error}`;
+        const msg = `Clone repository from ${repo.url} to ${localPath} error.`;
         this.log.error(msg);
+        this.log.error(error);
         throw new Error(msg);
       }
     }
@@ -142,7 +143,7 @@ export class RepositoryService {
       };
     } catch (error) {
       const msg = `update repository ${uri} error: ${error}`;
-      this.log.info(msg);
+      this.log.error(msg);
       throw new Error(msg);
     }
   }
