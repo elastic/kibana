@@ -23,7 +23,7 @@ export default () => ({
   name: 'kibana',
   type: 'kibana_context',
   context: {},
-  help: i18n('common.core_plugins.interpreter.public.functions.kibana.help', {
+  help: i18n.translate('common.core_plugins.interpreter.public.functions.kibana.help', {
     defaultMessage: 'Gets kibana global context'
   }),
   args: {},

@@ -25,7 +25,7 @@ export default () => ({
   context: {
     types: [],
   },
-  help: i18n('common.core_plugins.interpreter.public.functions.markdown.help', {
+  help: i18n.translate('common.core_plugins.interpreter.public.functions.markdown.help', {
     defaultMessage: 'Markdown visualization'
   }),
   args: {

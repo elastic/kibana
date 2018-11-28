@@ -25,7 +25,7 @@ export default () => ({
   context: {
     types: [],
   },
-  help: i18n('common.core_plugins.interpreter.public.functions.visualization.help', {
+  help: i18n.translate('common.core_plugins.interpreter.public.functions.visualization.help', {
     defaultMessage: 'A simple visualization'
   }),
   args: {

@@ -30,7 +30,7 @@ export default () => ({
       'kibana_table'
     ],
   },
-  help: i18n('common.core_plugins.interpreter.public.functions.tilemap.help', {
+  help: i18n.translate('common.core_plugins.interpreter.public.functions.tilemap.help', {
     defaultMessage: 'Tilemap visualization'
   }),
   args: {

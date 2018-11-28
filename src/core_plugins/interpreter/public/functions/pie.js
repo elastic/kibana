@@ -30,7 +30,7 @@ export default () => ({
       'kibana_table', 'null'
     ],
   },
-  help: i18n('common.core_plugins.interpreter.public.functions.pie.help', {
+  help: i18n.translate('common.core_plugins.interpreter.public.functions.pie.help', {
     defaultMessage: 'Pie visualization'
   }),
   args: {
