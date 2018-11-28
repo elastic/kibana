@@ -17,7 +17,29 @@
  * under the License.
  */
 
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+import { VisRequestHandlersRegistryProvider as RequestHandlersProvider } from 'ui/registry/vis_request_handlers';
+import { VisResponseHandlersRegistryProvider as ResponseHandlerProvider } from 'ui/registry/vis_response_handlers';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { IndexPatternsProvider } from 'ui/index_patterns';
+import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { PersistedState } from 'ui/persisted_state';
+
+function getHandler(from, type) {
+  if (typeof type === 'function') {
+    return type;
+  }
+  if (type === 'courier') {
+    return null;
+  }
+  const handlerDesc = from.find(handler => handler.name === type);
+  if (!handlerDesc) {
+    throw new Error(`Could not find handler "${type}".`);
+  }
+  return handlerDesc.handler;
+}
 
 export default () => ({
   name: 'visualization',
@@ -29,6 +51,18 @@ export default () => ({
     defaultMessage: 'A simple visualization'
   }),
   args: {
+    index: {
+      types: ['string', 'null'],
+      default: null,
+    },
+    metricsAtAllLevels: {
+      types: ['boolean'],
+      default: false,
+    },
+    partialRows: {
+      types: ['boolean'],
+      default: false,
+    },
     type: {
       types: ['string'],
       default: '',
@@ -40,17 +74,69 @@ export default () => ({
       multi: false,
     }
   },
-  fn(context, args) {
-    const params = args.params ? JSON.parse(args.params) : {};
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visConfig: {
-          type: args.type,
-          params: params
-        },
+  fn(context, args, handlers) {
+    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
+      const Private = $injector.get('Private');
+      const requestHandlers = Private(RequestHandlersProvider);
+      const responseHandlers = Private(ResponseHandlerProvider);
+      const visTypes = Private(VisTypesRegistryProvider);
+      const indexPatterns = Private(IndexPatternsProvider);
+      const queryFilter = Private(FilterBarQueryFilterProvider);
+
+      const visConfigParams = JSON.parse(args.visConfig || {});
+      const schemas = JSON.parse(args.schemas);
+      const visType = visTypes.byName[args.type || 'histogram'];
+      const requestHandler = getHandler(requestHandlers, visType.requestHandler);
+      const responseHandler = getHandler(responseHandlers, visType.responseHandler);
+      const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
+
+      const uiStateParams = args.uiState ? JSON.parse(args.uiState) : {};
+      const uiState = new PersistedState(uiStateParams);
+
+      if (requestHandler) {
+        context = await requestHandler({
+          partialRows: args.partialRows,
+          metricsAtAllLevels: args.metricsAtAllLevels,
+          index: indexPattern,
+          visParams: visConfigParams,
+          timeRange: get(context, 'timeRange', null),
+          query: get(context, 'query', null),
+          filters: get(context, 'filters', null),
+          uiState: uiState,
+          inspectorAdapters: handlers.inspectorAdapters,
+          queryFilter,
+          forceFetch: true,
+        });
       }
-    };
+
+      if (responseHandler) {
+        if (context.columns) {
+          // assign schemas to aggConfigs
+          context.columns.forEach(column => {
+            column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+          });
+
+          Object.keys(schemas).forEach(key => {
+            schemas[key].forEach(i => {
+              context.columns[i].aggConfig.schema = key;
+            });
+          });
+        }
+
+        context = await responseHandler(context);
+      }
+
+      return {
+        type: 'render',
+        as: 'visualization',
+        value: {
+          visData: context,
+          visConfig: {
+            type: args.type,
+            params: visConfigParams
+          },
+        }
+      };
+    });
   }
 });

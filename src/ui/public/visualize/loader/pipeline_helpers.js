@@ -150,7 +150,12 @@ export const buildPipeline = (vis, params) => {
       ${prepareJson('visConfig', visState.params)} 
       ${prepareJson('schemas', schemas)}`;
   } else {
-    pipeline += `visualization type='${vis.type.name}' ${prepareJson('visConfig', visState.params)}`;
+    pipeline += `visualization type='${vis.type.name}' 
+    ${prepareJson('visConfig', visState.params)}
+    ${prepareString('index', indexPattern.id)} 
+    metricsAtAllLevels=${vis.isHierarchical()} 
+    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'}
+    `;
   }
 
   return pipeline;
