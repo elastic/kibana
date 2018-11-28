@@ -1231,7 +1231,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const result = [];
 
       for (let i = 1; true; i++) {
-        const selector = new Array(i).fill('.agg-table-group').join(' ');
+        const selector = new Array(i).fill('.kbnAggTable__group').join(' ');
         const tables = await vis.findAllByCssSelector(selector);
         if (tables.length === 0) {
           break;
