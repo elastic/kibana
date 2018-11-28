@@ -129,6 +129,9 @@ export class EmbeddedVisualizeHandler {
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
     this.vis.hasInspector = this.hasInspector;
+    this.vis.getInspectorAdapters = () => {
+      return this.inspectorAdapters;
+    };
 
     // init default actions
     forEach(this.vis.type.events, (event, eventName) => {

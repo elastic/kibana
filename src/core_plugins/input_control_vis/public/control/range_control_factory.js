@@ -26,6 +26,7 @@ import {
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 const minMaxAgg = (field) => {
   const aggBody = {};
@@ -49,7 +50,7 @@ const minMaxAgg = (field) => {
 
 class RangeControl extends Control {
 
-  async fetch() {
+  async fetch(inspectorAdapters) {
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
@@ -62,13 +63,30 @@ class RangeControl extends Control {
     const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
 
     let resp;
+    const requestResponder = _.has(inspectorAdapters, 'requests')
+      ? inspectorAdapters.requests.start(this.label, { id: this.id })
+      : undefined;
     try {
+      if (requestResponder) {
+        requestResponder.stats(getRequestInspectorStats(searchSource));
+        searchSource.getSearchRequestBody().then(body => {
+          requestResponder.json(body);
+        });
+      }
       resp = await searchSource.fetch();
+      if (requestResponder) {
+        requestResponder
+          .stats(getResponseInspectorStats(searchSource, resp))
+          .ok({ json: resp });
+      }
     } catch(error) {
       this.disable(i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
         values: { errorMessage: error.message }
       }));
+      if (requestResponder) {
+        requestResponder.error({ error });
+      }
       return;
     }
 

@@ -26,6 +26,7 @@ import {
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
+import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -66,7 +67,7 @@ const termsAgg = ({ field, size, direction, query }) => {
 
 class ListControl extends Control {
 
-  fetch = async (query) => {
+  fetch = async (inspectorAdapters, query) => {
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
@@ -115,13 +116,30 @@ class ListControl extends Control {
 
     this.lastQuery = query;
     let resp;
+    const requestResponder = _.has(inspectorAdapters, 'requests')
+      ? inspectorAdapters.requests.start(this.label, { id: this.id })
+      : undefined;
     try {
+      if (requestResponder) {
+        requestResponder.stats(getRequestInspectorStats(searchSource));
+        searchSource.getSearchRequestBody().then(body => {
+          requestResponder.json(body);
+        });
+      }
       resp = await searchSource.fetch();
+      if (requestResponder) {
+        requestResponder
+          .stats(getResponseInspectorStats(searchSource, resp))
+          .ok({ json: resp });
+      }
     } catch(error) {
       this.disable(i18n.translate('inputControl.listControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch terms, error: {errorMessage}',
         values: { errorMessage: error.message }
       }));
+      if (requestResponder) {
+        requestResponder.error({ error });
+      }
       return;
     }
 

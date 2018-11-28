@@ -29,8 +29,7 @@ import { i18n } from '@kbn/i18n';
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
-  // return the visType object, which kibana will use to display and configure new Vis object of this type.
-  return VisFactory.createBaseVisualization({
+  const inputControlsVisType = VisFactory.createBaseVisualization({
     name: 'input_control_vis',
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Controls'
@@ -73,6 +72,12 @@ function InputControlVisProvider(Private) {
     requestHandler: 'none',
     responseHandler: 'none',
   });
+
+  inputControlsVisType.inspectorAdapters = {
+    requests: true
+  };
+
+  return inputControlsVisType;
 }
 
 // register the provider with the visTypes registry

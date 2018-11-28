@@ -96,7 +96,7 @@ class VisController {
       });
       const control = getControl(controlId);
       control.setAncestors(ancestors);
-      controlInitPromises.push(control.fetch());
+      controlInitPromises.push(control.fetch(this.vis.getInspectorAdapters()));
     });
 
     await Promise.all(controlInitPromises);
@@ -166,7 +166,7 @@ class VisController {
   async updateNestedControls() {
     const fetchPromises = this.controls.map(async (control) => {
       if (control.hasAncestors()) {
-        await control.fetch();
+        await control.fetch(this.vis.getInspectorAdapters());
       }
     });
     return await Promise.all(fetchPromises);
@@ -191,7 +191,7 @@ class VisController {
   }
 
   refreshControl = async (controlIndex, query) => {
-    await this.controls[controlIndex].fetch(query);
+    await this.controls[controlIndex].fetch(this.vis.getInspectorAdapters(), query);
     this.drawVis();
   }
 }
