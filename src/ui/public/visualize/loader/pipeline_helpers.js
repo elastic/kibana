@@ -72,8 +72,8 @@ const buildPipelineVisFunction = {
       ${prepareString('expression', visState.params.expression)} interval='${visState.params.interval}'`;
   },
   markdown: visState => {
-    return `markdown 
-      ${prepareString('md', visState.params.markdown)} ${prepareJson('visConfig', visState.params)}`;
+    return `kibana_markdown 
+      ${prepareString('expression', visState.params.markdown)} ${prepareJson('visConfig', visState.params)}`;
   },
   table: (visState, schemas) => {
     let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)} `;

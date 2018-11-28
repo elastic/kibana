@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 export default () => ({
-  name: 'markdown',
+  name: 'kibana_markdown',
   type: 'render',
   context: {
     types: [],
@@ -29,21 +29,21 @@ export default () => ({
     defaultMessage: 'Markdown visualization'
   }),
   args: {
-    md: {
+    expression: {
       types: ['string'],
       aliases: [ '_' ],
       default: '',
       help: 'markdown',
       multi: false,
     },
-    params: {
+    visConfig: {
       types: ['string'],
       default: '"{}"',
       multi: false,
     }
   },
   fn(context, args) {
-    const params = args.params ? JSON.parse(args.params) : {};
+    const params = args.visConfig ? JSON.parse(args.visConfig) : {};
     return {
       type: 'render',
       as: 'visualization',
