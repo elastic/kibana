@@ -315,6 +315,10 @@ async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
  * instances where customers manually expand the shards of an index.
  */
 function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
+  if (!_.has(_shards, 'total') || !_.has(_shards, 'successful')) {
+    return;
+  }
+
   const failed = _shards.total - _shards.successful;
 
   if (failed > 0) {

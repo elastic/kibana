@@ -562,6 +562,45 @@ describe('ElasticIndex', () => {
 
       await expect(read()).rejects.toThrow(/shards failed/);
     });
+
+    test('handles shards not being returned', async () => {
+      const index = '.myalias';
+      const callCluster = sinon.stub();
+      const batch = [
+        {
+          _id: 'such:1',
+          _source: {
+            acls: '3230a',
+            foos: { is: 'fun' },
+            such: { num: 1 },
+            type: 'such',
+          },
+        },
+      ];
+
+      callCluster
+        .onCall(0)
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'x',
+            hits: { hits: _.cloneDeep(batch) },
+          })
+        )
+        .onCall(1)
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'z',
+            hits: { hits: [] },
+          })
+        );
+
+      const read = Index.reader(callCluster, index, {
+        batchSize: 100,
+        scrollDuration: '5m',
+      });
+
+      expect(await read()).toEqual(batch);
+    });
   });
 
   describe('migrationsUpToDate', () => {
