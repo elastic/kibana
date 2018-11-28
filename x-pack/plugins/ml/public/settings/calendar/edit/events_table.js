@@ -8,6 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
+import moment from 'moment';
 
 import {
   EuiButton,
@@ -15,6 +16,8 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
 } from '@elastic/eui';
+
+const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 function DeleteButton({ onClick }) {
   return (
@@ -57,12 +60,20 @@ export function EventsTable({
     {
       field: 'start_time',
       name: 'Start',
-      sortable: true
+      sortable: true,
+      render: (timeMs) => {
+        const time = moment(timeMs);
+        return time.format(TIME_FORMAT);
+      }
     },
     {
       field: 'end_time',
       name: 'End',
-      sortable: true
+      sortable: true,
+      render: (timeMs) => {
+        const time = moment(timeMs);
+        return time.format(TIME_FORMAT);
+      }
     },
     {
       field: '',
