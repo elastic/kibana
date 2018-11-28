@@ -1,3 +1,8 @@
+/**
+ * This file is only for tests so it is it's own CSS
+ * to be imported directly by and only by this module.
+ */
+
 body#test-harness-body {
   /**
     now that tests include the kibana styles, we have
