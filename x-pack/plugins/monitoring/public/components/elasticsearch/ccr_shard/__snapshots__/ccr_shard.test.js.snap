@@ -131,7 +131,7 @@ exports[`CcrShard that it renders normally 1`] = `
             hasShadow={false}
             paddingSize="m"
           >
-            <MonitoringTimeseriesContainer />
+            <InjectIntl(MonitoringTimeseriesContainerUI) />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem
@@ -149,7 +149,7 @@ exports[`CcrShard that it renders normally 1`] = `
             hasShadow={false}
             paddingSize="m"
           >
-            <MonitoringTimeseriesContainer />
+            <InjectIntl(MonitoringTimeseriesContainerUI) />
           </EuiPanel>
         </EuiFlexItem>
       </React.Fragment>

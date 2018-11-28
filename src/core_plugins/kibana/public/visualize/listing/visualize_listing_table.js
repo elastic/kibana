@@ -260,14 +260,14 @@ export class VisualizeListingTable extends Component {
     this.setState({ selectedRowIds: newSelectedIds });
   };
 
-  onCreate() {
-    window.location = '#/visualize/new';
+  onCreate = () => {
+    this.props.onCreateVis();
   }
 
   renderToolBarActions() {
     return this.state.selectedRowIds.length > 0 ?
       <KuiListingTableDeleteButton onDelete={this.onDelete} aria-label="Delete selected visualizations"/> :
-      <KuiListingTableCreateButton onCreate={this.onCreate} aria-label="Create new visualization"/>;
+      <KuiListingTableCreateButton onCreate={this.onCreate} data-test-subj="createNewVis" aria-label="Create new visualization"/>;
   }
 
   renderPager() {
@@ -323,4 +323,5 @@ export class VisualizeListingTable extends Component {
 VisualizeListingTable.propTypes = {
   deleteSelectedItems: PropTypes.func,
   fetchItems: PropTypes.func,
+  onCreateVis: PropTypes.func.isRequired,
 };
