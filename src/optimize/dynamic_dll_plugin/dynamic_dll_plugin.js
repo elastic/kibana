@@ -47,17 +47,32 @@ export class DynamicDllPlugin {
     this.afterCompilationEntryPaths = '';
     this.maxCompilations = maxCompilations;
     this.performedCompilations = 0;
+    this.forceDLLCreationFlag = !!(process && process.env && process.env.FORCE_DLL_CREATION);
   }
 
   async init() {
     await this.dllCompiler.init();
     this.entryPaths = await this.dllCompiler.readEntryFile();
-    this.log(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
   }
 
   apply(compiler) {
-    this.registerHooks(compiler);
+    // Just register the init basic hooks
+    // in order to run the init function
+    this.registerInitBasicHooks(compiler);
+    // The dll reference should always be bind to the
+    // main webpack config.
     this.bindDllReferencePlugin(compiler);
+
+    // Verify if we must init and run the dynamic dll plugin tasks.
+    // We must run it every time we are not under a distributable env
+    if (!this.mustRunDynamicDllPluginTasks()) {
+      return;
+    }
+
+    // This call init all the DynamicDllPlugin tasks
+    // as it attaches the plugin to the main webpack
+    // lifecycle hooks needed to perform the logic
+    this.registerTasksHooks(compiler);
   }
 
   bindDllReferencePlugin(compiler) {
@@ -71,9 +86,13 @@ export class DynamicDllPlugin {
     }).apply(compiler);
   }
 
-  registerHooks(compiler) {
+  registerInitBasicHooks(compiler) {
     this.registerRunHook(compiler);
     this.registerWatchRunHook(compiler);
+  }
+
+  registerTasksHooks(compiler) {
+    this.log(['info', 'optimize:dynamic_dll_plugin'], 'Started dynamic dll plugin tasks');
     this.registerBeforeCompileHook(compiler);
     this.registerCompilationHook(compiler);
     this.registerDoneHook(compiler);
@@ -120,15 +139,6 @@ export class DynamicDllPlugin {
   registerCompilationHook(compiler) {
     compiler.hooks.compilation.tap('DynamicDllPlugin', compilation => {
       compilation.hooks.needAdditionalPass.tap('DynamicDllPlugin', () => {
-        // Verify if we must proceed and check if a dll compilation is needed.
-        // We must compile the dll, at least run the procedures to understand)
-        // if we already have everything we need inside the dll, every time
-        // we are not under a distributable environment, or dll wasn't
-        // yet created.
-        if (!this.mustCompileDll()) {
-          return compilation.needsDLLCompilation = false;
-        }
-
         // Run the procedures in order to execute our dll compilation
         // The process is very straightforward in it's conception:
         //
@@ -205,16 +215,29 @@ export class DynamicDllPlugin {
         // Sort and join all the discovered require deps
         // in order to create a consistent entry file
         this.afterCompilationEntryPaths = Object.keys(requiresMap).sort().join('\n');
+        // The dll compilation will run if on of the following conditions return true:
+        // 1 - the new generated entry paths are different from the
+        // old ones
+        // 2 - if no dll bundle is yet created
+        // 3 - if this.forceDLLCreationFlag were set from the node env var FORCE_DLL_CREATION and
+        // we are not running over the distributable. If we are running under the watch optimizer,
+        // this.forceDLLCreationFlag will only be applied in the very first execution,
+        // then will be set to false
         compilation.needsDLLCompilation = (this.afterCompilationEntryPaths !== this.entryPaths)
-          || !this.dllCompiler.dllExistsSync();
+          || !this.dllCompiler.dllExistsSync()
+          || (this.isToForceDLLCreation() && this.performedCompilations === 0);
         this.entryPaths = this.afterCompilationEntryPaths;
 
-        this.log(
-          ['info', 'optimize:dynamic_dll_plugin'],
-          compilation.needsDLLCompilation
-            ? 'Need to compile the client vendors dll'
-            : 'No need to compile client vendors dll'
-        );
+        // Only run this info log in the first performed dll compilation
+        // per each execution run
+        if (this.performedCompilations === 0) {
+          this.log(
+            ['info', 'optimize:dynamic_dll_plugin'],
+            compilation.needsDLLCompilation
+              ? 'Need to compile the client vendors dll'
+              : 'No need to compile client vendors dll'
+          );
+        }
 
         return compilation.needsDLLCompilation;
       });
@@ -241,6 +264,11 @@ export class DynamicDllPlugin {
       }
 
       this.performedCompilations = 0;
+      // reset this flag var set from the node env FORCE_DLL_CREATION on init,
+      // has the force_dll_creation is only valid for the very first run
+      if (this.forceDLLCreationFlag) {
+        this.forceDLLCreationFlag = false;
+      }
       this.log(['info', 'optimize:dynamic_dll_plugin'], 'Finished all dynamic dll plugin tasks');
     });
   }
@@ -364,10 +392,12 @@ export class DynamicDllPlugin {
     return internalRequiresMap;
   }
 
-  mustCompileDll() {
-    const forceDllCreation = process && process.env && process.env.FORCE_DLL_CREATION;
+  isToForceDLLCreation() {
+    return this.forceDLLCreationFlag;
+  }
 
-    return !IS_KIBANA_DISTRIBUTABLE || forceDllCreation;
+  mustRunDynamicDllPluginTasks() {
+    return !IS_KIBANA_DISTRIBUTABLE || this.isToForceDLLCreation();
   }
 
   async mapNormalModule(module) {
