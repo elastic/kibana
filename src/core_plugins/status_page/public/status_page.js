@@ -18,6 +18,7 @@
  */
 
 import 'ui/autoload/styles';
+import 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 import { destroyStatusPage, renderStatusPage } from './components/render';

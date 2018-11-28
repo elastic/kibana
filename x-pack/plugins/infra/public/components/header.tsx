@@ -10,35 +10,43 @@ import {
   EuiHeaderBreadcrumbs,
   EuiHeaderSection,
 } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
 
 interface HeaderProps {
   breadcrumbs?: EuiBreadcrumbDefinition[];
   appendSections?: React.ReactNode;
+  intl: InjectedIntl;
 }
 
-export class Header extends React.PureComponent<HeaderProps> {
-  private staticBreadcrumbs = [
-    {
-      href: '#/',
-      text: 'Infrastructure',
-    },
-  ];
+export const Header = injectI18n(
+  class extends React.PureComponent<HeaderProps> {
+    public static displayName = 'Header';
 
-  public render() {
-    const { breadcrumbs = [], appendSections = null } = this.props;
+    public render() {
+      const { breadcrumbs = [], appendSections = null, intl } = this.props;
+      const staticBreadcrumbs = [
+        {
+          href: '#/',
+          text: intl.formatMessage({
+            id: 'xpack.infra.header.infrastructureTitle',
+            defaultMessage: 'Infrastructure',
+          }),
+        },
+      ];
 
-    return (
-      <HeaderWrapper>
-        <EuiHeaderSection>
-          <EuiHeaderBreadcrumbs breadcrumbs={[...this.staticBreadcrumbs, ...breadcrumbs]} />
-        </EuiHeaderSection>
-        {appendSections}
-      </HeaderWrapper>
-    );
+      return (
+        <HeaderWrapper>
+          <EuiHeaderSection>
+            <EuiHeaderBreadcrumbs breadcrumbs={[...staticBreadcrumbs, ...breadcrumbs]} />
+          </EuiHeaderSection>
+          {appendSections}
+        </HeaderWrapper>
+      );
+    }
   }
-}
+);
 
 const HeaderWrapper = styled(EuiHeader)`
   height: 29px;

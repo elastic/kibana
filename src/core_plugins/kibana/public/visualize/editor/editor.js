@@ -128,18 +128,6 @@ function VisEditor(
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
 
-  // adds top level search source to the stack to which global filters are applied
-  const getTopLevelSearchSource = (searchSource) => {
-    if (searchSource.getParent()) return getTopLevelSearchSource(searchSource.getParent());
-    return searchSource;
-  };
-
-  const topLevelSearchSource =  getTopLevelSearchSource(searchSource);
-  const globalFiltersSearchSource = searchSource.create();
-  globalFiltersSearchSource.setField('index', searchSource.getField('index'));
-  topLevelSearchSource.setParent(globalFiltersSearchSource);
-
-
   $scope.vis = vis;
 
   const $appStatus = this.appStatus = {
@@ -338,10 +326,9 @@ function VisEditor(
     // update the searchSource when query updates
     $scope.fetch = function () {
       $state.save();
-      const globalFilters = queryFilter.getGlobalFilters();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
-      globalFiltersSearchSource.setField('filter', globalFilters);
+      $scope.globalFilters = queryFilter.getGlobalFilters();
       $scope.vis.forceReload();
     };
 
@@ -436,6 +423,7 @@ function VisEditor(
     const searchSourceGrandparent = searchSourceParent.getParent();
 
     delete savedVis.savedSearchId;
+    delete vis.savedSearchId;
     searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
 
     $state.query = searchSourceParent.getField('query');

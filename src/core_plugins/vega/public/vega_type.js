@@ -20,7 +20,6 @@
 import { i18n }  from '@kbn/i18n';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 import { Status } from 'ui/vis/update_status';
 import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
@@ -49,7 +48,6 @@ VisTypesRegistryProvider.register((Private) => {
       defaultMessage: 'Create custom visualizations using Vega and Vega-Lite',
     }),
     icon: 'visVega',
-    category: CATEGORY.OTHER,
     visConfig: { defaults: { spec: defaultSpec } },
     editorConfig: {
       optionsTemplate: vegaEditorTemplate,
@@ -65,7 +63,7 @@ VisTypesRegistryProvider.register((Private) => {
       showQueryBar: true,
       showFilterBar: true,
     },
-    stage: 'lab',
+    stage: 'experimental',
     feedbackMessage: defaultFeedbackMessage,
   });
 });

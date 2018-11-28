@@ -259,7 +259,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('Set the 1st filter value');
         await PageObjects.visualize.setFilterAggregationValue('geo.dest:"US"');
         log.debug('Toggle previous editor');
-        await PageObjects.visualize.toggleAggegationEditor(2);
+        await PageObjects.visualize.toggleAggregationEditor(2);
         log.debug('Add a new series');
         await PageObjects.visualize.clickAddBucket();
         log.debug('select bucket Split Slices');
@@ -272,6 +272,78 @@ export default function ({ getService, getPageObjects }) {
         const legends = await PageObjects.visualize.getLegendEntries();
         const expectedLegends = ['geo.dest:"US"', 'geo.dest:"UX"'];
         expect(legends).to.eql(expectedLegends);
+      });
+    });
+
+    describe('split chart', () => {
+      before(async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickPieChart();
+        await PageObjects.visualize.clickNewSearch();
+        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Chart');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('machine.os.raw');
+        await PageObjects.visualize.toggleAggregationEditor(2);
+        log.debug('Add a new series');
+        await PageObjects.visualize.clickAddBucket();
+        log.debug('select bucket Split Slices');
+        await PageObjects.visualize.clickBucket('Split Slices');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('geo.src');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.visualize.waitForVisualization();
+      });
+
+      it ('shows correct split chart', async () => {
+        const expectedTableData =  [
+          [ 'win 8', '2,904', 'CN', '560' ],
+          [ 'win 8', '2,904', 'IN', '489' ],
+          [ 'win 8', '2,904', 'US', '223' ],
+          [ 'win 8', '2,904', 'ID', '100' ],
+          [ 'win 8', '2,904', 'BR', '89' ],
+          [ 'win xp', '2,858', 'CN', '526' ],
+          [ 'win xp', '2,858', 'IN', '467' ],
+          [ 'win xp', '2,858', 'US', '250' ],
+          [ 'win xp', '2,858', 'ID', '98' ],
+          [ 'win xp', '2,858', 'BR', '84' ],
+          [ 'win 7', '2,814', 'CN', '537' ],
+          [ 'win 7', '2,814', 'IN', '460' ],
+          [ 'win 7', '2,814', 'US', '260' ],
+          [ 'win 7', '2,814', 'ID', '102' ],
+          [ 'win 7', '2,814', 'BR', '74' ],
+          [ 'ios', '2,784', 'IN', '494' ],
+          [ 'ios', '2,784', 'CN', '478' ],
+          [ 'ios', '2,784', 'US', '222' ],
+          [ 'ios', '2,784', 'ID', '96' ],
+          [ 'ios', '2,784', 'BR', '84' ],
+          [ 'osx', '1,322', 'IN', '242' ],
+          [ 'osx', '1,322', 'CN', '228' ],
+          [ 'osx', '1,322', 'US', '130' ],
+          [ 'osx', '1,322', 'ID', '56' ],
+          [ 'osx', '1,322', 'BR', '30' ]
+        ];
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
+        const data =  await PageObjects.visualize.getInspectorTableData();
+        await PageObjects.visualize.closeInspector();
+        log.debug(data);
+        expect(data).to.eql(expectedTableData);
+      });
+
+      it ('correctly applies filter', async () => {
+        const expectedTableData = [[ 'win 8', '560', 'CN', '560' ]];
+        await PageObjects.visualize.filterLegend('CN');
+        await PageObjects.visualize.applyFilters();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.openInspector();
+        await PageObjects.visualize.setInspectorTablePageSize(50);
+        const data =  await PageObjects.visualize.getInspectorTableData();
+        await PageObjects.visualize.closeInspector();
+        log.debug(data);
+        expect(data).to.eql(expectedTableData);
       });
     });
   });
