@@ -6,7 +6,7 @@ Internet Explorer has URL length restrictions, and some wiki and markup parsers 
 
 The short URLs enabled by this API are designed to make sharing Kibana URLs easier.
 
-NOTE: This endpoint is not accessible via the Console plugin in Kibana.
+NOTE: You cannot access these endpoints via the Console in Kibana.
 
 * <<url-shortening-api-api-shorten-url>>
 
