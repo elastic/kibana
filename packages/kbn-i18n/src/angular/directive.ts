@@ -58,21 +58,14 @@ function setHtmlContent(
   $sanitize: (html: string) => string,
   i18n: I18nServiceType
 ) {
+  const translatedMessage = i18n($scope.id, {
+    values: $scope.values,
+    defaultMessage: $scope.defaultMessage,
+  });
+
   if ($scope.bindValuesAsHtml) {
-    $element.html(
-      $sanitize(
-        i18n($scope.id, {
-          values: $scope.values,
-          defaultMessage: $scope.defaultMessage,
-        })
-      )
-    );
+    $element.html($sanitize(translatedMessage));
   } else {
-    $element.text(
-      i18n($scope.id, {
-        values: $scope.values,
-        defaultMessage: $scope.defaultMessage,
-      })
-    );
+    $element.text(translatedMessage);
   }
 }
