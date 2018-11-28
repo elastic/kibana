@@ -7,27 +7,27 @@ upgrade-checkup {
   background-color: $euiColorLightestShade;
 }
 
-.upgrade-checkup__deprecation-cell {
-  border: 1px solid #D9D9D9;
-  padding: 10px;
+// .upgrade-checkup__deprecation-cell {
+//   border: 1px solid #D9D9D9;
+//   padding: 10px;
 
-  & + & {
-    border-top: 0;
-    border-radius: 0
-  }
+//   & + & {
+//     border-top: 0;
+//     border-radius: 0
+//   }
 
-  &:first-child {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-  }
-  &:last-child {
-    @include euiBottomShadowSmall;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    margin-bottom: 10px;
-  }
-}
+//   &:first-child {
+//     border-top-left-radius: 4px;
+//     border-top-right-radius: 4px;
+//   }
+//   &:last-child {
+//     @include euiBottomShadowSmall;
+//     border-bottom-left-radius: 4px;
+//     border-bottom-right-radius: 4px;
+//     margin-bottom: 10px;
+//   }
+// }
 
-.upgrade-checkup__index-deprecation-header {
-  margin-top: 10px;
-}
+// .upgrade-checkup__index-deprecation-header {
+//   margin-top: 10px;
+// }

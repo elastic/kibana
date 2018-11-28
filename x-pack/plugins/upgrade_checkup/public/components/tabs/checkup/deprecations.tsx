@@ -32,11 +32,6 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
 }) => {
   const items = [];
 
-  const action = ACTION_MAP[deprecation.level];
-  if (action) {
-    items.push({ body: action });
-  }
-
   if (deprecation.details) {
     items.push({ title: 'Details', body: deprecation.details });
   }
@@ -71,11 +66,6 @@ interface IndexDeprecationProps {
  */
 const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
   const items = [];
-
-  const action = ACTION_MAP[deprecation.level];
-  if (action) {
-    items.push({ body: action });
-  }
 
   // Only show the last uiButton which should be the documentation link.
   const uiButtons = [deprecation.uiButtons[deprecation.uiButtons.length - 1]];
@@ -167,7 +157,6 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
               <EuiSpacer />
               <DeprecationList deprecations={groups[groupName]} currentGroupBy={currentGroupBy} />
             </EuiAccordion>,
-            // <EuiSpacer key={`spc-${groupName}`} />,
           ])}
       </div>
     </div>
