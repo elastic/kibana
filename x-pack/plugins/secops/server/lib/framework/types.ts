@@ -84,12 +84,6 @@ export interface FrameworkIndexPatternsService {
   }): Promise<FrameworkIndexFieldDescriptor[]>;
 }
 
-export interface FrameworkIndexPatternsService {
-  getFieldsForWildcard(options: {
-    pattern: string | string[];
-  }): Promise<FrameworkIndexFieldDescriptor[]>;
-}
-
 interface Alias {
   settings: {
     index: {
