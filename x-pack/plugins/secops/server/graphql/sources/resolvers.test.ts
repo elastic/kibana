@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
+import { omit } from 'lodash/fp';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { SourceStatus, SourceStatusAdapter } from '../../lib/source_status';
 import { Sources, SourcesAdapter } from '../../lib/sources';
@@ -63,8 +64,6 @@ describe('Test Source Resolvers', () => {
       {} as GraphQLResolveInfo
     );
     expect(mockSourcesAdapter.getAll).toHaveBeenCalled();
-    const expectedData = Object.assign({}, mockSourceData);
-    delete expectedData.status;
-    expect(data).toEqual(expectedData);
+    expect(data).toEqual(omit('status', mockSourceData));
   });
 });

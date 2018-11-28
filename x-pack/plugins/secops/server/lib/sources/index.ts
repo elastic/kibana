@@ -33,7 +33,7 @@ export interface SourceConfigurations {
 }
 
 export interface AliasConfiguration {
-  // metricAlias: string;
+  metricAlias: string;
   logAlias: string;
   auditbeatAlias: string;
 }
