@@ -16,6 +16,7 @@ export const getAPMIndexPattern = memoize(async () => {
     query: {
       type: 'index-pattern',
       search: `"${apmIndexPatternTitle}"`,
+      search_fields: 'title',
       per_page: 200
     }
   });
