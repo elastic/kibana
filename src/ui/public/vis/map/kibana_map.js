@@ -25,6 +25,10 @@ import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
+import {
+  EuiSpacer,
+  EuiCheckbox
+} from '@elastic/eui';
 
 function makeFitControl(fitContainer, kibanaMap) {
 
@@ -96,6 +100,71 @@ function makeLegendControl(container, kibanaMap, position) {
 
   return new LegendControl(container, kibanaMap, position);
 }
+
+const makeZoomWarningMsg = (function () {
+  let disableZoomMsg = false;
+  const setZoomMsg = boolDisableMsg => disableZoomMsg = boolDisableMsg;
+
+  class ZoomWarning extends React.Component {
+
+    constructor(props) {
+      super(props);
+      this.state = {
+        checked: false
+      };
+    }
+
+    render() {
+      return (
+        <div>
+          <p>
+            You&apos;ve reached the maximum number of zoom levels. To zoom
+            all the way in, upgrade to the&nbsp;
+            {
+              <a href="https://www.elastic.co/downloads/kibana">
+                {`default distribution `}
+              </a>
+            }
+            of Elasticsearch and Kibana. You&apos;ll get access to additional
+            zoom levels for free through the&nbsp;
+            {
+              <a href="https://www.elastic.co/elastic-maps-service">
+                {`Elastic Maps Service`}
+              </a>
+            }
+            . Or, you can configure a custom WMS compliant server.
+          </p>
+          <EuiSpacer size="xs"/>
+          <EuiCheckbox
+            id={'supress-zoom-warnings'}
+            label="Suppress warnings"
+            checked={this.state.checked}
+            onChange={({ target }) => {
+              this.setState({
+                checked: target.checked
+              }, () => this.props.onChange(this.state.checked));
+            }}
+          />
+        </div>
+      );
+    }
+  }
+
+  const zoomToast = ({
+    title: 'Max Zoom Warning',
+    text: <ZoomWarning onChange={setZoomMsg}/>
+  });
+
+  return (getZoomLevel, getMaxZoomLevel) => {
+    return () => {
+      const zoomLevel = getZoomLevel();
+      const maxMapZoom = getMaxZoomLevel();
+      if (!disableZoomMsg && zoomLevel === maxMapZoom) {
+        toastNotifications.addWarning(zoomToast);
+      }
+    };
+  };
+}());
 
 /**
  * Collects map functionality required for Kibana.
@@ -347,11 +416,11 @@ export class KibanaMap extends EventEmitter {
     }
   }
 
-  getZoomLevel() {
+  getZoomLevel = () => {
     return this._leafletMap.getZoom();
   }
 
-  getMaxZoomLevel() {
+  getMaxZoomLevel = () => {
     return this._leafletMap.getMaxZoom();
   }
 
@@ -485,46 +554,14 @@ export class KibanaMap extends EventEmitter {
     this._updateLegend();
   }
 
-  _addMaxZoomMessage = (() => {
-    const maxZoomToast = {
-      title: 'Max Zoom Warning',
-      text: (
-        <div>
-          <p>
-            You&apos;ve reached the maximum number of zoom levels. To zoom
-            all the way in, upgrade to the&nbsp;
-            {
-              <a href="https://www.elastic.co/downloads/kibana">
-                {`default distribution `}
-              </a>
-            }
-            of Elasticsearch and Kibana. You&apos;ll get access to additional
-            zoom levels for free through the&nbsp;
-            {
-              <a href="https://www.elastic.co/elastic-maps-service">
-                {`Elastic Maps Service`}
-              </a>
-            }
-            . Or, you can configure a custom WMS compliant server.
-          </p>
-        </div>
-      )
-    };
-    const zoomMessage = () => {
-      const zoomLevel = this.getZoomLevel();
-      const maxMapZoom = this._leafletMap.getMaxZoom();
-      if (zoomLevel === maxMapZoom) {
-        toastNotifications.addWarning(maxZoomToast);
-      }
-    };
+  _addMaxZoomMessage = layer => {
+    const zoomWarningMsg = makeZoomWarningMsg(this.getZoomLevel, this.getMaxZoomLevel);
 
-    return layer => {
-      this._leafletMap.on('zoomend', zoomMessage);
-      layer.on('remove', () => {
-        this._leafletMap.off('zoomend', zoomMessage);
-      });
-    };
-  })();
+    this._leafletMap.on('zoomend', zoomWarningMsg);
+    layer.on('remove', () => {
+      this._leafletMap.off('zoomend', zoomWarningMsg);
+    });
+  }
 
   setLegendPosition(position) {
     if (this._legendPosition === position) {
