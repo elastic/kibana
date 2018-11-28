@@ -23,7 +23,6 @@
     "@types/intl-relativeformat": "^2.1.0",
     "@types/json5": "^0.0.30",
     "@types/react-intl": "^2.3.11",
-    "cross-env": "^5.2.0",
     "del": "^3.0.0",
     "getopts": "^2.2.3",
     "supports-color": "^5.5.0",
