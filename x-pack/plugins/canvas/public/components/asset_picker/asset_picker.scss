@@ -1,7 +1,5 @@
 .canvasAssetPicker {
   @include euiScrollBar;
-  @include euiOverflowShadowBottom;
-  @include euiOverflowShadowTop;
   max-height: $euiSizeXXL * 3;
   overflow-x: hidden;
   overflow-y: auto;
