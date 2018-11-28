@@ -13,7 +13,7 @@ describe('validateInterval', () => {
     validationFunction = validateInterval.validationFunction;
   });
 
-  it('passes valid @every syntax', () => {
+  it('allows valid @every syntax', () => {
     expect(validationFunction(undefined, '@every 5s')).toBe(true);
   });
 
@@ -25,7 +25,7 @@ describe('validateInterval', () => {
     expect(validationFunction(undefined, '@every 25m')).toBe(true);
   });
 
-  it('checks for cron syntax', () => {
+  it('allows cron syntax', () => {
     expect(validationFunction(undefined, '* * *')).toBe(true);
   });
 
