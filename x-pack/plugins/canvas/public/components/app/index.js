@@ -44,11 +44,11 @@ const types = {
 
 const mapDispatchToProps = dispatch => ({
   // TODO: the correct socket path should come from upstream, using the constant here is not ideal
-  setAppReady: () => async () => {
+  setAppReady: basePath => async () => {
     try {
       // initialize the socket and interpreter
       loadPrivateBrowserFunctions();
-      await populateBrowserRegistries(types);
+      await populateBrowserRegistries(types, basePath);
 
       // set app state to ready
       dispatch(appReady());
