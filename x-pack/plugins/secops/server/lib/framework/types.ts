@@ -90,11 +90,19 @@ export interface FrameworkIndexPatternsService {
   }): Promise<FrameworkIndexFieldDescriptor[]>;
 }
 
+interface Alias {
+  settings: {
+    index: {
+      uuid: string;
+    };
+  };
+}
+
 export interface DatabaseGetIndicesResponse {
   [indexName: string]: {
     aliases: {
       // tslint:disable-next-line:no-any
-      [aliasName: string]: any;
+      [aliasName: string]: Alias;
     };
   };
 }
