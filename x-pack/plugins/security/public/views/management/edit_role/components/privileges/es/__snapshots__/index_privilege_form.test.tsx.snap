@@ -134,6 +134,10 @@ exports[`it renders without crashing 1`] = `
                       "isGroupLabelOption": false,
                       "label": "read_cross_cluster",
                     },
+                    Object {
+                      "isGroupLabelOption": false,
+                      "label": "manage_follow_index",
+                    },
                   ]
                 }
                 selectedOptions={Array []}
