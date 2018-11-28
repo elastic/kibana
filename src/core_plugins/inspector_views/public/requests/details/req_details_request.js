@@ -39,7 +39,7 @@ function RequestDetailsRequest({ request }) {
         className="insRequestDetailsRequest__devToolButton"
         href={chrome.addBasePath(`/app/kibana#/dev_tools/console?search_request=${searchRequest}&index=${index}`)}
       >
-        Copy to Dev Tools
+        Copy request to Console
       </EuiButtonEmpty>
     );
   }
