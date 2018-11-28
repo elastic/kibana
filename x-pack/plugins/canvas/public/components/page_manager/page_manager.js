@@ -26,7 +26,7 @@ export class PageManager extends React.PureComponent {
     selectedPage: PropTypes.string,
     deleteId: PropTypes.string,
     setDeleteId: PropTypes.func.isRequired,
-    workpadStyle: PropTypes.string,
+    workpadCSS: PropTypes.string,
   };
 
   state = {
@@ -159,7 +159,7 @@ export class PageManager extends React.PureComponent {
   };
 
   render() {
-    const { pages, addPage, deleteId, isWriteable, workpadStyle } = this.props;
+    const { pages, addPage, deleteId, isWriteable, workpadCSS } = this.props;
     const { showTrayPop } = this.state;
 
     return (
@@ -177,7 +177,7 @@ export class PageManager extends React.PureComponent {
                     {...provided.droppableProps}
                   >
                     {Style.it(
-                      workpadStyle,
+                      workpadCSS,
                       <div
                         className={`canvasPageManager__pageList ${
                           showTrayPop ? 'canvasPageManager--trayPop' : ''

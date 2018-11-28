@@ -77,7 +77,7 @@ export const Workpad = props => {
 
             // NOTE: the data-shared-* attributes here are used for reporting
             return Style.it(
-              workpad.style,
+              workpad.css,
               <div
                 className={`canvasWorkpad ${isFullscreen ? 'fullscreen' : ''}`}
                 style={fsStyle}
@@ -130,5 +130,5 @@ Workpad.propTypes = {
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   fetchAllRenderables: PropTypes.func.isRequired,
-  style: PropTypes.object,
+  css: PropTypes.object,
 };

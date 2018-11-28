@@ -12,14 +12,14 @@ import { getSelectedPage, getWorkpad, getPages, isWriteable } from '../../state/
 import { PageManager as Component } from './page_manager';
 
 const mapStateToProps = state => {
-  const { id, style } = getWorkpad(state);
+  const { id, css } = getWorkpad(state);
 
   return {
     isWriteable: isWriteable(state) && canUserWrite(state),
     pages: getPages(state),
     selectedPage: getSelectedPage(state),
     workpadId: id,
-    workpadStyle: style,
+    workpadCSS: css,
   };
 };
 

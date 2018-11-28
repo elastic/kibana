@@ -27,19 +27,19 @@ export class WorkpadConfig extends PureComponent {
   static propTypes = {
     size: PropTypes.object.isRequired,
     name: PropTypes.string.isRequired,
-    style: PropTypes.string,
+    css: PropTypes.string,
     setSize: PropTypes.func.isRequired,
     setName: PropTypes.func.isRequired,
-    setWorkpadStyle: PropTypes.func.isRequired,
+    setWorkpadCSS: PropTypes.func.isRequired,
   };
 
   state = {
-    style: this.props.style,
+    css: this.props.css,
   };
 
   render() {
-    const { size, name, setSize, setName, setWorkpadStyle } = this.props;
-    const { style } = this.state;
+    const { size, name, setSize, setName, setWorkpadCSS } = this.props;
+    const { css } = this.state;
     const rotate = () => setSize({ width: size.height, height: size.width });
 
     const badges = [
@@ -141,16 +141,16 @@ export class WorkpadConfig extends PureComponent {
           <div className="canvasArg__content">
             <EuiTextArea
               aria-label="Apply styles to all pages in this workpad"
-              value={style}
-              onChange={e => this.setState({ style: e.target.value })}
+              value={css}
+              onChange={e => this.setState({ css: e.target.value })}
               rows={10}
             />
             <EuiSpacer size="s" />
             <EuiButton
               size="s"
               onClick={() =>
-                setWorkpadStyle(
-                  style ||
+                setWorkpadCSS(
+                  css ||
                     `.canvasPage {
 
 }`

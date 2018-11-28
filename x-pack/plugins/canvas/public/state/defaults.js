@@ -29,7 +29,7 @@ export const getDefaultPage = () => {
   return {
     id: getId('page'),
     style: {
-      background: '',
+      background: '#FFF',
     },
     transition: {},
     elements: [],
@@ -43,7 +43,7 @@ export const getDefaultWorkpad = () => {
     id: getId('workpad'),
     width: 1080,
     height: 720,
-    style: '',
+    css: '',
     page: 0,
     pages: [page],
     colors: [
