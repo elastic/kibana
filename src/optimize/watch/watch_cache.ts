@@ -109,7 +109,7 @@ export class WatchCache {
 
     for (const filePath of filePaths) {
       try {
-        shaHash.update(await readAsync(filePath), 'utf8');
+        shaHash.update(await readAsync(filePath, 'utf8'), 'utf8');
       } catch (e) {
         /* no-op */
       }
