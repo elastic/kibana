@@ -25,8 +25,10 @@ interface I18nScope extends IScope {
   values?: Record<string, any>;
   defaultMessage: string;
   id: string;
-  bindValuesAsHtml: boolean;
 }
+
+const HTML_KEY_PREFIX = 'html_';
+const PLACEHOLDER_SEPARATOR = '@I18N@';
 
 export function i18nDirective(
   i18n: I18nServiceType,
@@ -38,34 +40,70 @@ export function i18nDirective(
       id: '@i18nId',
       defaultMessage: '@i18nDefaultMessage',
       values: '<?i18nValues',
-      bindValuesAsHtml: '=i18nBindValuesAsHtml',
     },
     link($scope, $element) {
       if ($scope.values) {
         $scope.$watchCollection('values', () => {
-          setHtmlContent($element, $scope, $sanitize, i18n);
+          setContent($element, $scope, $sanitize, i18n);
         });
       } else {
-        setHtmlContent($element, $scope, $sanitize, i18n);
+        setContent($element, $scope, $sanitize, i18n);
       }
     },
   };
 }
 
-function setHtmlContent(
+function setContent(
   $element: IRootElementService,
   $scope: I18nScope,
   $sanitize: (html: string) => string,
   i18n: I18nServiceType
 ) {
-  const translatedMessage = i18n($scope.id, {
-    values: $scope.values,
+  const originalValues = $scope.values;
+  const valuesWithPlaceholders = {} as Record<string, any>;
+  let hasValuesWithPlaceholders = false;
+
+  // If we have values with keys starts with HTML_KEY_PREFIX we should replace
+  // them with special placeholders that later one will be inserted as HTML
+  // into the DOM, the rest of the content will be treated as text. We don't
+  // sanitize values at this stage as some of the values can be excluded from
+  // the translated string (e.g. not used by ICU conditional statements).
+  if (originalValues) {
+    for (const [key, value] of Object.entries(originalValues)) {
+      if (key.startsWith(HTML_KEY_PREFIX)) {
+        valuesWithPlaceholders[
+          key.slice(HTML_KEY_PREFIX.length)
+        ] = `${PLACEHOLDER_SEPARATOR}${key}${PLACEHOLDER_SEPARATOR}`;
+
+        hasValuesWithPlaceholders = true;
+      } else {
+        valuesWithPlaceholders[key] = value;
+      }
+    }
+  }
+
+  const label = i18n($scope.id, {
+    values: valuesWithPlaceholders,
     defaultMessage: $scope.defaultMessage,
   });
 
-  if ($scope.bindValuesAsHtml) {
-    $element.html($sanitize(translatedMessage));
+  // If there are no placeholders to replace treat everything as text, otherwise
+  // insert label piece by piece replacing every placeholder with corresponding
+  // sanitized HTML content.
+  if (!hasValuesWithPlaceholders) {
+    $element.text(label);
   } else {
-    $element.text(translatedMessage);
+    $element.empty();
+    for (const contentOrPlaceholder of label.split(PLACEHOLDER_SEPARATOR)) {
+      if (!contentOrPlaceholder) {
+        continue;
+      }
+
+      $element.append(
+        originalValues!.hasOwnProperty(contentOrPlaceholder)
+          ? $sanitize(originalValues![contentOrPlaceholder])
+          : document.createTextNode(contentOrPlaceholder)
+      );
+    }
   }
 }

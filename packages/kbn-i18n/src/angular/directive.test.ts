@@ -89,8 +89,7 @@ describe('i18nDirective', () => {
       `<div
         i18n-id="id"
         i18n-default-message="Default message, {value}"
-        i18n-values="{ value: '<div ng-click=&quot;dangerousAction()&quot;></div>' }"
-        i18n-bind-values-as-html="true"
+        i18n-values="{ html_value: '<div ng-click=&quot;dangerousAction()&quot;></div>' }"
        />`
     );
 
@@ -104,9 +103,8 @@ describe('i18nDirective', () => {
     const element = angular.element(
       `<div
         i18n-id="id"
-        i18n-default-message="Default {one} onclick=alert(1) {two} message"
-        i18n-values="{ one: '<span', two: '>Press</span>' }"
-        i18n-bind-values-as-html="true"
+        i18n-default-message="Default {value} message"
+        i18n-values="{ html_value: '<span onclick=alert(1)>Press</span>' }"
        />`
     );
 
@@ -121,8 +119,7 @@ describe('i18nDirective', () => {
       `<div
         i18n-id="id"
         i18n-default-message="Default {value} message"
-        i18n-values="{ value: '<span onmouseover=&quot;alert(1)&quot;>Press</span>' }"
-        i18n-bind-values-as-html="true"
+        i18n-values="{ html_value: '<span onmouseover=&quot;alert(1)&quot;>Press</span>' }"
        />`
     );
 
@@ -132,7 +129,7 @@ describe('i18nDirective', () => {
     expect(element[0]).toMatchSnapshot();
   });
 
-  test(`doesn't render html in text-only message`, () => {
+  test(`doesn't render html in text-only value`, () => {
     const element = angular.element(
       `<div
         i18n-id="id"
