@@ -6,7 +6,7 @@
 
 import { AlertService } from './alert_service';
 
-describe('Alerting Service', () => {
+describe('Alerting Service', async () => {
   const mockTaskManager = { registerTaskDefinitions: jest.fn() };
   const mockServer = {
     start: jest.fn(),
@@ -18,7 +18,7 @@ describe('Alerting Service', () => {
   const alertService = new AlertService(mockKbnServer);
   expect(mockTaskManager.registerTaskDefinitions.mock.calls.length).toBe(0);
 
-  it('should forward registration on to task manager', () => {
+  it('should forward registration on to task manager', async () => {
     const testType = 'my-test-template';
     alertService.registerAlertTemplate({
       id: testType,
@@ -31,7 +31,21 @@ describe('Alerting Service', () => {
     );
   });
 
-  it('should have a register function', () => {
+  it('should have a register function', async () => {
+    const alertExport = await alertService.start();
     expect(typeof alertService.registerAlertTemplate).toEqual('function');
+    expect(typeof alertExport.registerAlertTemplate).toEqual('function');
+  });
+
+  it('should have a createAlert function', async () => {
+    const alertExport = await alertService.start();
+    expect(typeof alertService.createAlert).toEqual('function');
+    expect(typeof alertExport.createAlert).toEqual('function');
+  });
+
+  it('should have a find function', async () => {
+    const alertExport = await alertService.start();
+    expect(typeof alertService.find).toEqual('function');
+    expect(typeof alertExport.find).toEqual('function');
   });
 });

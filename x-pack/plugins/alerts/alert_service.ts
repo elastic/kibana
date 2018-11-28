@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { RunContext } from '../task_manager/task';
+import { RunContext, TaskDefinition, TaskDictionary } from '../task_manager/task';
 import { TaskManager } from '../task_manager/task_manager';
 
 interface CheckResult {
@@ -19,7 +19,7 @@ interface CheckResult {
 const CheckResultType = Joi.object({
   notify: Joi.boolean().optional(),
   history: Joi.boolean().optional(),
-  state: Joi.boolean().optional(),
+  state: Joi.object().optional(),
 });
 
 interface TemplateCheckContext {
@@ -59,12 +59,40 @@ export class AlertService {
         return await this.getAlerts();
       },
     });
+    server.route({
+      method: 'POST',
+      path: '/api/alerts/{alertId}',
+      handler: async () => {
+        return 'failed';
+      },
+    });
     this.taskManager = server.taskManager;
     this.kbnServer.afterPluginsInit(this.initAfterPlugins.bind(this));
   }
 
   public getTemplates(): string[] {
     return Object.keys(this.templatesMap);
+  }
+
+  public find({ templateId }: any) {
+    return this.taskManager.fetch({
+      query: {
+        bool: {
+          must: [
+            {
+              match: {
+                'task.taskType': templateId,
+              },
+            },
+            {
+              match: {
+                'task.scope': 'alert',
+              },
+            },
+          ],
+        },
+      },
+    });
   }
 
   public async getAlerts() {
@@ -81,8 +109,9 @@ export class AlertService {
 
   public registerAlertTemplate(template: AlertTemplate) {
     if (!this.templatesMap.has(template.id)) {
+      const info = (msg: string) => this.kbnServer.server.log(['info', 'alert-service'], msg);
       this.templatesMap.set(template.id, template);
-      const defs = {};
+      const defs: TaskDictionary<TaskDefinition> = {};
       defs[`${template.id}`] = {
         type: template.id,
         title: template.id,
@@ -92,23 +121,26 @@ export class AlertService {
         static: [
           {
             id: 'someTaskId',
-            type: template.id,
+            taskType: 'to-be-overriden',
             scope: 'alert',
+            interval: '1m',
+            params: {},
           },
         ],
         createTaskRunner(context: RunContext) {
           return {
             async run() {
-              return new Promise((resolve, reject) => {
+              return new Promise<any>((resolve, reject) => {
                 try {
-                  const results = template.check({
-                    state: context.taskInstance.state,
-                    params: context.taskInstance.params,
-                  });
+                  const results =
+                    template.check({
+                      state: context.taskInstance.state.state || {},
+                      params: context.taskInstance.params,
+                    }) || {};
 
-                  CheckResultType.validate(results);
+                  const validationResults = CheckResultType.validate(results);
 
-                  if (results.notify) {
+                  if (!validationResults.error && results.notify && template.notify) {
                     template.notify({
                       checkResults: results,
                       state: context.taskInstance.state,
@@ -116,8 +148,13 @@ export class AlertService {
                     });
                   }
 
-                  resolve();
+                  resolve({
+                    state: {
+                      ...results,
+                    },
+                  });
                 } catch (e) {
+                  info(e);
                   reject({
                     alert: template,
                     exception: e,
@@ -138,10 +175,10 @@ export class AlertService {
     }
   }
 
-  public async registerAlert(templateId: string, params: any): Promise<string> {
+  public async createAlert(templateId: string, id: string, params: any) {
     const task = await this.taskManager.schedule({
-      id: templateId,
-      taskType: 'alert:' + templateId,
+      id,
+      taskType: templateId,
       scope: 'alert',
       params,
     });
@@ -151,6 +188,8 @@ export class AlertService {
   public async start() {
     return {
       registerAlertTemplate: this.registerAlertTemplate,
+      createAlert: this.createAlert,
+      find: this.find,
     };
   }
 
