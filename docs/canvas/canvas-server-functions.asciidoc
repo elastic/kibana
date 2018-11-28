@@ -3,7 +3,7 @@
 
 beta[]These functions can only execute on the server. This may be for performance
 or security reasons, or because the function uses an API only available on the 
-{kib} server. If the expression is executing in the browser it will transfer to 
+{kib} server. If the expression is executing in the browser, it will transfer to 
 the server when it hits one of these functions.
 
 A * denotes a required argument.
@@ -17,5 +17,107 @@ A mock data set that includes project CI times with usernames, countries, and ru
 - *Returns:* datatable
 - *Arguments*
 +
-_Unnamed_::  (string) The name of the demo data set to use.  The defaults is` ci`.
+_Unnamed_::  (string) The name of the demo data set to use.  The defaults is `ci`.
 Alias:  type
+
+[float]
+=== esdocs
+
+Queries {es} and gets back raw documents. Specify the fields you want, 
+especially if you are asking for a lot of rows.
+
+- *Accepts:* filter
+- *Returns:* datatable
+- *Arguments*
++
+index:: (string) Specify an index pattern, for example, "logstash-*".  The defaults is `_all`.
++
+_Unnamed_::  (string) A Lucene query string.  The default is `_index:.kibana`. Aliases: query, q
++
+sort:: (string) Sort directions as "field, direction", for example, "@timestamp, desc" or "bytes, asc".
++
+fields:: (string) Comma separated list of fields. Fewer fields will perform better.
++
+metaFields:: (string) Comma separated list of meta fields, for example, "_index,_type".
++
+count:: (number) The number of docs to pull back. Smaller numbers perform better. 
+The default is `100`.
+
+[float]
+=== escount
+
+Queries {es} for a count of the number of hits matching a query.
+
+- *Accepts:* filter
+- *Returns:* number
+- *Arguments*
++
+index:: (string) Specify an index pattern, for example, "logstash-*".  The default is `_all`.
++
+_Unnamed_::	(string) A Lucene query string.  The default is `"-_index:.kibana"`. Alias: query, q
+
+[float]
+=== essql
+
+Specifies an {es} SQL.
+
+- *Accepts:* filter
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed*_:: 	(string) An SQL query. Aliases: query, q
++	
+count::	(number) The default is `1000`.
+
+[float]
+=== pointseries
+
+Turns a datatable into a point series model. Currently Canvas differentiates measure 
+from dimensions by looking for a TinyMath function. If you enter a TinyMath 
+expression in your argument, Canvas treats that argument as a measure. Otherwise, it 
+is a dimension. Dimensions are combined to create unique keys. Measures are 
+then deduplicated by those keys using the specified TinyMath function.
+
+- *Accepts:* datatable
+- *Returns:* pointseries
+- *Arguments*
++
+x::	(string) The values along the X-axis.
++
+y::	(string) The values along the Y-axis.
++
+color::	(string) An expression to use in determining the mark's color.
++
+size:: (string)	For elements that support it, the size of the marks.
++
+text:: (string) For use in charts that support it, the text to show in the mark.
+
+[float]
+=== server
+
+Forces the interpreter to return to the server.
+
+- *Accepts:* Anything or nothing
+- *Returns:* Depends on your input and arguments
++
+&nbsp;
+
+[float]
+=== timelion
+
+Uses Timelion to extract one or more time series from many sources.
+
+- *Accepts:* filter
+- *Returns:* datatable
+- *Arguments*
++
+_Unnamed_::	(string) A Timelion query. The default is `".es(*)"`. Aliases: query, q
++
+interval:: (string)	Bucket interval for the time series.  The default is `auto`.
++
+from:: (any) {es} date math string for the start of the time range.  The default is `now-1y`.
++
+to:: (any) {es} date math string for the end of the time range. The default is `now`.
++
+timezone:: (any) Time zone for the time range. The default is `UTC`.
+
