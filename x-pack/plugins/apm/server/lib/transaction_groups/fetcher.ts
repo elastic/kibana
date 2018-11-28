@@ -65,7 +65,7 @@ export function transactionGroupsFetcher(
               top_hits: {
                 size: 1,
                 sort: [
-                  { _score: 'desc' }, // sort by _score to increase the chance of a bucket with sampled:true is selected
+                  { _score: 'desc' }, // sort by _score to ensure that buckets with sampled:true ends up on top
                   { '@timestamp': { order: 'desc' } }
                 ]
               }
