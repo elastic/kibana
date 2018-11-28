@@ -17,9 +17,35 @@
  * under the License.
  */
 
-module.exports = {
-  rules: {
-    'require-license-header': require('./rules/require_license_header'),
-    'disallow-license-headers': require('./rules/disallow_license_headers'),
-  },
+const Lint = require('tslint');
+
+const FAILURE_STRING = 'This license header is not allowed in this file.';
+const RULE_NAME = 'disallow-license-header';
+
+exports.Rule = class extends Lint.Rules.AbstractRule {
+  apply(sourceFile) {
+    const [headerText] = this.getOptions().ruleArguments;
+
+    if (!headerText) {
+      throw new Error(`${RULE_NAME} requires a single argument containing the header text`);
+    }
+
+    if (!sourceFile.text.includes(headerText)) {
+      return [];
+    }
+
+    const start = sourceFile.text.indexOf(headerText);
+    const end = start + headerText.length;
+
+    return [
+      new Lint.RuleFailure(
+        sourceFile,
+        start,
+        end,
+        FAILURE_STRING,
+        RULE_NAME,
+        new Lint.Replacement(start, headerText.length, '')
+      )
+    ];
+  }
 };
