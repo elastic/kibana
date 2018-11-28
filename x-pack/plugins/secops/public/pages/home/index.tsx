@@ -14,24 +14,19 @@ import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
-import SplitPane from 'react-split-pane';
 import { LinkToPage } from '../../components/link_to';
 import {
   PageContainer,
   PageContent,
   PageHeader,
-  Pane1,
-  Pane1Header,
-  Pane1Style,
-  Pane2,
-  Pane2Style,
-  Pane2TimelineContainer,
+  Pane,
+  PaneHeader,
   PaneScrollContainer,
-  ResizerStyle,
   SubHeader,
   SubHeaderDatePicker,
 } from '../../components/page';
 import { DatePicker } from '../../components/page/date_picker';
+import { Flyout } from '../../components/page/flyout';
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { StatefulTimeline } from '../../components/timeline';
@@ -41,10 +36,13 @@ import { Hosts } from '../hosts';
 import { Network } from '../network';
 import { Overview } from '../overview';
 
-const maxTimelineWidth = 1125;
+const maxTimelineWidth = 760;
 
 export const HomePage = pure(() => (
   <PageContainer data-test-subj="pageContainer">
+    <Flyout>
+      <StatefulTimeline id="timeline" headers={headers} width={maxTimelineWidth} />
+    </Flyout>
     <PageHeader data-test-subj="pageHeader">
       <Navigation data-test-subj="navigation" />
     </PageHeader>
@@ -55,41 +53,21 @@ export const HomePage = pure(() => (
         </SubHeaderDatePicker>
         <EuiHorizontalRule margin="none" />
       </SubHeader>
-
-      <SplitPane
-        data-test-subj="splitPane"
-        split="vertical"
-        defaultSize="75%"
-        primary="second"
-        pane1Style={Pane1Style}
-        pane2Style={{
-          ...Pane2Style,
-          maxWidth: `${maxTimelineWidth}px`,
-        }}
-        resizerStyle={ResizerStyle}
-      >
-        <Pane1 data-test-subj="pane1">
-          <Pane1Header data-test-subj="pane1Header">
-            <EuiSearchBar onChange={noop} />
-          </Pane1Header>
-          <PaneScrollContainer data-test-subj="pane1ScrollContainer">
-            <Switch>
-              <Redirect from="/" exact={true} to="/overview" />
-              <Route path="/overview" component={Overview} />
-              <Route path="/hosts" component={Hosts} />
-              <Route path="/network" component={Network} />
-              <Route path="/link-to" component={LinkToPage} />
-              <Route component={NotFoundPage} />
-            </Switch>
-          </PaneScrollContainer>
-        </Pane1>
-
-        <Pane2 data-test-subj="pane2">
-          <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
-            <StatefulTimeline id="pane2-timeline" headers={headers} width={maxTimelineWidth} />
-          </Pane2TimelineContainer>
-        </Pane2>
-      </SplitPane>
+      <Pane data-test-subj="pane">
+        <PaneHeader data-test-subj="paneHeader">
+          <EuiSearchBar onChange={noop} />
+        </PaneHeader>
+        <PaneScrollContainer data-test-subj="pane1ScrollContainer">
+          <Switch>
+            <Redirect from="/" exact={true} to="/overview" />
+            <Route path="/overview" component={Overview} />
+            <Route path="/hosts" component={Hosts} />
+            <Route path="/network" component={Network} />
+            <Route path="/link-to" component={LinkToPage} />
+            <Route component={NotFoundPage} />
+          </Switch>
+        </PaneScrollContainer>
+      </Pane>
     </PageContent>
     <Footer />
   </PageContainer>

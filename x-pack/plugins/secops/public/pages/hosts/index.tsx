@@ -68,7 +68,7 @@ export const Hosts = connect()(
                     title="Events"
                   />
                 </VisualizationPlaceholder>
-                <Placeholders timelineId="pane2-timeline" count={8} myRoute="Hosts" />
+                <Placeholders timelineId="timeline" count={8} myRoute="Hosts" />
               </Pane1FlexContent>
             )}
           </EventsQuery>
@@ -98,7 +98,7 @@ const getEventsColumns = (dispatch: Dispatch) => [
           onClick={() => {
             dispatch(
               timelineActions.addProvider({
-                id: 'pane2-timeline',
+                id: 'timeline',
                 provider: {
                   enabled: true,
                   id: `id-${hostName}`,

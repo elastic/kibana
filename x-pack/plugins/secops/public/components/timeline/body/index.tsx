@@ -71,7 +71,7 @@ const TimeGutter = styled.span`
 
 const Pin = styled(EuiIcon)`
   min-width: 50px;
-  margin-right: 8px;
+  margin-right: 3px;
   margin-top: 5px;
   transform: rotate(45deg);
   color: grey;
