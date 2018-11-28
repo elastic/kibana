@@ -65,6 +65,7 @@ export class HeadlessChromiumDriverFactory {
 
       // Register with a few useful puppeteer event handlers:
       // https://pptr.dev/#?product=Puppeteer&version=v1.10.0&show=api-event-error
+      // https://github.com/GoogleChrome/puppeteer/blob/master/docs/api.md#class-page
 
       const stderr$ = Rx.fromEvent(page, 'console').pipe(
         filter(line => line._type === 'error'),
