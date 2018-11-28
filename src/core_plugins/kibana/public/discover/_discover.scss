@@ -56,7 +56,7 @@
   overflow: auto;
 
   // SASSTODO: add a monospace modifier to the doc-table component
-  .discover-table-row {
+  .kbnDocTable__row {
     font-family: $euiCodeFontFamily;
   }
 }
@@ -66,20 +66,6 @@
   background-color: $euiColorLightShade;
   padding: 5px 10px;
   text-align: center;
-}
-
-/**
- * 1. When switching between open and closed, the toggle changes size
- *    slightly which is a problem because it forces the entire table to
- *    re-render which is SLOW.
- */
-.dscTable__openButton {
-  appearance: none;
-  background-color: transparent;
-  padding: 0;
-  border: none;
-  width: 14px; /* 1 */
-  height: 14px;
 }
 
 /**

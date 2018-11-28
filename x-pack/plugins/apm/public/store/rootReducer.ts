@@ -14,7 +14,7 @@ import { IUrlParams, urlParamsReducer } from './urlParams';
 export interface IReduxState {
   location: any;
   urlParams: IUrlParams;
-  reactReduxRequest: StringMap;
+  reactReduxRequest: StringMap<any>;
 }
 
 export const rootReducer = combineReducers({
