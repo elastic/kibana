@@ -7,8 +7,6 @@
 import Hapi from 'hapi';
 
 import { Request } from './request';
-import { SavedObjectsClient } from './saved_objects_client';
-import { SavedObjectsRepository } from './saved_objects_repository';
 
 type SessionHandler = (request: Request, reply: Hapi.IReply) => void;
 type Handler = SessionHandler | string | Hapi.IRouteHandlerConfig;
@@ -35,12 +33,6 @@ export class Server extends Hapi.Server {
         getClient: () => any;
       };
     };
-  };
-  public savedObjects: {
-    SavedObjectsClient: typeof SavedObjectsClient;
-    getSavedObjectsRepository(
-      callCluster: (method: string, params: any) => Promise<any>
-    ): SavedObjectsRepository;
   };
 
   // @ts-ignore

@@ -6,8 +6,4 @@
 
 import Hapi from 'hapi';
 
-import { SavedObjectsClient } from './saved_objects_client';
-
-export class Request extends Hapi.Request {
-  public getSavedObjectsClient(): SavedObjectsClient;
-}
+export class Request extends Hapi.Request {}

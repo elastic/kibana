@@ -5,7 +5,4 @@
  */
 
 export * from './request';
-export * from './saved_objects_client';
-export * from './saved_objects_errors';
-export * from './saved_objects_repository';
 export * from './server';
