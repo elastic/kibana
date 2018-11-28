@@ -27,6 +27,9 @@ const { ToolingLog, withProcRunner, pickLevelFromFlags } = require('@kbn/dev-uti
 const ROOT_DIR = resolve(__dirname, '..');
 const BUILD_DIR = resolve(ROOT_DIR, 'target');
 
+const padRight = (width, str) =>
+  str.length >= width ? str : `${str}${' '.repeat(width - str.length)}`;
+
 const unknownFlags = [];
 const flags = getopts(process.argv, {
   boolean: ['watch', 'help'],
@@ -68,47 +71,29 @@ withProcRunner(log, async proc => {
 
   log.info(`Starting babel and typescript${flags.watch ? ' in watch mode' : ''}`);
   await Promise.all([
-    proc.run('babel:web ', {
-      cmd: 'babel',
-      args: [
-        'src',
-        '--config-file',
-        require.resolve('../babel.config.js'),
-        '--out-dir',
-        resolve(BUILD_DIR, 'web'),
-        '--extensions',
-        '.ts,.js,.tsx',
-        ...(flags.watch ? ['--watch'] : ['--quiet']),
-      ],
-      wait: true,
-      env: {
-        ...env,
-        BABEL_ENV: 'web',
-      },
-      cwd,
-    }),
+    ...['web', 'node'].map(subTask =>
+      proc.run(padRight(10, `babel:${subTask}`), {
+        cmd: 'babel',
+        args: [
+          'src',
+          '--config-file',
+          require.resolve('../babel.config.js'),
+          '--out-dir',
+          resolve(BUILD_DIR, subTask),
+          '--extensions',
+          '.ts,.js,.tsx',
+          ...(flags.watch ? ['--watch'] : ['--quiet']),
+        ],
+        wait: true,
+        env: {
+          ...env,
+          BABEL_ENV: subTask,
+        },
+        cwd,
+      })
+    ),
 
-    proc.run('babel:node', {
-      cmd: 'babel',
-      args: [
-        'src',
-        '--config-file',
-        require.resolve('../babel.config.js'),
-        '--out-dir',
-        resolve(BUILD_DIR, 'node'),
-        '--extensions',
-        '.ts,.js,.tsx',
-        ...(flags.watch ? ['--watch'] : ['--quiet']),
-      ],
-      wait: true,
-      env: {
-        ...env,
-        BABEL_ENV: 'node',
-      },
-      cwd,
-    }),
-
-    proc.run('tsc       ', {
+    proc.run(padRight(10, 'tsc'), {
       cmd: 'tsc',
       args: [
         '--emitDeclarationOnly',
