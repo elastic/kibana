@@ -233,9 +233,9 @@ export class IndexTableUi extends Component {
     });
   }
   renderBanners() {
-    const { indices = [], filterChanged } = this.props;
+    const { allIndices = [], filterChanged } = this.props;
     return getBannerExtensions().map((bannerExtension, i) => {
-      const bannerData = bannerExtension(indices);
+      const bannerData = bannerExtension(allIndices);
       if (!bannerData) {
         return null;
       }
