@@ -5,20 +5,25 @@
  */
 
 import { EuiBadge, EuiText } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, isUndefined } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
+import chrome from 'ui/chrome';
 
 import { EventItem, KpiItem } from '../../../common/graphql/types';
 import { BasicTable } from '../../components/basic_table';
+import { EmptyPage } from '../../components/empty_page';
 import { HorizontalBarChart, HorizontalBarChartData } from '../../components/horizontal_bar_chart';
 import { Pane1FlexContent } from '../../components/page';
 import { Placeholders, VisualizationPlaceholder } from '../../components/visualization_placeholder';
 import { EventsQuery } from '../../containers/events';
+import { WithSource } from '../../containers/source';
 import { timelineActions } from '../../store';
+
+const basePath = chrome.getBasePath();
 
 // start/end date to show good alert in the timeline
 const startDate = 1521830963132;
@@ -34,36 +39,49 @@ interface Props {
 
 export const Hosts = connect()(
   pure<Props>(({ dispatch }) => (
-    <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
-      {({ events, kpiEventType, loading }) => (
-        <Pane1FlexContent data-test-subj="pane1FlexContent">
-          <VisualizationPlaceholder>
-            <HorizontalBarChart
-              loading={loading}
-              title="KPI event types"
-              width={490}
-              height={279}
-              barChartdata={
-                kpiEventType.map((i: KpiItem) => ({
-                  x: i.count,
-                  y: i.value,
-                })) as HorizontalBarChartData[]
-              }
-            />
-          </VisualizationPlaceholder>
-          <VisualizationPlaceholder>
-            <BasicTable
-              columns={getEventsColumns(dispatch)}
-              loading={loading}
-              pageOfItems={events}
-              sortField="host.hostname"
-              title="Events"
-            />
-          </VisualizationPlaceholder>
-          <Placeholders timelineId="pane2-timeline" count={8} myRoute="Hosts" />
-        </Pane1FlexContent>
-      )}
-    </EventsQuery>
+    <WithSource sourceId="default">
+      {({ auditbeatIndicesExist }) =>
+        auditbeatIndicesExist || isUndefined(auditbeatIndicesExist) ? (
+          <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
+            {({ events, kpiEventType, loading }) => (
+              <Pane1FlexContent data-test-subj="pane1FlexContent">
+                <VisualizationPlaceholder>
+                  <HorizontalBarChart
+                    loading={loading}
+                    title="KPI event types"
+                    width={490}
+                    height={279}
+                    barChartdata={
+                      kpiEventType.map((i: KpiItem) => ({
+                        x: i.count,
+                        y: i.value,
+                      })) as HorizontalBarChartData[]
+                    }
+                  />
+                </VisualizationPlaceholder>
+                <VisualizationPlaceholder>
+                  <BasicTable
+                    columns={getEventsColumns(dispatch)}
+                    loading={loading}
+                    pageOfItems={events}
+                    sortField="host.hostname"
+                    title="Events"
+                  />
+                </VisualizationPlaceholder>
+                <Placeholders timelineId="pane2-timeline" count={8} myRoute="Hosts" />
+              </Pane1FlexContent>
+            )}
+          </EventsQuery>
+        ) : (
+          <EmptyPage
+            title="Looks like you don't have any auditbeat indices."
+            message="Let's add some!"
+            actionLabel="Setup Instructions"
+            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+          />
+        )
+      }
+    </WithSource>
   ))
 );
 

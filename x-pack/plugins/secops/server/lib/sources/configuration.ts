@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ConfigurationAdapter } from '../configuration';
-import { PartialSourceConfigurations } from './adapter_types';
 import { SourceConfigurations, SourcesAdapter } from './index';
+import { PartialSourceConfigurations } from './types';
 
 interface ConfigurationWithSources {
   sources?: PartialSourceConfigurations;
@@ -58,6 +58,7 @@ const DEFAULT_FIELDS = {
 
 const DEFAULT_SOURCE = {
   metricAlias: 'metricbeat-*',
-  fileAlias: 'filebeat-*',
+  logAlias: 'filebeat-*',
+  auditbeatAlias: 'auditbeat-*',
   fields: DEFAULT_FIELDS,
 };

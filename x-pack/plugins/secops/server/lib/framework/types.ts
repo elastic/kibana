@@ -23,7 +23,19 @@ export interface FrameworkAdapter {
     req: FrameworkRequest,
     method: 'msearch',
     options?: object
-  ): Promise<InfraDatabaseMultiResponse<Hit, Aggregation>>;
+  ): Promise<DatabaseMultiResponse<Hit, Aggregation>>;
+  callWithRequest(
+    req: FrameworkRequest,
+    method: 'indices.existsAlias',
+    options?: object
+  ): Promise<boolean>;
+  callWithRequest(
+    req: FrameworkRequest,
+    method: 'indices.getAlias' | 'indices.get',
+    options?: object
+  ): Promise<DatabaseGetIndicesResponse>;
+  // tslint:disable-next-line:no-any
+  getIndexPatternsService(req: FrameworkRequest<any>): FrameworkIndexPatternsService;
 }
 
 export interface FrameworkRequest<InternalRequest extends WrappableRequest = WrappableRequest> {
@@ -54,6 +66,36 @@ export interface DatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   };
 }
 
-export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends DatabaseResponse {
+export interface DatabaseMultiResponse<Hit, Aggregation> extends DatabaseResponse {
   responses: Array<DatabaseSearchResponse<Hit, Aggregation>>;
+}
+
+interface FrameworkIndexFieldDescriptor {
+  name: string;
+  type: string;
+  searchable: boolean;
+  aggregatable: boolean;
+  readFromDocValues: boolean;
+}
+
+export interface FrameworkIndexPatternsService {
+  getFieldsForWildcard(options: {
+    pattern: string | string[];
+  }): Promise<FrameworkIndexFieldDescriptor[]>;
+}
+
+interface Alias {
+  settings: {
+    index: {
+      uuid: string;
+    };
+  };
+}
+
+export interface DatabaseGetIndicesResponse {
+  [indexName: string]: {
+    aliases: {
+      [aliasName: string]: Alias;
+    };
+  };
 }

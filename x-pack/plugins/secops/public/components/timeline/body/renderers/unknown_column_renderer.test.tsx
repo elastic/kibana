@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import { EMPTY_VALUE } from '.';
-import { mockECSData } from '../../../../pages/mock/mock_ecs';
+import { mockECSData } from '../../../../mock/mock_ecs';
 import { ECS } from '../../ecs';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 

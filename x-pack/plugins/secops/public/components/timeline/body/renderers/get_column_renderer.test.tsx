@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EMPTY_VALUE } from '.';
 import { columnRenderers } from '.';
-import { mockECSData } from '../../../../pages/mock/mock_ecs';
+import { mockECSData } from '../../../../mock/mock_ecs';
 import { ECS } from '../../ecs';
 import { getColumnRenderer } from './get_column_renderer';
 
