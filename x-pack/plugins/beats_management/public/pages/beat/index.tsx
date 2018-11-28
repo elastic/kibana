@@ -16,10 +16,10 @@ import {
 import { first, sortByOrder } from 'lodash';
 import moment from 'moment';
 import React from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
-import { ConnectedTabs } from '../../components/navigation/connected_tabs';
 import { AppPageProps } from '../../frontend_types';
 
 interface PageState {
@@ -31,7 +31,6 @@ interface PageState {
 class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageState> {
   constructor(props: AppPageProps) {
     super(props);
-
     this.state = {
       beat: undefined,
       beatId: props.match.params.beatId,
@@ -84,26 +83,57 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
 
   public render() {
     const { beat } = this.state;
-    let id;
+    let id: string | undefined;
     let name;
 
     if (beat) {
       id = beat.id;
       name = beat.name;
     }
-    const title = this.state.isLoading
-      ? 'Loading'
-      : `Beat: ${name || 'No name receved from beat'} (id: ${id})`;
+    const title =
+      this.state.isLoading && id
+        ? 'Loading'
+        : `Beat: ${name || 'No name receved from beat'} (id: ${id})`;
 
     return (
       <PrimaryLayout title={title} actionSection={this.renderActionSection(beat)}>
         <React.Fragment>
-          <ConnectedTabs routes={this.props.routes} />
-          <ChildRoutes routes={this.props.routes} {...this.props} />
+          <EuiTabs>
+            <EuiTab
+              isSelected={`/beat/${id}/details` === this.props.history.location.pathname}
+              onClick={this.onTabClicked(`/beat/${id}/details`)}
+            >
+              Configurations
+            </EuiTab>
+            <EuiTab
+              isSelected={`/beat/${id}/tags` === this.props.history.location.pathname}
+              onClick={this.onTabClicked(`/beat/${id}/tags`)}
+            >
+              Configuration tags
+            </EuiTab>
+          </EuiTabs>
+          <Switch>
+            <ChildRoutes
+              routes={this.props.routes}
+              {...this.props}
+              beat={this.state.beat}
+              useSwitch={false}
+            />
+            {id && <Route render={() => <Redirect to={`/beat/${id}/details`} />} />}
+          </Switch>
         </React.Fragment>
       </PrimaryLayout>
     );
   }
+
+  private onTabClicked = (path: string) => {
+    return () => {
+      this.props.history.push({
+        pathname: path,
+        search: this.props.location.search,
+      });
+    };
+  };
 
   private async loadBeat() {
     const { beatId } = this.props.match.params;

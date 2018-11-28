@@ -18,6 +18,10 @@ import { RouteTreeBuilder } from './utils/page_loader';
 // @ts-ignore
 const requirePages = require.context('./pages', true, /\.tsx$/);
 const routeTreeBuilder = new RouteTreeBuilder(requirePages);
+const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys(), {
+  '/tag': ['action', 'tagid?'],
+  '/beat': ['beatId'],
+});
 
 interface RouterProps {
   libs: FrontendLibs;
@@ -54,10 +58,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
     if (this.state.loadingStatus === 'loading') {
       return <Loading />;
     }
-    const routesFromFilesystem = routeTreeBuilder.routeTreeFromPaths(requirePages.keys(), {
-      '/tag': ['action', 'tagid?'],
-      '/beat': ['beatId'],
-    });
+
     return (
       <HashRouter basename="/management/beats_management">
         <React.Fragment>
@@ -109,7 +110,7 @@ export class AppRouter extends Component<RouterProps, RouterState> {
               />
             )}
 
-            {/* This app does not make use of a homepage. The mainpage is beats/overivew */}
+            {/* This app does not make use of a homepage. The mainpage is overview/enrolled_beats */}
             <Route
               path="/"
               exact={true}
@@ -125,6 +126,10 @@ export class AppRouter extends Component<RouterProps, RouterState> {
                 {...URLProps}
                 {...{
                   libs: this.props.libs,
+                  containers: {
+                    beats: BeatsContainer,
+                    tags: TagsContainer,
+                  },
                 }}
               />
             )}

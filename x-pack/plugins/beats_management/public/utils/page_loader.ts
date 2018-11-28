@@ -51,14 +51,8 @@ export class RouteTreeBuilder {
     }
 
     // 404 route MUST be last or it gets used first in a switch
-    return allRoutes.sort((a: RouteConfig, b: RouteConfig) => {
-      if (a.path === '*') {
-        return 1;
-      } else if (b.path === '*') {
-        return -1;
-      } else {
-        return 0;
-      }
+    return allRoutes.sort((a: RouteConfig) => {
+      return a.path === '*' ? 1 : 0;
     });
   }
 
@@ -117,13 +111,16 @@ export class RouteTreeBuilder {
       };
     }
 
-    // route has a parent with mapped params, so we map it here too
+    // mapped route has a parent with mapped params, so we map it here too
     // e.g. /beat has a beatid param, so /beat/detail, a child of /beat
-    // should also have that param resulting in /beat/:beatid/detail
-    if (mapParams[filePath] && mapParams[cleanDir] && filePath !== cleanDir) {
+    // should also have that param resulting in /beat/:beatid/detail/:other
+    if (mapParams[cleanDir] && filePath !== cleanDir) {
       const dirWithParams = `${cleanDir}/:${mapParams[cleanDir].join('/:')}`;
+      const path = `${dirWithParams}/${file.replace('.tsx', '')}${
+        mapParams[filePath] ? '/:' : ''
+      }${(mapParams[filePath] || []).join('/:')}`;
       return {
-        path: `${dirWithParams}/${file.replace('.tsx', '')}/:${mapParams[filePath].join('/:')}`,
+        path,
         component: page[componentExportName],
       };
     }

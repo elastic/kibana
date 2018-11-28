@@ -8,6 +8,6 @@ import React from 'react';
 
 export class NotFoundPage extends React.PureComponent {
   public render() {
-    return <div>No content found</div>;
+    return <div>404, No content found</div>;
   }
 }

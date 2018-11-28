@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Container } from 'unstated';
 import { CMPopulatedBeat } from './../../common/domain_types';
 import { BeatsTagAssignment } from './../../server/lib/adapters/beats/adapter_types';

@@ -58,7 +58,7 @@ export const BeatsTableType: TableType = {
       field: 'name',
       name: 'Beat name',
       render: (name: string, beat: CMPopulatedBeat) => (
-        <ConnectedLink path={`/beat/${beat.id}`}>{name}</ConnectedLink>
+        <ConnectedLink path={`/beat/${beat.id}/details`}>{name}</ConnectedLink>
       ),
       sortable: true,
     },

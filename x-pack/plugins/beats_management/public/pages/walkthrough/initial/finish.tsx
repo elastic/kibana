@@ -5,8 +5,7 @@
  */
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
 import React from 'react';
-import { BeatTag, CMBeat } from '../../../../common/domain_types';
-import { BeatsTagAssignment } from '../../../../server/lib/adapters/beats/adapter_types';
+import { CMPopulatedBeat } from '../../../../common/domain_types';
 import { AppPageProps } from '../../../frontend_types';
 
 interface PageState {
@@ -71,9 +70,6 @@ export class FinishWalkthroughPage extends React.Component<AppPageProps, PageSta
     );
   }
 
-  private createBeatTagAssignments = (beats: CMBeat[], tag: BeatTag): BeatsTagAssignment[] =>
-    beats.map(({ id }) => ({ beatId: id, tag: tag.id }));
-
   private assignTagToBeat = async () => {
     if (!this.props.urlState.enrollmentToken) {
       return alert('Invalid URL, no enrollmentToken found');
@@ -86,10 +82,11 @@ export class FinishWalkthroughPage extends React.Component<AppPageProps, PageSta
     if (!beat) {
       return alert('Error: Beat not enrolled properly');
     }
-    const tags = await this.props.libs.tags.getTagsWithIds([this.props.urlState.createdTag]);
 
-    const assignments = this.createBeatTagAssignments([beat], tags[0]);
-    await this.props.libs.beats.assignTagsToBeats(assignments);
+    await this.props.containers.beats.assignTagsToBeats(
+      [beat as CMPopulatedBeat],
+      this.props.urlState.createdTag
+    );
     this.props.setUrlState({
       createdTag: '',
       enrollmentToken: '',

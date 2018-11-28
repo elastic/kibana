@@ -71,7 +71,7 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
         size="s"
         color="primary"
         onClick={async () => {
-          this.props.goTo(`/overview/beats/enroll`);
+          this.props.goTo(`/overview/enrolled_beats/enroll`);
         }}
       >
         Enroll Beats

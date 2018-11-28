@@ -106,6 +106,7 @@ describe('RouteTreeBuilder', () => {
     });
     expect(tree[1].path).toEqual('/beat/:beatId');
     expect(tree[1].routes![0].path).toEqual('/beat/:beatId/detail/:other');
+    expect(tree[1].routes![1].path).toEqual('/beat/:beatId/tags');
   });
   it('Should throw an error on invalid mapped path', () => {
     const mockRequire = jest.fn(path => ({
