@@ -11,6 +11,8 @@ export function getAvailablePrivileges(minimumPrivilege: KibanaPrivilege): Kiban
   switch (minimumPrivilege) {
     case NO_PRIVILEGE_VALUE:
       return ['read', 'all'];
+    case 'custom':
+      return ['read', 'all'];
     case 'read':
       return ['read', 'all'];
     case 'all':

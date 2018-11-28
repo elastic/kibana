@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider, InjectedIntl } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { UICapabilities } from 'ui/capabilities';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
@@ -20,10 +21,12 @@ interface Props {
   spacesEnabled: boolean;
   spaces?: Space[];
   uiCapabilities: UICapabilities;
+  features: Feature[];
   editable: boolean;
   kibanaAppPrivileges: KibanaPrivilege[];
   onChange: (role: Role) => void;
   validator: RoleValidator;
+  intl: InjectedIntl;
 }
 
 export class KibanaPrivileges extends Component<Props, {}> {
@@ -47,6 +50,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
       onChange,
       editable,
       validator,
+      features,
     } = this.props;
 
     if (spacesEnabled) {
@@ -56,6 +60,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
           role={role}
           spaces={spaces}
           uiCapabilities={uiCapabilities}
+          features={features}
           onChange={onChange}
           editable={editable}
           validator={validator}
@@ -65,9 +70,11 @@ export class KibanaPrivileges extends Component<Props, {}> {
       return (
         <SimplePrivilegeForm
           kibanaAppPrivileges={kibanaAppPrivileges}
+          features={features}
           role={role}
           onChange={onChange}
           editable={editable}
+          intl={this.props.intl}
         />
       );
     }

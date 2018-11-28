@@ -25,6 +25,7 @@ import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
 import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
@@ -50,6 +51,7 @@ interface Props {
   spacesEnabled: boolean;
   intl: InjectedIntl;
   uiCapabilities: UICapabilities;
+  features: Feature[];
 }
 
 interface State {
@@ -252,11 +254,13 @@ class EditRolePageUI extends Component<Props, State> {
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
+          features={this.props.features}
           uiCapabilities={this.props.uiCapabilities}
           editable={!isReservedRole(this.state.role)}
           role={this.state.role}
           onChange={this.onRoleChange}
           validator={this.validator}
+          intl={this.props.intl}
         />
       </div>
     );

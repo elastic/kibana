@@ -8,6 +8,7 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import { uiCapabilities } from 'ui/capabilities';
+import { kfetch } from 'ui/kfetch';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
 import 'angular-ui-select';
@@ -123,8 +124,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       spaces,
     } = $route.current.locals;
 
-    $scope.$$postDigest(() => {
+    $scope.$$postDigest(async () => {
       const domNode = document.getElementById('editRoleReactRoot');
+
+      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
 
       render(
         <I18nProvider>
@@ -141,6 +144,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             spaces={spaces}
             spacesEnabled={enableSpaceAwarePrivileges}
             uiCapabilities={uiCapabilities}
+            features={features}
           />
         </I18nProvider>, domNode);
 

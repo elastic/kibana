@@ -11,14 +11,22 @@ import {
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiFormRow,
   EuiSpacer,
+  // @ts-ignore
+  EuiSuperSelect,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { UICapabilities } from 'ui/capabilities';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
@@ -27,9 +35,9 @@ import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import { copyRole } from '../../../lib/copy_role';
 import { getAvailablePrivileges } from '../../../lib/get_available_privileges';
 import { RoleValidator } from '../../../lib/validate_role';
+import { FeatureTable } from './feature_table/feature_table';
 import { ImpactedSpacesFlyout } from './impacted_spaces_flyout';
 import { PrivilegeCalloutWarning } from './privilege_callout_warning';
-import { PrivilegeSelector } from './privilege_selector';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
@@ -42,6 +50,7 @@ interface Props {
   validator: RoleValidator;
   intl: InjectedIntl;
   uiCapabilities: UICapabilities;
+  features: Feature[];
 }
 
 interface PrivilegeForm {
@@ -56,6 +65,8 @@ interface SpacePrivileges {
 interface State {
   spacePrivileges: SpacePrivileges;
   privilegeForms: PrivilegeForm[];
+  showGlobalFeatureTable: boolean;
+  showSpacePrivilegeEditor: boolean;
 }
 
 class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
@@ -71,6 +82,8 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     this.state = {
       spacePrivileges,
       privilegeForms: [],
+      showGlobalFeatureTable: false,
+      showSpacePrivilegeEditor: false,
     };
   }
 
@@ -166,18 +179,78 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           description={description}
         >
           <EuiFormRow hasEmptyLabelSpace helpText={helptext}>
-            <PrivilegeSelector
-              data-test-subj={'kibanaMinimumPrivilege'}
-              availablePrivileges={kibanaAppPrivileges}
-              value={basePrivilege}
-              disabled={isReservedRole(role)}
-              allowNone={true}
+            <EuiSuperSelect
+              disabled={!this.props.editable}
               onChange={this.onKibanaBasePrivilegeChange}
+              options={[
+                {
+                  value: NO_PRIVILEGE_VALUE,
+                  inputDisplay: <EuiText>None</EuiText>,
+                  dropdownDisplay: (
+                    <EuiText>
+                      <strong>None</strong>
+                      <p>No access to Spaces</p>
+                    </EuiText>
+                  ),
+                },
+                // {
+                //   value: 'custom',
+                //   inputDisplay: <EuiText>Custom</EuiText>,
+                //   dropdownDisplay: (
+                //     <EuiText>
+                //       <strong>Custom</strong>
+                //       <p>Customize access to Kibana</p>
+                //     </EuiText>
+                //   ),
+                // },
+                {
+                  value: 'read',
+                  inputDisplay: <EuiText>Read</EuiText>,
+                  dropdownDisplay: (
+                    <EuiText>
+                      <strong>Read</strong>
+                      <p>Grants read-only access to all of Kibana</p>
+                    </EuiText>
+                  ),
+                },
+                {
+                  value: 'all',
+                  inputDisplay: <EuiText>All</EuiText>,
+                  dropdownDisplay: (
+                    <EuiText>
+                      <strong>All</strong>
+                      <p>Grants full access to Kibana</p>
+                    </EuiText>
+                  ),
+                },
+              ]}
+              hasDividers
+              valueOfSelected={basePrivilege}
             />
           </EuiFormRow>
+          {basePrivilege !== 'all' && (
+            <Fragment>
+              <EuiFormRow label={'Control features for all spaces'}>
+                <EuiSwitch
+                  checked={this.state.showGlobalFeatureTable}
+                  onChange={e => this.setState({ showGlobalFeatureTable: e.target.checked })}
+                />
+              </EuiFormRow>
+              {this.state.showGlobalFeatureTable && (
+                <EuiFormRow>
+                  <FeatureTable
+                    role={this.props.role}
+                    features={this.props.features}
+                    intl={this.props.intl}
+                    onChange={() => {
+                      return;
+                    }}
+                  />
+                </EuiFormRow>
+              )}
+            </Fragment>
+          )}
         </EuiDescribedFormGroup>
-
-        <EuiSpacer />
 
         {this.renderSpacePrivileges(basePrivilege, kibanaAppPrivileges)}
       </Fragment>
@@ -298,17 +371,40 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
   };
 
   public getSpaceForms = (basePrivilege: KibanaPrivilege) => {
-    if (!this.props.editable) {
+    if (!this.props.editable || !this.state.showSpacePrivilegeEditor) {
       return null;
     }
 
-    return this.state.privilegeForms.map((form, index) =>
-      this.getSpaceForm(form, index, basePrivilege)
+    const availableSpaces = this.getAvailableSpaces();
+
+    return (
+      <EuiFlyout onClose={() => this.setState({ showSpacePrivilegeEditor: false })} size="s">
+        <EuiFlyoutHeader>
+          <EuiTitle>
+            <h1>New space privilege</h1>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <PrivilegeSpaceForm
+            selectedSpaceIds={[]}
+            availableSpaces={availableSpaces}
+            availablePrivileges={this.props.kibanaAppPrivileges}
+            selectedPrivilege={NO_PRIVILEGE_VALUE}
+            validator={this.props.validator}
+            role={this.props.role}
+            features={this.props.features}
+            intl={this.props.intl}
+            onChange={() => null}
+            onDelete={() => null}
+          />
+        </EuiFlyoutBody>
+      </EuiFlyout>
     );
   };
 
   public addSpacePrivilege = () => {
     this.setState({
+      showSpacePrivilegeEditor: true,
       privilegeForms: [
         ...this.state.privilegeForms,
         {
@@ -340,27 +436,27 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     });
   };
 
-  public getSpaceForm = (form: PrivilegeForm, index: number, basePrivilege: KibanaPrivilege) => {
-    const { spaces: selectedSpaceIds, privilege } = form;
+  // public getSpaceForm = (form: PrivilegeForm, index: number, basePrivilege: KibanaPrivilege) => {
+  //   const { spaces: selectedSpaceIds, privilege } = form;
 
-    const availableSpaces = this.getAvailableSpaces(index);
+  //   const availableSpaces = this.getAvailableSpaces(index);
 
-    return (
-      <Fragment key={index}>
-        <PrivilegeSpaceForm
-          key={index}
-          availableSpaces={availableSpaces}
-          selectedSpaceIds={selectedSpaceIds}
-          availablePrivileges={getAvailablePrivileges(basePrivilege)}
-          selectedPrivilege={privilege}
-          onChange={this.onPrivilegeSpacePermissionChange(index)}
-          onDelete={this.onPrivilegeSpacePermissionDelete(index)}
-          validator={this.props.validator}
-        />
-        <EuiSpacer />
-      </Fragment>
-    );
-  };
+  //   return (
+  //     <Fragment key={index}>
+  //       <PrivilegeSpaceForm
+  //         key={index}
+  //         availableSpaces={availableSpaces}
+  //         selectedSpaceIds={selectedSpaceIds}
+  //         availablePrivileges={getAvailablePrivileges(basePrivilege)}
+  //         selectedPrivilege={privilege}
+  //         onChange={this.onPrivilegeSpacePermissionChange(index)}
+  //         onDelete={this.onPrivilegeSpacePermissionDelete(index)}
+  //         validator={this.props.validator}
+  //       />
+  //       <EuiSpacer />
+  //     </Fragment>
+  //   );
+  // };
 
   public onPrivilegeSpacePermissionChange = (index: number) => (form: PrivilegeForm) => {
     const existingPrivilegeForm = { ...this.state.privilegeForms[index] };
