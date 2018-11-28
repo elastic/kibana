@@ -6,14 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import {
-  closeFlyout,
-  Flyout,
-  openFlyout,
-  showFlyout,
-  showFlyoutButton,
-  showFlyoutElement,
-} from './flyout';
+import { closeFlyout, Flyout, FlyoutButton, FlyoutPane, openFlyout, showFlyout } from './flyout';
 
 describe('Flyout', () => {
   describe('rendering', () => {
@@ -118,11 +111,14 @@ describe('Flyout', () => {
     });
   });
 
-  describe('showFlyoutElement', () => {
+  describe('FlyoutPane', () => {
     test('should return the flyout element with a title', () => {
       const closeMock = jest.fn();
-      const flyoutElement = showFlyoutElement(closeMock, <p>I am a mock child</p>);
-      const wrapper = mount(<span>{flyoutElement}</span>);
+      const wrapper = mount(
+        <FlyoutPane onClose={closeMock}>
+          <span>I am a child of flyout</span>,
+        </FlyoutPane>
+      );
       expect(
         wrapper
           .find('[data-test-subj="flyoutTitle"]')
@@ -133,8 +129,11 @@ describe('Flyout', () => {
 
     test('should return the flyout element with children', () => {
       const closeMock = jest.fn();
-      const flyoutElement = showFlyoutElement(closeMock, <p>I am a mock child</p>);
-      const wrapper = mount(<span>{flyoutElement}</span>);
+      const wrapper = mount(
+        <FlyoutPane onClose={closeMock}>
+          <span>I am a mock child</span>,
+        </FlyoutPane>
+      );
       expect(
         wrapper
           .find('[data-test-subj="flyoutChildren"]')
@@ -145,8 +144,11 @@ describe('Flyout', () => {
 
     test('should call the onClose when the close button is clicked', () => {
       const closeMock = jest.fn();
-      const flyoutElement = showFlyoutElement(closeMock, <p>I am a mock child</p>);
-      const wrapper = mount(<span>{flyoutElement}</span>);
+      const wrapper = mount(
+        <FlyoutPane onClose={closeMock}>
+          <span>I am a mock child</span>,
+        </FlyoutPane>
+      );
       wrapper
         .find('[data-test-subj="flyout"] button')
         .first()
@@ -159,8 +161,7 @@ describe('Flyout', () => {
   describe('showFlyoutButton', () => {
     test('should return the flyout button with text', () => {
       const openMock = jest.fn();
-      const flyoutButton = showFlyoutButton(openMock);
-      const wrapper = mount(<span>{flyoutButton}</span>);
+      const wrapper = mount(<FlyoutButton onOpen={openMock} />);
       expect(
         wrapper
           .find('[data-test-subj="flyoutButton"]')
@@ -171,8 +172,7 @@ describe('Flyout', () => {
 
     test('should call the onOpen when the mouse is entered', () => {
       const openMock = jest.fn();
-      const flyoutButton = showFlyoutButton(openMock);
-      const wrapper = mount(<span>{flyoutButton}</span>);
+      const wrapper = mount(<FlyoutButton onOpen={openMock} />);
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')
         .first()

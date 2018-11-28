@@ -7,10 +7,10 @@
 import { ColumnHeader } from './column_header';
 
 /** The default minimum width of a column */
-export const DEFAULT_COLUMN_MIN_WIDTH = 95;
+export const DEFAULT_COLUMN_MIN_WIDTH = 100;
 
 /** The default minimum width of the Event column */
-export const DEFAULT_EVENT_COLUMN_WIDTH = 40;
+export const DEFAULT_EVENT_COLUMN_WIDTH = 300;
 
 /** The default column headers */
 export const headers: ColumnHeader[] = [

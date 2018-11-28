@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import * as React from 'react';
+import { pure } from 'recompose';
 import styled from 'styled-components';
 
 export const Overlay = styled.div`
@@ -17,7 +25,7 @@ export const Overlay = styled.div`
   height: 60%;
 `;
 
-export const Button = styled.div`
+export const Button = styled(EuiPanel)`
   padding: 10px 0 10px 0;
   display: flex;
   position: absolute;
@@ -42,6 +50,7 @@ export const Text = styled(EuiText)`
 
 interface Props {
   children?: React.ReactNode;
+  isFlyoutVisible?: boolean;
 }
 
 interface State {
@@ -57,10 +66,12 @@ export const closeFlyout = (setState: SetState) => showFlyout(false, setState);
 
 export const openFlyout = (setState: SetState) => showFlyout(true, setState);
 
-export const showFlyoutElement = (
-  onClose: () => void,
-  children: React.ReactNode
-): React.ReactNode => (
+interface FlyoutPaneProps {
+  onClose: () => void;
+  children: React.ReactNode;
+}
+
+export const FlyoutPane = pure(({ onClose, children }: FlyoutPaneProps) => (
   <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" data-test-subj="flyout">
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
@@ -71,25 +82,31 @@ export const showFlyoutElement = (
     </EuiFlyoutHeader>
     <EuiFlyoutBody data-test-subj="flyoutChildren">{children}</EuiFlyoutBody>
   </EuiFlyout>
-);
+));
 
-export const showFlyoutButton = (onOpen: () => void): React.ReactNode => (
+interface FlyoutButtonProps {
+  onOpen: () => void;
+}
+
+export const FlyoutButton = pure(({ onOpen }: FlyoutButtonProps) => (
   <Overlay data-test-subj="flyoutOverlay" onMouseEnter={onOpen}>
     <Button>
       <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
     </Button>
   </Overlay>
-);
+));
 
 export class Flyout extends React.PureComponent<Props, State> {
   public readonly state = {
-    isFlyoutVisible: false,
+    isFlyoutVisible: this.props.isFlyoutVisible ? this.props.isFlyoutVisible : false,
   };
 
   public render = () =>
-    this.state.isFlyoutVisible
-      ? showFlyoutElement(this.onClose, this.props.children)
-      : showFlyoutButton(this.onOpen);
+    this.state.isFlyoutVisible ? (
+      <FlyoutPane onClose={this.onClose}>{this.props.children}</FlyoutPane>
+    ) : (
+      <FlyoutButton onOpen={this.onOpen} />
+    );
 
   /** Provides stable instance reference for avoiding re-renders */
   public onClose = () => closeFlyout(this.setState.bind(this));

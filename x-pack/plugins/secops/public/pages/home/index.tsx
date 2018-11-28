@@ -36,7 +36,7 @@ import { Hosts } from '../hosts';
 import { Network } from '../network';
 import { Overview } from '../overview';
 
-const maxTimelineWidth = 760;
+const maxTimelineWidth = 1125;
 
 export const HomePage = pure(() => (
   <PageContainer data-test-subj="pageContainer">
