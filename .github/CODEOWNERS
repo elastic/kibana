@@ -4,3 +4,5 @@
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/plugins/security/  @elastic/kibana-security
 **/*.scss  @elastic/kibana-design
+/src/optimize/ @elastic/kibana-operations
+/src/dev/ @elastic/kibana-operations
