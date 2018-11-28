@@ -95,7 +95,6 @@ interface Alias {
 export interface DatabaseGetIndicesResponse {
   [indexName: string]: {
     aliases: {
-      // tslint:disable-next-line:no-any
       [aliasName: string]: Alias;
     };
   };

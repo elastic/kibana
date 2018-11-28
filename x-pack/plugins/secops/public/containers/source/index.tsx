@@ -9,7 +9,6 @@ import React from 'react';
 import { Query } from 'react-apollo';
 
 import { SourceQuery } from '../../../common/graphql/types';
-
 import { sourceQuery } from './source.gql_query';
 
 interface WithSourceArgs {
@@ -30,7 +29,7 @@ export const WithSource = ({ children, sourceId }: WithSourceProps) => (
   >
     {({ data }) =>
       children({
-        auditbeatIndicesExist: get('source.status,auditbeatIndicesExist', data),
+        auditbeatIndicesExist: get('source.status.auditbeatIndicesExist', data),
       })
     }
   </Query>

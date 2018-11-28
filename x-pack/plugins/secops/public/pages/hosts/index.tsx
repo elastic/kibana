@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
+import chrome from 'ui/chrome';
 
 import { EventItem, KpiItem } from '../../../common/graphql/types';
 import { BasicTable } from '../../components/basic_table';
@@ -19,9 +20,10 @@ import { HorizontalBarChart, HorizontalBarChartData } from '../../components/hor
 import { Pane1FlexContent } from '../../components/page';
 import { Placeholders, VisualizationPlaceholder } from '../../components/visualization_placeholder';
 import { EventsQuery } from '../../containers/events';
-import { WithKibanaChrome } from '../../containers/kibana_chrome';
 import { WithSource } from '../../containers/source';
 import { timelineActions } from '../../store';
+
+const basePath = chrome.getBasePath();
 
 // start/end date to show good alert in the timeline
 const startDate = 1521830963132;
@@ -71,16 +73,12 @@ export const Hosts = connect()(
             )}
           </EventsQuery>
         ) : (
-          <WithKibanaChrome>
-            {({ basePath }) => (
-              <EmptyPage
-                title="Looks like you don't have any auditbeat indices."
-                message="Let's add some!"
-                actionLabel="Setup Instructions"
-                actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-              />
-            )}
-          </WithKibanaChrome>
+          <EmptyPage
+            title="Looks like you don't have any auditbeat indices."
+            message="Let's add some!"
+            actionLabel="Setup Instructions"
+            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+          />
         )
       }
     </WithSource>
