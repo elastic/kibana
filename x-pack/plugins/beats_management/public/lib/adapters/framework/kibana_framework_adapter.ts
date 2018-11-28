@@ -18,7 +18,7 @@ import {
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public appState: object;
 
-  private management: any;
+  public management: any;
   private adapterService: KibanaAdapterServiceProvider;
   private rootComponent: React.ReactElement<any> | null = null;
   private uiModule: IModule;

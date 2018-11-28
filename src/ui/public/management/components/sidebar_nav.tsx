@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiIcon, EuiSideNav } from '@elastic/eui';
+import { EuiIcon, EuiSideNav, IconType } from '@elastic/eui';
 import React from 'react';
 
 interface Section {
@@ -26,7 +26,7 @@ interface Section {
   id: string;
   display: string;
   url: string;
-  icon: string;
+  icon: IconType;
   items: Section[];
 }
 
@@ -36,7 +36,7 @@ const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Sectio
   name: display,
   icon: icon ? <EuiIcon type={icon} /> : null,
   isSelected: selectedId === id,
-  onClick: () => url && (window.location = url),
+  onClick: () => url && (window.location.href = url),
 });
 
 const sideNavItems = (sections: Section[], selectedId: string) =>
