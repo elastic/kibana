@@ -1,0 +1,88 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { defaultTo } from 'lodash/fp';
+import * as React from 'react';
+import { DragDropContext, DropResult } from 'react-beautiful-dnd';
+import { connect } from 'react-redux';
+import { Dispatch } from 'redux';
+
+import { DataProvider } from '../../components/timeline/data_providers/data_provider';
+import { timelineActions } from '../../store';
+import { dragAndDropActions } from '../../store/local/drag_and_drop';
+import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
+import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
+import { State } from '../../store/reducer';
+import {
+  getProviderIdFromDraggable,
+  getTimelineIdFromDestination,
+  providerWasDroppedOnTimeline,
+} from './helpers';
+
+interface StateReduxProps {
+  dataProviders?: IdToDataProvider;
+  dispatch?: Dispatch;
+}
+
+type Props = StateReduxProps;
+
+interface AddProviderToTimelineParams {
+  result: DropResult;
+  dispatch: Dispatch;
+}
+
+const addProviderToTimeline = ({ result, dispatch }: AddProviderToTimelineParams): void => {
+  const timeline = getTimelineIdFromDestination(result);
+  const providerId = getProviderIdFromDraggable(result);
+
+  const providers: IdToDataProvider = JSON.parse(
+    sessionStorage.getItem('dataProviders') || '{}'
+  ) as IdToDataProvider;
+
+  const provider = providers[providerId];
+
+  if (provider) {
+    dispatch(timelineActions.addProvider({ id: timeline, provider }));
+  }
+};
+
+class DragDropContextWrapperComponent extends React.PureComponent<Props> {
+  public render() {
+    const { dataProviders, dispatch, children } = this.props;
+
+    const onDragEnd = (result: DropResult, dataProvider: DataProvider) => {
+      if (providerWasDroppedOnTimeline(result)) {
+        addProviderToTimeline({ result, dispatch: dispatch! });
+      }
+    };
+
+    return (
+      <DragDropContext
+        onDragEnd={result => {
+          const id = getProviderIdFromDraggable(result);
+          const dataProvider = dataProviders![id];
+          if (dataProvider != null) {
+            onDragEnd(result, dataProvider);
+          } else {
+            dispatch!(dragAndDropActions.noProviderFound({ id }));
+          }
+        }}
+      >
+        {children}
+      </DragDropContext>
+    );
+  }
+}
+
+const emptyDataProviders: IdToDataProvider = {}; // stable reference
+
+const mapStateToProps = (state: State) => {
+  const dataProviders = defaultTo(emptyDataProviders, dataProvidersSelector(state));
+
+  return { dataProviders };
+};
+
+export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);

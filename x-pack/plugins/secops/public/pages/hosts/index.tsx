@@ -11,13 +11,11 @@ import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
 
-import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { EventItem, KpiItem } from '../../../common/graphql/types';
 import { BasicTable } from '../../components/basic_table';
-import { IdToDataProvider } from '../../components/data_provider_context';
+import { DraggableWrapper } from '../../components/drag_and_drop/draggable_wrapper';
 import { HorizontalBarChart, HorizontalBarChartData } from '../../components/horizontal_bar_chart';
 import { Pane1FlexContent } from '../../components/page';
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import {
   Placeholders,
   ProviderContainer,
@@ -25,22 +23,13 @@ import {
 } from '../../components/visualization_placeholder';
 import { EventsQuery } from '../../containers/events';
 
-// start/end date to show good alert in the timeline
+// TODO: wire up the date picker to remove this hard-coded start/end date, which shows a good alert in the timeline
 const startDate = 1521830963132;
 const endDate = 1521862432253;
 
-// start/end date to show good data in the KPI event type
+// TODO: wire up the date picker to remove this hard-coded start/end date, which shows a good data for the KPI event type
 const startDate2 = 1541044800000;
 const endDate2 = 1543640399999;
-
-const ReactDndDropTarget = styled.div`
-  :hover {
-    background-color: rgb(217, 217, 217);
-    color: rgb(0, 0, 0);
-    border-radius: 4px;
-    transition: background-color 0.5s ease;
-  }
-`; // required by react-beautiful-dnd
 
 interface Props {
   dispatch: Dispatch;
@@ -93,33 +82,13 @@ export const Hosts = connect()(
                 title="Events"
               />
             </VisualizationPlaceholder>
-            <Placeholders timelineId="pane2-timeline" count={8} myRoute="Hosts" />
+            <Placeholders count={8} myRoute="Hosts" />
           </React.Fragment>
         )}
       </EventsQuery>
     </Pane1FlexContent>
   ))
 );
-const updateSessionStorage = (dataProvider: DataProvider): void => {
-  const oldProviders: IdToDataProvider = JSON.parse(
-    sessionStorage.getItem('dataProviders') || '{}'
-  ) as IdToDataProvider;
-
-  const newProviders = { ...oldProviders, [dataProvider.id]: dataProvider };
-  sessionStorage.setItem('dataProviders', JSON.stringify(newProviders));
-};
-interface GetDraggableIdParams {
-  dataProviderId: string;
-}
-
-const getDraggableId = ({ dataProviderId }: GetDraggableIdParams): string =>
-  `draggableId.provider.${dataProviderId}`;
-
-const getDroppableId = ({
-  visualizationPlaceholderId,
-}: {
-  visualizationPlaceholderId: string;
-}): string => `droppableId.provider.${visualizationPlaceholderId}`;
 
 const EventColumns = styled.div``;
 
@@ -133,49 +102,23 @@ const getEventsColumns = (dispatch: Dispatch) => [
       const hostName = getOr('--', 'host.hostname', item);
       return (
         <EventColumns>
-          <Droppable
-            droppableId={getDroppableId({
-              visualizationPlaceholderId: `hostname-${item.event!.id}`,
-            })}
-          >
-            {droppableProvided => (
-              <ReactDndDropTarget
-                innerRef={droppableProvided.innerRef}
-                {...droppableProvided.droppableProps}
-              >
-                <Draggable
-                  draggableId={getDraggableId({ dataProviderId: `${item.event!.id}` })}
-                  index={0}
-                  key={'pane2-timeline'}
-                >
-                  {provided => (
-                    <ProviderContainer
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      innerRef={provided.innerRef}
-                      data-test-subj="providerContainer"
-                    >
-                      {updateSessionStorage({
-                        enabled: true,
-                        id: `${item.event!.id}`,
-                        name: hostName,
-                        negated: false,
-                        componentResultParam: 'events',
-                        componentQuery: EventsQuery,
-                        componentQueryProps: {
-                          sourceId: 'default',
-                          startDate,
-                          endDate,
-                          filterQuery: `{"bool":{"should":[{"match":{"host.name":"${hostName}"}}],"minimum_should_match":1}}`,
-                        },
-                      })}
-                      {hostName}
-                    </ProviderContainer>
-                  )}
-                </Draggable>
-              </ReactDndDropTarget>
-            )}
-          </Droppable>
+          <DraggableWrapper
+            dataProvider={{
+              enabled: true,
+              id: `${item.event!.id}`,
+              name: hostName,
+              negated: false,
+              componentResultParam: 'events',
+              componentQuery: EventsQuery,
+              componentQueryProps: {
+                sourceId: 'default',
+                startDate,
+                endDate,
+                filterQuery: `{"bool":{"should":[{"match":{"host.name":"${hostName}"}}],"minimum_should_match":1}}`,
+              },
+            }}
+            render={() => hostName}
+          />
         </EventColumns>
       );
     },
@@ -219,8 +162,3 @@ const getEventsColumns = (dispatch: Dispatch) => [
     ),
   },
 ];
-
-const ProviderContainer = styled.div`
-  user-select: none;
-  cursor: grab;
-`;

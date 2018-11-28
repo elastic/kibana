@@ -5,10 +5,10 @@
  */
 
 import * as React from 'react';
-import { Droppable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { OnDataProviderRemoved } from '../events';
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
@@ -29,13 +29,6 @@ const DropTargetDataProviders = styled.div`
   margin: 5px;
   min-height: 100px;
   padding: 5px;
-`;
-
-const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
-  transition: background-color 0.7s ease;
-  background-color: ${props =>
-    props.isDraggingOver ? '#D9D9D9' : props.theme.eui.euiColorEmptyShade};
-  min-height: 100px;
 `;
 
 const getDroppableId = (id: string): string => `droppableId.timelineProviders.${id}`;
@@ -59,24 +52,16 @@ const getDroppableId = (id: string): string => `droppableId.timelineProviders.${
  */
 export const DataProviders = pure<Props>(({ id, dataProviders, onDataProviderRemoved }) => (
   <DropTargetDataProviders data-test-subj="dataProviders">
-    <Droppable droppableId={getDroppableId(id)}>
-      {(provided, snapshot) => (
-        <ReactDndDropTarget
-          innerRef={provided.innerRef}
-          {...provided.droppableProps}
-          isDraggingOver={snapshot.isDraggingOver}
-        >
-          {dataProviders.length ? (
-            <Providers
-              id={id}
-              dataProviders={dataProviders}
-              onDataProviderRemoved={onDataProviderRemoved}
-            />
-          ) : (
-            <Empty />
-          )}
-        </ReactDndDropTarget>
+    <DroppableWrapper droppableId={getDroppableId(id)}>
+      {dataProviders.length ? (
+        <Providers
+          id={id}
+          dataProviders={dataProviders}
+          onDataProviderRemoved={onDataProviderRemoved}
+        />
+      ) : (
+        <Empty />
       )}
-    </Droppable>
+    </DroppableWrapper>
   </DropTargetDataProviders>
 ));

@@ -7,14 +7,12 @@
 import { EuiPanel } from '@elastic/eui';
 import { range } from 'lodash/fp';
 import * as React from 'react';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
 
 import { WhoAmI } from '../containers/who_am_i';
-import { IdToDataProvider } from './data_provider_context';
-import { DataProvider } from './timeline/data_providers/data_provider';
+import { DraggableWrapper } from './drag_and_drop/draggable_wrapper';
 import { mockDataProviders } from './timeline/data_providers/mock/mock_data_providers';
 
 export const VisualizationPlaceholder = styled(EuiPanel)`
@@ -37,34 +35,12 @@ export const ProviderContainer = styled.div`
 `;
 
 export const PlaceholdersContainer = styled.div``; // required by react-beautiful-dnd
-const ReactDndDropTarget = styled.div``; // required by react-beautiful-dnd
 
 interface Props {
   count: number;
   myRoute: string;
   dispatch: Dispatch;
 }
-
-interface GetDraggableIdParams {
-  dataProviderId: string;
-}
-const getDraggableId = ({ dataProviderId }: GetDraggableIdParams): string =>
-  `draggableId.provider.${dataProviderId}`;
-
-const getDroppableId = ({
-  visualizationPlaceholderId,
-}: {
-  visualizationPlaceholderId: string;
-}): string => `droppableId.provider.${visualizationPlaceholderId}`;
-
-const updateSessionStorage = (dataProvider: DataProvider): void => {
-  const oldProviders: IdToDataProvider = JSON.parse(
-    sessionStorage.getItem('dataProviders') || '{}'
-  ) as IdToDataProvider;
-
-  const newProviders = { ...oldProviders, [dataProvider.id]: dataProvider };
-  sessionStorage.setItem('dataProviders', JSON.stringify(newProviders));
-};
 
 /** TODO: delete this stub */
 class PlaceholdersComponent extends React.PureComponent<Props> {
@@ -78,39 +54,19 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
             data-test-subj="visualizationPlaceholder"
             key={`visualizationPlaceholder-${i}`}
           >
-            <Droppable droppableId={getDroppableId({ visualizationPlaceholderId: `${i}` })}>
-              {droppableProvided => (
-                <ReactDndDropTarget
-                  innerRef={droppableProvided.innerRef}
-                  {...droppableProvided.droppableProps}
-                >
-                  <WhoAmI data-test-subj="whoAmI" sourceId="default">
-                    {({ appName }) => (
-                      <div>
-                        {appName} {myRoute}
-                      </div>
-                    )}
-                  </WhoAmI>
-                  <Draggable
-                    draggableId={getDraggableId({ dataProviderId: mockDataProviders[i].id })}
-                    index={i}
-                    key={mockDataProviders[i].id}
-                  >
-                    {provided => (
-                      <ProviderContainer
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        innerRef={provided.innerRef}
-                        data-test-subj="providerContainer"
-                      >
-                        {updateSessionStorage(mockDataProviders[i])}
-                        {mockDataProviders[i].name}
-                      </ProviderContainer>
-                    )}
-                  </Draggable>
-                </ReactDndDropTarget>
+            <WhoAmI data-test-subj="whoAmI" sourceId="default">
+              {({ appName }) => (
+                <div>
+                  {appName} {myRoute}
+                </div>
               )}
-            </Droppable>
+            </WhoAmI>
+            <DraggableWrapper
+              dataProvider={mockDataProviders[i]}
+              render={() => {
+                return mockDataProviders[i].name;
+              }}
+            />
           </VisualizationPlaceholder>
         ))}
       </React.Fragment>

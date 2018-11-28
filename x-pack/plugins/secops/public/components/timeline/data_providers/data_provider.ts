@@ -6,10 +6,12 @@
 
 import * as React from 'react';
 
+export type DataProviderId = string;
+
 /** Represents the Timeline data providers */
 export interface DataProvider {
   /** Uniquely identifies a data provider */
-  id: string;
+  id: DataProviderId;
   /** Human readable */
   name: string;
   /**
@@ -28,6 +30,4 @@ export interface DataProvider {
    * default: `false`
    */
   negated: boolean;
-  /** Renders an interactive card representation of the data provider */
-  render?: () => React.ReactNode;
 }

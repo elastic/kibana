@@ -18,6 +18,7 @@ import { Range } from './body/column_headers/range_picker/ranges';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
+import { ECS } from './ecs';
 import { OnColumnSorted, OnDataProviderRemoved, OnRangeSelected } from './events';
 import { Timeline } from './timeline';
 
