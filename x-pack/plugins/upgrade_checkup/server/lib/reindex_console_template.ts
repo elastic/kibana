@@ -87,5 +87,8 @@ const removeUnsettableSettings = (settings: object) =>
     'index.uuid',
     'index.creation_date',
     'index.version.created',
+    'index.version.upgraded',
     'index.provided_name',
+    'index.blocks',
+    'index.legacy',
   ]);
