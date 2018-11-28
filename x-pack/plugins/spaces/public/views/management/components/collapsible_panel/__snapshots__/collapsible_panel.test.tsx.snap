@@ -20,10 +20,10 @@ exports[`it renders without blowing up 1`] = `
       grow={false}
     >
       <EuiTitle
-        size="m"
+        size="xs"
         textTransform="none"
       >
-        <h2>
+        <h3>
           <React.Fragment>
             <EuiIcon
               className="collapsiblePanel__logo"
@@ -33,7 +33,7 @@ exports[`it renders without blowing up 1`] = `
              
           </React.Fragment>
           Elasticsearch
-        </h2>
+        </h3>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem

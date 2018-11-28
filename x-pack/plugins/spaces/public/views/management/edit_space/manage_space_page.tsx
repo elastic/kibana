@@ -183,7 +183,7 @@ class ManageSpacePageUI extends Component<Props, State> {
     if (this.editingExistingSpace()) {
       return `Edit space`;
     }
-    return `Create space`;
+    return `Create a space`;
   };
 
   public maybeGetSecureSpacesMessage = () => {

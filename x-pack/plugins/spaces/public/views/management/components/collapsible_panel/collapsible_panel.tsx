@@ -53,8 +53,8 @@ export class CollapsiblePanel extends Component<Props, State> {
       // @ts-ignore
       <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
+          <EuiTitle size={'xs'}>
+            <h3>
               {this.props.iconType && (
                 <Fragment>
                   <EuiIcon
@@ -65,7 +65,7 @@ export class CollapsiblePanel extends Component<Props, State> {
                 </Fragment>
               )}
               {this.props.title}
-            </h2>
+            </h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

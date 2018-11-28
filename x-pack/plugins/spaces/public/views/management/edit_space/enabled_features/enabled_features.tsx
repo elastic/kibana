@@ -100,7 +100,7 @@ export class EnabledFeatures extends Component<Props, {}> {
       <span>
         <FormattedMessage
           id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
-          defaultMessage="Change feature display"
+          defaultMessage="Control feature display"
         />{' '}
         {details}
       </span>
