@@ -57,6 +57,62 @@ const prepareString = (variable, data) => {
 
 const vislibCharts = ['histogram', 'line', 'area', 'gauge', 'goal', 'heatmap', 'horizontal_bar'];
 
+const buildPipelineVisFunction = {
+  vega: visState => {
+    return `vega ${prepareString('spec', visState.params.spec)}`;
+  },
+  input_control_vis: visState => {
+    return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
+  },
+  metrics: visState => {
+    return `tsvb ${prepareJson('params', visState.params)}`;
+  },
+  timelion: visState => {
+    return `timelion_vis 
+      ${prepareString('expression', visState.params.expression)} interval='${visState.params.interval}'`;
+  },
+  markdown: visState => {
+    return `markdown 
+      ${prepareString('md', visState.params.markdown)} ${prepareJson('visConfig', visState.params)}`;
+  },
+  table: (visState, schemas) => {
+    let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)} `;
+    if (schemas.split) schemas.split.forEach(split => pipeline += `split='${split}' `);
+    if (schemas.bucket) schemas.bucket.forEach(bucket => pipeline += `bucket='${bucket}' `);
+    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    return pipeline;
+  },
+  metric: (visState, schemas) => {
+    let pipeline = `kibana_metric ${prepareJson('visConfig', visState.params)} `;
+    if (schemas.bucket) schemas.bucket.forEach(bucket => pipeline += `bucket='${bucket}' `);
+    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    return pipeline;
+  },
+  tagcloud: (visState, schemas) => {
+    let pipeline = `tagcloud ${prepareJson('visConfig', visState.params)} `;
+    schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
+    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    return pipeline;
+  },
+  region_map: (visState, schemas) => {
+    let pipeline = `regionmap ${prepareJson('visConfig', visState.params)} `;
+    schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
+    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    return pipeline;
+  },
+  tile_map: (visState, schemas) => {
+    let pipeline = `tilemap ${prepareJson('visConfig', visState.params)} `;
+    if (schemas.segment) schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
+    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    return pipeline;
+  },
+  pie: (visState, schemas) => {
+    return `kibana_pie 
+      ${prepareJson('visConfig', visState.params)} 
+      ${prepareJson('schemas', schemas)}`;
+  }
+};
+
 export const buildPipeline = (vis, params) => {
   const { searchSource } = params;
   const { indexPattern } = vis;
@@ -86,55 +142,13 @@ export const buildPipeline = (vis, params) => {
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
 
-  // response handler/visualization
-  if (vis.type.name === 'vega') {
-    pipeline += `vega ${prepareString('spec', visState.params.spec)}`;
-  } else if (vis.type.name === 'input_control_vis') {
-    pipeline += `input_control_vis ${prepareJson('visConfig', visState.params)}`;
-  } else if (vis.type.name === 'metrics') {
-    pipeline += `tsvb ${prepareJson('params', visState.params)}`;
-  } else if (vis.type.name === 'timelion') {
-    pipeline += `timelion_vis 
-      ${prepareString('expression', visState.params.expression)} 
-      interval='${visState.params.interval}'`;
-  } else if (vis.type.name === 'markdown') {
-    pipeline += `markdown 
-      ${prepareString('md', visState.params.markdown)} 
-      ${prepareJson('visConfig', visState.params)}`;
-  } else if (vis.type.name === 'table') {
-    const schemas = getSchemas(vis);
-    pipeline += `kibana_table ${prepareJson('visConfig', visState.params)} `;
-    if (schemas.split) schemas.split.forEach(split => pipeline += `split='${split}' `);
-    if (schemas.bucket) schemas.bucket.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
-  } else if (vis.type.name === 'metric') {
-    const schemas = getSchemas(vis);
-    pipeline += `kibana_metric ${prepareJson('visConfig', visState.params)} `;
-    if (schemas.bucket) schemas.bucket.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
-  } else if (vis.type.name === 'tagcloud') {
-    const schemas = getSchemas(vis);
-    pipeline += `tagcloud ${prepareJson('visConfig', visState.params)} `;
-    schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
-  } else if (vis.type.name === 'region_map') {
-    const schemas = getSchemas(vis);
-    pipeline += `regionmap ${prepareJson('visConfig', visState.params)} `;
-    schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
-  } else if (vis.type.name === 'pie') {
-    pipeline += `kibana_pie 
-      ${prepareJson('visConfig', visState.params)} 
-      ${prepareJson('schemas', getSchemas(vis))}`;
-  } else if (vis.type.name === 'tile_map') {
-    const schemas = getSchemas(vis);
-    pipeline += `tilemap ${prepareJson('visConfig', visState.params)} `;
-    if (schemas.segment) schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+  const schemas = getSchemas(vis);
+  if (buildPipelineVisFunction[vis.type.name]) {
+    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas);
   } else if (vislibCharts.includes(vis.type.name)) {
     pipeline += `vislib type='${vis.type.name}' 
       ${prepareJson('visConfig', visState.params)} 
-      ${prepareJson('schemas', getSchemas(vis))}`;
+      ${prepareJson('schemas', schemas)}`;
   } else {
     pipeline += `visualization type='${vis.type.name}' ${prepareJson('visConfig', visState.params)}`;
   }
