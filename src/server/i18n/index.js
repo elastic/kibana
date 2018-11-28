@@ -33,7 +33,7 @@ export async function i18nMixin(kbnServer, server, config) {
     })
   ));
 
-  const translationPaths = [].concat(groupedEntries);
+  const translationPaths = [].concat(...groupedEntries);
 
   i18nLoader.registerTranslationFiles(translationPaths);
 
