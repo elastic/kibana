@@ -196,11 +196,7 @@ export default () => Joi.object({
   plugins: Joi.object({
     paths: Joi.array().items(Joi.string()).default([]),
     scanDirs: Joi.array().items(Joi.string()).default([]),
-    initialize: Joi.boolean().default(true),
-    translations: Joi.object({
-      scanDirs: Joi.array().items(Joi.string()).default([]),
-      paths: Joi.array().items(Joi.string()).default([])
-    }).default()
+    initialize: Joi.boolean().default(true)
   }).default(),
 
   path: Joi.object({
@@ -263,6 +259,7 @@ export default () => Joi.object({
 
   i18n: Joi.object({
     locale: Joi.string().default('en'),
+    translationsScanDirs: Joi.array().items(Joi.string()).default([]),
   }).default(),
 
 }).default();

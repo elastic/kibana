@@ -32,7 +32,6 @@ import {
   createPack$,
   createPackageJsonAtPath$,
   createPackageJsonsInDirectory$,
-  createChildDirectory$,
 } from './plugin_pack';
 
 import {
@@ -117,20 +116,6 @@ export function findPluginSpecs(settings, configToMutate) {
     )),
     distinct(getDistinctKeyForFindResult),
     share()
-  );
-
-  const translationPath$ = config$.pipe(
-    mergeMap(config =>
-      Rx.zip(
-        Rx.of(config.get('plugins.translations.paths')),
-        ...config.get('plugins.translations.scanDirs').map(
-          path => createChildDirectory$(path).pipe(
-            toArray()
-          )
-        )
-      )
-    ),
-    map(pathArrays => [].concat(...pathArrays))
   );
 
   const pack$ = createPack$(packageJson$).pipe(
@@ -263,8 +248,6 @@ export function findPluginSpecs(settings, configToMutate) {
     invalidVersionSpec$: extendConfig$.pipe(
       mergeMap(result => result.invalidVersionSpecs)
     ),
-
-    translationPath$,
   };
 }
 

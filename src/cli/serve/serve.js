@@ -132,19 +132,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       : [],
   )));
 
-  set('plugins.translations.scanDirs', _.compact([].concat(
+  set('i18n.translationsScanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
-    get('plugins.translations.scanDirs'),
-    opts.translationsPluginDir,
-    XPACK_INSTALLED && (!XPACK_OPTIONAL || !opts.oss)
-      ? [resolve(XPACK_INSTALLED_DIR, 'plugins')]
-      : [],
-  )));
-
-  set('plugins.translations.paths', _.compact([].concat(
-    get('plugins.translations.paths'),
-    opts.translationsPluginPath,
-    [resolve(__dirname, '..', '..', 'ui')],
+    get('plugins.paths'),
+    resolve(__dirname, '..', '..', 'ui'),
   )));
 
   merge(extraCliOptions);

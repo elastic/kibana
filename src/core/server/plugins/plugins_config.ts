@@ -27,14 +27,6 @@ const pluginsSchema = schema.object({
   paths: schema.arrayOf(schema.string(), {
     defaultValue: [],
   }),
-  translations: schema.object({
-    scanDirs: schema.arrayOf(schema.string(), {
-      defaultValue: [],
-    }),
-    paths: schema.arrayOf(schema.string(), {
-      defaultValue: [],
-    }),
-  }),
 });
 
 type PluginsConfigType = TypeOf<typeof pluginsSchema>;

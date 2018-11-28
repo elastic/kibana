@@ -18,18 +18,10 @@
  */
 
 import * as Rx from 'rxjs';
-import { map, distinct, toArray, tap, mergeMap } from 'rxjs/operators';
-
-import { resolve } from 'path';
-import { readdir, existsSync } from 'fs';
-import { promisify } from 'util';
-import { i18nLoader, i18n } from '@kbn/i18n';
-
+import { map, distinct, toArray, tap } from 'rxjs/operators';
 import { findPluginSpecs } from '../../plugin_discovery';
+
 import { Plugin } from './lib';
-
-
-const readdirAsync = promisify(readdir);
 
 export async function scanMixin(kbnServer, server, config) {
   const {
@@ -41,7 +33,6 @@ export async function scanMixin(kbnServer, server, config) {
     invalidVersionSpec$,
     spec$,
     disabledSpec$,
-    translationPath$,
   } = findPluginSpecs(kbnServer.settings, config);
 
   const logging$ = Rx.merge(
@@ -113,39 +104,6 @@ export async function scanMixin(kbnServer, server, config) {
       kbnServer.disabledPluginSpecs = specs;
     })
   );
-
-  await translationPath$.pipe(
-    mergeMap(async (paths) => {
-      const translationPaths = [];
-
-      for (const pluginPath of paths) {
-        const translationsDir = resolve(pluginPath, 'translations');
-
-        if (!existsSync(translationsDir)) {
-          continue;
-        }
-
-        const translations = (await readdirAsync(translationsDir) || [])
-          .filter(filePath => filePath.endsWith('.json'))
-          .map(filePath => resolve(translationsDir, filePath));
-
-        translationPaths.push(...translations);
-      }
-
-      i18nLoader.registerTranslationFiles(translationPaths);
-
-      const locale = config.get('i18n.locale');
-      const pureTranslations = await i18nLoader.getTranslationsByLocale(locale);
-
-      const translations = Object.freeze({
-        locale,
-        ...pureTranslations,
-      });
-
-      i18n.init(translations);
-      server.decorate('server', 'getUiTranslations', () => translations);
-    })
-  ).toPromise();
 
   // await completion of enabledSpecs$, disabledSpecs$, and logging$
   await Rx.merge(logging$, enabledSpecs$, disabledSpecs$).toPromise();
