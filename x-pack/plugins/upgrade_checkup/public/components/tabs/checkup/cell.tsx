@@ -29,7 +29,7 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
   items,
   children,
 }) => (
-  <div className="upgrade-checkup__deprecation-cell">
+  <div className="upgCell">
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow>
         {headline && (

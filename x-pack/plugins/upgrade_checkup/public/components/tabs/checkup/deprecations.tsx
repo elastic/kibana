@@ -11,7 +11,7 @@ import { EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../server/lib/es_migration_apis';
 import { DeprecationCell } from './cell';
-import { ACTION_MAP, COLOR_MAP, LEVEL_MAP } from './constants';
+import { COLOR_MAP, LEVEL_MAP } from './constants';
 import { DeprecationHealth } from './health';
 import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
 import { GroupByOption, LevelFilterOption } from './types';
@@ -33,7 +33,7 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
   const items = [];
 
   if (deprecation.details) {
-    items.push({ title: 'Details', body: deprecation.details });
+    items.push({ body: deprecation.details });
   }
 
   return (
