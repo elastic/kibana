@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
 import { TransactionListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_top_transactions';
 import { IUrlParams } from '../../../store/urlParams';
