@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UMAuthDomain } from './auth';
-export { UMPingsDomain } from './pings';
+export { UMAuthAdapter, UMAuthContainer } from './adapter_types';
+export { UMMemoryAuthAdapter } from './memory_auth_adapter';
+export { UMXPackAuthAdapter } from './xpack_auth_adapter';
