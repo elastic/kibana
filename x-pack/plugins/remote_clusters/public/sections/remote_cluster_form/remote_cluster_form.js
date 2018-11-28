@@ -271,7 +271,7 @@ export class RemoteClusterFormUi extends Component {
     }, {});
 
     this.onFieldsChange(newFields);
-  }
+  };
 
   renderSeeds() {
     const {
@@ -360,7 +360,7 @@ export class RemoteClusterFormUi extends Component {
   onSkipUnavailableChange = (skipUnavailableOptionId) => {
     const skipUnavailable = skipUnavailableOptionIdToValueMap[skipUnavailableOptionId];
     this.onFieldsChange({ skipUnavailable });
-  }
+  };
 
   renderSkipUnavailable() {
     const {
