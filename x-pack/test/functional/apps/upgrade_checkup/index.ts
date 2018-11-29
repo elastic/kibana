@@ -6,10 +6,10 @@
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable:no-default-export
-export default function statusPage({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('Status page', function statusPageTestSuite() {
+export default function upgradeCheckup({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
+  describe('Upgrade checkup ', function upgradeCheckupTestSuite() {
     this.tags('ciGroup4');
 
-    loadTestFile(require.resolve('./status_page'));
+    loadTestFile(require.resolve('./upgrade_checkup'));
   });
 }

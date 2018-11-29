@@ -13,7 +13,7 @@ import { UpgradeCheckupTabs } from './components/tabs';
 export class RootComponent extends React.Component {
   public render() {
     return (
-      <EuiPage restrictWidth>
+      <EuiPage restrictWidth data-test-subj="upgradeCheckupRoot">
         <EuiPageBody>
           <EuiPageHeader>
             <EuiPageHeaderSection>

@@ -20,6 +20,7 @@ import {
   AccountSettingProvider,
   InfraHomePageProvider,
   StatusPagePageProvider,
+  UpgradeCheckupProvider,
 } from './page_objects';
 
 import {
@@ -74,6 +75,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
       resolve(__dirname, './apps/status_page'),
+      resolve(__dirname, './apps/upgrade_checkup'),
     ],
 
     // define the name and providers for services that should be
@@ -125,6 +127,7 @@ export default async function ({ readConfigFile }) {
       spaceSelector: SpaceSelectorPageProvider,
       infraHome: InfraHomePageProvider,
       statusPage: StatusPagePageProvider,
+      upgradeCheckup: UpgradeCheckupProvider,
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
