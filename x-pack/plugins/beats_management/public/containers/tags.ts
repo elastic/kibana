@@ -26,6 +26,7 @@ export class TagsContainer extends Container<ContainerState> {
     } else {
       this.query = undefined;
     }
+
     const tags = await this.libs.tags.getAll(this.query);
 
     this.setState({

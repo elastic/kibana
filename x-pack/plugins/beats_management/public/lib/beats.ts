@@ -40,7 +40,7 @@ export class BeatsLib {
 
   // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
   /** Get an array of all enrolled beats. */
-  public getAll = async (ESQuery?: any): Promise<CMPopulatedBeat[]> => {
+  public getAll = async (ESQuery?: string): Promise<CMPopulatedBeat[]> => {
     const beats = await this.adapter.getAll(ESQuery);
     return await this.mergeInTags(beats);
   };

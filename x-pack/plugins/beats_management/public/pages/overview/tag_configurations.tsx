@@ -17,7 +17,6 @@ interface PageProps extends AppPageProps {
 }
 
 interface PageState {
-  tags: BeatTag[];
   tableRef: any;
 }
 
@@ -26,7 +25,6 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
     super(props);
 
     this.state = {
-      tags: [],
       tableRef: React.createRef(),
     };
 
@@ -74,7 +72,7 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
               actionHandler: this.handleTagsAction,
             }}
             ref={this.state.tableRef}
-            items={this.state.tags}
+            items={this.props.containers.tags.state.list}
             type={TagsTableType}
           />
         )}
