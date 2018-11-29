@@ -113,7 +113,12 @@ export class WorkpadPage extends PureComponent {
         tabIndex={0} // needed to capture keyboard events; focusing is also needed but React apparently does so implicitly
       >
         {isEditable && (
-          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector={`#${page.id}`} global />
+          <Shortcuts
+            name="ELEMENT"
+            handler={keyHandler}
+            targetNodeSelector={`#${page.id}`}
+            global
+          />
         )}
         {elements
           .map(element => {
