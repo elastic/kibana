@@ -127,8 +127,8 @@ export class AppRouter extends Component<RouterProps, RouterState> {
                 {...{
                   libs: this.props.libs,
                   containers: {
-                    beats: BeatsContainer,
-                    tags: TagsContainer,
+                    beats: this.props.beatsContainer,
+                    tags: this.props.tagsContainer,
                   },
                 }}
               />
