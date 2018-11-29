@@ -20,16 +20,29 @@ import { getKibana } from './get_kibana';
  * @return {Object} A combined object containing the different responses.
  */
 export function handleLocalStats(clusterInfo, clusterStats, license, xpack, kibana) {
-  return {
+  const stats = {
     timestamp: (new Date()).toISOString(),
     cluster_uuid: get(clusterInfo, 'cluster_uuid'),
     cluster_name: get(clusterInfo, 'cluster_name'),
     version: get(clusterInfo, 'version.number'),
     cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
     collection: 'local',
-    stack_stats: { xpack, kibana },
-    license,
   };
+
+  if (license) {
+    stats.license = license;
+  }
+  if (kibana || xpack) {
+    stats.stack_stats = {};
+    if (kibana) {
+      stats.stack_stats.kibana = kibana;
+    }
+    if (xpack) {
+      stats.stack_stats.xpack = xpack;
+    }
+  }
+
+  return stats;
 }
 
 /**
@@ -60,6 +73,5 @@ export function getLocalStatsWithCaller(server, callCluster) {
 export function getLocalStats(req) {
   const { server } = req;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
-
   return getLocalStatsWithCaller(server, callWithInternalUser);
 }
