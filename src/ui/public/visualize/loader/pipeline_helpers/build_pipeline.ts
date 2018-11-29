@@ -20,7 +20,12 @@
 import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisState } from 'ui/vis';
 
-type buildVisFunction = (visState: VisState, schemas?: any) => string;
+interface Schemas {
+  metric: number[];
+  [key: string]: number[];
+}
+
+type buildVisFunction = (visState: VisState, schemas: Schemas) => string;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
@@ -36,9 +41,9 @@ const vislibCharts: string[] = [
   'line',
 ];
 
-export const getSchemas = (vis: Vis) => {
+export const getSchemas = (vis: Vis): Schemas => {
   let cnt = 0;
-  const schemas: any = {
+  const schemas: Schemas = {
     metric: [],
   };
   const responseAggs = vis.aggs.getResponseAggs();
@@ -99,7 +104,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_markdown ${expression}${visConfig}`;
   },
   table: (visState, schemas) => {
-    let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)} `;
+    let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)}`;
     if (schemas.split) {
       pipeline += `split='${schemas.split.join(',')}' `;
     }
@@ -110,7 +115,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return pipeline;
   },
   metric: (visState, schemas) => {
-    let pipeline = `kibana_metric ${prepareJson('visConfig', visState.params)} `;
+    let pipeline = `kibana_metric ${prepareJson('visConfig', visState.params)}`;
     if (schemas.bucket) {
       pipeline += `bucket='${schemas.bucket.join(',')}' `;
     }
@@ -118,19 +123,19 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return pipeline;
   },
   tagcloud: (visState, schemas) => {
-    let pipeline = `tagcloud ${prepareJson('visConfig', visState.params)} `;
+    let pipeline = `tagcloud ${prepareJson('visConfig', visState.params)}`;
     pipeline += `bucket='${schemas.segment.join(',')}' `;
     pipeline += `metric='${schemas.metric.join(',')}' `;
     return pipeline;
   },
   region_map: (visState, schemas) => {
-    let pipeline = `regionmap ${prepareJson('visConfig', visState.params)} `;
+    let pipeline = `regionmap ${prepareJson('visConfig', visState.params)}`;
     pipeline += `bucket='${schemas.segment.join(',')}' `;
     pipeline += `metric='${schemas.metric.join(',')}' `;
     return pipeline;
   },
   tile_map: (visState, schemas) => {
-    let pipeline = `tilemap ${prepareJson('visConfig', visState.params)} `;
+    let pipeline = `tilemap ${prepareJson('visConfig', visState.params)}`;
     if (schemas.segment) {
       pipeline += `bucket='${schemas.segment.join(',')}' `;
     }
@@ -140,7 +145,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   pie: (visState, schemas) => {
     const visConfig = prepareJson('visConfig', visState.params);
     const visSchemas = prepareJson('schemas', schemas);
-    return `kibana_pie ${visConfig} ${visSchemas}`;
+    return `kibana_pie ${visConfig}${visSchemas}`;
   },
 };
 
