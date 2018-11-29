@@ -73,6 +73,7 @@ interface Props {
   appName: string;
   indexPatterns: IndexPattern[];
   store: Storage;
+  intl: InjectedIntl;
 }
 
 interface State {
