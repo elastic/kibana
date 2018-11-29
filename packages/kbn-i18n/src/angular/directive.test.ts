@@ -99,6 +99,21 @@ describe('i18nDirective', () => {
     expect(element[0]).toMatchSnapshot();
   });
 
+  test(`doesn't render html in result message with text-only values`, () => {
+    const element = angular.element(
+      `<div
+        i18n-id="id"
+        i18n-default-message="Default {one} onclick=alert(1) {two} message"
+        i18n-values="{ one: '<span', two: '>Press</span>' }"
+       />`
+    );
+
+    compile(element)(scope);
+    scope.$digest();
+
+    expect(element[0]).toMatchSnapshot();
+  });
+
   test('sanitizes onclick attribute', () => {
     const element = angular.element(
       `<div

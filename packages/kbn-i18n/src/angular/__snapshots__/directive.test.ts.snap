@@ -1,5 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`i18nDirective doesn't render html in result message with text-only values 1`] = `
+<div
+  class="ng-scope ng-isolate-scope"
+  i18n-default-message="Default {one} onclick=alert(1) {two} message"
+  i18n-id="id"
+  i18n-values="{ one: '<span', two: '>Press</span>' }"
+>
+  Default &lt;span onclick=alert(1) &gt;Press&lt;/span&gt; message
+</div>
+`;
+
 exports[`i18nDirective doesn't render html in text-only value 1`] = `
 <div
   class="ng-scope ng-isolate-scope"

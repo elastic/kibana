@@ -63,8 +63,8 @@ function setContent(
   const valuesWithPlaceholders = {} as Record<string, any>;
   let hasValuesWithPlaceholders = false;
 
-  // If we have values with keys starts with HTML_KEY_PREFIX we should replace
-  // them with special placeholders that later one will be inserted as HTML
+  // If we have values with the keys that start with HTML_KEY_PREFIX we should replace
+  // them with special placeholders that later on will be inserted as HTML
   // into the DOM, the rest of the content will be treated as text. We don't
   // sanitize values at this stage as some of the values can be excluded from
   // the translated string (e.g. not used by ICU conditional statements).
