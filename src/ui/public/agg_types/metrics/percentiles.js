@@ -23,19 +23,28 @@ import '../../number_list';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
+import { i18n } from '@kbn/i18n';
 
 const valueProps = {
   makeLabel: function () {
     const label = this.params.customLabel || this.getFieldDisplayName();
-    return ordinalSuffix(this.key) + ' percentile of ' + label;
+    return i18n.translate('common.ui.aggTypes.metrics.percentiles.valuePropsLabel', {
+      defaultMessage: '{percentile} percentile of {label}',
+      values: { percentile: ordinalSuffix(this.key), label }
+    });
   }
 };
 
 export const percentilesMetricAgg = new MetricAggType({
   name: 'percentiles',
-  title: 'Percentiles',
+  title: i18n.translate('common.ui.aggTypes.metrics.percentilesTitle', {
+    defaultMessage: 'Percentiles'
+  }),
   makeLabel: function (agg) {
-    return 'Percentiles of ' + agg.getFieldDisplayName();
+    return i18n.translate('common.ui.aggTypes.metrics.percentilesLabel', {
+      defaultMessage: 'Percentiles of {field}',
+      values: { field: agg.getFieldDisplayName() }
+    });
   },
   params: [
     {
