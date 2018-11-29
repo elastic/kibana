@@ -85,6 +85,10 @@ const extractValuesFromMap = (groups: InfraWaffleMapGroup[], values: number[] = 
 
 const calculateBoundsFromMap = (map: InfraWaffleData): InfraWaffleMapBounds => {
   const values = extractValuesFromMap(map);
+  // if there is only one value then we need to set the bottom range to zero
+  if (values.length === 1) {
+    values.unshift(0);
+  }
   return { min: min(values), max: max(values) };
 };
 
