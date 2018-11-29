@@ -26,7 +26,7 @@ import {
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('create and add embeddables', async () => {
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('saves the saved visualization url to the app link', async () => {
         await PageObjects.header.clickVisualize();
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
       });
 
