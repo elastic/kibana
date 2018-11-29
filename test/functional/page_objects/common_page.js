@@ -194,26 +194,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    runScript(fn, timeout = 10000) {
-      // wait for deps on window before running script
-      return remote
-        .setExecuteAsyncTimeout(timeout)
-        .executeAsync(function (done) {
-          const interval = setInterval(function () {
-            const ready = (document.readyState === 'complete');
-            const hasJQuery = !!window.$;
-
-            if (ready && hasJQuery) {
-              console.log('doc ready, jquery loaded');
-              clearInterval(interval);
-              done();
-            }
-          }, 10);
-        }).then(function () {
-          return remote.execute(fn);
-        });
-    }
-
     async sleep(sleepMilliseconds) {
       log.debug('... sleep(' + sleepMilliseconds + ') start');
       await delay(sleepMilliseconds);
