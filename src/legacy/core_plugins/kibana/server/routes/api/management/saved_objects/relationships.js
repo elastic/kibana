@@ -20,7 +20,7 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { findRelationships } from '../../../../lib/management/saved_objects/relationships';
-import { isNotFoundError } from '../../../../../../../server/saved_objects/service/lib/errors';
+import { isNotFoundError } from '../../../../../../../../server/saved_objects/service/lib/errors';
 
 export function registerRelationships(server) {
   server.route({
