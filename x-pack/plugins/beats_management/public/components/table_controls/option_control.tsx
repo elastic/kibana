@@ -16,6 +16,7 @@ import {
   EuiToolTipProps,
 } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { isArray } from 'lodash';
 import React from 'react';
 import { AssignmentControlSchema } from '../table';
@@ -24,6 +25,7 @@ import { ActionControl } from './action_control';
 import { TagBadgeList } from './tag_badge_list';
 
 interface ComponentProps {
+  intl: InjectedIntl;
   itemType: string;
   items?: any[];
   schema: AssignmentControlSchema[];
@@ -40,7 +42,7 @@ interface FixedEuiToolTipProps extends EuiToolTipProps {
 }
 const FixedEuiToolTip = (EuiToolTip as any) as React.SFC<FixedEuiToolTipProps>;
 
-export class OptionControl extends React.PureComponent<ComponentProps, ComponentState> {
+class OptionControlUi extends React.PureComponent<ComponentProps, ComponentState> {
   constructor(props: ComponentProps) {
     super(props);
 
@@ -53,7 +55,7 @@ export class OptionControl extends React.PureComponent<ComponentProps, Component
     schemaOrArray: AssignmentControlSchema | AssignmentControlSchema[],
     panels: any = []
   ) {
-    const { items, actionHandler } = this.props;
+    const { items, actionHandler, intl } = this.props;
 
     let schema: AssignmentControlSchema | null = null;
     let schemaArray: AssignmentControlSchema[] | null = null;
@@ -91,14 +93,23 @@ export class OptionControl extends React.PureComponent<ComponentProps, Component
       });
     } else {
       if (items === undefined) {
-        panel.content = 'Unknown Error.';
+        panel.content = intl.formatMessage({
+          id: 'xpack.beatsManagement.tableControls.unknownErrorMessage',
+          defaultMessage: 'Unknown Error.',
+        });
       } else if (items.length === 0) {
         panel.content = (
           <EuiPanel>
             <EuiCard
               icon={<EuiIcon size="l" type="bolt" />}
-              title="No tags found."
-              description="Please create a new configuration tag."
+              title={intl.formatMessage({
+                id: 'xpack.beatsManagement.tableControls.noTagsFoundTitle',
+                defaultMessage: 'No tags found.',
+              })}
+              description={intl.formatMessage({
+                id: 'xpack.beatsManagement.tableControls.noTagsFoundDescription',
+                defaultMessage: 'Please create a new configuration tag.',
+              })}
             />
           </EuiPanel>
         );
@@ -121,7 +132,7 @@ export class OptionControl extends React.PureComponent<ComponentProps, Component
   }
 
   public render() {
-    const { itemType, selectionCount, schema } = this.props;
+    const { itemType, selectionCount, schema, intl } = this.props;
 
     return (
       <EuiPopover
@@ -131,8 +142,21 @@ export class OptionControl extends React.PureComponent<ComponentProps, Component
             delay="long"
             content={
               selectionCount === 0
-                ? `Select ${itemType} to perform operations such as setting tags and unenrolling Beats.`
-                : `Manage your selected ${itemType}`
+                ? intl.formatMessage(
+                    {
+                      id: 'xpack.beatsManagement.tableControls.selectItemDescription',
+                      defaultMessage:
+                        'Select {itemType} to perform operations such as setting tags and unenrolling Beats.',
+                    },
+                    { itemType }
+                  )
+                : intl.formatMessage(
+                    {
+                      id: 'xpack.beatsManagement.tableControls.manageSelectedItemDescription',
+                      defaultMessage: 'Manage your selected {itemType}',
+                    },
+                    { itemType }
+                  )
             }
           >
             <EuiButton
@@ -146,7 +170,11 @@ export class OptionControl extends React.PureComponent<ComponentProps, Component
                 });
               }}
             >
-              Manage {itemType}
+              <FormattedMessage
+                id="xpack.beatsManagement.tableControls.manageItemButtonLabel"
+                defaultMessage="Manage {itemType}"
+                values={{ itemType }}
+              />
             </EuiButton>
           </FixedEuiToolTip>
         }
@@ -164,3 +192,5 @@ export class OptionControl extends React.PureComponent<ComponentProps, Component
     );
   }
 }
+
+export const OptionControl = injectI18n(OptionControlUi);
