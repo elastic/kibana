@@ -17,7 +17,13 @@ import { ColumnRenderer } from './body/renderers';
 import { RowRenderer } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
-import { OnColumnSorted, OnDataProviderRemoved, OnFilterChange, OnRangeSelected } from './events';
+import {
+  OnColumnSorted,
+  OnDataProviderRemoved,
+  OnFilterChange,
+  OnRangeSelected,
+  OnToggleDataProviderEnabled,
+} from './events';
 import { TimelineHeader } from './header/timeline_header';
 
 interface Props {
@@ -30,6 +36,7 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
+  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   range: Range;
   rowRenderers: RowRenderer[];
   sort: Sort;
@@ -60,6 +67,7 @@ export const Timeline = pure<Props>(
     onDataProviderRemoved,
     onFilterChange,
     onRangeSelected,
+    onToggleDataProviderEnabled,
     range,
     rowRenderers,
     sort,
@@ -70,6 +78,7 @@ export const Timeline = pure<Props>(
         id={id}
         dataProviders={dataProviders}
         onDataProviderRemoved={onDataProviderRemoved}
+        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
         width={width}
       />
       {dataProviders.map(provider => {

@@ -25,7 +25,12 @@ describe('DataProviders', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DataProviders dataProviders={dataProviders} id="foo" onDataProviderRemoved={noop} />
+          <DataProviders
+            id="foo"
+            dataProviders={dataProviders}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={noop}
+          />
         </DragDropContext>
       );
 
@@ -35,7 +40,12 @@ describe('DataProviders', () => {
     test('it should NOT render a placeholder given a non-empty collection of data providers', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DataProviders dataProviders={mockDataProviders} id="foo" onDataProviderRemoved={noop} />
+          <DataProviders
+            id="foo"
+            dataProviders={mockDataProviders}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={noop}
+          />
         </DragDropContext>
       );
 
@@ -45,7 +55,12 @@ describe('DataProviders', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <DataProviders dataProviders={mockDataProviders} id="foo" onDataProviderRemoved={noop} />
+          <DataProviders
+            id="foo"
+            dataProviders={mockDataProviders}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={noop}
+          />
         </DragDropContext>
       );
 

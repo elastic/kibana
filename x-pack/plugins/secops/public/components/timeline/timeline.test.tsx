@@ -11,7 +11,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { DragDropContext } from 'react-beautiful-dnd';
 
 import { eventsQuery } from '../../containers/events/events.gql_query';
-import { mockECSData } from '../../pages/mock/mock_ecs';
+import { mockECSData } from '../../mock/mock_ecs';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';
@@ -50,6 +50,7 @@ describe('Timeline', () => {
               onDataProviderRemoved={noop}
               onFilterChange={noop}
               onRangeSelected={noop}
+              onToggleDataProviderEnabled={noop}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -75,6 +76,7 @@ describe('Timeline', () => {
               onDataProviderRemoved={noop}
               onFilterChange={noop}
               onRangeSelected={noop}
+              onToggleDataProviderEnabled={noop}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -105,6 +107,7 @@ describe('Timeline', () => {
                 onDataProviderRemoved={noop}
                 onFilterChange={noop}
                 onRangeSelected={noop}
+                onToggleDataProviderEnabled={noop}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -142,6 +145,7 @@ describe('Timeline', () => {
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onFilterChange={noop}
                 onRangeSelected={noop}
+                onToggleDataProviderEnabled={noop}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -193,6 +197,7 @@ describe('Timeline', () => {
                 onDataProviderRemoved={noop}
                 onFilterChange={mockOnFilterChange}
                 onRangeSelected={noop}
+                onToggleDataProviderEnabled={noop}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -210,6 +215,59 @@ describe('Timeline', () => {
         expect(mockOnFilterChange).toBeCalledWith({
           columnId: headers[0].id,
           filter: newFilter,
+        });
+      });
+    });
+
+    describe('onToggleDataProviderEnabled', () => {
+      test('it invokes the onToggleDataProviderEnabled callback when the input is updated', () => {
+        const mockOnToggleDataProviderEnabled = jest.fn();
+
+        // for this test, all columns have text filters
+        const allColumnsHaveTextFilters = headers.map(header => ({
+          ...header,
+          columnHeaderType: 'text-filter' as ColumnHeaderType,
+        }));
+
+        const wrapper = mount(
+          <DragDropContext onDragEnd={noop}>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                onColumnSorted={noop}
+                onDataProviderRemoved={noop}
+                onFilterChange={noop}
+                onRangeSelected={noop}
+                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={sort}
+                width={1000}
+              />
+            </MockedProvider>
+          </DragDropContext>
+        );
+
+        wrapper
+          .find('[data-test-subj="switchButton"]')
+          .at(1)
+          .simulate('click');
+
+        const callbackParams = pick(
+          ['enabled', 'dataProvider.id', 'dataProvider.name', 'dataProvider.negated'],
+          mockOnToggleDataProviderEnabled.mock.calls[0][0]
+        );
+
+        expect(callbackParams).toEqual({
+          dataProvider: {
+            name: 'Provider 1',
+            negated: false,
+            id: 'id-Provider 1',
+          },
+          enabled: false,
         });
       });
     });

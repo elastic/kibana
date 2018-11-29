@@ -30,19 +30,19 @@ interface StateReduxProps {
 type Props = StateReduxProps;
 
 interface AddProviderToTimelineParams {
+  dataProviders: IdToDataProvider;
   result: DropResult;
   dispatch: Dispatch;
 }
 
-const addProviderToTimeline = ({ result, dispatch }: AddProviderToTimelineParams): void => {
+const addProviderToTimeline = ({
+  dataProviders,
+  result,
+  dispatch,
+}: AddProviderToTimelineParams): void => {
   const timeline = getTimelineIdFromDestination(result);
   const providerId = getProviderIdFromDraggable(result);
-
-  const providers: IdToDataProvider = JSON.parse(
-    sessionStorage.getItem('dataProviders') || '{}'
-  ) as IdToDataProvider;
-
-  const provider = providers[providerId];
+  const provider = dataProviders[providerId];
 
   if (provider) {
     dispatch(timelineActions.addProvider({ id: timeline, provider }));
@@ -55,7 +55,7 @@ class DragDropContextWrapperComponent extends React.PureComponent<Props> {
 
     const onDragEnd = (result: DropResult, dataProvider: DataProvider) => {
       if (providerWasDroppedOnTimeline(result)) {
-        addProviderToTimeline({ result, dispatch: dispatch! });
+        addProviderToTimeline({ dataProviders: dataProviders!, result, dispatch: dispatch! });
       }
     };
 

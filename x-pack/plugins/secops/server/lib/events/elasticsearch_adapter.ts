@@ -90,7 +90,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
 
     const query = {
       allowNoIndices: true,
-      index: options.sourceConfiguration.fileAlias,
+      index: options.sourceConfiguration.logAlias,
       ignoreUnavailable: true,
       body: {
         aggregations: agg,

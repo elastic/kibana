@@ -6,23 +6,12 @@
 
 import { Logger } from '../../utils/logger';
 import { Context } from '../index';
+import { mockSourceData } from './source.mock';
 
 /* tslint:disable */
 export const sourcesDataMock =
 [
-  {
-    "id": "default",
-    "configuration": {
-      "fields": {
-        "container": "docker.container.name",
-        "host": "beat.hostname",
-        "message": [
-          "message",
-          "@message"
-        ]
-      }
-    }
-  }
+  mockSourceData,
 ];
 /* tslint:enable */
 

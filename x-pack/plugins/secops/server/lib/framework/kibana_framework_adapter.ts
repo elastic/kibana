@@ -8,17 +8,18 @@ import { GraphQLSchema } from 'graphql';
 import { Request, Server } from 'hapi';
 
 import {
-  FrameworkAdapter,
-  FrameworkRequest,
-  internalFrameworkRequest,
-  WrappableRequest,
-} from './adapter_types';
-import {
   graphiqlHapi,
   graphqlHapi,
   HapiGraphiQLPluginOptions,
   HapiGraphQLPluginOptions,
 } from './apollo_server_hapi';
+import {
+  FrameworkAdapter,
+  FrameworkIndexPatternsService,
+  FrameworkRequest,
+  internalFrameworkRequest,
+  WrappableRequest,
+} from './types';
 
 declare module 'hapi' {
   interface PluginProperties {
@@ -82,6 +83,26 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       plugin: graphiqlHapi,
     });
   }
+
+  public getIndexPatternsService(
+    request: FrameworkRequest<Request>
+  ): FrameworkIndexPatternsService {
+    if (!isServerWithIndexPatternsServiceFactory(this.server)) {
+      throw new Error('Failed to access indexPatternsService for the request');
+    }
+    return this.server.indexPatternsServiceFactory({
+      // tslint:disable-next-line:no-any
+      callCluster: async (method: string, args: [object], ...rest: any[]) => {
+        const fieldCaps = await this.callWithRequest(
+          request,
+          method,
+          { ...args, allowNoIndices: true },
+          ...rest
+        );
+        return fieldCaps;
+      },
+    });
+  }
 }
 
 export function wrapRequest<InternalRequest extends WrappableRequest>(
@@ -96,3 +117,16 @@ export function wrapRequest<InternalRequest extends WrappableRequest>(
     query,
   };
 }
+
+interface ServerWithIndexPatternsServiceFactory extends Server {
+  indexPatternsServiceFactory(options: {
+    // tslint:disable-next-line:no-any
+    callCluster: (...args: any[]) => any;
+  }): FrameworkIndexPatternsService;
+}
+
+const isServerWithIndexPatternsServiceFactory = (
+  server: Server
+): server is ServerWithIndexPatternsServiceFactory =>
+  // tslint:disable-next-line:no-any
+  typeof (server as any).indexPatternsServiceFactory === 'function';

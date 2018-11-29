@@ -19,12 +19,19 @@ export const sourcesSchema = gql`
     id: ID!
     "The raw configuration of the source"
     configuration: SourceConfiguration!
+    "The status of the source"
+    status: SourceStatus!
   }
+
+  "The status of an infrastructure data source"
+  type SourceStatus
 
   "A set of configuration options for a security data source"
   type SourceConfiguration {
     "The alias to read file data from"
-    fileAlias: String!
+    logAlias: String!
+    "The alias to read auditbeat data from"
+    auditbeatAlias: String!
     "The field mapping to use for this source"
     fields: SourceFields!
   }

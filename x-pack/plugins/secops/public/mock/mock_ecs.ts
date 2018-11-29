@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ECS } from '../../components/timeline/ecs';
+import { ECS } from '../components/timeline/ecs';
 
 export const mockECSData: ECS[] = [
   {

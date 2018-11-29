@@ -20,7 +20,12 @@ describe('Providers', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <Providers dataProviders={mockDataProviders} id="foo" onDataProviderRemoved={noop} />
+          <Providers
+            id="foo"
+            dataProviders={mockDataProviders}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={noop}
+          />
         </DragDropContext>
       );
 
@@ -37,9 +42,10 @@ describe('Providers', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
           <Providers
-            dataProviders={mockDataProviders}
             id="foo"
+            dataProviders={mockDataProviders}
             onDataProviderRemoved={mockOnDataProviderRemoved}
+            onToggleDataProviderEnabled={noop}
           />
         </DragDropContext>
       );
@@ -59,6 +65,40 @@ describe('Providers', () => {
         id: 'id-Provider 1',
         name: 'Provider 1',
         negated: false,
+      });
+    });
+  });
+
+  describe('#onToggleDataProviderEnabled', () => {
+    test('it invokes the onToggleDataProviderEnabled callback when the switch button is clicked', () => {
+      const mockOnToggleDataProviderEnabled = jest.fn();
+
+      const wrapper = mount(
+        <Providers
+          id="foo"
+          dataProviders={mockDataProviders}
+          onDataProviderRemoved={noop}
+          onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+        />
+      );
+
+      wrapper
+        .find('[data-test-subj="switchButton"]')
+        .at(1)
+        .simulate('click');
+
+      const callbackParams = pick(
+        ['enabled', 'dataProvider.id', 'dataProvider.name', 'dataProvider.negated'],
+        mockOnToggleDataProviderEnabled.mock.calls[0][0]
+      );
+
+      expect(callbackParams).toEqual({
+        dataProvider: {
+          name: 'Provider 1',
+          negated: false,
+          id: 'id-Provider 1',
+        },
+        enabled: false,
       });
     });
   });

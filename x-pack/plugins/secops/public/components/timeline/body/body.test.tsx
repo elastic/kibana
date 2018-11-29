@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { Body } from '.';
-import { mockECSData } from '../../../pages/mock/mock_ecs';
+import { mockECSData } from '../../../mock/mock_ecs';
 import { headers } from './column_headers/headers';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';

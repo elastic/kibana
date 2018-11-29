@@ -9,7 +9,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
-import { OnDataProviderRemoved } from '../events';
+import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { Providers } from './providers';
@@ -18,6 +18,7 @@ interface Props {
   id: string;
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
+  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
 }
 
 const DropTargetDataProviders = styled.div`
@@ -50,18 +51,21 @@ const getDroppableId = (id: string): string => `droppableId.timelineProviders.${
  * the user to drop anything with a facet count into
  * the data pro section.
  */
-export const DataProviders = pure<Props>(({ id, dataProviders, onDataProviderRemoved }) => (
-  <DropTargetDataProviders data-test-subj="dataProviders">
-    <DroppableWrapper droppableId={getDroppableId(id)}>
-      {dataProviders.length ? (
-        <Providers
-          id={id}
-          dataProviders={dataProviders}
-          onDataProviderRemoved={onDataProviderRemoved}
-        />
-      ) : (
-        <Empty />
-      )}
-    </DroppableWrapper>
-  </DropTargetDataProviders>
-));
+export const DataProviders = pure<Props>(
+  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (
+    <DropTargetDataProviders data-test-subj="dataProviders">
+      <DroppableWrapper droppableId={getDroppableId(id)}>
+        {dataProviders.length ? (
+          <Providers
+            id={id}
+            dataProviders={dataProviders}
+            onDataProviderRemoved={onDataProviderRemoved}
+            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+          />
+        ) : (
+          <Empty />
+        )}
+      </DroppableWrapper>
+    </DropTargetDataProviders>
+  )
+);
