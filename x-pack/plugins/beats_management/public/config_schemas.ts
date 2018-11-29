@@ -359,21 +359,29 @@ const heartbeatConfig: YamlConfigSchema[] = [
   {
     id: 'urls',
     ui: {
-      label: 'Urls',
+      label: 'URLs',
       type: 'multi-input',
-      helpText: 'Put each host on a separate line',
+      helpText: 'For HTTP monitors: put each URL on a separate line',
       placeholder: 'https://www.elastic.co/\nhttp://localhost:80/',
     },
     // TODO: we should add multi-list host validation
+    error: 'One URL per line',
+  },
+  {
+    id: 'hosts',
+    ui: {
+      label: 'Hosts',
+      type: 'multi-input',
+      helpText: 'For TCP/ICMP monitors: put each Host on a separate line',
+    },
     error: 'One host per line',
-    required: true,
   },
   {
     id: 'check.response.status',
     ui: {
       label: 'Check Response Status',
       type: 'input',
-      helpText: 'Optionally specify a response status code check',
+      helpText: 'Optionally specify an HTTP response status code check',
       placeholder: 'e.g. 200',
     },
     error: 'Please provide a valid response status',
