@@ -1,5 +1,5 @@
 .kbnGlobalNav {
-  width: $kbnChromeGlobalNavClosedWidth;
+  width: $kbnGlobalNavClosedWidth;
   position: fixed;
   left: 0;
   top: 0;
@@ -9,17 +9,17 @@
   overflow: hidden;
 
   &.kbnGlobalNav-isOpen {
-    width: $kbnChromeGlobalNavOpenWidth;
+    width: $kbnGlobalNavOpenWidth;
 
     + .app-wrapper {
-      left: $kbnChromeGlobalNavOpenWidth;
+      left: $kbnGlobalNavOpenWidth;
     }
   }
 
   .kbnGlobalNav__smallLogoBrand,
   .kbnGlobalNav__logoBrand {
     height: $kbnGlobalNavLogoHeight;
-    width: $kbnChromeGlobalNavOpenWidth;
+    width: $kbnGlobalNavOpenWidth;
     list-style-type: none;
   }
 }

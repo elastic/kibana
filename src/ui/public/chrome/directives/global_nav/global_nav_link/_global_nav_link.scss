@@ -1,6 +1,6 @@
 .kbnGlobalNavLink {
   &:hover {
-    background-color: darken($euiColorPrimary, 15%);
+    background-color: shade($euiColorPrimary, 15%);
   }
 
   &.active {
@@ -10,7 +10,7 @@
 
 .kbnGlobalNavLink {
   position: relative;
-  width: $kbnChromeGlobalNavClosedWidth;
+  width: $kbnGlobalNavClosedWidth;
   height: $kbnGlobalNavAppIconHeight;
   line-height: $euiSizeL;
 
@@ -32,7 +32,7 @@
 
 .kbnGlobalNav-isOpen {
   .kbnGlobalNavLink {
-    width: $kbnChromeGlobalNavOpenWidth;
+    width: $kbnGlobalNavOpenWidth;
   }
 }
 
@@ -46,7 +46,7 @@
 
 .kbnGlobalNavLink__icon {
   display: inline-block;
-  width: $kbnChromeGlobalNavClosedWidth;
+  width: $kbnGlobalNavClosedWidth;
   height: $kbnGlobalNavAppIconHeight;
   float: left;
   text-align: center;
@@ -74,7 +74,7 @@
 .kbnGlobalNavLink__title {
   @include euiTextTruncate;
   display: none;
-  width: $kbnChromeGlobalNavOpenWidth - $kbnChromeGlobalNavClosedWidth - 3px;
+  width: $kbnGlobalNavOpenWidth - $kbnGlobalNavClosedWidth - 3px;
   float: right;
   font-size: 0.9em;
   text-align: left;

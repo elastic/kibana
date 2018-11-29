@@ -14,11 +14,11 @@
 .gphGraph__container {
   position: fixed;
   height: 100%;
-  width: calc(100% - #{$kbnChromeGlobalNavClosedWidth}); /* 1 */
+  width: calc(100% - #{$kbnGlobalNavClosedWidth}); /* 1 */
 }
 
 .kbnGlobalNav.kbnGlobalNav-isOpen + .app-wrapper .gphGraph__container {
-  width: calc(100% - #{$kbnChromeGlobalNavOpenWidth}); /* 1 */
+  width: calc(100% - #{$kbnGlobalNavOpenWidth}); /* 1 */
 }
 
 .gphGraph {

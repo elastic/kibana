@@ -27,7 +27,7 @@
     z-index: $euiZLevel1 + 1;
     visibility: visible;
     display: block;
-    animation: animate-loading-indicator 2s linear infinite;
+    animation: kbn-animate-loading-indicator 2s linear infinite;
     background-color: $kbnLoadingIndicatorColor2;
     background-image: linear-gradient(to right,
       $kbnLoadingIndicatorColor1 0%,
@@ -40,7 +40,7 @@
     width: 200%;
   }
 
-  @keyframes animate-loading-indicator {
+  @keyframes kbn-animate-loading-indicator {
     from { transform: translateX(0); }
     to { transform: translateX(-$kbnLoadingIndicatorBackgroundSize); }
   }
