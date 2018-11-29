@@ -15,7 +15,7 @@ import { dragAndDropActions } from '../../store/local/drag_and_drop';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
-import { DataProvider, DataProviderId } from '../timeline/data_providers/data_provider';
+import { DataProvider } from '../timeline/data_providers/data_provider';
 import { getDraggableId, getDroppableId } from './helpers';
 
 export interface OwnProps {
