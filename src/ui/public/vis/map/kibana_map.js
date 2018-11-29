@@ -144,6 +144,7 @@ const makeZoomWarningMsg = (function () {
                 checked: target.checked
               }, () => this.props.onChange(this.state.checked));
             }}
+            data-test-subj="suppressZoomWarnings"
           />
         </div>
       );
@@ -152,7 +153,8 @@ const makeZoomWarningMsg = (function () {
 
   const zoomToast = ({
     title: 'Max Zoom Warning',
-    text: <ZoomWarning onChange={setZoomMsg}/>
+    text: <ZoomWarning onChange={setZoomMsg}/>,
+    'data-test-subj': 'maxZoomWarning',
   });
 
   return (getZoomLevel, getMaxZoomLevel) => {
@@ -558,8 +560,11 @@ export class KibanaMap extends EventEmitter {
     const zoomWarningMsg = makeZoomWarningMsg(this.getZoomLevel, this.getMaxZoomLevel);
 
     this._leafletMap.on('zoomend', zoomWarningMsg);
+    this._containerNode.setAttribute('data-test-subj', 'zoomWarningEnabled');
+
     layer.on('remove', () => {
       this._leafletMap.off('zoomend', zoomWarningMsg);
+      this._containerNode.removeAttribute('data-test-subj');
     });
   }
 
