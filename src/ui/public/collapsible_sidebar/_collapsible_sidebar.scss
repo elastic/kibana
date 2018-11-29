@@ -1,0 +1,44 @@
+// SASSTODO: Can't rename main class
+// because it's also the name of the angular directive
+.collapsible-sidebar {
+  position: relative;
+  z-index: $kbnDiscoverSidebarDepth;
+
+  .kbnCollapsibleSidebar__collapseButton {
+    position: absolute;
+    top: 0;
+    right: -21px;
+    cursor: pointer;
+    z-index: -1;
+  }
+
+  &.closed {
+    width: 0 !important;
+    border-right-width: 0;
+    border-left-width: 0;
+
+    > * {
+      visibility: hidden;
+    }
+
+    .kbnCollapsibleSidebar__collapseButton {
+      visibility: visible;
+
+      .chevron-cont:before {
+        content: "\F138";
+      }
+    }
+  }
+}
+
+@include euiBreakpoint('xs', 's', 'm') {
+  .collapsible-sidebar {
+    &.closed {
+      display: none;
+    }
+
+    .kbnCollapsibleSidebar__collapseButton {
+      display: none;
+    }
+  }
+}
