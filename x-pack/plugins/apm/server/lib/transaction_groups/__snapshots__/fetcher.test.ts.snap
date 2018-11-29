@@ -14,6 +14,11 @@ Array [
                   "field": "transaction.duration.us",
                 },
               },
+              "durationSum": Object {
+                "sum": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
               "p95": Object {
                 "percentiles": Object {
                   "field": "transaction.duration.us",
@@ -41,7 +46,7 @@ Array [
             "terms": Object {
               "field": "transaction.name.keyword",
               "order": Object {
-                "avg": "desc",
+                "durationSum": "desc",
               },
               "size": 100,
             },

@@ -24,6 +24,9 @@ interface Bucket {
       '95.0': number;
     };
   };
+  durationSum: {
+    value: number;
+  };
   sample: {
     hits: {
       total: number;
@@ -57,7 +60,7 @@ export function transactionGroupsFetcher(
         transactions: {
           terms: {
             field: `${TRANSACTION_NAME}.keyword`,
-            order: { avg: 'desc' },
+            order: { durationSum: 'desc' },
             size: 100
           },
           aggs: {
@@ -73,6 +76,9 @@ export function transactionGroupsFetcher(
             avg: { avg: { field: TRANSACTION_DURATION } },
             p95: {
               percentiles: { field: TRANSACTION_DURATION, percents: [95] }
+            },
+            durationSum: {
+              sum: { field: 'transaction.duration.us' }
             }
           }
         }
