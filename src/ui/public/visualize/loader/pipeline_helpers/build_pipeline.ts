@@ -100,50 +100,50 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   table: (visState, schemas) => {
     let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)} `;
     if (schemas.split) {
-      schemas.split.forEach(split => (pipeline += `split='${split}' `));
+      pipeline += `split='${schemas.split.join(',')}' `;
     }
     if (schemas.bucket) {
-      schemas.bucket.forEach(bucket => (pipeline += `bucket='${bucket}' `));
+      pipeline += `bucket='${schemas.bucket.join(',')}' `;
     }
-    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
+    pipeline += `metric='${schemas.metric.join(',')}' `;
     return pipeline;
   },
   metric: (visState, schemas) => {
     let pipeline = `kibana_metric ${prepareJson('visConfig', visState.params)} `;
     if (schemas.bucket) {
-      schemas.bucket.forEach(bucket => (pipeline += `bucket='${bucket}' `));
+      pipeline += `bucket='${schemas.bucket.join(',')}' `;
     }
-    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
+    pipeline += `metric='${schemas.metric.join(',')}' `;
     return pipeline;
   },
   tagcloud: (visState, schemas) => {
     let pipeline = `tagcloud ${prepareJson('visConfig', visState.params)} `;
-    schemas.segment.forEach(bucket => (pipeline += `bucket='${bucket}' `));
-    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
+    pipeline += `bucket='${schemas.segment.join(',')}' `;
+    pipeline += `metric='${schemas.metric.join(',')}' `;
     return pipeline;
   },
   region_map: (visState, schemas) => {
     let pipeline = `regionmap ${prepareJson('visConfig', visState.params)} `;
-    schemas.segment.forEach(bucket => (pipeline += `bucket='${bucket}' `));
-    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
+    pipeline += `bucket='${schemas.segment.join(',')}' `;
+    pipeline += `metric='${schemas.metric.join(',')}' `;
     return pipeline;
   },
   tile_map: (visState, schemas) => {
     let pipeline = `tilemap ${prepareJson('visConfig', visState.params)} `;
     if (schemas.segment) {
-      schemas.segment.forEach(bucket => (pipeline += `bucket='${bucket}' `));
+      pipeline += `bucket='${schemas.segment.join(',')}' `;
     }
-    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
+    pipeline += `metric='${schemas.metric.join(',')}' `;
     return pipeline;
   },
   pie: (visState, schemas) => {
     const visConfig = prepareJson('visConfig', visState.params);
-    const schemas = prepareJson('schemas', schemas);
-    return `kibana_pie ${visConfig}${schemas}`;
+    const visSchemas = prepareJson('schemas', schemas);
+    return `kibana_pie ${visConfig} ${visSchemas}`;
   },
 };
 
-export const buildPipeline = (vis: Vis, params) => {
+export const buildPipeline = (vis: Vis, params: any) => {
   const { searchSource } = params;
   const { indexPattern } = vis;
   const query = searchSource.getField('query');

@@ -17,11 +17,13 @@
  * under the License.
  */
 
+// @ts-ignore
 import { fromExpression } from '@kbn/interpreter/common';
+// @ts-ignore
 import { interpretAst } from '@kbn/interpreter/public';
 
-export const runPipeline = async (pipeline: string, context, handlers) => {
-  const ast = fromExpression(pipeline);
+export const runPipeline = async (expression: string, context: any, handlers: any) => {
+  const ast = fromExpression(expression);
   const pipelineResponse = await interpretAst(ast, context, handlers);
   return pipelineResponse;
 };

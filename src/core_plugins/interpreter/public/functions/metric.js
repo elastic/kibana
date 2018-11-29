@@ -39,7 +39,7 @@ export default () => ({
     metric: {
       types: ['string'],
       default: '1',
-      multi: true,
+      multi: false,
     },
     visConfig: {
       types: ['string', 'null'],
@@ -49,9 +49,12 @@ export default () => ({
   },
   fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig || {});
-    const metricColumn = context.columns.find((column, i) =>
-      column.id === args.metric || column.name === args.metric || i === parseInt(args.metric));
-    metricColumn.aggConfig.schema = 'metric';
+    const metrics = args.metric.split(',');
+    metrics.forEach(metric => {
+      const metricColumn = context.columns.find((column, i) =>
+        column.id === metric || column.name === metric || i === parseInt(metric));
+      metricColumn.aggConfig.schema = 'metric';
+    });
     if (args.bucket) {
       const bucketColumn = context.columns.find((column, i) =>
         column.id === args.bucket || column.name === args.bucket || i === parseInt(args.bucket));

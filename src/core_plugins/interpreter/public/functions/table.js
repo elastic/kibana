@@ -37,16 +37,16 @@ export default () => ({
   args: {
     bucket: {
       types: ['string'],
-      multi: true,
+      multi: false,
     },
     split: {
       types: ['string'],
-      multi: true,
+      multi: false,
     },
     metric: {
       types: ['string'],
       default: '1',
-      multi: true,
+      multi: false,
     },
     visConfig: {
       types: ['string', 'null'],
@@ -56,20 +56,20 @@ export default () => ({
   },
   async fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig || {});
-    args.metric.forEach(metric => {
+    args.metric.split(',').forEach(metric => {
       const metricColumn = context.columns.find((column, i) =>
         column.id === metric || column.name === metric || i === parseInt(metric));
       metricColumn.aggConfig.schema = 'metric';
     });
     if (args.bucket) {
-      args.bucket.forEach(bucket => {
+      args.bucket.split(',').forEach(bucket => {
         const bucketColumn = context.columns.find((column, i) =>
           column.id === bucket || column.name === bucket || i === parseInt(bucket));
         bucketColumn.aggConfig.schema = 'bucket';
       });
     }
     if (args.split) {
-      args.split.forEach(split => {
+      args.split.split(',').forEach(split => {
         const splitColumn = context.columns.find((column, i) =>
           column.id === split || column.name === split || i === parseInt(split));
         splitColumn.aggConfig.schema = 'split';
