@@ -23,17 +23,17 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   KuiEmptyTablePrompt,
   KuiEmptyTablePromptPanel,
-  KuiLinkButton,
+  KuiButton,
   KuiButtonIcon,
 } from '@kbn/ui-framework/components';
 
-function NoVisualizationsPromptUi({ intl }) {
+function NoVisualizationsPromptUi({ onCreateVis, intl }) {
   return (
     <KuiEmptyTablePromptPanel>
       <KuiEmptyTablePrompt
         actions={
-          <KuiLinkButton
-            href="#/visualize/new"
+          <KuiButton
+            onClick={onCreateVis}
             buttonType="primary"
             icon={<KuiButtonIcon type="create"/>}
           >
@@ -41,7 +41,7 @@ function NoVisualizationsPromptUi({ intl }) {
               id="kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel"
               defaultMessage="Create a visualization"
             />
-          </KuiLinkButton>
+          </KuiButton>
         }
         message={intl.formatMessage({
           id: 'kbn.visualize.listing.noVisualizationsText',

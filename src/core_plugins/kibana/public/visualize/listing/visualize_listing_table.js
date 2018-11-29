@@ -322,7 +322,7 @@ class VisualizeListingTableUi extends Component {
         return <KuiListingTableNoMatchesPrompt />;
       }
 
-      return <NoVisualizationsPrompt />;
+      return <NoVisualizationsPrompt onCreateVis={this.onCreate}/>;
     }
 
     return null;
