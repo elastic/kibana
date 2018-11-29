@@ -220,7 +220,7 @@ describe('QueryBar', () => {
       />
     );
 
-    const instance = component.instance() as QueryBar;
+    const instance = component.instance() as QueryBar.WrappedComponent;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('change', { target: { value: 'extension:jpg' } });
@@ -245,7 +245,7 @@ describe('QueryBar', () => {
       />
     );
 
-    const instance = component.instance() as QueryBar;
+    const instance = component.instance() as QueryBar.WrappedComponent;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('change', { target: { value: 'extension:jpg' } });
