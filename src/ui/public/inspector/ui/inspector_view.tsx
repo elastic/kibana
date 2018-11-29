@@ -30,7 +30,7 @@ import { EuiFlyoutBody } from '@elastic/eui';
  */
 const InspectorView: React.SFC<{ useFlex?: boolean }> = ({ useFlex, children }) => {
   const classes = classNames({
-    'inspector-view__flex': Boolean(useFlex),
+    'kbnInspectorView--flex': Boolean(useFlex),
   });
   return <EuiFlyoutBody className={classes}>{children}</EuiFlyoutBody>;
 };

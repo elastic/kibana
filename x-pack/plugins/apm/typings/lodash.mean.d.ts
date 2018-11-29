@@ -5,6 +5,6 @@
  */
 
 declare module 'lodash.mean' {
-  function mean(numbers: number[]): number;
+  function mean(numbers: Array<number | null | undefined>): number;
   export = mean;
 }
