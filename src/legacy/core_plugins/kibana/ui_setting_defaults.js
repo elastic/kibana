@@ -19,7 +19,7 @@
 
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
-import { IS_KIBANA_RELEASE } from '../../utils';
+import { IS_KIBANA_RELEASE } from '../../../utils';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();

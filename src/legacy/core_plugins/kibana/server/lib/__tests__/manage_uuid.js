@@ -19,10 +19,10 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { startTestServers } from '../../../../../test_utils/kbn_server';
+import { startTestServers } from '../../../../../../test_utils/kbn_server';
 import manageUuid from '../manage_uuid';
 
-describe('core_plugins/kibana/server/lib', function () {
+describe('legacy/core_plugins/kibana/server/lib', function () {
   describe('manage_uuid', function () {
     const testUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
     let kbnServer;
