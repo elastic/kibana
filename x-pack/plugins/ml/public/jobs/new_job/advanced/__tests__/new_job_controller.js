@@ -24,7 +24,10 @@ describe('ML - Advanced Job Wizard - New Job Controller', () => {
       };
 
       const scope = $rootScope.$new();
-      $controller('MlNewJob', { $scope: scope });
+
+      expect(() => {
+        $controller('MlNewJob', { $scope: scope });
+      }).to.not.throwError();
 
       // This is just about initializing the controller and making sure
       // all angularjs based dependencies get loaded without error.
