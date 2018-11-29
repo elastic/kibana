@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
+import { i18n } from '@kbn/i18n';
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
@@ -31,8 +32,12 @@ export async function createDefaultSpace(server: any) {
     await savedObjectsRepository.create(
       'space',
       {
-        name: 'Default',
-        description: 'This is your default space!',
+        name: i18n.translate('xpack.spaces.defaultSpaceTitle', {
+          defaultMessage: 'Default',
+        }),
+        description: i18n.translate('xpack.spaces.defaultSpaceDescription', {
+          defaultMessage: 'This is your default space!',
+        }),
         color: '#00bfb3',
         _reserved: true,
       },
