@@ -20,7 +20,6 @@
 import expect from 'expect.js';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
-  const config = getService('config');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -28,26 +27,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
-  const getRemote = () => (
-    getService('remote')
-      .setFindTimeout(config.get('timeouts.find'))
-  );
-
   class DiscoverPage {
-    getQueryField() {
-      return getRemote()
-        .findByCssSelector('input[ng-model=\'state.query\']');
+    async getQueryField() {
+      return await find.byCssSelector('input[ng-model=\'state.query\']');
     }
 
-    getQuerySearchButton() {
-      return getRemote()
-        .findByCssSelector('button[aria-label=\'Search\']');
+    async getQuerySearchButton() {
+      return await find.byCssSelector('button[aria-label=\'Search\']');
     }
 
-    getChartTimespan() {
-      return getRemote()
-        .findByCssSelector('.small > span:nth-child(1)')
-        .getVisibleText();
+    async getChartTimespan() {
+      const el = await find.byCssSelector('.small > span:nth-child(1)');
+      return await el.getVisibleText();
     }
 
     async saveSearch(searchName) {
@@ -126,9 +117,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getBarChartXTicks() {
-      return getRemote()
-        .findAllByCssSelector('.x.axis.CategoryAxis-1 > .tick > text')
-        .getVisibleText();
+      const elements = await find.allByCssSelector('.x.axis.CategoryAxis-1 > .tick > text');
+      return await Promise.all(elements.map(async el => el.getVisibleText()));
     }
 
     getBarChartData() {
@@ -137,8 +127,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
       return PageObjects.header.waitUntilLoadingHasFinished()
         .then(() => {
-          return getRemote()
-            .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type');
+          return find.byCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type');
         })
         .then(function setYAxisLabel(y) {
           return y
@@ -151,8 +140,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         })
       // 2). find and save the y-axis pixel size (the chart height)
         .then(function getRect() {
-          return getRemote()
-            .findByCssSelector('rect.background')
+          return find.byCssSelector('rect.background')
             .then(function getRectHeight(chartAreaObj) {
               return chartAreaObj
                 .getAttribute('height')
@@ -165,9 +153,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         })
       // 3). get the chart-wrapper elements
         .then(function () {
-          return getRemote()
           // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-            .findAllByCssSelector('svg > g > g.series > rect') // rect
+          return find.allByCssSelector('svg > g > g.series > rect') // rect
             .then(function (chartTypes) {
               function getChartType(chart) {
                 return chart
@@ -203,13 +190,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     query(queryString) {
-      return getRemote()
-        .findByCssSelector('input[aria-label="Search input"]')
+      return find.byCssSelector('input[aria-label="Search input"]')
         .clearValue()
         .type(queryString)
         .then(() => {
-          return getRemote()
-            .findByCssSelector('button[aria-label="Search"]')
+          return find.byCssSelector('button[aria-label="Search"]')
             .click();
         })
         .then(() => {
@@ -217,52 +202,41 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         });
     }
 
-    getDocHeader() {
-      return getRemote()
-        .findByCssSelector('thead > tr:nth-child(1)')
-        .getVisibleText();
+    async getDocHeader() {
+      const header = await find.byCssSelector('thead > tr:nth-child(1)');
+      return await header.getVisibleText();
     }
 
     getDocTableIndex(index) {
-      return getRemote()
-        .findByCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
+      return find.byCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
         .getVisibleText();
     }
 
-    clickDocSortDown() {
-      return getRemote()
-        .findByCssSelector('.fa-sort-down')
-        .click();
+    async clickDocSortDown() {
+      await find.clickByCssSelector('.fa-sort-down');
     }
 
-    clickDocSortUp() {
-      return getRemote()
-        .findByCssSelector('.fa-sort-up')
-        .click();
+    async clickDocSortUp() {
+      await find.clickByCssSelector('.fa-sort-up');
     }
 
-    getMarks() {
-      return getRemote()
-        .findAllByCssSelector('mark')
-        .getVisibleText();
+    async getMarks() {
+      const marks = await find.allByCssSelector('mark');
+      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
     }
 
     async toggleSidebarCollapse() {
       return await testSubjects.click('collapseSideBarButton');
     }
 
-    getAllFieldNames() {
-      return getRemote()
-        .findAllByClassName('sidebar-item')
-        .then((items) => {
-          return Promise.all(items.map((item) => item.getVisibleText()));
-        });
+    async getAllFieldNames() {
+      const items = await find.allByCssSelector('.sidebar-item');
+      return await Promise.all(items.map((item) => item.getVisibleText()));
     }
 
-    getSidebarWidth() {
-      return getRemote()
-        .findByClassName('sidebar-list')
-        .getProperty('clientWidth');
+    async getSidebarWidth() {
+      const sidebar = await find.byCssSelector('.sidebar-list');
+      return await sidebar.getProperty('clientWidth');
     }
 
     async hasNoResults() {
@@ -298,24 +272,20 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await getRemote()
-        .findByCssSelector(`[data-test-subj="plus-${field}-${value}"]`)
-        .click();
+      await find.clickByCssSelector(`[data-test-subj="plus-${field}-${value}"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickFieldListMinusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await getRemote()
-        .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
-        .click();
+      await find.clickByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectIndexPattern(indexPattern) {
-      await getRemote().findByClassName('index-pattern-selection').click();
-      await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
+      await find.clickByCssSelector('.index-pattern-selection');
+      await find.setValue('.ui-select-search', indexPattern + '\n');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 

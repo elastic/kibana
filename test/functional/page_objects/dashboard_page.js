@@ -29,7 +29,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
   const config = getService('config');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -62,8 +62,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async preserveCrossAppState() {
-      const url = await remote.getCurrentUrl();
-      await remote.get(url, false);
+      const url = await browser.getCurrentUrl();
+      await browser.get(url, false);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -108,7 +108,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getDashboardIdFromCurrentUrl() {
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       const urlSubstring = 'kibana#/dashboard/';
       const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
       const endIndex = currentUrl.indexOf('?');

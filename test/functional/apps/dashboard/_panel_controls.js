@@ -26,7 +26,7 @@ import {
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await kibanaServer.uiSettings.disableToastAutohide();
-      await remote.refresh();
+      await browser.refresh();
 
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
@@ -85,9 +85,9 @@ export default function ({ getService, getPageObjects }) {
       // Based off an actual bug encountered in a PR where a hard refresh in edit mode did not show the edit mode
       // controls.
       it('are shown in edit mode after a hard refresh', async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         // the second parameter of true will include the timestamp in the url and trigger a hard refresh.
-        await remote.get(currentUrl.toString(), true);
+        await browser.get(currentUrl.toString(), true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await dashboardPanelActions.openContextMenu();
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
         expect(removeExists).to.equal(true);
 
         // Get rid of the timestamp in the url.
-        await remote.get(currentUrl.toString(), false);
+        await browser.get(currentUrl.toString(), false);
       });
 
       describe('on an expanded panel', function () {
@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }) {
           await dashboardPanelActions.openContextMenu();
           await dashboardPanelActions.clickEdit();
           await PageObjects.header.waitUntilLoadingHasFinished();
-          const currentUrl = await remote.getCurrentUrl();
+          const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
         });
 

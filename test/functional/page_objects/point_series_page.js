@@ -18,26 +18,17 @@
  */
 
 export function PointSeriesPageProvider({ getService }) {
-  const remote = getService('remote');
-  const config = getService('config');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-
-  const defaultFindTimeout = config.get('timeouts.find');
+  const find = getService('find');
 
   class PointSeriesVis {
-    clickOptions() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText('Panel Settings')
-        .click();
+    async clickOptions() {
+      return await find.clickByPartialLinkText('Panel Settings');
     }
 
-    clickAxisOptions() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText('Metrics & Axes')
-        .click();
+    async clickAxisOptions() {
+      return await find.clickByPartialLinkText('Metrics & Axes');
     }
 
     async clickAddAxis() {
@@ -45,45 +36,31 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     setAxisTitle(title, { index = 0 } = {}) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`#valueAxisTitle${index}`)
-        .clearValue()
-        .type(title);
+      return find.setValue(`#valueAxisTitle${index}`, title);
     }
 
     getValueAxesCount() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.kuiSideBarSection:contains("Value Axes") > .kuiSideBarSection')
+      return find.allByCssSelector('.kuiSideBarSection:contains("Value Axes") > .kuiSideBarSection')
         .then(all => all.length);
     }
 
     getSeriesCount() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.kuiSideBarSection:contains("Series") > .kuiSideBarSection')
+      return find.allByCssSelector('.kuiSideBarSection:contains("Series") > .kuiSideBarSection')
         .then(all => all.length);
     }
 
     getRightValueAxes() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.axis-wrapper-right g.axis')
+      return find.allByCssSelector('.axis-wrapper-right g.axis')
         .then(all => all.length);
     }
 
     getHistogramSeries() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.series.histogram')
+      return find.allByCssSelector('.series.histogram')
         .then(all => all.length);
     }
 
     getGridLines() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('g.grid > path')
+      return find.allByCssSelector('g.grid > path')
         .then(function (data) {
           function getGridLine(gridLine) {
             return gridLine
@@ -102,23 +79,17 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     toggleGridCategoryLines() {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector('#showCategoryLines')
+      return find.byCssSelector('#showCategoryLines')
         .click();
     }
 
     setGridValueAxis(axis) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#gridAxis option[value="${axis}"]`)
+      return find.byCssSelector(`select#gridAxis option[value="${axis}"]`)
         .click();
     }
 
     toggleCollapsibleTitle(title) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findAllByCssSelector('.kuiSideBarCollapsibleTitle .kuiSideBarCollapsibleTitle__text')
+      return find.allByCssSelector('.kuiSideBarCollapsibleTitle .kuiSideBarCollapsibleTitle__text')
         .then(sidebarTitles => {
           log.debug('found sidebar titles ' + sidebarTitles.length);
           function getTitle(titleDiv) {
@@ -138,50 +109,26 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     setValue(newValue) {
-      return remote
-        .setFindTimeout(defaultFindTimeout * 2)
-        .findByCssSelector('button[ng-click="numberListCntr.add()"]')
-        .click()
+      return find.clickByCssSelector('button[ng-click="numberListCntr.add()"]')
         .then(() => {
-          return remote
-            .setFindTimeout(defaultFindTimeout)
-            .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
-            .clearValue();
-        })
-        .then(() => {
-          return remote
-            .setFindTimeout(defaultFindTimeout)
-            .findByCssSelector('input[ng-model="numberListCntr.getList()[$index]"]')
-            .type(newValue);
+          return find.setValue('input[ng-model="numberListCntr.getList()[$index]"]', newValue);
         });
     }
 
     setValueAxisPosition(axis, position) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#valueAxisPosition${axis} option[label="${position}"]`)
-        .click();
+      return find.clickByCssSelector(`select#valueAxisPosition${axis} option[label="${position}"]`);
     }
 
     setCategoryAxisPosition(newValue) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#categoryAxisPosition option[label="${newValue}"]`)
-        .click();
+      return find.clickByCssSelector(`select#categoryAxisPosition option[label="${newValue}"]`);
     }
 
     setSeriesAxis(series, axis) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#seriesValueAxis${series} option[value="${axis}"]`)
-        .click();
+      return find.clickByCssSelector(`select#seriesValueAxis${series} option[value="${axis}"]`);
     }
 
     setSeriesType(series, type) {
-      return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByCssSelector(`select#seriesType${series} option[label="${type}"]`)
-        .click();
+      return find.clickByCssSelector(`select#seriesType${series} option[label="${type}"]`);
     }
   }
 

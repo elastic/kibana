@@ -27,7 +27,7 @@ const OPEN_INSPECTOR_TEST_SUBJ = 'dashboardPanelAction-openInspector';
 export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['header', 'common']);
 
@@ -55,7 +55,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       const panelOpen = await this.isContextMenuOpen(parent);
       if (!panelOpen) {
         await retry.try(async () => {
-          await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+          await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
           const toggleMenuItem = await this.findContextMenu(parent);
           await toggleMenuItem.click();
           const panelOpen = await this.isContextMenuOpen(parent);
@@ -66,7 +66,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async toggleExpandPanel(parent) {
       log.debug('toggleExpandPanel');
-      await (parent ? remote.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
       const expandShown = await this.toggleExpandActionExists();
       if (!expandShown) {
         await this.openContextMenu(parent);
@@ -86,7 +86,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
         }
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.waitForTopNavToBeVisible();
-        const current = await remote.getCurrentUrl();
+        const current = await browser.getCurrentUrl();
         if (current.indexOf('dashboard') >= 0) {
           throw new Error('Still on dashboard');
         }

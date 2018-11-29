@@ -11,12 +11,12 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'header']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
   describe('rbac ', async function () {
     before(async () => {
-      await remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
       log.debug('users');
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');

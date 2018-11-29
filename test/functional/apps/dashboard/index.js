@@ -18,14 +18,14 @@
  */
 
 export default function ({ getService, loadTestFile, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['dashboard']);
 
   describe('dashboard app', function () {
     describe('using current data', function () {
       before(async () => {
-        await remote.setWindowSize(1300, 900);
+        await browser.setWindowSize(1300, 900);
         await PageObjects.dashboard.initTests({
           kibanaIndex: 'dashboard/current/kibana',
           dataIndex: 'dashboard/current/data',
@@ -63,7 +63,7 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
     describe('using legacy data', function () {
-      before(() => remote.setWindowSize(1200, 900));
+      before(() => browser.setWindowSize(1200, 900));
 
       loadTestFile(require.resolve('./_dashboard_time_picker'));
       loadTestFile(require.resolve('./_bwc_shared_urls'));

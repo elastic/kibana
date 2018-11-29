@@ -23,7 +23,7 @@ import expect from 'expect.js';
 import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -54,7 +54,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async waitForVisualizationSelectPage() {
       await retry.try(async () => {
         const visualizeSelectTypePage = await testSubjects.find('visualizeSelectTypePage');
-        if (!visualizeSelectTypePage.isDisplayed()) {
+        if (!await visualizeSelectTypePage.isDisplayed()) {
           throw new Error('wait for visualization select page');
         }
       });
@@ -195,11 +195,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getLabTypeLinks() {
-      return await remote.findAllByPartialLinkText('(Lab)');
+      return await find.allByPartialLinkText('(Lab)');
     }
 
     async getExperimentalTypeLinks() {
-      return await remote.findAllByPartialLinkText('(Experimental)');
+      return await find.allByPartialLinkText('(Experimental)');
     }
 
     async isExperimentalInfoShown() {
@@ -403,7 +403,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
       await retry.try(async () => {
         const chartTypes = await retry.try(
-          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`));
+          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`)
+        );
         log.debug('found bucket types ' + chartTypes.length);
 
         async function getChartType(chart) {
@@ -433,7 +434,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
-        await remote.pressKeys('\uE006');
+        await browser.pressKeys('\uE006');
       });
       await PageObjects.common.sleep(500);
     }
@@ -541,7 +542,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(fieldValue);
-        await remote.pressKeys('\uE006');
+        await browser.pressKeys('\uE006');
       });
       await PageObjects.common.sleep(500);
     }
@@ -576,7 +577,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
-      await remote.pressKeys(Keys.RETURN);
+      await browser.pressKeys(Keys.RETURN);
     }
 
     async setCustomInterval(newValue) {
@@ -642,7 +643,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async sizeUpEditor() {
       await testSubjects.click('visualizeEditorResizer');
-      await remote.pressKeys(Keys.ARROW_RIGHT);
+      await browser.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -777,13 +778,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
-
-      return retry.try(function tryingForTime() {
-        return remote
-          .setFindTimeout(defaultFindTimeout)
-          .findByPartialLinkText(vizName)
-          .click();
-      });
+      return find.clickByPartialLinkText(vizName);
     }
 
     // this starts by clicking the Load Saved Viz button, not from the
@@ -1152,7 +1147,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const table = await testSubjects.find('tableVis');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await remote.moveMouseTo(cell);
+        await browser.moveMouseTo(cell);
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });
@@ -1183,8 +1178,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async filterPieSlice(name) {
       const slice = await this.getPieSlice(name);
       // Since slice is an SVG element we can't simply use .click() for it
-      await remote.moveMouseTo(slice);
-      await remote.clickMouseButton();
+      await browser.moveMouseTo(slice);
+      await browser.clickMouseButton();
     }
 
     async getPieSlice(name) {
