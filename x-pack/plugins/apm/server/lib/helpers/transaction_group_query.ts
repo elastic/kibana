@@ -23,6 +23,7 @@ export interface ITransactionGroupBucket {
       '95.0': number;
     };
   };
+  sum: { value: number };
   sample: {
     hits: {
       hits: Array<{
@@ -36,7 +37,7 @@ export const TRANSACTION_GROUP_AGGREGATES = {
   transactions: {
     terms: {
       field: `${TRANSACTION_NAME}.keyword`,
-      order: { avg: 'desc' },
+      order: { sum: 'desc' },
       size: 100
     },
     aggs: {
@@ -47,7 +48,8 @@ export const TRANSACTION_GROUP_AGGREGATES = {
         }
       },
       avg: { avg: { field: TRANSACTION_DURATION } },
-      p95: { percentiles: { field: TRANSACTION_DURATION, percents: [95] } }
+      p95: { percentiles: { field: TRANSACTION_DURATION, percents: [95] } },
+      sum: { sum: { field: TRANSACTION_DURATION } }
     }
   }
 };
@@ -78,7 +80,7 @@ export function prepareTransactionGroups({
   const results = buckets.map((bucket: ITransactionGroupBucket) => {
     const averageResponseTime = bucket.avg.value;
     const transactionsPerMinute = bucket.doc_count / minutes;
-    const impact = Math.round(averageResponseTime * transactionsPerMinute);
+    const impact = bucket.sum.value;
     const sample = bucket.sample.hits.hits[0]._source;
 
     return {
