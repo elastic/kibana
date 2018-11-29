@@ -1,6 +1,7 @@
 {
   "paths": {
     "common.ui": "src/ui",
+    "server": "src/server",
     "console": "src/core_plugins/console",
     "inputControl": "src/core_plugins/input_control_vis",
     "kbn": "src/core_plugins/kibana",
@@ -11,13 +12,11 @@
     "tableVis": "src/core_plugins/table_vis",
     "regionMap": "src/core_plugins/region_map",
     "statusPage": "src/core_plugins/status_page",
-    "tagCloud": "src/core_plugins/tagcloud",
-    "tagCloud": "src/core_plugins/tagcloud",
     "tileMap": "src/core_plugins/tile_map",
     "timelion": "src/core_plugins/timelion",
-    "tsvb": "src/core_plugins/metrics",
     "tagCloud": "src/core_plugins/tagcloud",
     "tsvb": "src/core_plugins/metrics",
+    "xpack.beatsManagement": "x-pack/plugins/beats_management",
     "xpack.graph": "x-pack/plugins/graph",
     "xpack.grokDebugger": "x-pack/plugins/grokdebugger",
     "xpack.idxMgmt": "x-pack/plugins/index_management",
