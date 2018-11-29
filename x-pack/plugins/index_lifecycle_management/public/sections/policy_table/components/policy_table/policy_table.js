@@ -47,7 +47,7 @@ const HEADERS = {
   coveredIndices: i18n.translate(
     'xpack.indexLifecycleMgmt.policyTable.headers.coveredIndicesHeader',
     {
-      defaultMessage: 'Covered Indices',
+      defaultMessage: 'Covered indices',
     }
   ),
   version: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.versionHeader', {
@@ -87,7 +87,7 @@ export class PolicyTableUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.policyTable.emptyPromptDescription"
-                defaultMessage="Index lifecycle policies help you control your index lifecycle"
+                defaultMessage=" An index lifecycle policy helps you manage your indices as they age."
               />
             </p>
           </Fragment>
@@ -169,10 +169,10 @@ export class PolicyTableUi extends Component {
           {value}
         </EuiLink>
       );
-    } else if (fieldName === 'coveredIndices' && value) {
+    } else if (fieldName === 'coveredIndices') {
       return (
         <EuiText>
-          <b>{value.length}</b>{' '}
+          <b>{value ? value.length : '0'}</b>
         </EuiText>
       );
     } else if (fieldName === 'modified_date' && value) {
@@ -190,7 +190,7 @@ export class PolicyTableUi extends Component {
       >
         <FormattedMessage
           id="xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel"
-          defaultMessage="Create new policy"
+          defaultMessage="Create policy"
         />
       </EuiButton>
     );
@@ -403,7 +403,7 @@ export class PolicyTableUi extends Component {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-                  defaultMessage="Create, update, or delete your index lifecycle policies."
+                  defaultMessage="Create, update, and delete your index lifecycle policies"
                 />
               </p>
             </EuiText>

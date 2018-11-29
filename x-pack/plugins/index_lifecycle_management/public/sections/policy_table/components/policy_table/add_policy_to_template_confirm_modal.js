@@ -105,7 +105,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
       text: i18n.translate(
         'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.chooseTemplateMessage',
         {
-          defaultMessage: 'Choose an index template',
+          defaultMessage: 'Select an index template',
         }
       ),
     });
@@ -145,7 +145,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
         label={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.rolloverAliasLabel"
-            defaultMessage="Rollover alias"
+            defaultMessage="Alias for rollover index"
           />
         }
       >
@@ -162,7 +162,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     const { intl, policy, onCancel } = this.props;
     const title = intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.title',
-      defaultMessage: 'Add policy {name} to template',
+      defaultMessage: 'Add policy "{name}" to template',
     }, { name: policy.name });
     return (
       <EuiOverlayMask>

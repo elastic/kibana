@@ -162,7 +162,13 @@ class EditPolicyUi extends Component {
             <div className="euiAnimateContentLoad">
               <EuiSpacer size="xs" />
               <EuiText color="subdued">
-                <p>Configure the phases of your data and when to transition between them.</p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePolicyDescriptionText"
+                    defaultMessage={`Use an index policy to automate the four phases of the index lifecycle,
+                      from actively writing to the index to deleting it.`}
+                  />
+                </p>
               </EuiText>
               <EuiSpacer />
               <Fragment>
@@ -180,7 +186,7 @@ class EditPolicyUi extends Component {
                           .{' '}
                           <FormattedMessage
                             id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
-                            defaultMessage={`Any changes you make will affect indices that this policy is attached to.
+                            defaultMessage={`Any changes you make will affect the indices that are attached to this policy.
                               Alternatively, you can save these changes in a new policy.`}
                           />
                         </p>
@@ -276,10 +282,17 @@ class EditPolicyUi extends Component {
                         onClick={this.submit}
                         color="secondary"
                       >
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
-                          defaultMessage="Save your policy"
-                        />
+                        {saveAsNewPolicy ? (
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewButton"
+                            defaultMessage="Save as new policy"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.editPolicy.saveButton"
+                            defaultMessage="Save policy"
+                          />
+                        )}
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

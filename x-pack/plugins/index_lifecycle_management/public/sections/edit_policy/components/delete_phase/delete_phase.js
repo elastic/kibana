@@ -68,7 +68,7 @@ export class DeletePhase extends PureComponent {
             <p>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescriptionText"
-                defaultMessage="Use this phase to define how long to retain your data."
+                defaultMessage="You no longer need your index.  You can define when it is safe to delete it."
               />
 
             </p>

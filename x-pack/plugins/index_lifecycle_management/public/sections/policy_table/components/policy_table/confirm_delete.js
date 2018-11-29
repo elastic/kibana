@@ -37,7 +37,7 @@ export class ConfirmDeleteUi extends Component {
     const { intl, policyToDelete, onCancel } = this.props;
     const title = intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.confirmDelete.title',
-      defaultMessage: 'Delete {name}',
+      defaultMessage: 'Delete policy "{name}"',
     }, { name: policyToDelete.name });
     return (
       <EuiOverlayMask>
@@ -53,7 +53,7 @@ export class ConfirmDeleteUi extends Component {
           <div>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.confirmDelete.undoneWarning"
-              defaultMessage="This operation cannot be undone."
+              defaultMessage="You cannot recover a deleted policy."
             />
           </div>
         </EuiConfirmModal>

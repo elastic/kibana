@@ -20,8 +20,8 @@ const MinAgeInputUi = props => {
           id={`${phase}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
           label={intl.formatMessage({
             id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
-            defaultMessage: '{phaseUpper} phase after',
-          }, { phaseUpper: `${phase.charAt(0).toUpperCase()}${phase.slice(1)}` })}
+            defaultMessage: 'Move to {phase} phase after',
+          }, { phase })}
           errorKey={PHASE_ROLLOVER_MINIMUM_AGE}
           isShowingErrors={isShowingErrors}
           errors={errors}

@@ -13,19 +13,22 @@ const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LIN
 
 export class LearnMoreLinkUi extends React.PureComponent {
   render() {
-    const { href, docPath } = this.props;
+    const { href, docPath, text } = this.props;
     let url;
     if (docPath) {
       url = `${esBase}${docPath}`;
     } else {
       url = href;
     }
+    const content = text ? text : (
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.learnMore"
+        defaultMessage="Learn more"
+      />
+    );
     return (
       <EuiLink href={url} target="_blank">
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.wizard.learnMore"
-          defaultMessage="Learn more"
-        />
+        {content}
       </EuiLink>
     );
 

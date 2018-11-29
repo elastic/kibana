@@ -25,11 +25,11 @@ export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
   }
   const message = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage',
     {
-      defaultMessage: 'Successfully {verb} lifecycle policy {lifecycleName}',
+      defaultMessage: '{verb} lifecycle policy "{lifecycleName}"',
       values: { verb: isNew ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createdMessage', {
-        defaultMessage: 'created',
+        defaultMessage: 'Created',
       }) : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.updatedMessage', {
-        defaultMessage: 'updated',
+        defaultMessage: 'Updated',
       }), lifecycleName: lifecycle.name }
     },
   );

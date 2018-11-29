@@ -136,7 +136,6 @@ export class AddLifecyclePolicyConfirmModal extends Component {
           onChange={e => {
             this.setState({ selectedAlias: e.target.value });
           }}
-          aria-label="Use aria labels when no actual label is in use"
         />
       </EuiFormRow>
     );
@@ -158,7 +157,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
       text: i18n.translate(
         'xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.choosePolicyMessage',
         {
-          defaultMessage: 'Choose a lifecycle policy',
+          defaultMessage: 'Select a lifecycle policy',
         }
       ),
     });
@@ -178,7 +177,6 @@ export class AddLifecyclePolicyConfirmModal extends Component {
             onChange={e => {
               this.setState({ selectedPolicyName: e.target.value });
             }}
-            aria-label="Use aria labels when no actual label is in use"
           />
         </EuiFormRow>
         {this.renderAliasFormElement(selectedPolicy)}
@@ -208,7 +206,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
-        defaultMessage="Add lifecycle policy to {indexName}"
+        defaultMessage={`Add lifecycle policy to "{indexName}"`}
         values={{
           indexName,
         }}

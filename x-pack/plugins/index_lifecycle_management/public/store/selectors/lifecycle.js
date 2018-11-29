@@ -34,10 +34,10 @@ import {
   getPolicies
 } from '.';
 const numberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberRequiredError', {
-  defaultMessage: 'A number is required'
+  defaultMessage: 'A number is required.'
 });
 const positiveNumberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberRequiredError', {
-  defaultMessage: 'Only positive numbers are allowed'
+  defaultMessage: 'Only positive numbers are allowed.'
 });
 export const validatePhase = (type, phase, errors) => {
   const phaseErrors = {};
@@ -78,12 +78,12 @@ export const validatePhase = (type, phase, errors) => {
     ) {
       phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
         i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError', {
-          defaultMessage: 'A maximum age is required'
+          defaultMessage: 'A maximum age is required.'
         })
       ];
       phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
         i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError', {
-          defaultMessage: 'A maximum index size is required'
+          defaultMessage: 'A maximum index size is required.'
         })
       ];
     }
@@ -104,7 +104,7 @@ export const validatePhase = (type, phase, errors) => {
     else if (phase[PHASE_FORCE_MERGE_SEGMENTS] < 1) {
       phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = [
         i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
-          defaultMessage: 'Only positive numbers above 0 are allowed'
+          defaultMessage: 'Only positive numbers above 0 are allowed.'
         })
       ];
     }
@@ -121,34 +121,34 @@ export const validateLifecycle = state => {
   const policyName = getSelectedPolicyName(state);
   if (!policyName) {
     errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameRequiredError', {
-      defaultMessage: 'A policy name is required'
+      defaultMessage: 'A policy name is required.'
     }));
   } else {
     if (policyName.startsWith('_')) {
       errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameStartsWithUnderscoreError', {
-        defaultMessage: 'A policy name cannot start with an underscore'
+        defaultMessage: 'A policy name cannot start with an underscore.'
       }));
     }
     if (policyName.includes(',')) {
       errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameContainsCommaError', {
-        defaultMessage: 'A policy name cannot include a comma'
+        defaultMessage: 'A policy name cannot include a comma.'
       }));
     }
     if (policyName.includes(' ')) {
       errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameContainsSpaceError', {
-        defaultMessage: 'A policy name cannot include a space'
+        defaultMessage: 'A policy name cannot include a space.'
       }));
     }
     if (TextEncoder && new TextEncoder('utf-8').encode(policyName).length > 255) {
       errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameTooLongError', {
-        defaultMessage: 'A policy name cannot be longer than 255 bytes'
+        defaultMessage: 'A policy name cannot be longer than 255 bytes.'
       }));
     }
   }
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
     errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError', {
-      defaultMessage: 'The policy name must be different'
+      defaultMessage: 'The policy name must be different.'
     }));
   }
 
@@ -156,7 +156,7 @@ export const validateLifecycle = state => {
     const policyNames = getPolicies(state).map(policy => policy.name);
     if (policyNames.includes(getSelectedPolicyName(state))) {
       errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameAlreadyUsedError', {
-        defaultMessage: 'That policy name is already used'
+        defaultMessage: 'That policy name is already used.'
       }));
     }
   }

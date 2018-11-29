@@ -36,10 +36,10 @@ addActionExtension(indices => {
       defaultMessage: 'Retry lifecycle step',
     }),
     successMessage: i18n.translate(
-      'xpack.idxMgmt.retryIndexLifecycleAction.successfullyRetriedLifecycleMessage',
+      'xpack.idxMgmt.retryIndexLifecycleAction.retriedLifecycleMessage',
       {
-        defaultMessage: 'Successfully called retry lifecycle step for: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Called retry lifecycle step for: {indexNames}',
+        values: { indexNames: indexNames.map(indexName => `"${indexName}"`).join(', ') },
       }
     ),
   };

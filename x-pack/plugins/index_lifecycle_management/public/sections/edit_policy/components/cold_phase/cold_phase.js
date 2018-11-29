@@ -80,7 +80,9 @@ class ColdPhaseUi extends PureComponent {
             <p>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
-                defaultMessage="A cold index is queried less frequently and thus no longer needs to be on the most performant hardware."
+                defaultMessage="You are querying your index less frequently, so you can allocate shards
+                  on significantly less performant hardware.
+                  Because your queries are slower, you might consider reducing the number of replicas."
               />
             </p>
             {phaseData[PHASE_ENABLED] ? (
@@ -163,7 +165,7 @@ class ColdPhaseUi extends PureComponent {
                       flush="left"
                       onClick={() => setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)}
                     >
-                    Set to same as warm phase
+                    Set to same number as warm phase
                     </EuiButtonEmpty>
                   </EuiFormRow>
                 </EuiFlexItem>
