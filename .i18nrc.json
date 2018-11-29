@@ -1,6 +1,7 @@
 {
   "paths": {
     "common.ui": "src/ui",
+    "server": "src/server",
     "console": "src/core_plugins/console",
     "inputControl": "src/core_plugins/input_control_vis",
     "kbn": "src/core_plugins/kibana",

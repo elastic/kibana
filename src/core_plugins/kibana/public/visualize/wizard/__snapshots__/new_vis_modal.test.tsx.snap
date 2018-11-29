@@ -504,6 +504,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                           role="menu"
                                         >
                                           <EuiKeyPadMenuItemButton
+                                            aria-describedby="visTypeDescription-vis"
                                             className="visNewVisDialog__type"
                                             data-test-subj="visType-vis"
                                             data-vis-stage="production"
@@ -523,6 +524,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             onMouseLeave={[Function]}
                                           >
                                             <button
+                                              aria-describedby="visTypeDescription-vis"
                                               className="euiKeyPadMenuItem visNewVisDialog__type"
                                               data-test-subj="visType-vis"
                                               data-vis-stage="production"
@@ -598,6 +600,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             </button>
                                           </EuiKeyPadMenuItemButton>
                                           <EuiKeyPadMenuItemButton
+                                            aria-describedby="visTypeDescription-visWithSearch"
                                             className="visNewVisDialog__type"
                                             data-test-subj="visType-visWithSearch"
                                             data-vis-stage="production"
@@ -617,6 +620,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             onMouseLeave={[Function]}
                                           >
                                             <button
+                                              aria-describedby="visTypeDescription-visWithSearch"
                                               className="euiKeyPadMenuItem visNewVisDialog__type"
                                               data-test-subj="visType-visWithSearch"
                                               data-vis-stage="production"

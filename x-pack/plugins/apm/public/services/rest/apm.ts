@@ -10,7 +10,7 @@ import { ServiceAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_s
 import { ServiceListAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
 import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
 import { TransactionListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_top_transactions';
 import { TransactionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
@@ -128,6 +128,7 @@ export async function loadTransactionDistribution({
   start,
   end,
   transactionName,
+  transactionId,
   kuery
 }: IUrlParams) {
   return callApi<ITransactionDistributionAPIResponse>({
@@ -136,6 +137,7 @@ export async function loadTransactionDistribution({
       start,
       end,
       transaction_name: transactionName,
+      transaction_id: transactionId,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
