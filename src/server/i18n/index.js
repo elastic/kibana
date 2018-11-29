@@ -18,21 +18,20 @@
  */
 
 import { resolve } from 'path';
-import glob from 'glob';
-import { promisify } from 'util';
+import globby from 'globby';
 import { i18n, i18nLoader } from '@kbn/i18n';
-
-const globAsync = promisify(glob);
 
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
   const groupedEntries = await Promise.all(
     config.get('i18n.translationsScanDirs').map(async path => {
-      const entries = await globAsync('**/translations/*.json', {
-        cwd: path,
-        ignore: ['**/node_modules/**', '**/__tests__/**'],
-      });
+      const entries = await globby(
+        ['translations/*.json', '*/translations/*.json', '*/plugins/*/translations/*.json'],
+        {
+          cwd: path,
+        }
+      );
 
       return entries.map(entry => resolve(path, entry));
     })
