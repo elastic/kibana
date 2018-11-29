@@ -430,6 +430,7 @@ function getSearchJsonFromConfig(formConfig) {
   const json = {
     index: formConfig.indexPattern.title,
     size: 0,
+    rest_total_hits_as_int: true,
     body: {
       query: {},
       aggs: {
