@@ -913,6 +913,12 @@ describe('SavedObjectsRepository', () => {
 
       sinon.assert.notCalled(onBeforeWrite);
     });
+
+    it('should set rest_total_hits_as_int to true on a request', async () => {
+      await savedObjectsRepository.find({ type: 'foo' });
+      sinon.assert.calledOnce(callAdminCluster);
+      expect(callAdminCluster.args[0][1]).toHaveProperty('rest_total_hits_as_int', true);
+    });
   });
 
   describe('#get', () => {
