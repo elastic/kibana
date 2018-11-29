@@ -25,8 +25,8 @@ interface Section {
   visible: boolean;
   id: string;
   display: string;
-  url: string;
-  icon: IconType;
+  url?: string;
+  icon?: IconType;
   items: Section[];
 }
 
@@ -39,7 +39,7 @@ const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Sectio
   onClick: () => url && (window.location.href = url),
 });
 
-const sideNavItems = (sections: Section[], selectedId: string) =>
+export const sideNavItems = (sections: Section[], selectedId: string) =>
   sections
     .filter(sectionVisible)
     .filter(section => section.items.filter(sectionVisible).length)
