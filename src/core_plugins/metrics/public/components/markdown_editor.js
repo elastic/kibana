@@ -34,20 +34,37 @@ import 'brace/theme/github';
 import {
   EuiText,
   EuiCodeBlock,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 class MarkdownEditor extends Component {
-  constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleOnLoad = this.handleOnLoad.bind(this);
+  state = {
+    visData: null,
+  };
+  subscription = null;
+
+  componentDidMount() {
+    if(this.props.visData$) {
+      this.subscription = this.props.visData$.subscribe((data) => {
+        this.setState({ visData: data });
+      });
+    }
   }
 
-  handleChange(value) {
+  componentWillUnmount() {
+    if(this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  handleChange = (value) => {
     this.props.onChange({ markdown: value });
   }
 
-  handleOnLoad(ace) {
+  handleOnLoad = (ace) => {
     this.ace = ace;
   }
 
@@ -58,7 +75,11 @@ class MarkdownEditor extends Component {
   }
 
   render() {
-    const { model, visData, dateFormat } = this.props;
+    const { visData } = this.state;
+    if (!visData) {
+      return null;
+    }
+    const { model, dateFormat } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
     const variables = convertSeriesToVars(series, model, dateFormat, this.props.getConfig);
     const rows = [];
@@ -114,8 +135,8 @@ class MarkdownEditor extends Component {
     walk(variables);
 
     return (
-      <div className="vis_editor__markdown">
-        <div className="vis_editor__markdown-editor">
+      <div className="tvbMarkdownEditor">
+        <div className="tvbMarkdownEditor__editor">
           <KuiCodeEditor
             onLoad={this.handleOnLoad}
             mode="markdown"
@@ -128,42 +149,78 @@ class MarkdownEditor extends Component {
             onChange={this.handleChange}
           />
         </div>
-        <div className="vis_editor__markdown-variables">
+        <div className="tvbMarkdownEditor__variables">
           <EuiText>
-            The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.{' '}
-            <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
-              Click here for documentation
-            </a>{' '}
-            on the available expressions.
+            <p>
+              <FormattedMessage
+                id="tsvb.markdownEditor.howToUseVariablesInMarkdownDescription"
+                defaultMessage="The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.
+                {handlebarLink} on the available expressions."
+                values={{
+                  handlebarLink: (
+                    <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
+                      <FormattedMessage
+                        id="tsvb.markdownEditor.howUseVariablesInMarkdownDescription.documentationLinkText"
+                        defaultMessage="Click here for documentation"
+                      />
+                    </a>
+                  )
+                }}
+              />
+            </p>
           </EuiText>
           <table className="table">
             <thead>
               <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Value</th>
+                <th scope="col">
+                  <FormattedMessage
+                    id="tsvb.markdownEditor.nameLabel"
+                    defaultMessage="Name"
+                  />
+                </th>
+                <th scope="col">
+                  <FormattedMessage
+                    id="tsvb.markdownEditor.valueLabel"
+                    defaultMessage="Value"
+                  />
+                </th>
               </tr>
             </thead>
             <tbody>{rows}</tbody>
           </table>
+
           {rows.length === 0 && (
-            <div className="vis_editor__no-markdown-variables">No variables available for the selected data metrics.</div>
+            <EuiTitle size="xxs" className="tvbMarkdownEditor__noVariables">
+              <span>
+                <FormattedMessage
+                  id="tsvb.markdownEditor.noVariablesAvailableDescription"
+                  defaultMessage="No variables available for the selected data metrics."
+                />
+              </span>
+            </EuiTitle>
           )}
 
-          <div className="vis_editor__markdown-code-desc">
-            <EuiText>
-              <p>
-                There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
-                creating lists with data from a group by...
-              </p>
-            </EuiText>
-          </div>
+          <EuiSpacer />
+
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="tsvb.markdownEditor.howToAccessEntireTreeDescription"
+                defaultMessage="There is also a special variable named {all} which you can use to access the entire tree. This is useful for
+                creating lists with data from a group by…"
+                values={{ all: (<code>_all</code>) }}
+              />
+            </p>
+          </EuiText>
+
+          <EuiSpacer />
 
           <EuiCodeBlock>
             {`# All servers:
 
-            {{#each _all}}
-            - {{ label }} {{ last.formatted }}
-            {{/each}}`}
+    {{#each _all}}
+    - {{ label }} {{ last.formatted }}
+    {{/each}}`}
           </EuiCodeBlock>
         </div>
       </div>
@@ -174,8 +231,8 @@ class MarkdownEditor extends Component {
 MarkdownEditor.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
-  visData: PropTypes.object,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  visData$: PropTypes.object,
 };
 
 export default MarkdownEditor;

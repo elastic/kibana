@@ -6,10 +6,9 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { ITransactionGroup } from '../../../../typings/TransactionGroup';
+import { ITransactionGroup } from 'x-pack/plugins/apm/server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
-// @ts-ignore
-import { asMillisWithDefault } from '../../../utils/formatters';
+import { asMillis } from '../../../utils/formatters';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
 // @ts-ignore
@@ -23,7 +22,7 @@ const StyledTransactionLink = styled(TransactionLink)`
 
 interface Props {
   items: ITransactionGroup[];
-  noItemsMessage: any;
+  noItemsMessage: React.ReactNode;
   isLoading: boolean;
 }
 
@@ -51,7 +50,7 @@ const traceListColumns: ITableColumn[] = [
     name: 'Avg. response time',
     sortable: true,
     dataType: 'number',
-    render: (value: number) => asMillisWithDefault(value)
+    render: (value: number) => asMillis(value)
   },
   {
     field: 'transactionsPerMinute',

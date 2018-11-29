@@ -8,19 +8,18 @@ import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import d3 from 'd3';
 import React, { Component } from 'react';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets';
-import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
-// @ts-ignore
+import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
+import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets/transform';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 import { fromQuery, history, toQuery } from '../../../../utils/url';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
-import EmptyMessage from '../../../shared/EmptyMessage';
+import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
-  x0: string;
-  x: string;
+  x0: number;
+  x: number;
   y: number;
   style: {
     cursor: string;
@@ -32,20 +31,22 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
     return [];
   }
 
-  return buckets.map(({ sample, count, key }) => {
-    return {
-      sample,
-      x0: key,
-      x: key + bucketSize,
-      y: count,
-      style: { cursor: count > 0 && sample ? 'pointer' : 'default' }
-    };
-  });
+  return buckets.map(
+    ({ sample, count, key }): IChartPoint => {
+      return {
+        sample,
+        x0: key,
+        x: key + bucketSize,
+        y: count,
+        style: { cursor: count > 0 && sample ? 'pointer' : 'default' }
+      };
+    }
+  );
 }
 
 interface Props {
   location: any;
-  distribution: IDistributionResponse;
+  distribution: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }
 
@@ -67,7 +68,7 @@ export class Distribution extends Component<Props> {
     );
 
     const isEmpty = distribution.totalHits === 0;
-    const xMax = d3.max(buckets, d => d.x);
+    const xMax = d3.max(buckets, d => d.x) || 0;
     const timeFormatter = getTimeFormatter(xMax);
     const unit = timeUnit(xMax);
 
@@ -86,7 +87,7 @@ export class Distribution extends Component<Props> {
       <div>
         <EuiTitle size="s">
           <h5>
-            Response time distribution{' '}
+            Transactions duration distribution{' '}
             <EuiToolTip
               content={
                 <div>
@@ -132,9 +133,9 @@ export class Distribution extends Component<Props> {
             bucket.y > 0 && bucket.sample
           }
           tooltipHeader={(bucket: IChartPoint) =>
-            `${timeFormatter(bucket.x0, false)} - ${timeFormatter(
+            `${timeFormatter(bucket.x0, { withUnit: false })} - ${timeFormatter(
               bucket.x,
-              false
+              { withUnit: false }
             )} ${unit}`
           }
           tooltipFooter={(bucket: IChartPoint) =>

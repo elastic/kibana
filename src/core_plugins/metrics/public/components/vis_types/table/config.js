@@ -29,7 +29,17 @@ import ColorRules from '../../color_rules';
 import {
   htmlIdGenerator,
   EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldText,
+  EuiFormRow,
+  EuiCode,
+  EuiHorizontalRule,
+  EuiFormLabel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 class TableSeriesConfig extends Component {
 
@@ -48,84 +58,155 @@ class TableSeriesConfig extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
+    const { intl } = this.props;
 
     const functionOptions = [
-      { label: 'Sum', value: 'sum' },
-      { label: 'Max', value: 'max' },
-      { label: 'Min', value: 'min' },
-      { label: 'Avg', value: 'mean' },
-      { label: 'Overall Sum', value: 'overall_sum' },
-      { label: 'Overall Max', value: 'overall_max' },
-      { label: 'Overall Min', value: 'overall_min' },
-      { label: 'Overall Avg', value: 'overall_avg' },
-      { label: 'Cumulative Sum', value: 'cumulative_sum' },
+      { label: intl.formatMessage({ id: 'tsvb.table.sumLabel', defaultMessage: 'Sum' }), value: 'sum' },
+      { label: intl.formatMessage({ id: 'tsvb.table.maxLabel', defaultMessage: 'Max' }), value: 'max' },
+      { label: intl.formatMessage({ id: 'tsvb.table.minLabel', defaultMessage: 'Min' }), value: 'min' },
+      { label: intl.formatMessage({ id: 'tsvb.table.avgLabel', defaultMessage: 'Avg' }), value: 'mean' },
+      { label: intl.formatMessage({ id: 'tsvb.table.overallSumLabel', defaultMessage: 'Overall Sum' }), value: 'overall_sum' },
+      { label: intl.formatMessage({ id: 'tsvb.table.overallMaxLabel', defaultMessage: 'Overall Max' }), value: 'overall_max' },
+      { label: intl.formatMessage({ id: 'tsvb.table.overallMinLabel', defaultMessage: 'Overall Min' }), value: 'overall_min' },
+      { label: intl.formatMessage({ id: 'tsvb.table.overallAvgLabel', defaultMessage: 'Overall Avg' }), value: 'overall_avg' },
+      { label: intl.formatMessage({ id: 'tsvb.table.cumulativeSumLabel', defaultMessage: 'Cumulative Sum' }), value: 'cumulative_sum' },
     ];
     const selectedAggFuncOption = functionOptions.find(option => {
       return model.aggregate_function === option.value;
     });
 
     return (
-      <div>
-        <div className="vis_editor__series_config-container">
-          <div className="vis_editor__series_config-row">
+      <div className="tvbAggRow">
+
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
             <DataFormatPicker
               onChange={handleSelectChange('formatter')}
               value={model.formatter}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('valueTemplateInput')}>Template (eg.<code>{'{{value}}/s'}</code>)</label>
-            <input
-              id={htmlId('valueTemplateInput')}
-              className="vis_editor__input-grows"
-              onChange={handleTextChange('value_template')}
-              value={model.value_template}
-            />
-          </div>
-          <div className="vis_editor__series_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('filterInput')}>Filter</label>
-            <input
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('template')}
+              label={(<FormattedMessage
+                id="tsvb.table.templateLabel"
+                defaultMessage="Template"
+              />)}
+              helpText={
+                <span>
+                  <FormattedMessage
+                    id="tsvb.table.templateHelpText"
+                    defaultMessage="eg.{templateExample}"
+                    values={{ templateExample: (<EuiCode>{'{{value}}/s'}</EuiCode>) }}
+                  />
+                </span>
+              }
+              fullWidth
+            >
+              <EuiFieldText
+                onChange={handleTextChange('value_template')}
+                value={model.value_template}
+                fullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="s" />
+
+        <EuiFlexGroup responsive={false} wrap={true}>
+          <EuiFlexItem grow={true}>
+            <EuiFormRow
               id={htmlId('filterInput')}
-              className="vis_editor__input-grows"
-              onChange={handleTextChange('filter')}
-              value={model.filter}
-            />
-            <label className="vis_editor__label">Show Trend Arrows</label>
+              label={(<FormattedMessage
+                id="tsvb.table.filterLabel"
+                defaultMessage="Filter"
+              />)}
+              fullWidth
+            >
+              <EuiFieldText
+                onChange={handleTextChange('filter')}
+                value={model.filter}
+                fullWidth
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormLabel>
+              <FormattedMessage
+                id="tsvb.table.showTrendArrowsLabel"
+                defaultMessage="Show trend arrows?"
+              />
+            </EuiFormLabel>
+            <EuiSpacer size="s" />
             <YesNo
               value={model.trend_arrows}
               name="trend_arrows"
               onChange={this.props.onChange}
             />
-          </div>
-          <div className="vis_editor__series_config-row">
-            <div className="vis_editor__row_item">
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="s" />
+
+        <EuiFlexGroup responsive={false} wrap={true}>
+          <EuiFlexItem grow={true}>
+            <EuiFormRow
+              id={htmlId('field')}
+              label={(<FormattedMessage
+                id="tsvb.table.fieldLabel"
+                defaultMessage="Field"
+              />)}
+            >
               <FieldSelect
                 fields={this.props.fields}
                 indexPattern={this.props.panel.index_pattern}
                 value={model.aggregate_by}
                 onChange={handleSelectChange('aggregate_by')}
+                fullWidth
               />
-            </div>
-            <label className="vis_editor__label" htmlFor={htmlId('aggregateFunctionInput')}>Aggregate Function</label>
-            <div className="vis_editor__row_item">
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiFormRow
+              id={htmlId('aggregateFunctionInput')}
+              label={(<FormattedMessage
+                id="tsvb.table.aggregateFunctionLabel"
+                defaultMessage="Aggregate function"
+              />)}
+              fullWidth
+            >
               <EuiComboBox
-                id={htmlId('aggregateFunctionInput')}
                 options={functionOptions}
                 selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={handleSelectChange('aggregate_function')}
                 singleSelection={true}
+                fullWidth
               />
-            </div>
-          </div>
-          <div className="vis_editor__series_config-row summarize__colorRules">
-            <ColorRules
-              primaryName="text"
-              primaryVarName="text"
-              hideSecondary={true}
-              model={model}
-              onChange={this.props.onChange}
-              name="color_rules"
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="s" />
+
+        <EuiTitle size="xxs">
+          <span>
+            <FormattedMessage
+              id="tsvb.table.colorRulesLabel"
+              defaultMessage="Color rules"
             />
-          </div>
-        </div>
+          </span>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+
+        <ColorRules
+          primaryName="text"
+          primaryVarName="text"
+          hideSecondary={true}
+          model={model}
+          onChange={this.props.onChange}
+          name="color_rules"
+        />
       </div>
     );
   }
@@ -138,6 +219,6 @@ TableSeriesConfig.propTypes = {
   onChange: PropTypes.func
 };
 
-export default TableSeriesConfig;
+export default injectI18n(TableSeriesConfig);
 
 

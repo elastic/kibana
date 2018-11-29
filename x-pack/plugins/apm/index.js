@@ -10,6 +10,8 @@ import { initServicesApi } from './server/routes/services';
 import { initErrorsApi } from './server/routes/errors';
 import { initStatusApi } from './server/routes/status_check';
 import { initTracesApi } from './server/routes/traces';
+import mappings from './mappings';
+import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 
 export function apm(kibana) {
   return new kibana.Plugin({
@@ -24,17 +26,24 @@ export function apm(kibana) {
         description: 'APM for the Elastic Stack',
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
-        euiIconType: 'apmApp'
+        euiIconType: 'apmApp',
+        order: 8100
       },
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
         return {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPattern: config.get('apm_oss.indexPattern')
+          apmIndexPatternTitle: config.get('apm_oss.indexPattern') // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
         };
       },
-      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav']
+      hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
+      savedObjectSchemas: {
+        'apm-telemetry': {
+          isNamespaceAgnostic: true
+        }
+      },
+      mappings
     },
 
     config(Joi) {
@@ -59,6 +68,7 @@ export function apm(kibana) {
       initServicesApi(server);
       initErrorsApi(server);
       initStatusApi(server);
+      makeApmUsageCollector(server);
     }
   });
 }

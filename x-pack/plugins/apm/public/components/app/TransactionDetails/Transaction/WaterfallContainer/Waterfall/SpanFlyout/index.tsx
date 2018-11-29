@@ -19,19 +19,23 @@ import React from 'react';
 import styled from 'styled-components';
 
 // @ts-ignore
-import { SERVICE_LANGUAGE_NAME } from '../../../../../../../../common/constants';
+import {
+  SERVICE_LANGUAGE_NAME,
+  SPAN_HEX_ID,
+  SPAN_ID
+} from '../../../../../../../../common/constants';
 import { px, unit } from '../../../../../../../style/variables';
 
 // @ts-ignore
 import Stacktrace from '../../../../../../shared/Stacktrace';
 
 import { DatabaseContext } from './DatabaseContext';
+import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
 import { Span } from '../../../../../../../../typings/Span';
-// @ts-ignore
-import DiscoverButton from '../../../../../../shared/DiscoverButton';
+import { DiscoverButton } from '../../../../../../shared/DiscoverButton';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
@@ -46,8 +50,8 @@ function getDiscoverQuery(span: Span) {
         language: 'lucene',
         query:
           span.version === 'v2'
-            ? `span.hex_id:${span.span.hex_id}`
-            : `span.id:${span.span.id}`
+            ? `${SPAN_HEX_ID}:"${span.span.hex_id}"`
+            : `${SPAN_ID}:"${span.span.id}"`
       }
     }
   };
@@ -72,6 +76,7 @@ export function SpanFlyout({
   const stackframes = span.span.stacktrace;
   const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
   const dbContext = span.context.db;
+  const httpContext = span.context.http;
 
   return (
     <EuiPortal>
@@ -96,6 +101,7 @@ export function SpanFlyout({
           <EuiHorizontalRule />
           <StickySpanProperties span={span} totalDuration={totalDuration} />
           <EuiHorizontalRule />
+          <HttpContext httpContext={httpContext} />
           <DatabaseContext dbContext={dbContext} />
           <StackTraceContainer>
             <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />

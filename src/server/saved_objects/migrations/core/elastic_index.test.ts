@@ -98,7 +98,10 @@ describe('ElasticIndex', () => {
     test('calls indices.create', async () => {
       const callCluster = sinon.spy(async (path: string, { body, index }: any) => {
         expect(path).toEqual('indices.create');
-        expect(body).toEqual({ mappings: { foo: 'bar' } });
+        expect(body).toEqual({
+          mappings: { foo: 'bar' },
+          settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
+        });
         expect(index).toEqual('.abcd');
       });
 
@@ -248,6 +251,7 @@ describe('ElasticIndex', () => {
                   properties: { foo: 'bar' },
                 },
               },
+              settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
             expect(arg.index).toEqual('.ze-index');
             return true;
@@ -303,6 +307,68 @@ describe('ElasticIndex', () => {
         'indices.getAlias',
         'indices.updateAliases',
         'indices.refresh',
+      ]);
+    });
+
+    test('throws error if re-index task fails', async () => {
+      const callCluster = sinon.spy(async (path: string, arg: any) => {
+        switch (path) {
+          case 'indices.create':
+            expect(arg.body).toEqual({
+              mappings: {
+                doc: {
+                  dynamic: 'strict',
+                  properties: { foo: 'bar' },
+                },
+              },
+              settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
+            });
+            expect(arg.index).toEqual('.ze-index');
+            return true;
+          case 'reindex':
+            expect(arg).toMatchObject({
+              body: {
+                dest: { index: '.ze-index' },
+                source: { index: '.muchacha' },
+              },
+              refresh: true,
+              waitForCompletion: false,
+            });
+            return { task: 'abc' };
+          case 'tasks.get':
+            expect(arg.taskId).toEqual('abc');
+            return {
+              completed: true,
+              error: {
+                type: 'search_phase_execution_exception',
+                reason: 'all shards failed',
+                failed_shards: [],
+              },
+            };
+          default:
+            throw new Error(`Dunnoes what ${path} means.`);
+        }
+      });
+
+      const info = {
+        aliases: {},
+        exists: true,
+        indexName: '.ze-index',
+        mappings: {
+          doc: {
+            dynamic: 'strict',
+            properties: { foo: 'bar' },
+          },
+        },
+      };
+      await expect(Index.convertToAlias(callCluster, info, '.muchacha', 10)).rejects.toThrow(
+        /Re-index failed \[search_phase_execution_exception\] all shards failed/
+      );
+
+      expect(callCluster.args.map(([path]) => path)).toEqual([
+        'indices.create',
+        'reindex',
+        'tasks.get',
       ]);
     });
   });

@@ -18,28 +18,31 @@
  */
 
 import { validateInterval } from '../lib/validate_interval';
-import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
+import { buildEsQuery } from '@kbn/es-query';
 
-const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http) {
-  const dashboardContext = Private(dashboardContextProvider);
-  const notify = new Notifier({ location: 'Metrics' });
+const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http, i18n) {
+  const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
 
   return {
     name: 'metrics',
-    handler: function (vis, { uiState, timeRange }) {
+    handler: function ({ uiState, timeRange, filters, query, visParams }) {
       const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
-        const panel = vis.params;
+        const panel = visParams;
         const uiStateObj = uiState.get(panel.type, {});
         const parsedTimeRange = timefilter.calculateBounds(timeRange);
         const scaledDataFormat = config.get('dateFormat:scaled');
         const dateFormat = config.get('dateFormat');
+        const esQueryConfigs = {
+          allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
+          queryStringOptions: config.get('query:queryString:options'),
+        };
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            filters: [dashboardContext()],
+            filters: [buildEsQuery(undefined, [query], filters, esQueryConfigs)],
             panels: [panel],
             state: uiStateObj
           };

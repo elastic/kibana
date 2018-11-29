@@ -6,18 +6,20 @@
 
 // @ts-ignore
 import { camelizeKeys } from 'humps';
-import { isEmpty } from 'lodash';
-import { ServiceResponse } from 'x-pack/plugins/apm/server/lib/services/get_service';
-import { ServiceListItemResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
-import { IDistributionResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_distribution';
+import { ServiceAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_service';
+import { ServiceListAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
+import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
+import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
+import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
+import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
+import { TransactionListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_top_transactions';
+import { TransactionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/get_transaction';
+import { SpanListAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/spans/get_spans';
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { ITransactionGroup } from 'x-pack/plugins/apm/typings/TransactionGroup';
-import { WaterfallResponse } from 'x-pack/plugins/apm/typings/waterfall';
 import { IUrlParams } from '../../store/urlParams';
 // @ts-ignore
 import { convertKueryToEsQuery } from '../kuery';
-// @ts-ignore
 import { callApi } from './callApi';
 // @ts-ignore
 import { getAPMIndexPattern } from './savedObjects';
@@ -35,7 +37,7 @@ export async function loadServerStatus() {
 }
 
 export async function loadAgentStatus() {
-  return callApi({
+  return callApi<{ dataFound: boolean }>({
     pathname: `/api/apm/status/agent`
   });
 }
@@ -55,12 +57,8 @@ export async function getEncodedEsQuery(kuery?: string) {
   return encodeURIComponent(JSON.stringify(esFilterQuery));
 }
 
-export async function loadServiceList({
-  start,
-  end,
-  kuery
-}: IUrlParams): Promise<ServiceListItemResponse> {
-  return callApi({
+export async function loadServiceList({ start, end, kuery }: IUrlParams) {
+  return callApi<ServiceListAPIResponse>({
     pathname: `/api/apm/services`,
     query: {
       start,
@@ -75,8 +73,8 @@ export async function loadServiceDetails({
   start,
   end,
   kuery
-}: IUrlParams): Promise<ServiceResponse> {
-  return callApi({
+}: IUrlParams) {
+  return callApi<ServiceAPIResponse>({
     pathname: `/api/apm/services/${serviceName}`,
     query: {
       start,
@@ -86,12 +84,8 @@ export async function loadServiceDetails({
   });
 }
 
-export async function loadTraceList({
-  start,
-  end,
-  kuery
-}: IUrlParams): Promise<ITransactionGroup[]> {
-  const groups: ITransactionGroup[] = await callApi({
+export async function loadTraceList({ start, end, kuery }: IUrlParams) {
+  const groups = await callApi<TraceListAPIResponse>({
     pathname: '/api/apm/traces',
     query: {
       start,
@@ -112,8 +106,8 @@ export async function loadTransactionList({
   end,
   kuery,
   transactionType
-}: IUrlParams): Promise<ITransactionGroup[]> {
-  const groups: ITransactionGroup[] = await callApi({
+}: IUrlParams) {
+  const groups = await callApi<TransactionListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transactions`,
     query: {
       start,
@@ -134,21 +128,25 @@ export async function loadTransactionDistribution({
   start,
   end,
   transactionName,
+  transactionId,
   kuery
-}: IUrlParams): Promise<IDistributionResponse> {
-  return callApi({
+}: IUrlParams) {
+  return callApi<ITransactionDistributionAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transactions/distribution`,
     query: {
       start,
       end,
       transaction_name: transactionName,
+      transaction_id: transactionId,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
 }
 
-function addVersion<T extends Span | Transaction>(item: T): T {
-  if (!isEmpty(item)) {
+function addVersion<T extends Span | Transaction | null | undefined>(
+  item: T
+): T {
+  if (item != null) {
     item.version = item.hasOwnProperty('trace') ? 'v2' : 'v1';
   }
 
@@ -167,8 +165,8 @@ export async function loadSpans({
   start,
   end,
   transactionId
-}: IUrlParams): Promise<Span[]> {
-  const hits: Span[] = await callApi({
+}: IUrlParams) {
+  const hits = await callApi<SpanListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}/spans`,
     query: {
       start,
@@ -180,7 +178,7 @@ export async function loadSpans({
 }
 
 export async function loadTrace({ traceId, start, end }: IUrlParams) {
-  const hits: WaterfallResponse = await callApi(
+  const hits = await callApi<TraceAPIResponse>(
     {
       pathname: `/api/apm/traces/${traceId}`,
       query: {
@@ -204,7 +202,7 @@ export async function loadTransaction({
   traceId,
   kuery
 }: IUrlParams) {
-  const result: Transaction = await callApi(
+  const result = await callApi<TransactionAPIResponse>(
     {
       pathname: `/api/apm/services/${serviceName}/transactions/${transactionId}`,
       query: {
@@ -230,7 +228,7 @@ export async function loadCharts({
   transactionType,
   transactionName
 }: IUrlParams) {
-  return callApi({
+  return callApi<TimeSeriesAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transactions/charts`,
     query: {
       start,
@@ -277,7 +275,8 @@ export async function loadErrorGroupDetails({
   kuery,
   errorGroupId
 }: IUrlParams) {
-  const res = await callApi(
+  // TODO: add types when error section is converted to ts
+  const res = await callApi<any>(
     {
       pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
       query: {
@@ -290,7 +289,7 @@ export async function loadErrorGroupDetails({
       camelcase: false
     }
   );
-  const camelizedRes = camelizeKeys(res);
+  const camelizedRes: any = camelizeKeys(res);
   if (res.error.context) {
     camelizedRes.error.context = res.error.context;
   }

@@ -41,7 +41,10 @@ export interface CallCluster {
   (path: 'reindex', opts: ReindexOpts): Promise<any>;
   (path: 'scroll', opts: ScrollOpts): Promise<SearchResults>;
   (path: 'search', opts: SearchOpts): Promise<SearchResults>;
-  (path: 'tasks.get', opts: { taskId: string }): Promise<{ completed: boolean }>;
+  (path: 'tasks.get', opts: { taskId: string }): Promise<{
+    completed: boolean;
+    error?: ErrorResponse;
+  }>;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -87,10 +90,8 @@ export interface IndexCreationOpts {
   body?: {
     mappings?: IndexMapping;
     settings?: {
-      index: {
-        number_of_shards: string;
-        number_of_replicas: string;
-      };
+      number_of_shards: number;
+      auto_expand_replicas: string;
     };
   };
 }
@@ -173,8 +174,13 @@ export interface SearchResults {
   _scroll_id?: string;
 }
 
+export interface ErrorResponse {
+  type: string;
+  reason: string;
+}
+
 export interface BulkResult {
-  items: Array<{ index: { error?: { type: string; reason: string } } }>;
+  items: Array<{ index: { error?: ErrorResponse } }>;
 }
 
 export interface IndexInfo {

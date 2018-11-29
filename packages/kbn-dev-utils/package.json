@@ -7,7 +7,8 @@
   "private": true,
   "scripts": {
     "build": "babel src --out-dir target",
-    "kbn:bootstrap": "yarn build"
+    "kbn:bootstrap": "yarn build --quiet",
+    "kbn:watch": "yarn build --watch"
   },
   "dependencies": {
     "chalk": "^2.4.1",
@@ -18,7 +19,7 @@
     "tslib": "^1.9.3"
   },
   "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
+    "@kbn/babel-preset": "1.0.0",
     "babel-cli": "^6.26.0",
     "chance": "1.0.6",
     "expect.js": "0.3.1"

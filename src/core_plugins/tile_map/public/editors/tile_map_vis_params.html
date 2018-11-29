@@ -30,7 +30,7 @@
         id="colorSchema"
         class="kuiSelect kuiSideBarSelect"
         ng-model="editorState.params.colorSchema"
-        ng-options="mode for mode in vis.type.editorConfig.collections.colorSchemas"
+        ng-options="mode.id as mode.label for mode in vis.type.editorConfig.collections.colorSchemas"
       ></select>
     </div>
   </div>

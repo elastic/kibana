@@ -1,0 +1,18 @@
+.disabled {
+  color: $euiColorMediumShade;
+  cursor: pointer;
+}
+
+ml-settings {
+  .mgtPanel {
+    .mgtPanel__link {
+      font-size: $euiFontSizeM;
+      line-height: $euiSizeXL;
+      margin-left: $euiSizeXS;
+    }
+
+    .disabled {
+      color: $euiColorMediumShade;
+    }
+  }
+}

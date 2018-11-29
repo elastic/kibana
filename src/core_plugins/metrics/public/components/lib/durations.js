@@ -17,21 +17,55 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const durationOutputOptions = [
-  { label: 'milliseconds', value: 'ms' },
-  { label: 'seconds', value: 's' },
-  { label: 'minutes', value: 'm' },
-  { label: 'hours', value: 'h' },
-  { label: 'days', value: 'd' },
-  { label: 'weeks', value: 'w' },
-  { label: 'months', value: 'M' },
-  { label: 'years', value: 'Y' }
+  {
+    label: i18n.translate('tsvb.durationOptions.millisecondsLabel', { defaultMessage: 'milliseconds' }),
+    value: 'ms'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.secondsLabel', { defaultMessage: 'seconds' }),
+    value: 's'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.minutesLabel', { defaultMessage: 'minutes' }),
+    value: 'm'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.hoursLabel', { defaultMessage: 'hours' }),
+    value: 'h'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.daysLabel', { defaultMessage: 'days' }),
+    value: 'd'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.weeksLabel', { defaultMessage: 'weeks' }),
+    value: 'w'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.monthsLabel', { defaultMessage: 'months' }),
+    value: 'M'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.yearsLabel', { defaultMessage: 'years' }),
+    value: 'Y'
+  }
 ];
 
 export const durationInputOptions = [
-  { label: 'picoseconds', value: 'ps' },
-  { label: 'nanoseconds', value: 'ns' },
-  { label: 'microseconds', value: 'us' },
+  {
+    label: i18n.translate('tsvb.durationOptions.picosecondsLabel', { defaultMessage: 'picoseconds' }),
+    value: 'ps'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.nanosecondsLabel', { defaultMessage: 'nanoseconds' }),
+    value: 'ns'
+  },
+  {
+    label: i18n.translate('tsvb.durationOptions.microsecondsLabel', { defaultMessage: 'microseconds' }),
+    value: 'us' },
   ...durationOutputOptions
 ];
 

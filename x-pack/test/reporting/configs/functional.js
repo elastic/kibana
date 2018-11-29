@@ -22,5 +22,8 @@ export async function getFunctionalConfig({ readConfigFile }) {
       reportName: 'X-Pack Reporting Functional Tests',
     },
     kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
+    testFiles: [require.resolve('../functional')],
   };
 }
+
+export default getFunctionalConfig;
