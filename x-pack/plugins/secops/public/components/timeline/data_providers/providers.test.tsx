@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
+import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 
@@ -16,12 +17,14 @@ describe('Providers', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <Providers
-            id="foo"
-            dataProviders={mockDataProviders}
-            onDataProviderRemoved={noop}
-            onToggleDataProviderEnabled={noop}
-          />
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onDataProviderRemoved={noop}
+              onToggleDataProviderEnabled={noop}
+            />
+          </DroppableWrapper>
         </DragDropContext>
       );
 
@@ -35,12 +38,14 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <Providers
-            id="foo"
-            dataProviders={mockDataProviders}
-            onDataProviderRemoved={mockOnDataProviderRemoved}
-            onToggleDataProviderEnabled={noop}
-          />
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onDataProviderRemoved={mockOnDataProviderRemoved}
+              onToggleDataProviderEnabled={noop}
+            />
+          </DroppableWrapper>
         </DragDropContext>
       );
 
@@ -69,12 +74,14 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <DragDropContext onDragEnd={noop}>
-          <Providers
-            id="foo"
-            dataProviders={mockDataProviders}
-            onDataProviderRemoved={noop}
-            onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-          />
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onDataProviderRemoved={noop}
+              onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+            />
+          </DroppableWrapper>
         </DragDropContext>
       );
 
