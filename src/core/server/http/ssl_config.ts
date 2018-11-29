@@ -101,7 +101,7 @@ export class SslConfig {
    */
   public getSecureOptions() {
     if (this.supportedProtocols === undefined || this.supportedProtocols.length === 0) {
-      return 0;
+      return cryptoConstants.SSL_OP_NO_TLSv1;
     }
 
     const supportedProtocols = this.supportedProtocols;

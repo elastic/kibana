@@ -138,7 +138,7 @@ export default () => Joi.object({
       }),
       keyPassphrase: Joi.string(),
       certificateAuthorities: Joi.array().single().items(Joi.string()).default([]),
-      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')),
+      supportedProtocols: Joi.array().items(Joi.string().valid('TLSv1', 'TLSv1.1', 'TLSv1.2')).default(['TLSv1.1', 'TLSv1.2']),
       cipherSuites: Joi.array().items(Joi.string()).default(cryptoConstants.defaultCoreCipherList.split(':'))
     }).default(),
     cors: Joi.when('$dev', {
