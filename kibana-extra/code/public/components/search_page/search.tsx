@@ -182,9 +182,7 @@ class SearchPage extends React.PureComponent<Props, State> {
     );
     if (repositorySearch.scope === SearchScope.repository) {
       const { repositories: repos } = repositorySearch.repositories;
-      const resultComps =
-        repos &&
-        repos.map(repo => <RepoItem key={repo.repository.uri} uri={repo.repository.uri} />);
+      const resultComps = repos && repos.map(repo => <RepoItem key={repo.uri} uri={repo.uri} />);
       const mainComp = (
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
