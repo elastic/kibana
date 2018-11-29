@@ -22,7 +22,7 @@ const setHttpRequestResponse = (err, response) => {
   callWithRequestFactory.mockReturnValueOnce(() => response);
 };
 
-describe.skip('[API Routes] Remote Clusters List', () => {
+describe('[API Routes] Remote Clusters List', () => {
   let server;
   let routeHandler;
 
@@ -45,8 +45,8 @@ describe.skip('[API Routes] Remote Clusters List', () => {
     const response = await routeHandler();
 
     expect(response).toEqual([
-      { name: 'abc', seeds: ['xyz'] },
-      { name: 'foo', seeds: ['bar'] }
+      { name: 'abc', seeds: ['xyz'], isConfiguredByNode: true },
+      { name: 'foo', seeds: ['bar'], isConfiguredByNode: true }
     ]);
   });
 

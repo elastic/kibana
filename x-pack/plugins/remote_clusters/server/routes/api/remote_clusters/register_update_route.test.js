@@ -25,7 +25,7 @@ const setHttpRequestResponse = (err, response) => {
   callWithRequestFactory.mockReturnValueOnce(() => response);
 };
 
-describe.skip('[API Routes] Remote Clusters Update', () => {
+describe('[API Routes] Remote Clusters Update', () => {
   let server;
   let routeHandler;
 
@@ -65,7 +65,8 @@ describe.skip('[API Routes] Remote Clusters Update', () => {
 
     expect(response).toEqual({
       name: 'test_cluster',
-      seeds: []
+      seeds: [],
+      isConfiguredByNode: false,
     });
   });
 

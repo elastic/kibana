@@ -45,6 +45,13 @@ export function deserializeCluster(name, esClusterObject) {
     };
   }
 
+  // It's unnecessary to send undefined values back to the client, so we can remove them.
+  Object.keys(deserializedClusterObject).forEach(key => {
+    if (deserializedClusterObject[key] === undefined) {
+      delete deserializedClusterObject[key];
+    }
+  });
+
   return deserializedClusterObject;
 }
 
