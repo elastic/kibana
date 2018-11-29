@@ -132,6 +132,7 @@ class HotPhaseUi extends PureComponent {
                   errors={errors}
                 >
                   <EuiFieldNumber
+                    id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                     value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
                     onChange={async e => {
                       await setPhaseData(
@@ -152,6 +153,10 @@ class HotPhaseUi extends PureComponent {
                   errors={errors}
                 >
                   <EuiSelect
+                    aria-label={intl.formatMessage({
+                      id: 'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeUnitsAriaLabel',
+                      defaultMessage: 'Maximum index size units'
+                    })}
                     value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}
                     onChange={async e => {
                       await setPhaseData(
@@ -187,6 +192,7 @@ class HotPhaseUi extends PureComponent {
                   errors={errors}
                 >
                   <EuiFieldNumber
+                    id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_AGE}`}
                     value={phaseData[PHASE_ROLLOVER_MAX_AGE]}
                     onChange={async e => {
                       await setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
@@ -204,6 +210,10 @@ class HotPhaseUi extends PureComponent {
                   errors={errors}
                 >
                   <EuiSelect
+                    aria-label={intl.formatMessage({
+                      id: 'xpack.indexLifecycleMgmt.hotPhase.maximumAgeUnitsAriaLabel',
+                      defaultMessage: 'Maximum age units'
+                    })}
                     value={phaseData[PHASE_ROLLOVER_MAX_AGE_UNITS]}
                     onChange={async e => {
                       await setPhaseData(

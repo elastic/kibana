@@ -89,6 +89,7 @@ class ColdPhaseUi extends PureComponent {
                 onClick={async () => {
                   await setPhaseData(PHASE_ENABLED, false);
                 }}
+                aria-controls="coldPhaseContent"
               >
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.coldhase.deactivateColdPhaseButton"
@@ -100,6 +101,7 @@ class ColdPhaseUi extends PureComponent {
                 onClick={async () => {
                   await setPhaseData(PHASE_ENABLED, true);
                 }}
+                aria-controls="coldPhaseContent"
               >
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseButton"
@@ -112,59 +114,63 @@ class ColdPhaseUi extends PureComponent {
         }
         fullWidth
       >
-        {phaseData[PHASE_ENABLED] ? (
-          <Fragment>
-            <MinAgeInput
-              errors={errors}
-              phaseData={phaseData}
-              phase={PHASE_COLD}
-              isShowingErrors={isShowingErrors}
-              setPhaseData={setPhaseData}
-            />
-            <EuiSpacer />
+        <div id="coldPhaseContent" aria-live="polite" role="region">
+          {phaseData[PHASE_ENABLED] ? (
+            <Fragment>
+              <MinAgeInput
+                errors={errors}
+                phaseData={phaseData}
+                phase={PHASE_COLD}
+                isShowingErrors={isShowingErrors}
+                setPhaseData={setPhaseData}
+              />
+              <EuiSpacer />
 
-            <NodeAllocation
-              setPhaseData={setPhaseData}
-              showNodeDetailsFlyout={showNodeDetailsFlyout}
-              errors={errors}
-              phaseData={phaseData}
-              isShowingErrors={isShowingErrors}
-            />
+              <NodeAllocation
+                phase={PHASE_COLD}
+                setPhaseData={setPhaseData}
+                showNodeDetailsFlyout={showNodeDetailsFlyout}
+                errors={errors}
+                phaseData={phaseData}
+                isShowingErrors={isShowingErrors}
+              />
 
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
-                <ErrableFormRow
-                  id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
-                  label={intl.formatMessage({
-                    id: 'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel',
-                    defaultMessage: 'Number of replicas',
-                  })}
-                  errorKey={PHASE_REPLICA_COUNT}
-                  isShowingErrors={isShowingErrors}
-                  errors={errors}
-                >
-                  <EuiFieldNumber
-                    value={phaseData[PHASE_REPLICA_COUNT]}
-                    onChange={async e => {
-                      await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
-                    }}
-                    min={0}
-                  />
-                </ErrableFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow hasEmptyLabelSpace>
-                  <EuiButtonEmpty
-                    flush="left"
-                    onClick={() => setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)}
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
+                  <ErrableFormRow
+                    id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
+                    label={intl.formatMessage({
+                      id: 'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel',
+                      defaultMessage: 'Number of replicas',
+                    })}
+                    errorKey={PHASE_REPLICA_COUNT}
+                    isShowingErrors={isShowingErrors}
+                    errors={errors}
                   >
+                    <EuiFieldNumber
+                      id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
+                      value={phaseData[PHASE_REPLICA_COUNT]}
+                      onChange={async e => {
+                        await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
+                      }}
+                      min={0}
+                    />
+                  </ErrableFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow hasEmptyLabelSpace>
+                    <EuiButtonEmpty
+                      flush="left"
+                      onClick={() => setPhaseData(PHASE_REPLICA_COUNT, warmPhaseReplicaCount)}
+                    >
                     Set to same as warm phase
-                  </EuiButtonEmpty>
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </Fragment>
-        ) : <div />}
+                    </EuiButtonEmpty>
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Fragment>
+          ) : <div />}
+        </div>
       </EuiDescribedFormGroup>
     );
   }

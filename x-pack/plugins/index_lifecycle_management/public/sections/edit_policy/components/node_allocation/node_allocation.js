@@ -50,6 +50,7 @@ class NodeAllocationUi extends Component {
         }
       >
         <EuiSelect
+          id={`${phase}.${PHASE_NODE_ATTRS}`}
           value={phaseData[PHASE_NODE_ATTRS] || ' '}
           options={nodeOptions}
           onChange={async e => {

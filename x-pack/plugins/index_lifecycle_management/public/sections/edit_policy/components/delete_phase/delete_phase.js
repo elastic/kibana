@@ -78,6 +78,7 @@ export class DeletePhase extends PureComponent {
                 onClick={async () => {
                   await setPhaseData(PHASE_ENABLED, false);
                 }}
+                aria-controls="deletePhaseContent"
               >
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deactivateDeletePhaseButton"
@@ -89,6 +90,7 @@ export class DeletePhase extends PureComponent {
                 onClick={async () => {
                   await setPhaseData(PHASE_ENABLED, true);
                 }}
+                aria-controls="deletePhaseContent"
               >
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.activateDeletePhaseButton"
@@ -101,15 +103,17 @@ export class DeletePhase extends PureComponent {
         }
         fullWidth
       >
-        {phaseData[PHASE_ENABLED] ? (
-          <MinAgeInput
-            errors={errors}
-            phaseData={phaseData}
-            phase={PHASE_DELETE}
-            isShowingErrors={isShowingErrors}
-            setPhaseData={setPhaseData}
-          />
-        ) : <div />}
+        <div id="deletePhaseContent" aria-live="polite" role="region">
+          {phaseData[PHASE_ENABLED] ? (
+            <MinAgeInput
+              errors={errors}
+              phaseData={phaseData}
+              phase={PHASE_DELETE}
+              isShowingErrors={isShowingErrors}
+              setPhaseData={setPhaseData}
+            />
+          ) : <div />}
+        </div>
       </EuiDescribedFormGroup>
     );
   }

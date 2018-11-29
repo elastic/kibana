@@ -27,6 +27,7 @@ const MinAgeInputUi = props => {
           errors={errors}
         >
           <EuiFieldNumber
+            id={`${phase}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
             onChange={async e => {
               setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);
@@ -38,6 +39,10 @@ const MinAgeInputUi = props => {
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <EuiFormRow hasEmptyLabelSpace>
           <EuiSelect
+            aria-label={intl.formatMessage({
+              id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeUnitsAriaLabel',
+              defaultMessage: '{phaseUpper} phase after units',
+            }, { phaseUpper: `${phase.charAt(0).toUpperCase()}${phase.slice(1)}` })}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE_UNITS]}
             onChange={e => setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE_UNITS, e.target.value)}
             options={[

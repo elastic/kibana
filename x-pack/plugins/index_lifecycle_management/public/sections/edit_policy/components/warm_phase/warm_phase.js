@@ -69,7 +69,18 @@ class WarmPhaseUi extends PureComponent {
       hotPhaseRolloverEnabled,
       intl,
     } = this.props;
-
+    const shrinkLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel',
+      defaultMessage: 'Shrink index',
+    });
+    const moveToWarmPhaseOnRolloverLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
+      defaultMessage: 'Move to warm phase on rollover',
+    });
+    const forcemergeLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel',
+      defaultMessage: 'Force merge data',
+    });
     return (
       <Fragment>
         <EuiDescribedFormGroup
@@ -99,6 +110,7 @@ class WarmPhaseUi extends PureComponent {
                   onClick={async () => {
                     await setPhaseData(PHASE_ENABLED, false);
                   }}
+                  aria-controls="warmPhaseContent"
                 >
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.deactivateWarmPhaseButton"
@@ -110,6 +122,7 @@ class WarmPhaseUi extends PureComponent {
                   onClick={async () => {
                     await setPhaseData(PHASE_ENABLED, true);
                   }}
+                  aria-controls="warmPhaseContent"
                 >
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.editPolicy.warmPhase.activateWarmPhaseButton"
@@ -123,77 +136,76 @@ class WarmPhaseUi extends PureComponent {
           fullWidth
         >
           <Fragment>
-            {phaseData[PHASE_ENABLED] ? (
-              <Fragment>
-                {hotPhaseRolloverEnabled ? (
-                  <EuiFormRow
-                    label={intl.formatMessage({
-                      id: 'xpack.indexLifecycleMgmt.warmPhase.rolloverConfigurationLabel',
-                      defaultMessage: 'Rollover configuration',
-                    })}
-                  >
-                    <EuiSwitch
-                      label={intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
-                        defaultMessage: 'Move to warm phase on rollover',
-                      })}
-                      checked={phaseData[WARM_PHASE_ON_ROLLOVER]}
-                      onChange={async e => {
-                        await setPhaseData(WARM_PHASE_ON_ROLLOVER, e.target.checked);
-                      }}
+            <div id="warmPhaseContent" aria-live="polite" role="region">
+              {phaseData[PHASE_ENABLED] ? (
+                <Fragment>
+                  {hotPhaseRolloverEnabled ? (
+                    <EuiFormRow
+                      id={`${PHASE_WARM}.${WARM_PHASE_ON_ROLLOVER}`}
+                    >
+                      <EuiSwitch
+                        label={moveToWarmPhaseOnRolloverLabel}
+                        id={`${PHASE_WARM}.${WARM_PHASE_ON_ROLLOVER}`}
+                        checked={phaseData[WARM_PHASE_ON_ROLLOVER]}
+                        onChange={async e => {
+                          await setPhaseData(WARM_PHASE_ON_ROLLOVER, e.target.checked);
+                        }}
+                      />
+                    </EuiFormRow>
+                  ) : null}
+                  {!phaseData[WARM_PHASE_ON_ROLLOVER] ? (
+                    <MinAgeInput
+                      errors={errors}
+                      phaseData={phaseData}
+                      phase={PHASE_WARM}
+                      isShowingErrors={isShowingErrors}
+                      setPhaseData={setPhaseData}
                     />
-                  </EuiFormRow>
-                ) : null}
-                {!phaseData[WARM_PHASE_ON_ROLLOVER] ? (
-                  <MinAgeInput
+                  ) : null}
+
+                  <EuiSpacer />
+
+                  <NodeAllocation
+                    phase={PHASE_WARM}
+                    setPhaseData={setPhaseData}
+                    showNodeDetailsFlyout={showNodeDetailsFlyout}
                     errors={errors}
                     phaseData={phaseData}
-                    phase={PHASE_WARM}
                     isShowingErrors={isShowingErrors}
-                    setPhaseData={setPhaseData}
                   />
-                ) : null}
 
-                <EuiSpacer />
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
+                      <ErrableFormRow
+                        id={`${PHASE_WARM}.${PHASE_REPLICA_COUNT}`}
+                        label={intl.formatMessage({
+                          id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel',
+                          defaultMessage: 'Number of replicas',
+                        })}
+                        errorKey={PHASE_REPLICA_COUNT}
+                        isShowingErrors={isShowingErrors}
+                        errors={errors}
+                      >
+                        <EuiFieldNumber
+                          id={`${PHASE_WARM}.${PHASE_REPLICA_COUNT}`}
+                          value={phaseData[PHASE_REPLICA_COUNT]}
+                          onChange={async e => {
+                            await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
+                          }}
+                          min={0}
+                        />
+                      </ErrableFormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
 
-                <NodeAllocation
-                  setPhaseData={setPhaseData}
-                  showNodeDetailsFlyout={showNodeDetailsFlyout}
-                  errors={errors}
-                  phaseData={phaseData}
-                  isShowingErrors={isShowingErrors}
-                />
-
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
-                    <ErrableFormRow
-                      id={`${PHASE_WARM}.${PHASE_REPLICA_COUNT}`}
-                      label={intl.formatMessage({
-                        id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel',
-                        defaultMessage: 'Number of replicas',
-                      })}
-                      errorKey={PHASE_REPLICA_COUNT}
-                      isShowingErrors={isShowingErrors}
-                      errors={errors}
-                    >
-                      <EuiFieldNumber
-                        value={phaseData[PHASE_REPLICA_COUNT]}
-                        onChange={async e => {
-                          await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
-                        }}
-                        min={0}
-                      />
-                    </ErrableFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="m" />
-              </Fragment>
-            ) : (
-              <EuiFormRow hasEmptyLabelSpace>
-                <div />
-              </EuiFormRow>
-            )}
+                  <EuiSpacer size="m" />
+                </Fragment>
+              ) : (
+                <EuiFormRow hasEmptyLabelSpace>
+                  <div />
+                </EuiFormRow>
+              )}
+            </div>
           </Fragment>
         </EuiDescribedFormGroup>
         {phaseData[PHASE_ENABLED] ? (
@@ -225,39 +237,42 @@ class WarmPhaseUi extends PureComponent {
                   onChange={async e => {
                     await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
                   }}
-                  label={intl.formatMessage({
-                    id: 'xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel',
-                    defaultMessage: 'Shrink index',
-                  })}
+                  label={shrinkLabel}
+                  aria-label={shrinkLabel}
+                  aria-controls="shrinkContent"
                 />
-                {phaseData[PHASE_SHRINK_ENABLED] ? (
-                  <Fragment>
-                    <EuiSpacer />
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <ErrableFormRow
-                          id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
-                          label={intl.formatMessage({
-                            id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
-                            defaultMessage: 'Number of primary shards',
-                          })}
-                          errorKey={PHASE_PRIMARY_SHARD_COUNT}
-                          isShowingErrors={isShowingErrors}
-                          errors={errors}
-                        >
-                          <EuiFieldNumber
-                            value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
-                            onChange={async e => {
-                              await setPhaseData(PHASE_PRIMARY_SHARD_COUNT, e.target.value);
-                            }}
-                            min={1}
-                          />
-                        </ErrableFormRow>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer />
-                  </Fragment>
-                ) : null}
+                <div id="shrinkContent" aria-live="polite" role="region">
+                  {phaseData[PHASE_SHRINK_ENABLED] ? (
+                    <Fragment>
+                      <EuiSpacer />
+                      <EuiFlexGroup>
+                        <EuiFlexItem grow={false}>
+                          <ErrableFormRow
+                            id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
+                            label={intl.formatMessage({
+                              id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
+                              defaultMessage: 'Number of primary shards',
+                            })}
+                            errorKey={PHASE_PRIMARY_SHARD_COUNT}
+                            isShowingErrors={isShowingErrors}
+                            errors={errors}
+                          >
+                            <EuiFieldNumber
+                              id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
+                              s
+                              value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
+                              onChange={async e => {
+                                await setPhaseData(PHASE_PRIMARY_SHARD_COUNT, e.target.value);
+                              }}
+                              min={1}
+                            />
+                          </ErrableFormRow>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer />
+                    </Fragment>
+                  ) : null}
+                </div>
               </Fragment>
             </EuiDescribedFormGroup>
             <EuiDescribedFormGroup
@@ -282,38 +297,39 @@ class WarmPhaseUi extends PureComponent {
               fullWidth
             >
               <EuiSwitch
-                label={intl.formatMessage({
-                  id: 'xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel',
-                  defaultMessage: 'Force merge data',
-                })}
+                label={forcemergeLabel}
+                aria-label={forcemergeLabel}
                 checked={phaseData[PHASE_FORCE_MERGE_ENABLED]}
                 onChange={async e => {
                   await setPhaseData(PHASE_FORCE_MERGE_ENABLED, e.target.checked);
                 }}
+                aria-controls="forcemergeContent"
               />
 
               <EuiSpacer />
-
-              {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
-                <ErrableFormRow
-                  id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
-                  label={intl.formatMessage({
-                    id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
-                    defaultMessage: 'Number of segments',
-                  })}
-                  errorKey={PHASE_FORCE_MERGE_SEGMENTS}
-                  isShowingErrors={isShowingErrors}
-                  errors={errors}
-                >
-                  <EuiFieldNumber
-                    value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
-                    onChange={async e => {
-                      await setPhaseData(PHASE_FORCE_MERGE_SEGMENTS, e.target.value);
-                    }}
-                    min={1}
-                  />
-                </ErrableFormRow>
-              ) : null}
+              <div id="forcemergeContent" aria-live="polite" role="region">
+                {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
+                  <ErrableFormRow
+                    id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
+                    label={intl.formatMessage({
+                      id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
+                      defaultMessage: 'Number of segments',
+                    })}
+                    errorKey={PHASE_FORCE_MERGE_SEGMENTS}
+                    isShowingErrors={isShowingErrors}
+                    errors={errors}
+                  >
+                    <EuiFieldNumber
+                      id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
+                      value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
+                      onChange={async e => {
+                        await setPhaseData(PHASE_FORCE_MERGE_SEGMENTS, e.target.value);
+                      }}
+                      min={1}
+                    />
+                  </ErrableFormRow>
+                ) : null}
+              </div>
             </EuiDescribedFormGroup>
           </Fragment>
         ) : null}
