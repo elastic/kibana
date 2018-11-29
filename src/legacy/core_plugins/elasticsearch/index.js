@@ -18,7 +18,7 @@
  */
 
 import { compact, get, has, set } from 'lodash';
-import { unset } from '../../utils';
+import { unset } from '../../../utils';
 
 import healthCheck from './lib/health_check';
 import { createDataCluster } from './lib/create_data_cluster';

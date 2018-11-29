@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Deprecations } from '../../deprecation';
+import { Deprecations } from '../../../deprecation';
 import index from './index';
 import { compact, noop, set } from 'lodash';
 
