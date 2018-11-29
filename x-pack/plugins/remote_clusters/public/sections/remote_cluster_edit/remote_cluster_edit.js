@@ -41,7 +41,7 @@ export class RemoteClusterEditUi extends Component {
     stopEditingCluster: PropTypes.func,
     editCluster: PropTypes.func,
     isEditingCluster: PropTypes.bool,
-    getEditClusterError: PropTypes.node,
+    getEditClusterError: PropTypes.string,
     clearEditClusterErrors: PropTypes.func,
     openDetailPanel: PropTypes.func,
   }
