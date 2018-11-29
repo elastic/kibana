@@ -28,6 +28,8 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 export class InputControlVis extends Component {
   constructor(props) {
     super(props);
@@ -61,6 +63,7 @@ export class InputControlVis extends Component {
               label={control.label}
               options={control.selectOptions}
               selectedOptions={control.value}
+              formatOptionLabel={control.format}
               disableMsg={control.isEnabled() ? null : control.disabledReason}
               multiselect={control.options.multiselect}
               dynamicOptions={control.options.dynamicOptions}
@@ -104,7 +107,7 @@ export class InputControlVis extends Component {
               disabled={!this.props.hasValues()}
               data-test-subj="inputControlClearBtn"
             >
-              Clear form
+              <FormattedMessage id="inputControl.vis.inputControlVis.clearFormButtonLabel" defaultMessage="Clear form"/>
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
@@ -115,7 +118,7 @@ export class InputControlVis extends Component {
               disabled={!this.props.hasChanges()}
               data-test-subj="inputControlCancelBtn"
             >
-              Cancel changes
+              <FormattedMessage id="inputControl.vis.inputControlVis.cancelChangesButtonLabel" defaultMessage="Cancel changes"/>
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
@@ -127,7 +130,7 @@ export class InputControlVis extends Component {
               disabled={!this.props.hasChanges()}
               data-test-subj="inputControlSubmitBtn"
             >
-              Apply changes
+              <FormattedMessage id="inputControl.vis.inputControlVis.applyChangesButtonLabel" defaultMessage="Apply changes"/>
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
@@ -142,7 +145,7 @@ export class InputControlVis extends Component {
     }
 
     return (
-      <div className="inputControlVis">
+      <div className="icvContainer">
         <EuiFlexGroup wrap>
           {this.renderControls()}
         </EuiFlexGroup>

@@ -32,7 +32,7 @@ interface LegacyLoggingConfig {
 }
 
 /**
- * Represents adapter between config provided by legacy platform and `RawConfig`
+ * Represents adapter between config provided by legacy platform and `Config`
  * supported by the current platform.
  */
 export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
@@ -59,14 +59,31 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     // TODO: New platform uses just a subset of `server` config from the legacy platform,
     // new values will be exposed once we need them (eg. customResponseHeaders or xsrf).
     return {
+      autoListen: configValue.autoListen,
       basePath: configValue.basePath,
       cors: configValue.cors,
       host: configValue.host,
       maxPayload: configValue.maxPayloadBytes,
       port: configValue.port,
       rewriteBasePath: configValue.rewriteBasePath,
-      ssl: configValue.ssl,
+      ssl: configValue.ssl && LegacyObjectToConfigAdapter.transformSSL(configValue.ssl),
     };
+  }
+
+  private static transformSSL(configValue: Record<string, any>) {
+    // `server.ssl.cert` is deprecated, legacy platform will issue deprecation warning.
+    if (configValue.cert) {
+      configValue.certificate = configValue.cert;
+      delete configValue.cert;
+    }
+
+    // Enabling ssl by only specifying server.ssl.certificate and server.ssl.key is deprecated,
+    // legacy platform will issue deprecation warning.
+    if (typeof configValue.enabled !== 'boolean' && configValue.certificate && configValue.key) {
+      configValue.enabled = true;
+    }
+
+    return configValue;
   }
 
   public get(configPath: ConfigPath) {

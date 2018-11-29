@@ -25,12 +25,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export const CallOutsComponent = ({
+export const CallOuts = ({
   deprecatedLangsInUse,
   painlessDocLink,
-  intl
 }) => {
   if (!deprecatedLangsInUse.length) {
     return null;
@@ -39,9 +38,10 @@ export const CallOutsComponent = ({
   return (
     <div>
       <EuiCallOut
-        title={intl.formatMessage({
-          id: 'kbn.management.editIndexPattern.scripted.deprecationLangHeader', defaultMessage: 'Deprecation languages in use'
-        })}
+        title={<FormattedMessage
+          id="kbn.management.editIndexPattern.scripted.deprecationLangHeader"
+          defaultMessage="Deprecation languages in use"
+        />}
         color="danger"
         iconType="cross"
       >
@@ -54,8 +54,12 @@ export const CallOutsComponent = ({
               deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
               link: (
                 <EuiLink href={painlessDocLink}>
-                  Painless
-                </EuiLink>)
+                  <FormattedMessage
+                    id="kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
+                    defaultMessage="Painless"
+                  />
+                </EuiLink>
+              )
             }}
           />
         </p>
@@ -64,5 +68,3 @@ export const CallOutsComponent = ({
     </div>
   );
 };
-
-export const CallOuts = injectI18n(CallOutsComponent);

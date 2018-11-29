@@ -55,14 +55,7 @@
           ng-mouseenter="setSwimlaneSelectActive(true)"
           ng-mouseleave="setSwimlaneSelectActive(false)"
         >
-          <ml-explorer-swimlane
-            swimlane-type="overall"
-            swimlane-data="overallSwimlaneData"
-            selected-job-ids="selectedJobIds"
-            chart-width="swimlaneWidth"
-            app-state="appState"
-            style="width: 100%; height: 250px;">
-          </ml-explorer-swimlane>
+          <ml-explorer-swimlane swimlane-type="overall" />
         </div>
 
         <div ng-if="viewBySwimlaneOptions.length > 0">
@@ -95,17 +88,10 @@
             ng-mouseenter="setSwimlaneSelectActive(true)"
             ng-mouseleave="setSwimlaneSelectActive(false)"
           >
-            <ml-explorer-swimlane
-              swimlane-type="viewBy"
-              swimlane-data="viewBySwimlaneData"
-              selected-job-ids="selectedJobIds"
-              chart-width="swimlaneWidth"
-              app-state="appState"
-              style="width: 100%; height: 250px;">
-            </ml-explorer-swimlane>
+            <ml-explorer-swimlane swimlane-type="viewBy" />
           </div>
 
-          <div ng-if="!showViewBySwimlane()" class="text-center visualize-error euiText">
+          <div ng-if="!showViewBySwimlane()" class="text-center visError euiText">
             <div class="item top"></div>
             <div class="item">
               <h4 class="euiTitle euiTitle--small">No {{swimlaneViewByFieldName}} influencers found</h4>
@@ -144,6 +130,8 @@
             </div>
           </div>
         </div>
+
+        <div class="euiSpacer euiSpacer--m"></div>
 
         <div class="euiText explorer-charts">
           <ml-explorer-charts-container />

@@ -19,6 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 
 import { OptionsMenu } from './options';
 
@@ -53,22 +54,24 @@ export function showOptionsPopover({
 
   document.body.appendChild(container);
   const element = (
-    <EuiWrappingPopover
-      className="navbar__popover"
-      id="popover"
-      button={anchorElement}
-      isOpen={true}
-      closePopover={onClose}
-    >
-      <OptionsMenu
-        darkTheme={darkTheme}
-        onDarkThemeChange={onDarkThemeChange}
-        useMargins={useMargins}
-        onUseMarginsChange={onUseMarginsChange}
-        hidePanelTitles={hidePanelTitles}
-        onHidePanelTitlesChange={onHidePanelTitlesChange}
-      />
-    </EuiWrappingPopover>
+    <I18nProvider>
+      <EuiWrappingPopover
+        className="navbar__popover"
+        id="popover"
+        button={anchorElement}
+        isOpen={true}
+        closePopover={onClose}
+      >
+        <OptionsMenu
+          darkTheme={darkTheme}
+          onDarkThemeChange={onDarkThemeChange}
+          useMargins={useMargins}
+          onUseMarginsChange={onUseMarginsChange}
+          hidePanelTitles={hidePanelTitles}
+          onHidePanelTitlesChange={onHidePanelTitlesChange}
+        />
+      </EuiWrappingPopover>
+    </I18nProvider>
   );
   ReactDOM.render(element, container);
 }

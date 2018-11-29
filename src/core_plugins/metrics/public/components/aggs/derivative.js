@@ -25,7 +25,15 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiFieldText,
+  EuiFormRow,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const DerivativeAgg = props => {
   const { siblings } = props;
@@ -47,36 +55,59 @@ export const DerivativeAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Metric</div>
-        <MetricSelect
-          onChange={handleSelectChange('field')}
-          metrics={siblings}
-          metric={model}
-          value={model.field}
-        />
-      </div>
-      <div>
-        <label className="vis_editor__label" htmlFor={htmlId('units')}>
-          Units (1s, 1m, etc)
-        </label>
-        <input
-          id={htmlId('units')}
-          className="vis_editor__input"
-          onChange={handleTextChange('unit')}
-          value={model.unit}
-          type="text"
-        />
-      </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.derivative.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+            fullWidth
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('metric')}
+            label={(<FormattedMessage
+              id="tsvb.derivative.metricLabel"
+              defaultMessage="Metric"
+            />)}
+            fullWidth
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('units')}
+            label={(<FormattedMessage
+              id="tsvb.derivative.unitsLabel"
+              defaultMessage="Units (1s, 1m, etc)"
+              description="1s and 1m are required values and must not be translated."
+            />)}
+            fullWidth
+          >
+            <EuiFieldText
+              onChange={handleTextChange('unit')}
+              value={model.unit}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };

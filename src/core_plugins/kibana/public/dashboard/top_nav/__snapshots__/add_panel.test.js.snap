@@ -11,28 +11,18 @@ exports[`render 1`] = `
   size="s"
 >
   <EuiFlyoutBody>
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
+    <EuiTitle
+      size="s"
+      textTransform="none"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
-        <EuiTitle
-          size="m"
-        >
-          <h2>
-            Add Panels
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <h1>
+        <FormattedMessage
+          defaultMessage="Add Panels"
+          id="kbn.dashboard.topNav.addPanelsTitle"
+          values={Object {}}
+        />
+      </h1>
+    </EuiTitle>
     <EuiTabs
       expand={false}
       size="m"
@@ -69,14 +59,18 @@ exports[`render 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Add new Visualization
+          <FormattedMessage
+            defaultMessage="Add new Visualization"
+            id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       }
-      find={[Function]}
       key="visSavedObjectFinder"
       noItemsMessage="No matching visualizations found."
       onChoose={[Function]}
       savedObjectType="visualization"
+      visTypes={Object {}}
     />
   </EuiFlyoutBody>
 </EuiFlyout>

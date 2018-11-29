@@ -28,7 +28,7 @@ export const createListRoute = () => ({
   path: '/api/sample_data',
   method: 'GET',
   config: {
-    handler: async (request, reply) => {
+    handler: async (request) => {
       const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
 
       const sampleDatasets = request.server.getSampleDatasets().map(sampleDataset => {
@@ -39,27 +39,33 @@ export const createListRoute = () => ({
           previewImagePath: sampleDataset.previewImagePath,
           overviewDashboard: sampleDataset.overviewDashboard,
           defaultIndex: sampleDataset.defaultIndex,
+          dataIndices: sampleDataset.dataIndices.map(dataIndexConfig => {
+            return { id: dataIndexConfig.id };
+          }),
         };
       });
 
       const isInstalledPromises = sampleDatasets.map(async sampleDataset => {
-        const index = createIndexName(request.server, sampleDataset.id);
-        try {
-          const indexExists = await callWithRequest(request, 'indices.exists', { index: index });
-          if (!indexExists) {
-            sampleDataset.status = NOT_INSTALLED;
-            return;
-          }
+        for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
+          const dataIndexConfig = sampleDataset.dataIndices[i];
+          const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+          try {
+            const indexExists = await callWithRequest(request, 'indices.exists', { index: index });
+            if (!indexExists) {
+              sampleDataset.status = NOT_INSTALLED;
+              return;
+            }
 
-          const { count } = await callWithRequest(request, 'count', { index: index });
-          if (count === 0) {
-            sampleDataset.status = NOT_INSTALLED;
+            const { count } = await callWithRequest(request, 'count', { index: index });
+            if (count === 0) {
+              sampleDataset.status = NOT_INSTALLED;
+              return;
+            }
+          } catch (err) {
+            sampleDataset.status = UNKNOWN;
+            sampleDataset.statusMsg = err.message;
             return;
           }
-        } catch (err) {
-          sampleDataset.status = UNKNOWN;
-          sampleDataset.statusMsg = err.message;
-          return;
         }
 
         try {
@@ -80,7 +86,7 @@ export const createListRoute = () => ({
       });
 
       await Promise.all(isInstalledPromises);
-      reply(sampleDatasets);
+      return sampleDatasets;
     }
   }
 });

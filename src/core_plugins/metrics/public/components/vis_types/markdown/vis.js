@@ -29,7 +29,7 @@ import ErrorComponent from '../../error';
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
   const series = _.get(visData, `${model.id}.series`, []);
-  const variables = convertSeriesToVars(series, model, dateFormat);
+  const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
   const style = {};
   let reversed = props.reversed;
   const panelBackgroundColor = model.background_color || backgroundColor;
@@ -47,8 +47,8 @@ function MarkdownVisualization(props) {
         ...variables
       }
     );
-    let className = 'thorMarkdown';
-    let contentClassName = `thorMarkdown__content ${model.markdown_vertical_align}`;
+    let className = 'tvbMarkdown';
+    let contentClassName = `tvbMarkdown__content ${model.markdown_vertical_align}`;
     if (model.markdown_scrollbars) contentClassName += ' scrolling';
     if (reversed) className += ' reversed';
     const markdownError = markdownSource instanceof Error ? markdownSource : null;
@@ -63,7 +63,7 @@ function MarkdownVisualization(props) {
     );
   }
   return (
-    <div className="dashboard__visualization" style={style}>
+    <div className="tvbVis" style={style}>
       {markdown}
     </div>
   );

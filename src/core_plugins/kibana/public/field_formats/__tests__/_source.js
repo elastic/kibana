@@ -43,8 +43,9 @@ describe('_source formatting', function () {
     }));
 
     it('should use the text content type if a field is not passed', function () {
-      const hit = _.first(hits);
-      expect(convertHtml(hit._source)).to.be(`<span ng-non-bindable>${JSON.stringify(hit._source)}</span>`);
+      const hit = { 'foo': 'bar', 'number': 42, 'hello': '<h1>World</h1>', 'also': 'with "quotes" or \'single quotes\'' };
+      // eslint-disable-next-line
+      expect(convertHtml(hit)).to.be('<span ng-non-bindable>{&quot;foo&quot;:&quot;bar&quot;,&quot;number&quot;:42,&quot;hello&quot;:&quot;&lt;h1&gt;World&lt;/h1&gt;&quot;,&quot;also&quot;:&quot;with \\&quot;quotes\\&quot; or &#39;single quotes&#39;&quot;}</span>');
     });
 
     it('uses the _source, field, and hit to create a <dl>', function () {

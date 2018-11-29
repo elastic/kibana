@@ -22,7 +22,6 @@ import $ from 'jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
 import template from './timelion_interval.html';
-import './timelion_interval.less';
 
 app.directive('timelionInterval', function ($compile, $timeout) {
   return {
@@ -43,7 +42,7 @@ app.directive('timelionInterval', function ($compile, $timeout) {
         '1w': '1 week',
         '1M': '1 month',
         '1y': '1 year',
-        'other': 'other'
+        'other': 'other',
       };
 
       $scope.$watch('model', function (newVal, oldVal) {

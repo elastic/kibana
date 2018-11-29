@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { ContextMenuAction } from 'ui/embeddable';
 
 class PanelActionsStore {
-  public actions: DashboardPanelAction[] = [];
+  public actions: ContextMenuAction[] = [];
 
   /**
    *
    * @type {IndexedArray} panelActionsRegistry
    */
-  public initializeFromRegistry(panelActionsRegistry: DashboardPanelAction[]) {
+  public initializeFromRegistry(panelActionsRegistry: ContextMenuAction[]) {
     panelActionsRegistry.forEach(panelAction => {
       this.actions.push(panelAction);
     });

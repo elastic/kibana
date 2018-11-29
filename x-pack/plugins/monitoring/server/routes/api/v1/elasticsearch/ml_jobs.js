@@ -30,7 +30,7 @@ export function mlJobRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
@@ -41,12 +41,12 @@ export function mlJobRoute(server) {
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
         const rows = await getMlJobs(req, esIndexPattern);
 
-        reply({
+        return {
           clusterStatus: getClusterStatus(clusterStats, shardStats),
           rows
-        });
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

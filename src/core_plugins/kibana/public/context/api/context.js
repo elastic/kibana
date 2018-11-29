@@ -216,6 +216,7 @@ function fetchContextProvider(indexPatterns, Private) {
             filter: {
               range: {
                 [timeField]: {
+                  format: 'epoch_millis',
                   ...startRange,
                   ...endRange,
                 }

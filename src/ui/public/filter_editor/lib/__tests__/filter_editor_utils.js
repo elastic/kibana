@@ -36,7 +36,7 @@ import {
   getFieldFromFilter,
   getOperatorFromFilter,
   getParamsFromFilter,
-  getFieldOptions,
+  getFilterableFields,
   getOperatorOptions,
   isFilterValid,
   buildFilter,
@@ -171,20 +171,20 @@ describe('FilterEditorUtils', function () {
     });
   });
 
-  describe('getFieldOptions', function () {
+  describe('getFilterableFields', function () {
     it('returns an empty array when no index patterns are provided', function () {
-      const fieldOptions = getFieldOptions();
+      const fieldOptions = getFilterableFields();
       expect(fieldOptions).to.eql([]);
     });
 
     it('returns the list of fields from the given index patterns', function () {
-      const fieldOptions = getFieldOptions([indexPattern]);
+      const fieldOptions = getFilterableFields([indexPattern]);
       expect(fieldOptions).to.be.an('array');
       expect(fieldOptions.length).to.be.greaterThan(0);
     });
 
     it('limits the fields to the filterable fields', function () {
-      const fieldOptions = getFieldOptions([indexPattern]);
+      const fieldOptions = getFilterableFields([indexPattern]);
       const nonFilterableFields = fieldOptions.filter(field => !field.filterable);
       expect(nonFilterableFields.length).to.be(0);
     });

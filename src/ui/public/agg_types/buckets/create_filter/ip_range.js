@@ -18,7 +18,7 @@
  */
 
 import { CidrMask } from '../../../utils/cidr_mask';
-import { buildRangeFilter } from '../../../filter_manager/lib/range';
+import { buildRangeFilter } from '@kbn/es-query';
 
 export function createFilterIpRange(aggConfig, key) {
   let range;
@@ -32,5 +32,5 @@ export function createFilterIpRange(aggConfig, key) {
     };
   }
 
-  return buildRangeFilter(aggConfig.params.field, { gte: range.from, lte: range.to }, aggConfig._indexPattern);
+  return buildRangeFilter(aggConfig.params.field, { gte: range.from, lte: range.to }, aggConfig.getIndexPattern());
 }

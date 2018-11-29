@@ -24,9 +24,12 @@ import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiFormRow } from '@elastic/eui';
 
 function CumulativeSumAgg(props) {
   const { model, siblings } = props;
+  const htmlId = htmlIdGenerator();
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   return (
@@ -37,24 +40,39 @@ function CumulativeSumAgg(props) {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Metric</div>
-        <MetricSelect
-          onChange={handleSelectChange('field')}
-          metrics={siblings}
-          metric={model}
-          value={model.field}
-        />
-      </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.cumulativeSum.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('metric')}
+            label={(<FormattedMessage
+              id="tsvb.cumulativeSum.metricLabel"
+              defaultMessage="Metric"
+            />)}
+          >
+            <MetricSelect
+              onChange={handleSelectChange('field')}
+              metrics={siblings}
+              metric={model}
+              value={model.field}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 

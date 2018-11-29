@@ -18,7 +18,7 @@
  */
 
 import moment from 'moment';
-import { buildRangeFilter } from '../../../filter_manager/lib/range';
+import { buildRangeFilter } from '@kbn/es-query';
 
 export function createFilterDateHistogram(agg, key) {
   const start = moment(key);
@@ -28,5 +28,5 @@ export function createFilterDateHistogram(agg, key) {
     gte: start.valueOf(),
     lt: start.add(interval).valueOf(),
     format: 'epoch_millis'
-  }, agg._indexPattern);
+  }, agg.getIndexPattern());
 }

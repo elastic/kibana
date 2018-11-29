@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { wrap } from 'boom';
+import { boomify } from 'boom';
 
 /**
  * Check the incoming request parameters to see if the action should be allowed to fire.
@@ -55,27 +55,26 @@ export function checkForErrors(action, actionId, data) {
  * @param {NotificationService} notificationService The notification service singleton.
  * @param {String} actionId The specified action's ID.
  * @param {Function} data The notification data to send via the specified action.
- * @param {Function} reply The response function from the server route.
  * @param {Function} _checkForErrors Exposed for testing.
  */
-export async function sendNotification(server, notificationService, actionId, data, reply, { _checkForErrors = checkForErrors } = { }) {
+export async function sendNotification(server, notificationService, actionId, data, { _checkForErrors = checkForErrors } = { }) {
   const action = notificationService.getActionForId(actionId);
   const error = _checkForErrors(action, actionId, data);
 
   if (error === null) {
     return action.performAction(data)
-      .then(result => reply(result.toJson()))
-      .catch(err => reply(wrap(err))); // by API definition, this should never happen as performAction isn't allow to throw errrors
+      .then(result => result.toJson())
+      .catch(err => boomify(err)); // by API definition, this should never happen as performAction isn't allow to throw errrors
   }
 
   server.log(['actions', 'error'], error.message);
 
-  reply({
+  return {
     status_code: 400,
     ok: false,
     message: `Error: ${error.message}`,
     error,
-  });
+  };
 }
 
 /**
@@ -98,11 +97,11 @@ export function notificationServiceSendRoute(server, notificationService) {
         })
       }
     },
-    handler: (req, reply) => {
+    handler: (req) => {
       const actionId = req.payload.action;
       const data = req.payload.data;
 
-      sendNotification(server, notificationService, actionId, data, reply);
+      sendNotification(server, notificationService, actionId, data);
     },
   });
 }

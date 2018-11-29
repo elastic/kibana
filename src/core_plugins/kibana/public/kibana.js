@@ -35,14 +35,16 @@ import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormats';
 import 'uiExports/fieldFormatEditors';
 import 'uiExports/navbarExtensions';
-import 'uiExports/dashboardPanelActions';
+import 'uiExports/contextMenuActions';
 import 'uiExports/managementSections';
+import 'uiExports/indexManagement';
 import 'uiExports/devTools';
 import 'uiExports/docViews';
 import 'uiExports/embeddableFactories';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
 import 'uiExports/autocompleteProviders';
+import 'uiExports/shareContextMenuExtensions';
 
 import 'ui/autoload/all';
 import './home';

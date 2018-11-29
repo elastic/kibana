@@ -3,23 +3,22 @@
 
   <div class="page-row">
 
-    <div class="kuiPanel management-panel">
+    <div class="kuiPanel mgtPanel">
       <div class="kuiPanelHeader">
         <div class="kuiPanelHeaderSection">
-          <div class="management-panel__heading-icon management-panel__heading-icon--elasticsearch"></div>
           <div class="kuiPanelHeader__title ng-binding">
             Job Management
           </div>
         </div>
       </div>
 
-      <div class="kuiPanelBody management-panel__body">
+      <div class="kuiPanelBody mgtPanel__body">
         <div class="row">
           <ul class="list-unstyled">
             <li class="col-xs-4 col-md-3 ng-scope">
               <a
                 data-test-subj=""
-                class="management-panel__link ng-binding"
+                class="mgtPanel__link ng-binding"
                 tooltip=""
                 tooltip-placement="bottom"
                 tooltip-popup-delay="400"
@@ -32,7 +31,7 @@
               <a
                 ng-if="(canCreateFilter === true)"
                 data-test-subj=""
-                class="management-panel__link ng-binding"
+                class="mgtPanel__link ng-binding"
                 tooltip=""
                 tooltip-placement="bottom"
                 tooltip-popup-delay="400"
@@ -42,7 +41,7 @@
               </a>
               <span
                 ng-if="(canCreateFilter === false)"
-                class="management-panel__link disabled  ng-binding"
+                class="mgtPanel__link disabled  ng-binding"
                 tooltip="You do not have permission to manage filter lists"
                 tooltip-placement="bottom"
                 tooltip-popup-delay="400"

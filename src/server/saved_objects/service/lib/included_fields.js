@@ -32,6 +32,7 @@ export function includedFields(type, fields) {
   const sourceType = type || '*';
 
   return sourceFields.map(f => `${sourceType}.${f}`)
+    .concat('namespace')
     .concat('type')
     .concat(fields); // v5 compatibility
 }

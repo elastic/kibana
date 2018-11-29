@@ -29,6 +29,7 @@ import {
   EuiTextColor,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const Header = ({
   onExportAll,
@@ -40,7 +41,12 @@ export const Header = ({
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
         <EuiTitle>
-          <h1>Saved Objects</h1>
+          <h1>
+            <FormattedMessage
+              id="kbn.management.objects.objectsTable.header.savedObjectsTitle"
+              defaultMessage="Saved Objects"
+            />
+          </h1>
         </EuiTitle>
       </EuiFlexItem>
 
@@ -53,7 +59,13 @@ export const Header = ({
               data-test-subj="exportAllObjects"
               onClick={onExportAll}
             >
-              Export {filteredCount} {filteredCount === 1 ? 'object' : 'objects'}
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.header.exportButtonLabel"
+                defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+                values={{
+                  filteredCount
+                }}
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -63,7 +75,10 @@ export const Header = ({
               data-test-subj="importObjects"
               onClick={onImport}
             >
-              Import
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.header.importButtonLabel"
+                defaultMessage="Import"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -72,7 +87,10 @@ export const Header = ({
               iconType="refresh"
               onClick={onRefresh}
             >
-              Refresh
+              <FormattedMessage
+                id="kbn.management.objects.objectsTable.header.refreshButtonLabel"
+                defaultMessage="Refresh"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -82,10 +100,13 @@ export const Header = ({
     <EuiText>
       <p>
         <EuiTextColor color="subdued">
-          From here you can delete saved objects, such as saved searches.
-          You can also edit the raw data of saved objects.
-          Typically objects are only modified via their associated application,
-          which is probably what you should use instead of this screen.
+          <FormattedMessage
+            id="kbn.management.objects.objectsTable.howToDeleteSavedObjectsDescription"
+            defaultMessage="From here you can delete saved objects, such as saved searches.
+            You can also edit the raw data of saved objects.
+            Typically objects are only modified via their associated application,
+            which is probably what you should use instead of this screen."
+          />
         </EuiTextColor>
       </p>
     </EuiText>

@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { EventEmitter } from 'events';
 import { resolve } from 'path';
 import process from 'process';
 
 import { pkg } from '../../../utils/package_json';
 
-interface PackageInfo {
+export interface PackageInfo {
   version: string;
   branch: string;
   buildNum: number;
@@ -38,8 +37,20 @@ interface EnvironmentMode {
 
 export interface EnvOptions {
   configs: string[];
-  cliArgs: Record<string, any>;
+  cliArgs: CliArgs;
   isDevClusterMaster: boolean;
+}
+
+export interface CliArgs {
+  dev: boolean;
+  envName?: string;
+  quiet: boolean;
+  silent: boolean;
+  watch: boolean;
+  repl: boolean;
+  basePath: boolean;
+  optimize: boolean;
+  open: boolean;
 }
 
 export class Env {
@@ -51,7 +62,6 @@ export class Env {
   }
 
   public readonly configDir: string;
-  public readonly corePluginsDir: string;
   public readonly binDir: string;
   public readonly logDir: string;
   public readonly staticFilesDir: string;
@@ -67,14 +77,9 @@ export class Env {
   public readonly mode: Readonly<EnvironmentMode>;
 
   /**
-   * @internal
-   */
-  public readonly legacy: EventEmitter;
-
-  /**
    * Arguments provided through command line.
    */
-  public readonly cliArgs: Readonly<Record<string, any>>;
+  public readonly cliArgs: Readonly<CliArgs>;
 
   /**
    * Paths to the configuration files.
@@ -91,7 +96,6 @@ export class Env {
    */
   constructor(readonly homeDir: string, options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
-    this.corePluginsDir = resolve(this.homeDir, 'core_plugins');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');
@@ -100,10 +104,11 @@ export class Env {
     this.configs = Object.freeze(options.configs);
     this.isDevClusterMaster = options.isDevClusterMaster;
 
+    const isDevMode = this.cliArgs.dev || this.cliArgs.envName === 'development';
     this.mode = Object.freeze<EnvironmentMode>({
-      dev: this.cliArgs.dev,
-      name: this.cliArgs.dev ? 'development' : 'production',
-      prod: !this.cliArgs.dev,
+      dev: isDevMode,
+      name: isDevMode ? 'development' : 'production',
+      prod: !isDevMode,
     });
 
     const isKibanaDistributable = pkg.build && pkg.build.distributable === true;
@@ -113,7 +118,5 @@ export class Env {
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
     });
-
-    this.legacy = new EventEmitter();
   }
 }

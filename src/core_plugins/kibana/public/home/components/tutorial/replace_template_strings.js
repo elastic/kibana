@@ -52,7 +52,8 @@ export function replaceTemplateStrings(text, params = {}) {
         base_url: ELASTIC_WEBSITE_URL,
         beats: {
           filebeat: documentationLinks.filebeat.base,
-          metricbeat: documentationLinks.metricbeat.base
+          metricbeat: documentationLinks.metricbeat.base,
+          heartbeat: documentationLinks.heartbeat.base
         },
         logstash: documentationLinks.logstash.base,
         version: DOC_LINK_VERSION

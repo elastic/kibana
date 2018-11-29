@@ -7,70 +7,51 @@
 
 
 /*
- * AngularJS directive for rendering Explorer dashboard swimlanes.
+ * AngularJS directive wrapper for rendering Anomaly Explorer's ExplorerSwimlane React component.
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { IntervalHelperProvider } from 'plugins/ml/util/ml_time_buckets';
 import { ExplorerSwimlane } from './explorer_swimlane';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlExplorerSwimlane', function ($compile, Private, mlExplorerDashboardService) {
+import { mlExplorerDashboardService } from './explorer_dashboard_service';
+
+module.directive('mlExplorerSwimlane', function () {
 
   function link(scope, element) {
-    // Re-render the swimlane whenever the underlying data changes.
-    function swimlaneDataChangeListener(swimlaneType) {
-      if (swimlaneType === scope.swimlaneType) {
-        render();
-      }
-    }
-
-    mlExplorerDashboardService.swimlaneDataChange.watch(swimlaneDataChangeListener);
-
-    element.on('$destroy', () => {
-      mlExplorerDashboardService.swimlaneDataChange.unwatch(swimlaneDataChangeListener);
-      scope.$destroy();
-    });
-
-    const MlTimeBuckets = Private(IntervalHelperProvider);
-
-    function render() {
-      if (scope.swimlaneData === undefined) {
+    function swimlaneDataChangeListener(props) {
+      if (
+        props.swimlaneType !== scope.swimlaneType ||
+        props.swimlaneData === undefined ||
+        props.swimlaneData.earliest === undefined ||
+        props.swimlaneData.latest === undefined
+      ) {
         return;
       }
-
-      const props = {
-        lanes: scope.swimlaneData.laneLabels,
-        startTime: scope.swimlaneData.earliest,
-        endTime: scope.swimlaneData.latest,
-        stepSecs: scope.swimlaneData.interval,
-        points: scope.swimlaneData.points,
-        chartWidth: scope.chartWidth,
-        MlTimeBuckets,
-        swimlaneData: scope.swimlaneData,
-        swimlaneType: scope.swimlaneType,
-        mlExplorerDashboardService,
-        appState: scope.appState
-      };
 
       ReactDOM.render(
         React.createElement(ExplorerSwimlane, props),
         element[0]
       );
     }
+    mlExplorerDashboardService.swimlaneDataChange.watch(swimlaneDataChangeListener);
+
+    element.on('$destroy', () => {
+      mlExplorerDashboardService.swimlaneDataChange.unwatch(swimlaneDataChangeListener);
+      // unmountComponentAtNode() needs to be called so dragSelectListener within
+      // the ExplorerSwimlane component gets unwatched properly.
+      ReactDOM.unmountComponentAtNode(element[0]);
+      scope.$destroy();
+    });
   }
 
   return {
     scope: {
-      swimlaneType: '@',
-      swimlaneData: '=',
-      selectedJobIds: '=',
-      chartWidth: '=',
-      appState: '='
+      swimlaneType: '@'
     },
     link
   };

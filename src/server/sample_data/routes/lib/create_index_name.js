@@ -17,6 +17,12 @@
  * under the License.
  */
 
-export function createIndexName(server, sampleDataSetId) {
-  return `kibana_sample_data_${sampleDataSetId}`;
+export function createIndexName(sampleDataSetId, dataIndexId) {
+  // Sample data schema was updated to support multiple indices in 6.5.
+  // This if statement ensures that sample data sets that used a single index prior to the schema change
+  // have the same index name to avoid orphaned indices when uninstalling.
+  if (sampleDataSetId === dataIndexId) {
+    return `kibana_sample_data_${sampleDataSetId}`;
+  }
+  return `kibana_sample_data_${sampleDataSetId}_${dataIndexId}`;
 }

@@ -11,29 +11,27 @@
  * anomalies in the raw data in the Machine Learning Explorer dashboard.
  */
 
-import './styles/explorer_charts_container.less';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 
 import $ from 'jquery';
 import { ExplorerChartsContainer } from './explorer_charts_container';
-import { exploreSeries } from './explore_series';
 import { explorerChartsContainerServiceFactory } from './explorer_charts_container_service';
 import { mlChartTooltipService } from '../../components/chart_tooltip/chart_tooltip_service';
+import { mlExplorerDashboardService } from '../explorer_dashboard_service';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.directive('mlExplorerChartsContainer', function (
-  mlExplorerDashboardService,
   mlSelectSeverityService
 ) {
 
   function link(scope, element) {
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
       mlSelectSeverityService,
-      updateComponent
+      updateComponent,
+      $('.explorer-charts')
     );
 
     mlExplorerDashboardService.anomalyDataChange.watch(anomalyDataChangeListener);
@@ -52,9 +50,8 @@ module.directive('mlExplorerChartsContainer', function (
 
     function updateComponent(data) {
       const props = {
-        exploreSeries,
+        chartsPerRow: data.chartsPerRow,
         seriesToPlot: data.seriesToPlot,
-        layoutCellsPerChart: data.layoutCellsPerChart,
         // convert truthy/falsy value to Boolean
         tooManyBuckets: !!data.tooManyBuckets,
         mlSelectSeverityService,
@@ -66,6 +63,8 @@ module.directive('mlExplorerChartsContainer', function (
         element[0]
       );
     }
+
+    mlExplorerDashboardService.chartsInitDone.changed();
   }
 
   return {

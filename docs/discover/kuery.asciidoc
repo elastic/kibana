@@ -13,9 +13,9 @@ what's new.
 ============
 
 Starting in 6.3, you can choose to opt-in to a number of exciting experimental query language enhancements under the
-options menu in the query bar. Currently, opting in will enable autocomplete functionality, scripted field support,
-and a simplified, easier to use syntax. We're hard at work building even more features for you to try out. Take 
-these features for a spin and let us know what you think!  
+options menu in the query bar. Currently, opting in will enable scripted field support and a simplified, easier to 
+use syntax. If you have a Basic license or above, autocomplete functionality will also be enabled. We're hard at 
+work building even more features for you to try out. Take these features for a spin and let us know what you think!
 
 ==== New Simplified Syntax
 

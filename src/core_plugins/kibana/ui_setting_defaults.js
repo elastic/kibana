@@ -19,13 +19,16 @@
 
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
+import { IS_KIBANA_RELEASE } from '../../utils';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
-  const numeralLanguageIds = numeralLanguages.map(function (numeralLanguage) {
+  // We add the `en` key manually here, since that's not a real numeral locale, but the
+  // default fallback in case the locale is not found.
+  const numeralLanguageIds = ['en', ...numeralLanguages.map(function (numeralLanguage) {
     return numeralLanguage.id;
-  });
+  })];
 
   // wrapped in provider so that a new instance is given to each app/test
   return {
@@ -43,6 +46,12 @@ export function getUiSettingDefaults() {
       value: true,
       description: `When set, * is allowed as the first character in a query clause. Currently only applies when experimental query
         features are enabled in the query bar. To disallow leading wildcards in basic lucene queries, use query:queryString:options`,
+    },
+    'k7design': {
+      name: 'Use the new K7 UI design',
+      value: IS_KIBANA_RELEASE,
+      description: `When set, Kibana will use the new K7 design targeted for release in 7.0. At this time, not all features are
+        implemented.`,
     },
     'search:queryLanguage': {
       name: 'Query language',
@@ -186,6 +195,15 @@ export function getUiSettingDefaults() {
         used when <strong>courier:setRequestPreference</strong> is set to "custom".`,
       category: ['search'],
     },
+    'courier:maxConcurrentShardRequests': {
+      name: 'Max Concurrent Shard Requests',
+      value: 0,
+      type: 'number',
+      description: `Controls the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
+        target="_blank" rel="noopener noreferrer">max_concurrent_shard_requests</a>
+        setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.`,
+      category: ['search'],
+    },
     'fields:popularLimit': {
       name: 'Popular fields limit',
       value: 10,
@@ -202,9 +220,10 @@ export function getUiSettingDefaults() {
       description: `Never show more than this many bars in date histograms, scale values if needed`,
     },
     'visualize:enableLabs': {
-      name: 'Enable labs',
+      name: 'Enable experimental visualizations',
       value: true,
-      description: `Enable lab visualizations in Visualize.`,
+      description: `Allows users to create, view, and edit experimental visualizations. If disabled,
+        only visualizations that are considered production-ready are available to the user.`,
       category: ['visualization'],
     },
     'visualization:tileMap:maxPrecision': {
@@ -517,6 +536,15 @@ export function getUiSettingDefaults() {
         Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.
       `,
       category: ['accessibility'],
+    },
+    'rollups:enableIndexPatterns': {
+      name: 'Enable rollup index patterns',
+      value: true,
+      description: `
+        Enable the creation of index patterns which capture rollup indices, which in turn enable
+        visualizations based on rollup data. Refresh the page to apply the changes.
+      `,
+      category: ['rollups'],
     },
   };
 }

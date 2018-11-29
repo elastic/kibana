@@ -9,7 +9,6 @@ import { toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
 import template from './account.html';
 import '../management/change_password_form/change_password_form';
-import './account.less';
 import '../../services/shield_user';
 
 routes.when('/account', {
@@ -33,7 +32,10 @@ routes.when('/account', {
       }
 
       $scope.user.$changePassword()
-        .then(() => toastNotifications.addSuccess('Updated password'))
+        .then(() => toastNotifications.addSuccess({
+          title: 'Updated password',
+          'data-test-subj': 'passwordUpdateSuccess',
+        }))
         .then(onSuccess)
         .catch(error => {
           if (error.status === 401) {

@@ -19,7 +19,8 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 import {
@@ -36,10 +37,8 @@ const mockListControl = {
   type: 'list',
   label: 'list control',
   value: [],
-  selectOptions: [
-    { label: 'choice1', value: 'choice1' },
-    { label: 'choice2', value: 'choice2' }
-  ]
+  selectOptions: ['choice1', 'choice2'],
+  format: (value) => { return value; },
 };
 const mockRangeControl = {
   id: 'mock-range-control',
@@ -52,7 +51,8 @@ const mockRangeControl = {
   label: 'range control',
   value: { min: 0, max: 0 },
   min: 0,
-  max: 100
+  max: 100,
+  format: (value) => { return value; }
 };
 const updateFiltersOnChange = false;
 
@@ -129,7 +129,7 @@ test('Clear btns enabled when there are values', () => {
 });
 
 test('clearControls', () => {
-  const component = mount(<InputControlVis
+  const component = mountWithIntl(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
@@ -148,7 +148,7 @@ test('clearControls', () => {
 });
 
 test('submitFilters', () => {
-  const component = mount(<InputControlVis
+  const component = mountWithIntl(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
@@ -167,7 +167,7 @@ test('submitFilters', () => {
 });
 
 test('resetControls', () => {
-  const component = mount(<InputControlVis
+  const component = mountWithIntl(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}

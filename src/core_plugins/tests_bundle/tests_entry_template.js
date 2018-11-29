@@ -38,41 +38,6 @@ import 'childnode-remove-polyfill';
 
 import { CoreSystem } from '__kibanaCore__'
 
-const legacyMetadata = {
-  version: '1.2.3',
-  buildNum: 1234,
-  vars: {
-    kbnIndex: '.kibana',
-    esShardTimeout: 1500,
-    esApiVersion: ${JSON.stringify(pkg.branch)},
-    esRequestTimeout: '300000',
-    tilemapsConfig: {
-      deprecated: {
-        isOverridden: false,
-        config: {
-          options: {
-          }
-        }
-      }
-    },
-    regionmapsConfig: {
-      layers: []
-    },
-    mapConfig: {
-      includeElasticMapsService: true,
-      manifestServiceUrl: 'https://catalogue-staging.maps.elastic.co/v2/manifest'
-    },
-    vegaConfig: {
-      enabled: true,
-      enableExternalUrls: true
-    },
-  },
-  uiSettings: {
-    defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
-    user: {}
-  }
-};
-
 // render the core system in a child of the body as the default children of the body
 // in the browser tests are needed for mocha and other test components to work
 const rootDomElement = document.createElement('div');
@@ -80,9 +45,42 @@ document.body.appendChild(rootDomElement)
 
 new CoreSystem({
   injectedMetadata: {
-    version: legacyMetadata.version,
-    buildNumber: legacyMetadata.buildNum,
-    legacyMetadata
+    version: '1.2.3',
+    buildNumber: 1234,
+    legacyMetadata: {
+      version: '1.2.3',
+      buildNum: 1234,
+      uiSettings: {
+        defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
+        user: {}
+      }
+    },
+    vars: {
+      kbnIndex: '.kibana',
+      esShardTimeout: 1500,
+      esApiVersion: ${JSON.stringify(pkg.branch)},
+      esRequestTimeout: '300000',
+      tilemapsConfig: {
+        deprecated: {
+          isOverridden: false,
+          config: {
+            options: {
+            }
+          }
+        }
+      },
+      regionmapsConfig: {
+        layers: []
+      },
+      mapConfig: {
+        includeElasticMapsService: true,
+        manifestServiceUrl: 'https://catalogue-staging.maps.elastic.co/v2/manifest'
+      },
+      vegaConfig: {
+        enabled: true,
+        enableExternalUrls: true
+      },
+    },
   },
   rootDomElement,
   useLegacyTestHarness: true,

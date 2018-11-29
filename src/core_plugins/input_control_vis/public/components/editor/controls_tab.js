@@ -23,6 +23,7 @@ import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
@@ -33,21 +34,10 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-export class ControlsTab extends Component {
+class ControlsTabUi extends Component {
 
   state = {
     type: 'list'
-  }
-
-  getIndexPatterns = async (search) => {
-    const resp = await this.props.scope.vis.API.savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: ['title'],
-      search: `${search}*`,
-      search_fields: ['title'],
-      perPage: 100
-    });
-    return resp.savedObjects;
   }
 
   getIndexPattern = async (indexPatternId) => {
@@ -126,7 +116,6 @@ export class ControlsTab extends Component {
           handleRemoveControl={this.handleRemoveControl}
           handleIndexPatternChange={this.handleIndexPatternChange}
           handleFieldNameChange={this.handleFieldNameChange}
-          getIndexPatterns={this.getIndexPatterns}
           getIndexPattern={this.getIndexPattern}
           handleCheckboxOptionChange={this.handleCheckboxOptionChange}
           handleNumberOptionChange={this.handleNumberOptionChange}
@@ -138,6 +127,8 @@ export class ControlsTab extends Component {
   }
 
   render() {
+    const { intl } = this.props;
+
     return (
       <div>
 
@@ -151,12 +142,21 @@ export class ControlsTab extends Component {
               >
                 <EuiSelect
                   options={[
-                    { value: 'range', text: 'Range slider' },
-                    { value: 'list', text: 'Options list' },
+                    { value: 'range', text: intl.formatMessage({
+                      id: 'inputControl.editor.controlsTab.select.rangeDropDownOptionLabel',
+                      defaultMessage: 'Range slider' })
+                    },
+                    { value: 'list', text: intl.formatMessage({
+                      id: 'inputControl.editor.controlsTab.select.listDropDownOptionLabel',
+                      defaultMessage: 'Options list' })
+                    },
                   ]}
                   value={this.state.type}
                   onChange={evt => this.setState({ type: evt.target.value })}
-                  aria-label="Select control type"
+                  aria-label={intl.formatMessage({
+                    id: 'inputControl.editor.controlsTab.select.controlTypeAriaLabel',
+                    defaultMessage: 'Select control type'
+                  })}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -169,9 +169,12 @@ export class ControlsTab extends Component {
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
-                  aria-label="Add control"
+                  aria-label={intl.formatMessage({
+                    id: 'inputControl.editor.controlsTab.select.addControlAriaLabel',
+                    defaultMessage: 'Add control'
+                  })}
                 >
-                  Add
+                  <FormattedMessage id="inputControl.editor.controlsTab.addButtonLabel" defaultMessage="Add"/>
                 </EuiButton>
               </EuiFormRow>
             </EuiFlexItem>
@@ -183,7 +186,9 @@ export class ControlsTab extends Component {
   }
 }
 
-ControlsTab.propTypes = {
+ControlsTabUi.propTypes = {
   scope: PropTypes.object.isRequired,
   stageEditorParams: PropTypes.func.isRequired
 };
+
+export const ControlsTab = injectI18n(ControlsTabUi);

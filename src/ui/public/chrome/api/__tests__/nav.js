@@ -26,7 +26,10 @@ import { KibanaParsedUrl } from '../../../url/kibana_parsed_url';
 const basePath = '/someBasePath';
 
 function init(customInternals = { basePath }) {
-  const chrome = {};
+  const chrome = {
+    addBasePath: (path) => path,
+    getBasePath: () => customInternals.basePath || '',
+  };
   const internals = {
     nav: [],
     ...customInternals,
@@ -36,50 +39,8 @@ function init(customInternals = { basePath }) {
 }
 
 describe('chrome nav apis', function () {
-  describe('#getBasePath()', function () {
-    it('returns the basePath', function () {
-      const { chrome } = init();
-      expect(chrome.getBasePath()).to.be(basePath);
-    });
-  });
-
-  describe('#addBasePath()', function () {
-    it('returns undefined when nothing is passed', function () {
-      const { chrome } = init();
-      expect(chrome.addBasePath()).to.be(undefined);
-    });
-
-    it('prepends the base path when the input is a path', function () {
-      const { chrome } = init();
-      expect(chrome.addBasePath('/other/path')).to.be(`${basePath}/other/path`);
-    });
-
-    it('ignores non-path urls', function () {
-      const { chrome } = init();
-      expect(chrome.addBasePath('http://github.com/elastic/kibana')).to.be('http://github.com/elastic/kibana');
-    });
-
-    it('includes the query string', function () {
-      const { chrome } = init();
-      expect(chrome.addBasePath('/app/kibana?a=b')).to.be(`${basePath}/app/kibana?a=b`);
-    });
-  });
-
-  describe('#removeBasePath', () => {
-    it ('returns the given URL as-is when no basepath is set', () => {
-      const basePath = '';
-      const { chrome } = init({ basePath });
-      expect(chrome.removeBasePath('/app/kibana?a=b')).to.be('/app/kibana?a=b');
-    });
-
-    it ('returns the given URL with the basepath stripped out when basepath is set', () => {
-      const { chrome } = init();
-      expect(chrome.removeBasePath(`${basePath}/app/kibana?a=b`)).to.be('/app/kibana?a=b');
-    });
-  });
-
   describe('#getNavLinkById', () => {
-    it ('retrieves the correct nav link, given its ID', () => {
+    it('retrieves the correct nav link, given its ID', () => {
       const appUrlStore = new StubBrowserStorage();
       const nav = [
         { id: 'kibana:discover', title: 'Discover' }
@@ -92,7 +53,7 @@ describe('chrome nav apis', function () {
       expect(navLink).to.eql(nav[0]);
     });
 
-    it ('throws an error if the nav link with the given ID is not found', () => {
+    it('throws an error if the nav link with the given ID is not found', () => {
       const appUrlStore = new StubBrowserStorage();
       const nav = [
         { id: 'kibana:discover', title: 'Discover' }

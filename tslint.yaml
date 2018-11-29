@@ -8,7 +8,6 @@ rulesDirectory:
 
 rules:
   prettier: true
-  no-unused-variable: true
   object-literal-sort-keys: false
   interface-name: false
   no-default-export: true
@@ -32,4 +31,12 @@ rules:
        * KIND, either express or implied.  See the License for the
        * specific language governing permissions and limitations
        * under the License.
+       */
+  disallow-license-header:
+    - true
+    - |-
+      /*
+       * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+       * or more contributor license agreements. Licensed under the Elastic License;
+       * you may not use this file except in compliance with the Elastic License.
        */

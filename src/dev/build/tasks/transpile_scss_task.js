@@ -20,6 +20,7 @@
 import { toArray } from 'rxjs/operators';
 import { buildAll } from '../../../server/sass/build_all';
 import { findPluginSpecs } from '../../../plugin_discovery/find_plugin_specs';
+import { collectUiExports } from '../../../ui/ui_exports/collect_ui_exports';
 
 export const TranspileScssTask = {
   description: 'Transpiling SCSS to CSS',
@@ -30,9 +31,10 @@ export const TranspileScssTask = {
 
     const { spec$ } = findPluginSpecs({ plugins: { scanDirs, paths } });
     const enabledPlugins = await spec$.pipe(toArray()).toPromise();
+    const uiExports = collectUiExports(enabledPlugins);
 
     try {
-      const bundles = await buildAll(enabledPlugins);
+      const bundles = await buildAll(uiExports.styleSheetPaths);
       bundles.forEach(bundle => log.info(`Compiled SCSS: ${bundle.source}`));
     } catch (error) {
       const { message, line, file } = error;

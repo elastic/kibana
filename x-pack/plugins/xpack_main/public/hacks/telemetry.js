@@ -6,7 +6,6 @@
 
 import Promise from 'bluebird';
 import {
-  CONFIG_TELEMETRY,
   REPORT_INTERVAL_MS,
   LOCALSTORAGE_KEY,
 } from '../../common/constants';
@@ -19,9 +18,9 @@ export class Telemetry {
    */
   constructor($injector, fetchTelemetry) {
     this._storage = $injector.get('localStorage');
-    this._config = $injector.get('config');
     this._$http = $injector.get('$http');
     this._telemetryUrl = $injector.get('telemetryUrl');
+    this._telemetryOptedIn = $injector.get('telemetryOptedIn');
     this._attributes = this._storage.get(LOCALSTORAGE_KEY) || {};
     this._fetchTelemetry = fetchTelemetry;
   }
@@ -42,8 +41,8 @@ export class Telemetry {
    * Check time interval passage
    */
   _checkReportStatus() {
-    // check if opt-in for telemetry is enabled in config
-    if (this._config.get(CONFIG_TELEMETRY, false)) {
+    // check if opt-in for telemetry is enabled
+    if (this._telemetryOptedIn) {
       // If the last report is empty it means we've never sent telemetry and
       // now is the time to send it.
       if (!this._get('lastReport')) {
@@ -78,13 +77,13 @@ export class Telemetry {
         });
       })
       .then(response => {
-      // we sent a report, so we need to record and store the current time stamp
+        // we sent a report, so we need to record and store the current time stamp
         this._set('lastReport', Date.now());
         this._saveToBrowser();
         return response;
       })
       .catch(() => {
-      // no ajaxErrorHandlers for telemetry
+        // no ajaxErrorHandlers for telemetry
         return Promise.resolve(null);
       });
   }

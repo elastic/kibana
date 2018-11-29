@@ -25,13 +25,13 @@ export function setupXsrf(server, config) {
   const versionHeader = 'kbn-version';
   const xsrfHeader = 'kbn-xsrf';
 
-  server.ext('onPostAuth', function (req, reply) {
+  server.ext('onPostAuth', function onPostAuthXsrf(req, h) {
     if (disabled) {
-      return reply.continue();
+      return h.continue;
     }
 
     if (whitelist.includes(req.path)) {
-      return reply.continue();
+      return h.continue;
     }
 
     const isSafeMethod = req.method === 'get' || req.method === 'head';
@@ -39,9 +39,9 @@ export function setupXsrf(server, config) {
     const hasXsrfHeader = xsrfHeader in req.headers;
 
     if (!isSafeMethod && !hasVersionHeader && !hasXsrfHeader) {
-      return reply(badRequest(`Request must contain a ${xsrfHeader} header.`));
+      throw badRequest(`Request must contain a ${xsrfHeader} header.`);
     }
 
-    return reply.continue();
+    return h.continue;
   });
 }

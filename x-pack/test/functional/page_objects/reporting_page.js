@@ -15,7 +15,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'security', 'header', 'settings', 'share']);
 
   class ReportingPage {
     async initTests() {
@@ -29,18 +29,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       });
 
       await remote.setWindowSize(1600, 850);
-    }
-
-    async clickTopNavReportingLink() {
-      await retry.try(() => testSubjects.click('topNavReportingLink'));
-    }
-
-    async isReportingPanelOpen() {
-      const generateReportButtonExists = await this.getGenerateReportButtonExists();
-      const unsavedChangesWarningExists = await this.getUnsavedChangesWarningExists();
-      const isOpen = generateReportButtonExists || unsavedChangesWarningExists;
-      log.debug('isReportingPanelOpen: ' + isOpen);
-      return isOpen;
     }
 
     async getUrlOfTab(tabIndex) {
@@ -118,20 +106,19 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async openReportingPanel() {
-      log.debug('openReportingPanel');
-      await retry.try(async () => {
-        const isOpen = await this.isReportingPanelOpen();
+    async openCsvReportingPanel() {
+      log.debug('openCsvReportingPanel');
+      await PageObjects.share.openShareMenuItem('CSV Reports');
+    }
 
-        if (!isOpen) {
-          await this.clickTopNavReportingLink();
-        }
+    async openPdfReportingPanel() {
+      log.debug('openPdfReportingPanel');
+      await PageObjects.share.openShareMenuItem('PDF Reports');
+    }
 
-        const wasOpened = await this.isReportingPanelOpen();
-        if (!wasOpened) {
-          throw new Error('Reporting panel was not opened successfully');
-        }
-      });
+    async openPngReportingPanel() {
+      log.debug('openPngReportingPanel');
+      await PageObjects.share.openShareMenuItem('PNG Reports');
     }
 
     async clickDownloadReportButton(timeout) {
@@ -143,14 +130,6 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       await Promise.all(toasts.map(t => t.click()));
     }
 
-    async getUnsavedChangesWarningExists() {
-      return await testSubjects.exists('unsavedChangesReportingWarning');
-    }
-
-    async getGenerateReportButtonExists() {
-      return await testSubjects.exists('generateReportButton');
-    }
-
     async getQueueReportError() {
       return await testSubjects.exists('queueReportError');
     }
@@ -159,8 +138,12 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       return await retry.try(() => testSubjects.find('generateReportButton'));
     }
 
-    async clickPreserveLayoutOption() {
-      await retry.try(() => testSubjects.click('preserveLayoutOption'));
+    async checkUsePrintLayout() {
+      // The print layout checkbox slides in as part of an animation, and tests can
+      // attempt to click it too quickly, leading to flaky tests. The 500ms wait allows
+      // the animation to complete before we attempt a click.
+      const menuAnimationDelay = 500;
+      await retry.tryForTime(menuAnimationDelay, () => testSubjects.click('usePrintLayout'));
     }
 
     async clickGenerateReportButton() {

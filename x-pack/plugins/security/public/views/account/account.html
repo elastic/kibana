@@ -31,7 +31,7 @@
       Username
     </label>
     <div class="euiText">
-      <p ng-bind="::user.username"></p>
+      <p ng-bind="::user.username" data-test-subj=usernameField></p>
     </div>
   </div>
 
@@ -41,7 +41,7 @@
       Email
     </label>
     <div class="euiText">
-      <p ng-bind="::accountController.getEmail()"></p>
+      <p ng-bind="::accountController.getEmail()" data-test-subj=emailIdField></p>
     </div>
   </div>
 

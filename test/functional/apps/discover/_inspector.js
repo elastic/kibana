@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
   const STATS_ROW_VALUE_INDEX = 1;
   function getHitCount(requestStats) {
     const hitsCountStatsRow = requestStats.find((statsRow) => {
-      return statsRow[STATS_ROW_NAME_INDEX] === 'Hits';
+      return statsRow[STATS_ROW_NAME_INDEX] === 'Hits (total)';
     });
     return hitsCountStatsRow[STATS_ROW_VALUE_INDEX];
   }

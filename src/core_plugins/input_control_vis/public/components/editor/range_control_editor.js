@@ -19,13 +19,15 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { IndexPatternSelect } from './index_pattern_select';
+import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 
 import {
   EuiFormRow,
   EuiFieldNumber,
 } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 function filterField(field) {
   return field.type === 'number';
@@ -43,11 +45,9 @@ export function RangeControlEditor(props) {
   return (
     <div>
 
-      <IndexPatternSelect
+      <IndexPatternSelectFormRow
         indexPatternId={props.controlParams.indexPattern}
         onChange={props.handleIndexPatternChange}
-        getIndexPatterns={props.getIndexPatterns}
-        getIndexPattern={props.getIndexPattern}
         controlIndex={props.controlIndex}
       />
 
@@ -62,7 +62,10 @@ export function RangeControlEditor(props) {
 
       <EuiFormRow
         id={stepSizeId}
-        label="Step Size"
+        label={<FormattedMessage
+          id="inputControl.editor.rangeControl.stepSizeLabel"
+          defaultMessage="Step Size"
+        />}
       >
         <EuiFieldNumber
           value={props.controlParams.options.step}
@@ -73,7 +76,10 @@ export function RangeControlEditor(props) {
 
       <EuiFormRow
         id={decimalPlacesId}
-        label="Decimal Places"
+        label={<FormattedMessage
+          id="inputControl.editor.rangeControl.decimalPlacesLabel"
+          defaultMessage="Decimal Places"
+        />}
       >
         <EuiFieldNumber
           min={0}
@@ -88,7 +94,6 @@ export function RangeControlEditor(props) {
 }
 
 RangeControlEditor.propTypes = {
-  getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   controlIndex: PropTypes.number.isRequired,
   controlParams: PropTypes.object.isRequired,

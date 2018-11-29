@@ -5,17 +5,4 @@
 @import '@elastic/eui/src/global_styling/variables/index';
 @import '@elastic/eui/src/global_styling/mixins/index';
 
-// EUI TODO: Add this
-@mixin kibanaCircleLogo() {
-  display: inline-block;
-  @include size($euiSizeXXL * 2);
-  line-height: $euiSizeXXL * 2;
-  text-align: center;
-  background-color: $euiColorEmptyShade;
-  border-radius: 100%;
-  padding: $euiSize;
-
-  .euiIcon {
-    vertical-align: baseline;
-  }
-}
+@import './mixins';

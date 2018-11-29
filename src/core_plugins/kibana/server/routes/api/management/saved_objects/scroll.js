@@ -45,13 +45,14 @@ export function registerScrollForExportRoute(server) {
       },
     },
 
-    handler: async (req, reply) => {
+    handler: async (req) => {
       const savedObjectsClient = req.getSavedObjectsClient();
       const objects = await findAll(savedObjectsClient, {
         perPage: 1000,
         type: req.payload.typesToInclude
       });
-      const response = objects.map(hit => {
+
+      return objects.map(hit => {
         const type = hit.type;
         return {
           _id: hit.id,
@@ -59,11 +60,10 @@ export function registerScrollForExportRoute(server) {
           _source: hit.attributes,
           _meta: {
             savedObjectVersion: 2
-          }
+          },
+          _migrationVersion: hit.migrationVersion,
         };
       });
-
-      reply(response);
     }
   });
 }
@@ -81,7 +81,7 @@ export function registerScrollForCountRoute(server) {
       },
     },
 
-    handler: async (req, reply) => {
+    handler: async (req) => {
       const savedObjectsClient = req.getSavedObjectsClient();
       const findOptions = {
         type: req.payload.typesToInclude,
@@ -107,7 +107,7 @@ export function registerScrollForCountRoute(server) {
         }
       }
 
-      reply(counts);
+      return counts;
     }
   });
 }

@@ -2,7 +2,7 @@
 
 exports[`renders ControlsTab 1`] = `
 <div>
-  <ControlEditor
+  <InjectIntl(ControlEditorUi)
     controlIndex={0}
     controlParams={
       Object {
@@ -20,7 +20,6 @@ exports[`renders ControlsTab 1`] = `
       }
     }
     getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
     handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
     handleIndexPatternChange={[Function]}
@@ -39,7 +38,7 @@ exports[`renders ControlsTab 1`] = `
       ]
     }
   />
-  <ControlEditor
+  <InjectIntl(ControlEditorUi)
     controlIndex={1}
     controlParams={
       Object {
@@ -54,7 +53,6 @@ exports[`renders ControlsTab 1`] = `
       }
     }
     getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
     handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
     handleIndexPatternChange={[Function]}
@@ -140,7 +138,11 @@ exports[`renders ControlsTab 1`] = `
             onClick={[Function]}
             type="button"
           >
-            Add
+            <FormattedMessage
+              defaultMessage="Add"
+              id="inputControl.editor.controlsTab.addButtonLabel"
+              values={Object {}}
+            />
           </EuiButton>
         </EuiFormRow>
       </EuiFlexItem>

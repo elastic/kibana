@@ -17,28 +17,25 @@
  * under the License.
  */
 
-import { AggConfig } from '../../vis/agg_config';
 import { AggType } from '../../agg_types/agg_type';
 
-export function PointSeriesFakeXAxisProvider() {
+const allAgg = new AggType({
+  name: 'all',
+  title: 'All docs',
+  ordered: false,
+  hasNoDsl: true
+});
 
-  const allAgg = new AggType({
-    name: 'all',
-    title: 'All docs',
-    ordered: false,
-    hasNoDsl: true
-  });
+export function makeFakeXAspect() {
+  const fake = {
+    makeLabel: () => 'all',
+    fieldFormatter: () => '',
+    type: allAgg
+  };
 
-  return function makeFakeXAxis(vis) {
-    const fake = new AggConfig(vis, {
-      type: allAgg,
-      schema: vis.type.schemas.all.byName.segment
-    });
-
-    return {
-      i: -1,
-      aggConfig: fake,
-      title: fake.makeLabel(),
-    };
+  return {
+    i: -1,
+    aggConfig: fake,
+    title: fake.makeLabel(),
   };
 }

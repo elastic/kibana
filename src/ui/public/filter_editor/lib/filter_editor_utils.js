@@ -57,7 +57,7 @@ export function getParamsFromFilter(filter) {
   };
 }
 
-export function getFieldOptions(indexPatterns) {
+export function getFilterableFields(indexPatterns) {
   return (indexPatterns || []).reduce((fields, indexPattern) => {
     const filterableFields = indexPattern.fields.filter(field => field.filterable);
     return [...fields, ...filterableFields];

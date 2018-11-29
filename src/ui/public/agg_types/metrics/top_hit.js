@@ -21,16 +21,40 @@ import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
 import topSortEditor from '../controls/top_sort.html';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
+import { aggTypeFieldFilters } from '../param_types/filter';
+import { i18n } from '@kbn/i18n';
 
 const isNumber = function (type) {
   return type === 'number';
 };
 
+aggTypeFieldFilters.addFilter(
+  (
+    field,
+    fieldParamType,
+    aggConfig,
+    vis
+  ) => {
+    if (aggConfig.type.name !== 'top_hit' || vis.type.name === 'table' || vis.type.name === 'metric') {
+      return true;
+    }
+    return field.type === 'number';
+
+  });
+
 export const topHitMetricAgg = new MetricAggType({
   name: 'top_hits',
-  title: 'Top Hit',
+  title: i18n.translate('common.ui.aggTypes.metrics.topHitTitle', {
+    defaultMessage: 'Top Hit'
+  }),
   makeLabel: function (aggConfig) {
-    let prefix = aggConfig.params.sortOrder.val === 'desc' ? 'Last' : 'First';
+    const lastPrefixLabel = i18n.translate('common.ui.aggTypes.metrics.topHit.lastPrefixLabel', {
+      defaultMessage: 'Last'
+    });
+    const firstPrefixLabel = i18n.translate('common.ui.aggTypes.metrics.topHit.firstPrefixLabel', {
+      defaultMessage: 'First'
+    });
+    let prefix = aggConfig.params.sortOrder.val === 'desc' ? lastPrefixLabel : firstPrefixLabel;
     if (aggConfig.params.size !== 1) {
       prefix += ` ${aggConfig.params.size}`;
     }
@@ -40,13 +64,9 @@ export const topHitMetricAgg = new MetricAggType({
   params: [
     {
       name: 'field',
+      type: 'field',
       onlyAggregatable: false,
-      filterFieldTypes: function (vis, value) {
-        if (vis.type.name === 'table' || vis.type.name === 'metric') {
-          return true;
-        }
-        return value === 'number';
-      },
+      filterFieldTypes: '*',
       write(agg, output) {
         const field = agg.params.field;
         output.params = {};
@@ -62,7 +82,7 @@ export const topHitMetricAgg = new MetricAggType({
           };
         } else {
           if (field.readFromDocValues) {
-            output.params.docvalue_fields = [ field.name ];
+            output.params.docvalue_fields = [ { field: field.name, format: 'use_field_mapping' } ];
           }
           output.params._source = field.name === '_source' ? true : field.name;
         }
@@ -74,35 +94,45 @@ export const topHitMetricAgg = new MetricAggType({
       editor: aggregateAndSizeEditor,
       options: [
         {
-          display: 'Min',
+          display: i18n.translate('common.ui.aggTypes.metrics.topHit.minLabel', {
+            defaultMessage: 'Min'
+          }),
           isCompatibleType: isNumber,
           isCompatibleVis: _.constant(true),
           disabled: true,
           val: 'min'
         },
         {
-          display: 'Max',
+          display: i18n.translate('common.ui.aggTypes.metrics.topHit.maxLabel', {
+            defaultMessage: 'Max'
+          }),
           isCompatibleType: isNumber,
           isCompatibleVis: _.constant(true),
           disabled: true,
           val: 'max'
         },
         {
-          display: 'Sum',
+          display: i18n.translate('common.ui.aggTypes.metrics.topHit.sumLabel', {
+            defaultMessage: 'Sum'
+          }),
           isCompatibleType: isNumber,
           isCompatibleVis: _.constant(true),
           disabled: true,
           val: 'sum'
         },
         {
-          display: 'Average',
+          display: i18n.translate('common.ui.aggTypes.metrics.topHit.averageLabel', {
+            defaultMessage: 'Average'
+          }),
           isCompatibleType: isNumber,
           isCompatibleVis: _.constant(true),
           disabled: true,
           val: 'average'
         },
         {
-          display: 'Concatenate',
+          display: i18n.translate('common.ui.aggTypes.metrics.topHit.concatenateLabel', {
+            defaultMessage: 'Concatenate'
+          }),
           isCompatibleType: _.constant(true),
           isCompatibleVis: function (name) {
             return name === 'metric' || name === 'table';
@@ -137,7 +167,7 @@ export const topHitMetricAgg = new MetricAggType({
       editor: null,
       filterFieldTypes: [ 'number', 'date', 'ip',  'string' ],
       default: function (agg) {
-        return agg._indexPattern.timeFieldName;
+        return agg.getIndexPattern().timeFieldName;
       },
       write: _.noop // prevent default write, it is handled below
     },
@@ -147,8 +177,18 @@ export const topHitMetricAgg = new MetricAggType({
       default: 'desc',
       editor: topSortEditor,
       options: [
-        { display: 'Descending', val: 'desc' },
-        { display: 'Ascending', val: 'asc' }
+        {
+          display: i18n.translate('common.ui.aggTypes.metrics.topHit.descendingLabel', {
+            defaultMessage: 'Descending'
+          }),
+          val: 'desc'
+        },
+        {
+          display: i18n.translate('common.ui.aggTypes.metrics.topHit.ascendingLabel', {
+            defaultMessage: 'Ascending'
+          }),
+          val: 'asc'
+        }
       ],
       write(agg, output) {
         const sortField = agg.params.sortField;
@@ -187,7 +227,7 @@ export const topHitMetricAgg = new MetricAggType({
     const path = agg.params.field.name;
 
     let values = _(hits).map(hit => {
-      return path === '_source' ? hit._source : agg._indexPattern.flattenHit(hit, true)[path];
+      return path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path];
     })
       .flatten()
       .value();

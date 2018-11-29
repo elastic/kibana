@@ -56,8 +56,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
-      await remote.get(appUrl);
-      await this.loginIfPrompted(appUrl);
+      await retry.try(async () => {
+        log.debug(`navigateToUrl ${appUrl}`);
+        await remote.get(appUrl);
+        const currentUrl = await this.loginIfPrompted(appUrl);
+        if (!currentUrl.includes(appUrl)) {
+          throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
+        }
+      });
     }
 
 
@@ -75,6 +81,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
           config.get('servers.kibana.password')
         );
         await remote.setFindTimeout(20000).findByCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide)');
+        await remote.get(appUrl);
         currentUrl = await remote.getCurrentUrl();
         log.debug(`Finished login process currentUrl = ${currentUrl}`);
       }

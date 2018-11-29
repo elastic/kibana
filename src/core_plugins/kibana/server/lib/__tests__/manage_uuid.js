@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import sinon from 'sinon';
-import { startTestServers } from '../../../../../test_utils/kbn_server.js';
+import { startTestServers } from '../../../../../test_utils/kbn_server';
 import manageUuid from '../manage_uuid';
 
 describe('core_plugins/kibana/server/lib', function () {

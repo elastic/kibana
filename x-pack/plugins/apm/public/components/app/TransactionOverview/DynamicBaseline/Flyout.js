@@ -18,10 +18,9 @@ import {
   EuiFlyoutHeader,
   EuiText,
   EuiTitle,
-  EuiSpacer,
-  EuiBetaBadge
+  EuiSpacer
 } from '@elastic/eui';
-import { getMlJobUrl, KibanaLink } from '../../../../utils/url';
+import { KibanaLink, ViewMLJob } from '../../../../utils/url';
 
 export default class DynamicBaselineFlyout extends Component {
   state = {
@@ -65,9 +64,13 @@ export default class DynamicBaselineFlyout extends Component {
           There&apos;s already a job running for anomaly detection on{' '}
           {serviceName} ({transactionType}
           ).{' '}
-          <a href={getMlJobUrl(serviceName, transactionType, location)}>
+          <ViewMLJob
+            serviceName={serviceName}
+            transactionType={transactionType}
+            location={location}
+          >
             View existing job
-          </a>
+          </ViewMLJob>
         </p>
       )
     });
@@ -82,9 +85,13 @@ export default class DynamicBaselineFlyout extends Component {
           The analysis is now running for {serviceName} ({transactionType}
           ). It might take a while before results are added to the response
           times graph.{' '}
-          <a href={getMlJobUrl(serviceName, transactionType, location)}>
+          <ViewMLJob
+            serviceName={serviceName}
+            transactionType={transactionType}
+            location={location}
+          >
             View job
-          </a>
+          </ViewMLJob>
         </p>
       )
     });
@@ -101,17 +108,17 @@ export default class DynamicBaselineFlyout extends Component {
     } = this.props;
     const { isLoading, hasIndexPattern } = this.state;
 
-    const flyout = (
+    if (!isOpen) {
+      return null;
+    }
+
+    return (
       <EuiFlyout onClose={onClose} size="s">
         <EuiFlyoutHeader>
           <EuiTitle>
             <h2>Enable anomaly detection on response times</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiBetaBadge
-            label="Beta"
-            tooltipContent="This feature is currently in beta. Please help us by reporting any bugs."
-          />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           {hasDynamicBaseline && (
@@ -125,9 +132,13 @@ export default class DynamicBaselineFlyout extends Component {
                   There is currently a job running for {serviceName} (
                   {transactionType}
                   ).{' '}
-                  <a href={getMlJobUrl(serviceName, transactionType, location)}>
+                  <ViewMLJob
+                    serviceName={serviceName}
+                    transactionType={transactionType}
+                    location={location}
+                  >
                     View existing job
-                  </a>
+                  </ViewMLJob>
                 </p>
               </EuiCallOut>
               <EuiSpacer size="m" />
@@ -199,8 +210,6 @@ export default class DynamicBaselineFlyout extends Component {
         </EuiFlyoutFooter>
       </EuiFlyout>
     );
-
-    return <React.Fragment>{isOpen && flyout}</React.Fragment>;
   }
 }
 

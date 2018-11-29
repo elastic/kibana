@@ -19,17 +19,25 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 
 import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';
 
-export class DashboardPanel extends React.Component {
+import {
+  EuiPanel,
+} from '@elastic/eui';
+
+class DashboardPanelUi extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      error: props.embeddableFactory ? null : `No factory found for embeddable`,
+      error: props.embeddableFactory ? null : props.intl.formatMessage({
+        id: 'kbn.dashboard.panel.noEmbeddableFactoryErrorMessage',
+        defaultMessage: 'No factory found for embeddable',
+      }),
     };
 
     this.mounted = false;
@@ -96,7 +104,10 @@ export class DashboardPanel extends React.Component {
         className="panel-content"
         ref={panelElement => this.panelElement = panelElement}
       >
-        {!this.props.initialized && 'loading...'}
+        {!this.props.initialized && <FormattedMessage
+          id="kbn.dashboard.panel.embeddableViewport.loadingLabel"
+          defaultMessage="loading…"
+        />}
       </div>
     );
   }
@@ -125,33 +136,29 @@ export class DashboardPanel extends React.Component {
 
   render() {
     const { viewOnlyMode, panel } = this.props;
-    const classes = classNames('dshPanel__panel', this.props.className, {
-      'dshPanel__panel--editing': !viewOnlyMode
+    const classes = classNames('dshPanel', this.props.className, {
+      'dshPanel--editing': !viewOnlyMode
     });
     return (
-      <div
-        className="dshPanel"
+      <EuiPanel
+        className={classes}
+        data-test-subj="dashboardPanel"
         onFocus={this.onFocus}
         onBlur={this.onBlur}
+        paddingSize="none"
       >
-        <div
-          className={classes}
-          data-test-subj="dashboardPanel"
-        >
-          <PanelHeader
-            panelId={panel.panelIndex}
-            embeddable={this.embeddable}
-          />
+        <PanelHeader
+          panelId={panel.panelIndex}
+          embeddable={this.embeddable}
+        />
 
-          {this.renderContent()}
-
-        </div>
-      </div>
+        {this.renderContent()}
+      </EuiPanel>
     );
   }
 }
 
-DashboardPanel.propTypes = {
+DashboardPanelUi.propTypes = {
   viewOnlyMode: PropTypes.bool.isRequired,
   onPanelFocused: PropTypes.func,
   onPanelBlurred: PropTypes.func,
@@ -179,3 +186,5 @@ DashboardPanel.propTypes = {
     panelIndex: PropTypes.string,
   }).isRequired,
 };
+
+export const DashboardPanel = injectI18n(DashboardPanelUi);

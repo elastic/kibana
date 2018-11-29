@@ -18,150 +18,32 @@
  */
 
 import path from 'path';
-import { savedObjects } from './saved_objects';
+import { i18n } from '@kbn/i18n';
+import { getSavedObjects } from './saved_objects';
+import { fieldMappings } from './field_mappings';
 
 export function logsSpecProvider() {
   return {
     id: 'logs',
-    name: 'Sample web logs',
-    description: 'Sample data, visualizations, and dashboards for monitoring web logs.',
+    name: i18n.translate('server.sampleData.logsSpecTitle', {
+      defaultMessage: 'Sample web logs',
+    }),
+    description: i18n.translate('server.sampleData.logsSpecDescription', {
+      defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
+    }),
     previewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard.png',
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
-    dataPath: path.join(__dirname, './logs.json.gz'),
-    fields: {
-      request: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256
-          }
-        }
-      },
-      geo: {
-        properties: {
-          srcdest: {
-            type: 'keyword'
-          },
-          src: {
-            type: 'keyword'
-          },
-          dest: {
-            type: 'keyword'
-          },
-          coordinates: {
-            type: 'geo_point'
-          }
-        }
-      },
-      utc_time: {
-        type: 'date'
-      },
-      url: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256
-          }
-        }
-      },
-      message: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256
-          }
-        }
-      },
-      host: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256
-          }
-        }
-      },
-      clientip: {
-        type: 'ip'
-      },
-      response: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256
-          }
-        }
-      },
-      machine: {
-        properties: {
-          ram: {
-            type: 'long'
-          },
-          os: {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256
-              }
-            }
-          }
-        }
-      },
-      agent: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256
-          }
-        }
-      },
-      bytes: {
-        type: 'long'
-      },
-      tags: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256
-          }
-        }
-      },
-      referer: {
-        type: 'keyword'
-      },
-      ip: {
-        type: 'ip'
-      },
-      timestamp: {
-        type: 'date'
-      },
-      phpmemory: {
-        type: 'long'
-      },
-      memory: {
-        type: 'double'
-      },
-      extension: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256
-          }
-        }
+    savedObjects: getSavedObjects(),
+    dataIndices: [
+      {
+        id: 'logs',
+        dataPath: path.join(__dirname, './logs.json.gz'),
+        fields: fieldMappings,
+        timeFields: ['timestamp'],
+        currentTimeMarker: '2018-08-01T00:00:00',
+        preserveDayOfWeekTimeOfDay: true,
       }
-    },
-    timeFields: ['timestamp'],
-    currentTimeMarker: '2018-08-01T00:00:00',
-    preserveDayOfWeekTimeOfDay: true,
-    savedObjects: savedObjects,
+    ]
   };
 }

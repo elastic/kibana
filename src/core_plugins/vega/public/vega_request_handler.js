@@ -18,24 +18,28 @@
  */
 
 import { VegaParser } from './data_model/vega_parser';
-import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 import { SearchCache } from './data_model/search_cache';
 import { TimeCache } from './data_model/time_cache';
 import { timefilter } from 'ui/timefilter';
+import { buildEsQuery } from '@kbn/es-query';
 
-export function VegaRequestHandlerProvider(Private, es, serviceSettings) {
-
-  const dashboardContext = Private(dashboardContextProvider);
+export function VegaRequestHandlerProvider(es, serviceSettings, config) {
   const searchCache = new SearchCache(es, { max: 10, maxAge: 4 * 1000 });
   const timeCache = new TimeCache(timefilter, 3 * 1000);
+
 
   return {
 
     name: 'vega',
 
-    handler(vis, { timeRange }) {
+    handler({ timeRange, filters, query, visParams }) {
       timeCache.setTimeRange(timeRange);
-      const vp = new VegaParser(vis.params.spec, searchCache, timeCache, dashboardContext, serviceSettings);
+      const esQueryConfigs = {
+        allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
+        queryStringOptions: config.get('query:queryString:options'),
+      };
+      const filtersDsl = buildEsQuery(undefined, [query], filters, esQueryConfigs);
+      const vp = new VegaParser(visParams.spec, searchCache, timeCache, filtersDsl, serviceSettings);
       return vp.parseAsync();
     }
 

@@ -31,15 +31,6 @@ export async function getDefaultAdminEmail(config, callCluster, log) {
   }
 
   // DEPRECATED (Remove below in 7.0): If an email address is not configured in kibana.yml, then fallback to xpack:defaultAdminEmail
-  if (!loggedDeprecationWarning) {
-    const message = (
-      `Monitoring is using ${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING} for cluster alert notifications, ` +
-      `which will not be supported in Kibana 7.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`
-    );
-
-    log.warn(message);
-    loggedDeprecationWarning = true;
-  }
 
   const index = config.get('kibana.index');
   const version = config.get('pkg.version');
@@ -50,7 +41,19 @@ export async function getDefaultAdminEmail(config, callCluster, log) {
     ignore: [400, 404] // 400 if the index is closed, 404 if it does not exist
   });
 
-  return get(uiSettingsDoc, ['_source', 'config', XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING], null);
+  const emailAddress = get(uiSettingsDoc, ['_source', 'config', XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING], null);
+
+  if (emailAddress && !loggedDeprecationWarning) {
+    const message = (
+      `Monitoring is using ${XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING} for cluster alert notifications, ` +
+      `which will not be supported in Kibana 7.0. Please configure ${emailAddressConfigKey} in your kibana.yml settings`
+    );
+
+    log.warn(message);
+    loggedDeprecationWarning = true;
+  }
+
+  return emailAddress;
 }
 
 // we use shouldUseNull to determine if we need to send nulls; we only send nulls if the last email wasn't null

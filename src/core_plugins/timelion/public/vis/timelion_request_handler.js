@@ -18,12 +18,11 @@
  */
 
 import _ from 'lodash';
-import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
-
+import { buildEsQuery } from '@kbn/es-query';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
-const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
+
+const TimelionRequestHandlerProvider = function (Private, Notifier, $http, config) {
   const timezone = Private(timezoneProvider)();
-  const dashboardContext = Private(dashboardContextProvider);
 
   const notify = new Notifier({
     location: 'Timelion'
@@ -31,21 +30,24 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http) {
 
   return {
     name: 'timelion',
-    handler: function (vis, { timeRange }) {
+    handler: function ({ timeRange, filters, query, visParams }) {
 
       return new Promise((resolve, reject) => {
-        const expression = vis.params.expression;
+        const expression = visParams.expression;
         if (!expression) return;
-
+        const esQueryConfigs = {
+          allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
+          queryStringOptions: config.get('query:queryString:options'),
+        };
         const httpResult = $http.post('../api/timelion/run', {
           sheet: [expression],
           extended: {
             es: {
-              filter: dashboardContext()
+              filter: buildEsQuery(undefined, [query], filters, esQueryConfigs)
             }
           },
           time: _.extend(timeRange, {
-            interval: vis.params.interval,
+            interval: visParams.interval,
             timezone: timezone
           }),
         })

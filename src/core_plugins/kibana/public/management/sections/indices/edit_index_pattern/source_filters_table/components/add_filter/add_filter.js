@@ -69,7 +69,7 @@ export class AddFilterComponent extends Component {
             isDisabled={filter.length === 0}
             onClick={this.onAddFilter}
           >
-            <FormattedMessage id="kbn.management.editIndexPattern.source.addButton" defaultMessage="Add" />
+            <FormattedMessage id="kbn.management.editIndexPattern.source.addButtonLabel" defaultMessage="Add" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

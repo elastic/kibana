@@ -87,6 +87,14 @@
       "memory_limit": 1501560832,
       "count": 1
     },
+    "apm": {
+      "totalEvents": null,
+      "memRss": null,
+      "memTotal": null,
+      "apms": {
+        "total": null
+      }
+    },
     "beats": {
       "totalEvents": null,
       "bytesSent": null,

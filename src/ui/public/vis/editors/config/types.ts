@@ -22,7 +22,7 @@
  */
 interface Param {
   hidden?: boolean;
-  warning?: string;
+  help?: string;
 }
 
 /**
@@ -41,7 +41,16 @@ export type NumericIntervalParam = Partial<Param> & {
   base: number;
 };
 
-export type EditorParamConfig = NumericIntervalParam | FixedParam | Param;
+/**
+ * Time interval parameters must always be set in the editor to a multiple of
+ * the specified base. It can optionally also be hidden.
+ */
+export type TimeIntervalParam = Partial<Param> & {
+  default: string;
+  timeBase: string;
+};
+
+export type EditorParamConfig = NumericIntervalParam | TimeIntervalParam | FixedParam | Param;
 
 export interface EditorConfig {
   [paramName: string]: EditorParamConfig;

@@ -54,7 +54,7 @@ function MetricVisualization(props) {
       const seriesDef = model.series.find(s => _.includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template);
+        newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
       return _.assign({}, _.pick(row, ['label', 'data']), newProps);
@@ -74,8 +74,10 @@ function MetricVisualization(props) {
     params.reversed = color(panelBackgroundColor).luminosity() < 0.45;
   }
   const style = { backgroundColor: panelBackgroundColor };
+  params.backgroundColor = panelBackgroundColor;
+
   return (
-    <div className="dashboard__visualization" style={style}>
+    <div className="tvbVis" style={style}>
       <Metric {...params}/>
     </div>
   );

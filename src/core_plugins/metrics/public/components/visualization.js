@@ -63,24 +63,23 @@ function Visualization(props) {
 
   const component = types[model.type];
   if (component) {
-    return React.createElement(component, {
-      dateFormat: props.dateFormat,
-      reversed: props.reversed,
-      backgroundColor: props.backgroundColor,
-      model: props.model,
-      onBrush: props.onBrush,
-      onChange: props.onChange,
-      onUiState: props.onUiState,
-      uiState: props.uiState,
-      visData: visData.type === model.type ? visData : {}
-    });
+    return (
+      React.createElement(component, {
+        dateFormat: props.dateFormat,
+        reversed: props.reversed,
+        backgroundColor: props.backgroundColor,
+        model: props.model,
+        onBrush: props.onBrush,
+        onChange: props.onChange,
+        onUiState: props.onUiState,
+        uiState: props.uiState,
+        visData: visData.type === model.type ? visData : {},
+        getConfig: props.getConfig
+      })
+    );
   }
   return <div className={props.className} />;
 }
-
-Visualization.defaultProps = {
-  className: 'thor__visualization'
-};
 
 Visualization.propTypes = {
   backgroundColor: PropTypes.string,
@@ -92,7 +91,12 @@ Visualization.propTypes = {
   uiState: PropTypes.object,
   reversed: PropTypes.bool,
   visData: PropTypes.object,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  getConfig: PropTypes.func
+};
+
+Visualization.defaultProps = {
+  className: 'tvbVis'
 };
 
 export default Visualization;

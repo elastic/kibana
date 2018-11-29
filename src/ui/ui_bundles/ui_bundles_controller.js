@@ -152,7 +152,12 @@ export class UiBundlesController {
       await mkdirpAsync(this._workingDir);
     } else {
       // delete all children of the working directory
-      await del(this.resolvePath('*'));
+      await del(this.resolvePath('*'), {
+        // since we know that `this.resolvePath()` is going to return an absolute path based on the `optimize.bundleDir`
+        // and since we don't want to require that users specify a bundleDir that is within the cwd or limit the cwd
+        // directory used to run Kibana in any way we use force here
+        force: true
+      });
     }
 
     // write the entry/style files for each bundle

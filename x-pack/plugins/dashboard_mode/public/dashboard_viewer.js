@@ -14,6 +14,7 @@ import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 
 // import the uiExports that we want to "use"
+import 'uiExports/contextMenuActions';
 import 'uiExports/visTypes';
 import 'uiExports/visResponseHandlers';
 import 'uiExports/visRequestHandlers';
@@ -26,6 +27,7 @@ import 'uiExports/docViews';
 import 'uiExports/fieldFormats';
 import 'uiExports/search';
 import 'uiExports/autocompleteProviders';
+import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'plugins/kibana/dashboard';
@@ -34,6 +36,7 @@ import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
 import 'ui/pager';
+import 'ui/pager_control';
 import 'leaflet';
 
 import { showAppRedirectNotification } from 'ui/notify';

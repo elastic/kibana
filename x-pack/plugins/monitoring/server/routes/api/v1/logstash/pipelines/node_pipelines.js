@@ -32,7 +32,7 @@ export function logstashNodePipelinesRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req) => {
       const config = server.config();
       const { ccs } = req.payload;
       const { clusterUuid, logstashUuid } = req.params;
@@ -53,9 +53,9 @@ export function logstashNodePipelinesRoute(server) {
           throughputMetric,
           nodesCountMetric
         );
-        reply(response);
+        return response;
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

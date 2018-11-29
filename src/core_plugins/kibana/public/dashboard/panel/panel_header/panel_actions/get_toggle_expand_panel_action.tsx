@@ -18,15 +18,16 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { DashboardPanelAction } from 'ui/dashboard_panel_actions';
+import { ContextMenuAction } from 'ui/embeddable';
 
 /**
  * Returns an action that toggles the panel into maximized or minimized state.
  * @param {boolean} isExpanded
  * @param {function} toggleExpandedPanel
- * @return {DashboardPanelAction}
+ * @return {ContextMenuAction}
  */
 export function getToggleExpandPanelAction({
   isExpanded,
@@ -35,9 +36,15 @@ export function getToggleExpandPanelAction({
   isExpanded: boolean;
   toggleExpandedPanel: () => void;
 }) {
-  return new DashboardPanelAction(
+  return new ContextMenuAction(
     {
-      displayName: isExpanded ? 'Minimize' : 'Full screen',
+      displayName: isExpanded
+        ? i18n.translate('kbn.dashboard.panel.toggleExpandPanel.expandedDisplayName', {
+            defaultMessage: 'Minimize',
+          })
+        : i18n.translate('kbn.dashboard.panel.toggleExpandPanel.notExpandedDisplayName', {
+            defaultMessage: 'Full screen',
+          }),
       id: 'togglePanel',
       parentPanelId: 'mainMenu',
     },

@@ -17,22 +17,38 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 
-import './styles/main.less';
+import { formatValue } from '../../../../formatters/format_value';
 
 export function DetectorDescriptionList({
   job,
-  detector }) {
+  detector,
+  anomaly, }) {
 
   const listItems = [
     {
-      title: 'job ID',
+      title: 'Job ID',
       description: job.job_id,
     },
     {
-      title: 'detector',
+      title: 'Detector',
       description: detector.detector_description,
     }
   ];
+
+  if (anomaly.actual !== undefined) {
+    // Format based on magnitude of value at this stage, rather than using the
+    // Kibana field formatter (if set) which would add complexity converting
+    // the entered value to / from e.g. bytes.
+    const actual = formatValue(anomaly.actual, anomaly.source.function);
+    const typical = formatValue(anomaly.typical, anomaly.source.function);
+
+    listItems.push(
+      {
+        title: 'Selected anomaly',
+        description: `actual ${actual}, typical ${typical}`,
+      }
+    );
+  }
 
   return (
     <EuiDescriptionList
@@ -45,5 +61,6 @@ export function DetectorDescriptionList({
 DetectorDescriptionList.propTypes = {
   job: PropTypes.object.isRequired,
   detector: PropTypes.object.isRequired,
+  anomaly: PropTypes.object.isRequired,
 };
 

@@ -43,7 +43,7 @@ describe('AggParams class', function () {
   describe('AggParam creation', function () {
     it('Uses the FieldParamType class for params with the name "field"', function () {
       const params = [
-        { name: 'field' }
+        { name: 'field', type: 'field' }
       ];
       const aggParams = new AggParams(params);
 

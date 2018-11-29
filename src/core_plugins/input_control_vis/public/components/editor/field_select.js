@@ -20,13 +20,14 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiFormRow,
   EuiComboBox,
 } from '@elastic/eui';
 
-export class FieldSelect extends Component {
+class FieldSelectUi extends Component {
   constructor(props) {
     super(props);
 
@@ -132,6 +133,7 @@ export class FieldSelect extends Component {
     const selectId = `fieldSelect-${this.props.controlIndex}`;
 
     const selectedOptions = [];
+    const { intl } = this.props;
     if (this.props.fieldName) {
       selectedOptions.push({ value: this.props.fieldName, label: this.props.fieldName });
     }
@@ -139,10 +141,13 @@ export class FieldSelect extends Component {
     return (
       <EuiFormRow
         id={selectId}
-        label="Field"
+        label={<FormattedMessage id="inputControl.editor.fieldSelect.fieldLabel" defaultMessage="Field" />}
       >
         <EuiComboBox
-          placeholder="Select field..."
+          placeholder={intl.formatMessage({
+            id: 'inputControl.editor.fieldSelect.selectFieldPlaceholder',
+            defaultMessage: 'Select field...'
+          })}
           singleSelection={true}
           isLoading={this.state.isLoading}
           options={this.state.fields}
@@ -155,7 +160,7 @@ export class FieldSelect extends Component {
   }
 }
 
-FieldSelect.propTypes = {
+FieldSelectUi.propTypes = {
   getIndexPattern: PropTypes.func.isRequired,
   indexPatternId: PropTypes.string,
   onChange: PropTypes.func.isRequired,
@@ -163,3 +168,5 @@ FieldSelect.propTypes = {
   filterField: PropTypes.func,
   controlIndex: PropTypes.number.isRequired,
 };
+
+export const FieldSelect = injectI18n(FieldSelectUi);

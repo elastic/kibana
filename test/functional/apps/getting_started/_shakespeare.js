@@ -37,14 +37,13 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       log.debug('Load empty_kibana and Shakespeare Getting Started data\n'
       + 'https://www.elastic.co/guide/en/kibana/current/tutorial-load-dataset.html');
-      await esArchiver.load('empty_kibana');
+      await esArchiver.load('empty_kibana', { skipExisting: true });
       log.debug('Load shakespeare data');
       await esArchiver.loadIfNeeded('getting_started/shakespeare');
     });
 
     it('should create shakespeare index pattern', async function () {
       log.debug('Create shakespeare index pattern');
-      await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('shakes', null);
       const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
       const patternName = await indexPageHeading.getVisibleText();
