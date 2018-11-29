@@ -109,8 +109,8 @@ export class Flyout extends React.PureComponent<Props, State> {
     );
 
   /** Provides stable instance reference for avoiding re-renders */
-  private onClose = () => closeFlyout(this.setState.bind(this));
+  public onClose = () => closeFlyout(this.setState.bind(this));
 
   /** Provides stable instance reference for avoiding re-renders */
-  private onOpen = () => openFlyout(this.setState.bind(this));
+  public onOpen = () => openFlyout(this.setState.bind(this));
 }
