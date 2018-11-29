@@ -108,9 +108,17 @@ export class Flyout extends React.PureComponent<Props, State> {
       <FlyoutButton onOpen={this.onOpen} />
     );
 
-  /** Provides stable instance reference for avoiding re-renders */
+  /**
+   * Provides stable instance reference for avoiding re-renders.
+   * setState.bind is required although this is a ES2017 function since setState
+   * is impure and calls other functions within this class.
+   */
   public onClose = () => closeFlyout(this.setState.bind(this));
 
-  /** Provides stable instance reference for avoiding re-renders */
+  /**
+   * Provides stable instance reference for avoiding re-renders.
+   * setState.bind is required although this is a ES2017 function since setState
+   * is impure and calls other functions within this class.
+   */
   public onOpen = () => openFlyout(this.setState.bind(this));
 }
