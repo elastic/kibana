@@ -30,7 +30,10 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
       tableRef: React.createRef(),
     };
 
-    this.loadTags();
+    if (props.urlState.tagsKBar) {
+      props.containers.tags.reload(props.urlState.tagsKBar);
+    }
+
     props.renderAction(this.renderActionArea());
   }
 
@@ -57,7 +60,10 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
               isValid: this.props.libs.elasticsearch.isKueryValid(
                 this.props.urlState.tagsKBar || ''
               ),
-              onChange: (value: any) => this.props.setUrlState({ tagsKBar: value }),
+              onChange: (value: any) => {
+                this.props.setUrlState({ tagsKBar: value });
+                this.props.containers.tags.reload(this.props.urlState.tagsKBar);
+              },
               onSubmit: () => null, // todo
               value: this.props.urlState.tagsKBar || '',
             }}
@@ -76,35 +82,25 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
     );
   }
 
-  private handleTagsAction = async (action: AssignmentActionType, payload: any) => {
+  private handleTagsAction = async (action: AssignmentActionType) => {
     switch (action) {
       case AssignmentActionType.Delete:
         const tags = this.getSelectedTags().map((tag: BeatTag) => tag.id);
-        const success = await this.props.libs.tags.delete(tags);
+        const success = await this.props.containers.tags.delete(tags);
         if (!success) {
           alert(
             'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned'
           );
         } else {
-          this.loadTags();
           if (this.state.tableRef && this.state.tableRef.current) {
             this.state.tableRef.current.resetSelection();
           }
         }
         break;
     }
-
-    this.loadTags();
   };
 
   private getSelectedTags = () => {
     return this.state.tableRef.current ? this.state.tableRef.current.state.selection : [];
   };
-
-  private async loadTags() {
-    const tags = await this.props.libs.tags.getAll();
-    this.setState({
-      tags,
-    });
-  }
 }

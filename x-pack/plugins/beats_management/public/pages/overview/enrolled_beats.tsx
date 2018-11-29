@@ -17,7 +17,6 @@ import {
 import { flatten, intersection, sortBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { Subscribe } from 'unstated';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { EnrollBeat } from '../../components/enroll_beats';
@@ -49,6 +48,10 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
       notifications: [],
       tags: null,
     };
+
+    if (props.urlState.beatsKBar) {
+      props.containers.beats.reload(props.urlState.beatsKBar);
+    }
 
     props.renderAction(this.renderActionArea());
   }
@@ -115,63 +118,58 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
 
   public render() {
     return (
-      <Subscribe to={[BeatsContainer, TagsContainer]}>
-        {(beats: BeatsContainer, tags: TagsContainer) => (
-          <React.Fragment>
-            <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
-              {autocompleteProps => (
-                <Table
-                  kueryBarProps={{
-                    ...autocompleteProps,
-                    filterQueryDraft: 'false', // todo
-                    isValid: this.props.libs.elasticsearch.isKueryValid(
-                      this.props.urlState.beatsKBar || ''
-                    ), // todo check if query converts to es query correctly
-                    onChange: (value: any) => this.props.setUrlState({ beatsKBar: value }), // todo
-                    onSubmit: () => null, // todo
-                    value: this.props.urlState.beatsKBar || '',
-                  }}
-                  assignmentOptions={{
-                    items: this.filterTags(tags.state.list),
-                    schema: beatsListAssignmentOptions,
-                    type: 'assignment',
-                    actionHandler: async (action: AssignmentActionType, payload: any) => {
-                      switch (action) {
-                        case AssignmentActionType.Assign:
-                          const status = await beats.toggleTagAssignment(
-                            payload,
-                            this.getSelectedBeats()
-                          );
-                          this.notifyUpdatedTagAssociation(
-                            status,
-                            this.getSelectedBeats(),
-                            payload
-                          );
-                          break;
-                        case AssignmentActionType.Delete:
-                          beats.deactivate(this.getSelectedBeats());
-                          this.notifyBeatDisenrolled(this.getSelectedBeats());
-                          break;
-                        case AssignmentActionType.Reload:
-                          tags.reload();
-                          break;
-                      }
-                    },
-                  }}
-                  items={sortBy(beats.state.list, 'id') || []}
-                  ref={this.tableRef}
-                  type={BeatsTableType}
-                />
-              )}
-            </WithKueryAutocompletion>
-            <EuiGlobalToastList
-              toasts={this.state.notifications}
-              dismissToast={() => this.setState({ notifications: [] })}
-              toastLifeTimeMs={5000}
+      <React.Fragment>
+        <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
+          {autocompleteProps => (
+            <Table
+              kueryBarProps={{
+                ...autocompleteProps,
+                filterQueryDraft: 'false', // todo
+                isValid: this.props.libs.elasticsearch.isKueryValid(
+                  this.props.urlState.beatsKBar || ''
+                ), // todo check if query converts to es query correctly
+                onChange: (value: any) => {
+                  this.props.setUrlState({ beatsKBar: value });
+                  this.props.containers.beats.reload(this.props.urlState.beatsKBar);
+                }, // todo
+                onSubmit: () => null, // todo
+                value: this.props.urlState.beatsKBar || '',
+              }}
+              assignmentOptions={{
+                items: this.filterTags(this.props.containers.tags.state.list),
+                schema: beatsListAssignmentOptions,
+                type: 'assignment',
+                actionHandler: async (action: AssignmentActionType, payload: any) => {
+                  switch (action) {
+                    case AssignmentActionType.Assign:
+                      const status = await this.props.containers.beats.toggleTagAssignment(
+                        payload,
+                        this.getSelectedBeats()
+                      );
+                      this.notifyUpdatedTagAssociation(status, this.getSelectedBeats(), payload);
+                      break;
+                    case AssignmentActionType.Delete:
+                      this.props.containers.beats.deactivate(this.getSelectedBeats());
+                      this.notifyBeatDisenrolled(this.getSelectedBeats());
+                      break;
+                    case AssignmentActionType.Reload:
+                      this.props.containers.tags.reload();
+                      break;
+                  }
+                },
+              }}
+              items={sortBy(this.props.containers.beats.state.list, 'id') || []}
+              ref={this.tableRef}
+              type={BeatsTableType}
             />
-          </React.Fragment>
-        )}
-      </Subscribe>
+          )}
+        </WithKueryAutocompletion>
+        <EuiGlobalToastList
+          toasts={this.state.notifications}
+          dismissToast={() => this.setState({ notifications: [] })}
+          toastLifeTimeMs={5000}
+        />
+      </React.Fragment>
     );
   }
 

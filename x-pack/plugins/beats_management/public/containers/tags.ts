@@ -13,6 +13,7 @@ interface ContainerState {
 }
 
 export class TagsContainer extends Container<ContainerState> {
+  private query?: string;
   constructor(private readonly libs: FrontendLibs) {
     super();
     this.state = {
@@ -20,12 +21,12 @@ export class TagsContainer extends Container<ContainerState> {
     };
   }
   public reload = async (kuery?: string) => {
-    // let query;
-    // if (kuery) {
-    //   query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);
-    // }
-    // TODO wire up kquery
-    const tags = await this.libs.tags.getAll();
+    if (kuery) {
+      this.query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);
+    } else {
+      this.query = undefined;
+    }
+    const tags = await this.libs.tags.getAll(this.query);
 
     this.setState({
       list: tags,
@@ -36,7 +37,7 @@ export class TagsContainer extends Container<ContainerState> {
     const tagIds = tags.map((tag: BeatTag) => tag.id);
     const success = await this.libs.tags.delete(tagIds);
     if (success) {
-      this.reload();
+      this.reload(this.query);
     }
     return success;
   };

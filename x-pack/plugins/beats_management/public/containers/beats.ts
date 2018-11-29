@@ -13,6 +13,7 @@ interface ContainerState {
 }
 
 export class BeatsContainer extends Container<ContainerState> {
+  private query?: string;
   constructor(private readonly libs: FrontendLibs) {
     super();
     this.state = {
@@ -20,11 +21,12 @@ export class BeatsContainer extends Container<ContainerState> {
     };
   }
   public reload = async (kuery?: string) => {
-    let query;
     if (kuery) {
-      query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);
+      this.query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);
+    } else {
+      this.query = undefined;
     }
-    const beats = await this.libs.beats.getAll(query);
+    const beats = await this.libs.beats.getAll(this.query);
 
     this.setState({
       list: beats,
@@ -39,7 +41,7 @@ export class BeatsContainer extends Container<ContainerState> {
     // because the compile code above has a very minor race condition, we wait,
     // the max race condition time is really 10ms but doing 100 to be safe
     setTimeout(async () => {
-      await this.reload();
+      await this.reload(this.query);
     }, 100);
   };
 
@@ -58,7 +60,7 @@ export class BeatsContainer extends Container<ContainerState> {
     }
     const assignments = createBeatTagAssignments(beats, tagId);
     await this.libs.beats.removeTagsFromBeats(assignments);
-    await this.reload();
+    await this.reload(this.query);
   };
 
   public assignTagsToBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
@@ -67,7 +69,7 @@ export class BeatsContainer extends Container<ContainerState> {
     }
     const assignments = createBeatTagAssignments(beats, tagId);
     await this.libs.beats.assignTagsToBeats(assignments);
-    await this.reload();
+    await this.reload(this.query);
   };
 }
 
