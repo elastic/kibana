@@ -28,6 +28,15 @@ export default function ({ getService, getPageObjects }) {
 
   const FIELD_NAME = 'machine.os.raw';
 
+  const STATS_ROW_NAME_INDEX = 0;
+  const STATS_ROW_VALUE_INDEX = 1;
+  function getRequestStat(requestStats, statLabel) {
+    const hitsCountStatsRow = requestStats.find((statsRow) => {
+      return statsRow[STATS_ROW_NAME_INDEX] === statLabel;
+    });
+    return hitsCountStatsRow[STATS_ROW_VALUE_INDEX];
+  }
+
   describe('input control visualization', () => {
 
     before(async () => {
@@ -43,10 +52,22 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
+    describe('inspector', () => {
+      after(async () => {
+        await PageObjects.visualize.closeInspector();
+      });
 
-    it('should not have inspector enabled', async function () {
-      const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
-      expect(spyToggleExists).to.be(false);
+      it('should have inspector enabled', async function () {
+        const spyToggleExists = await PageObjects.visualize.isInspectorButtonEnabled();
+        expect(spyToggleExists).to.be(true);
+      });
+
+      it('should display request stats', async function () {
+        await PageObjects.visualize.openInspector();
+        const requestStats = await PageObjects.visualize.getInspectorTableData();
+        expect(getRequestStat(requestStats, 'Index pattern')).to.be('logstash-*');
+        expect(getRequestStat(requestStats, 'Hits')).to.be('0');
+      });
     });
 
     describe('updateFiltersOnChange is false', () => {
