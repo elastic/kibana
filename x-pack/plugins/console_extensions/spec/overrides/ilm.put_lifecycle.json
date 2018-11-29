@@ -8,10 +8,17 @@
             "actions": {
               "allocate": {
                 "number_of_replicas": 1,
-                "include": {},
-                "exclude": {},
+                "include": {
+                  "_name": "",
+                  "_ip": ""
+                },
+                "exclude": {
+                  "_name": "",
+                  "_ip": ""
+                },
                 "require": {
-                  "_name": ""
+                  "_name": "",
+                  "_ip": ""
                 }
               },
               "shrink": {
@@ -26,10 +33,17 @@
           "actions": {
             "allocate": {
               "number_of_replicas": 1,
-              "include": {},
-              "exclude": {},
+              "include": {
+                "_name": "",
+                "_ip": ""
+              },
+              "exclude": {
+                "_name": "",
+                "_ip": ""
+              },
               "require": {
-                "_name": ""
+                "_name": "",
+                "_ip": ""
               }
             },
             "shrink": {
@@ -46,10 +60,17 @@
             "actions": {
               "allocate": {
                 "number_of_replicas": 1,
-                "include": {},
-                "exclude": {},
+                "include": {
+                  "_name": "",
+                  "_ip": ""
+                },
+                "exclude": {
+                  "_name": "",
+                  "_ip": ""
+                },
                 "require": {
-                  "_name": ""
+                  "_name": "",
+                  "_ip": ""
                 }
               }
             }  
@@ -58,10 +79,17 @@
           "actions": {
             "allocate": {
               "number_of_replicas": 1,
-              "include": {},
-              "exclude": {},
+              "include": {
+                "_name": "",
+                "_ip": ""
+              },
+              "exclude": {
+                "_name": "",
+                "_ip": ""
+              },
               "require": {
-                "_name": ""
+                "_name": "",
+                "_ip": ""
               }
             }
           }
@@ -72,10 +100,17 @@
             "actions": {
               "allocate": {
                 "number_of_replicas": 1,
-                "include": {},
-                "exclude": {},
+                "include": {
+                  "_name": "",
+                  "_ip": ""
+                },
+                "exclude": {
+                  "_name": "",
+                  "_ip": ""
+                },
                 "require": {
-                  "_name": ""
+                  "_name": "",
+                  "_ip": ""
                 }
               },
               "shrink": {
