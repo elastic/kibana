@@ -35,7 +35,7 @@ export const WAIT_FOR_EXISTS_TIME = 2500;
 export function FindProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
-  const remote = getService('remote');
+  const leadfoot = getService('__leadfoot__');
   const retry = getService('retry');
 
   const defaultFindTimeout = config.get('timeouts.find');
@@ -43,10 +43,10 @@ export function FindProvider({ getService }) {
   class Find {
     async _withTimeout(timeout, block) {
       try {
-        const remoteWithTimeout = remote.setFindTimeout(timeout);
+        const remoteWithTimeout = leadfoot.setFindTimeout(timeout);
         return await block(remoteWithTimeout);
       } finally {
-        remote.setFindTimeout(defaultFindTimeout);
+        leadfoot.setFindTimeout(defaultFindTimeout);
       }
     }
 
@@ -61,7 +61,7 @@ export function FindProvider({ getService }) {
 
     async _ensureElementWithTimeout(timeout, getElementFunction) {
       try {
-        const remoteWithTimeout = remote.setFindTimeout(timeout);
+        const remoteWithTimeout = leadfoot.setFindTimeout(timeout);
         return await retry.try(async () => {
           const element = await getElementFunction(remoteWithTimeout);
           // Calling any method forces a staleness check
@@ -69,7 +69,7 @@ export function FindProvider({ getService }) {
           return element;
         });
       } finally {
-        remote.setFindTimeout(defaultFindTimeout);
+        leadfoot.setFindTimeout(defaultFindTimeout);
       }
     }
 
@@ -95,7 +95,7 @@ export function FindProvider({ getService }) {
     }
 
     async activeElement() {
-      return await remote.getActiveElement();
+      return await leadfoot.getActiveElement();
     }
 
     async setValue(selector, text) {
@@ -212,7 +212,7 @@ export function FindProvider({ getService }) {
       // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
       // it's gone.
       const element = await this.byCssSelector(selector, timeout);
-      await remote.moveMouseTo(element);
+      await leadfoot.moveMouseTo(element);
 
       const clickIfNotDisabled = async (element, resolve) => {
         const disabled = await element.getProperty('disabled');
@@ -232,7 +232,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByPartialLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byPartialLinkText(linkText, timeout);
-        await remote.moveMouseTo(element);
+        await leadfoot.moveMouseTo(element);
         await element.click();
       });
     }
@@ -241,12 +241,12 @@ export function FindProvider({ getService }) {
       log.debug(`clickByLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byLinkText(linkText, timeout);
-        await remote.moveMouseTo(element);
+        await leadfoot.moveMouseTo(element);
         await element.click();
       });
     }
 
-    async byButtonText(buttonText, element = remote, timeout = defaultFindTimeout) {
+    async byButtonText(buttonText, element = leadfoot, timeout = defaultFindTimeout) {
       log.debug(`byButtonText(${buttonText})`);
       return await retry.tryForTime(timeout, async () => {
         const allButtons = await element.findAllByTagName('button');
@@ -261,7 +261,7 @@ export function FindProvider({ getService }) {
       });
     }
 
-    async clickByButtonText(buttonText, element = remote, timeout = defaultFindTimeout) {
+    async clickByButtonText(buttonText, element = leadfoot, timeout = defaultFindTimeout) {
       log.debug(`clickByButtonText(${buttonText})`);
       await retry.try(async () => {
         const button = await this.byButtonText(buttonText, element, timeout);
@@ -273,7 +273,7 @@ export function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
-        await remote.moveMouseTo(element);
+        await leadfoot.moveMouseTo(element);
         await element.click();
       });
     }
@@ -281,19 +281,19 @@ export function FindProvider({ getService }) {
       log.debug(`clickByDisplayedLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.findDisplayedByLinkText(linkText, timeout);
-        await remote.moveMouseTo(element);
+        await leadfoot.moveMouseTo(element);
         await element.click();
       });
     }
     async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
       await retry.try(async () => {
         const element = await this.findDisplayedByCssSelector(selector, timeout);
-        await remote.moveMouseTo(element);
+        await leadfoot.moveMouseTo(element);
         await element.click();
       });
     }
     async waitForDeletedByCssSelector(selector) {
-      await remote.waitForDeletedByCssSelector(selector);
+      await leadfoot.waitForDeletedByCssSelector(selector);
     }
   }
 

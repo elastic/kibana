@@ -18,22 +18,22 @@
  */
 
 export default function ({ getService, loadTestFile }) {
-  const remote = getService('remote');
+  const leadfoot = getService('__leadfoot__');
 
   describe('suite3', () => {
     before(async () => {
       process.send({
         name: 'before suite3',
-        size: await remote.getWindowSize()
+        size: await leadfoot.getWindowSize()
       });
 
-      await remote.setWindowSize(800, 800);
+      await leadfoot.setWindowSize(800, 800);
     });
 
     it('has the right window size', async () => {
       process.send({
         name: 'in suite3',
-        size: await remote.getWindowSize()
+        size: await leadfoot.getWindowSize()
       });
     });
 
@@ -42,7 +42,7 @@ export default function ({ getService, loadTestFile }) {
     after(async () => {
       process.send({
         name: 'after suite3',
-        size: await remote.getWindowSize()
+        size: await leadfoot.getWindowSize()
       });
     });
   });

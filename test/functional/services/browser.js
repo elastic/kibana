@@ -20,7 +20,7 @@
 import { modifyUrl } from '../../../src/core/utils';
 
 export function BrowserProvider({ getService }) {
-  const remote = getService('remote');
+  const leadfoot = getService('__leadfoot__');
 
   return new class BrowserService {
     /**
@@ -31,7 +31,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<{width: number, height: number}>}
      */
     async getWindowSize(...args) {
-      return await remote.getWindowSize(...args);
+      return await leadfoot.getWindowSize(...args);
     }
 
 
@@ -45,7 +45,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async setWindowSize(...args) {
-      await remote.setWindowSize(...args);
+      await leadfoot.setWindowSize(...args);
     }
 
     /**
@@ -56,7 +56,7 @@ export function BrowserProvider({ getService }) {
      */
     async getCurrentUrl() {
       // strip _t=Date query param when url is read
-      const current = await remote.getCurrentUrl();
+      const current = await leadfoot.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
         delete parsed.query._t;
       });
@@ -77,9 +77,9 @@ export function BrowserProvider({ getService }) {
           parsed.query._t = Date.now();
         });
 
-        return await remote.get(urlWithTime);
+        return await leadfoot.get(urlWithTime);
       }
-      return await remote.get(url);
+      return await leadfoot.get(url);
     }
 
     /**
@@ -94,7 +94,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async moveMouseTo(...args) {
-      await remote.moveMouseTo(...args);
+      await leadfoot.moveMouseTo(...args);
     }
 
     /**
@@ -104,7 +104,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async refresh() {
-      await remote.refresh();
+      await leadfoot.refresh();
     }
 
     /**
@@ -114,7 +114,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async goBack() {
-      await remote.goBack();
+      await leadfoot.goBack();
     }
 
     /**
@@ -125,7 +125,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async pressKeys(...args) {
-      await remote.pressKeys(...args);
+      await leadfoot.pressKeys(...args);
     }
 
     /**
@@ -138,7 +138,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async clickMouseButton(...args) {
-      await remote.clickMouseButton(...args);
+      await leadfoot.clickMouseButton(...args);
     }
 
     /**
@@ -149,7 +149,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async pressMouseButton(...args) {
-      await remote.pressMouseButton(...args);
+      await leadfoot.pressMouseButton(...args);
     }
 
     /**
@@ -160,7 +160,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async releaseMouseButton(...args) {
-      await remote.releaseMouseButton(...args);
+      await leadfoot.releaseMouseButton(...args);
     }
 
     /**
@@ -171,7 +171,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<string>}
      */
     async getPageSource(...args) {
-      return await remote.getPageSource(...args);
+      return await leadfoot.getPageSource(...args);
     }
 
     /**
@@ -183,7 +183,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<LogEntry[]>}
      */
     async getLogsFor(...args) {
-      return await remote.getLogsFor(...args);
+      return await leadfoot.getLogsFor(...args);
     }
 
     /**
@@ -193,7 +193,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<Buffer>}
      */
     async takeScreenshot(...args) {
-      return await remote.takeScreenshot(...args);
+      return await leadfoot.takeScreenshot(...args);
     }
 
     /**
@@ -203,7 +203,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async doubleClick(...args) {
-      await remote.doubleClick(...args);
+      await leadfoot.doubleClick(...args);
     }
 
     /**
@@ -214,7 +214,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async switchToWindow(...args) {
-      await remote.switchToWindow(...args);
+      await leadfoot.switchToWindow(...args);
     }
 
     /**
@@ -224,7 +224,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<string[]>}
      */
     async getAllWindowHandles(...args) {
-      return await remote.getAllWindowHandles(...args);
+      return await leadfoot.getAllWindowHandles(...args);
     }
 
     /**
@@ -235,7 +235,7 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async closeCurrentWindow(...args) {
-      await remote.closeCurrentWindow(...args);
+      await leadfoot.closeCurrentWindow(...args);
     }
 
     /**
@@ -246,7 +246,7 @@ export function BrowserProvider({ getService }) {
      * @param  {...any[]} args
      */
     async execute(...args) {
-      return await remote.execute(...args);
+      return await leadfoot.execute(...args);
     }
   };
 }
