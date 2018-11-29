@@ -1,12 +1,12 @@
 {
   "ilm.remove_policy": {
     "methods": [
-      "DELETE"
+      "POST"
     ],
     "patterns": [
-      "{indices}/_ilm",
-      "_ilm"
+      "{indices}/_ilm/remove",
+      "_ilm/remove"
     ],
-    "documentation": "http://www.elastic.co/guide/en/index_lifecycle/current/index_lifecycle.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-delete-policy.html"
   }
 }
