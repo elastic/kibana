@@ -20,9 +20,9 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import { AggConfig } from '../../../../ui/public/vis/agg_config';
-import AggConfigResult from '../../../../ui/public/vis/agg_config_result';
-import { VisProvider } from '../../../../ui/public/vis';
+import { AggConfig } from '../../../../../ui/public/vis/agg_config';
+import AggConfigResult from '../../../../../ui/public/vis/agg_config_result';
+import { VisProvider } from '../../../../../ui/public/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { splitRowsOnColumn, splitTable, legacyTableResponseHandler } from '../legacy_response_handler';
 
