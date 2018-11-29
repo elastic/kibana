@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartInterval = 'Daily';
         const expectedBarChartData = [4757, 4614, 4633];
 
-        await remote.goBack();
+        await browser.goBack();
         await retry.try(async function tryingForTime() {
           const actualInterval = await PageObjects.discover.getChartInterval();
           expect(actualInterval).to.be(expectedChartInterval);
@@ -413,7 +413,7 @@ export default function ({ getService, getPageObjects }) {
     describe('time zone switch', () => {
       it('should show bars in the correct time zone after switching', async function () {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
-        await remote.refresh();
+        await browser.refresh();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const ticks = await PageObjects.discover.getBarChartXTicks();
         expect(ticks).to.eql(['2015-09-19 17:00', '2015-09-20 17:00', '2015-09-21 17:00', '2015-09-22 17:00']);
