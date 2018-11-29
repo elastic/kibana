@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -e
+set -o pipefail
+
 # run setup script that gives us node, yarn, and bootstraps the project
 source "src/dev/ci_setup/setup.sh";
 
