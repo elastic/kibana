@@ -538,9 +538,12 @@ class QueryBarUI extends Component<Props, State> {
             onClick={this.onClickSubmitButton}
           >
             {this.isDirty() ? (
-              <FormattedMessage id="common.ui.queryBar.updateLabel" defaultMessage="Update" />
+              <FormattedMessage id="common.ui.queryBar.updateButtonLabel" defaultMessage="Update" />
             ) : (
-              <FormattedMessage id="common.ui.queryBar.refreshLabel" defaultMessage="Refresh" />
+              <FormattedMessage
+                id="common.ui.queryBar.refreshButtonLabel"
+                defaultMessage="Refresh"
+              />
             )}
           </EuiButton>
         </EuiFlexItem>

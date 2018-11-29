@@ -85,7 +85,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
                   docsLink: (
                     <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
                       <FormattedMessage
-                        id="common.ui.queryBar.syntaxOptionsDescription.linkText"
+                        id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
                         defaultMessage="here"
                       />
                     </EuiLink>
@@ -126,7 +126,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
                   docsLink: (
                     <EuiLink href={luceneQuerySyntaxDocs} target="_blank">
                       <FormattedMessage
-                        id="common.ui.queryBar.luceneDocsDescription.linkText"
+                        id="common.ui.queryBar.luceneDocsDescription.docsLinkText"
                         defaultMessage="here"
                       />
                     </EuiLink>
