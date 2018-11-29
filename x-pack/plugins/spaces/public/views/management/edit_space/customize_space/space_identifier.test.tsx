@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { SpaceValidator } from '../lib';
+import { SpaceValidator } from '../../lib';
 import { SpaceIdentifier } from './space_identifier';
 
 test('renders without crashing', () => {
@@ -17,7 +17,7 @@ test('renders without crashing', () => {
     },
     editable: true,
     onChange: jest.fn(),
-    validator: new SpaceValidator(),
+    validator: new SpaceValidator({ features: [] }),
   };
   const wrapper = shallowWithIntl(
     <SpaceIdentifier.WrappedComponent {...props} intl={null as any} />

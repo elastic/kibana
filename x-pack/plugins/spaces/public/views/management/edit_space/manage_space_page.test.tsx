@@ -13,6 +13,7 @@ import { ManageSpacePage } from './manage_space_page';
 const space = {
   id: 'my-space',
   name: 'My Space',
+  disabledFeatures: [],
 };
 const buildMockChrome = () => {
   return {
@@ -39,11 +40,12 @@ describe('ManageSpacePage', () => {
       <ManageSpacePage.WrappedComponent
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
         intl={null as any}
       />
     );
     const nameInput = wrapper.find('input[name="name"]');
-    const descriptionInput = wrapper.find('input[name="description"]');
+    const descriptionInput = wrapper.find('textarea[name="description"]');
 
     nameInput.simulate('change', { target: { value: 'New Space Name' } });
     descriptionInput.simulate('change', { target: { value: 'some description' } });
@@ -58,6 +60,7 @@ describe('ManageSpacePage', () => {
       description: 'some description',
       color: undefined,
       initials: undefined,
+      disabledFeatures: [],
     });
   });
 
@@ -71,6 +74,7 @@ describe('ManageSpacePage', () => {
             description: 'hey an existing space',
             color: '#aabbcc',
             initials: 'AB',
+            disabledFeatures: [],
           },
         });
       }),
@@ -91,6 +95,7 @@ describe('ManageSpacePage', () => {
         spaceId={'existing-space'}
         spacesManager={spacesManager}
         spacesNavState={spacesNavState}
+        features={[{ id: 'foo', name: 'foo', privileges: {} }]}
         intl={null as any}
       />
     );
@@ -104,7 +109,7 @@ describe('ManageSpacePage', () => {
     wrapper.update();
 
     const nameInput = wrapper.find('input[name="name"]');
-    const descriptionInput = wrapper.find('input[name="description"]');
+    const descriptionInput = wrapper.find('textarea[name="description"]');
 
     nameInput.simulate('change', { target: { value: 'New Space Name' } });
     descriptionInput.simulate('change', { target: { value: 'some description' } });
@@ -119,6 +124,7 @@ describe('ManageSpacePage', () => {
       description: 'some description',
       color: '#aabbcc',
       initials: 'AB',
+      disabledFeatures: [],
     });
   });
 });

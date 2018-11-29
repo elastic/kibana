@@ -14,11 +14,13 @@ const spaces = [
   {
     id: 'default',
     name: 'Default',
+    disabledFeatures: [],
     _reserved: true,
   },
   {
     id: 'custom-1',
     name: 'Custom 1',
+    disabledFeatures: [],
   },
   {
     id: 'custom-2',
@@ -26,6 +28,7 @@ const spaces = [
     initials: 'LG',
     color: '#ABCDEF',
     description: 'my description here',
+    disabledFeatures: [],
   },
 ];
 

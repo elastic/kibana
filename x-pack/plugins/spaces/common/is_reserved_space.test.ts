@@ -11,6 +11,7 @@ test('it returns true for reserved spaces', () => {
   const space: Space = {
     id: '',
     name: '',
+    disabledFeatures: [],
     _reserved: true,
   };
 
@@ -21,6 +22,7 @@ test('it returns false for non-reserved spaces', () => {
   const space: Space = {
     id: '',
     name: '',
+    disabledFeatures: [],
   };
 
   expect(isReservedSpace(space)).toEqual(false);

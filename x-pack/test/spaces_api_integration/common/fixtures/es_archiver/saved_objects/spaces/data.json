@@ -10,6 +10,7 @@
       "space": {
         "name": "Default Space",
         "description": "This is the default space",
+        "disabledFeatures": [],
         "_reserved": true
       }
     }
@@ -27,7 +28,8 @@
       "updated_at": "2017-09-21T18:49:16.270Z",
       "space": {
         "name": "Space 1",
-        "description": "This is the first test space"
+        "description": "This is the first test space",
+        "disabledFeatures": []
       }
     }
   }
@@ -44,7 +46,8 @@
       "updated_at": "2017-09-21T18:49:16.270Z",
       "space": {
         "name": "Space 2",
-        "description": "This is the second test space"
+        "description": "This is the second test space",
+        "disabledFeatures": []
       }
     }
   }

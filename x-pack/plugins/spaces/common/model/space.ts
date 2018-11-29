@@ -10,5 +10,6 @@ export interface Space {
   description?: string;
   color?: string;
   initials?: string;
+  disabledFeatures: string[];
   _reserved?: boolean;
 }

@@ -18,11 +18,12 @@ import { wrapError } from './server/lib/errors';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
+import { migrateToKibana660 } from './server/lib/migrations';
 import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { initSpacesRequestInterceptors } from './server/lib/space_request_interceptors';
 import { SpacesClient } from './server/lib/spaces_client';
 import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
-import { toggleUiCapabilities } from './server/lib/toggle_ui_capabilities';
+import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
 import { initPublicSpacesApi } from './server/routes/api/public';
 import { initPrivateApis } from './server/routes/api/v1';
 
@@ -55,6 +56,11 @@ export const spaces = (kibana: any) =>
       ],
       hacks: [],
       mappings,
+      migrations: {
+        space: {
+          '6.6.0': migrateToKibana660,
+        },
+      },
       savedObjectSchemas: {
         space: {
           isNamespaceAgnostic: true,
@@ -96,7 +102,9 @@ export const spaces = (kibana: any) =>
         }
 
         if (vars.activeSpace.space) {
-          vars.uiCapabilities = await toggleUiCapabilities(
+          const features = server.plugins.xpack_main.getFeatures();
+          vars.uiCapabilities = toggleUICapabilities(
+            features,
             vars.uiCapabilities,
             vars.activeSpace.space
           );

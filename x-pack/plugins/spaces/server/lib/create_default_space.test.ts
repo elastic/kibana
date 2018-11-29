@@ -99,6 +99,7 @@ test(`it creates the default space when one does not exist`, async () => {
     {
       _reserved: true,
       description: 'This is your default space!',
+      disabledFeatures: [],
       name: 'Default',
       color: '#00bfb3',
     },
