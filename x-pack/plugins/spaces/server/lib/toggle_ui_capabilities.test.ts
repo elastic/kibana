@@ -29,26 +29,27 @@ const features: Feature[] = [
   },
 ];
 
-const buildUiCapabilities = () => ({
-  navLinks: {
-    feature1: true,
-    feature2: true,
-    feature3: true,
-    unknownFeature: true,
-  },
-  feature_1: {
-    foo: true,
-    bar: true,
-  },
-  feature_2: {
-    foo: true,
-    bar: true,
-  },
-  feature_3: {
-    foo: true,
-    bar: true,
-  },
-});
+const buildUiCapabilities = () =>
+  Object.freeze({
+    navLinks: {
+      feature1: true,
+      feature2: true,
+      feature3: true,
+      unknownFeature: true,
+    },
+    feature_1: {
+      foo: true,
+      bar: true,
+    },
+    feature_2: {
+      foo: true,
+      bar: true,
+    },
+    feature_3: {
+      foo: true,
+      bar: true,
+    },
+  });
 
 describe('toggleUiCapabilities', () => {
   it('does not toggle capabilities when the space has no disabled features', () => {

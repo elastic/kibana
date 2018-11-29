@@ -85,7 +85,7 @@ export class EnabledFeatures extends Component<Props, {}> {
           <em>
             <FormattedMessage
               id="xpack.spaces.management.enabledSpaceFeatures.someFeaturesEnabledMessage"
-              defaultMessage="({enabledCount} / {featureCount} features visible"
+              defaultMessage="({enabledCount} / {featureCount} features visible)"
               values={{
                 enabledCount,
                 featureCount,

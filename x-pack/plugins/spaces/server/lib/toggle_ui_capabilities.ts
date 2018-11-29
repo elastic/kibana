@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../common/model/space';
@@ -13,9 +13,11 @@ export function toggleUICapabilities(
   uiCapabilities: UICapabilities,
   activeSpace: Space
 ) {
-  toggleDisabledFeatures(features, uiCapabilities, activeSpace);
+  const clonedCapabilities = _.cloneDeep(uiCapabilities);
 
-  return uiCapabilities;
+  toggleDisabledFeatures(features, clonedCapabilities, activeSpace);
+
+  return clonedCapabilities;
 }
 
 function toggleDisabledFeatures(
