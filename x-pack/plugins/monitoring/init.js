@@ -61,6 +61,9 @@ export const init = (monitoringPlugin, server) => {
     navLinkId: 'monitoring',
     privileges: {
       all: {
+        metadata: {
+          tooltip: 'The monitoring_user role should be assigned to grant access'
+        },
         app: ['monitoring'],
         savedObject: {
           all: [],

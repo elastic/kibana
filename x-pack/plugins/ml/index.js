@@ -70,6 +70,9 @@ export const ml = (kibana) => {
         navLinkId: 'ml',
         privileges: {
           all: {
+            metadata: {
+              tooltip: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
+            },
             app: ['ml'],
             savedObject: {
               all: [],
