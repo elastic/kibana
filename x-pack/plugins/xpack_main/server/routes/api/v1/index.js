@@ -6,3 +6,4 @@
 
 export { xpackInfoRoute } from './xpack_info';
 export { telemetryRoute } from './telemetry';
+export { featuresRoute } from './features';

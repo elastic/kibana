@@ -20,10 +20,12 @@ const createMockHttpAgent = (withSpaces = false) => {
     {
       id: '',
       name: 'space 1',
+      disabledFeatures: [],
     },
     {
       id: '',
       name: 'space 2',
+      disabledFeatures: [],
     },
   ];
 
@@ -42,7 +44,7 @@ const createMockHttpAgent = (withSpaces = false) => {
 describe('NavControlPopover', () => {
   it('renders without crashing', () => {
     const activeSpace = {
-      space: { id: '', name: 'foo' },
+      space: { id: '', name: 'foo', disabledFeatures: [] },
       valid: true,
     };
 
@@ -61,7 +63,7 @@ describe('NavControlPopover', () => {
 
   it('renders a SpaceAvatar with the active space', async () => {
     const activeSpace = {
-      space: { id: '', name: 'foo' },
+      space: { id: '', name: 'foo', disabledFeatures: [] },
       valid: true,
     };
 

@@ -39,16 +39,19 @@ export function getAllTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
         name: 'Default Space',
         description: 'This is the default space',
         _reserved: true,
+        disabledFeatures: [],
       },
       {
         id: 'space_1',
         name: 'Space 1',
         description: 'This is the first test space',
+        disabledFeatures: [],
       },
       {
         id: 'space_2',
         name: 'Space 2',
         description: 'This is the second test space',
+        disabledFeatures: [],
       },
     ].filter(entry => spaceIds.includes(entry.id));
     expect(resp.body).to.eql(expectedBody);

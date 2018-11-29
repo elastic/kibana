@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders without crashing 1`] = `
+<React.Fragment>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      label="Initials (2 max)"
+    >
+      <EuiFieldText
+        compressed={false}
+        fullWidth={false}
+        inputRef={[Function]}
+        isLoading={false}
+        name="spaceInitials"
+        onChange={[Function]}
+        value=""
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      label="Color"
+    >
+      <EuiColorPicker
+        aria-label="Select a color"
+        color="#BFA180"
+        onChange={[Function]}
+        showColorLabel={true}
+      />
+    </EuiFormRow>
+  </EuiFlexItem>
+</React.Fragment>
+`;

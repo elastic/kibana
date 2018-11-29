@@ -66,7 +66,7 @@ export const ml = (kibana) => {
       xpackMainPlugin.registerFeature({
         id: 'ml',
         name: 'Machine Learning',
-        icon: 'mlApp',
+        icon: 'machineLearningApp',
         navLinkId: 'ml',
         privileges: {
           all: {

@@ -6,7 +6,7 @@
 
 import { injectXPackInfoSignature } from './inject_xpack_info_signature';
 import { XPackInfo } from './xpack_info';
-import { registerFeature, getFeatures } from './feature_registry';
+import { getFeatures, registerFeature } from './feature_registry';
 
 /**
  * Setup the X-Pack Main plugin. This is fired every time that the Elasticsearch plugin becomes Green.

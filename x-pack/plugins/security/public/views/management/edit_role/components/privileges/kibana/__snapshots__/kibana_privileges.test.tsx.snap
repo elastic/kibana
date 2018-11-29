@@ -32,10 +32,12 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
         Array [
           Object {
             "_reserved": true,
+            "disabledFeatures": Array [],
             "id": "default",
             "name": "Default Space",
           },
           Object {
+            "disabledFeatures": Array [],
             "id": "marketing",
             "name": "Marketing",
           },

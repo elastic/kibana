@@ -11,6 +11,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
           size="s"
           space={
             Object {
+              "disabledFeatures": Array [],
               "id": "",
               "name": "foo",
             }

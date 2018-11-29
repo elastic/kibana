@@ -35,11 +35,13 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             Object {
               "_reserved": true,
               "description": "",
+              "disabledFeatures": Array [],
               "id": "default",
               "name": "Default Space",
             },
             Object {
               "description": "",
+              "disabledFeatures": Array [],
               "id": "marketing",
               "name": "Marketing",
             },

@@ -3,49 +3,46 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
+  // @ts-ignore
+  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { ChangeEvent, Component, Fragment } from 'react';
-
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
+import React, { Component, Fragment } from 'react';
 import { uiCapabilities } from 'ui/capabilities';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
+import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { isReservedSpace } from '../../../../common';
 import { Space } from '../../../../common/model/space';
-import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
 import { toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
-import { CustomizeSpaceAvatar } from './customize_space_avatar';
+import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
+import { EnabledFeatures } from './enabled_features';
 import { ReservedSpaceBadge } from './reserved_space_badge';
-import { SpaceIdentifier } from './space_identifier';
 
 interface Props {
   spacesManager: SpacesManager;
   spaceId?: string;
   spacesNavState: SpacesNavState;
   intl: InjectedIntl;
+  features: Feature[];
 }
 
 interface State {
@@ -62,7 +59,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.validator = new SpaceValidator({ shouldValidate: false });
+    this.validator = new SpaceValidator({ shouldValidate: false, features: props.features });
     this.state = {
       isLoading: true,
       space: {},
@@ -108,11 +105,9 @@ class ManageSpacePageUI extends Component<Props, State> {
     const content = this.state.isLoading ? this.getLoadingIndicator() : this.getForm();
 
     return (
-      <EuiPage className="spcManagePage">
+      <EuiPage className="spcManagePage" restrictWidth>
         <EuiPageBody>
-          <EuiPageContent className="spcManagePage__content">
-            <EuiPageContentBody>{content}</EuiPageContentBody>
-          </EuiPageContent>
+          <EuiForm>{content}</EuiForm>
           {this.maybeGetSecureSpacesMessage()}
         </EuiPageBody>
       </EuiPage>
@@ -124,100 +119,53 @@ class ManageSpacePageUI extends Component<Props, State> {
       <div>
         <EuiLoadingSpinner size={'xl'} />{' '}
         <EuiTitle>
-          <h1>
-            <FormattedMessage
-              id="xpack.spaces.management.manageSpacePage.loadingTitle"
-              defaultMessage="Loading…"
-            />
-          </h1>
+          <h1>Loading...</h1>
         </EuiTitle>
       </div>
     );
   };
 
   public getForm = () => {
-    const { intl } = this.props;
-
     if (!uiCapabilities.spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 
-    const { name = '', description = '' } = this.state.space;
-
     return (
-      <EuiForm>
+      <Fragment>
         {this.getFormHeading()}
+
+        <EuiSpacer size={'s'} />
+
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.spaces.management.manageSpacePage.manageDescription"
+            defaultMessage={'Organize your saved objects into meaningful categories.'}
+          />
+        </EuiText>
 
         <EuiSpacer />
 
-        <EuiFormRow
-          label={intl.formatMessage({
-            id: 'xpack.spaces.management.manageSpacePage.nameFormRowLabel',
-            defaultMessage: 'Name',
-          })}
-          {...this.validator.validateSpaceName(this.state.space)}
-          fullWidth
-        >
-          <EuiFieldText
-            name="name"
-            placeholder={intl.formatMessage({
-              id: 'xpack.spaces.management.manageSpacePage.awesomeSpacePlaceholder',
-              defaultMessage: 'Awesome space',
-            })}
-            value={name}
-            onChange={this.onNameChange}
-            fullWidth
-          />
-        </EuiFormRow>
-        {name && (
-          <Fragment>
-            <EuiFlexGroup responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiFormRow label="Avatar">
-                  <SpaceAvatar space={this.state.space} size="l" />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <CustomizeSpaceAvatar space={this.state.space} onChange={this.onAvatarChange} />
-            </EuiFlexGroup>
-            <EuiSpacer />
-          </Fragment>
-        )}
+        <CustomizeSpace
+          space={this.state.space}
+          onChange={this.onSpaceChange}
+          editingExistingSpace={this.editingExistingSpace()}
+          validator={this.validator}
+          intl={this.props.intl}
+        />
 
-        {this.state.space && isReservedSpace(this.state.space) ? null : (
-          <Fragment>
-            <SpaceIdentifier
-              space={this.state.space}
-              editable={!this.editingExistingSpace()}
-              onChange={this.onSpaceIdentifierChange}
-              validator={this.validator}
-            />
-          </Fragment>
-        )}
+        <EuiSpacer />
 
-        <EuiFormRow
-          label={intl.formatMessage({
-            id: 'xpack.spaces.management.editSpace.manageSpacePage.optionalDescriptionFormRowLabel',
-            defaultMessage: 'Description (optional)',
-          })}
-          {...this.validator.validateSpaceDescription(this.state.space)}
-          fullWidth
-        >
-          <EuiFieldText
-            name="description"
-            placeholder={intl.formatMessage({
-              id: 'xpack.spaces.management.manageSpacePage.hereMagicHappensPlaceholder',
-              defaultMessage: 'This is where the magic happens',
-            })}
-            value={description}
-            onChange={this.onDescriptionChange}
-            fullWidth
-          />
-        </EuiFormRow>
+        <EnabledFeatures
+          space={this.state.space}
+          features={this.props.features}
+          onChange={this.onSpaceChange}
+          intl={this.props.intl}
+        />
 
-        <EuiHorizontalRule />
+        <EuiSpacer />
 
         {this.getFormButtons()}
-      </EuiForm>
+      </Fragment>
     );
   };
 
@@ -233,19 +181,9 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   public getTitle = () => {
     if (this.editingExistingSpace()) {
-      return (
-        <FormattedMessage
-          id="xpack.spaces.management.manageSpacePage.editSpaceTitle"
-          defaultMessage="Edit space"
-        />
-      );
+      return `Edit space`;
     }
-    return (
-      <FormattedMessage
-        id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
-        defaultMessage="Create space"
-      />
-    );
+    return `Create a space`;
   };
 
   public maybeGetSecureSpacesMessage = () => {
@@ -256,17 +194,7 @@ class ManageSpacePageUI extends Component<Props, State> {
   };
 
   public getFormButtons = () => {
-    const saveText = this.editingExistingSpace() ? (
-      <FormattedMessage
-        id="xpack.spaces.management.manageSpacePage.updateSpaceButtonLabel"
-        defaultMessage="Update space"
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.spaces.management.manageSpacePage.createSpaceButtonLabel"
-        defaultMessage="Create space"
-      />
-    );
+    const saveText = this.editingExistingSpace() ? 'Update space' : 'Create space';
     return (
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={false}>
@@ -276,10 +204,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={this.backToSpacesList} data-test-subj="cancel-space-button">
-            <FormattedMessage
-              id="xpack.spaces.management.manageSpacePage.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
+            Cancel
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
@@ -306,49 +231,9 @@ class ManageSpacePageUI extends Component<Props, State> {
     return null;
   };
 
-  public onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!this.state.space) {
-      return;
-    }
-
-    const canUpdateId = !this.editingExistingSpace();
-
-    let { id } = this.state.space;
-
-    if (canUpdateId) {
-      id = toSpaceIdentifier(e.target.value);
-    }
-
+  public onSpaceChange = (updatedSpace: Partial<Space>) => {
     this.setState({
-      space: {
-        ...this.state.space,
-        name: e.target.value,
-        id,
-      },
-    });
-  };
-
-  public onDescriptionChange = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      space: {
-        ...this.state.space,
-        description: e.target.value,
-      },
-    });
-  };
-
-  public onSpaceIdentifierChange = (e: ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      space: {
-        ...this.state.space,
-        id: toSpaceIdentifier(e.target.value),
-      },
-    });
-  };
-
-  public onAvatarChange = (space: Partial<Space>) => {
-    this.setState({
-      space,
+      space: updatedSpace,
     });
   };
 
@@ -374,7 +259,13 @@ class ManageSpacePageUI extends Component<Props, State> {
     }
 
     const name = this.state.space.name || '';
-    const { id = toSpaceIdentifier(name), description, initials, color } = this.state.space;
+    const {
+      id = toSpaceIdentifier(name),
+      description,
+      initials,
+      color,
+      disabledFeatures = [],
+    } = this.state.space;
 
     const params = {
       name,
@@ -382,6 +273,7 @@ class ManageSpacePageUI extends Component<Props, State> {
       description,
       initials,
       color,
+      disabledFeatures,
     };
 
     let action;
