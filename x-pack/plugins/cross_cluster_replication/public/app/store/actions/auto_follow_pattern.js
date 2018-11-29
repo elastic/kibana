@@ -5,18 +5,34 @@
  */
 
 import { SECTIONS, API_STATUS } from '../../constants';
-import { loadAutoFollowPatterns as loadAutoFollowPatternsRequest } from '../../services/api';
+import {
+  loadAutoFollowPatterns as loadAutoFollowPatternsRequest,
+  createAutoFollowPattern as createAutoFollowPatternRequest,
+} from '../../services/api';
+import routing from '../../services/routing';
 import * as t from '../action_types';
 import { apiAction } from './api';
 
-const { AUTO_FOLLOW_PATTERN } = SECTIONS;
+const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
 
 export const loadAutoFollowPatterns = (isUpdating = false) =>
   apiAction({
     label: t.AUTO_FOLLOW_PATTERN_LOAD,
-    scope: AUTO_FOLLOW_PATTERN,
+    scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
     handler: async () => {
       return await loadAutoFollowPatternsRequest();
     },
   });
+
+export const createAutoFollowPattern = (id, autoFollowPattern) => (
+  apiAction({
+    label: t.AUTO_FOLLOW_PATTERN_CREATE,
+    status: API_STATUS.SAVING,
+    scope,
+    handler: async () => {
+      await createAutoFollowPatternRequest(id, autoFollowPattern);
+      routing.navigate('/home');
+    }
+  })
+);

@@ -21,7 +21,6 @@ import {
 
 import routing from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
-import { BASE_PATH } from '../../../../common/constants';
 import { SectionUnauthorized } from '../../components';
 
 export class CrossClusterReplicationHomeUI extends PureComponent {
@@ -63,7 +62,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
             <EuiButton
-              {...routing.getRouterLinkProps(`${BASE_PATH}/auto_follow_patterns/add`)}
+              {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
               fill
             >
               <FormattedMessage

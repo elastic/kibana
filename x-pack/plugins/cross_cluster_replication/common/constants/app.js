@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SECTIONS = {
-  AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
-  INDEX_FOLLOWER: 'indexFollower',
-  REMOTE_CLUSTER: 'remoteCluster'
+export const APPS = {
+  CCR_APP: 'ccr',
+  REMOTE_CLUSTER_APP: 'remote_cluster',
 };

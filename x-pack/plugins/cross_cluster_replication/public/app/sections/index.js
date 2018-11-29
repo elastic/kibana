@@ -5,3 +5,4 @@
  */
 
 export { CrossClusterReplicationHome } from './home';
+export { AutoFollowPatternAdd } from './auto_follow_pattern_add';

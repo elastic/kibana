@@ -9,10 +9,16 @@
  */
 
 import { createLocation } from 'history';
+import { APPS, BASE_PATH, BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const isModifiedEvent = event => !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 const isLeftClickEvent = event => event.button === 0;
+
+const appToBasePathMap = {
+  [APPS.CCR_APP]: BASE_PATH,
+  [APPS.REMOTE_CLUSTER_APP]: BASE_PATH_REMOTE_CLUSTERS
+};
 
 class Routing {
   _userHasLeftApp = false;
@@ -24,9 +30,9 @@ class Routing {
    *
    * @param {*} to URL to navigate to
    */
-  getRouterLinkProps(to) {
+  getRouterLinkProps(to, base = BASE_PATH) {
     const location = typeof to === "string"
-      ? createLocation(to, null, null, this._reactRouter.history.location)
+      ? createLocation(base + to, null, null, this._reactRouter.history.location)
       : to;
 
     const href = this._reactRouter.history.createHref(location);
@@ -51,6 +57,21 @@ class Routing {
     };
 
     return { href, onClick };
+  }
+
+  navigate(route = '/home', app = APPS.CCR_APP, params) {
+    const search = params
+      ? `?${Object.entries(params).reduce((queryParams, [key, value]) => (
+        queryParams
+          ? `${queryParams}&${key}=${value}`
+          : `${key}=${value}`
+      ), '')}`
+      : undefined;
+
+    this._reactRouter.history.push({
+      pathname: appToBasePathMap[app] + route,
+      search,
+    });
   }
 
   get reactRouter() {

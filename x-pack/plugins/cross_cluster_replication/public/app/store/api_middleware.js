@@ -5,7 +5,7 @@
  */
 
 import * as t from './action_types';
-import { apiEnd, apiError, apiStart }  from './actions/api';
+import { apiEnd, setApiError, apiStart, clearApiError }  from './actions/api';
 
 export const apiMiddleware = ({ dispatch }) => next => async (action) => {
   next(action);
@@ -17,16 +17,14 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
   const { label, scope, status, handler } = action.payload;
 
   dispatch(apiStart({ label, scope, status }));
-
-  // Reset Api errors
-  dispatch(apiError({ error: null, scope }));
+  dispatch(clearApiError(scope));
 
   let response;
 
   try {
     response = await handler();
   } catch (error) {
-    dispatch(apiError({ error, scope }));
+    dispatch(setApiError({ error, scope }));
     dispatch(apiEnd({ label, scope }));
 
     dispatch({

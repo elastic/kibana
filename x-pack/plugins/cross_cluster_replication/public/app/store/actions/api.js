@@ -13,4 +13,6 @@ export const apiStart = ({ label, scope, status = API_STATUS.LOADING }) => ({ ty
 
 export const apiEnd = ({ label, scope }) => ({ type: t.API_END, payload: { label, scope } });
 
-export const apiError = ({ error, scope }) => ({ type: t.API_ERROR, payload: { error, scope } });
+export const setApiError = ({ error, scope }) => ({ type: t.API_ERROR_SET, payload: { error, scope } });
+
+export const clearApiError = (scope) => ({ type: t.API_ERROR_SET, payload: { error: null, scope } });

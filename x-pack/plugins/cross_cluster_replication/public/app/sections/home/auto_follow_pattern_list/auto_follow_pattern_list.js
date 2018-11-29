@@ -11,7 +11,6 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import routing from '../../../services/routing';
 import { API_STATUS } from '../../../constants';
-import { BASE_PATH } from '../../../../../common/constants';
 import { SectionLoading, SectionError } from '../../../components';
 import { AutoFollowPatternTable } from './components';
 
@@ -44,7 +43,7 @@ export class AutoFollowPatternListUI extends PureComponent {
           <h1>
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptTitle"
-              defaultMessage="Cross cluster replication"
+              defaultMessage="Cross Cluster Replication"
             />
           </h1>
         )}
@@ -60,13 +59,13 @@ export class AutoFollowPatternListUI extends PureComponent {
         }
         actions={
           <EuiButton
-            {...routing.getRouterLinkProps(`${BASE_PATH}/auto_follow_patterns/add`)}
+            {...routing.getRouterLinkProps('/auto_follow_patterns/add')}
             fill
             iconType="plusInCircle"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.addAutoFollowPatternButtonLabel"
-              defaultMessage="Add auto-follow pattern"
+              defaultMessage="Create auto-follow pattern"
             />
           </EuiButton>
         }

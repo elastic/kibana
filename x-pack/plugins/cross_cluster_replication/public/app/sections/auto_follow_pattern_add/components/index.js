@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SECTIONS = {
-  AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
-  INDEX_FOLLOWER: 'indexFollower',
-  REMOTE_CLUSTER: 'remoteCluster'
-};
+export { AutoFollowPatternForm } from './auto_follow_pattern_form';

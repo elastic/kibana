@@ -8,7 +8,7 @@
 export const API = 'API';
 export const API_START = 'API_START';
 export const API_END = 'API_END';
-export const API_ERROR = 'API_ERROR';
+export const API_ERROR_SET = 'API_ERROR_SET';
 
 // Auto Follow Pattern
 export const AUTO_FOLLOW_PATTERN_LOAD = 'AUTO_FOLLOW_PATTERN_LOAD';

@@ -7,3 +7,4 @@
 export { SectionLoading } from './section_loading';
 export { SectionError } from './section_error';
 export { SectionUnauthorized } from './section_unauthorized';
+export { RemoteClustersProvider } from './remote_clusters_provider';

@@ -11,7 +11,7 @@ import { Route, Switch, Redirect } from 'react-router-dom';
 import routing from './services/routing';
 import { BASE_PATH } from '../../common/constants';
 
-import { CrossClusterReplicationHome } from './sections';
+import { CrossClusterReplicationHome, AutoFollowPatternAdd } from './sections';
 
 export class App extends Component {
   static contextTypes = {
@@ -42,6 +42,7 @@ export class App extends Component {
       <div>
         <Switch>
           <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/auto_follow_patterns`} />
+          <Route path={`${BASE_PATH}/auto_follow_patterns/add`} component={AutoFollowPatternAdd} />
           <Route path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
         </Switch>
       </div>
