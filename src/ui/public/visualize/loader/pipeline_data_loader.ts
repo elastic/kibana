@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { toastNotifications } from 'ui/notify';
 import { RequestHandlerParams, Vis } from '../../vis';
 
 // @ts-ignore No typing present
@@ -31,35 +30,19 @@ export class PipelineDataLoader {
     this.vis.showRequestError = false;
     this.vis.pipelineExpression = buildPipeline(this.vis, params);
 
-    try {
-      return await runPipeline(
-        this.vis.pipelineExpression,
-        {},
-        {
-          getInitialContext: () => ({
-            query: params.query,
-            timeRange: params.timeRange,
-            filters: params.filters
-              ? params.filters.filter(filter => !filter.meta.disabled)
-              : undefined,
-          }),
-          inspectorAdapters: params.inspectorAdapters,
-        }
-      );
-    } catch (error) {
-      params.searchSource.cancelQueued();
-
-      this.vis.requestError = error;
-      this.vis.showRequestError =
-        error.type && ['NO_OP_SEARCH_STRATEGY', 'UNSUPPORTED_QUERY'].includes(error.type);
-
-      // tslint:disable-next-line
-      console.error(error);
-
-      toastNotifications.addDanger({
-        title: 'Error in visualization',
-        text: error.message,
-      });
-    }
+    return await runPipeline(
+      this.vis.pipelineExpression,
+      {},
+      {
+        getInitialContext: () => ({
+          query: params.query,
+          timeRange: params.timeRange,
+          filters: params.filters
+            ? params.filters.filter(filter => !filter.meta.disabled)
+            : undefined,
+        }),
+        inspectorAdapters: params.inspectorAdapters,
+      }
+    );
   }
 }
