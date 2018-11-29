@@ -420,6 +420,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500);
     }
 
+    async applyFilters() {
+      return await testSubjects.click('filterBarApplyFilters');
+    }
     /**
      * Set the test for a filter aggregation.
      * @param {*} filterValue the string value of the filter
