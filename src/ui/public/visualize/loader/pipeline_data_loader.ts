@@ -34,14 +34,15 @@ export class PipelineDataLoader {
     try {
       return await runPipeline(
         this.vis.pipelineExpression,
+        {},
         {
-          query: params.query,
-          timeRange: params.timeRange,
-          filters: params.filters
-            ? params.filters.filter(filter => !filter.meta.disabled)
-            : undefined,
-        },
-        {
+          getInitialContext: () => ({
+            query: params.query,
+            timeRange: params.timeRange,
+            filters: params.filters
+              ? params.filters.filter(filter => !filter.meta.disabled)
+              : undefined,
+          }),
           inspectorAdapters: params.inspectorAdapters,
         }
       );

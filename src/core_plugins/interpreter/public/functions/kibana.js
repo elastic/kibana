@@ -27,12 +27,27 @@ export default () => ({
     defaultMessage: 'Gets kibana global context'
   }),
   args: {},
-  fn(context) {
+  fn(context, args, handlers) {
+    const initialContext = handlers.getInitialContext ? handlers.getInitialContext() : {};
+
+    if (context.query) {
+      const contextQueries = Array.isArray(context.query) ? context.query : [context.query];
+      initialContext.query = initialContext.query.concat(contextQueries);
+    }
+
+    if (context.filters) {
+      // merge filters
+      initialContext.filters = initialContext.filters.concat(context.filters);
+    }
+
+    const timeRange = initialContext.timeRange ? JSON.parse(initialContext.timeRange) : context.timeRange;
+
     return {
+      ...context,
       type: 'kibana_context',
-      query: context.query,
-      filters: context.filters,
-      timeRange: context.timeRange,
+      query: initialContext.query,
+      filters: initialContext.filters,
+      timeRange: timeRange,
     };
   },
 });
