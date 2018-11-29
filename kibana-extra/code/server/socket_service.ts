@@ -4,26 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Socket } from 'socket.io';
+import SocketIO from 'socket.io';
 
 import { CloneProgress, RepositoryUri, SocketKind } from '../model';
+import { Server } from './kibana_types';
 import { Log } from './log';
 
 export class SocketService {
-  private sockets: Map<SocketKind, Socket>;
-
-  constructor(private readonly log: Log) {
-    this.sockets = new Map<SocketKind, Socket>();
-  }
-
-  public registerSocket(kind: SocketKind, s: Socket) {
-    this.log.info(`Register socket for ${kind}`);
-    this.sockets.set(kind, s);
-  }
-
-  public unregisterSocket(kind: SocketKind) {
-    this.log.info(`Unregister socket for ${kind}`);
-    this.sockets.delete(kind);
+  public readonly io: SocketIO.Server;
+  constructor(server: Server, private readonly log: Log) {
+    this.io = SocketIO(server.listener, { path: '/ws' });
   }
 
   public broadcastCloneProgress(
@@ -48,11 +38,8 @@ export class SocketService {
     progress: number,
     options: any
   ) {
-    const s = this.sockets.get(kind);
-    if (!s) {
-      return;
-    }
-    s.emit(kind, {
+    this.log.debug(`broadcasting ${kind} message to all clients`);
+    this.io.sockets.emit(kind, {
       ...options,
       repoUri,
       progress,

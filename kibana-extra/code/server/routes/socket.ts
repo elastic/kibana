@@ -4,22 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import SocketIO, { Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 
-import { SocketKind } from '../../model';
 import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { SocketService } from '../socket_service';
 
 export function socketRoute(server: Server, socketService: SocketService, log: Log) {
-  const socketIO = SocketIO(server.listener, { path: '/ws' });
+  const socketIO = socketService.io;
 
   socketIO.on('connection', (socket: Socket) => {
-    log.debug('User connected, attaching handlers and register socket.');
-
-    socketService.registerSocket(SocketKind.CLONE_PROGRESS, socket);
-    socketService.registerSocket(SocketKind.DELETE_PROGRESS, socket);
-    socketService.registerSocket(SocketKind.INDEX_PROGRESS, socket);
+    log.debug(`User ${socket.id} connected, attaching handlers and register socket.`);
 
     // TODO(mengwei): apply the same security check as Canvas does.
     // const request = socket.handshake;
@@ -27,9 +22,6 @@ export function socketRoute(server: Server, socketService: SocketService, log: L
 
     socket.on('disconnect', () => {
       log.debug('User disconnected, removing handlers and unregister sockets.');
-      socketService.unregisterSocket(SocketKind.CLONE_PROGRESS);
-      socketService.unregisterSocket(SocketKind.DELETE_PROGRESS);
-      socketService.unregisterSocket(SocketKind.INDEX_PROGRESS);
     });
   });
 }

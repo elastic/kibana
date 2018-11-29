@@ -98,7 +98,7 @@ export default (kibana: any) =>
         return;
       }
 
-      const socketService = new SocketService(log);
+      const socketService = new SocketService(server, log);
 
       // Initialize search clients
       const repoSearchClient = new RepositorySearchClient(dataCluster.getClient(), log);

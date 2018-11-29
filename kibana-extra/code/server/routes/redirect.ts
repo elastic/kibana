@@ -11,23 +11,24 @@ import wreck from 'wreck';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 
-const BASE_PLACEHOLDER = '/{baseUrl}';
+export const BASE_PLACEHOLDER = '/{baseUrl}';
+
+export async function mainNodeBaseUrl(redirectUrl: string) {
+  const u = url.parse(redirectUrl);
+  const res = await wreck.request('HEAD', '/', {
+    baseUrl: `${u.protocol}//${u.host}`,
+  });
+  if (res.statusCode === 302) {
+    return res.headers.location;
+  } else {
+    // no base url?
+    return '';
+  }
+}
 
 export function redirectRoute(server: hapi.Server, serverOptions: ServerOptions, log: Logger) {
   let redirectUrl = serverOptions.redirectToNode;
   const hasBaseUrl = redirectUrl.includes(BASE_PLACEHOLDER);
-  const mainNodeBaseUrl = async () => {
-    const u = url.parse(redirectUrl);
-    const res = await wreck.request('HEAD', '/', {
-      baseUrl: `${u.protocol}//${u.host}`,
-    });
-    if (res.statusCode === 302) {
-      return res.headers.location;
-    } else {
-      // no base url?
-      return '';
-    }
-  };
   const proxyHandler = {
     proxy: {
       passThrough: true,
@@ -35,8 +36,8 @@ export function redirectRoute(server: hapi.Server, serverOptions: ServerOptions,
         let uri;
         if (hasBaseUrl) {
           // send a head request to find main node's base url;
-          const baseUrl = await mainNodeBaseUrl();
-          redirectUrl = redirectUrl.replace(BASE_PLACEHOLDER, baseUrl);
+          const baseUrl = await mainNodeBaseUrl(redirectUrl);
+          redirectUrl = serverOptions.redirectToNode.replace(BASE_PLACEHOLDER, baseUrl);
         }
         uri = `${redirectUrl}${request.path}`;
         if (request.url.search) {
