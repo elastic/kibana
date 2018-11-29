@@ -26,6 +26,7 @@ import {
 import { fileRoute } from './server/routes/file';
 import { lspRoute, symbolByQnameRoute } from './server/routes/lsp';
 import { redirectRoute } from './server/routes/redirect';
+import { redirectSocketRoute } from './server/routes/redirect_socket';
 import { repositoryRoute } from './server/routes/repository';
 import {
   documentSearchRoute,
@@ -94,7 +95,7 @@ export default (kibana: any) =>
           `redirect node enabled,all requests will be redirected to ${serverOptions.redirectToNode}`
         );
         redirectRoute(server, options, log);
-        // todo handle websockets
+        await redirectSocketRoute(server, options, log);
         return;
       }
 

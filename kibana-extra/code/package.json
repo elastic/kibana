@@ -15,6 +15,7 @@
     "kbn": "node ../../kibana/scripts/kbn",
     "tslint": "tslint --project tsconfig.json --format stylish",
     "start": "plugin-helpers start --config ../config/kibana/kibana.yml",
+    "debug-another": "node --inspect ../../kibana/scripts/kibana.js -p 5701 --config ../../config/kibana/kibana.another.yml --optimize.enabled=false --env.name=development --plugin-path=.",
     "another": "node ../../kibana/scripts/kibana.js -p 5701 --config ../../config/kibana/kibana.another.yml --env.name=development --plugin-path=.",
     "test:server": "plugin-helpers test:server",
     "test:browser": "plugin-helpers test:browser",
