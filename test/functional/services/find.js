@@ -288,6 +288,9 @@ export function FindProvider({ getService }) {
         await element.click();
       });
     }
+    async waitForDeletedByCssSelector(selector) {
+      await remote.waitForDeletedByCssSelector(selector);
+    }
   }
 
   return new Find();

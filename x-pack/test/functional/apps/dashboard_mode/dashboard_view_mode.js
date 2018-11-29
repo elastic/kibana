@@ -9,7 +9,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
-      remote.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows the dashboard landing page by default', async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         console.log('url: ', currentUrl);
         expect(currentUrl).to.contain('dashboards');
       });

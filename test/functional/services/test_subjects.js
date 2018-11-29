@@ -29,7 +29,7 @@ import { WAIT_FOR_EXISTS_TIME } from './find';
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
@@ -79,8 +79,8 @@ export function TestSubjectsProvider({ getService }) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await remote.doubleClick();
+        await browser.moveMouseTo(element);
+        await browser.doubleClick();
       });
     }
 
@@ -139,7 +139,7 @@ export function TestSubjectsProvider({ getService }) {
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
-        const input = await remote.getActiveElement();
+        const input = await browser.getActiveElement();
         await input.clearValue();
         await input.type(text);
       });
@@ -191,7 +191,7 @@ export function TestSubjectsProvider({ getService }) {
       // moveMouseTo function.
       await retry.try(async () => {
         const element = await this.find(selector);
-        await remote.moveMouseTo(element);
+        await browser.moveMouseTo(element);
       });
     }
 
@@ -203,7 +203,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async waitForDeleted(selector) {
-      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
+      await find.waitForDeletedByCssSelector(testSubjSelector(selector));
     }
   }
 
