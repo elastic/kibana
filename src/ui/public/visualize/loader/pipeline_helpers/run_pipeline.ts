@@ -17,8 +17,11 @@
  * under the License.
  */
 
-export { AggConfig } from './agg_config';
-export { Vis, VisProvider, VisState } from './vis';
-export { VisualizationController, VisType } from './vis_types/vis_type';
-export * from './request_handlers';
-export * from './response_handlers';
+import { fromExpression } from '@kbn/interpreter/common';
+import { interpretAst } from '@kbn/interpreter/public';
+
+export const runPipeline = async (pipeline: string, context, handlers) => {
+  const ast = fromExpression(pipeline);
+  const pipelineResponse = await interpretAst(ast, context, handlers);
+  return pipelineResponse;
+};

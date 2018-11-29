@@ -17,8 +17,5 @@
  * under the License.
  */
 
-export { AggConfig } from './agg_config';
-export { Vis, VisProvider, VisState } from './vis';
-export { VisualizationController, VisType } from './vis_types/vis_type';
-export * from './request_handlers';
-export * from './response_handlers';
+export { buildPipeline } from './build_pipeline';
+export { runPipeline } from './run_pipeline';

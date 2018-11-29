@@ -17,24 +17,46 @@
  * under the License.
  */
 
+import { AggConfig, Vis, VisState } from 'ui/vis';
 
-import { fromExpression } from '@kbn/interpreter/common';
-import { interpretAst } from '@kbn/interpreter/public';
+type buildVisFunction = (visState: VisState, schemas?: any) => string;
 
-const getSchemas = (vis) => {
+interface BuildPipelineVisFunction {
+  [key: string]: buildVisFunction;
+}
+
+const vislibCharts: string[] = [
+  'area',
+  'gauge',
+  'goal',
+  'heatmap',
+  'histogram',
+  'horizontal_bar',
+  'line',
+];
+
+export const getSchemas = (vis: Vis) => {
   let cnt = 0;
-  const schemas = {
+  const schemas: any = {
     metric: [],
   };
   const responseAggs = vis.aggs.getResponseAggs();
   const isHierarchical = vis.isHierarchical();
-  const metrics = responseAggs.filter(agg => agg.type.type === 'metrics');
-  responseAggs.forEach((agg) => {
-    if (!agg.enabled) return;
+  const metrics = responseAggs.filter((agg: AggConfig) => agg.type.type === 'metrics');
+  responseAggs.forEach((agg: AggConfig) => {
+    if (!agg.enabled) {
+      return;
+    }
     let schemaName = agg.schema ? agg.schema.name || agg.schema : null;
-    if (typeof schemaName === 'object') schemaName = null;
-    if (!schemaName) return;
-    if (!schemas[schemaName]) schemas[schemaName] = [];
+    if (typeof schemaName === 'object') {
+      schemaName = null;
+    }
+    if (!schemaName) {
+      return;
+    }
+    if (!schemas[schemaName]) {
+      schemas[schemaName] = [];
+    }
     if (!isHierarchical || agg.type.type !== 'metrics') {
       schemas[schemaName].push(cnt++);
     }
@@ -47,17 +69,15 @@ const getSchemas = (vis) => {
   return schemas;
 };
 
-const prepareJson = (variable, data) => {
+export const prepareJson = (variable: string, data: object): string => {
   return `${variable}='${JSON.stringify(data).replace(/'/g, `\\'`)}' `;
 };
 
-const prepareString = (variable, data) => {
+export const prepareString = (variable: string, data: string): string => {
   return `${variable}='${data.replace(/'/g, `\\'`)}' `;
 };
 
-const vislibCharts = ['histogram', 'line', 'area', 'gauge', 'goal', 'heatmap', 'horizontal_bar'];
-
-const buildPipelineVisFunction = {
+export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   vega: visState => {
     return `vega ${prepareString('spec', visState.params.spec)}`;
   },
@@ -68,52 +88,62 @@ const buildPipelineVisFunction = {
     return `tsvb ${prepareJson('params', visState.params)}`;
   },
   timelion: visState => {
-    return `timelion_vis 
-      ${prepareString('expression', visState.params.expression)} interval='${visState.params.interval}'`;
+    const expression = prepareString('expression', visState.params.expression);
+    const interval = prepareString('interval', visState.params.interval);
+    return `timelion_vis ${expression}${interval}`;
   },
   markdown: visState => {
-    return `kibana_markdown 
-      ${prepareString('expression', visState.params.markdown)} ${prepareJson('visConfig', visState.params)}`;
+    const expression = prepareString('expression', visState.params.markdown);
+    const visConfig = prepareJson('visConfig', visState.params);
+    return `kibana_markdown ${expression}${visConfig}`;
   },
   table: (visState, schemas) => {
     let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)} `;
-    if (schemas.split) schemas.split.forEach(split => pipeline += `split='${split}' `);
-    if (schemas.bucket) schemas.bucket.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    if (schemas.split) {
+      schemas.split.forEach(split => (pipeline += `split='${split}' `));
+    }
+    if (schemas.bucket) {
+      schemas.bucket.forEach(bucket => (pipeline += `bucket='${bucket}' `));
+    }
+    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
     return pipeline;
   },
   metric: (visState, schemas) => {
     let pipeline = `kibana_metric ${prepareJson('visConfig', visState.params)} `;
-    if (schemas.bucket) schemas.bucket.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    if (schemas.bucket) {
+      schemas.bucket.forEach(bucket => (pipeline += `bucket='${bucket}' `));
+    }
+    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
     return pipeline;
   },
   tagcloud: (visState, schemas) => {
     let pipeline = `tagcloud ${prepareJson('visConfig', visState.params)} `;
-    schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    schemas.segment.forEach(bucket => (pipeline += `bucket='${bucket}' `));
+    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
     return pipeline;
   },
   region_map: (visState, schemas) => {
     let pipeline = `regionmap ${prepareJson('visConfig', visState.params)} `;
-    schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    schemas.segment.forEach(bucket => (pipeline += `bucket='${bucket}' `));
+    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
     return pipeline;
   },
   tile_map: (visState, schemas) => {
     let pipeline = `tilemap ${prepareJson('visConfig', visState.params)} `;
-    if (schemas.segment) schemas.segment.forEach(bucket => pipeline += `bucket='${bucket}' `);
-    schemas.metric.forEach(metric => pipeline += `metric='${metric}' `);
+    if (schemas.segment) {
+      schemas.segment.forEach(bucket => (pipeline += `bucket='${bucket}' `));
+    }
+    schemas.metric.forEach(metric => (pipeline += `metric='${metric}' `));
     return pipeline;
   },
   pie: (visState, schemas) => {
-    return `kibana_pie 
-      ${prepareJson('visConfig', visState.params)} 
-      ${prepareJson('schemas', schemas)}`;
-  }
+    const visConfig = prepareJson('visConfig', visState.params);
+    const schemas = prepareJson('schemas', schemas);
+    return `kibana_pie ${visConfig}${schemas}`;
+  },
 };
 
-export const buildPipeline = (vis, params) => {
+export const buildPipeline = (vis: Vis, params) => {
   const { searchSource } = params;
   const { indexPattern } = vis;
   const query = searchSource.getField('query');
@@ -159,10 +189,4 @@ export const buildPipeline = (vis, params) => {
   }
 
   return pipeline;
-};
-
-export const runPipeline = async (pipeline, context, handlers) => {
-  const ast = fromExpression(pipeline);
-  const pipelineResponse = await interpretAst(ast, context, handlers);
-  return pipelineResponse;
 };
