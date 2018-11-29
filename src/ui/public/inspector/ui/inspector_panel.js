@@ -28,8 +28,6 @@ import {
 
 import { InspectorViewChooser } from './inspector_view_chooser';
 
-import './inspector.less';
-
 function hasAdaptersChanged(oldAdapters, newAdapters) {
   return Object.keys(oldAdapters).length !== Object.keys(newAdapters).length
     || Object.keys(oldAdapters).some(key => oldAdapters[key] !== newAdapters[key]);

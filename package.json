@@ -99,10 +99,10 @@
     "@kbn/datemath": "5.0.0",
     "@kbn/es-query": "1.0.0",
     "@kbn/i18n": "1.0.0",
+    "@kbn/interpreter": "1.0.0",
     "@kbn/pm": "1.0.0",
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
-    "@kbn/interpreter": "1.0.0",
     "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
     "angular": "1.6.9",
@@ -259,6 +259,7 @@
     "@types/d3": "^3.5.41",
     "@types/dedent": "^0.7.0",
     "@types/del": "^3.0.1",
+    "@types/delete-empty": "^2.0.0",
     "@types/elasticsearch": "^5.0.26",
     "@types/enzyme": "^3.1.12",
     "@types/eslint": "^4.16.2",
@@ -266,6 +267,7 @@
     "@types/fetch-mock": "^5.12.2",
     "@types/getopts": "^2.0.0",
     "@types/glob": "^5.0.35",
+    "@types/globby": "^8.0.0",
     "@types/graphql": "^0.13.1",
     "@types/hapi": "^17.0.18",
     "@types/has-ansi": "^3.0.0",
@@ -312,6 +314,7 @@
     "chromedriver": "2.42.1",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
+    "delete-empty": "^2.0.0",
     "enzyme": "3.2.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "enzyme-to-json": "3.3.1",
@@ -326,7 +329,6 @@
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-prettier": "^2.6.2",
     "eslint-plugin-react": "^7.11.1",
-    "event-stream": "3.3.2",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
     "fetch-mock": "^5.13.1",
@@ -394,7 +396,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "8.11.4",
+    "node": "8.14.0",
     "yarn": "^1.10.1"
   }
 }
