@@ -54,6 +54,7 @@ import {
   EmbeddingProvider,
   RenderableProvider,
   TableProvider,
+  BrowserProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -113,6 +114,7 @@ export default async function ({ readConfigFile }) {
       embedding: EmbeddingProvider,
       renderable: RenderableProvider,
       table: TableProvider,
+      browser: BrowserProvider,
     },
     servers: commonConfig.get('servers'),
 
