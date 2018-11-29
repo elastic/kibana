@@ -19,8 +19,8 @@ export {
 } from './detail_panel';
 
 export {
-  disconnectClusters,
-} from './disconnect_clusters';
+  removeClusters,
+} from './remove_clusters';
 
 export {
   editCluster,

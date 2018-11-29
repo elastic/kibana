@@ -29,6 +29,6 @@ export async function editCluster(cluster) {
   return await httpClient.put(`${apiPrefix}/${name}`, rest);
 }
 
-export async function disconnectClusters(names) {
+export async function removeClusters(names) {
   return await Promise.all(names.map(name => httpClient.delete(`${apiPrefix}/${name}`)));
 }

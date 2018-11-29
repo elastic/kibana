@@ -7,20 +7,20 @@
 import { connect } from 'react-redux';
 
 import {
-  disconnectClusters,
+  removeClusters,
 } from '../../../../store/actions';
 
-import { DisconnectButton as DisconnectButtonComponent } from './disconnect_button';
+import { RemoveClusterButton as RemoveClusterButtonComponent } from './remove_cluster_button';
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    disconnectClusters: (names) => {
-      dispatch(disconnectClusters(names));
+    removeClusters: (names) => {
+      dispatch(removeClusters(names));
     },
   };
 };
 
-export const DisconnectButton = connect(
+export const RemoveClusterButton = connect(
   undefined,
   mapDispatchToProps,
-)(DisconnectButtonComponent);
+)(RemoveClusterButtonComponent);

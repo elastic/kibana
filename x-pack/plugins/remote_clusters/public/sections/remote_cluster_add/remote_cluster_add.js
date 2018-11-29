@@ -56,7 +56,7 @@ export class RemoteClusterAddUi extends Component {
       text: (
         <FormattedMessage
           id="xpack.remoteClusters.add.breadcrumbs.addText"
-          defaultMessage="Connect"
+          defaultMessage="Add"
         />
       ),
     }];
@@ -77,7 +77,7 @@ export class RemoteClusterAddUi extends Component {
                   <h1>
                     <FormattedMessage
                       id="xpack.remoteClusters.addTitle"
-                      defaultMessage="Connect remote cluster"
+                      defaultMessage="Add remote cluster"
                     />
                   </h1>
                 </EuiTitle>

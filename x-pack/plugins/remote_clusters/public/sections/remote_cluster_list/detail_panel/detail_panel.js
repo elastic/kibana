@@ -30,7 +30,7 @@ import {
 
 import { CRUD_APP_BASE_PATH } from '../../../constants';
 
-import { ConnectionStatus, DisconnectButton } from '../components';
+import { ConnectionStatus, RemoveClusterButton } from '../components';
 
 export class DetailPanelUi extends Component {
   static propTypes = {
@@ -299,7 +299,7 @@ export class DetailPanelUi extends Component {
       clusterName,
     } = this.props;
 
-    // Remote clusters configured by a node's elasticsearch.yml file can't be edited or disconnected.
+    // Remote clusters configured by a node's elasticsearch.yml file can't be edited or removeed.
     if (!cluster || cluster.isConfiguredByNode) {
       return null;
     }
@@ -308,7 +308,7 @@ export class DetailPanelUi extends Component {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <DisconnectButton
+            <RemoveClusterButton
               clusterNames={[clusterName]}
               isSmallButton={true}
             />

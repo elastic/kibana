@@ -22,4 +22,4 @@ export const getEditedCluster = (state) => getClustersByName(state)[state.editCl
 export const isEditingCluster = (state) => state.editCluster.isEditing;
 export const getEditClusterError = (state) => state.editCluster.error;
 
-export const isDisconnectingCluster = (state) => state.disconnectCluster.isDisconnecting;
+export const isRemovingCluster = (state) => state.removeCluster.isRemoving;

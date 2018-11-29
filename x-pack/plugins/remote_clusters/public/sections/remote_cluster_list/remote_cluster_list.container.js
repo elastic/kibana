@@ -10,7 +10,7 @@ import {
   getClustersList,
   isLoading,
   isEditingCluster,
-  isDisconnectingCluster,
+  isRemovingCluster,
   clusterLoadError,
 } from '../../store/selectors';
 
@@ -28,7 +28,7 @@ const mapStateToProps = (state) => {
     clusters: getClustersList(state),
     isLoading: isLoading(state),
     isCopyingCluster: isEditingCluster(state),
-    isDisconnectingCluster: isDisconnectingCluster(state),
+    isRemovingCluster: isRemovingCluster(state),
     clusterLoadError: clusterLoadError(state),
   };
 };

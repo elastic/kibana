@@ -13,7 +13,7 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 
-import { ConnectionStatus, DisconnectButton } from '../components';
+import { ConnectionStatus, RemoveClusterButton } from '../components';
 
 export class RemoteClusterTableUi extends Component {
   static propTypes = {
@@ -129,7 +129,7 @@ export class RemoteClusterTableUi extends Component {
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <DisconnectButton
+        <RemoveClusterButton
           clusterNames={selectedItems.map(({ name }) => name)}
         />
       ) : undefined,

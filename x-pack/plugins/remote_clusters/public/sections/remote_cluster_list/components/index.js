@@ -5,4 +5,4 @@
  */
 
 export { ConnectionStatus } from './connection_status';
-export { DisconnectButton } from './disconnect_button';
+export { RemoveClusterButton } from './remove_cluster_button';

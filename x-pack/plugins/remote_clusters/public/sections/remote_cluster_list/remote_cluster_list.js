@@ -49,7 +49,7 @@ export class RemoteClusterListUi extends Component {
     clusters: PropTypes.array,
     isLoading: PropTypes.bool,
     isCopyingCluster: PropTypes.bool,
-    isDisconnectingCluster: PropTypes.bool,
+    isRemovingCluster: PropTypes.bool,
   }
 
   static getDerivedStateFromProps(props) {
@@ -108,9 +108,9 @@ export class RemoteClusterListUi extends Component {
   }
 
   renderBlockingAction() {
-    const { isCopyingCluster, isDisconnectingCluster } = this.props;
+    const { isCopyingCluster, isRemovingCluster } = this.props;
 
-    if (isCopyingCluster || isDisconnectingCluster) {
+    if (isCopyingCluster || isRemovingCluster) {
       return (
         <EuiOverlayMask>
           <EuiLoadingKibana size="xl"/>
@@ -181,7 +181,7 @@ export class RemoteClusterListUi extends Component {
           <h1>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterList.emptyPromptTitle"
-              defaultMessage="Connect your first remote cluster"
+              defaultMessage="Add your first remote cluster"
             />
           </h1>
         )}
@@ -203,7 +203,7 @@ export class RemoteClusterListUi extends Component {
           >
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterList.emptyPrompt.connectButtonLabel"
-              defaultMessage="Connect a remote cluster"
+              defaultMessage="Add a remote cluster"
             />
           </EuiButton>
         }
@@ -255,7 +255,7 @@ export class RemoteClusterListUi extends Component {
             >
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterList.connectButtonLabel"
-                defaultMessage="Connect a remote cluster"
+                defaultMessage="Add a remote cluster"
               />
             </EuiButton>
           </EuiPageContentHeaderSection>

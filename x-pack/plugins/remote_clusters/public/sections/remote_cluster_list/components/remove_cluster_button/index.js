@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DisconnectButton } from './disconnect_button.container';
+export { RemoveClusterButton } from './remove_cluster_button.container';

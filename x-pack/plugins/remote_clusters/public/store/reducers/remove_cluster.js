@@ -5,28 +5,28 @@
  */
 
 import {
-  DISCONNECT_CLUSTERS_START,
-  DISCONNECT_CLUSTERS_SUCCESS,
-  DISCONNECT_CLUSTERS_FAILURE,
+  REMOVE_CLUSTERS_START,
+  REMOVE_CLUSTERS_SUCCESS,
+  REMOVE_CLUSTERS_FAILURE,
 } from '../action_types';
 
 const initialState = {
-  isDisconnecting: false,
+  isRemoving: false,
 };
 
-export function disconnectCluster(state = initialState, action) {
+export function removeCluster(state = initialState, action) {
   const { type } = action;
 
   switch (type) {
-    case DISCONNECT_CLUSTERS_START:
+    case REMOVE_CLUSTERS_START:
       return {
-        isDisconnecting: true,
+        isRemoving: true,
       };
 
-    case DISCONNECT_CLUSTERS_FAILURE:
-    case DISCONNECT_CLUSTERS_SUCCESS:
+    case REMOVE_CLUSTERS_FAILURE:
+    case REMOVE_CLUSTERS_SUCCESS:
       return {
-        isDisconnecting: false,
+        isRemoving: false,
       };
 
     default:
