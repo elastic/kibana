@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SearchSource } from 'ui/courier';
 import { AggConfig, Vis, VisState } from 'ui/vis';
 
 type buildVisFunction = (visState: VisState, schemas?: any) => string;
@@ -143,7 +144,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
 };
 
-export const buildPipeline = (vis: Vis, params: any) => {
+export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) => {
   const { searchSource } = params;
   const { indexPattern } = vis;
   const query = searchSource.getField('query');
@@ -165,9 +166,9 @@ export const buildPipeline = (vis: Vis, params: any) => {
 
   // request handler
   if (vis.type.requestHandler === 'courier') {
-    pipeline += `esaggs 
-    ${prepareString('index', indexPattern.id)} 
-    metricsAtAllLevels=${vis.isHierarchical()} 
+    pipeline += `esaggs
+    ${prepareString('index', indexPattern.id)}
+    metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'}
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
@@ -176,14 +177,14 @@ export const buildPipeline = (vis: Vis, params: any) => {
   if (buildPipelineVisFunction[vis.type.name]) {
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas);
   } else if (vislibCharts.includes(vis.type.name)) {
-    pipeline += `vislib type='${vis.type.name}' 
-      ${prepareJson('visConfig', visState.params)} 
+    pipeline += `vislib type='${vis.type.name}'
+      ${prepareJson('visConfig', visState.params)}
       ${prepareJson('schemas', schemas)}`;
   } else {
-    pipeline += `visualization type='${vis.type.name}' 
+    pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visState.params)}
-    ${prepareString('index', indexPattern.id)} 
-    metricsAtAllLevels=${vis.isHierarchical()} 
+    ${prepareString('index', indexPattern.id)}
+    metricsAtAllLevels=${vis.isHierarchical()}
     partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'}
     `;
   }

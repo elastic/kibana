@@ -18,8 +18,6 @@
  */
 
 import { RequestHandlerParams, Vis } from '../../vis';
-
-// @ts-ignore No typing present
 import { buildPipeline, runPipeline } from './pipeline_helpers';
 
 export class PipelineDataLoader {
