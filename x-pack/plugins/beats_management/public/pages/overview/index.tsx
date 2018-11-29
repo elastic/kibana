@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  // @ts-ignore types for EuiTab not currently available
+  EuiTab,
+  // @ts-ignore types for EuiTab not currently available
+  EuiTabs,
+} from '@elastic/eui';
 import React from 'react';
 import { Subscribe } from 'unstated';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
-import { ConnectedTabs } from '../../components/navigation/connected_tabs';
 import { BeatsContainer } from '../../containers/beats';
 import { TagsContainer } from '../../containers/tags';
 import { withUrlState } from '../../containers/with_url_state';
@@ -31,8 +36,10 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
       beats: [],
     };
   }
-  public onSelectedTabChanged = (id: string) => {
-    this.props.goTo(id);
+  public onTabClicked = (path: string) => {
+    return () => {
+      this.props.goTo(path);
+    };
   };
 
   public render() {
@@ -42,7 +49,22 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
           <Subscribe to={[BeatsContainer, TagsContainer]}>
             {(beats: BeatsContainer, tags: TagsContainer) => (
               <React.Fragment>
-                <ConnectedTabs routes={this.props.routes} />
+                <EuiTabs>
+                  <EuiTab
+                    isSelected={`/overview/enrolled_beats` === this.props.history.location.pathname}
+                    onClick={this.onTabClicked(`/overview/enrolled_beats`)}
+                  >
+                    Enrolled Beats
+                  </EuiTab>
+                  <EuiTab
+                    isSelected={
+                      `/overview/configuration_tags` === this.props.history.location.pathname
+                    }
+                    onClick={this.onTabClicked(`/overview/configuration_tags`)}
+                  >
+                    Configuration tags
+                  </EuiTab>
+                </EuiTabs>
                 <ChildRoutes
                   routes={this.props.routes}
                   renderAction={renderAction}

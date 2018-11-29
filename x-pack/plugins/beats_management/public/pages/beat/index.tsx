@@ -128,10 +128,7 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
 
   private onTabClicked = (path: string) => {
     return () => {
-      this.props.history.push({
-        pathname: path,
-        search: this.props.location.search,
-      });
+      this.props.goTo(path);
     };
   };
 

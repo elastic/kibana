@@ -10,8 +10,6 @@ import {
   EuiHeader,
   EuiHeaderBreadcrumbs,
   EuiHeaderSection,
-  EuiModal,
-  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -23,22 +21,19 @@ import {
 import styled from 'styled-components';
 import { BreadcrumbConsumer } from '../navigation/route_with_breadcrumb';
 
-type RenderCallback = ((component: JSX.Element) => void);
+type RenderCallback = ((component: () => JSX.Element) => void);
 interface PrimaryLayoutProps {
   title: string;
   actionSection?: React.ReactNode;
-  modalRender?: () => React.ReactNode;
-  modalClosePath?: string;
 }
 export class PrimaryLayout extends Component<PrimaryLayoutProps> {
-  private actionSection: JSX.Element | null = null;
+  private actionSection: (() => JSX.Element) | null = null;
   constructor(props: PrimaryLayoutProps) {
     super(props);
   }
 
   public render() {
     const children: (callback: RenderCallback) => void | ReactNode = this.props.children as any;
-    const modalContent = this.props.modalRender && this.props.modalRender();
     return (
       <React.Fragment>
         <BreadcrumbConsumer>
@@ -71,7 +66,8 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
                 </EuiTitle>
               </EuiPageHeaderSection>
               <EuiPageHeaderSection>
-                {this.actionSection || this.props.actionSection || <span>Nothing</span>}
+                {(this.actionSection && this.actionSection()) ||
+                  this.props.actionSection || <span>Nothing</span>}
               </EuiPageHeaderSection>
             </EuiPageHeader>
             <EuiPageContent>
@@ -82,26 +78,12 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
               </EuiPageContentBody>
             </EuiPageContent>
           </EuiPageBody>
-          {modalContent && (
-            <EuiOverlayMask>
-              <EuiModal
-                onClose={() => {
-                  // this.props.history.push(this.props.modalClosePath);
-                }}
-                style={{
-                  width: '640px',
-                }}
-              >
-                {modalContent}
-              </EuiModal>
-            </EuiOverlayMask>
-          )}
         </EuiPage>
       </React.Fragment>
     );
   }
 
-  private renderAction = (component: JSX.Element) => {
+  private renderAction = (component: () => JSX.Element) => {
     this.actionSection = component;
     this.forceUpdate();
   };

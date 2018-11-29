@@ -23,15 +23,11 @@ import { EnrollBeat } from '../../components/enroll_beats';
 import { BeatsTableType, Table } from '../../components/table';
 import { beatsListAssignmentOptions } from '../../components/table/assignment_schema';
 import { AssignmentActionType } from '../../components/table/table';
-import { BeatsContainer } from '../../containers/beats';
-import { TagsContainer } from '../../containers/tags';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AppPageProps } from '../../frontend_types';
 
 interface PageProps extends AppPageProps {
-  beatsContainer: BeatsContainer;
-  tagsContainer: TagsContainer;
-  renderAction: (area: JSX.Element) => void;
+  renderAction: (area: () => JSX.Element) => void;
 }
 
 interface PageState {
@@ -52,8 +48,7 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
     if (props.urlState.beatsKBar) {
       props.containers.beats.reload(props.urlState.beatsKBar);
     }
-
-    props.renderAction(this.renderActionArea());
+    props.renderAction(this.renderActionArea);
   }
 
   public renderActionArea = () => (
@@ -208,7 +203,7 @@ export class BeatsPage extends React.PureComponent<PageProps, PageState> {
     const selectedIds = this.tableRef.current.state.selection.map((beat: any) => beat.id);
     const beats: CMPopulatedBeat[] = [];
     selectedIds.forEach((id: any) => {
-      const beat = this.props.beatsContainer.state.list.find(b => b.id === id);
+      const beat = this.props.containers.beats.state.list.find(b => b.id === id);
       if (beat) {
         beats.push(beat);
       }

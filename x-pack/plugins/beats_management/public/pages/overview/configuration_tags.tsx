@@ -13,7 +13,7 @@ import { WithKueryAutocompletion } from '../../containers/with_kuery_autocomplet
 import { AppPageProps } from '../../frontend_types';
 
 interface PageProps extends AppPageProps {
-  renderAction: (area: JSX.Element) => void;
+  renderAction: (area: () => JSX.Element) => void;
 }
 
 interface PageState {
@@ -32,7 +32,7 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
       props.containers.tags.reload(props.urlState.tagsKBar);
     }
 
-    props.renderAction(this.renderActionArea());
+    props.renderAction(this.renderActionArea);
   }
 
   public renderActionArea = () => (
