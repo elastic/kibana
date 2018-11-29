@@ -23,7 +23,7 @@ import { SearchRequestProvider } from '../search_request';
 import { SegmentedHandleProvider } from './segmented_handle';
 import { pushAll } from '../../../../utils/collection';
 
-export function SegmentedSearchRequestProvider(Private, config, esShardTimeout) {
+export function SegmentedSearchRequestProvider(Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedHandle = Private(SegmentedHandleProvider);
 
@@ -108,7 +108,6 @@ export function SegmentedSearchRequestProvider(Private, config, esShardTimeout) 
         if (_.isNumber(this._desiredSize)) {
           params.body.size = this._pickSizeForIndices(indices);
         }
-        params.body.timeout = `${esShardTimeout}ms`;
 
         return params;
       });

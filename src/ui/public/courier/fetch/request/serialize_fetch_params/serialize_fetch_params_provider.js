@@ -20,7 +20,7 @@
 import { serializeFetchParams } from './serialize_fetch_params';
 import { timefilter } from 'ui/timefilter';
 
-export function SerializeFetchParamsProvider(Promise, kbnIndex, sessionId, config) {
+export function SerializeFetchParamsProvider(Promise, kbnIndex, sessionId, config, esShardTimeout) {
   return (fetchParams) => (
     serializeFetchParams(
       fetchParams,
@@ -28,6 +28,7 @@ export function SerializeFetchParamsProvider(Promise, kbnIndex, sessionId, confi
       timefilter,
       kbnIndex,
       sessionId,
-      config)
+      config,
+      esShardTimeout)
   );
 }

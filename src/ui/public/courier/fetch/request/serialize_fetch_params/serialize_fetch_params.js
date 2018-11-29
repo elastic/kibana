@@ -50,7 +50,8 @@ export function serializeFetchParams(
   timeFilter,
   kbnIndex,
   sessionId,
-  config) {
+  config,
+  esShardTimeout) {
   const indexToListMapping = {};
   const timeBounds = timeFilter.getActiveBounds();
   const promises = requestsFetchParams.map(function (fetchParams) {
@@ -93,6 +94,7 @@ export function serializeFetchParams(
           type: fetchParams.type,
           search_type: fetchParams.search_type,
           ignore_unavailable: true,
+          timeout: esShardTimeout,
         };
         if (config.get('courier:setRequestPreference') === 'sessionId') {
           header.preference = sessionId;
