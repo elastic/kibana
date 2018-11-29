@@ -39,7 +39,14 @@ export function TransactionDistributionRequest({
   urlParams: IUrlParams;
   render: RRRRender<ITransactionDistributionAPIResponse>;
 }) {
-  const { serviceName, start, end, transactionName, kuery } = urlParams;
+  const {
+    serviceName,
+    transactionId,
+    start,
+    end,
+    transactionName,
+    kuery
+  } = urlParams;
 
   if (!(serviceName && start && end && transactionName)) {
     return null;
@@ -49,7 +56,9 @@ export function TransactionDistributionRequest({
     <Request
       id={ID}
       fn={loadTransactionDistribution}
-      args={[{ serviceName, start, end, transactionName, kuery }]}
+      args={[
+        { serviceName, transactionId, start, end, transactionName, kuery }
+      ]}
       selector={getTransactionDistribution}
       render={render}
     />

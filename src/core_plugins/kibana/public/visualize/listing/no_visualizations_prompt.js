@@ -22,22 +22,22 @@ import React from 'react';
 import {
   KuiEmptyTablePrompt,
   KuiEmptyTablePromptPanel,
-  KuiLinkButton,
+  KuiButton,
   KuiButtonIcon,
 } from '@kbn/ui-framework/components';
 
-export function NoVisualizationsPrompt() {
+export function NoVisualizationsPrompt({ onCreateVis }) {
   return (
     <KuiEmptyTablePromptPanel>
       <KuiEmptyTablePrompt
         actions={
-          <KuiLinkButton
-            href="#/visualize/new"
+          <KuiButton
+            onClick={onCreateVis}
             buttonType="primary"
             icon={<KuiButtonIcon type="create"/>}
           >
             Create a visualization
-          </KuiLinkButton>
+          </KuiButton>
         }
         message="Looks like you don't have any visualizations. Let's create some!"
       />
