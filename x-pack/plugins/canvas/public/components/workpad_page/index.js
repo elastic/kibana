@@ -4,21 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from 'ui/storage';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { compose, withState, withProps } from 'recompose';
-import { getWindow } from '../../lib/get_window';
 import { notify } from '../../lib/notify';
 import { aeroelastic } from '../../lib/aeroelastic_kibana';
+import { setClipboardData, getClipboardData } from '../../lib/clipboard';
 import { removeElements, duplicateElement } from '../../state/actions/elements';
 import { getFullscreen, canUserWrite } from '../../state/selectors/app';
 import { getElements, isWriteable } from '../../state/selectors/workpad';
-import { LOCALSTORAGE_CLIPBOARD } from '../../../common/lib/constants';
 import { withEventHandlers } from './event_handlers';
 import { WorkpadPage as Component } from './workpad_page';
-
-const storage = new Storage(getWindow().localStorage);
 
 const mapStateToProps = (state, ownProps) => {
   return {
@@ -109,19 +105,19 @@ export const WorkpadPage = compose(
         },
         copyElements: () => {
           if (selectedElements.length) {
-            storage.set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(selectedElements));
+            setClipboardData(selectedElements);
             notify.success('Copied element to clipboard');
           }
         },
         cutElements: () => {
           if (selectedElements.length) {
-            storage.set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(selectedElements));
+            setClipboardData(selectedElements);
             removeElements(page.id)(selectedElementIds);
             notify.success('Copied element to clipboard');
           }
         },
         pasteElements: () => {
-          const elements = JSON.parse(storage.get(LOCALSTORAGE_CLIPBOARD));
+          const elements = JSON.parse(getClipboardData());
           if (elements) elements.map(element => duplicateElement(page.id)(element));
         },
       };
