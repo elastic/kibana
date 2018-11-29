@@ -1,0 +1,393 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import * as Rx from 'rxjs';
+import { concatMap } from 'rxjs/operators';
+
+function promiseProxy(promise, elementWrapper) {
+  const extraProps = {
+    then(...args) {
+      return promise.then(...args);
+    },
+    catch(...args) {
+      return promise.catch(...args);
+    }
+  };
+
+  return new Proxy(elementWrapper, {
+    get(_, prop, receiver) {
+      return extraProps.hasOwnProperty(prop)
+        ? extraProps[prop]
+        : Reflect.get(elementWrapper, prop, receiver);
+    }
+  });
+}
+
+export class LeadfootElementWrapper {
+  constructor(leadfootElement, remote) {
+    if (leadfootElement instanceof LeadfootElementWrapper) {
+      return leadfootElement;
+    }
+
+    const wrap = otherLeadfootElement => (
+      new LeadfootElementWrapper(otherLeadfootElement, remote)
+    );
+
+    const wrapAll = otherLeadfootElements => (
+      otherLeadfootElements.map(wrap)
+    );
+
+    this._queue$ = new Rx.Subject();
+    this._queue$.pipe(
+      concatMap(async ({ defer, fn }) => {
+        try {
+          defer.resolve(await fn({ leadfootElement, remote, wrap, wrapAll }));
+        } catch (error) {
+          defer.reject(error);
+        }
+      })
+    ).subscribe();
+  }
+
+  _task(fn) {
+    const defer = {};
+    defer.promise = new Promise((resolve, reject) => {
+      defer.resolve = resolve;
+      defer.reject = reject;
+    });
+
+    this._queue$.next({
+      defer,
+      fn
+    });
+
+    return promiseProxy(defer.promise, this);
+  }
+
+  /**
+   * Clicks the element. This method works on both mouse and touch platforms
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#click
+   *
+   * @return {Promise<void>}
+   */
+  click() {
+    return this._task(async ({ leadfootElement }) => {
+      await leadfootElement.click();
+    });
+  }
+
+  /**
+   * Gets all elements inside this element matching the given CSS class name.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findAllByClassName
+   *
+   * @param {string} className
+   * @return {Promise<LeadfootElementWrapper[]>}
+   */
+  findAllByClassName(className) {
+    return this._task(async ({ leadfootElement, wrapAll }) => {
+      return wrapAll(await leadfootElement.findAllByClassName(className));
+    });
+  }
+
+  /**
+   * Clears the value of a form element.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#clearValue
+   *
+   * @return {Promise<void>}
+   */
+  clearValue(...args) {
+    return this._task(async ({ leadfootElement }) => {
+      await leadfootElement.clearValue(args);
+    });
+  }
+
+  /**
+   * Types into the element. This method works the same as the leadfoot/Session#pressKeys method
+   * except that any modifier keys are automatically released at the end of the command. This
+   * method should be used instead of leadfoot/Session#pressKeys to type filenames into file
+   * upload fields.
+   *
+   * Since 1.5, if the WebDriver server supports remote file uploads, and you type a path to
+   * a file on your local computer, that file will be transparently uploaded to the remote
+   * server and the remote filename will be typed instead. If you do not want to upload local
+   * files, use leadfoot/Session#pressKeys instead.
+   *
+   * @param {string|string[]} value
+   * @return {Promise<void>}
+   */
+  type(value) {
+    return this._task(async ({ leadfootElement }) => {
+      await leadfootElement.type(value);
+    });
+  }
+
+  /**
+   * Gets the first element inside this element matching the given CSS class name.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findByClassName
+   *
+   * @param {string} className
+   * @return {Promise<LeadfootElementWrapper>}
+   */
+  findByClassName(className) {
+    return this._task(async ({ leadfootElement, wrap }) => {
+      return wrap(await leadfootElement.findByClassName(className));
+    });
+  }
+
+  /**
+   * Returns whether or not the element would be visible to an actual user. This means
+   * that the following types of elements are considered to be not displayed:
+   *
+   *  - Elements with display: none
+   *  - Elements with visibility: hidden
+   *  - Elements positioned outside of the viewport that cannot be scrolled into view
+   *  - Elements with opacity: 0
+   *  - Elements with no offsetWidth or offsetHeight
+   *
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#isDisplayed
+   *
+   * @return {Promise<boolean>}
+   */
+  isDisplayed() {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.isDisplayed();
+    });
+  }
+
+  /**
+   * Gets an attribute of the element.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#getAttribute
+   *
+   * @param {string} name
+   */
+  getAttribute(name) {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.getAttribute(name);
+    });
+  }
+
+  /**
+   * Gets the visible text within the element. <br> elements are converted to line breaks
+   * in the returned text, and whitespace is normalised per the usual XML/HTML whitespace
+   * normalisation rules.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#getVisibleText
+   *
+   * @return {Promise<string>}
+   */
+  getVisibleText() {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.getVisibleText();
+    });
+  }
+
+  /**
+   * Gets the position of the element relative to the top-left corner of the document,
+   * taking into account scrolling and CSS transformations (if they are supported).
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#getPosition
+   *
+   * @return {Promise<{x: number, y: number}>}
+   */
+  getPosition() {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.getPosition();
+    });
+  }
+
+  /**
+   * Gets all elements inside this element matching the given CSS selector.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findAllByCssSelector
+   *
+   * @param {string} selector
+   * @return {Promise<LeadfootElementWrapper[]>}
+   */
+  findAllByCssSelector(selector) {
+    return this._task(async ({ leadfootElement, wrapAll }) => {
+      return wrapAll(await leadfootElement.findAllByCssSelector(selector));
+    });
+  }
+
+  /**
+   * Gets the first element inside this element matching the given CSS selector.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findByCssSelector
+   *
+   * @param {string} selector
+   * @return {Promise<LeadfootElementWrapper>}
+   */
+  findByCssSelector(selector) {
+    return this._task(async ({ leadfootElement, wrap }) => {
+      return wrap(await leadfootElement.findByCssSelector(selector));
+    });
+  }
+
+  /**
+   * Returns whether or not a form element can be interacted with.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#isEnabled
+   *
+   * @return {Promise<boolean>}
+   */
+  isEnabled() {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.isEnabled();
+    });
+  }
+
+  /**
+   * Gets all elements inside this element matching the given HTML tag name.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findAllByTagName
+   *
+   * @param {string} tagName
+   * @return {Promise<LeadfootElementWrapper[]>}
+   */
+  findAllByTagName(tagName) {
+    return this._task(async ({ leadfootElement, wrapAll }) => {
+      return wrapAll(await leadfootElement.findAllByTagName(tagName));
+    });
+  }
+
+  /**
+   * Gets a property of the element.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#getProperty
+   *
+   * @param {string} name
+   * @return {Promise<any>}
+   */
+  getProperty(name) {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.getProperty(name);
+    });
+  }
+
+  /**
+   * Moves the remote environment’s mouse cursor to this element. If the element is outside
+   * of the viewport, the remote driver will attempt to scroll it into view automatically.
+   * https://theintern.io/leadfoot/module-leadfoot_Session.html#moveMouseTo
+   *
+   * @return {Promise<void>}
+   */
+  moveMouseTo() {
+    return this._task(async ({ leadfootElement, remote }) => {
+      await remote.moveMouseTo(leadfootElement);
+    });
+  }
+
+  /**
+   * Gets a CSS computed property value for the element.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#getComputedStyle
+   *
+   * @param {string} propertyName
+   * @return {Promise<string>}
+   */
+  getComputedStyle(propertyName) {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.getComputedStyle(propertyName);
+    });
+  }
+
+  /**
+   * Gets the size of the element, taking into account CSS transformations (if they are supported).
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#getSize
+   *
+   * @return {Promise<{width: number, height: number}>}
+   */
+  getSize() {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.getSize();
+    });
+  }
+
+  /**
+   * Gets the first element inside this element matching the given HTML tag name.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findByTagName
+   *
+   * @param {string} tagName
+   * @return {Promise<LeadfootElementWrapper>}
+   */
+  findByTagName(tagName) {
+    return this._task(async ({ leadfootElement, wrap }) => {
+      return wrap(await leadfootElement.findByTagName(tagName));
+    });
+  }
+
+  /**
+   * Returns whether or not a form element is currently selected (for drop-down options and radio buttons),
+   * or whether or not the element is currently checked (for checkboxes).
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#isSelected
+   *
+   * @return {Promise<boolean>}
+   */
+  isSelected() {
+    return this._task(async ({ leadfootElement }) => {
+      return await leadfootElement.isSelected();
+    });
+  }
+
+  /**
+   * Gets the first displayed element inside this element matching the given CSS selector. This is
+   * inherently slower than leadfoot/Element#find, so should only be used in cases where the
+   * visibility of an element cannot be ensured in advance.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findDisplayedByCssSelector
+   *
+   * @param {string} selector
+   * @return {Promise<LeadfootElementWrapper>}
+   */
+  findDisplayedByCssSelector(selector) {
+    return this._task(async ({ leadfootElement, wrap }) => {
+      return wrap(await leadfootElement.findDisplayedByCssSelector(selector));
+    });
+  }
+
+  /**
+   * Waits for all elements inside this element matching the given CSS class name to be destroyed.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#waitForDeletedByClassName
+   *
+   * @param {string} className
+   * @return {Promise<void>}
+   */
+  waitForDeletedByClassName(className) {
+    return this._task(async ({ leadfootElement }) => {
+      await leadfootElement.waitForDeletedByClassName(className);
+    });
+  }
+
+  /**
+   * Gets the first element inside this element partially matching the given case-insensitive link text.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findByPartialLinkText
+   *
+   * @param {string} text
+   * @return {Promise<LeadfootElementWrapper>}
+   */
+  findByPartialLinkText(text) {
+    return this._task(async ({ leadfootElement, wrap }) => {
+      return wrap(await leadfootElement.findByPartialLinkText(text));
+    });
+  }
+
+  /**
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#findByXpath
+   *
+   * @deprecated
+   * @param {string} xpath
+   * @return {Promise<LeadfootElementWrapper>}
+   */
+  findByXpath(xpath) {
+    return this._task(async ({ leadfootElement, wrap }) => {
+      return wrap(await leadfootElement.findByXpath(xpath));
+    });
+  }
+}
