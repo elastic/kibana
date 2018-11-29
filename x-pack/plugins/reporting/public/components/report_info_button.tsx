@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { get } from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
 import { JobInfo, jobQueueClient } from '../lib/job_queue_client';
 
 interface Props {
@@ -32,6 +33,7 @@ interface State {
 }
 
 const NA = 'n/a';
+const UNKNOWN = 'unknown';
 
 const getDimensions = (info: JobInfo) => {
   const defaultDimensions = { width: null, height: null };
@@ -72,6 +74,8 @@ export class ReportInfoButton extends Component<Props, State> {
     if (!info) {
       return null;
     }
+
+    const jobType = get(info, 'jobtype', NA);
 
     // TODO queue method (clicked UI, watcher, etc)
     const jobInfoParts = {
@@ -116,7 +120,7 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Job Type',
-          description: get(info, 'jobtype', NA),
+          description: jobType,
         },
         {
           title: 'Content Type',
@@ -146,7 +150,9 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Browser Type',
-          description: get(info, 'browser_type', NA),
+          description: USES_HEADLESS_JOB_TYPES.includes(jobType)
+            ? get(info, 'browser_type', UNKNOWN)
+            : NA,
         },
       ],
     };
