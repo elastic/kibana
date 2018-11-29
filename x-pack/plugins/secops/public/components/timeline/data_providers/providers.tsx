@@ -100,6 +100,7 @@ const FlexGroup = styled.span`
   justify-content: flex-end;
   flex-grow: 1;
   align-items: center;
+  margin-left: 5px;
 `;
 
 /**

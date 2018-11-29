@@ -26,14 +26,14 @@ describe('get_column_renderer', () => {
     const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
     const row = rowRenderer.renderRow(nonSuricata, <span>some child</span>);
     const wrapper = mount(<span>{row}</span>);
-    expect(wrapper.text()).toEqual('some child');
+    expect(wrapper.text()).toContain('some child');
   });
 
   test('should render a suricata row data when it is a suricata row', () => {
     const rowRenderer = getRowRenderer(suricata, rowRenderers);
     const row = rowRenderer.renderRow(suricata, <span>some child </span>);
     const wrapper = mount(<span>{row}</span>);
-    expect(wrapper.text()).toEqual(
+    expect(wrapper.text()).toContain(
       'some child ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)'
     );
   });

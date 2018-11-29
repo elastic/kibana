@@ -8,6 +8,9 @@ import * as React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { ThemeProvider } from 'styled-components';
+
+import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 
 interface Props {
   droppableId: string;
@@ -21,15 +24,17 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
 `;
 
 export const DroppableWrapper = pure<Props>(({ droppableId, children }) => (
-  <Droppable droppableId={droppableId}>
-    {(provided, snapshot) => (
-      <ReactDndDropTarget
-        innerRef={provided.innerRef}
-        {...provided.droppableProps}
-        isDraggingOver={snapshot.isDraggingOver}
-      >
-        {children}
-      </ReactDndDropTarget>
-    )}
-  </Droppable>
+  <ThemeProvider theme={{ eui: euiVars }}>
+    <Droppable droppableId={droppableId}>
+      {(provided, snapshot) => (
+        <ReactDndDropTarget
+          innerRef={provided.innerRef}
+          {...provided.droppableProps}
+          isDraggingOver={snapshot.isDraggingOver}
+        >
+          {children}
+        </ReactDndDropTarget>
+      )}
+    </Droppable>
+  </ThemeProvider>
 ));

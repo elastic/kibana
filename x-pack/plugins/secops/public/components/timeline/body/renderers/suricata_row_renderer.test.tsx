@@ -38,7 +38,7 @@ describe('plain_row_renderer', () => {
   test('should render a suricata row', () => {
     const children = suricataRowRenderer.renderRow(suricata, <span>some children </span>);
     const wrapper = mount(<span>{children}</span>);
-    expect(wrapper.text()).toEqual(
+    expect(wrapper.text()).toContain(
       'some children ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)'
     );
   });

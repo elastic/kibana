@@ -8,11 +8,7 @@ import { mount } from 'enzyme';
 import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
-import {
-  getEventCount,
-  mockDataProviderNames,
-  mockDataProviders,
-} from './mock/mock_data_providers';
+import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
 import { Providers } from './providers';
 
 describe('Providers', () => {
@@ -29,9 +25,7 @@ describe('Providers', () => {
         </DragDropContext>
       );
 
-      mockDataProviderNames().forEach(name =>
-        expect(wrapper.text()).toContain(`${getEventCount(name)} ${name}`)
-      );
+      mockDataProviderNames().forEach(name => expect(wrapper.text()).toContain(name));
     });
   });
 
@@ -74,12 +68,14 @@ describe('Providers', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
 
       const wrapper = mount(
-        <Providers
-          id="foo"
-          dataProviders={mockDataProviders}
-          onDataProviderRemoved={noop}
-          onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <Providers
+            id="foo"
+            dataProviders={mockDataProviders}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+          />
+        </DragDropContext>
       );
 
       wrapper

@@ -10,10 +10,12 @@ import { Empty } from './empty';
 
 describe('Empty', () => {
   describe('rendering', () => {
+    const dropMessage = ['Drop', 'anything', 'highlighted', 'here'];
+
     test('it renders the expected message', () => {
       const wrapper = mount(<Empty />);
 
-      expect(wrapper.text()).toEqual('Drop anything with a Facet count here');
+      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
     });
   });
 });

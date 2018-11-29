@@ -10,15 +10,11 @@ import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
-import {
-  getEventCount,
-  mockDataProviderNames,
-  mockDataProviders,
-} from './mock/mock_data_providers';
+import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
 
 describe('DataProviders', () => {
   describe('rendering', () => {
-    const dropMessage = 'Drop anything with a Facet count here';
+    const dropMessage = ['Drop', 'anything', 'highlighted', 'here'];
 
     test('it should render a placeholder when there are zero data providers', () => {
       const dataProviders: DataProvider[] = [];
@@ -34,7 +30,7 @@ describe('DataProviders', () => {
         </DragDropContext>
       );
 
-      expect(wrapper.text()).toContain(dropMessage);
+      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
     });
 
     test('it should NOT render a placeholder given a non-empty collection of data providers', () => {
@@ -49,7 +45,7 @@ describe('DataProviders', () => {
         </DragDropContext>
       );
 
-      expect(wrapper.text()).not.toContain(dropMessage);
+      dropMessage.forEach(word => expect(wrapper.text()).not.toContain(word));
     });
 
     test('it renders the data providers', () => {
@@ -64,9 +60,7 @@ describe('DataProviders', () => {
         </DragDropContext>
       );
 
-      mockDataProviderNames().forEach(name =>
-        expect(wrapper.text()).toContain(`${getEventCount(name)} ${name}`)
-      );
+      mockDataProviderNames().forEach(name => expect(wrapper.text()).toContain(name));
     });
   });
 });
