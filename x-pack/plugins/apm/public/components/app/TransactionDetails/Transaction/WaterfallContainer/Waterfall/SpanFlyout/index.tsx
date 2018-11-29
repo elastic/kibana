@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -12,10 +13,12 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
+  // @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTabbedContent'"
+  EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
-import { get } from 'lodash';
-import React from 'react';
+import { get, keys } from 'lodash';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
 
 // @ts-ignore
@@ -40,6 +43,10 @@ import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 
 const StackTraceContainer = styled.div`
   margin-top: ${px(unit)};
+`;
+
+const TagName = styled.div`
+  font-weight: bold;
 `;
 
 function getDiscoverQuery(span: Span) {
@@ -77,6 +84,7 @@ export function SpanFlyout({
   const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
   const dbContext = span.context.db;
   const httpContext = span.context.http;
+  const tagContext = span.context.tags;
 
   return (
     <EuiPortal>
@@ -101,11 +109,47 @@ export function SpanFlyout({
           <EuiHorizontalRule />
           <StickySpanProperties span={span} totalDuration={totalDuration} />
           <EuiHorizontalRule />
-          <HttpContext httpContext={httpContext} />
-          <DatabaseContext dbContext={dbContext} />
-          <StackTraceContainer>
-            <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
-          </StackTraceContainer>
+          <EuiTabbedContent
+            tabs={[
+              {
+                id: 'stack-trace',
+                name: 'Strack Trace',
+                content: (
+                  <Fragment>
+                    <HttpContext httpContext={httpContext} />
+                    <DatabaseContext dbContext={dbContext} />
+                    <StackTraceContainer>
+                      <Stacktrace
+                        stackframes={stackframes}
+                        codeLanguage={codeLanguage}
+                      />
+                    </StackTraceContainer>
+                  </Fragment>
+                )
+              },
+              {
+                id: 'tags',
+                name: 'Tags',
+                content: (
+                  <Fragment>
+                    <EuiBasicTable
+                      columns={[
+                        {
+                          field: 'key',
+                          render: (key: string) => <TagName>{key}</TagName>
+                        },
+                        { field: 'value' }
+                      ]}
+                      items={keys(tagContext).map(key => ({
+                        key,
+                        value: get(tagContext, key)
+                      }))}
+                    />
+                  </Fragment>
+                )
+              }
+            ]}
+          />
         </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>
