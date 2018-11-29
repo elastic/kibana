@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot } from '../../utils';
+import { fromRoot } from '../../../utils';
 
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';
