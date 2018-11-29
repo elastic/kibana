@@ -6,7 +6,7 @@ or security reasons, or because the function uses an API only available on the
 {kib} server. If the expression is executing in the browser, it will transfer to 
 the server when it hits one of these functions.
 
-A * denotes a required argument.
+*A * denotes a required argument.*
 
 [float]
 === demodata
@@ -18,12 +18,12 @@ A mock data set that includes project CI times with usernames, countries, and ru
 - *Arguments*
 +
 _Unnamed_::  (string) The name of the demo data set to use.  The defaults is `ci`.
-Alias:  type
+Alias: type
 
 [float]
 === esdocs
 
-Queries {es} and gets back raw documents. Specify the fields you want, 
+Queries {es} and gets back raw documents. Specify the fields you want to receive, 
 especially if you are asking for a lot of rows.
 
 - *Accepts:* filter
@@ -73,7 +73,7 @@ count::	(number) The default is `1000`.
 === pointseries
 
 Turns a datatable into a point series model. Currently Canvas differentiates measure 
-from dimensions by looking for a TinyMath function. If you enter a TinyMath 
+from dimensions by looking for a <<canvas-tinymath-functions, Tiny Math function>>. If you enter a TinyMath 
 expression in your argument, Canvas treats that argument as a measure. Otherwise, it 
 is a dimension. Dimensions are combined to create unique keys. Measures are 
 then deduplicated by those keys using the specified TinyMath function.
@@ -99,7 +99,6 @@ Forces the interpreter to return to the server.
 
 - *Accepts:* Anything or nothing
 - *Returns:* Depends on your input and arguments
-+
 &nbsp;
 
 [float]
