@@ -98,34 +98,19 @@
           "__template": {
             "after": "1d",
             "actions": {
-              "allocate": {
-                "number_of_replicas": 1,
-                "include": {
-                  "_name": "",
-                  "_ip": ""
-                },
-                "exclude": {
-                  "_name": "",
-                  "_ip": ""
-                },
-                "require": {
-                  "_name": "",
-                  "_ip": ""
-                }
-              },
-              "shrink": {
-                "number_of_shards": 1
-              },
-              "forcemerge": {
-                "max_num_segments": 1
+              "rollover": {
+                "max_age": "7d",
+                "max_docs": 1000,
+                "max_size": "5gb"
               }
             }  
           },
           "after": "1d",
           "actions": {
             "rollover": {
-              "max_age": "1d",
-              "max_size": ""
+              "max_age": "7d",
+              "max_docs": 1000,
+              "max_size": "5gb"
             }
           }
         },
