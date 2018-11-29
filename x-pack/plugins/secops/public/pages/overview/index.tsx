@@ -12,6 +12,6 @@ import { Placeholders } from '../../components/visualization_placeholder';
 
 export const Overview = pure(() => (
   <Pane1FlexContent>
-    <Placeholders timelineId="pane2-timeline" count={10} myRoute="Overview" />
+    <Placeholders timelineId="timeline" count={10} myRoute="Overview" />
   </Pane1FlexContent>
 ));

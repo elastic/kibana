@@ -5,7 +5,6 @@
  */
 
 import { EuiPage } from '@elastic/eui';
-import * as React from 'react';
 import styled from 'styled-components';
 
 export const PageContainer = styled.div`
@@ -65,17 +64,15 @@ export const PaneScrollContainer = styled.div`
   overflow-y: scroll;
 `;
 
-export const Pane1 = styled.div`
+export const Pane = styled.div`
   height: 100%;
   overflow: hidden;
   user-select: none;
 `;
 
-/** For use with the `SplitPane` `pane1Style` prop */
-export const Pane1Style: React.CSSProperties = {
-  height: '100%',
-  marginTop: '5px',
-};
+export const PaneHeader = styled.div`
+  display: flex;
+`;
 
 export const Pane1FlexContent = styled.div`
   display: flex;
@@ -83,32 +80,3 @@ export const Pane1FlexContent = styled.div`
   flex-wrap: wrap;
   height: 100%;
 `;
-
-export const Pane1Header = styled.div`
-  display: flex;
-`;
-
-export const Pane2 = styled.div`
-  height: 100%;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  user-select: none;
-`;
-
-/** For use with the `SplitPane` `pane2Style` prop */
-export const Pane2Style: React.CSSProperties = {
-  height: '100%',
-};
-
-export const Pane2TimelineContainer = styled.div`
-  height: 100%;
-`;
-
-/** For use with the `SplitPane` `resizerStyle` prop */
-export const ResizerStyle: React.CSSProperties = {
-  border: '5px solid #909AA1',
-  backgroundClip: 'padding-box',
-  cursor: 'col-resize',
-  margin: '5px',
-  zIndex: 1,
-};
