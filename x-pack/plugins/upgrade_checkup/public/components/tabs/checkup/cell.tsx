@@ -6,7 +6,16 @@
 
 import React, { ReactNode, StatelessComponent } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 
 interface DeprecationCellProps {
   headline?: string;
@@ -43,6 +52,11 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
             <h2>{headline}</h2>
           </EuiTitle>
         )}
+
+        <div>
+          <EuiLink>Documentation link here</EuiLink>
+          <EuiSpacer size="s" />
+        </div>
 
         {items.map(item => (
           <div key={item.title}>

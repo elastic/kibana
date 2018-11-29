@@ -219,7 +219,8 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
                   {currentGroupBy === GroupByOption.message && (
                     <Fragment>
                       &emsp;
-                      <EuiButton size="s">Move button here</EuiButton>
+                      {/* TODO: This button should be the action-oriented version if it exists */}
+                      <EuiButton size="s">Action button here</EuiButton>
                     </Fragment>
                   )}
                 </div>
