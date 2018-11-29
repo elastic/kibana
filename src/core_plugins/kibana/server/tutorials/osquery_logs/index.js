@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function osqueryLogsSpecProvider() {
+export function osqueryLogsSpecProvider(server, context) {
   const moduleName = 'osquery';
   const geoipRequired = false;
   const uaRequired = false;
@@ -42,7 +42,7 @@ export function osqueryLogsSpecProvider() {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
       },
     }),
-    //euiIconType: 'logoOsquery',
+    euiIconType: 'logoOsquery',
     artifacts: {
       dashboards: [
         {
@@ -59,7 +59,7 @@ export function osqueryLogsSpecProvider() {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/osquery_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired),
+    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

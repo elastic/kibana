@@ -39,8 +39,8 @@ export const setManyRoute = {
         changes: Joi.object().unknown(true).required()
       }).required()
     },
-    handler(request, reply) {
-      reply(handleRequest(request));
+    handler(request) {
+      return handleRequest(request);
     }
   }
 };

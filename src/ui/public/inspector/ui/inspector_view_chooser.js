@@ -106,6 +106,7 @@ class InspectorViewChooser extends Component {
         closePopover={this.closeSelector}
         panelPaddingSize="none"
         anchorPosition="downRight"
+        repositionOnScroll
       >
         <EuiContextMenuPanel
           items={views.map(this.renderView)}

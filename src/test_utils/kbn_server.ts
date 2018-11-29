@@ -57,11 +57,13 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
     configs: [],
     cliArgs: {
       dev: false,
+      open: false,
       quiet: false,
       silent: false,
       watch: false,
       repl: false,
       basePath: false,
+      optimize: false,
     },
     isDevClusterMaster: false,
   });

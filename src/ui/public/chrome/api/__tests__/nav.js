@@ -27,6 +27,7 @@ const basePath = '/someBasePath';
 
 function init(customInternals = { basePath }) {
   const chrome = {
+    addBasePath: (path) => path,
     getBasePath: () => customInternals.basePath || '',
   };
   const internals = {
@@ -39,7 +40,7 @@ function init(customInternals = { basePath }) {
 
 describe('chrome nav apis', function () {
   describe('#getNavLinkById', () => {
-    it ('retrieves the correct nav link, given its ID', () => {
+    it('retrieves the correct nav link, given its ID', () => {
       const appUrlStore = new StubBrowserStorage();
       const nav = [
         { id: 'kibana:discover', title: 'Discover' }
@@ -52,7 +53,7 @@ describe('chrome nav apis', function () {
       expect(navLink).to.eql(nav[0]);
     });
 
-    it ('throws an error if the nav link with the given ID is not found', () => {
+    it('throws an error if the nav link with the given ID is not found', () => {
       const appUrlStore = new StubBrowserStorage();
       const nav = [
         { id: 'kibana:discover', title: 'Discover' }

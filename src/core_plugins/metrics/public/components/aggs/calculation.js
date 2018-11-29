@@ -28,8 +28,17 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { htmlIdGenerator } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiTextArea,
+  EuiFormRow,
+  EuiCode,
+} from '@elastic/eui';
 
 class CalculationAgg extends Component {
 
@@ -61,40 +70,70 @@ class CalculationAgg extends Component {
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
       >
-        <div className="vis_editor__row_item">
-          <div>
-            <div className="vis_editor__label">Aggregation</div>
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiFlexItem>
+            <EuiFormLabel htmlFor={htmlId('aggregation')}>
+              <FormattedMessage
+                id="tsvb.calculation.aggregationLabel"
+                defaultMessage="Aggregation"
+              />
+            </EuiFormLabel>
             <AggSelect
+              id={htmlId('aggregation')}
               panelType={this.props.panel.type}
               siblings={this.props.siblings}
               value={model.type}
               onChange={handleSelectChange('type')}
             />
-            <div className="vis_editor__variables">
-              <div className="vis_editor__label">Variables</div>
-              <Vars
-                metrics={siblings}
-                onChange={handleChange}
-                name="variables"
-                model={model}
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiFormLabel htmlFor={htmlId('variables')}>
+              <FormattedMessage
+                id="tsvb.calculation.variablesLabel"
+                defaultMessage="Variables"
               />
-            </div>
-            <div className="vis_editor__row_item">
-              <label className="vis_editor__label" htmlFor={htmlId('painless')}>
-                Painless Script - Variables are keys on the <code>params</code>
-                object, i.e. <code>params.&lt;name&gt;</code>.
-                To access the bucket interval (in milliseconds) use <code>params._interval</code>.
-              </label>
-              <input
-                id={htmlId('painless')}
-                className="vis_editor__input-grows-100"
-                type="text"
+            </EuiFormLabel>
+            <Vars
+              id={htmlId('variables')}
+              metrics={siblings}
+              onChange={handleChange}
+              name="variables"
+              model={model}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('painless')}
+              label={(<FormattedMessage
+                id="tsvb.calculation.painlessScriptLabel"
+                defaultMessage="Painless Script"
+              />)}
+              fullWidth
+              helpText={
+                <div>
+                  <FormattedMessage
+                    id="tsvb.calculation.painlessScriptDescription"
+                    defaultMessage="Variables are keys on the {params} object, i.e. {paramsName}. To access the bucket
+                    interval (in milliseconds) use {paramsInterval}."
+                    values={{
+                      params: (<EuiCode>params</EuiCode>),
+                      paramsName: (<EuiCode>params.&lt;name&gt;</EuiCode>),
+                      paramsInterval: (<EuiCode>params._interval</EuiCode>)
+                    }}
+                  />
+                </div>
+              }
+            >
+              <EuiTextArea
                 onChange={handleTextChange('script')}
                 value={model.script}
+                fullWidth
               />
-            </div>
-          </div>
-        </div>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </AggRow>
     );
   }

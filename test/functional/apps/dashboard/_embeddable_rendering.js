@@ -46,13 +46,13 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.lineChartPointsCount(5);
     await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
     await dashboardExpect.timelionLegendCount(0);
-    const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
+    const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
     expect(tsvbGuageExists).to.be(true);
     await dashboardExpect.tsvbMetricValuesExist(['210,007,889,606']);
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 6286.674715909091']);
     await dashboardExpect.tsvbTableCellCount(20);
     await dashboardExpect.tsvbTimeSeriesLegendCount(1);
-    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.67']);
+    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.675']);
     await dashboardExpect.vegaTextsExist(['5,000']);
   };
 
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.lineChartPointsCount(3);
 
     await dashboardExpect.timelionLegendCount(0);
-    const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
+    const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
     expect(tsvbGuageExists).to.be(true);
     await dashboardExpect.tsvbMetricValuesExist(['0']);
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 0']);

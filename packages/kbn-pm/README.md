@@ -52,7 +52,24 @@ scripts, while still having a nice developer experience.
 
 ## How it works
 
-The approach we went for to handle multiple packages in Kibana is relying on
+### Internal usage
+
+For packages that are referenced within the Kibana repo itself (for example,
+using the `@kbn/datemath` package from an `x-pack` plugin), we are leveraging
+Yarn's workspaces feature. This allows yarn to optimize node_modules within
+the entire repo to avoid duplicate modules by hoisting common packages as high
+in the dependency tree as possible.
+
+To reference a package from within the Kibana repo, simply use the current
+version number from that package's package.json file. Then, running `yarn kbn
+bootstrap` will symlink that package into your dependency tree. That means
+you can make changes to `@kbn/datematch` and immediately have them available
+in Kibana itself. No `npm publish` needed anymore — Kibana will always rely
+directly on the code that's in the local packages.
+
+### External Plugins
+
+For external plugins, referencing packages in Kibana relies on
 `link:` style dependencies in Yarn. With `link:` dependencies you specify the
 relative location to a package instead of a version when adding it to
 `package.json`. For example:
@@ -62,11 +79,9 @@ relative location to a package instead of a version when adding it to
 ```
 
 Now when you run `yarn` it will set up a symlink to this folder instead of
-downloading code from the npm registry. That means you can make changes to
-`@kbn/datematch` and immediately have them available in Kibana itself. No
-`npm publish` needed anymore — Kibana will always rely directly on the code
-that's in the local packages. And we can also do the same in x-pack-kibana or
-any other Kibana plugin, e.g.
+downloading code from the npm registry. This allows external plugins to always
+use the versions of the package that is bundled with the Kibana version they
+are running inside of.
 
 ```
 "@kbn/datemath": "link:../../kibana/packages/kbn-date-math"
@@ -191,10 +206,10 @@ While exploring the approach to static dependencies we built PoCs using npm 5
 workspaces][yarn-workspaces], Yarn (using `link:` dependencies), and
 [Lerna][lerna].
 
-In the end we decided to build our own tool, based on Yarn and `link:`
-dependencies. This gave us the control we wanted, and it fits nicely into our
-context (e.g. where publishing to npm isn't necessarily something we want to
-do).
+In the end we decided to build our own tool, based on Yarn, and `link:`
+dependencies, and workspaces. This gave us the control we wanted, and it fits
+nicely into our context (e.g. where publishing to npm isn't necessarily
+something we want to do).
 
 ### Some notes from this exploration
 

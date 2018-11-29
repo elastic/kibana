@@ -19,6 +19,7 @@
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
 import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
@@ -40,7 +41,10 @@ const mapStateToProps = ({ dashboard }, { embeddableFactory, panelId }) => {
   let error = null;
   if (!embeddableFactory) {
     const panelType = getPanelType(dashboard, panelId);
-    error = `No embeddable factory found for panel type ${panelType}`;
+    error = i18n.translate('kbn.dashboard.panel.noFoundEmbeddableFactoryErrorMessage', {
+      defaultMessage: 'No embeddable factory found for panel type {panelType}',
+      values: { panelType },
+    });
   } else {
     error = (embeddable && getEmbeddableError(dashboard, panelId)) || '';
   }

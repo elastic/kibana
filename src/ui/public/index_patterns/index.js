@@ -17,6 +17,8 @@
  * under the License.
  */
 
+export { IndexPatternSelect } from './components/index_pattern_select';
+
 export { IndexPatternsProvider } from './index_patterns';
 
 export {

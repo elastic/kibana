@@ -16,9 +16,18 @@ function executeJobFn(server) {
   const config = server.config();
   const logger = createTaggedLogger(server, ['reporting', 'csv', 'debug']);
   const generateCsv = createGenerateCsv(logger);
+  const serverBasePath = config.get('server.basePath');
 
   return async function executeJob(job, cancellationToken) {
-    const { searchRequest, fields, indexPatternSavedObject, metaFields, conflictedTypesFields, headers: serializedEncryptedHeaders } = job;
+    const {
+      searchRequest,
+      fields,
+      indexPatternSavedObject,
+      metaFields,
+      conflictedTypesFields,
+      headers: serializedEncryptedHeaders,
+      basePath
+    } = job;
 
     let decryptedHeaders;
     try {
@@ -31,6 +40,10 @@ function executeJobFn(server) {
 
     const fakeRequest = {
       headers: decryptedHeaders,
+      // This is used by the spaces SavedObjectClientWrapper to determine the existing space.
+      // We use the basePath from the saved job, which we'll have post spaces being implemented;
+      // or we use the server base path, which uses the default space
+      getBasePath: () => basePath || serverBasePath,
     };
 
     const callEndpoint = (endpoint, clientParams = {}, options = {}) => {

@@ -44,10 +44,10 @@ module.controller('SenseController', function SenseController(Private, $scope, $
   let input;
   let output;
   $timeout(async () => {
-    output = initializeOutput($('#output'));
-    input = initializeInput($('#editor'), $('#editor_actions'), $('#copy_as_curl'), output, $scope.openDocumentation);
+    output = initializeOutput($('#ConAppOutput'));
+    input = initializeInput($('#ConAppEditor'), $('#ConAppEditorActions'), $('#ConCopyAsCurl'), output, $scope.openDocumentation);
     init(input, output, $location.search().load_from);
-    kbnUiAceKeyboardModeService.initialize($scope, $('#editor'));
+    kbnUiAceKeyboardModeService.initialize($scope, $('#ConAppEditor'));
     const session = input.getSession();
     session.getSelection().on('changeCursor', () => {
       $scope.getDocumentation();
@@ -67,7 +67,8 @@ module.controller('SenseController', function SenseController(Private, $scope, $
       if (endpoint
         && endpoint.documentation
         && endpoint.documentation.indexOf('http') !== -1) {
-        $scope.documentation = endpoint.documentation.replace('master', DOC_LINK_VERSION);
+        $scope.documentation = endpoint.documentation.replace('/master/', `/${DOC_LINK_VERSION}/`);
+        $scope.documentation = $scope.documentation.replace('/current/', `/${DOC_LINK_VERSION}/`);
         $scope.$apply();
       } else {
         $scope.documentation = null;

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './styles/main.less';
 import './editor/editor';
 import './wizard/wizard';
 import 'ui/draggable/draggable_container';
@@ -41,6 +40,21 @@ uiRoutes
     template: visualizeListingTemplate,
     controller: VisualizeListingController,
     controllerAs: 'listingController',
+    resolve: {
+      createNewVis: () => false,
+    },
+  })
+  .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
+    template: visualizeListingTemplate,
+    controller: VisualizeListingController,
+    controllerAs: 'listingController',
+    resolve: {
+      createNewVis: () => true,
+    },
+  })
+  // Old path, will be removed in 7.0
+  .when('/visualize/step/1', {
+    redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
   });
 
 FeatureCatalogueRegistryProvider.register(() => {

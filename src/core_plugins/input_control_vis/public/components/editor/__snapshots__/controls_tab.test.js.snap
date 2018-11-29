@@ -20,7 +20,6 @@ exports[`renders ControlsTab 1`] = `
       }
     }
     getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
     handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
     handleIndexPatternChange={[Function]}
@@ -54,7 +53,6 @@ exports[`renders ControlsTab 1`] = `
       }
     }
     getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
     handleCheckboxOptionChange={[Function]}
     handleFieldNameChange={[Function]}
     handleIndexPatternChange={[Function]}

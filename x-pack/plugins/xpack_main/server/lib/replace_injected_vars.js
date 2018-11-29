@@ -5,13 +5,15 @@
  */
 
 import { getTelemetryOptIn } from "./get_telemetry_opt_in";
+import { buildUserProfile } from './user_profile_registry';
 
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;
   const withXpackInfo = async () => ({
     ...originalInjectedVars,
     telemetryOptedIn: await getTelemetryOptIn(request),
-    xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined
+    xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined,
+    userProfile: await buildUserProfile(request),
   });
 
   // security feature is disabled

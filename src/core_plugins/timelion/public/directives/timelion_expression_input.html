@@ -1,5 +1,5 @@
 <div
-  class="timelionExpressionInputContainer"
+  class="timExpressionInput__container"
   role="combobox"
   aria-expanded="{{suggestions.isVisible}}"
   aria-owns="timelionSuggestionList"
@@ -12,8 +12,8 @@
     data-expression-input
     role="textbox"
     rows="{{ rows }}"
-    class="timelionExpressionInput kuiTextArea fullWidth"
-    placeholder="Try a query with .es(*)"
+    class="timExpressionInput kuiTextArea fullWidth"
+    placeholder="{{ ::'timelion.expressionInputPlaceholder' | i18n: { defaultMessage: 'Try a query with {esQuery}', values: { esQuery: '.es(*)' } } }}"
     ng-model="sheet"
     ng-focus="onFocusInput()"
     ng-keydown="onKeyDownInput($event)"
@@ -22,7 +22,7 @@
     ng-mousedown="onMouseDownInput()"
     ng-mouseup="onMouseUpInput()"
     ng-click="onClickExpression()"
-    aria-label="Timelion expression"
+    aria-label="{{ ::'timelion.expressionInputAriaLabel' | i18n: { defaultMessage: 'Timelion expression' } }}"
     aria-multiline="false"
     aria-autocomplete="list"
     aria-controls="timelionSuggestionList"

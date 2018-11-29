@@ -19,6 +19,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
       key="statementName"
     >
       <EuiButtonEmpty
+        aria-label="else"
         color="text"
         flush="left"
         iconSide="left"
@@ -56,6 +57,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
       key="statementName"
     >
       <EuiButtonEmpty
+        aria-label="if"
         color="text"
         flush="left"
         iconSide="left"
@@ -92,7 +94,7 @@ exports[`Statement component renders a PluginStatement component for plugin mode
   <div
     className="monPipelineViewer__spaceContainer"
   />
-  <PluginStatement
+  <InjectIntl(PluginStatementUi)
     onShowVertexDetails={[MockFunction]}
     statement={
       PluginStatement {
@@ -145,6 +147,7 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
       key="statementName"
     >
       <EuiButtonEmpty
+        aria-label="else"
         color="text"
         flush="left"
         iconSide="left"

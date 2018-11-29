@@ -11,6 +11,7 @@ import { ElasticsearchMetric } from '../../metrics';
 import { getDefaultNodeFromId } from './get_default_node_from_id';
 import { calculateNodeType } from './calculate_node_type';
 import { getNodeTypeClassLabel } from './get_node_type_class_label';
+import { i18n } from '@kbn/i18n';
 
 export function handleResponse(clusterState, shardStats, nodeUuid) {
   return response => {
@@ -44,13 +45,16 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
         dataSize: get(sourceStats, 'indices.store.size_in_bytes'),
         freeSpace: get(sourceStats, 'fs.total.available_in_bytes'),
         usedHeap: get(sourceStats, 'jvm.mem.heap_used_percent'),
-        status: 'Online',
+        status: i18n.translate('xpack.monitoring.es.nodes.onlineStatusLabel', {
+          defaultMessage: 'Online' }),
         isOnline: true,
       };
     } else {
       nodeSummary = {
-        nodeTypeLabel: 'Offline Node',
-        status: 'Offline',
+        nodeTypeLabel: i18n.translate('xpack.monitoring.es.nodes.offlineNodeStatusLabel', {
+          defaultMessage: 'Offline Node' }),
+        status: i18n.translate('xpack.monitoring.es.nodes.offlineStatusLabel', {
+          defaultMessage: 'Offline' }),
         isOnline: false,
       };
     }

@@ -31,10 +31,18 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
  */
-export const loadTestFiles = (mocha, log, lifecycle, providers, paths, updateBaselines) => {
+export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, excludePaths, updateBaselines }) => {
+  const pendingExcludes = new Set(excludePaths.slice(0));
+
   const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
+    }
+
+    if (pendingExcludes.has(path)) {
+      pendingExcludes.delete(path);
+      log.warning('Skipping test file %s', path);
+      return;
     }
 
     loadTracer(path, `testFile[${path}]`, () => {
@@ -74,9 +82,14 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths, updateBas
 
       mocha.suite.emit('require', returnVal, path, mocha);
       mocha.suite.emit('post-require', global, path, mocha);
+
       context.revertProxiedAssignments();
     });
   };
 
   paths.forEach(innerLoadTestFile);
+
+  if (pendingExcludes.size) {
+    throw new Error(`After loading all test files some exclude paths were not consumed:${['', ...pendingExcludes].join('\n  -')}`);
+  }
 };

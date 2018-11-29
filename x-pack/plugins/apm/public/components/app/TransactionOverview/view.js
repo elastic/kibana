@@ -67,12 +67,12 @@ class TransactionOverview extends Component {
     const { hasDynamicBaseline, license, location, urlParams } = this.props;
 
     const { serviceName, transactionType } = urlParams;
-    const mlEnabled = chrome.getInjected('mlEnabled');
+    const mlEnabled = chrome.getInjected('mlEnabled', false);
 
     const ChartHeaderContent =
       hasDynamicBaseline && get(license.data, 'features.ml.isAvailable') ? (
         <MLTipContainer>
-          <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
+          <EuiIconTip content="The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
           <MLText>
             Machine Learning:{' '}
             <ViewMLJob

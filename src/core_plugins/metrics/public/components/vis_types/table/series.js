@@ -22,10 +22,11 @@ import PropTypes from 'prop-types';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createTextHandler from '../../lib/create_text_handler';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import { createUpDownHandler } from '../../lib/sort_keyhandler';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function TopNSeries(props) {
   const {
@@ -36,21 +37,18 @@ function TopNSeries(props) {
     disableDelete,
     disableAdd,
     selectedTab,
-    visible
+    visible,
+    intl
   } = props;
 
   const handleChange = createTextHandler(onChange);
   const aggs = model.metrics.map(createAggRowRender(props));
 
-  let caretClassName = 'fa fa-caret-down';
-  if (!visible) caretClassName = 'fa fa-caret-right';
+  let caretIcon = 'arrowDown';
+  if (!visible) caretIcon = 'arrowRight';
 
   let body = null;
   if (visible) {
-    let metricsClassName = 'kbnTabs__tab';
-    let optionsClassname = 'kbnTabs__tab';
-    if (selectedTab === 'metrics') metricsClassName += '-active';
-    if (selectedTab === 'options') optionsClassname += '-active';
     let seriesBody;
     if (selectedTab === 'metrics') {
       const handleSort = (data) => {
@@ -64,7 +62,7 @@ function TopNSeries(props) {
             dynamic={true}
             direction="vertical"
             onSort={handleSort}
-            sortHandle="vis_editor__agg_sort"
+            sortHandle="tvbAggRow__sortHandle"
           >
             { aggs }
           </Sortable>
@@ -81,22 +79,28 @@ function TopNSeries(props) {
       );
     }
     body = (
-      <div className="vis_editor__series-row">
-        <div className="kbnTabs sm">
-          <div
-            className={metricsClassName}
+      <div className="tvbSeries__body">
+        <EuiTabs size="s">
+          <EuiTab
+            isSelected={selectedTab === 'metrics'}
             onClick={() => props.switchTab('metrics')}
           >
-            Metrics
-          </div>
-          <div
+            <FormattedMessage
+              id="tsvb.table.tab.metricsLabel"
+              defaultMessage="Metrics"
+            />
+          </EuiTab>
+          <EuiTab
             data-test-subj="seriesOptions"
-            className={optionsClassname}
+            isSelected={selectedTab === 'options'}
             onClick={() => props.switchTab('options')}
           >
-            Options
-          </div>
-        </div>
+            <FormattedMessage
+              id="tsvb.table.tab.optionsLabel"
+              defaultMessage="Options"
+            />
+          </EuiTab>
+        </EuiTabs>
         {seriesBody}
       </div>
     );
@@ -105,52 +109,69 @@ function TopNSeries(props) {
   let dragHandle;
   if (!props.disableDelete) {
     dragHandle = (
-      <EuiToolTip content="Sort">
-        <button
-          className="vis_editor__sort thor__button-outlined-default sm"
-          aria-label="Sort series by pressing up/down"
-          onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={(<FormattedMessage
+            id="tsvb.table.dragToSortTooltip"
+            defaultMessage="Drag to sort"
+          />)}
         >
-          <i className="fa fa-sort" />
-        </button>
-      </EuiToolTip>
+          <EuiButtonIcon
+            className="tvbSeries__sortHandle"
+            iconType="grab"
+            aria-label={intl.formatMessage({ id: 'tsvb.table.dragToSortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
+            onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     );
   }
 
   return (
     <div
-      className={`${props.className} vis_editor__series`}
+      className={`${props.className}`}
       style={props.style}
       onMouseDown={props.onMouseDown}
       onTouchStart={props.onTouchStart}
     >
-      <div className="vis_editor__container">
-        <div className="vis_editor__series-details">
-          <button className="vis_editor__series-visibility-toggle" onClick={props.toggleVisible}>
-            <i className={caretClassName}/>
-          </button>
-          <div className="vis_editor__row vis_editor__row_item">
-            <input
-              aria-label="Label"
-              className="vis_editor__input-grows"
-              onChange={handleChange('label')}
-              placeholder="Label"
-              value={model.label}
-            />
-          </div>
-          { dragHandle }
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={caretIcon}
+            color="text"
+            onClick={props.toggleVisible}
+            aria-label={intl.formatMessage({ id: 'tsvb.table.toggleSeriesEditorAriaLabel', defaultMessage: 'Toggle series editor' })}
+            aria-expanded={props.visible}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiFieldText
+            fullWidth
+            aria-label={intl.formatMessage({ id: 'tsvb.table.labelAriaLabel', defaultMessage: 'Label' })}
+            onChange={handleChange('label')}
+            placeholder={intl.formatMessage({ id: 'tsvb.table.labelPlaceholder', defaultMessage: 'Label' })}
+            value={model.label}
+          />
+        </EuiFlexItem>
+
+        { dragHandle }
+
+        <EuiFlexItem grow={false}>
           <AddDeleteButtons
-            addTooltip="Add Series"
-            deleteTooltip="Delete Series"
-            cloneTooltip="Clone Series"
+            addTooltip={intl.formatMessage({ id: 'tsvb.table.addSeriesTooltip', defaultMessage: 'Add Series' })}
+            deleteTooltip={intl.formatMessage({ id: 'tsvb.table.deleteSeriesTooltip', defaultMessage: 'Delete Series' })}
+            cloneTooltip={intl.formatMessage({ id: 'tsvb.table.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
+            responsive={false}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       { body }
     </div>
   );
@@ -180,4 +201,4 @@ TopNSeries.propTypes = {
   visible: PropTypes.bool
 };
 
-export default TopNSeries;
+export default injectI18n(TopNSeries);

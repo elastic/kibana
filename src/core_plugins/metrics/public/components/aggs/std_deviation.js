@@ -27,22 +27,40 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const StandardDeviationAgg = props => {
-  const { series, panel, fields } = props;
+const StandardDeviationAggUi = props => {
+  const { series, panel, fields, intl } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
 
   const modeOptions = [
-    { label: 'Raw', value: 'raw' },
-    { label: 'Upper Bound', value: 'upper' },
-    { label: 'Lower Bound', value: 'lower' },
+    {
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.rawLabel', defaultMessage: 'Raw' }),
+      value: 'raw'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.upperBoundLabel', defaultMessage: 'Upper Bound' }),
+      value: 'upper'
+    },
+    {
+      дabel: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.lowerBoundLabel', defaultMessage: 'Lower Bound' }),
+      value: 'lower'
+    },
   ];
 
   if (panel.type !== 'table') {
-    modeOptions.push({ label: 'Bounds Band', value: 'band' });
+    modeOptions.push({
+      label: intl.formatMessage({ id: 'tsvb.stdDeviation.modeOptions.boundsBandLabel', defaultMessage: 'Bounds Band' }),
+      value: 'band'
+    });
   }
 
   const handleChange = createChangeHandler(props.onChange, model);
@@ -63,51 +81,76 @@ export const StandardDeviationAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          panelType={props.panel.type}
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
-      </div>
-      <div className="vis_editor__std_deviation-field">
-        <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
-        <FieldSelect
-          id={htmlId('field')}
-          fields={fields}
-          type={model.type}
-          restrict="numeric"
-          indexPattern={indexPattern}
-          value={model.field}
-          onChange={handleSelectChange('field')}
-        />
-      </div>
-      <div className="vis_editor__std_deviation-sigma_item">
-        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>Sigma</label>
-        <input
-          id={htmlId('sigma')}
-          className="vis_editor__std_deviation-sigma"
-          value={model.sigma}
-          onChange={handleTextChange('sigma')}
-        />
-      </div>
-      <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
-        <EuiComboBox
-          id={htmlId('mode')}
-          options={modeOptions}
-          selectedOptions={selectedModeOption ? [selectedModeOption] : []}
-          onChange={handleSelectChange('mode')}
-          singleSelection={true}
-        />
-      </div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.stdDeviation.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('field')}
+            label={(<FormattedMessage
+              id="tsvb.stdDeviation.fieldLabel"
+              defaultMessage="Field"
+            />)}
+          >
+            <FieldSelect
+              fields={fields}
+              type={model.type}
+              restrict="numeric"
+              indexPattern={indexPattern}
+              value={model.field}
+              onChange={handleSelectChange('field')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('sigma')}
+            label={(<FormattedMessage
+              id="tsvb.stdDeviation.sigmaLabel"
+              defaultMessage="Sigma"
+            />)}
+          >
+            <EuiFieldText
+              value={model.sigma}
+              onChange={handleTextChange('sigma')}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('mode')}
+            label={(<FormattedMessage
+              id="tsvb.stdDeviation.modeLabel"
+              defaultMessage="Mode"
+            />)}
+          >
+            <EuiComboBox
+              options={modeOptions}
+              selectedOptions={selectedModeOption ? [selectedModeOption] : []}
+              onChange={handleSelectChange('mode')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };
 
-StandardDeviationAgg.propTypes = {
+StandardDeviationAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -118,3 +161,5 @@ StandardDeviationAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
+
+export const StandardDeviationAgg = injectI18n(StandardDeviationAggUi);

@@ -65,3 +65,10 @@ considered unique based on its persistent UUID, which is written to the path.dat
 *Details:* Any timezone can now be specified by canonical id.
 
 *Impact:* The logging.useUTC flag will have to be replaced with a timezone id.  If set to true the id is `UTC`.
+
+[float]
+=== kibana.yml setting `elasticsearch.url` sets port based on protocol
+*Details:* In prior versions of Kibana, if no port was specified in `elasticsearch.url` a default of 9200 was chosen.
+The port is now protocol dependent: https ports will use 443, and http ports will use 80.
+
+*Impact:* If your `elasticsearch.url` was dependent on an unspecified port set to 9200, `:9200` will have to be appended to the url.

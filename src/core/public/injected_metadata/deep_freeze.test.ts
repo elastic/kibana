@@ -84,8 +84,6 @@ it('types return values to prevent mutations in typescript', async () => {
 
 index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a constant or a read-only property.
 index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a constant or a read-only property.
-index.ts(42,1): error TS2542: Index signature in type 'RecursiveReadonlyArray<number>' only permits reading.
-index.ts(50,8): error TS2339: Property 'push' does not exist on type 'RecursiveReadonlyArray<number>'.
 "
 `);
 });

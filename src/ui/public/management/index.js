@@ -17,38 +17,11 @@
  * under the License.
  */
 
-import { ManagementSection } from './section';
-
 export {
   PAGE_TITLE_COMPONENT,
+  PAGE_SUBTITLE_COMPONENT,
   PAGE_FOOTER_COMPONENT,
 } from '../../../core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
-
 export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
-
 export { Field } from '../../../core_plugins/kibana/public/management/sections/settings/components/field/field';
-
-export const management = new ManagementSection('management', {
-  display: 'Management'
-});
-
-// TODO: where should this live?
-management.register('data', {
-  display: 'Connect Data',
-  order: 0
-});
-
-management.register('elasticsearch', {
-  display: 'Elasticsearch',
-  order: 20
-});
-
-management.register('kibana', {
-  display: 'Kibana',
-  order: 30,
-});
-
-management.register('logstash', {
-  display: 'Logstash',
-  order: 30,
-});
+export { management } from './sections_register';

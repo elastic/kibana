@@ -2,7 +2,6 @@
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 1`] = `
 Object {
-  "layoutCellsPerChart": 12,
   "seriesToPlot": Array [],
   "timeFieldName": "timestamp",
   "tooManyBuckets": false,
@@ -11,7 +10,7 @@ Object {
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 2`] = `
 Object {
-  "layoutCellsPerChart": 6,
+  "chartsPerRow": 1,
   "seriesToPlot": Array [
     Object {
       "bucketSpanSeconds": 900,
@@ -40,6 +39,7 @@ Object {
       "entityFields": Array [
         Object {
           "fieldName": "airline",
+          "fieldType": "partition",
           "fieldValue": "AAL",
         },
       ],
@@ -71,7 +71,7 @@ Object {
 
 exports[`explorerChartsContainerService call anomalyChangeListener with actual series config 3`] = `
 Object {
-  "layoutCellsPerChart": 6,
+  "chartsPerRow": 1,
   "seriesToPlot": Array [
     Object {
       "bucketSpanSeconds": 900,
@@ -582,6 +582,7 @@ Object {
       "entityFields": Array [
         Object {
           "fieldName": "airline",
+          "fieldType": "partition",
           "fieldValue": "AAL",
         },
       ],
@@ -603,8 +604,8 @@ Object {
       "loading": false,
       "metricFieldName": "responsetime",
       "metricFunction": "avg",
-      "plotEarliest": 1486611900000,
-      "plotLatest": 1486714500000,
+      "plotEarliest": 1486560600000,
+      "plotLatest": 1486765800000,
       "selectedEarliest": 1486656000000,
       "selectedLatest": 1486670399999,
       "timeField": "@timestamp",

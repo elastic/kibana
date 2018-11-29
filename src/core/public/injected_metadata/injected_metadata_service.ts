@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { get } from 'lodash';
+import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 
 export interface InjectedMetadataParams {
@@ -24,8 +26,25 @@ export interface InjectedMetadataParams {
     version: string;
     buildNumber: number;
     basePath: string;
+    vars: {
+      [key: string]: unknown;
+    };
     legacyMetadata: {
-      [key: string]: any;
+      app: unknown;
+      translations: unknown;
+      bundleId: string;
+      nav: unknown;
+      version: string;
+      branch: string;
+      buildNum: number;
+      buildSha: string;
+      basePath: string;
+      serverName: string;
+      devMode: boolean;
+      uiSettings: {
+        defaults: UiSettingsState;
+        user?: UiSettingsState;
+      };
     };
   };
 }
@@ -53,6 +72,14 @@ export class InjectedMetadataService {
 
       getLegacyMetadata: () => {
         return this.state.legacyMetadata;
+      },
+
+      getInjectedVar: (name: string, defaultValue?: any): unknown => {
+        return get(this.state.vars, name, defaultValue);
+      },
+
+      getInjectedVars: () => {
+        return this.state.vars;
       },
     };
   }

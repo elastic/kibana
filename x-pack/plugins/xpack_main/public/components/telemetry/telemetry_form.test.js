@@ -41,7 +41,12 @@ const buildTelemetryOptInProvider = () => {
 describe('TelemetryForm', () => {
   it('renders as expected', () => {
     expect(shallow(
-      <TelemetryForm query={{ text: '' }} onQueryMatchChange={jest.fn()} telemetryOptInProvider={buildTelemetryOptInProvider()} />)
+      <TelemetryForm
+        spacesEnabled={false}
+        query={{ text: '' }}
+        onQueryMatchChange={jest.fn()}
+        telemetryOptInProvider={buildTelemetryOptInProvider()}
+      />)
     ).toMatchSnapshot();
   });
 });

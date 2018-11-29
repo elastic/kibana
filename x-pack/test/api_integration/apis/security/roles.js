@@ -32,7 +32,7 @@ export default function ({ getService }) {
                 {
                   field_security: {
                     grant: ['*'],
-                    except: [ 'geo.*' ]
+                    except: ['geo.*']
                   },
                   names: ['logstash-*'],
                   privileges: ['read', 'view_index_metadata'],
@@ -41,14 +41,10 @@ export default function ({ getService }) {
               ],
               run_as: ['watcher_user'],
             },
-            kibana: [
-              {
-                privileges: ['all'],
-              },
-              {
-                privileges: ['read'],
-              },
-            ],
+            kibana: {
+              global: ['all', 'read'],
+              space: {}
+            }
           })
           .expect(204);
 
@@ -62,7 +58,7 @@ export default function ({ getService }) {
                 privileges: ['read', 'view_index_metadata'],
                 field_security: {
                   grant: ['*'],
-                  except: [ 'geo.*' ]
+                  except: ['geo.*']
                 },
                 query: `{ "match": { "geo.src": "CN" } }`,
               },
@@ -70,12 +66,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['all'],
-                resources: ['*'],
-              },
-              {
-                application: 'kibana-.kibana',
-                privileges: ['read'],
+                privileges: ['all', 'read'],
                 resources: ['*'],
               }
             ],
@@ -102,8 +93,8 @@ export default function ({ getService }) {
                 names: ['beats-*'],
                 privileges: ['write'],
                 field_security: {
-                  grant: [ 'request.*' ],
-                  except: [ 'response.*' ]
+                  grant: ['request.*'],
+                  except: ['response.*']
                 },
                 query: `{ "match": { "host.name": "localhost" } }`,
               },
@@ -139,7 +130,7 @@ export default function ({ getService }) {
                 {
                   field_security: {
                     grant: ['*'],
-                    except: [ 'geo.*' ]
+                    except: ['geo.*']
                   },
                   names: ['logstash-*'],
                   privileges: ['read', 'view_index_metadata'],
@@ -148,14 +139,10 @@ export default function ({ getService }) {
               ],
               run_as: ['watcher_user'],
             },
-            kibana: [
-              {
-                privileges: ['all'],
-              },
-              {
-                privileges: ['read'],
-              },
-            ],
+            kibana: {
+              global: ['all', 'read'],
+              space: {}
+            }
           })
           .expect(204);
 
@@ -169,7 +156,7 @@ export default function ({ getService }) {
                 privileges: ['read', 'view_index_metadata'],
                 field_security: {
                   grant: ['*'],
-                  except: [ 'geo.*' ]
+                  except: ['geo.*']
                 },
                 query: `{ "match": { "geo.src": "CN" } }`,
               },
@@ -177,12 +164,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['all'],
-                resources: ['*'],
-              },
-              {
-                application: 'kibana-.kibana',
-                privileges: ['read'],
+                privileges: ['all', 'read'],
                 resources: ['*'],
               },
               {

@@ -26,11 +26,17 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
   EuiComboBox,
+  EuiSpacer,
+  EuiFormRow,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const TopHitAgg = props => {
-  const { fields, series, panel } = props;
+const TopHitAggUi = props => {
+  const { fields, series, panel, intl } = props;
   const defaults = {
     agg_with: 'avg',
     size: 1,
@@ -46,15 +52,33 @@ export const TopHitAgg = props => {
   const handleTextChange = createTextHandler(handleChange);
 
   const aggWithOptions = [
-    { label: 'Avg', value: 'avg' },
-    { label: 'Max', value: 'max' },
-    { label: 'Min', value: 'min' },
-    { label: 'Sum', value: 'sum' },
+    {
+      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.averageLabel', defaultMessage: 'Avg' }),
+      value: 'avg',
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.maxLabel', defaultMessage: 'Max' }),
+      value: 'max'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.minLabel', defaultMessage: 'Min' }),
+      value: 'min'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.topHit.aggWithOptions.sumLabel', defaultMessage: 'Sum' }),
+      value: 'sum'
+    },
   ];
 
   const orderOptions = [
-    { label: 'Asc', value: 'asc' },
-    { label: 'Desc', value: 'desc' },
+    {
+      label: intl.formatMessage({ id: 'tsvb.topHit.orderOptions.ascLabel', defaultMessage: 'Asc' }),
+      value: 'asc'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.topHit.orderOptions.descLabel', defaultMessage: 'Desc' }),
+      value: 'desc'
+    },
   ];
 
   const htmlId = htmlIdGenerator();
@@ -72,23 +96,31 @@ export const TopHitAgg = props => {
       onDelete={props.onDelete}
       siblings={props.siblings}
     >
-      <div className="vis_editor__row_item">
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              panelType={props.panel.type}
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.topHit.aggregationLabel"
+              defaultMessage="Aggregation"
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('field')}>
-              Field
-            </label>
+          </EuiFormLabel>
+          <AggSelect
+            id={htmlId('aggregation')}
+            panelType={props.panel.type}
+            siblings={props.siblings}
+            value={model.type}
+            onChange={handleSelectChange('type')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('field')}
+            label={(<FormattedMessage
+              id="tsvb.topHit.fieldLabel"
+              defaultMessage="Field"
+            />)}
+          >
             <FieldSelect
-              id={htmlId('field')}
               fields={fields}
               type={model.type}
               restrict="numeric"
@@ -96,63 +128,88 @@ export const TopHitAgg = props => {
               value={model.field}
               onChange={handleSelectChange('field')}
             />
-          </div>
-        </div>
-        <div className="vis_editor__agg_row-item">
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('size')}>
-              Size
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            id={htmlId('size')}
+            label={(<FormattedMessage
+              id="tsvb.topHit.sizeLabel"
+              defaultMessage="Size"
+            />)}
+          >
+            {/*
+              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+              Should it be text or number?
+            */}
             <input
-              id={htmlId('size')}
-              className="vis_editor__input-grows-100"
+              className="tvbAgg__input"
               value={model.size}
               onChange={handleTextChange('size')}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('agg_with')}>
-              Aggregate with
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('agg_with')}
+            label={(<FormattedMessage
+              id="tsvb.topHit.aggregateWithLabel"
+              defaultMessage="Aggregate with"
+            />)}
+          >
             <EuiComboBox
               isClearable={false}
-              id={htmlId('agg_with')}
-              placeholder="Select..."
+              placeholder={intl.formatMessage({ id: 'tsvb.topHit.aggregateWith.selectPlaceholder', defaultMessage: 'Select…' })}
               options={aggWithOptions}
               selectedOptions={selectedAggWithOption ? [selectedAggWithOption] : []}
               onChange={handleSelectChange('agg_with')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('order_by')}>
-              Order by
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('order_by')}
+            label={(<FormattedMessage
+              id="tsvb.topHit.orderByLabel"
+              defaultMessage="Order by"
+            />)}
+          >
             <FieldSelect
-              id={htmlId('order_by')}
               restrict="date"
               value={model.order_by}
               onChange={handleSelectChange('order_by')}
               indexPattern={indexPattern}
               fields={fields}
             />
-          </div>
-          <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('order')}>
-              Order
-            </label>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('order')}
+            label={(<FormattedMessage
+              id="tsvb.topHit.orderLabel"
+              defaultMessage="Order"
+            />)}
+          >
             <EuiComboBox
               isClearable={false}
-              id={htmlId('order')}
-              placeholder="Select..."
+              placeholder={intl.formatMessage({ id: 'tsvb.topHit.order.selectPlaceholder', defaultMessage: 'Select…' })}
               options={orderOptions}
               selectedOptions={selectedOrderOption ? [selectedOrderOption] : []}
               onChange={handleSelectChange('order')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
-          </div>
-        </div>
-      </div>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </AggRow>
   );
 };
+
+export const TopHitAgg = injectI18n(TopHitAggUi);

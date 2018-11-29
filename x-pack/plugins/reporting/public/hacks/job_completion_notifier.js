@@ -8,27 +8,24 @@ import React from 'react';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
-import { addSystemApiHeader } from 'ui/system_api';
 import { get } from 'lodash';
-import {
-  API_BASE_URL
-} from '../../common/constants';
-import 'plugins/reporting/services/job_queue';
-import 'plugins/reporting/services/job_completion_notifications';
+import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
+import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
 import {
   EuiButton,
 } from '@elastic/eui';
+import { downloadReport } from '../lib/download_report';
 
 /**
  * Poll for changes to reports. Inform the user of changes when the license is active.
  */
 uiModules.get('kibana')
-  .run(($http, reportingJobQueue, Private, reportingPollConfig, reportingJobCompletionNotifications) => {
+  .run((Private, reportingPollConfig) => {
     // Don't show users any reporting toasts until they're logged in.
-    if (Private(PathProvider).isLoginOrLogout()) {
+    if (Private(PathProvider).isUnauthenticated()) {
       return;
     }
 
@@ -44,7 +41,7 @@ uiModules.get('kibana')
       const isJobSuccessful = get(job, '_source.status') === 'completed';
 
       if (!isJobSuccessful) {
-        const errorDoc = await reportingJobQueue.getContent(job._id);
+        const errorDoc = await jobQueueClient.getContent(job._id);
         const text = errorDoc.content;
         return toastNotifications.addDanger({
           title: `Couldn't create report for ${reportObjectType} '${reportObjectTitle}'`,
@@ -112,22 +109,22 @@ uiModules.get('kibana')
           return;
         }
 
-        const jobIds = reportingJobCompletionNotifications.getAll();
+        const jobIds = jobCompletionNotifications.getAll();
         if (!jobIds.length) {
           return;
         }
 
-        const jobs = await getJobs($http, jobIds);
+        const jobs = await jobQueueClient.list(0, jobIds);
         jobIds.forEach(async jobId => {
           const job = jobs.find(j => j._id === jobId);
           if (!job) {
-            reportingJobCompletionNotifications.remove(jobId);
+            jobCompletionNotifications.remove(jobId);
             return;
           }
 
           if (job._source.status === 'completed' || job._source.status === 'failed') {
             await showCompletionNotification(job);
-            reportingJobCompletionNotifications.remove(job.id);
+            jobCompletionNotifications.remove(job.id);
             return;
           }
         });
@@ -139,21 +136,3 @@ uiModules.get('kibana')
     });
     poller.start();
   });
-
-async function getJobs($http, jobs) {
-  // Get all jobs in "completed" status since last check, sorted by completion time
-  const apiBaseUrl = chrome.addBasePath(API_BASE_URL);
-
-  // Only getting the first 10, to prevent URL overflows
-  const url = `${apiBaseUrl}/jobs/list?ids=${jobs.slice(0, 10).join(',')}`;
-  const headers = addSystemApiHeader({});
-  const response = await $http.get(url, { headers });
-  return response.data;
-}
-
-function downloadReport(jobId) {
-  const apiBaseUrl = chrome.addBasePath(API_BASE_URL);
-  const downloadLink = `${apiBaseUrl}/jobs/download/${jobId}`;
-  window.open(downloadLink);
-}
-

@@ -19,6 +19,7 @@
 
 import L from 'leaflet';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import { KibanaMapLayer } from 'ui/vis/map/kibana_map_layer';
 import { HeatmapMarkers } from './markers/heatmap';
@@ -83,7 +84,12 @@ export class GeohashLayer extends KibanaMapLayer {
         }, this._zoom, this._featureCollectionMetaData.max);
         break;
       default:
-        throw new Error(`${this._geohashOptions.mapType} mapType not recognized`);
+        throw new Error(i18n.translate('tileMap.geohashLayer.mapTitle', {
+          defaultMessage: '{mapType} mapType not recognized',
+          values: {
+            mapType: this._geohashOptions.mapType,
+          },
+        }));
 
     }
 

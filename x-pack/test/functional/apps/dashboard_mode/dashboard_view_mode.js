@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
         expect(collapseLinkExists).to.be(true);
 
         const navLinks = await find.allByCssSelector('.global-nav-link');
-        expect(navLinks.length).to.equal(4);
+        expect(navLinks.length).to.equal(5);
       });
 
       it('shows the dashboard landing page by default', async () => {
@@ -163,13 +163,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the visualization edit icon', async () => {
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        expect(editLinkExists).to.be(false);
+        await dashboardPanelActions.expectMissingEditPanelAction();
       });
 
       it('does not show the visualization delete icon', async () => {
-        const deleteIconExists = await dashboardPanelActions.removePanelActionExists();
-        expect(deleteIconExists).to.be(false);
+        await dashboardPanelActions.expectMissingRemovePanelAction();
       });
 
       it('shows the timepicker', async () => {

@@ -62,7 +62,7 @@ export class Plugin {
     const { config } = kbnServer;
 
     // setup the hapi register function and get on with it
-    const asyncRegister = async (server, options) => {
+    const register = async (server, options) => {
       this._server = server;
       this._options = options;
 
@@ -85,15 +85,8 @@ export class Plugin {
       }
     };
 
-    const register = (server, options, next) => {
-      asyncRegister(server, options)
-        .then(() => next(), next);
-    };
-
-    register.attributes = { name: id, version: version };
-
     await kbnServer.server.register({
-      register: register,
+      plugin: { register, name: id, version },
       options: config.has(configPrefix) ? config.get(configPrefix) : null
     });
 

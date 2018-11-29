@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -37,6 +38,7 @@ import {
   clearStagedFilters,
   updateFilters,
   updateQuery,
+  closeContextMenu,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState } from './panel';
@@ -100,6 +102,8 @@ export class DashboardStateManager {
     PanelUtils.initPanelIndexes(this.getPanels());
 
     this.createStateMonitor();
+
+    store.dispatch(closeContextMenu());
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
@@ -547,7 +551,9 @@ export class DashboardStateManager {
    */
   syncTimefilterWithDashboard(timeFilter, quickTimeRanges) {
     if (!this.getIsTimeSavedWithDashboard()) {
-      throw new Error('The time is not saved with this dashboard so should not be synced.');
+      throw new Error(i18n.translate('kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage', {
+        defaultMessage: 'The time is not saved with this dashboard so should not be synced.',
+      }));
     }
 
     let mode;

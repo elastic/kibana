@@ -131,8 +131,8 @@ export function initChromeNavApi(chrome, internals) {
   };
 
   internals.nav.forEach(link => {
-    link.url = relativeToAbsolute(link.url);
-    link.subUrlBase = relativeToAbsolute(link.subUrlBase);
+    link.url = relativeToAbsolute(chrome.addBasePath(link.url));
+    link.subUrlBase = relativeToAbsolute(chrome.addBasePath(link.subUrlBase));
   });
 
   // simulate a possible change in url to initialize the

@@ -20,12 +20,13 @@
 import { parse } from '@babel/parser';
 
 import { extractI18nCallMessages } from './i18n_call';
-import { isI18nTranslateFunction, traverseNodes } from '../utils';
+import { isI18nTranslateFunction, traverseNodes, createParserErrorMessage } from '../utils';
+import { createFailError } from '../../run';
 
 /**
  * Matches `i18n(...)` in `#{i18n('id', { defaultMessage: 'Message text' })}`
  */
-const PUG_I18N_REGEX = /(?<=\#\{)i18n\((([^)']|'([^'\\]|\\.)*')*\)(?=\}))/g;
+const PUG_I18N_REGEX = /i18n\((([^)']|'([^'\\]|\\.)*')*)\)/g;
 
 /**
  * Example: `#{i18n('message-id', { defaultMessage: 'Message text' })}`
@@ -34,7 +35,22 @@ export function* extractPugMessages(buffer) {
   const expressions = buffer.toString().match(PUG_I18N_REGEX) || [];
 
   for (const expression of expressions) {
-    for (const node of traverseNodes(parse(expression).program.body)) {
+    let ast;
+
+    try {
+      ast = parse(expression);
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        const errorWithContext = createParserErrorMessage(expression, error);
+        throw createFailError(
+          `Couldn't parse Pug expression with i18n(...) call:\n${errorWithContext}`
+        );
+      }
+
+      throw error;
+    }
+
+    for (const node of traverseNodes(ast.program.body)) {
       if (isI18nTranslateFunction(node)) {
         yield extractI18nCallMessages(node);
         break;

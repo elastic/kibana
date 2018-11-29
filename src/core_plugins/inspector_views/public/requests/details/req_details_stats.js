@@ -38,7 +38,7 @@ class RequestDetailsStats extends Component {
         key={stat.name}
       >
         <EuiTableRowCell>
-          <span className="requests-stats__icon">
+          <span className="insRequestDetailsStats__icon">
             { stat.description &&
               <EuiIconTip
                 aria-label="Description"

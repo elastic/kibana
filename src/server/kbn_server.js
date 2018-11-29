@@ -18,7 +18,6 @@
  */
 
 import { constant, once, compact, flatten } from 'lodash';
-import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
@@ -38,7 +37,6 @@ import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { sampleDataMixin } from './sample_data';
-import { kibanaIndexMappingsMixin } from './mappings';
 import { urlShorteningMixin } from './url_shortening';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -87,9 +85,6 @@ export default class KbnServer {
       uiMixin,
       i18nMixin,
       indexPatternsMixin,
-
-      // setup server.getKibanaIndexMappingsDsl()
-      kibanaIndexMappingsMixin,
 
       // setup saved object routes
       savedObjectsMixin,
@@ -142,22 +137,30 @@ export default class KbnServer {
   async listen() {
     await this.ready();
 
+    const { server, config } = this;
+
+    await server.kibanaMigrator.awaitMigration();
+
     if (isWorker) {
       // help parent process know when we are ready
       process.send(['WORKER_LISTENING']);
     }
 
-    const { server, config } = this;
     server.log(['listening', 'info'], `Server running at ${server.info.uri}${
       config.get('server.rewriteBasePath')
         ? config.get('server.basePath')
         : ''
     }`);
+
     return server;
   }
 
   async close() {
-    await fromNode(cb => this.server.stop(cb));
+    if (!this.server) {
+      return;
+    }
+
+    await this.server.stop();
   }
 
   async inject(opts) {
@@ -177,10 +180,10 @@ export default class KbnServer {
     const loggingOptions = loggingConfiguration(config);
     const subset = {
       ops: config.get('ops'),
-      logging: config.get('logging')
+      logging: config.get('logging'),
     };
     const plain = JSON.stringify(subset, null, 2);
     this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
-    this.server.plugins['even-better'].monitor.reconfigure(loggingOptions);
+    this.server.plugins['@elastic/good'].reconfigure(loggingOptions);
   }
 }

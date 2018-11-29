@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should resize the editor', async function () {
-        const editorSidebar = await find.byCssSelector('.vis-editor-sidebar');
+        const editorSidebar = await find.byCssSelector('.visEditor__sidebar');
         const initialSize = await editorSidebar.getSize();
         await PageObjects.visualize.sizeUpEditor();
         const afterSize = await editorSidebar.getSize();

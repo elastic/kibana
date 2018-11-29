@@ -83,6 +83,12 @@ export async function bootstrap({
     await shutdown(err);
   }
 
+  if (cliArgs.optimize) {
+    const cliLogger = root.logger.get('cli');
+    cliLogger.info('Optimization done.');
+    await shutdown();
+  }
+
   process.on('SIGHUP', () => {
     const cliLogger = root.logger.get('cli');
     cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });

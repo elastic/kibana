@@ -46,7 +46,7 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
     },
     pageData: getPageData
   },
-  controller($injector, $scope) {
+  controller($injector, $scope, i18n) {
     timefilter.enableTimeRangeSelector();
     timefilter.enableAutoRefreshSelector();
 
@@ -56,7 +56,13 @@ uiRoutes.when('/logstash/node/:uuid/advanced', {
     $scope.pageData = $route.current.locals.pageData;
 
     const title = $injector.get('title');
-    title($scope.cluster, `Logstash - ${$scope.pageData.nodeSummary.name} - Advanced`);
+    const routeTitle = i18n('xpack.monitoring.logstash.node.advanced.routeTitle', {
+      defaultMessage: 'Logstash - {nodeName} - Advanced',
+      values: {
+        nodeName: $scope.pageData.nodeSummary.name
+      }
+    });
+    title($scope.cluster, routeTitle);
 
     const $executor = $injector.get('$executor');
     $executor.register({

@@ -20,8 +20,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import './editor_options_group.less';
-
 import {
   EuiAccordion,
   EuiPanel,
@@ -40,7 +38,7 @@ function EditorOptionsGroup(props) {
   return (
     <EuiPanel
       grow={false}
-      className="editorOptionsGroup__panel"
+      className="visEditorOptionsGroup__panel"
     >
       <EuiAccordion
         id={htmlIdGenerator('eog')()}

@@ -2,10 +2,8 @@
 
 exports[`renders RangeControlEditor 1`] = `
 <div>
-  <InjectIntl(IndexPatternSelectUi)
+  <InjectIntl(IndexPatternSelectFormRowUi)
     controlIndex={0}
-    getIndexPattern={[Function]}
-    getIndexPatterns={[Function]}
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />

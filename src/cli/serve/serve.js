@@ -113,6 +113,11 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
+  if (opts.optimize) {
+    set('server.autoListen', false);
+    set('plugins.initialize', false);
+  }
+
   set('plugins.scanDirs', _.compact([].concat(
     get('plugins.scanDirs'),
     opts.pluginDir
@@ -170,7 +175,9 @@ export default function (program) {
       pluginPathCollector,
       []
     )
-    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
+    .option('--optimize', 'Optimize and then stop the server');
+
 
   if (CAN_REPL) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
@@ -184,6 +191,7 @@ export default function (program) {
   if (CAN_CLUSTER) {
     command
       .option('--dev', 'Run the server with development mode defaults')
+      .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
       .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
@@ -207,12 +215,14 @@ export default function (program) {
         configs: [].concat(opts.config || []),
         cliArgs: {
           dev: !!opts.dev,
+          open: !!opts.open,
           envName: unknownOptions.env ? unknownOptions.env.name : undefined,
           quiet: !!opts.quiet,
           silent: !!opts.silent,
           watch: !!opts.watch,
           repl: !!opts.repl,
           basePath: !!opts.basePath,
+          optimize: !!opts.optimize,
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,
@@ -223,4 +233,5 @@ export default function (program) {
         applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
       });
     });
+
 }

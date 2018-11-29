@@ -76,10 +76,11 @@ class ListControl extends Control {
     let ancestorFilters;
     if (this.hasAncestors()) {
       if (this.hasUnsetAncestor()) {
-        this.disable(i18n.translate('inputControl.listControl.disableTootip', {
+        this.disable(i18n.translate('inputControl.listControl.disableTooltip', {
           defaultMessage: 'Disabled until \'{label}\' is set.',
           values: { label: this.ancestors[0].label }
         }));
+        this.lastAncestorValues = undefined;
         return;
       }
 
@@ -117,7 +118,7 @@ class ListControl extends Control {
     try {
       resp = await searchSource.fetch();
     } catch(error) {
-      this.disable(i18n.translate('inputControl.listControl.unableToFetchTootip', {
+      this.disable(i18n.translate('inputControl.listControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch terms, error: {errorMessage}',
         values: { errorMessage: error.message }
       }));
@@ -130,9 +131,7 @@ class ListControl extends Control {
     }
 
     const selectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-      return { label: this.format(bucket.key), value: bucket.key.toString() };
-    }).sort((a, b) => {
-      return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+      return bucket.key;
     });
 
     if(selectOptions.length === 0 && !query) {

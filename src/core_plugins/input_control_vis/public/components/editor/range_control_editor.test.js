@@ -23,7 +23,6 @@ import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
-import { getIndexPatternsMock } from './__tests__/get_index_patterns_mock';
 
 import {
   RangeControlEditor,
@@ -52,7 +51,6 @@ beforeEach(() => {
 
 test('renders RangeControlEditor', () => {
   const component = shallow(<RangeControlEditor
-    getIndexPatterns={getIndexPatternsMock}
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
@@ -65,7 +63,6 @@ test('renders RangeControlEditor', () => {
 
 test('handleNumberOptionChange - step', () => {
   const component = mountWithIntl(<RangeControlEditor
-    getIndexPatterns={getIndexPatternsMock}
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}
@@ -92,7 +89,6 @@ test('handleNumberOptionChange - step', () => {
 
 test('handleNumberOptionChange - decimalPlaces', () => {
   const component = mountWithIntl(<RangeControlEditor
-    getIndexPatterns={getIndexPatternsMock}
     getIndexPattern={getIndexPatternMock}
     controlIndex={0}
     controlParams={controlParams}

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { Writable } from 'stream';
+
 import { startServersCli } from './cli';
 import { checkMockConsoleLogSnapshot } from '../../test_helpers';
 
@@ -36,7 +38,7 @@ describe('start servers CLI', () => {
     const processMock = {
       exit: exitMock,
       argv: argvMock,
-      stdout: { on: jest.fn(), once: jest.fn(), emit: jest.fn() },
+      stdout: new Writable(),
       cwd: jest.fn(),
     };
 
@@ -124,15 +126,6 @@ describe('start servers CLI', () => {
       await startServersCli('foo');
 
       expect(exitMock).not.toHaveBeenCalled();
-    });
-
-    it('rejects non-enum value for esFrom', async () => {
-      global.process.argv.push('--esFrom', 'butter');
-
-      await startServersCli('foo');
-
-      expect(exitMock).toHaveBeenCalledWith(1);
-      checkMockConsoleLogSnapshot(logMock);
     });
 
     it('accepts debug option', async () => {

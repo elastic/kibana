@@ -21,9 +21,11 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import {
-  EuiComboBox,
+  htmlIdGenerator, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiLink,
 } from '@elastic/eui';
 import { durationOutputOptions, durationInputOptions } from './lib/durations';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
 class DataFormatPicker extends Component {
@@ -91,6 +93,7 @@ class DataFormatPicker extends Component {
   }
 
   render() {
+    const htmlId = htmlIdGenerator();
     const value = this.props.value || '';
     let defaultValue = value;
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
@@ -99,12 +102,13 @@ class DataFormatPicker extends Component {
     if (durationFormatTest.test(value)) {
       defaultValue = 'duration';
     }
+    const { intl } = this.props;
     const options = [
-      { label: 'Bytes', value: 'bytes' },
-      { label: 'Number', value: 'number' },
-      { label: 'Percent', value: 'percent' },
-      { label: 'Duration', value: 'duration' },
-      { label: 'Custom', value: 'custom' }
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.bytesLabel', defaultMessage: 'Bytes' }), value: 'bytes' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.numberLabel', defaultMessage: 'Number' }), value: 'number' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.percentLabel', defaultMessage: 'Percent' }), value: 'percent' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.durationLabel', defaultMessage: 'Duration' }), value: 'duration' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.customLabel', defaultMessage: 'Custom' }), value: 'custom' }
     ];
     const selectedOption = options.find(option => {
       return defaultValue === option.value;
@@ -120,11 +124,101 @@ class DataFormatPicker extends Component {
         return to === option.value;
       });
       return (
-        <div className="vis_editor__data_format_picker-container">
-          <div className="vis_editor__label">
-            {this.props.label}
-          </div>
-          <div className="vis_editor__item">
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiFormRow id={htmlId('date')} label={this.props.label}>
+              <EuiComboBox
+                isClearable={false}
+                options={options}
+                selectedOptions={selectedOption ? [selectedOption] : []}
+                onChange={this.handleChange}
+                singleSelection={true}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              id={htmlId('from')}
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.fromLabel"
+                defaultMessage="From"
+              />)}
+            >
+              <EuiComboBox
+                isClearable={false}
+                options={durationInputOptions}
+                selectedOptions={selectedFrom ? [selectedFrom] : []}
+                onChange={this.handleDurationChange('from')}
+                singleSelection={true}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              id={htmlId('to')}
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.toLabel"
+                defaultMessage="To"
+              />)}
+            >
+              <EuiComboBox
+                isClearable={false}
+                options={durationOutputOptions}
+                selectedOptions={selectedTo ? [selectedTo] : []}
+                onChange={this.handleDurationChange('to')}
+                singleSelection={true}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFormRow
+              id={htmlId('decimal')}
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.decimalPlacesLabel"
+                defaultMessage="Decimal places"
+              />)}
+            >
+              <EuiFieldText
+                defaultValue={decimals}
+                inputRef={(el) => this.decimals = el}
+                onChange={this.handleDurationChange('decimals')}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+    if (defaultValue === 'custom') {
+      custom = (
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={(<FormattedMessage
+              id="tsvb.dataFormatPicker.formatStringLabel"
+              defaultMessage="Format string"
+            />)}
+            helpText={
+              <span>
+                <FormattedMessage
+                  id="tsvb.dataFormatPicker.formatStringHelpText"
+                  defaultMessage="See {numeralJsLink}"
+                  values={{ numeralJsLink: (<EuiLink href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</EuiLink>) }}
+                />
+              </span>
+            }
+          >
+            <EuiFieldText
+              defaultValue={value}
+              inputRef={(el) => this.custom = el}
+              onChange={this.handleCustomChange}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      );
+    }
+    return (
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow label={this.props.label}>
             <EuiComboBox
               isClearable={false}
               options={options}
@@ -132,79 +226,17 @@ class DataFormatPicker extends Component {
               onChange={this.handleChange}
               singleSelection={true}
             />
-          </div>
-          <div className="vis_editor__label">From</div>
-          <div className="vis_editor__item">
-            <EuiComboBox
-              isClearable={false}
-              options={durationInputOptions}
-              selectedOptions={selectedFrom ? [selectedFrom] : []}
-              onChange={this.handleDurationChange('from')}
-              singleSelection={true}
-            />
-          </div>
-          <div className="vis_editor__label">To</div>
-          <div className="vis_editor__item">
-            <EuiComboBox
-              isClearable={false}
-              options={durationOutputOptions}
-              selectedOptions={selectedTo ? [selectedTo] : []}
-              onChange={this.handleDurationChange('to')}
-              singleSelection={true}
-            />
-          </div>
-          <div className="vis_editor__label">Decimal Places</div>
-          <input
-            style={{ width: 60 }}
-            className="vis_editor__input"
-            defaultValue={decimals}
-            ref={(el) => this.decimals = el}
-            onChange={this.handleDurationChange('decimals')}
-            type="text"
-          />
-        </div>
-      );
-    }
-    if (defaultValue === 'custom') {
-      custom = (
-        <div className="vis_editor__data_format_picker-custom_row">
-          <div className="vis_editor__label">
-            Format String (See <a href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</a>)
-          </div>
-          <input
-            style={{ width: 100 }}
-            className="vis_editor__input"
-            defaultValue={value}
-            ref={(el) => this.custom = el}
-            onChange={this.handleCustomChange}
-            type="text"
-          />
-        </div>
-      );
-    }
-    return (
-      <div className="vis_editor__data_format_picker-container">
-        <div className="vis_editor__label">
-          {this.props.label}
-        </div>
-        <div className="vis_editor__item">
-          <EuiComboBox
-            isClearable={false}
-            options={options}
-            selectedOptions={selectedOption ? [selectedOption] : []}
-            onChange={this.handleChange}
-            singleSelection={true}
-          />
-        </div>
+          </EuiFormRow>
+        </EuiFlexItem>
         {custom}
-      </div>
+      </EuiFlexGroup>
     );
   }
 
 }
 
 DataFormatPicker.defaultProps = {
-  label: 'Data Formatter'
+  label: i18n.translate('tsvb.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' })
 };
 
 DataFormatPicker.propTypes = {
@@ -213,4 +245,4 @@ DataFormatPicker.propTypes = {
   onChange: PropTypes.func
 };
 
-export default DataFormatPicker;
+export default injectI18n(DataFormatPicker);

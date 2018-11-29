@@ -30,7 +30,7 @@ export function registerCloseRoute(server) {
   server.route({
     path: '/api/index_management/indices/close',
     method: 'POST',
-    handler: async (request, reply) => {
+    handler: async (request, h) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const indices = getIndexArrayFromPayload(request.payload);
 
@@ -38,13 +38,13 @@ export function registerCloseRoute(server) {
         await closeIndices(callWithRequest, indices);
 
         //TODO: Should we check acknowledged = true?
-        reply();
+        return h.response();
       } catch (err) {
         if (isEsError(err)) {
-          return reply(wrapEsError(err));
+          throw wrapEsError(err);
         }
 
-        reply(wrapUnknownError(err));
+        throw wrapUnknownError(err);
       }
     },
     config: {

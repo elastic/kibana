@@ -25,12 +25,14 @@ import sinon from 'sinon';
 import cheerio from 'cheerio';
 import { noop } from 'lodash';
 
+import * as getUiSettingsServiceForRequestNS from '../ui_settings/ui_settings_service_for_request';
 import { createRoot, getKbnServer, request } from '../../test_utils/kbn_server';
 
 const getInjectedVarsFromResponse = (resp) => {
+  expect(resp.statusCode).to.be(200);
   const $ = cheerio.load(resp.text);
   const data = $('kbn-injected-metadata').attr('data');
-  return JSON.parse(data).legacyMetadata.vars;
+  return JSON.parse(data).vars;
 };
 
 const injectReplacer = (kbnServer, replacer) => {
@@ -45,6 +47,8 @@ const injectReplacer = (kbnServer, replacer) => {
 };
 
 describe('UiExports', function () {
+  const sandbox = sinon.createSandbox();
+
   let root;
   let kbnServer;
   before(async () => {
@@ -60,15 +64,19 @@ describe('UiExports', function () {
 
     kbnServer = getKbnServer(root);
 
-    // TODO: hopefully we can add better support for something
-    // like this in the new platform
-    kbnServer.server._requestor._decorations.getUiSettingsService = {
-      apply: undefined,
-      method: () => ({ getDefaults: noop, getUserProvided: noop })
-    };
+    // Mock out the ui settings which depends on ES
+    sandbox
+      .stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest')
+      .returns({
+        getDefaults: noop,
+        getUserProvided: noop
+      });
   });
 
-  after(async () => await root.shutdown());
+  after(async () => {
+    await root.shutdown();
+    sandbox.restore();
+  });
 
   let originalInjectedVarsReplacers;
   beforeEach(() => {
@@ -154,7 +162,9 @@ describe('UiExports', function () {
         .expect(200);
 
       sinon.assert.calledOnce(stub);
-      expect(stub.firstCall.args[0]).to.eql({ from_defaults: true, from_test_app: true });
+      const args = stub.lastCall.args[0];
+      expect(args.from_defaults).to.be(true);
+      expect(args.from_test_app).to.be(true);
     });
   });
 });

@@ -28,6 +28,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
 import { getInAppUrl } from './lib/get_in_app_url';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
@@ -52,31 +53,33 @@ function updateObjectsTable($scope, $injector) {
     }
 
     render(
-      <ObjectsTable
-        savedObjectsClient={savedObjectsClient}
-        services={services}
-        indexPatterns={indexPatterns}
-        $http={$http}
-        perPageConfig={config.get('savedObjects:perPage')}
-        basePath={chrome.getBasePath()}
-        newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index')}
-        getEditUrl={(id, type) => {
-          if (type === 'index-pattern' || type === 'indexPatterns') {
-            return kbnUrl.eval(`#/management/kibana/indices/${id}`);
-          }
-          const serviceName = typeToServiceName(type);
-          if (!serviceName) {
-            toastNotifications.addWarning(`Unknown saved object type: ${type}`);
-            return null;
-          }
+      <I18nProvider>
+        <ObjectsTable
+          savedObjectsClient={savedObjectsClient}
+          services={services}
+          indexPatterns={indexPatterns}
+          $http={$http}
+          perPageConfig={config.get('savedObjects:perPage')}
+          basePath={chrome.getBasePath()}
+          newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index')}
+          getEditUrl={(id, type) => {
+            if (type === 'index-pattern' || type === 'indexPatterns') {
+              return kbnUrl.eval(`#/management/kibana/indices/${id}`);
+            }
+            const serviceName = typeToServiceName(type);
+            if (!serviceName) {
+              toastNotifications.addWarning(`Unknown saved object type: ${type}`);
+              return null;
+            }
 
-          return kbnUrl.eval(`#/management/kibana/objects/${serviceName}/${id}`);
-        }}
-        goInApp={(id, type) => {
-          kbnUrl.change(getInAppUrl(id, type));
-          $scope.$apply();
-        }}
-      />,
+            return kbnUrl.eval(`#/management/kibana/objects/${serviceName}/${id}`);
+          }}
+          goInApp={(id, type) => {
+            kbnUrl.change(getInAppUrl(id, type));
+            $scope.$apply();
+          }}
+        />
+      </I18nProvider>,
       node,
     );
   });

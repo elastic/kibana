@@ -63,6 +63,7 @@ export class InputControlVis extends Component {
               label={control.label}
               options={control.selectOptions}
               selectedOptions={control.value}
+              formatOptionLabel={control.format}
               disableMsg={control.isEnabled() ? null : control.disabledReason}
               multiselect={control.options.multiselect}
               dynamicOptions={control.options.dynamicOptions}
@@ -144,7 +145,7 @@ export class InputControlVis extends Component {
     }
 
     return (
-      <div className="inputControlVis">
+      <div className="icvContainer">
         <EuiFlexGroup wrap>
           {this.renderControls()}
         </EuiFlexGroup>

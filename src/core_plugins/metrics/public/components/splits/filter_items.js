@@ -24,7 +24,9 @@ import * as collectionActions from '../lib/collection_actions';
 import AddDeleteButtons from '../add_delete_buttons';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
-class FilterItems extends Component {
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
+class FilterItemsUi extends Component {
 
   constructor(props) {
     super(props);
@@ -52,42 +54,45 @@ class FilterItems extends Component {
       .bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete
       .bind(null, this.props, model);
+    const { intl } = this.props;
+
     return  (
-      <div className="vis_editor__split-filter-row" key={model.id}>
-        <div className="vis_editor__split-filter-color">
+      <EuiFlexGroup gutterSize="s" className="tvbAggRow" alignItems="center" key={model.id}>
+        <EuiFlexItem grow={false}>
           <ColorPicker
             disableTrash={true}
             onChange={handleChange}
             name="color"
             value={model.color}
           />
-        </div>
-        <div className="vis_editor__split-filter-item">
-          <input
-            placeholder="Filter"
-            className="vis_editor__input-grows-100"
-            type="text"
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFieldText
+            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
             onChange={this.handleChange(model, 'filter')}
             value={model.filter}
+            fullWidth
           />
-        </div>
-        <div className="vis_editor__split-filter-item">
-          <input
-            placeholder="Label"
-            className="vis_editor__input-grows-100"
-            type="text"
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFieldText
+            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelPlaceholder', defaultMessage: 'Label' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.labelAriaLabel', defaultMessage: 'Label' })}
             onChange={this.handleChange(model, 'label')}
             value={model.label}
+            fullWidth
           />
-        </div>
-        <div className="vis_editor__split-filter-control">
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <AddDeleteButtons
             onAdd={handleAdd}
             onDelete={handleDelete}
             disableDelete={items.length < 2}
+            responsive={false}
           />
-        </div>
-      </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -96,7 +101,7 @@ class FilterItems extends Component {
     if (!model[name]) return (<div/>);
     const rows = model[name].map(this.renderRow);
     return (
-      <div className="vis_editor__split-filters">
+      <div>
         { rows }
       </div>
     );
@@ -104,10 +109,11 @@ class FilterItems extends Component {
 
 }
 
-FilterItems.propTypes = {
+FilterItemsUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
   onChange: PropTypes.func
 };
 
+const FilterItems = injectI18n(FilterItemsUi);
 export default FilterItems;

@@ -60,7 +60,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.helpButton"
+          id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
       </EuiLink>
@@ -94,7 +94,11 @@ exports[`UrlFormatEditor should render label template help 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Label template help
+        <FormattedMessage
+          defaultMessage="Label template help"
+          id="common.ui.fieldEditor.url.labelTemplateHelpText"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}
@@ -181,7 +185,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.helpButton"
+          id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
       </EuiLink>
@@ -215,7 +219,11 @@ exports[`UrlFormatEditor should render normally 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Label template help
+        <FormattedMessage
+          defaultMessage="Label template help"
+          id="common.ui.fieldEditor.url.labelTemplateHelpText"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}
@@ -302,7 +310,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
       >
         <FormattedMessage
           defaultMessage="URL template help"
-          id="common.ui.fieldEditor.url.template.helpButton"
+          id="common.ui.fieldEditor.url.template.helpLinkText"
           values={Object {}}
         />
       </EuiLink>
@@ -336,7 +344,11 @@ exports[`UrlFormatEditor should render url template help 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Label template help
+        <FormattedMessage
+          defaultMessage="Label template help"
+          id="common.ui.fieldEditor.url.labelTemplateHelpText"
+          values={Object {}}
+        />
       </EuiLink>
     }
     isInvalid={false}

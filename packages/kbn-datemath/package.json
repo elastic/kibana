@@ -8,7 +8,7 @@
   "typings": "target/index.d.ts",
   "scripts": {
     "build": "babel src --out-dir target --copy-files",
-    "kbn:bootstrap": "yarn build",
+    "kbn:bootstrap": "yarn build --quiet",
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
@@ -17,6 +17,7 @@
     "babel-preset-env": "^1.6.1"
   },
   "dependencies": {
-    "moment": "^2.13.0"
+    "moment": "^2.13.0",
+    "tslib": "^1.9.3"
   }
 }

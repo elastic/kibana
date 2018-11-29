@@ -27,8 +27,9 @@ import {
 } from '@babel/types';
 
 import { extractI18nCallMessages } from './i18n_call';
-import { isI18nTranslateFunction, traverseNodes } from '../utils';
+import { createParserErrorMessage, isI18nTranslateFunction, traverseNodes } from '../utils';
 import { extractIntlMessages, extractFormattedMessages } from './react';
+import { createFailError } from '../../run';
 
 /**
  * Detect Intl.formatMessage() function call (React).
@@ -43,17 +44,11 @@ import { extractIntlMessages, extractFormattedMessages } from './react';
 export function isIntlFormatMessageFunction(node) {
   return (
     isCallExpression(node) &&
-    (
-      isIdentifier(node.callee, { name: 'formatMessage' }) ||
-      (
-        isMemberExpression(node.callee) &&
-        (
-          isIdentifier(node.callee.object, { name: 'intl' }) ||
-          isIdentifier(node.callee.object.property, { name: 'intl' })
-        ) &&
-        isIdentifier(node.callee.property, { name: 'formatMessage' })
-      )
-    )
+    (isIdentifier(node.callee, { name: 'formatMessage' }) ||
+      (isMemberExpression(node.callee) &&
+        (isIdentifier(node.callee.object, { name: 'intl' }) ||
+          isIdentifier(node.callee.object.property, { name: 'intl' })) &&
+        isIdentifier(node.callee.property, { name: 'formatMessage' })))
   );
 }
 
@@ -67,12 +62,23 @@ export function isFormattedMessageElement(node) {
 }
 
 export function* extractCodeMessages(buffer) {
-  const content = parse(buffer.toString(), {
-    sourceType: 'module',
-    plugins: ['jsx', 'typescript', 'objectRestSpread', 'classProperties', 'asyncGenerators'],
-  });
+  let ast;
 
-  for (const node of traverseNodes(content.program.body)) {
+  try {
+    ast = parse(buffer.toString(), {
+      sourceType: 'module',
+      plugins: ['jsx', 'typescript', 'objectRestSpread', 'classProperties', 'asyncGenerators'],
+    });
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      const errorWithContext = createParserErrorMessage(buffer.toString(), error);
+      throw createFailError(errorWithContext);
+    }
+
+    throw error;
+  }
+
+  for (const node of traverseNodes(ast.program.body)) {
     if (isI18nTranslateFunction(node)) {
       yield extractI18nCallMessages(node);
     } else if (isIntlFormatMessageFunction(node)) {

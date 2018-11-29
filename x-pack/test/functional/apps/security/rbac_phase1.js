@@ -25,20 +25,28 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_all', {
-        "kibana": ["all"],
-        "indices": [{
-          "names": ["logstash-*"],
-          "privileges": ["read", "view_index_metadata"]
-        }]
+        kibana: {
+          global: ['all']
+        },
+        elasticsearch: {
+          "indices": [{
+            "names": ["logstash-*"],
+            "privileges": ["read", "view_index_metadata"]
+          }]
+        }
       });
 
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_read', {
-        "kibana": ["read"],
-        "indices": [{
-          "names": ["logstash-*"],
-          "privileges": ["read", "view_index_metadata"]
-        }]
+        kibana: {
+          global: ['read']
+        },
+        elasticsearch: {
+          "indices": [{
+            "names": ["logstash-*"],
+            "privileges": ["read", "view_index_metadata"]
+          }]
+        }
       });
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');

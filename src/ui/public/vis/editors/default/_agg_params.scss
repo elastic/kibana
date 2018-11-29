@@ -1,0 +1,12 @@
+.visEditorAggParam__error {
+  margin: $vis-editor-agg-editor-spacing 0;
+  padding: $vis-editor-agg-editor-spacing;
+  text-align: center;
+
+  // Calculate error colors
+  $backgroundColor: tintOrShade($euiColorDanger, 90%, 70%);
+  $textColor: makeHighContrastColor($euiColorDanger, $backgroundColor);
+
+  color: $textColor;
+  background-color: $backgroundColor;
+}

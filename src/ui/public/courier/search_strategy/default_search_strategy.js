@@ -19,6 +19,7 @@
 
 import { addSearchStrategy } from './search_strategy_registry';
 import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
+import { SearchError } from './search_error';
 
 function getAllFetchParams(searchRequests, Promise) {
   return Promise.map(searchRequests, (searchRequest) => {
@@ -32,24 +33,23 @@ function getAllFetchParams(searchRequests, Promise) {
 }
 
 async function serializeAllFetchParams(fetchParams, searchRequests, serializeFetchParams) {
-  const searcRequestsWithFetchParams = [];
+  const searchRequestsWithFetchParams = [];
   const failedSearchRequests = [];
 
   // Gather the fetch param responses from all the successful requests.
   fetchParams.forEach((result, index) => {
     if (result.resolved) {
-      searcRequestsWithFetchParams.push(result.resolved);
+      searchRequestsWithFetchParams.push(result.resolved);
     } else {
       const searchRequest = searchRequests[index];
 
-      // TODO: All strategies will need to implement this.
       searchRequest.handleFailure(result.rejected);
       failedSearchRequests.push(searchRequest);
     }
   });
 
   return {
-    serializedFetchParams: await serializeFetchParams(searcRequestsWithFetchParams),
+    serializedFetchParams: await serializeFetchParams(searchRequestsWithFetchParams),
     failedSearchRequests,
   };
 }
@@ -79,14 +79,30 @@ export const defaultSearchStrategy = {
     const searching = es.msearch(msearchParams);
 
     return {
-      // Unwrap the responses object returned by the es client.
-      searching: searching.then(({ responses }) => responses),
+      // Munge data into shape expected by consumer.
+      searching: new Promise((resolve, reject) => {
+        // Unwrap the responses object returned by the ES client.
+        searching.then(({ responses }) => {
+          resolve(responses);
+        }).catch(error => {
+          // Format ES client error as a SearchError.
+          const { statusCode, displayName, message, path } = error;
+
+          const searchError = new SearchError({
+            status: statusCode,
+            title: displayName,
+            message,
+            path,
+          });
+
+          reject(searchError);
+        });
+      }),
       abort: searching.abort,
       failedSearchRequests,
     };
   },
 
-  // Accept multiple criteria for determining viability to be as flexible as possible.
   isViable: (indexPattern) => {
     if (!indexPattern) {
       return false;

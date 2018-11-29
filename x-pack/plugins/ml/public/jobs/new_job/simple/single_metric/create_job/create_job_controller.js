@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 
-import 'plugins/kibana/visualize/styles/main.less';
 import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
@@ -31,9 +30,10 @@ import { loadCurrentIndexPattern, loadCurrentSavedSearch, timeBasedIndexCheck } 
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import {
-  createSearchItems,
+  SearchItemsProvider,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { SingleMetricJobServiceProvider } from './create_job_service';
@@ -67,6 +67,7 @@ module
     $scope,
     $route,
     $filter,
+    $timeout,
     Private,
     AppState) {
 
@@ -113,12 +114,13 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 
@@ -198,6 +200,7 @@ module
       end: 0,
       timeField: indexPattern.timeFieldName,
       indexPattern: undefined,
+      usesSavedSearch: (savedSearch.id !== undefined),
       query,
       filters,
       combinedQuery,
@@ -401,6 +404,8 @@ module
                     $scope.formConfig.end,
                     'timeseriesexplorer');
 
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
+
                   loadCharts();
                 })
                 .catch((resp) => {
@@ -451,6 +456,7 @@ module
               }
             } else {
               $scope.jobState = JOB_STATE.FINISHED;
+              focusOnResultsLink('job_finished_view_results_link', $timeout);
             }
 
             if (ignoreModel) {

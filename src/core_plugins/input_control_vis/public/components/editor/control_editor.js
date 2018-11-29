@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './control_editor.less';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControlEditor } from './range_control_editor';
@@ -71,7 +70,6 @@ class ControlEditorUi extends Component {
             controlParams={this.props.controlParams}
             handleIndexPatternChange={this.changeIndexPattern}
             handleFieldNameChange={this.changeFieldName}
-            getIndexPatterns={this.props.getIndexPatterns}
             getIndexPattern={this.props.getIndexPattern}
             handleNumberOptionChange={this.props.handleNumberOptionChange}
             handleCheckboxOptionChange={this.props.handleCheckboxOptionChange}
@@ -87,7 +85,6 @@ class ControlEditorUi extends Component {
             controlParams={this.props.controlParams}
             handleIndexPatternChange={this.changeIndexPattern}
             handleFieldNameChange={this.changeFieldName}
-            getIndexPatterns={this.props.getIndexPatterns}
             getIndexPattern={this.props.getIndexPattern}
             handleNumberOptionChange={this.props.handleNumberOptionChange}
           />
@@ -154,7 +151,7 @@ class ControlEditorUi extends Component {
 
   render() {
     return (
-      <EuiPanel grow={false} className="controlEditorPanel">
+      <EuiPanel grow={false} className="icvControlEditor__panel">
 
         <EuiAccordion
           id="controlEditorAccordion"
@@ -179,7 +176,6 @@ ControlEditorUi.propTypes = {
   handleRemoveControl: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
-  getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   handleCheckboxOptionChange: PropTypes.func.isRequired,
   handleNumberOptionChange: PropTypes.func.isRequired,
