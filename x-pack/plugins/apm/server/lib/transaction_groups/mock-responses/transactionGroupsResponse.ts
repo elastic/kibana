@@ -21,7 +21,7 @@ export const transactionGroupsResponse = ({
           doc_count: 180,
           avg: { value: 255966.30555555556 },
           p95: { values: { '95.0': 320238.5 } },
-          durationSum: { value: 46073935 },
+          sum: { value: 46073935 },
           sample: {
             hits: {
               total: 180,
@@ -141,7 +141,7 @@ export const transactionGroupsResponse = ({
           doc_count: 21911,
           avg: { value: 48021.972616494 },
           p95: { values: { '95.0': 67138.18364917398 } },
-          durationSum: { value: 1052209442 },
+          sum: { value: 1052209442 },
           sample: {
             hits: {
               total: 21911,
@@ -261,7 +261,7 @@ export const transactionGroupsResponse = ({
           doc_count: 3247,
           avg: { value: 33265.03326147213 },
           p95: { values: { '95.0': 58827.489999999976 } },
-          durationSum: { value: 108011563 },
+          sum: { value: 108011563 },
           sample: {
             hits: {
               total: 3247,
@@ -377,7 +377,7 @@ export const transactionGroupsResponse = ({
           doc_count: 700,
           avg: { value: 32900.72714285714 },
           p95: { values: { '95.0': 40444 } },
-          durationSum: { value: 23030509 },
+          sum: { value: 23030509 },
           sample: {
             hits: {
               total: 700,
@@ -493,7 +493,7 @@ export const transactionGroupsResponse = ({
           doc_count: 4639,
           avg: { value: 32554.36257814184 },
           p95: { values: { '95.0': 59356.73611111111 } },
-          durationSum: { value: 151019688 },
+          sum: { value: 151019688 },
           sample: {
             hits: {
               total: 4639,
@@ -614,7 +614,7 @@ export const transactionGroupsResponse = ({
           doc_count: 736,
           avg: { value: 32387.73641304348 },
           p95: { values: { '95.0': 40061.1 } },
-          durationSum: { value: 23837374 },
+          sum: { value: 23837374 },
           sample: {
             hits: {
               total: 736,
@@ -730,7 +730,7 @@ export const transactionGroupsResponse = ({
           doc_count: 3366,
           avg: { value: 32159.926322043968 },
           p95: { values: { '95.0': 59845.85714285714 } },
-          durationSum: { value: 108250312 },
+          sum: { value: 108250312 },
           sample: {
             hits: {
               total: 3366,
@@ -851,7 +851,7 @@ export const transactionGroupsResponse = ({
           doc_count: 3694,
           avg: { value: 27516.89144558744 },
           p95: { values: { '95.0': 56064.679999999986 } },
-          durationSum: { value: 101647397 },
+          sum: { value: 101647397 },
           sample: {
             hits: {
               total: 3694,
@@ -973,7 +973,7 @@ export const transactionGroupsResponse = ({
           doc_count: 147,
           avg: { value: 21331.714285714286 },
           p95: { values: { '95.0': 30938 } },
-          durationSum: { value: 3135762 },
+          sum: { value: 3135762 },
           sample: {
             hits: {
               total: 147,
@@ -1091,7 +1091,7 @@ export const transactionGroupsResponse = ({
           doc_count: 2102,
           avg: { value: 17189.329210275926 },
           p95: { values: { '95.0': 39284.79999999999 } },
-          durationSum: { value: 36131970 },
+          sum: { value: 36131970 },
           sample: {
             hits: {
               total: 2102,
@@ -1213,7 +1213,7 @@ export const transactionGroupsResponse = ({
           doc_count: 1449,
           avg: { value: 12763.68806073154 },
           p95: { values: { '95.0': 30576.749999999996 } },
-          durationSum: { value: 18494584 },
+          sum: { value: 18494584 },
           sample: {
             hits: {
               total: 1449,
@@ -1329,7 +1329,7 @@ export const transactionGroupsResponse = ({
           doc_count: 3678,
           avg: { value: 12683.190864600327 },
           p95: { values: { '95.0': 35009.67999999999 } },
-          durationSum: { value: 46648776 },
+          sum: { value: 46648776 },
           sample: {
             hits: {
               total: 3678,
@@ -1445,7 +1445,7 @@ export const transactionGroupsResponse = ({
           doc_count: 2400,
           avg: { value: 11257.757916666667 },
           p95: { values: { '95.0': 35222.944444444445 } },
-          durationSum: { value: 27018619 },
+          sum: { value: 27018619 },
           sample: {
             hits: {
               total: 2400,
@@ -1561,7 +1561,7 @@ export const transactionGroupsResponse = ({
           doc_count: 1283,
           avg: { value: 10584.05144193297 },
           p95: { values: { '95.0': 26555.399999999998 } },
-          durationSum: { value: 13579338 },
+          sum: { value: 13579338 },
           sample: {
             hits: {
               total: 1283,
@@ -1675,7 +1675,7 @@ export const transactionGroupsResponse = ({
           doc_count: 1839,
           avg: { value: 10548.218597063622 },
           p95: { values: { '95.0': 28413.383333333328 } },
-          durationSum: { value: 19398174 },
+          sum: { value: 19398174 },
           sample: {
             hits: {
               total: 1839,
@@ -1791,7 +1791,7 @@ export const transactionGroupsResponse = ({
           doc_count: 1900,
           avg: { value: 9868.217894736843 },
           p95: { values: { '95.0': 27486.5 } },
-          durationSum: { value: 18749614 },
+          sum: { value: 18749614 },
           sample: {
             hits: {
               total: 1900,
@@ -1912,7 +1912,7 @@ export const transactionGroupsResponse = ({
           doc_count: 20,
           avg: { value: 5192.9 },
           p95: { values: { '95.0': 13230.5 } },
-          durationSum: { value: 103858 },
+          sum: { value: 103858 },
           sample: {
             hits: {
               total: 20,
@@ -2038,7 +2038,7 @@ export const transactionGroupsResponse = ({
           doc_count: 358,
           avg: { value: 4694.005586592179 },
           p95: { values: { '95.0': 11022.99999999992 } },
-          durationSum: { value: 1680454 },
+          sum: { value: 1680454 },
           sample: {
             hits: {
               total: 358,
@@ -2155,7 +2155,7 @@ export const transactionGroupsResponse = ({
           doc_count: 336,
           avg: { value: 4549.889880952381 },
           p95: { values: { '95.0': 7719.700000000001 } },
-          durationSum: { value: 1528763 },
+          sum: { value: 1528763 },
           sample: {
             hits: {
               total: 336,
@@ -2272,7 +2272,7 @@ export const transactionGroupsResponse = ({
           doc_count: 7115,
           avg: { value: 3504.5108924806746 },
           p95: { values: { '95.0': 11431.738095238095 } },
-          durationSum: { value: 24934595 },
+          sum: { value: 24934595 },
           sample: {
             hits: {
               total: 7115,
@@ -2395,7 +2395,7 @@ export const transactionGroupsResponse = ({
           doc_count: 364,
           avg: { value: 2742.4615384615386 },
           p95: { values: { '95.0': 4370.000000000002 } },
-          durationSum: { value: 998256 },
+          sum: { value: 998256 },
           sample: {
             hits: {
               total: 364,
@@ -2513,7 +2513,7 @@ export const transactionGroupsResponse = ({
           doc_count: 62606,
           avg: { value: 2651.8784461553205 },
           p95: { values: { '95.0': 6140.579335038363 } },
-          durationSum: { value: 166023502 },
+          sum: { value: 166023502 },
           sample: {
             hits: {
               total: 62606,
@@ -2618,7 +2618,7 @@ export const transactionGroupsResponse = ({
           doc_count: 7487,
           avg: { value: 1422.926672899693 },
           p95: { values: { '95.0': 2311.885238095238 } },
-          durationSum: { value: 10653452 },
+          sum: { value: 10653452 },
           sample: {
             hits: {
               total: 7487,

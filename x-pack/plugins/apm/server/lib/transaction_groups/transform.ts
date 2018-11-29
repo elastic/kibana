@@ -16,17 +16,16 @@ export interface ITransactionGroup {
   averageResponseTime: number;
   transactionsPerMinute: number;
   impact: number;
-  absoluteImpact: number;
 }
 
 function calculateRelativeImpacts(results: ITransactionGroup[]) {
-  const values = results.map(({ absoluteImpact }) => absoluteImpact);
+  const values = results.map(({ impact }) => impact);
   const max = Math.max(...values);
   const min = Math.min(...values);
 
   return results.map(bucket => ({
     ...bucket,
-    impact: ((bucket.absoluteImpact - min) / (max - min)) * 100 || 0
+    impact: ((bucket.impact - min) / (max - min)) * 100 || 0
   }));
 }
 
@@ -45,6 +44,7 @@ export function transactionGroupsTransformer({
   const results = buckets.map(bucket => {
     const averageResponseTime = bucket.avg.value;
     const transactionsPerMinute = bucket.doc_count / minutes;
+    const impact = bucket.sum.value;
     const sample = bucket.sample.hits.hits[0]._source;
 
     return {
@@ -53,8 +53,7 @@ export function transactionGroupsTransformer({
       p95: bucket.p95.values['95.0'],
       averageResponseTime,
       transactionsPerMinute,
-      impact: 0,
-      absoluteImpact: bucket.durationSum.value
+      impact
     };
   });
 

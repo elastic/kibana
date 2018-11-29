@@ -16,17 +16,9 @@ import { Setup } from '../helpers/setup_request';
 interface Bucket {
   key: string;
   doc_count: number;
-  avg: {
-    value: number;
-  };
-  p95: {
-    values: {
-      '95.0': number;
-    };
-  };
-  durationSum: {
-    value: number;
-  };
+  avg: { value: number };
+  p95: { values: { '95.0': number } };
+  sum: { value: number };
   sample: {
     hits: {
       total: number;
@@ -60,7 +52,7 @@ export function transactionGroupsFetcher(
         transactions: {
           terms: {
             field: `${TRANSACTION_NAME}.keyword`,
-            order: { durationSum: 'desc' },
+            order: { sum: 'desc' },
             size: 100
           },
           aggs: {
@@ -77,9 +69,7 @@ export function transactionGroupsFetcher(
             p95: {
               percentiles: { field: TRANSACTION_DURATION, percents: [95] }
             },
-            durationSum: {
-              sum: { field: 'transaction.duration.us' }
-            }
+            sum: { sum: { field: TRANSACTION_DURATION } }
           }
         }
       }

@@ -25,7 +25,7 @@ describe('transactionGroupsTransformer', () => {
       doc_count: 180,
       avg: { value: 255966.30555555556 },
       p95: { values: { '95.0': 320238.5 } },
-      durationSum: { value: 3000000000 },
+      sum: { value: 3000000000 },
       sample: {
         hits: {
           total: 180,
@@ -48,7 +48,6 @@ describe('transactionGroupsTransformer', () => {
       {
         averageResponseTime: 255966.30555555556,
         impact: 0,
-        absoluteImpact: 3000000000,
         name: 'POST /api/orders',
         p95: 320238.5,
         sample: 'sample source',
@@ -57,13 +56,13 @@ describe('transactionGroupsTransformer', () => {
     ]);
   });
 
-  it('should calculate relative impact from durationSum', () => {
-    const getBucket = (durationSum: number) => ({
+  it('should calculate impact from sum', () => {
+    const getBucket = (sum: number) => ({
       key: 'POST /api/orders',
       doc_count: 180,
       avg: { value: 300000 },
       p95: { values: { '95.0': 320000 } },
-      durationSum: { value: durationSum },
+      sum: { value: sum },
       sample: { hits: { total: 180, hits: [{ _source: 'sample source' }] } }
     });
 
