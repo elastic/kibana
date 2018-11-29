@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-
 import { sideNavItems } from '../components/sidebar_nav';
 
 const activeProps = { visible: true, disabled: false };
@@ -66,6 +64,6 @@ const managementSections = [
 
 describe('Management', () => {
   it('filters and filters and maps section objects into SidebarNav items', () => {
-    expect(sideNavItems(managementSections, 'active-item-id')).to.equal({});
+    expect(sideNavItems(managementSections, 'active-item-id')).toMatchSnapshot();
   });
 });
