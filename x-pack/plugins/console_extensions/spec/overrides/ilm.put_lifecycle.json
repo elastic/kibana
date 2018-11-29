@@ -3,10 +3,29 @@
     "data_autocomplete_rules": {
       "phases": {
         "warm": {
-          "after": "",
+          "__template": {
+            "after": "1d",
+            "actions": {
+              "allocate": {
+                "number_of_replicas": 1,
+                "include": {},
+                "exclude": {},
+                "require": {
+                  "_name": ""
+                }
+              },
+              "shrink": {
+                "number_of_shards": 1
+              },
+              "forcemerge": {
+                "max_num_segments": 1
+              }
+            }  
+          },
+          "after": "1d",
           "actions": {
             "allocate": {
-              "number_of_replicas": "",
+              "number_of_replicas": 1,
               "include": {},
               "exclude": {},
               "require": {
@@ -14,18 +33,31 @@
               }
             },
             "shrink": {
-              "number_of_shards": ""
+              "number_of_shards": 1
             },
             "forcemerge": {
-              "max_num_segments": ""
+              "max_num_segments": 1
             }
           }
         },
         "cold": {
-          "after": "",
+          "__template": {
+            "after": "1d",
+            "actions": {
+              "allocate": {
+                "number_of_replicas": 1,
+                "include": {},
+                "exclude": {},
+                "require": {
+                  "_name": ""
+                }
+              }
+            }  
+          },
+          "after": "1d",
           "actions": {
             "allocate": {
-              "number_of_replicas": "",
+              "number_of_replicas": 1,
               "include": {},
               "exclude": {},
               "require": {
@@ -35,15 +67,41 @@
           }
         },
         "hot": {
-          "after": "",
+          "__template": {
+            "after": "1d",
+            "actions": {
+              "allocate": {
+                "number_of_replicas": 1,
+                "include": {},
+                "exclude": {},
+                "require": {
+                  "_name": ""
+                }
+              },
+              "shrink": {
+                "number_of_shards": 1
+              },
+              "forcemerge": {
+                "max_num_segments": 1
+              }
+            }  
+          },
+          "after": "1d",
           "actions": {
             "rollover": {
-              "max_age": ""
+              "max_age": "1d",
+              "max_size": ""
             }
           }
         },
         "delete": {
-          "after": "",
+          "__template": {
+            "after": "1d",
+            "actions": {
+              "delete": {}
+            }
+          },
+          "after": "1d",
           "actions": {
             "delete": {}
           }
