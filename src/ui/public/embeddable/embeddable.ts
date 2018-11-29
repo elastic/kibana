@@ -19,7 +19,7 @@
 
 import * as PropTypes from 'prop-types';
 import { Adapters } from 'ui/inspector';
-import { ContainerState } from './types';
+import { ContainerState, Filters, SavedVisualization, TimeRange } from './types';
 
 // TODO: we'll be able to get rid of this shape once all of dashboard is typescriptified too.
 export const embeddableShape = PropTypes.shape({
@@ -62,6 +62,10 @@ interface EmbeddableOptions {
 
 export abstract class Embeddable {
   public readonly metadata: EmbeddableMetadata = {};
+
+  public readonly filters: Filters = [];
+  public readonly timeRange: TimeRange = { to: '', from: '' };
+  public readonly savedVisualization: SavedVisualization = { id: '' };
 
   // TODO: Make title and editUrl required and move out of options parameter.
   constructor(options: EmbeddableOptions = {}) {

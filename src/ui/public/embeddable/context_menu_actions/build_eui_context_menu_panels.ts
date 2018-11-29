@@ -47,17 +47,19 @@ function buildEuiContextMenuPanelItemsAndChildPanels({
   actions,
   embeddable,
   containerState,
+  closeContextMenu,
 }: {
   contextMenuPanelId: string;
   actions: ContextMenuAction[];
   embeddable?: Embeddable;
   containerState: ContainerState;
+  closeContextMenu: any;
 }) {
   const items: EuiContextMenuPanelItemDescriptor[] = [];
   const childPanels: EuiContextMenuPanelDescriptor[] = [];
   const actionsForPanel = getActionsForPanel(contextMenuPanelId, actions);
   actionsForPanel.forEach(action => {
-    const isVisible = action.isVisible({ embeddable, containerState });
+    const isVisible = action.isVisible({ embeddable, containerState, closeContextMenu });
     if (!isVisible) {
       return;
     }
@@ -69,6 +71,7 @@ function buildEuiContextMenuPanelItemsAndChildPanels({
           actions,
           embeddable,
           containerState,
+          closeContextMenu,
         })
       );
     }
@@ -78,6 +81,7 @@ function buildEuiContextMenuPanelItemsAndChildPanels({
         action,
         containerState,
         embeddable,
+        closeContextMenu,
       })
     );
   });
@@ -99,17 +103,19 @@ export function buildEuiContextMenuPanels({
   actions,
   embeddable,
   containerState,
+  closeContextMenu,
 }: {
   contextMenuPanel: ContextMenuPanel;
   actions: ContextMenuAction[];
   embeddable?: Embeddable;
   containerState: ContainerState;
+  closeContextMenu: any;
 }): EuiContextMenuPanelDescriptor[] {
   const euiContextMenuPanel: EuiContextMenuPanelDescriptor = {
     id: contextMenuPanel.id,
     title: contextMenuPanel.title,
     items: [],
-    content: contextMenuPanel.getContent({ embeddable, containerState }),
+    content: contextMenuPanel.getContent({ embeddable, containerState, closeContextMenu }),
   };
   const contextMenuPanels = [euiContextMenuPanel];
 
@@ -118,6 +124,7 @@ export function buildEuiContextMenuPanels({
     actions,
     embeddable,
     containerState,
+    closeContextMenu,
   });
 
   euiContextMenuPanel.items = items;
@@ -135,29 +142,31 @@ function convertPanelActionToContextMenuItem({
   action,
   containerState,
   embeddable,
+  closeContextMenu,
 }: {
   action: ContextMenuAction;
   containerState: ContainerState;
   embeddable?: Embeddable;
+  closeContextMenu: any;
 }): EuiContextMenuPanelItemDescriptor {
   const menuPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: action.displayName,
     icon: action.icon,
     panel: _.get(action, 'childContextMenuPanel.id'),
-    disabled: action.isDisabled({ embeddable, containerState }),
+    disabled: action.isDisabled({ embeddable, containerState, closeContextMenu }),
     'data-test-subj': `dashboardPanelAction-${action.id}`,
   };
 
   if (action.onClick) {
     menuPanelItem.onClick = () => {
       if (action.onClick) {
-        action.onClick({ embeddable, containerState });
+        action.onClick({ embeddable, containerState, closeContextMenu });
       }
     };
   }
 
   if (action.getHref) {
-    menuPanelItem.href = action.getHref({ embeddable, containerState });
+    menuPanelItem.href = action.getHref({ embeddable, containerState, closeContextMenu });
   }
 
   return menuPanelItem;

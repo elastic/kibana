@@ -195,6 +195,7 @@ const mergeProps = (
       actions,
       embeddable: ownProps.embeddable,
       containerState,
+      closeContextMenu: closeMyContextMenuPanel,
     });
   }
 

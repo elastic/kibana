@@ -33,4 +33,6 @@ export interface PanelActionAPI {
    * Information about the current state of the panel and dashboard.
    */
   containerState: ContainerState;
+
+  closeContextMenu(): void;
 }
