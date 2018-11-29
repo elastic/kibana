@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { get, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { LearnMoreLink } from '../../../components/learn_more_link';
 import {
   EuiCallOut,
   EuiSelect,
@@ -181,6 +182,16 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
           onClose={onCancel}
         >
           {this.renderForm()}
+          <EuiSpacer size="m" />
+          <LearnMoreLink
+            docPath="indices-templates.html"
+            text={
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexTemplatesLink"
+                defaultMessage="Learn about index templates"
+              />
+            }
+          />
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
