@@ -44,7 +44,7 @@ import {
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 
 const KEY_CODES = {
   LEFT: 37,
