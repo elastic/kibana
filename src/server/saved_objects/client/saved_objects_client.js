@@ -107,7 +107,8 @@ export class SavedObjectsClient {
   async delete(type, id) {
     const response = await this._withKibanaIndex('deleteByQuery', {
       body: createIdQuery({ type, id }),
-      refresh: 'wait_for'
+      refresh: 'wait_for',
+      conflicts: 'proceed'
     });
 
     if (get(response, 'deleted') === 0) {
