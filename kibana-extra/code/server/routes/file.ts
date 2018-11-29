@@ -34,8 +34,18 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       const skip = queries.skip ? parseInt(queries.skip as string, 10) : 0;
       const depth = queries.depth ? parseInt(queries.depth as string, 10) : 0;
       const withParents = 'parents' in queries;
+      const flatten = 'flatten' in queries;
       try {
-        return await fileResolver.fileTree(uri, path, ref, skip, limit, withParents, depth);
+        return await fileResolver.fileTree(
+          uri,
+          path,
+          ref,
+          skip,
+          limit,
+          withParents,
+          depth,
+          flatten
+        );
       } catch (e) {
         if (e.isBoom) {
           return e;

@@ -9,6 +9,7 @@ import { EuiIcon, EuiSideNav } from '@elastic/eui';
 
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { last } from 'rxjs/operators';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
@@ -32,9 +33,11 @@ class CodeFileTree extends React.Component<Props> {
   }
 
   public onClick = (node: Tree) => {
-    const { resource, org, repo, revision } = this.props.match.params;
-    const pathType = node.type === FileTreeItemType.File ? PathTypes.blob : PathTypes.tree;
-    this.props.history.push(`/${resource}/${org}/${repo}/${pathType}/${revision}/${node.path}`);
+    const { resource, org, repo, revision, path } = this.props.match.params;
+    if (!(path === node.path)) {
+      const pathType = node.type === FileTreeItemType.File ? PathTypes.blob : PathTypes.tree;
+      this.props.history.push(`/${resource}/${org}/${repo}/${pathType}/${revision}/${node.path}`);
+    }
   };
 
   public getTreeToggler = (path: string) => () => {
@@ -45,14 +48,25 @@ class CodeFileTree extends React.Component<Props> {
     }
   };
 
+  public flattenDirectory: (node: Tree) => Tree[] = (node: Tree) => {
+    if (node.childrenCount === 1) {
+      return [node, ...this.flattenDirectory(node.children![0])];
+    } else {
+      return [node];
+    }
+  };
+
   public getItemRenderer = (node: Tree, forceOpen: boolean) => () => {
     const className = this.props.match.params.path === node.path ? 'activeFileNode' : 'fileNode';
     const onClick = () => this.onClick(node);
     switch (node.type) {
       case FileTreeItemType.Directory: {
-        const onFolderClick = () => {
-          this.getTreeToggler(node.path || '')();
-          this.onClick(node);
+        const onFolderClick = e => {
+          if (e.target.tagName === 'DIV') {
+            this.onClick(node);
+          } else {
+            this.getTreeToggler(node.path || '')();
+          }
         };
         return (
           <div onClick={onFolderClick} className={className}>
@@ -87,8 +101,26 @@ class CodeFileTree extends React.Component<Props> {
       renderItem: this.getItemRenderer(node, forceOpen),
       forceOpen,
     };
-    if (forceOpen && node.type === 1 && node.children && node.children.length > 0) {
-      data.items = node.children.map(this.treeToItems);
+    if (node.type === FileTreeItemType.Directory && Number(node.childrenCount) > 0) {
+      const nodes = this.flattenDirectory(node);
+      const length = nodes.length;
+      if (length > 1 && !(this.props.match.params.path === node.path)) {
+        data.name = nodes.map(n => n.name).join('/');
+        data.id = data.name;
+        const lastNode = nodes[length - 1];
+        const flattenNode = {
+          ...lastNode,
+          name: data.name,
+          id: data.id,
+        };
+        data.forceOpen = this.props.openedPaths.includes(flattenNode.path!);
+        data.renderItem = this.getItemRenderer(flattenNode, data.forceOpen);
+        if (Number(flattenNode.childrenCount) > 0) {
+          data.items = flattenNode.children!.map(this.treeToItems);
+        }
+      } else {
+        data.items = node.children!.map(this.treeToItems);
+      }
     }
     return data;
   };

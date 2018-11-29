@@ -144,7 +144,8 @@ export class GitOperations {
     skip: number = 0,
     limit: number = DEFAULT_TREE_CHILDREN_LIMIT,
     resolveParents: boolean = false,
-    childrenDepth: number = 1
+    childrenDepth: number = 1,
+    flatten: boolean = false
   ): Promise<FileTree> {
     const repo = await this.openRepo(uri);
     const commit = await this.getCommit(repo, revision);
@@ -163,12 +164,21 @@ export class GitOperations {
         [],
         skip,
         limit,
-        childrenDepth
+        childrenDepth,
+        flatten
       );
     };
     if (path) {
       if (resolveParents) {
-        return this.walkTree(await getRoot(), tree, path.split('/'), skip, limit, childrenDepth);
+        return this.walkTree(
+          await getRoot(),
+          tree,
+          path.split('/'),
+          skip,
+          limit,
+          childrenDepth,
+          flatten
+        );
       } else {
         const entry = await checkExists(
           () => Promise.resolve(tree.getEntry(path)),
@@ -176,7 +186,7 @@ export class GitOperations {
         );
         if (entry.isDirectory()) {
           const tree1 = await entry.getTree();
-          return this.walkTree(entry2Tree(entry), tree1, [], skip, limit, childrenDepth);
+          return this.walkTree(entry2Tree(entry), tree1, [], skip, limit, childrenDepth, flatten);
         } else {
           return entry2Tree(entry);
         }
@@ -286,22 +296,40 @@ export class GitOperations {
     paths: string[],
     skip: number,
     limit: number,
-    childrenDepth: number = 1
+    childrenDepth: number = 1,
+    flatten: boolean = false
   ): Promise<FileTree> {
     const [path, ...rest] = paths;
+    fileTree.childrenCount = tree.entryCount();
     if (!fileTree.children) {
       fileTree.children = [];
       for (const e of tree.entries().slice(skip, limit)) {
-        if (e.path() !== path) {
-          const child = entry2Tree(e);
-          fileTree.children.push(child);
-          if (e.isDirectory() && childrenDepth > 1) {
-            await this.walkTree(child, await e.getTree(), [], skip, limit, childrenDepth - 1);
+        const child = entry2Tree(e);
+        fileTree.children.push(child);
+        if (e.isDirectory()) {
+          const childChildrenCount = (await this.walkTree(
+            { ...child },
+            await e.getTree(),
+            [],
+            skip,
+            limit,
+            childrenDepth,
+            flatten
+          )).childrenCount;
+          if ((childChildrenCount === 1 && flatten) || childrenDepth > 1) {
+            await this.walkTree(
+              child,
+              await e.getTree(),
+              [],
+              skip,
+              limit,
+              childrenDepth - 1,
+              flatten
+            );
           }
         }
       }
     }
-    fileTree.childrenCount = tree.entryCount();
     if (path) {
       const entry = await checkExists(
         () => Promise.resolve(tree.getEntry(path)),
@@ -309,7 +337,15 @@ export class GitOperations {
       );
       let child = entry2Tree(entry);
       if (entry.isDirectory()) {
-        child = await this.walkTree(child, await entry.getTree(), rest, skip, limit, childrenDepth);
+        child = await this.walkTree(
+          child,
+          await entry.getTree(),
+          rest,
+          skip,
+          limit,
+          childrenDepth,
+          flatten
+        );
       }
       const idx = fileTree.children.findIndex(c => c.name === entry.name());
       if (idx >= 0) {

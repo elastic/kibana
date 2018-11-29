@@ -5,7 +5,7 @@
  */
 
 import { Action } from 'redux-actions';
-import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { call, put, takeEvery, takeLatest } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { FileTree } from '../../model';
 import {
@@ -77,7 +77,7 @@ function* fetchPath(payload: FetchRepoTreePayload) {
 function requestRepoTree({ uri, revision, path, limit = 50 }: FetchRepoTreePayload) {
   return kfetch({
     pathname: `../api/code/repo/${uri}/tree/${revision}/${path}`,
-    query: { parents: true, limit },
+    query: { parents: true, limit, flatten: true },
   });
 }
 
