@@ -11,7 +11,7 @@ import { wrapEsError, wrapCustomError, wrapUnknownError } from '../../../lib/err
 
 import { get } from 'lodash';
 import { doesClusterExist } from '../../../lib/does_cluster_exist';
-import { deserializeCluster, serializeCluster } from '../../../lib/cluster_serialization';
+import { serializeCluster, deserializeCluster } from '../../../lib/cluster_serialization';
 
 export function registerAddRoute(server) {
   const isEsError = isEsErrorFactory(server);
@@ -22,19 +22,7 @@ export function registerAddRoute(server) {
     method: 'POST',
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { name, ...rest } = request.payload;
-
-      const addClusterPayload = {
-        persistent: {
-          cluster: {
-            remote: {
-              [name]: {
-                ...serializeCluster(rest),
-              }
-            }
-          }
-        }
-      };
+      const { name, seeds, skipUnavailable } = request.payload;
 
       // Check if cluster already exists
       try {
@@ -47,17 +35,21 @@ export function registerAddRoute(server) {
       }
 
       try {
+        const addClusterPayload = serializeCluster({ name, seeds, skipUnavailable });
         const response = await callWithRequest('cluster.putSettings', { body: addClusterPayload });
         const acknowledged = get(response, 'acknowledged');
         const cluster = get(response, `persistent.cluster.remote.${name}`);
 
-        if(acknowledged && cluster) {
-          return deserializeCluster(name, cluster);
+        if (acknowledged && cluster) {
+          return {
+            ...deserializeCluster(name, cluster),
+            isConfiguredByNode: false,
+          };
         }
 
-        // If for some reason the ES response does not have the updated cluster information,
+        // If for some reason the ES response did not acknowledge,
         // return an error. This shouldn't happen.
-        return wrapCustomError(new Error('Unable to add cluster, no information returned from ES.'), 400);
+        return wrapCustomError(new Error('Unable to add cluster, no response returned from ES.'), 400);
       } catch (err) {
         if (isEsError(err)) {
           return wrapEsError(err);
@@ -72,7 +64,7 @@ export function registerAddRoute(server) {
         payload: Joi.object({
           name: Joi.string().required(),
           seeds: Joi.array().items(Joi.string()).required(),
-          skipUnavailable: Joi.boolean().optional(),
+          skipUnavailable: Joi.boolean().allow(null).optional(),
         }).required()
       }
     }

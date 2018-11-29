@@ -13,7 +13,9 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingKibana,
   EuiLoadingSpinner,
+  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -46,6 +48,8 @@ export class RemoteClusterListUi extends Component {
     openDetailPanel: PropTypes.func,
     clusters: PropTypes.array,
     isLoading: PropTypes.bool,
+    isCopyingCluster: PropTypes.bool,
+    isRemovingCluster: PropTypes.bool,
   }
 
   static getDerivedStateFromProps(props) {
@@ -101,6 +105,20 @@ export class RemoteClusterListUi extends Component {
         </EuiTitle>
       </EuiPageContentHeaderSection>
     );
+  }
+
+  renderBlockingAction() {
+    const { isCopyingCluster, isRemovingCluster } = this.props;
+
+    if (isCopyingCluster || isRemovingCluster) {
+      return (
+        <EuiOverlayMask>
+          <EuiLoadingKibana size="xl"/>
+        </EuiOverlayMask>
+      );
+    }
+
+    return null;
   }
 
   renderNoPermission() {
@@ -163,7 +181,7 @@ export class RemoteClusterListUi extends Component {
           <h1>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterList.emptyPromptTitle"
-              defaultMessage="Connect your first remote cluster"
+              defaultMessage="Add your first remote cluster"
             />
           </h1>
         )}
@@ -185,7 +203,7 @@ export class RemoteClusterListUi extends Component {
           >
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterList.emptyPrompt.connectButtonLabel"
-              defaultMessage="Connect a remote cluster"
+              defaultMessage="Add a remote cluster"
             />
           </EuiButton>
         }
@@ -237,7 +255,7 @@ export class RemoteClusterListUi extends Component {
             >
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterList.connectButtonLabel"
-                defaultMessage="Connect a remote cluster"
+                defaultMessage="Add a remote cluster"
               />
             </EuiButton>
           </EuiPageContentHeaderSection>
@@ -272,6 +290,8 @@ export class RemoteClusterListUi extends Component {
         <EuiPageBody>
           <EuiPageContent>
             {content}
+
+            {this.renderBlockingAction()}
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

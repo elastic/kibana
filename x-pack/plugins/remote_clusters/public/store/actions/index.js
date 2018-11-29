@@ -5,22 +5,22 @@
  */
 
 export {
+  addCluster,
+  clearAddClusterErrors,
+} from './add_cluster';
+
+export {
+  copyCluster,
+} from './copy_cluster';
+
+export {
   openDetailPanel,
   closeDetailPanel,
 } from './detail_panel';
 
 export {
-  loadClusters,
-} from './load_clusters';
-
-export {
-  refreshClusters,
-} from './refresh_clusters';
-
-export {
-  addCluster,
-  clearAddClusterErrors,
-} from './add_cluster';
+  removeClusters,
+} from './remove_clusters';
 
 export {
   editCluster,
@@ -30,5 +30,9 @@ export {
 } from './edit_cluster';
 
 export {
-  disconnectClusters,
-} from './disconnect_clusters';
+  loadClusters,
+} from './load_clusters';
+
+export {
+  refreshClusters,
+} from './refresh_clusters';

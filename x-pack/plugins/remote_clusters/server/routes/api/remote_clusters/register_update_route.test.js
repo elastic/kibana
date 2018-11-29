@@ -65,7 +65,8 @@ describe('[API Routes] Remote Clusters Update', () => {
 
     expect(response).toEqual({
       name: 'test_cluster',
-      seeds: []
+      seeds: [],
+      isConfiguredByNode: false,
     });
   });
 
@@ -87,7 +88,7 @@ describe('[API Routes] Remote Clusters Update', () => {
       }
     });
 
-    expect(response).toEqual(wrapCustomError(new Error('Unable to update cluster, no information returned from ES.'), 400));
+    expect(response).toEqual(wrapCustomError(new Error('Unable to update cluster, no response returned from ES.'), 400));
   });
 
   it('should return an error if the cluster does not exist', async () => {

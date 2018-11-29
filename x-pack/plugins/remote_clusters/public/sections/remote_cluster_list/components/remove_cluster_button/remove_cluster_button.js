@@ -14,9 +14,9 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
-export class DisconnectButtonUi extends Component {
+export class RemoveClusterButtonUi extends Component {
   static propTypes = {
-    disconnectClusters: PropTypes.func.isRequired,
+    removeClusters: PropTypes.func.isRequired,
     clusterNames: PropTypes.array.isRequired,
     isSmallButton: PropTypes.bool,
   };
@@ -42,8 +42,8 @@ export class DisconnectButtonUi extends Component {
   };
 
   onConfirm = () => {
-    const { disconnectClusters, clusterNames } = this.props;
-    disconnectClusters(clusterNames);
+    const { removeClusters, clusterNames } = this.props;
+    removeClusters(clusterNames);
     this.closeConfirmModal();
   }
 
@@ -51,28 +51,28 @@ export class DisconnectButtonUi extends Component {
     const { clusterNames, isSmallButton } = this.props;
     const isSingleCluster = clusterNames.length === 1;
 
-    if(isSmallButton) {
+    if (isSmallButton) {
       return (
         <FormattedMessage
-          id="xpack.remoteClusters.disconnectButton.shortButtonLabel"
-          defaultMessage="Disconnect"
+          id="xpack.remoteClusters.removeButton.shortButtonLabel"
+          defaultMessage="Remove"
         />
       );
     }
 
-    if(isSingleCluster) {
+    if (isSingleCluster) {
       return (
         <FormattedMessage
-          id="xpack.remoteClusters.disconnectButton.singleButtonLabel"
-          defaultMessage="Disconnect remote cluster"
+          id="xpack.remoteClusters.removeButton.singleButtonLabel"
+          defaultMessage="Remove remote cluster"
         />
       );
     }
 
     return (
       <FormattedMessage
-        id="xpack.remoteClusters.disconnectButton.multipleButtonLabel"
-        defaultMessage="Disconnect {count} remote clusters"
+        id="xpack.remoteClusters.removeButton.multipleButtonLabel"
+        defaultMessage="Remove {count} remote clusters"
         values={{ count: clusterNames.length }}
       />
     );
@@ -87,23 +87,24 @@ export class DisconnectButtonUi extends Component {
 
     if (isModalOpen) {
       const title = isSingleCluster ? intl.formatMessage({
-        id: 'xpack.remoteClusters.disconnectButton.confirmModal.deleteSingleClusterTitle',
-        defaultMessage: 'Disconnect remote cluster \'{name}\'?',
+        id: 'xpack.remoteClusters.removeButton.confirmModal.deleteSingleClusterTitle',
+        defaultMessage: 'Remove remote cluster \'{name}\'?',
       }, { name: clusterNames[0] }) : intl.formatMessage({
-        id: 'xpack.remoteClusters.disconnectButton.confirmModal.multipleDeletionTitle',
-        defaultMessage: 'Disconnect {count} remote clusters?',
+        id: 'xpack.remoteClusters.removeButton.confirmModal.multipleDeletionTitle',
+        defaultMessage: 'Remove {count} remote clusters?',
       }, { count: clusterNames.length });
 
-      const content = isSingleCluster ? null : (
+      const content = (
         <Fragment>
           <p>
             <FormattedMessage
-              id="xpack.remoteClusters.disconnectButton.confirmModal.multipleDeletionDescription"
-              defaultMessage="You are about to disconnect from {isSingleCluster, plural, one {this cluster} other {these clusters}}"
+              id="xpack.remoteClusters.removeButton.confirmModal.multipleDeletionDescription"
+              defaultMessage="You are about to remove {isSingleCluster, plural, one
+                {this remote cluster.} other {these remote clusters:}}"
               values={{ isSingleCluster: isSingleCluster ? 1 : 0 }}
             />
           </p>
-          {<ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>}
+          { isSingleCluster ? null : (<ul>{clusterNames.map(name => <li key={name}>{name}</li>)}</ul>)}
         </Fragment>
       );
 
@@ -115,15 +116,15 @@ export class DisconnectButtonUi extends Component {
             onConfirm={this.onConfirm}
             cancelButtonText={
               intl.formatMessage({
-                id: 'xpack.remoteClusters.disconnectButton.confirmModal.cancelButtonText',
+                id: 'xpack.remoteClusters.removeButton.confirmModal.cancelButtonText',
                 defaultMessage: 'Cancel',
               })
             }
             buttonColor="danger"
             confirmButtonText={
               intl.formatMessage({
-                id: 'xpack.remoteClusters.disconnectButton.confirmModal.confirmButtonText',
-                defaultMessage: 'Disconnect',
+                id: 'xpack.remoteClusters.removeButton.confirmModal.confirmButtonText',
+                defaultMessage: 'Remove',
               })
             }
           >
@@ -135,7 +136,10 @@ export class DisconnectButtonUi extends Component {
 
     return (
       <Fragment>
-        <EuiButton color="danger" onClick={this.showConfirmModal}>
+        <EuiButton
+          color="danger"
+          onClick={this.showConfirmModal}
+        >
           {this.renderButtonText()}
         </EuiButton>
         {modal}
@@ -144,4 +148,4 @@ export class DisconnectButtonUi extends Component {
   }
 }
 
-export const DisconnectButton = injectI18n(DisconnectButtonUi);
+export const RemoveClusterButton = injectI18n(RemoveClusterButtonUi);

@@ -63,7 +63,8 @@ describe('[API Routes] Remote Clusters Add', () => {
 
     expect(response).toEqual({
       name: 'test_cluster',
-      seeds: []
+      seeds: [],
+      isConfiguredByNode: false,
     });
   });
 
@@ -83,7 +84,7 @@ describe('[API Routes] Remote Clusters Add', () => {
       }
     });
 
-    expect(response).toEqual(wrapCustomError(new Error('Unable to add cluster, no information returned from ES.'), 400));
+    expect(response).toEqual(wrapCustomError(new Error('Unable to add cluster, no response returned from ES.'), 400));
   });
 
   it('should return an error if the cluster already exists', async () => {

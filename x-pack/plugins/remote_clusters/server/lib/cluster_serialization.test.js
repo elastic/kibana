@@ -55,7 +55,7 @@ describe('cluster_serialization', () => {
         connectedNodesCount: 1,
         maxConnectionsPerCluster: 3,
         initialConnectTimeout: '30s',
-        skipUnavailable: false
+        skipUnavailable: false,
       });
     });
 
@@ -97,21 +97,35 @@ describe('cluster_serialization', () => {
         transportPingSchedule: '-1',
         transportCompress: false,
       })).toEqual({
-        seeds: [ 'localhost:9300' ],
-        skip_unavailable: false,
+        persistent: {
+          cluster: {
+            remote: {
+              test_cluster: {
+                seeds: [ 'localhost:9300' ],
+                skip_unavailable: false,
+              },
+            },
+          },
+        },
       });
     });
 
     it('should serialize a cluster object with missing properties', () => {
       expect(serializeCluster({
+        name: 'test_cluster',
         seeds: [ 'localhost:9300' ],
       })).toEqual({
-        seeds: [ 'localhost:9300' ],
+        persistent: {
+          cluster: {
+            remote: {
+              test_cluster: {
+                seeds: [ 'localhost:9300' ],
+                skip_unavailable: null,
+              },
+            },
+          },
+        },
       });
-
-      expect(serializeCluster({
-        name: 'test_cluster',
-      })).toEqual({});
     });
   });
 });

@@ -9,7 +9,9 @@ import { connect } from 'react-redux';
 import {
   getClustersList,
   isLoading,
-  clusterLoadError
+  isEditingCluster,
+  isRemovingCluster,
+  clusterLoadError,
 } from '../../store/selectors';
 
 import {
@@ -25,6 +27,8 @@ const mapStateToProps = (state) => {
   return {
     clusters: getClustersList(state),
     isLoading: isLoading(state),
+    isCopyingCluster: isEditingCluster(state),
+    isRemovingCluster: isRemovingCluster(state),
     clusterLoadError: clusterLoadError(state),
   };
 };

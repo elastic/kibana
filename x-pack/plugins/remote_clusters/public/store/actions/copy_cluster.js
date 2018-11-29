@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fatalError } from 'ui/notify';
+import { fatalError, toastNotifications } from 'ui/notify';
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { loadClusters } from './load_clusters';
 
@@ -15,15 +15,12 @@ import {
 } from '../../services';
 
 import {
-  EDIT_CLUSTER_START,
-  EDIT_CLUSTER_STOP,
   EDIT_CLUSTER_SAVE,
   EDIT_CLUSTER_SUCCESS,
   EDIT_CLUSTER_FAILURE,
-  CLEAR_EDIT_CLUSTER_ERRORS,
 } from '../action_types';
 
-export const editCluster = (cluster) => async (dispatch) => {
+export const copyCluster = (cluster) => async (dispatch) => {
   dispatch({
     type: EDIT_CLUSTER_SAVE,
   });
@@ -44,7 +41,7 @@ export const editCluster = (cluster) => async (dispatch) => {
           type: EDIT_CLUSTER_FAILURE,
           payload: {
             error: {
-              message: i18n.translate('xpack.remoteClusters.editAction.failedDefaultErrorMessage', {
+              message: i18n.translate('xpack.remoteClusters.redefineAction.failedDefaultErrorMessage', {
                 defaultMessage: 'Request failed with a {statusCode} error. {message}',
                 values: { statusCode, message: data.message },
               }),
@@ -57,43 +54,26 @@ export const editCluster = (cluster) => async (dispatch) => {
 
     // This error isn't an HTTP error, so let the fatal error screen tell the user something
     // unexpected happened.
-    return fatalError(error, i18n.translate('xpack.remoteClusters.editAction.errorTitle', {
-      defaultMessage: 'Error editing cluster',
+    return fatalError(error, i18n.translate('xpack.remoteClusters.redefineAction.errorTitle', {
+      defaultMessage: 'Error copying cluster',
     }));
   }
+
+  toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.redefineAction.successTitle', {
+    defaultMessage: `Created persistent copy of '{name}'`,
+    values: { name: cluster.name },
+  }));
 
   dispatch({
     type: EDIT_CLUSTER_SUCCESS,
   });
+
+  dispatch(loadClusters());
 
   // This will open the new job in the detail panel. Note that we're *not* showing a success toast
   // here, because it would partially obscure the detail panel.
   getRouter().history.push({
     pathname: `${CRUD_APP_BASE_PATH}/list`,
     search: `?cluster=${cluster.name}`,
-  });
-};
-
-export const startEditingCluster = ({ clusterName }) => (dispatch) => {
-  dispatch(loadClusters());
-
-  dispatch({
-    type: EDIT_CLUSTER_START,
-    payload: { clusterName },
-  });
-};
-
-export const stopEditingCluster = () => (dispatch) => {
-  // Load the clusters to refresh the one we just edited.
-  dispatch(loadClusters());
-
-  dispatch({
-    type: EDIT_CLUSTER_STOP,
-  });
-};
-
-export const clearEditClusterErrors = () => (dispatch) => {
-  dispatch({
-    type: CLEAR_EDIT_CLUSTER_ERRORS,
   });
 };

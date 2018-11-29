@@ -21,3 +21,5 @@ export const getAddClusterError = (state) => state.addCluster.error;
 export const getEditedCluster = (state) => getClustersByName(state)[state.editCluster.clusterName];
 export const isEditingCluster = (state) => state.editCluster.isEditing;
 export const getEditClusterError = (state) => state.editCluster.error;
+
+export const isRemovingCluster = (state) => state.removeCluster.isRemoving;

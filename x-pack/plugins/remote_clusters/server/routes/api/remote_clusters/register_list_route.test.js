@@ -45,8 +45,8 @@ describe('[API Routes] Remote Clusters List', () => {
     const response = await routeHandler();
 
     expect(response).toEqual([
-      { name: 'abc', seeds: ['xyz'] },
-      { name: 'foo', seeds: ['bar'] }
+      { name: 'abc', seeds: ['xyz'], isConfiguredByNode: true },
+      { name: 'foo', seeds: ['bar'], isConfiguredByNode: true }
     ]);
   });
 
