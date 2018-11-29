@@ -8,8 +8,8 @@ import { IconType } from '@elastic/eui';
 import _ from 'lodash';
 
 export interface FeaturePrivilegeDefinition {
-  metadata: {
-    tooltip: string;
+  metadata?: {
+    tooltip?: string;
   };
   api?: string[];
   app: string[];
