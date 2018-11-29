@@ -100,7 +100,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async isAbsoluteSectionShowing() {
       log.debug('isAbsoluteSectionShowing');
-      return await PageObjects.common.doesCssSelectorExist('input[ng-model=\'absolute.from\']');
+      return await find.existsByCssSelector('input[ng-model=\'absolute.from\']');
     }
 
     async showAbsoluteSection() {

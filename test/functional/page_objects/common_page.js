@@ -286,21 +286,6 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('top-nav');
     }
 
-    async doesCssSelectorExist(selector) {
-      log.debug(`doesCssSelectorExist ${selector}`);
-
-      const exists = await remote
-        .setFindTimeout(1000)
-        .findByCssSelector(selector)
-        .then(() => true)
-        .catch(() => false);
-
-      remote.setFindTimeout(defaultFindTimeout);
-
-      log.debug(`exists? ${exists}`);
-      return exists;
-    }
-
     async isChromeVisible() {
       const globalNavShown = await testSubjects.exists('globalNav');
       const topNavShown = await testSubjects.exists('top-nav');
