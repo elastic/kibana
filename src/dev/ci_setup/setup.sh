@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-set -o pipefail
 
 dir="$(pwd)"
 cacheDir="${CACHE_DIR:-"$HOME/.kibana"}"
