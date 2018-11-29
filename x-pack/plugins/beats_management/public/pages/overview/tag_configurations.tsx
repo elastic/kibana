@@ -40,7 +40,7 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
       size="s"
       color="primary"
       onClick={async () => {
-        // goTo('/tag/create');
+        this.props.goTo('/tag/create');
       }}
     >
       Add Tag

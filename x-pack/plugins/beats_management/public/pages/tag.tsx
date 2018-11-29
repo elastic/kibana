@@ -93,7 +93,7 @@ export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tags')}>
+              <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tag_configurations')}>
                 Cancel
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -132,7 +132,7 @@ export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
   };
   private saveTag = async () => {
     await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
-    this.props.goTo(`/overview/tags`);
+    this.props.goTo(`/overview/tag_configurations`);
   };
   private getNumExclusiveConfigurationBlocks = () =>
     this.state.tag.configuration_blocks
