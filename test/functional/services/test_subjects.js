@@ -139,7 +139,7 @@ export function TestSubjectsProvider({ getService }) {
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
-        const input = await browser.getActiveElement();
+        const input = await find.activeElement();
         await input.clearValue();
         await input.type(text);
       });

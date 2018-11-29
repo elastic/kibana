@@ -94,6 +94,10 @@ export function FindProvider({ getService }) {
       });
     }
 
+    async activeElement() {
+      return await remote.getActiveElement();
+    }
+
     async setValue(selector, text) {
       return await retry.try(async () => {
         const element = await this.byCssSelector(selector);
@@ -102,7 +106,7 @@ export function FindProvider({ getService }) {
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
-        const input = await remote.getActiveElement();
+        const input = await this.activeElement();
         await input.clearValue();
         await input.type(text);
       });
