@@ -181,6 +181,19 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    /**
+     * Asserts that the toolbar pagination (count and arrows) is either displayed or not displayed.
+     * @param { displayed: boolean }
+     */
+    async expectToolbarPaginationDisplayed({ displayed }) {
+      const subjects = ['btnPrevPage', 'btnNextPage', 'toolBarPagerText'];
+      if (displayed) {
+        return await Promise.all(subjects.map(async subj => await testSubjects.existOrFail(subj)));
+      } else {
+        return await Promise.all(subjects.map(async subj => await testSubjects.missingOrFail(subj)));
+      }
+    }
+
     async switchToEditMode() {
       log.debug('Switching to edit mode');
       await testSubjects.click('dashboardEditMode');
