@@ -48,7 +48,7 @@ export default () => ({
     },
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig || {});
+    const visConfigParams = JSON.parse(args.visConfig);
     const metrics = args.metric.split(',');
     metrics.forEach(metric => {
       const metricColumn = context.columns.find((column, i) =>

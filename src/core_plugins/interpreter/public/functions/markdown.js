@@ -43,7 +43,7 @@ export default () => ({
     }
   },
   fn(context, args) {
-    const params = args.visConfig ? JSON.parse(args.visConfig) : {};
+    const params = JSON.parse(args.visConfig);
     return {
       type: 'render',
       as: 'visualization',

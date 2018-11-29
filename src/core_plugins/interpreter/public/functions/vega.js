@@ -37,36 +37,35 @@ export default () => ({
   args: {
     spec: {
       types: ['string'],
-      default: '{}',
+      default: '',
       multi: false,
     },
   },
-  fn(context, args) {
-    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
-      const Private = $injector.get('Private');
-      const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
+  async fn(context, args) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get('Private');
+    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
 
-      const response = await vegaRequestHandler({
-        timeRange: get(context, 'timeRange', null),
-        query: get(context, 'q', null),
-        filters: get(context, 'filters', null),
-        visParams: { spec: args.spec },
-        forceFetch: true
-      });
-
-      return {
-        type: 'render',
-        as: 'visualization',
-        value: {
-          visData: response,
-          visConfig: {
-            type: 'vega',
-            params: {
-              spec: args.spec
-            }
-          },
-        }
-      };
+    const response = await vegaRequestHandler({
+      timeRange: get(context, 'timeRange', null),
+      query: get(context, 'q', null),
+      filters: get(context, 'filters', null),
+      visParams: { spec: args.spec },
+      forceFetch: true
     });
+
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: {
+        visData: response,
+        visConfig: {
+          type: 'vega',
+          params: {
+            spec: args.spec
+          }
+        },
+      }
+    };
   }
 });

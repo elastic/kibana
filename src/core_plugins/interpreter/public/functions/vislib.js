@@ -50,44 +50,43 @@ export default () => ({
       multi: false,
     },
   },
-  fn(context, args) {
-    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
-      const Private = $injector.get('Private');
-      const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
-      const visTypes = Private(VisTypesRegistryProvider);
-      const visConfigParams = JSON.parse(args.visConfig || {});
-      const schemas = JSON.parse(args.schemas);
-      const visType = visTypes.byName[args.type || 'histogram'];
+  async fn(context, args) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get('Private');
+    const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
+    const visTypes = Private(VisTypesRegistryProvider);
+    const visConfigParams = JSON.parse(args.visConfig);
+    const schemas = JSON.parse(args.schemas);
+    const visType = visTypes.byName[args.type || 'histogram'];
 
-      if (context.columns) {
-        // assign schemas to aggConfigs
-        context.columns.forEach(column => {
-          column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+    if (context.columns) {
+      // assign schemas to aggConfigs
+      context.columns.forEach(column => {
+        column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+      });
+
+      Object.keys(schemas).forEach(key => {
+        schemas[key].forEach(i => {
+          context.columns[i].aggConfig.schema = key;
         });
+      });
+    }
 
-        Object.keys(schemas).forEach(key => {
-          schemas[key].forEach(i => {
-            context.columns[i].aggConfig.schema = key;
-          });
-        });
-      }
+    const convertedData = await responseHandler(context);
 
-      const convertedData = await responseHandler(context);
-
-      return {
-        type: 'render',
-        as: 'visualization',
-        value: {
-          visData: convertedData,
-          visConfig: {
-            type: args.type,
-            params: visConfigParams,
-          },
-          params: {
-            listenOnChange: true,
-          }
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: {
+        visData: convertedData,
+        visConfig: {
+          type: args.type,
+          params: visConfigParams,
         },
-      };
-    });
+        params: {
+          listenOnChange: true,
+        }
+      },
+    };
   },
 });

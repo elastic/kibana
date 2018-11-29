@@ -61,40 +61,38 @@ export default () => ({
       multi: false,
     },
   },
-  fn(context, args, handlers) {
-    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
-      const Private = $injector.get('Private');
-      const indexPatterns = Private(IndexPatternsProvider);
-      const SearchSource = Private(SearchSourceProvider);
-      const queryFilter = Private(FilterBarQueryFilterProvider);
+  async fn(context, args, handlers) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get('Private');
+    const indexPatterns = Private(IndexPatternsProvider);
+    const SearchSource = Private(SearchSourceProvider);
+    const queryFilter = Private(FilterBarQueryFilterProvider);
 
-      const aggConfigsState = JSON.parse(args.aggConfigs);
-      const indexPattern = await indexPatterns.get(args.index);
-      const aggs = new AggConfigs(indexPattern, aggConfigsState);
+    const aggConfigsState = JSON.parse(args.aggConfigs);
+    const indexPattern = await indexPatterns.get(args.index);
+    const aggs = new AggConfigs(indexPattern, aggConfigsState);
 
-      // we should move searchSource creation inside courier request handler
-      const searchSource = new SearchSource();
-      searchSource.setField('index', indexPattern);
+    // we should move searchSource creation inside courier request handler
+    const searchSource = new SearchSource();
+    searchSource.setField('index', indexPattern);
 
-      const response = await courierRequestHandler({
-        searchSource: searchSource,
-        aggs: aggs,
-        timeRange: get(context, 'timeRange', null),
-        query: get(context, 'query', null),
-        filters: get(context, 'filters', null),
-        forceFetch: true,
-        isHierarchical: args.metricsAtAllLevels,
-        partialRows: args.partialRows,
-        inspectorAdapters: handlers.inspectorAdapters,
-        queryFilter,
-      });
-
-      return {
-        type: 'kibana_table',
-        index: args.index,
-        ...response,
-      };
-
+    const response = await courierRequestHandler({
+      searchSource: searchSource,
+      aggs: aggs,
+      timeRange: get(context, 'timeRange', null),
+      query: get(context, 'query', null),
+      filters: get(context, 'filters', null),
+      forceFetch: true,
+      isHierarchical: args.metricsAtAllLevels,
+      partialRows: args.partialRows,
+      inspectorAdapters: handlers.inspectorAdapters,
+      queryFilter,
     });
+
+    return {
+      type: 'kibana_table',
+      index: args.index,
+      ...response,
+    };
   },
 });

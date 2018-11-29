@@ -49,25 +49,23 @@ export default () => ({
       multi: false,
     }
   },
-  fn(context, args) {
-    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
-      const Private = $injector.get('Private');
-      const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
+  async fn(context, args) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get('Private');
+    const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
 
-      const response = await timelionRequestHandler({
-        timeRange: get(context, 'timeRange', null),
-        query: get(context, 'query', null),
-        filters: get(context, 'filters', null),
-        forceFetch: true,
-        visParams: { expression: args.expression, interval: args.interval }
-      });
-
-      return {
-        type: 'render',
-        as: 'visualization',
-        value: response,
-      };
-
+    const response = await timelionRequestHandler({
+      timeRange: get(context, 'timeRange', null),
+      query: get(context, 'query', null),
+      filters: get(context, 'filters', null),
+      forceFetch: true,
+      visParams: { expression: args.expression, interval: args.interval }
     });
+
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: response,
+    };
   },
 });

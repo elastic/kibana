@@ -68,75 +68,84 @@ export default () => ({
       default: '',
       multi: false,
     },
+    schemas: {
+      types: ['string'],
+      default: '"{}"',
+      multi: false,
+    },
     visConfig: {
       types: ['string'],
       default: '"{}"',
       multi: false,
+    },
+    uiState: {
+      types: ['string'],
+      default: '"{}"',
+      multi: false
     }
   },
-  fn(context, args, handlers) {
-    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
-      const Private = $injector.get('Private');
-      const requestHandlers = Private(RequestHandlersProvider);
-      const responseHandlers = Private(ResponseHandlerProvider);
-      const visTypes = Private(VisTypesRegistryProvider);
-      const indexPatterns = Private(IndexPatternsProvider);
-      const queryFilter = Private(FilterBarQueryFilterProvider);
+  async fn(context, args, handlers) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get('Private');
+    const requestHandlers = Private(RequestHandlersProvider);
+    const responseHandlers = Private(ResponseHandlerProvider);
+    const visTypes = Private(VisTypesRegistryProvider);
+    const indexPatterns = Private(IndexPatternsProvider);
+    const queryFilter = Private(FilterBarQueryFilterProvider);
 
-      const visConfigParams = JSON.parse(args.visConfig || {});
-      const schemas = JSON.parse(args.schemas);
-      const visType = visTypes.byName[args.type || 'histogram'];
-      const requestHandler = getHandler(requestHandlers, visType.requestHandler);
-      const responseHandler = getHandler(responseHandlers, visType.responseHandler);
-      const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
+    const visConfigParams = JSON.parse(args.visConfig);
+    const schemas = JSON.parse(args.schemas);
+    const visType = visTypes.byName[args.type || 'histogram'];
+    const requestHandler = getHandler(requestHandlers, visType.requestHandler);
+    const responseHandler = getHandler(responseHandlers, visType.responseHandler);
+    const indexPattern = args.index ? await indexPatterns.get(args.index) : null;
 
-      const uiStateParams = args.uiState ? JSON.parse(args.uiState) : {};
-      const uiState = new PersistedState(uiStateParams);
+    const uiStateParams = JSON.parse(args.uiState);
+    const uiState = new PersistedState(uiStateParams);
 
-      if (requestHandler) {
-        context = await requestHandler({
-          partialRows: args.partialRows,
-          metricsAtAllLevels: args.metricsAtAllLevels,
-          index: indexPattern,
-          visParams: visConfigParams,
-          timeRange: get(context, 'timeRange', null),
-          query: get(context, 'query', null),
-          filters: get(context, 'filters', null),
-          uiState: uiState,
-          inspectorAdapters: handlers.inspectorAdapters,
-          queryFilter,
-          forceFetch: true,
+    if (requestHandler) {
+      context = await requestHandler({
+        partialRows: args.partialRows,
+        metricsAtAllLevels: args.metricsAtAllLevels,
+        index: indexPattern,
+        visParams: visConfigParams,
+        timeRange: get(context, 'timeRange', null),
+        query: get(context, 'query', null),
+        filters: get(context, 'filters', null),
+        uiState: uiState,
+        inspectorAdapters: handlers.inspectorAdapters,
+        queryFilter,
+        forceFetch: true,
+      });
+    }
+
+    if (responseHandler) {
+      if (context.columns) {
+        // assign schemas to aggConfigs
+        context.columns.forEach(column => {
+          column.aggConfig.aggConfigs.schemas = visType.schemas.all;
+        });
+
+        Object.keys(schemas).forEach(key => {
+          schemas[key].forEach(i => {
+            context.columns[i].aggConfig.schema = key;
+          });
         });
       }
 
-      if (responseHandler) {
-        if (context.columns) {
-          // assign schemas to aggConfigs
-          context.columns.forEach(column => {
-            column.aggConfig.aggConfigs.schemas = visType.schemas.all;
-          });
+      context = await responseHandler(context);
+    }
 
-          Object.keys(schemas).forEach(key => {
-            schemas[key].forEach(i => {
-              context.columns[i].aggConfig.schema = key;
-            });
-          });
-        }
-
-        context = await responseHandler(context);
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: {
+        visData: context,
+        visConfig: {
+          type: args.type,
+          params: visConfigParams
+        },
       }
-
-      return {
-        type: 'render',
-        as: 'visualization',
-        value: {
-          visData: context,
-          visConfig: {
-            type: args.type,
-            params: visConfigParams
-          },
-        }
-      };
-    });
+    };
   }
 });

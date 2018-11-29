@@ -40,38 +40,36 @@ export default () => ({
   args: {
     params: {
       types: ['string'],
-      default: '""',
+      default: '"{}"',
       multi: false,
     },
     uiState: {
       types: ['string'],
-      default: '""',
+      default: '"{}"',
       multi: false
     }
   },
-  fn(context, args) {
-    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
-      const Private = $injector.get('Private');
-      const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
+  async fn(context, args) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get('Private');
+    const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
 
-      const params = JSON.parse(args.params);
-      const uiStateParams = args.uiState ? JSON.parse(args.uiState) : {};
-      const uiState = new PersistedState(uiStateParams);
+    const params = JSON.parse(args.params);
+    const uiStateParams = JSON.parse(args.uiState);
+    const uiState = new PersistedState(uiStateParams);
 
-      const response = await metricsRequestHandler({
-        timeRange: get(context, 'timeRange', null),
-        query: get(context, 'query', null),
-        filters: get(context, 'filters', null),
-        visParams: params,
-        uiState: uiState,
-      });
-
-      return {
-        type: 'render',
-        as: 'visualization',
-        value: response,
-      };
-
+    const response = await metricsRequestHandler({
+      timeRange: get(context, 'timeRange', null),
+      query: get(context, 'query', null),
+      filters: get(context, 'filters', null),
+      visParams: params,
+      uiState: uiState,
     });
+
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: response,
+    };
   },
 });

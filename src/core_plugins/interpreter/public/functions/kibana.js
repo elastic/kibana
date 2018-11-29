@@ -40,7 +40,7 @@ export default () => ({
       initialContext.filters = initialContext.filters.concat(context.filters);
     }
 
-    const timeRange = initialContext.timeRange ? JSON.parse(initialContext.timeRange) : context.timeRange;
+    const timeRange = initialContext.timeRange || context.timeRange;
 
     return {
       ...context,

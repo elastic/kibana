@@ -51,39 +51,38 @@ export default () => ({
       default: null,
     }
   },
-  fn(context, args) {
-    return chrome.dangerouslyGetActiveInjector().then(async $injector => {
-      const savedSearches = $injector.get('savedSearches');
-      const queryArg = args.q ? JSON.parse(args.q) : [];
-      let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
-      let filters = args.filters ? JSON.parse(args.filters) : [];
+  async fn(context, args) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const savedSearches = $injector.get('savedSearches');
+    const queryArg = args.q ? JSON.parse(args.q) : [];
+    let queries = Array.isArray(queryArg) ? queryArg : [queryArg];
+    let filters = args.filters ? JSON.parse(args.filters) : [];
 
-      if (args.savedSearchId) {
-        const savedSearch = await savedSearches.get(args.savedSearchId);
-        const searchQuery = savedSearch.searchSource.getField('query');
-        const searchFilters = savedSearch.searchSource.getField('filter');
-        queries = queries.concat(searchQuery);
-        filters = filters.concat(searchFilters);
-      }
+    if (args.savedSearchId) {
+      const savedSearch = await savedSearches.get(args.savedSearchId);
+      const searchQuery = savedSearch.searchSource.getField('query');
+      const searchFilters = savedSearch.searchSource.getField('filter');
+      queries = queries.concat(searchQuery);
+      filters = filters.concat(searchFilters);
+    }
 
-      if (context.query) {
-        const contextQueries = Array.isArray(context.query) ? context.query : [context.query];
-        queries = queries.concat(contextQueries);
-      }
+    if (context.query) {
+      const contextQueries = Array.isArray(context.query) ? context.query : [context.query];
+      queries = queries.concat(contextQueries);
+    }
 
-      if (context.filters) {
-        // merge filters
-        filters = filters.concat(context.filters);
-      }
+    if (context.filters) {
+      // merge filters
+      filters = filters.concat(context.filters);
+    }
 
-      const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;
+    const timeRange = args.timeRange ? JSON.parse(args.timeRange) : context.timeRange;
 
-      return {
-        type: 'kibana_context',
-        query: queries,
-        filters: filters,
-        timeRange: timeRange,
-      };
-    });
+    return {
+      type: 'kibana_context',
+      query: queries,
+      filters: filters,
+      timeRange: timeRange,
+    };
   },
 });
