@@ -294,7 +294,7 @@ export class VisualizeListingTable extends Component {
         return <KuiListingTableNoMatchesPrompt />;
       }
 
-      return <NoVisualizationsPrompt />;
+      return <NoVisualizationsPrompt onCreateVis={this.onCreate}/>;
     }
 
     return null;
