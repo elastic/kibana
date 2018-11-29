@@ -17,9 +17,43 @@
  * under the License.
  */
 
-import { buildPipelineVisFunction } from './build_pipeline';
+import { prepareJson, prepareString, buildPipelineVisFunction } from './build_pipeline';
 
 describe('visualize loader pipeline helpers: build pipeline', () => {
+  describe('prepareJson', () => {
+    it('returns a correctly formatted key/value string', () => {
+      const expected = `foo='{}' `; // trailing space is expected
+      const actual = prepareJson('foo', {});
+      expect(actual).toBe(expected);
+    });
+
+    it('stringifies provided data', () => {
+      const expected = `foo='{\"well\":\"hello\",\"there\":{\"friend\":true}}' `;
+      const actual = prepareJson('foo', { well: 'hello', there: { friend: true } });
+      expect(actual).toBe(expected);
+    });
+
+    it('escapes single quotes', () => {
+      const expected = `foo='{\"well\":\"hello \\'hi\\'\",\"there\":{\"friend\":true}}' `;
+      const actual = prepareJson('foo', { well: `hello 'hi'`, there: { friend: true } });
+      expect(actual).toBe(expected);
+    });
+  });
+
+  describe('prepareString', () => {
+    it('returns a correctly formatted key/value string', () => {
+      const expected = `foo='bar' `; // trailing space is expected
+      const actual = prepareString('foo', 'bar');
+      expect(actual).toBe(expected);
+    });
+
+    it('escapes single quotes', () => {
+      const expected = `foo='\\'bar\\'' `;
+      const actual = prepareString('foo', `'bar'`);
+      expect(actual).toBe(expected);
+    });
+  });
+
   describe('buildPipelineVisFunction', () => {
     it('handles vega function', () => {
       const params = { spec: 'this is a test' };
