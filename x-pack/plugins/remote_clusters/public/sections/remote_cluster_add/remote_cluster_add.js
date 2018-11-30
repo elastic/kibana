@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiBreadcrumbs,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -18,11 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps } from '../../services';
-
 import { RemoteClusterForm } from '../remote_cluster_form';
-
 
 export class RemoteClusterAddUi extends Component {
   static propTypes = {
@@ -44,23 +39,6 @@ export class RemoteClusterAddUi extends Component {
   render() {
     const { isAddingCluster, addClusterError } = this.props;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.remoteClusters.add.breadcrumbs.listText"
-          defaultMessage="Remote clusters"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.remoteClusters.add.breadcrumbs.addText"
-          defaultMessage="Add"
-        />
-      ),
-    }];
-
     return (
       <Fragment>
         <EuiPage>
@@ -69,7 +47,6 @@ export class RemoteClusterAddUi extends Component {
               horizontalPosition="center"
               className="remoteClusterAddPage"
             >
-              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
               <EuiSpacer size="xs" />
 
               <EuiPageContentHeader>

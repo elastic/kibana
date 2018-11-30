@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
-  EuiBreadcrumbs,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -25,8 +24,6 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps } from '../../services';
-
 import { RemoteClusterForm } from '../remote_cluster_form';
 
 const disabledFields = {
@@ -158,23 +155,6 @@ export class RemoteClusterEditUi extends Component {
       clusterName,
     } = this.state;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.remoteClusters.edit.breadcrumbs.listText"
-          defaultMessage="Remote clusters"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.remoteClusters.edit.breadcrumbs.addText"
-          defaultMessage="Edit"
-        />
-      ),
-    }];
-
     return (
       <Fragment>
         <EuiPage>
@@ -183,8 +163,6 @@ export class RemoteClusterEditUi extends Component {
               horizontalPosition="center"
               className="remoteClusterAddPage"
             >
-              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-
               <EuiSpacer size="xs" />
 
               <EuiPageContentHeader>

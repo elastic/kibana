@@ -18,6 +18,13 @@ export {
 } from './api_errors';
 
 export {
+  listBreadcrumb,
+  listBreadcrumbLink,
+  addBreadcrumb,
+  editBreadcrumb,
+} from './breadcrumbs';
+
+export {
   isSeedNodeValid,
   isSeedNodePortValid,
 } from './validate_seed_node';
