@@ -60,7 +60,7 @@ const loggingTimezone = (settings, log) => {
   if (_.has(settings, 'logging.useUTC')) {
     const timezone = settings.logging.useUTC ? 'UTC' : false;
     set('logging.timezone', timezone);
-    unset(settings, 'logging.UTC');
+    unset(settings, 'logging.useUTC');
     log(`Config key "logging.useUTC" is deprecated. It has been replaced with "logging.timezone"`);
   }
 };
