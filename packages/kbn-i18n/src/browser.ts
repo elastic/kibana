@@ -18,5 +18,6 @@
  */
 
 import * as i18nCore from './core';
+import './locales.js';
 
 export const i18n = i18nCore;

@@ -26,9 +26,6 @@ import { Formats, formats as EN_FORMATS } from './formats';
 import { hasValues, isObject, isString, mergeAll } from './helper';
 import { isPseudoLocale, translateUsingPseudoLocale } from './pseudo_locale';
 
-// Add all locale data to `IntlMessageFormat`.
-import './locales.js';
-
 const EN_LOCALE = 'en';
 const LOCALE_DELIMITER = '-';
 const translationsForLocale: Record<string, Translation> = {};
