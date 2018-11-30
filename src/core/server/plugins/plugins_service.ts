@@ -19,7 +19,7 @@
 
 import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
-import { CoreService, KibanaCore } from '../../types';
+import { BaseServices, CoreService } from '../../types';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { Plugin, PluginName } from './plugin';
@@ -34,24 +34,24 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
-  constructor(private readonly core: KibanaCore) {
-    this.log = core.logger.get('plugins-service');
-    this.pluginsSystem = new PluginsSystem(core);
+  constructor(private readonly baseServices: BaseServices) {
+    this.log = baseServices.logger.get('plugins-service');
+    this.pluginsSystem = new PluginsSystem(baseServices);
   }
 
   public async start() {
     this.log.debug('Starting plugins service');
 
-    const config = await this.core.configService
+    const config = await this.baseServices.configService
       .atPath('plugins', PluginsConfig)
       .pipe(first())
       .toPromise();
 
-    const { error$, plugin$ } = discover(config, this.core);
+    const { error$, plugin$ } = discover(config, this.baseServices);
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
-    if (!config.initialize || this.core.env.isDevClusterMaster) {
+    if (!config.initialize || this.baseServices.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
       return new Map();
     }
@@ -92,7 +92,9 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
     await plugin$
       .pipe(
         mergeMap(async plugin => {
-          const isEnabled = await this.core.configService.isEnabledAtPath(plugin.configPath);
+          const isEnabled = await this.baseServices.configService.isEnabledAtPath(
+            plugin.configPath
+          );
 
           if (pluginEnableStatuses.has(plugin.name)) {
             throw new Error(`Plugin with id "${plugin.name}" is already registered!`);

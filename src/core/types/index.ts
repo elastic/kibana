@@ -18,4 +18,4 @@
  */
 
 export { CoreService } from './core_service';
-export { KibanaCore } from './kibana_core';
+export { BaseServices } from './base_services';

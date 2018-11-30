@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KibanaCore } from '../../types';
+import { BaseServices } from '../../types';
 
 const mockCreatePluginInitializerCore = jest.fn();
 const mockCreatePluginStartCore = jest.fn();
@@ -55,7 +55,7 @@ function createPlugin(
 let pluginsSystem: PluginsSystem;
 let configService: ConfigService;
 let env: Env;
-let core: KibanaCore;
+let baseServices: BaseServices;
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
@@ -65,9 +65,9 @@ beforeEach(() => {
     logger
   );
 
-  core = { env, logger, configService };
+  baseServices = { env, logger, configService };
 
-  pluginsSystem = new PluginsSystem(core);
+  pluginsSystem = new PluginsSystem(baseServices);
 });
 
 afterEach(() => {
@@ -183,8 +183,8 @@ Array [
 `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginInitializerCore).toHaveBeenCalledWith(plugin, core);
-    expect(mockCreatePluginStartCore).toHaveBeenCalledWith(plugin, core);
+    expect(mockCreatePluginInitializerCore).toHaveBeenCalledWith(plugin, baseServices);
+    expect(mockCreatePluginStartCore).toHaveBeenCalledWith(plugin, baseServices);
 
     expect(plugin.init).toHaveBeenCalledTimes(1);
     expect(plugin.init).toHaveBeenCalledWith(initCoreMap.get(plugin.name));

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KibanaCore } from '../../types';
+import { BaseServices } from '../../types';
 import { PluginsService } from './plugins_service';
 
 /** @internal */
@@ -29,7 +29,7 @@ export { PluginName } from './plugin';
 export class PluginsModule {
   public readonly service: PluginsService;
 
-  constructor(core: KibanaCore) {
-    this.service = new PluginsService(core);
+  constructor(baseServices: BaseServices) {
+    this.service = new PluginsService(baseServices);
   }
 }

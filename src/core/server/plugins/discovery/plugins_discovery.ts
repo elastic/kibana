@@ -21,7 +21,7 @@ import { readdir, stat } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
-import { KibanaCore } from '../../../types';
+import { BaseServices } from '../../../types';
 import { Logger } from '../../logging';
 import { Plugin } from '../plugin';
 import { PluginsConfig } from '../plugins_config';
@@ -38,17 +38,17 @@ const fsStat$ = bindNodeCallback(stat);
  * all the errors that occurred during discovery process.
  *
  * @param config Plugin config instance.
- * @param core Kibana core values.
+ * @param baseServices Kibana core values.
  * @internal
  */
-export function discover(config: PluginsConfig, core: KibanaCore) {
-  const log = core.logger.get('plugins-discovery');
+export function discover(config: PluginsConfig, baseServices: BaseServices) {
+  const log = baseServices.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
   const discoveryResults$ = processPluginSearchPaths$(config.pluginSearchPaths, log).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, core)
+        ? createPlugin$(pluginPathOrError, log, baseServices)
         : [pluginPathOrError];
     }),
     shareReplay()
@@ -97,13 +97,13 @@ function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logge
  * isn't valid.
  * @param path Path to the plugin directory where manifest should be loaded from.
  * @param log Plugin discovery logger instance.
- * @param core Kibana core values.
+ * @param baseServices Kibana core values.
  */
-function createPlugin$(path: string, log: Logger, core: KibanaCore) {
-  return from(parseManifest(path, core.env.packageInfo)).pipe(
+function createPlugin$(path: string, log: Logger, baseServices: BaseServices) {
+  return from(parseManifest(path, baseServices.env.packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new Plugin(path, manifest, core.logger.get('plugins', manifest.id));
+      return new Plugin(path, manifest, baseServices.logger.get('plugins', manifest.id));
     }),
     catchError(err => [err])
   );

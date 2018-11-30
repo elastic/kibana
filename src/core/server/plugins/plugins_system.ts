@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { KibanaCore } from '../../types';
+import { BaseServices } from '../../types';
 import { Logger } from '../logging';
 import { Plugin, PluginName } from './plugin';
 import { createPluginInitializerCore, createPluginStartCore } from './plugins_core';
@@ -28,8 +28,8 @@ export class PluginsSystem {
   private readonly log: Logger;
   private readonly startedPlugins: PluginName[] = [];
 
-  constructor(private readonly core: KibanaCore) {
-    this.log = core.logger.get('plugins-system');
+  constructor(private readonly baseServices: BaseServices) {
+    this.log = baseServices.logger.get('plugins-system');
   }
 
   public addPlugin(plugin: Plugin) {
@@ -60,11 +60,14 @@ export class PluginsSystem {
         {} as Record<PluginName, unknown>
       );
 
-      plugin.init(createPluginInitializerCore(plugin, this.core));
+      plugin.init(createPluginInitializerCore(plugin, this.baseServices));
 
       exposedValues.set(
         pluginName,
-        await plugin.start(createPluginStartCore(plugin, this.core), exposedDependencyValues)
+        await plugin.start(
+          createPluginStartCore(plugin, this.baseServices),
+          exposedDependencyValues
+        )
       );
 
       this.startedPlugins.push(pluginName);

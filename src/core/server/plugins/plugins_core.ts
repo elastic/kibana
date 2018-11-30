@@ -19,7 +19,7 @@
 
 import { Type } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { KibanaCore } from '../../types';
+import { BaseServices } from '../../types';
 import { ConfigWithSchema, EnvironmentMode } from '../config';
 import { LoggerFactory } from '../logging';
 import { Plugin } from './plugin';
@@ -41,7 +41,7 @@ export interface PluginInitializerCore {
 export interface PluginStartCore {}
 
 /**
- * This returns a facade for `KibanaCore` that will be exposed to the plugin initializer.
+ * This returns a facade for `BaseServices` that will be exposed to the plugin initializer.
  * This facade should be safe to use across entire plugin lifespan.
  *
  * This is called for each plugin when it's created, so each plugin gets its own
@@ -50,25 +50,25 @@ export interface PluginStartCore {}
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param plugin The plugin we're building these values for.
- * @param core The core Kibana features
+ * @param baseServices The core Kibana features
  * @internal
  */
 export function createPluginInitializerCore<TPluginContract, TPluginDependencies>(
   plugin: Plugin<TPluginContract, TPluginDependencies>,
-  core: KibanaCore
+  baseServices: BaseServices
 ): PluginInitializerCore {
   return {
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
      */
-    env: { mode: core.env.mode },
+    env: { mode: baseServices.env.mode },
 
     /**
      * Plugin-scoped logger
      */
     logger: {
       get(...contextParts) {
-        return core.logger.get('plugins', plugin.name, ...contextParts);
+        return baseServices.logger.get('plugins', plugin.name, ...contextParts);
       },
     },
 
@@ -84,17 +84,17 @@ export function createPluginInitializerCore<TPluginContract, TPluginDependencies
        * static `schema` that we validate the config at the given `path` against.
        */
       create(ConfigClass) {
-        return core.configService.atPath(plugin.configPath, ConfigClass);
+        return baseServices.configService.atPath(plugin.configPath, ConfigClass);
       },
       createIfExists(ConfigClass) {
-        return core.configService.optionalAtPath(plugin.configPath, ConfigClass);
+        return baseServices.configService.optionalAtPath(plugin.configPath, ConfigClass);
       },
     },
   };
 }
 
 /**
- * This returns a facade for `KibanaCore` that will be exposed to the plugin `start` method.
+ * This returns a facade for `BaseServices` that will be exposed to the plugin `start` method.
  * This facade should be safe to use only within `start` itself.
  *
  * This is called for each plugin when it's started, so each plugin gets its own
@@ -103,12 +103,12 @@ export function createPluginInitializerCore<TPluginContract, TPluginDependencies
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param plugin The plugin we're building these values for.
- * @param core The core Kibana features
+ * @param baseServices The core Kibana features
  * @internal
  */
 export function createPluginStartCore<TPluginContract, TPluginDependencies>(
   plugin: Plugin<TPluginContract, TPluginDependencies>,
-  core: KibanaCore
+  baseServices: BaseServices
 ): PluginStartCore {
   return {};
 }

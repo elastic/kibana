@@ -25,7 +25,7 @@ import { LoggerFactory } from '../server/logging';
  * variety of places within the core itself.
  * @internal
  */
-export interface KibanaCore {
+export interface BaseServices {
   env: Env;
   configService: ConfigService;
   logger: LoggerFactory;
