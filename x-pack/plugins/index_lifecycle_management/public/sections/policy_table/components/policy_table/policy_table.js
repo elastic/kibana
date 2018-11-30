@@ -12,6 +12,9 @@ import { BASE_PATH } from '../../../../../common/constants';
 import { NoMatch } from '../no_match';
 import { getPolicyPath } from '../../../../services/navigation';
 import {
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui/lib/services';
+import {
   EuiBetaBadge,
   EuiButton,
   EuiLink,
@@ -40,22 +43,33 @@ import {
 import { ConfirmDelete } from './confirm_delete';
 import { AddPolicyToTemplateConfirmModal } from './add_policy_to_template_confirm_modal';
 import { getFilteredIndicesUri } from '../../../../../../index_management/public/services/navigation';
-const HEADERS = {
-  name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
-    defaultMessage: 'Name',
-  }),
-  coveredIndices: i18n.translate(
-    'xpack.indexLifecycleMgmt.policyTable.headers.coveredIndicesHeader',
-    {
-      defaultMessage: 'Covered indices',
-    }
-  ),
-  version: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.versionHeader', {
-    defaultMessage: 'Version',
-  }),
-  modified_date: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader', {
-    defaultMessage: 'Modified date',
-  }),
+const COLUMNS = {
+  name: {
+    label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.nameHeader', {
+      defaultMessage: 'Name',
+    }),
+  },
+  coveredIndices: {
+    label: i18n.translate(
+      'xpack.indexLifecycleMgmt.policyTable.headers.coveredIndicesHeader',
+      {
+        defaultMessage: 'Covered indices',
+      },
+    ),
+    width: 120
+  },
+  version: {
+    label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.versionHeader', {
+      defaultMessage: 'Version',
+    }),
+    width: 120
+  },
+  modified_date: {
+    label: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.modifiedDateHeader', {
+      defaultMessage: 'Modified date',
+    }),
+    width: 200
+  }
 };
 
 export class PolicyTableUi extends Component {
@@ -133,7 +147,7 @@ export class PolicyTableUi extends Component {
 
   buildHeader() {
     const { sortField, isSortAscending } = this.props;
-    const headers = Object.entries(HEADERS).map(([fieldName, label]) => {
+    const headers = Object.entries(COLUMNS).map(([fieldName, { label, width }]) => {
       const isSorted = sortField === fieldName;
       return (
         <EuiTableHeaderCell
@@ -143,6 +157,7 @@ export class PolicyTableUi extends Component {
           isSortAscending={isSortAscending}
           data-test-subj={`policyTableHeaderCell-${fieldName}`}
           className={'policyTable__header--' + fieldName}
+          width={width}
         >
           {label}
         </EuiTableHeaderCell>
@@ -152,7 +167,7 @@ export class PolicyTableUi extends Component {
       <EuiTableHeaderCell
         key="deleteHeader"
         data-test-subj="policyTableHeaderCell-delete"
-        style={{ width: 100 }}
+        width={100}
       />
     );
     return headers;
@@ -207,7 +222,7 @@ export class PolicyTableUi extends Component {
     const hasCoveredIndices = policy.coveredIndices && policy.coveredIndices.length;
     const { intl } = this.props;
     const { name } = policy;
-    const cells = Object.keys(HEADERS).map(fieldName => {
+    const cells = Object.entries(COLUMNS).map(([fieldName, { width }]) => {
       const value = policy[fieldName];
       return (
         <EuiTableRowCell
@@ -215,6 +230,7 @@ export class PolicyTableUi extends Component {
           truncateText={false}
           data-test-subj={`policyTableCell-${fieldName}`}
           className={'policyTable__content--' + fieldName}
+          width={width}
         >
           {this.buildRowCell(fieldName, value)}
         </EuiTableRowCell>
@@ -239,6 +255,7 @@ export class PolicyTableUi extends Component {
       });
     cells.push(
       <EuiTableRowCell
+        align={RIGHT_ALIGNMENT}
         key={`delete-${name}`}
         truncateText={false}
         data-test-subj={`policyTableCell-delete-${name}`}
