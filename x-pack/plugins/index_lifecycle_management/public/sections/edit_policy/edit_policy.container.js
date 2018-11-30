@@ -9,7 +9,6 @@ import { EditPolicy as PresentationComponent } from './edit_policy';
 import {
   getSaveAsNewPolicy,
   getSelectedPolicy,
-  getAffectedIndexTemplates,
   validateLifecycle,
   getLifecycle,
   getPolicies,
@@ -34,7 +33,6 @@ export const EditPolicy = connect(
       firstError,
       errors,
       selectedPolicy: getSelectedPolicy(state),
-      affectedIndexTemplates: getAffectedIndexTemplates(state),
       saveAsNewPolicy: getSaveAsNewPolicy(state),
       lifecycle: getLifecycle(state),
       policies: getPolicies(state),

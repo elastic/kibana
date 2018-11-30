@@ -8,13 +8,11 @@
 
 
 import { combineReducers } from 'redux';
-import { indexTemplate } from './index_template';
 import { nodes } from './nodes';
 import { policies } from './policies';
 import { general } from './general';
 
 export const indexLifecycleManagement = combineReducers({
-  indexTemplate,
   nodes,
   policies,
   general,

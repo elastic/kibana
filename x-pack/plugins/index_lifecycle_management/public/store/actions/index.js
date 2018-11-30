@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-export * from './index_template';
 export * from './nodes';
 export * from './policies';
 export * from './lifecycle';
