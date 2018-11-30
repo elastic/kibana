@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -15,7 +15,6 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -28,7 +27,6 @@ export class NodeAttrsDetailsUi extends PureComponent {
 
     details: PropTypes.array,
     selectedNodeAttrs: PropTypes.string.isRequired,
-    allocationRules: PropTypes.object,
   };
 
   componentWillMount() {
@@ -36,7 +34,7 @@ export class NodeAttrsDetailsUi extends PureComponent {
   }
 
   render() {
-    const { selectedNodeAttrs, allocationRules, details, close, intl } = this.props;
+    const { selectedNodeAttrs, details, close, intl } = this.props;
 
     return (
       <EuiPortal>
@@ -52,21 +50,6 @@ export class NodeAttrsDetailsUi extends PureComponent {
               </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {allocationRules ? (
-              <Fragment>
-                <EuiSpacer size="s" />
-                <EuiCallOut
-                  title="Heads up"
-                  color="warning"
-                >
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.nodeAttrDetails.existingAllocationRulesWarning"
-                    defaultMessage="Be aware that this index template has existing allocation rules which will affect the list of nodes these indices can be allocated to." //eslint-disable-line max-len
-                  />
-                </EuiCallOut>
-                <EuiSpacer size="s" />
-              </Fragment>
-            ) : null}
             <EuiInMemoryTable
               items={details}
               columns={[
