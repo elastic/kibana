@@ -10,7 +10,7 @@ import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
-import { Providers } from './providers';
+import { getDraggableId, Providers } from './providers';
 
 describe('Providers', () => {
   describe('rendering', () => {
@@ -65,6 +65,14 @@ describe('Providers', () => {
         name: 'Provider 1',
         negated: false,
       });
+    });
+  });
+
+  describe('#getDraggableId', () => {
+    test('it returns the expected id', () => {
+      expect(getDraggableId({ id: 'timeline1', dataProviderId: 'abcd' })).toEqual(
+        'draggableId.timeline.timeline1.dataProvider.abcd'
+      );
     });
   });
 

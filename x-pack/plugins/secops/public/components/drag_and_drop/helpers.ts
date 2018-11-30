@@ -11,6 +11,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { timelineActions } from '../../store';
 import { dragAndDropActions } from '../../store/local/drag_and_drop';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
+import { DataProvider } from '../timeline/data_providers/data_provider'; // tslint:disable-line:no-unused-variable (linter bug!)
 
 export const draggableContentPrefix = 'draggableId.content.';
 
