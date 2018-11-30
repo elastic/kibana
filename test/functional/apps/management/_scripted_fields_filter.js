@@ -24,13 +24,13 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const log = getService('log');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['settings']);
 
   describe('filter scripted fields', function describeIndexTests() {
 
     beforeEach(async function () {
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await PageObjects.settings.navigateTo();
