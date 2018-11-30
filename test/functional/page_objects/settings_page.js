@@ -23,11 +23,9 @@ import expect from 'expect.js';
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const find = getService('find');
   const flyout = getService('flyout');
-  const config = getService('config');
-  const defaultFindTimeout = config.get('timeouts.find');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const PageObjects = getPageObjects(['header', 'common']);
@@ -176,13 +174,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return Promise.all(getChartTypesPromises);
     }
 
-    getTableRow(rowNumber, colNumber) {
-      return remote.setFindTimeout(defaultFindTimeout)
-        // passing in zero-based index, but adding 1 for css 1-based indexes
-        .findByCssSelector('table.euiTable tbody tr:nth-child(' +
-          (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
-          (colNumber + 1) + ')'
-        );
+    async getTableRow(rowNumber, colNumber) {
+      // passing in zero-based index, but adding 1 for css 1-based indexes
+      return await find.byCssSelector(
+        'table.euiTable tbody tr:nth-child(' +
+        (rowNumber + 1) + ') td.euiTableRowCell:nth-child(' +
+        (colNumber + 1) + ')'
+      );
     }
 
     async getFieldsTabCount() {
@@ -295,7 +293,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         log.info('currentUrl', currentUrl);
         if (!currentUrl.match(/indices\/.+\?/)) {
           throw new Error('Index pattern not created');
@@ -315,7 +313,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getIndexPatternIdFromUrl() {
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       const indexPatternId = currentUrl.match(/.*\/(.*)/)[1];
 
       log.debug('index pattern ID: ', indexPatternId);
@@ -360,7 +358,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await testSubjects.click('confirmModalConfirmButton');
       });
       await retry.try(async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         if (currentUrl.match(/indices\/.+\?/)) {
           throw new Error('Index pattern not removed');
         }
