@@ -139,9 +139,9 @@ class EditPolicyUi extends Component {
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent
+            className="ilmEditPolicyPageContent"
             verticalPosition="center"
             horizontalPosition="center"
-            className="ilmContent"
           >
             <EuiTitle>
               <h4>
