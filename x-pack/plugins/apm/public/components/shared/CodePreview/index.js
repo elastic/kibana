@@ -22,20 +22,15 @@ import python from 'react-syntax-highlighter/dist/languages/python';
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
 import { Variables } from './Variables';
 import { Context } from './Context';
+import { FrameHeading } from '../Stacktrace/FrameHeading';
 
 registerLanguage('javascript', javascript);
 registerLanguage('python', python);
 registerLanguage('ruby', ruby);
 
-const FileDetails = styled.div`
-  color: ${colors.gray3};
-  padding: ${px(units.half)};
+const CodeHeader = styled.div`
   border-bottom: 1px solid ${colors.gray4};
   border-radius: ${borderRadius} ${borderRadius} 0 0;
-`;
-
-const FileDetail = styled.span`
-  font-weight: bold;
 `;
 
 const Container = styled.div`
@@ -45,14 +40,6 @@ const Container = styled.div`
   border: 1px solid ${colors.gray4};
   border-radius: ${borderRadius};
   background: ${props => (props.isLibraryFrame ? colors.white : colors.gray5)};
-
-  ${FileDetails} {
-    ${props => (!props.hasContext ? 'border-bottom: 0' : null)};
-  }
-
-  ${FileDetail} {
-    color: ${props => (props.isLibraryFrame ? colors.gray1 : colors.black)};
-  }
 `;
 
 class CodePreview extends PureComponent {
@@ -67,26 +54,22 @@ class CodePreview extends PureComponent {
 
   render() {
     const { stackframe, codeLanguage, isLibraryFrame } = this.props;
-    const hasContext = !(
-      isEmpty(stackframe.context) && isEmpty(stackframe.line.context)
-    );
     const hasVariables = !isEmpty(stackframe.vars);
 
     return (
-      <Container hasContext={hasContext} isLibraryFrame={isLibraryFrame}>
-        <FileDetails>
-          <FileDetail>{stackframe.filename}</FileDetail> in{' '}
-          <FileDetail>{stackframe.function}</FileDetail> at{' '}
-          <FileDetail>line {stackframe.line.number}</FileDetail>
-        </FileDetails>
-
-        {hasContext && (
-          <Context
+      <Container isLibraryFrame={isLibraryFrame}>
+        <CodeHeader>
+          <FrameHeading
             stackframe={stackframe}
-            codeLanguage={codeLanguage}
             isLibraryFrame={isLibraryFrame}
           />
-        )}
+        </CodeHeader>
+
+        <Context
+          stackframe={stackframe}
+          codeLanguage={codeLanguage}
+          isLibraryFrame={isLibraryFrame}
+        />
 
         {hasVariables && (
           <Variables

@@ -12,6 +12,7 @@ import { Ellipsis } from '../../shared/Icons';
 import { units, px } from '../../../style/variables';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { EuiLink, EuiTitle } from '@elastic/eui';
+import { FrameHeading } from './FrameHeading';
 
 const LibraryFrameToggle = styled.div`
   margin: 0 0 ${px(units.plus)} 0;
@@ -37,6 +38,12 @@ function getCollapsedLibraryFrames(stackframes) {
       { ...prevItem, stackframes: [...prevItem.stackframes, stackframe] }
     ];
   }, []);
+}
+
+function hasSourceLines(stackframe) {
+  return (
+    !isEmpty(stackframe.context) || !isEmpty(get(stackframe, 'line.context'))
+  );
 }
 
 class Stacktrace extends PureComponent {
@@ -79,13 +86,16 @@ class Stacktrace extends PureComponent {
         </EuiTitle>
         {getCollapsedLibraryFrames(stackframes).map((item, i) => {
           if (!item.libraryFrame) {
-            return (
-              <CodePreview
-                key={i}
-                stackframe={item}
-                codeLanguage={codeLanguage}
-              />
-            );
+            if (hasSourceLines(item)) {
+              return (
+                <CodePreview
+                  key={i}
+                  stackframe={item}
+                  codeLanguage={codeLanguage}
+                />
+              );
+            }
+            return <FrameHeading key={i} stackframe={item} />;
           }
 
           return (
@@ -115,14 +125,19 @@ function Libraryframes({ visible, stackframes, codeLanguage, onClick }) {
 
       <LibraryFrames>
         {visible &&
-          stackframes.map((stackframe, i) => (
-            <CodePreview
-              key={i}
-              stackframe={stackframe}
-              isLibraryFrame
-              codeLanguage={codeLanguage}
-            />
-          ))}
+          stackframes.map(
+            (stackframe, i) =>
+              hasSourceLines(stackframe) ? (
+                <CodePreview
+                  key={i}
+                  stackframe={stackframe}
+                  isLibraryFrame
+                  codeLanguage={codeLanguage}
+                />
+              ) : (
+                <FrameHeading key={i} stackframe={stackframe} isLibraryFrame />
+              )
+          )}
       </LibraryFrames>
     </div>
   );
