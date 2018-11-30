@@ -129,6 +129,11 @@ export function FindProvider({ getService }) {
       return await this.allByCustom(leadfoot => leadfoot.findAllByLinkText(selector), timeout);
     }
 
+    async allByPartialLinkText(linkText, timeout = defaultFindTimeout) {
+      log.debug('find.allByPartialLinkText: ' + linkText);
+      return await this.allByCustom(leadfoot => leadfoot.findAllByPartialLinkText(linkText), timeout);
+    }
+
     async allByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug('in findAllByCssSelector: ' + selector);
       return await this.allByCustom(leadfoot => leadfoot.findAllByCssSelector(selector), timeout);
