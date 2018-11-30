@@ -11,14 +11,13 @@ import copy from 'copy-to-clipboard';
 
 import {
   EuiButton,
-  EuiCodeEditor,
+  EuiCodeBlock,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyout,
-  EuiTitle,
-  EuiSpacer,
-  EuiButtonEmpty,
+  EuiFlyoutHeader,
   EuiPortal,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
@@ -42,7 +41,7 @@ export class PolicyJsonFlyoutUi extends PureComponent {
     return (
       <EuiPortal>
         <EuiFlyout maxWidth={400} ownFocus onClose={close}>
-          <EuiFlyoutBody>
+          <EuiFlyoutHeader>
             <EuiTitle>
               <h2>
                 <FormattedMessage
@@ -52,28 +51,23 @@ export class PolicyJsonFlyoutUi extends PureComponent {
                 />
               </h2>
             </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiCodeEditor
-              value={lifecycle}
-              mode="javascript"
-              theme="github"
-              isReadOnly
-            />
-            <EuiSpacer size="s" />
+          </EuiFlyoutHeader>
+
+          <EuiFlyoutBody>
+            <EuiCodeBlock
+              language="json"
+            >
+              {lifecycle}
+            </EuiCodeBlock>
+          </EuiFlyoutBody>
+
+          <EuiFlyoutFooter>
             <EuiButton onClick={() => this.copyToClipboard(lifecycle)}>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.policyJsonFlyout.copyToClipboardButton"
                 defaultMessage="Copy to clipboard"
               />
             </EuiButton>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyJsonFlyout.closeLabel"
-                defaultMessage="Close"
-              />
-            </EuiButtonEmpty>
           </EuiFlyoutFooter>
         </EuiFlyout>
       </EuiPortal>
