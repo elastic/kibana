@@ -58,7 +58,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
     }
   );
 
-  const fetchAnchorRow = (state) => () => {
+  const fetchAnchorRow = (state, i18n) => () => {
     const { queryParameters: { indexPatternId, anchorType, anchorId, sort, tieBreakerField } } = state;
 
     if (!tieBreakerField) {
@@ -81,7 +81,9 @@ export function QueryActionsProvider(courier, Private, Promise) {
         (error) => {
           setFailedStatus(state)('anchor', { error });
           toastNotifications.addDanger({
-            title: 'Unable to load the anchor document',
+            title: i18n('kbn.context.unableToLoadAnchorDocumentDescription', {
+              defaultMessage: 'Unable to load the anchor document'
+            }),
             text: <MarkdownSimple>{error.message}</MarkdownSimple>,
           });
           throw error;
@@ -89,7 +91,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
       );
   };
 
-  const fetchPredecessorRows = (state) => () => {
+  const fetchPredecessorRows = (state, i18n) => () => {
     const {
       queryParameters: { indexPatternId, filters, predecessorCount, sort, tieBreakerField },
       rows: { anchor },
@@ -125,7 +127,9 @@ export function QueryActionsProvider(courier, Private, Promise) {
         (error) => {
           setFailedStatus(state)('predecessors', { error });
           toastNotifications.addDanger({
-            title: 'Unable to load documents',
+            title: i18n('kbn.context.unableToLoadDocumentDescription', {
+              defaultMessage: 'Unable to load documents'
+            }),
             text: <MarkdownSimple>{error.message}</MarkdownSimple>,
           });
           throw error;
@@ -133,7 +137,7 @@ export function QueryActionsProvider(courier, Private, Promise) {
       );
   };
 
-  const fetchSuccessorRows = (state) => () => {
+  const fetchSuccessorRows = (state, i18n) => () => {
     const {
       queryParameters: { indexPatternId, filters, sort, successorCount, tieBreakerField },
       rows: { anchor },
@@ -169,7 +173,9 @@ export function QueryActionsProvider(courier, Private, Promise) {
         (error) => {
           setFailedStatus(state)('successors', { error });
           toastNotifications.addDanger({
-            title: 'Unable to load documents',
+            title: i18n('kbn.context.unableToLoadDocumentDescription', {
+              defaultMessage: 'Unable to load documents'
+            }),
             text: <MarkdownSimple>{error.message}</MarkdownSimple>,
           });
           throw error;

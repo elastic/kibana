@@ -42,7 +42,12 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
         hasShadow
         allowFullScreen
         fullScreenIconColor="dark"
-        alt="screenshot of primary dashboard."
+        alt={
+          <FormattedMessage
+            id="kbn.home.tutorial.introduction.imageAltDescription"
+            defaultMessage="screenshot of primary dashboard."
+          />
+        }
         url={previewUrl}
       />
     );
