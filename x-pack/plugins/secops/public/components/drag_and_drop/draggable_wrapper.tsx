@@ -15,7 +15,7 @@ import { dragAndDropActions } from '../../store/local/drag_and_drop';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
-import { DataProvider } from '../timeline/data_providers/data_provider';
+import { DataProvider, DataProviderId } from '../timeline/data_providers/data_provider'; // tslint:disable-line:no-unused-variable (linter bug!)
 import { getDraggableId, getDroppableId } from './helpers';
 
 export interface OwnProps {
@@ -80,6 +80,10 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
                     {...provided.dragHandleProps}
                     innerRef={provided.innerRef}
                     data-test-subj="providerContainer"
+                    style={{
+                      ...provided.draggableProps.style,
+                      zIndex: 9000,
+                    }}
                   >
                     {render(dataProvider)}
                   </ProviderContainer>

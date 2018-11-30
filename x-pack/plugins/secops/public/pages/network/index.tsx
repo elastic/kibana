@@ -11,7 +11,7 @@ import { Pane1FlexContent } from '../../components/page';
 import { Placeholders } from '../../components/visualization_placeholder';
 
 export const Network = pure(() => (
-  <Pane1FlexContent data-test-subj="pane1FlexContent">
+  <Pane1FlexContent>
     <Placeholders count={10} myRoute="Network" />
   </Pane1FlexContent>
 ));

@@ -13,7 +13,6 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import SplitPane from 'react-split-pane';
 import { Dispatch } from 'redux';
 
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
@@ -22,18 +21,14 @@ import {
   PageContainer,
   PageContent,
   PageHeader,
-  Pane1,
-  Pane1Header,
-  Pane1Style,
-  Pane2,
-  Pane2Style,
-  Pane2TimelineContainer,
+  Pane,
+  PaneHeader,
   PaneScrollContainer,
-  ResizerStyle,
   SubHeader,
   SubHeaderDatePicker,
 } from '../../components/page';
 import { DatePicker } from '../../components/page/date_picker';
+import { Flyout } from '../../components/page/flyout';
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { StatefulTimeline } from '../../components/timeline';
@@ -49,13 +44,14 @@ interface Props {
   dispatch: Dispatch;
 }
 
-const timelineId = 'pane2-timeline';
-
 class HomePageComponent extends React.PureComponent<Props> {
   public render() {
     return (
       <PageContainer data-test-subj="pageContainer">
         <DragDropContextWrapper>
+          <Flyout>
+            <StatefulTimeline id="timeline" headers={headers} width={maxTimelineWidth} />
+          </Flyout>
           <PageHeader data-test-subj="pageHeader">
             <Navigation data-test-subj="navigation" />
           </PageHeader>
@@ -67,40 +63,21 @@ class HomePageComponent extends React.PureComponent<Props> {
               <EuiHorizontalRule margin="none" />
             </SubHeader>
 
-            <SplitPane
-              data-test-subj="splitPane"
-              split="vertical"
-              defaultSize="75%"
-              primary="second"
-              pane1Style={Pane1Style}
-              pane2Style={{
-                ...Pane2Style,
-                maxWidth: `${maxTimelineWidth}px`,
-              }}
-              resizerStyle={ResizerStyle}
-            >
-              <Pane1 data-test-subj="pane1">
-                <Pane1Header data-test-subj="pane1Header">
-                  <EuiSearchBar onChange={noop} />
-                </Pane1Header>
-                <PaneScrollContainer data-test-subj="pane1ScrollContainer">
-                  <Switch>
-                    <Redirect from="/" exact={true} to="/overview" />
-                    <Route path="/overview" component={Overview} />
-                    <Route path="/hosts" component={Hosts} />
-                    <Route path="/network" component={Network} />
-                    <Route path="/link-to" component={LinkToPage} />
-                    <Route component={NotFoundPage} />
-                  </Switch>
-                </PaneScrollContainer>
-              </Pane1>
-
-              <Pane2 data-test-subj="pane2">
-                <Pane2TimelineContainer data-test-subj="pane2TimelineContainer">
-                  <StatefulTimeline id={timelineId} headers={headers} width={maxTimelineWidth} />
-                </Pane2TimelineContainer>
-              </Pane2>
-            </SplitPane>
+            <Pane data-test-subj="pane">
+              <PaneHeader data-test-subj="paneHeader">
+                <EuiSearchBar onChange={noop} />
+              </PaneHeader>
+              <PaneScrollContainer data-test-subj="pane1ScrollContainer">
+                <Switch>
+                  <Redirect from="/" exact={true} to="/overview" />
+                  <Route path="/overview" component={Overview} />
+                  <Route path="/hosts" component={Hosts} />
+                  <Route path="/network" component={Network} />
+                  <Route path="/link-to" component={LinkToPage} />
+                  <Route component={NotFoundPage} />
+                </Switch>
+              </PaneScrollContainer>
+            </Pane>
           </PageContent>
           <Footer />
         </DragDropContextWrapper>
