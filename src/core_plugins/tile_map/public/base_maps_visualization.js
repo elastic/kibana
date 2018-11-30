@@ -23,10 +23,18 @@ import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import 'ui/vis/map/service_settings';
 import { toastNotifications } from 'ui/notify';
+import { uiModules } from 'ui/modules';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
 const EMS_TMS_URL = 'https://tiles.maps.elastic.co';  // TODO: Remove in favor of new EMS logic
+
+const emsServiceSettings = new Promise((resolve) => {
+  uiModules.get('kibana').run(($injector) => {
+    const serviceSttings = $injector.get('serviceSettings');
+    resolve(serviceSttings);
+  });
+});
 
 export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
 
@@ -191,14 +199,14 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         && serviceSettings.shouldShowZoomMessage();
     }
 
-    _setTmsLayer(tmsLayer) {
+    async _setTmsLayer(tmsLayer) {
       this._kibanaMap.setMinZoom(tmsLayer.minZoom);
       this._kibanaMap.setMaxZoom(tmsLayer.maxZoom);
       if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
-      const url = tmsLayer.url;
       const showZoomMessage = this._isConstrainedZoomBaseLayer(tmsLayer);
+      const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
       delete options.url;
@@ -223,7 +231,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
      */
     async _updateParams() {
       const mapParams = this._getMapsParams();
-      await this._updateBaseLayer(mapParams);
+      await this._updateBaseLayer();
       this._kibanaMap.setLegendPosition(mapParams.legendPosition);
       this._kibanaMap.setShowTooltip(mapParams.addTooltip);
       this._kibanaMap.useUiStateFromVisualization(this.vis);

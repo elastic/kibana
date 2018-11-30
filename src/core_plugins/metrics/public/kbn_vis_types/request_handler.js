@@ -20,15 +20,14 @@
 import { validateInterval } from '../lib/validate_interval';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
-import { BuildESQueryProvider } from 'ui/courier';
+import { buildEsQuery } from '@kbn/es-query';
 
-const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http) {
-  const notify = new Notifier({ location: 'Metrics' });
-  const buildEsQuery = Private(BuildESQueryProvider);
+const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http, i18n) {
+  const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
 
   return {
     name: 'metrics',
-    handler: function ({ aggs, uiState, timeRange, filters, query, visParams }) {
+    handler: function ({ uiState, timeRange, filters, query, visParams }) {
       const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
         const panel = visParams;
@@ -36,10 +35,14 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, $http
         const parsedTimeRange = timefilter.calculateBounds(timeRange);
         const scaledDataFormat = config.get('dateFormat:scaled');
         const dateFormat = config.get('dateFormat');
+        const esQueryConfigs = {
+          allowLeadingWildcards: config.get('query:allowLeadingWildcards'),
+          queryStringOptions: config.get('query:queryString:options'),
+        };
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...parsedTimeRange },
-            filters: [buildEsQuery(aggs.indexPattern, [query], filters)],
+            filters: [buildEsQuery(undefined, [query], filters, esQueryConfigs)],
             panels: [panel],
             state: uiStateObj
           };

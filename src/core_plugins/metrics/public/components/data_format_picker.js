@@ -24,6 +24,8 @@ import {
   htmlIdGenerator, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiLink,
 } from '@elastic/eui';
 import { durationOutputOptions, durationInputOptions } from './lib/durations';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
 class DataFormatPicker extends Component {
@@ -100,12 +102,13 @@ class DataFormatPicker extends Component {
     if (durationFormatTest.test(value)) {
       defaultValue = 'duration';
     }
+    const { intl } = this.props;
     const options = [
-      { label: 'Bytes', value: 'bytes' },
-      { label: 'Number', value: 'number' },
-      { label: 'Percent', value: 'percent' },
-      { label: 'Duration', value: 'duration' },
-      { label: 'Custom', value: 'custom' }
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.bytesLabel', defaultMessage: 'Bytes' }), value: 'bytes' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.numberLabel', defaultMessage: 'Number' }), value: 'number' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.percentLabel', defaultMessage: 'Percent' }), value: 'percent' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.durationLabel', defaultMessage: 'Duration' }), value: 'duration' },
+      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.customLabel', defaultMessage: 'Custom' }), value: 'custom' }
     ];
     const selectedOption = options.find(option => {
       return defaultValue === option.value;
@@ -134,7 +137,13 @@ class DataFormatPicker extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow id={htmlId('from')} label="From">
+            <EuiFormRow
+              id={htmlId('from')}
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.fromLabel"
+                defaultMessage="From"
+              />)}
+            >
               <EuiComboBox
                 isClearable={false}
                 options={durationInputOptions}
@@ -145,7 +154,13 @@ class DataFormatPicker extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow id={htmlId('to')} label="To">
+            <EuiFormRow
+              id={htmlId('to')}
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.toLabel"
+                defaultMessage="To"
+              />)}
+            >
               <EuiComboBox
                 isClearable={false}
                 options={durationOutputOptions}
@@ -156,7 +171,13 @@ class DataFormatPicker extends Component {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow id={htmlId('decimal')} label="Decimal places">
+            <EuiFormRow
+              id={htmlId('decimal')}
+              label={(<FormattedMessage
+                id="tsvb.dataFormatPicker.decimalPlacesLabel"
+                defaultMessage="Decimal places"
+              />)}
+            >
               <EuiFieldText
                 defaultValue={decimals}
                 inputRef={(el) => this.decimals = el}
@@ -171,9 +192,18 @@ class DataFormatPicker extends Component {
       custom = (
         <EuiFlexItem grow={false}>
           <EuiFormRow
-            label="Format string"
+            label={(<FormattedMessage
+              id="tsvb.dataFormatPicker.formatStringLabel"
+              defaultMessage="Format string"
+            />)}
             helpText={
-              <span>See <EuiLink href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</EuiLink></span>
+              <span>
+                <FormattedMessage
+                  id="tsvb.dataFormatPicker.formatStringHelpText"
+                  defaultMessage="See {numeralJsLink}"
+                  values={{ numeralJsLink: (<EuiLink href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</EuiLink>) }}
+                />
+              </span>
             }
           >
             <EuiFieldText
@@ -206,7 +236,7 @@ class DataFormatPicker extends Component {
 }
 
 DataFormatPicker.defaultProps = {
-  label: 'Data Formatter'
+  label: i18n.translate('tsvb.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' })
 };
 
 DataFormatPicker.propTypes = {
@@ -215,4 +245,4 @@ DataFormatPicker.propTypes = {
   onChange: PropTypes.func
 };
 
-export default DataFormatPicker;
+export default injectI18n(DataFormatPicker);

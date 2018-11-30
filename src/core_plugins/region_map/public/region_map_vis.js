@@ -19,19 +19,21 @@
 
 import './region_map_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { CATEGORY } from 'ui/vis/vis_category';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { RegionMapsVisualizationProvider } from './region_map_visualization';
 import { Status } from 'ui/vis/update_status';
+import { ORIGIN } from 'ui/vis/map/origin';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config, i18n) {
+
   const VisFactory = Private(VisFactoryProvider);
   const RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
 
-  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted', false));
+  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, ORIGIN.KIBANA_YML));
+
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
@@ -40,7 +42,6 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
     title: i18n('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
     description: i18n('regionMap.mapVis.regionMapDescription', { defaultMessage: 'Show metrics on a thematic map. Use one of the \
 provided base maps, or add your own. Darker colors represent higher values.' }),
-    category: CATEGORY.MAP,
     icon: 'visMapRegion',
     visConfig: {
       defaults: {

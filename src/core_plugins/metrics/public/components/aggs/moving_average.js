@@ -37,9 +37,10 @@ import {
   EuiCode,
   EuiTextArea,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-export const MovingAverageAgg = props => {
-  const { siblings } = props;
+const MovingAverageAggUi = props => {
+  const { siblings, intl } = props;
   const defaults = {
     settings: '',
     minimize: 0,
@@ -52,11 +53,27 @@ export const MovingAverageAgg = props => {
   const handleTextChange = createTextHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
   const modelOptions = [
-    { label: 'Simple', value: 'simple' },
-    { label: 'Linear', value: 'linear' },
-    { label: 'Exponentially Weighted', value: 'ewma' },
-    { label: 'Holt-Linear', value: 'holt' },
-    { label: 'Holt-Winters', value: 'holt_winters' }
+    {
+      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.simpleLabel', defaultMessage: 'Simple' }),
+      value: 'simple'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.linearLabel', defaultMessage: 'Linear' }),
+      value: 'linear'
+    },
+    {
+      label: intl.formatMessage({
+        id: 'tsvb.movingAverage.modelOptions.exponentiallyWeightedLabel', defaultMessage: 'Exponentially Weighted' }),
+      value: 'ewma'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.holtLinearLabel', defaultMessage: 'Holt-Linear' }),
+      value: 'holt'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.movingAverage.modelOptions.holtWintersLabel', defaultMessage: 'Holt-Winters' }),
+      value: 'holt_winters'
+    }
   ];
   const minimizeOptions = [
     { label: 'True', value: 1 },
@@ -80,7 +97,12 @@ export const MovingAverageAgg = props => {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.movingAverage.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={props.panel.type}
@@ -92,7 +114,10 @@ export const MovingAverageAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('metric')}
-            label="Metric"
+            label={(<FormattedMessage
+              id="tsvb.movingAverage.metricLabel"
+              defaultMessage="Metric"
+            />)}
           >
             <MetricSelect
               onChange={handleSelectChange('field')}
@@ -110,11 +135,14 @@ export const MovingAverageAgg = props => {
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('model')}
-            label="Model"
+            label={(<FormattedMessage
+              id="tsvb.movingAverage.modelLabel"
+              defaultMessage="Model"
+            />)}
           >
             <EuiComboBox
               isClearable={false}
-              placeholder="Select"
+              placeholder={intl.formatMessage({ id: 'tsvb.movingAverage.model.selectPlaceholder', defaultMessage: 'Select' })}
               options={modelOptions}
               selectedOptions={selectedModelOption ? [selectedModelOption] : []}
               onChange={handleSelectChange('model')}
@@ -123,7 +151,13 @@ export const MovingAverageAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('windowSize')} label="Window size">
+          <EuiFormRow
+            id={htmlId('windowSize')}
+            label={(<FormattedMessage
+              id="tsvb.movingAverage.windowSizeLabel"
+              defaultMessage="Window Size"
+            />)}
+          >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
               Should it be text or number?
@@ -137,9 +171,15 @@ export const MovingAverageAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('minimize')} label="Minimize">
+          <EuiFormRow
+            id={htmlId('minimize')}
+            label={(<FormattedMessage
+              id="tsvb.movingAverage.minimizeLabel"
+              defaultMessage="Minimize"
+            />)}
+          >
             <EuiComboBox
-              placeholder="Select"
+              placeholder={intl.formatMessage({ id: 'tsvb.movingAverage.minimize.selectPlaceholder', defaultMessage: 'Select' })}
               options={minimizeOptions}
               selectedOptions={selectedMinimizeOption ? [selectedMinimizeOption] : []}
               onChange={handleSelectChange('minimize')}
@@ -148,7 +188,13 @@ export const MovingAverageAgg = props => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('predict')} label="Predict">
+          <EuiFormRow
+            id={htmlId('predict')}
+            label={(<FormattedMessage
+              id="tsvb.movingAverage.predictLabel"
+              defaultMessage="Predict"
+            />)}
+          >
             {/*
               EUITODO: The following input couldn't be converted to EUI because of type mis-match.
               Should it be text or number?
@@ -169,9 +215,18 @@ export const MovingAverageAgg = props => {
         <EuiFormRow
           fullWidth
           id={htmlId('settings')}
-          label="Settings"
+          label={(<FormattedMessage
+            id="tsvb.movingAverage.settingsLabel"
+            defaultMessage="Settings"
+          />)}
           helpText={
-            <span><EuiCode>Key=Value</EuiCode> space-delimited</span>
+            <span>
+              <FormattedMessage
+                id="tsvb.movingAverage.settingsDescription"
+                defaultMessage="{keyValue} space-delimited"
+                values={{ keyValue: (<EuiCode>Key=Value</EuiCode>) }}
+              />
+            </span>
           }
         >
           <EuiTextArea
@@ -185,7 +240,7 @@ export const MovingAverageAgg = props => {
   );
 };
 
-MovingAverageAgg.propTypes = {
+MovingAverageAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -196,3 +251,5 @@ MovingAverageAgg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
 };
+
+export const MovingAverageAgg = injectI18n(MovingAverageAggUi);

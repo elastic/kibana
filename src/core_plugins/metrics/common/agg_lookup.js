@@ -18,37 +18,39 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
+
 const lookup = {
-  count: 'Count',
-  calculation: 'Calculation',
-  std_deviation: 'Std. Deviation',
-  variance: 'Variance',
-  sum_of_squares: 'Sum of Sq.',
-  avg: 'Average',
-  max: 'Max',
-  min: 'Min',
-  sum: 'Sum',
-  percentile: 'Percentile',
-  percentile_rank: 'Percentile Rank',
-  cardinality: 'Cardinality',
-  value_count: 'Value Count',
-  derivative: 'Derivative',
-  cumulative_sum: 'Cumulative Sum',
-  moving_average: 'Moving Average',
-  avg_bucket: 'Overall Average',
-  min_bucket: 'Overall Min',
-  max_bucket: 'Overall Max',
-  sum_bucket: 'Overall Sum',
-  variance_bucket: 'Overall Variance',
-  sum_of_squares_bucket: 'Overall Sum of Sq.',
-  std_deviation_bucket: 'Overall Std. Deviation',
-  series_agg: 'Series Agg',
-  math: 'Math',
-  serial_diff: 'Serial Difference',
-  filter_ratio: 'Filter Ratio',
-  positive_only: 'Positive Only',
-  static: 'Static Value',
-  top_hit: 'Top Hit',
+  count: i18n.translate('tsvb.aggLookup.countLabel', { defaultMessage: 'Count' }),
+  calculation: i18n.translate('tsvb.aggLookup.calculationLabel', { defaultMessage: 'Calculation' }),
+  std_deviation: i18n.translate('tsvb.aggLookup.deviationLabel', { defaultMessage: 'Std. Deviation' }),
+  variance: i18n.translate('tsvb.aggLookup.varianceLabel', { defaultMessage: 'Variance' }),
+  sum_of_squares: i18n.translate('tsvb.aggLookup.sumOfSqLabel', { defaultMessage: 'Sum of Sq.' }),
+  avg: i18n.translate('tsvb.aggLookup.averageLabel', { defaultMessage: 'Average' }),
+  max: i18n.translate('tsvb.aggLookup.maxLabel', { defaultMessage: 'Max' }),
+  min: i18n.translate('tsvb.aggLookup.minLabel', { defaultMessage: 'Min' }),
+  sum: i18n.translate('tsvb.aggLookup.sumLabel', { defaultMessage: 'Sum' }),
+  percentile: i18n.translate('tsvb.aggLookup.percentileLabel', { defaultMessage: 'Percentile' }),
+  percentile_rank: i18n.translate('tsvb.aggLookup.percentileRankLabel', { defaultMessage: 'Percentile Rank' }),
+  cardinality: i18n.translate('tsvb.aggLookup.cardinalityLabel', { defaultMessage: 'Cardinality' }),
+  value_count: i18n.translate('tsvb.aggLookup.valueCountLabel', { defaultMessage: 'Value Count' }),
+  derivative: i18n.translate('tsvb.aggLookup.derivativeLabel', { defaultMessage: 'Derivative' }),
+  cumulative_sum: i18n.translate('tsvb.aggLookup.cumulativeSumLabel', { defaultMessage: 'Cumulative Sum' }),
+  moving_average: i18n.translate('tsvb.aggLookup.movingAverageLabel', { defaultMessage: 'Moving Average' }),
+  avg_bucket: i18n.translate('tsvb.aggLookup.overallAverageLabel', { defaultMessage: 'Overall Average' }),
+  min_bucket: i18n.translate('tsvb.aggLookup.overallMinLabel', { defaultMessage: 'Overall Min' }),
+  max_bucket: i18n.translate('tsvb.aggLookup.overallMaxLabel', { defaultMessage: 'Overall Max' }),
+  sum_bucket: i18n.translate('tsvb.aggLookup.overallSumLabel', { defaultMessage: 'Overall Sum' }),
+  variance_bucket: i18n.translate('tsvb.aggLookup.overallVarianceLabel', { defaultMessage: 'Overall Variance' }),
+  sum_of_squares_bucket: i18n.translate('tsvb.aggLookup.overallSumOfSqLabel', { defaultMessage: 'Overall Sum of Sq.' }),
+  std_deviation_bucket: i18n.translate('tsvb.aggLookup.overallStdDeviationLabel', { defaultMessage: 'Overall Std. Deviation' }),
+  series_agg: i18n.translate('tsvb.aggLookup.seriesAggLabel', { defaultMessage: 'Series Agg' }),
+  math: i18n.translate('tsvb.aggLookup.mathLabel', { defaultMessage: 'Math' }),
+  serial_diff: i18n.translate('tsvb.aggLookup.serialDifferenceLabel', { defaultMessage: 'Serial Difference' }),
+  filter_ratio: i18n.translate('tsvb.aggLookup.filterRatioLabel', { defaultMessage: 'Filter Ratio' }),
+  positive_only: i18n.translate('tsvb.aggLookup.positiveOnlyLabel', { defaultMessage: 'Positive Only' }),
+  static: i18n.translate('tsvb.aggLookup.staticValueLabel', { defaultMessage: 'Static Value' }),
+  top_hit: i18n.translate('tsvb.aggLookup.topHitLabel', { defaultMessage: 'Top Hit' }),
 };
 
 const pipeline = [
@@ -98,7 +100,10 @@ export function createOptions(type = '_all', siblings = []) {
       const disabled = _.includes(pipeline, value) ? !enablePipelines : false;
       return {
         label: disabled
-          ? `${label} (use the "+" button to add this pipeline agg)`
+          ? i18n.translate('tsvb.aggLookup.addPipelineAggDescription', {
+            defaultMessage: '{label} (use the "+" button to add this pipeline agg)',
+            values: { label }
+          })
           : label,
         value,
         disabled,

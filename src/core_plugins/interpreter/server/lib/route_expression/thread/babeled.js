@@ -17,16 +17,5 @@
  * under the License.
  */
 
-require('babel-register')({
-  ignore: [
-    // stolen from kibana/src/setup_node_env/babel_register/register.js
-    // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
-    // is `x-pack` and `b` is not `node_modules`
-    /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
-  ],
-  babelrc: false,
-  presets: [require.resolve('@kbn/babel-preset/node_preset')],
-});
-
-require('./polyfill');
+require('../../../../../../setup_node_env');
 require('./worker');

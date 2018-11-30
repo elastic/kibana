@@ -41,6 +41,7 @@ import {
   EuiHorizontalRule,
   EuiCode,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 class TopNPanelConfig extends Component {
 
@@ -83,15 +84,28 @@ class TopNPanelConfig extends Component {
       view = (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
-            <EuiTitle size="s"><span>Data</span></EuiTitle>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFormRow
               id={htmlId('itemUrl')}
-              label="Item url"
+              label={(<FormattedMessage
+                id="tsvb.topN.optionsTab.itemUrlLabel"
+                defaultMessage="Item url"
+              />)}
               helpText={
                 <span>
-                  This supports mustache templating.
-                  <EuiCode>{'{{key}}'}</EuiCode> is set to the term.
+                  <FormattedMessage
+                    id="tsvb.topN.optionsTab.itemUrlDescription"
+                    defaultMessage="This supports mustache templating. {key} is set to the term."
+                    values={{ key: (<EuiCode>{'{{key}}'}</EuiCode>) }}
+                  />
                 </span>
               }
             >
@@ -115,7 +129,10 @@ class TopNPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label="Panel filter"
+                  label={(<FormattedMessage
+                    id="tsvb.topN.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -126,7 +143,12 @@ class TopNPanelConfig extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>Ignore global filter?</EuiFormLabel>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="tsvb.topN.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
                 <EuiSpacer size="s" />
                 <YesNo
                   value={model.ignore_global_filter}
@@ -140,12 +162,24 @@ class TopNPanelConfig extends Component {
           <EuiSpacer />
 
           <EuiPanel>
-            <EuiTitle size="s"><span>Style</span></EuiTitle>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.styleLabel"
+                  defaultMessage="Style"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="m" />
 
             <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>Background color:</EuiFormLabel>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="tsvb.topN.optionsTab.backgroundColorLabel"
+                    defaultMessage="Background color:"
+                  />
+                </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ColorPicker
@@ -158,7 +192,14 @@ class TopNPanelConfig extends Component {
 
             <EuiHorizontalRule />
 
-            <EuiTitle size="xxs"><span>Color rules</span></EuiTitle>
+            <EuiTitle size="xxs">
+              <span>
+                <FormattedMessage
+                  id="tsvb.topN.optionsTab.colorRulesLabel"
+                  defaultMessage="Color rules"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="s" />
             <ColorRules
               model={model}
@@ -179,13 +220,19 @@ class TopNPanelConfig extends Component {
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
-            Data
+            <FormattedMessage
+              id="tsvb.topN.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
           >
-            Panel options
+            <FormattedMessage
+              id="tsvb.topN.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel options"
+            />
           </EuiTab>
         </EuiTabs>
         {view}

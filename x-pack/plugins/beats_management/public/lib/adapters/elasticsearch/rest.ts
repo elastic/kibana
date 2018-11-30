@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore TODO type this
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { AutocompleteSuggestion, getAutocompleteProvider } from 'ui/autocomplete_providers';
-// @ts-ignore TODO type this
-import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
 import { RestAPIAdapter } from '../rest_api/adapter_types';
 import { ElasticsearchAdapter } from './adapter_types';
 
