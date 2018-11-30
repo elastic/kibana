@@ -18,13 +18,14 @@ export async function getKibana(server, callCluster) {
   const platform = get(stats, 'os.platform');
   const platformRelease = get(stats, 'os.platformRelease');
 
-  // organize the object into telemetry format
+  // combine core stats (os types, saved objects) with plugin usage stats
+  // organize the object into the same format as monitoring-enabled telemetry
   return {
     count: 1,
     indices: 1,
-    distros: {
-      platforms: [platform],
-      platformReleases: [platformRelease],
+    os: {
+      platforms: [{ platform, count: 1 }],
+      platformReleases: [{ platformRelease, count: 1 }],
     },
     plugins,
     ...kibana,

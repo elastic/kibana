@@ -66,9 +66,10 @@ export default function ({ getService }) {
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.spaces.available).to.be(true);
 
-      expect(stats.stack_stats.kibana.distros).to.be.an('object');
-      expect(stats.stack_stats.kibana.distros.platforms).to.be.an('array');
-      expect(stats.stack_stats.kibana.distros.platformReleases).to.be.an('array');
+      expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
+      expect(stats.stack_stats.kibana.os.platforms[0].count).to.be(1);
+      expect(stats.stack_stats.kibana.os.platformReleases[0].platformRelease).to.be.a('string');
+      expect(stats.stack_stats.kibana.os.platformReleases[0].count).to.be(1);
 
       expect(stats.stack_stats.xpack.graph).to.be.an('object');
       expect(stats.stack_stats.xpack.ilm).to.be.an('object');
