@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { flatten, get } from 'lodash';
 import React from 'react';
@@ -24,7 +25,6 @@ import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
 import { getSupportedConfig } from '../../config_schemas_translations_map';
-import { i18n } from '@kbn/i18n';
 
 interface PageProps {
   beat: CMPopulatedBeat;
