@@ -121,6 +121,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
             </EuiFormRow>
           </EuiFlexItem>
           {this.getGrantedFieldsControl()}
+          {this.getDeniedFieldsControl()}
         </EuiFlexGroup>
 
         <EuiSpacer />
@@ -170,6 +171,46 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 onCreateOption={this.onCreateGrantedField}
                 onChange={this.onGrantedFieldsChange}
                 isDisabled={this.props.isReservedRole}
+              />
+            </Fragment>
+          </EuiFormRow>
+        </EuiFlexItem>
+      );
+    }
+
+    return null;
+  };
+
+  public getDeniedFieldsControl = () => {
+    const { allowFieldLevelSecurity, availableFields, indexPrivilege, isReservedRole } = this.props;
+
+    if (!allowFieldLevelSecurity) {
+      return null;
+    }
+
+    const { except = [] } = indexPrivilege.field_security || {};
+
+    if (allowFieldLevelSecurity) {
+      return (
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.security.management.editRoles.indexPrivilegeForm.deniedFieldsFormRowLabel"
+                defaultMessage="Denied fields (optional)"
+              />
+            }
+            fullWidth={true}
+            className="indexPrivilegeForm__deniedFieldsRow"
+          >
+            <Fragment>
+              <EuiComboBox
+                data-test-subj={`deniedFieldInput${this.props.formIndex}`}
+                options={availableFields ? availableFields.map(toOption) : []}
+                selectedOptions={except.map(toOption)}
+                onCreateOption={this.onCreateDeniedField}
+                onChange={this.onDeniedFieldsChange}
+                isDisabled={isReservedRole}
               />
             </Fragment>
           </EuiFormRow>
@@ -316,6 +357,35 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       field_security: {
         ...this.props.indexPrivilege.field_security,
         grant: grantedFields.map(fromOption),
+      },
+    });
+  };
+
+  public onCreateDeniedField = (except: string) => {
+    if (
+      !this.props.indexPrivilege.field_security ||
+      !this.props.indexPrivilege.field_security.except
+    ) {
+      return;
+    }
+
+    const newExcepts = this.props.indexPrivilege.field_security.except.concat([except]);
+
+    this.props.onChange({
+      ...this.props.indexPrivilege,
+      field_security: {
+        ...this.props.indexPrivilege.field_security,
+        except: newExcepts,
+      },
+    });
+  };
+
+  public onDeniedFieldsChange = (deniedFields: EuiComboBoxOptionProps[]) => {
+    this.props.onChange({
+      ...this.props.indexPrivilege,
+      field_security: {
+        ...this.props.indexPrivilege.field_security,
+        except: deniedFields.map(fromOption),
       },
     });
   };

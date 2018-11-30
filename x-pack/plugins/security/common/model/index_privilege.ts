@@ -9,6 +9,7 @@ export interface IndexPrivilege {
   privileges: string[];
   field_security?: {
     grant?: string[];
+    except?: string[];
   };
   query?: string;
 }
