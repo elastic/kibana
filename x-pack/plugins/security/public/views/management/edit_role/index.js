@@ -113,7 +113,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       if (allowFieldLevelSecurity) {
         emptyOption.field_security = {
-          grant: ['*']
+          grant: ['*'],
+          except: [],
         };
       }
 

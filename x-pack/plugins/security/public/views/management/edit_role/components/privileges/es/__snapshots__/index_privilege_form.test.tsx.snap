@@ -185,6 +185,39 @@ exports[`it renders without crashing 1`] = `
               </React.Fragment>
             </EuiFormRow>
           </EuiFlexItem>
+          <EuiFlexItem
+            component="div"
+            grow={true}
+          >
+            <EuiFormRow
+              className="indexPrivilegeForm__deniedFieldsRow"
+              describedByIds={Array []}
+              fullWidth={true}
+              hasEmptyLabelSpace={false}
+              label={
+                <FormattedMessage
+                  defaultMessage="Denied fields (optional)"
+                  id="xpack.security.management.editRoles.indexPrivilegeForm.deniedFieldsFormRowLabel"
+                  values={Object {}}
+                />
+              }
+            >
+              <React.Fragment>
+                <EuiComboBox
+                  compressed={false}
+                  data-test-subj="deniedFieldInput0"
+                  fullWidth={false}
+                  isClearable={true}
+                  isDisabled={false}
+                  onChange={[Function]}
+                  onCreateOption={[Function]}
+                  options={Array []}
+                  selectedOptions={Array []}
+                  singleSelection={false}
+                />
+              </React.Fragment>
+            </EuiFormRow>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer
           size="l"
