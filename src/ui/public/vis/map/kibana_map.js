@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiSpacer,
-  EuiCheckbox
+  EuiButtonEmpty
 } from '@elastic/eui';
 
 function makeFitControl(fitContainer, kibanaMap) {
@@ -110,7 +110,7 @@ const makeZoomWarningMsg = (function () {
     constructor(props) {
       super(props);
       this.state = {
-        checked: false
+        disabled: false
       };
     }
 
@@ -135,24 +135,25 @@ const makeZoomWarningMsg = (function () {
             . Or, you can configure a custom WMS compliant server.
           </p>
           <EuiSpacer size="xs"/>
-          <EuiCheckbox
-            id={'supress-zoom-warnings'}
-            label="Suppress warnings"
-            checked={this.state.checked}
-            onChange={({ target }) => {
+          <EuiButtonEmpty
+            size="s"
+            isDisabled={this.state.disabled}
+            onClick={() => {
               this.setState({
-                checked: target.checked
-              }, () => this.props.onChange(this.state.checked));
+                disabled: true
+              }, () => this.props.onChange(this.state.disabled));
             }}
             data-test-subj="suppressZoomWarnings"
-          />
+          >
+            {`Don't show again`}
+          </EuiButtonEmpty>
         </div>
       );
     }
   }
 
   const zoomToast = ({
-    title: 'Max Zoom Warning',
+    title: 'No additional zoom levels',
     text: <ZoomWarning onChange={setZoomMsg}/>,
     'data-test-subj': 'maxZoomWarning',
   });
@@ -162,7 +163,7 @@ const makeZoomWarningMsg = (function () {
       const zoomLevel = getZoomLevel();
       const maxMapZoom = getMaxZoomLevel();
       if (!disableZoomMsg && zoomLevel === maxMapZoom) {
-        toastNotifications.addWarning(zoomToast);
+        toastNotifications.addDanger(zoomToast);
       }
     };
   };
