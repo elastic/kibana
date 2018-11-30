@@ -261,7 +261,6 @@ class WarmPhaseUi extends PureComponent {
                           >
                             <EuiFieldNumber
                               id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
-                              s
                               value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
                               onChange={async e => {
                                 await setPhaseData(PHASE_PRIMARY_SHARD_COUNT, e.target.value);
