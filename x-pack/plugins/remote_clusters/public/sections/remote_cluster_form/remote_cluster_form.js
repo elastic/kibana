@@ -112,6 +112,13 @@ export class RemoteClusterFormUi extends Component {
           defaultMessage="Nickname is required."
         />
       );
+    } else if (name.match(/[^a-zA-Z\d]/)) {
+      errors.name = (
+        <FormattedMessage
+          id="xpack.remoteClusters.form.errors.lettersAndNumbersOnly"
+          defaultMessage="Name can only contain letters and numbers."
+        />
+      );
     }
 
     if (!seeds.some(seed => Boolean(seed.trim()))) {
