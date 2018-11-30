@@ -8,7 +8,6 @@ import { Range } from '../../../components/timeline/body/column_headers/range_pi
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { ECS } from '../../../components/timeline/ecs';
-import { mockECSData } from '../../../mock/mock_ecs';
 
 export interface TimelineModel {
   id: string;
@@ -17,15 +16,22 @@ export interface TimelineModel {
   range: Range;
   show: boolean;
   sort: Sort;
+  activePage: number;
+  itemsPerPage: number;
 }
 
 export const timelineDefaults: Readonly<
-  Pick<TimelineModel, 'dataProviders' | 'data' | 'range' | 'show' | 'sort'>
+  Pick<
+    TimelineModel,
+    'dataProviders' | 'data' | 'range' | 'show' | 'sort' | 'activePage' | 'itemsPerPage'
+  >
 > = {
   dataProviders: [],
-  data: mockECSData,
+  data: [],
   range: '1 Day',
   show: false,
+  activePage: 0,
+  itemsPerPage: 5,
   sort: {
     columnId: 'timestamp',
     sortDirection: 'descending',

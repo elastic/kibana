@@ -29,3 +29,17 @@ export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT
 export const removeProvider = actionCreator<{ id: string; providerId: string }>('REMOVE_PROVIDER');
 
 export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
+
+export const updateDataProviderEnabled = actionCreator<{
+  id: string;
+  enabled: boolean;
+  providerId: string;
+}>('TOGGLE_PROVIDER_ENABLED');
+
+export const updateItemsPerPage = actionCreator<{ id: string; itemsPerPage: number }>(
+  'UPDATE_ITEMS_PER_PAGE'
+);
+
+export const updatePageIndex = actionCreator<{ id: string; activePage: number }>(
+  'UPDATE_PAGE_INDEX'
+);

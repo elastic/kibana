@@ -9,6 +9,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ECS } from './ecs';
 
+import { EuiTablePagination } from '@elastic/eui';
 import { EventsProps, EventsQuery } from '../../containers/events';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
@@ -18,6 +19,8 @@ import { RowRenderer } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import {
+  OnChangeItemsPerPage,
+  OnChangePage,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnFilterChange,
@@ -27,16 +30,22 @@ import {
 import { TimelineHeader } from './header/timeline_header';
 
 interface Props {
+  activePage: number;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   dataProviders: DataProvider[];
   height?: string;
   id: string;
+  itemsPerPage: number;
+  itemsPerPageOptions: number[];
+  onChangeItemsPerPage: OnChangeItemsPerPage;
+  onChangePage: OnChangePage;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
   onRangeSelected: OnRangeSelected;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
+  pageCount: number;
   range: Range;
   rowRenderers: RowRenderer[];
   sort: Sort;
@@ -58,16 +67,22 @@ const defaultHeight = '100%';
 /** The parent Timeline component */
 export const Timeline = pure<Props>(
   ({
+    activePage,
     columnHeaders,
     columnRenderers,
     dataProviders,
     height = defaultHeight,
     id,
+    itemsPerPage,
+    itemsPerPageOptions,
+    onChangeItemsPerPage,
+    onChangePage,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
     onRangeSelected,
     onToggleDataProviderEnabled,
+    pageCount,
     range,
     rowRenderers,
     sort,
@@ -110,6 +125,18 @@ export const Timeline = pure<Props>(
           </EventsQuery>
         );
       })}
+      {dataProviders.length !== 0 && (
+        <div data-test-subj="table-pagination">
+          <EuiTablePagination
+            activePage={activePage}
+            itemsPerPage={itemsPerPage}
+            itemsPerPageOptions={itemsPerPageOptions}
+            pageCount={pageCount}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onChangePage={onChangePage}
+          />
+        </div>
+      )}
     </TimelineDiv>
   )
 );

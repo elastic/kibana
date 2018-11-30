@@ -20,6 +20,8 @@ import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
 import { ECS } from './ecs';
 import {
+  OnChangeItemsPerPage,
+  OnChangePage,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnRangeSelected,
@@ -28,8 +30,12 @@ import {
 import { Timeline } from './timeline';
 
 export interface OwnProps {
+  activePage: number;
   id: string;
   headers: ColumnHeader[];
+  itemsPerPage: number;
+  itemsPerPageOptions: number[];
+  pageCount: number;
   width: number;
 }
 
@@ -65,6 +71,19 @@ interface DispatchProps {
     id: string;
     providerId: string;
   }>;
+  updateDataProviderEnabled?: ActionCreator<{
+    id: string;
+    providerId: string;
+    enabled: boolean;
+  }>;
+  updateItemsPerPage?: ActionCreator<{
+    id: string;
+    itemsPerPage: number;
+  }>;
+  updatePageIndex?: ActionCreator<{
+    id: string;
+    activePage: number;
+  }>;
 }
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
@@ -78,51 +97,57 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
   public render() {
     const {
+      activePage,
       dataProviders,
       headers,
       id,
+      itemsPerPage,
+      itemsPerPageOptions,
+      pageCount,
       range,
       removeProvider,
       sort,
       updateRange,
       updateSort,
       width,
+      updateDataProviderEnabled,
+      updateItemsPerPage,
+      updatePageIndex,
     } = this.props;
 
-    const onColumnSorted: OnColumnSorted = sorted => {
-      updateSort!({ id, sort: sorted });
-    };
+    const onColumnSorted: OnColumnSorted = sorted => updateSort!({ id, sort: sorted });
 
-    const onDataProviderRemoved: OnDataProviderRemoved = dataProvider => {
+    const onDataProviderRemoved: OnDataProviderRemoved = dataProvider =>
       removeProvider!({ id, providerId: dataProvider.id });
-    };
 
-    const onRangeSelected: OnRangeSelected = selectedRange => {
+    const onRangeSelected: OnRangeSelected = selectedRange =>
       updateRange!({ id, range: selectedRange });
-    };
 
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({
-      dataProvider,
-      enabled,
-    }) => {
-      window.alert(
-        `TODO: Plumb redux within timeline/index.tsx DataProvider: ${
-          dataProvider.name
-        } is: ${enabled}`
-      );
-    };
+    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = ({ dataProvider, enabled }) =>
+      updateDataProviderEnabled!({ id, enabled, providerId: dataProvider.id });
+
+    const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
+      updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage });
+
+    const onChangePage: OnChangePage = pageIndex => updatePageIndex!({ id, activePage: pageIndex });
 
     return (
       <Timeline
+        activePage={activePage}
         columnHeaders={headers}
         columnRenderers={columnRenderers}
         id={id}
         dataProviders={dataProviders!}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onChangePage={onChangePage}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onRangeSelected={onRangeSelected}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        pageCount={pageCount}
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort!}
@@ -148,6 +173,9 @@ export const StatefulTimeline = connect(
     updateProviders: timelineActions.updateProviders,
     updateRange: timelineActions.updateRange,
     updateSort: timelineActions.updateSort,
+    updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
+    updateItemsPerPage: timelineActions.updateItemsPerPage,
+    updatePageIndex: timelineActions.updatePageIndex,
     removeProvider: timelineActions.removeProvider,
   }
 )(StatefulTimelineComponent);

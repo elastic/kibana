@@ -48,7 +48,15 @@ const HomePageComponent = pure<Props>(() => (
   <PageContainer data-test-subj="pageContainer">
     <DragDropContextWrapper>
       <Flyout timelineId="timeline">
-        <StatefulTimeline id="timeline" headers={headers} width={defaultWidth} />
+        <StatefulTimeline
+          id="timeline"
+          activePage={0}
+          itemsPerPage={5}
+          itemsPerPageOptions={[5, 10, 20]}
+          pageCount={100}
+          headers={headers}
+          width={defaultWidth}
+        />
       </Flyout>
       <PageHeader data-test-subj="pageHeader">
         <Navigation data-test-subj="navigation" />
