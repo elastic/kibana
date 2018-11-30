@@ -46,14 +46,16 @@ const getPageData = ($injector) => {
     });
 };
 
-function makeUpgradeMessage(logstashVersions) {
+function makeUpgradeMessage(logstashVersions, i18n) {
   if (!Array.isArray(logstashVersions)
     || (logstashVersions.length === 0)
     || logstashVersions.some(isPipelineMonitoringSupportedInVersion)) {
     return null;
   }
 
-  return 'Pipeline monitoring is only available in Logstash version 6.0.0 or higher.';
+  return i18n('xpack.monitoring.logstash.pipelines.notAvalibleDescription', {
+    defaultMessage: 'Pipeline monitoring is only available in Logstash version 6.0.0 or higher.'
+  });
 }
 
 uiRoutes
@@ -67,7 +69,7 @@ uiRoutes
       pageData: getPageData
     },
     controller: class LogstashPipelinesList extends MonitoringViewBaseEuiTableController {
-      constructor($injector, $scope) {
+      constructor($injector, $scope, i18n) {
         super({
           title: 'Logstash Pipelines',
           storageKey: 'logstash.pipelines',
@@ -96,7 +98,7 @@ uiRoutes
           }
 
           const upgradeMessage = pageData
-            ? makeUpgradeMessage(pageData.clusterStatus.versions)
+            ? makeUpgradeMessage(pageData.clusterStatus.versions, i18n)
             : null;
 
           render(
