@@ -19,9 +19,9 @@ export const droppableContentPrefix = 'droppableId.content.';
 
 export const droppableTimelineProvidersPrefix = 'droppableId.timelineProviders.';
 
-export const draggableTimelineFlyoutButtonPrefix = 'draggableId.timelineFlyoutButtons.';
+export const draggableTimelineFlyoutButtonPrefix = 'draggableFlyoutButton';
 
-export const droppableTimelineFlyoutButtonPrefix = 'droppableId.timelineFlyoutButtons.';
+export const droppableTimelineFlyoutButtonPrefix = 'droppableFlyoutButton';
 
 export const getDraggableId = (dataProviderId: string): string =>
   `${draggableContentPrefix}${dataProviderId}`;
