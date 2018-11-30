@@ -19,10 +19,8 @@
 
 import { BaseServices } from '../../types';
 
-const mockCreatePluginInitializerBaseServices = jest.fn();
 const mockCreatePluginStartBaseServices = jest.fn();
 jest.mock('./plugin_base_services', () => ({
-  createPluginInitializerBaseServices: mockCreatePluginInitializerBaseServices,
   createPluginStartBaseServices: mockCreatePluginStartBaseServices,
 }));
 
@@ -48,7 +46,7 @@ function createPlugin(
       optionalPlugins: optional,
       ui: true,
     },
-    logger.get()
+    { logger } as any
   );
 }
 
@@ -112,7 +110,6 @@ test('`startPlugins` throws if plugins have circular optional dependency', async
 test('`startPlugins` ignores missing optional dependency', async () => {
   const plugin = createPlugin('some-id', { optional: ['missing-dep'] });
   jest.spyOn(plugin, 'start').mockResolvedValue('test');
-  jest.spyOn(plugin, 'init').mockResolvedValue(undefined);
 
   pluginsSystem.addPlugin(plugin);
 
@@ -141,22 +138,16 @@ test('`startPlugins` correctly orders plugins and returns exposed values', async
     ],
   ] as Array<[Plugin, Record<PluginName, unknown>]>);
 
-  const initBaseServicesMap = new Map();
   const startBaseServicesMap = new Map();
 
   [...plugins.keys()].forEach((plugin, index) => {
     jest.spyOn(plugin, 'start').mockResolvedValue(`added-as-${index}`);
-    jest.spyOn(plugin, 'init').mockResolvedValue(undefined);
 
-    initBaseServicesMap.set(plugin.name, `init-for-${plugin.name}`);
     startBaseServicesMap.set(plugin.name, `start-for-${plugin.name}`);
 
     pluginsSystem.addPlugin(plugin);
   });
 
-  mockCreatePluginInitializerBaseServices.mockImplementation(plugin =>
-    initBaseServicesMap.get(plugin.name)
-  );
   mockCreatePluginStartBaseServices.mockImplementation(plugin =>
     startBaseServicesMap.get(plugin.name)
   );
@@ -187,12 +178,7 @@ Array [
 `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginInitializerBaseServices).toHaveBeenCalledWith(plugin, baseServices);
     expect(mockCreatePluginStartBaseServices).toHaveBeenCalledWith(plugin, baseServices);
-
-    expect(plugin.init).toHaveBeenCalledTimes(1);
-    expect(plugin.init).toHaveBeenCalledWith(initBaseServicesMap.get(plugin.name));
-
     expect(plugin.start).toHaveBeenCalledTimes(1);
     expect(plugin.start).toHaveBeenCalledWith(startBaseServicesMap.get(plugin.name), deps);
   }

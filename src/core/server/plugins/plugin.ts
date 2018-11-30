@@ -94,54 +94,24 @@ export class Plugin<
   public readonly requiredDependencies: PluginManifest['requiredPlugins'];
   public readonly optionalDependencies: PluginManifest['optionalPlugins'];
 
+  private readonly log: Logger;
+
   private instance?: ReturnType<PluginInitializer<TStartContract, TDependencies>>;
 
   constructor(
     public readonly path: string,
     private readonly manifest: PluginManifest,
-    private readonly log: Logger
+    private readonly baseServices: PluginInitializerBaseServices
   ) {
+    this.log = baseServices.logger.get();
     this.name = manifest.id;
     this.configPath = manifest.configPath;
     this.requiredDependencies = manifest.requiredPlugins;
     this.optionalDependencies = manifest.optionalPlugins;
   }
 
-  public init(baseServices: PluginInitializerBaseServices) {
-    this.log.info('Initializing plugin');
-
-    const pluginDefinition = require(this.path);
-    if (!('plugin' in pluginDefinition)) {
-      throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
-    }
-
-    const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TStartContract, TDependencies>;
-    };
-    if (!initializer || typeof initializer !== 'function') {
-      throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
-    }
-
-    const instance = initializer(baseServices);
-    if (!instance || typeof instance !== 'object') {
-      throw new Error(
-        `Initializer for plugin "${
-          this.manifest.id
-        }" is expected to return plugin instance, but returned "${typeDetect(instance)}".`
-      );
-    }
-
-    if (typeof instance.start !== 'function') {
-      throw new Error(`Instance of plugin "${this.name}" does not define "start" function.`);
-    }
-
-    this.instance = instance;
-  }
-
   public async start(baseServices: PluginStartBaseServices, dependencies: TDependencies) {
-    if (this.instance === undefined) {
-      throw new Error(`Plugin "${this.name}" is not initialized.`);
-    }
+    this.instance = this.createPluginInstance();
 
     this.log.info('Starting plugin');
 
@@ -158,5 +128,36 @@ export class Plugin<
     if (typeof this.instance.stop === 'function') {
       await this.instance.stop();
     }
+  }
+
+  private createPluginInstance() {
+    this.log.info('Initializing plugin');
+
+    const pluginDefinition = require(this.path);
+    if (!('plugin' in pluginDefinition)) {
+      throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
+    }
+
+    const { plugin: initializer } = pluginDefinition as {
+      plugin: PluginInitializer<TStartContract, TDependencies>;
+    };
+    if (!initializer || typeof initializer !== 'function') {
+      throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
+    }
+
+    const instance = initializer(this.baseServices);
+    if (!instance || typeof instance !== 'object') {
+      throw new Error(
+        `Initializer for plugin "${
+          this.manifest.id
+        }" is expected to return plugin instance, but returned "${typeDetect(instance)}".`
+      );
+    }
+
+    if (typeof instance.start !== 'function') {
+      throw new Error(`Instance of plugin "${this.name}" does not define "start" function.`);
+    }
+
+    return instance;
   }
 }

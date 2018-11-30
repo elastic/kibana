@@ -22,7 +22,7 @@ import { Observable } from 'rxjs';
 import { BaseServices } from '../../types';
 import { ConfigWithSchema, EnvironmentMode } from '../config';
 import { LoggerFactory } from '../logging';
-import { Plugin } from './plugin';
+import { Plugin, PluginManifest } from './plugin';
 
 export interface PluginInitializerBaseServices {
   env: { mode: EnvironmentMode };
@@ -49,12 +49,12 @@ export interface PluginStartBaseServices {}
  *
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
- * @param plugin The plugin we're building these values for.
+ * @param pluginManifest The manifest of the plugin we're building these values for.
  * @param baseServices The core Kibana features
  * @internal
  */
-export function createPluginInitializerBaseServices<TPluginContract, TPluginDependencies>(
-  plugin: Plugin<TPluginContract, TPluginDependencies>,
+export function createPluginInitializerBaseServices(
+  pluginManifest: PluginManifest,
   baseServices: BaseServices
 ): PluginInitializerBaseServices {
   return {
@@ -68,7 +68,7 @@ export function createPluginInitializerBaseServices<TPluginContract, TPluginDepe
      */
     logger: {
       get(...contextParts) {
-        return baseServices.logger.get('plugins', plugin.name, ...contextParts);
+        return baseServices.logger.get('plugins', pluginManifest.id, ...contextParts);
       },
     },
 
@@ -84,10 +84,10 @@ export function createPluginInitializerBaseServices<TPluginContract, TPluginDepe
        * static `schema` that we validate the config at the given `path` against.
        */
       create(ConfigClass) {
-        return baseServices.configService.atPath(plugin.configPath, ConfigClass);
+        return baseServices.configService.atPath(pluginManifest.configPath, ConfigClass);
       },
       createIfExists(ConfigClass) {
-        return baseServices.configService.optionalAtPath(plugin.configPath, ConfigClass);
+        return baseServices.configService.optionalAtPath(pluginManifest.configPath, ConfigClass);
       },
     },
   };

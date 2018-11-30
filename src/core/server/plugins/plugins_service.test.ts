@@ -124,7 +124,7 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
           optionalPlugins: ['some-optional-plugin'],
           ui: true,
         },
-        logger.get()
+        { logger } as any
       ),
       new Plugin(
         'path-5',
@@ -137,7 +137,7 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
           optionalPlugins: [],
           ui: false,
         },
-        logger.get()
+        { logger } as any
       ),
     ]),
   });
@@ -171,7 +171,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
           optionalPlugins: [],
           ui: true,
         },
-        logger.get()
+        { logger } as any
       ),
       new Plugin(
         'path-2',
@@ -184,7 +184,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
           optionalPlugins: [],
           ui: true,
         },
-        logger.get()
+        { logger } as any
       ),
       new Plugin(
         'path-3',
@@ -197,7 +197,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
           optionalPlugins: [],
           ui: true,
         },
-        logger.get()
+        { logger } as any
       ),
       new Plugin(
         'path-4',
@@ -210,7 +210,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
           optionalPlugins: [],
           ui: true,
         },
-        logger.get()
+        { logger } as any
       ),
     ]),
   });
@@ -249,7 +249,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
       optionalPlugins: ['missing-optional-dep'],
       ui: true,
     },
-    logger.get()
+    { logger } as any
   );
 
   const secondPlugin = new Plugin(
@@ -263,7 +263,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
       optionalPlugins: [],
       ui: false,
     },
-    logger.get()
+    { logger } as any
   );
 
   mockDiscover.mockReturnValue({

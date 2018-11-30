@@ -24,6 +24,7 @@ import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
 import { BaseServices } from '../../../types';
 import { Logger } from '../../logging';
 import { Plugin } from '../plugin';
+import { createPluginInitializerBaseServices } from '../plugin_base_services';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
@@ -103,7 +104,11 @@ function createPlugin$(path: string, log: Logger, baseServices: BaseServices) {
   return from(parseManifest(path, baseServices.env.packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new Plugin(path, manifest, baseServices.logger.get('plugins', manifest.id));
+      return new Plugin(
+        path,
+        manifest,
+        createPluginInitializerBaseServices(manifest, baseServices)
+      );
     }),
     catchError(err => [err])
   );
