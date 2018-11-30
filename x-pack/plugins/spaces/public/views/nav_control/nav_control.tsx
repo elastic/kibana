@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { constant } from 'lodash';
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
@@ -59,13 +60,15 @@ module.controller(
     $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
       if (isVisible && !mounted && !pathProvider.isUnauthenticated()) {
         render(
-          <NavControlPopover
-            spacesManager={spacesManager}
-            activeSpace={activeSpace}
-            userProfile={userProfile}
-            anchorPosition={'rightCenter'}
-            buttonClass={SpacesGlobalNavButton}
-          />,
+          <I18nProvider>
+            <NavControlPopover
+              spacesManager={spacesManager}
+              activeSpace={activeSpace}
+              userProfile={userProfile}
+              anchorPosition={'rightCenter'}
+              buttonClass={SpacesGlobalNavButton}
+            />
+          </I18nProvider>,
           domNode
         );
         mounted = true;

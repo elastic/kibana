@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
+
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
