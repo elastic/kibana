@@ -6,6 +6,8 @@
 
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
+import 'ui/autoload/all';
+import 'ui/courier';
 import { UMFrameworkAdapter } from '../../lib';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
