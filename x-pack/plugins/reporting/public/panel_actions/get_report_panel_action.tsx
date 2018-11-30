@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { set } from 'lodash';
+import moment from 'moment';
 import rison from 'rison-node';
 import { ContextMenuAction, ContextMenuActionsRegistryProvider, Embeddable } from 'ui/embeddable';
 import { kfetch } from 'ui/kfetch';
@@ -59,14 +60,29 @@ class GetReportPanelAction extends ContextMenuAction {
     // Remove panels state since this report is for only one visualization panel
     set(this.state, 'panels', true);
 
+    // Adds UI state for modified colors and other customizations
+    set(this.state, 'uiState', embeddable.customization);
+
+    const fromtime = moment.isMoment(embeddable.timeRange.from)
+      ? embeddable.timeRange.from.toISOString()
+      : embeddable.timeRange.from;
+    const totime = moment.isMoment(embeddable.timeRange.to)
+      ? embeddable.timeRange.to.toISOString()
+      : embeddable.timeRange.to;
+
+    let appquerystring = this.state.toQueryParam();
+
+    // Colors have a # that is not handled correctly so we encode it here
+    appquerystring = appquerystring.replace(new RegExp('#', 'g'), '%23');
+
+    // mode of quick is hard coded and works ok even if time is relative or absolute and
+    // refreshinterval is not used in the report
     const visualizationURL =
       `/app/kibana#/visualize/edit/${
         embeddable.savedVisualization.id
-      }?_g=(refreshInterval:(pause:!f,value:900000),time:(from:${
-        embeddable.timeRange.from
-      },mode:quick,to:${embeddable.timeRange.to}))` +
+      }?_g=(refreshInterval:(pause:!f,value:900000),time:(from:'${fromtime}',mode:quick,to:'${totime}'))` +
       '&_a=' +
-      this.state.toQueryParam();
+      appquerystring;
 
     const reportconfig = {
       browserTimezone: 'America/Phoenix',
@@ -83,9 +99,10 @@ class GetReportPanelAction extends ContextMenuAction {
 
     const query = {
       jobParams: rison.encode(reportconfig),
-      visualization: JSON.stringify(embeddable.filters),
     };
+
     const API_BASE_URL = '/api/reporting/generate';
+
     toastNotifications.addSuccess({
       title: `Queued report for ${reportconfig.objectType}`,
       text: 'Track its progress in Management',
@@ -93,6 +110,7 @@ class GetReportPanelAction extends ContextMenuAction {
     });
 
     const resp = await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/png`, query });
+
     jobCompletionNotifications.add(resp.job.id);
   }
 }
