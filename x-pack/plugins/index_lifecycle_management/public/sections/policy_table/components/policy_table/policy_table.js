@@ -399,24 +399,30 @@ export class PolicyTableUi extends Component {
           <EuiPageContent>
             <div className="policyTable__horizontalScroll">
               {this.renderConfirmModal()}
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="l">
-                    <h1>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                        defaultMessage="Index lifecycle policies"
-                      />
-                    </h1>
+                  <EuiFlexGroup alignItems="center" gutterSize="m">
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="l">
+                        <h1>
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
+                            defaultMessage="Index lifecycle policies"
+                          />
+                        </h1>
+                      </EuiTitle>
+                    </EuiFlexItem>
 
-                  </EuiTitle>
-
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge label="Beta" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
+
                 {policies.length ? (
                   <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
                 ) : null}
               </EuiFlexGroup>
-              <EuiBetaBadge label="Beta" />
               <EuiSpacer size="s" />
               <EuiText>
                 <p>
