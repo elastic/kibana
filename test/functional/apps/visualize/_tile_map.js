@@ -23,17 +23,14 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const remote = getService('remote');
+  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
 
   describe('tile map visualize app', function () {
 
-
     describe('incomplete config', function describeIndexTests() {
-
-      let zoomWarningEnabled;
-      const timeout = 1;
 
       before(async function () {
         remote.setWindowSize(1280, 1000);
@@ -48,8 +45,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickNewSearch();
         log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-        zoomWarningEnabled = await testSubjects
-          .exists('zoomWarningEnabled');
         //do not configure aggs
       });
 
@@ -59,54 +54,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickMapZoomIn();
         await PageObjects.visualize.clickMapZoomIn();
       });
-
-
-      it('should display a warning at zoom level 10 when zoom warning enabled',
-        async () => {
-          log.debug(`Zoom warning enabled: ${zoomWarningEnabled}`);
-
-          const zoomLevel = 10;
-          for (let i = 0; i < zoomLevel; i++) {
-            await PageObjects.visualize.clickMapZoomIn();
-          }
-
-          zoomWarningEnabled
-            ? testSubjects.existOrFail('maxZoomWarning', timeout)
-            : testSubjects.missingOrFail('maxZoomWarning', timeout);
-        });
-
-      it('should continue providing zoom warning if left alone',
-        async () => {
-          const zoomLevel = 10;
-          for (let i = 0; i < zoomLevel; i++) {
-            await PageObjects.visualize.clickMapZoomIn();
-          }
-
-          testSubjects.existOrFail('maxZoomWarning');
-
-          await PageObjects.visualize.clickMapZoomOut();
-          await PageObjects.visualize.clickMapZoomIn();
-
-          testSubjects.existOrFail('maxZoomWarning');
-        });
-
-      it('should suppress zoom warning if suppress warnings checkbox checked',
-        async () => {
-          const zoomLevel = 10;
-          for (let i = 0; i < zoomLevel; i++) {
-            await PageObjects.visualize.clickMapZoomIn();
-          }
-
-          testSubjects.existOrFail('maxZoomWarning', timeout);
-          await PageObjects.visualize.checkCheckbox('suppressZoomWarnings');
-
-          await PageObjects.visualize.clickMapZoomOut();
-          await PageObjects.visualize.clickMapZoomIn();
-
-          testSubjects.missingOrFail('maxZoomWarning', timeout);
-        });
     });
-
 
 
     describe('complete config', function describeIndexTests() {
@@ -271,6 +219,68 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.header.waitUntilLoadingHasFinished();
         });
       });
+    });
+
+    describe('zoom warning behavior', function describeIndexTests() {
+
+      const waitForLoading = false;
+      let zoomWarningEnabled;
+      let last = false;
+      const toastDefaultLife = 6000;
+
+      before(async function () {
+        remote.setWindowSize(1280, 1000);
+
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickTileMap');
+        await PageObjects.visualize.clickTileMap();
+        await PageObjects.visualize.clickNewSearch();
+
+        zoomWarningEnabled = await testSubjects.exists('zoomWarningEnabled');
+        log.debug(`Zoom warning enabled: ${zoomWarningEnabled}`);
+
+        const zoomLevel = 9;
+        for (let i = 0; i < zoomLevel; i++) {
+          await PageObjects.visualize.clickMapZoomIn();
+        }
+
+      });
+
+      beforeEach(async function () {
+        await PageObjects.common.sleep(2000);
+        await PageObjects.visualize.clickMapZoomIn(waitForLoading);
+      });
+
+      afterEach(async function () {
+        if (!last) {
+          await PageObjects.common.sleep(toastDefaultLife);
+          await PageObjects.visualize.clickMapZoomOut(waitForLoading);
+        }
+      });
+
+      it('should show warning at zoom 10',
+        async () => {
+          testSubjects.existOrFail('maxZoomWarning');
+        });
+
+      it('should continue providing zoom warning if left alone',
+        async () => {
+          testSubjects.existOrFail('maxZoomWarning');
+        });
+
+      it('should suppress zoom warning if suppress warnings button clicked',
+        async () => {
+          last = true;
+          await find.clickByCssSelector('[data-test-subj="suppressZoomWarnings"]');
+
+          await PageObjects.common.sleep(toastDefaultLife + 2000);
+          await PageObjects.visualize.clickMapZoomOut(waitForLoading);
+          await PageObjects.common.sleep(1000);
+          await PageObjects.visualize.clickMapZoomIn(waitForLoading);
+
+          testSubjects.missingOrFail('maxZoomWarning');
+        });
     });
   });
 }
