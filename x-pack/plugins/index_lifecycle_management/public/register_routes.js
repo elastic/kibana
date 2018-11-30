@@ -36,6 +36,8 @@ if (chrome.getInjected('ilmUiEnabled')) {
     controllerAs: 'indexLifecycleManagement',
     controller: class IndexLifecycleManagementController {
       constructor($scope, $route, $http, kbnUrl, $rootScope) {
+        // clean up previously rendered React app if one exists
+        // this happens because of React Router redirects
         elem && unmountComponentAtNode(elem);
         setHttpClient($http);
         setUrlService({
