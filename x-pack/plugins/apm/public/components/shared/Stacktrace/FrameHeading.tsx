@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { get } from 'lodash';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { colors, fontFamilyCode, px, units } from '../../../style/variables';
 
@@ -43,11 +44,17 @@ const FrameHeading: React.SFC<Props> = ({
   const FileDetail = isLibraryFrame
     ? LibraryFrameFileDetail
     : AppFrameFileDetail;
+  const lineNumber: number = get(stackframe, 'line.number');
   return (
     <FileDetails>
       <FileDetail>{stackframe.filename}</FileDetail> in{' '}
-      <FileDetail>{stackframe.function}</FileDetail> at{' '}
-      <FileDetail>line {stackframe.line.number}</FileDetail>
+      <FileDetail>{stackframe.function}</FileDetail>
+      {lineNumber > 0 && (
+        <Fragment>
+          {' at '}
+          <FileDetail>line {stackframe.line.number}</FileDetail>
+        </Fragment>
+      )}
     </FileDetails>
   );
 };

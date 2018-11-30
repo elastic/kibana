@@ -130,8 +130,7 @@ exports[`CodePreview should render with data 1`] = `
       >
         &lt;anonymous&gt;
       </span>
-       at
-       
+       at 
       <span
         className="c3"
       >
