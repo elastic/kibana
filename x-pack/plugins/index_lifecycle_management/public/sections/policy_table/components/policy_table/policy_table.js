@@ -214,6 +214,7 @@ export class PolicyTableUi extends Component {
           key={`${fieldName}-${name}`}
           truncateText={false}
           data-test-subj={`policyTableCell-${fieldName}`}
+          className={'policyTable__content--' + fieldName}
         >
           {this.buildRowCell(fieldName, value)}
         </EuiTableRowCell>
@@ -379,39 +380,41 @@ export class PolicyTableUi extends Component {
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent>
-            {this.renderConfirmModal()}
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                      defaultMessage="Index lifecycle policies"
-                    />
-                  </h1>
+            <div className="policyTable__horizontalScroll">
+              {this.renderConfirmModal()}
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h1>
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
+                        defaultMessage="Index lifecycle policies"
+                      />
+                    </h1>
 
-                </EuiTitle>
+                  </EuiTitle>
 
-              </EuiFlexItem>
-              {policies.length ? (
-                <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-            <EuiBetaBadge label="Beta" />
-            <EuiSpacer size="s" />
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-                  defaultMessage="Create, update, and delete your index lifecycle policies"
-                />
-              </p>
-            </EuiText>
+                </EuiFlexItem>
+                {policies.length ? (
+                  <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+              <EuiBetaBadge label="Beta" />
+              <EuiSpacer size="s" />
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
+                    defaultMessage="Create, update, and delete your index lifecycle policies"
+                  />
+                </p>
+              </EuiText>
 
-            <EuiSpacer />
-            {content}
-            <EuiSpacer size="m" />
-            {policies.length ? this.renderPager() : null}
+              <EuiSpacer />
+              {content}
+              <EuiSpacer size="m" />
+              {policies.length ? this.renderPager() : null}
+            </div>
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

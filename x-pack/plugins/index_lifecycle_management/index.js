@@ -29,6 +29,7 @@ export function indexLifecycleManagement(kibana) {
     configPrefix: 'xpack.ilm',
     require: ['kibana', 'elasticsearch', 'xpack_main', 'index_management'],
     uiExports: {
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: ['plugins/index_lifecycle_management'],
       injectDefaultVars(server) {
         const config = server.config();
