@@ -133,6 +133,7 @@ describe('QueryBar', () => {
         appName={'discover'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
+        intl={null as any}
       />
     );
 
@@ -147,6 +148,7 @@ describe('QueryBar', () => {
         appName={'discover'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
+        intl={null as any}
       />
     );
 
@@ -162,6 +164,7 @@ describe('QueryBar', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
+        intl={null as any}
       />
     );
 
@@ -177,6 +180,7 @@ describe('QueryBar', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
+        intl={null as any}
       />
     );
 
@@ -195,6 +199,7 @@ describe('QueryBar', () => {
         indexPatterns={[mockIndexPattern]}
         store={mockStorage}
         disableAutoFocus={true}
+        intl={null as any}
       />
     );
 
@@ -217,6 +222,7 @@ describe('QueryBar', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
+        intl={null as any}
       />
     );
 
@@ -242,6 +248,7 @@ describe('QueryBar', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
+        intl={null as any}
       />
     );
 
@@ -267,6 +274,7 @@ describe('QueryBar', () => {
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
+        intl={null as any}
       />
     );
 
