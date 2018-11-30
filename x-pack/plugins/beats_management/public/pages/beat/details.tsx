@@ -10,6 +10,7 @@ import {
   // @ts-ignore EuiInMemoryTable typings not yet available
   EuiInMemoryTable,
   EuiLink,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -104,6 +105,7 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
     return (
       <React.Fragment>
         <Breadcrumb title={`Beat: ${beat.id}`} path={`/beat/${beat.id}/details`} />
+        <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
