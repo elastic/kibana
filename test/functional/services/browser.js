@@ -20,32 +20,30 @@
 import { modifyUrl } from '../../../src/core/utils';
 
 export function BrowserProvider({ getService }) {
-  const leadfoot = getService('__leadfoot__');
+  const driver = getService('webDriver');
 
   return new class BrowserService {
     /**
-     * Gets the dimensions of a window.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#getWindowSize
+     * Retrieves the a rect describing the current top-level window's size and position.
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
      *
-     * @param  {string} windowHandle Optional - Omit this argument to query the currently focused window.
-     * @return {Promise<{width: number, height: number}>}
+     * @return {Promise<{height: number, width: number, x: number, y: number}>}
      */
-    async getWindowSize(...args) {
-      return await leadfoot.getWindowSize(...args);
+    async getWindowSize() {
+      return await driver.manage().window().getRect();
     }
 
 
     /**
      * Sets the dimensions of a window.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#setWindowSize
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
      *
-     * @param {string} windowHandle Optional
      * @param {number} width
      * @param {number} height
      * @return {Promise<void>}
      */
     async setWindowSize(...args) {
-      await leadfoot.setWindowSize(...args);
+      await driver.manage().window().setRect({ width: args[0], height: args[1] });
     }
 
     /**
@@ -56,7 +54,7 @@ export function BrowserProvider({ getService }) {
      */
     async getCurrentUrl() {
       // strip _t=Date query param when url is read
-      const current = await leadfoot.getCurrentUrl();
+      const current = await driver.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
         delete parsed.query._t;
       });
@@ -77,16 +75,15 @@ export function BrowserProvider({ getService }) {
           parsed.query._t = Date.now();
         });
 
-        return await leadfoot.get(urlWithTime);
+        return await driver.get(urlWithTime);
       }
-      return await leadfoot.get(url);
+      return await driver.get(url);
     }
 
     /**
      * Moves the remote environment’s mouse cursor to the specified element or relative
-     * position. If the element is outside of the viewport, the remote driver will attempt
-     * to scroll it into view automatically.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#moveMouseTo
+     * position.
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
      *
      * @param {Element} element Optional
      * @param {number} xOffset Optional
@@ -94,31 +91,35 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async moveMouseTo(element, xOffset, yOffset) {
+      const mouse = driver.actions().mouse();
+      const actions = driver.actions({ bridge: true });
       if (element) {
-        await element.moveMouseTo(xOffset, yOffset);
+        await actions.pause(mouse).move({ origin: args[0] }).perform();
+      } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
+        await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
       } else {
-        await leadfoot.moveMouseTo(null, xOffset, yOffset);
+        throw new Error('Element or coordinates should be provided');
       }
     }
 
     /**
      * Reloads the current browser window/frame.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#refresh
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#refresh
      *
      * @return {Promise<void>}
      */
     async refresh() {
-      await leadfoot.refresh();
+      await driver.navigate().refresh();
     }
 
     /**
      * Navigates the focused window/frame back one page using the browser’s navigation history.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#goBack
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#back
      *
      * @return {Promise<void>}
      */
     async goBack() {
-      await leadfoot.goBack();
+      await driver.navigate().back();
     }
 
     /**
@@ -129,7 +130,16 @@ export function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async pressKeys(...args) {
-      await leadfoot.pressKeys(...args);
+      let actions = driver.actions({ async: true });
+      const kb = actions.keyboard();
+      if (Array.isArray(args)) {
+        args.forEach(key => actions = actions.keyDown(key));
+        actions = actions.pause(kb);
+        args.forEach(key => actions = actions.keyUp(key));
+        await actions.perform();
+      } else {
+        await actions.keyDown(args[0]).pause(kb).keyUp(args[0]).perform();
+      }
     }
 
     /**
@@ -138,119 +148,137 @@ export function BrowserProvider({ getService }) {
      * the page was loaded.
      * https://theintern.io/leadfoot/module-leadfoot_Session.html#clickMouseButton
      *
-     * @param {number} button Optional
+     * @param {Element} element Optional
+     * @param {number} xOffset Optional
+     * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
     async clickMouseButton(...args) {
-      await leadfoot.clickMouseButton(...args);
+      const mouse = driver.actions().mouse();
+      const actions = driver.actions({ bridge: true });
+      if (args[0] instanceof Element) {
+        await actions.pause(mouse).move({ origin: args[0] }).click().perform();
+      } else if (isNaN(args[1]) || isNaN(args[2]) === false) {
+        await actions.pause(mouse).move({ origin: { x: args[1], y: args[2] } }).click().perform();
+      } else {
+        throw new Error('Element or coordinates should be provided');
+      }
     }
 
     /**
      * Depresses a mouse button without releasing it.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#pressMouseButton
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#press
      *
-     * @param {number} button Optional
+     * @param {number} button Optional, default LEFT
      * @return {Promise<void>}
      */
     async pressMouseButton(...args) {
-      await leadfoot.pressMouseButton(...args);
+      const actions = driver.actions({ bridge: true });
+      await actions.press(...args).perform();
     }
 
     /**
      * Releases a previously depressed mouse button.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#releaseMouseButton
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#release
      *
-     * @param {number} button Optional
+     * @param {number} button Optional, default LEFT
      * @return {Promise<void>}
      */
     async releaseMouseButton(...args) {
-      await leadfoot.releaseMouseButton(...args);
+      const actions = driver.actions({ bridge: true });
+      await actions.release(...args).perform();
     }
 
     /**
      * Gets the HTML loaded in the focused window/frame. This markup is serialised by the remote
      * environment so may not exactly match the HTML provided by the Web server.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#getPageSource
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getPageSource
      *
      * @return {Promise<string>}
      */
-    async getPageSource(...args) {
-      return await leadfoot.getPageSource(...args);
+    async getPageSource() {
+      return await driver.getPageSource();
     }
 
     /**
      * Gets all logs from the remote environment of the given type. The logs in the remote
      * environment are cleared once they have been retrieved.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#getLogsFor
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Logs.html#get
      *
-     * @param {string} type
+     * @param {!logging.Type} type The desired log type.
      * @return {Promise<LogEntry[]>}
      */
     async getLogsFor(...args) {
-      return await leadfoot.getLogsFor(...args);
+      return await driver.manage().logs().get(...args);
     }
 
     /**
-     * Gets a screenshot of the focused window and returns it in PNG format.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#takeScreenshot
+     * Gets a screenshot of the focused window and returns it as a base-64 encoded PNG
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#takeScreenshot
      *
      * @return {Promise<Buffer>}
      */
-    async takeScreenshot(...args) {
-      return await leadfoot.takeScreenshot(...args);
+    async takeScreenshot() {
+      return await driver.takeScreenshot();
     }
 
     /**
-     * Double-clicks the primary mouse button.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#doubleClick
-     *
+     * Double-clicks the element.
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
+     * @param {Element} element
      * @return {Promise<void>}
      */
     async doubleClick(...args) {
-      await leadfoot.doubleClick(...args);
+      if (args[0] instanceof Element) {
+        const actions = driver.actions({ bridge: true });
+        await actions.doubleClick(...args).perform();
+      } else {
+        throw new Error('Element object should be provided');
+      }
     }
 
     /**
-     * Switches the currently focused window to a new window.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#switchToWindow
+     * Changes the focus of all future commands to another window. Windows may be specified
+     * by their window.name attributeor by its handle (as returned by WebDriver#getWindowHandles).
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_TargetLocator.html
      *
      * @param {string} handle
      * @return {Promise<void>}
      */
     async switchToWindow(...args) {
-      await leadfoot.switchToWindow(...args);
+      await driver.switchTo().window(...args);
     }
 
     /**
      * Gets a list of identifiers for all currently open windows.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#getAllWindowHandles
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getAllWindowHandles
      *
      * @return {Promise<string[]>}
      */
-    async getAllWindowHandles(...args) {
-      return await leadfoot.getAllWindowHandles(...args);
+    async getAllWindowHandles() {
+      return await driver.getAllWindowHandles();
     }
 
     /**
      * Closes the currently focused window. In most environments, after the window has been
      * closed, it is necessary to explicitly switch to whatever window is now focused.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#closeCurrentWindow
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#close
      *
      * @return {Promise<void>}
      */
-    async closeCurrentWindow(...args) {
-      await leadfoot.closeCurrentWindow(...args);
+    async closeCurrentWindow() {
+      await driver.close();
     }
 
     /**
      * Executes JavaScript code within the focused window/frame. The code should return a value synchronously.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#execute
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#executeScript
      *
      * @param  {string|function} function
      * @param  {...any[]} args
      */
     async execute(...args) {
-      return await leadfoot.execute(...args);
+      return await driver.executeScript(...args);
     }
   };
 }
