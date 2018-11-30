@@ -25,7 +25,7 @@
 
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
-  (path: 'count', opts: CountOpts): Promise<{ count: number }>;
+  (path: 'count', opts: CountOpts): Promise<{ count: number; _shards: ShardsInfo }>;
   (path: 'clearScroll', opts: { scrollId: string }): Promise<any>;
   (path: 'indices.create' | 'indices.delete', opts: IndexCreationOpts): Promise<any>;
   (path: 'indices.exists', opts: IndexOpts): Promise<boolean>;
@@ -172,6 +172,14 @@ export interface SearchResults {
     hits: RawDoc[];
   };
   _scroll_id?: string;
+  _shards: ShardsInfo;
+}
+
+export interface ShardsInfo {
+  total: number;
+  successful: number;
+  skipped: number;
+  failed: number;
 }
 
 export interface ErrorResponse {
