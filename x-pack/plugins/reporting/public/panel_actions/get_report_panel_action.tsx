@@ -30,6 +30,15 @@ class GetReportPanelAction extends ContextMenuAction {
     );
     this.state = state;
   }
+  public isVisible({ embeddable }: { embeddable: Embeddable }): boolean {
+    if (!embeddable) {
+      return false;
+    }
+    if (!embeddable.savedVisualization.id) {
+      return false;
+    }
+    return true;
+  }
 
   public async onClick({
     embeddable,
@@ -39,6 +48,9 @@ class GetReportPanelAction extends ContextMenuAction {
     closeContextMenu: any;
   }) {
     if (!embeddable) {
+      return;
+    }
+    if (!embeddable.savedVisualization.id) {
       return;
     }
 
