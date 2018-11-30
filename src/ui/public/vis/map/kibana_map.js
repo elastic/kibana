@@ -128,12 +128,18 @@ const makeZoomWarningMsg = (function () {
               Or, you can configure a custom WMS compliant server.`}
               values={{
                 defaultDistribution: (
-                  <a href="https://www.elastic.co/downloads/kibana">
+                  <a
+                    target="_blank"
+                    href="https://www.elastic.co/downloads/kibana"
+                  >
                     {`default distribution `}
                   </a>
                 ),
                 ems: (
-                  <a href="https://www.elastic.co/elastic-maps-service">
+                  <a
+                    target="_blank"
+                    href="https://www.elastic.co/elastic-maps-service"
+                  >
                     {`Elastic Maps Service`}
                   </a>
                 )
