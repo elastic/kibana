@@ -40,6 +40,7 @@ const ESCAPE_LINE_BREAK_REGEX = /(?<!\\)\\\n/g;
 const HTML_LINE_BREAK_REGEX = /[\s]*\n[\s]*/g;
 
 const ARGUMENT_ELEMENT_TYPE = 'argumentElement';
+const HTML_KEY_PREFIX = 'html_';
 
 export const readFileAsync = promisify(fs.readFile);
 export const writeFileAsync = promisify(fs.writeFile);
@@ -162,16 +163,20 @@ function extractValueReferencesFromIcuAst(node, keys = new Set()) {
 /**
  * Checks whether values from "values" and "defaultMessage" correspond to each other.
  *
- * @param {string[]} valuesKeys array of "values" property keys
+ * @param {string[]} prefixedValuesKeys array of "values" property keys
  * @param {string} defaultMessage "defaultMessage" value
  * @param {string} messageId message id for fail errors
  * @throws if "values" and "defaultMessage" don't correspond to each other
  */
-export function checkValuesProperty(valuesKeys, defaultMessage, messageId) {
+export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageId) {
   // skip validation if defaultMessage doesn't use ICU and values prop has no keys
-  if (!valuesKeys.length && !defaultMessage.includes('{')) {
+  if (!prefixedValuesKeys.length && !defaultMessage.includes('{')) {
     return;
   }
+
+  const valuesKeys = prefixedValuesKeys.map(
+    key => (key.startsWith(HTML_KEY_PREFIX) ? key.slice(HTML_KEY_PREFIX.length) : key)
+  );
 
   let defaultMessageAst;
 
