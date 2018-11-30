@@ -67,9 +67,8 @@ uiModules.get('kibana')
         this._invalidateSettings();
       }
 
-      // TODO: Test
-      shouldShowZoomMessage() {
-        return this._showZoomMessage;
+      shouldShowZoomMessage({ origin }) {
+        return origin === ORIGIN.EMS && this._showZoomMessage;
       }
 
       disableZoomMessage() {

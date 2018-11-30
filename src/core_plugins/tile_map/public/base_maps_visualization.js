@@ -27,7 +27,6 @@ import { uiModules } from 'ui/modules';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22;//increase this to 22. Better for WMS
-const EMS_TMS_URL = 'https://tiles.maps.elastic.co';  // TODO: Remove in favor of new EMS logic
 
 const emsServiceSettings = new Promise((resolve) => {
   uiModules.get('kibana').run(($injector) => {
@@ -191,22 +190,14 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
       }
     }
 
-    // TODO: Replace w/ logic from new PR
-    _isConstrainedZoomBaseLayer(options) {
-      const { url } = options;
-
-      return url.startsWith(EMS_TMS_URL)
-        && serviceSettings.shouldShowZoomMessage();
-    }
-
     async _setTmsLayer(tmsLayer) {
       this._kibanaMap.setMinZoom(tmsLayer.minZoom);
       this._kibanaMap.setMaxZoom(tmsLayer.maxZoom);
       if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
         this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
       }
-      const showZoomMessage = this._isConstrainedZoomBaseLayer(tmsLayer);
       const url = await (await emsServiceSettings).getUrlTemplateForTMSLayer(tmsLayer);
+      const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
       const options = _.cloneDeep(tmsLayer);
       delete options.id;
       delete options.url;
