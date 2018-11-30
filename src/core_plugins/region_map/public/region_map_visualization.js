@@ -70,7 +70,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       }
 
       this._updateChoroplethLayerForNewMetrics(
-        this._vis.params.selectedLayer.url,
+        this._vis.params.selectedLayer.name,
         this._vis.params.selectedLayer.attribution,
         this._vis.params.showAllShapes,
         results
@@ -96,7 +96,7 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
       }
 
       this._updateChoroplethLayerForNewProperties(
-        visParams.selectedLayer.url,
+        visParams.selectedLayer.name,
         visParams.selectedLayer.attribution,
         this._vis.params.showAllShapes
       );
@@ -107,40 +107,42 @@ export function RegionMapsVisualizationProvider(Private, config, i18n) {
 
     }
 
-    _updateChoroplethLayerForNewMetrics(url, attribution, showAllData, newMetrics) {
-      if (this._choroplethLayer && this._choroplethLayer.canReuseInstanceForNewMetrics(url, showAllData, newMetrics)) {
+    _updateChoroplethLayerForNewMetrics(name, attribution, showAllData, newMetrics) {
+      if (this._choroplethLayer && this._choroplethLayer.canReuseInstanceForNewMetrics(name, showAllData, newMetrics)) {
         return;
       }
-      return this._recreateChoroplethLayer(url, attribution, showAllData);
+      return this._recreateChoroplethLayer(name, attribution, showAllData);
     }
 
-    _updateChoroplethLayerForNewProperties(url, attribution, showAllData) {
-      if (this._choroplethLayer && this._choroplethLayer.canReuseInstance(url, showAllData)) {
+    _updateChoroplethLayerForNewProperties(name, attribution, showAllData) {
+      if (this._choroplethLayer && this._choroplethLayer.canReuseInstance(name, showAllData)) {
         return;
       }
-      return this._recreateChoroplethLayer(url, attribution, showAllData);
+      return this._recreateChoroplethLayer(name, attribution, showAllData);
     }
 
-    _recreateChoroplethLayer(url, attribution, showAllData) {
+    _recreateChoroplethLayer(name, attribution, showAllData) {
 
       this._kibanaMap.removeLayer(this._choroplethLayer);
 
 
       if (this._choroplethLayer) {
         this._choroplethLayer = this._choroplethLayer.cloneChoroplethLayerForNewData(
-          url,
+          name,
           attribution,
           this.vis.params.selectedLayer.format,
           showAllData,
-          this.vis.params.selectedLayer.meta
+          this.vis.params.selectedLayer.meta,
+          this.vis.params.selectedLayer
         );
       } else {
         this._choroplethLayer = new ChoroplethLayer(
-          url,
+          name,
           attribution,
           this.vis.params.selectedLayer.format,
           showAllData,
-          this.vis.params.selectedLayer.meta
+          this.vis.params.selectedLayer.meta,
+          this.vis.params.selectedLayer
         );
       }
 
