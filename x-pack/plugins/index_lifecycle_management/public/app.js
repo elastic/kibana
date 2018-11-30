@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { HashRouter, Switch, Route } from 'react-router-dom';
+import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyTable } from './sections/policy_table';
 import { BASE_PATH } from '../common/constants';
@@ -13,6 +13,7 @@ import { BASE_PATH } from '../common/constants';
 export const App = () => (
   <HashRouter>
     <Switch>
+      <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}policies`}/>
       <Route exact path={`${BASE_PATH}policies`} component={PolicyTable}/>
       <Route path={`${BASE_PATH}policies/edit/:policyName?`} component={EditPolicy}/>
     </Switch>

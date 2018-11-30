@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { setHttpClient } from './services/api';
 import chrome from 'ui/chrome';
@@ -19,7 +19,7 @@ import routes from 'ui/routes';
 
 import template from './main.html';
 import { manageAngularLifecycle } from './services/manage_angular_lifecycle';
-
+let elem;
 const renderReact = async (elem) => {
   render(
     <I18nProvider>
@@ -36,6 +36,7 @@ if (chrome.getInjected('ilmUiEnabled')) {
     controllerAs: 'indexLifecycleManagement',
     controller: class IndexLifecycleManagementController {
       constructor($scope, $route, $http, kbnUrl, $rootScope) {
+        elem && unmountComponentAtNode(elem);
         setHttpClient($http);
         setUrlService({
           change(url) {
@@ -44,7 +45,7 @@ if (chrome.getInjected('ilmUiEnabled')) {
           }
         });
         $scope.$$postDigest(() => {
-          const elem = document.getElementById('indexLifecycleManagementReactRoot');
+          elem = document.getElementById('indexLifecycleManagementReactRoot');
           renderReact(elem);
           manageAngularLifecycle($scope, $route, elem);
         });
