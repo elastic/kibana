@@ -219,7 +219,7 @@ export class PolicyTableUi extends Component {
     }
   }
   buildRowCells(policy) {
-    const hasCoveredIndices = policy.coveredIndices && policy.coveredIndices.length;
+    const hasCoveredIndices = Boolean(policy.coveredIndices && policy.coveredIndices.length);
     const { intl } = this.props;
     const { name } = policy;
     const cells = Object.entries(COLUMNS).map(([fieldName, { width }]) => {
