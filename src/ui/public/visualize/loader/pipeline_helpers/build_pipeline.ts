@@ -188,10 +188,11 @@ export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) 
   } else {
     pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visState.params)}
-    ${prepareString('index', indexPattern.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'}
-    `;
+    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'} `;
+    if (indexPattern) {
+      pipeline += `${prepareString('index', indexPattern.id)}`;
+    }
   }
 
   return pipeline;

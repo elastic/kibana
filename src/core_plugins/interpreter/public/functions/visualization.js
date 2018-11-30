@@ -31,7 +31,7 @@ function getHandler(from, type) {
   if (typeof type === 'function') {
     return type;
   }
-  if (type === 'courier') {
+  if (type === 'courier' || type === 'none') {
     return null;
   }
   const handlerDesc = from.find(handler => handler.name === type);
