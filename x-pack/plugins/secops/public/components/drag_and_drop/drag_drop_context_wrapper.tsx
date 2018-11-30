@@ -10,42 +10,40 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
-import { dragAndDropActions } from '../../store/local/drag_and_drop';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
-import {
-  addProviderToTimeline,
-  getProviderIdFromDraggable,
-  providerWasDroppedOnTimeline,
-} from './helpers';
+import { addProviderToTimeline, providerWasDroppedOnTimeline } from './helpers';
 
 interface Props {
   dataProviders?: IdToDataProvider;
   dispatch?: Dispatch;
 }
 
+interface OnDragEndHandlerParams {
+  result: DropResult;
+  dataProviders: IdToDataProvider;
+  dispatch: Dispatch;
+}
+
+const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerParams) => {
+  if (providerWasDroppedOnTimeline(result)) {
+    addProviderToTimeline({ dataProviders, result, dispatch });
+  }
+};
+
 class DragDropContextWrapperComponent extends React.PureComponent<Props> {
   public render() {
     const { dataProviders, dispatch, children } = this.props;
 
-    const onDragEnd = (result: DropResult, dataProvider: DataProvider) => {
-      if (providerWasDroppedOnTimeline(result)) {
-        addProviderToTimeline({ dataProviders: dataProviders!, result, dispatch: dispatch! });
-      }
-    };
-
     return (
       <DragDropContext
         onDragEnd={result => {
-          const id = getProviderIdFromDraggable(result);
-          const dataProvider = dataProviders![id];
-          if (dataProvider != null) {
-            onDragEnd(result, dataProvider);
-          } else {
-            dispatch!(dragAndDropActions.noProviderFound({ id }));
-          }
+          onDragEndHandler({
+            result,
+            dataProviders: dataProviders!,
+            dispatch: dispatch!,
+          });
         }}
       >
         {children}

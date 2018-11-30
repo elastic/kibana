@@ -8,6 +8,7 @@ import { DropResult } from 'react-beautiful-dnd';
 import { Dispatch } from 'redux';
 
 import { timelineActions } from '../../store';
+import { dragAndDropActions } from '../../store/local/drag_and_drop';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 
 interface GetDraggableIdParams {
@@ -67,5 +68,7 @@ export const addProviderToTimeline = ({
 
   if (provider) {
     dispatch(timelineActions.addProvider({ id: timeline, provider }));
+  } else {
+    dispatch(dragAndDropActions.noProviderFound({ id: providerId }));
   }
 };

@@ -18,9 +18,14 @@ import { State } from '../../store/reducer';
 import { DataProvider, DataProviderId } from '../timeline/data_providers/data_provider'; // tslint:disable-line:no-unused-variable (linter bug!)
 import { getDraggableId, getDroppableId } from './helpers';
 
-// The following empty styled.div are required by react-beautiful-dnd:
-const ReactDndDropTarget = styled.div``;
-const ProviderContainer = styled.div``;
+const ReactDndDropTarget = styled.div``; // required by react-beautiful-dnd:
+const ProviderContainer = styled.div`
+  &:hover {
+    transition: background-color 0.7s ease;
+    background-color: #d9d9d9;
+  }
+`;
+
 const DraggableContent = styled.div``;
 
 export interface OwnProps {
@@ -82,7 +87,7 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
                     data-test-subj="providerContainer"
                     style={{
                       ...provided.draggableProps.style,
-                      zIndex: 9000,
+                      zIndex: 9000, // EuiFlyout has a z-index of 8000
                     }}
                   >
                     {render(dataProvider)}
