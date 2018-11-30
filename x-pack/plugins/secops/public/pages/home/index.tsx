@@ -32,13 +32,12 @@ import { Flyout } from '../../components/page/flyout';
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { StatefulTimeline } from '../../components/timeline';
+import { defaultWidth } from '../../components/timeline/body';
 import { headers } from '../../components/timeline/body/column_headers/headers';
 import { NotFoundPage } from '../404';
 import { Hosts } from '../hosts';
 import { Network } from '../network';
 import { Overview } from '../overview';
-
-const maxTimelineWidth = 1125;
 
 interface Props {
   dispatch: Dispatch;
@@ -50,7 +49,7 @@ class HomePageComponent extends React.PureComponent<Props> {
       <PageContainer data-test-subj="pageContainer">
         <DragDropContextWrapper>
           <Flyout>
-            <StatefulTimeline id="timeline" headers={headers} width={maxTimelineWidth} />
+            <StatefulTimeline id="timeline" headers={headers} width={defaultWidth} />
           </Flyout>
           <PageHeader data-test-subj="pageHeader">
             <Navigation data-test-subj="navigation" />

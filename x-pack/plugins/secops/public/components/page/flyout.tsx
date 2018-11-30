@@ -15,6 +15,7 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { defaultWidth } from '../timeline/body';
 
 export const Overlay = styled.div`
   position: absolute;
@@ -74,7 +75,7 @@ interface FlyoutPaneProps {
 export const FlyoutPane = pure(({ onClose, children }: FlyoutPaneProps) => (
   <EuiFlyout
     size="l"
-    maxWidth={1125 + 50}
+    maxWidth={defaultWidth + 50}
     onClose={onClose}
     aria-labelledby="flyoutTitle"
     data-test-subj="flyout"
