@@ -1,5 +1,4 @@
 optimize:
-  unsafeCache: true
   sourceMaps: false
 #  sourceMaps: '#cheap-source-map'
 
@@ -11,3 +10,9 @@ code:
 #    init:
 #      - 'yarn'
 #      - 'install'
+
+xpack.security.encryptionKey: "something_at_least_32_characters"
+xpack.reporting.encryptionKey: "something_at_least_32_characters"
+
+elasticsearch.username: "elastic"
+elasticsearch.password: "changeme"

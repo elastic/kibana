@@ -11,3 +11,5 @@ code:
 #      - 'yarn'
 #      - 'install'
 
+xpack.security.encryptionKey: "something_at_least_32_characters"
+xpack.reporting.encryptionKey: "something_at_least_32_characters"
