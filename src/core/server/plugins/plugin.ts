@@ -20,7 +20,7 @@
 import typeDetect from 'type-detect';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginInitializerCore, PluginStartCore } from './plugins_core';
+import { PluginInitializerBaseServices, PluginStartBaseServices } from './plugin_base_services';
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -75,9 +75,12 @@ export interface PluginManifest {
 }
 
 type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName, unknown>> = (
-  core: PluginInitializerCore
+  baseServices: PluginInitializerBaseServices
 ) => {
-  start: (core: PluginStartCore, dependencies: TDependencies) => TExposedContract;
+  start: (
+    startBaseServices: PluginStartBaseServices,
+    dependencies: TDependencies
+  ) => TExposedContract;
   stop?: () => void;
 };
 
@@ -104,7 +107,7 @@ export class Plugin<
     this.optionalDependencies = manifest.optionalPlugins;
   }
 
-  public init(core: PluginInitializerCore) {
+  public init(baseServices: PluginInitializerBaseServices) {
     this.log.info('Initializing plugin');
 
     const pluginDefinition = require(this.path);
@@ -119,7 +122,7 @@ export class Plugin<
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
     }
 
-    const instance = initializer(core);
+    const instance = initializer(baseServices);
     if (!instance || typeof instance !== 'object') {
       throw new Error(
         `Initializer for plugin "${
@@ -135,14 +138,14 @@ export class Plugin<
     this.instance = instance;
   }
 
-  public async start(core: PluginStartCore, dependencies: TDependencies) {
+  public async start(baseServices: PluginStartBaseServices, dependencies: TDependencies) {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" is not initialized.`);
     }
 
     this.log.info('Starting plugin');
 
-    return await this.instance.start(core, dependencies);
+    return await this.instance.start(baseServices, dependencies);
   }
 
   public async stop() {

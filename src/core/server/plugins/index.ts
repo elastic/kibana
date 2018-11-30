@@ -22,7 +22,7 @@ import { PluginsService } from './plugins_service';
 
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';
-export { PluginInitializerCore, PluginStartCore } from './plugins_core';
+export { PluginInitializerBaseServices, PluginStartBaseServices } from './plugin_base_services';
 export { PluginName } from './plugin';
 
 /** @internal */

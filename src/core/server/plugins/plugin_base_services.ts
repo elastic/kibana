@@ -24,7 +24,7 @@ import { ConfigWithSchema, EnvironmentMode } from '../config';
 import { LoggerFactory } from '../logging';
 import { Plugin } from './plugin';
 
-export interface PluginInitializerCore {
+export interface PluginInitializerBaseServices {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
   config: {
@@ -38,7 +38,7 @@ export interface PluginInitializerCore {
 }
 
 // tslint:disable no-empty-interface
-export interface PluginStartCore {}
+export interface PluginStartBaseServices {}
 
 /**
  * This returns a facade for `BaseServices` that will be exposed to the plugin initializer.
@@ -53,10 +53,10 @@ export interface PluginStartCore {}
  * @param baseServices The core Kibana features
  * @internal
  */
-export function createPluginInitializerCore<TPluginContract, TPluginDependencies>(
+export function createPluginInitializerBaseServices<TPluginContract, TPluginDependencies>(
   plugin: Plugin<TPluginContract, TPluginDependencies>,
   baseServices: BaseServices
-): PluginInitializerCore {
+): PluginInitializerBaseServices {
   return {
     /**
      * Environment information that is safe to expose to plugins and may be beneficial for them.
@@ -106,9 +106,9 @@ export function createPluginInitializerCore<TPluginContract, TPluginDependencies
  * @param baseServices The core Kibana features
  * @internal
  */
-export function createPluginStartCore<TPluginContract, TPluginDependencies>(
+export function createPluginStartBaseServices<TPluginContract, TPluginDependencies>(
   plugin: Plugin<TPluginContract, TPluginDependencies>,
   baseServices: BaseServices
-): PluginStartCore {
+): PluginStartBaseServices {
   return {};
 }

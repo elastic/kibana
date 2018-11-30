@@ -20,7 +20,10 @@
 import { BaseServices } from '../../types';
 import { Logger } from '../logging';
 import { Plugin, PluginName } from './plugin';
-import { createPluginInitializerCore, createPluginStartCore } from './plugins_core';
+import {
+  createPluginInitializerBaseServices,
+  createPluginStartBaseServices,
+} from './plugin_base_services';
 
 /** @internal */
 export class PluginsSystem {
@@ -60,12 +63,12 @@ export class PluginsSystem {
         {} as Record<PluginName, unknown>
       );
 
-      plugin.init(createPluginInitializerCore(plugin, this.baseServices));
+      plugin.init(createPluginInitializerBaseServices(plugin, this.baseServices));
 
       exposedValues.set(
         pluginName,
         await plugin.start(
-          createPluginStartCore(plugin, this.baseServices),
+          createPluginStartBaseServices(plugin, this.baseServices),
           exposedDependencyValues
         )
       );

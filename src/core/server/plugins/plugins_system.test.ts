@@ -19,11 +19,11 @@
 
 import { BaseServices } from '../../types';
 
-const mockCreatePluginInitializerCore = jest.fn();
-const mockCreatePluginStartCore = jest.fn();
-jest.mock('./plugins_core', () => ({
-  createPluginInitializerCore: mockCreatePluginInitializerCore,
-  createPluginStartCore: mockCreatePluginStartCore,
+const mockCreatePluginInitializerBaseServices = jest.fn();
+const mockCreatePluginStartBaseServices = jest.fn();
+jest.mock('./plugin_base_services', () => ({
+  createPluginInitializerBaseServices: mockCreatePluginInitializerBaseServices,
+  createPluginStartBaseServices: mockCreatePluginStartBaseServices,
 }));
 
 import { BehaviorSubject } from 'rxjs';
@@ -141,21 +141,25 @@ test('`startPlugins` correctly orders plugins and returns exposed values', async
     ],
   ] as Array<[Plugin, Record<PluginName, unknown>]>);
 
-  const initCoreMap = new Map();
-  const startCoreMap = new Map();
+  const initBaseServicesMap = new Map();
+  const startBaseServicesMap = new Map();
 
   [...plugins.keys()].forEach((plugin, index) => {
     jest.spyOn(plugin, 'start').mockResolvedValue(`added-as-${index}`);
     jest.spyOn(plugin, 'init').mockResolvedValue(undefined);
 
-    initCoreMap.set(plugin.name, `init-for-${plugin.name}`);
-    startCoreMap.set(plugin.name, `start-for-${plugin.name}`);
+    initBaseServicesMap.set(plugin.name, `init-for-${plugin.name}`);
+    startBaseServicesMap.set(plugin.name, `start-for-${plugin.name}`);
 
     pluginsSystem.addPlugin(plugin);
   });
 
-  mockCreatePluginInitializerCore.mockImplementation(plugin => initCoreMap.get(plugin.name));
-  mockCreatePluginStartCore.mockImplementation(plugin => startCoreMap.get(plugin.name));
+  mockCreatePluginInitializerBaseServices.mockImplementation(plugin =>
+    initBaseServicesMap.get(plugin.name)
+  );
+  mockCreatePluginStartBaseServices.mockImplementation(plugin =>
+    startBaseServicesMap.get(plugin.name)
+  );
 
   expect([...(await pluginsSystem.startPlugins())]).toMatchInlineSnapshot(`
 Array [
@@ -183,13 +187,13 @@ Array [
 `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginInitializerCore).toHaveBeenCalledWith(plugin, baseServices);
-    expect(mockCreatePluginStartCore).toHaveBeenCalledWith(plugin, baseServices);
+    expect(mockCreatePluginInitializerBaseServices).toHaveBeenCalledWith(plugin, baseServices);
+    expect(mockCreatePluginStartBaseServices).toHaveBeenCalledWith(plugin, baseServices);
 
     expect(plugin.init).toHaveBeenCalledTimes(1);
-    expect(plugin.init).toHaveBeenCalledWith(initCoreMap.get(plugin.name));
+    expect(plugin.init).toHaveBeenCalledWith(initBaseServicesMap.get(plugin.name));
 
     expect(plugin.start).toHaveBeenCalledTimes(1);
-    expect(plugin.start).toHaveBeenCalledWith(startCoreMap.get(plugin.name), deps);
+    expect(plugin.start).toHaveBeenCalledWith(startBaseServicesMap.get(plugin.name), deps);
   }
 });
