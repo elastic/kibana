@@ -16,6 +16,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { Dispatch } from 'redux';
 
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
+import { Flyout } from '../../components/flyout';
 import { LinkToPage } from '../../components/link_to';
 import {
   PageContainer,
@@ -28,7 +29,6 @@ import {
   SubHeaderDatePicker,
 } from '../../components/page';
 import { DatePicker } from '../../components/page/date_picker';
-import { Flyout } from '../../components/page/flyout';
 import { Footer } from '../../components/page/footer';
 import { Navigation } from '../../components/page/navigation';
 import { StatefulTimeline } from '../../components/timeline';
@@ -48,7 +48,7 @@ class HomePageComponent extends React.PureComponent<Props> {
     return (
       <PageContainer data-test-subj="pageContainer">
         <DragDropContextWrapper>
-          <Flyout>
+          <Flyout timelineId="timeline">
             <StatefulTimeline id="timeline" headers={headers} width={defaultWidth} />
           </Flyout>
           <PageHeader data-test-subj="pageHeader">

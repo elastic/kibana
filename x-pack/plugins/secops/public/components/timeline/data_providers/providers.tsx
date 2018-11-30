@@ -117,7 +117,7 @@ export const Providers = pure<Props>(
     <PanelProviders data-test-subj="providers">
       {dataProviders.map((dataProvider, i) => (
         // Providers are a special drop target that cant be drag-and-dropped
-        // to another destination, so it doesn't use a DraggableWrapper
+        // to another destination, so it doesn't use our DraggableWrapper
         <Draggable
           draggableId={getDraggableId({ id, dataProviderId: dataProvider.id })}
           index={i}

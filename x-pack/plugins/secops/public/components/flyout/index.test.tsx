@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { closeFlyout, Flyout, FlyoutButton, FlyoutPane, openFlyout, showFlyout } from './flyout';
+import { closeFlyout, Flyout, FlyoutButton, FlyoutPane, openFlyout, showFlyout } from '.';
 
 describe('Flyout', () => {
   describe('rendering', () => {

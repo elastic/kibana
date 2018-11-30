@@ -19,6 +19,10 @@ export const droppableContentPrefix = 'droppableId.content.';
 
 export const droppableTimelineProvidersPrefix = 'droppableId.timelineProviders.';
 
+export const draggableTimelineFlyoutButtonPrefix = 'draggableId.timelineFlyoutButtons.';
+
+export const droppableTimelineFlyoutButtonPrefix = 'droppableId.timelineFlyoutButtons.';
+
 export const getDraggableId = (dataProviderId: string): string =>
   `${draggableContentPrefix}${dataProviderId}`;
 
@@ -37,6 +41,10 @@ export const destinationIsTimelineProviders = (result: DropResult): boolean =>
   result.destination != null &&
   result.destination.droppableId.startsWith(droppableTimelineProvidersPrefix);
 
+export const destinationIsTimelineButton = (result: DropResult): boolean =>
+  result.destination != null &&
+  result.destination.droppableId.startsWith(droppableTimelineFlyoutButtonPrefix);
+
 export const getTimelineIdFromDestination = (result: DropResult): string =>
   result.destination != null &&
   result.destination.droppableId.startsWith(droppableTimelineProvidersPrefix)
@@ -51,6 +59,12 @@ export const providerWasDroppedOnTimeline = (result: DropResult): boolean =>
   draggableIsContent(result) &&
   sourceIsContent(result) &&
   destinationIsTimelineProviders(result);
+
+export const providerWasDroppedOnTimelineButton = (result: DropResult): boolean =>
+  reasonIsDrop(result) &&
+  draggableIsContent(result) &&
+  sourceIsContent(result) &&
+  destinationIsTimelineButton(result);
 
 interface AddProviderToTimelineParams {
   dataProviders: IdToDataProvider;
@@ -81,4 +95,25 @@ export const addProviderToTimeline = ({
   } else {
     dispatch(noProviderFound({ id: providerId }));
   }
+};
+
+interface ShowTimelineParams {
+  result: DropResult;
+  show: boolean;
+  dispatch: Dispatch;
+  showTimeline?: ActionCreator<{
+    id: string;
+    show: boolean;
+  }>;
+}
+
+export const updateShowTimeline = ({
+  result,
+  show,
+  dispatch,
+  showTimeline = timelineActions.showTimeline,
+}: ShowTimelineParams): void => {
+  const timeline = getTimelineIdFromDestination(result);
+
+  dispatch(showTimeline({ id: timeline, show }));
 };

@@ -13,7 +13,12 @@ import { Dispatch } from 'redux';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
-import { addProviderToTimeline, providerWasDroppedOnTimeline } from './helpers';
+import {
+  addProviderToTimeline,
+  providerWasDroppedOnTimeline,
+  providerWasDroppedOnTimelineButton,
+  updateShowTimeline,
+} from './helpers';
 
 interface Props {
   dataProviders?: IdToDataProvider;
@@ -29,6 +34,11 @@ interface OnDragEndHandlerParams {
 const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerParams) => {
   if (providerWasDroppedOnTimeline(result)) {
     addProviderToTimeline({ dataProviders, result, dispatch });
+  }
+
+  if (providerWasDroppedOnTimelineButton(result)) {
+    addProviderToTimeline({ dataProviders, result, dispatch });
+    updateShowTimeline({ result, show: true, dispatch });
   }
 };
 
