@@ -72,7 +72,8 @@ export class EmsFileParser {
       }
 
       // This URL can bypass loader sanitization at the later stage
-      obj.url = bypassExternalUrlCheck(foundLayer.url);
+      const url = await this._serviceSettings.getUrlForRegionLayer(foundLayer);
+      obj.url = bypassExternalUrlCheck(url);
     }
   }
 
