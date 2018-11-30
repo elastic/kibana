@@ -45,27 +45,6 @@ export function CalendarForm({
 }) {
   return (
     <EuiForm>
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={isEdit ? onEdit : onCreate}
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : 'Save'}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            disabled={saving}
-            href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
-          >
-            Cancel
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
 
       <EuiFormRow
         label="Calendar ID"
@@ -134,6 +113,26 @@ export function CalendarForm({
           showNewEventModal={showNewEventModal}
         />
       </EuiFormRow>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={isEdit ? onEdit : onCreate}
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save'}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            disabled={saving}
+            href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
+          >
+            Cancel
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiForm>
   );
 }

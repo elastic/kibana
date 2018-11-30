@@ -25,18 +25,28 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
+import { TIME_FORMAT } from './events_table';
 
+const VALID_DATE_STRING_LENGTH = 19;
 
 export class NewEventModal extends Component {
   constructor(props) {
     super(props);
+
+    const startDate = moment().startOf('day');
+    const endDate = moment().startOf('day').add(1, 'days');
+
     this.state = {
-      startDate: moment().startOf('day'),
-      endDate: moment().startOf('day').add(1, 'days'),
+      startDate,
+      endDate,
       description: '',
       selectedTabId: 'Single day',
+      startDateString: startDate.format(TIME_FORMAT),
+      endDateString: endDate.format(TIME_FORMAT)
     };
   }
 
@@ -87,7 +97,12 @@ export class NewEventModal extends Component {
     if (start > end) {
       end = endMoment.startOf('day').add(1, 'days');
     }
-    this.setState({ startDate: start, endDate: end });
+    this.setState({
+      startDate: start,
+      endDate: end,
+      startDateString: start.format(TIME_FORMAT),
+      endDateString: end.format(TIME_FORMAT)
+    });
   }
 
   handleChangeEnd = (date) => {
@@ -102,7 +117,52 @@ export class NewEventModal extends Component {
     if (start > end) {
       start = startMoment.startOf('day').subtract(1, 'days');
     }
-    this.setState({ startDate: start, endDate: end });
+    this.setState({
+      startDate: start,
+      endDate: end,
+      startDateString: start.format(TIME_FORMAT),
+      endDateString: end.format(TIME_FORMAT)
+    });
+  }
+
+  handleTimeStartChange = (event) => {
+    const dateString = event.target.value;
+    let isValidDate = false;
+
+    if (dateString.length === VALID_DATE_STRING_LENGTH) {
+      isValidDate = moment(dateString).isValid(TIME_FORMAT, true);
+    } else {
+      this.setState({
+        startDateString: dateString,
+      });
+    }
+
+    if (isValidDate) {
+      this.setState({
+        startDateString: dateString,
+        startDate: moment(dateString)
+      });
+    }
+  }
+
+  handleTimeEndChange = (event) => {
+    const dateString = event.target.value;
+    let isValidDate = false;
+
+    if (dateString.length === VALID_DATE_STRING_LENGTH) {
+      isValidDate = moment(dateString).isValid(TIME_FORMAT, true);
+    } else {
+      this.setState({
+        endDateString: dateString,
+      });
+    }
+
+    if (isValidDate) {
+      this.setState({
+        endDateString: dateString,
+        endDate: moment(dateString)
+      });
+    }
   }
 
   getTabs = () => [{
@@ -128,17 +188,56 @@ export class NewEventModal extends Component {
     content: this.renderRangedDatePicker()
   }];
 
-  // TODO time range has the text input
   renderRangedDatePicker = () => {
-    const { startDate, endDate, selectedTabId } = this.state;
+    const {
+      startDate,
+      endDate,
+      startDateString,
+      endDateString,
+      selectedTabId
+    } = this.state;
+    const isTimeRange = selectedTabId === 'Time range';
+    let timeInputs = null;
+
+    if (isTimeRange) {
+      timeInputs = (
+        <Fragment>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow label="From:">
+                <EuiFieldText
+                  name="startTime"
+                  onChange={this.handleTimeStartChange}
+                  placeholder={TIME_FORMAT}
+                  value={startDateString}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow label="To:">
+                <EuiFieldText
+                  name="endTime"
+                  onChange={this.handleTimeEndChange}
+                  placeholder={TIME_FORMAT}
+                  value={endDateString}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
+      );
+    }
 
     return (
       <Fragment>
+        <EuiSpacer size="s" />
+        {timeInputs}
         <EuiSpacer size="s" />
         <EuiDatePickerRange
           iconType={false}
           startDateControl={
             <EuiDatePicker
+              fullWidth
               inline
               selected={startDate}
               onChange={this.handleChangeStart}
@@ -146,12 +245,14 @@ export class NewEventModal extends Component {
               endDate={endDate}
               isInvalid={startDate > endDate}
               aria-label="Start date"
-              timeFormat="HH:mm"
-              showTimeSelect={selectedTabId === 'Time range'}
+              timeFormat={TIME_FORMAT}
+              dateFormat={TIME_FORMAT}
+              // showTimeSelect={isTimeRange}
             />
           }
           endDateControl={
             <EuiDatePicker
+              fullWidth
               inline
               selected={endDate}
               onChange={this.handleChangeEnd}
@@ -159,8 +260,9 @@ export class NewEventModal extends Component {
               endDate={endDate}
               isInvalid={startDate > endDate}
               aria-label="End date"
-              timeFormat="HH:mm"
-              showTimeSelect={selectedTabId === 'Time range'}
+              timeFormat={TIME_FORMAT}
+              dateFormat={TIME_FORMAT}
+              // showTimeSelect={isTimeRange}
             />
           }
         />

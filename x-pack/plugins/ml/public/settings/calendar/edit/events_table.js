@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+export const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 function DeleteButton({ onClick }) {
   return (
