@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
@@ -20,12 +19,12 @@ routes.when('/account', {
     }
   },
   controllerAs: 'accountController',
-  controller($scope, $route, Notifier) {
+  controller($scope, $route, Notifier, i18n) {
     $scope.user = $route.current.locals.user;
 
     const notifier = new Notifier();
 
-    $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword, i18n) => {
+    $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword) => {
       $scope.user.newPassword = newPassword;
       if (currentPassword) {
         // If the currentPassword is null, we shouldn't send it.
@@ -50,7 +49,7 @@ routes.when('/account', {
 
     this.getEmail = () => {
       if ($scope.user.email) return $scope.user.email;
-      return i18n.translate('xpack.security.account.noEmailMessage', {
+      return i18n('xpack.security.account.noEmailMessage', {
         defaultMessage: '(No email)'
       });
     };
