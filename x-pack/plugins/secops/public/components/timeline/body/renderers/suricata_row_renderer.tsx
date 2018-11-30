@@ -12,10 +12,6 @@ import styled, { keyframes } from 'styled-components';
 import { createLinkWithSignature, RowRenderer } from '.';
 import { ECS } from '../../ecs';
 
-const SuricataSignature = styled.div`
-  margin-top 10px;
-`;
-
 const dropInEffect = keyframes`
   0% {
     border: 1px solid;
@@ -60,6 +56,48 @@ const SuricataRow = styled.div`
   }
 `;
 
+const SuricataSignature = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin-top 10px;
+`;
+
+const ButtonContainer = styled.div``;
+
+const Details = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 5px;
+  min-width: 340px;
+`;
+
+const LabelValuePairContainer = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Label = styled.div`
+  font-weight: bold;
+`;
+
+const Value = styled.div``;
+
+interface LabelValuePairParams {
+  label: string;
+  ariaLabel: string;
+  value: string;
+}
+
+const LabelValuePair = ({ label, ariaLabel, value }: LabelValuePairParams) => (
+  <LabelValuePairContainer>
+    <Label>{label}</Label>
+    <Value aria-label={ariaLabel}>{value}</Value>
+  </LabelValuePairContainer>
+);
+
 export const suricataRowRenderer: RowRenderer = {
   isInstance: (ecs: ECS) => {
     if (ecs && ecs.event && ecs.event.module && ecs.event.module.toLowerCase() === 'suricata') {
@@ -73,95 +111,26 @@ export const suricataRowRenderer: RowRenderer = {
       <SuricataRow>
         {children}
         {signature != null ? (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-          >
-            <SuricataSignature>
-              <EuiButton fill size="s" href={createLinkWithSignature(signature)}>
+          <SuricataSignature>
+            <ButtonContainer>
+              <EuiButton fill size="s" href={createLinkWithSignature(signature)} target="_blank">
                 {signature}
               </EuiButton>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  width: '100%',
-                  alignItems: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    marginTop: '5px',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Protocol
-                </div>
-                <div>TCP</div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      margin: '10px 35px 0 0',
-                    }}
-                  >
-                    <div
-                      style={{
-                        marginTop: '5px',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Source Host
-                    </div>
-                    <div>{data.source.ip}</div>
-                    <div
-                      style={{
-                        marginTop: '5px',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Destination Host
-                    </div>
-                    <div>{data.destination.ip}</div>
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      margin: '10px 20px 0 60px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        marginTop: '5px',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Source Port
-                    </div>
-                    <div>{data.source.port}</div>
-                    <div
-                      style={{
-                        marginTop: '10px',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Destination Port
-                    </div>
-                    <div>{data.destination.port}</div>
-                  </div>
-                </div>
-              </div>
-            </SuricataSignature>
-          </div>
+            </ButtonContainer>
+            <Details>
+              <LabelValuePair label="Protocol" ariaLabel="Protocol" value="TCP" />
+              <LabelValuePair
+                label="Source"
+                ariaLabel="Source"
+                value={`${data.source.ip}:${data.source.port}`}
+              />
+              <LabelValuePair
+                label="Destination"
+                ariaLabel="Destination"
+                value={`${data.destination.ip}:${data.destination.port}`}
+              />
+            </Details>
+          </SuricataSignature>
         ) : null}
       </SuricataRow>
     );

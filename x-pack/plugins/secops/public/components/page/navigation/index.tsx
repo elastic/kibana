@@ -55,7 +55,9 @@ const AddSources = styled.div`
 
 const AddData = pure(() => (
   <AddSources>
-    <EuiButton href="kibana#home/tutorial_directory/security">Add data</EuiButton>
+    <EuiButton href="kibana#home/tutorial_directory/security" target="_blank">
+      Add data
+    </EuiButton>
   </AddSources>
 ));
 

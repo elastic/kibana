@@ -47,7 +47,7 @@ const TimelineDiv = styled.div<{ width: string; height: string }>`
   display: flex;
   flex-direction: column;
   min-height: 700px;
-  overflow: none;
+  overflow: hidden;
   user-select: none;
   width: ${props => props.width};
   height: ${props => props.height};
@@ -82,7 +82,6 @@ export const Timeline = pure<Props>(
         width={width}
       />
       {dataProviders.map(provider => {
-        // const QueryComponent = provider.componentQuery as React.ComponentClass;
         const queryProps: EventsProps = provider.componentQueryProps as EventsProps;
         const resParm = provider.componentResultParam;
         return (
