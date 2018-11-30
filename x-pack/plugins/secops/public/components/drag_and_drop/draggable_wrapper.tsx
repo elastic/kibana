@@ -25,10 +25,9 @@ const ProviderContainer = styled.div`
     background-color: #d9d9d9;
   }
 `;
-
 const DraggableContent = styled.div``;
 
-export interface OwnProps {
+interface OwnProps {
   dataProvider: DataProvider;
   render: (props: DataProvider) => React.ReactNode;
 }
@@ -66,16 +65,14 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
 
     return (
       <DraggableContent data-test-subj="draggableWrapperDiv">
-        <Droppable
-          droppableId={getDroppableId({ visualizationPlaceholderId: `${dataProvider.id}` })}
-        >
+        <Droppable droppableId={getDroppableId(dataProvider.id)}>
           {droppableProvided => (
             <ReactDndDropTarget
               innerRef={droppableProvided.innerRef}
               {...droppableProvided.droppableProps}
             >
               <Draggable
-                draggableId={getDraggableId({ dataProviderId: dataProvider.id })}
+                draggableId={getDraggableId(dataProvider.id)}
                 index={0}
                 key={dataProvider.id}
               >

@@ -9,6 +9,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
+import { droppableTimelineProvidersPrefix } from '../../drag_and_drop/helpers';
 import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
@@ -32,7 +33,7 @@ const DropTargetDataProviders = styled.div`
   padding: 5px;
 `;
 
-const getDroppableId = (id: string): string => `droppableId.timelineProviders.${id}`;
+const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
 
 /**
  * Renders the data providers section of the timeline.

@@ -1,0 +1,346 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import {
+  destinationIsTimelineProviders,
+  draggableIsContent,
+  getDraggableId,
+  getDroppableId,
+  getProviderIdFromDraggable,
+  getTimelineIdFromDestination,
+  providerWasDroppedOnTimeline,
+  reasonIsDrop,
+  sourceIsContent,
+} from './helpers';
+
+describe('helpers', () => {
+  describe('#getDraggableId', () => {
+    test('it returns the expected id', () => {
+      const id = getDraggableId('dataProvider1234');
+      const expected = 'draggableId.content.dataProvider1234';
+
+      expect(id).toEqual(expected);
+    });
+  });
+
+  describe('#getDroppableId', () => {
+    test('it returns the expected id', () => {
+      const id = getDroppableId('a-visualization');
+      const expected = 'droppableId.content.a-visualization';
+
+      expect(id).toEqual(expected);
+    });
+  });
+
+  describe('#sourceIsContent', () => {
+    test('it returns returns true when the source is content', () => {
+      expect(
+        sourceIsContent({
+          destination: { droppableId: 'droppableId.timelineProviders.timeline', index: 0 },
+          draggableId: 'draggableId.content.2119990039033485',
+          reason: 'DROP',
+          source: { index: 0, droppableId: 'droppableId.content.2119990039033485' },
+          type: 'DEFAULT',
+        })
+      ).toEqual(true);
+    });
+
+    test('it returns returns false when the source is NOT content', () => {
+      expect(
+        sourceIsContent({
+          destination: { droppableId: 'droppableId.timelineProviders.timeline', index: 0 },
+          draggableId: 'draggableId.somethingElse.2119990039033485',
+          reason: 'DROP',
+          source: { index: 0, droppableId: 'droppableId.somethingElse.2119990039033485' },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+  });
+
+  describe('#draggableIsContent', () => {
+    test('it returns returns true when the draggable is content', () => {
+      expect(
+        draggableIsContent({
+          destination: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.content.685260508808089',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(true);
+    });
+
+    test('it returns returns false when the draggable is NOT content', () => {
+      expect(
+        draggableIsContent({
+          destination: null,
+          draggableId: 'draggableId.timeline.timeline.dataProvider.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+  });
+
+  describe('#reasonIsDrop', () => {
+    test('it returns returns true when the reason is DROP', () => {
+      expect(
+        reasonIsDrop({
+          destination: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.content.685260508808089',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(true);
+    });
+
+    test('it returns returns false when the reason is NOT DROP', () => {
+      expect(
+        reasonIsDrop({
+          destination: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.685260508808089',
+          reason: 'CANCEL',
+          source: {
+            droppableId: 'droppableId.content.685260508808089',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+  });
+
+  describe('#destinationIsTimelineProviders', () => {
+    test('it returns returns true when the destination is timelineProviders', () => {
+      expect(
+        destinationIsTimelineProviders({
+          destination: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.content.685260508808089',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(true);
+    });
+
+    test('it returns returns false when the destination is null', () => {
+      expect(
+        destinationIsTimelineProviders({
+          destination: null,
+          draggableId: 'draggableId.timeline.timeline.dataProvider.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+
+    test('it returns returns false when the destination is NOT timelineProviders', () => {
+      expect(
+        destinationIsTimelineProviders({
+          destination: {
+            droppableId: 'droppableId.somewhere.else',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.content.685260508808089',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+  });
+
+  describe('#getTimelineIdFromDestination', () => {
+    test('it returns returns the timeline id from the destination', () => {
+      expect(
+        getTimelineIdFromDestination({
+          destination: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.content.685260508808089',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual('timeline');
+    });
+
+    test('it returns returns an empty string when the destination is null', () => {
+      expect(
+        getTimelineIdFromDestination({
+          destination: null,
+          draggableId: 'draggableId.timeline.timeline.dataProvider.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual('');
+    });
+
+    test('it returns returns an empty string when the destination is not a timeline', () => {
+      expect(
+        getTimelineIdFromDestination({
+          destination: {
+            droppableId: 'droppableId.somewhere.else',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.content.685260508808089',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual('');
+    });
+  });
+
+  describe('#getProviderIdFromDraggable', () => {
+    test('it returns the expected id', () => {
+      const id = getProviderIdFromDraggable({
+        destination: {
+          droppableId: 'droppableId.timelineProviders.timeline',
+          index: 0,
+        },
+        draggableId: 'draggableId.content.2119990039033485',
+        reason: 'DROP',
+        source: {
+          droppableId: 'droppableId.content.2119990039033485',
+          index: 0,
+        },
+        type: 'DEFAULT',
+      });
+      const expected = '2119990039033485';
+
+      expect(id).toEqual(expected);
+    });
+  });
+
+  describe('#providerWasDroppedOnTimeline', () => {
+    test('it returns returns true when a provider was dropped on the timeline', () => {
+      expect(
+        providerWasDroppedOnTimeline({
+          destination: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.2119990039033485',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.content.2119990039033485',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(true);
+    });
+
+    test('it returns returns false when the reason is NOT DROP', () => {
+      expect(
+        providerWasDroppedOnTimeline({
+          destination: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.2119990039033485',
+          reason: 'CANCEL',
+          source: {
+            droppableId: 'droppableId.content.2119990039033485',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+
+    test('it returns returns false when the draggable is NOT content', () => {
+      expect(
+        providerWasDroppedOnTimeline({
+          destination: null,
+          draggableId: 'draggableId.timeline.timeline.dataProvider.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.timelineProviders.timeline',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+
+    test('it returns returns false when the the source is NOT content', () => {
+      expect(
+        providerWasDroppedOnTimeline({
+          destination: { droppableId: 'droppableId.timelineProviders.timeline', index: 0 },
+          draggableId: 'draggableId.somethingElse.2119990039033485',
+          reason: 'DROP',
+          source: { index: 0, droppableId: 'droppableId.somethingElse.2119990039033485' },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+
+    test('it returns returns false when the the destination is NOT timeline providers', () => {
+      expect(
+        providerWasDroppedOnTimeline({
+          destination: {
+            droppableId: 'droppableId.somewhere.else',
+            index: 0,
+          },
+          draggableId: 'draggableId.content.685260508808089',
+          reason: 'DROP',
+          source: {
+            droppableId: 'droppableId.content.685260508808089',
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+  });
+});

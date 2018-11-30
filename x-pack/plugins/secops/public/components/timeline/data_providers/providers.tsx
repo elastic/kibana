@@ -92,6 +92,7 @@ interface GetDraggableIdParams {
   id: string;
   dataProviderId: string;
 }
+
 export const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): string =>
   `draggableId.timeline.${id}.dataProvider.${dataProviderId}`;
 
