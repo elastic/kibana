@@ -69,7 +69,7 @@ class NodeAllocationUi extends Component {
             {learnMoreLinks}
           </EuiCallOut>
 
-          <EuiSpacer size="m" />
+          <EuiSpacer size="xl" />
         </Fragment>
       );
     }
