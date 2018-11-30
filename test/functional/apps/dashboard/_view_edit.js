@@ -234,8 +234,8 @@ export default function ({ getService, getPageObjects }) {
         it('when time changed is stored with dashboard', async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
           const newFromTime = '2015-09-19 06:31:44.000';
-          const newToTime = '2015-09-29 06:31:44.000';
-          await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-29 06:31:44.000');
+          const newToTime = '2015-09-19 06:31:44.000';
+          await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
           await PageObjects.dashboard.saveDashboard(dashboardName, true);
           await PageObjects.header.clickToastOK();
           await PageObjects.dashboard.clickEdit();
