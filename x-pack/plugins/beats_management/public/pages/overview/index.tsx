@@ -44,7 +44,7 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
 
   public render() {
     return (
-      <PrimaryLayout title="Beats">
+      <PrimaryLayout title="Beats" hideBreadcrumbs={this.props.libs.framework.info.k7Design}>
         {(renderAction: any) => (
           <Subscribe to={[BeatsContainer, TagsContainer]}>
             {(beats: BeatsContainer, tags: TagsContainer) => (

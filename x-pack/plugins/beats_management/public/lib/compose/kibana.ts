@@ -49,7 +49,8 @@ export function compose(): FrontendLibs {
       routes,
       chrome.getBasePath,
       onKibanaReady,
-      XPackInfoProvider
+      XPackInfoProvider,
+      chrome.getUiSettingsClient()
     )
   );
 

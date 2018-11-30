@@ -10,7 +10,7 @@ import { ThemeProvider } from 'styled-components';
 import { Provider as UnstatedProvider, Subscribe } from 'unstated';
 import { BASE_PATH } from '../common/constants';
 import { Background } from './components/layouts/background';
-import { BreadcrumbProvider } from './components/navigation/route_with_breadcrumb';
+import { BreadcrumbProvider } from './components/navigation/breadcrumb';
 import { BeatsContainer } from './containers/beats';
 import { TagsContainer } from './containers/tags';
 import { compose } from './lib/compose/kibana';
@@ -32,7 +32,8 @@ async function startApp(libs: FrontendLibs) {
           </Subscribe>
         </BreadcrumbProvider>
       </UnstatedProvider>
-    </ThemeProvider>
+    </ThemeProvider>,
+    libs.framework.getUISetting('k7design') ? 'management' : 'self'
   );
 
   await libs.framework.waitUntilFrameworkReady();

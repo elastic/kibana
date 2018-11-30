@@ -7,9 +7,9 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore types for EuiTab not currently available
+  // @ts-ignore
   EuiTab,
-  // @ts-ignore types for EuiTabs not currently available
+  // @ts-ignore
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
@@ -19,6 +19,7 @@ import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
+import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { AppPageProps } from '../../frontend_types';
 
@@ -96,8 +97,13 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
         : `Beat: ${name || 'No name receved from beat'} (id: ${id})`;
 
     return (
-      <PrimaryLayout title={title} actionSection={this.renderActionSection(beat)}>
+      <PrimaryLayout
+        title={title}
+        actionSection={this.renderActionSection(beat)}
+        hideBreadcrumbs={this.props.libs.framework.info.k7Design}
+      >
         <React.Fragment>
+          <Breadcrumb title={`Enrolled Beats`} path={`/overview/enrolled_beats`} />
           <EuiTabs>
             <EuiTab
               isSelected={`/beat/${id}/details` === this.props.history.location.pathname}
@@ -112,15 +118,18 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
               Configuration tags
             </EuiTab>
           </EuiTabs>
-          <Switch>
-            <ChildRoutes
-              routes={this.props.routes}
-              {...this.props}
-              beat={this.state.beat}
-              useSwitch={false}
-            />
-            {id && <Route render={() => <Redirect to={`/beat/${id}/details`} />} />}
-          </Switch>
+          {!this.state.beat && <div>Beat not found</div>}
+          {this.state.beat && (
+            <Switch>
+              <ChildRoutes
+                routes={this.props.routes}
+                {...this.props}
+                beat={this.state.beat}
+                useSwitch={false}
+              />
+              {id && <Route render={() => <Redirect to={`/beat/${id}/details`} />} />}
+            </Switch>
+          )}
         </React.Fragment>
       </PrimaryLayout>
     );

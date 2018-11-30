@@ -17,13 +17,14 @@ import { flatten, get } from 'lodash';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
 import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ConnectedLink } from '../../components/navigation/connected_link';
 import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
 import { supportedConfigs } from '../../config_schemas';
 
 interface PageProps {
-  beat: CMPopulatedBeat | undefined;
+  beat: CMPopulatedBeat;
 }
 
 interface PageState {
@@ -41,9 +42,6 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
   public render() {
     const props = this.props;
     const { beat } = props;
-    if (!beat) {
-      return <div>Beat not found</div>;
-    }
     const configurationBlocks = flatten(
       beat.full_tags.map((tag: BeatTag) => {
         return tag.configuration_blocks.map(configuration => ({
@@ -105,6 +103,7 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
     ];
     return (
       <React.Fragment>
+        <Breadcrumb title={`Beat: ${beat.id}`} path={`/beat/${beat.id}/details`} />
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">

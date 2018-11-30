@@ -34,16 +34,31 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   private xpackInfo: FrameworkInfo | null = null;
   private adapterService: KibanaAdapterServiceProvider;
   private shieldUser: FrameworkUser | null = null;
-
+  private settingSubscription: any;
   constructor(
     private readonly PLUGIN_ID: string,
     private readonly management: ManagementAPI,
     private readonly routes: UIRoutes,
     private readonly getBasePath: () => string,
     private readonly onKibanaReady: (Private: any) => void,
-    private readonly XPackInfoProvider: unknown
+    private readonly XPackInfoProvider: unknown,
+    private readonly uiSettings: any
   ) {
     this.adapterService = new KibanaAdapterServiceProvider();
+
+    this.settingSubscription = uiSettings.getUpdate$().subscribe({
+      next: ({ key, newValue }: { key: string; newValue: boolean }) => {
+        if (key === 'k7design' && this.xpackInfo) {
+          this.xpackInfo.k7Design = newValue;
+        }
+      },
+    });
+  }
+
+  // We dont really want to have this, but it's needed to conditionaly render for k7 due to
+  // when that data is needed.
+  public getUISetting(key: 'k7design'): boolean {
+    return this.uiSettings.get(key);
   }
 
   public setUISettings = (key: string, value: any) => {
@@ -60,6 +75,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         try {
           xpackInfoUnpacked = {
             basePath: this.getBasePath(),
+            k7Design: this.uiSettings.get('k7design'),
             license: {
               type: xpackInfo.getLicense().type,
               expired: !xpackInfo.getLicense().isActive,
@@ -97,13 +113,22 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   }
 
-  public renderUIAtPath(path: string, component: React.ReactElement<any>) {
+  public renderUIAtPath(
+    path: string,
+    component: React.ReactElement<any>,
+    toController: 'management' | 'self' = 'self'
+  ) {
     const DOM_ELEMENT_NAME = this.PLUGIN_ID.replace('_', '-');
     const adapter = this;
     this.routes.when(
       `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
       {
-        template: `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`,
+        template:
+          toController === 'self'
+            ? `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`
+            : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
+                <div id="${DOM_ELEMENT_NAME}ReactRoot" />
+               </kbn-management-app>`,
         // tslint:disable-next-line: max-classes-per-file
         controller: ($scope: any, $route: any) => {
           $scope.$$postDigest(() => {
@@ -173,6 +198,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         if (elem) {
           ReactDOM.unmountComponentAtNode(elem);
           elem.remove();
+          this.settingSubscription.unsubscribe();
         }
       }
     });
@@ -185,6 +211,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       if (elem) {
         ReactDOM.unmountComponentAtNode(elem);
         elem.remove();
+        this.settingSubscription.unsubscribe();
       }
     });
   }

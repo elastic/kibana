@@ -27,10 +27,12 @@ export interface FrameworkAdapter {
     order?: number;
   }): void;
   setUISettings(key: string, value: any): void;
+  getUISetting(key: 'k7design'): boolean;
 }
 
 export const RuntimeFrameworkInfo = t.type({
   basePath: t.string,
+  k7Design: t.boolean,
   license: t.type({
     type: t.union(LICENSES.map(s => t.literal(s))),
     expired: t.boolean,

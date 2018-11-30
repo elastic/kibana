@@ -14,6 +14,8 @@ export class FrameworkLib {
   public registerManagementSection = this.adapter.registerManagementSection.bind(this.adapter);
   public registerManagementUI = this.adapter.registerManagementUI.bind(this.adapter);
   public setUISettings = this.adapter.setUISettings.bind(this.adapter);
+  public getUISetting = this.adapter.getUISetting.bind(this.adapter);
+
   constructor(private readonly adapter: FrameworkAdapter) {}
 
   public get currentUser() {

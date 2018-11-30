@@ -7,6 +7,7 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { BeatTag } from '../../../common/domain_types';
+import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { AssignmentActionType, Table, TagsTableType } from '../../components/table';
 import { tagListAssignmentOptions } from '../../components/table/assignment_schema';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
@@ -49,34 +50,37 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
 
   public render() {
     return (
-      <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="tag">
-        {autocompleteProps => (
-          <Table
-            kueryBarProps={{
-              ...autocompleteProps,
-              filterQueryDraft: 'false', // todo
-              isValid: this.props.libs.elasticsearch.isKueryValid(
-                this.props.urlState.tagsKBar || ''
-              ),
-              onChange: (value: any) => {
-                this.props.setUrlState({ tagsKBar: value });
-                this.props.containers.tags.reload(this.props.urlState.tagsKBar);
-              },
-              onSubmit: () => null, // todo
-              value: this.props.urlState.tagsKBar || '',
-            }}
-            assignmentOptions={{
-              schema: tagListAssignmentOptions,
-              type: 'primary',
-              items: [],
-              actionHandler: this.handleTagsAction,
-            }}
-            ref={this.state.tableRef}
-            items={this.props.containers.tags.state.list}
-            type={TagsTableType}
-          />
-        )}
-      </WithKueryAutocompletion>
+      <React.Fragment>
+        <Breadcrumb title={`Configuration tags}`} path={`/overview/configuration_tags`} />
+        <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="tag">
+          {autocompleteProps => (
+            <Table
+              kueryBarProps={{
+                ...autocompleteProps,
+                filterQueryDraft: 'false', // todo
+                isValid: this.props.libs.elasticsearch.isKueryValid(
+                  this.props.urlState.tagsKBar || ''
+                ),
+                onChange: (value: any) => {
+                  this.props.setUrlState({ tagsKBar: value });
+                  this.props.containers.tags.reload(this.props.urlState.tagsKBar);
+                },
+                onSubmit: () => null, // todo
+                value: this.props.urlState.tagsKBar || '',
+              }}
+              assignmentOptions={{
+                schema: tagListAssignmentOptions,
+                type: 'primary',
+                items: [],
+                actionHandler: this.handleTagsAction,
+              }}
+              ref={this.state.tableRef}
+              items={this.props.containers.tags.state.list}
+              type={TagsTableType}
+            />
+          )}
+        </WithKueryAutocompletion>
+      </React.Fragment>
     );
   }
 

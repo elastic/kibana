@@ -6,4 +6,4 @@
 
 export { BreadcrumbProvider } from './provider';
 export { BreadcrumbConsumer } from './consumer';
-export { RouteWithBreadcrumb } from './route_with_breadcrumb';
+export { Breadcrumb } from './breadcrumb';

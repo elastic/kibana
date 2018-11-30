@@ -19,12 +19,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { BreadcrumbConsumer } from '../navigation/route_with_breadcrumb';
+import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
 type RenderCallback = ((component: () => JSX.Element) => void);
 interface PrimaryLayoutProps {
   title: string;
   actionSection?: React.ReactNode;
+  hideBreadcrumbs?: boolean;
 }
 export class PrimaryLayout extends Component<PrimaryLayoutProps> {
   private actionSection: (() => JSX.Element) | null = null;
@@ -36,27 +37,29 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
     const children: (callback: RenderCallback) => void | ReactNode = this.props.children as any;
     return (
       <React.Fragment>
-        <BreadcrumbConsumer>
-          {({ breadcrumbs }) => (
-            <HeaderWrapper>
-              <EuiHeaderSection>
-                <EuiHeaderBreadcrumbs
-                  breadcrumbs={[
-                    {
-                      href: '#/management',
-                      text: 'Management',
-                    },
-                    {
-                      href: '#/management/beats_management',
-                      text: 'Beats',
-                    },
-                    ...breadcrumbs,
-                  ]}
-                />
-              </EuiHeaderSection>
-            </HeaderWrapper>
-          )}
-        </BreadcrumbConsumer>
+        {!this.props.hideBreadcrumbs && (
+          <BreadcrumbConsumer>
+            {({ breadcrumbs }) => (
+              <HeaderWrapper>
+                <EuiHeaderSection>
+                  <EuiHeaderBreadcrumbs
+                    breadcrumbs={[
+                      {
+                        href: '#/management',
+                        text: 'Management',
+                      },
+                      {
+                        href: '#/management/beats_management',
+                        text: 'Beats',
+                      },
+                      ...breadcrumbs,
+                    ]}
+                  />
+                </EuiHeaderSection>
+              </HeaderWrapper>
+            )}
+          </BreadcrumbConsumer>
+        )}
         <EuiPage>
           <EuiPageBody>
             <EuiPageHeader>
