@@ -18,6 +18,11 @@ import { State } from '../../store/reducer';
 import { DataProvider, DataProviderId } from '../timeline/data_providers/data_provider'; // tslint:disable-line:no-unused-variable (linter bug!)
 import { getDraggableId, getDroppableId } from './helpers';
 
+// The following empty styled.div are required by react-beautiful-dnd:
+const ReactDndDropTarget = styled.div``;
+const ProviderContainer = styled.div``;
+const DraggableContent = styled.div``;
+
 export interface OwnProps {
   dataProvider: DataProvider;
   render: (props: DataProvider) => React.ReactNode;
@@ -35,11 +40,6 @@ interface DispatchProps {
     id: DataProviderId;
   }>;
 }
-
-// The following empty styled.div are required by react-beautiful-dnd:
-const ReactDndDropTarget = styled.div``;
-const ProviderContainer = styled.div``;
-const DraggableContent = styled.div``;
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 

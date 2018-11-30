@@ -92,8 +92,9 @@ interface GetDraggableIdParams {
   id: string;
   dataProviderId: string;
 }
-const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): string =>
+export const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): string =>
   `draggableId.timeline.${id}.dataProvider.${dataProviderId}`;
+
 const FlexGroup = styled.span`
   display: flex;
   flex-wrap: nowrap;
@@ -114,6 +115,8 @@ export const Providers = pure<Props>(
   ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (
     <PanelProviders data-test-subj="providers">
       {dataProviders.map((dataProvider, i) => (
+        // Providers are a special drop target that cant be drag-and-dropped
+        // to another destination, so it doesn't use a DraggableWrapper
         <Draggable
           draggableId={getDraggableId({ id, dataProviderId: dataProvider.id })}
           index={i}

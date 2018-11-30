@@ -24,8 +24,6 @@ import {
   VisualizationPlaceholder,
 } from '../../components/visualization_placeholder';
 import { EventsQuery } from '../../containers/events';
-
-// TODO: wire up the date picker to remove this hard-coded start/end date, which shows a good alert in the timeline
 import { WithSource } from '../../containers/source';
 
 const basePath = chrome.getBasePath();

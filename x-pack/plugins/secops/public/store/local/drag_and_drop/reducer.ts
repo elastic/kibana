@@ -23,7 +23,7 @@ interface RegisterProviderHandlerParams {
   dataProviders: IdToDataProvider;
 }
 
-const registerProviderHandler = ({
+export const registerProviderHandler = ({
   provider,
   dataProviders,
 }: RegisterProviderHandlerParams): IdToDataProvider => ({
@@ -36,7 +36,7 @@ interface UnRegisterProviderHandlerParams {
   dataProviders: IdToDataProvider;
 }
 
-const unRegisterProviderHandler = ({
+export const unRegisterProviderHandler = ({
   id,
   dataProviders,
 }: UnRegisterProviderHandlerParams): IdToDataProvider => omit(id, dataProviders);

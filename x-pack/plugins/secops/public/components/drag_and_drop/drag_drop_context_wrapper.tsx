@@ -11,43 +11,20 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
-import { timelineActions } from '../../store';
 import { dragAndDropActions } from '../../store/local/drag_and_drop';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
 import {
+  addProviderToTimeline,
   getProviderIdFromDraggable,
-  getTimelineIdFromDestination,
   providerWasDroppedOnTimeline,
 } from './helpers';
 
-interface StateReduxProps {
+interface Props {
   dataProviders?: IdToDataProvider;
   dispatch?: Dispatch;
 }
-
-type Props = StateReduxProps;
-
-interface AddProviderToTimelineParams {
-  dataProviders: IdToDataProvider;
-  result: DropResult;
-  dispatch: Dispatch;
-}
-
-const addProviderToTimeline = ({
-  dataProviders,
-  result,
-  dispatch,
-}: AddProviderToTimelineParams): void => {
-  const timeline = getTimelineIdFromDestination(result);
-  const providerId = getProviderIdFromDraggable(result);
-  const provider = dataProviders[providerId];
-
-  if (provider) {
-    dispatch(timelineActions.addProvider({ id: timeline, provider }));
-  }
-};
 
 class DragDropContextWrapperComponent extends React.PureComponent<Props> {
   public render() {

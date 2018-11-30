@@ -5,6 +5,11 @@
  */
 
 import { DropResult } from 'react-beautiful-dnd';
+import { Dispatch } from 'redux';
+
+import { timelineActions } from '../../store';
+import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
+
 interface GetDraggableIdParams {
   dataProviderId: string;
 }
@@ -44,3 +49,23 @@ export const providerWasDroppedOnTimeline = (result: DropResult): boolean =>
   draggableIsContent(result) &&
   sourceIsContent(result) &&
   destinationIsTimelineProviders(result);
+
+interface AddProviderToTimelineParams {
+  dataProviders: IdToDataProvider;
+  result: DropResult;
+  dispatch: Dispatch;
+}
+
+export const addProviderToTimeline = ({
+  dataProviders,
+  result,
+  dispatch,
+}: AddProviderToTimelineParams): void => {
+  const timeline = getTimelineIdFromDestination(result);
+  const providerId = getProviderIdFromDraggable(result);
+  const provider = dataProviders[providerId];
+
+  if (provider) {
+    dispatch(timelineActions.addProvider({ id: timeline, provider }));
+  }
+};
