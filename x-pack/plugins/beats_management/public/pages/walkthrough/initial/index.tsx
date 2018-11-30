@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { NoDataLayout } from '../../../components/layouts/no_data';
-// import { Switch } from 'react-router-dom';
 import { WalkthroughLayout } from '../../../components/layouts/walkthrough';
 import { ChildRoutes } from '../../../components/navigation/child_routes';
 import { ConnectedLink } from '../../../components/navigation/connected_link';
 import { AppPageProps } from '../../../frontend_types';
 
-export class InitialWalkthroughPage extends Component<AppPageProps> {
+class InitialWalkthroughPageComponent extends Component<
+  AppPageProps & {
+    intl: InjectedIntl;
+  }
+> {
   public render() {
+    const { intl } = this.props;
+
     if (this.props.location.pathname === '/walkthrough/initial') {
       return (
         <NoDataLayout
@@ -21,30 +27,50 @@ export class InitialWalkthroughPage extends Component<AppPageProps> {
           actionSection={
             <ConnectedLink path="/walkthrough/initial/beat">
               <EuiButton color="primary" fill>
-                Enroll Beat
+                <FormattedMessage
+                  id="xpack.beatsManagement.enrollBeat.enrollBeatButtonLabel"
+                  defaultMessage="Enroll Beat"
+                />{' '}
               </EuiButton>
             </ConnectedLink>
           }
         >
-          <p>Manage your configurations in a central location.</p>
+          <p>
+            <FormattedMessage
+              id="xpack.beatsManagement.enrollBeat.beatsCentralManagementDescription"
+              defaultMessage="Manage your configurations in a central location."
+            />
+          </p>
         </NoDataLayout>
       );
     }
     return (
       <WalkthroughLayout
-        title="Get started with Beats central management"
+        title={intl.formatMessage({
+          id: 'xpack.beatsManagement.enrollBeat.getStartedBeatsCentralManagementTitle',
+          defaultMessage: 'Get started with Beats central management',
+        })}
         walkthroughSteps={[
           {
             id: '/walkthrough/initial/beat',
-            name: 'Enroll Beat',
+            name: intl.formatMessage({
+              id: 'xpack.beatsManagement.enrollBeat.enrollBeatStepLabel',
+              defaultMessage: 'Enroll Beat',
+            }),
           },
           {
             id: '/walkthrough/initial/tag',
-            name: 'Create tag',
+            name: intl.formatMessage({
+              id: 'xpack.beatsManagement.enrollBeat.createTagStepLabel',
+              defaultMessage: 'Create tag',
+            }),
           },
           {
             id: '/walkthrough/initial/finish',
-            name: 'Finish',
+            name: intl.formatMessage({
+              id: 'xpack.beatsManagement.enrollBeat.finishStepLabel',
+              defaultMessage: 'Finish',
+            }),
           },
         ]}
         goTo={() => {
@@ -57,3 +83,4 @@ export class InitialWalkthroughPage extends Component<AppPageProps> {
     );
   }
 }
+export const InitialWalkthroughPage = injectI18n(InitialWalkthroughPageComponent);

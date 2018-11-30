@@ -13,6 +13,7 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { first, sortByOrder } from 'lodash';
 import moment from 'moment';
 import React from 'react';
@@ -23,14 +24,17 @@ import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { ChildRoutes } from '../../components/navigation/child_routes';
 import { AppPageProps } from '../../frontend_types';
 
+interface PageProps extends AppPageProps {
+  intl: InjectedIntl;
+}
 interface PageState {
   beat: CMPopulatedBeat | undefined;
   beatId: string;
   isLoading: boolean;
 }
 
-class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageState> {
-  constructor(props: AppPageProps) {
+class BeatDetailsPageComponent extends React.PureComponent<PageProps, PageState> {
+  constructor(props: PageProps) {
     super(props);
     this.state = {
       beat: undefined,
@@ -52,37 +56,53 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            Type:&nbsp;
-            <strong>{beat.type}</strong>.
+            <FormattedMessage
+              id="xpack.beatsManagement.beat.actionSectionTypeLabel"
+              defaultMessage="Type: {beatType}."
+              values={{ beatType: <strong>{beat.type}</strong> }}
+            />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
-            Version:&nbsp;
-            <strong>{beat.version}</strong>.
+            <FormattedMessage
+              id="xpack.beatsManagement.beat.actionSectionVersionLabel"
+              defaultMessage="Version: {beatVersion}."
+              values={{ beatVersion: <strong>{beat.version}</strong> }}
+            />
           </EuiText>
         </EuiFlexItem>
         {beat.full_tags &&
           beat.full_tags.length > 0 && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
-                Last Config Update:{' '}
-                <strong>
-                  {moment(
-                    first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
-                  ).fromNow()}
-                </strong>
-                .
+                <FormattedMessage
+                  id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
+                  defaultMessage="Last Config Update: {lastUpdateTime}."
+                  values={{
+                    lastUpdateTime: (
+                      <strong>
+                        {moment(
+                          first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
+                        ).fromNow()}
+                      </strong>
+                    ),
+                  }}
+                />
               </EuiText>
             </EuiFlexItem>
           )}
       </EuiFlexGroup>
     ) : (
-      <div>Beat not found</div>
+      <FormattedMessage
+        id="xpack.beatsManagement.beat.beatNotFoundMessage"
+        defaultMessage="Beat not found"
+      />
     );
   }
 
   public render() {
+    const { intl } = this.props;
     const { beat } = this.state;
     let id: string | undefined;
     let name;
@@ -91,10 +111,27 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
       id = beat.id;
       name = beat.name;
     }
-    const title =
-      this.state.isLoading && id
-        ? 'Loading'
-        : `Beat: ${name || 'No name receved from beat'} (id: ${id})`;
+
+    const title = this.state.isLoading
+      ? intl.formatMessage({
+          id: 'xpack.beatsManagement.beat.loadingTitle',
+          defaultMessage: 'Loading',
+        })
+      : intl.formatMessage(
+          {
+            id: 'xpack.beatsManagement.beat.beatNameAndIdTitle',
+            defaultMessage: 'Beat: {nameOrNoName} (id: {id})',
+          },
+          {
+            nameOrNoName:
+              name ||
+              intl.formatHTMLMessage({
+                id: 'xpack.beatsManagement.beat.noNameReceivedFromBeatTitle',
+                defaultMessage: 'No name received from beat',
+              }),
+            id,
+          }
+        );
 
     return (
       <PrimaryLayout
@@ -109,13 +146,19 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
               isSelected={`/beat/${id}/details` === this.props.history.location.pathname}
               onClick={this.onTabClicked(`/beat/${id}/details`)}
             >
-              Configurations
+              <FormattedMessage
+                id="xpack.beatsManagement.beat.configTabLabel"
+                defaultMessage="Config"
+              />
             </EuiTab>
             <EuiTab
               isSelected={`/beat/${id}/tags` === this.props.history.location.pathname}
               onClick={this.onTabClicked(`/beat/${id}/tags`)}
             >
-              Configuration tags
+              <FormattedMessage
+                id="xpack.beatsManagement.beat.configurationTagsTabLabel"
+                defaultMessage="Configuration tags"
+              />
             </EuiTab>
           </EuiTabs>
           {!this.state.beat && <div>Beat not found</div>}
@@ -142,12 +185,18 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
   };
 
   private async loadBeat() {
+    const { intl } = this.props;
     const { beatId } = this.props.match.params;
     let beat;
     try {
       beat = await this.props.libs.beats.get(beatId);
       if (!beat) {
-        throw new Error('beat not found');
+        throw new Error(
+          intl.formatMessage({
+            id: 'xpack.beatsManagement.beat.beatNotFoundErrorMessage',
+            defaultMessage: 'beat not found',
+          })
+        );
       }
     } catch (e) {
       throw new Error(e);
@@ -155,4 +204,5 @@ class BeatDetailsPageComponent extends React.PureComponent<AppPageProps, PageSta
     this.setState({ beat, isLoading: false });
   }
 }
-export const BeatDetailsPage = BeatDetailsPageComponent;
+
+export const BeatDetailsPage = injectI18n(BeatDetailsPageComponent);

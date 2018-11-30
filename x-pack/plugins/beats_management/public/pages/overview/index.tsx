@@ -5,11 +5,12 @@
  */
 
 import {
-  // @ts-ignore types for EuiTab not currently available
+  // @ts-ignore types for EuiTabs not currently available
   EuiTab,
   // @ts-ignore types for EuiTab not currently available
   EuiTabs,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Subscribe } from 'unstated';
 import { CMPopulatedBeat } from '../../../common/domain_types';
@@ -54,7 +55,10 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
                     isSelected={`/overview/enrolled_beats` === this.props.history.location.pathname}
                     onClick={this.onTabClicked(`/overview/enrolled_beats`)}
                   >
-                    Enrolled Beats
+                    <FormattedMessage
+                      id="xpack.beatsManagement.beats.enrolledBeatsTabTitle"
+                      defaultMessage="Enrolled Beats"
+                    />
                   </EuiTab>
                   <EuiTab
                     isSelected={
@@ -62,7 +66,10 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
                     }
                     onClick={this.onTabClicked(`/overview/configuration_tags`)}
                   >
-                    Configuration tags
+                    <FormattedMessage
+                      id="xpack.beatsManagement.beats.configurationTagsTabTitle"
+                      defaultMessage="Configuration tags"
+                    />
                   </EuiTab>
                 </EuiTabs>
                 <ChildRoutes

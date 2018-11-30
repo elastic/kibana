@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, ReactNode } from 'react';
-
 import {
   EuiHeader,
   EuiHeaderBreadcrumbs,
@@ -18,6 +16,8 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { Component, ReactNode } from 'react';
 import styled from 'styled-components';
 import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
@@ -46,11 +46,15 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
                     breadcrumbs={[
                       {
                         href: '#/management',
-                        text: 'Management',
+                        text: i18n.translate('xpack.beatsManagement.breadcrumb.managementTitle', {
+                          defaultMessage: 'Management',
+                        }),
                       },
                       {
                         href: '#/management/beats_management',
-                        text: 'Beats',
+                        text: i18n.translate('xpack.beatsManagement.breadcrumb.beatsTitle', {
+                          defaultMessage: 'Beats',
+                        }),
                       },
                       ...breadcrumbs,
                     ]}

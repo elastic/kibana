@@ -5,6 +5,7 @@
  */
 
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Provider as UnstatedProvider, Subscribe } from 'unstated';
@@ -41,13 +42,17 @@ async function startApp(libs: FrontendLibs) {
   if (libs.framework.licenseIsAtLeast('standard')) {
     libs.framework.registerManagementSection({
       id: 'beats',
-      name: 'Beats',
+      name: i18n.translate('xpack.beatsManagement.centralManagementSectionLabel', {
+        defaultMessage: 'Beats',
+      }),
       iconName: 'logoBeats',
     });
 
     libs.framework.registerManagementUI({
       sectionId: 'beats',
-      name: 'Central Management (Beta)',
+      name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
+        defaultMessage: 'Central Management (Beta)',
+      }),
       basePath: BASE_PATH,
     });
   }

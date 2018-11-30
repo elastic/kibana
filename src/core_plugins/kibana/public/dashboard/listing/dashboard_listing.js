@@ -19,6 +19,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -49,7 +50,7 @@ export const EMPTY_FILTER = '';
 // and not supporting server-side paging.
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
-export class DashboardListing extends React.Component {
+class DashboardListingUi extends React.Component {
 
   constructor(props) {
     super(props);
@@ -111,7 +112,12 @@ export class DashboardListing extends React.Component {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
       toastNotifications.addDanger({
-        title: `Unable to delete dashboard(s)`,
+        title: (
+          <FormattedMessage
+            id="kbn.dashboard.listing.unableToDeleteDashboardsDangerMessage"
+            defaultMessage="Unable to delete dashboard(s)"
+          />
+        ),
         text: `${error}`,
       });
     }
@@ -194,14 +200,34 @@ export class DashboardListing extends React.Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title="Delete selected dashboards?"
+          title={
+            <FormattedMessage
+              id="kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.title"
+              defaultMessage="Delete selected dashboards?"
+            />
+          }
           onCancel={this.closeDeleteModal}
           onConfirm={this.deleteSelectedItems}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={
+            <FormattedMessage
+              id="kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="kbn.dashboard.listing.deleteSelectedDashboardsConfirmModal.confirmButtonLabel"
+              defaultMessage="Delete"
+            />
+          }
           defaultFocusedButton="cancel"
         >
-          <p>{`You can't recover deleted dashboards.`}</p>
+          <p>
+            <FormattedMessage
+              id="kbn.dashboard.listing.deleteDashboardsConfirmModalDescription"
+              defaultMessage="You can't recover deleted dashboards."
+            />
+          </p>
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
@@ -212,14 +238,38 @@ export class DashboardListing extends React.Component {
       return (
         <React.Fragment>
           <EuiCallOut
-            title="Listing limit exceeded"
+            title={
+              <FormattedMessage
+                id="kbn.dashboard.listing.listingLimitExceededTitle"
+                defaultMessage="Listing limit exceeded"
+              />
+            }
             color="warning"
             iconType="help"
           >
             <p>
-              You have {this.state.totalDashboards} dashboards,
-              but your <strong>listingLimit</strong> setting prevents the table below from displaying more than {this.props.listingLimit}.
-              You can change this setting under <EuiLink href="#/management/kibana/settings">Advanced Settings</EuiLink>.
+              <FormattedMessage
+                id="kbn.dashboard.listing.listingLimitExceededDescription"
+                defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents
+                the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
+                values={{
+                  totalDashboards: this.state.totalDashboards,
+                  listingLimitValue: this.props.listingLimit,
+                  listingLimitText: (
+                    <strong>
+                      listingLimit
+                    </strong>
+                  ),
+                  advancedSettingsLink: (
+                    <EuiLink href="#/management/kibana/settings">
+                      <FormattedMessage
+                        id="kbn.dashboard.listing.listingLimitExceeded.advancedSettingsLinkText"
+                        defaultMessage="Advanced Settings"
+                      />
+                    </EuiLink>
+                  )
+                }}
+              />
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -233,7 +283,12 @@ export class DashboardListing extends React.Component {
       return '';
     }
 
-    return 'No dashboards matched your search.';
+    return (
+      <FormattedMessage
+        id="kbn.dashboard.listing.noMatchedDashboardsMessage"
+        defaultMessage="No dashboards matched your search."
+      />
+    );
   }
 
   renderNoItemsMessage() {
@@ -243,7 +298,10 @@ export class DashboardListing extends React.Component {
         <EuiText>
           <h2>
             <EuiTextColor color="subdued">
-              {`Looks like you don't have any dashboards.`}
+              <FormattedMessage
+                id="kbn.dashboard.listing.noDashboardsItemsMessage"
+                defaultMessage="Looks like you don't have any dashboards."
+              />
             </EuiTextColor>
           </h2>
         </EuiText>
@@ -254,14 +312,37 @@ export class DashboardListing extends React.Component {
       <div>
         <EuiEmptyPrompt
           iconType="dashboardApp"
-          title={<h2>Create your first dashboard</h2>}
+          title={
+            <h2>
+              <FormattedMessage
+                id="kbn.dashboard.listing.createNewDashboard.title"
+                defaultMessage="Create your first dashboard"
+              />
+            </h2>
+          }
           body={
             <Fragment>
               <p>
-                You can combine data views from any Kibana app into one dashboard and see everything in one place.
+                <FormattedMessage
+                  id="kbn.dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription"
+                  defaultMessage="You can combine data views from any Kibana app into one dashboard and see everything in one place."
+                />
               </p>
               <p>
-                New to Kibana? <EuiLink href="#/home/tutorial_directory/sampleData">Install some sample data</EuiLink> to take a test drive.
+                <FormattedMessage
+                  id="kbn.dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  values={{
+                    sampleDataInstallLink: (
+                      <EuiLink href="#/home/tutorial_directory/sampleData">
+                        <FormattedMessage
+                          id="kbn.dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          defaultMessage="Install some sample data"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
               </p>
             </Fragment>
           }
@@ -272,7 +353,10 @@ export class DashboardListing extends React.Component {
               iconType="plusInCircle"
               data-test-subj="createDashboardPromptButton"
             >
-              Create new dashboard
+              <FormattedMessage
+                id="kbn.dashboard.listing.createNewDashboard.createButtonLabel"
+                defaultMessage="Create new dashboard"
+              />
             </EuiButton>
           }
         />
@@ -282,6 +366,7 @@ export class DashboardListing extends React.Component {
   }
 
   renderSearchBar() {
+    const { intl } = this.props;
     let deleteBtn;
     if (this.state.selectedIds.length > 0) {
       deleteBtn = (
@@ -292,7 +377,10 @@ export class DashboardListing extends React.Component {
             data-test-subj="deleteSelectedDashboards"
             key="delete"
           >
-            Delete selected
+            <FormattedMessage
+              id="kbn.dashboard.listing.searchBar.deleteSelectedButtonLabel"
+              defaultMessage="Delete selected"
+            />
           </EuiButton>
         </EuiFlexItem>
       );
@@ -303,8 +391,14 @@ export class DashboardListing extends React.Component {
         {deleteBtn}
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            aria-label="Filter dashboards"
-            placeholder="Search..."
+            aria-label={intl.formatMessage({
+              id: 'kbn.dashboard.listing.searchBar.searchFieldAriaLabel',
+              defaultMessage: 'Filter dashboards',
+            })}
+            placeholder={intl.formatMessage({
+              id: 'kbn.dashboard.listing.searchBar.searchFieldPlaceholder',
+              defaultMessage: 'Search…',
+            })}
             fullWidth
             value={this.state.filter}
             onChange={(e) => {
@@ -320,10 +414,14 @@ export class DashboardListing extends React.Component {
   }
 
   renderTable() {
+    const { intl } = this.props;
     const tableColumns = [
       {
         field: 'title',
-        name: 'Title',
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.titleColumnName',
+          defaultMessage: 'Title',
+        }),
         sortable: true,
         render: (field, record) => (
           <EuiLink
@@ -336,14 +434,20 @@ export class DashboardListing extends React.Component {
       },
       {
         field: 'description',
-        name: 'Description',
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.descriptionColumnName',
+          defaultMessage: 'Description',
+        }),
         dataType: 'string',
         sortable: true,
       }
     ];
     if (!this.props.hideWriteControls) {
       tableColumns.push({
-        name: 'Actions',
+        name: intl.formatMessage({
+          id: 'kbn.dashboard.listing.table.actionsColumnName',
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
             render: (record) => {
@@ -351,7 +455,10 @@ export class DashboardListing extends React.Component {
                 <EuiLink
                   href={`#${createDashboardEditUrl(record.id)}?_a=(viewMode:edit)`}
                 >
-                  Edit
+                  <FormattedMessage
+                    id="kbn.dashboard.listing.table.actionsColumn.editLinkText"
+                    defaultMessage="Edit"
+                  />
                 </EuiLink>
               );
             }
@@ -413,7 +520,10 @@ export class DashboardListing extends React.Component {
             href={`#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`}
             data-test-subj="newDashboardLink"
           >
-            Create new dashboard
+            <FormattedMessage
+              id="kbn.dashboard.listing.createNewDashboardButtonLabel"
+              defaultMessage="Create new dashboard"
+            />
           </EuiButton>
         </EuiFlexItem>
       );
@@ -426,7 +536,10 @@ export class DashboardListing extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                Dashboards
+                <FormattedMessage
+                  id="kbn.dashboard.listing.dashboardsTitle"
+                  defaultMessage="Dashboards"
+                />
               </h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -471,7 +584,7 @@ export class DashboardListing extends React.Component {
   }
 }
 
-DashboardListing.propTypes = {
+DashboardListingUi.propTypes = {
   find: PropTypes.func.isRequired,
   delete: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
@@ -479,6 +592,8 @@ DashboardListing.propTypes = {
   initialFilter: PropTypes.string,
 };
 
-DashboardListing.defaultProps = {
+DashboardListingUi.defaultProps = {
   initialFilter: EMPTY_FILTER,
 };
+
+export const DashboardListing = injectI18n(DashboardListingUi);

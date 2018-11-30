@@ -20,7 +20,7 @@
 jest.mock('ui/visualize/loader/visualize_loader', () => ({}));
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import VisEditorVisualization from './vis_editor_visualization';
 
 describe('getVisualizeLoader', () => {
@@ -45,7 +45,7 @@ describe('getVisualizeLoader', () => {
   });
 
   it('should not call _handler.update until getVisualizeLoader returns _handler', async () => {
-    const wrapper = mount(
+    const wrapper = mountWithIntl(
       <VisEditorVisualization />
     );
 

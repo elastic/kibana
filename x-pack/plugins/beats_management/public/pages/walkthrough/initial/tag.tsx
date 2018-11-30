@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { BeatTag } from '../../../../common/domain_types';
 import { TagEdit } from '../../../components/tag/tag_edit';
@@ -52,7 +54,10 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
               }
               onClick={this.saveTag}
             >
-              Save & Continue
+              <FormattedMessage
+                id="xpack.beatsManagement.createTag.saveAndContinueButtonLabel"
+                defaultMessage="Save & Continue"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -72,7 +77,11 @@ export class InitialTagPage extends Component<AppPageProps, PageState> {
   private saveTag = async () => {
     const newTag = await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
     if (!newTag) {
-      return alert('error saving tag');
+      return alert(
+        i18n.translate('xpack.beatsManagement.createTag.errorSavingTagTitle', {
+          defaultMessage: 'error saving tag',
+        })
+      );
     }
     this.props.setUrlState({
       createdTag: newTag.id,

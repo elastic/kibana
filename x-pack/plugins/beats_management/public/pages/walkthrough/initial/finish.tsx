@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { CMPopulatedBeat } from '../../../../common/domain_types';
 import { AppPageProps } from '../../../frontend_types';
@@ -11,8 +12,17 @@ import { AppPageProps } from '../../../frontend_types';
 interface PageState {
   assigned: boolean;
 }
-export class FinishWalkthroughPage extends React.Component<AppPageProps, PageState> {
-  constructor(props: AppPageProps) {
+class FinishWalkthrough extends React.Component<
+  AppPageProps & {
+    intl: InjectedIntl;
+  },
+  PageState
+> {
+  constructor(
+    props: AppPageProps & {
+      intl: InjectedIntl;
+    }
+  ) {
     super(props);
 
     this.state = {
@@ -41,15 +51,22 @@ export class FinishWalkthroughPage extends React.Component<AppPageProps, PageSta
           <EuiPageContent>
             <EuiEmptyPrompt
               iconType="logoBeats"
-              title={<h2>Congratulations!</h2>}
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.beatsManagement.enrollBeat.nextStepTitle"
+                    defaultMessage="Your Beat is enrolled. What's next?"
+                  />
+                </h2>
+              }
               body={
                 <React.Fragment>
                   <p>
-                    You have enrolled your first beat, and we have assigned your new tag with its
-                    configurations to it
+                    <FormattedMessage
+                      id="xpack.beatsManagement.enrollBeat.nextStepDescription"
+                      defaultMessage="Start your Beat to check for configuration errors, then click Done."
+                    />
                   </p>
-                  <h3>Next Steps</h3>
-                  <p>All that is left to do is to start the beat you just enrolled.</p>
                 </React.Fragment>
               }
               actions={
@@ -60,7 +77,10 @@ export class FinishWalkthroughPage extends React.Component<AppPageProps, PageSta
                     goTo('/overview/enrolled_beats');
                   }}
                 >
-                  Done
+                  <FormattedMessage
+                    id="xpack.beatsManagement.enrollBeat.firstBeatEnrollingDoneButtonLabel"
+                    defaultMessage="Done"
+                  />
                 </EuiButton>
               }
             />
@@ -71,16 +91,32 @@ export class FinishWalkthroughPage extends React.Component<AppPageProps, PageSta
   }
 
   private assignTagToBeat = async () => {
+    const { intl } = this.props;
     if (!this.props.urlState.enrollmentToken) {
-      return alert('Invalid URL, no enrollmentToken found');
+      return alert(
+        intl.formatMessage({
+          id: 'xpack.beatsManagement.enrollBeat.assignTagToBeatInvalidURLNoTokenFountTitle',
+          defaultMessage: 'Invalid URL, no enrollmentToken found',
+        })
+      );
     }
     if (!this.props.urlState.createdTag) {
-      return alert('Invalid URL, no createdTag found');
+      return alert(
+        intl.formatMessage({
+          id: 'xpack.beatsManagement.enrollBeat.assignTagToBeatInvalidURLNoTagFoundTitle',
+          defaultMessage: 'Invalid URL, no createdTag found',
+        })
+      );
     }
 
     const beat = await this.props.libs.beats.getBeatWithToken(this.props.urlState.enrollmentToken);
     if (!beat) {
-      return alert('Error: Beat not enrolled properly');
+      return alert(
+        intl.formatMessage({
+          id: 'xpack.beatsManagement.enrollBeat.assignTagToBeatNotEnrolledProperlyTitle',
+          defaultMessage: 'Error: Beat not enrolled properly',
+        })
+      );
     }
 
     await this.props.containers.beats.assignTagsToBeats(
@@ -94,3 +130,5 @@ export class FinishWalkthroughPage extends React.Component<AppPageProps, PageSta
     return true;
   };
 }
+
+export const FinishWalkthroughPage = injectI18n(FinishWalkthrough);

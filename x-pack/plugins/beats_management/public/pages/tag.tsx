@@ -9,10 +9,10 @@ import 'brace/theme/github';
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { sample } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
-
 import { BeatTag, CMBeat, CMPopulatedBeat } from '../../common/domain_types';
 import { PrimaryLayout } from '../components/layouts/primary';
 import { TagEdit } from '../components/tag';
@@ -23,9 +23,14 @@ interface TagPageState {
   attachedBeats: CMPopulatedBeat[] | null;
   tag: BeatTag;
 }
-export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
+class TagPageComponent extends React.PureComponent<
+  AppPageProps & {
+    intl: InjectedIntl;
+  },
+  TagPageState
+> {
   private mode: 'edit' | 'create' = 'create';
-  constructor(props: AppPageProps) {
+  constructor(props: AppPageProps & { intl: InjectedIntl }) {
     super(props);
     const randomColor = sample(
       Object.keys(euiVars)
@@ -51,9 +56,26 @@ export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
     }
   }
   public render() {
+    const { intl } = this.props;
+
     return (
       <PrimaryLayout
-        title={this.mode === 'create' ? 'Create Tag' : `Update Tag: ${this.state.tag.id}`}
+        title={
+          this.mode === 'create'
+            ? intl.formatMessage({
+                id: 'xpack.beatsManagement.tag.createTagTitle',
+                defaultMessage: 'Create Tag',
+              })
+            : intl.formatMessage(
+                {
+                  id: 'xpack.beatsManagement.tag.updateTagTitle',
+                  defaultMessage: 'Update Tag: {tagId}',
+                },
+                {
+                  tagId: this.state.tag.id,
+                }
+              )
+        }
       >
         <div>
           <TagEdit
@@ -89,12 +111,18 @@ export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
                 }
                 onClick={this.saveTag}
               >
-                Save
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.saveButtonLabel"
+                  defaultMessage="Save"
+                />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tag_configurations')}>
-                Cancel
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -139,3 +167,5 @@ export class TagPage extends React.PureComponent<AppPageProps, TagPageState> {
       .map(({ type }) => UNIQUENESS_ENFORCING_TYPES.some(uniqueType => uniqueType === type))
       .reduce((acc, cur) => (cur ? acc + 1 : acc), 0);
 }
+
+export const TagPage = injectI18n(TagPageComponent);

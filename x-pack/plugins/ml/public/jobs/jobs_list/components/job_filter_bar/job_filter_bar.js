@@ -130,7 +130,7 @@ export class JobFilterBar extends Component {
             }}
             filters={filters}
             onChange={this.onChange}
-            className="mchJobFilterBar"
+            className="mlJobFilterBar"
           />
         </EuiFlexItem>
         { this.renderError() || ''}

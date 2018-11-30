@@ -5,6 +5,8 @@
  */
 
 import { EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { BeatTag } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
@@ -15,13 +17,14 @@ import { AppPageProps } from '../../frontend_types';
 
 interface PageProps extends AppPageProps {
   renderAction: (area: () => JSX.Element) => void;
+  intl: InjectedIntl;
 }
 
 interface PageState {
   tableRef: any;
 }
 
-export class TagsPage extends React.PureComponent<PageProps, PageState> {
+class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
   constructor(props: PageProps) {
     super(props);
 
@@ -44,14 +47,22 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
         this.props.goTo('/tag/create');
       }}
     >
-      Add Tag
+      <FormattedMessage
+        id="xpack.beatsManagement.tags.addTagButtonLabel"
+        defaultMessage="Add Tag"
+      />
     </EuiButton>
   );
 
   public render() {
     return (
       <React.Fragment>
-        <Breadcrumb title={`Configuration tags}`} path={`/overview/configuration_tags`} />
+        <Breadcrumb
+          title={i18n.translate('xpack.beatsManagement.breadcrumb.configurationTags', {
+            defaultMessage: 'Configuration tags',
+          })}
+          path={`/overview/configuration_tags`}
+        />
         <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="tag">
           {autocompleteProps => (
             <Table
@@ -85,13 +96,18 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
   }
 
   private handleTagsAction = async (action: AssignmentActionType) => {
+    const { intl } = this.props;
     switch (action) {
       case AssignmentActionType.Delete:
         const tags = this.getSelectedTags().map((tag: BeatTag) => tag.id);
         const success = await this.props.containers.tags.delete(tags);
         if (!success) {
           alert(
-            'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned'
+            intl.formatMessage({
+              id: 'xpack.beatsManagement.tags.someTagsMightBeAssignedToBeatsTitle',
+              defaultMessage:
+                'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned',
+            })
           );
         } else {
           if (this.state.tableRef && this.state.tableRef.current) {
@@ -106,3 +122,5 @@ export class TagsPage extends React.PureComponent<PageProps, PageState> {
     return this.state.tableRef.current ? this.state.tableRef.current.state.selection : [];
   };
 }
+
+export const TagsPage = injectI18n(TagsPageComponent);

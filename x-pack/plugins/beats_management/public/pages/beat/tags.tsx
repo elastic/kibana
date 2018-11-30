@@ -5,6 +5,7 @@
  */
 
 import { EuiGlobalToastList } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CMPopulatedBeat } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
@@ -35,7 +36,13 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
     const { beat } = this.props;
     return (
       <React.Fragment>
-        <Breadcrumb title={`Beat: ${beat.id}`} path={`/beat/${beat.id}/tags`} />
+        <Breadcrumb
+          title={i18n.translate('xpack.beatsManagement.breadcrumb.beatTags', {
+            defaultMessage: 'Beat tags for: {beatId}',
+            values: { beatId: beat.id },
+          })}
+          path={`/beat/${beat.id}/tags`}
+        />
         <Table
           hideTableControls={true}
           items={beat ? beat.full_tags : []}
