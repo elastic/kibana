@@ -22,6 +22,7 @@ import { toastNotifications } from 'ui/notify';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
 import { mapToLayerWithId } from './util';
 import '../../tile_map/public/editors/wms_options';
+import { ORIGIN } from 'ui/vis/map/origin';
 
 uiModules.get('kibana/region_map')
   .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig) {
@@ -38,7 +39,7 @@ uiModules.get('kibana/region_map')
           serviceSettings.getFileLayers()
             .then(function (layersFromService) {
 
-              layersFromService = layersFromService.map(mapToLayerWithId.bind(null, 'elastic_maps_service', true));
+              layersFromService = layersFromService.map(mapToLayerWithId.bind(null, ORIGIN.EMS));
               const newVectorLayers = $scope.collections.vectorLayers.slice();
               for (let i = 0; i < layersFromService.length; i += 1) {
                 const layerFromService = layersFromService[i];
