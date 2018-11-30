@@ -7,6 +7,7 @@
 import { connect } from 'react-redux';
 
 import {
+  isDetailPanelOpen,
   getClustersList,
   isLoading,
   isEditingCluster,
@@ -26,6 +27,7 @@ import { RemoteClusterList as RemoteClusterListView } from './remote_cluster_lis
 const mapStateToProps = (state) => {
   return {
     clusters: getClustersList(state),
+    isDetailPanelOpen: isDetailPanelOpen(state),
     isLoading: isLoading(state),
     isCopyingCluster: isEditingCluster(state),
     isRemovingCluster: isRemovingCluster(state),

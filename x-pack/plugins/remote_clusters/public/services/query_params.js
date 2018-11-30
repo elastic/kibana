@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { parse } from 'querystring';
+
 export function extractQueryParams(queryString) {
-  if (!queryString || queryString.trim().length === 0) {
+  const hrefSplit = queryString.split('?');
+  if (!hrefSplit.length) {
     return {};
   }
 
-  const extractedQueryParams = {};
-  const queryParamPairs = queryString.split('?')[1].split('&').map(paramString => paramString.split('='));
-
-  queryParamPairs.forEach(([ key, value ]) => {
-    extractedQueryParams[key] = decodeURIComponent(value);
-  });
-
-  return extractedQueryParams;
+  return parse(hrefSplit[1]);
 }

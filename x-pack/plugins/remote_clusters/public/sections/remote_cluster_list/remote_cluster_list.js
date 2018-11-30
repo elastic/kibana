@@ -43,9 +43,11 @@ const REFRESH_RATE_MS = 30000;
 
 export class RemoteClusterListUi extends Component {
   static propTypes = {
-    loadClusters: PropTypes.func,
-    refreshClusters: PropTypes.func,
-    openDetailPanel: PropTypes.func,
+    loadClusters: PropTypes.func.isRequired,
+    refreshClusters: PropTypes.func.isRequired,
+    openDetailPanel: PropTypes.func.isRequired,
+    closeDetailPanel: PropTypes.func.isRequired,
+    isDetailPanelOpen: PropTypes.bool,
     clusters: PropTypes.array,
     isLoading: PropTypes.bool,
     isCopyingCluster: PropTypes.bool,
@@ -55,6 +57,8 @@ export class RemoteClusterListUi extends Component {
   static getDerivedStateFromProps(props) {
     const {
       openDetailPanel,
+      closeDetailPanel,
+      isDetailPanelOpen,
       history: {
         location: {
           search,
@@ -67,6 +71,8 @@ export class RemoteClusterListUi extends Component {
     // Show deeplinked remoteCluster whenever remoteClusters get loaded or the URL changes.
     if (clusterName != null) {
       openDetailPanel(clusterName);
+    } else if (isDetailPanelOpen) {
+      closeDetailPanel();
     }
 
     return null;
