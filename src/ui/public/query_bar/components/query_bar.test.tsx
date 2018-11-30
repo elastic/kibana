@@ -74,6 +74,7 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { QueryBar } from 'ui/query_bar';
 import { QueryLanguageSwitcher } from 'ui/query_bar/components/language_switcher';
+import { QueryBarUI } from './query_bar';
 
 const noop = () => {
   return;
@@ -226,7 +227,7 @@ describe('QueryBar', () => {
       />
     );
 
-    const instance = component.instance() as QueryBar.WrappedComponent;
+    const instance = component.instance() as QueryBarUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('change', { target: { value: 'extension:jpg' } });
@@ -252,7 +253,7 @@ describe('QueryBar', () => {
       />
     );
 
-    const instance = component.instance() as QueryBar.WrappedComponent;
+    const instance = component.instance() as QueryBarUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiFieldText).find('input');
     inputWrapper.simulate('change', { target: { value: 'extension:jpg' } });

@@ -86,7 +86,7 @@ interface State {
   currentProps?: Props;
 }
 
-class QueryBarUI extends Component<Props, State> {
+export class QueryBarUI extends Component<Props, State> {
   public static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (isEqual(prevState.currentProps, nextProps)) {
       return null;
