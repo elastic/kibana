@@ -14,7 +14,7 @@ if (chrome.getInjected('ilmUiEnabled')) {
     display: i18n.translate('xpack.indexLifecycleMgmt.appTitle', {
       defaultMessage: 'Index Lifecycle Policies',
     }),
-    order: 1,
+    order: 2,
     url: `#${BASE_PATH}policies`,
   });
 }
