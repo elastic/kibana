@@ -27,6 +27,8 @@ esSection.register('remote_clusters', {
   url: `#${CRUD_APP_BASE_PATH}/list`,
 });
 
+let appElement;
+
 const renderReact = async (elem) => {
   render(
     <I18nProvider>
@@ -45,6 +47,13 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
   controllerAs: 'remoteClusters',
   controller: class RemoteClustersController {
     constructor($scope, $route, $http) {
+      if (appElement) {
+        // React-router's <Redirect> will cause this controller to re-execute without the $destroy
+        // handler being called. This means the app will re-mount, so we need to unmount it first
+        // here.
+        unmountComponentAtNode(appElement);
+      }
+
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
       setHttpClient($http);
@@ -53,7 +62,7 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
       setUserHasLeftApp(false);
 
       $scope.$$postDigest(() => {
-        const appElement = document.getElementById('remoteClustersReactRoot');
+        appElement = document.getElementById('remoteClustersReactRoot');
         renderReact(appElement);
 
         const appRoute = $route.current;
