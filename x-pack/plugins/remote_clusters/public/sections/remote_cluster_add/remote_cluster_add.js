@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { CRUD_APP_BASE_PATH } from '../../constants';
 import { RemoteClusterForm } from '../remote_cluster_form';
 
 export class RemoteClusterAddUi extends Component {
@@ -34,6 +35,11 @@ export class RemoteClusterAddUi extends Component {
 
   save = (clusterConfig) => {
     this.props.addCluster(clusterConfig);
+  };
+
+  cancel = () => {
+    const { history } = this.props;
+    history.push(CRUD_APP_BASE_PATH);
   };
 
   render() {
@@ -64,6 +70,7 @@ export class RemoteClusterAddUi extends Component {
                 isSaving={isAddingCluster}
                 saveError={addClusterError}
                 save={this.save}
+                cancel={this.cancel}
               />
             </EuiPageContent>
           </EuiPageBody>
