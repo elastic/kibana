@@ -189,17 +189,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverQueryHits');
     }
 
-    query(queryString) {
-      return find.byCssSelector('input[aria-label="Search input"]')
-        .clearValue()
-        .type(queryString)
-        .then(() => {
-          return find.byCssSelector('button[aria-label="Search"]')
-            .click();
-        })
-        .then(() => {
-          return PageObjects.header.waitUntilLoadingHasFinished();
-        });
+    async query(queryString) {
+      await find.setValue('input[aria-label="Search input"]', queryString);
+      await find.clickByCssSelector('button[aria-label="Search"]');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getDocHeader() {

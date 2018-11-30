@@ -17,67 +17,22 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
-import { concatMap } from 'rxjs/operators';
-
-function promiseProxy(promise, elementWrapper) {
-  const extraProps = {
-    then(...args) {
-      return promise.then(...args);
-    },
-    catch(...args) {
-      return promise.catch(...args);
-    }
-  };
-
-  return new Proxy(elementWrapper, {
-    get(_, prop, receiver) {
-      return extraProps.hasOwnProperty(prop)
-        ? extraProps[prop]
-        : Reflect.get(elementWrapper, prop, receiver);
-    }
-  });
-}
-
 export class LeadfootElementWrapper {
-  constructor(leadfootElement, remote) {
+  constructor(leadfootElement, leadfoot) {
     if (leadfootElement instanceof LeadfootElementWrapper) {
       return leadfootElement;
     }
 
-    const wrap = otherLeadfootElement => (
-      new LeadfootElementWrapper(otherLeadfootElement, remote)
-    );
-
-    const wrapAll = otherLeadfootElements => (
-      otherLeadfootElements.map(wrap)
-    );
-
-    this._queue$ = new Rx.Subject();
-    this._queue$.pipe(
-      concatMap(async ({ defer, fn }) => {
-        try {
-          defer.resolve(await fn({ leadfootElement, remote, wrap, wrapAll }));
-        } catch (error) {
-          defer.reject(error);
-        }
-      })
-    ).subscribe();
+    this._leadfootElement = leadfootElement;
+    this._leadfoot = leadfoot;
   }
 
-  _task(fn) {
-    const defer = {};
-    defer.promise = new Promise((resolve, reject) => {
-      defer.resolve = resolve;
-      defer.reject = reject;
-    });
+  _wrap(otherLeadfootElement) {
+    return new LeadfootElementWrapper(otherLeadfootElement, this._leadfoot);
+  }
 
-    this._queue$.next({
-      defer,
-      fn
-    });
-
-    return promiseProxy(defer.promise, this);
+  _wrapAll(otherLeadfootElements) {
+    return otherLeadfootElements.map(e => this._wrap(e));
   }
 
   /**
@@ -86,10 +41,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<void>}
    */
-  click() {
-    return this._task(async ({ leadfootElement }) => {
-      await leadfootElement.click();
-    });
+  async click() {
+    await this._leadfootElement.click();
   }
 
   /**
@@ -99,10 +52,10 @@ export class LeadfootElementWrapper {
    * @param {string} className
    * @return {Promise<LeadfootElementWrapper[]>}
    */
-  findAllByClassName(className) {
-    return this._task(async ({ leadfootElement, wrapAll }) => {
-      return wrapAll(await leadfootElement.findAllByClassName(className));
-    });
+  async findAllByClassName(className) {
+    return await this._wrapAll(
+      await this._leadfootElement.findAllByClassName(className)
+    );
   }
 
   /**
@@ -111,10 +64,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<void>}
    */
-  clearValue(...args) {
-    return this._task(async ({ leadfootElement }) => {
-      await leadfootElement.clearValue(args);
-    });
+  async clearValue(...args) {
+    await this._leadfootElement.clearValue(args);
   }
 
   /**
@@ -131,10 +82,8 @@ export class LeadfootElementWrapper {
    * @param {string|string[]} value
    * @return {Promise<void>}
    */
-  type(value) {
-    return this._task(async ({ leadfootElement }) => {
-      await leadfootElement.type(value);
-    });
+  async type(value) {
+    await this._leadfootElement.type(value);
   }
 
   /**
@@ -144,10 +93,8 @@ export class LeadfootElementWrapper {
    * @param {string} className
    * @return {Promise<LeadfootElementWrapper>}
    */
-  findByClassName(className) {
-    return this._task(async ({ leadfootElement, wrap }) => {
-      return wrap(await leadfootElement.findByClassName(className));
-    });
+  async findByClassName(className) {
+    return this._wrap(await this._leadfootElement.findByClassName(className));
   }
 
   /**
@@ -164,10 +111,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  isDisplayed() {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.isDisplayed();
-    });
+  async isDisplayed() {
+    return await this._leadfootElement.isDisplayed();
   }
 
   /**
@@ -176,10 +121,8 @@ export class LeadfootElementWrapper {
    *
    * @param {string} name
    */
-  getAttribute(name) {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.getAttribute(name);
-    });
+  async getAttribute(name) {
+    return await this._leadfootElement.getAttribute(name);
   }
 
   /**
@@ -190,10 +133,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<string>}
    */
-  getVisibleText() {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.getVisibleText();
-    });
+  async getVisibleText() {
+    return await this._leadfootElement.getVisibleText();
   }
 
   /**
@@ -203,10 +144,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<{x: number, y: number}>}
    */
-  getPosition() {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.getPosition();
-    });
+  async getPosition() {
+    return await this._leadfootElement.getPosition();
   }
 
   /**
@@ -216,10 +155,8 @@ export class LeadfootElementWrapper {
    * @param {string} selector
    * @return {Promise<LeadfootElementWrapper[]>}
    */
-  findAllByCssSelector(selector) {
-    return this._task(async ({ leadfootElement, wrapAll }) => {
-      return wrapAll(await leadfootElement.findAllByCssSelector(selector));
-    });
+  async findAllByCssSelector(selector) {
+    return this._wrapAll(await this._leadfootElement.findAllByCssSelector(selector));
   }
 
   /**
@@ -229,10 +166,8 @@ export class LeadfootElementWrapper {
    * @param {string} selector
    * @return {Promise<LeadfootElementWrapper>}
    */
-  findByCssSelector(selector) {
-    return this._task(async ({ leadfootElement, wrap }) => {
-      return wrap(await leadfootElement.findByCssSelector(selector));
-    });
+  async findByCssSelector(selector) {
+    return this._wrap(await this._leadfootElement.findByCssSelector(selector));
   }
 
   /**
@@ -241,10 +176,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  isEnabled() {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.isEnabled();
-    });
+  async isEnabled() {
+    return await this._leadfootElement.isEnabled();
   }
 
   /**
@@ -254,10 +187,8 @@ export class LeadfootElementWrapper {
    * @param {string} tagName
    * @return {Promise<LeadfootElementWrapper[]>}
    */
-  findAllByTagName(tagName) {
-    return this._task(async ({ leadfootElement, wrapAll }) => {
-      return wrapAll(await leadfootElement.findAllByTagName(tagName));
-    });
+  async findAllByTagName(tagName) {
+    return this._wrapAll(await this._leadfootElement.findAllByTagName(tagName));
   }
 
   /**
@@ -267,10 +198,8 @@ export class LeadfootElementWrapper {
    * @param {string} name
    * @return {Promise<any>}
    */
-  getProperty(name) {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.getProperty(name);
-    });
+  async getProperty(name) {
+    return await this._leadfootElement.getProperty(name);
   }
 
   /**
@@ -280,10 +209,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<void>}
    */
-  moveMouseTo() {
-    return this._task(async ({ leadfootElement, remote }) => {
-      await remote.moveMouseTo(leadfootElement);
-    });
+  async moveMouseTo() {
+    return await this._leadfoot.moveMouseTo(this._leadfootElement);
   }
 
   /**
@@ -293,10 +220,8 @@ export class LeadfootElementWrapper {
    * @param {string} propertyName
    * @return {Promise<string>}
    */
-  getComputedStyle(propertyName) {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.getComputedStyle(propertyName);
-    });
+  async getComputedStyle(propertyName) {
+    return await this._leadfootElement.getComputedStyle(propertyName);
   }
 
   /**
@@ -305,10 +230,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<{width: number, height: number}>}
    */
-  getSize() {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.getSize();
-    });
+  async getSize() {
+    return await this._leadfootElement.getSize();
   }
 
   /**
@@ -318,10 +241,8 @@ export class LeadfootElementWrapper {
    * @param {string} tagName
    * @return {Promise<LeadfootElementWrapper>}
    */
-  findByTagName(tagName) {
-    return this._task(async ({ leadfootElement, wrap }) => {
-      return wrap(await leadfootElement.findByTagName(tagName));
-    });
+  async findByTagName(tagName) {
+    return this._wrap(await this._leadfootElement.findByTagName(tagName));
   }
 
   /**
@@ -331,10 +252,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<boolean>}
    */
-  isSelected() {
-    return this._task(async ({ leadfootElement }) => {
-      return await leadfootElement.isSelected();
-    });
+  async isSelected() {
+    return await this._leadfootElement.isSelected();
   }
 
   /**
@@ -346,10 +265,8 @@ export class LeadfootElementWrapper {
    * @param {string} selector
    * @return {Promise<LeadfootElementWrapper>}
    */
-  findDisplayedByCssSelector(selector) {
-    return this._task(async ({ leadfootElement, wrap }) => {
-      return wrap(await leadfootElement.findDisplayedByCssSelector(selector));
-    });
+  async findDisplayedByCssSelector(selector) {
+    return this._wrap(await this._leadfootElement.findDisplayedByCssSelector(selector));
   }
 
   /**
@@ -359,10 +276,8 @@ export class LeadfootElementWrapper {
    * @param {string} className
    * @return {Promise<void>}
    */
-  waitForDeletedByClassName(className) {
-    return this._task(async ({ leadfootElement }) => {
-      await leadfootElement.waitForDeletedByClassName(className);
-    });
+  async waitForDeletedByClassName(className) {
+    await this._leadfootElement.waitForDeletedByClassName(className);
   }
 
   /**
@@ -372,10 +287,8 @@ export class LeadfootElementWrapper {
    * @param {string} text
    * @return {Promise<LeadfootElementWrapper>}
    */
-  findByPartialLinkText(text) {
-    return this._task(async ({ leadfootElement, wrap }) => {
-      return wrap(await leadfootElement.findByPartialLinkText(text));
-    });
+  async findByPartialLinkText(text) {
+    return this._wrap(await this._leadfootElement.findByPartialLinkText(text));
   }
 
   /**
@@ -385,9 +298,7 @@ export class LeadfootElementWrapper {
    * @param {string} xpath
    * @return {Promise<LeadfootElementWrapper>}
    */
-  findByXpath(xpath) {
-    return this._task(async ({ leadfootElement, wrap }) => {
-      return wrap(await leadfootElement.findByXpath(xpath));
-    });
+  async findByXpath(xpath) {
+    return this._wrap(await this._leadfootElement.findByXpath(xpath));
   }
 }
