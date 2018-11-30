@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { functionsRegistry } from '@kbn/interpreter/common';
+import { populateServerRegistries } from '@kbn/interpreter/server';
 import { routes } from './server/routes';
-import { functionsRegistry } from './common/lib';
 import { commonFunctions } from './common/functions';
-import { populateServerRegistries } from './server/lib/server_registries';
 import { registerCanvasUsageCollector } from './server/usage';
 import { loadSampleData } from './server/sample_data';
 
@@ -15,7 +15,11 @@ export default async function(server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
-    const reportingBrowserType = config.get('xpack.reporting.capture.browser.type');
+    const reportingBrowserType = (() => {
+      const configKey = 'xpack.reporting.capture.browser.type';
+      if (!config.has(configKey)) return null;
+      return config.get(configKey);
+    })();
 
     return {
       kbnIndex: config.get('kibana.index'),

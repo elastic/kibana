@@ -44,8 +44,13 @@ class DataViewComponent extends Component {
     tabularLoader: null,
   }
 
-  static getDerivedStateFromProps(nextProps) {
+  static getDerivedStateFromProps(nextProps, state) {
+    if (nextProps.adapters === state.adapters) {
+      return null;
+    }
+
     return {
+      adapters: nextProps.adapters,
       tabularData: null,
       tabularOptions: {},
       tabularPromise: nextProps.adapters.data.getTabular(),

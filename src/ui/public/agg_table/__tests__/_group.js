@@ -113,7 +113,7 @@ describe('AggTableGroup Directive', function () {
     const $subTables = $el.find('kbn-agg-table');
     expect($subTables.length).to.be(3);
 
-    const $subTableHeaders = $el.find('.agg-table-group-header');
+    const $subTableHeaders = $el.find('.kbnAggTable__groupHeader');
     expect($subTableHeaders.length).to.be(3);
 
     $subTableHeaders.each(function (i) {

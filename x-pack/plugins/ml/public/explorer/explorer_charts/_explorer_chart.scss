@@ -2,7 +2,7 @@
   overflow: hidden;
 
   .ml-explorer-chart-svg {
-    font-size: $euiSizeXS;
+    font-size: $euiFontSizeXS;
     font-family: $euiFontFamily;
 
     .line-chart {
@@ -85,19 +85,19 @@
   }
 
   .anomaly-marker.critical {
-    fill: $mchColorCritical;
+    fill: $mlColorCritical;
   }
 
   .anomaly-marker.major {
-    fill: $mchColorMajor;
+    fill: $mlColorMajor;
   }
 
   .anomaly-marker.minor {
-    fill: $mchColorMinor;
+    fill: $mlColorMinor;
   }
 
   .anomaly-marker.warning {
-    fill: $mchColorWarning;
+    fill: $mlColorWarning;
   }
 
   .anomaly-marker.low {

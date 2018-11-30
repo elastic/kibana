@@ -54,11 +54,16 @@ export async function calculateBucketSize(
     params.body.query.bool.filter.push(esFilterQuery);
   }
 
-  const resp = await client('search', params);
+  interface Aggs {
+    stats: {
+      max: number;
+    };
+  }
+
+  const resp = await client<void, Aggs>('search', params);
   const minBucketSize: number = config.get('xpack.apm.minimumBucketSize');
   const bucketTargetCount: number = config.get('xpack.apm.bucketTargetCount');
-  const max: number = resp.aggregations.stats.max;
+  const max = resp.aggregations.stats.max;
   const bucketSize = Math.floor(max / bucketTargetCount);
-
   return bucketSize > minBucketSize ? bucketSize : minBucketSize;
 }

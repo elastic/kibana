@@ -32,9 +32,10 @@ import {
   EuiTitle,
   EuiFormRow,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-function SeriesAgg(props) {
-  const { panel, model } = props;
+function SeriesAggUi(props) {
+  const { panel, model, intl } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -42,15 +43,42 @@ function SeriesAgg(props) {
   const htmlId = htmlIdGenerator();
 
   const functionOptions = [
-    { label: 'Sum', value: 'sum' },
-    { label: 'Max', value: 'max' },
-    { label: 'Min', value: 'min' },
-    { label: 'Avg', value: 'mean' },
-    { label: 'Overall Sum', value: 'overall_sum' },
-    { label: 'Overall Max', value: 'overall_max' },
-    { label: 'Overall Min', value: 'overall_min' },
-    { label: 'Overall Avg', value: 'overall_avg' },
-    { label: 'Cumulative Sum', value: 'cumulative_sum' },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.sumLabel', defaultMessage: 'Sum' }),
+      value: 'sum'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.maxLabel', defaultMessage: 'Max' }),
+      value: 'max'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.minLabel', defaultMessage: 'Min' }),
+      value: 'min'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.avgLabel', defaultMessage: 'Avg' }),
+      value: 'mean'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallSumLabel', defaultMessage: 'Overall Sum' }),
+      value: 'overall_sum'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallMaxLabel', defaultMessage: 'Overall Max' }),
+      value: 'overall_max'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallMinLabel', defaultMessage: 'Overall Min' }),
+      value: 'overall_min'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.overallAvgLabel', defaultMessage: 'Overall Avg' }),
+      value: 'overall_avg'
+    },
+    {
+      label: intl.formatMessage({ id: 'tsvb.seriesAgg.functionOptions.cumulativeSumLabel', defaultMessage: 'Cumulative Sum' }),
+      value: 'cumulative_sum'
+    },
   ];
   const selectedFunctionOption = functionOptions.find(option => {
     return model.function === option.value;
@@ -66,7 +94,12 @@ function SeriesAgg(props) {
         siblings={props.siblings}
       >
         <EuiTitle className="tvbAggRow__unavailable" size="xxxs">
-          <span>Series Agg is not compatible with the table visualization.</span>
+          <span>
+            <FormattedMessage
+              id="tsvb.seriesAgg.seriesAggIsNotCompatibleLabel"
+              defaultMessage="Series Agg is not compatible with the table visualization."
+            />
+          </span>
         </EuiTitle>
       </AggRow>
     );
@@ -82,7 +115,12 @@ function SeriesAgg(props) {
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormLabel htmlFor={htmlId('aggregation')}>Aggregation</EuiFormLabel>
+          <EuiFormLabel htmlFor={htmlId('aggregation')}>
+            <FormattedMessage
+              id="tsvb.seriesAgg.aggregationLabel"
+              defaultMessage="Aggregation"
+            />
+          </EuiFormLabel>
           <AggSelect
             id={htmlId('aggregation')}
             panelType={panel.type}
@@ -92,7 +130,13 @@ function SeriesAgg(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow id={htmlId('function')} label="Function">
+          <EuiFormRow
+            id={htmlId('function')}
+            label={(<FormattedMessage
+              id="tsvb.seriesAgg.functionLabel"
+              defaultMessage="Function"
+            />)}
+          >
             <EuiComboBox
               options={functionOptions}
               selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
@@ -107,7 +151,7 @@ function SeriesAgg(props) {
 
 }
 
-SeriesAgg.propTypes = {
+SeriesAggUi.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
   model: PropTypes.object,
@@ -119,4 +163,5 @@ SeriesAgg.propTypes = {
   siblings: PropTypes.array,
 };
 
+const SeriesAgg = injectI18n(SeriesAggUi);
 export default SeriesAgg;

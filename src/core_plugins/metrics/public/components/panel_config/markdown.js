@@ -45,8 +45,9 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-class MarkdownPanelConfig extends Component {
+class MarkdownPanelConfigUi extends Component {
 
   constructor(props) {
     super(props);
@@ -78,13 +79,23 @@ class MarkdownPanelConfig extends Component {
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
+    const { intl } = this.props;
 
     const htmlId = htmlIdGenerator();
 
     const alignOptions = [
-      { label: 'Top', value: 'top' },
-      { label: 'Middle', value: 'middle' },
-      { label: 'Bottom', value: 'bottom' }
+      {
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.topLabel', defaultMessage: 'Top' }),
+        value: 'top'
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.middleLabel', defaultMessage: 'Middle' }),
+        value: 'middle'
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.markdown.alignOptions.bottomLabel', defaultMessage: 'Bottom' }),
+        value: 'bottom'
+      }
     ];
     const selectedAlignOption = alignOptions.find(option => {
       return model.markdown_vertical_align === option.value;
@@ -106,7 +117,14 @@ class MarkdownPanelConfig extends Component {
       view = (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
-            <EuiTitle size="s"><span>Data</span></EuiTitle>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.markdown.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="m" />
 
             <IndexPattern
@@ -121,7 +139,10 @@ class MarkdownPanelConfig extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label="Panel filter"
+                  label={(<FormattedMessage
+                    id="tsvb.markdown.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
                   fullWidth
                 >
                   <EuiFieldText
@@ -132,7 +153,12 @@ class MarkdownPanelConfig extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel>Ignore global filter?</EuiFormLabel>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="tsvb.markdown.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
                 <EuiSpacer size="s" />
                 <YesNo
                   value={model.ignore_global_filter}
@@ -146,12 +172,24 @@ class MarkdownPanelConfig extends Component {
           <EuiSpacer />
 
           <EuiPanel>
-            <EuiTitle size="s"><span>Style</span></EuiTitle>
+            <EuiTitle size="s">
+              <span>
+                <FormattedMessage
+                  id="tsvb.markdown.optionsTab.styleLabel"
+                  defaultMessage="Style"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="m" />
 
             <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>Background color:</EuiFormLabel>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="tsvb.markdown.optionsTab.backgroundColorLabel"
+                    defaultMessage="Background color:"
+                  />
+                </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
                 <ColorPicker
@@ -161,7 +199,12 @@ class MarkdownPanelConfig extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }}>Show scrollbars?</EuiFormLabel>
+                <EuiFormLabel style={{ marginBottom: 0 }}>
+                  <FormattedMessage
+                    id="tsvb.markdown.optionsTab.showScrollbarsLabel"
+                    defaultMessage="Show scrollbars?"
+                  />
+                </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
                 <YesNo
@@ -171,7 +214,12 @@ class MarkdownPanelConfig extends Component {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('valign')}>Vertical alignment:</EuiFormLabel>
+                <EuiFormLabel style={{ marginBottom: 0 }} htmlFor={htmlId('valign')}>
+                  <FormattedMessage
+                    id="tsvb.markdown.optionsTab.verticalAlignmentLabel"
+                    defaultMessage="Vertical alignment:"
+                  />
+                </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiComboBox
@@ -187,7 +235,14 @@ class MarkdownPanelConfig extends Component {
 
             <EuiHorizontalRule />
 
-            <EuiTitle size="xxs"><span>Custom CSS (supports Less)</span></EuiTitle>
+            <EuiTitle size="xxs">
+              <span>
+                <FormattedMessage
+                  id="tsvb.markdown.optionsTab.customCSSLabel"
+                  defaultMessage="Custom CSS (supports Less)"
+                />
+              </span>
+            </EuiTitle>
             <EuiSpacer size="s" />
             <KuiCodeEditor
               mode="less"
@@ -209,20 +264,29 @@ class MarkdownPanelConfig extends Component {
             isSelected={selectedTab === 'markdown'}
             onClick={() => this.switchTab('markdown')}
           >
-            Markdown
+            <FormattedMessage
+              id="tsvb.markdown.markdownTab.markdownButtonLabel"
+              defaultMessage="Markdown"
+            />
           </EuiTab>
           <EuiTab
             data-test-subj="markdownDataBtn"
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
-            Data
+            <FormattedMessage
+              id="tsvb.markdown.dataTab.dataButtonLabel"
+              defaultMessage="Data"
+            />
           </EuiTab>
           <EuiTab
             isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
           >
-            Panel options
+            <FormattedMessage
+              id="tsvb.markdown.optionsTab.panelOptionsButtonLabel"
+              defaultMessage="Panel options"
+            />
           </EuiTab>
         </EuiTabs>
         {view}
@@ -231,11 +295,12 @@ class MarkdownPanelConfig extends Component {
   }
 }
 
-MarkdownPanelConfig.propTypes = {
+MarkdownPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
   dateFormat: PropTypes.string
 };
 
+const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);
 export default MarkdownPanelConfig;

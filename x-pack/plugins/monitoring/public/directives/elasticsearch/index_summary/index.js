@@ -8,6 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { IndexDetailStatus } from 'plugins/monitoring/components/elasticsearch/index_detail_status';
+import { I18nProvider } from '@kbn/i18n/react';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringIndexSummary', () => {
@@ -16,7 +17,7 @@ uiModule.directive('monitoringIndexSummary', () => {
     scope: { summary: '=' },
     link(scope, $el) {
       scope.$watch('summary', summary => {
-        render(<IndexDetailStatus stats={summary} />, $el[0]);
+        render(<I18nProvider><IndexDetailStatus stats={summary} /></I18nProvider>, $el[0]);
       });
     }
   };

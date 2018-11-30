@@ -19,7 +19,6 @@
 
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { CATEGORY } from 'ui/vis/vis_category';
 import pointSeriesTemplate from './editors/point_series.html';
 
 export default function PointSeriesVisType(Private, i18n) {
@@ -30,7 +29,6 @@ export default function PointSeriesVisType(Private, i18n) {
     title: i18n('kbnVislibVisTypes.area.areaTitle', { defaultMessage: 'Area' }),
     icon: 'visArea',
     description: i18n('kbnVislibVisTypes.area.areaDescription', { defaultMessage: 'Emphasize the quantity beneath a line chart' }),
-    category: CATEGORY.BASIC,
     visConfig: {
       defaults: {
         type: 'area',
