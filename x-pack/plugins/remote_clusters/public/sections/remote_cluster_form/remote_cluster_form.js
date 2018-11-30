@@ -109,7 +109,7 @@ export class RemoteClusterFormUi extends Component {
       errors.name = (
         <FormattedMessage
           id="xpack.remoteClusters.form.errors.nameMissing"
-          defaultMessage="Name is required."
+          defaultMessage="Nickname is required."
         />
       );
     }
@@ -593,7 +593,7 @@ export class RemoteClusterFormUi extends Component {
                 <h4>
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.sectionNameTitle"
-                    defaultMessage="Remote cluster name"
+                    defaultMessage="Name"
                   />
                 </h4>
               </EuiTitle>
@@ -601,7 +601,8 @@ export class RemoteClusterFormUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
-                defaultMessage="This is the name of the remote cluster you want to connect to."
+                defaultMessage="Name this remote cluster so you can easily identify
+                it later."
               />
             )}
             fullWidth
@@ -610,7 +611,7 @@ export class RemoteClusterFormUi extends Component {
               label={(
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
-                  defaultMessage="Remote cluster name"
+                  defaultMessage="Name"
                 />
               )}
               error={errorClusterName}
