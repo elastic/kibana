@@ -24,7 +24,7 @@ import routing from '../../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
 import { AutoFollowPatternForm, RemoteClustersProvider, SectionLoading, SectionError } from '../../components';
 
-class AutoFollowPatternAddUI extends PureComponent {
+class AutoFollowPatternEditUI extends PureComponent {
   static propTypes = {
     createAutoFollowPattern: PropTypes.func.isRequired,
     clearApiError: PropTypes.func.isRequired,
@@ -36,11 +36,12 @@ class AutoFollowPatternAddUI extends PureComponent {
     this.props.clearApiError();
   }
 
-  renderEmptyClusters() {
+  renderMissingCluster({ name, remoteCluster }) {
     const { intl } = this.props;
+
     const title = intl.formatMessage({
-      id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutTitle',
-      defaultMessage: 'No remote cluster found'
+      id: 'xpack.crossClusterReplication.autoFollowPatternEditForm.emptyRemoteClustersTitle',
+      defaultMessage: 'Remote cluster not found'
     });
 
     return (
@@ -48,55 +49,22 @@ class AutoFollowPatternAddUI extends PureComponent {
         <EuiCallOut
           title={title}
           color="warning"
-          iconType="cross"
+          iconType="help"
         >
           <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutDescription"
-            defaultMessage="You haven't added yet any remote cluster. In order to create an auto-follow pattern you need to add a remote cluster." //eslint-disable-line max-len
+            id="xpack.crossClusterReplication.autoFollowPatternEditForm.emptyRemoteClustersDescription"
+            defaultMessage="The remote cluster '{remoteCluster}' does not exist or is not connected. Make sure it is connected before editing the '{name}' auto-follow pattern." //eslint-disable-line max-len
+            values={{ remoteCluster, name }}
           />
         </EuiCallOut>
         <EuiSpacer />
         <EuiButton
-          {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS)}
+          {...routing.getRouterLinkProps('/list', BASE_PATH_REMOTE_CLUSTERS)}
           fill
           iconType="plusInCircle"
         >
           <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternCreateForm.addRemoteClusterButtonLabel"
-            defaultMessage="Add a remote cluster"
-          />
-        </EuiButton>
-      </Fragment>
-    );
-  }
-
-  renderNoConnectedCluster() {
-    const { intl } = this.props;
-    const title = intl.formatMessage({
-      id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.noRemoteClustersConnectedCallOutTitle',
-      defaultMessage: 'Remote cluster connection error'
-    });
-
-    return (
-      <Fragment>
-        <EuiCallOut
-          title={title}
-          color="warning"
-          iconType="cross"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternCreateForm.noRemoteClustersConnectedCallOutDescription"
-            defaultMessage="None of your clusters are connected. Verify your clusters settings and make sure at least one cluster is connected before creating an auto-follow pattern." //eslint-disable-line max-len
-          />
-        </EuiCallOut>
-        <EuiSpacer />
-        <EuiButton
-          {...routing.getRouterLinkProps('/', BASE_PATH_REMOTE_CLUSTERS)}
-          fill
-          iconType="plusInCircle"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternCreateForm.viewRemoteClusterButtonLabel"
+            id="xpack.crossClusterReplication.autoFollowPatternEditForm.viewtRemoteClustersButtonLabel"
             defaultMessage="View remote clusters"
           />
         </EuiButton>
@@ -105,7 +73,7 @@ class AutoFollowPatternAddUI extends PureComponent {
   }
 
   render() {
-    const { createAutoFollowPattern, apiStatus, apiError } = this.props;
+    const { createAutoFollowPattern, apiStatus, apiError, autoFollowPattern } = this.props;
 
     const breadcrumbs = [{
       text: (
@@ -118,8 +86,8 @@ class AutoFollowPatternAddUI extends PureComponent {
     }, {
       text: (
         <FormattedMessage
-          id="xpack.crossClusterReplication.autoFollowPattern.breadcrumbs.addText"
-          defaultMessage="Add auto-follow pattern"
+          id="xpack.crossClusterReplication.autoFollowPattern.breadcrumbs.editText"
+          defaultMessage="Edit auto-follow pattern"
         />
       ),
     }];
@@ -135,8 +103,8 @@ class AutoFollowPatternAddUI extends PureComponent {
               <EuiTitle size="l">
                 <h1>
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPattern.addTitle"
-                    defaultMessage="Add auto-follow pattern"
+                    id="xpack.crossClusterReplication.autoFollowPattern.editTitle"
+                    defaultMessage="Edit auto-follow pattern"
                   />
                 </h1>
               </EuiTitle>
@@ -148,7 +116,7 @@ class AutoFollowPatternAddUI extends PureComponent {
                   return (
                     <SectionLoading>
                       <FormattedMessage
-                        id="xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClusters"
+                        id="xpack.crossClusterReplication.autoFollowPatternForm.loadingRemoteClusters"
                         defaultMessage="Loading remote clusters..."
                       />
                     </SectionLoading>
@@ -159,12 +127,10 @@ class AutoFollowPatternAddUI extends PureComponent {
                   return <SectionError title={null} error={error} />;
                 }
 
-                if (!remoteClusters.length) {
-                  return this.renderEmptyClusters();
-                }
+                const autoFollowPatternCluster = remoteClusters.find(cluster => cluster.name === autoFollowPattern.remoteCluster);
 
-                if (remoteClusters.every(cluster => cluster.isConnected === false)) {
-                  return this.renderNoConnectedCluster();
+                if (!autoFollowPatternCluster || !autoFollowPatternCluster.isConnected) {
+                  return this.renderMissingCluster(autoFollowPattern);
                 }
 
                 return (
@@ -172,6 +138,7 @@ class AutoFollowPatternAddUI extends PureComponent {
                     apiStatus={apiStatus}
                     apiError={apiError}
                     remoteClusters={remoteClusters}
+                    autoFollowPattern={autoFollowPattern}
                     createAutoFollowPattern={createAutoFollowPattern}
                   />
                 );
@@ -184,4 +151,4 @@ class AutoFollowPatternAddUI extends PureComponent {
   }
 }
 
-export const AutoFollowPatternAdd = injectI18n(AutoFollowPatternAddUI);
+export const AutoFollowPatternEdit = injectI18n(AutoFollowPatternEditUI);

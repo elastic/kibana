@@ -34,7 +34,6 @@ class Routing {
     const location = typeof to === "string"
       ? createLocation(base + to, null, null, this._reactRouter.history.location)
       : to;
-
     const href = this._reactRouter.history.createHref(location);
 
     const onClick = event => {

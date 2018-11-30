@@ -25,14 +25,19 @@ export const loadAutoFollowPatterns = (isUpdating = false) =>
     },
   });
 
-export const createAutoFollowPattern = (id, autoFollowPattern) => (
+export const createAutoFollowPattern = (name, autoFollowPattern) => (
   apiAction({
     label: t.AUTO_FOLLOW_PATTERN_CREATE,
     status: API_STATUS.SAVING,
     scope,
     handler: async () => {
-      await createAutoFollowPatternRequest(id, autoFollowPattern);
+      await createAutoFollowPatternRequest(name, autoFollowPattern);
       routing.navigate('/home');
     }
   })
 );
+
+export const selectAutoFollowPattern = (name) => ({
+  type: t.AUTO_FOLLOW_PATTERN_SELECT,
+  payload: name
+});

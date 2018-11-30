@@ -7,11 +7,6 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-
-import routing from '../../../services/routing';
-import { API_STATUS } from '../../../constants';
-import { SectionError } from '../../../components';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,6 +27,11 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
+import routing from '../services/routing';
+import { API_STATUS } from '../constants';
+import { SectionError } from './';
+import { getPrefixSuffixFromFollowPattern, getPreviewIndicesFromAutoFollowPattern } from '../services/auto_follow_pattern';
+
 const getFirstConnectedCluster = (clusters) => {
   for (let i = 0; i < clusters.length; i++) {
     if (clusters[i].isConnected) {
@@ -41,22 +41,31 @@ const getFirstConnectedCluster = (clusters) => {
   return {};
 };
 
+const getEmptyAutoFollowPattern = (remoteClusters) => ({
+  name: '',
+  remoteCluster: getFirstConnectedCluster(remoteClusters).name,
+  leaderIndexPatterns: [],
+  followIndexPatternPrefix: '',
+  followIndexPatternSuffix: '',
+});
+
 class AutoFollowPatternFormUI extends PureComponent {
   static propTypes = {
     createAutoFollowPattern: PropTypes.func.isRequired,
+    autoFollowPattern: PropTypes.object,
     apiError: PropTypes.object,
     apiStatus: PropTypes.string.isRequired,
     remoteClusters: PropTypes.array.isRequired,
   }
 
   state = {
-    autoFollowPattern: {
-      name: '',
-      remoteCluster: getFirstConnectedCluster(this.props.remoteClusters).name,
-      leaderIndexPatterns: [],
-      followIndexPatternPrefix: '',
-      followIndexPatternSuffix: '',
-    }
+    autoFollowPattern: this.props.autoFollowPattern
+      ? {
+        ...this.props.autoFollowPattern,
+        ...getPrefixSuffixFromFollowPattern(this.props.autoFollowPattern.followIndexPattern)
+      }
+      : getEmptyAutoFollowPattern(this.props.remoteClusters),
+    isNew: typeof this.props.autoFollowPattern === 'undefined'
   }
 
   onFieldsChange = (fields) => {
@@ -106,54 +115,6 @@ class AutoFollowPatternFormUI extends PureComponent {
     // TODO
   }
 
-  /**
-   * Return the follow index pattern by concatening the prefix + {{leader_index}} + the sufix
-   *
-   * @param {boolean} interpretTemplate Whether to replace the {{leader_index}} template by the leader index pattern value
-   * @param {number} limit Set the maximum number of result when interpreting the {{leader_index}} template
-   * @param {Array<string>} wildcardlaceHolders If interpretTemplate is set to true, those are the value that will replace the "*" from the leader index pattern
-   *
-   * @example
-   * // interpretTemplate === false
-   * => "somePrefix_{{leader_index}}_someSuffix"
-   *
-   * // interpretTemplate === true
-   * => ["somePrefix_leader-index-0", "somePrefix_leader-index-1", "somePrefix_leader-index-2"]
-   */
-  getFollowIndexPattern = (interpretTemplate = false, limit = 3,  wildcardlaceHolders = ['0', '1', '2']) => {
-    const { followIndexPatternPrefix, followIndexPatternSuffix, leaderIndexPatterns } = this.state.autoFollowPattern;
-
-    const renderFollowPatternWithTemplateString = (template = '{{leader_index}}') => (
-      followIndexPatternPrefix + template + followIndexPatternSuffix
-    );
-
-    const renderFollowPatternWithWildcardPlaceholders = () => {
-      const indicesPreview = [];
-      let indexPreview;
-      let leaderIndexTemplate;
-
-      leaderIndexPatterns.forEach((leaderIndexPattern) => {
-        wildcardlaceHolders.forEach((placeHolder) => {
-          leaderIndexTemplate = leaderIndexPattern.replace(/\*/g, placeHolder);
-          indexPreview = renderFollowPatternWithTemplateString(leaderIndexTemplate);
-
-          if (!indicesPreview.includes(indexPreview)) {
-            indicesPreview.push(indexPreview);
-          }
-        });
-      });
-
-      return {
-        indicesPreview: indicesPreview.slice(0, limit),
-        hasMore: indicesPreview.length > limit,
-      };
-    };
-
-    return interpretTemplate
-      ? renderFollowPatternWithWildcardPlaceholders()
-      : renderFollowPatternWithTemplateString();
-  }
-
   getFields = () => {
     const { autoFollowPattern: stateFields } = this.state;
     const { followIndexPatternPrefix, followIndexPatternSuffix, ...rest } = stateFields;
@@ -193,7 +154,8 @@ class AutoFollowPatternFormUI extends PureComponent {
   renderForm = () => {
     const { intl } = this.props;
     const {
-      autoFollowPattern: { name, remoteCluster, leaderIndexPatterns, followIndexPatternPrefix, followIndexPatternSuffix }
+      autoFollowPattern: { name, remoteCluster, leaderIndexPatterns, followIndexPatternPrefix, followIndexPatternSuffix },
+      isNew,
     } = this.state;
 
     /**
@@ -236,7 +198,7 @@ class AutoFollowPatternFormUI extends PureComponent {
               value={name}
               onChange={e => this.onFieldsChange({ name: e.target.value })}
               fullWidth
-              disabled={false}
+              disabled={!isNew}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -285,11 +247,22 @@ class AutoFollowPatternFormUI extends PureComponent {
             isInvalid={false}
             fullWidth
           >
-            <EuiSuperSelect
-              options={remoteClustersOptions}
-              valueOfSelected={remoteCluster}
-              onChange={this.onClusterChange}
-            />
+            <Fragment>
+              { isNew && (
+                <EuiSuperSelect
+                  options={remoteClustersOptions}
+                  valueOfSelected={remoteCluster}
+                  onChange={this.onClusterChange}
+                />
+              )}
+              { !isNew && (
+                <EuiFieldText
+                  value={remoteCluster}
+                  fullWidth
+                  disabled={true}
+                />
+              )}
+            </Fragment>
           </EuiFormRow>
         </EuiDescribedFormGroup>
       );
@@ -359,7 +332,12 @@ class AutoFollowPatternFormUI extends PureComponent {
      */
     const renderAutoFollowPattern = () => {
       const renderFollowIndicesPreview = () => {
-        const { indicesPreview, hasMore } = this.getFollowIndexPattern(true, 5);
+        const { indicesPreview } = getPreviewIndicesFromAutoFollowPattern({
+          prefix: followIndexPatternPrefix,
+          suffix: followIndexPatternSuffix,
+          leaderIndexPatterns
+        });
+
         return (
           <EuiCallOut
             title="Example of indices that will be generated"
@@ -368,12 +346,10 @@ class AutoFollowPatternFormUI extends PureComponent {
             <p>Here are some examples of the indices that might be generated with the above settings:</p>
             <ul>
               {indicesPreview.map((followerIndex, i) => <li key={i}>{followerIndex}</li>)}
-              {hasMore && <li>...</li>}
             </ul>
           </EuiCallOut>
         );
       };
-
 
       return (
         <EuiDescribedFormGroup

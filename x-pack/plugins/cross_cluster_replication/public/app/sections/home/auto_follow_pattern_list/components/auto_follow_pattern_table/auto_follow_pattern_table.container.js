@@ -6,9 +6,12 @@
 
 import { connect } from 'react-redux';
 
+import { selectAutoFollowPattern } from '../../../../../store/actions';
 import { AutoFollowPatternTable as AutoFollowPatternTableComponent } from './auto_follow_pattern_table';
 
-const mapDispatchToProps = null;
+const mapDispatchToProps = (dispatch) => ({
+  selectAutoFollowPattern: (name) => dispatch(selectAutoFollowPattern(name)),
+});
 
 export const AutoFollowPatternTable = connect(
   null,

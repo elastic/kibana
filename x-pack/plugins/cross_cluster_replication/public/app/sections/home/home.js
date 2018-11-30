@@ -67,7 +67,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
             >
               <FormattedMessage
                 id="xpack.cross_cluster_replication.add_autofollow_pattern_button_label"
-                defaultMessage="Create auto-follow pattern"
+                defaultMessage="Create an auto-follow pattern"
               />
             </EuiButton>
           </EuiPageContentHeaderSection>

@@ -11,6 +11,8 @@ import {
   EuiInMemoryTable,
   EuiButton,
 } from '@elastic/eui';
+import routing from '../../../../../services/routing';
+import { getPrefixSuffixFromFollowPattern } from '../../../../../services/auto_follow_pattern';
 
 export class AutoFollowPatternTableUI extends PureComponent {
   static propTypes = {
@@ -48,11 +50,7 @@ export class AutoFollowPatternTableUI extends PureComponent {
   };
 
   getTableColumns() {
-    const editField = () => {
-      console.log('Coming soon!');
-    };
-
-    const { intl } = this.props;
+    const { intl, selectAutoFollowPattern } = this.props;
 
     return [{
       field: 'name',
@@ -88,9 +86,25 @@ export class AutoFollowPatternTableUI extends PureComponent {
       name: (
         <FormattedMessage
           id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
-          defaultMessage="Follower pattern"
+          defaultMessage="Follower pattern prefix"
         />
       ),
+      render: (followIndexPattern) => {
+        const { followIndexPatternPrefix } = getPrefixSuffixFromFollowPattern(followIndexPattern);
+        return followIndexPatternPrefix;
+      }
+    }, {
+      field: 'followIndexPattern',
+      name: (
+        <FormattedMessage
+          id="xpack.cross_cluster_replication.autofollow_pattern_list.table.connected_nodes_column_title"
+          defaultMessage="Follower pattern suffix"
+        />
+      ),
+      render: (followIndexPattern) => {
+        const { followIndexPatternSuffix } = getPrefixSuffixFromFollowPattern(followIndexPattern);
+        return followIndexPatternSuffix;
+      }
     }, {
       name: '',
       actions: [
@@ -99,7 +113,10 @@ export class AutoFollowPatternTableUI extends PureComponent {
           description: intl.formatMessage({
             id: 'kbn.management.editIndexPattern.fields.table.editDescription', defaultMessage: 'Edit' }),
           icon: 'pencil',
-          onClick: editField,
+          onClick: ({ name }) => {
+            selectAutoFollowPattern(name);
+            routing.navigate(`/auto_follow_patterns/edit/${name}`);
+          },
           type: 'icon',
         },
       ],
