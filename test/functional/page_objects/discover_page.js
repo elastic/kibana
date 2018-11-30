@@ -207,9 +207,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await header.getVisibleText();
     }
 
-    getDocTableIndex(index) {
-      return find.byCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
-        .getVisibleText();
+    async getDocTableIndex(index) {
+      const row = await find.byCssSelector('tr.discover-table-row:nth-child(' + (index) + ')');
+      return await row.getVisibleText();
     }
 
     async clickDocSortDown() {
