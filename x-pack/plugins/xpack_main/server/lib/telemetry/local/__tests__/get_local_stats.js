@@ -74,14 +74,14 @@ describe('get_local_stats', () => {
 
   describe('handleLocalStats', () => {
     it('returns expected object without xpack and kibana data', () => {
-      const r1 = handleLocalStats(clusterInfo, clusterStats);
-      expect(r1.cluster_uuid).to.eql(localStats.cluster_uuid);
-      expect(r1.cluster_name).to.eql(localStats.cluster_name);
-      expect(r1.cluster_stats).to.eql(localStats.cluster_stats);
-      expect(r1.version).to.be('2.3.4');
-      expect(r1.collection).to.be('local');
-      expect(r1.license).to.be(undefined);
-      expect(r1.stack_stats).to.be(undefined);
+      const result = handleLocalStats(clusterInfo, clusterStats);
+      expect(result.cluster_uuid).to.eql(localStats.cluster_uuid);
+      expect(result.cluster_name).to.eql(localStats.cluster_name);
+      expect(result.cluster_stats).to.eql(localStats.cluster_stats);
+      expect(result.version).to.be('2.3.4');
+      expect(result.collection).to.be('local');
+      expect(result.license).to.be(undefined);
+      expect(result.stack_stats).to.be(undefined);
     });
 
     it('returns expected object with xpack and kibana data', () => {
@@ -92,8 +92,6 @@ describe('get_local_stats', () => {
   describe('getLocalStatsWithCaller', () => {
     it('returns expected object without xpack data when X-Pack fails to respond', async () => {
       const callClusterUsageFailed = sinon.stub();
-      const callClusterLicenseFailed = sinon.stub();
-      const callClusterBothFailed = sinon.stub();
 
       mockGetLocalStats(
         callClusterUsageFailed,
@@ -103,41 +101,18 @@ describe('get_local_stats', () => {
         Promise.reject('usage failed')
       );
 
-      mockGetLocalStats(
-        callClusterLicenseFailed,
-        Promise.resolve(clusterInfo),
-        Promise.resolve(clusterStats),
-        Promise.reject('license failed'),
-        Promise.resolve(xpack)
-      );
+      const result = await getLocalStatsWithCaller(getMockServer(), callClusterUsageFailed);
+      expect(result.cluster_uuid).to.eql(localStats.cluster_uuid);
+      expect(result.cluster_name).to.eql(localStats.cluster_name);
+      expect(result.cluster_stats).to.eql(localStats.cluster_stats);
+      expect(result.version).to.be('2.3.4');
+      expect(result.collection).to.be('local');
 
-      mockGetLocalStats(
-        callClusterBothFailed,
-        Promise.resolve(clusterInfo),
-        Promise.resolve(clusterStats),
-        Promise.reject('license failed'),
-        Promise.reject('usage failed')
-      );
+      // license and xpack usage info come from the same cluster call
+      expect(result.license).to.be(undefined);
+      expect(result.stack_stats.xpack).to.be(undefined);
 
-      const r1 = await getLocalStatsWithCaller(getMockServer(), callClusterUsageFailed);
-      expect(r1.cluster_uuid).to.eql(localStats.cluster_uuid);
-      expect(r1.cluster_name).to.eql(localStats.cluster_name);
-      expect(r1.cluster_stats).to.eql(localStats.cluster_stats);
-      expect(r1.version).to.be('2.3.4');
-      expect(r1.collection).to.be('local');
-      expect(r1.license).to.be(undefined);
-      expect(r1.stack_stats.xpack).to.be(undefined);
-      expect(r1.stack_stats.kibana).to.be.an('object');
-
-      const r2 = await getLocalStatsWithCaller(getMockServer(), callClusterLicenseFailed);
-      expect(r2.license).to.be(undefined);
-      //expect(r2.stack_stats.xpack).to.be.an('object'); // FIXME
-      expect(r2.stack_stats.kibana).to.be.an('object');
-
-      const r3 = await getLocalStatsWithCaller(getMockServer(), callClusterBothFailed);
-      expect(r3.license).to.be(undefined);
-      expect(r3.stack_stats.xpack).to.be(undefined);
-      expect(r3.stack_stats.kibana).to.be.an('object');
+      expect(result.stack_stats.kibana).to.be.an('object');
     });
 
     it('returns expected object with xpack data', async () => {
@@ -151,8 +126,8 @@ describe('get_local_stats', () => {
         Promise.resolve(xpack)
       );
 
-      const r1 = await getLocalStatsWithCaller(getMockServer(), callCluster);
-      expect(r1.stack_stats.xpack).to.eql(localStats.stack_stats.xpack);
+      const result = await getLocalStatsWithCaller(getMockServer(), callCluster);
+      expect(result.stack_stats.xpack).to.eql(localStats.stack_stats.xpack);
     });
   });
 
@@ -172,11 +147,11 @@ describe('get_local_stats', () => {
         Promise.resolve(xpack)
       );
 
-      const r1 = await getLocalStats(req);
-      expect(r1.cluster_uuid).to.eql(localStats.cluster_uuid);
-      expect(r1.cluster_name).to.eql(localStats.cluster_name);
-      expect(r1.version).to.eql(localStats.version);
-      expect(r1.cluster_stats).to.eql(localStats.cluster_stats);
+      const result = await getLocalStats(req);
+      expect(result.cluster_uuid).to.eql(localStats.cluster_uuid);
+      expect(result.cluster_name).to.eql(localStats.cluster_name);
+      expect(result.version).to.eql(localStats.version);
+      expect(result.cluster_stats).to.eql(localStats.cluster_stats);
     });
   });
 });
