@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.settings.removeIndexPattern();
         });
 
-        it('should sort ascending', function () {
+        it.skip('should sort ascending', function () {
           return PageObjects.settings.sortBy(col.heading)
           .then(function getText() {
             return col.selector();
