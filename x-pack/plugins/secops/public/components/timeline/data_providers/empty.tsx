@@ -29,7 +29,7 @@ const Flex = styled.div`
 export const Empty = pure(() => (
   <Flex data-test-subj="empty">
     <Text>Drop anything</Text>
-    <EuiBadge color="#D9D9D9">highlighted</EuiBadge>
+    <EuiBadge color="#d9d9d9">highlighted</EuiBadge>
     <Text>here</Text>
   </Flex>
 ));

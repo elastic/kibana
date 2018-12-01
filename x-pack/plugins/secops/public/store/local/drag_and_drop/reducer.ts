@@ -7,10 +7,7 @@
 import { omit } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 
-import {
-  DataProvider,
-  DataProviderId,
-} from '../../../components/timeline/data_providers/data_provider';
+import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { registerProvider, unRegisterProvider } from './actions';
 import { DragAndDropModel, IdToDataProvider } from './model';
 
@@ -32,7 +29,7 @@ export const registerProviderHandler = ({
 });
 
 interface UnRegisterProviderHandlerParams {
-  id: DataProviderId;
+  id: string;
   dataProviders: IdToDataProvider;
 }
 

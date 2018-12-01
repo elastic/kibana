@@ -18,7 +18,7 @@ import { Range } from './body/column_headers/range_picker/ranges';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
-import { ECS } from './ecs'; // tslint:disable-line:no-unused-variable (linter bug!)
+import { ECS } from './ecs';
 import {
   OnColumnSorted,
   OnDataProviderRemoved,

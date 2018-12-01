@@ -18,15 +18,9 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Draggable } from 'react-beautiful-dnd';
 import { Dispatch } from 'redux';
 import { State, timelineActions } from '../../store';
 import { timelineByIdSelector } from '../../store/selectors';
-import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
-import {
-  draggableTimelineFlyoutButtonPrefix,
-  droppableTimelineFlyoutButtonPrefix,
-} from '../drag_and_drop/helpers';
 import { defaultWidth } from '../timeline/body';
 
 export const Overlay = styled.div`
@@ -64,7 +58,6 @@ export const Text = styled(EuiText)`
 interface OwnProps {
   timelineId: string;
   children?: React.ReactNode;
-  isFlyoutVisible?: boolean;
 }
 
 interface DispatchProps {
@@ -106,26 +99,11 @@ interface FlyoutButtonProps {
   onOpen: () => void;
 }
 
-const ProviderContainer = styled.div``; // required because react-beautiful-dnd cannot wrap EuiPanel directly
-
-export const FlyoutButton = pure(({ timelineId, onOpen }: FlyoutButtonProps) => (
-  <Overlay data-test-subj="flyoutOverlay" onClick={onOpen}>
-    <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
-      <Draggable draggableId={`${draggableTimelineFlyoutButtonPrefix}${timelineId}`} index={0}>
-        {provided => (
-          <ProviderContainer
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            innerRef={provided.innerRef}
-            data-test-subj="flyoutButtonContainer"
-          >
-            <Button>
-              <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
-            </Button>
-          </ProviderContainer>
-        )}
-      </Draggable>
-    </DroppableWrapper>
+export const FlyoutButton = pure(({ onOpen }: FlyoutButtonProps) => (
+  <Overlay data-test-subj="flyoutOverlay" onClick={onOpen} onMouseEnter={onOpen}>
+    <Button>
+      <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
+    </Button>
   </Overlay>
 ));
 

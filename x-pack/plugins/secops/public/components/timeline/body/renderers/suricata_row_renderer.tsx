@@ -63,8 +63,6 @@ const SuricataSignature = styled.div`
   margin-top 10px;
 `;
 
-const ButtonContainer = styled.div``;
-
 const Details = styled.div`
   display: flex;
   flex-direction: row;
@@ -83,8 +81,6 @@ const Label = styled.div`
   font-weight: bold;
 `;
 
-const Value = styled.div``;
-
 interface LabelValuePairParams {
   label: string;
   ariaLabel: string;
@@ -94,7 +90,7 @@ interface LabelValuePairParams {
 const LabelValuePair = ({ label, ariaLabel, value }: LabelValuePairParams) => (
   <LabelValuePairContainer>
     <Label>{label}</Label>
-    <Value aria-label={ariaLabel}>{value}</Value>
+    <div aria-label={ariaLabel}>{value}</div>
   </LabelValuePairContainer>
 );
 
@@ -112,11 +108,9 @@ export const suricataRowRenderer: RowRenderer = {
         {children}
         {signature != null ? (
           <SuricataSignature>
-            <ButtonContainer>
-              <EuiButton fill size="s" href={createLinkWithSignature(signature)} target="_blank">
-                {signature}
-              </EuiButton>
-            </ButtonContainer>
+            <EuiButton fill size="s" href={createLinkWithSignature(signature)} target="_blank">
+              {signature}
+            </EuiButton>
             <Details>
               <LabelValuePair label="Protocol" ariaLabel="Protocol" value="TCP" />
               <LabelValuePair

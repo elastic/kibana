@@ -19,7 +19,7 @@ interface Props {
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
   transition: background-color 0.7s ease;
   background-color: ${props =>
-    props.isDraggingOver ? '#D9D9D9' : props.theme.eui.euiColorEmptyShade};
+    props.isDraggingOver ? '#d9d9d9' : props.theme.eui.euiColorEmptyShade};
   min-height: 100px;
 `;
 

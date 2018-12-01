@@ -5,11 +5,6 @@
  */
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 
-/**
- * IdToDataProvider is really indexed by DataProviderId, but it is typed as
- * 'string' because the current version of TS prevents the use of type
- * aliases in type signatures
- */
 export interface IdToDataProvider {
   [id: string]: DataProvider;
 }

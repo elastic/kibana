@@ -15,8 +15,8 @@ declare global {
   }
 }
 
-export const createStore = (): Store<State, AnyAction> => {
+export const createStore = (state = initialState): Store<State, AnyAction> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-  return createReduxStore(reducer, initialState, composeEnhancers(applyMiddleware(thunk)));
+  return createReduxStore(reducer, state, composeEnhancers(applyMiddleware(thunk)));
 };

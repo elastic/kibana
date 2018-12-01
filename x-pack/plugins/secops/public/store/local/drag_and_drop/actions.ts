@@ -5,15 +5,12 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import {
-  DataProvider,
-  DataProviderId,
-} from '../../../components/timeline/data_providers/data_provider';
+import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/drag_and_drop');
 
 export const registerProvider = actionCreator<{ provider: DataProvider }>('REGISTER_PROVIDER');
 
-export const unRegisterProvider = actionCreator<{ id: DataProviderId }>('UNREGISTER_PROVIDER');
+export const unRegisterProvider = actionCreator<{ id: string }>('UNREGISTER_PROVIDER');
 
-export const noProviderFound = actionCreator<{ id: DataProviderId }>('NO_PROVIDER_FOUND');
+export const noProviderFound = actionCreator<{ id: string }>('NO_PROVIDER_FOUND');

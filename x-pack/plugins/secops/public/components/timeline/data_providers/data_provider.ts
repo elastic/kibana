@@ -6,12 +6,10 @@
 
 import * as React from 'react';
 
-export type DataProviderId = string;
-
 /** Represents the Timeline data providers */
 export interface DataProvider {
   /** Uniquely identifies a data provider */
-  id: DataProviderId;
+  id: string;
   /** Human readable */
   name: string;
   /**

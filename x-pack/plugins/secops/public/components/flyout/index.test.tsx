@@ -6,12 +6,50 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { closeFlyout, Flyout, FlyoutButton, FlyoutPane, openFlyout, showFlyout } from '.';
+import { Provider as ReduxStoreProvider } from 'react-redux';
+
+import { set } from 'lodash/fp';
+import { Flyout, FlyoutButton, FlyoutComponent, FlyoutPane } from '.';
+import { createStore, State } from '../../store';
 
 describe('Flyout', () => {
+  const state: State = {
+    local: {
+      dragAndDrop: {
+        dataProviders: {},
+      },
+      timeline: {
+        timelineById: {
+          test: {
+            id: 'test',
+            dataProviders: [],
+            data: [],
+            range: '1 Day',
+            show: false,
+            sort: {
+              columnId: 'timestamp',
+              sortDirection: 'descending',
+            },
+          },
+        },
+      },
+    },
+  };
+
+  let store = createStore(state);
+
+  beforeEach(() => {
+    store = createStore(state);
+  });
+
   describe('rendering', () => {
     test('it renders the default flyout state as a button', () => {
-      const wrapper = mount(<Flyout />);
+      const wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <Flyout timelineId="test" />
+        </ReduxStoreProvider>
+      );
+
       expect(
         wrapper
           .find('[data-test-subj="flyoutButton"]')
@@ -21,7 +59,15 @@ describe('Flyout', () => {
     });
 
     test('it renders the title element when its state is set to flyout is true', () => {
-      const wrapper = mount(<Flyout />).setState({ isFlyoutVisible: true });
+      const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
+      const storeShowIsTrue = createStore(stateShowIsTrue);
+
+      const wrapper = mount(
+        <ReduxStoreProvider store={storeShowIsTrue}>
+          <Flyout timelineId="test" />
+        </ReduxStoreProvider>
+      );
+
       expect(
         wrapper
           .find('[data-test-subj="flyoutTitle"]')
@@ -31,16 +77,30 @@ describe('Flyout', () => {
     });
 
     test('it does NOT render the fly out button when its state is set to flyout is true', () => {
-      const wrapper = mount(<Flyout />).setState({ isFlyoutVisible: true });
+      const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
+      const storeShowIsTrue = createStore(stateShowIsTrue);
+
+      const wrapper = mount(
+        <ReduxStoreProvider store={storeShowIsTrue}>
+          <Flyout timelineId="test" />
+        </ReduxStoreProvider>
+      );
+
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
     });
 
     test('it renders children elements when its state is set to flyout is true', () => {
+      const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
+      const storeShowIsTrue = createStore(stateShowIsTrue);
+
       const wrapper = mount(
-        <Flyout>
-          <p>I am a child of flyout</p>
-        </Flyout>
-      ).setState({ isFlyoutVisible: true });
+        <ReduxStoreProvider store={storeShowIsTrue}>
+          <Flyout timelineId="test">
+            <p>I am a child of flyout</p>
+          </Flyout>
+        </ReduxStoreProvider>
+      );
+
       expect(
         wrapper
           .find('[data-test-subj="flyoutChildren"]')
@@ -50,59 +110,38 @@ describe('Flyout', () => {
     });
 
     test('should call the onOpen when the mouse is entered for rendering', () => {
-      const openMock = jest.fn();
-      const wrapper = mount<Flyout>(<Flyout />);
-      wrapper.instance().onOpen = openMock;
-      wrapper.instance().forceUpdate();
+      const showTimeline = jest.fn();
+      const wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <FlyoutComponent show={false} timelineId="test" showTimeline={showTimeline} />
+        </ReduxStoreProvider>
+      );
+
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')
         .first()
         .simulate('mouseenter');
 
-      expect(openMock).toBeCalled();
+      expect(showTimeline).toBeCalled();
     });
 
     test('should call the onClose when the close button is clicked', () => {
-      const closeMock = jest.fn();
-      const wrapper = mount<Flyout>(<Flyout />).setState({ isFlyoutVisible: true });
-      wrapper.instance().onClose = closeMock;
-      wrapper.instance().forceUpdate();
+      const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
+      const storeShowIsTrue = createStore(stateShowIsTrue);
+
+      const showTimeline = jest.fn();
+      const wrapper = mount(
+        <ReduxStoreProvider store={storeShowIsTrue}>
+          <FlyoutComponent show={true} timelineId="test" showTimeline={showTimeline} />
+        </ReduxStoreProvider>
+      );
+
       wrapper
         .find('[data-test-subj="flyout"] button')
         .first()
         .simulate('click');
 
-      expect(closeMock).toBeCalled();
-    });
-  });
-
-  describe('showFlyout', () => {
-    test('should set a state to true when true is passed as an argument', () => {
-      const mockSetState = jest.fn();
-      showFlyout(true, mockSetState);
-      expect(mockSetState).toBeCalledWith({ isFlyoutVisible: true });
-    });
-
-    test('should set a state to false when false is passed as an argument', () => {
-      const mockSetState = jest.fn();
-      showFlyout(false, mockSetState);
-      expect(mockSetState).toBeCalledWith({ isFlyoutVisible: false });
-    });
-  });
-
-  describe('closeFlyout', () => {
-    test('should set a state to false when false is passed as an argument', () => {
-      const mockSetState = jest.fn();
-      closeFlyout(mockSetState);
-      expect(mockSetState).toBeCalledWith({ isFlyoutVisible: false });
-    });
-  });
-
-  describe('openFlyout', () => {
-    test('should set a state to true when true is passed as an argument', () => {
-      const mockSetState = jest.fn();
-      openFlyout(mockSetState);
-      expect(mockSetState).toBeCalledWith({ isFlyoutVisible: true });
+      expect(showTimeline).toBeCalled();
     });
   });
 
@@ -156,7 +195,7 @@ describe('Flyout', () => {
   describe('showFlyoutButton', () => {
     test('should return the flyout button with text', () => {
       const openMock = jest.fn();
-      const wrapper = mount(<FlyoutButton onOpen={openMock} />);
+      const wrapper = mount(<FlyoutButton timelineId="test" onOpen={openMock} />);
       expect(
         wrapper
           .find('[data-test-subj="flyoutButton"]')
@@ -167,7 +206,7 @@ describe('Flyout', () => {
 
     test('should call the onOpen when the mouse is entered', () => {
       const openMock = jest.fn();
-      const wrapper = mount(<FlyoutButton onOpen={openMock} />);
+      const wrapper = mount(<FlyoutButton timelineId="test" onOpen={openMock} />);
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')
         .first()
