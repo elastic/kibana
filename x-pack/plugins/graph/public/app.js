@@ -70,6 +70,15 @@ if (uiRoutes.enable) {
 }
 
 uiRoutes
+  .defaults(/.*/, {
+    k7Breadcrumbs: () => [
+      {
+        text: 'Graph',
+      }
+    ]
+  });
+
+uiRoutes
   .when('/home', {
     template: appTemplate,
     resolve: {
