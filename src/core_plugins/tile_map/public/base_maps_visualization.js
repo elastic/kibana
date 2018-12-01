@@ -145,10 +145,8 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
           const firstRoadMapLayer = tmsServices.find((s) => {
             return s.id === 'road_map';//first road map layer
           });
-          const fallback = firstRoadMapLayer ? firstRoadMapLayer : tmsServices[0];
-          if (fallback) {
-            this._setTmsLayer(firstRoadMapLayer);
-          }
+          const initMapLayer = firstRoadMapLayer ? firstRoadMapLayer : tmsServices[0];
+          this._setTmsLayer(initMapLayer);
         } catch (e) {
           toastNotifications.addWarning(e.message);
           return;

@@ -22,6 +22,7 @@ import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
 import { ORIGIN } from './origin';
+import { toastNotifications } from 'ui/notify';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -76,7 +77,7 @@ uiModules.get('kibana')
 
           try {
             const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
-            return response.data;
+            return response;
           } catch (e) {
             if (!e) {
               e = new Error('Unknown error');
@@ -108,21 +109,23 @@ uiModules.get('kibana')
         this._loadTMSServices = _.once(async () => {
 
           const catalogue = await this._loadCatalogue();
-          const tmsService = catalogue.services.find((service) => service.type === 'tms');
+          const tmsService = catalogue.services.find(service =>
+            service.type === 'tms');
           if (!tmsService) {
             return [];
           }
           const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
-          const preppedTMSServices = tmsManifest.data.services.map((tmsService) => {
-            const preppedService = _.cloneDeep(tmsService);
-            preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
-            preppedService.subdomains = preppedService.subdomains || [];
-            preppedService.origin = ORIGIN.EMS;
-            return preppedService;
-          });
+          const preppedTMSServices = tmsManifest
+            ? tmsManifest.services.map((tmsService) => {
+              const preppedService = _.cloneDeep(tmsService);
+              preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
+              preppedService.subdomains = preppedService.subdomains || [];
+              preppedService.origin = ORIGIN.EMS;
+              return preppedService;
+            })
+            : [];
 
           return preppedTMSServices;
-
         });
 
       }
@@ -139,8 +142,16 @@ uiModules.get('kibana')
       async _getManifest(manifestUrl) {
         return $http({
           url: extendUrl(manifestUrl, { query: this._queryParams }),
-          method: 'GET'
-        });
+          method: 'GET',
+          timeout: 4000
+        }).then(resp => resp.data)
+          .catch(resp => {
+            toastNotifications.addDanger(
+              `Status: ${resp.status}, failed to load: ${manifestUrl}. To \
+              disable, set "map.includeElasticMapsService: false" in your \
+              kibana configuration file.`
+            );
+          });
       }
 
 

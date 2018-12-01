@@ -24,6 +24,7 @@ import _ from 'lodash';
 import { zoomToPrecision } from '../../utils/zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 
+
 function makeFitControl(fitContainer, kibanaMap) {
 
   const FitControl = L.Control.extend({
