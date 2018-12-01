@@ -64,12 +64,9 @@ export function initBreadcrumbsApi(
   // bootstraps and lets us integrate with the angular router so that we can
   // automatically clear the breadcrumbs if we switch to a Kibana app that
   // does not use breadcrumbs correctly
-  internals.$setupBreadcrumbsAutoClear = (
-    $rootScope: IRootScopeService,
-    $route: any,
-    $injector: any
-  ) => {
+  internals.$setupBreadcrumbsAutoClear = ($rootScope: IRootScopeService, $injector: any) => {
     const uiSettings = chrome.getUiSettingsClient();
+    const $route = $injector.has('$route') ? $injector.get('$route') : {};
 
     $rootScope.$on('$routeChangeStart', () => {
       breadcrumbSetSinceRouteChange = false;
