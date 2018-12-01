@@ -19,6 +19,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
+  ccr.autoFollowPattern = ca({
+    urls: [
+      {
+        fmt: '/_ccr/auto_follow/<%=id%>',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    method: 'GET'
+  });
+
   ccr.createAutoFollowPattern = ca({
     urls: [
       {
