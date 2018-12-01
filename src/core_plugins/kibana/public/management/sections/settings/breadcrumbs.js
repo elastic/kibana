@@ -25,7 +25,7 @@ export function getBreadcrumbs() {
     MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('kbn.management.settings.breadcrumb', {
-        defaultMessage: 'Advanced Settings',
+        defaultMessage: 'Advanced settings',
       })
     }
   ];
