@@ -20,6 +20,7 @@ const Flex = styled.div`
   align-items: center;
   display: flex;
   justify-content: center;
+  min-height: 100px;
 `;
 
 /**
@@ -27,8 +28,8 @@ const Flex = styled.div`
  */
 export const Empty = pure(() => (
   <Flex data-test-subj="empty">
-    <Text>Drop anything with a </Text>
-    <EuiBadge color="primary">Facet</EuiBadge>
-    <Text> count here</Text>
+    <Text>Drop anything</Text>
+    <EuiBadge color="#d9d9d9">highlighted</EuiBadge>
+    <Text>here</Text>
   </Flex>
 ));

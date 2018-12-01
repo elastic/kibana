@@ -7,56 +7,60 @@
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
-import {
-  getEventCount,
-  mockDataProviderNames,
-  mockDataProviders,
-} from './mock/mock_data_providers';
+import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
 
 describe('DataProviders', () => {
   describe('rendering', () => {
-    const dropMessage = 'Drop anything with a Facet count here';
+    const dropMessage = ['Drop', 'anything', 'highlighted', 'here'];
 
     test('it should render a placeholder when there are zero data providers', () => {
       const dataProviders: DataProvider[] = [];
 
       const wrapper = mount(
-        <DataProviders
-          dataProviders={dataProviders}
-          onDataProviderRemoved={noop}
-          onToggleDataProviderEnabled={noop}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <DataProviders
+            id="foo"
+            dataProviders={dataProviders}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={noop}
+          />
+        </DragDropContext>
       );
 
-      expect(wrapper.text()).toContain(dropMessage);
+      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
     });
 
     test('it should NOT render a placeholder given a non-empty collection of data providers', () => {
       const wrapper = mount(
-        <DataProviders
-          dataProviders={mockDataProviders}
-          onDataProviderRemoved={noop}
-          onToggleDataProviderEnabled={noop}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <DataProviders
+            id="foo"
+            dataProviders={mockDataProviders}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={noop}
+          />
+        </DragDropContext>
       );
 
-      expect(wrapper.text()).not.toContain(dropMessage);
+      dropMessage.forEach(word => expect(wrapper.text()).not.toContain(word));
     });
 
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <DataProviders
-          dataProviders={mockDataProviders}
-          onDataProviderRemoved={noop}
-          onToggleDataProviderEnabled={noop}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <DataProviders
+            id="foo"
+            dataProviders={mockDataProviders}
+            onDataProviderRemoved={noop}
+            onToggleDataProviderEnabled={noop}
+          />
+        </DragDropContext>
       );
 
-      mockDataProviderNames().forEach(name =>
-        expect(wrapper.text()).toContain(`${getEventCount(name)} ${name}`)
-      );
+      mockDataProviderNames().forEach(name => expect(wrapper.text()).toContain(name));
     });
   });
 });

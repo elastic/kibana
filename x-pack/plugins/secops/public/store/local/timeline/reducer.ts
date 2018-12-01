@@ -15,6 +15,7 @@ import {
   addProvider,
   createTimeline,
   removeProvider,
+  showTimeline,
   updateData,
   updateProviders,
   updateRange,
@@ -50,6 +51,24 @@ const addNewTimeline = ({ id, timelineById }: AddNewTimelineParams): TimelineByI
     ...timelineDefaults,
   },
 });
+
+interface UpdateShowTimelineProps {
+  id: string;
+  show: boolean;
+  timelineById: TimelineById;
+}
+
+const updateShowTimeline = ({ id, show, timelineById }: UpdateShowTimelineProps): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      show,
+    },
+  };
+};
 
 interface AddTimelineProviderParams {
   id: string;
@@ -190,6 +209,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
     timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
+  }))
+  .case(showTimeline, (state, { id, show }) => ({
+    ...state,
+    timelineById: updateShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
   .case(removeProvider, (state, { id, providerId }) => ({
     ...state,

@@ -90,6 +90,8 @@ const ColumnRender = styled.div<{ minwidth: string; maxwidth: string }>`
 
 const defaultHeight = '100%';
 
+export const defaultWidth = 1125;
+
 /** Renders the timeline body */
 export const Body = pure<Props>(
   ({

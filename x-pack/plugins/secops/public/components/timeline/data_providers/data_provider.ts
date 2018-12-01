@@ -28,6 +28,4 @@ export interface DataProvider {
    * default: `false`
    */
   negated: boolean;
-  /** Renders an interactive card representation of the data provider */
-  render: () => React.ReactNode;
 }
