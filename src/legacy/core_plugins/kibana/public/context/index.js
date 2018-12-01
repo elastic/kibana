@@ -21,14 +21,28 @@ import _ from 'lodash';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import uiRoutes from 'ui/routes';
+import { i18n } from '@kbn/i18n';
 
 import './app';
 import contextAppRouteTemplate from './index.html';
-
+import { getRootBreadcrumbs } from '../discover/breadcrumbs';
 
 uiRoutes
   .when('/context/:indexPatternId/:type/:id*', {
     controller: ContextAppRouteController,
+    k7Breadcrumbs($route) {
+      const { indexPattern } = $route.current.locals;
+
+      return [
+        ...getRootBreadcrumbs(),
+        {
+          text: i18n.translate('kbn.context.breadcrumb', {
+            defaultMessage: 'Context',
+            values: { indexPatternTitle: indexPattern.title }
+          })
+        }
+      ];
+    },
     controllerAs: 'contextAppRoute',
     resolve: {
       indexPattern: function ($route, indexPatterns) {
