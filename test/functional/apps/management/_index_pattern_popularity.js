@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
         screenshots.take('Settings-indices-result-popularity-updated');
       });
 
-      it('should be reset on cancel', async function () {
+      it.skip('should be reset on cancel', async function () {
         // Cancel saving the popularity change
         await PageObjects.settings.controlChangeCancel();
         await fix5030();
