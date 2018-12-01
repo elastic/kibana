@@ -12,7 +12,7 @@ import { Dispatch } from 'redux';
 import styled from 'styled-components';
 
 import { WhoAmI } from '../containers/who_am_i';
-import { timelineActions } from '../store';
+import { DraggableWrapper } from './drag_and_drop/draggable_wrapper';
 import { mockDataProviders } from './timeline/data_providers/mock/mock_data_providers';
 
 export const VisualizationPlaceholder = styled(EuiPanel)`
@@ -24,7 +24,7 @@ export const VisualizationPlaceholder = styled(EuiPanel)`
     margin: 5px;
     padding: 5px 5px 5px 10px;
     width: 500px;
-    height: 309px;
+    height: 320px;
     user-select: none;
   }
 `;
@@ -32,11 +32,11 @@ export const VisualizationPlaceholder = styled(EuiPanel)`
 export const ProviderContainer = styled.div`
   margin: 5px;
   user-select: none;
-  cursor: grab;
 `;
 
+export const PlaceholdersContainer = styled.div``; // required by react-beautiful-dnd
+
 interface Props {
-  timelineId: string;
   count: number;
   myRoute: string;
   dispatch: Dispatch;
@@ -45,7 +45,7 @@ interface Props {
 /** TODO: delete this stub */
 class PlaceholdersComponent extends React.PureComponent<Props> {
   public render() {
-    const { count, dispatch, myRoute, timelineId } = this.props;
+    const { count, myRoute } = this.props;
 
     return (
       <React.Fragment>
@@ -61,15 +61,12 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
                 </div>
               )}
             </WhoAmI>
-            <ProviderContainer
-              onClick={() => {
-                dispatch(
-                  timelineActions.addProvider({ id: timelineId, provider: mockDataProviders[i] })
-                );
+            <DraggableWrapper
+              dataProvider={mockDataProviders[i]}
+              render={() => {
+                return mockDataProviders[i].name;
               }}
-            >
-              {mockDataProviders[i].render()}
-            </ProviderContainer>
+            />
           </VisualizationPlaceholder>
         ))}
       </React.Fragment>

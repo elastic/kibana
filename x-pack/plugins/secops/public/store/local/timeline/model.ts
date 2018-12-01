@@ -15,15 +15,17 @@ export interface TimelineModel {
   dataProviders: DataProvider[];
   data: ECS[];
   range: Range;
+  show: boolean;
   sort: Sort;
 }
 
 export const timelineDefaults: Readonly<
-  Pick<TimelineModel, 'dataProviders' | 'data' | 'range' | 'sort'>
+  Pick<TimelineModel, 'dataProviders' | 'data' | 'range' | 'show' | 'sort'>
 > = {
   dataProviders: [],
   data: mockECSData,
   range: '1 Day',
+  show: false,
   sort: {
     columnId: 'timestamp',
     sortDirection: 'descending',

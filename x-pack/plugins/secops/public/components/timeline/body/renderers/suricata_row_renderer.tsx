@@ -12,11 +12,6 @@ import styled, { keyframes } from 'styled-components';
 import { createLinkWithSignature, RowRenderer } from '.';
 import { ECS } from '../../ecs';
 
-const SuricataSignature = styled.div`
-  margin-top: 10px;
-  margin-left: 30px;
-`;
-
 const dropInEffect = keyframes`
   0% {
     border: 1px solid;
@@ -61,6 +56,44 @@ const SuricataRow = styled.div`
   }
 `;
 
+const SuricataSignature = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin-top 10px;
+`;
+
+const Details = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 5px;
+  min-width: 340px;
+`;
+
+const LabelValuePairContainer = styled.div`
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Label = styled.div`
+  font-weight: bold;
+`;
+
+interface LabelValuePairParams {
+  label: string;
+  ariaLabel: string;
+  value: string;
+}
+
+const LabelValuePair = ({ label, ariaLabel, value }: LabelValuePairParams) => (
+  <LabelValuePairContainer>
+    <Label>{label}</Label>
+    <div aria-label={ariaLabel}>{value}</div>
+  </LabelValuePairContainer>
+);
+
 export const suricataRowRenderer: RowRenderer = {
   isInstance: (ecs: ECS) => {
     if (ecs && ecs.event && ecs.event.module && ecs.event.module.toLowerCase() === 'suricata') {
@@ -75,9 +108,22 @@ export const suricataRowRenderer: RowRenderer = {
         {children}
         {signature != null ? (
           <SuricataSignature>
-            <EuiButton fill size="s" href={createLinkWithSignature(signature)}>
+            <EuiButton fill size="s" href={createLinkWithSignature(signature)} target="_blank">
               {signature}
             </EuiButton>
+            <Details>
+              <LabelValuePair label="Protocol" ariaLabel="Protocol" value="TCP" />
+              <LabelValuePair
+                label="Source"
+                ariaLabel="Source"
+                value={`${data.source.ip}:${data.source.port}`}
+              />
+              <LabelValuePair
+                label="Destination"
+                ariaLabel="Destination"
+                value={`${data.destination.ip}:${data.destination.port}`}
+              />
+            </Details>
           </SuricataSignature>
         ) : null}
       </SuricataRow>

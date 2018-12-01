@@ -27,3 +27,5 @@ export const updateRange = actionCreator<{ id: string; range: Range }>('UPDATE_R
 export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT');
 
 export const removeProvider = actionCreator<{ id: string; providerId: string }>('REMOVE_PROVIDER');
+
+export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');

@@ -8,12 +8,15 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
+import { droppableTimelineProvidersPrefix } from '../../drag_and_drop/helpers';
 import { OnDataProviderRemoved, OnToggleDataProviderEnabled } from '../events';
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { Providers } from './providers';
 
 interface Props {
+  id: string;
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
@@ -29,6 +32,8 @@ const DropTargetDataProviders = styled.div`
   min-height: 100px;
   padding: 5px;
 `;
+
+const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
 
 /**
  * Renders the data providers section of the timeline.
@@ -48,17 +53,20 @@ const DropTargetDataProviders = styled.div`
  * the data pro section.
  */
 export const DataProviders = pure<Props>(
-  ({ dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }) => (
+  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
-      {dataProviders.length ? (
-        <Providers
-          dataProviders={dataProviders}
-          onDataProviderRemoved={onDataProviderRemoved}
-          onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        />
-      ) : (
-        <Empty />
-      )}
+      <DroppableWrapper droppableId={getDroppableId(id)}>
+        {dataProviders.length ? (
+          <Providers
+            id={id}
+            dataProviders={dataProviders}
+            onDataProviderRemoved={onDataProviderRemoved}
+            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+          />
+        ) : (
+          <Empty />
+        )}
+      </DroppableWrapper>
     </DropTargetDataProviders>
   )
 );

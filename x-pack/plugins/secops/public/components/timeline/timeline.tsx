@@ -9,6 +9,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ECS } from './ecs';
 
+import { EventsProps, EventsQuery } from '../../containers/events';
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Range } from './body/column_headers/range_picker/ranges';
@@ -30,6 +31,7 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   dataProviders: DataProvider[];
   height?: string;
+  id: string;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
@@ -45,7 +47,7 @@ const TimelineDiv = styled.div<{ width: string; height: string }>`
   display: flex;
   flex-direction: column;
   min-height: 700px;
-  overflow: none;
+  overflow: hidden;
   user-select: none;
   width: ${props => props.width};
   height: ${props => props.height};
@@ -60,6 +62,7 @@ export const Timeline = pure<Props>(
     columnRenderers,
     dataProviders,
     height = defaultHeight,
+    id,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
@@ -72,17 +75,23 @@ export const Timeline = pure<Props>(
   }) => (
     <TimelineDiv data-test-subj="timeline" width={`${width}px`} height={height}>
       <TimelineHeader
+        id={id}
         dataProviders={dataProviders}
         onDataProviderRemoved={onDataProviderRemoved}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
         width={width}
       />
       {dataProviders.map(provider => {
-        const QueryComponent = provider.componentQuery as React.ComponentClass;
-        const queryProps = provider.componentQueryProps;
+        const queryProps: EventsProps = provider.componentQueryProps as EventsProps;
         const resParm = provider.componentResultParam;
         return (
-          <QueryComponent {...queryProps} key={provider.id}>
+          <EventsQuery
+            sourceId="default"
+            startDate={queryProps.startDate}
+            endDate={queryProps.endDate}
+            filterQuery={queryProps.filterQuery}
+            key={provider.id}
+          >
             {(resData: {}) => (
               <Body
                 columnHeaders={columnHeaders}
@@ -98,7 +107,7 @@ export const Timeline = pure<Props>(
                 width={width}
               />
             )}
-          </QueryComponent>
+          </EventsQuery>
         );
       })}
     </TimelineDiv>

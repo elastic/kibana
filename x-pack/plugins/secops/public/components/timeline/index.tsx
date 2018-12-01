@@ -116,6 +116,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       <Timeline
         columnHeaders={headers}
         columnRenderers={columnRenderers}
+        id={id}
         dataProviders={dataProviders!}
         onColumnSorted={onColumnSorted}
         onDataProviderRemoved={onDataProviderRemoved}

@@ -117,7 +117,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
             filter,
           },
         },
-        size: 500,
+        size: 100,
         sort: [
           {
             [options.sourceConfiguration.fields.timestamp]: 'desc',

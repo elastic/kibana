@@ -13,7 +13,7 @@ import { EventItem, GetEventsQuery, KpiItem } from '../../../common/graphql/type
 
 import { eventsQuery } from './events.gql_query';
 
-interface EventsArgs {
+export interface EventsArgs {
   events: EventItem[];
   kpiEventType: KpiItem[];
   loading: boolean;

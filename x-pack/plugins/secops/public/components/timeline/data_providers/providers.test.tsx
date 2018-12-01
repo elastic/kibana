@@ -7,27 +7,28 @@
 import { mount } from 'enzyme';
 import { noop, pick } from 'lodash/fp';
 import * as React from 'react';
-import {
-  getEventCount,
-  mockDataProviderNames,
-  mockDataProviders,
-} from './mock/mock_data_providers';
-import { Providers } from './providers';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
+import { mockDataProviderNames, mockDataProviders } from './mock/mock_data_providers';
+import { getDraggableId, Providers } from './providers';
 
 describe('Providers', () => {
   describe('rendering', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <Providers
-          dataProviders={mockDataProviders}
-          onDataProviderRemoved={noop}
-          onToggleDataProviderEnabled={noop}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onDataProviderRemoved={noop}
+              onToggleDataProviderEnabled={noop}
+            />
+          </DroppableWrapper>
+        </DragDropContext>
       );
 
-      mockDataProviderNames().forEach(name =>
-        expect(wrapper.text()).toContain(`${getEventCount(name)} ${name}`)
-      );
+      mockDataProviderNames().forEach(name => expect(wrapper.text()).toContain(name));
     });
   });
 
@@ -36,11 +37,16 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
 
       const wrapper = mount(
-        <Providers
-          dataProviders={mockDataProviders}
-          onDataProviderRemoved={mockOnDataProviderRemoved}
-          onToggleDataProviderEnabled={noop}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onDataProviderRemoved={mockOnDataProviderRemoved}
+              onToggleDataProviderEnabled={noop}
+            />
+          </DroppableWrapper>
+        </DragDropContext>
       );
 
       wrapper
@@ -62,16 +68,29 @@ describe('Providers', () => {
     });
   });
 
+  describe('#getDraggableId', () => {
+    test('it returns the expected id', () => {
+      expect(getDraggableId({ id: 'timeline1', dataProviderId: 'abcd' })).toEqual(
+        'draggableId.timeline.timeline1.dataProvider.abcd'
+      );
+    });
+  });
+
   describe('#onToggleDataProviderEnabled', () => {
     test('it invokes the onToggleDataProviderEnabled callback when the switch button is clicked', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
 
       const wrapper = mount(
-        <Providers
-          dataProviders={mockDataProviders}
-          onDataProviderRemoved={noop}
-          onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-        />
+        <DragDropContext onDragEnd={noop}>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onDataProviderRemoved={noop}
+              onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+            />
+          </DroppableWrapper>
+        </DragDropContext>
       );
 
       wrapper

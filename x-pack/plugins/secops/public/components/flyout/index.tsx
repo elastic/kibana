@@ -12,9 +12,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { defaultTo, getOr } from 'lodash/fp';
 import * as React from 'react';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+
+import { Dispatch } from 'redux';
+import { State, timelineActions } from '../../store';
+import { timelineByIdSelector } from '../../store/selectors';
+import { defaultWidth } from '../timeline/body';
 
 export const Overlay = styled.div`
   position: absolute;
@@ -48,23 +55,20 @@ export const Text = styled(EuiText)`
   z-index: 3;
 `;
 
-interface Props {
+interface OwnProps {
+  timelineId: string;
   children?: React.ReactNode;
-  isFlyoutVisible?: boolean;
 }
 
-interface State {
-  isFlyoutVisible: boolean;
+interface DispatchProps {
+  showTimeline: (id: string, show: boolean) => void;
 }
 
-type SetState = (opts: State) => void;
+interface StateReduxProps {
+  show: boolean;
+}
 
-export const showFlyout = (isFlyoutVisible: boolean, setState: SetState) =>
-  setState({ isFlyoutVisible });
-
-export const closeFlyout = (setState: SetState) => showFlyout(false, setState);
-
-export const openFlyout = (setState: SetState) => showFlyout(true, setState);
+type Props = OwnProps & DispatchProps & StateReduxProps;
 
 interface FlyoutPaneProps {
   onClose: () => void;
@@ -72,7 +76,13 @@ interface FlyoutPaneProps {
 }
 
 export const FlyoutPane = pure(({ onClose, children }: FlyoutPaneProps) => (
-  <EuiFlyout onClose={onClose} aria-labelledby="flyoutTitle" data-test-subj="flyout">
+  <EuiFlyout
+    size="l"
+    maxWidth={defaultWidth + 50}
+    onClose={onClose}
+    aria-labelledby="flyoutTitle"
+    data-test-subj="flyout"
+  >
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
         <h2 data-test-subj="flyoutTitle" id="flyoutTitle">
@@ -85,40 +95,57 @@ export const FlyoutPane = pure(({ onClose, children }: FlyoutPaneProps) => (
 ));
 
 interface FlyoutButtonProps {
+  timelineId: string;
   onOpen: () => void;
 }
 
 export const FlyoutButton = pure(({ onOpen }: FlyoutButtonProps) => (
-  <Overlay data-test-subj="flyoutOverlay" onMouseEnter={onOpen}>
+  <Overlay data-test-subj="flyoutOverlay" onClick={onOpen} onMouseEnter={onOpen}>
     <Button>
       <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
     </Button>
   </Overlay>
 ));
 
-export class Flyout extends React.PureComponent<Props, State> {
-  public readonly state = {
-    isFlyoutVisible: this.props.isFlyoutVisible ? this.props.isFlyoutVisible : false,
-  };
+export const FlyoutComponent = pure<Props>(({ show, timelineId, showTimeline, children }) => (
+  <React.Fragment>
+    <div
+      style={{
+        visibility: show ? 'visible' : 'hidden',
+      }}
+    >
+      <FlyoutPane
+        onClose={() => {
+          showTimeline(timelineId, false);
+        }}
+      >
+        {children}
+      </FlyoutPane>
+      >
+    </div>
+    {!show ? (
+      <FlyoutButton
+        timelineId={timelineId}
+        onOpen={() => {
+          showTimeline(timelineId, true);
+        }}
+      />
+    ) : null}
+  </React.Fragment>
+));
 
-  public render = () =>
-    this.state.isFlyoutVisible ? (
-      <FlyoutPane onClose={this.onClose}>{this.props.children}</FlyoutPane>
-    ) : (
-      <FlyoutButton onOpen={this.onOpen} />
-    );
+const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
+  const timelineById = defaultTo({}, timelineByIdSelector(state));
+  const show = getOr('false', `${timelineId}.show`, timelineById);
 
-  /**
-   * Provides stable instance reference for avoiding re-renders.
-   * setState.bind is required although this is a ES2017 function since setState
-   * is impure and calls other functions within this class.
-   */
-  public onClose = () => closeFlyout(this.setState.bind(this));
+  return { show };
+};
 
-  /**
-   * Provides stable instance reference for avoiding re-renders.
-   * setState.bind is required although this is a ES2017 function since setState
-   * is impure and calls other functions within this class.
-   */
-  public onOpen = () => openFlyout(this.setState.bind(this));
-}
+const bindActionsToDispatch = (dispatch: Dispatch) => ({
+  showTimeline: (id: string, show: boolean) => dispatch(timelineActions.showTimeline({ show, id })),
+});
+
+export const Flyout = connect(
+  mapStateToProps,
+  bindActionsToDispatch
+)(FlyoutComponent);

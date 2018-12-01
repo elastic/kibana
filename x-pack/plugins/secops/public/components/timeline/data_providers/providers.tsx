@@ -6,6 +6,7 @@
 
 import { EuiButtonIcon, EuiPanel, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import * as React from 'react';
+import { Draggable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
@@ -55,6 +56,7 @@ const SwitchButton = pure(({ onToggleDataProviderEnabled, dataProvider }: Switch
 });
 
 interface Props {
+  id: string;
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
@@ -84,12 +86,23 @@ const Spacer = styled(EuiSpacer)`
   border-left: 1px solid #ccc;
 `;
 
+const ProviderContainer = styled.div``; // required because react-beautiful-dnd cannot wrap EuiPanel directly
+
+interface GetDraggableIdParams {
+  id: string;
+  dataProviderId: string;
+}
+
+export const getDraggableId = ({ id, dataProviderId }: GetDraggableIdParams): string =>
+  `draggableId.timeline.${id}.dataProvider.${dataProviderId}`;
+
 const FlexGroup = styled.span`
   display: flex;
   flex-wrap: nowrap;
   justify-content: flex-end;
   flex-grow: 1;
   align-items: center;
+  margin-left: 5px;
 `;
 
 /**
@@ -97,26 +110,43 @@ const FlexGroup = styled.span`
  * affords uniform UI controls for the following actions:
  * 1) removing a data provider
  * 2) temporarily disabling a data provider
- * 3) applying boolean negation to the data provider
+ * 3) TODO: applying boolean negation to the data provider
  */
 export const Providers = pure<Props>(
-  ({ dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }) => (
+  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (
     <PanelProviders data-test-subj="providers">
-      {dataProviders.map(dataProvider => (
-        <PanelProvider data-test-subj="provider" key={dataProvider.id}>
-          {dataProvider.render()}
-          <FlexGroup>
-            <SwitchButton
-              onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-              dataProvider={dataProvider}
-            />
-            <Spacer />
-            <CloseButton
-              onDataProviderRemoved={onDataProviderRemoved}
-              dataProvider={dataProvider}
-            />
-          </FlexGroup>
-        </PanelProvider>
+      {dataProviders.map((dataProvider, i) => (
+        // Providers are a special drop target that cant be drag-and-dropped
+        // to another destination, so it doesn't use our DraggableWrapper
+        <Draggable
+          draggableId={getDraggableId({ id, dataProviderId: dataProvider.id })}
+          index={i}
+          key={dataProvider.id}
+        >
+          {provided => (
+            <ProviderContainer
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              innerRef={provided.innerRef}
+              data-test-subj="providerContainer"
+            >
+              <PanelProvider data-test-subj="provider" key={dataProvider.id}>
+                {dataProvider.name}
+                <FlexGroup>
+                  <SwitchButton
+                    onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+                    dataProvider={dataProvider}
+                  />
+                  <Spacer />
+                  <CloseButton
+                    onDataProviderRemoved={onDataProviderRemoved}
+                    dataProvider={dataProvider}
+                  />
+                </FlexGroup>
+              </PanelProvider>
+            </ProviderContainer>
+          )}
+        </Draggable>
       ))}
     </PanelProviders>
   )
