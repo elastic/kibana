@@ -17,12 +17,16 @@
  * under the License.
  */
 
-export {
-  PAGE_TITLE_COMPONENT,
-  PAGE_SUBTITLE_COMPONENT,
-  PAGE_FOOTER_COMPONENT,
-} from '../../../core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
-export { registerSettingsComponent } from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
-export { Field } from '../../../core_plugins/kibana/public/management/sections/settings/components/field/field';
-export { management } from './sections_register';
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { i18n } from '@kbn/i18n';
+
+export function getBreadcrumbs() {
+  return [
+    MANAGEMENT_BREADCRUMB,
+    {
+      text: i18n.translate('kbn.management.settings.breadcrumb', {
+        defaultMessage: 'Advanced Settings',
+      })
+    }
+  ];
+}
