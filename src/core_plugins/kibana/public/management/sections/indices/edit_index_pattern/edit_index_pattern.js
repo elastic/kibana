@@ -35,6 +35,7 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
@@ -167,17 +168,15 @@ uiRoutes
 
 uiRoutes
   .when('/management/kibana/indices', {
-    resolve: {
-      redirect: function ($location, config) {
-        const defaultIndex = config.get('defaultIndex');
+    redirectTo() {
+      const defaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
         let path = '/management/kibana/index';
 
         if (defaultIndex) {
           path = `/management/kibana/indices/${defaultIndex}`;
         }
 
-        $location.path(path).replace();
-      }
+      return path;
     }
   });
 
