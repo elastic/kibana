@@ -5,48 +5,52 @@
  */
 
 import React from 'react';
-import { pure } from 'recompose';
 
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
 
-import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { EmptyPage } from '../../components/empty_page';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
+
+import { InfrastructureBetaBadgeHeaderSection } from '../../components/beta_badge_header_section';
 import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
 import { WithWaffleOptionsUrlState } from '../../containers/waffle/with_waffle_options';
 import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
 import { WithSource } from '../../containers/with_source';
 
-export const HomePage = pure(() => (
-  <ColumnarPage>
-    <WithSource>
-      {({ metricIndicesExist }) =>
-        metricIndicesExist || metricIndicesExist === null ? (
-          <>
-            <WithWaffleTimeUrlState />
-            <WithWaffleFilterUrlState />
-            <WithWaffleOptionsUrlState />
-            <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
-            <HomeToolbar />
-            <HomePageContent />
-          </>
-        ) : (
-          <WithKibanaChrome>
-            {({ basePath }) => (
-              <EmptyPage
-                title="Looks like you don't have any metrics indices."
-                message="Let's add some!"
-                actionLabel="Setup Instructions"
-                actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
-                data-test-subj="noMetricsIndicesPrompt"
-              />
-            )}
-          </WithKibanaChrome>
-        )
-      }
-    </WithSource>
-  </ColumnarPage>
-));
+export class HomePage extends React.PureComponent {
+  public render() {
+    return (
+      <ColumnarPage>
+        <WithSource>
+          {({ metricIndicesExist }) =>
+            metricIndicesExist || metricIndicesExist === null ? (
+              <>
+                <WithWaffleTimeUrlState />
+                <WithWaffleFilterUrlState />
+                <WithWaffleOptionsUrlState />
+                <Header appendSections={<InfrastructureBetaBadgeHeaderSection />} />
+                <HomeToolbar />
+                <HomePageContent />
+              </>
+            ) : (
+              <WithKibanaChrome>
+                {({ basePath }) => (
+                  <EmptyPage
+                    title="Looks like you don't have any metrics indices."
+                    message="Let's add some!"
+                    actionLabel="Setup Instructions"
+                    actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/metrics`}
+                    data-test-subj="noMetricsIndicesPrompt"
+                  />
+                )}
+              </WithKibanaChrome>
+            )
+          }
+        </WithSource>
+      </ColumnarPage>
+    );
+  }
+}

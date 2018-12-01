@@ -10,6 +10,7 @@ import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 
+import { pure } from 'recompose';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
@@ -42,25 +43,19 @@ const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerP
   }
 };
 
-class DragDropContextWrapperComponent extends React.PureComponent<Props> {
-  public render() {
-    const { dataProviders, dispatch, children } = this.props;
-
-    return (
-      <DragDropContext
-        onDragEnd={result => {
-          onDragEndHandler({
-            result,
-            dataProviders: dataProviders!,
-            dispatch: dispatch!,
-          });
-        }}
-      >
-        {children}
-      </DragDropContext>
-    );
-  }
-}
+const DragDropContextWrapperComponent = pure<Props>(({ dataProviders, dispatch, children }) => (
+  <DragDropContext
+    onDragEnd={result => {
+      onDragEndHandler({
+        result,
+        dataProviders: dataProviders!,
+        dispatch: dispatch!,
+      });
+    }}
+  >
+    {children}
+  </DragDropContext>
+));
 
 const emptyDataProviders: IdToDataProvider = {}; // stable reference
 
