@@ -76,11 +76,13 @@ export function initBreadcrumbsApi(
     });
 
     $rootScope.$on('$routeChangeSuccess', () => {
-      if (breadcrumbSetSinceRouteChange || $route.current.$$route.redirectTo) {
+      const current = $route.current || {};
+
+      if (breadcrumbSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
         return;
       }
 
-      const k7BreadcrumbsProvider = $route.current.k7Breadcrumbs;
+      const k7BreadcrumbsProvider = current.k7Breadcrumbs;
       if (!k7BreadcrumbsProvider || !uiSettings.get('k7design')) {
         newPlatformChrome.setBreadcrumbs([]);
         return;
