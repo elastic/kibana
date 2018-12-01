@@ -174,7 +174,7 @@ export const buildPipeline = (vis: Vis, params: { searchSource: SearchSource }) 
     pipeline += `esaggs
     ${prepareString('index', indexPattern.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'}
+    partialRows=${vis.params.showPartialRows || vis.type.requiresPartialRows || false}
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
 
