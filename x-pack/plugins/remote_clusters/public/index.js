@@ -13,7 +13,7 @@ import { management } from 'ui/management';
 import routes from 'ui/routes';
 
 import { CRUD_APP_BASE_PATH } from './constants';
-import { setHttpClient, setUserHasLeftApp } from './services';
+import { setHttpClient, setUserHasLeftApp, setRedirect } from './services';
 import { App } from './app';
 import template from './main.html';
 import { remoteClustersStore } from './store';
@@ -46,7 +46,7 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
   template: template,
   controllerAs: 'remoteClusters',
   controller: class RemoteClustersController {
-    constructor($scope, $route, $http) {
+    constructor($scope, $route, $http, kbnUrl) {
       if (appElement) {
         // React-router's <Redirect> will cause this controller to re-execute without the $destroy
         // handler being called. This means the app will re-mount, so we need to unmount it first
@@ -57,6 +57,12 @@ routes.when(`${CRUD_APP_BASE_PATH}/:view?/:id?`, {
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
       setHttpClient($http);
+
+      setRedirect((path) => {
+        $scope.$evalAsync(() => {
+          kbnUrl.redirect(path);
+        });
+      });
 
       // If returning to the app, we'll need to reset this state.
       setUserHasLeftApp(false);
