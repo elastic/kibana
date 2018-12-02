@@ -139,7 +139,7 @@ uiModules.get('kibana')
             jobCompletionNotifications.remove(jobId);
             return;
           }
-
+          console.log('before showCompletionNotification ' + job._source.status);
           if (job._source.status === JobStatuses.COMPLETED || job._source.status === JobStatuses.FAILED) {
             await showCompletionNotification(job);
             jobCompletionNotifications.remove(job.id);
