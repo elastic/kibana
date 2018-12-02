@@ -66,19 +66,7 @@ uiModules.get('kibana')
         const reportingSectionUrl = `${managementUrl}/kibana/reporting`;
         seeReportLink = (
           <p>
-            <FormattedMessage
-              id="xpack.reporting.jobCompletionNotifier.reportLink.pickItUpFromPathDescription"
-              defaultMessage="Pick it up from {path}."
-              values={{ path: (
-                <a href={reportingSectionUrl}>
-                  <FormattedMessage
-                    id="xpack.reporting.jobCompletionNotifier.reportLink.reportingSectionUrlLinkLabel"
-                    defaultMessage="Management > Kibana > Reporting"
-                  />
-                </a>
-              )
-              }}
-            />
+            Pick it up from <a href={reportingSectionUrl}>Management &gt; Kibana &gt; Reporting</a>.
           </p>
         );
       }
@@ -89,10 +77,7 @@ uiModules.get('kibana')
           data-test-subj="downloadCompletedReportButton"
           onClick={() => { downloadReport(job._id); }}
         >
-          <FormattedMessage
-            id="xpack.reporting.jobCompletionNotifier.downloadReportButtonLabel"
-            defaultMessage="Download report"
-          />
+          Download report
         </EuiButton>
       );
 
@@ -121,14 +106,9 @@ uiModules.get('kibana')
         });
       }
 
+      console.log(`Created report for ${reportObjectType} '${reportObjectTitle}'`);
       toastNotifications.addSuccess({
-        title: (
-          <FormattedMessage
-            id="xpack.reporting.jobCompletionNotifier.successfullyCreatedReportNotificationTitle"
-            defaultMessage="Created report for {reportObjectType} '{reportObjectTitle}'"
-            values={{ reportObjectType, reportObjectTitle }}
-          />
-        ),
+        title: `Created report for ${reportObjectType} '${reportObjectTitle}'`,
         text: (
           <div>
             {seeReportLink}
