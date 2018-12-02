@@ -335,13 +335,19 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
   const searchResult = (i: number) =>
     Promise.resolve({
       _scroll_id: i,
+      _shards: {
+        successful: 1,
+        total: 1,
+      },
       hits: {
         hits: docs[i] || [],
       },
     });
   callCluster.withArgs('indices.get').returns(Promise.resolve(index));
   callCluster.withArgs('indices.getAlias').returns(Promise.resolve(alias));
-  callCluster.withArgs('reindex').returns(Promise.resolve({ task: 'zeid' }));
+  callCluster
+    .withArgs('reindex')
+    .returns(Promise.resolve({ task: 'zeid', _shards: { successful: 1, total: 1 } }));
   callCluster.withArgs('tasks.get').returns(Promise.resolve({ completed: true }));
   callCluster.withArgs('search').returns(searchResult(0));
 
@@ -358,7 +364,9 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
     .returns(searchResult(docs.length));
 
   callCluster.withArgs('bulk').returns(Promise.resolve({ items: [] }));
-  callCluster.withArgs('count').returns(Promise.resolve({ count: numOutOfDate }));
+  callCluster
+    .withArgs('count')
+    .returns(Promise.resolve({ count: numOutOfDate, _shards: { successful: 1, total: 1 } }));
 }
 
 function clusterStub(opts: { callCluster: CallCluster }) {

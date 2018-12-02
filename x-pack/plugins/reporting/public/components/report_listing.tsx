@@ -19,6 +19,7 @@ import { JobStatuses } from '../constants/job_statuses';
 import { downloadReport } from '../lib/download_report';
 import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
 import { ReportErrorButton } from './report_error_button';
+import { ReportInfoButton } from './report_info_button';
 
 import {
   EuiBasicTable,
@@ -224,6 +225,7 @@ class ReportListingUi extends Component<Props, State> {
                 <div>
                   {this.renderDownloadButton(record)}
                   {this.renderReportErrorButton(record)}
+                  {this.renderInfoButton(record)}
                 </div>
               );
             },
@@ -302,6 +304,10 @@ class ReportListingUi extends Component<Props, State> {
     }
 
     return <ReportErrorButton jobId={record.id} />;
+  };
+
+  private renderInfoButton = (record: Job) => {
+    return <ReportInfoButton jobId={record.id} />;
   };
 
   private onTableChange = ({ page }: { page: { index: number } }) => {
