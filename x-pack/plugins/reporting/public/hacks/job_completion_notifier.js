@@ -5,14 +5,12 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import { get } from 'lodash';
 import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
-import { JobStatuses } from '../constants/job_statuses';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
@@ -40,19 +38,13 @@ uiModules.get('kibana')
       const reportObjectTitle = job._source.payload.title;
       const reportObjectType = job._source.payload.type;
 
-      const isJobSuccessful = get(job, '_source.status') === JobStatuses.COMPLETED;
+      const isJobSuccessful = get(job, '_source.status') === 'completed';
 
       if (!isJobSuccessful) {
         const errorDoc = await jobQueueClient.getContent(job._id);
         const text = errorDoc.content;
         return toastNotifications.addDanger({
-          title: (
-            <FormattedMessage
-              id="xpack.reporting.jobCompletionNotifier.couldNotCreateReportTitle"
-              defaultMessage="Couldn't create report for {reportObjectType} '{reportObjectTitle}'"
-              values={{ reportObjectType, reportObjectTitle }}
-            />
-          ),
+          title: `Couldn't create report for ${reportObjectType} '${reportObjectTitle}'`,
           text,
         });
       }
@@ -85,19 +77,10 @@ uiModules.get('kibana')
 
       if (maxSizeReached) {
         return toastNotifications.addWarning({
-          title: (
-            <FormattedMessage
-              id="xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportTitle"
-              defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
-              values={{ reportObjectType, reportObjectTitle }}
-            />
-          ),
+          title: `Created partial report for ${reportObjectType} '${reportObjectTitle}'`,
           text: (
             <div>
-              <FormattedMessage
-                id="xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportDescription"
-                defaultMessage="The report reached the max size and contains partial data."
-              />
+              <p>The report reached the max size and contains partial data.</p>
               {seeReportLink}
               {downloadReportButton}
             </div>
@@ -106,7 +89,6 @@ uiModules.get('kibana')
         });
       }
 
-      console.log(`Created report for ${reportObjectType} '${reportObjectTitle}'`);
       toastNotifications.addSuccess({
         title: `Created report for ${reportObjectType} '${reportObjectTitle}'`,
         text: (
@@ -139,8 +121,8 @@ uiModules.get('kibana')
             jobCompletionNotifications.remove(jobId);
             return;
           }
-          console.log('before showCompletionNotification ' + job._source.status);
-          if (job._source.status === JobStatuses.COMPLETED || job._source.status === JobStatuses.FAILED) {
+
+          if (job._source.status === 'completed' || job._source.status === 'failed') {
             await showCompletionNotification(job);
             jobCompletionNotifications.remove(job.id);
             return;
