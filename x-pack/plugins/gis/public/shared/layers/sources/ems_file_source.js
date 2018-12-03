@@ -69,7 +69,7 @@ export class EMSFileSource extends VectorSource {
   }
 
   renderDetails() {
-    const emsHotLink = emsServiceSettings.getEMSHotLinkByName(this._descriptor.name);
+    const emsHotLink = emsServiceSettings.getEMSHotLink(this._descriptor.name);
     return (
       <EuiText color="subdued" size="s">
         <p className="gisLayerDetails">
