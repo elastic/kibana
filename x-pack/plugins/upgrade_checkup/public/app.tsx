@@ -6,22 +6,14 @@
 
 import React from 'react';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 
 import { UpgradeCheckupTabs } from './components/tabs';
 
 export class RootComponent extends React.Component {
   public render() {
     return (
-      <EuiPage>
+      <EuiPage restrictWidth>
         <EuiPageBody>
           <EuiPageHeader>
             <EuiPageHeaderSection>
@@ -30,11 +22,7 @@ export class RootComponent extends React.Component {
               </EuiTitle>
             </EuiPageHeaderSection>
           </EuiPageHeader>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <UpgradeCheckupTabs />
-            </EuiPageContentBody>
-          </EuiPageContent>
+          <UpgradeCheckupTabs />
         </EuiPageBody>
       </EuiPage>
     );

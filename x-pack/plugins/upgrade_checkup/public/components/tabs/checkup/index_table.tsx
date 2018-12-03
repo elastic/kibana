@@ -63,7 +63,6 @@ export class IndexDeprecationTable extends React.Component<
         sorting={sorting}
         pagination={pagination}
         onChange={this.onTableChange}
-        show
       />
     );
   }

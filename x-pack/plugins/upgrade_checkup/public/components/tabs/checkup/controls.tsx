@@ -5,7 +5,7 @@
  */
 import React, { StatelessComponent } from 'react';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { LevelFilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
@@ -32,23 +32,25 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
   currentGroupBy,
   onGroupByChange,
 }) => (
-  <EuiFlexGroup alignItems="center">
-    <EuiFlexItem grow>
-      <div>
-        <EuiButton
-          onClick={loadData}
-          iconType="refresh"
-          isLoading={loadingState === LoadingState.Loading}
-        >
-          {loadingState === LoadingState.Loading ? 'Loading…' : 'Rerun Checkup'}
-        </EuiButton>
-      </div>
+  <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
+    <EuiFlexItem grow={true}>
+      <EuiFieldSearch placeholder="Filter list" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
+      <EuiButton
+        fill
+        onClick={loadData}
+        iconType="refresh"
+        isLoading={loadingState === LoadingState.Loading}
+      >
+        Refresh
+      </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

@@ -6,22 +6,27 @@
 
 import React, { StatelessComponent } from 'react';
 
-import { EuiHealth } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
-import { COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from './constants';
+import { ACTION_MAP, COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from './constants';
 
 interface DeprecationHealthProps {
   deprecations: DeprecationInfo[];
+  single?: boolean;
 }
 
 /**
  * Displays a summary health for a list of deprecations that shows the number and level of highest severity
  * deprecations in the list.
+ * TODO: Allow showing all severity levels
  */
-export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({ deprecations }) => {
+export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({
+  deprecations,
+  single,
+}) => {
   if (deprecations.length === 0) {
-    return <EuiHealth color="success">No problems</EuiHealth>;
+    return <span />;
   }
 
   const levels = deprecations.map(d => LEVEL_MAP[d.level]);
@@ -29,6 +34,11 @@ export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({ 
   const highestLevel = REVERSE_LEVEL_MAP[highest];
   const numHighest = deprecations.filter(d => d.level === highestLevel).length;
   const color = COLOR_MAP[highestLevel];
+  const tooltip = ACTION_MAP[highestLevel];
 
-  return <EuiHealth color={color}>{`${numHighest} ${highestLevel}`}</EuiHealth>;
+  return (
+    <EuiToolTip content={tooltip}>
+      <EuiBadge color={color}>{`${single ? '' : numHighest} ${highestLevel}`}</EuiBadge>
+    </EuiToolTip>
+  );
 };
