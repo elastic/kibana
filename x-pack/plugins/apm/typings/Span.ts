@@ -22,7 +22,7 @@ export interface HttpContext {
   url?: string;
 }
 
-export interface TagsContext {
+interface TagsContext {
   [key: string]: string;
 }
 
