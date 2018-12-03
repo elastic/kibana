@@ -23,6 +23,8 @@ import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
 import { ORIGIN } from './origin';
 import { toastNotifications } from 'ui/notify';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -146,11 +148,38 @@ uiModules.get('kibana')
           timeout: 4000
         }).then(resp => resp.data)
           .catch(resp => {
-            toastNotifications.addDanger(
-              `Status: ${resp.status}, failed to load: ${manifestUrl}. To \
-              disable, set "map.includeElasticMapsService: false" in your \
-              kibana configuration file.`
-            );
+            toastNotifications.addDanger({
+              title: 'EMS unavailable',
+              text: (
+                <p>
+                  <FormattedMessage
+                    id="common.ui.vis.map.serviceSettings.emsManifestUnavailable"
+                    defaultMessage={`Status: {respStatus}, failed to load the
+                    {manifestUrl}. To disable EMS, please refer to the
+                    {kibanaConfigSettings}`}
+                    values={{
+                      respStatus: resp.status,
+                      manifestUrl: (
+                        <a
+                          target="_blank"
+                          href={manifestUrl}
+                        >
+                          {'EMS manifest'}
+                        </a>
+                      ),
+                      kibanaConfigSettings: (
+                        <a
+                          target="_blank"
+                          href="https://www.elastic.co/guide/en/kibana/current/settings.html"
+                        >
+                          {'Kibana configuration settings'}
+                        </a>
+                      )
+                    }}
+                  />
+                </p>
+              )
+            });
           });
       }
 
