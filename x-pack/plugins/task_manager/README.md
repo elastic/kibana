@@ -93,22 +93,6 @@ taskManager.registerTaskDefinitions({
         },
       };
     },
-
-    // [Optional] Create instances of this task defintion automatically
-    static: [
-      // these are the instance details that you would pass to
-      // taskManager.schedule.
-      {
-        //NOTE: there is no need to specify task type here, it will be
-        // overridden by the task manager and will be task type definition.
-        id: 'default-cluster-monitoring-task',
-
-        // ...
-        // other task instance properties
-      },
-
-      // another instance
-    ]
   },
 });
 ```

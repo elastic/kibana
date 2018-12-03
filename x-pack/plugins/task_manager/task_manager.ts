@@ -89,17 +89,6 @@ export class TaskManager {
       store.addSupportedTypes(Object.keys(this.definitions));
       await store.init();
       await poller.start();
-      // schedule all the static tasks
-      Object.keys(this.definitions).forEach((k: string) => {
-        const taskDef = this.definitions[k];
-
-        if (taskDef.static) {
-          taskDef.static.forEach(async (t: TaskInstance) => {
-            t.taskType = k;
-            await this.schedule(t);
-          });
-        }
-      });
     });
   }
 
@@ -144,7 +133,7 @@ export class TaskManager {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance, options?: any) {
-    this.assertInitialized('only static tasks can be scheduled before task manager is initialized');
+    this.assertInitialized('Tasks cannot be scheduled until after task manager is initialized!');
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance,

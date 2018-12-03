@@ -112,12 +112,6 @@ export interface TaskDefinition {
    * and an optional cancel function which cancels the task.
    */
   createTaskRunner: TaskRunCreatorFunction;
-
-  /**
-   * Static tasks are defined by dependant plugins before all plugins have
-   * initlialized. The task manager handles making sure they are created.
-   */
-  static?: TaskInstance[];
 }
 
 /**
@@ -134,9 +128,6 @@ export const validateTaskDefinition = Joi.object({
   timeOut: Joi.string().default('5m'),
   numWorkers: Joi.number().default(1),
   createTaskRunner: Joi.func().required(),
-  static: Joi.array()
-    .items(Joi.object())
-    .optional(),
 }).default();
 
 /**
