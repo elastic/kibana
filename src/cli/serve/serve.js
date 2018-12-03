@@ -171,7 +171,7 @@ export default function (program) {
       pluginDirCollector,
       [
         fromRoot('plugins'),
-        fromRoot('src/core_plugins')
+        fromRoot('src/legacy/core_plugins')
       ]
     )
     .option(

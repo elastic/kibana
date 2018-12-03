@@ -11,14 +11,14 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings', 'common', 'graph', 'header']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
 
   describe.skip('graph', function () { // eslint-disable-line jest/no-disabled-tests
     before(async () => {
-      await remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
       await esArchiver.loadIfNeeded('graph/secrepo');
       await esArchiver.load('empty_kibana');
