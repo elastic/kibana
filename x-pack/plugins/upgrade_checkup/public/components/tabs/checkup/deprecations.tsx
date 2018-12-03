@@ -49,7 +49,8 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      uiButtons={deprecation.uiButtons}
+      actions={deprecation.actions}
+      docUrl={deprecation.url}
       items={items}
     />
   );
@@ -67,21 +68,11 @@ const SimpleMessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprec
     items.push({ body: deprecation.details });
   }
 
-  return <DeprecationCell items={items} />;
+  return <DeprecationCell items={items} docUrl={deprecation.url} />;
 };
 
-interface DeprecationSummary {
-  message: string;
-  url: string;
-  level: string;
-  uiButtons: Array<{
-    label: string;
-    url: string;
-  }>;
-}
-
 interface IndexDeprecationProps {
-  deprecation: DeprecationSummary;
+  deprecation: DeprecationInfo;
   indices: IndexDeprecationDetails[];
 }
 
@@ -89,19 +80,8 @@ interface IndexDeprecationProps {
  * Shows a single deprecation and table of affected indices with details for each index.
  */
 const IndexDeprecation: StatelessComponent<IndexDeprecationProps> = ({ deprecation, indices }) => {
-  const items = [];
-
-  // Only show the last uiButton which should be the documentation link.
-  // const uiButtons = [deprecation.uiButtons[deprecation.uiButtons.length - 1]];
-
   return (
-    <DeprecationCell
-      // TODO: Do not repeat the message or health (and move button up to accordion header)
-      // headline={deprecation.message}
-      // healthColor={COLOR_MAP[deprecation.level]}
-      // uiButtons={uiButtons}
-      items={items}
-    >
+    <DeprecationCell docUrl={deprecation.url}>
       <IndexDeprecationTable indices={indices} />
     </DeprecationCell>
   );
@@ -120,7 +100,11 @@ const DeprecationList: StatelessComponent<{
   if (currentGroupBy === GroupByOption.message && deprecations[0].index !== undefined) {
     // If we're grouping by index we assume that every deprecation message is the same
     // issue and that each deprecation will have an index associated with it.
-    const indices = deprecations.map(dep => ({ index: dep.index!, details: dep.details }));
+    const indices = deprecations.map(dep => ({
+      index: dep.index!,
+      details: dep.details,
+      actions: dep.actions,
+    }));
 
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {
@@ -216,13 +200,6 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
                     single={currentGroupBy === GroupByOption.message}
                     deprecations={groups[groupName]}
                   />
-                  {currentGroupBy === GroupByOption.message && (
-                    <Fragment>
-                      &emsp;
-                      {/* TODO: This button should be the action-oriented version if it exists */}
-                      <EuiButton size="s">Action button here</EuiButton>
-                    </Fragment>
-                  )}
                 </div>
               }
             >

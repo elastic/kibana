@@ -6,13 +6,17 @@
 
 import React from 'react';
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiButton } from '@elastic/eui';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
 export interface IndexDeprecationDetails {
   index: string;
   details?: string;
+  actions?: Array<{
+    label: string;
+    url: string;
+  }>;
 }
 
 interface IndexDeprecationTableProps {
@@ -48,6 +52,11 @@ export class IndexDeprecationTable extends React.Component<
       { field: 'index', name: 'Index', sortable: true },
       { field: 'details', name: 'Details' },
     ];
+
+    if (this.actionsColumn) {
+      // @ts-ignore
+      columns.push(this.actionsColumn);
+    }
 
     const sorting = { sort: { field: sortField, direction: sortDirection } };
     const pagination = {
@@ -105,5 +114,29 @@ export class IndexDeprecationTable extends React.Component<
     });
 
     return { totalItemCount, pageSizeOptions, hidePerPageOptions: false };
+  }
+
+  private get actionsColumn() {
+    // NOTE: this naive implementation assumes all indices in the table have
+    // the same actions. This should work for known usecases.
+    const { indices } = this.props;
+    if (!indices.find(i => i.actions !== undefined)) {
+      return null;
+    }
+
+    const actions = indices[0].actions!;
+
+    return {
+      actions: actions.map((action, idx) => ({
+        render(index: IndexDeprecationDetails) {
+          const { url, label } = index.actions![idx];
+          return (
+            <EuiButton size="s" href={url} target="_blank">
+              {label}
+            </EuiButton>
+          );
+        },
+      })),
+    };
   }
 }

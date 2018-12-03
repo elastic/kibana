@@ -77,28 +77,14 @@ describe('getUpgradeCheckupStatus', () => {
     expect(reindexDeprecation).toBeTruthy();
   });
 
-  it('adds uiButtons for docs', async () => {
-    deprecationsResponse = {
-      index_settings: {},
-      node_settings: [],
-      cluster_settings: [{ url: 'http://docs.com/doc' } as DeprecationInfo],
-    };
-    const resp = await getUpgradeCheckupStatus(callWithRequest, {} as any, '/');
-
-    // Adds a uiButtons property with the documentation label.
-    expect(resp.cluster[0]).toHaveProperty('uiButtons', [
-      { label: 'Read Documentation', url: 'http://docs.com/doc' },
-    ]);
-  });
-
   describe('reindexing button', () => {
-    it('adds a uiButton for reindexing in console app', async () => {
+    it('adds an action for reindexing in console app', async () => {
       assistanceResponse = { indices: { myIndex: { action_required: 'reindex' } } };
       deprecationsResponse = { index_settings: {}, cluster_settings: [], node_settings: [] };
       const resp = await getUpgradeCheckupStatus(callWithRequest, {} as any, '');
 
       // Adds a uiButtons property with the documentation label.
-      expect(resp.indices[0].uiButtons![0]).toMatchInlineSnapshot(`
+      expect(resp.indices[0].actions![0]).toMatchInlineSnapshot(`
 Object {
   "label": "Reindex in Console",
   "url": "/app/kibana#/dev_tools/console?load_from=%2Fapi%2Fupgrade_checkup%2Freindex%2Fconsole_template%2FmyIndex.json",
@@ -112,7 +98,7 @@ Object {
       const resp = await getUpgradeCheckupStatus(callWithRequest, {} as any, '/mybasepath');
 
       // Adds a uiButtons property with the documentation label.
-      expect(resp.indices[0].uiButtons![0]).toMatchInlineSnapshot(`
+      expect(resp.indices[0].actions![0]).toMatchInlineSnapshot(`
 Object {
   "label": "Reindex in Console",
   "url": "/mybasepath/app/kibana#/dev_tools/console?load_from=%2Fmybasepath%2Fapi%2Fupgrade_checkup%2Freindex%2Fconsole_template%2FmyIndex.json",

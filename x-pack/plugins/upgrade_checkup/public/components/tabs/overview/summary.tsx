@@ -14,6 +14,7 @@ import {
   EuiPanel,
   // @ts-ignore
   EuiSpacer,
+  // @ts-ignore
   EuiStat,
   EuiText,
 } from '@elastic/eui';

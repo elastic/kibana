@@ -18,13 +18,14 @@ import {
 } from '@elastic/eui';
 
 interface DeprecationCellProps {
+  items?: Array<{ title?: string; body: string }>;
+  docUrl?: string;
   headline?: string;
   healthColor?: string;
-  uiButtons?: Array<{
+  actions?: Array<{
     label: string;
     url: string;
   }>;
-  items: Array<{ title?: string; body: string }>;
   children?: ReactNode;
 }
 
@@ -34,8 +35,9 @@ interface DeprecationCellProps {
 export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
-  uiButtons,
-  items,
+  actions,
+  docUrl,
+  items = [],
   children,
 }) => (
   <div className="upgDeprecationCell">
@@ -53,13 +55,17 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
           </EuiTitle>
         )}
 
-        <div>
-          <EuiLink>Documentation link here</EuiLink>
-          <EuiSpacer size="s" />
-        </div>
+        {docUrl && (
+          <div>
+            <EuiLink href={docUrl} target="_blank">
+              Documentation
+            </EuiLink>
+            <EuiSpacer size="s" />
+          </div>
+        )}
 
         {items.map(item => (
-          <div key={item.title}>
+          <div key={item.title || item.body}>
             <EuiText>
               {item.title && <h6>{item.title}</h6>}
               <p>{item.body}</p>
@@ -68,8 +74,8 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
         ))}
       </EuiFlexItem>
 
-      {uiButtons &&
-        uiButtons.map(button => (
+      {actions &&
+        actions.map(button => (
           <EuiFlexItem key={button.url} grow={false}>
             <EuiButton size="s" href={button.url} target="_blank">
               {button.label}
@@ -77,6 +83,8 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
           </EuiFlexItem>
         ))}
     </EuiFlexGroup>
+
+    <EuiSpacer size="s" />
 
     {children}
   </div>

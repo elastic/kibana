@@ -20,7 +20,7 @@ import fakeDeprecations from './__fixtures__/fake_deprecations.json';
 export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
-  uiButtons: Array<{
+  actions?: Array<{
     label: string;
     url: string;
   }>;
@@ -65,30 +65,11 @@ export async function getUpgradeCheckupStatus(
   }
 
   return {
-    cluster: deprecations.cluster_settings.map(addUiButtonForDocs),
-    nodes: deprecations.node_settings.map(addUiButtonForDocs),
-    indices: getCombinedIndexInfos(migrationAssistance, deprecations, basePath).map(
-      addUiButtonForDocs
-    ),
+    cluster: deprecations.cluster_settings,
+    nodes: deprecations.node_settings,
+    indices: getCombinedIndexInfos(migrationAssistance, deprecations, basePath),
   };
 }
-
-// Adds a uiButton item pointing the Elasticsearch docs for the given warning.
-const addUiButtonForDocs = (
-  dep: DeprecationInfo | EnrichedDeprecationInfo
-): EnrichedDeprecationInfo => {
-  const uiButtons = ((dep as any).uiButtons || []).concat([
-    {
-      label: 'Read Documentation',
-      url: dep.url,
-    },
-  ]);
-
-  return {
-    ...dep,
-    uiButtons,
-  };
-};
 
 // Combines the information from the migration assistance api and the deprecation api into a single array.
 // Enhances with information about which index the deprecation applies to and adds buttons for accessing the
@@ -99,10 +80,10 @@ const getCombinedIndexInfos = (
   basePath: string
 ) => {
   const combinedIndexInfo: EnrichedDeprecationInfo[] = [];
+
   Object.keys(deprecations.index_settings).forEach(indexName => {
     deprecations.index_settings[indexName]
       .map(d => ({ ...d, index: indexName }))
-      .map(addUiButtonForDocs)
       .forEach(d => combinedIndexInfo.push(d));
   });
 
@@ -116,7 +97,7 @@ const getCombinedIndexInfos = (
         level: 'critical',
         message: 'This index must be reindexed in order to upgrade the Elastic Stack.',
         details: 'Reindexing is irreversible, so always back up your index before proceeding.',
-        uiButtons: [
+        actions: [
           {
             label: 'Reindex in Console',
             url: consoleTemplateUrl(basePath, indexName),
@@ -130,7 +111,6 @@ const getCombinedIndexInfos = (
         level: 'critical',
         message: 'This index must be upgraded in order to upgrade the Elastic Stack.',
         details: 'Upgrading is irreversible, so always back up your index before proceeding.',
-        uiButtons: [],
         url:
           'https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-upgrade.html',
       });
