@@ -76,7 +76,7 @@ describe('ems_client', () => {
   });
 
 
-  it('..getFileLayers', async () => {
+  it('.getFileLayers', async () => {
     const emsClient = getEMSClient();
     const layers = await emsClient.getFileLayers();
     expect(layers.length).to.be(18);
@@ -113,6 +113,17 @@ describe('ems_client', () => {
     expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
     expect(layer.getDisplayName()).to.be('pays');
 
+
+    const fields = layer.getFieldsInLanguage();
+    expect(fields).to.eql([ { name: 'iso2',
+      description: 'code ISO 3166-1 alpha-2 du pays',
+      type: 'id' },
+    { name: 'iso3',
+      description: 'code ISO 3166-1 alpha-3',
+      type: 'id' },
+    { name: 'name', description: 'nom', type: 'property' } ]);
+
+
   });
 
   it('.getFileLayers[0] - localized (fallback)', async () => {
@@ -128,6 +139,15 @@ describe('ems_client', () => {
     // expect(layer.hasId('World Countries')).to.be(true);//todo
     expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
     expect(layer.getDisplayName()).to.be('World Countries');
+
+    const fields = layer.getFieldsInLanguage();
+    expect(fields).to.eql([ { name: 'iso2',
+      description: 'ISO 3166-1 alpha-2 code',
+      type: 'id' },
+    { name: 'iso3',
+      description: 'ISO 3166-1 alpha-3 code',
+      type: 'id' },
+    { name: 'name', description: 'name', type: 'property' } ]);
 
   });
 

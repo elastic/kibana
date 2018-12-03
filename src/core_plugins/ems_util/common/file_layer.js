@@ -26,7 +26,6 @@ export class FileLayer {
   }
 
 
-
   getHTMLAttribution() {
 
     const attributions = this._config.attribution.map(attribution => {
@@ -41,8 +40,14 @@ export class FileLayer {
     return attributions.join('|');
   }
 
-  getFields() {
-    return this._config.fields;
+  getFieldsInLanguage() {
+    return this._config.fields.map(field => {
+      return {
+        name: field.id,
+        description: this._emsClient.getValueInLanguage(field.label),
+        type: field.type
+      };
+    });
   }
 
   getDisplayName() {
@@ -57,6 +62,13 @@ export class FileLayer {
   hasId(id) {
     const matchesLegacyId = this._config.legacy_ids.indexOf(id) >= 0;
     return this._config.layer_id === id || matchesLegacyId;
+  }
+
+
+  async getDefaultFormat() {
+
+    //check for legacy defaults
+
   }
 
 
