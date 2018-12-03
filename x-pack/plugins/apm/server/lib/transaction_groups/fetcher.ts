@@ -64,7 +64,10 @@ export function transactionGroupsFetcher(
             sample: {
               top_hits: {
                 size: 1,
-                sort: [{ '@timestamp': { order: 'desc' } }]
+                sort: [
+                  { _score: 'desc' }, // sort by _score to ensure that buckets with sampled:true ends up on top
+                  { '@timestamp': { order: 'desc' } }
+                ]
               }
             },
             avg: { avg: { field: TRANSACTION_DURATION } },
