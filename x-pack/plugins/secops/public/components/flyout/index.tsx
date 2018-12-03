@@ -98,17 +98,21 @@ export const FlyoutPane = pure(({ onClose, children }: FlyoutPaneProps) => (
 ));
 
 interface FlyoutButtonProps {
-  timelineId: string;
   onOpen: () => void;
+  show: boolean;
+  timelineId: string;
 }
 
-export const FlyoutButton = pure(({ onOpen }: FlyoutButtonProps) => (
-  <Overlay data-test-subj="flyoutOverlay" onClick={onOpen} onMouseEnter={onOpen}>
-    <Button>
-      <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
-    </Button>
-  </Overlay>
-));
+export const FlyoutButton = pure(
+  ({ onOpen, show }: FlyoutButtonProps) =>
+    show ? (
+      <Overlay data-test-subj="flyoutOverlay" onClick={onOpen} onMouseEnter={onOpen}>
+        <Button>
+          <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
+        </Button>
+      </Overlay>
+    ) : null
+);
 
 export const FlyoutComponent = pure<Props>(({ show, timelineId, showTimeline, children }) => (
   <>
@@ -118,12 +122,11 @@ export const FlyoutComponent = pure<Props>(({ show, timelineId, showTimeline, ch
       </FlyoutPane>
       >
     </Visible>
-    {show ? null : (
-      <FlyoutButton
-        timelineId={timelineId}
-        onOpen={() => showTimeline({ id: timelineId, show: true })}
-      />
-    )}
+    <FlyoutButton
+      show={!show}
+      timelineId={timelineId}
+      onOpen={() => showTimeline({ id: timelineId, show: true })}
+    />
   </>
 ));
 
