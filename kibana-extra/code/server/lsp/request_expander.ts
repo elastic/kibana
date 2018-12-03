@@ -228,13 +228,13 @@ export class RequestExpander implements ILanguageServerHandler {
       },
     };
 
-    if (this.workspaces.size >= this.maxWorkspace) {
+    if (this.workspaces.size > this.maxWorkspace) {
       let oldestWorkspace;
       let oldestAccess = Number.MAX_VALUE;
       for (const [workspace, ws] of this.workspaces) {
         if (ws.lastAccess < oldestAccess) {
           oldestAccess = ws.lastAccess;
-          oldestWorkspace = workspace;
+          oldestWorkspace = path.join(this.serverOptions.workspacePath, workspace);
         }
       }
       if (oldestWorkspace) {

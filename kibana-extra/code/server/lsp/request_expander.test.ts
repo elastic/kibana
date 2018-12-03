@@ -30,7 +30,6 @@ afterAll(() => {
 test('requests should be sequential', async () => {
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
-    initialize: sinon.stub().resolves('init'),
     handleRequest: sinon.stub().callsFake(() => {
       const start = Date.now();
       return new Promise(resolve => {
@@ -55,4 +54,104 @@ test('requests should be sequential', async () => {
   const response2 = await response2Promise;
   // response2 should not be started before repsonse1 ends.
   expect(response1.result.end).toBeLessThanOrEqual(response2.result.start);
+});
+test('be able to open multiple workspace', async () => {
+  // @ts-ignore
+  const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
+    initialize: sinon.stub().callsFake(() => {
+      proxyStub.initialized = true;
+      return Promise.resolve();
+    }),
+    handleRequest: sinon.stub().resolvesArg(0),
+  });
+  const expander = new RequestExpander(proxyStub, true, 2, options);
+  const request1 = {
+    method: 'request1',
+    params: [],
+    workspacePath: '/tmp/test/workspace/1',
+  };
+  const request2 = {
+    method: 'request2',
+    params: [],
+    workspacePath: '/tmp/test/workspace/2',
+  };
+  fs.mkdirSync(request1.workspacePath);
+  fs.mkdirSync(request2.workspacePath);
+  await expander.handleRequest(request1);
+  await expander.handleRequest(request2);
+  expect(proxyStub.initialize.called);
+  expect(
+    proxyStub.initialize.calledOnceWith({}, [
+      {
+        name: request1.workspacePath,
+        uri: `file://${request1.workspacePath}`,
+      },
+    ])
+  ).toBeTruthy();
+  expect(
+    proxyStub.handleRequest.calledWith({
+      method: 'workspace/didChangeWorkspaceFolders',
+      params: {
+        event: {
+          added: [
+            {
+              name: request2.workspacePath,
+              uri: `file://${request2.workspacePath}`,
+            },
+          ],
+          removed: [],
+        },
+      },
+      isNotification: true,
+    })
+  ).toBeTruthy();
+});
+
+test(' be able to swap workspace', async () => {
+  // @ts-ignore
+  const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
+    initialize: sinon.stub().callsFake(() => {
+      proxyStub.initialized = true;
+      return Promise.resolve();
+    }),
+    handleRequest: sinon.stub().resolvesArg(0),
+  });
+  const expander = new RequestExpander(proxyStub, true, 1, options);
+  const request1 = {
+    method: 'request1',
+    params: [],
+    workspacePath: '/tmp/test/workspace/1',
+  };
+  const request2 = {
+    method: 'request2',
+    params: [],
+    workspacePath: '/tmp/test/workspace/2',
+  };
+  fs.mkdirSync(request1.workspacePath);
+  fs.mkdirSync(request2.workspacePath);
+  await expander.handleRequest(request1);
+  await expander.handleRequest(request2);
+  expect(proxyStub.initialize.called);
+  expect(
+    proxyStub.handleRequest.calledWith({
+      method: 'workspace/didChangeWorkspaceFolders',
+      params: {
+        event: {
+          added: [
+            {
+              name: request2.workspacePath,
+              uri: `file://${request2.workspacePath}`,
+            },
+          ],
+          removed: [
+            {
+              name: request1.workspacePath,
+              uri: `file://${request1.workspacePath}`,
+            },
+          ],
+        },
+      },
+      isNotification: true,
+    })
+  ).toBeTruthy();
 });
