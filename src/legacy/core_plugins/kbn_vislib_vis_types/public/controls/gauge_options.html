@@ -1,0 +1,398 @@
+<div class="kuiSideBarSection">
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="gaugeType"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.gaugeTypeLabel"
+      i18n-default-message="Gauge Type"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="gaugeType"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="editorState.params.gauge.gaugeType"
+        ng-options="mode for mode in collections.gaugeTypes"
+      ></select>
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="percentageMode"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.percentageModeLabel"
+      i18n-default-message="Percentage Mode"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="percentageMode" type="checkbox" ng-model="editorState.params.gauge.percentageMode">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" ng-hide="editorState.params.gauge.type === 'simple'">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="verticalSplit"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.verticalSplitLabel"
+      i18n-default-message="Vertical Split"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="editorState.params.gauge.verticalSplit">&nbsp;
+      <icon-tip
+        content="'Shows gauges one under another'"
+        position="'right'"
+      ></icon-tip>
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="displayWarnings"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.displayWarningsLabel"
+      i18n-default-message="Display warnings"
+    ></label>
+
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="displayWarnings" type="checkbox" ng-model="editorState.params.isDisplayWarning">
+      &nbsp;
+      <icon-tip
+        content="'Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed.'"
+        position="'right'"
+      ></icon-tip>
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="addLegend"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.showLegendLabel"
+      i18n-default-message="Show Legend"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="addLegend" type="checkbox" ng-model="editorState.params.addLegend">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="showLabels"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.showLabelsLabel"
+      i18n-default-message="Show Labels"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="editorState.params.gauge.labels.show">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow" ng-show="editorState.params.gauge.labels.show">
+    <label
+      class="kuiSideBarFormRow__label"
+      for="subText"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.subTextLabel"
+      i18n-default-message="Sub Text"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input
+        id="subText"
+        class="kuiInput kuiSideBarInput"
+        ng-model="editorState.params.gauge.style.subText"
+        type="text"
+      >
+    </div>
+  </div>
+
+  <div
+    class="kuiSideBarFormRow"
+    ng-hide="editorState.params.gauge.type === 'simple'"
+    ng-show="editorState.params.gauge.colorsRange.length > 1"
+  >
+    <label
+      class="kuiSideBarFormRow__label"
+      for="extendRange"
+      i18n-id="kbnVislibVisTypes.controls.gaugeOptions.autoExtendRangeLabel"
+      i18n-default-message="Auto Extend Range"
+    ></label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="extendRange" type="checkbox" ng-model="editorState.params.gauge.extendRange">
+      &nbsp;
+      <icon-tip
+        content="'Extends range to the maximum value in your data'"
+        position="'right'"
+      ></icon-tip>
+    </div>
+  </div>
+
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        kbn-accessible-click
+        aria-expanded="{{!!showColorRange}}"
+        aria-controls="gaugeOptionsRanges"
+        aria-label="Toggle range options"
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="showColorRange = !showColorRange"
+      >
+      <span
+        aria-hidden="true"
+        ng-class="{ 'fa-caret-down': showColorRange, 'fa-caret-right': !showColorRange }"
+        class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+      ></span>
+      <span
+        class="kuiSideBarCollapsibleTitle__text"
+        i18n-id="kbnVislibVisTypes.controls.gaugeOptions.rangesTitle"
+        i18n-default-message="Ranges"
+      ></span>
+      </div>
+    </div>
+
+    <div id="gaugeOptionsRanges" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
+      <div class="kuiSideBarSection">
+        <table class="visEditorAgg__rangesTable form-group" ng-show="editorState.params.gauge.colorsRange.length">
+          <tr>
+            <th scope="col">
+              <label
+                id="gaugeOptionsCustomRangeFrom"
+                i18n-id="kbnVislibVisTypes.controls.gaugeOptions.fromTitle"
+                i18n-default-message="From"
+              ></label>
+            </th>
+            <th scope="col" colspan="2">
+              <label
+                id="gaugeOptionsCustomRangeTo"
+                i18n-id="kbnVislibVisTypes.controls.gaugeOptions.toTitle"
+                i18n-default-message="To"
+              ></label>
+            </th>
+          </tr>
+
+          <tr ng-repeat="range in editorState.params.gauge.colorsRange track by $index">
+            <td>
+              <input
+                aria-labelledby="gaugeOptionsCustomRangeFrom"
+                ng-model="range.from"
+                type="number"
+                class="form-control"
+                name="range.from"
+                greater-or-equal-than="{{getGreaterThan($index)}}"
+                required
+                step="any" />
+            </td>
+            <td>
+              <input
+                aria-labelledby="gaugeOptionsCustomRangeTo"
+                ng-model="range.to"
+                type="number"
+                class="form-control"
+                name="range.to"
+                greater-or-equal-than="{{range.from}}"
+                required
+                step="any" />
+            </td>
+            <td>
+              <button
+                type="button"
+                ng-click="removeRange($index)"
+                ng-show="editorState.params.gauge.colorsRange.length > 1"
+                class="kuiButton kuiButton--danger kuiButton--small">
+                <i class="fa fa-times"></i>
+              </button>
+            </td>
+          </tr>
+        </table>
+
+        <div class="hintbox" ng-show="!editorState.params.gauge.colorsRange.length">
+          <p>
+            <i class="fa fa-danger text-danger"></i>
+            <span
+              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.specifiedRangeNumberWarningMessage"
+              i18n-default-message="{required} You must specify at least one range."
+              i18n-values="{ html_required: '<strong>' + requiredText + '</strong>' }"
+            ></span>
+          </p>
+        </div>
+
+        <div
+          ng-click="addRange()"
+          class="kuiButton kuiButton--primary kuiButton--fullWidth"
+          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.addRangeTitle"
+          i18n-default-message="Add Range"
+        ></div>
+        <div class="euiSpacer euiSpacer--s"></div>
+        <div
+          class="text text-center text-info"
+          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.howToChangeColorsDescription"
+          i18n-default-message="Note: colors can be changed in the legend"
+        ></div>
+      </div>
+    </div>
+  </div>
+  <div ng-show="editorState.params.gauge.colorsRange.length > 1">
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        kbn-accessible-click
+        aria-expanded="{{!!showColorOptions}}"
+        aria-controls="gaugeOptionsColors"
+        aria-label="Toggle color options"
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="showColorOptions = !showColorOptions"
+      >
+      <span
+        aria-hidden="true"
+        ng-class="{
+        'fa-caret-down': showColorOptions,
+        'fa-caret-right': !showColorOptions
+        }"
+        class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+      ></span>
+      <span
+        class="kuiSideBarCollapsibleTitle__text"
+        i18n-id="kbnVislibVisTypes.controls.gaugeOptions.colorOptionsTitle"
+        i18n-default-message="Color Options"
+      ></span>
+      </div>
+    </div>
+    <div id="gaugeOptionsColors" ng-if="showColorOptions" class="kuiSideBarCollapsibleSection">
+      <div class="kuiSideBarSection">
+        <div class="kuiSideBarFormRow">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="colorSchema"
+            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.colorSchemaLabel"
+            i18n-default-message="Color Schema"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <select
+              id="colorSchema"
+              class="kuiSelect kuiSideBarSelect"
+              ng-model="editorState.params.gauge.colorSchema"
+              ng-options="mode.id as mode.label for mode in collections.colorSchemas"
+            ></select>
+          </div>
+          <div
+            class="text-info text-center"
+            ng-show="customColors"
+            ng-click="resetColors()"
+            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.resetColorsTitle"
+            i18n-default-message="reset colors"
+          ></div>
+        </div>
+
+        <div class="kuiSideBarFormRow">
+          <label
+            class="kuiSideBarFormRow__label"
+            for="invertColors"
+            i18n-id="kbnVislibVisTypes.controls.gaugeOptions.reverseColorSchemaLabel"
+            i18n-default-message="Reverse Color Schema"
+          ></label>
+          <div class="kuiSideBarFormRow__control">
+            <input class="kuiCheckBox" id="invertColors" type="checkbox" ng-model="editorState.params.gauge.invertColors">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="kuiSideBarCollapsibleTitle">
+      <div
+        kbn-accessible-click
+        aria-expanded="{{!!showStyle}}"
+        aria-controls="gaugeOptionsStyle"
+        aria-label="Toggle style options"
+        class="kuiSideBarCollapsibleTitle__label"
+        ng-click="showStyle = !showStyle"
+      >
+        <span
+          aria-hidden="true"
+          ng-class="{
+          'fa-caret-down': showStyle,
+          'fa-caret-right': !showStyle
+          }"
+          class="fa fa-caret-right kuiSideBarCollapsibleTitle__caret"
+        ></span>
+        <span
+          class="kuiSideBarCollapsibleTitle__text"
+          i18n-id="kbnVislibVisTypes.controls.gaugeOptions.styleTitle"
+          i18n-default-message="Style"
+        ></span>
+      </div>
+    </div>
+    <div id="gaugeOptionsStyle" ng-if="showStyle" class="kuiSideBarCollapsibleSection">
+
+      <div class="kuiSideBarSection">
+        <div ng-hide="editorState.params.gauge.type === 'simple'">
+          <div class="kuiSideBarFormRow" ng-show="editorState.params.gauge.colorsRange.length > 1">
+            <label
+              class="kuiSideBarFormRow__label"
+              for="labelColor"
+              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.colorLabelsLabel"
+              i18n-default-message="Color Labels"
+            ></label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="labelColor" type="checkbox" ng-model="editorState.params.gauge.style.labelColor">
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label
+              class="kuiSideBarFormRow__label"
+              for="showScale"
+              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.showScaleLabel"
+              i18n-default-message="Show Scale"
+            ></label>
+            <div class="kuiSideBarFormRow__control">
+              <input class="kuiCheckBox" id="showScale" type="checkbox" ng-model="editorState.params.gauge.scale.show">
+            </div>
+          </div>
+        </div>
+        <div ng-show="editorState.params.gauge.type === 'simple'">
+          <div class="kuiSideBarFormRow">
+            <label
+              class="kuiSideBarFormRow__label"
+              for="gaugeColorMode"
+              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.colorLabel"
+              i18n-default-message="Color"
+            ></label>
+            <div class="kuiSideBarFormRow__control">
+              <select
+                id="gaugeColorMode"
+                class="kuiSelect kuiSideBarSelect"
+                ng-model="editorState.params.gauge.gaugeColorMode"
+                ng-options="mode for mode in collections.gaugeColorMode"
+              ></select>
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label
+              class="kuiSideBarFormRow__label"
+              for="backColor"
+              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.backTextColorLabel"
+              i18n-default-message="Back/Text Color"
+            ></label>
+            <div class="kuiSideBarFormRow__control">
+              <input
+                id="backTextColor"
+                class="kuiInput kuiSideBarInput"
+                ng-model="editorState.params.gauge.style.bgFill"
+              >
+            </div>
+          </div>
+          <div class="kuiSideBarFormRow">
+            <label
+              class="kuiSideBarFormRow__label"
+              for="showScale"
+              i18n-id="kbnVislibVisTypes.controls.gaugeOptions.fontSizeLabel"
+              i18n-default-message="Font Size ({fontSize}pt)"
+              i18n-values="{ fontSize: editorState.params.gauge.style.fontSize }"
+            ></label>
+            <div class="kuiSideBarFormRow__control">
+              <input type="range" ng-model="editorState.params.gauge.style.fontSize" class="form-control" min="12" max="120" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -22,6 +22,15 @@ import { uiModules } from 'ui/modules';
 import { Breadcrumb, ChromeStartContract } from '../../../../core/public/chrome';
 export { Breadcrumb };
 
+export interface BreadcrumbsApi {
+  get$(): ReturnType<ChromeStartContract['getBreadcrumbs$']>;
+  set(newBreadcrumbs: Breadcrumb[]): void;
+}
+
+export interface WithBreadcrumbsApi {
+  breadcrumbs: BreadcrumbsApi;
+}
+
 let newPlatformChrome: ChromeStartContract;
 export function __newPlatformInit__(instance: ChromeStartContract) {
   if (newPlatformChrome) {
