@@ -75,7 +75,7 @@ export class SslConfig {
   public keyPassphrase: string | undefined;
 
   public cipherSuites: string[];
-  public supportedProtocols: string[] | undefined;
+  public supportedProtocols: string[];
 
   /**
    * @internal
