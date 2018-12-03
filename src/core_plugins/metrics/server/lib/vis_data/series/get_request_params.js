@@ -25,12 +25,12 @@ export default (req, panel, series) => {
 
   bodies.push({
     index: indexPattern,
-    ignore: [404],
-    timeout: '90s',
-    requestTimeout: 90000,
+    //ignore: [404],
     ignoreUnavailable: true,
   });
 
-  bodies.push(buildRequestBody(req, panel, series));
+  const body = buildRequestBody(req, panel, series);
+  body.timeout = '90s';
+  bodies.push(body);
   return bodies;
 };
