@@ -7845,7 +7845,6 @@ class Project {
         this.path = projectPath;
         this.packageJsonLocation = (0, _path.resolve)(this.path, 'package.json');
         this.nodeModulesLocation = (0, _path.resolve)(this.path, 'node_modules');
-        this.optimizeLocation = (0, _path.resolve)(this.path, 'optimize');
         this.targetLocation = (0, _path.resolve)(this.path, 'target');
         this.productionDependencies = this.json.dependencies || {};
         this.devDependencies = this.json.devDependencies || {};
@@ -7899,6 +7898,9 @@ class Project {
      */
     getIntermediateBuildDirectory() {
         return (0, _path.resolve)(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+    }
+    getCleanConfig() {
+        return this.json.kibana && this.json.kibana.clean || {};
     }
     hasScript(name) {
         return name in this.scripts;
@@ -23153,28 +23155,55 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 const CleanCommand = exports.CleanCommand = {
     description: 'Remove the node_modules and target directories from all projects.',
     name: 'clean',
-    run(projects, projectGraph, { rootPath }) {
+    run(projects) {
         return _asyncToGenerator(function* () {
-            const directoriesToDelete = [];
+            const toDelete = [];
             for (const project of projects.values()) {
                 if (yield (0, _fs.isDirectory)(project.nodeModulesLocation)) {
-                    directoriesToDelete.push(project.nodeModulesLocation);
+                    toDelete.push({
+                        cwd: project.path,
+                        pattern: (0, _path.relative)(project.path, project.nodeModulesLocation)
+                    });
                 }
                 if (yield (0, _fs.isDirectory)(project.targetLocation)) {
-                    directoriesToDelete.push(project.targetLocation);
+                    toDelete.push({
+                        cwd: project.path,
+                        pattern: (0, _path.relative)(project.path, project.targetLocation)
+                    });
                 }
-                if (yield (0, _fs.isDirectory)(project.optimizeLocation)) {
-                    directoriesToDelete.push(project.optimizeLocation);
+                const { extraPatterns } = project.getCleanConfig();
+                if (extraPatterns) {
+                    toDelete.push({
+                        cwd: project.path,
+                        pattern: extraPatterns
+                    });
                 }
             }
-            if (directoriesToDelete.length === 0) {
-                _log.log.write(_chalk2.default.bold.green('\n\nNo directories to delete'));
+            if (toDelete.length === 0) {
+                _log.log.write(_chalk2.default.bold.green('\n\nNothing to delete'));
             } else {
-                _log.log.write(_chalk2.default.bold.red('\n\nDeleting directories:\n'));
-                for (const dir of directoriesToDelete) {
-                    const deleting = (0, _del2.default)(dir, { force: true });
-                    _ora2.default.promise(deleting, (0, _path.relative)(rootPath, dir));
-                    yield deleting;
+                _log.log.write(_chalk2.default.bold.red('\n\nDeleting:\n'));
+                /**
+                 * In order to avoid patterns like `/build` in packages from accidentally
+                 * impacting files outside the package we use `process.chdir()` to change
+                 * the cwd to the package and execute `del()` without the `force` option
+                 * so it will check that each file being deleted is within the package.
+                 *
+                 * `del()` does support a `cwd` option, but it's only for resolving the
+                 * patterns and does not impact the cwd check.
+                 */
+                const originalCwd = process.cwd();
+                try {
+                    for (const _ref of toDelete) {
+                        const { pattern, cwd } = _ref;
+
+                        process.chdir(cwd);
+                        const promise = (0, _del2.default)(pattern);
+                        _ora2.default.promise(promise, (0, _path.relative)(originalCwd, (0, _path.join)(cwd, String(pattern))));
+                        yield promise;
+                    }
+                } finally {
+                    process.chdir(originalCwd);
                 }
             }
         })();

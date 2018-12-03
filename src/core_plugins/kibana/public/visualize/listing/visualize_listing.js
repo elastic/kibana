@@ -28,6 +28,7 @@ import chrome from 'ui/chrome';
 
 import { VisualizeListingTable } from './visualize_listing_table';
 import { NewVisModal } from '../wizard/new_vis_modal';
+import { VisualizeConstants } from '../visualize_constants';
 
 import { injectI18nProvider } from '@kbn/i18n/react';
 
@@ -39,6 +40,7 @@ export function VisualizeListingController($injector, createNewVis) {
   const Notifier = $injector.get('Notifier');
   const Private = $injector.get('Private');
   const config = $injector.get('config');
+  const kbnUrl = $injector.get('kbnUrl');
 
   this.visTypeRegistry = Private(VisTypesRegistryProvider);
 
@@ -53,6 +55,10 @@ export function VisualizeListingController($injector, createNewVis) {
 
   this.closeNewVisModal = () => {
     this.showNewVisModal = false;
+    // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
+    if (createNewVis) {
+      kbnUrl.changePath(VisualizeConstants.LANDING_PAGE_PATH);
+    }
   };
 
   if (createNewVis) {
