@@ -38,8 +38,8 @@ export const CleanClientModulesOnDLLTask = {
       ...kbnWebpackLoaders.map(loader => build.resolvePath(`node_modules/${loader}`))
     ];
     const discoveredPluginEntries = await globby([
-      `${baseDir}/src/core_plugins/*/index.js`,
-      `!${baseDir}/src/core_plugins/**/public`
+      `${baseDir}/src/legacy/core_plugins/*/index.js`,
+      `!${baseDir}/src/legacy/core_plugins/**/public`
     ]);
 
     // Compose all the needed entries
