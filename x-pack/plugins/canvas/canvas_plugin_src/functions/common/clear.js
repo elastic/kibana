@@ -6,6 +6,7 @@
 
 export const clear = () => ({
   name: 'clear',
+  type: 'null',
   help: 'Clears context and returns null',
   args: {},
   fn: () => null,
