@@ -64,11 +64,25 @@ export class FileLayer {
     return this._config.layer_id === id || matchesLegacyId;
   }
 
+  _getDefaultFormat() {
+    const defaultFormat = this._config.formats.find(format => {
+      return format.legacy_default;
+    });
+    if (defaultFormat) {
+      return defaultFormat;
+    }
+    return this._config.formats[0];
+  }
 
-  async getDefaultFormat() {
 
-    //check for legacy defaults
+  getDefaultFormatType() {
+    const format = this._getDefaultFormat();
+    return format.format;
+  }
 
+  getDefaultFormatUrl() {
+    const format = this._getDefaultFormat();
+    return this._emsClient.extendUrlWithParams(format.url);
   }
 
 

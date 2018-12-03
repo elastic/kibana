@@ -103,6 +103,9 @@ describe('ems_client', () => {
     const emsClient = getEMSClient({
       language: 'fr'
     });
+    emsClient.addQueryParams({
+      foo: 'bar'
+    });
     const layers = await emsClient.getFileLayers();
 
     const layer = layers[0];
@@ -122,6 +125,9 @@ describe('ems_client', () => {
       description: 'code ISO 3166-1 alpha-3',
       type: 'id' },
     { name: 'name', description: 'nom', type: 'property' } ]);
+
+    expect(layer.getDefaultFormatType()).to.be('geojson');
+    expect(layer.getDefaultFormatUrl()).to.be('https://vector-staging.maps.elastic.co/files/world_countries_v1.geo.json?elastic_tile_service_tos=agree&my_app_version=6.x.x&foo=bar');
 
 
   });
@@ -159,7 +165,7 @@ describe('ems_client', () => {
 
   });
 
-  it('..findTMSServiceById', async () => {
+  it('.findTMSServiceById', async () => {
     const emsClient = getEMSClient();
     const tmsService = await emsClient.findTMSServiceById('road_map');
     expect(tmsService.getId()).to.be('road_map');

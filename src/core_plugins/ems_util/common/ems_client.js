@@ -107,8 +107,7 @@ export class EMSClientV66 {
 
       try {
         const url = this.extendUrlWithParams(this._manifestServiceUrl);
-        const response = await this._getManifest(url);
-        return response;
+        return await this._getManifest(url);
       } catch (e) {
         if (!e) {
           e = new Error('Unknown error');
@@ -167,7 +166,6 @@ export class EMSClientV66 {
       query: this._queryParams
     }));
   }
-
 
   async getFileLayers() {
     return await this._loadFileLayers();
