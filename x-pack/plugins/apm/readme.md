@@ -1,11 +1,6 @@
-# Documentation for APM in x-pack-kibana
+# Documentation for APM UI
 
-_Note: Be sure to run the following commands from inside the `x-pack` directory._
-
-### Format with Prettier
-```
-npx prettier "./plugins/apm/**/*.js" --write
-```
+Note: Run the following commands from `kibana/x-pack`.
 
 ### Run tests
 ```
@@ -16,8 +11,15 @@ node scripts/jest.js plugins/apm --watch
 ```
 node scripts/jest.js plugins/apm --updateSnapshot
 ```
+---
 
-### Run ESLint (run from kibana root)
+Note: Run the following commands from `kibana/`.
+
+### Format with Prettier
+
+`./node_modules/.bin/prettier  "./x-pack/plugins/apm/**/*.js" --write`
+
+### Run ESLint
 ```
 ./node_modules/.bin/eslint ./x-pack/plugins/apm
 ```
