@@ -27,7 +27,7 @@ import {
 
 import './samples.less';
 
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export class FormatEditorSamplesComponent extends PureComponent {
   static propTypes = {
@@ -68,7 +68,7 @@ export class FormatEditorSamplesComponent extends PureComponent {
 
     return samples.length ? (
       <EuiFormRow
-        label={intl.formatMessage({ id: 'common.ui.fieldEditor.samplesHeader', defaultMessage: 'Samples' })}
+        label={<FormattedMessage id="common.ui.fieldEditor.samplesHeader" defaultMessage="Samples" />}
       >
         <EuiBasicTable
           className="fieldFormatEditor__samples"

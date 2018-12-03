@@ -151,7 +151,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await this.clickSavedSearchTab();
       await this.filterEmbeddableNames(searchName);
 
-      await testSubjects.click(`addPanel${searchName.split(' ').join('-')}`);
+      await testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
       await testSubjects.exists('addSavedSearchToDashboardSuccess');
       await this.closeAddPanel();
     }
@@ -173,7 +173,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug(`DashboardAddPanel.addVisualization(${vizName})`);
       await this.ensureAddPanelIsShowing();
       await this.filterEmbeddableNames(`"${vizName.replace('-', ' ')}"`);
-      await testSubjects.click(`addPanel${vizName.split(' ').join('-')}`);
+      await testSubjects.click(`savedObjectTitle${vizName.split(' ').join('-')}`);
       await this.closeAddPanel();
     }
 
@@ -188,7 +188,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
       await this.ensureAddPanelIsShowing();
       await this.filterEmbeddableNames(`"${name}"`);
-      return await testSubjects.exists(`addPanel${name.split(' ').join('-')}`);
+      return await testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
     }
   };
 }

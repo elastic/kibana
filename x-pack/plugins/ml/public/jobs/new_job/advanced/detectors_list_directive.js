@@ -31,6 +31,7 @@ module.directive('mlJobDetectorsList', function ($modal) {
       fields: '=mlFields',
       catFieldNameSelected: '=mlCatFieldNameSelected',
       editMode: '=mlEditMode',
+      onUpdate: '=mlOnDetectorsUpdate'
     },
     template,
     controller: function ($scope) {
@@ -42,11 +43,14 @@ module.directive('mlJobDetectorsList', function ($modal) {
           } else {
             $scope.detectors.push(dtr);
           }
+
+          $scope.onUpdate();
         }
       };
 
       $scope.removeDetector = function (index) {
         $scope.detectors.splice(index, 1);
+        $scope.onUpdate();
       };
 
       $scope.editDetector = function (index) {

@@ -8,7 +8,7 @@
 
 import chrome from 'ui/chrome';
 import _ from 'lodash';
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../../../../services/http_service';
 
 import emailBody from './email.html';
 import emailInfluencersBody from './email-influencers.html';
@@ -153,4 +153,3 @@ class CreateWatchService {
 }
 
 export const mlCreateWatchService =  new CreateWatchService();
-

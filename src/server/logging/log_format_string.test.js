@@ -37,9 +37,9 @@ const makeEvent = () => ({
 });
 
 describe('KbnLoggerStringFormat', () => {
-  it('logs in UTC when useUTC is true', async () => {
+  it('logs in UTC', async () => {
     const format = new KbnLoggerStringFormat({
-      useUTC: true
+      timezone: 'UTC'
     });
 
     const result = await createPromiseFromStreams([
@@ -51,10 +51,8 @@ describe('KbnLoggerStringFormat', () => {
       .toContain(moment.utc(time).format('HH:mm:ss.SSS'));
   });
 
-  it('logs in local timezone when useUTC is false', async () => {
-    const format = new KbnLoggerStringFormat({
-      useUTC: false
-    });
+  it('logs in local timezone when timezone is undefined', async () => {
+    const format = new KbnLoggerStringFormat({});
 
     const result = await createPromiseFromStreams([
       createListStream([makeEvent()]),

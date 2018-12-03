@@ -14,7 +14,7 @@ export const CONFIG_TELEMETRY = 'telemetry:optIn';
  * @type {string}
  */
 export const CONFIG_TELEMETRY_DESC = (
-  'Help us improve the Elastic Stack by providing basic feature usage statistics? We will never share this data outside of Elastic.'
+  'Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.'
 );
 
 /**
@@ -53,3 +53,8 @@ export const REPORT_INTERVAL_MS = 86400000;
  * Key for the localStorage service
  */
 export const LOCALSTORAGE_KEY = 'xpack.data';
+
+/**
+ * Link to the Elastic Telemetry privacy statement.
+ */
+export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-privacy-statement`;

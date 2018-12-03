@@ -29,7 +29,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const find = getService('find');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
@@ -46,13 +46,13 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.lineChartPointsCount(5);
     await dashboardExpect.tagCloudWithValuesFound(['CN', 'IN', 'US', 'BR', 'ID']);
     await dashboardExpect.timelionLegendCount(0);
-    const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
+    const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
     expect(tsvbGuageExists).to.be(true);
     await dashboardExpect.tsvbMetricValuesExist(['210,007,889,606']);
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 6286.674715909091']);
     await dashboardExpect.tsvbTableCellCount(20);
     await dashboardExpect.tsvbTimeSeriesLegendCount(1);
-    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.67']);
+    await dashboardExpect.tsvbTopNValuesExist(['5,734.79', '6,286.675']);
     await dashboardExpect.vegaTextsExist(['5,000']);
   };
 
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.lineChartPointsCount(3);
 
     await dashboardExpect.timelionLegendCount(0);
-    const tsvbGuageExists = await find.existsByCssSelector('.thorHalfGauge');
+    const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
     expect(tsvbGuageExists).to.be(true);
     await dashboardExpect.tsvbMetricValuesExist(['0']);
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 0']);
@@ -91,9 +91,9 @@ export default function ({ getService, getPageObjects }) {
 
     after(async () => {
       // Get rid of the timestamp added in this test, as well any global or app state.
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl.replace(/\?.*$/, '');
-      await remote.get(newUrl, false);
+      await browser.get(newUrl, false);
     });
 
     it('adding visualizations', async () => {
@@ -132,8 +132,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data rendered correctly when dashboard is hard refreshed', async () => {
-      const currentUrl = await remote.getCurrentUrl();
-      await remote.get(currentUrl, true);
+      const currentUrl = await browser.getCurrentUrl();
+      await browser.get(currentUrl, true);
 
       await expectAllDataRenders();
     });

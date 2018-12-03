@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import chrome from 'ui/chrome';
 import { PersistedLog } from './';
+import { createLogKey } from './create_log_key';
 
 class RecentlyAccessed {
   constructor() {
@@ -28,7 +29,8 @@ class RecentlyAccessed {
         return oldItem.id === newItem.id;
       }
     };
-    this.history = new PersistedLog('kibana.history.recentlyAccessed', historyOptions);
+    const logKey = createLogKey('recentlyAccessed', chrome.getBasePath());
+    this.history = new PersistedLog(logKey, historyOptions);
   }
 
   add(link, label, id) {

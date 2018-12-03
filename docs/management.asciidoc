@@ -17,6 +17,10 @@ include::management/managing-licenses.asciidoc[]
 
 include::management/index-patterns.asciidoc[]
 
+include::management/rollups/create_and_manage_rollups.asciidoc[]
+
+include::management/rollups/visualize_rollup_data.asciidoc[]
+
 include::management/managing-fields.asciidoc[]
 
 include::management/managing-indices.asciidoc[]
@@ -24,3 +28,5 @@ include::management/managing-indices.asciidoc[]
 include::management/advanced-options.asciidoc[]
 
 include::management/managing-saved-objects.asciidoc[]
+
+include::management/managing-beats.asciidoc[]

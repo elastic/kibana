@@ -18,23 +18,30 @@
  */
 
 const createdInstanceProxies = new WeakSet();
+const INITIALIZING = Symbol('async instance initializing');
 
 export const isAsyncInstance = val =>(
   createdInstanceProxies.has(val)
 );
 
 export const createAsyncInstance = (type, name, promiseForValue) => {
-  let finalValue;
+  let instance = INITIALIZING;
 
-  const initPromise = promiseForValue.then(v => finalValue = v);
+  const initPromise = promiseForValue.then(v => instance = v);
   const initFn = () => initPromise;
 
   const assertReady = desc => {
-    if (!finalValue) {
+    if (instance === INITIALIZING) {
       throw new Error(`
         ${type} \`${desc}\` is loaded asynchronously but isn't available yet. Either await the
         promise returned from ${name}.init(), or move this access into a test hook
         like \`before()\` or \`beforeEach()\`.
+      `);
+    }
+
+    if (typeof instance !== 'object') {
+      throw new TypeError(`
+        ${type} \`${desc}\` is not supported because ${name} is ${typeof instance}
       `);
     }
   };
@@ -42,71 +49,71 @@ export const createAsyncInstance = (type, name, promiseForValue) => {
   const proxy = new Proxy({}, {
     apply(target, context, args) {
       assertReady(`${name}()`);
-      return Reflect.apply(finalValue, context, args);
+      return Reflect.apply(instance, context, args);
     },
 
     construct(target, args, newTarget) {
       assertReady(`new ${name}()`);
-      return Reflect.construct(finalValue, args, newTarget);
+      return Reflect.construct(instance, args, newTarget);
     },
 
     defineProperty(target, prop, descriptor) {
       assertReady(`${name}.${prop}`);
-      return Reflect.defineProperty(finalValue, prop, descriptor);
+      return Reflect.defineProperty(instance, prop, descriptor);
     },
 
     deleteProperty(target, prop) {
       assertReady(`${name}.${prop}`);
-      return Reflect.deleteProperty(finalValue, prop);
+      return Reflect.deleteProperty(instance, prop);
     },
 
     get(target, prop, receiver) {
       if (prop === 'init') return initFn;
 
       assertReady(`${name}.${prop}`);
-      return Reflect.get(finalValue, prop, receiver);
+      return Reflect.get(instance, prop, receiver);
     },
 
     getOwnPropertyDescriptor(target, prop) {
       assertReady(`${name}.${prop}`);
-      return Reflect.getOwnPropertyDescriptor(finalValue, prop);
+      return Reflect.getOwnPropertyDescriptor(instance, prop);
     },
 
     getPrototypeOf() {
       assertReady(`${name}`);
-      return Reflect.getPrototypeOf(finalValue);
+      return Reflect.getPrototypeOf(instance);
     },
 
     has(target, prop) {
       if (prop === 'init') return true;
 
       assertReady(`${name}.${prop}`);
-      return Reflect.has(finalValue, prop);
+      return Reflect.has(instance, prop);
     },
 
     isExtensible() {
       assertReady(`${name}`);
-      return Reflect.isExtensible(finalValue);
+      return Reflect.isExtensible(instance);
     },
 
     ownKeys() {
       assertReady(`${name}`);
-      return Reflect.ownKeys(finalValue);
+      return Reflect.ownKeys(instance);
     },
 
     preventExtensions() {
       assertReady(`${name}`);
-      return Reflect.preventExtensions(finalValue);
+      return Reflect.preventExtensions(instance);
     },
 
     set(target, prop, value, receiver) {
       assertReady(`${name}.${prop}`);
-      return Reflect.set(finalValue, prop, value, receiver);
+      return Reflect.set(instance, prop, value, receiver);
     },
 
     setPrototypeOf(target, prototype) {
       assertReady(`${name}`);
-      return Reflect.setPrototypeOf(finalValue, prototype);
+      return Reflect.setPrototypeOf(instance, prototype);
     }
   });
 

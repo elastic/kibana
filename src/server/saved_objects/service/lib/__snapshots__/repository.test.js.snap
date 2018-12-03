@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be a string 1`] = `"namespace is required, and must be a string"`;
+
+exports[`SavedObjectsRepository #deleteByNamespace requires namespace to be defined 1`] = `"namespace is required, and must be a string"`;

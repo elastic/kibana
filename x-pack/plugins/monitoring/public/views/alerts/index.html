@@ -6,13 +6,23 @@
   </div>
 
   <div class="page-row">
-    <h3 class="kuiScreenReaderOnly">Alerts</h3>
+    <h3
+      class="kuiScreenReaderOnly"
+      i18n-id="xpack.monitoring.alerts.alertsTitle"
+      i18n-default-message="Alerts"
+    >
+    </h3>
     <monitoring-cluster-alerts-listing alerts="alerts.data"></monitoring-cluster-alerts-listing>
   </div>
 
   <div class="page-row">
     <p>
-      <a kbn-href="#/overview">« Cluster Overview</a>
+      <a
+        kbn-href="#/overview"
+        i18n-id="xpack.monitoring.alerts.clusterOverviewLinkLabel"
+        i18n-default-message="« Cluster Overview"
+      >
+      </a>
     </p>
   </div>
 </monitoring-main>

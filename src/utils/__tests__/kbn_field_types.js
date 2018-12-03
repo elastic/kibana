@@ -100,7 +100,9 @@ describe('utils/kbn_field_types', () => {
         'geo_shape',
         'ip',
         'murmur3',
+        'nested',
         'number',
+        'object',
         'string',
         'unknown',
       ]);

@@ -138,6 +138,21 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
+    describe('sortField is multi-field with single type as array', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, ['saved'], 'title.raw'))
+          .toEqual({
+            sort: [
+              {
+                'saved.title.raw': {
+                  order: undefined,
+                  unmapped_type: 'keyword'
+                }
+              }
+            ]
+          });
+      });
+    });
     describe('sortField is root multi-field with multiple types', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, ['saved', 'pending'], 'type.raw'))

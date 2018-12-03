@@ -17,20 +17,24 @@
  * under the License.
  */
 
-import { Server } from 'hapi-latest';
+import { Server, ServerOptions } from 'hapi';
 
 import { modifyUrl } from '../../utils';
-import { Env } from '../config';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 import { createServer, getServerOptions } from './http_tools';
 import { Router } from './router';
 
+export interface HttpServerInfo {
+  server: Server;
+  options: ServerOptions;
+}
+
 export class HttpServer {
   private server?: Server;
   private registeredRouters: Set<Router> = new Set();
 
-  constructor(private readonly log: Logger, private readonly env: Env) {}
+  constructor(private readonly log: Logger) {}
 
   public isListening() {
     return this.server !== undefined && this.server.listener.listening;
@@ -62,21 +66,18 @@ export class HttpServer {
       }
     }
 
-    // Notify legacy compatibility layer about HTTP(S) connection providing server
-    // instance with connection options so that we can properly bridge core and
-    // the "legacy" Kibana internally.
-    this.env.legacy.emit('connection', {
-      options: serverOptions,
-      server: this.server,
-    });
-
     await this.server.start();
 
-    this.log.info(
-      `Server running at ${this.server.info.uri}${config.rewriteBasePath ? config.basePath : ''}`,
-      // The "legacy" Kibana will output log records with `listening` tag even if `quiet` logging mode is enabled.
-      { tags: ['listening'] }
+    this.log.debug(
+      `http server running at ${this.server.info.uri}${
+        config.rewriteBasePath ? config.basePath : ''
+      }`
     );
+
+    // Return server instance with the connection options so that we can properly
+    // bridge core and the "legacy" Kibana internally. Once this bridge isn't
+    // needed anymore we shouldn't return anything from this method.
+    return { server: this.server, options: serverOptions };
   }
 
   public async stop() {

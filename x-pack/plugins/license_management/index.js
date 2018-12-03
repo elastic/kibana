@@ -14,6 +14,7 @@ export function licenseManagement(kibana)  {
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch'],
     uiExports: {
+      styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: [
         'plugins/license_management',
       ]

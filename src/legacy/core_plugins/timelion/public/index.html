@@ -1,0 +1,81 @@
+<div class="timApp app-container" ng-controller="timelion">
+  <!-- Local nav. -->
+  <kbn-top-nav name="timelion" config="topNavMenu">
+    <!-- Transcluded elements. -->
+    <div data-transclude-slots>
+      <div data-transclude-slot="topLeftCorner">
+        <span class="kuiLocalTitle" ng-show="opts.savedSheet.id">
+          {{opts.savedSheet.lastSavedTitle}}
+          &nbsp;
+          <span class="fa fa-bolt" ng-click="showStats = !showStats"></span>
+          &nbsp;
+          <span class="timApp__stats" ng-show="showStats">
+            <span
+              i18n-id="timelion.topNavMenu.statsDescription"
+              i18n-default-message="Query Time {queryTime}ms / Processing Time {processingTime}ms"
+              i18n-values="{
+                queryTime: stats.queryTime - stats.invokeTime,
+                processingTime: stats.sheetTime - stats.queryTime,
+              }"></span>
+          </span>
+        </span>
+      </div>
+    </div>
+  </kbn-top-nav>
+
+  <div class="timApp__container">
+    <div>
+      <!-- Search. -->
+      <form
+        role="form"
+        ng-submit="search()"
+        class="kuiFieldGroup kuiFieldGroup--alignTop kuiVerticalRhythm"
+      >
+        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+          <timelion-expression-input
+            sheet="state.sheet[state.selected]"
+            rows="1"
+            update-chart="search()"
+            should-popover-suggestions="true"
+          ></timelion-expression-input>
+        </div>
+
+        <div class="kuiFieldGroupSection">
+          <timelion-interval
+            class="kuiVerticalRhythmSmall"
+            model="state.interval"
+          ></timelion-interval>
+
+          <button
+            type="submit"
+            aria-label="{{ ::'timelion.search.submitAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
+            class="kuiButton kuiButton--primary fullWidth kuiVerticalRhythmSmall"
+          >
+            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-play"></span>
+          </button>
+        </div>
+      </form>
+
+      <div class="kuiVerticalRhythm">
+        <timelion-fullscreen
+          ng-show="transient.fullscreen"
+          transient="transient"
+          state="state"
+          series="sheet[state.selected]"
+          expression="state.sheet[state.selected]"
+          on-search="search"
+        ></timelion-fullscreen>
+
+        <timelion-cells
+          ng-show="!transient.fullscreen"
+          transient="transient"
+          state="state"
+          sheet="sheet"
+          on-search="search"
+          on-select="setActiveCell"
+        ></timelion-cells>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

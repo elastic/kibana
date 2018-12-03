@@ -20,7 +20,7 @@ exports[`TransactionOverview should not call loadTransactionList without any pro
     transactionType="request"
   />
   <Connect(TabNavigation) />
-  <OverviewChartsRequest
+  <TransactionOverviewChartsRequest
     render={[Function]}
     urlParams={
       Object {

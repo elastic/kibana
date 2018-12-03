@@ -31,8 +31,6 @@ import {
 import { isValidCustomUrlSettingsTimeRange } from '../../../jobs/components/custom_url_editor/utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 
-import './styles/main.less';
-
 import {
   TIME_RANGE_TYPE,
   URL_TYPE
@@ -175,9 +173,9 @@ export class CustomUrlEditor extends Component {
     });
 
     const entityOptions = queryEntityFieldNames.map(fieldName => ({ label: fieldName }));
-    const queryFieldNames = kibanaSettings.queryFieldNames;
     let selectedEntityOptions = [];
-    if (queryFieldNames !== undefined) {
+    if (kibanaSettings !== undefined && kibanaSettings.queryFieldNames !== undefined) {
+      const queryFieldNames = kibanaSettings.queryFieldNames;
       selectedEntityOptions = queryFieldNames.map(fieldName => ({ label: fieldName }));
     }
 
@@ -197,7 +195,7 @@ export class CustomUrlEditor extends Component {
           <h4>Create new custom URL</h4>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiForm>
+        <EuiForm className="ml-edit-url-form">
           <EuiFormRow
             label="Label"
             className="url-label"

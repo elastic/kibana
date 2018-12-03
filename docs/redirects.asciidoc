@@ -1,0 +1,14 @@
+[role="exclude",id="redirects"]
+= Deleted pages
+
+[partintro]
+--
+
+The following pages have moved or been deleted.
+
+--
+[role="exclude",id="monitoring-xpack-kibana"]
+== Configuring monitoring in {kib}
+
+See <<monitoring-kibana>>.
+

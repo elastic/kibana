@@ -17,29 +17,26 @@
  * under the License.
  */
 
-export function PointSeriesInitYAxisProvider() {
+export function initYAxis(chart) {
+  const y = chart.aspects.y;
 
-  return function initYAxis(chart) {
-    const y = chart.aspects.y;
+  if (Array.isArray(y)) {
+    // TODO: vis option should allow choosing this format
+    chart.yAxisFormatter = y[0].aggConfig.fieldFormatter();
+    chart.yAxisLabel = ''; // use the legend
+  } else {
+    chart.yAxisFormatter = y.aggConfig.fieldFormatter();
+    chart.yAxisLabel = y.title;
+  }
 
-    if (Array.isArray(y)) {
-      // TODO: vis option should allow choosing this format
-      chart.yAxisFormatter = y[0].aggConfig.fieldFormatter();
-      chart.yAxisLabel = ''; // use the legend
+  const z = chart.aspects.series;
+  if (z) {
+    if (Array.isArray(z)) {
+      chart.zAxisFormatter = z[0].aggConfig.fieldFormatter();
+      chart.zAxisLabel = ''; // use the legend
     } else {
-      chart.yAxisFormatter = y.aggConfig.fieldFormatter();
-      chart.yAxisLabel = y.title;
+      chart.zAxisFormatter = z.aggConfig.fieldFormatter();
+      chart.zAxisLabel = z.title;
     }
-
-    const z = chart.aspects.series;
-    if (z) {
-      if (Array.isArray(z)) {
-        chart.zAxisFormatter = z[0].aggConfig.fieldFormatter();
-        chart.zAxisLabel = ''; // use the legend
-      } else {
-        chart.zAxisFormatter = z.aggConfig.fieldFormatter();
-        chart.zAxisLabel = z.title;
-      }
-    }
-  };
+  }
 }

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Request } from 'react-redux-request';
-import { loadErrorDistribution } from '../../services/rest/apm';
+import { loadErrorDistribution } from '../../services/rest/apm/error_groups';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'errorDistribution';
@@ -20,7 +20,7 @@ export function getErrorDistribution(state) {
 export function ErrorDistributionRequest({ urlParams, render }) {
   const { serviceName, start, end, errorGroupId, kuery } = urlParams;
 
-  if (!(serviceName, start, end, errorGroupId)) {
+  if (!(serviceName && start && end && errorGroupId)) {
     return null;
   }
 

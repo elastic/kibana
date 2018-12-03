@@ -19,6 +19,7 @@
 
 import { SearchSource } from '../../courier';
 import { QueryFilter } from '../../filter_bar/query_filter';
+import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { Filters, Query, TimeRange } from '../../visualize';
 import { AggConfigs } from '../agg_configs';
@@ -33,9 +34,13 @@ export interface RequestHandlerParams {
   forceFetch: boolean;
   queryFilter: QueryFilter;
   uiState: PersistedState;
+  partialRows?: boolean;
+  inspectorAdapters?: Adapters;
+  isHierarchical?: boolean;
+  visParams?: any;
 }
 
-export type RequestHandler = <T>(vis: Vis, params: RequestHandlerParams) => T;
+export type RequestHandler = <T>(params: RequestHandlerParams) => T;
 
 export interface RequestHandlerDescription {
   name: string;

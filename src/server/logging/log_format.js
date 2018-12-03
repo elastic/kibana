@@ -18,7 +18,7 @@
  */
 
 import Stream from 'stream';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { get, _ } from 'lodash';
 import numeral from '@elastic/numeral';
 import chalk from 'chalk';
@@ -66,10 +66,10 @@ export default class TransformObjStream extends Stream.Transform {
   }
 
   extractAndFormatTimestamp(data, format) {
-    const { useUTC } = this.config;
+    const { timezone } = this.config;
     const date = moment(data['@timestamp']);
-    if (useUTC) {
-      date.utc();
+    if (timezone) {
+      date.tz(timezone);
     }
     return date.format(format);
   }
@@ -151,11 +151,11 @@ export default class TransformObjStream extends Stream.Transform {
       const message =  get(event, 'error.message');
       data.message = message || 'Unknown error (no message)';
     }
-    else if (event.data instanceof Error) {
+    else if (event.error instanceof Error) {
       data.type = 'error';
       data.level = _.contains(event.tags, 'fatal') ? 'fatal' : 'error';
-      data.error = serializeError(event.data);
-      const message =  get(event, 'data.message');
+      data.error = serializeError(event.error);
+      const message =  get(event, 'error.message');
       data.message = message || 'Unknown error object (no message)';
     }
     else if (_.isPlainObject(event.data) && event.data.tmpl) {

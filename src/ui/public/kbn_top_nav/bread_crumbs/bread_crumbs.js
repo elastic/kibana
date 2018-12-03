@@ -20,13 +20,13 @@
 import breadCrumbsTemplate from './bread_crumbs.html';
 import { uiModules } from '../../modules';
 import uiRouter from '../../routes';
+import chrome from '../../chrome';
 
 const module = uiModules.get('kibana');
 
 module.directive('breadCrumbs', function () {
   return {
     restrict: 'E',
-    replace: true,
     scope: {
       omitCurrentPage: '=',
       /**
@@ -47,7 +47,8 @@ module.directive('breadCrumbs', function () {
       useLinks: '='
     },
     template: breadCrumbsTemplate,
-    controller: function ($scope) {
+    controller: function ($scope, config) {
+      config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
       function omitPagesFilter(crumb) {
         return (
@@ -70,6 +71,15 @@ module.directive('breadCrumbs', function () {
             .filter(omitPagesFilter)
             .filter(omitCurrentPageFilter)
         );
+
+        const newBreadcrumbs = $scope.breadcrumbs
+          .map(b => ({ text: b.display, href: b.href }));
+
+        if ($scope.pageTitle) {
+          newBreadcrumbs.push({ text: $scope.pageTitle });
+        }
+
+        chrome.breadcrumbs.set(newBreadcrumbs);
       });
     }
   };

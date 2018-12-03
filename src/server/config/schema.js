@@ -186,7 +186,7 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-    useUTC: Joi.boolean().default(true),
+    timezone: Joi.string().allow(false).default('UTC')
   }).default(),
 
   ops: Joi.object({
@@ -201,6 +201,12 @@ export default () => Joi.object({
 
   path: Joi.object({
     data: Joi.string().default(getData())
+  }).default(),
+
+  migrations: Joi.object({
+    batchSize: Joi.number().default(100),
+    scrollDuration: Joi.string().default('15m'),
+    pollInterval: Joi.number().default(1500),
   }).default(),
 
   optimize: Joi.object({

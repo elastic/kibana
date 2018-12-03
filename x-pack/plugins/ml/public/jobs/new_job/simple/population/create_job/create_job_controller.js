@@ -8,7 +8,6 @@
 
 import _ from 'lodash';
 
-import 'plugins/kibana/visualize/styles/main.less';
 import { aggTypes } from 'ui/agg_types/index';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
@@ -31,9 +30,10 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import { loadNewJobDefaults, newJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { mlEscape } from 'plugins/ml/util/string_utils';
 import {
-  createSearchItems,
+  SearchItemsProvider,
   addNewJobToRecentlyAccessed,
-  moveToAdvancedJobCreationProvider } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
+  moveToAdvancedJobCreationProvider,
+  focusOnResultsLink } from 'plugins/ml/jobs/new_job/utils/new_job_utils';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { PopulationJobServiceProvider } from './create_job_service';
@@ -63,7 +63,6 @@ const module = uiModules.get('apps/ml');
 module
   .controller('MlCreatePopulationJob', function (
     $scope,
-    $route,
     $timeout,
     Private,
     AppState) {
@@ -109,12 +108,13 @@ module
     // flag to stop all results polling if the user navigates away from this page
     let globalForceStop = false;
 
+    const createSearchItems = Private(SearchItemsProvider);
     const {
       indexPattern,
       savedSearch,
       query,
       filters,
-      combinedQuery } = createSearchItems($route);
+      combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
 
@@ -130,6 +130,7 @@ module
       formValid: false,
       bucketSpanValid: true,
       bucketSpanEstimator: { status: 0, message: '' },
+      cardinalityValidator: { status: 0, message: '' },
       aggTypeOptions: filterAggTypes(aggTypes.byType[METRIC_AGG_TYPE]),
       fields: [],
       overFields: [],
@@ -196,17 +197,18 @@ module
       end: 0,
       overField: undefined,
       timeField: indexPattern.timeFieldName,
-      // splitField: undefined,
       influencerFields: [],
       firstSplitFieldName: undefined,
       indexPattern: indexPattern,
       query,
       filters,
       combinedQuery,
+      usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',
       description: '',
       jobGroups: [],
       useDedicatedIndex: false,
+      enableModelPlot: false,
       modelMemoryLimit: DEFAULT_MODEL_MEMORY_LIMIT
     };
 
@@ -524,6 +526,8 @@ module
                     $scope.formConfig.end,
                     'explorer');
 
+                  focusOnResultsLink('job_running_view_results_link', $timeout);
+
                   loadCharts();
                 })
                 .catch((resp) => {
@@ -537,6 +541,9 @@ module
           });
       }
     };
+
+    // expose this function so it can be used in the enable model plot checkbox directive
+    $scope.getJobFromConfig = mlPopulationJobService.getJobFromConfig;
 
     addJobValidationMethods($scope, mlPopulationJobService);
 
@@ -576,6 +583,7 @@ module
                   }
                 } else {
                   $scope.jobState = JOB_STATE.FINISHED;
+                  focusOnResultsLink('job_finished_view_results_link', $timeout);
                 }
                 jobCheck();
               });

@@ -36,12 +36,17 @@ export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
 
   constructor(private params: FatalErrorsParams) {
-    this.errorInfo$.pipe(first(), tap(() => this.onFirstError())).subscribe({
-      error: error => {
-        // tslint:disable-next-line no-console
-        console.error('Uncaught error in fatal error screen internals', error);
-      },
-    });
+    this.errorInfo$
+      .pipe(
+        first(),
+        tap(() => this.onFirstError())
+      )
+      .subscribe({
+        error: error => {
+          // tslint:disable-next-line no-console
+          console.error('Uncaught error in fatal error screen internals', error);
+        },
+      });
   }
 
   public add = (error: Error | string, source?: string) => {

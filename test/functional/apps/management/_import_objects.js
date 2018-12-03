@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.settings.setImportIndexFieldOption(2);
+      await PageObjects.settings.associateIndexPattern('d1e4c910-a2e6-11e7-bb30-233be9be6a15', 'logstash-*');
       await PageObjects.settings.clickConfirmChanges();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.settings.clickImportDone();
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.settings.setImportIndexFieldOption(2);
+      await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
       await PageObjects.settings.clickConfirmChanges();
 
       // Override the visualization.
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_exists.json'), false);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.settings.setImportIndexFieldOption(2);
+      await PageObjects.settings.associateIndexPattern('logstash-*', 'logstash-*');
       await PageObjects.settings.clickConfirmChanges();
 
       // *Don't* override the visualization.

@@ -12,7 +12,6 @@ import { TimeBuckets } from 'ui/time_buckets';
 import 'plugins/watcher/components/flot_chart';
 import 'plugins/watcher/components/chart_tooltip';
 import template from './threshold_preview_chart.html';
-import './threshold_preview_chart.less';
 import { COLORS, LINE_WIDTHS, MARGINS } from './constants';
 
 const app = uiModules.get('xpack/watcher');

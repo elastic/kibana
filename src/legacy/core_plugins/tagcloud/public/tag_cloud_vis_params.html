@@ -1,0 +1,49 @@
+<div class="kuiSideBarSection">
+  <div class="form-group">
+    <div class="form-group">
+      <label i18n-id="tagCloud.visParams.textScaleLabel" i18n-default-message="Text Scale"></label>
+      <select class="form-control" ng-model="editorState.params.scale" ng-options="mode for mode in config.collections.scales"></select>
+    </div>
+    <div class="form-group">
+      <label i18n-id="tagCloud.visParams.orientationsLabel" i18n-default-message="Orientations"></label>
+      <select class="form-control" ng-model="editorState.params.orientation" ng-options="mode for mode in config.collections.orientations"></select>
+    </div>
+    <div class="form-group">
+      <label i18n-id="tagCloud.visParams.fontSizeLabel" i18n-default-message="Font Size"></label>
+      <div class="tgcFontSizeSlider"></div>
+      <div class="kuiBar">
+        <div class="kuiBarSection">
+          <input
+            type="number"
+            min="1"
+            max="{{editorState.params.maxFontSize}}"
+            class="kuiTextInput tgcFontSizeSlider__input"
+            ng-model="editorState.params.minFontSize"
+            aria-label="{{ ::'tagCloud.visParams.minFontSizeAriaLabel' | i18n: { defaultMessage: 'Minimum tag font size' } }}"
+            aria-describedby="tagCloudFontSliderMinUnit"
+          >
+          <span id="tagCloudFontSliderMinUnit" aria-label="{{ ::'tagCloud.visParams.minPixelsAriaLabel' | i18n: { defaultMessage: 'pixels' } }}">px</span>
+        </div>
+        <div class="kuiBarSection">
+          <input
+            type="number"
+            min="{{editorState.params.minFontSize}}"
+            max="100"
+            class="kuiTextInput tgcFontSizeSlider__input"
+            ng-model="editorState.params.maxFontSize"
+            aria-label="{{ ::'tagCloud.visParams.maxFontSizeAriaLabel' | i18n: { defaultMessage: 'Maximum tag font size' } }}"
+            aria-describedby="tagCloudFontSliderMaxUnit"
+          >
+          <span id="tagCloudFontSliderMaxUnit" aria-label="{{ ::'tagCloud.visParams.maxPixelsAriaLabel' | i18n: { defaultMessage: 'pixels' } }}">px</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <label>
+        <input type="checkbox" value="{{hideLabel}}" ng-model="editorState.params.showLabel" name="showLabel"
+               ng-checked="editorState.params.showLabel">
+        <span i18n-id="tagCloud.visParams.showLabelToggleLabel" i18n-default-message="Show Label"></span>
+      </label>
+    </div>
+  </div>
+</div>

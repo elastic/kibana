@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
@@ -123,6 +123,11 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedTimeString = `${fromTimeString} - ${toTimeString}`;
         expect(actualTimeString).to.be(expectedTimeString);
+      });
+
+      it('should show bars in the correct time zone', async function () {
+        const ticks = await PageObjects.discover.getBarChartXTicks();
+        expect(ticks).to.eql(['2015-09-20 00:00', '2015-09-21 00:00', '2015-09-22 00:00', '2015-09-23 00:00']);
       });
 
       it('should show correct initial chart interval of Auto', async function () {
@@ -235,7 +240,7 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartInterval = 'Daily';
         const expectedBarChartData = [4757, 4614, 4633];
 
-        await remote.goBack();
+        await browser.goBack();
         await retry.try(async function tryingForTime() {
           const actualInterval = await PageObjects.discover.getChartInterval();
           expect(actualInterval).to.be(expectedChartInterval);
@@ -402,6 +407,16 @@ export default function ({ getService, getPageObjects }) {
           expect(title).to.eql(expected.title);
           expect(description).to.eql(expected.description);
         });
+      });
+    });
+
+    describe('time zone switch', () => {
+      it('should show bars in the correct time zone after switching', async function () {
+        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await browser.refresh();
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        const ticks = await PageObjects.discover.getBarChartXTicks();
+        expect(ticks).to.eql(['2015-09-19 17:00', '2015-09-20 17:00', '2015-09-21 17:00', '2015-09-22 17:00']);
       });
     });
   });

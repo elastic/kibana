@@ -9,18 +9,45 @@ import expect from 'expect.js';
 
 import { replaceInjectedVars } from '../replace_injected_vars';
 
+const buildRequest = (telemetryOptedIn = null, path = '/app/kibana') => {
+  const get = sinon.stub();
+  if (telemetryOptedIn === null) {
+    get.withArgs('telemetry', 'telemetry').returns(Promise.reject(new Error('not found exception')));
+  } else {
+    get.withArgs('telemetry', 'telemetry').returns(Promise.resolve({ attributes: { enabled: telemetryOptedIn } }));
+  }
+
+  return {
+    path,
+    getSavedObjectsClient: () => {
+      return {
+        get,
+        create: sinon.stub(),
+
+        errors: {
+          isNotFoundError: (error) => {
+            return error.message === 'not found exception';
+          }
+        }
+      };
+    }
+  };
+};
+
 describe('replaceInjectedVars uiExport', () => {
   it('sends xpack info if request is authenticated and license is not basic', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = {};
+    const request = buildRequest();
     const server = mockServer();
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
+      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
-      }
+      },
+      userProfile: {},
     });
 
     sinon.assert.calledOnce(server.plugins.security.isAuthenticated);
@@ -29,37 +56,92 @@ describe('replaceInjectedVars uiExport', () => {
 
   it('sends the xpack info if security plugin is disabled', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = {};
+    const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
+      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
-      }
+      },
+      userProfile: {},
     });
   });
 
   it('sends the xpack info if xpack license is basic', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = {};
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.license.isOneOf.returns(true);
 
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
+      telemetryOptedIn: null,
       xpackInitialInfo: {
         b: 1
-      }
+      },
+      userProfile: {},
+    });
+  });
+
+  it('respects the telemetry opt-in document when opted-out', async () => {
+    const originalInjectedVars = { a: 1 };
+    const request = buildRequest(false);
+    const server = mockServer();
+    server.plugins.xpack_main.info.license.isOneOf.returns(true);
+
+    const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
+    expect(newVars).to.eql({
+      a: 1,
+      telemetryOptedIn: false,
+      xpackInitialInfo: {
+        b: 1
+      },
+      userProfile: {},
+    });
+  });
+
+  it('respects the telemetry opt-in document when opted-in', async () => {
+    const originalInjectedVars = { a: 1 };
+    const request = buildRequest(true);
+    const server = mockServer();
+    server.plugins.xpack_main.info.license.isOneOf.returns(true);
+
+    const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
+    expect(newVars).to.eql({
+      a: 1,
+      telemetryOptedIn: true,
+      xpackInitialInfo: {
+        b: 1
+      },
+      userProfile: {},
+    });
+  });
+
+  it('indicates that telemetry is opted-out when not loading an application', async () => {
+    const originalInjectedVars = { a: 1 };
+    const request = buildRequest(true, '/');
+    const server = mockServer();
+    server.plugins.xpack_main.info.license.isOneOf.returns(true);
+
+    const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
+    expect(newVars).to.eql({
+      a: 1,
+      telemetryOptedIn: false,
+      xpackInitialInfo: {
+        b: 1
+      },
+      userProfile: {},
     });
   });
 
   it('sends the originalInjectedVars if not authenticated', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = {};
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.security.isAuthenticated.returns(false);
 
@@ -69,7 +151,7 @@ describe('replaceInjectedVars uiExport', () => {
 
   it('sends the originalInjectedVars if xpack info is unavailable', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = {};
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.isAvailable.returns(false);
 
@@ -79,7 +161,7 @@ describe('replaceInjectedVars uiExport', () => {
 
   it('sends the originalInjectedVars (with xpackInitialInfo = undefined) if security is disabled, xpack info is unavailable', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = {};
+    const request = buildRequest();
     const server = mockServer();
     delete server.plugins.security;
     server.plugins.xpack_main.info.isAvailable.returns(false);
@@ -87,13 +169,15 @@ describe('replaceInjectedVars uiExport', () => {
     const newVars = await replaceInjectedVars(originalInjectedVars, request, server);
     expect(newVars).to.eql({
       a: 1,
-      xpackInitialInfo: undefined
+      telemetryOptedIn: null,
+      xpackInitialInfo: undefined,
+      userProfile: {},
     });
   });
 
   it('sends the originalInjectedVars if the license check result is not available', async () => {
     const originalInjectedVars = { a: 1 };
-    const request = {};
+    const request = buildRequest();
     const server = mockServer();
     server.plugins.xpack_main.info.feature().getLicenseCheckResults.returns(undefined);
 

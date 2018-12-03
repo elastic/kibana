@@ -17,7 +17,11 @@
  * under the License.
  */
 
+import { SavedObjectsRepository } from './repository';
 import { SavedObjectsRepositoryProvider } from './repository_provider';
+jest.mock('./repository', () => ({
+  SavedObjectsRepository: jest.fn()
+}));
 
 test('requires "callCluster" to be provided', () => {
   const provider = new SavedObjectsRepositoryProvider({
@@ -32,31 +36,36 @@ test('requires "callCluster" to be provided', () => {
 });
 
 test('creates a valid Repository', async () => {
-  const properties = {
-    index: 'default-index',
-    mappings: {
-      foo: {
-        properties: {
-          field: { type: 'string' }
-        }
-      }
-    },
-    onBeforeWrite: jest.fn()
-  };
-
-  const provider = new SavedObjectsRepositoryProvider(properties);
-
-  const callCluster = jest.fn().mockReturnValue({
-    _id: 'new'
+  const index = Symbol();
+  const mappings = Symbol();
+  const migrator = Symbol();
+  const schema = Symbol();
+  const serializer = Symbol();
+  const onBeforeWrite = Symbol();
+  const provider = new SavedObjectsRepositoryProvider({
+    index,
+    mappings,
+    migrator,
+    schema,
+    serializer,
+    onBeforeWrite,
   });
+  const callCluster = () => {};
+  const expectedReturnValue = {
+    foo: 'bar',
+  };
+  SavedObjectsRepository.mockImplementation(() => expectedReturnValue);
 
-  const repository = provider.getRepository(callCluster);
+  const actualReturnValue = provider.getRepository(callCluster);
 
-  await repository.create('foo', {});
-
-  expect(callCluster).toHaveBeenCalledTimes(1);
-  expect(properties.onBeforeWrite).toHaveBeenCalledTimes(1);
-  expect(callCluster).toHaveBeenCalledWith('index', expect.objectContaining({
-    index: properties.index
-  }));
+  expect(actualReturnValue).toEqual(expectedReturnValue);
+  expect(SavedObjectsRepository).toHaveBeenCalledWith({
+    index,
+    mappings,
+    migrator,
+    schema,
+    serializer,
+    onBeforeWrite,
+    callCluster,
+  });
 });

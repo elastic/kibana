@@ -9,18 +9,22 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects([
     'security',
     'common',
+    'discover',
     'dashboard',
     'header',
-    'settings']);
+    'settings',
+  ]);
   const dashboardName = 'Dashboard View Mode Test Dashboard';
+  const savedSearchName = 'Saved search for dashboard';
 
   describe('Dashboard View Mode', () => {
 
@@ -33,11 +37,16 @@ export default function ({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
-      remote.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
+      await PageObjects.discover.saveSearch(savedSearchName);
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.saveDashboard(dashboardName);
     });
 
@@ -115,11 +124,11 @@ export default function ({ getService, getPageObjects }) {
         expect(collapseLinkExists).to.be(true);
 
         const navLinks = await find.allByCssSelector('.global-nav-link');
-        expect(navLinks.length).to.equal(4);
+        expect(navLinks.length).to.equal(5);
       });
 
       it('shows the dashboard landing page by default', async () => {
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         console.log('url: ', currentUrl);
         expect(currentUrl).to.contain('dashboards');
       });
@@ -163,18 +172,20 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('does not show the visualization edit icon', async () => {
-        const editLinkExists = await dashboardPanelActions.editPanelActionExists();
-        expect(editLinkExists).to.be(false);
+        await dashboardPanelActions.expectMissingEditPanelAction();
       });
 
       it('does not show the visualization delete icon', async () => {
-        const deleteIconExists = await dashboardPanelActions.removePanelActionExists();
-        expect(deleteIconExists).to.be(false);
+        await dashboardPanelActions.expectMissingRemovePanelAction();
       });
 
       it('shows the timepicker', async () => {
         const timePickerExists = await testSubjects.exists('globalTimepickerButton');
         expect(timePickerExists).to.be(true);
+      });
+
+      it('can paginate on a saved search', async () => {
+        await PageObjects.dashboard.expectToolbarPaginationDisplayed({ displayed: true });
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
@@ -192,6 +203,7 @@ export default function ({ getService, getPageObjects }) {
         const managementAppExists = await find.existsByLinkText('Management');
         expect(managementAppExists).to.be(true);
       });
+
     });
   });
 }

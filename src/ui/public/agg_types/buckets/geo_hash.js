@@ -20,10 +20,10 @@
 import _ from 'lodash';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
-import { AggConfig } from '../../vis/agg_config';
 import precisionTemplate from '../controls/precision.html';
 import { geohashColumns } from '../../utils/decode_geo_hash';
 import { geoContains, scaleBounds } from '../../utils/geo_utils';
+import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
 
@@ -69,10 +69,13 @@ function isOutsideCollar(bounds, collar) {
 
 export const geoHashBucketAgg = new BucketAggType({
   name: 'geohash_grid',
-  title: 'Geohash',
+  title: i18n.translate('common.ui.aggTypes.buckets.geohashGridTitle', {
+    defaultMessage: 'Geohash',
+  }),
   params: [
     {
       name: 'field',
+      type: 'field',
       filterFieldTypes: 'geo_point'
     },
     {
@@ -101,6 +104,11 @@ export const geoHashBucketAgg = new BucketAggType({
       write: _.noop
     },
     {
+      name: 'mapBounds',
+      default: null,
+      write: _.noop
+    },
+    {
       name: 'precision',
       editor: precisionTemplate,
       default: defaultPrecision,
@@ -117,7 +125,7 @@ export const geoHashBucketAgg = new BucketAggType({
   ],
   getRequestAggs: function (agg) {
     const aggs = [];
-    const { vis, params } = agg;
+    const params = agg.params;
 
     if (params.isFilteredByCollar && agg.getField()) {
       const { mapBounds, mapZoom } = params;
@@ -137,7 +145,7 @@ export const geoHashBucketAgg = new BucketAggType({
             bottom_right: mapCollar.bottom_right
           }
         };
-        aggs.push(new AggConfig(vis, {
+        aggs.push(agg.aggConfigs.createAggConfig({
           type: 'filter',
           id: 'filter_agg',
           enabled: true,
@@ -147,20 +155,20 @@ export const geoHashBucketAgg = new BucketAggType({
           schema: {
             group: 'buckets'
           }
-        }));
+        },  { addToAggConfigs: false }));
       }
     }
 
     aggs.push(agg);
 
     if (params.useGeocentroid) {
-      aggs.push(new AggConfig(vis, {
+      aggs.push(agg.aggConfigs.createAggConfig({
         type: 'geo_centroid',
         enabled: true,
         params: {
           field: agg.getField()
         }
-      }));
+      }, { addToAggConfigs: false }));
     }
 
     return aggs;

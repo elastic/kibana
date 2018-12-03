@@ -1,0 +1,105 @@
+<div class="list-group">
+  <button class="list-group-item" ng-click="section = 'sheet'" type="button">
+    <h4
+      class="list-group-item-heading"
+      i18n-id="timelion.topNavMenu.save.saveEntireSheetTitle"
+      i18n-default-message="Save entire Timelion sheet"
+    ></h4>
+    <p
+      class="list-group-item-text"
+      i18n-id="timelion.topNavMenu.save.saveEntireSheetDescription"
+      i18n-default-message="You want this option if you mostly use Timelion expressions from within
+                            the Timelion app and don't need to add Timelion charts to Kibana
+                            dashboards. You may also want this if you make use of references to
+                            other panels."
+    ></p>
+  </button>
+
+  <div class="list-group-item" ng-show="section == 'sheet'">
+    <form role="form" class="container-fluid" ng-submit="opts.saveSheet()">
+      <label
+        for="savedSheet"
+        class="kuiLabel kuiVerticalRhythmSmall"
+        i18n-id="timelion.topNavMenu.save.saveEntireSheetLabel"
+        i18n-default-message="Save sheet as"
+      ></label>
+
+      <input
+        id="savedSheet"
+        ng-model="opts.savedSheet.title"
+        input-focus="select"
+        class="form-control kuiVerticalRhythmSmall"
+        placeholder="{{ ::'timelion.topNavMenu.save.saveEntireSheet.inputPlaceholder' | i18n: { defaultMessage: 'Name this sheet...' } }}"
+        aria-label="{{ ::'timelion.topNavMenu.save.saveEntireSheet.inputAriaLabel' | i18n: { defaultMessage: 'Name' } }}"
+      >
+
+      <saved-object-save-as-check-box
+        class="kuiVerticalRhythmSmall"
+        saved-object="opts.savedSheet"
+      ></saved-object-save-as-check-box>
+
+      <button
+        ng-disabled="!opts.savedSheet.title"
+        type="submit"
+        class="kuiButton kuiButton--primary kuiVerticalRhythmSmall"
+        i18n-id="timelion.topNavMenu.save.saveEntireSheet.submitButtonLabel"
+        i18n-default-message="Save"
+      ></button>
+    </form>
+  </div>
+
+  <button class="list-group-item" ng-click="section = 'expression'" type="button">
+    <h4
+      class="list-group-item-heading"
+      i18n-id="timelion.topNavMenu.save.saveAsDashboardPanelTitle"
+      i18n-default-message="Save current expression as Kibana dashboard panel"
+    ></h4>
+    <p
+      class="list-group-item-text"
+      i18n-id="timelion.topNavMenu.save.saveAsDashboardPanelDescription"
+      i18n-default-message="Need to add a chart to a Kibana dashboard? We can do that! This option
+                            will save your currently selected expression as a panel that can be
+                            added to Kibana dashboards as you would add anything else. Note, if you
+                            use references to other panels you will need to remove the refences by
+                            copying the referenced expression directly into the expression you are
+                            saving. Click a chart to select a different expression to save."
+    ></p>
+  </button>
+
+  <div class="list-group-item" ng-show="section == 'expression'">
+    <form role="form" class="container-fluid" ng-submit="opts.saveExpression(panelTitle)">
+      <div class="form-group">
+        <label
+          class="control-label"
+          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.selectedExpressionLabel"
+          i18n-default-message="Currently selected expression"
+        ></label>
+        <code>{{opts.state.sheet[opts.state.selected]}}</code>
+      </div>
+      <div class="form-group">
+        <label
+          for="savedExpression"
+          class="control-label"
+          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanelLabel"
+          i18n-default-message="Save expression as"
+        ></label>
+        <input
+          id="savedExpression"
+          ng-model="panelTitle"
+          input-focus="select"
+          class="form-control"
+          placeholder="{{ ::'timelion.topNavMenu.save.saveAsDashboardPanel.inputPlaceholder' | i18n: { defaultMessage: 'Name this panel' } }}"
+        >
+      </div>
+      <div class="form-group">
+        <button
+          ng-disabled="!panelTitle"
+          type="submit"
+          class="kuiButton kuiButton--primary"
+          i18n-id="timelion.topNavMenu.save.saveAsDashboardPanel.submitButtonLabel"
+          i18n-default-message="Save"
+        ></button>
+      </div>
+    </form>
+  </div>
+</div>

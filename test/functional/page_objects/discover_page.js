@@ -20,40 +20,32 @@
 import expect from 'expect.js';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
-  const config = getService('config');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
 
-  const getRemote = () => (
-    getService('remote')
-      .setFindTimeout(config.get('timeouts.find'))
-  );
-
   class DiscoverPage {
-    getQueryField() {
-      return getRemote()
-        .findByCssSelector('input[ng-model=\'state.query\']');
+    async getQueryField() {
+      return await find.byCssSelector('input[ng-model=\'state.query\']');
     }
 
-    getQuerySearchButton() {
-      return getRemote()
-        .findByCssSelector('button[aria-label=\'Search\']');
+    async getQuerySearchButton() {
+      return await find.byCssSelector('button[aria-label=\'Search\']');
     }
 
-    getChartTimespan() {
-      return getRemote()
-        .findByCssSelector('.small > span:nth-child(1)')
-        .getVisibleText();
+    async getChartTimespan() {
+      const el = await find.byCssSelector('.small > span:nth-child(1)');
+      return await el.getVisibleText();
     }
 
     async saveSearch(searchName) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
-      await getRemote().findDisplayedById('SaveSearch').pressKeys(searchName);
-      await testSubjects.click('discoverSaveSearchButton');
+      await testSubjects.setValue('savedObjectTitle', searchName);
+      await testSubjects.click('confirmSaveSavedObjectButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       // LeeDr - this additional checking for the saved search name was an attempt
       // to cause this method to wait for the reloading of the page to complete so
@@ -71,15 +63,29 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await Promise.all(headerElements.map(el => el.getVisibleText()));
     }
 
-    async openSavedSearch() {
+    async openLoadSavedSearchPanel() {
+      const isOpen = await testSubjects.exists('loadSearchForm');
+      if (isOpen) {
+        return;
+      }
+
       // We need this try loop here because previous actions in Discover like
       // saving a search cause reloading of the page and the "Open" menu item goes stale.
       await retry.try(async () => {
         await this.clickLoadSavedSearchButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const loadIsOpen = await testSubjects.exists('loadSearchForm');
-        expect(loadIsOpen).to.be(true);
+        const isOpen = await testSubjects.exists('loadSearchForm');
+        expect(isOpen).to.be(true);
       });
+    }
+
+    async closeLoadSaveSearchPanel() {
+      const isOpen = await testSubjects.exists('loadSearchForm');
+      if (!isOpen) {
+        return;
+      }
+
+      await flyout.close('loadSearchForm');
     }
 
     async hasSavedSearch(searchName) {
@@ -88,7 +94,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async loadSavedSearch(searchName) {
-      await this.clickLoadSavedSearchButton();
+      await this.openLoadSavedSearchPanel();
       const searchLink = await find.byPartialLinkText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -110,14 +116,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('discoverCurrentQuery');
     }
 
+    async getBarChartXTicks() {
+      const elements = await find.allByCssSelector('.x.axis.CategoryAxis-1 > .tick > text');
+      return await Promise.all(elements.map(async el => el.getVisibleText()));
+    }
+
     getBarChartData() {
       let yAxisLabel = 0;
       let yAxisHeight;
 
       return PageObjects.header.waitUntilLoadingHasFinished()
         .then(() => {
-          return getRemote()
-            .findByCssSelector('div.y-axis-div-wrapper > div > svg > g > g:last-of-type');
+          return find.byCssSelector('div.visAxis__splitAxes--y > div > svg > g > g:last-of-type');
         })
         .then(function setYAxisLabel(y) {
           return y
@@ -130,8 +140,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         })
       // 2). find and save the y-axis pixel size (the chart height)
         .then(function getRect() {
-          return getRemote()
-            .findByCssSelector('rect.background')
+          return find.byCssSelector('rect.background')
             .then(function getRectHeight(chartAreaObj) {
               return chartAreaObj
                 .getAttribute('height')
@@ -142,11 +151,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
                 });
             });
         })
-      // 3). get the chart-wrapper elements
+      // 3). get the visWrapper__chart elements
         .then(function () {
-          return getRemote()
-          // #kibana-body > div.content > div > div > div > div.vis-editor-canvas > visualize > div.visualize-chart > div > div.vis-col-wrapper > div.chart-wrapper > div > svg > g > g.series.\30 > rect:nth-child(1)
-            .findAllByCssSelector('svg > g > g.series > rect') // rect
+          // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
+          return find.allByCssSelector('svg > g > g.series > rect') // rect
             .then(function (chartTypes) {
               function getChartType(chart) {
                 return chart
@@ -182,13 +190,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     query(queryString) {
-      return getRemote()
-        .findByCssSelector('input[aria-label="Search input"]')
+      return find.byCssSelector('input[aria-label="Search input"]')
         .clearValue()
         .type(queryString)
         .then(() => {
-          return getRemote()
-            .findByCssSelector('button[aria-label="Search"]')
+          return find.byCssSelector('button[aria-label="Search"]')
             .click();
         })
         .then(() => {
@@ -196,52 +202,41 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         });
     }
 
-    getDocHeader() {
-      return getRemote()
-        .findByCssSelector('thead > tr:nth-child(1)')
-        .getVisibleText();
+    async getDocHeader() {
+      const header = await find.byCssSelector('thead > tr:nth-child(1)');
+      return await header.getVisibleText();
     }
 
-    getDocTableIndex(index) {
-      return getRemote()
-        .findByCssSelector('tr.discover-table-row:nth-child(' + (index) + ')')
-        .getVisibleText();
+    async getDocTableIndex(index) {
+      const row = await find.byCssSelector('tr.kbnDocTable__row:nth-child(' + (index) + ')');
+      return await row.getVisibleText();
     }
 
-    clickDocSortDown() {
-      return getRemote()
-        .findByCssSelector('.fa-sort-down')
-        .click();
+    async clickDocSortDown() {
+      await find.clickByCssSelector('.fa-sort-down');
     }
 
-    clickDocSortUp() {
-      return getRemote()
-        .findByCssSelector('.fa-sort-up')
-        .click();
+    async clickDocSortUp() {
+      await find.clickByCssSelector('.fa-sort-up');
     }
 
-    getMarks() {
-      return getRemote()
-        .findAllByCssSelector('mark')
-        .getVisibleText();
+    async getMarks() {
+      const marks = await find.allByCssSelector('mark');
+      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
     }
 
     async toggleSidebarCollapse() {
       return await testSubjects.click('collapseSideBarButton');
     }
 
-    getAllFieldNames() {
-      return getRemote()
-        .findAllByClassName('sidebar-item')
-        .then((items) => {
-          return Promise.all(items.map((item) => item.getVisibleText()));
-        });
+    async getAllFieldNames() {
+      const items = await find.allByCssSelector('.sidebar-item');
+      return await Promise.all(items.map((item) => item.getVisibleText()));
     }
 
-    getSidebarWidth() {
-      return getRemote()
-        .findByClassName('sidebar-list')
-        .getProperty('clientWidth');
+    async getSidebarWidth() {
+      const sidebar = await find.byCssSelector('.sidebar-list');
+      return await sidebar.getProperty('clientWidth');
     }
 
     async hasNoResults() {
@@ -274,25 +269,24 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    clickFieldListPlusFilter(field, value) {
+    async clickFieldListPlusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      return getRemote()
-        .findByCssSelector(`[data-test-subj="plus-${field}-${value}"]`)
-        .click();
+      await find.clickByCssSelector(`[data-test-subj="plus-${field}-${value}"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    clickFieldListMinusFilter(field, value) {
+    async clickFieldListMinusFilter(field, value) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      return getRemote()
-        .findByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]')
-        .click();
+      await find.clickByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async selectIndexPattern(indexPattern) {
-      await getRemote().findByClassName('index-pattern-selection').click();
-      await getRemote().findByClassName('ui-select-search').type(indexPattern + '\n');
+      await find.clickByCssSelector('.index-pattern-selection');
+      await find.setValue('.ui-select-search', indexPattern + '\n');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async removeAllFilters() {

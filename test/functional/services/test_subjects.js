@@ -24,28 +24,32 @@ import {
   map as mapAsync,
 } from 'bluebird';
 
+import { WAIT_FOR_EXISTS_TIME } from './find';
+
 export function TestSubjectsProvider({ getService }) {
   const log = getService('log');
   const retry = getService('retry');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const find = getService('find');
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
 
   class TestSubjects {
-    async exists(selector, timeout = 1000) {
+    async exists(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`TestSubjects.exists(${selector})`);
       return await find.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout);
     }
 
-    async existOrFail(selector, timeout = 1000) {
-      log.debug(`TestSubjects.existOrFail(${selector})`);
-      const doesExist = await this.exists(selector, timeout);
-      // Verify element exists, or else fail the test consuming this.
-      expect(doesExist).to.be(true);
+    async existOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
+      await retry.try(async () => {
+        log.debug(`TestSubjects.existOrFail(${selector})`);
+        const doesExist = await this.exists(selector, timeout);
+        // Verify element exists, or else fail the test consuming this.
+        expect(doesExist).to.be(true);
+      });
     }
 
-    async missingOrFail(selector, timeout = 1000) {
+    async missingOrFail(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`TestSubjects.missingOrFail(${selector})`);
       const doesExist = await this.exists(selector, timeout);
       // Verify element is missing, or else fail the test consuming this.
@@ -61,24 +65,24 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async clickWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
+      log.debug(`TestSubjects.click(${selector})`);
+      await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
+    }
+
     async click(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.click(${selector})`);
-      return await retry.try(async () => {
-        const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await element.click();
-      });
+      await find.clickByCssSelector(testSubjSelector(selector), timeout);
     }
 
     async doubleClick(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
-        await remote.moveMouseTo(element);
-        await remote.doubleClick();
+        await browser.moveMouseTo(element);
+        await browser.doubleClick();
       });
     }
-
 
     async descendantExists(selector, parentElement) {
       return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
@@ -135,7 +139,7 @@ export function TestSubjectsProvider({ getService }) {
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
-        const input = await remote.getActiveElement();
+        const input = await find.activeElement();
         await input.clearValue();
         await input.type(text);
       });
@@ -145,6 +149,13 @@ export function TestSubjectsProvider({ getService }) {
       return await retry.try(async () => {
         const element = await this.find(selector);
         return await element.isEnabled();
+      });
+    }
+
+    async isDisplayed(selector) {
+      return await retry.try(async () => {
+        const element = await this.find(selector);
+        return await element.isDisplayed();
       });
     }
 
@@ -180,7 +191,7 @@ export function TestSubjectsProvider({ getService }) {
       // moveMouseTo function.
       await retry.try(async () => {
         const element = await this.find(selector);
-        await remote.moveMouseTo(element);
+        await browser.moveMouseTo(element);
       });
     }
 
@@ -192,7 +203,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async waitForDeleted(selector) {
-      await remote.waitForDeletedByCssSelector(testSubjSelector(selector));
+      await find.waitForDeletedByCssSelector(testSubjSelector(selector));
     }
   }
 

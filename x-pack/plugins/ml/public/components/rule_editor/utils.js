@@ -12,6 +12,7 @@ import {
 } from '../../../common/constants/detector_rule';
 
 import { cloneDeep } from 'lodash';
+import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 
 export function getNewConditionDefaults() {
@@ -157,6 +158,25 @@ export function updateJobRules(job, detectorIndex, rules) {
   });
 }
 
+// Updates an ML filter used in the scope part of a rule,
+// adding an item to the filter with the specified ID.
+export function addItemToFilter(item, filterId) {
+  return new Promise((resolve, reject) => {
+    ml.filters.updateFilter(
+      filterId,
+      undefined,
+      [item],
+      undefined
+    )
+      .then((updatedFilter) => {
+        resolve(updatedFilter);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
 export function buildRuleDescription(rule) {
   const { actions, conditions, scope } = rule;
   let description = 'skip ';
@@ -181,7 +201,7 @@ export function buildRuleDescription(rule) {
         description += ' AND ';
       }
 
-      description += `${condition.applies_to} is ${operatorToText(condition.operator)} ${condition.value}`;
+      description += `${appliesToText(condition.applies_to)} is ${operatorToText(condition.operator)} ${condition.value}`;
     });
   }
 
@@ -249,4 +269,36 @@ export function operatorToText(operator) {
     default:
       return (operator !== undefined) ? operator : '';
   }
+}
+
+// Returns the value of the selected 'applies_to' field from the
+// selected anomaly i.e. the actual, typical or diff from typical.
+export function getAppliesToValueFromAnomaly(anomaly, appliesTo) {
+  let actualValue;
+  let typicalValue;
+
+  const actual = anomaly.actual;
+  if (actual !== undefined) {
+    actualValue = Array.isArray(actual) ? actual[0] : actual;
+  }
+
+  const typical = anomaly.typical;
+  if (typical !== undefined) {
+    typicalValue = Array.isArray(typical) ? typical[0] : typical;
+  }
+
+  switch (appliesTo) {
+    case APPLIES_TO.ACTUAL:
+      return actualValue;
+
+    case APPLIES_TO.TYPICAL:
+      return typicalValue;
+
+    case APPLIES_TO.DIFF_FROM_TYPICAL:
+      if (actual !== undefined && typical !== undefined) {
+        return Math.abs(actualValue - typicalValue);
+      }
+  }
+
+  return undefined;
 }

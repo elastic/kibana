@@ -39,11 +39,15 @@ describe('cli invalid config support', function () {
       .map(obj => ({
         ...obj,
         pid: '## PID ##',
-        '@timestamp': '## @timestamp ##'
+        '@timestamp': '## @timestamp ##',
+        error: '## Error with stack trace ##',
       }));
 
     expect(error).toBe(undefined);
     expect(status).toBe(64);
-    expect(logLines).toMatchSnapshot();
+    expect(logLines[0].message).toMatch('{ Error: "unknown.key", "other.unknown.key", "other.third", "some.flat.key", and "' +
+        'some.array" settings were not applied. Check for spelling errors and ensure that expected plugins are installed.');
+    expect(logLines[0].tags).toEqual(['fatal', 'root']);
+    expect(logLines[0].type).toEqual('log');
   }, 20 * 1000);
 });
