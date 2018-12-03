@@ -6,7 +6,7 @@
 ++++
 
 Use the information in this section to troubleshoot common problems and find 
-answers for frequently asked questions related to {monitoring}.
+answers for frequently asked questions related to the {kib} {monitor-features}.
 
 [float]
 === Cannot view the cluster because the license information is invalid
@@ -22,3 +22,27 @@ The following error appears in a banner at the top of the screen in {kib} on the
 You cannot monitor a version 6.3 or later cluster from {kib} version 6.2 or earlier. 
 To resolve this issue, upgrade {kib} to 6.3 or later. See 
 {stack-ref}/upgrading-elastic-stack.html[Upgrading the {stack}]. 
+
+[float]
+=== No monitoring data is visible in {kib}
+
+*Symptoms:*
+
+The *Monitoring* page in {kib} is empty. 
+
+*Resolution:*
+
+. Confirm that {kib} is seeking monitoring data from the appropriate {es} URL.
+By default, data is retrieved from the cluster specified in the 
+`elasticsearch.url` setting in the `kibana.yml` file. If you want to retrieve it
+from a different monitoring cluster, set `xpack.monitoring.elasticsearch.url`.
+See <<monitoring-settings-kb>>.
+
+. Confirm that there is monitoring data available at that URL. It is stored in
+indices such as `.monitoring-kibana-*` and `.monitoring-es-*`. At a minimum, you
+must have monitoring data for the {es} production cluster. Once that data exists,
+{kib} can display monitoring data for other products in the cluster.
+
+. Set the time filter to “Last 1 hour”.  When monitoring data appears in your
+cluster, the page automatically refreshes with the monitoring summary.
+

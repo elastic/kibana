@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom';
 import { constant } from 'lodash';
 
 import { uiModules } from 'ui/modules';
+import chrome from 'ui/chrome';
 
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
 import template from 'plugins/security/views/nav_control/nav_control.html';
@@ -59,7 +60,7 @@ chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
 
     const props = {
       user: ShieldUser.getCurrent(),
-      route: `${kbnBaseUrl}#/account`,
+      route: chrome.addBasePath(`${kbnBaseUrl}#/account`),
     };
 
     props.user.$promise.then(() => {

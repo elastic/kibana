@@ -66,8 +66,24 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       maxPayload: configValue.maxPayloadBytes,
       port: configValue.port,
       rewriteBasePath: configValue.rewriteBasePath,
-      ssl: configValue.ssl,
+      ssl: configValue.ssl && LegacyObjectToConfigAdapter.transformSSL(configValue.ssl),
     };
+  }
+
+  private static transformSSL(configValue: Record<string, any>) {
+    // `server.ssl.cert` is deprecated, legacy platform will issue deprecation warning.
+    if (configValue.cert) {
+      configValue.certificate = configValue.cert;
+      delete configValue.cert;
+    }
+
+    // Enabling ssl by only specifying server.ssl.certificate and server.ssl.key is deprecated,
+    // legacy platform will issue deprecation warning.
+    if (typeof configValue.enabled !== 'boolean' && configValue.certificate && configValue.key) {
+      configValue.enabled = true;
+    }
+
+    return configValue;
   }
 
   public get(configPath: ConfigPath) {

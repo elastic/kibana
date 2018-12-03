@@ -53,8 +53,7 @@
 
     .filter-button {
       opacity: 0.3;
-      width: 20px;
-      padding-top: 2px;
+      min-width: 14px;
 
       .euiIcon {
         width: 14px;
@@ -105,13 +104,8 @@
       }
 
       .filter-button {
-        height: 20px;
-        padding-top: 2px;
-
-        .euiButtonIcon__icon {
-          -webkit-transform: translateY(-7px);
-          transform: translateY(-7px);
-        }
+        -webkit-transform: translateY(-1px);
+        transform: translateY(-1px);
       }
 
     }

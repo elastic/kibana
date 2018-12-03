@@ -10,10 +10,14 @@ import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { callApi } from './callApi';
 
 export const getAPMIndexPattern = memoize(async () => {
+  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
   const res = await callApi({
     pathname: `/api/saved_objects/_find`,
     query: {
-      type: 'index-pattern'
+      type: 'index-pattern',
+      search: `"${apmIndexPatternTitle}"`,
+      search_fields: 'title',
+      per_page: 200
     }
   });
 
@@ -21,10 +25,9 @@ export const getAPMIndexPattern = memoize(async () => {
     return;
   }
 
-  const apmIndexPattern = chrome.getInjected('apmIndexPattern');
   const apmSavedObject = first(
     res.savedObjects.filter(
-      savedObject => savedObject.attributes.title === apmIndexPattern
+      savedObject => savedObject.attributes.title === apmIndexPatternTitle
     )
   );
 

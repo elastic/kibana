@@ -36,12 +36,16 @@ export default class WatchOptimizer extends BaseOptimizer {
     super(opts);
     this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
+    this.watchCache = opts.watchCache;
     this.status$ = new Rx.ReplaySubject(1);
   }
 
   async init() {
     this.initializing = true;
     this.initialBuildComplete = false;
+
+    // try reset the watch optimizer cache
+    await this.watchCache.tryReset();
 
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
