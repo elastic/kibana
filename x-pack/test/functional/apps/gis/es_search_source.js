@@ -11,7 +11,7 @@ export default function ({ getPageObjects }) {
 
   describe('layer source is elasticsearch documents', () => {
     before(async () => {
-      await PageObjects.gis.loadSavedWorkspace('logstash events');
+      await PageObjects.gis.loadSavedMap('logstash events');
     });
 
     after(async () => {

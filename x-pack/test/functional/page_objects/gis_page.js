@@ -16,33 +16,33 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     // use the search filter box to narrow the results down to a single
     // entry, or at least to a single page of results
-    async loadSavedWorkspace(name) {
-      log.debug(`Load Saved Workspace ${name}`);
+    async loadSavedMap(name) {
+      log.debug(`Load Saved Map ${name}`);
 
-      await this.gotoWorkspaceListingPage();
+      await this.gotoMapListingPage();
 
       await retry.try(async () => {
-        await this.searchForWorkspaceWithName(name);
-        await this.selectWorkspace(name);
+        await this.searchForMapWithName(name);
+        await this.selectMap(name);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const onWorkspaceListingPage = await this.onWorkspaceListingPage();
-        if (onWorkspaceListingPage) {
-          throw new Error(`Failed to open workspace ${name}`);
+        const onMapListingPage = await this.onMapListingPage();
+        if (onMapListingPage) {
+          throw new Error(`Failed to open map ${name}`);
         }
       });
     }
 
-    async onWorkspaceListingPage() {
-      log.debug(`onWorkspaceListingPage`);
+    async onMapListingPage() {
+      log.debug(`onMapListingPage`);
       const exists = await testSubjects.exists('gisListingPage');
       return exists;
     }
 
-    async searchForWorkspaceWithName(name) {
-      log.debug(`searchForWorkspaceWithName: ${name}`);
+    async searchForMapWithName(name) {
+      log.debug(`searchForMapWithName: ${name}`);
 
-      await this.gotoWorkspaceListingPage();
+      await this.gotoMapListingPage();
 
       await retry.try(async () => {
         const searchFilter = await testSubjects.find('searchFilter');
@@ -54,18 +54,18 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async selectWorkspace(name) {
-      await testSubjects.click(`workspaceListingTitleLink-${name.split(' ').join('-')}`);
+    async selectMap(name) {
+      await testSubjects.click(`mapListingTitleLink-${name.split(' ').join('-')}`);
     }
 
-    async gotoWorkspaceListingPage() {
-      log.debug('gotoWorkspaceListingPage');
-      const onPage = await this.onWorkspaceListingPage();
+    async gotoMapListingPage() {
+      log.debug('gotoMapListingPage');
+      const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
           await PageObjects.common.navigateToUrl('gis', '/');
-          const onWorkspaceListingPage = await this.onWorkspaceListingPage();
-          if (!onWorkspaceListingPage) throw new Error('Not on workspace listing page.');
+          const onMapListingPage = await this.onMapListingPage();
+          if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
       }
     }

@@ -264,7 +264,7 @@ export class MapListing extends React.Component {
         render: (field, record) => (
           <EuiLink
             href={`#/map/${record.id}`}
-            data-test-subj={`MapListingTitleLink-${record.title.split(' ').join('-')}`}
+            data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
           </EuiLink>

@@ -1,0 +1,24 @@
+{
+  "type": "index",
+  "value": {
+    "index": "geo_shapes",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "0"
+      }
+    },
+    "mappings": {
+      "doc": {
+        "properties": {
+          "geometry": {
+            "type": "geo_shape"
+          },
+          "name": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}

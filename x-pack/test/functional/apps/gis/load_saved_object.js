@@ -9,9 +9,9 @@ import expect from 'expect.js';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['gis', 'header']);
 
-  describe('load gis-workspace saved objects', () => {
+  describe('load gis-map saved objects', () => {
     before(async () => {
-      await PageObjects.gis.loadSavedWorkspace('logstash events');
+      await PageObjects.gis.loadSavedMap('logstash events');
     });
 
     after(async () => {

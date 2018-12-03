@@ -7,18 +7,25 @@
 export default function ({ loadTestFile, getService }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
 
   describe('gis app', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('gis');
+      await esArchiver.load('gis/data');
+      await esArchiver.load('gis/kibana');
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
-      remote.setWindowSize(1600, 1000);
+      browser.setWindowSize(1600, 1000);
+
+    });
+
+    after(async () => {
+      await esArchiver.unload('gis/data');
+      await esArchiver.unload('gis/kibana');
     });
 
     loadTestFile(require.resolve('./load_saved_object'));
