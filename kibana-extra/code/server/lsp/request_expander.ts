@@ -46,6 +46,7 @@ export class RequestExpander implements ILanguageServerHandler {
   // a map for workspacePath -> Workspace
   private workspaces: Map<string, Workspace> = new Map();
   private workspaceRoot: string;
+  private running = false;
 
   constructor(
     proxy: LanguageServerProxy,
@@ -68,7 +69,10 @@ export class RequestExpander implements ILanguageServerHandler {
         resolve,
         reject,
       });
-      this.handleNext();
+      if (!this.running) {
+        this.running = true;
+        this.handleNext();
+      }
     });
   }
 
@@ -164,6 +168,8 @@ export class RequestExpander implements ILanguageServerHandler {
           }
         }
       );
+    } else {
+      this.running = false;
     }
   }
 
