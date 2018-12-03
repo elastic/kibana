@@ -18,7 +18,6 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Dispatch } from 'redux';
 import { State, timelineActions } from '../../store';
 import { timelineByIdSelector } from '../../store/selectors';
 import { defaultWidth } from '../timeline/body';
@@ -55,13 +54,17 @@ export const Text = styled(EuiText)`
   z-index: 3;
 `;
 
+const Visible = styled.div<{ show: boolean }>`
+  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
+`;
+
 interface OwnProps {
   timelineId: string;
   children?: React.ReactNode;
 }
 
 interface DispatchProps {
-  showTimeline: (id: string, show: boolean) => void;
+  showTimeline: ({ id, show }: { id: string; show: boolean }) => void;
 }
 
 interface StateReduxProps {
@@ -108,30 +111,20 @@ export const FlyoutButton = pure(({ onOpen }: FlyoutButtonProps) => (
 ));
 
 export const FlyoutComponent = pure<Props>(({ show, timelineId, showTimeline, children }) => (
-  <React.Fragment>
-    <div
-      style={{
-        visibility: show ? 'visible' : 'hidden',
-      }}
-    >
-      <FlyoutPane
-        onClose={() => {
-          showTimeline(timelineId, false);
-        }}
-      >
+  <>
+    <Visible show={show}>
+      <FlyoutPane onClose={() => showTimeline({ id: timelineId, show: false })}>
         {children}
       </FlyoutPane>
       >
-    </div>
-    {!show ? (
+    </Visible>
+    {show ? null : (
       <FlyoutButton
         timelineId={timelineId}
-        onOpen={() => {
-          showTimeline(timelineId, true);
-        }}
+        onOpen={() => showTimeline({ id: timelineId, show: true })}
       />
-    ) : null}
-  </React.Fragment>
+    )}
+  </>
 ));
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
@@ -141,11 +134,9 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   return { show };
 };
 
-const bindActionsToDispatch = (dispatch: Dispatch) => ({
-  showTimeline: (id: string, show: boolean) => dispatch(timelineActions.showTimeline({ show, id })),
-});
-
 export const Flyout = connect(
   mapStateToProps,
-  bindActionsToDispatch
+  {
+    showTimeline: timelineActions.showTimeline,
+  }
 )(FlyoutComponent);

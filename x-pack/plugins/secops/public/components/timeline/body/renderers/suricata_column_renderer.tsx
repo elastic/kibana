@@ -32,13 +32,13 @@ export const suricataColumnRenderer: ColumnRenderer = {
         const signature = get('suricata.eve.alert.signature', data) as string;
         const cve = getSuricataCVEFromSignature(signature);
         if (cve != null) {
-          return <React.Fragment>{cve}</React.Fragment>;
+          return <>{cve}</>;
         } else {
-          return <React.Fragment>{getOr(EMPTY_VALUE, 'event.id', data)}</React.Fragment>;
+          return <>{getOr(EMPTY_VALUE, 'event.id', data)}</>;
         }
       default:
         // unknown column name
-        return <React.Fragment>{EMPTY_VALUE}</React.Fragment>;
+        return <>{EMPTY_VALUE}</>;
     }
   },
 };
