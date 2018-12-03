@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { flatten, get } from 'lodash';
 import React from 'react';
 import { TABLE_CONFIG } from '../../../common/constants';
@@ -20,17 +21,18 @@ import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/do
 import { ConnectedLink } from '../../components/connected_link';
 import { TagBadge } from '../../components/tag';
 import { ConfigView } from '../../components/tag/config_view/index';
-import { supportedConfigs } from '../../config_schemas';
+import { getSupportedConfig } from '../../config_schemas_translations_map';
 
 interface PageProps {
   beat: CMPopulatedBeat | undefined;
+  intl: InjectedIntl;
 }
 
 interface PageState {
   selectedConfig: ConfigurationBlock | null;
 }
 
-export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
+class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
   constructor(props: PageProps) {
     super(props);
 
@@ -40,9 +42,16 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
   }
   public render() {
     const props = this.props;
-    const { beat } = props;
+    const { beat, intl } = props;
     if (!beat) {
-      return <div>Beat not found</div>;
+      return (
+        <div>
+          <FormattedMessage
+            id="xpack.beatsManagement.beat.beatNotFoundErrorTitle"
+            defaultMessage="Beat not found"
+          />
+        </div>
+      );
     }
     const configurationBlocks = flatten(
       beat.full_tags.map((tag: BeatTag) => {
@@ -54,7 +63,7 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
           ...beat,
           ...configuration,
           displayValue: get(
-            supportedConfigs.find(config => config.value === configuration.type),
+            getSupportedConfig().find(config => config.value === configuration.type),
             'text',
             null
           ),
@@ -65,7 +74,10 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
     const columns = [
       {
         field: 'displayValue',
-        name: 'Type',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beatConfigurations.typeColumnName',
+          defaultMessage: 'Type',
+        }),
         sortable: true,
         render: (value: string | null, configuration: any) => (
           <EuiLink
@@ -81,17 +93,26 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
       },
       {
         field: 'module',
-        name: 'Module',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beatConfigurations.moduleColumnName',
+          defaultMessage: 'Module',
+        }),
         sortable: true,
       },
       {
         field: 'description',
-        name: 'Description',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beatConfigurations.descriptionColumnName',
+          defaultMessage: 'Description',
+        }),
         sortable: true,
       },
       {
         field: 'tagId',
-        name: 'Tag',
+        name: intl.formatMessage({
+          id: 'xpack.beatsManagement.beatConfigurations.tagColumnName',
+          defaultMessage: 'Tag',
+        }),
         render: (id: string, block: any) => (
           <ConnectedLink path={`/tag/edit/${id}`}>
             <TagBadge
@@ -108,13 +129,21 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h4>Configurations</h4>
+              <h4>
+                <FormattedMessage
+                  id="xpack.beatsManagement.beat.detailsConfigurationTitle"
+                  defaultMessage="Configurations"
+                />
+              </h4>
             </EuiTitle>
             <EuiText size="s">
               <p>
-                You can have multiple configurations applied to an individual tag. These
-                configurations can repeat or mix types as necessary. For example, you may utilize
-                three metricbeat configurations alongside one input and filebeat configuration.
+                <FormattedMessage
+                  id="xpack.beatsManagement.beat.detailsConfigurationDescription"
+                  defaultMessage="You can have multiple configurations applied to an individual tag. These configurations can repeat
+                    or mix types as necessary. For example, you may utilize three metricbeat configurations alongside one input and
+                    filebeat configuration."
+                />
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -132,3 +161,4 @@ export class BeatDetailPage extends React.PureComponent<PageProps, PageState> {
     );
   }
 }
+export const BeatDetailPage = injectI18n(BeatDetailPageUi);
