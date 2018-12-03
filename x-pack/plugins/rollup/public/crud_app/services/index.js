@@ -19,6 +19,12 @@ export {
 } from './api_errors';
 
 export {
+  listBreadcrumb,
+  listBreadcrumbLink,
+  createBreadcrumb,
+} from './breadcrumbs';
+
+export {
   cronExpressionToParts,
   cronPartsToExpression,
   MINUTE,
