@@ -7,9 +7,9 @@ import React, { StatelessComponent } from 'react';
 
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
+import { GroupByOption, LevelFilterOption, LoadingState } from '../../types';
 import { LevelFilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
-import { GroupByOption, LevelFilterOption, LoadingState } from './types';
 
 interface CheckupControlsProps {
   allDeprecations?: DeprecationInfo[];

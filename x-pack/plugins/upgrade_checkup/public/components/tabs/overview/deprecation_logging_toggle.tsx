@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSwitch } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
-import { LoadingState } from '../checkup/types';
+import { LoadingState } from '../../types';
 
 interface DeprecationLoggingTabState {
   loadingState: LoadingState;

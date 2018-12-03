@@ -30,6 +30,8 @@ export interface UpgradeCheckupStatus {
   cluster: EnrichedDeprecationInfo[];
   nodes: EnrichedDeprecationInfo[];
   indices: EnrichedDeprecationInfo[];
+
+  [checkupType: string]: EnrichedDeprecationInfo[];
 }
 
 export async function getUpgradeCheckupStatus(

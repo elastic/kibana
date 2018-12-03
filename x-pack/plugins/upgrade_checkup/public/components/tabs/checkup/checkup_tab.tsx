@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import axios from 'axios';
 import React, { Fragment } from 'react';
 
 import {
@@ -18,23 +17,25 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
-
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../server/lib/es_migration_apis';
+import {
+  GroupByOption,
+  LevelFilterOption,
+  LoadingState,
+  UpgradeCheckupTabComponent,
+  UpgradeCheckupTabProps,
+} from '../../types';
 import { CheckupControls } from './controls';
 import { GroupedDeprecations } from './deprecations';
-import { GroupByOption, LevelFilterOption, LoadingState } from './types';
 
 type CHECKUP_TYPE = 'cluster' | 'nodes' | 'indices';
 
-interface CheckupTabProps {
+interface CheckupTabProps extends UpgradeCheckupTabProps {
   checkupType: CHECKUP_TYPE;
 }
 
 interface CheckupTabState {
-  loadingState: LoadingState;
-  deprecations?: EnrichedDeprecationInfo[];
   currentFilter: Set<LevelFilterOption>;
   currentGroupBy: GroupByOption;
 }
@@ -47,12 +48,11 @@ const filterDeps = (levels: Set<LevelFilterOption>) => (dep: DeprecationInfo) =>
  * Displays a list of deprecations that filterable and groupable. Can be used for cluster,
  * nodes, or indices checkups.
  */
-export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState> {
+export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, CheckupTabState> {
   constructor(props: CheckupTabProps) {
     super(props);
 
     this.state = {
-      loadingState: LoadingState.Loading,
       // initialize to all filters
       currentFilter: new Set([
         LevelFilterOption.info,
@@ -63,13 +63,9 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
     };
   }
 
-  public componentWillMount() {
-    return this.loadData();
-  }
-
   public render() {
-    const { checkupType } = this.props;
-    const { currentFilter, currentGroupBy, deprecations, loadingState } = this.state;
+    const { checkupType, loadingState, refreshCheckupData } = this.props;
+    const { currentFilter, currentGroupBy } = this.state;
 
     return (
       <Fragment>
@@ -88,12 +84,13 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
               <EuiCallOut title="Sorry, there was an error" color="danger" iconType="cross">
                 <p>There was a network error retrieving the checkup results.</p>
               </EuiCallOut>
-            ) : deprecations && deprecations.filter(filterDeps(currentFilter)).length > 0 ? (
+            ) : this.deprecations &&
+            this.deprecations.filter(filterDeps(currentFilter)).length > 0 ? (
               <Fragment>
                 <CheckupControls
-                  allDeprecations={deprecations}
+                  allDeprecations={this.deprecations}
                   loadingState={loadingState}
-                  loadData={this.loadData}
+                  loadData={refreshCheckupData}
                   currentFilter={currentFilter}
                   onFilterChange={this.changeFilter}
                   availableGroupByOptions={this.availableGroupByOptions()}
@@ -123,19 +120,10 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
     );
   }
 
-  private loadData = async () => {
-    try {
-      this.setState({ loadingState: LoadingState.Loading });
-      const resp = await axios.get(chrome.addBasePath('/api/upgrade_checkup/status'));
-      this.setState({
-        loadingState: LoadingState.Success,
-        deprecations: resp.data[this.props.checkupType],
-      });
-    } catch (e) {
-      // TODO: show error message?
-      this.setState({ loadingState: LoadingState.Error });
-    }
-  };
+  private get deprecations() {
+    const { checkupData, checkupType } = this.props;
+    return checkupData ? checkupData[checkupType] : null;
+  }
 
   private changeFilter = (filter: LevelFilterOption) => {
     // Make a copy so we don't modify the current one being rendered.
@@ -155,7 +143,7 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
   };
 
   private availableGroupByOptions() {
-    const { deprecations } = this.state;
+    const deprecations = this.deprecations;
 
     if (!deprecations) {
       return [];
@@ -165,7 +153,8 @@ export class CheckupTab extends React.Component<CheckupTabProps, CheckupTabState
   }
 
   private renderCheckupData() {
-    const { deprecations, currentFilter, currentGroupBy } = this.state;
+    const deprecations = this.deprecations!;
+    const { currentFilter, currentGroupBy } = this.state;
 
     return (
       <GroupedDeprecations

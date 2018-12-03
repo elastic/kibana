@@ -16,7 +16,7 @@ import {
   EuiNotificationBadge,
 } from '@elastic/eui';
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
-import { LevelFilterOption } from './types';
+import { LevelFilterOption } from '../../types';
 
 interface LevelFilterBarProps {
   allDeprecations?: DeprecationInfo[];

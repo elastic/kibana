@@ -4,6 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { UpgradeCheckupStatus } from '../../server/lib/es_migration_apis';
+
+export interface UpgradeCheckupTabProps {
+  checkupData?: UpgradeCheckupStatus;
+  refreshCheckupData: () => Promise<void>;
+  loadingState: LoadingState;
+  setSelectedTabIndex: (tabIndex: number) => void;
+}
+
+export class UpgradeCheckupTabComponent<
+  T extends UpgradeCheckupTabProps = UpgradeCheckupTabProps,
+  S = {}
+> extends React.Component<T, S> {}
+
 export enum LoadingState {
   Loading,
   Success,

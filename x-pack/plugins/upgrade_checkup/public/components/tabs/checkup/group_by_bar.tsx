@@ -12,7 +12,7 @@ import {
   // @ts-ignore
   EuiFilterGroup,
 } from '@elastic/eui';
-import { GroupByOption } from './types';
+import { GroupByOption } from '../../types';
 
 // UI labels for the enum type
 const GroupByOptionLabel: { [I in GroupByOption]: string } = {

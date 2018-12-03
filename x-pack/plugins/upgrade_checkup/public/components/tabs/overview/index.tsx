@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 
 import {
   EuiCallOut,
+  // @ts-ignore
   EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,13 +19,29 @@ import {
   EuiPageContentBody,
   EuiPanel,
   EuiSpacer,
+  // @ts-ignore
   EuiStat,
   EuiText,
 } from '@elastic/eui';
+import { LoadingState, UpgradeCheckupTabComponent } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
-export class OverviewTab extends React.Component {
+export class OverviewTab extends UpgradeCheckupTabComponent {
   public render() {
+    const { loadingState, checkupData, setSelectedTabIndex } = this.props;
+
+    if (loadingState !== LoadingState.Success) {
+      return null;
+    }
+
+    const countByType = Object.keys(checkupData!).reduce(
+      (counts, checkupType) => {
+        counts[checkupType] = checkupData![checkupType].length;
+        return counts;
+      },
+      {} as { [checkupType: string]: number }
+    );
+
     return (
       <Fragment>
         <EuiSpacer />
@@ -41,15 +58,15 @@ export class OverviewTab extends React.Component {
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem style={{ maxWidth: 220 }}>
             <EuiPanel>
-              <EuiStat title="2" description="Cluster issues">
-                <EuiLink>View all</EuiLink>
+              <EuiStat title={countByType.cluster} description="Cluster issues">
+                <EuiLink onClick={() => setSelectedTabIndex(1)}>View all</EuiLink>
               </EuiStat>
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem style={{ maxWidth: 220 }}>
             <EuiPanel>
-              <EuiStat title="14" description="Index issues">
-                <EuiLink>View all</EuiLink>
+              <EuiStat title={countByType.indices} description="Index issues">
+                <EuiLink onClick={() => setSelectedTabIndex(2)}>View all</EuiLink>
               </EuiStat>
             </EuiPanel>
           </EuiFlexItem>

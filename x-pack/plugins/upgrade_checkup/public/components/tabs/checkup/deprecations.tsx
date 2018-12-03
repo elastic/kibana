@@ -19,11 +19,11 @@ import {
 
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../server/lib/es_migration_apis';
+import { GroupByOption, LevelFilterOption } from '../../types';
 import { DeprecationCell } from './cell';
 import { COLOR_MAP, LEVEL_MAP } from './constants';
 import { DeprecationHealth } from './health';
 import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
-import { GroupByOption, LevelFilterOption } from './types';
 
 const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
