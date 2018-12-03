@@ -109,25 +109,25 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
           clusters[clusterUuid].heartbeat = {
             monitors: 0,
             endpoints: 0
-          }
+          };
         }
-        var clusterHb = clusters[clusterUuid].heartbeat
+        const clusterHb = clusters[clusterUuid].heartbeat;
 
-        clusterHb.monitors += heartbeatState.monitors 
-        clusterHb.endpoints += heartbeatState.endpoints 
-        for (var proto in heartbeatState) {
+        clusterHb.monitors += heartbeatState.monitors;
+        clusterHb.endpoints += heartbeatState.endpoints;
+        for (const proto in heartbeatState) {
           if (!heartbeatState.hasOwnProperty(proto)) continue;
-          let val = heartbeatState[proto]
-          if (typeof(val) !== "object") continue;
+          const val = heartbeatState[proto];
+          if (typeof val !== "object") continue;
 
           if (!(proto in clusters[clusterUuid])) {
             clusterHb[proto] = {
               monitors: 0,
               endpoints: 0
-            }
+            };
           }
-          clusterHb[proto].monitors += val.monitors 
-          clusterHb[proto].endpoints += val.endpoints 
+          clusterHb[proto].monitors += val.monitors;
+          clusterHb[proto].endpoints += val.endpoints;
         }
       }
 
