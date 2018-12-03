@@ -45,11 +45,13 @@ const unescapeTemplateVars = url => {
 
 
 
+const DEFAULT_LANGUAGE = 'en';
+
 
 export class EMSClientV66 {
 
 
-  constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer }) {
+  constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language }) {
 
     this._queryParams = {
       my_app_version: kbnVersion
@@ -60,8 +62,10 @@ export class EMSClientV66 {
     this._loadCatalogue = null;
     this._loadFileLayers = null;
     this._loadTMSServices = null;
+    this._language = typeof language === 'string' ? language : DEFAULT_LANGUAGE;
 
     this._invalidateSettings();
+
 
   }
 
@@ -90,6 +94,7 @@ export class EMSClientV66 {
    * @param additionalQueryParams
    */
   addQueryParams(additionalQueryParams) {
+    console.log('ad', additionalQueryParams);
     for (const key in additionalQueryParams) {
       if (additionalQueryParams.hasOwnProperty(key)) {
         if (additionalQueryParams[key] !== this._queryParams[key]) {

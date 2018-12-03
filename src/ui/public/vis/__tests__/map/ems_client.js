@@ -46,6 +46,20 @@ describe('ems_client', () => {
 
 
   });
+
+  it('.addQueryParams', async () => {
+
+    const emsClient = getEMSClient();
+    emsClient.addQueryParams({
+      'foo': 'bar'
+    });
+    const tiles = await emsClient.getTMSServices();
+    const url = tiles[0].getUrlTemplate();
+    expect(url).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=6.x.x&foo=bar');
+
+
+  });
+
 });
 
 
