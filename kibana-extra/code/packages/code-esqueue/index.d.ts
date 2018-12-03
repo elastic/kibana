@@ -9,4 +9,4 @@ export { CancellationToken } from './helpers/cancellation_token';
 export { Job } from './job';
 export { Worker, WorkerOutput } from './worker';
 export { Esqueue } from './esqueue';
-export { EsClient } from './misc';
+export { AnyObject, EsClient } from './misc';

@@ -7,7 +7,8 @@ import { RootState } from '../reducers';
 
 export const getTree = (state: RootState) => state.file.tree;
 
-export const lastRequestPathSelector: (state: RootState) => string = (state: RootState) => state.symbol.lastRequestPath || '';
+export const lastRequestPathSelector: (state: RootState) => string = (state: RootState) =>
+  state.symbol.lastRequestPath || '';
 
 export const structureSelector = (state: RootState) => {
   const pathname = lastRequestPathSelector(state);

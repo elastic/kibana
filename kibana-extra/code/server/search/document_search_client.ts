@@ -293,6 +293,10 @@ export class DocumentSearchClient extends AbstractSearchClient {
   }
 
   private getSourceContent(hitsContent: SourceHit[], doc: Document) {
+    if (hitsContent.length === 0) {
+      return undefined;
+    }
+
     const slicedHighlights = hitsContent.slice(0, MAX_HIT_NUMBER);
     const slicedRanges: LineRange[] = slicedHighlights.map(hit => ({
       startLine: hit.range.startLoc.line,
