@@ -39,15 +39,16 @@ export abstract class EmbeddableFactory {
 
   /**
    *
-   * @param {{ id: string }} containerMetadata. Currently just passing in panelState but it's more than we need, so we should
-   * decouple this to only include data given to us from the embeddable when it's added to the dashboard. Generally
-   * will be just the object id, but could be anything depending on the plugin.
+   * @param embeddableConfiguration. Any specific data that the factory requires to create an instance of an
+   * embeddable of this type.
    * @param {onEmbeddableStateChanged} onEmbeddableStateChanged - embeddable should call this function with updated
    * state whenever something changes that the dashboard should know about.
    * @return {Promise.<Embeddable>}
    */
   public abstract create(
-    containerMetadata: { id: string },
+    embeddableConfiguration: object,
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ): Promise<Embeddable>;
+
+  public abstract list(): Promise<object[]>;
 }

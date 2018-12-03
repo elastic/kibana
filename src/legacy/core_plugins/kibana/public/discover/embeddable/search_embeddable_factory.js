@@ -57,4 +57,10 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
         });
       });
   }
+
+  async list() {
+    return this.searchLoader.map(savedVis => ({
+      id: savedVis.id
+    }));
+  }
 }

@@ -79,4 +79,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
       }
     });
   }
+
+  public async list() {
+    return this.savedVisualizations.map(savedVis => ({
+      id: savedVis.id,
+    }));
+  }
 }
