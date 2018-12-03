@@ -24,6 +24,7 @@ import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/query_bar';
+import { uiCapabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
@@ -134,90 +135,7 @@ function VisEditor(
     dirty: !savedVis.id
   };
 
-  $scope.topNavMenu = [{
-    key: 'save',
-    description: 'Save Visualization',
-    testId: 'visualizeSaveButton',
-    disableButton() {
-      return Boolean(vis.dirty);
-    },
-    tooltip() {
-      if (vis.dirty) {
-        return 'Apply or Discard your changes before saving';
-      }
-    },
-    run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-        const currentTitle = savedVis.title;
-        savedVis.title = newTitle;
-        savedVis.copyOnSave = newCopyOnSave;
-        const saveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        };
-        return doSave(saveOptions).then(({ id, error }) => {
-          // If the save wasn't successful, put the original values back.
-          if (!id || error) {
-            savedVis.title = currentTitle;
-          }
-          return { id, error };
-        });
-      };
-
-      const saveModal = (
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          title={savedVis.title}
-          showCopyOnSave={savedVis.id ? true : false}
-          objectType="visualization"
-        />);
-      showSaveModal(saveModal);
-    }
-  }, {
-    key: 'share',
-    description: 'Share Visualization',
-    testId: 'shareTopNavButton',
-    run: (menuItem, navController, anchorElement) => {
-      const hasUnappliedChanges = vis.dirty;
-      const hasUnsavedChanges = $appStatus.dirty;
-      showShareContextMenu({
-        anchorElement,
-        allowEmbed: true,
-        getUnhashableStates,
-        objectId: savedVis.id,
-        objectType: 'visualization',
-        shareContextMenuExtensions,
-        sharingData: {
-          title: savedVis.title,
-        },
-        isDirty: hasUnappliedChanges || hasUnsavedChanges,
-      });
-    }
-  }, {
-    key: 'inspect',
-    description: 'Open Inspector for visualization',
-    testId: 'openInspectorButton',
-    disableButton() {
-      return !vis.hasInspector || !vis.hasInspector();
-    },
-    run() {
-      vis.openInspector().bindToAngularScope($scope);
-    },
-    tooltip() {
-      if (!vis.hasInspector || !vis.hasInspector()) {
-        return 'This visualization doesn\'t support any inspectors.';
-      }
-    }
-  }, {
-    key: 'refresh',
-    description: 'Refresh',
-    run: function () {
-      vis.forceReload();
-    },
-    testId: 'visualizeRefreshButton',
-  }];
+  $scope.topNavMenu = getTopNavMenu();
 
   let stateMonitor;
 
@@ -258,6 +176,105 @@ function VisEditor(
 
     return appState;
   }());
+
+  function getTopNavMenu() {
+
+    const saveAction = {
+      key: 'save',
+      description: 'Save Visualization',
+      testId: 'visualizeSaveButton',
+      disableButton() {
+        return Boolean(vis.dirty);
+      },
+      tooltip() {
+        if (vis.dirty) {
+          return 'Apply or Discard your changes before saving';
+        }
+      },
+      run: async () => {
+        const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+          const currentTitle = savedVis.title;
+          savedVis.title = newTitle;
+          savedVis.copyOnSave = newCopyOnSave;
+          const saveOptions = {
+            confirmOverwrite: false,
+            isTitleDuplicateConfirmed,
+            onTitleDuplicate,
+          };
+          return doSave(saveOptions).then(({ id, error }) => {
+            // If the save wasn't successful, put the original values back.
+            if (!id || error) {
+              savedVis.title = currentTitle;
+            }
+            return { id, error };
+          });
+        };
+
+        const saveModal = (
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => { }}
+            title={savedVis.title}
+            showCopyOnSave={savedVis.id ? true : false}
+            objectType="visualization"
+          />);
+        showSaveModal(saveModal);
+      }
+    };
+
+    const shareAction = {
+      key: 'share',
+      description: 'Share Visualization',
+      testId: 'shareTopNavButton',
+      run: (menuItem, navController, anchorElement) => {
+        const hasUnappliedChanges = vis.dirty;
+        const hasUnsavedChanges = $appStatus.dirty;
+        showShareContextMenu({
+          anchorElement,
+          allowEmbed: true,
+          getUnhashableStates,
+          objectId: savedVis.id,
+          objectType: 'visualization',
+          shareContextMenuExtensions,
+          sharingData: {
+            title: savedVis.title,
+          },
+          isDirty: hasUnappliedChanges || hasUnsavedChanges,
+        });
+      }
+    };
+
+    const inspectAction = {
+      key: 'inspect',
+      description: 'Open Inspector for visualization',
+      testId: 'openInspectorButton',
+      disableButton() {
+        return !vis.hasInspector || !vis.hasInspector();
+      },
+      run() {
+        vis.openInspector().bindToAngularScope($scope);
+      },
+      tooltip() {
+        if (!vis.hasInspector || !vis.hasInspector()) {
+          return 'This visualization doesn\'t support any inspectors.';
+        }
+      }
+    };
+
+    const refreshAction = {
+      key: 'refresh',
+      description: 'Refresh',
+      run: function () {
+        vis.forceReload();
+      },
+      testId: 'visualizeRefreshButton',
+    };
+
+    if (uiCapabilities.visualize.showWriteControls) {
+      return [saveAction, shareAction, inspectAction, refreshAction];
+    }
+    return [shareAction, inspectAction, refreshAction];
+  }
 
   function init() {
     // export some objects
