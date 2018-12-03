@@ -1,0 +1,12 @@
+
+/**
+ * 1. Encapsulate this fix to avoid modifying global styling.
+ */
+.crossClusterReplicationPageContent {
+  max-width: 1000px !important;
+  width: 100% !important;
+
+  .euiText .euiButton--warning {
+    color: $euiColorWarning; // [1]
+  }
+}

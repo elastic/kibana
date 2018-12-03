@@ -5,9 +5,10 @@
  */
 
 import chrome from 'ui/chrome';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, API_REMOTE_CLUSTERS_BASE_PATH } from '../../../common/constants';
 
 const apiPrefix = chrome.addBasePath(API_BASE_PATH);
+const apiPrefixRemoteClusters = chrome.addBasePath(API_REMOTE_CLUSTERS_BASE_PATH);
 
 // This is an Angular service, which is why we use this provider pattern
 // to access it within our React app.
@@ -19,7 +20,17 @@ export function setHttpClient(client) {
 
 // ---
 
-
 export const loadAutoFollowPatterns = async () => {
-  return await httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(response => response.data);
+  return await httpClient.get(`${apiPrefix}/auto_follow_patterns`)
+    .then(response => response.data);
 };
+
+export async function loadRemoteClusters() {
+  return await httpClient.get(`${apiPrefixRemoteClusters}`)
+    .then(response => response.data);
+}
+
+export async function createAutoFollowPattern(id, autoFollowPattern) {
+  return await httpClient.put(`${apiPrefix}/auto_follow_patterns/${id}`, autoFollowPattern)
+    .then(response => response.data);
+}

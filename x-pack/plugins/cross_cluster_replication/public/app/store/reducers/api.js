@@ -29,7 +29,7 @@ export const reducer = (state = initialState, action) => {
     case t.API_END: {
       return { ...state, status: { ...state.status, [scope]: API_STATUS.IDLE } };
     }
-    case t.API_ERROR: {
+    case t.API_ERROR_SET: {
       return { ...state, error: { ...state.error, [scope]: error } };
     }
     default:

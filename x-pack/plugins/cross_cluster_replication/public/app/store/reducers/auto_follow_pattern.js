@@ -18,6 +18,9 @@ export const reducer = (state = initialState, action) => {
     case success(t.AUTO_FOLLOW_PATTERN_LOAD): {
       return { ...state, byId: action.payload };
     }
+    case t.AUTO_FOLLOW_PATTERN_SELECT: {
+      return { ...state, selectedId: action.payload };
+    }
     default:
       return state;
   }

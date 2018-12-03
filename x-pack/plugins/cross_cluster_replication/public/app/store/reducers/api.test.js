@@ -6,7 +6,7 @@
 
 import { reducer, initialState } from './api';
 import { API_STATUS } from '../../constants';
-import { apiStart, apiEnd, apiError } from '../actions';
+import { apiStart, apiEnd, setApiError } from '../actions';
 
 describe('CCR Api reducers', () => {
   const scope = 'testSection';
@@ -24,9 +24,9 @@ describe('CCR Api reducers', () => {
     expect(result.status[scope]).toEqual(API_STATUS.IDLE);
   });
 
-  it('API_ERROR should set the Api error on scope', () => {
+  it('API_ERROR_SET should set the Api error on scope', () => {
     const error = { foo: 'bar' };
-    const result = reducer(initialState, apiError({ error, scope }));
+    const result = reducer(initialState, setApiError({ error, scope }));
 
     expect(result.error[scope]).toBe(error);
   });
