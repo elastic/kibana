@@ -9,12 +9,10 @@ import PropTypes from 'prop-types';
 
 import {
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyout,
   EuiTitle,
   EuiInMemoryTable,
   EuiSpacer,
-  EuiButtonEmpty,
   EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -70,14 +68,6 @@ export class NodeAttrsDetailsUi extends PureComponent {
               sorting={true}
             />
           </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.nodeAttrDetails.closeLabel"
-                defaultMessage="Close"
-              />
-            </EuiButtonEmpty>
-          </EuiFlyoutFooter>
         </EuiFlyout>
       </EuiPortal>
     );
