@@ -4,7 +4,7 @@
 The Console plugin provides a UI to interact with the REST API of Elasticsearch. Console has two main areas: the *editor*,
 where you compose requests to Elasticsearch, and the *response* pane, which displays the responses to the request.
 
-NOTE: The Elasticsearch API is currently the only service that you can interact with via the Console.
+NOTE: You cannot interact with Kibana API endpoints via the Console.
 
 .The Console UI
 image::dev-tools/console/images/introduction_screen.png[Screenshot]

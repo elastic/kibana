@@ -24,7 +24,7 @@ wherever possible.
 have breaking changes in any version of Kibana, or it might even be removed
 entirely.
 
-NOTE: These APIs are not accessible via the Console plugin in Kibana.
+NOTE: You cannot access these APIs via the Console in Kibana.
 
 [float]
 == APIs
