@@ -20,6 +20,13 @@ Kibana provides step-by-step instructions to help you add your data sources.
 The {infra-guide}[Infrastructure Monitoring Guide] is good source for more detailed
 instructions and information.
 
+[float]
+== Configure data sources 
+
+By default the Infrastructure UI uses the `metricbeat-*` index pattern to query the data.
+If you configured Metricbeat to export data to a different set of indices you will need to set `
+xpack.infra.sources.default.metricAlias` in `config/kibana.yml` to match your index pattern.
+
 --
 
 include::monitor.asciidoc[]
