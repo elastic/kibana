@@ -19,21 +19,21 @@ import { TileStyle } from '../../shared/layers/styles/tile_style';
 
 const module = uiModules.get('app/gis');
 
-module.factory('SavedGisWorkspace', function (Private) {
+module.factory('SavedGisMap', function (Private) {
   const SavedObject = Private(SavedObjectProvider);
-  createLegacyClass(SavedGisWorkspace).inherits(SavedObject);
-  function SavedGisWorkspace(id) {
-    SavedGisWorkspace.Super.call(this, {
-      type: SavedGisWorkspace.type,
-      mapping: SavedGisWorkspace.mapping,
-      searchSource: SavedGisWorkspace.searchsource,
+  createLegacyClass(SavedGisMap).inherits(SavedObject);
+  function SavedGisMap(id) {
+    SavedGisMap.Super.call(this, {
+      type: SavedGisMap.type,
+      mapping: SavedGisMap.mapping,
+      searchSource: SavedGisMap.searchsource,
 
       // if this is null/undefined then the SavedObject will be assigned the defaults
       id: id,
 
       // default values that will get assigned if the doc is new
       defaults: {
-        title: 'New Workspace',
+        title: 'New Map',
         description: '',
         layerListJSON: JSON.stringify([
           {
@@ -59,10 +59,10 @@ module.factory('SavedGisWorkspace', function (Private) {
     this.showInRecentlyAccessed = true;
   }
 
-  SavedGisWorkspace.type = 'gis-workspace';
+  SavedGisMap.type = 'gis-map';
 
   // Mappings are used to place object properties into saved object _source
-  SavedGisWorkspace.mapping = {
+  SavedGisMap.mapping = {
     title: 'text',
     description: 'text',
     mapStateJSON: 'text',
@@ -73,15 +73,15 @@ module.factory('SavedGisWorkspace', function (Private) {
     }
   };
 
-  SavedGisWorkspace.fieldOrder = ['title', 'description'];
+  SavedGisMap.fieldOrder = ['title', 'description'];
 
-  SavedGisWorkspace.searchsource = false;
+  SavedGisMap.searchsource = false;
 
-  SavedGisWorkspace.prototype.getFullPath = function () {
-    return `/app/gis#workspace/${this.id}`;
+  SavedGisMap.prototype.getFullPath = function () {
+    return `/app/gis#map/${this.id}`;
   };
 
-  SavedGisWorkspace.prototype.syncWithStore = function (state) {
+  SavedGisMap.prototype.syncWithStore = function (state) {
     const layerList = getLayerListRaw(state);
     // Layer list from store contains requested data.
     // We do not want to store this in the saved object so it is getting removed
@@ -108,5 +108,5 @@ module.factory('SavedGisWorkspace', function (Private) {
     };
   };
 
-  return SavedGisWorkspace;
+  return SavedGisMap;
 });

@@ -109,7 +109,7 @@
               }
             }
           },
-          "gis-workspace" : {
+          "gis-map" : {
             "properties" : {
               "bounds" : {
                 "type" : "geo_shape",

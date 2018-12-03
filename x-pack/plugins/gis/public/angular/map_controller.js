@@ -12,7 +12,7 @@ import { applyTheme } from 'ui/theme';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { getStore } from '../store/store';
-import { GISApp } from '../components/gis_app';
+import { GisMap } from '../components/gis_map';
 import { setTimeFilters, mapExtentChanged, replaceLayerList } from '../actions/store_actions';
 import { getIsDarkTheme } from '../store/ui';
 import { Inspector } from 'ui/inspector';
@@ -27,10 +27,10 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
 const app = uiModules.get('app/gis', []);
 
-app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
+app.controller('GisMapController', ($scope, $route, config, kbnUrl) => {
 
   let isLayersListInitializedFromSavedObject = false;
-  const savedWorkspace = $scope.workspace = $route.current.locals.workspace;
+  const savedMap = $scope.map = $route.current.locals.map;
   let isDarkTheme;
   let unsubscribe;
 
@@ -40,10 +40,10 @@ app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
       handleStoreChanges(store);
     });
 
-    // sync store with savedWorkspace mapState
+    // sync store with savedMap mapState
     // layerList is synced after map has initialized and extent is known.
-    if (savedWorkspace.mapStateJSON) {
-      const mapState = JSON.parse(savedWorkspace.mapStateJSON);
+    if (savedMap.mapStateJSON) {
+      const mapState = JSON.parse(savedMap.mapStateJSON);
       const timeFilters = mapState.timeFilters ? mapState.timeFilters : timefilter.getTime();
       store.dispatch(setTimeFilters(timeFilters));
       store.dispatch(mapExtentChanged({
@@ -55,7 +55,7 @@ app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
-        <GISApp/>
+        <GisMap/>
       </Provider>,
       root);
   });
@@ -76,7 +76,7 @@ app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
     // Delayed until after map is ready so map extent is known
     if (!isLayersListInitializedFromSavedObject && getMapReady(store.getState())) {
       isLayersListInitializedFromSavedObject = true;
-      const layerList = savedWorkspace.layerListJSON ? JSON.parse(savedWorkspace.layerListJSON) : [];
+      const layerList = savedMap.layerListJSON ? JSON.parse(savedMap.layerListJSON) : [];
       store.dispatch(replaceLayerList(layerList));
     }
   }
@@ -94,41 +94,41 @@ app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
     }
   });
 
-  $scope.getWorkspaceTitle = function () {
-    return $scope.workspace.title;
+  $scope.getMapTitle = function () {
+    return $scope.map.title;
   };
   // k7design breadcrumbs
   // TODO subscribe to store change and change when store updates title
   chrome.breadcrumbs.set([
-    { text: 'Workspace', href: '#' },
-    { text: $scope.getWorkspaceTitle() }
+    { text: 'Map', href: '#' },
+    { text: $scope.getMapTitle() }
   ]);
   config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
   async function doSave(saveOptions) {
     const store = await  getStore();
-    savedWorkspace.syncWithStore(store.getState());
+    savedMap.syncWithStore(store.getState());
 
     let id;
     try {
-      id = await savedWorkspace.save(saveOptions);
+      id = await savedMap.save(saveOptions);
     } catch(err) {
       toastNotifications.addDanger({
-        title: `Error on saving '${savedWorkspace.title}'`,
+        title: `Error on saving '${savedMap.title}'`,
         text: err.message,
-        'data-test-subj': 'saveWorkspaceError',
+        'data-test-subj': 'saveMapError',
       });
       return { error: err };
     }
 
     if (id) {
       toastNotifications.addSuccess({
-        title: `Saved '${savedWorkspace.title}'`,
-        'data-test-subj': 'saveWorkspaceSuccess',
+        title: `Saved '${savedMap.title}'`,
+        'data-test-subj': 'saveMapSuccess',
       });
 
-      if (savedWorkspace.id !== $route.current.params.id) {
-        kbnUrl.change(`workspace/{{id}}`, { id: savedWorkspace.id });
+      if (savedMap.id !== $route.current.params.id) {
+        kbnUrl.change(`map/{{id}}`, { id: savedMap.id });
       }
     }
     return { id };
@@ -150,13 +150,13 @@ app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
     }
   }, {
     key: 'save',
-    description: 'Save workspace',
-    testId: 'workspaceSaveButton',
+    description: 'Save map',
+    testId: 'mapSaveButton',
     run: async () => {
       const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-        const currentTitle = savedWorkspace.title;
-        savedWorkspace.title = newTitle;
-        savedWorkspace.copyOnSave = newCopyOnSave;
+        const currentTitle = savedMap.title;
+        savedMap.title = newTitle;
+        savedMap.copyOnSave = newCopyOnSave;
         const saveOptions = {
           confirmOverwrite: false,
           isTitleDuplicateConfirmed,
@@ -165,7 +165,7 @@ app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
         return doSave(saveOptions).then(({ id, error }) => {
           // If the save wasn't successful, put the original values back.
           if (!id || error) {
-            savedWorkspace.title = currentTitle;
+            savedMap.title = currentTitle;
           }
           return { id, error };
         });
@@ -175,9 +175,9 @@ app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
         <SavedObjectSaveModal
           onSave={onSave}
           onClose={() => {}}
-          title={savedWorkspace.title}
-          showCopyOnSave={savedWorkspace.id ? true : false}
-          objectType={'gis-workspace'}
+          title={savedMap.title}
+          showCopyOnSave={savedMap.id ? true : false}
+          objectType={'gis-map'}
         />);
       showSaveModal(saveModal);
     }

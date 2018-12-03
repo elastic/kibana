@@ -25,16 +25,16 @@ import 'react-vis/dist/style.css';
 import "mapbox-gl/dist/mapbox-gl.css";
 
 import 'ui/vis/map/service_settings';
-import './angular/services/workspace_saved_object_loader';
-import './angular/workspace_controller';
+import './angular/services/gis_map_saved_object_loader';
+import './angular/map_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';
-import workspaceTemplate from './angular/workspace.html';
-import { WorkspaceListing } from './shared/components/workspace_listing';
+import mapTemplate from './angular/map.html';
+import { MapListing } from './shared/components/map_listing';
 
 const app = uiModules.get('app/gis', ['ngRoute', 'react']);
 
-app.directive('workspaceListing', function (reactDirective) {
-  return reactDirective(WorkspaceListing);
+app.directive('mapListing', function (reactDirective) {
+  return reactDirective(MapListing);
 });
 
 routes.enable();
@@ -42,21 +42,21 @@ routes.enable();
 routes
   .when('/', {
     template: listingTemplate,
-    controller($scope, gisWorkspaceSavedObjectLoader, config) {
+    controller($scope, gisMapSavedObjectLoader, config) {
       $scope.listingLimit = config.get('savedObjects:listingLimit');
       $scope.find = (search) => {
-        return gisWorkspaceSavedObjectLoader.find(search, $scope.listingLimit);
+        return gisMapSavedObjectLoader.find(search, $scope.listingLimit);
       };
       $scope.delete = (ids) => {
-        return gisWorkspaceSavedObjectLoader.delete(ids);
+        return gisMapSavedObjectLoader.delete(ids);
       };
     },
     resolve: {
-      hasWorkspaces: function (kbnUrl) {
-        chrome.getSavedObjectsClient().find({ type: 'gis-workspace', perPage: 1 }).then(resp => {
-          // Do not show empty listing page, just redirect to a new workspace
+      hasMaps: function (kbnUrl) {
+        chrome.getSavedObjectsClient().find({ type: 'gis-map', perPage: 1 }).then(resp => {
+          // Do not show empty listing page, just redirect to a new map
           if (resp.savedObjects.length === 0) {
-            kbnUrl.redirect('/workspace');
+            kbnUrl.redirect('/map');
           }
 
           return true;
@@ -64,27 +64,27 @@ routes
       }
     }
   })
-  .when('/workspace', {
-    template: workspaceTemplate,
-    controller: 'GisWorkspaceController',
+  .when('/map', {
+    template: mapTemplate,
+    controller: 'GisMapController',
     resolve: {
-      workspace: function (gisWorkspaceSavedObjectLoader, redirectWhenMissing) {
-        return gisWorkspaceSavedObjectLoader.get()
+      map: function (gisMapSavedObjectLoader, redirectWhenMissing) {
+        return gisMapSavedObjectLoader.get()
           .catch(redirectWhenMissing({
-            'workspace': '/'
+            'map': '/'
           }));
       }
     }
   })
-  .when('/workspace/:id', {
-    template: workspaceTemplate,
-    controller: 'GisWorkspaceController',
+  .when('/map/:id', {
+    template: mapTemplate,
+    controller: 'GisMapController',
     resolve: {
-      workspace: function (gisWorkspaceSavedObjectLoader, redirectWhenMissing, $route) {
+      map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route) {
         const id = $route.current.params.id;
-        return gisWorkspaceSavedObjectLoader.get(id)
+        return gisMapSavedObjectLoader.get(id)
           .catch(redirectWhenMissing({
-            'workspace': '/'
+            'map': '/'
           }));
       }
     }

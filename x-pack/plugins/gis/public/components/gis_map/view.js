@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Toasts } from '../toasts';
 
 
-export function GISApp(props) {
+export function GisMap(props) {
   const {
     layerDetailsVisible,
     addLayerVisible,

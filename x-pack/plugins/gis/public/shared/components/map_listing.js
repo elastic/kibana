@@ -27,7 +27,7 @@ import {
 
 export const EMPTY_FILTER = '';
 
-export class WorkspaceListing extends React.Component {
+export class MapListing extends React.Component {
 
   constructor(props) {
     super(props);
@@ -89,7 +89,7 @@ export class WorkspaceListing extends React.Component {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
       toastNotifications.addDanger({
-        title: `Unable to delete workspace(s)`,
+        title: `Unable to delete map(s)`,
         text: `${error}`,
       });
     }
@@ -211,7 +211,7 @@ export class WorkspaceListing extends React.Component {
     }
 
     if (this.hasNoItems()) {
-      return `Looks like you don't have any workspaces. Click the create button to create one.`;
+      return `Looks like you don't have any maps. Click the create button to create one.`;
     }
 
     return 'No items matched your search.';
@@ -263,8 +263,8 @@ export class WorkspaceListing extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            href={`#/workspace/${record.id}`}
-            data-test-subj={`workspaceListingTitleLink-${record.title.split(' ').join('-')}`}
+            href={`#/map/${record.id}`}
+            data-test-subj={`MapListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
           </EuiLink>
@@ -320,10 +320,10 @@ export class WorkspaceListing extends React.Component {
       createButton = (
         <EuiFlexItem grow={false}>
           <EuiButton
-            href={`#/workspace`}
-            data-test-subj="newWorkspaceLink"
+            href={`#/map`}
+            data-test-subj="newMapLink"
           >
-            Create new workspace
+            Create new map
           </EuiButton>
         </EuiFlexItem>
       );
@@ -336,7 +336,7 @@ export class WorkspaceListing extends React.Component {
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
               <h1>
-                GIS workspaces
+                GIS maps
               </h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -381,7 +381,7 @@ export class WorkspaceListing extends React.Component {
   }
 }
 
-WorkspaceListing.propTypes = {
+MapListing.propTypes = {
   find: PropTypes.func.isRequired,
   delete: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,

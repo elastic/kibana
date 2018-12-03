@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { GISApp } from './view';
+import { GisMap } from './view';
 import { getFlyoutDisplay, FLYOUT_STATE } from '../../store/ui';
 
 function mapStateToProps(state = {}) {
@@ -17,5 +17,5 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedGISApp = connect(mapStateToProps)(GISApp);
-export { connectedGISApp as GISApp };
+const connectedGisMap = connect(mapStateToProps)(GisMap);
+export { connectedGisMap as GisMap };

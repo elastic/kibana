@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './saved_gis_workspace';
+import './saved_gis_map';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
@@ -15,12 +15,12 @@ const module = uiModules.get('app/gis');
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
 SavedObjectRegistryProvider.register({
-  service: 'gisWorkspaceSavedObjectLoader',
-  title: 'gisWorkspaces'
+  service: 'gisMapSavedObjectLoader',
+  title: 'gisMaps'
 });
 
 // This is the only thing that gets injected into controllers
-module.service('gisWorkspaceSavedObjectLoader', function (Private, SavedGisWorkspace, kbnIndex, kbnUrl, $http, chrome) {
+module.service('gisMapSavedObjectLoader', function (Private, SavedGisMap, kbnIndex, kbnUrl, $http, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  return new SavedObjectLoader(SavedGisWorkspace, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
+  return new SavedObjectLoader(SavedGisMap, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
 });

@@ -1,7 +1,7 @@
 [
   {
-    "id" : "gis-workspace:01392550-d955-11e8-978a-91956e08b85e",
-    "type": "gis-workspace",
+    "id" : "gis-map:01392550-d955-11e8-978a-91956e08b85e",
+    "type": "gis-map",
     "updated_at" : "2018-10-22T12:41:57.071Z",
     "version": 1,
     "attributes" : {
