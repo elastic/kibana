@@ -30,3 +30,28 @@ test plugin), you can just run:
 ```
 yarn start --plugin-path=test/plugin_functional/plugins/<plugin_folder>
 ```
+
+If you wish to start Kibana with multiple test plugins, you can run:
+
+```
+yarn start --plugin-path=test/plugin_functional/plugins/<plugin_folder1> --plugin-path=test/plugin_functional/plugins/<plugin_folder2> ... 
+```
+
+If you wish to load up specific es archived data for your test, you can do so via:
+
+```
+node scripts/es_archiver.js load <archive> [--es-url=http://elastic:changeme@localhost:9200] [--kibana-url=http://elastic:changeme@localhost:5601/{basepath?}]
+```
+
+That will load the specified archive located in `test/functional/fixtures/es_archiver/<archive>`
+
+*Note:* The `--es-url` and `--kibana-url` options may or may not be neccessary depending on your current Kibana configuration settings.
+
+Another option, which will automatically use any specific settings the test environment may rely on, is to boot up the functional test server pointing to the plugin configuration file.
+
+```
+node scripts/functional_tests_server --config test/plugin_functional/config.js
+```
+
+*Note:* you may still need to use the es_archiver script to boot up any required data.
+
