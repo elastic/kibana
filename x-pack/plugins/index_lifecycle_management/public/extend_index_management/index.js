@@ -135,18 +135,22 @@ addFilterExtension(indices => {
   } else {
     return [
       {
-        type: 'field_value_toggle_group',
+        type: 'field_value_selection',
+        name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.lifecycleStatusLabel', {
+          defaultMessage: 'Lifecycle status',
+        }),
+        multiSelect: false,
         field: 'ilm.managed',
-        items: [
+        options: [
           {
             value: true,
-            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.managedLabel', {
               defaultMessage: 'Managed',
             }),
           },
           {
             value: false,
-            name: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.unmanagedLabel', {
               defaultMessage: 'Unmanaged',
             }),
           },
@@ -161,21 +165,25 @@ addFilterExtension(indices => {
         multiSelect: 'or',
         options: [
           {
-            value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
+            value: 'hot',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
               defaultMessage: 'hot',
             }),
           },
           {
+            view: 'warm',
             value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
               defaultMessage: 'warm',
             }),
           },
           {
+            view: 'cold',
             value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
               defaultMessage: 'cold',
             }),
           },
           {
+            view: 'delete',
             value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
               defaultMessage: 'delete',
             }),
