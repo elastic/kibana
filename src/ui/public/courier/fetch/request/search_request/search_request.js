@@ -144,7 +144,7 @@ export function SearchRequestProvider(Promise) {
 
     continue() {
       throw new Error(
-        i18n.translate('common.ui.courier.fetch.unableStartRequestErrorMessage', {
+        i18n.translate('common.ui.courier.fetch.unableContinueRequestErrorMessage', {
           defaultMessage: 'Unable to continue {type} request',
           values: { type: this.type }
         })
