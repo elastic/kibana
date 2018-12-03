@@ -20,6 +20,7 @@
 import MarkdownIt from 'markdown-it';
 import _ from 'lodash';
 import { modifyUrl } from '../../../core/public/utils';
+import { TMSService } from './tms_service';
 
 const extendUrl = (url, props) => (
   modifyUrl(url, parsed => _.merge(parsed, props))
@@ -45,10 +46,11 @@ const unescapeTemplateVars = url => {
 
 
 
-export class EMSClient {
+export class EMSClientV66 {
 
 
   constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer }) {
+
     this._queryParams = {
       my_app_version: kbnVersion
     };
@@ -59,16 +61,26 @@ export class EMSClient {
     this._loadFileLayers = null;
     this._loadTMSServices = null;
 
+    this._invalidateSettings();
+
   }
+
+
+
 
   /**
    * this internal method is overridden by the tests to simulate custom manifest.
    */
   async _getManifest(manifestUrl) {
-    // return $http({
-    //   url: extendUrl(manifestUrl, { query: this._queryParams }),
-    //   method: 'GET'
-    // });
+
+    console.log('should get manfiest', manifestUrl);
+
+    const url = extendUrl(manifestUrl, { query: this._queryParams });
+    console.log(url);
+    const result = await fetch(url);
+    const json = await result.json();
+    console.log(json);
+    return json;
   }
 
 
@@ -95,8 +107,9 @@ export class EMSClient {
     this._loadCatalogue = _.once(async () => {
 
       try {
-        const response = await this._getManifest(this._manifestServiceUrl, this._queryParams);
-        return response.data;
+        const url = this.extendUrlWithParams(this._manifestServiceUrl);
+        const response = await this._getManifest(url);
+        return response;
       } catch (e) {
         if (!e) {
           e = new Error('Unknown error');
@@ -108,23 +121,23 @@ export class EMSClient {
       }
     });
 
-
-    this._loadFileLayers = _.once(async () => {
-      const catalogue = await this._loadCatalogue();
-
-      const fileService = catalogue.services.find(service => service.type === 'file');
-      if (!fileService) {
-        return [];
-      }
-
-      const manifest = await this._getManifest(fileService.manifest, this._queryParams);
-      const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
-      layers.forEach((layer) => {
-        layer.url = this._extendUrlWithParams(layer.url);
-        layer.attribution = this._sanitizer(markdownIt.render(layer.attribution));
-      });
-      return layers;
-    });
+    //
+    // this._loadFileLayers = _.once(async () => {
+    //   const catalogue = await this._loadCatalogue();
+    //
+    //   const fileService = catalogue.services.find(service => service.type === 'file');
+    //   if (!fileService) {
+    //     return [];
+    //   }
+    //
+    //   const manifest = await this._getManifest(fileService.manifest, this._queryParams);
+    //   const layers = manifest.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
+    //   layers.forEach((layer) => {
+    //     layer.url = this._extendUrlWithParams(layer.url);
+    //     layer.attribution = this._sanitizer(markdownIt.render(layer.attribution));
+    //   });
+    //   return layers;
+    // });
 
     this._loadTMSServices = _.once(async () => {
 
@@ -134,21 +147,21 @@ export class EMSClient {
         return [];
       }
       const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
-      const preppedTMSServices = tmsManifest.data.services.map((tmsService) => {
-        const preppedService = _.cloneDeep(tmsService);
-        preppedService.attribution = this._sanitizer(markdownIt.render(preppedService.attribution));
-        preppedService.subdomains = preppedService.subdomains || [];
-        preppedService.url = this._extendUrlWithParams(preppedService.url);
-        return preppedService;
-      });
 
-      return preppedTMSServices;
+
+      return tmsManifest.services.map(serviceConfig => {
+        return new TMSService(serviceConfig, this);
+      });
 
     });
 
   }
 
-  _extendUrlWithParams(url) {
+  sanitizeMarkdown(markdown) {
+    return this._sanitizer(markdownIt.render(markdown));
+  }
+
+  extendUrlWithParams(url) {
     return unescapeTemplateVars(extendUrl(url, {
       query: this._queryParams
     }));
@@ -160,21 +173,7 @@ export class EMSClient {
   }
 
   async getTMSServices() {
-
-    const allServices = [];
-    // if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
-    //   const tmsService = _.cloneDeep(tmsOptionsFromConfig);
-    //   tmsService.url = tilemapsConfig.deprecated.config.url;
-    //   tmsService.id = 'TMS in config/kibana.yml';
-    //   allServices.push(tmsService);
-    // }
-
-    const servicesFromManifest = await this._loadTMSServices();
-    return allServices.concat(servicesFromManifest);
-  }
-
-  async getFileLayerForName() {
-
+    return await this._loadTMSServices();
   }
 
 

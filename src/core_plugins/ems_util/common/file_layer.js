@@ -32,6 +32,10 @@ export class FileLayer {
 
   }
 
+  async getGeoJson() {
+
+  }
+
 
   getId() {
 

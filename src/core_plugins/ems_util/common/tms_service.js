@@ -17,21 +17,35 @@
  * under the License.
  */
 
-
 export class TMSService {
 
-  constructor() {
-
+  constructor(config,  emsClient) {
+    this._config = config;
+    this._emsClient = emsClient;
   }
 
-  getUrl() {
+  getUrlTemplate() {
+    return this._emsClient.extendUrlWithParams(this._config.url);
   }
 
-  getDisplayName() {
+  getHTMLAttribution() {
+    return this._emsClient.sanitizeMarkdown(this._config.attribution);
   }
 
+  getMinZoom() {
+    return this._config.minZoom;
+  }
+
+  getMaxZoom() {
+    return this._config.maxZoom;
+  }
 
   getId() {
+    return this._config.id;
+  }
+
+  getAttribution() {
+    this._emsClient.sanitizeMarkdown(this._config.attribution);
   }
 
 }
