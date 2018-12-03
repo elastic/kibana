@@ -111,7 +111,7 @@ export class WatchCache {
     await deleteEmpty(this.cachePath);
 
     // delete dlls
-    await del(await globby(this.dllsPath, { dot: true }));
+    await del(this.dllsPath);
 
     // re-write new cache state file
     await this.write();
