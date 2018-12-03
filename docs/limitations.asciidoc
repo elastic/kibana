@@ -7,11 +7,11 @@
 
 * <<nested-objects>>
 * <<export-data>>
+* <<graph-limitations,Graph analytics>>
 
-These {kib} features also have limitations:
+These {stack} features also have limitations that affect {kib}:
 
 * {stack-ov}/watcher-limitations.html[Alerting]
-* <<graph-limitations,Graph analytics>> 
 * {stack-ov}/ml-limitations.html[Machine learning]
 * {stack-ov}/security-limitations.html[Security]
 
