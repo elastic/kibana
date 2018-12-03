@@ -39,13 +39,12 @@ export default async (req, panel) => {
 
       bodies.push({
         index: indexPattern,
-        ignore: [404],
-        timeout: '90s',
-        requestTimeout: 90000,
         ignoreUnavailable: true,
       });
 
-      bodies.push(buildAnnotationRequest(req, panel, annotation));
+      const body = buildAnnotationRequest(req, panel, annotation);
+      body.timeout = '90s';
+      bodies.push(body);
       return bodies;
     });
 
