@@ -11,6 +11,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { BASE_PATH } from '../../../../../common/constants';
 import { NoMatch } from '../no_match';
 import { getPolicyPath } from '../../../../services/navigation';
+import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
 import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui/lib/services';
@@ -18,13 +19,14 @@ import {
   EuiBetaBadge,
   EuiButton,
   EuiLink,
-  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPage,
+  EuiPopover,
+  EuiContextMenu,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
@@ -35,7 +37,6 @@ import {
   EuiTableRowCell,
   EuiTitle,
   EuiText,
-  EuiToolTip,
   EuiPageBody,
   EuiPageContent,
 } from '@elastic/eui';
@@ -218,8 +219,85 @@ export class PolicyTableUi extends Component {
       return null;
     }
   }
-  buildRowCells(policy) {
+  buildActionPanelTree(policy) {
+    const { intl } = this.props;
     const hasCoveredIndices = Boolean(policy.coveredIndices && policy.coveredIndices.length);
+
+    const viewIndicesLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
+      defaultMessage: 'View indices linked to policy',
+    });
+    const addPolicyToTemplateLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText',
+      defaultMessage: 'Add policy to index template',
+    });
+    const deletePolicyLabel = intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonText',
+      defaultMessage: 'Delete policy',
+    });
+    const deletePolicyTooltip = hasCoveredIndices ? intl.formatMessage({
+      id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledTooltip',
+      defaultMessage: 'You cannot delete a policy that is being used by an index',
+    }) : null;
+    const items = [];
+    if (hasCoveredIndices) {
+      items.push({
+        name: viewIndicesLabel,
+        icon: 'list',
+        onClick: () => {
+          window.location.hash = getFilteredIndicesUri(`ilm.policy:${policy.name}`);
+        }
+      });
+    }
+    items.push({
+      name: addPolicyToTemplateLabel,
+      icon: 'plusInCircle',
+      onClick: () =>
+        this.setState({
+          renderConfirmModal: this.renderAddPolicyToTemplateConfirmModal,
+          policyToAddToTemplate: policy,
+        })
+    });
+    items.push({
+      name: deletePolicyLabel,
+      disabled: hasCoveredIndices,
+      icon: 'trash',
+      toolTipContent: deletePolicyTooltip,
+      onClick: () =>
+        this.setState({
+          renderConfirmModal: this.renderDeleteConfirmModal,
+          policyToDelete: policy,
+        })
+    });
+    const panelTree = {
+      id: 0,
+      title: intl.formatMessage({
+        id: 'xpack.indexLifecycleMgmt.policyTable.policyActionsMenu.panelTitle',
+        defaultMessage: 'Policy options',
+      }),
+      items
+    };
+    return flattenPanelTree(panelTree);
+  }
+  togglePolicyPopover = (policy) => {
+    if (this.isPolicyPopoverOpen(policy)) {
+      this.closePolicyPopover(policy);
+    } else {
+      this.openPolicyPopover(policy);
+    }
+  }
+  isPolicyPopoverOpen = (policy) => {
+    return this.state.policyPopover === policy.name;
+  }
+  closePolicyPopover = (policy) => {
+    if (this.isPolicyPopoverOpen(policy)) {
+      this.setState({ policyPopover: null });
+    }
+  }
+  openPolicyPopover = (policy) => {
+    this.setState({ policyPopover: policy.name });
+  }
+  buildRowCells(policy) {
     const { intl } = this.props;
     const { name } = policy;
     const cells = Object.entries(COLUMNS).map(([fieldName, { width }]) => {
@@ -236,67 +314,41 @@ export class PolicyTableUi extends Component {
         </EuiTableRowCell>
       );
     });
-    const viewIndicesLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.viewIndicesButtonText',
-      defaultMessage: 'View indices',
-    });
-    const addPolicyToTemplateLabel = intl.formatMessage({
-      id: 'xpack.indexLifecycleMgmt.policyTable.addPolicyToTemplateButtonText',
-      defaultMessage: 'Add policy to index template',
-    });
-    const deletePolicyLabel = hasCoveredIndices
-      ? intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
-        defaultMessage: 'Cannot delete a policy that is used by an index',
-      })
-      : intl.formatMessage({
-        id: 'xpack.indexLifecycleMgmt.policyTable.deletePolicyButtonDisabledText',
-        defaultMessage: 'Delete policy',
-      });
+    const button = (
+      <EuiButton
+        data-test-subj="policyActionsContextMenuButton"
+        iconSide="right"
+        aria-label="Policy options"
+        onClick={() => this.togglePolicyPopover(policy)}
+        iconType="arrowDown"
+        fill
+      >
+        {intl.formatMessage({
+          id: 'xpack.indexLifecycleMgmt.policyTable.actionsButtonText',
+          defaultMessage: 'Actions',
+        })}
+      </EuiButton>
+    );
     cells.push(
       <EuiTableRowCell
         align={RIGHT_ALIGNMENT}
         key={`delete-${name}`}
         truncateText={false}
-        data-test-subj={`policyTableCell-delete-${name}`}
+        data-test-subj={`policyTableCell-actions-${name}`}
         style={{ width: 100 }}
       >
-        <EuiToolTip position="bottom" content={deletePolicyLabel}>
-          <EuiButtonIcon
-            isDisabled={hasCoveredIndices}
-            aria-label={deletePolicyLabel}
-            color={hasCoveredIndices ? 'disabled' : 'danger'}
-            onClick={() =>
-              this.setState({
-                renderConfirmModal: this.renderDeleteConfirmModal,
-                policyToDelete: policy,
-              })
-            }
-            iconType="trash"
-          />
-        </EuiToolTip>
-        {hasCoveredIndices ? (
-          <EuiToolTip position="bottom" content={viewIndicesLabel}>
-            <EuiButtonIcon
-              color="primary"
-              aria-label={viewIndicesLabel}
-              href={getFilteredIndicesUri(`ilm.policy:${policy.name}`)}
-              iconType="list"
-            />
-          </EuiToolTip>
-        ) : null}
-        <EuiToolTip position="bottom" content={addPolicyToTemplateLabel}>
-          <EuiButtonIcon
-            aria-label={addPolicyToTemplateLabel}
-            onClick={() =>
-              this.setState({
-                renderConfirmModal: this.renderAddPolicyToTemplateConfirmModal,
-                policyToAddToTemplate: policy,
-              })
-            }
-            iconType="plusInCircle"
-          />
-        </EuiToolTip>
+        <EuiPopover
+          id="contextMenuPolicy"
+          button={button}
+          isOpen={this.isPolicyPopoverOpen(policy)}
+          closePopover={() => this.closePolicyPopover(policy)}
+          panelPaddingSize="none"
+          withTitle
+          anchorPosition="rightUp"
+          repositionOnScroll
+        >
+          <EuiContextMenu initialPanelId={0} panels={this.buildActionPanelTree(policy)} />
+        </EuiPopover>
       </EuiTableRowCell>
     );
     return cells;
