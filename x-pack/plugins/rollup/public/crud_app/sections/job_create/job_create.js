@@ -193,6 +193,7 @@ export class JobCreateUi extends Component {
 
       const formattedNumericFields = formatFields(numericFields, 'numeric');
       const formattedKeywordFields = formatFields(keywordFields, 'keyword');
+      const formattedDateFields = formatFields(indexPatternDateFields, 'date');
 
       function sortFields(a, b) {
         const nameA = a.name.toUpperCase();
@@ -215,7 +216,11 @@ export class JobCreateUi extends Component {
       ].sort(sortFields);
 
       const indexPatternHistogramFields = [ ...formattedNumericFields ].sort(sortFields);
-      const indexPatternMetricsFields = [ ...formattedNumericFields ].sort(sortFields);
+
+      const indexPatternMetricsFields = [
+        ...formattedNumericFields,
+        ...formattedDateFields,
+      ].sort(sortFields);
 
       this.setState({
         indexPatternAsyncErrors,
