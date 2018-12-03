@@ -1,6 +1,10 @@
 .ml-new-job {
   display: block;
 }
+// Required to prevent overflow of flex item in IE11
+.ml-new-job-callout {
+  width: 100%;
+}
 
 // SASSTODO: Proper calcs. This looks too brittle to touch quickly
 .detector {

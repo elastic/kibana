@@ -5,6 +5,7 @@
  */
 
 import { EuiDatePicker, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import styled from 'styled-components';
@@ -17,11 +18,12 @@ interface LogTimeControlsProps {
   stopLiveStreaming: () => any;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
+  intl: InjectedIntl;
 }
 
-export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
+class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
   public render() {
-    const { currentTime, isLiveStreaming } = this.props;
+    const { currentTime, isLiveStreaming, intl } = this.props;
 
     const currentMoment = currentTime ? moment(currentTime) : null;
 
@@ -29,7 +31,14 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
       return (
         <EuiFilterGroup>
           <InlineWrapper>
-            <EuiDatePicker disabled onChange={noop} value="streaming..." />
+            <EuiDatePicker
+              disabled
+              onChange={noop}
+              value={intl.formatMessage({
+                id: 'xpack.infra.logs.streamingDescription',
+                defaultMessage: 'streaming…',
+              })}
+            />
           </InlineWrapper>
           <EuiFilterButton
             color="primary"
@@ -37,7 +46,10 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
             iconSide="left"
             onClick={this.stopLiveStreaming}
           >
-            Stop streaming
+            <FormattedMessage
+              id="xpack.infra.logs.stopStreamingButtonLabel"
+              defaultMessage="Stop streaming"
+            />
           </EuiFilterButton>
         </EuiFilterGroup>
       );
@@ -57,7 +69,10 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
             />
           </InlineWrapper>
           <EuiFilterButton iconType="play" iconSide="left" onClick={this.startLiveStreaming}>
-            Stream live
+            <FormattedMessage
+              id="xpack.infra.logs.startStreamingButtonLabel"
+              defaultMessage="Stream live"
+            />
           </EuiFilterButton>
         </EuiFilterGroup>
       );
@@ -78,6 +93,8 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
     this.props.stopLiveStreaming();
   };
 }
+
+export const LogTimeControls = injectI18n(LogTimeControlsUI);
 
 const InlineWrapper = styled.div`
   display: inline-block;

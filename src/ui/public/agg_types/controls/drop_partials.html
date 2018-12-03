@@ -1,6 +1,6 @@
-<div class="checkbox" ng-if="agg.params.field.name === agg.vis.indexPattern.timeFieldName">
+<div class="checkbox" ng-if="agg.params.field.name === agg.getIndexPattern().timeFieldName">
   <label>
-    <input ng-model="agg.params.drop_partials" type="checkbox">
+    <input ng-model="agg.params.drop_partials" type="checkbox" data-test-subj="dropPartialBucketsCheckbox">
     Drop partial buckets
     &nbsp;
     <icon-tip

@@ -64,6 +64,7 @@ export default async function ({ readConfigFile }) {
   return {
     // list paths to the files that contain your plugins tests
     testFiles: [
+      resolve(__dirname, './apps/canvas'),
       resolve(__dirname, './apps/graph'),
       resolve(__dirname, './apps/monitoring'),
       resolve(__dirname, './apps/watcher'),
@@ -186,6 +187,10 @@ export default async function ({ readConfigFile }) {
       },
       infraOps: {
         pathname: '/app/infra'
+      },
+      canvas: {
+        pathname: '/app/canvas',
+        hash: '/',
       }
     },
 

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import './github_markdown.less';
 import classNames from 'classnames';
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
@@ -83,7 +82,7 @@ export class Markdown extends PureComponent {
       ...rest
     } = this.props;
 
-    const classes = classNames('markdown-body', className);
+    const classes = classNames('kbnMarkdown__body', className);
     const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
     const renderedMarkdown = markdownRenderer(markdown);
     return (
