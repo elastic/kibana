@@ -19,7 +19,7 @@ export const selectTimeUpdatePolicyInterval = (state: WaffleTimeState) =>
 export const selectCurrentTimeRange = createSelector(
   selectCurrentTime,
   currentTime => ({
-    from: currentTime - 1000 * 60 * 60,
+    from: currentTime - 1000 * 60 * 5,
     interval: '1m',
     to: currentTime,
   })

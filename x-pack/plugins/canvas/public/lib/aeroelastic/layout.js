@@ -660,10 +660,18 @@ const alignmentGuides = (shapes, guidedShapes, draggedShape) => {
     if (d.type === 'annotation') continue; // fixme avoid this by not letting annotations get in here
     // key points of the dragged shape bounding box
     for (let j = 0; j < shapes.length; j++) {
-      const s = shapes[j];
-      if (d.id === s.id) continue; // don't self-constrain; todo in the future, self-constrain to the original location
-      if (s.type === 'annotation') continue; // fixme avoid this by not letting annotations get in here
-      if (s.parent) continue; // for now, don't snap to grouped elements fixme could snap, but make sure transform is gloabl
+      const referenceShape = shapes[j];
+      if (referenceShape.type === 'annotation') continue; // fixme avoid this by not letting annotations get in here
+      if (referenceShape.parent) continue; // for now, don't snap to grouped elements fixme could snap, but make sure transform is gloabl
+      const s =
+        d.id === referenceShape.id
+          ? {
+              ...d,
+              localTransformMatrix: d.baselineLocalTransformMatrix || d.localTransformMatrix,
+              a: d.baseAB ? d.baseAB[0] : d.a,
+              b: d.baseAB ? d.baseAB[1] : d.b,
+            }
+          : referenceShape;
       // key points of the stationery shape
       for (let k = -1; k < 2; k++) {
         for (let l = -1; l < 2; l++) {

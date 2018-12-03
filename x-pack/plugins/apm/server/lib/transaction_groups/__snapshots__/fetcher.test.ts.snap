@@ -27,6 +27,9 @@ Array [
                   "size": 1,
                   "sort": Array [
                     Object {
+                      "_score": "desc",
+                    },
+                    Object {
                       "@timestamp": Object {
                         "order": "desc",
                       },
