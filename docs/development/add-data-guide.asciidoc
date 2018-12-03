@@ -13,7 +13,7 @@ Each tutorial contains three sets of instructions:
 === Creating a new tutorial
 1. Create a new directory in the link:https://github.com/elastic/kibana/tree/master/src/legacy/core_plugins/kibana/server/tutorials[tutorials directory].
 2. In the new directory, create a file called `index.js` that exports a function.
-The function must return a JavaScript object that conforms to the link:https://github.com/elastic/kibana/blob/master/src/lgeacy/core_plugins/kibana/common/tutorials/tutorial_schema.js[tutorial schema].
+The function must return a JavaScript object that conforms to the link:https://github.com/elastic/kibana/blob/master/src/legacy/core_plugins/kibana/common/tutorials/tutorial_schema.js[tutorial schema].
 3. Register the tutorial in link:https://github.com/elastic/kibana/blob/master/src/legacy/core_plugins/kibana/server/tutorials/register.js[register.js] by calling `server.registerTutorial(myFuncImportedFromIndexJs)`.
 4. Add image assets to the link:https://github.com/elastic/kibana/tree/master/src/legacy/core_plugins/kibana/public/home/tutorial_resources[tutorial_resources directory].
 5. Run Kibana locally to preview the tutorial.
