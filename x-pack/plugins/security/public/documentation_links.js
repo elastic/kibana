@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-len */
+
 import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 export const documentationLinks = {
   dashboardViewMode: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-view-modes.html`,
-  esClusterPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/x-pack/${DOC_LINK_VERSION}/security-privileges.html#security-privileges`,
-  esIndicesPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/x-pack/${DOC_LINK_VERSION}/security-privileges.html#privileges-list-indices`,
+  esClusterPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-overview/${DOC_LINK_VERSION}/security-privileges.html#security-privileges`,
+  esIndicesPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack-overview/${DOC_LINK_VERSION}/security-privileges.html#privileges-list-indices`,
   esRunAsPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/x-pack/${DOC_LINK_VERSION}/security-privileges.html#_run_as_privilege`,
 };
