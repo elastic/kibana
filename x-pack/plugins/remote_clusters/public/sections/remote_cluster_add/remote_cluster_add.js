@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiPage,
@@ -18,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
+import { listBreadcrumbLink, addBreadcrumb } from '../../services';
 import { RemoteClusterForm } from '../remote_cluster_form';
 
 export class RemoteClusterAddUi extends Component {
@@ -26,6 +29,11 @@ export class RemoteClusterAddUi extends Component {
     isAddingCluster: PropTypes.bool,
     addClusterError: PropTypes.object,
     clearAddClusterErrors: PropTypes.func,
+  }
+
+  constructor(props) {
+    super(props);
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumbLink, addBreadcrumb ]);
   }
 
   componentWillUnmount() {

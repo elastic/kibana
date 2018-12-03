@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiButton,
@@ -29,7 +31,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps, extractQueryParams } from '../../services';
+import { getRouterLinkProps, extractQueryParams, listBreadcrumb } from '../../services';
 
 import {
   RemoteClusterTable,
@@ -81,9 +83,11 @@ export class RemoteClusterListUi extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
-
     props.loadClusters();
+
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+
+    this.state = {};
   }
 
   componentDidMount() {

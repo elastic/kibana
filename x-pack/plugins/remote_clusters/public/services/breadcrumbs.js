@@ -13,13 +13,13 @@ import { CRUD_APP_BASE_PATH } from '../constants';
 
 export const listBreadcrumb = {
   text: i18n.translate('xpack.remoteClusters.listBreadcrumbTitle', {
-    defaultMessage: 'Dashboard',
+    defaultMessage: 'Remote Clusters',
   }),
 };
 
 export const listBreadcrumbLink = {
   ...listBreadcrumb,
-  href: CRUD_APP_BASE_PATH,
+  href: `#${CRUD_APP_BASE_PATH}`,
 };
 
 export const addBreadcrumb = {

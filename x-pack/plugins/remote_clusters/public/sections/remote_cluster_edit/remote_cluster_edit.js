@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiFlexGroup,
@@ -24,6 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
+import { listBreadcrumbLink, editBreadcrumb } from '../../services';
 import { RemoteClusterForm } from '../remote_cluster_form';
 
 const disabledFields = {
@@ -45,6 +48,8 @@ export class RemoteClusterEditUi extends Component {
 
   constructor(props) {
     super(props);
+
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumbLink, editBreadcrumb ]);
 
     const {
       match: {
