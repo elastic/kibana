@@ -40,8 +40,7 @@ uiModules.get('kibana')
       const reportObjectTitle = job._source.payload.title;
       const reportObjectType = job._source.payload.type;
 
-      console.log(JobStatuses);
-      const isJobSuccessful = get(job, '_source.status') === 'completed';
+      const isJobSuccessful = get(job, '_source.status') === JobStatuses.COMPLETED;
 
       if (!isJobSuccessful) {
         const errorDoc = await jobQueueClient.getContent(job._id);
@@ -164,7 +163,7 @@ uiModules.get('kibana')
             return;
           }
 
-          if (job._source.status === 'completed' || job._source.status === 'failed') {
+          if (job._source.status === JobStatuses.COMPLETED || job._source.status === JobStatuses.FAILED) {
             await showCompletionNotification(job);
             jobCompletionNotifications.remove(job.id);
             return;
