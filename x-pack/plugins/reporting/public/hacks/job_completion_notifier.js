@@ -12,6 +12,7 @@ import { uiModules } from 'ui/modules';
 import { get } from 'lodash';
 import { jobQueueClient } from 'plugins/reporting/lib/job_queue_client';
 import { jobCompletionNotifications } from 'plugins/reporting/lib/job_completion_notifications';
+import { JobStatuses } from '../constants/job_statuses';
 import { PathProvider } from 'plugins/xpack_main/services/path';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { Poller } from '../../../../common/poller';
@@ -39,7 +40,7 @@ uiModules.get('kibana')
       const reportObjectTitle = job._source.payload.title;
       const reportObjectType = job._source.payload.type;
 
-      const isJobSuccessful = get(job, '_source.status') === 'completed';
+      const isJobSuccessful = get(job, '_source.status') === JobStatuses.COMPLETED;
 
       if (!isJobSuccessful) {
         const errorDoc = await jobQueueClient.getContent(job._id);
@@ -162,7 +163,7 @@ uiModules.get('kibana')
             return;
           }
 
-          if (job._source.status === 'completed' || job._source.status === 'failed') {
+          if (job._source.status === JobStatuses.COMPLETED || job._source.status === JobStatuses.FAILED) {
             await showCompletionNotification(job);
             jobCompletionNotifications.remove(job.id);
             return;
