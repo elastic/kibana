@@ -746,10 +746,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.0.0.tgz#e6fe9e1aa8b00c93045178f78a6dd0d457d56fa8"
-  integrity sha512-WL6sp6u2Rt1O7a2exLU/RuDcRnpluPN6aQ2JexBl+G6mVyF8F5I3RGJKTJp3jOozOaODRY2ev+Nq57EydkjrKg==
+"@elastic/eui@5.3.0":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.3.0.tgz#6a871b209c757141ebe88f5c77393652cb43c24d"
+  integrity sha512-fvOSwZsdQHGpLUIPVLGZus+ty4hJtHVTGqhdwNIFyCt1/gha/S7nEN2Gsk442gfDbGE2girc6vhD3Bl1gzBYRA==
   dependencies:
     classnames "^2.2.5"
     core-js "^2.5.1"
