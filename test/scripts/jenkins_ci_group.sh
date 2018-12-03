@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 source src/dev/ci_setup/checkout_sibling_es.sh
 
 "$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;

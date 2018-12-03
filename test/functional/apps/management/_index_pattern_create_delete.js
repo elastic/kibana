@@ -21,7 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings', 'common']);
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should have index pattern in url', function url() {
         return retry.try(function tryingForTime() {
-          return remote.getCurrentUrl()
+          return browser.getCurrentUrl()
             .then(function (currentUrl) {
               expect(currentUrl).to.contain(indexPatternId);
             });
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
       it('should remove index pattern from url', function indexNotInUrl() {
         // give the url time to settle
         return retry.try(function tryingForTime() {
-          return remote.getCurrentUrl()
+          return browser.getCurrentUrl()
             .then(function (currentUrl) {
               log.debug('currentUrl = ' + currentUrl);
               expect(currentUrl).to.not.contain('logstash-*');
