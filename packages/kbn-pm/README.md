@@ -75,7 +75,7 @@ relative location to a package instead of a version when adding it to
 `package.json`. For example:
 
 ```
-"@kbn/i18n": "link:packages/kbn-datemath"
+"@kbn/i18n": "link:packages/kbn-i18n"
 ```
 
 Now when you run `yarn` it will set up a symlink to this folder instead of
