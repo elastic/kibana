@@ -97,7 +97,7 @@ class PipelineListUi extends React.Component {
           <EuiLoadingSpinner size="m" />
           &nbsp; <FormattedMessage
             id="xpack.logstash.pipelineList.pipelinesLoadingMessage"
-            defaultMessage="Loading pipelines...."
+            defaultMessage="Loading pipelines…"
           />
         </div>
       ),
@@ -167,14 +167,14 @@ class PipelineListUi extends React.Component {
         iconType="cross"
         title={(
           <FormattedMessage
-            id="xpack.logstash.pipelineList.noPermissionToManagePipelinesTitle"
+            id="xpack.logstash.pipelineList.noPermissionToManageTitle"
             defaultMessage="You do not have permission to manage Logstash pipelines."
           />
         )}
       >
         <p>
           <FormattedMessage
-            id="xpack.logstash.pipelineList.noPermissionToManagePipelinesDescription"
+            id="xpack.logstash.pipelineList.noPermissionToManageDescription"
             defaultMessage="Please contact your administrator."
           />
         </p>
@@ -222,7 +222,7 @@ class PipelineListUi extends React.Component {
           if (numErrors) {
             text = intl.formatMessage({
               id: 'xpack.logstash.pipelineList.pipelinesCouldNotBeDeletedDescription',
-              defaultMessage: `But {numErrors} {numErrors, plural, one {# Pipeline} other {# Pipelines}} couldn't be deleted.`,
+              defaultMessage: `But {numErrors, plural, one {# Pipeline} other {# Pipelines}} couldn't be deleted.`,
             }, {
               numErrors,
             });
@@ -232,7 +232,7 @@ class PipelineListUi extends React.Component {
             title: intl.formatMessage({
               id: 'xpack.logstash.pipelineList.successfullyDeletedPipelinesNotification',
               defaultMessage:
-                'Deleted {numSuccesses} out of {numPipelinesSelected} {numPipelinesSelected, plural, one {# Pipeline} other {# Pipelines}}',
+                'Deleted {numSuccesses} out of {numPipelinesSelected, plural, one {# Pipeline} other {# Pipelines}}',
             }, {
               numSuccesses,
               numPipelinesSelected,
@@ -244,7 +244,7 @@ class PipelineListUi extends React.Component {
           toastNotifications.addError(intl.formatMessage({
             id: 'xpack.logstash.pipelineList.couldNotDeletePipelinesNotification',
             defaultMessage:
-              'Failed to delete {numErrors} {numErrors, plural, one {# Pipeline} other {# Pipelines}}',
+              'Failed to delete {numErrors, plural, one {# Pipeline} other {# Pipelines}}',
           }, {
             numErrors,
           }));

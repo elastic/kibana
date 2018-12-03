@@ -34,7 +34,7 @@ export function checkLicense(xpackLicenseInfo) {
 
   // Security is not enabled in ES
   if (!isSecurityEnabled) {
-    const message = i18n.translate('xpack.logstash.managementSection.howToEnablePipelineManagementFeaturesDescription', {
+    const message = i18n.translate('xpack.logstash.managementSection.enableSecurityDescription', {
       defaultMessage: 'Security must be enabled in order to use Logstash pipeline management features.' +
         ' Please set xpack.security.enabled: true in your elasticsearch.yml.',
     });
@@ -52,7 +52,7 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       enableLinks: false,
       isReadOnly: false,
-      message: i18n.translate('xpack.logstash.managementSection.licenseDoesNotSupportPipelineManagementFeaturesDescription', {
+      message: i18n.translate('xpack.logstash.managementSection.licenseDoesNotSupportDescription', {
         defaultMessage: 'Your {licenseType} license does not support Logstash pipeline management features. Please upgrade your license.',
         values: { licenseType },
       }),

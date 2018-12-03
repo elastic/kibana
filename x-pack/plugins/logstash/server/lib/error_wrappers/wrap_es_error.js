@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 export function wrapEsError(err) {
   const statusCode = err.statusCode;
   if (statusCode === 403) {
-    return Boom.forbidden(i18n.translate('xpack.logstash.insufficientUserPermissionsForManagingPipelinesDescription', {
+    return Boom.forbidden(i18n.translate('xpack.logstash.insufficientUserPermissionsDescription', {
       defaultMessage: 'Insufficient user permissions for managing Logstash pipelines',
     }));
   }
