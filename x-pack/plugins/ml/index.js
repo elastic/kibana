@@ -8,6 +8,7 @@
 
 import { resolve } from 'path';
 import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 import { checkLicense } from './server/lib/check_license';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { jobRoutes } from './server/routes/anomaly_detectors';
@@ -71,7 +72,9 @@ export const ml = (kibana) => {
         privileges: {
           all: {
             metadata: {
-              tooltip: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
+              tooltip: i18n.translate('xpack.ml.privileges.tooltip', {
+                defaultMessage: 'The machine_learning_user or machine_learning_admin role should be assigned to grant access'
+              })
             },
             app: ['ml'],
             savedObject: {
