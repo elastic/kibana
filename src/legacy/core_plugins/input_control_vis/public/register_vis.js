@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
 
-  const inputControlsVisType = VisFactory.createBaseVisualization({
+  return VisFactory.createBaseVisualization({
     name: 'input_control_vis',
     title: i18n.translate('inputControl.register.controlsTitle', {
       defaultMessage: 'Controls'
@@ -71,13 +71,10 @@ function InputControlVisProvider(Private) {
     },
     requestHandler: 'none',
     responseHandler: 'none',
+    inspectorAdapters: {
+      requests: true
+    },
   });
-
-  inputControlsVisType.inspectorAdapters = {
-    requests: true
-  };
-
-  return inputControlsVisType;
 }
 
 // register the provider with the visTypes registry
