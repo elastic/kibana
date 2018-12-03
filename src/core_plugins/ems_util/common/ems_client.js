@@ -21,6 +21,7 @@ import MarkdownIt from 'markdown-it';
 import _ from 'lodash';
 import { modifyUrl } from '../../../core/public/utils';
 import { TMSService } from './tms_service';
+import { FileLayer } from './file_layer';
 
 const extendUrl = (url, props) => (
   modifyUrl(url, parsed => _.merge(parsed, props))
@@ -44,7 +45,6 @@ const unescapeTemplateVars = url => {
 };
 
 
-
 const DEFAULT_LANGUAGE = 'en';
 
 
@@ -57,7 +57,7 @@ export class EMSClientV66 {
       my_app_version: kbnVersion
     };
 
-    this._sanitizer = htmlSanitizer  ? htmlSanitizer : x => x;
+    this._sanitizer = htmlSanitizer ? htmlSanitizer : x => x;
     this._manifestServiceUrl = manifestServiceUrl;
     this._loadCatalogue = null;
     this._loadFileLayers = null;
@@ -66,25 +66,20 @@ export class EMSClientV66 {
 
     this._invalidateSettings();
 
-
   }
 
 
-
+  getValueInLanguage(i18nObject) {
+    return i18nObject[this._language] ? i18nObject[this._language] : i18nObject[DEFAULT_LANGUAGE];
+  }
 
   /**
    * this internal method is overridden by the tests to simulate custom manifest.
    */
   async _getManifest(manifestUrl) {
-
-    console.log('should get manfiest', manifestUrl);
-
     const url = extendUrl(manifestUrl, { query: this._queryParams });
-    console.log(url);
     const result = await fetch(url);
-    const json = await result.json();
-    console.log(json);
-    return json;
+    return await result.json();
   }
 
 
@@ -94,7 +89,6 @@ export class EMSClientV66 {
    * @param additionalQueryParams
    */
   addQueryParams(additionalQueryParams) {
-    console.log('ad', additionalQueryParams);
     for (const key in additionalQueryParams) {
       if (additionalQueryParams.hasOwnProperty(key)) {
         if (additionalQueryParams[key] !== this._queryParams[key]) {
@@ -126,23 +120,21 @@ export class EMSClientV66 {
       }
     });
 
-    //
-    // this._loadFileLayers = _.once(async () => {
-    //   const catalogue = await this._loadCatalogue();
-    //
-    //   const fileService = catalogue.services.find(service => service.type === 'file');
-    //   if (!fileService) {
-    //     return [];
-    //   }
-    //
-    //   const manifest = await this._getManifest(fileService.manifest, this._queryParams);
-    //   const layers = manifest.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
-    //   layers.forEach((layer) => {
-    //     layer.url = this._extendUrlWithParams(layer.url);
-    //     layer.attribution = this._sanitizer(markdownIt.render(layer.attribution));
-    //   });
-    //   return layers;
-    // });
+
+    this._loadFileLayers = _.once(async () => {
+
+      const catalogue = await this._loadCatalogue();
+      const fileService = catalogue.services.find(service => service.type === 'file');
+      if (!fileService) {
+        return [];
+      }
+
+      const manifest = await this._getManifest(fileService.manifest, this._queryParams);
+
+      return manifest.layers.map(layerConfig => {
+        return new FileLayer(layerConfig, this);
+      });
+    });
 
     this._loadTMSServices = _.once(async () => {
 
@@ -166,6 +158,10 @@ export class EMSClientV66 {
     return this._sanitizer(markdownIt.render(markdown));
   }
 
+  sanitizeHtml(html) {
+    return this._sanitizer(html);
+  }
+
   extendUrlWithParams(url) {
     return unescapeTemplateVars(extendUrl(url, {
       query: this._queryParams
@@ -179,6 +175,15 @@ export class EMSClientV66 {
 
   async getTMSServices() {
     return await this._loadTMSServices();
+  }
+
+  async findLayerById(id) {
+    const fileLayers = await this.getFileLayers();
+    for (let i = 0; i < fileLayers.length; i++) {
+      if (fileLayers[i].hasId(id)) {
+        return fileLayers[i];
+      }
+    }
   }
 
 

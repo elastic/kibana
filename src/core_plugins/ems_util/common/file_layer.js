@@ -20,24 +20,43 @@
 
 export class FileLayer {
 
-  constructor() {
-
+  constructor(config, emsClient) {
+    this._config = config;
+    this._emsClient = emsClient;
   }
 
-  getUrl() {
 
+
+  getHTMLAttribution() {
+
+    const attributions = this._config.attribution.map(attribution => {
+
+
+      const url = this._emsClient.getValueInLanguage(attribution.url);
+      const label = this._emsClient.getValueInLanguage(attribution.label);
+
+      const html = `<a href=${url}>${label}</a>`;
+      return this._emsClient.sanitizeHtml(html);
+    });
+    return attributions.join('|');
+  }
+
+  getFields() {
+    return this._config.fields;
   }
 
   getDisplayName() {
-
-  }
-
-  async getGeoJson() {
-
+    const layerName = this._emsClient.getValueInLanguage(this._config.layer_name);
+    return (layerName)  ? layerName  : '';
   }
 
   getId() {
+    return this._config.layer_id;
+  }
 
+  hasId(id) {
+    const matchesLegacyId = this._config.legacy_ids.indexOf(id) >= 0;
+    return this._config.layer_id === id || matchesLegacyId;
   }
 
 

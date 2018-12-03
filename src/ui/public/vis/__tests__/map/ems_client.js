@@ -50,6 +50,12 @@ describe('ems_client', () => {
   it('.addQueryParams', async () => {
 
     const emsClient = getEMSClient();
+
+
+    const tilesBefore = await emsClient.getTMSServices();
+    const urlBefore = tilesBefore[0].getUrlTemplate();
+    expect(urlBefore).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=6.x.x');
+
     emsClient.addQueryParams({
       'foo': 'bar'
     });
@@ -60,15 +66,73 @@ describe('ems_client', () => {
 
   });
 
+
+  it('..getFileLayers', async () => {
+    const emsClient = getEMSClient();
+    const layers = await emsClient.getFileLayers();
+    expect(layers.length).to.be(18);
+  });
+
+  it('.getFileLayers[0]', async () => {
+    const emsClient = getEMSClient();
+    const layers = await emsClient.getFileLayers();
+
+    const layer = layers[0];
+    expect(layer.getId()).to.be('world_countries');
+    expect(layer.hasId('world_countries')).to.be(true);
+
+    // expect(layer.hasId('World Countries')).to.be(true);//todo
+    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
+
+    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
+
+    expect(layer.getDisplayName()).to.be('World Countries');
+
+  });
+
+  it('..getFileLayers[0] - localized (known)', async () => {
+    const emsClient = getEMSClient({
+      language: 'fr'
+    });
+    const layers = await emsClient.getFileLayers();
+
+    const layer = layers[0];
+    expect(layer.getId()).to.be('world_countries');
+    expect(layer.hasId('world_countries')).to.be(true);
+
+    // expect(layer.hasId('World Countries')).to.be(true);//todo
+    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
+    expect(layer.getDisplayName()).to.be('pays');
+
+  });
+
+  it('..getFileLayers[0] - localized (fallback)', async () => {
+    const emsClient = getEMSClient({
+      language: 'zz'//madeup
+    });
+    const layers = await emsClient.getFileLayers();
+
+    const layer = layers[0];
+    expect(layer.getId()).to.be('world_countries');
+    expect(layer.hasId('world_countries')).to.be(true);
+
+    // expect(layer.hasId('World Countries')).to.be(true);//todo
+    expect(layer.getHTMLAttribution()).to.be('<a href=http://www.naturalearthdata.com/about/terms-of-use>Made with NaturalEarth</a>|<a href=https://www.elastic.co/elastic-maps-service>Elastic Maps Service</a>');
+    expect(layer.getDisplayName()).to.be('World Countries');
+
+  });
+
+
 });
 
 
-function getEMSClient() {
+function getEMSClient(options) {
 
   const emsClient = new EMSClientV66({
     kbnVersion: '6.x.x',
     manifestServiceUrl: 'https://foobar',
-    htmlSanitizer: x => x
+    htmlSanitizer: x => x,
+    ...options
   });
 
   emsClient._getManifest = async (url) => {
