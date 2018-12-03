@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 
+import { uiCapabilities } from 'ui/capabilities';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify, fatalError, toastNotifications } from 'ui/notify';
@@ -113,105 +114,7 @@ app.controller('timelion', function (
   const defaultExpression = '.es(*)';
   const savedSheet = $route.current.locals.savedSheet;
 
-  $scope.topNavMenu = [{
-    key: i18n('timelion.topNavMenu.newSheetButtonLabel', {
-      defaultMessage: 'new',
-    }),
-    description: i18n('timelion.topNavMenu.newSheetButtonAriaLabel', {
-      defaultMessage: 'New Sheet',
-    }),
-    run: function () { kbnUrl.change('/'); },
-    testId: 'timelionNewButton',
-  }, {
-    key: i18n('timelion.topNavMenu.addChartButtonLabel', {
-      defaultMessage: 'add',
-    }),
-    description: i18n('timelion.topNavMenu.addChartButtonAriaLabel', {
-      defaultMessage: 'Add a chart',
-    }),
-    run: function () { $scope.newCell(); },
-    testId: 'timelionAddChartButton',
-  }, {
-    key: i18n('timelion.topNavMenu.saveSheetButtonLabel', {
-      defaultMessage: 'save',
-    }),
-    description: i18n('timelion.topNavMenu.saveSheetButtonAriaLabel', {
-      defaultMessage: 'Save Sheet',
-    }),
-    template: require('plugins/timelion/partials/save_sheet.html'),
-    testId: 'timelionSaveButton',
-  }, {
-    key: i18n('timelion.topNavMenu.deleteSheetButtonLabel', {
-      defaultMessage: 'delete',
-    }),
-    description: i18n('timelion.topNavMenu.deleteSheetButtonAriaLabel', {
-      defaultMessage: 'Delete current sheet',
-    }),
-    disableButton: function () {
-      return !savedSheet.id;
-    },
-    run: function () {
-      const title = savedSheet.title;
-      function doDelete() {
-        savedSheet.delete().then(() => {
-          toastNotifications.addSuccess(i18n(
-            'timelion.topNavMenu.delete.modal.successNotificationText',
-            {
-              defaultMessage: `Deleted '{title}'`,
-              values: { title },
-            }
-          ));
-          kbnUrl.change('/');
-        }).catch(error => fatalError(error, location));
-      }
-
-      const confirmModalOptions = {
-        onConfirm: doDelete,
-        confirmButtonText: i18n('timelion.topNavMenu.delete.modal.confirmButtonLabel', {
-          defaultMessage: 'Delete',
-        }),
-        title: i18n('timelion.topNavMenu.delete.modalTitle', {
-          defaultMessage: `Delete Timelion sheet '{title}'?`,
-          values: { title }
-        }),
-      };
-
-      confirmModal(
-        i18n('timelion.topNavMenu.delete.modal.warningText', {
-          defaultMessage: `You can't recover deleted sheets.`,
-        }),
-        confirmModalOptions
-      );
-    },
-    testId: 'timelionDeleteButton',
-  }, {
-    key: i18n('timelion.topNavMenu.openSheetButtonLabel', {
-      defaultMessage: 'open',
-    }),
-    description: i18n('timelion.topNavMenu.openSheetButtonAriaLabel', {
-      defaultMessage: 'Open Sheet',
-    }),
-    template: require('plugins/timelion/partials/load_sheet.html'),
-    testId: 'timelionOpenButton',
-  }, {
-    key: i18n('timelion.topNavMenu.optionsButtonLabel', {
-      defaultMessage: 'options',
-    }),
-    description: i18n('timelion.topNavMenu.optionsButtonAriaLabel', {
-      defaultMessage: 'Options',
-    }),
-    template: require('plugins/timelion/partials/sheet_options.html'),
-    testId: 'timelionOptionsButton',
-  }, {
-    key: i18n('timelion.topNavMenu.helpButtonLabel', {
-      defaultMessage: 'help',
-    }),
-    description: i18n('timelion.topNavMenu.helpButtonAriaLabel', {
-      defaultMessage: 'Help',
-    }),
-    template: '<timelion-help></timelion-help>',
-    testId: 'timelionDocsButton',
-  }];
+  $scope.topNavMenu = getTopNavMenu();
 
   $timeout(function () {
     if (config.get('timelion:showTutorial', true)) {
@@ -229,6 +132,126 @@ app.controller('timelion', function (
       rows: savedSheet.timelion_rows,
       interval: savedSheet.timelion_interval
     };
+  }
+
+  function getTopNavMenu() {
+
+    const newSheetAction = {
+      key: i18n('timelion.topNavMenu.newSheetButtonLabel', {
+        defaultMessage: 'new',
+      }),
+      description: i18n('timelion.topNavMenu.newSheetButtonAriaLabel', {
+        defaultMessage: 'New Sheet',
+      }),
+      run: function () { kbnUrl.change('/'); },
+      testId: 'timelionNewButton',
+    };
+
+    const addSheetAction = {
+      key: i18n('timelion.topNavMenu.addChartButtonLabel', {
+        defaultMessage: 'add',
+      }),
+      description: i18n('timelion.topNavMenu.addChartButtonAriaLabel', {
+        defaultMessage: 'Add a chart',
+      }),
+      run: function () { $scope.newCell(); },
+      testId: 'timelionAddChartButton',
+    };
+
+    const saveSheetAction = {
+      key: i18n('timelion.topNavMenu.saveSheetButtonLabel', {
+        defaultMessage: 'save',
+      }),
+      description: i18n('timelion.topNavMenu.saveSheetButtonAriaLabel', {
+        defaultMessage: 'Save Sheet',
+      }),
+      template: require('plugins/timelion/partials/save_sheet.html'),
+      testId: 'timelionSaveButton',
+    };
+
+    const deleteSheetAction = {
+      key: i18n('timelion.topNavMenu.deleteSheetButtonLabel', {
+        defaultMessage: 'delete',
+      }),
+      description: i18n('timelion.topNavMenu.deleteSheetButtonAriaLabel', {
+        defaultMessage: 'Delete current sheet',
+      }),
+      disableButton: function () {
+        return !savedSheet.id;
+      },
+      run: function () {
+        const title = savedSheet.title;
+        function doDelete() {
+          savedSheet.delete().then(() => {
+            toastNotifications.addSuccess(i18n(
+              'timelion.topNavMenu.delete.modal.successNotificationText',
+              {
+                defaultMessage: `Deleted '{title}'`,
+                values: { title },
+              }
+            ));
+            kbnUrl.change('/');
+          }).catch(error => fatalError(error, location));
+        }
+
+        const confirmModalOptions = {
+          onConfirm: doDelete,
+          confirmButtonText: i18n('timelion.topNavMenu.delete.modal.confirmButtonLabel', {
+            defaultMessage: 'Delete',
+          }),
+          title: i18n('timelion.topNavMenu.delete.modalTitle', {
+            defaultMessage: `Delete Timelion sheet '{title}'?`,
+            values: { title }
+          }),
+        };
+
+        confirmModal(
+          i18n('timelion.topNavMenu.delete.modal.warningText', {
+            defaultMessage: `You can't recover deleted sheets.`,
+          }),
+          confirmModalOptions
+        );
+      },
+      testId: 'timelionDeleteButton',
+    };
+
+    const openSheetAction = {
+      key: i18n('timelion.topNavMenu.openSheetButtonLabel', {
+        defaultMessage: 'open',
+      }),
+      description: i18n('timelion.topNavMenu.openSheetButtonAriaLabel', {
+        defaultMessage: 'Open Sheet',
+      }),
+      template: require('plugins/timelion/partials/load_sheet.html'),
+      testId: 'timelionOpenButton',
+    };
+
+    const optionsAction = {
+      key: i18n('timelion.topNavMenu.optionsButtonLabel', {
+        defaultMessage: 'options',
+      }),
+      description: i18n('timelion.topNavMenu.optionsButtonAriaLabel', {
+        defaultMessage: 'Options',
+      }),
+      template: require('plugins/timelion/partials/sheet_options.html'),
+      testId: 'timelionOptionsButton',
+    };
+
+    const helpAction = {
+      key: i18n('timelion.topNavMenu.helpButtonLabel', {
+        defaultMessage: 'help',
+      }),
+      description: i18n('timelion.topNavMenu.helpButtonAriaLabel', {
+        defaultMessage: 'Help',
+      }),
+      template: '<timelion-help></timelion-help>',
+      testId: 'timelionDocsButton',
+    };
+
+    if (uiCapabilities.timelion.showWriteControls) {
+      return [newSheetAction, addSheetAction, saveSheetAction, deleteSheetAction, openSheetAction, optionsAction, helpAction];
+    }
+    return [newSheetAction, addSheetAction, openSheetAction, optionsAction, helpAction];
   }
 
   const init = function () {
