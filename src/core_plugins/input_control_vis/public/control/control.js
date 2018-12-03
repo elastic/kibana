@@ -60,7 +60,7 @@ export class Control {
     throw new Error('fetch method not defined, subclass are required to implement');
   }
 
-  format(value) {
+  format = (value) => {
     const field = this.filterManager.getField();
     if (field) {
       return field.format.convert(value);

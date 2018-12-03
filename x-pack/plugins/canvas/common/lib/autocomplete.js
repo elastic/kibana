@@ -5,8 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { parse } from '@kbn/interpreter/common/lib/grammar';
-import { getByAlias } from '@kbn/interpreter/common/lib/get_by_alias';
+import { parse, getByAlias } from '@kbn/interpreter/common';
 
 const MARKER = 'CANVAS_SUGGESTION_MARKER';
 

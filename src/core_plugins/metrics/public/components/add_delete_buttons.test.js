@@ -19,14 +19,14 @@
 
 import React from 'react';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import sinon from 'sinon';
 import AddDeleteButtons from './add_delete_buttons';
 
 describe('AddDeleteButtons', () => {
   it('calls onAdd={handleAdd}', () => {
     const handleAdd = sinon.spy();
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AddDeleteButtons onAdd={handleAdd} />
     );
     wrapper.find('EuiButtonIcon').at(0).simulate('click');
@@ -35,7 +35,7 @@ describe('AddDeleteButtons', () => {
 
   it('calls onDelete={handleDelete}', () => {
     const handleDelete = sinon.spy();
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AddDeleteButtons onDelete={handleDelete} />
     );
     wrapper.find('EuiButtonIcon').at(1).simulate('click');
@@ -44,7 +44,7 @@ describe('AddDeleteButtons', () => {
 
   it('calls onClone={handleClone}', () => {
     const handleClone = sinon.spy();
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AddDeleteButtons onClone={handleClone} />
     );
     wrapper.find('EuiButtonIcon').at(0).simulate('click');
@@ -52,21 +52,21 @@ describe('AddDeleteButtons', () => {
   });
 
   it('disableDelete={true}', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AddDeleteButtons disableDelete={true} />
     );
     expect(wrapper.find({ text: 'Delete' })).to.have.length(0);
   });
 
   it('disableAdd={true}', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AddDeleteButtons disableAdd={true} />
     );
     expect(wrapper.find({ text: 'Add' })).to.have.length(0);
   });
 
   it('should not display clone by default', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AddDeleteButtons />
     );
     expect(wrapper.find({ text: 'Clone' })).to.have.length(0);
@@ -74,7 +74,7 @@ describe('AddDeleteButtons', () => {
 
   it('should not display clone when disableAdd={true}', () => {
     const fn = sinon.spy();
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <AddDeleteButtons onClone={fn} disableAdd={true} />
     );
     expect(wrapper.find({ text: 'Clone' })).to.have.length(0);

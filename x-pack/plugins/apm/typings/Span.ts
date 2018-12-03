@@ -18,8 +18,13 @@ interface Processor {
   event: 'span';
 }
 
+export interface HttpContext {
+  url?: string;
+}
+
 interface Context {
   db?: DbContext;
+  http?: HttpContext;
   service: ContextService;
   [key: string]: unknown;
 }

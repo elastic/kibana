@@ -17,11 +17,6 @@
  * under the License.
  */
 
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  export const EuiWrappingPopover: React.SFC<any>;
-}
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 

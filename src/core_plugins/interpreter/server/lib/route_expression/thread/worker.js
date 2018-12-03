@@ -18,9 +18,8 @@
  */
 
 import uuid from 'uuid/v4';
-import { populateServerRegistries } from '@kbn/interpreter/server/server_registries';
-import { interpretProvider } from '@kbn/interpreter/common/interpreter/interpret';
-import { serializeProvider } from '@kbn/interpreter/common/lib/serialize';
+import { populateServerRegistries } from '@kbn/interpreter/server';
+import { interpretProvider, serializeProvider } from '@kbn/interpreter/common';
 
 // We actually DO need populateServerRegistries here since this is a different node process
 const pluginsReady = populateServerRegistries(['commonFunctions', 'types']);

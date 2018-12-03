@@ -4,12 +4,11 @@
       <td field-name="field"
           field-type="mapping[field].type"
           width="1%"
-          class="doc-viewer-field">
+          class="kbnDocViewer__field">
       </td>
-      <td width="1%" class="doc-viewer-buttons" ng-if="filter">
+      <td width="1%" class="kbnDocViewer__buttons" ng-if="filter">
         <span ng-if="mapping[field].filterable">
           <button
-            class="doc-viewer-button"
             aria-label="Filter for value"
             ng-click="filter(mapping[field], flattened[field], '+')"
             data-test-subj="addInclusiveFilterButton"
@@ -21,7 +20,6 @@
           </button>
 
           <button
-            class="doc-viewer-button"
             aria-label="Filter out value"
             ng-click="filter(mapping[field], flattened[field],'-')"
             tooltip="Filter out value"
@@ -37,7 +35,6 @@
         </span>
         <span ng-if="canToggleColumns()">
           <button
-            class="doc-viewer-button"
             aria-label="Toggle column in table"
             aria-pressed="{{isColumnActive(field)}}"
             ng-click="toggleColumn(field)"
@@ -51,7 +48,6 @@
         </span>
         <span ng-if="!indexPattern.metaFields.includes(field) && !mapping[field].scripted">
           <button
-            class="doc-viewer-button"
             aria-label="Filter for field present"
             ng-click="filter('_exists_', field, '+')"
             tooltip="Filter for field present"
@@ -73,16 +69,16 @@
         <i ng-if="!mapping[field] && field[0] === '_'"
           tooltip-placement="top"
           tooltip="Field names beginning with _ are not supported"
-          class="fa fa-warning text-color-warning doc-viewer-underscore"></i>
+          class="fa fa-warning text-color-warning kbnDocViewer__underscore"></i>
         <i ng-if="!mapping[field] && field[0] !== '_' && !showArrayInObjectsWarning(doc, field)"
           tooltip-placement="top"
           tooltip="No cached mapping for this field. Refresh field list from the Management > Index Patterns page"
-          class="fa fa-warning text-color-warning doc-viewer-no-mapping"></i>
+          class="fa fa-warning text-color-warning kbnDocViewer__noMapping"></i>
         <i ng-if="showArrayInObjectsWarning(doc, field)"
           tooltip-placement="top"
           tooltip="Objects in arrays are not well supported."
-          class="fa fa-warning text-color-warning doc-viewer-object-array"></i>
-        <div class="doc-viewer-value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
+          class="fa fa-warning text-color-warning kbnDocViewer__objectArray"></i>
+        <div class="kbnDocViewer__value" ng-bind-html="typeof(formatted[field]) === 'undefined' ? hit[field] : formatted[field] | trustAsHtml"></div>
       </td>
     </tr>
   </tbody>

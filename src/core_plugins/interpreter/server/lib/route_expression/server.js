@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { getServerRegistries } from '@kbn/interpreter/server/server_registries';
-import { interpretProvider } from '@kbn/interpreter/common/interpreter/interpret';
+import { getServerRegistries } from '@kbn/interpreter/server';
+import { interpretProvider } from '@kbn/interpreter/common';
 import { createHandlers } from '../create_handlers';
 
 export const server = async ({ onFunctionNotFound, server, request }) => {
