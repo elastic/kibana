@@ -52,6 +52,22 @@
   "value": {
     "index": ".kibana",
     "type": "doc",
+    "id": "index-pattern:e20b2a30-f735-11e8-8ce0-9723965e01e3",
+    "source": {
+      "type" : "index-pattern",
+      "index-pattern" : {
+        "title" : "meta_for_geo_shapes*",
+        "fields" : "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"prop1\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"name\":\"shape_name\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
     "id": "gis-map:d2e73f40-e14a-11e8-a35a-370a8516603a",
     "source": {
       "type" : "gis-map",
@@ -60,6 +76,38 @@
         "description" : "",
         "mapStateJSON" : "{\"zoom\":4,\"center\":{\"lon\":-100.41,\"lat\":32.82},\"timeFilters\":{\"from\":\"2015-09-20T00:00:00.000Z\",\"to\":\"2015-09-23T00:00:00.000Z\"}}",
         "layerListJSON" : "[{\"id\":\"0hmz5\",\"label\":\"EMS base layer (road_map)\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"tmsy6\",\"label\":\"logstash events\",\"showAtAllZoomLevels\":false,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_SEARCH\",\"indexPatternId\":\"c698b940-e149-11e8-a35a-370a8516603a\",\"geoField\":\"geo.coordinates\",\"limit\":2048,\"filterByMapBounds\":true,\"showTooltip\":true,\"tooltipProperties\":[]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"STATIC\",\"options\":{\"color\":\"#e6194b\"}}},\"previousStyle\":null},\"type\":\"VECTOR\"}]",
+        "uiStateJSON" : "{\"isDarkMode\":false}",
+        "bounds" : {
+          "type" : "envelope",
+          "coordinates" : [
+            [
+              -131.611171875002,
+              39.17729080254418
+            ],
+            [
+              -69.20882812500054,
+              25.973294086525087
+            ]
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "type": "doc",
+    "id": "gis-map:1649cc70-f736-11e8-8ce0-9723965e01e3",
+    "source": {
+      "type" : "gis-map",
+      "gis-map" : {
+        "title" : "join example",
+        "description" : "",
+        "mapStateJSON" : "{\"zoom\":3.02,\"center\":{\"lon\":77.33426,\"lat\":-0.04647},\"timeFilters\":{\"from\":\"now-15m\",\"to\":\"now\",\"mode\":\"quick\"}}",
+        "layerListJSON" : "[{\"id\":\"0hmz5\",\"label\":\"EMS base layer (road_map)\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\",\"id\":\"road_map\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"TILE\",\"properties\":{\"alphaValue\":1}},\"type\":\"TILE\",\"minZoom\":0,\"maxZoom\":24},{\"id\":\"n1t6f\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"type\":\"ES_SEARCH\",\"indexPatternId\":\"561253e0-f731-11e8-8487-11b9dd924f96\",\"geoField\":\"geometry\",\"limit\":2048,\"filterByMapBounds\":false,\"showTooltip\":true,\"tooltipProperties\":[]},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"field\":{\"label\":\"max(prop1) group by meta_for_geo_shapes*.shape_name\",\"name\":\"__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name\",\"origin\":\"join\"},\"color\":\"Blues\"}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"alphaValue\":1},\"temporary\":true,\"previousStyle\":null},\"type\":\"VECTOR\",\"joins\":[{\"leftField\":\"name\",\"right\":{\"indexPatternId\":\"e20b2a30-f735-11e8-8ce0-9723965e01e3\",\"indexPatternTitle\":\"meta_for_geo_shapes*\",\"term\":\"shape_name\",\"metrics\":[{\"type\":\"max\",\"field\":\"prop1\"}]}}]}]",
         "uiStateJSON" : "{\"isDarkMode\":false}",
         "bounds" : {
           "type" : "envelope",

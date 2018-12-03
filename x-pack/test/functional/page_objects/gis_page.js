@@ -48,6 +48,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
         const searchFilter = await testSubjects.find('searchFilter');
         await searchFilter.clearValue();
         await searchFilter.click();
+        await searchFilter.type(name);
         await PageObjects.common.pressEnterKey();
       });
 
@@ -95,6 +96,36 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async openInspectorView(viewId) {
+      await this.openInspector();
+      log.debug(`Open Inspector view ${viewId}`);
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click(viewId);
+    }
+
+    async openInspectorMapView() {
+      await this.openInspectorView('inspectorViewChooserMap');
+    }
+
+    async openInspectorRequestsView() {
+      await this.openInspectorView('inspectorViewChooserRequests');
+    }
+
+    async getMapboxStyle() {
+      log.debug('getMapboxStyle');
+      await this.openInspectorMapView();
+      await testSubjects.click('mapboxStyleTab');
+      const mapboxStyleContainer = await testSubjects.find('mapboxStyleContainer');
+      const mapboxStyleJson = await mapboxStyleContainer.getVisibleText();
+      let mapboxStyle;
+      try {
+        mapboxStyle = JSON.parse(mapboxStyleJson);
+      } catch(err) {
+        throw new Error(`Unable to parse mapbox style, error: ${err.message}`);
+      }
+      return mapboxStyle;
+    }
+
     async getInspectorTableData() {
       const inspectorPanel = await testSubjects.find('inspectorPanel');
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
@@ -108,7 +139,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async getInspectorRequestStat(statName) {
-      await this.openInspector();
+      await this.openInspectorRequestsView();
       const requestStats = await this.getInspectorTableData();
       return this._getInspectorStatRowHit(requestStats, statName);
     }

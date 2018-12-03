@@ -58,3 +58,81 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "1",
+    "source": {
+      "shape_name": "alpha",
+      "prop1": 7
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "2",
+    "source": {
+      "shape_name": "alpha",
+      "prop1": 8
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "3",
+    "source": {
+      "shape_name": "alpha",
+      "prop1": 10
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "4",
+    "source": {
+      "shape_name": "bravo",
+      "prop1": 3
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "5",
+    "source": {
+      "shape_name": "charlie",
+      "prop1": 11
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "meta_for_geo_shapes",
+    "type": "doc",
+    "id": "6",
+    "source": {
+      "shape_name": "charlie",
+      "prop1": 12
+    }
+  }
+}

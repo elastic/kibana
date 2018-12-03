@@ -24,9 +24,11 @@ class MapDetails extends Component {
   tabs = [{
     id: DETAILS_TAB_ID,
     name: 'Map details',
+    dataTestSubj: 'mapDetailsTab',
   }, {
     id: STYLE_TAB_ID,
     name: 'Mapbox style',
+    dataTestSubj: 'mapboxStyleTab',
   }];
 
   state = {
@@ -42,13 +44,14 @@ class MapDetails extends Component {
   renderTab = () => {
     if (STYLE_TAB_ID === this.state.selectedTabId) {
       return (
-        <EuiCodeBlock
-          language="json"
-          paddingSize="s"
-          data-test-subj="inspectorRequestBody"
-        >
-          { JSON.stringify(this.props.mapStyle, null, 2) }
-        </EuiCodeBlock>
+        <div data-test-subj="mapboxStyleContainer">
+          <EuiCodeBlock
+            language="json"
+            paddingSize="s"
+          >
+            { JSON.stringify(this.props.mapStyle, null, 2) }
+          </EuiCodeBlock>
+        </div>
       );
     }
 
@@ -86,6 +89,7 @@ class MapDetails extends Component {
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
+        data-test-subj={tab.dataTestSubj}
       >
         {tab.name}
       </EuiTab>

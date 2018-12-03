@@ -30,5 +30,6 @@ export default function ({ loadTestFile, getService }) {
 
     loadTestFile(require.resolve('./load_saved_object'));
     loadTestFile(require.resolve('./es_search_source'));
+    loadTestFile(require.resolve('./joins'));
   });
 }
