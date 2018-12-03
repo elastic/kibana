@@ -36,5 +36,5 @@ export const emptyColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, ecs: ECS) =>
     plainColumnsOverridden.includes(columnName) && dataNotExistsAtColumn(columnName, ecs),
 
-  renderColumn: (columnName: string, data: ECS) => <React.Fragment>{EMPTY_VALUE}</React.Fragment>,
+  renderColumn: (columnName: string, data: ECS) => <>{EMPTY_VALUE}</>,
 };

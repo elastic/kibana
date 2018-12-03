@@ -18,7 +18,6 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Dispatch } from 'redux';
 import { State, timelineActions } from '../../store';
 import { timelineByIdSelector } from '../../store/selectors';
 import { defaultWidth } from '../timeline/body';
@@ -55,13 +54,17 @@ export const Text = styled(EuiText)`
   z-index: 3;
 `;
 
+const Visible = styled.div<{ show: boolean }>`
+  visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
+`;
+
 interface OwnProps {
   timelineId: string;
   children?: React.ReactNode;
 }
 
 interface DispatchProps {
-  showTimeline: (id: string, show: boolean) => void;
+  showTimeline: ({ id, show }: { id: string; show: boolean }) => void;
 }
 
 interface StateReduxProps {
@@ -95,43 +98,36 @@ export const FlyoutPane = pure(({ onClose, children }: FlyoutPaneProps) => (
 ));
 
 interface FlyoutButtonProps {
-  timelineId: string;
   onOpen: () => void;
+  show: boolean;
+  timelineId: string;
 }
 
-export const FlyoutButton = pure(({ onOpen }: FlyoutButtonProps) => (
-  <Overlay data-test-subj="flyoutOverlay" onClick={onOpen} onMouseEnter={onOpen}>
-    <Button>
-      <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
-    </Button>
-  </Overlay>
-));
+export const FlyoutButton = pure(
+  ({ onOpen, show }: FlyoutButtonProps) =>
+    show ? (
+      <Overlay data-test-subj="flyoutOverlay" onClick={onOpen} onMouseEnter={onOpen}>
+        <Button>
+          <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
+        </Button>
+      </Overlay>
+    ) : null
+);
 
 export const FlyoutComponent = pure<Props>(({ show, timelineId, showTimeline, children }) => (
-  <React.Fragment>
-    <div
-      style={{
-        visibility: show ? 'visible' : 'hidden',
-      }}
-    >
-      <FlyoutPane
-        onClose={() => {
-          showTimeline(timelineId, false);
-        }}
-      >
+  <>
+    <Visible show={show}>
+      <FlyoutPane onClose={() => showTimeline({ id: timelineId, show: false })}>
         {children}
       </FlyoutPane>
       >
-    </div>
-    {!show ? (
-      <FlyoutButton
-        timelineId={timelineId}
-        onOpen={() => {
-          showTimeline(timelineId, true);
-        }}
-      />
-    ) : null}
-  </React.Fragment>
+    </Visible>
+    <FlyoutButton
+      show={!show}
+      timelineId={timelineId}
+      onOpen={() => showTimeline({ id: timelineId, show: true })}
+    />
+  </>
 ));
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
@@ -141,11 +137,9 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   return { show };
 };
 
-const bindActionsToDispatch = (dispatch: Dispatch) => ({
-  showTimeline: (id: string, show: boolean) => dispatch(timelineActions.showTimeline({ show, id })),
-});
-
 export const Flyout = connect(
   mapStateToProps,
-  bindActionsToDispatch
+  {
+    showTimeline: timelineActions.showTimeline,
+  }
 )(FlyoutComponent);

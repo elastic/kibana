@@ -57,26 +57,26 @@ export const plainColumnRenderer: ColumnRenderer = {
     const getOrEmpty = getOr(EMPTY_VALUE);
     switch (columnName) {
       case 'category':
-        return <React.Fragment>{getOrEmpty('event.category', data)}</React.Fragment>;
+        return <>{getOrEmpty('event.category', data)}</>;
       case 'destination':
-        return <React.Fragment>{getOrEmpty('destination.ip', data)}</React.Fragment>;
+        return <>{getOrEmpty('destination.ip', data)}</>;
       case 'event':
-        return <React.Fragment>{data.event.id}</React.Fragment>;
+        return <>{data.event.id}</>;
       case 'geo':
-        return <React.Fragment>{getOrEmpty('geo.region_name', data)}</React.Fragment>;
+        return <>{getOrEmpty('geo.region_name', data)}</>;
       case 'severity':
-        return <React.Fragment>{getOrEmpty('event.severity', data)}</React.Fragment>;
+        return <>{getOrEmpty('event.severity', data)}</>;
       case 'source':
-        return <React.Fragment>{getOrEmpty('source.ip', data)}</React.Fragment>;
+        return <>{getOrEmpty('source.ip', data)}</>;
       case 'timestamp':
-        return <React.Fragment>{moment(data.timestamp).format('YYYY-MM-DD')}</React.Fragment>;
+        return <>{moment(data.timestamp).format('YYYY-MM-DD')}</>;
       case 'type':
-        return <React.Fragment>{getOrEmpty('event.type', data)}</React.Fragment>;
+        return <>{getOrEmpty('event.type', data)}</>;
       case 'user':
-        return <React.Fragment>{getOrEmpty('user.name', data)}</React.Fragment>;
+        return <>{getOrEmpty('user.name', data)}</>;
       default:
         // unknown column name
-        return <React.Fragment>{EMPTY_VALUE}</React.Fragment>;
+        return <>{EMPTY_VALUE}</>;
     }
   },
 };

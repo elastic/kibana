@@ -23,7 +23,7 @@ import {
 
 interface Props {
   dataProviders?: IdToDataProvider;
-  dispatch?: Dispatch;
+  dispatch: Dispatch;
 }
 
 interface OnDragEndHandlerParams {
@@ -49,7 +49,7 @@ const DragDropContextWrapperComponent = pure<Props>(({ dataProviders, dispatch, 
       onDragEndHandler({
         result,
         dataProviders: dataProviders!,
-        dispatch: dispatch!,
+        dispatch,
       });
     }}
   >

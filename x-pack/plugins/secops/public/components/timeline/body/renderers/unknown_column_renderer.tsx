@@ -11,5 +11,5 @@ import { ECS } from '../../ecs';
 
 export const unknownColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: ECS) => true,
-  renderColumn: (columnName: string, data: ECS) => <React.Fragment>{EMPTY_VALUE}</React.Fragment>,
+  renderColumn: (columnName: string, data: ECS) => <>{EMPTY_VALUE}</>,
 };

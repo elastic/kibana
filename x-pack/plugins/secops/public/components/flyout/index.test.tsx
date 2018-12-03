@@ -193,9 +193,21 @@ describe('Flyout', () => {
   });
 
   describe('showFlyoutButton', () => {
+    test('should show the flyout button when show is true', () => {
+      const openMock = jest.fn();
+      const wrapper = mount(<FlyoutButton show={true} timelineId="test" onOpen={openMock} />);
+      expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(true);
+    });
+
+    test('should NOT show the flyout button when show is false', () => {
+      const openMock = jest.fn();
+      const wrapper = mount(<FlyoutButton show={false} timelineId="test" onOpen={openMock} />);
+      expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
+    });
+
     test('should return the flyout button with text', () => {
       const openMock = jest.fn();
-      const wrapper = mount(<FlyoutButton timelineId="test" onOpen={openMock} />);
+      const wrapper = mount(<FlyoutButton show={true} timelineId="test" onOpen={openMock} />);
       expect(
         wrapper
           .find('[data-test-subj="flyoutButton"]')
@@ -206,7 +218,7 @@ describe('Flyout', () => {
 
     test('should call the onOpen when the mouse is entered', () => {
       const openMock = jest.fn();
-      const wrapper = mount(<FlyoutButton timelineId="test" onOpen={openMock} />);
+      const wrapper = mount(<FlyoutButton show={true} timelineId="test" onOpen={openMock} />);
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')
         .first()

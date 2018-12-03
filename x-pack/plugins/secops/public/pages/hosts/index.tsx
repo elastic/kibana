@@ -130,9 +130,9 @@ const getEventsColumns = (dispatch: Dispatch) => [
     name: 'Source',
     truncateText: true,
     render: (item: EventItem) => (
-      <React.Fragment>
+      <>
         {getOr('--', 'source.ip', item).slice(0, 12)} : {getOr('--', 'source.port', item)}
-      </React.Fragment>
+      </>
     ),
   },
   {
@@ -140,9 +140,9 @@ const getEventsColumns = (dispatch: Dispatch) => [
     sortable: true,
     truncateText: true,
     render: (item: EventItem) => (
-      <React.Fragment>
+      <>
         {getOr('--', 'destination.ip', item).slice(0, 12)} : {getOr('--', 'destination.port', item)}
-      </React.Fragment>
+      </>
     ),
   },
   {
@@ -150,9 +150,9 @@ const getEventsColumns = (dispatch: Dispatch) => [
     sortable: true,
     truncateText: true,
     render: (item: EventItem) => (
-      <React.Fragment>
+      <>
         {getOr('--', 'geo.region_name', item)} - {getOr('--', 'geo.country_iso_code', item)}
-      </React.Fragment>
+      </>
     ),
   },
 ];

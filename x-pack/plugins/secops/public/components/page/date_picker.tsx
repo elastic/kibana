@@ -30,7 +30,7 @@ interface DatePickerProps {
 
 export const DatePicker = pure<DatePickerProps>(
   ({ startDate = getDefaultStartDate(), endDate = getDefaultEndDate() }) => (
-    <React.Fragment>
+    <>
       <EuiDatePickerRange
         startDateControl={
           <EuiDatePicker
@@ -53,6 +53,6 @@ export const DatePicker = pure<DatePickerProps>(
           />
         }
       />
-    </React.Fragment>
+    </>
   )
 );
