@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { PHASE_NODE_ATTRS } from '../../../../store/constants';
 import { ErrableFormRow } from '../../form_errors';
@@ -49,6 +49,9 @@ class NodeAllocationUi extends Component {
       nodeOptions,
       errors
     } = this.props;
+    if (!nodeOptions) {
+      return <EuiLoadingSpinner size="s" />;
+    }
     if (!nodeOptions.length) {
       return (
         <Fragment>

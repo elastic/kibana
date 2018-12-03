@@ -11,7 +11,7 @@ export const getNodeOptions = createSelector(
   [state => getNodes(state)],
   nodes => {
     if (!nodes) {
-      return [];
+      return null;
     }
 
     const options = Object.keys(nodes).map(attrs => ({
