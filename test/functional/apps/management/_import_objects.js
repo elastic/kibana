@@ -181,6 +181,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.removeIndexPattern();
 
       // Then, import the objects
+	  // TODO - this is failing
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json'));
       await PageObjects.header.waitUntilLoadingHasFinished();
