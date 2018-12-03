@@ -37,6 +37,10 @@ export class VegaMapView extends VegaBaseView {
       if (!this._$container) return;
       const mapStyle = mapConfig.mapStyle === 'default' ? 'road_map' : mapConfig.mapStyle;
       baseMapOpts = tmsServices.find((s) => s.id === mapStyle);
+      baseMapOpts = {
+        url: await this._serviceSettings.getUrlTemplateForTMSLayer(baseMapOpts),
+        ...baseMapOpts
+      };
       if (!baseMapOpts) {
         this.onWarn(i18n.translate('vega.mapView.mapStyleNotFoundWarningMessage', {
           defaultMessage: '{mapStyleParam} was not found',
