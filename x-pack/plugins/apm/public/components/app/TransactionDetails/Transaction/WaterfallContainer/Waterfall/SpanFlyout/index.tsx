@@ -113,7 +113,7 @@ export function SpanFlyout({
             tabs={[
               {
                 id: 'stack-trace',
-                name: 'Strack Trace',
+                name: 'Stack Trace',
                 content: (
                   <Fragment>
                     <HttpContext httpContext={httpContext} />
