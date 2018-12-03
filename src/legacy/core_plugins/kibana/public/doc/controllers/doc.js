@@ -26,7 +26,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { i18n } from '@kbn/i18n';
-
+import { getRootBreadcrumbs } from '../../discover/breadcrumbs';
 
 const app = uiModules.get('apps/doc', [
   'kibana/notify',
@@ -42,6 +42,7 @@ const resolveIndexPattern = {
 };
 
 const k7Breadcrumbs = () => [
+  ...getRootBreadcrumbs(),
   {
     text: i18n.translate('kbn.doc.breadcrumb', {
       defaultMessage: 'Document'
