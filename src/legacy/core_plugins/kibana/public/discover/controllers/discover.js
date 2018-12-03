@@ -21,6 +21,8 @@ import _ from 'lodash';
 import React from 'react';
 import angular from 'angular';
 import chrome from 'ui/chrome';
+import * as Rx from 'rxjs';
+import { share } from 'rxjs/operators';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import * as filterActions from 'ui/doc_table/actions/filter';
@@ -906,7 +908,23 @@ function discoverController(
         },
         aggs: visStateAggs
       });
+      const actions = {};
+      // init default actions
+      _.forEach($scope.vis.type.events, (event, eventName) => {
+        if (event.disabled || !eventName) {
+          return;
+        } else {
+          actions[eventName] = event.defaultAction;
+        }
+      });
 
+      $scope.vis.eventsSubject = new Rx.Subject();
+      const events$ = $scope.vis.eventsSubject.asObservable().pipe(share());
+      events$.subscribe(event => {
+        if (actions[event.name]) {
+          actions[event.name](event.data);
+        }
+      });
       $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
         return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
       });
