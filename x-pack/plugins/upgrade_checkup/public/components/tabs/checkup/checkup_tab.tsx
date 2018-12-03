@@ -37,12 +37,9 @@ interface CheckupTabProps extends UpgradeCheckupTabProps {
 
 interface CheckupTabState {
   currentFilter: Set<LevelFilterOption>;
+  search: string;
   currentGroupBy: GroupByOption;
 }
-
-const filterDeps = (levels: Set<LevelFilterOption>) => (dep: DeprecationInfo) => {
-  return levels.has(dep.level as LevelFilterOption);
-};
 
 /**
  * Displays a list of deprecations that filterable and groupable. Can be used for cluster,
@@ -59,13 +56,14 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
         LevelFilterOption.warning,
         LevelFilterOption.critical,
       ]),
+      search: '',
       currentGroupBy: GroupByOption.message,
     };
   }
 
   public render() {
     const { checkupType, loadingState, refreshCheckupData } = this.props;
-    const { currentFilter, currentGroupBy } = this.state;
+    const { currentFilter, search, currentGroupBy } = this.state;
 
     return (
       <Fragment>
@@ -84,8 +82,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
               <EuiCallOut title="Sorry, there was an error" color="danger" iconType="cross">
                 <p>There was a network error retrieving the checkup results.</p>
               </EuiCallOut>
-            ) : this.deprecations &&
-            this.deprecations.filter(filterDeps(currentFilter)).length > 0 ? (
+            ) : this.deprecations && this.deprecations.length > 0 ? (
               <Fragment>
                 <CheckupControls
                   allDeprecations={this.deprecations}
@@ -93,6 +90,8 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
                   loadData={refreshCheckupData}
                   currentFilter={currentFilter}
                   onFilterChange={this.changeFilter}
+                  search={search}
+                  onSearchChange={this.changeSearch}
                   availableGroupByOptions={this.availableGroupByOptions()}
                   currentGroupBy={currentGroupBy}
                   onGroupByChange={this.changeGroupBy}
@@ -138,6 +137,10 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
     this.setState({ currentFilter: newFilters });
   };
 
+  private changeSearch = (search: string) => {
+    this.setState({ search });
+  };
+
   private changeGroupBy = (groupBy: GroupByOption) => {
     this.setState({ currentGroupBy: groupBy });
   };
@@ -154,12 +157,13 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
 
   private renderCheckupData() {
     const deprecations = this.deprecations!;
-    const { currentFilter, currentGroupBy } = this.state;
+    const { currentFilter, currentGroupBy, search } = this.state;
 
     return (
       <GroupedDeprecations
         currentGroupBy={currentGroupBy}
         currentFilter={currentFilter}
+        search={search}
         allDeprecations={deprecations}
       />
     );

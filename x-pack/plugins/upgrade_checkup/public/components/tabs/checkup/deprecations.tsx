@@ -29,8 +29,29 @@ const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
 };
 
-const filterDeps = (levels: Set<LevelFilterOption>) => (dep: DeprecationInfo) => {
-  return levels.has(dep.level as LevelFilterOption);
+const filterDeps = (levels: Set<LevelFilterOption>, search: string) => {
+  const conditions: Array<(dep: DeprecationInfo) => boolean> = [
+    dep => levels.has(dep.level as LevelFilterOption),
+  ];
+
+  if (search.length > 0) {
+    // Change everything to lower case for a case-insensitive comparison
+    conditions.push(dep => {
+      try {
+        const searchReg = new RegExp(search.toLowerCase());
+        return Boolean(
+          dep.message.toLowerCase().match(searchReg) ||
+            (dep.details && dep.details.match(searchReg))
+        );
+      } catch (e) {
+        // ignore any regexp errors.
+        return true;
+      }
+    });
+  }
+
+  // Return true if every condition function returns true (boolean AND)
+  return (dep: DeprecationInfo) => conditions.map(c => c(dep)).every(t => t);
 };
 
 /**
@@ -129,6 +150,7 @@ const DeprecationList: StatelessComponent<{
 
 interface GroupedDeprecationsProps {
   currentFilter: Set<LevelFilterOption>;
+  search: string;
   currentGroupBy: GroupByOption;
   allDeprecations?: EnrichedDeprecationInfo[];
 }
@@ -153,10 +175,10 @@ export class GroupedDeprecations extends React.Component<
   };
 
   public render() {
-    const { currentGroupBy, allDeprecations = [], currentFilter } = this.props;
+    const { currentGroupBy, allDeprecations = [], currentFilter, search } = this.props;
     const { forceExpand, expandNumber } = this.state;
 
-    const deprecations = allDeprecations.filter(filterDeps(currentFilter));
+    const deprecations = allDeprecations.filter(filterDeps(currentFilter, search));
 
     // Display number of results shown
     const showMoreMessage = deprecations.length === 0 ? '. Change filters to show more.' : '';

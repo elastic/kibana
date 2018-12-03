@@ -17,6 +17,8 @@ interface CheckupControlsProps {
   loadData: () => void;
   currentFilter: Set<LevelFilterOption>;
   onFilterChange: (filter: LevelFilterOption) => void;
+  search: string;
+  onSearchChange: (filter: string) => void;
   availableGroupByOptions: GroupByOption[];
   currentGroupBy: GroupByOption;
   onGroupByChange: (groupBy: GroupByOption) => void;
@@ -28,13 +30,19 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
   loadData,
   currentFilter,
   onFilterChange,
+  search,
+  onSearchChange,
   availableGroupByOptions,
   currentGroupBy,
   onGroupByChange,
 }) => (
   <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
     <EuiFlexItem grow={true}>
-      <EuiFieldSearch placeholder="Filter list" />
+      <EuiFieldSearch
+        placeholder="Filter list"
+        value={search}
+        onChange={e => onSearchChange(e.target.value)}
+      />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
