@@ -22,8 +22,6 @@ import { Env } from '../config';
 
 const pluginsSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
-  scanDirs: schema.maybe(schema.arrayOf(schema.string())),
-  paths: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 type PluginsConfigType = TypeOf<typeof pluginsSchema>;

@@ -87,6 +87,14 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
     return configValue;
   }
 
+  private static transformPlugins(configValue: Record<string, any>) {
+    // This property is the only one we use from the existing `plugins` config node
+    // since `scanDirs` and `paths` aren't respected by new platform plugin discovery.
+    return {
+      initialize: configValue.initialize,
+    };
+  }
+
   public get(configPath: ConfigPath) {
     const configValue = super.get(configPath);
     switch (configPath) {
@@ -94,6 +102,8 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
         return LegacyObjectToConfigAdapter.transformLogging(configValue);
       case 'server':
         return LegacyObjectToConfigAdapter.transformServer(configValue);
+      case 'plugins':
+        return LegacyObjectToConfigAdapter.transformPlugins(configValue);
       default:
         return configValue;
     }
