@@ -5,10 +5,7 @@
  */
 
 import squel from 'squel';
-import { map, zipObject } from 'lodash';
-import { buildBoolArray } from '../../../../server/lib/build_bool_array';
-import { normalizeType } from '../../../../server/lib/normalize_type';
-import { sanitizeName } from '../../../../server/lib/sanitize_name';
+import { queryEsSQL } from '../../../../server/lib/query_es_sql';
 
 export const esdocs = () => ({
   name: 'esdocs',
@@ -76,41 +73,10 @@ export const esdocs = () => ({
       if (sortField) query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
     }
 
-    return handlers
-      .elasticsearchClient('transport.request', {
-        path: '/_xpack/sql?format=json',
-        method: 'POST',
-        body: {
-          fetch_size: args.count,
-          query: query.toString(),
-          filter: {
-            bool: {
-              must: [{ match_all: {} }, ...buildBoolArray(context.and)],
-            },
-          },
-        },
-      })
-      .then(res => {
-        const columns = res.columns.map(({ name, type }) => {
-          return { name: sanitizeName(name), type: normalizeType(type) };
-        });
-        const columnNames = map(columns, 'name');
-        const rows = res.rows.map(row => zipObject(columnNames, row));
-        return {
-          type: 'datatable',
-          columns,
-          rows,
-        };
-      })
-      .catch(e => {
-        if (e.message.indexOf('parsing_exception') > -1) {
-          throw new Error(
-            `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${
-              e.message
-            }`
-          );
-        }
-        throw new Error(`Unexpected error from Elasticsearch: ${e.message}`);
-      });
+    return queryEsSQL(handlers.elasticsearchClient, {
+      count: args.count,
+      query,
+      filter: context.and,
+    });
   },
 });
