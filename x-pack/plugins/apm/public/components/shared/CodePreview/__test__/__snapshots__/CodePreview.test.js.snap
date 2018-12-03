@@ -1,6 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CodePreview should render with data 1`] = `
+.c2 {
+  color: #999999;
+  padding: 8px;
+  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
+}
+
+.c3 {
+  font-weight: bold;
+  color: #000000;
+}
+
 .c4 {
   position: relative;
   border-radius: 0 0 5px 5px;
@@ -82,17 +93,6 @@ exports[`CodePreview should render with data 1`] = `
   margin: 0;
   white-space: pre;
   z-index: 2;
-}
-
-.c2 {
-  color: #999999;
-  padding: 8px;
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
-}
-
-.c3 {
-  font-weight: bold;
-  color: #000000;
 }
 
 .c1 {

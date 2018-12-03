@@ -7,6 +7,7 @@
 import { get } from 'lodash';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { Stackframe } from '../../../../typings/APMDoc';
 import { colors, fontFamilyCode, px, units } from '../../../style/variables';
 
 const FileDetails = styled.div`
@@ -21,16 +22,6 @@ const AppFrameFileDetail = styled.span`
   font-weight: bold;
   color: ${colors.black};
 `;
-
-interface StackframeLine {
-  number: number;
-}
-
-interface Stackframe {
-  filename: string;
-  function: string;
-  line: StackframeLine;
-}
 
 interface Props {
   stackframe: Stackframe;

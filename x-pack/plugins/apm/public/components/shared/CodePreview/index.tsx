@@ -7,22 +7,30 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
 import {
-  units,
-  px,
+  borderRadius,
   colors,
   fontFamilyCode,
-  borderRadius
+  px,
+  units
 } from '../../../style/variables';
 
 import { isEmpty } from 'lodash';
 
-import { registerLanguage } from 'react-syntax-highlighter/dist/light';
+// TODO add dependency for @types/react-syntax-highlighter
+// @ts-ignore
 import javascript from 'react-syntax-highlighter/dist/languages/javascript';
+// @ts-ignore
 import python from 'react-syntax-highlighter/dist/languages/python';
+// @ts-ignore
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
-import { Variables } from './Variables';
-import { Context } from './Context';
+// @ts-ignore
+import { registerLanguage } from 'react-syntax-highlighter/dist/light';
+import { Stackframe } from '../../../../typings/APMDoc';
 import { FrameHeading } from '../Stacktrace/FrameHeading';
+// @ts-ignore
+import { Context } from './Context';
+// @ts-ignore
+import { Variables } from './Variables';
 
 registerLanguage('javascript', javascript);
 registerLanguage('python', python);
@@ -33,7 +41,11 @@ const CodeHeader = styled.div`
   border-radius: ${borderRadius} ${borderRadius} 0 0;
 `;
 
-const Container = styled.div`
+interface ContainerProps {
+  isLibraryFrame?: boolean;
+}
+
+const Container = styled.div<ContainerProps>`
   margin: 0 0 ${px(units.plus)} 0;
   position: relative;
   font-family: ${fontFamilyCode};
@@ -42,17 +54,23 @@ const Container = styled.div`
   background: ${props => (props.isLibraryFrame ? colors.white : colors.gray5)};
 `;
 
-class CodePreview extends PureComponent {
-  state = {
+interface Props {
+  isLibraryFrame?: boolean;
+  codeLanguage?: string;
+  stackframe: Stackframe;
+}
+
+export class CodePreview extends PureComponent<Props> {
+  public state = {
     variablesVisible: false
   };
 
-  toggleVariables = () =>
+  public toggleVariables = () =>
     this.setState(() => {
       return { variablesVisible: !this.state.variablesVisible };
     });
 
-  render() {
+  public render() {
     const { stackframe, codeLanguage, isLibraryFrame } = this.props;
     const hasVariables = !isEmpty(stackframe.vars);
 
@@ -82,5 +100,3 @@ class CodePreview extends PureComponent {
     );
   }
 }
-
-export default CodePreview;
