@@ -23,7 +23,6 @@ export default (req, panel, entities) => {
   entities.forEach(entity => {
     bodies.push({
       index: panel.index_pattern,
-      //ignore: [404],
       ignoreUnavailable: true,
     });
     const body = buildRequestBody(req, panel, entity);

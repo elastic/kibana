@@ -25,7 +25,6 @@ export default (req, panel, series) => {
 
   bodies.push({
     index: indexPattern,
-    //ignore: [404],
     ignoreUnavailable: true,
   });
 

@@ -39,7 +39,6 @@ export default async (req, panel) => {
 
       bodies.push({
         index: indexPattern,
-        //ignore: [404],
         ignoreUnavailable: true,
       });
 
