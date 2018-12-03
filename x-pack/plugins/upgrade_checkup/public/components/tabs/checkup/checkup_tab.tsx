@@ -17,8 +17,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
-import { EnrichedDeprecationInfo } from '../../../../server/lib/es_migration_apis';
 import {
   GroupByOption,
   LevelFilterOption,

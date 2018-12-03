@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { groupBy } from 'lodash';
 import React, { Fragment, StatelessComponent } from 'react';
 
 import {
   EuiAccordion,
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -188,7 +188,7 @@ export class GroupedDeprecations extends React.Component<
         ? `No deprecations`
         : `Showing ${deprecations.length} of ${allDeprecations.length}${showMoreMessage}`;
 
-    const groups = _.groupBy(deprecations, currentGroupBy);
+    const groups = groupBy(deprecations, currentGroupBy);
 
     return (
       <div>
@@ -225,7 +225,11 @@ export class GroupedDeprecations extends React.Component<
                 buttonContent={<span className="upgDeprecations__itemName">{groupName}</span>}
                 extraAction={
                   <div>
-                    {currentGroupBy === GroupByOption.message && (
+                    {/* TODO: clean this up */}
+                    {Boolean(
+                      currentGroupBy === GroupByOption.message &&
+                        groups[groupName].filter(g => g.index).length
+                    ) && (
                       <Fragment>
                         <EuiBadge color="hollow">
                           {groups[groupName].filter(g => g.index).length} indices
