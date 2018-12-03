@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const MANAGEMENT_BREADCRUMB = Object.freeze({
-  text: i18n.translate('kbn.management.breadcrum', {
+  text: i18n.translate('common.ui.management.breadcrumb', {
     defaultMessage: 'Management'
   }),
   href: '#/management'
