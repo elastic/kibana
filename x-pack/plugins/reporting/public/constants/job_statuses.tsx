@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const enum JobStatuses {
+export enum JobStatuses {
   PENDING = 'pending',
   PROCESSING = 'processing',
   COMPLETED = 'completed',
