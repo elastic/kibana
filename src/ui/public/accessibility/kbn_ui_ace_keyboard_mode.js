@@ -41,11 +41,11 @@ uiModules
   .get('kibana')
   .factory('kbnUiAceKeyboardModeService', () => ({
     initialize(scope, element) {
-      const uniqueId = `kbnUIAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
+      const uniqueId = `kbnUiAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
 
       const hint = angular.element(
         `<div
-          class="kbnUIAceKeyboardHint"
+          class="kbnUiAceKeyboardHint"
           id="${uniqueId}"
           tabindex="0"
           role="application"
@@ -63,12 +63,12 @@ uiModules
 
       function startEditing() {
         // We are not using ng-class in the element, so that we won't need to $compile it
-        hint.addClass('kbnUIAceKeyboardHint-isInactive');
+        hint.addClass('kbnUiAceKeyboardHint-isInactive');
         uiAceTextbox.focus();
       }
 
       function enableOverlay() {
-        hint.removeClass('kbnUIAceKeyboardHint-isInactive');
+        hint.removeClass('kbnUiAceKeyboardHint-isInactive');
       }
 
       hint.keydown(ev => {
