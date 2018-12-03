@@ -14,3 +14,4 @@ export const LOCALSTORAGE_LASTPAGE = 'canvas:lastpage';
 export const FETCH_TIMEOUT = 30000; // 30 seconds
 export const CANVAS_USAGE_TYPE = 'canvas';
 export const SECURITY_AUTH_MESSAGE = 'Authentication failed';
+export const DEFAULT_WORKPAD_CSS = '.canvasPage {\n\n}';

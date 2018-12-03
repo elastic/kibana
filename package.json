@@ -89,7 +89,7 @@
     ]
   },
   "dependencies": {
-    "@elastic/eui": "5.0.0",
+    "@elastic/eui": "5.3.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana1",
     "@elastic/numeral": "2.3.2",
@@ -329,7 +329,6 @@
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-prettier": "^2.6.2",
     "eslint-plugin-react": "^7.11.1",
-    "event-stream": "3.3.2",
     "expect.js": "0.3.1",
     "faker": "1.1.0",
     "fetch-mock": "^5.13.1",
