@@ -22,7 +22,7 @@ import expect from 'expect.js';
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
   VisualizeConstants
-} from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+} from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
