@@ -10,38 +10,23 @@ import {
   EuiCallOut,
   // @ts-ignore
   EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
   EuiLink,
   EuiPageContent,
   EuiPageContentBody,
-  EuiPanel,
   EuiSpacer,
   // @ts-ignore
   EuiStat,
   EuiText,
 } from '@elastic/eui';
-import { LoadingState, UpgradeCheckupTabComponent } from '../../types';
+
+import { UpgradeCheckupTabComponent } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
+import { Summary } from './summary';
 
 export class OverviewTab extends UpgradeCheckupTabComponent {
   public render() {
-    const { loadingState, checkupData, setSelectedTabIndex } = this.props;
-
-    if (loadingState !== LoadingState.Success) {
-      return null;
-    }
-
-    const countByType = Object.keys(checkupData!).reduce(
-      (counts, checkupType) => {
-        counts[checkupType] = checkupData![checkupType].length;
-        return counts;
-      },
-      {} as { [checkupType: string]: number }
-    );
-
     return (
       <Fragment>
         <EuiSpacer />
@@ -54,39 +39,7 @@ export class OverviewTab extends UpgradeCheckupTabComponent {
 
         <EuiSpacer />
 
-        {/* TODO: Hook this up with actual numbers and links to tabs */}
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem style={{ maxWidth: 220 }}>
-            <EuiPanel>
-              <EuiStat title={countByType.cluster} description="Cluster issues">
-                <EuiLink onClick={() => setSelectedTabIndex(1)}>View all</EuiLink>
-              </EuiStat>
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem style={{ maxWidth: 220 }}>
-            <EuiPanel>
-              <EuiStat title={countByType.indices} description="Index issues">
-                <EuiLink onClick={() => setSelectedTabIndex(2)}>View all</EuiLink>
-              </EuiStat>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer />
-
-        {/* TODO: Only show this if there are 0 issues (also don't show the above) */}
-        <EuiPanel>
-          <EuiText grow={false}>
-            <h2>The coast is clear!</h2>
-            <p>
-              There are no issues with either your cluster or your indices. You may proceed with the
-              upgrade.
-            </p>
-            <p>
-              If you're on cloud, <EuiLink>go here</EuiLink>, otherwise <EuiLink>go here</EuiLink>.
-            </p>
-          </EuiText>
-        </EuiPanel>
+        <Summary {...this.props} />
 
         <EuiSpacer />
 

@@ -76,6 +76,7 @@ export class UpgradeCheckupTabs extends React.Component<{}, TabsState> {
   private loadData = async () => {
     try {
       this.setState({ loadingState: LoadingState.Loading });
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const resp = await axios.get(chrome.addBasePath('/api/upgrade_checkup/status'));
       this.setState({
         loadingState: LoadingState.Success,
