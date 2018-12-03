@@ -24,7 +24,7 @@ import routing from '../../services/routing';
 import { BASE_PATH_REMOTE_CLUSTERS } from '../../../../common/constants';
 import { AutoFollowPatternForm, RemoteClustersProvider, SectionLoading, SectionError } from '../../components';
 
-class AutoFollowPatternAddUI extends PureComponent {
+class AutoFollowPatternAddUi extends PureComponent {
   static propTypes = {
     createAutoFollowPattern: PropTypes.func.isRequired,
     clearApiError: PropTypes.func.isRequired,
@@ -50,22 +50,24 @@ class AutoFollowPatternAddUI extends PureComponent {
           color="warning"
           iconType="cross"
         >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutDescription"
-            defaultMessage="You haven't added yet any remote cluster. In order to create an auto-follow pattern you need to add a remote cluster." //eslint-disable-line max-len
-          />
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternCreateForm.emptyRemoteClustersCallOutDescription"
+              defaultMessage="Auto-follow patterns capture indices on remote clusters. Add a remote cluster before you create an auto-follow pattern." //eslint-disable-line max-len
+            />
+          </p>
+
+          <EuiButton
+            {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS)}
+            iconType="plusInCircle"
+            color="warning"
+          >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternCreateForm.addRemoteClusterButtonLabel"
+              defaultMessage="Add remote cluster"
+            />
+          </EuiButton>
         </EuiCallOut>
-        <EuiSpacer />
-        <EuiButton
-          {...routing.getRouterLinkProps('/add', BASE_PATH_REMOTE_CLUSTERS)}
-          fill
-          iconType="plusInCircle"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternCreateForm.addRemoteClusterButtonLabel"
-            defaultMessage="Add a remote cluster"
-          />
-        </EuiButton>
       </Fragment>
     );
   }
@@ -84,22 +86,22 @@ class AutoFollowPatternAddUI extends PureComponent {
           color="warning"
           iconType="cross"
         >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternCreateForm.noRemoteClustersConnectedCallOutDescription"
-            defaultMessage="None of your clusters are connected. Verify your clusters settings and make sure at least one cluster is connected before creating an auto-follow pattern." //eslint-disable-line max-len
-          />
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternCreateForm.noRemoteClustersConnectedCallOutDescription"
+              defaultMessage="None of your clusters are connected. Verify your clusters settings and make sure at least one cluster is connected before creating an auto-follow pattern." //eslint-disable-line max-len
+            />
+          </p>
+          <EuiButton
+            {...routing.getRouterLinkProps('/', BASE_PATH_REMOTE_CLUSTERS)}
+            color="warning"
+          >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternCreateForm.viewRemoteClusterButtonLabel"
+              defaultMessage="View remote clusters"
+            />
+          </EuiButton>
         </EuiCallOut>
-        <EuiSpacer />
-        <EuiButton
-          {...routing.getRouterLinkProps('/', BASE_PATH_REMOTE_CLUSTERS)}
-          fill
-          iconType="plusInCircle"
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.autoFollowPatternCreateForm.viewRemoteClusterButtonLabel"
-            defaultMessage="View remote clusters"
-          />
-        </EuiButton>
       </Fragment>
     );
   }
@@ -127,7 +129,10 @@ class AutoFollowPatternAddUI extends PureComponent {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent >
+          <EuiPageContent
+            horizontalPosition="center"
+            className="crossClusterReplicationPageContent"
+          >
             <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
             <EuiSpacer size="xs" />
 
@@ -184,4 +189,4 @@ class AutoFollowPatternAddUI extends PureComponent {
   }
 }
 
-export const AutoFollowPatternAdd = injectI18n(AutoFollowPatternAddUI);
+export const AutoFollowPatternAdd = injectI18n(AutoFollowPatternAddUi);

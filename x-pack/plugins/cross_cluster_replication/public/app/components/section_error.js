@@ -13,7 +13,7 @@ import {
 export function SectionError({ title, error }) {
   const {
     error: errorString,
-    cause, // wrapEsError on the server add a "cause" array
+    cause, // wrapEsError() on the server add a "cause" array
   } = error.data;
 
   return (
