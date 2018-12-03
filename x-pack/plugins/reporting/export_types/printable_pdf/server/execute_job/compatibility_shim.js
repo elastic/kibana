@@ -26,7 +26,7 @@ export function compatibilityShimFactory(server) {
     }
 
     throw new Error(i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.unableToGenerateReportErrorMessage', {
-      defaultMessage: 'Unable to generate report for url {savedObjUrl}, it\'s not a Kibana URL',
+      defaultMessage: `Unable to generate report for url {savedObjUrl}, it's not a Kibana URL`,
       values: { savedObjUrl: savedObject.url }
     }));
   };

@@ -103,10 +103,12 @@ class ReportingPanelContentUi extends Component<Props, State> {
         <EuiSpacer size="s" />
 
         <EuiText size="s">
-          <FormattedMessage
-            id="xpack.reporting.panelContent.howToCallGenerationDescription"
-            defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
-          />
+          <p>
+            <FormattedMessage
+              id="xpack.reporting.panelContent.howToCallGenerationDescription"
+              defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
+            />
+          </p>
         </EuiText>
         <EuiSpacer size="s" />
 

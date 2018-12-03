@@ -52,7 +52,7 @@ export const reporting = (kibana) => {
           }),
           value: null,
           description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
-            defaultMessage: 'Custom image to use in the PDF\'s footer'
+            defaultMessage: `Custom image to use in the PDF's footer`
           }),
           type: 'image',
           options: {

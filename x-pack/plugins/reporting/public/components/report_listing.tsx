@@ -9,6 +9,7 @@ declare module '@elastic/eui' {
   export const EuiBasicTable: React.SFC<any>;
 }
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { Component } from 'react';
@@ -61,6 +62,39 @@ interface State {
   jobs: Job[];
   isLoading: boolean;
 }
+
+const jobStatusLabelsMap = new Map<JobStatuses, string>([
+  [
+    JobStatuses.PENDING,
+    i18n.translate('xpack.reporting.jobStatuses.pendingText', {
+      defaultMessage: 'pending',
+    }),
+  ],
+  [
+    JobStatuses.PROCESSING,
+    i18n.translate('xpack.reporting.jobStatuses.processingText', {
+      defaultMessage: 'processing',
+    }),
+  ],
+  [
+    JobStatuses.COMPLETED,
+    i18n.translate('xpack.reporting.jobStatuses.completedText', {
+      defaultMessage: 'completed',
+    }),
+  ],
+  [
+    JobStatuses.FAILED,
+    i18n.translate('xpack.reporting.jobStatuses.failedText', {
+      defaultMessage: 'failed',
+    }),
+  ],
+  [
+    JobStatuses.CANCELLED,
+    i18n.translate('xpack.reporting.jobStatuses.cancelledText', {
+      defaultMessage: 'cancelled',
+    }),
+  ],
+]);
 
 class ReportListingUi extends Component<Props, State> {
   private mounted?: boolean;
@@ -168,22 +202,27 @@ class ReportListingUi extends Component<Props, State> {
         render: (status: string, record: Job) => {
           if (status === 'pending') {
             return (
-              <FormattedMessage
-                id="xpack.reporting.listing.tableValue.createdAtDetail.pendingStatusReachedText"
-                defaultMessage="pending - waiting for job to be processed"
-              />
+              <div>
+                <FormattedMessage
+                  id="xpack.reporting.listing.tableValue.createdAtDetail.pendingStatusReachedText"
+                  defaultMessage="pending - waiting for job to be processed"
+                />
+              </div>
             );
           }
 
           let maxSizeReached;
           if (record.max_size_reached) {
             maxSizeReached = (
-              <FormattedMessage
-                id="xpack.reporting.listing.tableValue.createdAtDetail.maxSizeReachedText"
-                defaultMessage=" - max size reached"
-              />
+              <span>
+                <FormattedMessage
+                  id="xpack.reporting.listing.tableValue.createdAtDetail.maxSizeReachedText"
+                  defaultMessage=" - max size reached"
+                />
+              </span>
             );
           }
+
           let statusTimestamp;
           if (status === JobStatuses.PROCESSING && record.started_at) {
             statusTimestamp = this.formatDate(record.started_at);
@@ -193,12 +232,20 @@ class ReportListingUi extends Component<Props, State> {
           ) {
             statusTimestamp = this.formatDate(record.completed_at);
           }
+
+          const statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
+
           if (statusTimestamp) {
             return (
               <div>
-                {status}
-                {' at '}
-                <span className="eui-textNoWrap">{statusTimestamp}</span>
+                <FormattedMessage
+                  id="xpack.reporting.listing.tableValue.createdAtDetail.statusTimestampText"
+                  defaultMessage="{statusLabel} at {statusTimestamp}"
+                  values={{
+                    statusLabel,
+                    statusTimestamp: <span className="eui-textNoWrap">{statusTimestamp}</span>,
+                  }}
+                />
                 {maxSizeReached}
               </div>
             );
@@ -207,7 +254,7 @@ class ReportListingUi extends Component<Props, State> {
           // unknown status
           return (
             <div>
-              {status}
+              {statusLabel}
               {maxSizeReached}
             </div>
           );
@@ -356,39 +403,6 @@ class ReportListingUi extends Component<Props, State> {
     }
 
     if (this.mounted) {
-      const { intl } = this.props;
-      const getStatusLabel = (statusString: string) => {
-        switch (statusString) {
-          case JobStatuses.PENDING:
-            return intl.formatMessage({
-              id: 'xpack.reporting.jobStatuses.pendingText',
-              defaultMessage: 'pending',
-            });
-          case JobStatuses.PROCESSING:
-            return intl.formatMessage({
-              id: 'xpack.reporting.jobStatuses.processingText',
-              defaultMessage: 'processing',
-            });
-          case JobStatuses.COMPLETED:
-            return intl.formatMessage({
-              id: 'xpack.reporting.jobStatuses.completedText',
-              defaultMessage: 'completed',
-            });
-          case JobStatuses.FAILED:
-            return intl.formatMessage({
-              id: 'xpack.reporting.jobStatuses.failedText',
-              defaultMessage: 'failed',
-            });
-          case JobStatuses.CANCELLED:
-            return intl.formatMessage({
-              id: 'xpack.reporting.jobStatuses.cancelledText',
-              defaultMessage: 'cancelled',
-            });
-          default:
-            return statusString;
-        }
-      };
-
       this.setState({
         isLoading: false,
         total,
@@ -403,7 +417,8 @@ class ReportListingUi extends Component<Props, State> {
             started_at: job._source.started_at,
             completed_at: job._source.completed_at,
             status: job._source.status,
-            statusLabel: getStatusLabel(job._source.status),
+            statusLabel:
+              jobStatusLabelsMap.get(job._source.status as JobStatuses) || job._source.status,
             max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
           };
         }),

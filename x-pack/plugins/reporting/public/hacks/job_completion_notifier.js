@@ -73,7 +73,7 @@ uiModules.get('kibana')
                 <a href={reportingSectionUrl}>
                   <FormattedMessage
                     id="xpack.reporting.jobCompletionNotifier.reportLink.reportingSectionUrlLinkLabel"
-                    defaultMessage="Management > Kibana > Reporting"
+                    defaultMessage="Management &gt; Kibana &gt; Reporting"
                   />
                 </a>
               )
@@ -109,10 +109,12 @@ uiModules.get('kibana')
           ),
           text: (
             <div>
-              <FormattedMessage
-                id="xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportDescription"
-                defaultMessage="The report reached the max size and contains partial data."
-              />
+              <p>
+                <FormattedMessage
+                  id="xpack.reporting.jobCompletionNotifier.maxSizeReached.partialReportDescription"
+                  defaultMessage="The report reached the max size and contains partial data."
+                />
+              </p>
               {seeReportLink}
               {downloadReportButton}
             </div>
