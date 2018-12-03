@@ -133,62 +133,77 @@ interface GroupedDeprecationsProps {
   allDeprecations?: EnrichedDeprecationInfo[];
 }
 
+interface GroupedDeprecationsState {
+  forceExpand: true | false | null;
+  expandNumber: number;
+}
+
 /**
  * Displays groups of deprecation messages in an accordion.
  */
-export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> = ({
-  currentGroupBy,
-  allDeprecations = [],
-  currentFilter,
-}) => {
-  const deprecations = allDeprecations.filter(filterDeps(currentFilter));
+export class GroupedDeprecations extends React.Component<
+  GroupedDeprecationsProps,
+  GroupedDeprecationsState
+> {
+  public state = {
+    forceExpand: false,
+    // expandNumber is used as workaround to force EuiAccordion to re-render by
+    // incrementing this number when expand all or collapse all is clicked.
+    expandNumber: 0,
+  };
 
-  // Display number of results shown
-  const showMoreMessage = deprecations.length === 0 ? '. Change filters to show more.' : '';
+  public render() {
+    const { currentGroupBy, allDeprecations = [], currentFilter } = this.props;
+    const { forceExpand, expandNumber } = this.state;
 
-  const message =
-    allDeprecations.length === 0
-      ? `No deprecations`
-      : `Showing ${deprecations.length} of ${allDeprecations.length}${showMoreMessage}`;
+    const deprecations = allDeprecations.filter(filterDeps(currentFilter));
 
-  const groups = _.groupBy(deprecations, currentGroupBy);
+    // Display number of results shown
+    const showMoreMessage = deprecations.length === 0 ? '. Change filters to show more.' : '';
 
-  return (
-    <div>
-      <EuiFlexGroup responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="left" size="s">
-            Expand all
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="left" size="s">
-            Collapse all
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem />
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <p>{message}</p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    const message =
+      allDeprecations.length === 0
+        ? `No deprecations`
+        : `Showing ${deprecations.length} of ${allDeprecations.length}${showMoreMessage}`;
 
-      <EuiSpacer size="s" />
+    const groups = _.groupBy(deprecations, currentGroupBy);
 
-      <div className="upgDeprecations">
-        {Object.keys(groups)
-          .sort()
-          .map(groupName => [
-            <EuiAccordion
-              className="upgDeprecations__item"
-              key={`acc-${groupName}`}
-              id={`depgroup-${groupName}`}
-              buttonContent={<span className="upgDeprecations__itemName">{groupName}</span>}
-              extraAction={
-                <div>
-                  {currentGroupBy === GroupByOption.message &&
-                    groups[groupName][0].index !== undefined && (
+    return (
+      <div>
+        <EuiFlexGroup responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty flush="left" size="s" onClick={() => this.setExpand(true)}>
+              Expand all
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty flush="left" size="s" onClick={() => this.setExpand(false)}>
+              Collapse all
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem />
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <p>{message}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <div className="upgDeprecations">
+          {Object.keys(groups)
+            .sort()
+            .map(groupName => [
+              <EuiAccordion
+                className="upgDeprecations__item"
+                initialIsOpen={forceExpand}
+                key={`acc-${groupName}-${expandNumber}`}
+                id={`depgroup-${groupName}`}
+                buttonContent={<span className="upgDeprecations__itemName">{groupName}</span>}
+                extraAction={
+                  <div>
+                    {currentGroupBy === GroupByOption.message && (
                       <Fragment>
                         <EuiBadge color="hollow">
                           {groups[groupName].filter(g => g.index).length} indices
@@ -196,17 +211,22 @@ export const GroupedDeprecations: StatelessComponent<GroupedDeprecationsProps> =
                         &emsp;
                       </Fragment>
                     )}
-                  <DeprecationHealth
-                    single={currentGroupBy === GroupByOption.message}
-                    deprecations={groups[groupName]}
-                  />
-                </div>
-              }
-            >
-              <DeprecationList deprecations={groups[groupName]} currentGroupBy={currentGroupBy} />
-            </EuiAccordion>,
-          ])}
+                    <DeprecationHealth
+                      single={currentGroupBy === GroupByOption.message}
+                      deprecations={groups[groupName]}
+                    />
+                  </div>
+                }
+              >
+                <DeprecationList deprecations={groups[groupName]} currentGroupBy={currentGroupBy} />
+              </EuiAccordion>,
+            ])}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+
+  private setExpand = (forceExpand: boolean) => {
+    this.setState({ forceExpand, expandNumber: this.state.expandNumber + 1 });
+  };
+}
