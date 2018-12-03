@@ -7,7 +7,7 @@
 import React from 'react';
 import { Request } from 'react-redux-request';
 import { createSelector } from 'reselect';
-import { loadTraceList } from '../../services/rest/apm';
+import { loadTraceList } from '../../services/rest/apm/traces';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'traceList';
