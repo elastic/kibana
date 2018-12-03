@@ -41,6 +41,7 @@ import { findFirstError } from '../../services/find_errors';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { PolicyJsonFlyout } from './components/policy_json_flyout';
 import { ErrableFormRow } from './form_errors';
+import { LearnMoreLink } from '../components';
 class EditPolicyUi extends Component {
   static propTypes = {
     selectedPolicy: PropTypes.object.isRequired,
@@ -167,6 +168,16 @@ class EditPolicyUi extends Component {
                     id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePolicyDescriptionText"
                     defaultMessage={`Use an index policy to automate the four phases of the index lifecycle,
                       from actively writing to the index to deleting it.`}
+                  />
+                  {' '}
+                  <LearnMoreLink
+                    docPath="index-lifecycle-management.html"
+                    text={
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexLifecycleManagementLinkText"
+                        defaultMessage="Learn about index lifecycle management"
+                      />
+                    }
                   />
                 </p>
               </EuiText>
