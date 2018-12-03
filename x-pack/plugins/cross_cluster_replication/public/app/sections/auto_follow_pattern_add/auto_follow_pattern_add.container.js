@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 
 import { SECTIONS } from '../../constants';
 import { getApiStatus, getApiError } from '../../store/selectors';
-import { createAutoFollowPattern, clearApiError } from '../../store/actions';
+import { saveAutoFollowPattern, clearApiError } from '../../store/actions';
 import { AutoFollowPatternAdd as AutoFollowPatternAddView } from './auto_follow_pattern_add';
 
 const scope = SECTIONS.AUTO_FOLLOW_PATTERN;
@@ -19,7 +19,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  createAutoFollowPattern: (id, autoFollowPattern) => dispatch(createAutoFollowPattern(id, autoFollowPattern)),
+  saveAutoFollowPattern: (id, autoFollowPattern) => dispatch(saveAutoFollowPattern(id, autoFollowPattern)),
   clearApiError: () => dispatch(clearApiError(scope)),
 });
 

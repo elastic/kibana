@@ -7,12 +7,12 @@
 
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { registerAutoFollowPatternRoutes } from './auto_follow_pattern';
-import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../fixtures/auto_follow_pattern';
+import { getAutoFollowPatternMock, getAutoFollowPatternListMock } from '../../../fixtures';
 import { deserializeAutoFollowPattern } from '../../lib/auto_follow_pattern_serialization';
 
-jest.mock('../../lib/call_with_request_factory', () => ({ callWithRequestFactory: jest.fn() }));
-jest.mock('../../lib/is_es_error_factory', () => ({ isEsErrorFactory: () => () => true }));
-jest.mock('../../lib/license_pre_routing_factory', () => ({ licensePreRoutingFactory: () => null }));
+jest.mock('../../lib/call_with_request_factory');
+jest.mock('../../lib/is_es_error_factory');
+jest.mock('../../lib/license_pre_routing_factory');
 
 /**
  * Hashtable to save the route handlers
