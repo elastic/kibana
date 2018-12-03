@@ -26,7 +26,10 @@ export function disableUICapabilitesFactory(
     .filter(navLinkId => navLinkId != null);
 
   const actions: Actions = authorization.actions;
-  const shouldDisableFeatureUICapability = (featureId: string, uiCapability: string) => {
+  const shouldDisableFeatureUICapability = (
+    featureId: keyof UICapabilities,
+    uiCapability: string
+  ) => {
     // if the navLink isn't for a feature that we have registered, we don't wish to
     // disable it based on privileges
     return featureId !== 'navLinks' || featureNavLinkIds.includes(uiCapability);
@@ -66,6 +69,10 @@ export function disableUICapabilitesFactory(
       // is generally when the user hasn't authenticated yet and we're displaying the
       // login screen, which isn't driven any uiCapabilities
       if (err.statusCode === 401 || err.statusCode === 403) {
+        server.log(
+          ['security', 'debug'],
+          `Disabling all uiCapabilities because we received a ${err.statusCode}: ${err.message}`
+        );
         return disableAll(uiCapabilities);
       }
       throw err;

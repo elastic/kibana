@@ -47,6 +47,7 @@ const createMockServer = (options: MockServerOptions) => {
   };
 
   return {
+    log: jest.fn(),
     plugins: {
       security: {
         authorization: mockAuthorizationService,
@@ -63,6 +64,7 @@ describe('usingPrivileges', () => {
         checkPrivileges: {
           reject: {
             statusCode: 401,
+            message: 'super informative message',
           },
         },
         features: [
@@ -106,6 +108,26 @@ describe('usingPrivileges', () => {
           bar: false,
         },
       });
+
+      expect(mockServer.log).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        "security",
+        "debug",
+      ],
+      "Disabling all uiCapabilities because we received a 401: super informative message",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
+}
+`);
     });
 
     test(`disables uiCapabilities when a 403 is thrown`, async () => {
@@ -113,6 +135,7 @@ describe('usingPrivileges', () => {
         checkPrivileges: {
           reject: {
             statusCode: 403,
+            message: 'even more super informative message',
           },
         },
         features: [
@@ -156,6 +179,25 @@ describe('usingPrivileges', () => {
           bar: false,
         },
       });
+      expect(mockServer.log).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        "security",
+        "debug",
+      ],
+      "Disabling all uiCapabilities because we received a 403: even more super informative message",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "isThrow": false,
+      "value": undefined,
+    },
+  ],
+}
+`);
     });
 
     test(`otherwise it throws the error`, async () => {
@@ -174,6 +216,7 @@ describe('usingPrivileges', () => {
           },
         })
       ).rejects.toThrowErrorMatchingSnapshot();
+      expect(mockServer.log).not.toHaveBeenCalled();
     });
   });
 
