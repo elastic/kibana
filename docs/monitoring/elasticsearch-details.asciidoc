@@ -98,3 +98,35 @@ image::monitoring/images/monitoring-index-advanced.png["Elasticsearch Index Adva
 
 The Advanced index view can be used to diagnose issues that generally involve
 more advanced knowledge of {es}, such as wasteful index memory usage.
+
+[float]
+[[jobs-page]]
+==== Jobs
+
+To view {ml} job metrics, click **Jobs**. For each job in your cluster, it shows
+information such as its status, the number of records processed, the size of the
+model, the number of forecasts, and the node that runs the job.
+
+image::monitoring/images/monitoring-jobs.png["Machine learning jobs",link="images/monitoring-jobs.png"]
+
+[float]
+[[ccr-overview-page]]
+==== CCR
+
+beta[]
+
+To view {ccr} metrics, click **CCR**. For each follower index on the cluster, it 
+shows information such as the leader index, an indication of how much the
+follower index is lagging behind the leader index, the last fetch time, the
+number of operations synced, and error messages. If you select a follower index,
+you can view the same information for each shard. For example:
+
+image::monitoring/images/monitoring-ccr.png["Cross-cluster replication",link="images/monitoring-ccr.png"]
+
+If you select a shard, you can see graphs for the fetch and operation delays. 
+You can also see advanced information, which contains the results from the 
+{ref}/ccr-get-follow-stats.html[get follower stats API]. For example:
+ 
+image::monitoring/images/monitoring-ccr-shard.png["Cross-cluster replication shard details",link="images/monitoring-ccr-shard.png"]
+
+For more information, see {stack-ov}/xpack-ccr.html[Cross-cluster replication].

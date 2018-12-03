@@ -35,8 +35,10 @@ export const BootstrapCommand: ICommand = {
     });
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
 
-    const frozenLockfile = options['frozen-lockfile'] === true;
-    const extraArgs = frozenLockfile ? ['--frozen-lockfile'] : [];
+    const extraArgs = [
+      ...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []),
+      ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
+    ];
 
     log.write(chalk.bold('\nRunning installs in topological order:'));
 

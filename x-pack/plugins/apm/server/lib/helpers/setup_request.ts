@@ -5,7 +5,7 @@
  */
 
 /* tslint:disable no-console */
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { AggregationSearchResponse, SearchParams } from 'elasticsearch';
 import { Request } from 'hapi';
 import moment from 'moment';
 
@@ -14,7 +14,7 @@ function decodeEsQuery(esQuery?: string): object {
 }
 
 interface KibanaConfig {
-  get: (key: string) => any;
+  get: <T = void>(key: string) => T;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -28,13 +28,16 @@ declare module 'hapi' {
   }
 }
 
-type Client<T> = (type: string, params: SearchParams) => SearchResponse<T>;
+export type ESClient = <T = void, U = void>(
+  type: string,
+  params: SearchParams
+) => Promise<AggregationSearchResponse<T, U>>;
 
-export interface Setup<T = any> {
+export interface Setup {
   start: number;
   end: number;
-  esFilterQuery: any;
-  client: Client<T>;
+  esFilterQuery?: any;
+  client: ESClient;
   config: KibanaConfig;
 }
 
@@ -45,11 +48,11 @@ interface APMRequestQuery {
   esFilterQuery: string;
 }
 
-export function setupRequest(req: Request) {
+export function setupRequest(req: Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
 
-  function client<T>(type: string, params: SearchParams): SearchResponse<T> {
+  const client: ESClient = (type, params) => {
     if (query._debug) {
       console.log(`DEBUG ES QUERY:`);
       console.log(
@@ -61,7 +64,7 @@ export function setupRequest(req: Request) {
       console.log(JSON.stringify(params.body, null, 4));
     }
     return cluster.callWithRequest(req, type, params);
-  }
+  };
 
   return {
     start: moment.utc(query.start).valueOf(),

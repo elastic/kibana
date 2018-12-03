@@ -72,7 +72,7 @@ class TransactionOverview extends Component {
     const ChartHeaderContent =
       hasDynamicBaseline && get(license.data, 'features.ml.isAvailable') ? (
         <MLTipContainer>
-          <EuiIconTip content="The stream around the average response time shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
+          <EuiIconTip content="The stream around the average duration shows the expected bounds. An annotation is shown for anomaly scores &gt;= 75." />
           <MLText>
             Machine Learning:{' '}
             <ViewMLJob
