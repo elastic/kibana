@@ -21,11 +21,17 @@ import moment from 'moment';
 
 import { searchRequestQueue } from '../../../search_request_queue';
 
+import { i18n } from '@kbn/i18n';
+
 export function SearchRequestProvider(Promise) {
   class SearchRequest {
     constructor({ source, defer, errorHandler }) {
       if (!errorHandler) {
-        throw new Error('errorHandler is required');
+        throw new Error(
+          i18n.translate('common.ui.courier.fetch.requireErrorHandlerErrorMessage', {
+            defaultMessage: 'errorHandler is required',
+          })
+        );
       }
 
       this.errorHandler = errorHandler;
@@ -99,7 +105,11 @@ export function SearchRequestProvider(Promise) {
 
     start() {
       if (this.started) {
-        throw new TypeError('Unable to start request because it has already started');
+        throw new TypeError(
+          i18n.translate('common.ui.courier.fetch.unableStartRequestErrorMessage', {
+            defaultMessage: 'Unable to start request because it has already started',
+          })
+        );
       }
 
       this.started = true;
@@ -133,7 +143,12 @@ export function SearchRequestProvider(Promise) {
     }
 
     continue() {
-      throw new Error('Unable to continue ' + this.type + ' request');
+      throw new Error(
+        i18n.translate('common.ui.courier.fetch.unableStartRequestErrorMessage', {
+          defaultMessage: 'Unable to continue {type} request',
+          values: { type: this.type }
+        })
+      );
     }
 
     retry() {
