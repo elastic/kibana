@@ -173,13 +173,11 @@ uiRoutes
   .when('/management/kibana/indices', {
     redirectTo() {
       const defaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
-      let path = '/management/kibana/index';
-
       if (defaultIndex) {
-        path = `/management/kibana/indices/${defaultIndex}`;
+        return `/management/kibana/indices/${defaultIndex}`;
       }
 
-      return path;
+      return '/management/kibana/index';
     }
   });
 
