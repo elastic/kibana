@@ -62,7 +62,8 @@ export function createGenerateCsv(logger) {
     logger('finished generating');
     return {
       content: builder.getString(),
-      maxSizeReached
+      maxSizeReached,
+      size: builder.getSizeInBytes(),
     };
   };
 }
