@@ -44,14 +44,14 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickDiscover() {
       log.debug('click Discover tab');
-      await this.clickSelector("a[href*='discover']");
+      await this.clickSelector('a[href*=\'discover\']');
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
       log.debug('click Visualize tab');
-      await this.clickSelector("a[href*='visualize']");
+      await this.clickSelector('a[href*=\'visualize\']');
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
       await this.confirmTopNavTextContains('visualize');
@@ -59,7 +59,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickDashboard() {
       log.debug('click Dashboard tab');
-      await this.clickSelector("a[href*='dashboard']");
+      await this.clickSelector('a[href*=\'dashboard\']');
       await retry.try(async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
@@ -72,13 +72,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickManagement() {
       log.debug('click Management tab');
-      await this.clickSelector("a[href*='management']");
+      await this.clickSelector('a[href*=\'management\']');
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickSettings() {
       log.debug('click Settings tab');
-      await this.clickSelector("a[href*='settings']");
+      await this.clickSelector('a[href*=\'settings\']');
     }
 
     async clickTimepicker() {
@@ -97,7 +97,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async isAbsoluteSectionShowing() {
       log.debug('isAbsoluteSectionShowing');
-      return await find.existsByCssSelector("input[ng-model='absolute.from']");
+      return await find.existsByCssSelector('input[ng-model=\'absolute.from\']');
     }
 
     async showAbsoluteSection() {
@@ -117,7 +117,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
-        const element = await find.byCssSelector("input[ng-model='absolute.from']");
+        const element = await find.byCssSelector('input[ng-model=\'absolute.from\']');
         return await element.getProperty('value');
       });
     }
@@ -127,7 +127,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
-        const element = await find.byCssSelector("input[ng-model='absolute.to']");
+        const element = await find.byCssSelector('input[ng-model=\'absolute.to\']');
         return await element.getProperty('value');
       });
     }
@@ -137,7 +137,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
-        await find.setValue("input[ng-model='absolute.from']", timeString);
+        await find.setValue('input[ng-model=\'absolute.from\']', timeString);
       });
     }
 
@@ -146,7 +146,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
-        await find.setValue("input[ng-model='absolute.to']", timeString);
+        await find.setValue('input[ng-model=\'absolute.to\']', timeString);
       });
     }
 
