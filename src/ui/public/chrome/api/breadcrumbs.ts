@@ -51,7 +51,7 @@ export function initBreadcrumbsApi(
   // clear the breadcrumbs between angular route changes.
   let breadcrumbSetSinceRouteChange = false;
 
-   // reset breadcrumbSetSinceRouteChange any time the breadcrumbs change, even
+  // reset breadcrumbSetSinceRouteChange any time the breadcrumbs change, even
   // if it was done directly through the new platform
   newPlatformChrome.getBreadcrumbs$().subscribe({
     next() {
