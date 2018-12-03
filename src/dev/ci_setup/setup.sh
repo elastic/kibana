@@ -34,18 +34,6 @@ echo "-> XPACK_DIR $XPACK_DIR"
 echo "-> PARENT_DIR $PARENT_DIR"
 
 ###
-### Extract the bootstrap cache that we create in the packer_cache.sh script
-###
-bootstrapCache="$cacheDir/bootstrap_cache/master.tar"
-if [ -f "$bootstrapCache" ]; then
-  echo "extracting bootstrap_cache from $bootstrapCache";
-  tar -xf "$bootstrapCache";
-else
-  echo "bootstrap_cache missing";
-  exit 1;
-fi
-
-###
 ### download node
 ###
 UNAME=$(uname)

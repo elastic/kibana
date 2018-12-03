@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 set -e
-set -o pipefail
 
 # run setup script that gives us node, yarn, and bootstraps the project
-source "src/dev/ci_setup/setup.sh";
+source src/dev/ci_setup/setup.sh;
 
 # download es snapshots
 node scripts/es snapshot --download-only;

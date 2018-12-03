@@ -19,7 +19,7 @@
 
 import { IndexPattern } from 'ui/index_patterns';
 
-import { debounce, isEqual } from 'lodash';
+import { compact, debounce, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import { getFromLegacyIndexPattern } from 'ui/index_patterns/static_utils';
 import { kfetch } from 'ui/kfetch';
@@ -187,7 +187,11 @@ export class QueryBarUI extends Component<Props, State> {
     const recentSearchSuggestions = this.getRecentSearchSuggestions(query);
 
     const autocompleteProvider = getAutocompleteProvider(language);
-    if (!autocompleteProvider) {
+    if (
+      !autocompleteProvider ||
+      !Array.isArray(this.props.indexPatterns) ||
+      compact(this.props.indexPatterns).length === 0
+    ) {
       return recentSearchSuggestions;
     }
 
