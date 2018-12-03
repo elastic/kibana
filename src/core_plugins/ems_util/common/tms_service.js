@@ -44,8 +44,8 @@ export class TMSService {
     return this._config.id;
   }
 
-  getAttribution() {
-    this._emsClient.sanitizeMarkdown(this._config.attribution);
+  hasId(id) {
+    return this._config.id === id;
   }
 
 }

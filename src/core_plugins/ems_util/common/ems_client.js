@@ -177,11 +177,20 @@ export class EMSClientV66 {
     return await this._loadTMSServices();
   }
 
-  async findLayerById(id) {
+  async findFileLayerById(id) {
     const fileLayers = await this.getFileLayers();
     for (let i = 0; i < fileLayers.length; i++) {
       if (fileLayers[i].hasId(id)) {
         return fileLayers[i];
+      }
+    }
+  }
+
+  async findTMSServiceById(id) {
+    const tmsServices = await this.getTMSServices();
+    for (let i = 0; i < tmsServices.length; i++) {
+      if (tmsServices[i].hasId(id)) {
+        return tmsServices[i];
       }
     }
   }

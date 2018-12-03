@@ -42,6 +42,7 @@ describe('ems_client', () => {
     expect (tileService.getHTMLAttribution()).to.be('<p>© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>\n');
     expect (tileService.getMinZoom()).to.be(0);
     expect (tileService.getMaxZoom()).to.be(10);
+    expect (tileService.hasId('road_map')).to.be(true);
 
 
 
@@ -59,9 +60,17 @@ describe('ems_client', () => {
     emsClient.addQueryParams({
       'foo': 'bar'
     });
-    const tiles = await emsClient.getTMSServices();
-    const url = tiles[0].getUrlTemplate();
+    let tiles = await emsClient.getTMSServices();
+    let url = tiles[0].getUrlTemplate();
     expect(url).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=6.x.x&foo=bar');
+
+    emsClient.addQueryParams({
+      'foo': 'schmoo',
+      'bar': 'foo'
+    });
+    tiles = await emsClient.getTMSServices();
+    url = tiles[0].getUrlTemplate();
+    expect(url).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=6.x.x&foo=schmoo&bar=foo');
 
 
   });
@@ -90,7 +99,7 @@ describe('ems_client', () => {
 
   });
 
-  it('..getFileLayers[0] - localized (known)', async () => {
+  it('.getFileLayers[0] - localized (known)', async () => {
     const emsClient = getEMSClient({
       language: 'fr'
     });
@@ -106,7 +115,7 @@ describe('ems_client', () => {
 
   });
 
-  it('..getFileLayers[0] - localized (fallback)', async () => {
+  it('.getFileLayers[0] - localized (fallback)', async () => {
     const emsClient = getEMSClient({
       language: 'zz'//madeup
     });
@@ -122,11 +131,26 @@ describe('ems_client', () => {
 
   });
 
+  it('.findFileLayerById', async () => {
+    const emsClient = getEMSClient();
+    const layer = await emsClient.findFileLayerById('world_countries');
+    expect(layer.getId()).to.be('world_countries');
+    expect(layer.hasId('world_countries')).to.be(true);
+
+  });
+
+  it('..findTMSServiceById', async () => {
+    const emsClient = getEMSClient();
+    const tmsService = await emsClient.findTMSServiceById('road_map');
+    expect(tmsService.getId()).to.be('road_map');
+
+  });
+
 
 });
 
 
-function getEMSClient(options) {
+function getEMSClient(options = {}) {
 
   const emsClient = new EMSClientV66({
     kbnVersion: '6.x.x',
