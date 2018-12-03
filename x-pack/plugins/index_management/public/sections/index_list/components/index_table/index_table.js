@@ -342,7 +342,7 @@ export class IndexTableUi extends Component {
                   <p>
                     <FormattedMessage
                       id="xpack.idxMgmt.indexTable.sectionDescription"
-                      defaultMessage="Update your Elasticsearch indices individually or in bulk"
+                      defaultMessage="Update your Elasticsearch indices individually or in bulk."
                     />
                   </p>
                 </EuiText>

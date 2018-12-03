@@ -428,7 +428,7 @@ export class PolicyTableUi extends Component {
                 <p>
                   <FormattedMessage
                     id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-                    defaultMessage="Create, update, and delete your index lifecycle policies"
+                    defaultMessage="Create, update, and delete your index lifecycle policies."
                   />
                 </p>
               </EuiText>

@@ -167,25 +167,25 @@ addFilterExtension(indices => {
           {
             value: 'hot',
             view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.hotLabel', {
-              defaultMessage: 'hot',
+              defaultMessage: 'Hot',
             }),
           },
           {
             view: 'warm',
             value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
-              defaultMessage: 'warm',
+              defaultMessage: 'Warm',
             }),
           },
           {
             view: 'cold',
             value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
-              defaultMessage: 'cold',
+              defaultMessage: 'Cold',
             }),
           },
           {
             view: 'delete',
             value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
-              defaultMessage: 'delete',
+              defaultMessage: 'Delete',
             }),
           },
         ],
