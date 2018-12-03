@@ -96,21 +96,6 @@ class AutoFollowPatternFormUI extends PureComponent {
     });
   }
 
-  /**
-   * Work in progress. So far it does not work as we can't control the
-   * underline input but I will see this with the EUI team as it would be nice
-   * to be able to control the "searchValue" from outside the EuiComboBox.
-   * The idea here is to add the leaderIndexPattern when leaving the field without
-   * having to press "ENTER"
-   */
-  onLeaderIndexPatternsBlur = () => {
-    // const { value } = e.target;
-    // if (typeof value === 'string' && !!value.trim()) {
-    //   this.onCreateLeaderIndexPattern(value);
-    //   e.target.value = '';
-    // }
-  }
-
   onLeaderIndexPatternInputChange = () => {
     // TODO
   }
@@ -169,7 +154,7 @@ class AutoFollowPatternFormUI extends PureComponent {
               <h4>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.sectionAutoFollowPatternNameTitle"
-                  defaultMessage="Auto-follow pattern name"
+                  defaultMessage="Name"
                 />
               </h4>
             </EuiTitle>
@@ -319,7 +304,6 @@ class AutoFollowPatternFormUI extends PureComponent {
               onChange={this.onLeaderIndexPatternChange}
               onSearchChange={this.onLeaderIndexPatternInputChange}
               isInvalid={false}
-              onBlur={this.onLeaderIndexPatternsBlur}
               fullWidth
             />
           </EuiFormRow>
