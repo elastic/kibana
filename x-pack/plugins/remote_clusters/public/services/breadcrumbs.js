@@ -7,10 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { CRUD_APP_BASE_PATH } from '../constants';
 
-// TODO: Use chrome.breadcrumbs service to surface these breadcrumbs once Management stops
-// auto-generating breadcrumbs based on Angular router.
-// Example: chrome.breadcrumbs.set([ listBreadcrumbLink, editBreadcrumb ]);
-
 export const listBreadcrumb = {
   text: i18n.translate('xpack.remoteClusters.listBreadcrumbTitle', {
     defaultMessage: 'Remote Clusters',
