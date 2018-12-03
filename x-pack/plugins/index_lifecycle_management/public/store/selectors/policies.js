@@ -37,7 +37,6 @@ import {
   WARM_PHASE_ON_ROLLOVER,
   PHASE_SHRINK_ENABLED
 } from '../constants';
-import { getIndexTemplates } from '.';
 import { filterItems, sortTable } from '../../services';
 
 
@@ -92,10 +91,6 @@ export const getSelectedPolicyName = state => {
     return getSelectedOriginalPolicyName(state);
   }
   return state.policies.selectedPolicy.name;
-};
-
-export const getAllPolicyNamesFromTemplates = state => {
-  return getIndexTemplates(state).map(template => template.index_lifecycle_name).filter(name => name);
 };
 
 export const getPhases = state => state.policies.selectedPolicy.phases;
