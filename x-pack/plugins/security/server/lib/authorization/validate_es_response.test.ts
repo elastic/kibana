@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateEsPrivilegeResponse } from "./validate_es_response";
+import { validateEsPrivilegeResponse } from './validate_es_response';
 
 const resource1 = 'foo-resource';
 const resource2 = 'bar-resource';
@@ -16,7 +16,6 @@ const commonResponse = {
 };
 
 describe('validateEsPrivilegeResponse', () => {
-
   it('should validate a proper response', () => {
     const response = {
       ...commonResponse,
@@ -25,18 +24,23 @@ describe('validateEsPrivilegeResponse', () => {
           [resource1]: {
             action1: true,
             action2: true,
-            action3: true
+            action3: true,
           },
           [resource2]: {
             action1: true,
             action2: true,
-            action3: true
-          }
-        }
-      }
+            action3: true,
+          },
+        },
+      },
     };
 
-    const result = validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2]);
+    const result = validateEsPrivilegeResponse(
+      response,
+      application,
+      ['action1', 'action2', 'action3'],
+      [resource1, resource2]
+    );
     expect(result).toEqual(response);
   });
 
@@ -47,19 +51,24 @@ describe('validateEsPrivilegeResponse', () => {
         [application]: {
           [resource1]: {
             action1: true,
-            action3: true
+            action3: true,
           },
           [resource2]: {
             action1: true,
             action2: true,
-            action3: true
-          }
-        }
-      }
+            action3: true,
+          },
+        },
+      },
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -77,14 +86,19 @@ describe('validateEsPrivilegeResponse', () => {
           [resource2]: {
             action1: true,
             action2: true,
-            action3: true
-          }
-        }
-      }
+            action3: true,
+          },
+        },
+      },
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -102,13 +116,18 @@ describe('validateEsPrivilegeResponse', () => {
             action1: true,
             action2: true,
             action3: true,
-          }
-        }
+          },
+        },
       },
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response as any,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -126,7 +145,7 @@ describe('validateEsPrivilegeResponse', () => {
             action1: true,
             action2: true,
             action3: true,
-          }
+          },
         },
         otherApplication: {
           [resource1]: {
@@ -138,13 +157,18 @@ describe('validateEsPrivilegeResponse', () => {
             action1: true,
             action2: true,
             action3: true,
-          }
-        }
+          },
+        },
       },
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -155,18 +179,28 @@ describe('validateEsPrivilegeResponse', () => {
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
   it('fails validation when the "application" property is missing from the response', () => {
     const response = {
       ...commonResponse,
-      index: {}
+      index: {},
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response as any,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -180,12 +214,17 @@ describe('validateEsPrivilegeResponse', () => {
             action2: true,
             action3: true,
           },
-        }
+        },
       },
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -193,13 +232,17 @@ describe('validateEsPrivilegeResponse', () => {
     const response = {
       ...commonResponse,
       application: {
-        [application]: {
-        }
+        [application]: {},
       },
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -217,13 +260,18 @@ describe('validateEsPrivilegeResponse', () => {
             action1: true,
             action2: true,
             action3: true,
-          }
-        }
+          },
+        },
       },
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -238,12 +286,17 @@ describe('validateEsPrivilegeResponse', () => {
             action2: true,
             action3: true,
           },
-        }
+        },
       },
     };
 
     expect(() =>
-      validateEsPrivilegeResponse(response, application, ['action1', 'action2', 'action3'], [resource1, resource2])
+      validateEsPrivilegeResponse(
+        response as any,
+        application,
+        ['action1', 'action2', 'action3'],
+        [resource1, resource2]
+      )
     ).toThrowErrorMatchingSnapshot();
   });
 });
