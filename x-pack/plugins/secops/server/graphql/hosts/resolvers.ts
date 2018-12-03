@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FieldNode, SelectionNode, SelectionSetNode } from 'graphql';
-import { isEmpty } from 'lodash/fp';
-
 import { SourceResolvers } from '../../../common/graphql/types';
 import { AppResolvedResult, AppResolverOf } from '../../lib/framework';
-import { Hosts } from '../../lib/Hosts';
-import { HostsRequestOptions } from '../../lib/Hosts/types';
+import { Hosts } from '../../lib/hosts';
+import { HostsRequestOptions } from '../../lib/hosts/types';
 import { Context } from '../../lib/types';
+import { getFields } from '../../utils/build_query/fields';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
@@ -38,37 +36,11 @@ export const createHostsResolvers = (
       const options: HostsRequestOptions = {
         sourceConfiguration: source.configuration,
         timerange: args.timerange,
+        pagination: args.pagination,
         filterQuery: parseFilterQuery(args.filterQuery || ''),
-        fields: fields.map(f => f.replace('Hosts.', '')),
+        fields: fields.map(f => f.replace('hosts.', '')),
       };
-      return libs.Hosts.getHosts(req, options);
+      return libs.hosts.getHosts(req, options);
     },
   },
 });
-
-const getFields = (
-  data: SelectionSetNode | FieldNode,
-  fields: string[] = [],
-  postFields: string[] = []
-): string[] => {
-  if (data.kind === 'Field' && data.selectionSet && !isEmpty(data.selectionSet.selections)) {
-    return getFields(data.selectionSet, fields);
-  } else if (data.kind === 'SelectionSet') {
-    return data.selections.reduce(
-      (res: string[], item: SelectionNode) => {
-        if (item.kind === 'Field') {
-          const field: FieldNode = item as FieldNode;
-          if (field.name.kind === 'Name' && field.name.value.includes('kpi')) {
-            return [...res, field.name.value];
-          } else if (field.selectionSet && !isEmpty(field.selectionSet.selections)) {
-            return getFields(field.selectionSet, res, postFields.concat(field.name.value));
-          }
-          return [...res, [...postFields, field.name.value].join('.')];
-        }
-        return res;
-      },
-      fields as string[]
-    );
-  }
-  return fields;
-};

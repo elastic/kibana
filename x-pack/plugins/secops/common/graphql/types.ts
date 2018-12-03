@@ -39,7 +39,7 @@ export interface Source {
   configuration: SourceConfiguration /** The raw configuration of the source */;
   status: SourceStatus /** The status of the source */;
   getEvents?: EventsData | null /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
-  Hosts?: HostsData | null /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
+  Hosts: HostsData /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
   whoAmI?: SayMyName | null /** Just a simple example to get the app name */;
 }
 /** A set of configuration options for a security data source */
@@ -137,17 +137,16 @@ export interface SuricataAlertData {
 }
 
 export interface HostsData {
-  hosts: HostItem[];
+  hosts: (HostItem | null)[];
+  total?: number | null;
 }
 
 export interface HostItem {
   _id?: string | null;
   name?: string | null;
   firstSeen?: string | null;
-  Version?: string | null;
-  mainPackages?: string | null;
-  openPorts?: string | null;
-  riskFactor?: number | null;
+  version?: string | null;
+  os?: string | null;
 }
 
 export interface SayMyName {
@@ -159,6 +158,11 @@ export interface TimerangeInput {
   to: number /** The end of the timerange */;
   from: number /** The beginning of the timerange */;
 }
+
+export interface PaginationInput {
+  size: number /** The size parameter allows you to configure the maximum amount of items to be returned */;
+  page: number /** The page parameter defines the offset from the first result you want to fetch */;
+}
 export interface SourceQueryArgs {
   id: string /** The id of the source */;
 }
@@ -168,6 +172,7 @@ export interface GetEventsSourceArgs {
 }
 export interface HostsSourceArgs {
   timerange: TimerangeInput;
+  pagination: PaginationInput;
   filterQuery?: string | null;
 }
 export interface IndexFieldsSourceStatusArgs {
@@ -222,7 +227,7 @@ export namespace SourceResolvers {
       Context
     > /** Gets Suricata events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
     Hosts?: HostsResolver<
-      HostsData | null,
+      HostsData,
       any,
       Context
     > /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */;
@@ -255,7 +260,7 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
   }
 
-  export type HostsResolver<R = HostsData | null, Parent = any, Context = any> = Resolver<
+  export type HostsResolver<R = HostsData, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context,
@@ -263,6 +268,7 @@ export namespace SourceResolvers {
   >;
   export interface HostsArgs {
     timerange: TimerangeInput;
+    pagination: PaginationInput;
     filterQuery?: string | null;
   }
 
@@ -681,10 +687,16 @@ export namespace SuricataAlertDataResolvers {
 
 export namespace HostsDataResolvers {
   export interface Resolvers<Context = any> {
-    hosts?: HostsResolver<HostItem[], any, Context>;
+    hosts?: HostsResolver<(HostItem | null)[], any, Context>;
+    total?: TotalResolver<number | null, any, Context>;
   }
 
-  export type HostsResolver<R = HostItem[], Parent = any, Context = any> = Resolver<
+  export type HostsResolver<R = (HostItem | null)[], Parent = any, Context = any> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TotalResolver<R = number | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context
@@ -696,10 +708,8 @@ export namespace HostItemResolvers {
     _id?: IdResolver<string | null, any, Context>;
     name?: NameResolver<string | null, any, Context>;
     firstSeen?: FirstSeenResolver<string | null, any, Context>;
-    Version?: VersionResolver<string | null, any, Context>;
-    mainPackages?: MainPackagesResolver<string | null, any, Context>;
-    openPorts?: OpenPortsResolver<string | null, any, Context>;
-    riskFactor?: RiskFactorResolver<number | null, any, Context>;
+    version?: VersionResolver<string | null, any, Context>;
+    os?: OsResolver<string | null, any, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = any, Context = any> = Resolver<
@@ -722,17 +732,7 @@ export namespace HostItemResolvers {
     Parent,
     Context
   >;
-  export type MainPackagesResolver<R = string | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type OpenPortsResolver<R = string | null, Parent = any, Context = any> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type RiskFactorResolver<R = number | null, Parent = any, Context = any> = Resolver<
+  export type OsResolver<R = string | null, Parent = any, Context = any> = Resolver<
     R,
     Parent,
     Context

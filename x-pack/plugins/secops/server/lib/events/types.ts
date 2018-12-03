@@ -5,7 +5,6 @@
  */
 
 import { EventsData, SourceConfiguration, TimerangeInput } from '../../../common/graphql/types';
-import { JsonObject } from '../../../common/typed_json';
 import { FrameworkRequest } from '../framework';
 import { ESQuery, SearchHit } from '../types';
 
@@ -31,14 +30,3 @@ export interface EventData extends SearchHit {
     [agg: string]: any;
   };
 }
-
-export interface TermAggregation {
-  [agg: string]: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
-  };
-}
-
-export type EventFilterQuery = JsonObject;

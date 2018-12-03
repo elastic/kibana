@@ -11,18 +11,17 @@ export const hostsSchema = gql`
     _id: String
     name: String
     firstSeen: String
-    Version: String
-    mainPackages: String
-    openPorts: String
-    riskFactor: Float
+    version: String
+    os: String
   }
 
   type HostsData {
-    hosts: [HostItem!]!
+    hosts: [HostItem]!
+    total: Int
   }
 
   extend type Source {
     "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
-    Hosts(timerange: TimerangeInput!, filterQuery: String): HostsData
+    Hosts(timerange: TimerangeInput!, pagination: PaginationInput!, filterQuery: String): HostsData!
   }
 `;

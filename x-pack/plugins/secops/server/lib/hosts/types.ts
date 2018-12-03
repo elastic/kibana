@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsData, SourceConfiguration, TimerangeInput } from '../../../common/graphql/types';
-import { JsonObject } from '../../../common/typed_json';
+import {
+  HostsData,
+  PaginationInput,
+  SourceConfiguration,
+  TimerangeInput,
+} from '../../../common/graphql/types';
 import { FrameworkRequest } from '../framework';
 import { ESQuery, SearchHit } from '../types';
 
@@ -15,12 +19,13 @@ export interface HostsAdapter {
 
 export interface HostsRequestOptions {
   sourceConfiguration: SourceConfiguration;
+  pagination: PaginationInput;
   timerange: TimerangeInput;
   filterQuery: ESQuery | undefined;
   fields: string[];
 }
 
-export interface EventData extends SearchHit {
+export interface HostData extends SearchHit {
   sort: string[];
   _source: {
     // tslint:disable-next-line:no-any
@@ -31,14 +36,3 @@ export interface EventData extends SearchHit {
     [agg: string]: any;
   };
 }
-
-export interface TermAggregation {
-  [agg: string]: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-    }>;
-  };
-}
-
-export type EventFilterQuery = JsonObject;

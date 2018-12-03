@@ -6,7 +6,7 @@
 
 import { HostsData } from '../../../common/graphql/types';
 import { FrameworkRequest } from '../framework';
-// export { ElasticsearchHostsAdapter } from './elasticsearch_adapter';
+export * from './elasticsearch_adapter';
 import { HostsAdapter, HostsRequestOptions } from './types';
 
 export class Hosts {

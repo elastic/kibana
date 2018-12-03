@@ -40,6 +40,7 @@ export interface Context {
 }
 
 export type ESQuery = ESRangeQuery | ESQueryStringQuery | ESMatchQuery | JsonObject;
+export type FilterQuery = JsonObject;
 
 export interface ESRangeQuery {
   range: {
@@ -111,3 +112,12 @@ export interface Explanation {
 }
 
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];
+
+export interface TermAggregation {
+  [agg: string]: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+    }>;
+  };
+}

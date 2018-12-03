@@ -4,51 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, merge } from 'lodash/fp';
-import { EventItem, EventsData, KpiItem } from '../../../common/graphql/types';
+import { get, getOr, has, merge } from 'lodash/fp';
+import { HostItem, HostsData } from '../../../common/graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-import { buildQuery, EventFieldsMap } from './query.dsl';
-import { EventData, EventsAdapter, EventsRequestOptions } from './types';
+import { buildQuery, HostsFieldsMap } from './query.dsl';
+import { HostData, HostsAdapter, HostsRequestOptions } from './types';
 
-export class ElasticsearchEventsAdapter implements EventsAdapter {
+export class ElasticsearchHostsAdapter implements HostsAdapter {
   private framework: FrameworkAdapter;
   constructor(framework: FrameworkAdapter) {
     this.framework = framework;
   }
 
-  public async getEvents(
+  public async getHosts(
     request: FrameworkRequest,
-    options: EventsRequestOptions
-  ): Promise<EventsData> {
-    const response = await this.framework.callWithRequest<EventData, TermAggregation>(
+    options: HostsRequestOptions
+  ): Promise<HostsData> {
+    const response = await this.framework.callWithRequest<HostData, TermAggregation>(
       request,
       'search',
       buildQuery(options)
     );
-
-    const kpiEventType: KpiItem[] =
-      response.aggregations && response.aggregations.count_event_type
-        ? response.aggregations.count_event_type.buckets.map(item => ({
-            value: item.key,
-            count: item.doc_count,
-          }))
-        : [];
+    const total = getOr(0, 'aggregations.host_count.value', response);
     const hits = response.hits.hits;
-    const events = hits.map(formatEventsData(options.fields)) as [EventItem];
+    const hosts = hits.map(formatHostsData(options.fields)) as [HostItem];
     return {
-      events,
-      kpiEventType,
-    } as EventsData;
+      hosts,
+      total,
+    } as HostsData;
   }
 }
 
-const formatEventsData = (fields: string[]) => (hit: EventData) =>
+const formatHostsData = (fields: string[]) => (hit: HostData) =>
   fields.reduce(
     (flattenedFields, fieldName) => {
       flattenedFields._id = get('_id', hit);
-      if (EventFieldsMap.hasOwnProperty(fieldName)) {
-        const esField = Object.getOwnPropertyDescriptor(EventFieldsMap, fieldName);
+      if (HostsFieldsMap.hasOwnProperty(fieldName)) {
+        const esField = Object.getOwnPropertyDescriptor(HostsFieldsMap, fieldName);
         return has(esField && esField.value, hit._source)
           ? merge(
               flattenedFields,
