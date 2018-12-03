@@ -21,7 +21,12 @@ export async function getTelemetry(req, config, start, end, { _getAllStats = get
   let response = [];
 
   if (config.get('xpack.monitoring.enabled')) {
-    response = await _getAllStats(req, start, end);
+    try {
+      // attempt to collect stats from multiple clusters in monitoring data
+      response = await _getAllStats(req, start, end);
+    } catch (err) {
+      // no-op
+    }
   }
 
   if (!Array.isArray(response) || response.length === 0) {
