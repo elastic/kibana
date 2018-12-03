@@ -10,23 +10,8 @@ import { get } from 'lodash';
  * Check user privileges for read access to monitoring
  * Pass callWithInternalUser to bulkFetchUsage
  */
-export async function getKibana(server, callWithInternalUser, callWithReq) {
+export async function getKibana(server, callWithInternalUser) {
   const { collectorSet } = server.usage;
-
-  const hasPrivilegesResponse = await callWithReq('transport.request', {
-    method: 'POST',
-    path: '/_xpack/security/user/_has_privileges',
-    body: {
-      index: [ { names: [ '.monitoring-*' ], privileges: [ 'read' ] } ]
-    },
-    ignoreUnavailable: true // we allow 404 incase the user shutdown security in-between the check and now
-  });
-  const { has_all_requested: hasPrivileges } = hasPrivilegesResponse;
-
-  if (!hasPrivileges) {
-    return;
-  }
-
   const usage = await collectorSet.bulkFetch(callWithInternalUser);
   const { kibana, kibana_stats: stats, ...plugins } = collectorSet.toObject(usage);
 
