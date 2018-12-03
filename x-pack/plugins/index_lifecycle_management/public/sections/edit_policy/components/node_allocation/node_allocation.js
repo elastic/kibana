@@ -12,7 +12,7 @@ import { ErrableFormRow } from '../../form_errors';
 import { LearnMoreLink } from '../../../components/learn_more_link';
 const learnMoreLinks = (
   <Fragment>
-    <br />
+    <EuiSpacer size="s" />
     <LearnMoreLink
       docPath="indices-rollover-index.html"
       text={
@@ -22,7 +22,7 @@ const learnMoreLinks = (
         />
       }
     />
-    <br />
+    <EuiSpacer size="s" />
     <LearnMoreLink
       text={
         <FormattedMessage
@@ -86,20 +86,6 @@ class NodeAllocationUi extends Component {
         errorKey={PHASE_NODE_ATTRS}
         isShowingErrors={isShowingErrors}
         errors={errors}
-        helpText={
-          phaseData[PHASE_NODE_ATTRS] ? (
-            <EuiButtonEmpty
-              flush="left"
-              iconType="eye"
-              onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
-            >
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
-                defaultMessage="View a list of nodes attached to this configuration"
-              />
-            </EuiButtonEmpty>
-          ) : null
-        }
       >
         <EuiSelect
           id={`${phase}.${PHASE_NODE_ATTRS}`}
@@ -109,6 +95,17 @@ class NodeAllocationUi extends Component {
             await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
           }}
         />
+        <EuiSpacer size="s" />
+        <EuiButtonEmpty
+          flush="left"
+          iconType="eye"
+          onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
+        >
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
+            defaultMessage="View a list of nodes attached to this configuration"
+          />
+        </EuiButtonEmpty>
         {learnMoreLinks}
       </ErrableFormRow>
     );
