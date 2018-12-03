@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { BaseServices } from '../../types';
+import { CoreContext } from '../../types';
 import { PluginsService } from './plugins_service';
 
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';
-export { PluginInitializerBaseServices, PluginStartBaseServices } from './plugin_base_services';
+export { PluginInitializerContext, PluginStartContext } from './plugin_context';
 export { PluginName } from './plugin';
 
 /** @internal */
 export class PluginsModule {
   public readonly service: PluginsService;
 
-  constructor(baseServices: BaseServices) {
-    this.service = new PluginsService(baseServices);
+  constructor(coreContext: CoreContext) {
+    this.service = new PluginsService(coreContext);
   }
 }

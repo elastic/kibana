@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { BaseServices } from '../../types';
+import { CoreContext } from '../../types';
 
-const mockCreatePluginStartBaseServices = jest.fn();
-jest.mock('./plugin_base_services', () => ({
-  createPluginStartBaseServices: mockCreatePluginStartBaseServices,
+const mockCreatePluginStartContext = jest.fn();
+jest.mock('./plugin_context', () => ({
+  createPluginStartContext: mockCreatePluginStartContext,
 }));
 
 import { BehaviorSubject } from 'rxjs';
@@ -53,7 +53,7 @@ function createPlugin(
 let pluginsSystem: PluginsSystem;
 let configService: ConfigService;
 let env: Env;
-let baseServices: BaseServices;
+let coreContext: CoreContext;
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
@@ -63,9 +63,9 @@ beforeEach(() => {
     logger
   );
 
-  baseServices = { env, logger, configService };
+  coreContext = { env, logger, configService };
 
-  pluginsSystem = new PluginsSystem(baseServices);
+  pluginsSystem = new PluginsSystem(coreContext);
 });
 
 afterEach(() => {
@@ -138,19 +138,17 @@ test('`startPlugins` correctly orders plugins and returns exposed values', async
     ],
   ] as Array<[Plugin, Record<PluginName, unknown>]>);
 
-  const startBaseServicesMap = new Map();
+  const startContextMap = new Map();
 
   [...plugins.keys()].forEach((plugin, index) => {
     jest.spyOn(plugin, 'start').mockResolvedValue(`added-as-${index}`);
 
-    startBaseServicesMap.set(plugin.name, `start-for-${plugin.name}`);
+    startContextMap.set(plugin.name, `start-for-${plugin.name}`);
 
     pluginsSystem.addPlugin(plugin);
   });
 
-  mockCreatePluginStartBaseServices.mockImplementation(plugin =>
-    startBaseServicesMap.get(plugin.name)
-  );
+  mockCreatePluginStartContext.mockImplementation(plugin => startContextMap.get(plugin.name));
 
   expect([...(await pluginsSystem.startPlugins())]).toMatchInlineSnapshot(`
 Array [
@@ -178,8 +176,8 @@ Array [
 `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginStartBaseServices).toHaveBeenCalledWith(plugin, baseServices);
+    expect(mockCreatePluginStartContext).toHaveBeenCalledWith(plugin, coreContext);
     expect(plugin.start).toHaveBeenCalledTimes(1);
-    expect(plugin.start).toHaveBeenCalledWith(startBaseServicesMap.get(plugin.name), deps);
+    expect(plugin.start).toHaveBeenCalledWith(startContextMap.get(plugin.name), deps);
   }
 });

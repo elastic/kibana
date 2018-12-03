@@ -21,10 +21,10 @@ import { readdir, stat } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
-import { BaseServices } from '../../../types';
+import { CoreContext } from '../../../types';
 import { Logger } from '../../logging';
 import { Plugin } from '../plugin';
-import { createPluginInitializerBaseServices } from '../plugin_base_services';
+import { createPluginInitializerContext } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
@@ -39,17 +39,17 @@ const fsStat$ = bindNodeCallback(stat);
  * all the errors that occurred during discovery process.
  *
  * @param config Plugin config instance.
- * @param baseServices Kibana core values.
+ * @param coreContext Kibana core values.
  * @internal
  */
-export function discover(config: PluginsConfig, baseServices: BaseServices) {
-  const log = baseServices.logger.get('plugins-discovery');
+export function discover(config: PluginsConfig, coreContext: CoreContext) {
+  const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
   const discoveryResults$ = processPluginSearchPaths$(config.pluginSearchPaths, log).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, baseServices)
+        ? createPlugin$(pluginPathOrError, log, coreContext)
         : [pluginPathOrError];
     }),
     shareReplay()
@@ -98,17 +98,13 @@ function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logge
  * isn't valid.
  * @param path Path to the plugin directory where manifest should be loaded from.
  * @param log Plugin discovery logger instance.
- * @param baseServices Kibana core values.
+ * @param coreContext Kibana core context.
  */
-function createPlugin$(path: string, log: Logger, baseServices: BaseServices) {
-  return from(parseManifest(path, baseServices.env.packageInfo)).pipe(
+function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
+  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new Plugin(
-        path,
-        manifest,
-        createPluginInitializerBaseServices(manifest, baseServices)
-      );
+      return new Plugin(path, manifest, createPluginInitializerContext(coreContext, manifest));
     }),
     catchError(err => [err])
   );

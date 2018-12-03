@@ -17,5 +17,5 @@
  * under the License.
  */
 
+export { CoreContext } from './core_context';
 export { CoreService } from './core_service';
-export { BaseServices } from './base_services';

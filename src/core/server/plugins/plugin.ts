@@ -20,7 +20,7 @@
 import typeDetect from 'type-detect';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginInitializerBaseServices, PluginStartBaseServices } from './plugin_base_services';
+import { PluginInitializerContext, PluginStartContext } from './plugin_context';
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -75,12 +75,9 @@ export interface PluginManifest {
 }
 
 type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName, unknown>> = (
-  baseServices: PluginInitializerBaseServices
+  coreContext: PluginInitializerContext
 ) => {
-  start: (
-    startBaseServices: PluginStartBaseServices,
-    dependencies: TDependencies
-  ) => TExposedContract;
+  start: (pluginStartContext: PluginStartContext, dependencies: TDependencies) => TExposedContract;
   stop?: () => void;
 };
 
@@ -101,21 +98,21 @@ export class Plugin<
   constructor(
     public readonly path: string,
     private readonly manifest: PluginManifest,
-    private readonly baseServices: PluginInitializerBaseServices
+    private readonly initializerContext: PluginInitializerContext
   ) {
-    this.log = baseServices.logger.get();
+    this.log = initializerContext.logger.get();
     this.name = manifest.id;
     this.configPath = manifest.configPath;
     this.requiredDependencies = manifest.requiredPlugins;
     this.optionalDependencies = manifest.optionalPlugins;
   }
 
-  public async start(baseServices: PluginStartBaseServices, dependencies: TDependencies) {
+  public async start(startContext: PluginStartContext, dependencies: TDependencies) {
     this.instance = this.createPluginInstance();
 
     this.log.info('Starting plugin');
 
-    return await this.instance.start(baseServices, dependencies);
+    return await this.instance.start(startContext, dependencies);
   }
 
   public async stop() {
@@ -145,7 +142,7 @@ export class Plugin<
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
     }
 
-    const instance = initializer(this.baseServices);
+    const instance = initializer(this.initializerContext);
     if (!instance || typeof instance !== 'object') {
       throw new Error(
         `Initializer for plugin "${

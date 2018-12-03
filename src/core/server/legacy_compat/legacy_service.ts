@@ -20,7 +20,7 @@
 import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
-import { BaseServices, CoreService } from '../../types';
+import { CoreContext, CoreService } from '../../types';
 import { Config } from '../config';
 import { DevConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpServiceStartContract } from '../http';
@@ -46,14 +46,14 @@ export class LegacyService implements CoreService {
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
 
-  constructor(private readonly baseServices: BaseServices) {
-    this.log = baseServices.logger.get('legacy-service');
+  constructor(private readonly coreContext: CoreContext) {
+    this.log = coreContext.logger.get('legacy-service');
   }
 
   public async start(deps: Deps) {
     this.log.debug('starting legacy service');
 
-    const update$ = this.baseServices.configService.getConfig$().pipe(
+    const update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
         if (this.kbnServer !== undefined) {
           this.kbnServer.applyLoggingConfiguration(config.toRaw());
@@ -70,7 +70,7 @@ export class LegacyService implements CoreService {
       .pipe(
         first(),
         mergeMap(async config => {
-          if (this.baseServices.env.isDevClusterMaster) {
+          if (this.coreContext.env.isDevClusterMaster) {
             await this.createClusterManager(config);
             return;
           }
@@ -96,21 +96,21 @@ export class LegacyService implements CoreService {
   }
 
   private async createClusterManager(config: Config) {
-    const basePathProxy$ = this.baseServices.env.cliArgs.basePath
+    const basePathProxy$ = this.coreContext.env.cliArgs.basePath
       ? combineLatest(
-          this.baseServices.configService.atPath('dev', DevConfig),
-          this.baseServices.configService.atPath('server', HttpConfig)
+          this.coreContext.configService.atPath('dev', DevConfig),
+          this.coreContext.configService.atPath('server', HttpConfig)
         ).pipe(
           first(),
           map(
             ([devConfig, httpConfig]) =>
-              new BasePathProxyServer(this.baseServices.logger.get('server'), httpConfig, devConfig)
+              new BasePathProxyServer(this.coreContext.logger.get('server'), httpConfig, devConfig)
           )
         )
       : EMPTY;
 
     require('../../../cli/cluster/cluster_manager').create(
-      this.baseServices.env.cliArgs,
+      this.coreContext.env.cliArgs,
       config.toRaw(),
       await basePathProxy$.toPromise()
     );
@@ -131,18 +131,18 @@ export class LegacyService implements CoreService {
               listener: this.setupProxyListener(deps.http.server),
             }
           : { autoListen: false },
-      handledConfigPaths: await this.baseServices.configService.getUsedPaths(),
+      handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
       plugins: deps.plugins,
     });
 
     // The kbnWorkerType check is necessary to prevent the repl
     // from being started multiple times in different processes.
     // We only want one REPL.
-    if (this.baseServices.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
+    if (this.coreContext.env.cliArgs.repl && process.env.kbnWorkerType === 'server') {
       require('../../../cli/repl').startRepl(kbnServer);
     }
 
-    const httpConfig = await this.baseServices.configService
+    const httpConfig = await this.coreContext.configService
       .atPath('server', HttpConfig)
       .pipe(first())
       .toPromise();
@@ -163,7 +163,7 @@ export class LegacyService implements CoreService {
 
   private setupProxyListener(server: HapiServer) {
     const legacyProxy = new LegacyPlatformProxy(
-      this.baseServices.logger.get('legacy-proxy'),
+      this.coreContext.logger.get('legacy-proxy'),
       server.listener
     );
 

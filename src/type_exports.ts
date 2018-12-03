@@ -27,7 +27,7 @@
  * in one of the known plugin locations (kibana/plugins/* or kibana-extra/*):
  *
  * ```ts
- * import { Logger, PluginInitializerBaseServices, PluginStartBaseServices } from '../../kibana';
+ * import { Logger, PluginInitializerContext, PluginStartContext } from '../../kibana';
  *
  * export interface SomePluginContract {
  *   setValue: (val: string) => void;
@@ -36,23 +36,23 @@
  * class Plugin {
  *   private readonly log: Logger;
  *
- *   constructor(private readonly baseServices: PluginInitializerBaseServices) {
- *     this.log = baseServices.logger.get();
+ *   constructor(private readonly initializerContext: PluginInitializerContext) {
+ *     this.log = initializerContext.logger.get();
  *   }
  *
- *   start(baseServices: PluginStartBaseServices, deps: Record<string, any>) {
+ *   start(startContext: PluginStartContext, deps: Record<string, any>) {
  *    this.log.info('Hello from plugin!');
  *
  *    let value = 'Hello World!';
  *
- *    const router = baseServices.http.createAndRegisterRouter('/some-path');
+ *    const router = startContext.http.createAndRegisterRouter('/some-path');
  *    router.get('/some-value', (req, res) => res.ok(value));
  *
  *    return { setValue: (val: string) => { value = val; } };
  *   }
  * }
  *
- * export plugin = (baseServices: PluginInitializerBaseServices) => new Plugin(baseServices));
+ * export plugin = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext));
  * ```
  *
  * **NOTE:** If the code is not needed in plugins, we can add a `at_internal` JSDoc
@@ -61,8 +61,4 @@
  */
 
 export { Logger, LoggerFactory } from './core/server/logging';
-export {
-  PluginInitializerBaseServices,
-  PluginName,
-  PluginStartBaseServices,
-} from './core/server/plugins';
+export { PluginInitializerContext, PluginName, PluginStartContext } from './core/server/plugins';

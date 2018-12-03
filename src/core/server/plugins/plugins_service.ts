@@ -19,7 +19,7 @@
 
 import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
-import { BaseServices, CoreService } from '../../types';
+import { CoreContext, CoreService } from '../../types';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { Plugin, PluginName } from './plugin';
@@ -34,24 +34,24 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
-  constructor(private readonly baseServices: BaseServices) {
-    this.log = baseServices.logger.get('plugins-service');
-    this.pluginsSystem = new PluginsSystem(baseServices);
+  constructor(private readonly coreContext: CoreContext) {
+    this.log = coreContext.logger.get('plugins-service');
+    this.pluginsSystem = new PluginsSystem(coreContext);
   }
 
   public async start() {
     this.log.debug('Starting plugins service');
 
-    const config = await this.baseServices.configService
+    const config = await this.coreContext.configService
       .atPath('plugins', PluginsConfig)
       .pipe(first())
       .toPromise();
 
-    const { error$, plugin$ } = discover(config, this.baseServices);
+    const { error$, plugin$ } = discover(config, this.coreContext);
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
 
-    if (!config.initialize || this.baseServices.env.isDevClusterMaster) {
+    if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
       return new Map();
     }
@@ -92,9 +92,7 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
     await plugin$
       .pipe(
         mergeMap(async plugin => {
-          const isEnabled = await this.baseServices.configService.isEnabledAtPath(
-            plugin.configPath
-          );
+          const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
           if (pluginEnableStatuses.has(plugin.name)) {
             throw new Error(`Plugin with id "${plugin.name}" is already registered!`);

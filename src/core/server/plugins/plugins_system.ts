@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { BaseServices } from '../../types';
+import { CoreContext } from '../../types';
 import { Logger } from '../logging';
 import { Plugin, PluginName } from './plugin';
-import { createPluginStartBaseServices } from './plugin_base_services';
+import { createPluginStartContext } from './plugin_context';
 
 /** @internal */
 export class PluginsSystem {
@@ -28,8 +28,8 @@ export class PluginsSystem {
   private readonly log: Logger;
   private readonly startedPlugins: PluginName[] = [];
 
-  constructor(private readonly baseServices: BaseServices) {
-    this.log = baseServices.logger.get('plugins-system');
+  constructor(private readonly coreContext: CoreContext) {
+    this.log = coreContext.logger.get('plugins-system');
   }
 
   public addPlugin(plugin: Plugin) {
@@ -63,7 +63,7 @@ export class PluginsSystem {
       exposedValues.set(
         pluginName,
         await plugin.start(
-          createPluginStartBaseServices(plugin, this.baseServices),
+          createPluginStartContext(this.coreContext, plugin),
           exposedDependencyValues
         )
       );

@@ -18,22 +18,24 @@
  */
 
 import { first } from 'rxjs/operators';
-import { Logger, PluginInitializerCore, PluginName, PluginStartCore } from '../../../';
+import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from '../../../';
 import { TestBedConfig } from './config';
 
 class Plugin {
   private readonly log: Logger;
 
-  constructor(private readonly core: PluginInitializerCore) {
-    this.log = this.core.logger.get();
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.log = this.initializerContext.logger.get();
   }
 
-  public async start(core: PluginStartCore, deps: Record<PluginName, unknown>) {
+  public async start(startContext: PluginStartContext, deps: Record<PluginName, unknown>) {
     this.log.debug(
-      `Starting TestBed with core contract [${Object.keys(core)}] and deps [${Object.keys(deps)}]`
+      `Starting TestBed with core contract [${Object.keys(startContext)}] and deps [${Object.keys(
+        deps
+      )}]`
     );
 
-    const config = await this.core.config
+    const config = await this.initializerContext.config
       .create(TestBedConfig)
       .pipe(first())
       .toPromise();
@@ -48,4 +50,5 @@ class Plugin {
   }
 }
 
-export const plugin = (core: PluginInitializerCore) => new Plugin(core);
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new Plugin(initializerContext);

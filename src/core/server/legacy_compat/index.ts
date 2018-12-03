@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BaseServices } from '../../types';
+import { CoreContext } from '../../types';
 import { LegacyService } from './legacy_service';
 
 /** @internal */
@@ -29,7 +29,7 @@ export { LegacyService } from './legacy_service';
 export class LegacyCompatModule {
   public readonly service: LegacyService;
 
-  constructor(baseServices: BaseServices) {
-    this.service = new LegacyService(baseServices);
+  constructor(coreContext: CoreContext) {
+    this.service = new LegacyService(coreContext);
   }
 }
