@@ -32,23 +32,23 @@ export function createProxy(server) {
       }
     },
     async handler(req, h) {
+      let body = null;
       try {
         const { payload } = req;
-        const body = payload
+        body = payload
           .toString('utf8')
           .split('\n')
           .filter(Boolean)
           .map(JSON.parse);
-        const response = await callWithRequest(req, 'msearch', {
-          body
-        });
+      } catch (e) {
+        return h.response(Boom.badRequest('Unable to parse request'));
+      }
+
+      try {
+        const response = await callWithRequest(req, 'msearch', { body });
         return h.response(response);
       } catch(e) {
-        if (e instanceof Error) {
-          return h.response(Boom.badRequest('Unable to parse request'));
-        } else {
-          return h.response(e);
-        }
+        return h.response(e);
       }
     },
   });
