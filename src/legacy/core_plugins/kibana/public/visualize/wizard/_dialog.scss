@@ -8,6 +8,10 @@
 .visNewVisDialog__body {
   display: flex;
   padding: $euiSizeM $euiSizeL 0;
+  min-height: 0;
+}
+.visNewVisDialog__list {
+  min-height: 0;
 }
 
 .visNewVisDialog__searchWrapper {
@@ -16,6 +20,7 @@
 
 .visNewVisDialog__typesWrapper {
   max-width: $euiSizeXXL * 10;
+  min-height: 0;
   padding-top: 2px; // Account for search field dropshadow
   padding-bottom: $euiSize;
   // Add overflow shadows via pseudo elements
