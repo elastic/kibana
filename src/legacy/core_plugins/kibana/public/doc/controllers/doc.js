@@ -25,6 +25,7 @@ import html from '../index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
+import { i18n } from '@kbn/i18n';
 
 
 const app = uiModules.get('apps/doc', [
@@ -40,18 +41,29 @@ const resolveIndexPattern = {
   }
 };
 
+const k7Breadcrumbs = () => [
+  {
+    text: i18n.translate('kbn.doc.breadcrumb', {
+      defaultMessage: 'Document'
+    })
+  }
+];
+
 uiRoutes
   .when('/doc/:indexPattern/:index/:type/:id', {
     template: html,
-    resolve: resolveIndexPattern
+    resolve: resolveIndexPattern,
+    k7Breadcrumbs
   })
   .when('/doc/:indexPattern/:index/:type', {
     template: html,
-    resolve: resolveIndexPattern
+    resolve: resolveIndexPattern,
+    k7Breadcrumbs
   });
 
-app.controller('doc', function ($scope, $route, es) {
+app.controller('doc', function ($scope, $route, es, config) {
 
+  config.bindToScope($scope, 'k7design');
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
