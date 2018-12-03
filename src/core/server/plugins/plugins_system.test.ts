@@ -148,7 +148,7 @@ test('`startPlugins` correctly orders plugins and returns exposed values', async
     pluginsSystem.addPlugin(plugin);
   });
 
-  mockCreatePluginStartContext.mockImplementation(plugin => startContextMap.get(plugin.name));
+  mockCreatePluginStartContext.mockImplementation((_, plugin) => startContextMap.get(plugin.name));
 
   expect([...(await pluginsSystem.startPlugins())]).toMatchInlineSnapshot(`
 Array [
@@ -176,7 +176,7 @@ Array [
 `);
 
   for (const [plugin, deps] of plugins) {
-    expect(mockCreatePluginStartContext).toHaveBeenCalledWith(plugin, coreContext);
+    expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, plugin);
     expect(plugin.start).toHaveBeenCalledTimes(1);
     expect(plugin.start).toHaveBeenCalledWith(startContextMap.get(plugin.name), deps);
   }

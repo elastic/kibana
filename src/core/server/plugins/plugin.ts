@@ -81,7 +81,11 @@ type PluginInitializer<TExposedContract, TDependencies extends Record<PluginName
   stop?: () => void;
 };
 
-/** @internal */
+/**
+ * Lightweight wrapper around discovered plugin that is responsible for instantiating
+ * plugin and dispatching proper context and dependencies into plugin's lifecycle hooks.
+ * @internal
+ */
 export class Plugin<
   TStartContract = unknown,
   TDependencies extends Record<PluginName, unknown> = Record<PluginName, unknown>
@@ -107,6 +111,13 @@ export class Plugin<
     this.optionalDependencies = manifest.optionalPlugins;
   }
 
+  /**
+   * Instantiates plugin and calls `start` function exposed by the plugin initializer.
+   * @param startContext Context that consists of various core services tailored specifically
+   * for the `start` lifecycle event.
+   * @param dependencies The dictionary where the key is the dependency name and the value
+   * is the contract returned by the dependency's `start` function.
+   */
   public async start(startContext: PluginStartContext, dependencies: TDependencies) {
     this.instance = this.createPluginInstance();
 
@@ -115,6 +126,9 @@ export class Plugin<
     return await this.instance.start(startContext, dependencies);
   }
 
+  /**
+   * Calls optional `stop` function exposed by the plugin initializer.
+   */
   public async stop() {
     if (this.instance === undefined) {
       return;
@@ -125,10 +139,12 @@ export class Plugin<
     if (typeof this.instance.stop === 'function') {
       await this.instance.stop();
     }
+
+    this.instance = undefined;
   }
 
   private createPluginInstance() {
-    this.log.info('Initializing plugin');
+    this.log.debug('Initializing plugin');
 
     const pluginDefinition = require(this.path);
     if (!('plugin' in pluginDefinition)) {
