@@ -18,6 +18,7 @@ import {
   EuiConfirmModal,
   EuiFieldText,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { addLifecyclePolicyToTemplate, loadIndexTemplates } from '../../../../services/api';
@@ -43,14 +44,14 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
       });
       const message = intl.formatMessage({
         id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.successMessage',
-        defaultMessage: 'Added policy {policyName} to template {templateName}',
+        defaultMessage: 'Added policy {policyName} to index template {templateName}',
       }, { policyName, templateName });
       toastNotifications.addSuccess(message);
       onCancel();
     } catch (e) {
       const title = intl.formatMessage({
         id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.errorMessage',
-        defaultMessage: 'Error adding policy {policyName} to template {templateName}',
+        defaultMessage: 'Error adding policy {policyName} to index template {templateName}',
       }, { policyName, templateName });
       showApiError(e, title);
     }
@@ -163,7 +164,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     const { intl, policy, onCancel } = this.props;
     const title = intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.title',
-      defaultMessage: 'Add policy "{name}" to template',
+      defaultMessage: 'Add policy "{name}" to index template',
     }, { name: policy.name });
     return (
       <EuiOverlayMask>
@@ -181,17 +182,25 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
           })}
           onClose={onCancel}
         >
-          {this.renderForm()}
-          <EuiSpacer size="m" />
-          <LearnMoreLink
-            docPath="indices-templates.html"
-            text={
+          <EuiText>
+            <p>
               <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexTemplatesLink"
-                defaultMessage="Learn about index templates"
+                id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.explanationText"
+                defaultMessage="This will apply the lifecycle policy to
+                  all indices which match the index template."
+              />{' '}<LearnMoreLink
+                docPath="indices-templates.html"
+                text={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexTemplatesLink"
+                    defaultMessage="Learn about index templates"
+                  />
+                }
               />
-            }
-          />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {this.renderForm()}
         </EuiConfirmModal>
       </EuiOverlayMask>
     );
