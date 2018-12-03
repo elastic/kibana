@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import moment from 'moment';
+import { documentationLinks } from '../../lib/documentation_links';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Paginate } from '../paginate';
@@ -359,7 +360,7 @@ export class WorkpadLoader extends React.PureComponent {
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiLink href="https://canvas.elastic.co" target="_blank">
+                    <EuiLink href={documentationLinks.canvas} target="_blank">
                       Docs
                     </EuiLink>
                   </EuiFlexItem>
