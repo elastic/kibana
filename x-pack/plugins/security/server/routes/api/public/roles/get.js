@@ -68,7 +68,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
     async handler(request) {
       try {
         const response = await callWithRequest(request, 'shield.getRole');
-        return transformRolesFromEs(response);
+        return _.sortBy(transformRolesFromEs(response), 'name');
       } catch (error) {
         return wrapError(error);
       }
