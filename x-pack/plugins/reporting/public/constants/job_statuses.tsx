@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { xpackInfoRoute } from './xpack_info';
-export { telemetryRoute } from './telemetry';
-export { settingsRoute } from './settings';
+export enum JobStatuses {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+}
