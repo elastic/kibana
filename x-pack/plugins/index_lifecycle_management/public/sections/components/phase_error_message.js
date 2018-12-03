@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 export const PhaseErrorMessage = ({ isShowingErrors }) => {
   return isShowingErrors ? (
-    <EuiTextColor color="danger">
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.phaseErrorMessage"
-            defaultMessage="This phase contains errors"
-          />
-        </p>
-      </EuiText>
-    </EuiTextColor>
+    <EuiBadge className="eui-alignMiddle" color="danger">
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.phaseErrorMessage"
+        defaultMessage="Fix errors"
+      />
+    </EuiBadge>
   ) : null;
 };

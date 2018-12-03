@@ -72,7 +72,8 @@ class HotPhaseUi extends PureComponent {
                 defaultMessage="Hot phase"
               />
             </span>{' '}
-            <ActiveBadge />
+            {isShowingErrors ? null : <ActiveBadge />}
+            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
           </div>
         }
         titleSize="s"
@@ -82,10 +83,9 @@ class HotPhaseUi extends PureComponent {
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.hotPhaseDescriptionMessage"
                 defaultMessage={`This phase is required. You are actively querying and 
-                writing to your index.  For faster updates, you can roll over the index when it hits a specified size or age.`}
+                writing to your index.  For faster updates, you can roll over the index when it gets too big or too old.`}
               />
             </p>
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
           </Fragment>
         }
         fullWidth
@@ -93,16 +93,37 @@ class HotPhaseUi extends PureComponent {
         <EuiFormRow
           hasEmptyLabelSpace
           helpText={
-            <p>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                defaultMessage="If true, rollover the index when it gets too big or too old. The alias switches to the new index."
-              />
-              {' '}
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
+                  defaultMessage="Rollover uses an alias with is_write_index set appropriately.
+                    Only the most recent index receives new data."
+                />
+                {' '}
+
+              </p>
               <LearnMoreLink
+                text={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutRolloverLinkText"
+                    defaultMessage="Learn about rollover"
+                  />
+                }
                 docPath="indices-rollover-index.html"
               />
-            </p>
+              <br/>
+              <LearnMoreLink
+                text={
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutIndexAliasesLinkText"
+                    defaultMessage="Learn about index aliases"
+                  />
+
+                }
+                docPath="indices-aliases.html"
+              />
+            </Fragment>
           }
         >
           <EuiSwitch

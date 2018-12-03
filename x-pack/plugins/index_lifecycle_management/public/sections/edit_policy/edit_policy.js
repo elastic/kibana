@@ -99,7 +99,7 @@ class EditPolicyUi extends Component {
       toastNotifications.addDanger(
         intl.formatMessage({
           id: 'xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage',
-          defaultMessage: 'Please the fix errors on the page',
+          defaultMessage: 'Please fix the  errors on this page.',
         })
       );
       const element = document.getElementById(`${firstError}-row`);
@@ -204,7 +204,7 @@ class EditPolicyUi extends Component {
                           <span>
                             <FormattedMessage
                               id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
-                              defaultMessage="Save this as a new policy"
+                              defaultMessage="Save as new policy"
                             />
                           </span>
                         }

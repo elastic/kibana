@@ -57,9 +57,10 @@ export class DeletePhase extends PureComponent {
                 defaultMessage="Delete phase"
               />
             </span>{' '}
-            {phaseData[PHASE_ENABLED] ? (
+            {phaseData[PHASE_ENABLED] && !isShowingErrors ? (
               <ActiveBadge />
             ) : null}
+            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
           </div>
         }
         titleSize="s"
@@ -98,7 +99,6 @@ export class DeletePhase extends PureComponent {
                 />
               </EuiButton>
             )}
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
           </Fragment>
         }
         fullWidth

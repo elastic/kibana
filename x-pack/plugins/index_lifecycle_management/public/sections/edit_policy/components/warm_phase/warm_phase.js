@@ -92,7 +92,8 @@ class WarmPhaseUi extends PureComponent {
                   defaultMessage="Warm phase"
                 />
               </span>{' '}
-              {phaseData[PHASE_ENABLED] ? <ActiveBadge /> : null}
+              {phaseData[PHASE_ENABLED] && !isShowingErrors ? <ActiveBadge /> : null}
+              <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </div>
           }
           titleSize="s"
@@ -132,7 +133,6 @@ class WarmPhaseUi extends PureComponent {
                   />
                 </EuiButton>
               )}
-              <PhaseErrorMessage isShowingErrors={isShowingErrors} />
             </Fragment>
           }
           fullWidth

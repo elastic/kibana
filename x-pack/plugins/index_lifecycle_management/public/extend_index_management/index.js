@@ -171,20 +171,20 @@ addFilterExtension(indices => {
             }),
           },
           {
-            view: 'warm',
-            value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
+            value: 'warm',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.warmLabel', {
               defaultMessage: 'Warm',
             }),
           },
           {
-            view: 'cold',
-            value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
+            value: 'cold',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.coldLabel', {
               defaultMessage: 'Cold',
             }),
           },
           {
-            view: 'delete',
-            value: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
+            value: 'delete',
+            view: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtFilter.deleteLabel', {
               defaultMessage: 'Delete',
             }),
           },

@@ -57,7 +57,7 @@ class NodeAllocationUi extends Component {
             title={
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesMissingLabel"
-                defaultMessage="No node attributes configured"
+                defaultMessage="No node attributes configured in elasticsearch.yml"
               />
             }
             color="warning"
