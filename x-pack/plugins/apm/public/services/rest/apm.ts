@@ -128,6 +128,7 @@ export async function loadTransactionDistribution({
   start,
   end,
   transactionName,
+  transactionId,
   kuery
 }: IUrlParams) {
   return callApi<ITransactionDistributionAPIResponse>({
@@ -136,6 +137,7 @@ export async function loadTransactionDistribution({
       start,
       end,
       transaction_name: transactionName,
+      transaction_id: transactionId,
       esFilterQuery: await getEncodedEsQuery(kuery)
     }
   });
