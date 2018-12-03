@@ -53,7 +53,7 @@ where `locale` is [ISO 639 language code](https://en.wikipedia.org/wiki/List_of_
 
 For example:
 ```
-src/core_plugins/kibana/translations/fr.json
+src/legacy/core_plugins/kibana/translations/fr.json
 ```
 
 When a new translation file is added, you have to register this file into
@@ -378,18 +378,32 @@ The translation `directive` has the following syntax:
 ```html
 <ANY
   i18n-id="{string}"
+  i18n-default-message="{string}"
   [i18n-values="{object}"]
-  [i18n-default-message="{string}"]
   [i18n-description="{string}"]
 ></ANY>
 ```
 
 Where:
 - `i18n-id` - translation id to be translated
-- `i18n-values` - values to pass into translation
 - `i18n-default-message` - will be used unless translation was successful
+- `i18n-values` - values to pass into translation
 - `i18n-description` - optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
+
+If HTML rendering in `i18n-values` is required then value key in `i18n-values` object
+should have `html_` prefix. Otherwise the value will be inserted to the message without
+HTML rendering.\
+Example:
+```html
+<p
+  i18n-id="namespace.id"
+  i18n-default-message="Text with an emphasized {text}."
+  i18n-values="{
+    html_text: '<em>text</em>',
+  }"
+></p>
+```
 
 Angular `I18n` module is placed into `autoload` module, so it will be
 loaded automatically. After that we can use i18n directive in Angular templates:
