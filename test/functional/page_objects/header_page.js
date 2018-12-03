@@ -19,7 +19,6 @@
 
 export function HeaderPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
-  const remote = getService('remote');
   const log = getService('log');
   const retry = getService('retry');
   const find = getService('find');
@@ -45,22 +44,22 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickDiscover() {
       log.debug('click Discover tab');
-      await this.clickSelector('a[href*=\'discover\']');
+      await this.clickSelector("a[href*='discover']");
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickVisualize() {
       log.debug('click Visualize tab');
-      await this.clickSelector('a[href*=\'visualize\']');
+      await this.clickSelector("a[href*='visualize']");
       await PageObjects.common.waitForTopNavToBeVisible();
-      await this.confirmTopNavTextContains('visualize');
       await this.awaitGlobalLoadingIndicatorHidden();
+      await this.confirmTopNavTextContains('visualize');
     }
 
     async clickDashboard() {
       log.debug('click Dashboard tab');
-      await this.clickSelector('a[href*=\'dashboard\']');
+      await this.clickSelector("a[href*='dashboard']");
       await retry.try(async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
         const isLandingPageVisible = await testSubjects.exists('dashboardLandingPage');
@@ -73,13 +72,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickManagement() {
       log.debug('click Management tab');
-      await this.clickSelector('a[href*=\'management\']');
+      await this.clickSelector("a[href*='management']");
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     async clickSettings() {
       log.debug('click Settings tab');
-      await this.clickSelector('a[href*=\'settings\']');
+      await this.clickSelector("a[href*='settings']");
     }
 
     async clickTimepicker() {
@@ -88,7 +87,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickQuickButton() {
       await retry.try(async () => {
-        remote.setFindTimeout(defaultFindTimeout);
         await testSubjects.click('timepicker-quick-button');
       });
     }
@@ -99,7 +97,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async isAbsoluteSectionShowing() {
       log.debug('isAbsoluteSectionShowing');
-      return await PageObjects.common.doesCssSelectorExist('input[ng-model=\'absolute.from\']');
+      return await find.existsByCssSelector("input[ng-model='absolute.from']");
     }
 
     async showAbsoluteSection() {
@@ -107,7 +105,6 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       const isAbsoluteSectionShowing = await this.isAbsoluteSectionShowing();
       if (!isAbsoluteSectionShowing) {
         await retry.try(async () => {
-          await remote.setFindTimeout(defaultFindTimeout);
           await testSubjects.click('timepicker-absolute-button');
           // Check to make sure one of the elements on the absolute section is showing.
           await this.getFromTime();
@@ -120,10 +117,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
-        remote.setFindTimeout(defaultFindTimeout);
-        return await remote
-          .findByCssSelector('input[ng-model=\'absolute.from\']')
-          .getProperty('value');
+        const element = await find.byCssSelector("input[ng-model='absolute.from']");
+        return await element.getProperty('value');
       });
     }
 
@@ -132,8 +127,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
-        remote.setFindTimeout(defaultFindTimeout);
-        return await remote.findByCssSelector('input[ng-model=\'absolute.to\']').getProperty('value');
+        const element = await find.byCssSelector("input[ng-model='absolute.to']");
+        return await element.getProperty('value');
       });
     }
 
@@ -142,11 +137,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
-        remote.setFindTimeout(defaultFindTimeout);
-        await remote
-          .findByCssSelector('input[ng-model=\'absolute.from\']')
-          .clearValue()
-          .type(timeString);
+        await find.setValue("input[ng-model='absolute.from']", timeString);
       });
     }
 
@@ -155,18 +146,13 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.ensureTimePickerIsOpen();
         await this.showAbsoluteSection();
-        remote.setFindTimeout(defaultFindTimeout);
-        await remote
-          .findByCssSelector('input[ng-model=\'absolute.to\']')
-          .clearValue()
-          .type(timeString);
+        await find.setValue("input[ng-model='absolute.to']", timeString);
       });
     }
 
     async clickGoButton() {
       log.debug('clickGoButton');
       await retry.try(async () => {
-        remote.setFindTimeout(defaultFindTimeout);
         await testSubjects.click('timepickerGoButton');
         await this.waitUntilLoadingHasFinished();
       });
@@ -201,10 +187,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await this.ensureTimePickerIsOpen();
       log.debug('--Clicking Quick button');
       await this.clickQuickButton();
-      await remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByLinkText(quickTime)
-        .click();
+      await find.clickByLinkText(quickTime);
     }
 
     async getAutoRefreshState() {
@@ -243,10 +226,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
 
     async clickToastOK() {
       log.debug('clickToastOK');
-      await retry.try(async () => {
-        remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByCssSelector('button[ng-if="notif.accept"]').click();
-      });
+      await find.clickByCssSelector('button[ng-if="notif.accept"]');
     }
 
     async waitUntilLoadingHasFinished() {
