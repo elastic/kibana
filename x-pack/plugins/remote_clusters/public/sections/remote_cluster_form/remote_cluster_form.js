@@ -351,7 +351,7 @@ export class RemoteClusterFormUi extends Component {
             noSuggestions
             placeholder={intl.formatMessage({
               id: 'xpack.remoteClusters.remoteClusterForm.fieldSeedsPlaceholder',
-              defaultMessage: 'Type and then hit ENTER',
+              defaultMessage: '127.0.0.1:9400',
             })}
             selectedOptions={formattedSeeds}
             onCreateOption={this.onCreateSeed}
