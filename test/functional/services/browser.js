@@ -19,8 +19,8 @@
 
 import { modifyUrl } from '../../../src/core/utils';
 
-export function BrowserProvider({ getService }) {
-  const driver = getService('webDriver');
+export async function BrowserProvider({ getService }) {
+  const { driver } = await getService('webDriver').init();
 
   return new class BrowserService {
     /**

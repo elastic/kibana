@@ -34,10 +34,10 @@ import { LeadfootElementWrapper } from './lib/leadfoot_element_wrapper';
 // where your user is and what they should click next.
 export const WAIT_FOR_EXISTS_TIME = 2500;
 
-export function FindProvider({ getService }) {
+export async function FindProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
-  const { driver, until, By } = getService('webDriver');
+  const { driver, until, By } = await getService('webDriver').init();
   const retry = getService('retry');
 
   const defaultFindTimeout = config.get('timeouts.find');

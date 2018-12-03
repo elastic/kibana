@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { initLeadfootCommand } from './leadfoot_command';
+import { initWebDriver } from './webdriver';
 import { BrowserDriverApi } from './browser_driver_api';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
   const config = getService('config');
   const log = getService('log');
-  const possibleBrowsers = ['chrome', 'firefox'];
+  const possibleBrowsers = ['chrome', 'firefox', 'ie'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
   if (!possibleBrowsers.includes(browserType)) {
@@ -36,35 +36,25 @@ export async function RemoteProvider({ getService }) {
 
   await browserDriverApi.start();
 
-  const { command } = await initLeadfootCommand({ log, browserDriverApi: browserDriverApi });
+  const { driver, By, Key, until } = await initWebDriver({ log, browserDriverApi: browserDriverApi });
 
   log.info('Remote initialized');
 
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await command.setWindowSize(1600, 1000);
+    await driver.manage().window().setRect({ width: 1600, height: 1000 });
   });
 
   const windowSizeStack = [];
   lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.unshift(await command.getWindowSize());
+    windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 
   lifecycle.on('afterTestSuite', async () => {
     const { width, height } = windowSizeStack.shift();
-    await command.setWindowSize(width, height);
+    await driver.manage().window().setRect({ width: width, height: height });
   });
 
-  return new Proxy({}, {
-    get(obj, prop) {
-      if (prop === 'then' || prop === 'catch' || prop === 'finally') {
-        // prevent the remote from being treated like a promise by
-        // hiding it's promise-like properties
-        return undefined;
-      }
-
-      return command[prop];
-    }
-  });
+  return { driver, By, Key, until };
 }
