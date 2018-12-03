@@ -63,6 +63,19 @@ export const DocumentSchema = {
       },
     },
   },
+  repository_config: {
+    properties: {
+      uri: {
+        type: 'text',
+      },
+      disableJava: {
+        type: 'boolean',
+      },
+      disableTypescript: {
+        type: 'boolean',
+      },
+    },
+  },
   // A single Repository Git Status object resides in this document index.
   repository_git_status: {
     properties: {

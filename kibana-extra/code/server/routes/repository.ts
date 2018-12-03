@@ -9,6 +9,7 @@ import Boom from 'boom';
 import hapi from 'hapi';
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
+import { RepositoryConfig } from '../../model';
 import { RepositoryIndexInitializerFactory } from '../indexer';
 import { Log } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
@@ -184,6 +185,67 @@ export function repositoryRoute(
         return {};
       } catch (error) {
         const msg = `Index repository ${repoUri} error: ${error}`;
+        log.error(msg);
+        return Boom.notFound(msg);
+      }
+    },
+  });
+
+  // Update a repo config
+  server.route({
+    path: '/api/code/repo/config/{uri*3}',
+    method: 'PUT',
+    async handler(req, h) {
+      const config: RepositoryConfig = req.payload as RepositoryConfig;
+      const repoUrl: string = config.uri;
+
+      const log = new Log(req.server);
+
+      // Reject the request if the url is an invalid git url.
+      if (!isValidGitUrl(repoUrl)) {
+        return Boom.badRequest(`Invalid git url: ${repoUrl}`);
+      }
+
+      const repo = RepositoryUtils.buildRepository(repoUrl);
+      const repoObjectClient = new RepositoryObjectClient(
+        req.server.plugins.elasticsearch.getCluster('data').getClient()
+      );
+
+      try {
+        // Check if the repository exists
+        await repoObjectClient.getRepository(repo.uri);
+      } catch (error) {
+        const msg = `Repository not existed for ${repoUrl}`;
+        log.error(msg);
+        return Boom.badRequest(msg);
+      }
+
+      try {
+        // Persist to elasticsearch
+        await repoObjectClient.setRepositoryConfig(repo.uri, config);
+        return {};
+      } catch (error) {
+        const msg = `Issue repository clone request for ${repoUrl} error: ${error}`;
+        log.error(msg);
+        return Boom.badRequest(msg);
+      }
+    },
+  });
+
+  // Get repository config
+  server.route({
+    path: '/api/code/repo/config/{uri*3}',
+    method: 'GET',
+    async handler(req) {
+      const repoUri = req.params.uri as string;
+      const log = new Log(req.server);
+      try {
+        const repoObjectClient = new RepositoryObjectClient(
+          req.server.plugins.elasticsearch.getCluster('data').getClient()
+        );
+        return await repoObjectClient.getRepositoryConfig(repoUri);
+      } catch (error) {
+        const msg = `Get repository config ${repoUri} error: ${error}`;
         log.error(msg);
         return Boom.notFound(msg);
       }

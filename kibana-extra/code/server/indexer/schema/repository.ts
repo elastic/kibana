@@ -17,8 +17,6 @@ export const RepositoryAnalysisSettings = DocumentAnalysisSettings;
 export const RepositoryTypeName = DocumentTypeName;
 export const RepositoryIndexNamePrefix = DocumentIndexNamePrefix;
 export const RepositoryIndexName = DocumentIndexName;
-export const RepositoryStatusTypeName = DocumentTypeName;
-export const RepositoryStatusIndexName = DocumentIndexName;
 
 // The field name of repository object nested in the Document index.
 export const RepositoryReservedField = 'repository';
@@ -28,3 +26,5 @@ export const RepositoryGitStatusReservedField = 'repository_git_status';
 export const RepositoryDeleteStatusReservedField = 'repository_delete_status';
 // The field name of repository lsp index status object nested in the Document index.
 export const RepositoryLspIndexStatusReservedField = 'repository_lsp_index_status';
+// The field name of repository config object nested in the Document index.
+export const RepositoryConfigReservedField = 'repository_config';

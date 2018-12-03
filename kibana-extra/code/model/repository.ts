@@ -21,6 +21,12 @@ export interface Repository {
   nextIndexTimestamp?: Date;
 }
 
+export interface RepositoryConfig {
+  uri: RepositoryUri;
+  disableJava?: boolean;
+  disableTypescript?: boolean;
+}
+
 export interface FileTree {
   name: string;
   type: FileTreeItemType;

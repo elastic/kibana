@@ -14,7 +14,7 @@ import path from 'path';
 import { LspService } from "./lsp_service";
 import { ServerOptions } from "../server_options";
 import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
-import { RepositoryStatusTypeName, RepositoryGitStatusReservedField } from '../indexer/schema';
+import { RepositoryGitStatusReservedField, RepositoryTypeName} from '../indexer/schema';
 
 jest.setTimeout(30000);
 
@@ -65,7 +65,7 @@ function mockEsClient(): any {
   const api = {
     get: function (params: any) {
       const { type } = params;
-      if (type === RepositoryStatusTypeName) {
+      if (type === RepositoryTypeName) {
         return {
           _source: {
             [RepositoryGitStatusReservedField]: {

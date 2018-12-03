@@ -8,13 +8,13 @@ import { EsClient } from '@code/esqueue';
 
 import { CloneWorkerProgress, Repository, RepositoryUri, WorkerProgress } from '../../model';
 import {
+  RepositoryConfigReservedField,
   RepositoryDeleteStatusReservedField,
   RepositoryGitStatusReservedField,
+  RepositoryIndexName,
   RepositoryIndexNamePrefix,
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
-  RepositoryStatusIndexName,
-  RepositoryStatusTypeName,
   RepositoryTypeName,
 } from '../indexer/schema';
 
@@ -35,6 +35,10 @@ export class RepositoryObjectClient {
 
   public async getRepositoryDeleteStatus(repoUri: RepositoryUri): Promise<WorkerProgress> {
     return await this.getRepositoryObject(repoUri, RepositoryDeleteStatusReservedField);
+  }
+
+  public async getRepositoryConfig(repoUri: RepositoryUri): Promise<Repository> {
+    return await this.getRepositoryObject(repoUri, RepositoryConfigReservedField);
   }
 
   public async getRepository(repoUri: RepositoryUri): Promise<Repository> {
@@ -83,6 +87,10 @@ export class RepositoryObjectClient {
     );
   }
 
+  public async setRepositoryConfig(repoUri: RepositoryUri, repo: Repository) {
+    return await this.setRepositoryObject(repoUri, RepositoryConfigReservedField, repo);
+  }
+
   public async setRepository(repoUri: RepositoryUri, repo: Repository) {
     return await this.setRepositoryObject(repoUri, RepositoryReservedField, repo);
   }
@@ -112,8 +120,8 @@ export class RepositoryObjectClient {
     reservedFieldName: string
   ): Promise<any> {
     const res = await this.esClient.get({
-      index: RepositoryStatusIndexName(repoUri),
-      type: RepositoryStatusTypeName,
+      index: RepositoryIndexName(repoUri),
+      type: RepositoryTypeName,
       id: this.getRepositoryObjectId(reservedFieldName),
     });
     return res._source[reservedFieldName];
@@ -121,8 +129,8 @@ export class RepositoryObjectClient {
 
   private async setRepositoryObject(repoUri: RepositoryUri, reservedFieldName: string, obj: any) {
     return await this.esClient.index({
-      index: RepositoryStatusIndexName(repoUri),
-      type: RepositoryStatusTypeName,
+      index: RepositoryIndexName(repoUri),
+      type: RepositoryTypeName,
       id: this.getRepositoryObjectId(reservedFieldName),
       body: JSON.stringify({
         [reservedFieldName]: obj,
@@ -136,8 +144,8 @@ export class RepositoryObjectClient {
     obj: any
   ) {
     return await this.esClient.update({
-      index: RepositoryStatusIndexName(repoUri),
-      type: RepositoryStatusTypeName,
+      index: RepositoryIndexName(repoUri),
+      type: RepositoryTypeName,
       id: this.getRepositoryObjectId(reservedFieldName),
       body: JSON.stringify({
         doc: {
@@ -149,8 +157,8 @@ export class RepositoryObjectClient {
 
   private async deleteRepositoryObject(repoUri: RepositoryUri, reservedFieldName: string) {
     return await this.esClient.delete({
-      index: RepositoryStatusIndexName(repoUri),
-      type: RepositoryStatusTypeName,
+      index: RepositoryIndexName(repoUri),
+      type: RepositoryTypeName,
       id: this.getRepositoryObjectId(reservedFieldName),
     });
   }
