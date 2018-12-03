@@ -97,7 +97,7 @@ export function telemetryRoute(server) {
       } catch (err) {
         if (config.get('env.dev')) {
         // don't ignore errors when running in dev mode
-          return boomify(err);
+          return boomify(err, { statusCode: err.status });
         } else {
         // ignore errors, return empty set and a 200
           return h.response([]).code(200);
