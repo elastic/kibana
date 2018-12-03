@@ -27,7 +27,7 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-gis-root';
 
 const app = uiModules.get('app/gis', []);
 
-app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbState, kbnUrl) => {
+app.controller('GisWorkspaceController', ($scope, $route, config, kbnUrl) => {
 
   let isLayersListInitializedFromSavedObject = false;
   const savedWorkspace = $scope.workspace = $route.current.locals.workspace;
@@ -99,7 +99,7 @@ app.controller('GisWorkspaceController', ($scope, $route, config, breadcrumbStat
   };
   // k7design breadcrumbs
   // TODO subscribe to store change and change when store updates title
-  breadcrumbState.set([
+  chrome.breadcrumbs.set([
     { text: 'Workspace', href: '#' },
     { text: $scope.getWorkspaceTitle() }
   ]);
