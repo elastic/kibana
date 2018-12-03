@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
 import { InfraNode, InfraNodePath } from '../../../common/graphql/types';
 import {
@@ -44,7 +45,12 @@ function findOrCreateGroupWithNodes(
   }
   return {
     id,
-    name: id === '__all__' ? 'All' : last(path).value,
+    name:
+      id === '__all__'
+        ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithNodes.allName', {
+            defaultMessage: 'All',
+          })
+        : last(path).value,
     count: 0,
     width: 0,
     squareSize: 0,
@@ -63,7 +69,12 @@ function findOrCreateGroupWithGroups(
   }
   return {
     id,
-    name: id === '__all__' ? 'All' : last(path).value,
+    name:
+      id === '__all__'
+        ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithGroups.allName', {
+            defaultMessage: 'All',
+          })
+        : last(path).value,
     count: 0,
     width: 0,
     squareSize: 0,
