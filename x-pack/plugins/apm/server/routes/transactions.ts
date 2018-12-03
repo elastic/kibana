@@ -9,13 +9,12 @@ import { Server } from 'hapi';
 import Joi from 'joi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getTimeseriesData } from '../lib/transactions/charts/get_timeseries_data';
+import { getChartsData } from '../lib/transactions/charts';
 import { getDistribution } from '../lib/transactions/distribution';
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
 import { getTransaction } from '../lib/transactions/get_transaction';
 import { getSpans } from '../lib/transactions/spans/get_spans';
 
-const pre = [{ method: setupRequest, assign: 'setup' }];
 const ROOT = '/api/apm/services/{serviceName}/transactions';
 const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
@@ -28,7 +27,6 @@ export function initTransactionsApi(server: Server) {
     method: 'GET',
     path: ROOT,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators({
           transaction_type: Joi.string().default('request'),
@@ -41,7 +39,7 @@ export function initTransactionsApi(server: Server) {
       const { transaction_type: transactionType } = req.query as {
         transaction_type: string;
       };
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
 
       return getTopTransactions({
         serviceName,
@@ -55,7 +53,6 @@ export function initTransactionsApi(server: Server) {
     method: 'GET',
     path: `${ROOT}/{transactionId}`,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators({
           traceId: Joi.string().allow('')
@@ -65,7 +62,7 @@ export function initTransactionsApi(server: Server) {
     handler: req => {
       const { transactionId } = req.params;
       const { traceId } = req.query as { traceId: string };
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       return getTransaction(transactionId, traceId, setup).catch(
         defaultErrorHandler
       );
@@ -76,14 +73,13 @@ export function initTransactionsApi(server: Server) {
     method: 'GET',
     path: `${ROOT}/{transactionId}/spans`,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators()
       }
     },
     handler: req => {
       const { transactionId } = req.params;
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       return getSpans(transactionId, setup).catch(defaultErrorHandler);
     }
   });
@@ -92,7 +88,6 @@ export function initTransactionsApi(server: Server) {
     method: 'GET',
     path: `${ROOT}/charts`,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators({
           transaction_type: Joi.string().default('request'),
@@ -102,7 +97,7 @@ export function initTransactionsApi(server: Server) {
       }
     },
     handler: req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       const { serviceName } = req.params;
       const { transaction_type: transactionType } = req.query as {
         transaction_type: string;
@@ -111,7 +106,7 @@ export function initTransactionsApi(server: Server) {
         transaction_name: string;
       };
 
-      return getTimeseriesData({
+      return getChartsData({
         serviceName,
         transactionType,
         transactionName,
@@ -124,22 +119,29 @@ export function initTransactionsApi(server: Server) {
     method: 'GET',
     path: `${ROOT}/distribution`,
     options: {
-      pre,
       validate: {
         query: withDefaultValidators({
-          transaction_name: Joi.string().required()
+          transaction_name: Joi.string().required(),
+          transaction_id: Joi.string().default('')
         })
       }
     },
     handler: req => {
-      const { setup } = req.pre;
+      const setup = setupRequest(req);
       const { serviceName } = req.params;
-      const { transaction_name: transactionName } = req.query as {
+      const {
+        transaction_name: transactionName,
+        transaction_id: transactionId
+      } = req.query as {
         transaction_name: string;
+        transaction_id: string;
       };
-      return getDistribution(serviceName, transactionName, setup).catch(
-        defaultErrorHandler
-      );
+      return getDistribution(
+        serviceName,
+        transactionName,
+        transactionId,
+        setup
+      ).catch(defaultErrorHandler);
     }
   });
 }
