@@ -115,7 +115,12 @@ export class DataRecognizer {
       query: moduleConfig.query
     };
 
-    const resp = await this.callWithRequest('search', { index, size, body });
+    const resp = await this.callWithRequest('search', {
+      index,
+      rest_total_hits_as_int: true,
+      size,
+      body
+    });
     return (resp.hits.total !== 0);
   }
 
