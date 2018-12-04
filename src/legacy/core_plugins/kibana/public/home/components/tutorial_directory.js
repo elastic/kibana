@@ -22,6 +22,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
+import chrome from 'ui/chrome';
 
 import {
   EuiPage,
@@ -32,15 +33,21 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiPageBody,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 
 
 import { getTutorials } from '../load_tutorials';
 
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
+
+const homeTitle = i18n.translate('kbn.home.tutorial.homeTitle', { defaultMessage: 'Home' });
+const addDataTitle = i18n.translate('kbn.home.tutorial.addDataTitle', { defaultMessage: 'Add Data' });
 
 class TutorialDirectoryUi extends React.Component {
 
@@ -80,6 +87,16 @@ class TutorialDirectoryUi extends React.Component {
 
   async componentDidMount() {
     this._isMounted = true;
+
+    if(this.props.isK7Design) {
+      chrome.breadcrumbs.set([
+        {
+          text: homeTitle,
+          href: '#/home'
+        },
+        { text: addDataTitle }
+      ]);
+    }
 
     const tutorialConfigs = await getTutorials();
 
@@ -181,17 +198,21 @@ class TutorialDirectoryUi extends React.Component {
   }
 
   render() {
+    let breadcrumbs;
+    if (!this.props.isK7Design) {
+      breadcrumbs = (
+        <EuiText>
+          <EuiLink href="#/home">{homeTitle}</EuiLink> / {addDataTitle}
+        </EuiText>
+      );
+    }
+
     return (
       <EuiPage className="homPage">
         <EuiPageBody>
 
-          <a className="kuiLink" href="#/home">
-            <FormattedMessage
-              id="kbn.home.tutorial.homeTitle"
-              defaultMessage="Home"
-            />
-          </a>
-          <EuiSpacer size="s" />
+          {breadcrumbs}
+
           <EuiTitle size="l">
             <h1>
               <FormattedMessage
@@ -219,6 +240,7 @@ TutorialDirectoryUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
+  isK7Design: PropTypes.bool.isRequired,
 };
 
 export const TutorialDirectory = injectI18n(TutorialDirectoryUi);

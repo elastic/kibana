@@ -27,11 +27,14 @@ import {
   HomeApp
 } from './components/home_app';
 import { recentlyAccessed } from 'ui/persisted_log';
+import { i18n } from '@kbn/i18n';
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
   return reactDirective(HomeApp);
 });
+
+const homeTitle = i18n.translate('kbn.home.tutorial.homeTitle', { defaultMessage: 'Home' });
 
 function getRoute() {
   return {
@@ -42,7 +45,10 @@ function getRoute() {
         item.link = chrome.addBasePath(item.link);
         return item;
       });
-    }
+    },
+    k7Breadcrumbs: () => [
+      { text: homeTitle },
+    ]
   };
 }
 
