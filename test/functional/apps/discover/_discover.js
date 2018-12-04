@@ -145,6 +145,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct initial chart interval of Auto', async function () {
+        await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';
