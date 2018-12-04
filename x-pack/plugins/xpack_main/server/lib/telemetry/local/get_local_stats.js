@@ -8,7 +8,7 @@ import { get, omit } from 'lodash';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getXPack } from './get_xpack';
-import { getKibana } from './get_kibana';
+import { getKibana, handleKibanaStats } from './get_kibana';
 
 /**
  * Handle the separate local calls by combining them into a single object response that looks like the
@@ -19,7 +19,7 @@ import { getKibana } from './get_kibana';
  * @param {Object} xpack License and X-Pack details
  * @return {Object} A combined object containing the different responses.
  */
-export function handleLocalStats(clusterInfo, clusterStats, license, xpack, kibana) {
+export function handleLocalStats(server, clusterInfo, clusterStats, license, xpack, kibana) {
   const stats = {
     timestamp: (new Date()).toISOString(),
     cluster_uuid: get(clusterInfo, 'cluster_uuid'),
@@ -29,19 +29,10 @@ export function handleLocalStats(clusterInfo, clusterStats, license, xpack, kiba
     collection: 'local',
   };
 
-  if (license) {
-    stats.license = license;
-  }
-  if (kibana || xpack) {
-    stats.stack_stats = {};
-    if (kibana) {
-      stats.stack_stats.kibana = kibana;
-    }
-    if (xpack) {
-      stats.stack_stats.xpack = xpack;
-    }
-  }
-
+  stats.license = license;
+  stats.stack_stats = {};
+  stats.stack_stats.kibana = handleKibanaStats(server, kibana);
+  stats.stack_stats.xpack = xpack;
   return stats;
 }
 
@@ -59,7 +50,7 @@ export function getLocalStatsWithCaller(server, callCluster) {
     getXPack(callCluster),        // { license, xpack }
     getKibana(server, callCluster)
   ]).then(([clusterInfo, clusterStats, { license, xpack }, kibana]) => {
-    return handleLocalStats(clusterInfo, clusterStats, license, xpack, kibana);
+    return handleLocalStats(server, clusterInfo, clusterStats, license, xpack, kibana);
   }
   );
 }

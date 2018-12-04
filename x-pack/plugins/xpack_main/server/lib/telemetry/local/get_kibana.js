@@ -6,14 +6,12 @@
 
 import { get, omit } from 'lodash';
 
-/*
- * Check user privileges for read access to monitoring
- * Pass callWithInternalUser to bulkFetchUsage
- */
-export async function getKibana(server, callWithInternalUser) {
-  const { collectorSet } = server.usage;
-  const usage = await collectorSet.bulkFetch(callWithInternalUser);
-  const { kibana, kibana_stats: stats, ...plugins } = collectorSet.toObject(usage);
+export function handleKibanaStats(server, response) {
+  if (!response) {
+    return;
+  }
+
+  const { kibana, kibana_stats: stats, ...plugins } = response;
 
   const platform = get(stats, 'os.platform');
   const platformRelease = get(stats, 'os.platformRelease');
@@ -37,4 +35,14 @@ export async function getKibana(server, callWithInternalUser) {
     versions: [{ version, count: 1 }],
     plugins,
   };
+}
+
+/*
+ * Check user privileges for read access to monitoring
+ * Pass callWithInternalUser to bulkFetchUsage
+ */
+export async function getKibana(server, callWithInternalUser) {
+  const { collectorSet } = server.usage;
+  const usage = await collectorSet.bulkFetch(callWithInternalUser);
+  return collectorSet.toObject(usage);
 }

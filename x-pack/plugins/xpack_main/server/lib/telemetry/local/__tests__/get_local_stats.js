@@ -32,10 +32,6 @@ function mockGetLocalStats(callCluster, clusterInfo, clusterStats, license, usag
   mockGetXPack(callCluster, license, usage);
 }
 
-function dropTimestamp(localStats) {
-  return omit(localStats, 'timestamp');
-}
-
 describe('get_local_stats', () => {
   const clusterUuid = 'abc123';
   const clusterName = 'my-cool-cluster';
@@ -59,8 +55,7 @@ describe('get_local_stats', () => {
   const kibana = {
     kibana: {
       great: 'googlymoogly',
-      versions: [{ version: '8675309', count: 1 }],
-      plugins: {}
+      versions: [{ version: '8675309', count: 1 }]
     },
     kibana_stats: {
       os: {
@@ -73,6 +68,7 @@ describe('get_local_stats', () => {
     rain: { chances: 2 },
     snow: { chances: 0 },
   };
+
   const localStats = {
     collection: 'local',
     cluster_uuid: clusterUuid,
@@ -105,18 +101,18 @@ describe('get_local_stats', () => {
 
   describe('handleLocalStats', () => {
     it('returns expected object without xpack and kibana data', () => {
-      const result = handleLocalStats(clusterInfo, clusterStats);
+      const result = handleLocalStats(getMockServer(), clusterInfo, clusterStats);
       expect(result.cluster_uuid).to.eql(localStats.cluster_uuid);
       expect(result.cluster_name).to.eql(localStats.cluster_name);
       expect(result.cluster_stats).to.eql(localStats.cluster_stats);
       expect(result.version).to.be('2.3.4');
       expect(result.collection).to.be('local');
       expect(result.license).to.be(undefined);
-      expect(result.stack_stats).to.be(undefined);
+      expect(result.stack_stats).to.eql({ kibana: undefined, xpack: undefined });
     });
 
     it('returns expected object with xpack', () => {
-      const result = dropTimestamp(handleLocalStats(clusterInfo, clusterStats, license, xpack));
+      const result = handleLocalStats(getMockServer(), clusterInfo, clusterStats, license, xpack);
       const { stack_stats: stack, ...cluster } = result;
       expect(cluster.collection).to.be(localStats.collection);
       expect(cluster.cluster_uuid).to.be(localStats.cluster_uuid);
@@ -156,11 +152,9 @@ describe('get_local_stats', () => {
       // license and xpack usage info come from the same cluster call
       expect(result.license).to.be(undefined);
       expect(result.stack_stats.xpack).to.be(undefined);
-
-      expect(result.stack_stats.kibana).to.be.an('object');
     });
 
-    it('returns expected object with xpack data', async () => {
+    it('returns expected object with xpack and kibana data', async () => {
       const callCluster = sinon.stub();
 
       mockGetLocalStats(
