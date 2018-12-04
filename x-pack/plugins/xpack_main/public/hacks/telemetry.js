@@ -92,13 +92,7 @@ export class Telemetry {
    * Public method
    */
   start() {
-    const checkAndSend = () => {
-      // check immediately
-      this._sendIfDue();
-      // check again every 1 minute
-      window.setTimeout(() => checkAndSend(), 60000);
-    };
-    checkAndSend();
+    window.setInterval(() => this._sendIfDue(), 60000);
   }
 
 } // end class
