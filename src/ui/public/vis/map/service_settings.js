@@ -57,6 +57,8 @@ uiModules.get('kibana')
 
     class ServiceSettings {
 
+      EMS_LOAD_TIMEOUT = 8000;
+
       constructor() {
         this._queryParams = {
           my_app_version: kbnVersion
@@ -74,7 +76,7 @@ uiModules.get('kibana')
         this._loadCatalogue = _.once(async () => {
 
           if (!mapConfig.includeElasticMapsService) {
-            return { services: [] };
+            return [];
           }
 
           try {
@@ -93,15 +95,15 @@ uiModules.get('kibana')
 
 
         this._loadFileLayers = _.once(async () => {
-          const catalogue = await this._loadCatalogue();
+          const services = await this._loadCatalogue();
 
-          const fileService = catalogue.services.find(service => service.type === 'file');
+          const fileService = services.find(service => service.type === 'file');
           if (!fileService) {
             return [];
           }
 
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
-          const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
+          const layers = manifest.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
           layers.forEach((layer) => {
             layer.attribution = $sanitize(markdownIt.render(layer.attribution));
           });
@@ -110,15 +112,15 @@ uiModules.get('kibana')
 
         this._loadTMSServices = _.once(async () => {
 
-          const catalogue = await this._loadCatalogue();
-          const tmsService = catalogue.services.find(service =>
+          const services = await this._loadCatalogue();
+          const tmsService = services.find(service =>
             service.type === 'tms');
           if (!tmsService) {
             return [];
           }
           const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
           const preppedTMSServices = tmsManifest
-            ? tmsManifest.services.map((tmsService) => {
+            ? tmsManifest.map((tmsService) => {
               const preppedService = _.cloneDeep(tmsService);
               preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
               preppedService.subdomains = preppedService.subdomains || [];
@@ -145,8 +147,8 @@ uiModules.get('kibana')
         return $http({
           url: extendUrl(manifestUrl, { query: this._queryParams }),
           method: 'GET',
-          timeout: 4000
-        }).then(resp => resp.data)
+          timeout: this.EMS_LOAD_TIMEOUT
+        }).then(({ data }) => data.services)
           .catch(resp => {
             toastNotifications.addDanger({
               title: 'EMS unavailable',
