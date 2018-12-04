@@ -7,3 +7,4 @@
 export { ActiveBadge } from './active_badge';
 export { LearnMoreLink } from './learn_more_link';
 export { PhaseErrorMessage } from './phase_error_message';
+export { OptionalLabel } from './optional_label';

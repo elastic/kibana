@@ -21,6 +21,7 @@ import {
   PHASE_SHRINK_ENABLED,
   PHASE_FORCE_MERGE_ENABLED,
   PHASE_FORCE_MERGE_SEGMENTS,
+  PHASE_REPLICA_COUNT,
   WARM_PHASE_ON_ROLLOVER
 } from '../constants';
 import {
@@ -58,6 +59,10 @@ export const validatePhase = (type, phase, errors) => {
       }
       // If forcemerge is disabled, there is no need to validate this
       if (numberedAttribute === PHASE_FORCE_MERGE_SEGMENTS && !phase[PHASE_FORCE_MERGE_ENABLED]) {
+        continue;
+      }
+      // PHASE_REPLICA_COUNT is optional
+      if (numberedAttribute === PHASE_REPLICA_COUNT && !phase[numberedAttribute]) {
         continue;
       }
       if (!isNumber(phase[numberedAttribute])) {

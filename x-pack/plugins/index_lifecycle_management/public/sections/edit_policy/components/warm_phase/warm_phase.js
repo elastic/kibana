@@ -34,7 +34,7 @@ import {
 } from '../../../../store/constants';
 import { NodeAllocation } from '../node_allocation';
 import { ErrableFormRow } from '../../form_errors';
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../components';
+import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { MinAgeInput } from '../min_age_input';
 class WarmPhaseUi extends PureComponent {
   static propTypes = {
@@ -180,10 +180,15 @@ class WarmPhaseUi extends PureComponent {
                     <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                       <ErrableFormRow
                         id={`${PHASE_WARM}.${PHASE_REPLICA_COUNT}`}
-                        label={intl.formatMessage({
-                          id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel',
-                          defaultMessage: 'Number of replicas',
-                        })}
+                        label={
+                          <Fragment>
+                            <FormattedMessage
+                              id="xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel"
+                              defaultMessage="Number of replicas"
+                            />
+                            <OptionalLabel />
+                          </Fragment>
+                        }
                         errorKey={PHASE_REPLICA_COUNT}
                         isShowingErrors={isShowingErrors}
                         errors={errors}

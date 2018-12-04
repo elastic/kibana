@@ -29,7 +29,7 @@ import {
 } from '../../../../store/constants';
 import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
-import { ActiveBadge, PhaseErrorMessage } from '../../../components';
+import { ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { NodeAllocation } from '../node_allocation';
 
 class ColdPhaseUi extends PureComponent {
@@ -58,7 +58,6 @@ class ColdPhaseUi extends PureComponent {
       warmPhaseReplicaCount,
       errors,
       isShowingErrors,
-      intl,
     } = this.props;
 
     return (
@@ -141,10 +140,15 @@ class ColdPhaseUi extends PureComponent {
                 <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                   <ErrableFormRow
                     id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
-                    label={intl.formatMessage({
-                      id: 'xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel',
-                      defaultMessage: 'Number of replicas',
-                    })}
+                    label={
+                      <Fragment>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel"
+                          defaultMessage="Number of replicas"
+                        />
+                        <OptionalLabel />
+                      </Fragment>
+                    }
                     errorKey={PHASE_REPLICA_COUNT}
                     isShowingErrors={isShowingErrors}
                     errors={errors}
