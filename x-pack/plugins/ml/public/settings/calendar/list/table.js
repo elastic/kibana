@@ -51,6 +51,7 @@ function renderToolsRight() {
 export function CalendarsListTable({
   calendarsList,
   onDeleteClick,
+  loading,
 }) {
 
   const sorting = {
@@ -112,6 +113,7 @@ export function CalendarsListTable({
         search={search}
         pagination={pagination}
         sorting={sorting}
+        loading={loading}
       />
     </React.Fragment>
   );
@@ -120,4 +122,5 @@ export function CalendarsListTable({
 CalendarsListTable.propTypes = {
   calendarsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired
 };

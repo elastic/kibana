@@ -20,8 +20,8 @@ import {
 
 import { CalendarsListTable } from './table';
 import { ml } from '../../../services/ml_api_service';
+import { toastNotifications } from 'ui/notify';
 
-// TODO: add error handling for calendars load
 export class CalendarsList extends Component {
   constructor(props) {
     super(props);
@@ -33,18 +33,20 @@ export class CalendarsList extends Component {
     };
   }
 
-  loadCalendars = () => {
-    ml.calendars()
-      .then((resp) => {
-        this.setState({
-          calendars: resp,
-          loading: false,
-          isDestroyModalVisible: false,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
+  loadCalendars = async () => {
+    try {
+      const calendars = await ml.calendars();
+
+      this.setState({
+        calendars,
+        loading: false,
+        isDestroyModalVisible: false,
       });
+    } catch (error) {
+      console.log(error);
+      this.setState({ loading: false });
+      toastNotifications.addDanger('An error occurred loading calendar list.');
+    }
   }
 
   closeDestroyModal = () => {
@@ -55,18 +57,17 @@ export class CalendarsList extends Component {
     this.setState({ isDestroyModalVisible: true, calendarId });
   }
 
-  // TODO: handle error of calendar delete - toast with message
-  deleteCalendar = () => {
+  deleteCalendar = async () => {
     const { calendarId } = this.state;
 
-    ml.deleteCalendar({ calendarId })
-      .then(() => {
-        this.loadCalendars();
-      })
-      .catch((error) => {
-        this.closeDestroyModal();
-        console.log(error);
-      });
+    try {
+      await ml.deleteCalendar({ calendarId });
+      this.loadCalendars();
+    } catch (error) {
+      console.log(error);
+      this.closeDestroyModal();
+      toastNotifications.addDanger(`An error occurred deleting calendar: ${calendarId}`);
+    }
   }
 
   // TODO: check if events and job_ids always array
@@ -85,7 +86,7 @@ export class CalendarsList extends Component {
   }
 
   render() {
-    const { calendars, calendarId } = this.state;
+    const { calendars, calendarId, loading } = this.state;
     let destroyModal = '';
 
     if (this.state.isDestroyModalVisible) {
@@ -114,6 +115,7 @@ export class CalendarsList extends Component {
           horizontalPosition="center"
         >
           <CalendarsListTable
+            loading={loading}
             calendarsList={this.addRequiredFieldsToList(calendars)}
             onDeleteClick={this.showDestroyModal}
           />

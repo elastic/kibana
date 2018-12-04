@@ -23,6 +23,7 @@ import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { ml } from 'plugins/ml/services/ml_api_service';
+import { toastNotifications } from 'ui/notify';
 // import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 
 export class NewCalendar extends Component {
@@ -51,88 +52,89 @@ export class NewCalendar extends Component {
     this.formSetup();
   }
 
-  // TODO: add some error handling - toast on error with try again message
-  formSetup() {
-    getCalendarSettingsData()
-      .then(({ jobIds, groupIds, calendars }) => {
-        const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
-        const groupIdOptions = groupIds.map((groupId) => ({ label: groupId }));
+  async formSetup() {
+    try {
+      const { jobIds, groupIds, calendars } = await getCalendarSettingsData();
 
-        let selectedCalendar;
-        let formCalendarId = '';
-        const selectedJobOptions = [];
-        const selectedGroupOptions = [];
-        let eventsList = [];
-        // Better to build a map with calendar id as keys for constant lookup time?
-        if (this.props.calendarId !== undefined) {
-          selectedCalendar = calendars.find((cal) => cal.calendar_id === this.props.calendarId);
+      const jobIdOptions = jobIds.map((jobId) => ({ label: jobId }));
+      const groupIdOptions = groupIds.map((groupId) => ({ label: groupId }));
 
-          if (selectedCalendar) {
-            formCalendarId = selectedCalendar.calendar_id;
-            eventsList = selectedCalendar.events;
-            selectedCalendar.job_ids.forEach(id => {
-              if (jobIds.find((jobId) => jobId === id)) {
-                selectedJobOptions.push({ label: id });
-              } else if (groupIds.find((groupId) => groupId === id)) {
-                selectedGroupOptions.push({ label: id });
-              }
-            });
-          }
+      const selectedJobOptions = [];
+      const selectedGroupOptions = [];
+      let eventsList = [];
+      let selectedCalendar;
+      let formCalendarId = '';
+
+      // Editing existing calendar.
+      if (this.props.calendarId !== undefined) {
+        selectedCalendar = calendars.find((cal) => cal.calendar_id === this.props.calendarId);
+
+        if (selectedCalendar) {
+          formCalendarId = selectedCalendar.calendar_id;
+          eventsList = selectedCalendar.events;
+
+          selectedCalendar.job_ids.forEach(id => {
+            if (jobIds.find((jobId) => jobId === id)) {
+              selectedJobOptions.push({ label: id });
+            } else if (groupIds.find((groupId) => groupId === id)) {
+              selectedGroupOptions.push({ label: id });
+            }
+          });
         }
+      }
 
-        this.setState({
-          events: eventsList,
-          formCalendarId,
-          jobIds,
-          jobIdOptions,
-          groupIds,
-          groupIdOptions,
-          calendars,
-          loading: false,
-          selectedJobOptions,
-          selectedGroupOptions,
-          selectedCalendar
-        });
-      })
-      .catch((err) => {
-        console.log(err);
-        this.setState({ loading: false });
+      this.setState({
+        events: eventsList,
+        formCalendarId,
+        jobIds,
+        jobIdOptions,
+        groupIds,
+        groupIdOptions,
+        calendars,
+        loading: false,
+        selectedJobOptions,
+        selectedGroupOptions,
+        selectedCalendar
       });
+    } catch (error) {
+      console.log(error);
+      this.setState({ loading: false });
+      toastNotifications.addDanger('An error occurred loading calendar form data. Try refreshing the page.');
+    }
   }
 
-  // Validate and save - NOTE: can we validate calendar id with just the form on the front-end?
-  // TODO: add error handling - toast to show some try again message
-  onCreate = () => {
+  // TODO: Validate and save - NOTE: can we validate calendar id with just the form on the front-end?
+  onCreate = async () => {
     const calendar = this.setUpCalendarForApi();
 
     if (validateCalendarId(calendar.calendarId, { calendarId: { valid: true } })) {
       this.setState({ saving: true });
 
-      ml.addCalendar(calendar)
-        .then(() => {
-          window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
-        })
-        .catch((error) => {
-          console.log('Error saving calendar', error);
-          this.setState({ saving: false });
-        });
+      try {
+        await ml.addCalendar(calendar);
+        window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+      } catch (error) {
+        console.log('Error saving calendar', error);
+        this.setState({ saving: false });
+        toastNotifications.addDanger(`An error occurred creating calendar: ${calendar.calendarId}`);
+      }
     } else {
       // Trigger validation error message for form
     }
   }
 
-  // TODO: add error handling - toast to show some try again message
-  onEdit = () => {
+  onEdit = async () => {
     const calendar = this.setUpCalendarForApi();
     this.setState({ saving: true });
-    ml.updateCalendar(calendar)
-      .then(() => {
-        window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
-      })
-      .catch((error) => {
-        console.log('Error saving calendar', error);
-        this.setState({ saving: false });
-      });
+
+    try {
+      await ml.updateCalendar(calendar);
+      window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+    } catch (error) {
+      console.log('Error saving calendar', error);
+      this.setState({ saving: false });
+      toastNotifications.addDanger(`An error occurred saving calendar: ${calendar.calendarId}. Try refreshing the page.`);
+    }
   }
 
   setUpCalendarForApi = () => {
@@ -146,15 +148,6 @@ export class NewCalendar extends Component {
 
     const jobIds = selectedJobOptions.map((option) => option.label);
     const groupIds = selectedGroupOptions.map((option) => option.label);
-
-    // set up event
-    // const events = events.map((event) => {
-    //   return {
-    //     description: event.description,
-    //     start_time: event.start_time,
-    //     end_time: event.end_time
-    //   };
-    // });
 
     // set up calendar
     const calendar = {
