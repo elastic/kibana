@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { getDefaultWorkpad } from '../../state/defaults';
@@ -13,6 +14,20 @@ import { gotoPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { setCanUserWrite } from '../../state/actions/transient';
 import { WorkpadApp } from './workpad_app';
+
+function setBreadcrumb(workpadName) {
+  // always allow navigation to the home page
+  const base = [
+    {
+      text: 'Canvas',
+      href: '#/',
+    },
+  ];
+
+  if (workpadName != null) base.push({ text: workpadName });
+
+  chrome.breadcrumbs.set(base);
+}
 
 export const routes = [
   {
@@ -77,6 +92,9 @@ export const routes = [
           // set the active page using the number provided in the url
           const pageIndex = pageNumber - 1;
           if (pageIndex !== workpad.page) dispatch(gotoPage(pageIndex));
+
+          // update the application's breadcrumb
+          setBreadcrumb(workpad.name);
         },
         meta: {
           component: WorkpadApp,
