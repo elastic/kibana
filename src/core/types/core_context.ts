@@ -17,19 +17,16 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
-import { LegacyService } from './legacy_service';
+import { ConfigService, Env } from '../server/config';
+import { LoggerFactory } from '../server/logging';
 
-/** @internal */
-export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
-/** @internal */
-export { LegacyService } from './legacy_service';
-
-/** @internal */
-export class LegacyCompatModule {
-  public readonly service: LegacyService;
-
-  constructor(coreContext: CoreContext) {
-    this.service = new LegacyService(coreContext);
-  }
+/**
+ * Groups all main Kibana's core modules/systems/services that are consumed in a
+ * variety of places within the core itself.
+ * @internal
+ */
+export interface CoreContext {
+  env: Env;
+  configService: ConfigService;
+  logger: LoggerFactory;
 }
