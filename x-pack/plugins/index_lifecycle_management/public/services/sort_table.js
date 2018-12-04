@@ -10,8 +10,11 @@ const stringSort = (fieldName) => (item) => item[fieldName];
 const arraySort = (fieldName) => (item) => (item[fieldName] || []).length;
 
 const sorters = {
+  version: stringSort('version'),
   name: stringSort('name'),
   coveredIndices: arraySort('coveredIndices'),
+  modified_date: stringSort('modified_date')
+
 };
 export const sortTable = (array = [], sortField, isSortAscending) => {
   const sorted = sortBy(array, sorters[sortField]);
