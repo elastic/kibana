@@ -62,7 +62,7 @@ module.exports = {
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
-        'packages/kbn-datemath/**/*.js',
+        'packages/elastic-datemath/**/*',
         'packages/kbn-dev-utils/**/*',
         'packages/kbn-i18n/**/*',
         'packages/kbn-plugin-generator/**/*',
