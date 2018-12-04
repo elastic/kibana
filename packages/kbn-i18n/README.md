@@ -13,32 +13,7 @@ message syntax.
 
 ## Localization files
 
-Localization files have JSON format but they also support [JSON5](https://github.com/json5/json5) format.
-
-The main benefits of using `JSON5`:
-
-- Objects may have a single trailing comma.
-- Single and multi-line comments are allowed.
-- Strings may span multiple lines by escaping new line characters.
-
-Short example:
-
-```js
-{
-  // comments
-  unquoted: 'and you can quote me on that',
-  singleQuotes: 'I can use "double quotes" here',
-  lineBreaks: "Wow! \
-No \\n's!",
-  hexadecimal: 0xdecaf,
-  leadingDecimalPoint: .8675309, andTrailing: 8675309.,
-  positiveSign: +1,
-  trailingComma: 'in objects', andIn: ['arrays',],
-  "backwardsCompatible": "with JSON",
-}
-```
-
-*Currently we don't use JSON5, because vendors' software requires standard JSON.*
+Localization files are JSON files.
 
 Using comments can help to understand which section of the application
 the localization key is used for. Also `namespaces`
@@ -456,8 +431,8 @@ In order to translate attributes in AngularJS we should use `i18nFilter`:
 
 ## I18n tools
 
-In order to simplify localization process, some build tools were implemented:
+In order to simplify localization process, some additional tools were implemented:
 - tool for verifying all translations have translatable strings and extracting default messages from templates
-- tool for verifying locale files and integrating them to Kibana
+- tool for verifying translation files and integrating them to Kibana
 
 [I18n tools documentation](../../src/dev/i18n/README.md)
