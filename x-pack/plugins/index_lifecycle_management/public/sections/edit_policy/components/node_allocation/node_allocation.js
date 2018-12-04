@@ -50,7 +50,12 @@ class NodeAllocationUi extends Component {
       errors
     } = this.props;
     if (!nodeOptions) {
-      return <EuiLoadingSpinner size="s" />;
+      return (
+        <Fragment>
+          <EuiLoadingSpinner size="xl" />
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
     }
     if (!nodeOptions.length) {
       return (
