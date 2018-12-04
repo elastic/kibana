@@ -48,6 +48,7 @@ function merge(target: Record<string, any>, value: any, key?: string) {
   return target;
 }
 
+/** @internal */
 export const getConfigFromFiles = (configFiles: ReadonlyArray<string>) => {
   let mergedYaml = {};
 

@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
-import { LegacyService } from './legacy_service';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 /** @internal */
-export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
-/** @internal */
-export { LegacyService } from './legacy_service';
+export class TestBedConfig {
+  public static schema = schema.object({
+    secret: schema.string({ defaultValue: 'Not really a secret :/' }),
+  });
 
-/** @internal */
-export class LegacyCompatModule {
-  public readonly service: LegacyService;
+  public readonly secret: string;
 
-  constructor(coreContext: CoreContext) {
-    this.service = new LegacyService(coreContext);
+  constructor(config: TypeOf<typeof TestBedConfig['schema']>) {
+    this.secret = config.secret;
   }
 }
