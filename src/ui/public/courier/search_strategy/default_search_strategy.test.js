@@ -50,6 +50,11 @@ describe('defaultSearchStrategy', function () {
       expect(searchArgs.es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(42);
     });
 
+    test('should set rest_total_hits_as_int to true on a request', async () => {
+      await search(searchArgs);
+      expect(searchArgs.es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
+    });
+
   });
 
 });

@@ -16,6 +16,11 @@ import {
   IHistoryTab
 } from '..';
 
+type PropsOf<Component> = Component extends React.SFC<infer Props>
+  ? Props
+  : never;
+type EuiTabProps = PropsOf<typeof EuiTab>;
+
 describe('HistoryTabs', () => {
   let mockLocation: any;
   let mockHistory: any;
@@ -62,7 +67,7 @@ describe('HistoryTabs', () => {
     const wrapper = shallow(<HistoryTabsWithoutRouter {...testProps} />);
     expect(wrapper).toMatchSnapshot();
 
-    const tabs: ShallowWrapper<EuiTab> = wrapper.find(EuiTab);
+    const tabs: ShallowWrapper<EuiTabProps> = wrapper.find(EuiTab);
     expect(tabs.at(0).props().isSelected).toEqual(false);
     expect(tabs.at(1).props().isSelected).toEqual(true);
     expect(tabs.at(2).props().isSelected).toEqual(false);
@@ -82,7 +87,7 @@ describe('HistoryTabs', () => {
       .at(2)
       .simulate('click');
 
-    const tabs: ReactWrapper<EuiTab> = wrapper.find(EuiTab);
+    const tabs: ReactWrapper<EuiTabProps> = wrapper.find(EuiTab);
     expect(tabs.at(0).props().isSelected).toEqual(false);
     expect(tabs.at(1).props().isSelected).toEqual(false);
     expect(tabs.at(2).props().isSelected).toEqual(true);
