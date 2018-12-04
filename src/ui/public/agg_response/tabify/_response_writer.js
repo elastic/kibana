@@ -31,7 +31,7 @@ import { tabifyGetColumns } from './_get_columns';
  * @param {Object} timeRange - time range object, if provided
  */
 function TabbedAggResponseWriter(aggs, {
-  isHierarchical = false,
+  isHierarchical = false, // eslint-disable-line no-unused-vars
   columnsForAllBuckets,
   partialRows = false,
   timeRange
