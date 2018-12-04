@@ -72,7 +72,6 @@ describe('service_settings (FKA tilemaptest)', function () {
 
   afterEach(function () {
     getManifestStub.removeStub();
-    // serviceSettings._getManifest.restore();
     mapConfig.manifestServiceUrl = manifestServiceUrlOriginal;
     tilemapsConfig.deprecated = tilemapsConfigDeprecatedOriginal;
   });
