@@ -37,7 +37,7 @@ export const WAIT_FOR_EXISTS_TIME = 2500;
 export async function FindProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
-  const { driver, until, By } = await getService('webDriver').init();
+  const { driver, until, By } = await getService('__webdriver__').init();
   const retry = getService('retry');
 
   const defaultFindTimeout = config.get('timeouts.find');

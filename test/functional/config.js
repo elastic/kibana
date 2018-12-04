@@ -96,7 +96,7 @@ export default async function ({ readConfigFile }) {
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
       retry: commonConfig.get('services.retry'),
-      webDriver: RemoteProvider,
+      __webdriver__: RemoteProvider,
       filterBar: FilterBarProvider,
       queryBar: QueryBarProvider,
       find: FindProvider,

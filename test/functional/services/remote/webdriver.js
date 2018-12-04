@@ -30,7 +30,7 @@ const MINUTE = 60 * SECOND;
 let attemptCounter = 0;
 async function attemptToCreateCommand(log, driverApi) {
   const attemptId = ++attemptCounter;
-  log.debug('[webDriver] Creating session');
+  log.debug('[webdriver] Creating session');
 
   const buildDriverInstance = async (browserType) => {
     switch (browserType) {
@@ -68,7 +68,7 @@ async function attemptToCreateCommand(log, driverApi) {
 
   if (attemptId !== attemptCounter) return; // abort
 
-  log.debug('[webDriver] Registering session for teardown');
+  log.debug('[webdriver] Registering session for teardown');
   driverApi.beforeStop(async () => await session.quit());
   if (attemptId !== attemptCounter) return; // abort
 
