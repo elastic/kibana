@@ -96,16 +96,18 @@ class NodeAllocationUi extends Component {
           }}
         />
         <EuiSpacer size="s" />
-        <EuiButtonEmpty
-          flush="left"
-          iconType="eye"
-          onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
-        >
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
-            defaultMessage="View a list of nodes attached to this configuration"
-          />
-        </EuiButtonEmpty>
+        {!!phaseData[PHASE_NODE_ATTRS] ? (
+          <EuiButtonEmpty
+            flush="left"
+            iconType="eye"
+            onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}
+          >
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.editPolicy.viewNodeDetailsButton"
+              defaultMessage="View a list of nodes attached to this configuration"
+            />
+          </EuiButtonEmpty>
+        ) : <div /> }
         {learnMoreLinks}
       </ErrableFormRow>
     );
