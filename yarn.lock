@@ -1356,11 +1356,6 @@
   resolved "https://registry.yarnpkg.com/@types/indent-string/-/indent-string-3.0.0.tgz#9ebb391ceda548926f5819ad16405349641b999f"
   integrity sha1-nrs5HO2lSJJvWBmtFkBTSWQbmZ8=
 
-"@types/inline-style-prefixer@3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/inline-style-prefixer/-/inline-style-prefixer-3.0.1.tgz#8541e636b029124b747952e9a28848286d2b5bf6"
-  integrity sha512-+kbOcYW1/noncDwRryRoB9tH87IYcMfdBGvw98iocK39LtTA2DFL7agmk4UHW/GxjzVfwrxfjlLrqrgA7MCtmg==
-
 "@types/intl-relativeformat@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@types/intl-relativeformat/-/intl-relativeformat-2.1.0.tgz#3a2b0043380388f39c666665ec517e11412f1358"
