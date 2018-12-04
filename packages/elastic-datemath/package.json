@@ -1,9 +1,8 @@
 {
-  "name": "@kbn/datemath",
+  "name": "@elastic/datemath",
   "version": "5.0.0",
   "description": "elasticsearch datemath parser, used in kibana",
   "license": "Apache-2.0",
-  "private": true,
   "main": "target/index.js",
   "typings": "target/index.d.ts",
   "scripts": {
