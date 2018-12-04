@@ -37,6 +37,7 @@ export function CalendarForm({
   onEdit,
   onEventDelete,
   onGroupSelection,
+  showImportModal,
   onJobSelection,
   saving,
   selectedGroupOptions,
@@ -110,7 +111,9 @@ export function CalendarForm({
         <EventsTable
           eventsList={eventsList}
           onDeleteClick={onEventDelete}
+          showImportModal={showImportModal}
           showNewEventModal={showNewEventModal}
+          showSearchBar
         />
       </EuiFormRow>
       <EuiSpacer size="l" />
@@ -150,6 +153,7 @@ CalendarForm.propTypes = {
   onEdit: PropTypes.func.isRequired,
   onEventDelete: PropTypes.func.isRequired,
   onGroupSelection: PropTypes.func.isRequired,
+  showImportModal: PropTypes.func.isRequired,
   onJobSelection: PropTypes.func.isRequired,
   saving: PropTypes.bool.isRequired,
   selectedGroupOptions: PropTypes.array.isRequired,

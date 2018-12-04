@@ -21,6 +21,7 @@ import chrome from 'ui/chrome';
 import { getCalendarSettingsData, validateCalendarId } from './utils';
 import { CalendarForm } from './calendar_form';
 import { NewEventModal } from './new_event_modal';
+import { ImportModal } from './import_modal';
 import { ml } from 'plugins/ml/services/ml_api_service';
 // import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 
@@ -29,6 +30,7 @@ export class NewCalendar extends Component {
     super(props);
     this.state = {
       isNewEventModalVisible: false,
+      isImportModalVisible: false,
       loading: true,
       jobIds: [],
       jobIdOptions: [],
@@ -199,6 +201,18 @@ export class NewCalendar extends Component {
     });
   };
 
+  showImportModal = () => {
+    this.setState(prevState => ({
+      isImportModalVisible: !prevState.isImportModalVisible,
+    }));
+  }
+
+  closeImportModal = () => {
+    this.setState({
+      isImportModalVisible: false,
+    });
+  }
+
   onEventDelete = (eventId) => {
     this.setState(prevState => ({
       events: prevState.events.filter(event => event.event_id !== eventId)
@@ -220,10 +234,18 @@ export class NewCalendar extends Component {
     }));
   }
 
+  addImportedEvents = (events) => {
+    this.setState(prevState => ({
+      events: [...prevState.events, ...events],
+      isImportModalVisible: false
+    }));
+  }
+
   render() {
     const {
       events,
       isNewEventModalVisible,
+      isImportModalVisible,
       formCalendarId,
       description,
       groupIdOptions,
@@ -234,14 +256,23 @@ export class NewCalendar extends Component {
       selectedGroupOptions
     } = this.state;
 
-    let newEventModal = '';
+    let modal = '';
 
     if (isNewEventModalVisible) {
-      newEventModal = (
+      modal = (
         <EuiOverlayMask>
           <NewEventModal
             addEvent={this.addEvent}
             closeModal={this.closeNewEventModal}
+          />
+        </EuiOverlayMask>
+      );
+    } else if (isImportModalVisible) {
+      modal = (
+        <EuiOverlayMask>
+          <ImportModal
+            addImportedEvents={this.addImportedEvents}
+            closeImportModal={this.closeImportModal}
           />
         </EuiOverlayMask>
       );
@@ -267,6 +298,7 @@ export class NewCalendar extends Component {
             onEdit={this.onEdit}
             onEventDelete={this.onEventDelete}
             onGroupSelection={this.onGroupSelection}
+            showImportModal={this.showImportModal}
             onJobSelection={this.onJobSelection}
             saving={saving}
             selectedGroupOptions={selectedGroupOptions}
@@ -275,7 +307,7 @@ export class NewCalendar extends Component {
             showNewEventModal={this.showNewEventModal}
           />
         </EuiPageContent>
-        {newEventModal}
+        {modal}
       </EuiPage>
     );
   }

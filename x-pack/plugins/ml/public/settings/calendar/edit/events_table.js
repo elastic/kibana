@@ -36,6 +36,8 @@ function DeleteButton({ onClick }) {
 export function EventsTable({
   eventsList,
   onDeleteClick,
+  showSearchBar,
+  showImportModal,
   showNewEventModal
 }) {
   const sorting = {
@@ -46,7 +48,7 @@ export function EventsTable({
   };
 
   const pagination = {
-    initialPageSize: 10,
+    initialPageSize: 5,
     pageSizeOptions: [5, 10]
   };
 
@@ -101,7 +103,7 @@ export function EventsTable({
         key="ml_import_event"
         size="s"
         iconType="importAction"
-        onClick={() => { }}
+        onClick={showImportModal}
       >
         Import events
       </EuiButton>
@@ -121,7 +123,7 @@ export function EventsTable({
         columns={columns}
         pagination={pagination}
         sorting={sorting}
-        search={search}
+        search={showSearchBar ? search : undefined}
       />
     </Fragment>
   );
@@ -130,5 +132,13 @@ export function EventsTable({
 EventsTable.propTypes = {
   eventsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
-  showNewEventModal: PropTypes.func.isRequired
+  showImportModal: PropTypes.func,
+  showNewEventModal: PropTypes.func,
+  showSearchBar: PropTypes.bool,
+};
+
+EventsTable.defaultProps = {
+  // showImportModal: PropTypes.func,
+  // showNewEventModal: PropTypes.func,
+  showSearchBar: false,
 };
