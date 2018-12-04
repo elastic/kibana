@@ -65,12 +65,12 @@ import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
-import { createPhraseFilter } from '../../../../../ui/public/filter_bar/filters/phrase_filter';
+import { createPhraseFilter } from '../../../../../../ui/public/filter_bar/filters/phrase_filter';
 import {
   createMetaFilter, enable, disable, pin, unpin,
   toggleDisabled,
   toggleNegation, togglePinned,
-} from '../../../../../ui/public/filter_bar/filters/meta_filter';
+} from '../../../../../../ui/public/filter_bar/filters/meta_filter';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
