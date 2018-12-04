@@ -23,8 +23,8 @@ let Alerts = {
 };
 
 const elasticsearch = {
-  query(context: any) {
-    return context;
+  query(context: any, params: any) {
+    return context + params;
   },
 };
 
@@ -55,7 +55,7 @@ Alerts.register({
   uiHints: {
     short_message: 'Cpu usage is {value} which is over the threshold {threshold}',
   },
-  run({ actions, state, params }) {
+  run(actions: any, state: any, params: any) {
     const results = elasticsearch.query(params.index, state.scroll_id);
 
     if (results.cpu_usage > params.threshold) {
@@ -74,8 +74,8 @@ Alerts.register({
 // client-side
 Alerts.registerUI({
   register_id: 'cpu_threshold_alert',
-  render({ dom, props, done }) {
-    return arguments;
+  render(dom: any, props: any, done: any) {
+    return dom + props + done;
   },
 });
 
@@ -184,8 +184,7 @@ Alerts.register({
     },
     action: { type: 'action:notification', required: false, name: 'Notification action' },
   },
-  execute(ctx, params) {
-    const params = ctx.params;
+  execute(ctx: any, params: any) {
     const r = ctx.helper.render;
 
     ctx.log.info(r('Running search request for { ctx.meta.task_id }'), params.search);
