@@ -323,8 +323,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it ('correctly applies filter', async () => {
-        const expectedTableData = [[ 'win 8', '560', 'CN', '560' ]];
-        await PageObjects.visualize.filterLegend('CN');
+        const expectedTableData = [[ 'win 8', '100', 'ID', '100' ]];
+        await PageObjects.visualize.filterPieSlice('ID');
         await PageObjects.visualize.applyFilters();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.openInspector();
