@@ -56,7 +56,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The sum of all numbers in `args` if `args` 

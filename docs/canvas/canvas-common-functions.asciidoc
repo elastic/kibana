@@ -1,11 +1,11 @@
 [[canvas-common-functions]]
 === Canvas common functions
 
-beta[]The common functions can run anywhere, 
-which means they'll execute wherever the expression is currently executing. For example,
-if the engine is currently running on the server, the functions will run on the server.
+beta[]The common functions can run anywhere, which means they'll execute wherever 
+the expression is currently executing. For example, if the engine is currently 
+running on the server, the functions will run on the server.
 
-*A * denotes a required argument.*
+A *** denotes a required argument.
 
 
 [float]
@@ -13,11 +13,20 @@ if the engine is currently running on the server, the functions will run on the 
 
 Returns true if all of the conditions are true.
 
-- *Accepts:* Anything or nothing
-- *Returns:* boolean
-- *Arguments*
-+
-_Unnamed_*::  (boolean) The conditions to check.
+*Accepts:* Anything or nothing
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_*
+<|boolean
+<|The conditions to check
+|===
+
+*Returns:* boolean
 
 
 [float]
@@ -26,27 +35,49 @@ _Unnamed_*::  (boolean) The conditions to check.
 Converts between core types, for example, string, number, null, boolean, date 
 and rename columns.
 
--  *Accepts:* datatable
--  *Returns:* datatable
--  *Arguments*
-+
-column*:: (string) The name of the column to alter.
-+
-type:: (string) The type to convert the column to. Leave blank to not change type. 
-The default is `null`.
-+
-name:: (string) The resultant column name. Leave blank to not rename. The default is `null`.
+*Accepts:* datatable
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|column
+<|string
+<|The name of the column to alter
+
+<|type
+<|string
+<|The type to convert the column to; leave blank to not change type (default: `null`)
+
+<|name
+<|string
+<|The resultant column name; leave blank to not rename (default: `null`)
+|===
+
+*Returns:* datatable
+
 
 [float]
 === any
 
 Returns true if any of the conditions are true.
 
-- *Accepts:* Anything or nothing
-- *Returns:* boolean
-- *Arguments*
-+
-_Unnamed_*::  (boolean) The conditions to check.
+*Accepts:* Anything or nothing
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_*
+<|boolean
+<|The conditions to check
+|===
+
+*Returns:* boolean
 
 
 [float]
@@ -54,12 +85,20 @@ _Unnamed_*::  (boolean) The conditions to check.
 
 Creates a datatable with a single value.
 
--  *Accepts:* string, boolean, number, null
-- *Returns:* datatable
-- *Arguments*
-+
-_Unnamed_*::  (string) A name to give the column. The default is `value`.
-Alias: name
+*Accepts:* string, boolean, number, null
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_* (Alias: `name`)
+<|string
+<|A name to give the column (default: `value`)
+|===
+
+*Returns:* datatable
 
 
 [float]
@@ -67,39 +106,64 @@ Alias: name
 
 Configures axis of a visualization.
 
-- *Accepts:* datatable
-- *Returns:* axisConfig
-- *Arguments*
-+
-show:: (boolean) The default is `true.`
- +
-position:: (string) The position of the axis labels, for example, top, bottom, left, and right.
+*Accepts:* datatable
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|show
+<|boolean
+<|default: `true`
+
+<|position
+<|string
+<|The position of the axis labels, for example, top, bottom, left, and right
+|===
+
+*Returns:* axisConfig
+
 
 [float]
 === case
 
 Builds a case (including a condition/result) to pass to the switch function.
 
-- *Accepts:* Anything or nothing
-- *Returns:* case
-- *Arguments*
-+
-_Unnamed_::	 (any) This value is compared to the context to see if the condition 
+*Accepts:* Anything or nothing
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_
+<|any
+<|This value is compared to the context to see if the condition 
 is met. It is overridden by the "if" argument if both are provided.
-+
-if*::	(boolean)	This value determines whether or not the condition is met. 
+
+<|if*
+<|boolean
+<|This value determines whether or not the condition is met. 
 It overrides the unnamed argument if both are provided.
-+
-then:: (any) The value to return if the condition is met.
-   
-   
+
+<|then
+<|any
+<|The value to return if the condition is met
+|===
+
+*Returns:* case
+
 [float]
 === clog
 
 Outputs the context to the console.
 
-- *Accepts:* Anything or nothing
-- *Returns:* Depends on your input and arguments
+*Accepts:* Anything or nothing
+
+*Returns:* Depends on your input and arguments
 
 
 [float]
@@ -107,15 +171,25 @@ Outputs the context to the console.
 
 Includes or excludes columns from a data table. If you specify both, this will exclude first.
 
-- *Accepts:* datatable
-- *Returns:* datatable
-- *Arguments*
-+
-include:: (string) A comma separated list of column names to keep in the table. 
-The default is `null.`
-+
-exclude:: (string) A comma separated list of column names to remove from the table.
-The default is `null.`
+*Accepts:* datatable
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|include
+<|string
+<|A comma separated list of column names to keep in the table (default: `null`)
+
+<|exclude
+<|string
+<|A comma separated list of column names to remove from the table (default: `null`)
+|===
+
+*Returns:* datatable
+
    
 [float]
 === compare
@@ -124,16 +198,27 @@ Compares the input to something else to determine true or false.
 Usually used in combination with `if`. This only works with primitive types, 
 such as number, string, and boolean.
 
-- *Accepts:* null, string, number, boolean
-- *Returns:* boolean
-- *Arguments*
-+
-_Unnamed_:: (string) The operator to use in the comparison: 
+*Accepts:* null, string, number, boolean
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_ (Alias: `op`)
+<|string
+<|The operator to use in the comparison: 
 `eq` (equal), `ne` (not equal), `lt` (less than), `gt` (greater than), `lte ``(less than equal), 
-  `gte` (greater than eq). The default is `eq`. Alias: op.
-+ 
-to:: (any) The value to compare the context to, usually returned by a subexpression.  
-Aliases: this, b
+`gte` (greater than eq). The default is `eq`. 
+
+<|to (Aliases: `this`, `b`)
+<|any
+<|The value to compare the context to, usually returned by a subexpression
+|===
+
+*Returns:* boolean
+
 
 [float]
 === containerStyle
@@ -141,25 +226,49 @@ Aliases: this, b
 Creates an object used for describing the properties of a series on a chart. 
 You would usually use this inside of a charting function.
 
-- *Accepts:* null
-- *Returns:* containerStyle
-- *Arguments*
-+
-border::  (string) Valid CSS border string.
-+
-borderRadius::  (string) Number of pixels to use when rounding the border.
-+
-padding::  (string) Content distance in pixels from border.
-+
-backgroundColor::  (string) Valid CSS background color string.
-+
-backgroundImage::  (string) Valid CSS background image string.
-+
-backgroundSize::  (string) Valid CSS background size string. The default is `contain`.
-+
-backgroundRepeat::  (string) Valid CSS background repeat string.  The default is `no-repeat`.
-+
-opacity::  (number) A number between 0 and 1 representing the degree of transparency of the element.
+*Accepts:* null
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|border
+<|string
+<|Valid CSS border string
+
+<|borderRadius
+<|string
+<|Number of pixels to use when rounding the border
+
+<|padding
+<|string
+<|Content distance in pixels from border
+
+<|backgroundColor
+<|string
+<|Valid CSS background color string
+
+<|backgroundImage
+<|string
+<|Valid CSS background image string
+
+<|backgroundSize
+<|string
+<|Valid CSS background size string (default: `contain`)
+
+<|backgroundRepeat
+<|string
+<|Valid CSS background repeat string (default: `no-repeat`)
+
+<|opacity
+<|number
+<|A number between 0 and 1 representing the degree of transparency of the element
+|===
+
+*Returns:* containerStyle
+
 
 [float]
 === context
@@ -167,39 +276,66 @@ opacity::  (number) A number between 0 and 1 representing the degree of transpar
 Returns whatever you pass into it. This can be useful when you need to use 
 context as argument to a function as a sub-expression.
 
-- *Accepts:* Anything or nothing
-- *Returns:* Depends on your input and arguments
+*Accepts:* Anything or nothing
+
+*Returns:* Depends on your input and arguments
 
 [float]
 === csv
 
 Creates a datatable from CSV input.
 
-- *Accepts:* null
-- *Returns:* containerStyle
-- *Arguments*
-+
-_Unnamed*_::  (string) CSV data to use.
-+
-delimiter*::  (string) Data separation character.
-+
-newline*::  (string) Row separation character.
+*Accepts:* null
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_* 
+<|string
+<|CSV data to use
+
+<|delimiter*
+<|string
+<|Data separation character
+
+<|newLine*
+<|string
+<|Row separation character
+|===
+
+*Returns:* containerStyle
+
 
 [float]
 === date
 
 Returns the current time, or a time parsed from a string, as milliseconds since epoch.
 
-- *Accepts:* null
-- *Returns:* number
-- *Arguments*
-+
-_Unnamed_::  (string) An optional date string to be parsed into milliseconds 
+*Accepts:* null
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_ 
+<|string
+<|An optional date string to be parsed into milliseconds 
 since epoch. Can be either a valid JavaScript Date input or a string to parse 
 using the format argument. Must be an ISO 8601 string or you must provide the format.
-+
-format*::  (string) The Moment.js format for parsing the optional date 
+
+<|format*
+<|string
+<|The Moment.js format for parsing the optional date 
 string. See the https://momentjs.com/docs/#/displaying/[Moment.js documentation].
+|===
+
+*Returns:* number
+
 
 [float]
 === do
@@ -207,125 +343,234 @@ string. See the https://momentjs.com/docs/#/displaying/[Moment.js documentation]
 Runs multiple sub-expressions. Returns the passed in context. Nice for running 
 actions producing functions.
 
-- *Accepts:* Anything or nothing
-- *Returns:* Depends on your input and arguments
-- *Arguments*
-+
-_Unnamed_::  (any) One or more sub-expressions. The value of these is not 
+*Accepts:* Anything or nothing
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_ 
+<|any
+<|One or more sub-expressions. The value of these is not 
 available in the root pipeline as this function simply returns the passed in context.
+|===
+
+*Returns:* Depends on your input and arguments
+
 
 [float]
 === dropdownControl
 
 Configures a dropdown filter control element.
 
-- *Accepts:* datatable
-- *Returns:* render
-- *Arguments*
-+
-filterColumn:: (any) The column or field to which to attach the filter.
-+
-valueColumn:: (any) The datatable column from which to extract the unique values 
-for the dropdown.
+*Accepts:* datatable
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|filterColumn
+<|any
+<|The column or field to which to attach the filter
+
+<|valueColumn
+<|any
+<|The datatable column from which to extract the unique values 
+for the dropdown
+|===
+
+*Returns:* render
+
 
 [float]
 === eq
 
 Returns whether the context is equal to the argument.
 
-- *Accepts:* Anything or nothing
-- *Returns:* boolean
-- *Arguments*
-+
-_Unnamed*_:: (boolean, number, string) The value to which to compare the context.
+*Accepts:* Anything or nothing
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_*
+<|boolean, number, string
+<|The value to which to compare the context
+|===
+
+*Returns:* boolean
 
 [float]
 === exactly
 
 Creates a filter that matches a given column for a perfectly exact value.
 
-- *Accepts:* filter
-- *Returns:* filter
-- *Arguments*
-+
-column*:: (string) The column or field to attach the filter to. Aliases: field, c
-+
-value*:: (string) The value to match exactly, including white space and 
-capitalization. Aliases: v, val
+*Accepts:* filter
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|column* (Aliases: `field`, `c`)
+<|string
+<|The column or field to attach the filter to
+
+<|value* (Aliases: `v`, `val`)
+<|string
+<|The value to match exactly, including white space and 
+capitalization
+|===
+
+*Returns:* filter
+
 
 [float]
 === filterrows
 
 Filters rows in a datatable based on the return value of a subexpression.
 
-- *Accepts:* datatable
-- *Returns:* datatable
-- *Arguments*
-+
-_Unnamed*_::  (boolean) An expression to pass into each row in the datatable.
+*Accepts:* datatable
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_* (Alias: `fn`)
+<|boolean
+<|An expression to pass into each row in the datatable.
 The expression should return a boolean. A true value preserves the row, 
-and a false value removes it.  Alias: fn
+and a false value removes it.
+|===
+
+*Returns:* datatable
+
 
 [float]
 === font
 
 Creates font style.
 
-- *Accepts:* null
-- *Returns:* style
-- *Arguments*
-+
-size::  (number) The font size in pixels.  The default is `14`.
-+
-lHeight*::  (number) The line height in pixels. Alias: lineHeight
-+
-family::  (string) An acceptable CSS web font string. The default is `"'Open Sans', Helvetica, Arial, sans-serif"`
-+
-color::  (string) The text color
-+
-weight::  (string) The font weight, for example, `normal`, `bold`, `bolder`, `lighter`, 
-`100`, `200`, `300`, `400`, `500`, `600`, `700`, `800`, `900`.  The default is `normal.`
-+
-underline::  (boolean) Underline the text, `true` or `false`. The default is `false`.
-+
-italic::  (boolean) Italicize the text, `true` or `false`. The default is `false`.
-+
-align::  (string) The horizontal alignment of text.  The default is `left`.
+*Accepts:* null
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|size
+<|number
+<|The font size in pixels (default: `14`)
+
+<|lHeight* (Alias: `lineHeight`)
+<|number
+<|The line height in pixels
+
+<|family
+<|string
+<|An acceptable CSS web font string (default: `"'Open Sans', Helvetica, Arial, sans-serif"`)
+
+<|color
+<|string
+<|The text color
+
+<|weight
+<|string
+<|The font weight, for example, `normal`, `bold`, `bolder`, `lighter`, 
+`100`, `200`, `300`, `400`, `500`, `600`, `700`, `800`, `900` (default is `normal`)
+
+<|underline
+<|boolean
+<|Underline the text, `true` or `false` (default is `false`)
+
+<|italic
+<|boolean
+<|Italicize the text, `true` or `false` (default is `false`)
+
+<|align
+<|string
+<|The horizontal alignment of text (default is `left`)
+|===
+
+*Returns:* style
+
 
 [float]
 === formatdate
 
 Outputs milliseconds since epoch as a formatted string.
 
-- *Accepts:* number
-- *Returns:* string
-- *Arguments*
-+
-_Unnamed*_:: (string) Moment.js Format with which to bucket. See the https://momentjs.com/docs/#/displaying/[Moment.js documentation].
+*Accepts:* number
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_* 
+<|string
+<|Moment.js Format with which to bucket, see the https://momentjs.com/docs/#/displaying/[Moment.js documentation]
+|===
+
+*Returns:* string
+
 
 [float]
 === formatnumber
 
 Turns a number into a string using a Number.js format.
 
-- *Accepts:* number
-- *Returns:* string
-- *Arguments*
-+
-_Unnamed*_:: (string) Numeral.js format string. See the http://numeraljs.com/#format[Numeral.js documentation]
+*Accepts:* number
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_* 
+<|string
+<|Numeral.js format string, see the http://numeraljs.com/#format[Numeral.js documentation]
+|===
+
+*Returns:* string
+
 
 [float]
 === getCell
 
 Fetches a single cell in a table.
 
-- *Accepts:* datatable
-- *Returns:* Depends on your input and arguments
-- *Arguments*
-+
-_Unnamed*_:: (string) The name of the column value to fetch. Aliases: column, c
-+
-row:: (number) The row number, starting at 0.  The default is `0`. Alias: r
+*Accepts:* datatable
+
+[cols="3*^"]
+|===
+<s|Argument
+<s|Type
+<s|Description
+
+<|_Unnamed_* (Aliases: `column`, `c`)
+<|string
+<|The name of the column value to fetch
+
+<|row (Alias: `r`)
+<|number
+<|The row number, starting at 0 (default: `0`)
+|===
+
+*Returns:* Depends on your input and arguments
+
 
 [float]
 === gt
