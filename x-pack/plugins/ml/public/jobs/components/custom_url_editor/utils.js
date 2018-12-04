@@ -319,6 +319,7 @@ export function getTestUrl(job, customUrl) {
   return new Promise((resolve, reject) => {
     ml.esSearch({
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       body
     })
       .then((resp) => {

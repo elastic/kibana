@@ -69,6 +69,7 @@ export const defaultSearchStrategy = {
     } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
 
     const msearchParams = {
+      rest_total_hits_as_int: true,
       body: serializedFetchParams,
     };
 
