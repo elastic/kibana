@@ -51,7 +51,7 @@ If you wish to load up specific es archived data for your test, you can do so vi
 node scripts/es_archiver.js load <archive> [--es-url=http://username:password@localhost:9200] [--kibana-url=http://username:password@localhost:5601/{basepath?}]
 ```
 
-That will load the specified archive located in the archive directory specified by the default functional config file, located in `test/functional/config`
+That will load the specified archive located in the archive directory specified by the default functional config file, located in `test/functional/config.js`. To load archives from other function config files you can pass `--config path/to/config.js`.
 
 *Note:* The `--es-url` and `--kibana-url` options may or may not be neccessary depending on your current Kibana configuration settings, and their values
 may also change based on those settings (for example if you are not running with security you will not need the `username:password` portion).
