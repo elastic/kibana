@@ -139,7 +139,7 @@ export function getDefaultLocale() {
  * @param [newFormats.date]
  * @param [newFormats.time]
  */
-export function setFormats(newFormats: Formats) {
+function setFormats(newFormats: Formats) {
   if (!isObject(newFormats) || !hasValues(newFormats)) {
     throw new Error('[I18n] A `formats` must be a non-empty object.');
   }
