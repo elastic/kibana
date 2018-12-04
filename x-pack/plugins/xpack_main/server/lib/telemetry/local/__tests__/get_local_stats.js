@@ -56,7 +56,23 @@ describe('get_local_stats', () => {
   };
   const license = { fancy: 'license' };
   const xpack = { also: 'fancy' };
-  const kibana = { is: 'nice' };
+  const kibana = {
+    kibana: {
+      great: 'googlymoogly',
+      versions: [{ version: '8675309', count: 1 }],
+      plugins: {}
+    },
+    kibana_stats: {
+      os: {
+        platform: 'rocky',
+        platformRelease: 'iv',
+      }
+    },
+    sun: { chances: 5 },
+    clouds: { chances: 95 },
+    rain: { chances: 2 },
+    snow: { chances: 0 },
+  };
   const localStats = {
     collection: 'local',
     cluster_uuid: clusterUuid,
@@ -67,7 +83,22 @@ describe('get_local_stats', () => {
     version,
     cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
     stack_stats: {
-      kibana: { is: 'nice' },
+      kibana: {
+        great: 'googlymoogly',
+        count: 1,
+        indices: 1,
+        os: {
+          platforms: [{ platform: 'rocky', count: 1 }],
+          platformReleases: [{ platformRelease: 'iv', count: 1 }]
+        },
+        versions: [{ version: '8675309', count: 1 }],
+        plugins: {
+          sun: { chances: 5 },
+          clouds: { chances: 95 },
+          rain: { chances: 2 },
+          snow: { chances: 0 },
+        }
+      },
       xpack: { also: 'fancy' },
     }
   };
@@ -84,8 +115,22 @@ describe('get_local_stats', () => {
       expect(result.stack_stats).to.be(undefined);
     });
 
-    it('returns expected object with xpack and kibana data', () => {
-      expect(dropTimestamp(handleLocalStats(clusterInfo, clusterStats, license, xpack, kibana))).to.eql(localStats);
+    it('returns expected object with xpack', () => {
+      const result = dropTimestamp(handleLocalStats(clusterInfo, clusterStats, license, xpack));
+      const { stack_stats: stack, ...cluster } = result;
+      expect(cluster.collection).to.be(localStats.collection);
+      expect(cluster.cluster_uuid).to.be(localStats.cluster_uuid);
+      expect(cluster.cluster_name).to.be(localStats.cluster_name);
+
+      // kibana stats get chopped up (kibana_stats, plugins) before
+      // handleLocalStats - see test below for `result.stack_stats.kibana`
+      // verification
+      expect(stack.kibana).to.be(undefined);
+
+      expect(cluster.version).to.eql(localStats.version);
+      expect(cluster.cluster_stats).to.eql(localStats.cluster_stats);
+      expect(cluster.license).to.eql(localStats.license);
+      expect(stack.xpack).to.eql(localStats.stack_stats.xpack);
     });
   });
 
@@ -126,8 +171,9 @@ describe('get_local_stats', () => {
         Promise.resolve(xpack)
       );
 
-      const result = await getLocalStatsWithCaller(getMockServer(), callCluster);
+      const result = await getLocalStatsWithCaller(getMockServer(callCluster, kibana), callCluster);
       expect(result.stack_stats.xpack).to.eql(localStats.stack_stats.xpack);
+      expect(result.stack_stats.kibana).to.eql(localStats.stack_stats.kibana);
     });
   });
 

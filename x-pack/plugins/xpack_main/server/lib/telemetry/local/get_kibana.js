@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 
 /*
  * Check user privileges for read access to monitoring
@@ -27,8 +27,7 @@ export async function getKibana(server, callWithInternalUser) {
   // combine core stats (os types, saved objects) with plugin usage stats
   // organize the object into the same format as monitoring-enabled telemetry
   return {
-    ...kibana,
-    index: undefined, // discard index
+    ...omit(kibana, 'index'), // discard index
     count: 1,
     indices: 1,
     os: {
