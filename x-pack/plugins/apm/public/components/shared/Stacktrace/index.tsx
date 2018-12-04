@@ -4,59 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiTitle } from '@elastic/eui';
-import { get, isEmpty } from 'lodash';
+import { EuiTitle } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import React, { PureComponent } from 'react';
-import styled from 'styled-components';
-import { Stackframe } from '../../../../typings/APMDoc';
-import { px, units } from '../../../style/variables';
 import { CodePreview } from '../../shared/CodePreview';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { Ellipsis } from '../../shared/Icons';
 import { FrameHeading } from './FrameHeading';
-
-export interface StackframeCollapsed extends Stackframe {
-  libraryFrame?: boolean;
-  stackframes?: Stackframe[];
-}
-
-const LibraryFrameToggle = styled.div`
-  margin: 0 0 ${px(units.plus)} 0;
-  user-select: none;
-`;
-
-function getCollapsedLibraryFrames(
-  stackframes: Stackframe[]
-): StackframeCollapsed[] {
-  return stackframes.reduce((acc: any, stackframe: StackframeCollapsed) => {
-    if (!stackframe.libraryFrame) {
-      return [...acc, stackframe];
-    }
-
-    // current stackframe is library frame
-    const prevItem: StackframeCollapsed = acc[acc.length - 1];
-    if (!get(prevItem, 'libraryFrame')) {
-      return [...acc, { libraryFrame: true, stackframes: [stackframe] }];
-    }
-
-    return [
-      ...acc.slice(0, -1),
-      {
-        ...prevItem,
-        stackframes: prevItem.stackframes
-          ? [...prevItem.stackframes, stackframe]
-          : [stackframe]
-      }
-    ];
-  }, []);
-}
-
-function hasSourceLines(stackframe: Stackframe) {
-  return (
-    !isEmpty(stackframe.context) || !isEmpty(get(stackframe, 'line.context'))
-  );
-}
+import { LibraryFrames } from './LibraryFrames';
+import {
+  getCollapsedLibraryFrames,
+  hasSourceLines,
+  StackframeCollapsed
+} from './stacktraceUtils';
 
 interface Props {
   stackframes?: StackframeCollapsed[];
@@ -125,7 +86,7 @@ export class Stacktrace extends PureComponent<Props, State> {
           }
 
           return (
-            <Libraryframes
+            <LibraryFrames
               key={i}
               visible={libraryframes[i]}
               stackframes={item.stackframes || []}
@@ -138,45 +99,3 @@ export class Stacktrace extends PureComponent<Props, State> {
     );
   }
 }
-
-interface LibraryframesProps {
-  visible?: boolean;
-  stackframes: Stackframe[];
-  codeLanguage?: string;
-  onClick: () => void;
-}
-
-const Libraryframes: React.SFC<LibraryframesProps> = ({
-  visible,
-  stackframes,
-  codeLanguage,
-  onClick
-}) => {
-  return (
-    <div>
-      <LibraryFrameToggle>
-        <EuiLink onClick={onClick}>
-          <Ellipsis horizontal={visible} style={{ marginRight: units.half }} />{' '}
-          {stackframes.length} library frames
-        </EuiLink>
-      </LibraryFrameToggle>
-
-      <div>
-        {visible &&
-          stackframes.map(
-            (stackframe, i) =>
-              hasSourceLines(stackframe) ? (
-                <CodePreview
-                  key={i}
-                  stackframe={stackframe}
-                  isLibraryFrame
-                  codeLanguage={codeLanguage}
-                />
-              ) : (
-                <FrameHeading key={i} stackframe={stackframe} isLibraryFrame />
-              )
-          )}
-      </div>
-    </div>
-  );
-};
