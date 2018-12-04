@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { getBaseBreadcrumb, setBreadcrumb } from '../../lib/breadcrumbs';
 import { HomeApp } from './home_app';
 
 export const routes = [
@@ -12,11 +12,7 @@ export const routes = [
     name: 'home',
     path: '/',
     action: () => () => {
-      chrome.breadcrumbs.set([
-        {
-          text: 'Canvas',
-        },
-      ]);
+      setBreadcrumb([getBaseBreadcrumb()]);
     },
     meta: {
       component: HomeApp,
