@@ -96,7 +96,7 @@
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
-    "@elastic/datemath": "5.0.0",
+    "@elastic/datemath": "5.0.1",
     "@kbn/es-query": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
