@@ -42,7 +42,7 @@ export class NodeAttrsDetailsUi extends PureComponent {
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.nodeAttrDetails.title"
-                  defaultMessage="Nodes that contain the attribute: {selectedNodeAttrs}"
+                  defaultMessage="Nodes that contain the attribute {selectedNodeAttrs}"
                   values={{ selectedNodeAttrs }}
                 />
               </h2>
