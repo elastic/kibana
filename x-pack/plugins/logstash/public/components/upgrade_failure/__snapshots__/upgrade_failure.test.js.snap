@@ -354,17 +354,13 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                               <span
                                 className="euiButtonEmpty__text"
                               >
-                                <span
-                                  className="euiButtonEmpty__text"
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
                                 >
-                                  <FormattedMessage
-                                    defaultMessage="Go back"
-                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    Go back
-                                  </FormattedMessage>
-                                </span>
+                                  Go back
+                                </FormattedMessage>
                               </span>
                             </span>
                           </button>
@@ -737,21 +733,13 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                               <span
                                 className="euiButtonEmpty__text"
                               >
-<<<<<<< HEAD
-                                Go back
-=======
-                                <span
-                                  className="euiButtonEmpty__text"
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
                                 >
-                                  <FormattedMessage
-                                    defaultMessage="Go back"
-                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    Go back
-                                  </FormattedMessage>
-                                </span>
->>>>>>> master
+                                  Go back
+                                </FormattedMessage>
                               </span>
                             </span>
                           </button>
@@ -1124,21 +1112,13 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                               <span
                                 className="euiButtonEmpty__text"
                               >
-<<<<<<< HEAD
-                                Go back
-=======
-                                <span
-                                  className="euiButtonEmpty__text"
+                                <FormattedMessage
+                                  defaultMessage="Go back"
+                                  id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                  values={Object {}}
                                 >
-                                  <FormattedMessage
-                                    defaultMessage="Go back"
-                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
-                                    values={Object {}}
-                                  >
-                                    Go back
-                                  </FormattedMessage>
-                                </span>
->>>>>>> master
+                                  Go back
+                                </FormattedMessage>
                               </span>
                             </span>
                           </button>
