@@ -46,8 +46,8 @@ import { i18n } from '@kbn/i18n';
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
-const homeTitle = i18n.translate('kbn.home.tutorial.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('kbn.home.tutorial.addDataTitle', { defaultMessage: 'Add Data' });
+const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
+const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add Data' });
 
 class TutorialDirectoryUi extends React.Component {
 

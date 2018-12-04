@@ -46,8 +46,8 @@ const INSTRUCTIONS_TYPE = {
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud'
 };
 
-const homeTitle = i18n.translate('kbn.home.tutorial.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('kbn.home.tutorial.addDataTitle', { defaultMessage: 'Add Data' });
+const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
+const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add Data' });
 
 class TutorialUi extends React.Component {
 

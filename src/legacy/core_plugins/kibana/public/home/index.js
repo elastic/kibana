@@ -34,7 +34,7 @@ app.directive('homeApp', function (reactDirective) {
   return reactDirective(HomeApp);
 });
 
-const homeTitle = i18n.translate('kbn.home.tutorial.homeTitle', { defaultMessage: 'Home' });
+const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 
 function getRoute() {
   return {
