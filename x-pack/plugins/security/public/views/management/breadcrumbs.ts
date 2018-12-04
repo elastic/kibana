@@ -30,6 +30,17 @@ export function getEditUserBreadcrumbs($route: Record<string, any>) {
   ];
 }
 
+export function getCreateUserBreadcrumbs() {
+  return [
+    ...getUsersBreadcrumbs(),
+    {
+      text: i18n.translate('xpack.security.users.createBreadcrumb', {
+        defaultMessage: 'Create',
+      }),
+    },
+  ];
+}
+
 export function getRolesBreadcrumbs() {
   return [
     MANAGEMENT_BREADCRUMB,
@@ -49,6 +60,17 @@ export function getEditRoleBreadcrumbs($route: Record<string, any>) {
     {
       text: name,
       href: `#/management/security/roles/edit/${name}`,
+    },
+  ];
+}
+
+export function getCreateRoleBreadcrumbs() {
+  return [
+    ...getUsersBreadcrumbs(),
+    {
+      text: i18n.translate('xpack.security.roles.createBreadcrumb', {
+        defaultMessage: 'Create',
+      }),
     },
   ];
 }
