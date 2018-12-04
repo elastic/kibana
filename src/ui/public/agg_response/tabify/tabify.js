@@ -27,8 +27,8 @@ import { TabifyBuckets } from './_buckets';
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
  * @param {Object} esResponse - response that came back from Elasticsearch
  * @param {Object} respOpts - options object for the ResponseWriter with params set by Courier
- * @param {boolean} respOpts.isHierarchical - reflects the value of vis.isHierarchical()
- * @param {boolean} respOpts.metricsAtAllLevels - reflects the value of vis.params.showMetricsAtAllLevels
+ * @param {boolean} respOpts.isHierarchical - vis.isHierarchical(): used to figure out if we need to build a request with metrics on every level
+ * @param {boolean} respOpts.columnsForAllBuckets - used to figure out if we need to return columns for each bucket/metric
  * @param {boolean} respOpts.partialRows - reflects the value of vis.params.showPartialRows
  * @param {Object} respOpts.timeRange - time range object, if provided
  */

@@ -25,14 +25,14 @@ import { tabifyGetColumns } from './_get_columns';
  * produces a table, or a series of tables.
  *
  * @param {AggConfigs} aggs - the agg configs object to which the aggregation response correlates
- * @param {boolean} isHierarchical - reflects the value of vis.isHierarchical()
- * @param {boolean} metricsAtAllLevels - reflects the value of vis.params.showMetricsAtAllLevels
+ * @param {boolean} isHierarchical - vis.isHierarchical(): used to figure out if we need to build a request with metrics on every level
+ * @param {boolean} columnsForAllBuckets - used to figure out if we need to return columns for each bucket/metric
  * @param {boolean} partialRows - reflects the value of vis.params.showPartialRows
  * @param {Object} timeRange - time range object, if provided
  */
 function TabbedAggResponseWriter(aggs, {
   isHierarchical = false,
-  metricsAtAllLevels,
+  columnsForAllBuckets,
   partialRows = false,
   timeRange
 } = {}) {
@@ -41,11 +41,10 @@ function TabbedAggResponseWriter(aggs, {
   this.metricBuffer = [];
 
   this.aggs = aggs;
-  this.showPartialRows = partialRows;
-  // Fall back to `isHierarchical` if this vis doesn't have the showMetricsAtAllLevels param
-  this.metricsAtAllLevels = typeof metricsAtAllLevels !== 'undefined' ? metricsAtAllLevels : isHierarchical;
+  this.removePartialRows = !partialRows;
+  this.removeColumnsForAllBuckets = !columnsForAllBuckets;
 
-  this.columns = tabifyGetColumns(aggs.getResponseAggs(), !this.metricsAtAllLevels);
+  this.columns = tabifyGetColumns(aggs.getResponseAggs(), this.removeColumnsForAllBuckets);
   this.aggStack = [...this.columns];
 
   this.rows = [];
@@ -76,7 +75,7 @@ TabbedAggResponseWriter.prototype.row = function () {
     this.rowBuffer[metric.id] = metric.value;
   });
 
-  if (!toArray(this.rowBuffer).length || (!this.showPartialRows && this.isPartialRow(this.rowBuffer))) {
+  if (!toArray(this.rowBuffer).length || (this.removePartialRows && this.isPartialRow(this.rowBuffer))) {
     return;
   }
 

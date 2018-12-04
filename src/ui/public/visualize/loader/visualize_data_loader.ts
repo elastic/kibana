@@ -73,10 +73,14 @@ export class VisualizeDataLoader {
     this.vis.showRequestError = false;
 
     try {
+      const columnsForAllBuckets =
+        typeof this.vis.params.showMetricsAtAllLevels !== 'undefined'
+          ? this.vis.params.showMetricsAtAllLevels
+          : this.vis.isHierarchical();
       // searchSource is only there for courier request handler
       const requestHandlerResponse = await this.requestHandler({
         partialRows: this.vis.type.requiresPartialRows || this.vis.params.showPartialRows,
-        metricsAtAllLevels: this.vis.params.showMetricsAtAllLevels,
+        columnsForAllBuckets,
         isHierarchical: this.vis.isHierarchical(),
         visParams: this.vis.params,
         ...params,
