@@ -41,13 +41,17 @@ export const CleanClientModulesOnDLLTask = {
       `${baseDir}/node_modules/x-pack`,
       ...kbnWebpackLoaders.map(loader => `${baseDir}/node_modules/${loader}`)
     ];
-    const discoveredPluginEntries = await globby([
+    const discoveredLegacyCorePluginEntries = await globby([
       `${baseDir}/src/legacy/core_plugins/*/index.js`,
       `!${baseDir}/src/legacy/core_plugins/**/public`
     ]);
+    const discoveredPluginEntries = await globby([
+      `${baseDir}/src/plugins/*/index.js`,
+      `!${baseDir}/src/plugins/**/public`
+    ]);
 
     // Compose all the needed entries
-    const serverEntries = [ ...mainCodeEntries, ...discoveredPluginEntries];
+    const serverEntries = [ ...mainCodeEntries, ...discoveredLegacyCorePluginEntries, ...discoveredPluginEntries];
 
     // Get the dependencies found searching through the server
     // side code entries that were provided
