@@ -25,7 +25,6 @@ import html from '../index.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
-import { i18n } from '@kbn/i18n';
 import { getRootBreadcrumbs } from '../../discover/breadcrumbs';
 
 const app = uiModules.get('apps/doc', [
@@ -41,12 +40,10 @@ const resolveIndexPattern = {
   }
 };
 
-const k7Breadcrumbs = () => [
+const k7Breadcrumbs = ($route) => [
   ...getRootBreadcrumbs(),
   {
-    text: i18n.translate('kbn.doc.breadcrumb', {
-      defaultMessage: 'Document'
-    })
+    text: `${$route.current.params.index}#${$route.current.params.id}`
   }
 ];
 

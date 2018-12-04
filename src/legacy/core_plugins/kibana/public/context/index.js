@@ -32,13 +32,17 @@ uiRoutes
     controller: ContextAppRouteController,
     k7Breadcrumbs($route) {
       const { indexPattern } = $route.current.locals;
+      const { id } = $route.current.params;
 
       return [
         ...getRootBreadcrumbs(),
         {
           text: i18n.translate('kbn.context.breadcrumb', {
-            defaultMessage: 'Context',
-            values: { indexPatternTitle: indexPattern.title }
+            defaultMessage: 'Context of {indexPatternTitle}#{docId}',
+            values: {
+              indexPatternTitle: indexPattern.title,
+              docId: id
+            }
           })
         }
       ];
