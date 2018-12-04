@@ -37,11 +37,16 @@ Array [
                   ],
                 },
               },
+              "sum": Object {
+                "sum": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
             },
             "terms": Object {
               "field": "transaction.name.keyword",
               "order": Object {
-                "avg": "desc",
+                "sum": "desc",
               },
               "size": 100,
             },

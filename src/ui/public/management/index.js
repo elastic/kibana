@@ -28,3 +28,4 @@ export {
 export { Field } from '../../../legacy/core_plugins/kibana/public/management/sections/settings/components/field/field';
 export { management } from './sections_register';
 export { SidebarNav } from './components';
+export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';

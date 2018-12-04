@@ -28,7 +28,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management, SidebarNav } from 'ui/management';
+import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import 'ui/kbn_top_nav';
@@ -37,7 +37,10 @@ const SIDENAV_ID = 'management-sidenav';
 
 uiRoutes
   .when('/management', {
-    template: landingTemplate
+    template: landingTemplate,
+    k7Breadcrumbs: () => [
+      MANAGEMENT_BREADCRUMB
+    ]
   });
 
 uiRoutes
