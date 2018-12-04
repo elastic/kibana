@@ -30,6 +30,9 @@ export const CleanClientModulesOnDLLTask = {
     const kbnPkg = config.getKibanaPkg();
     const kbnPkgDependencies = (kbnPkg && kbnPkg.dependencies) || {};
     const kbnWebpackLoaders = Object.keys(kbnPkgDependencies).filter(dep => !!dep.includes('-loader'));
+
+    // Define the entry points for the server code in order to
+    // start here later looking for the server side dependencies
     const mainCodeEntries = [
       build.resolvePath('src/cli'),
       build.resolvePath('src/cli_keystore'),
