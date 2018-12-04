@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 
 export function calculateBounds(timeRange, options = {}) {
   return {

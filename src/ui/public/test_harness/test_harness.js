@@ -26,7 +26,7 @@ import { Notifier } from '../notify';
 import { metadata } from '../metadata';
 import { UiSettingsClient } from '../../../core/public/ui_settings';
 
-import './test_harness.less';
+import './test_harness.css';
 import 'ng_mock';
 import { setupTestSharding } from './test_sharding';
 
