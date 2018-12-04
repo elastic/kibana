@@ -8,4 +8,10 @@ import { ILanguageServerHandler } from './proxy';
 
 export interface ILanguageServerLauncher {
   launch(builtinWorkspace: boolean, maxWorkspace: number): Promise<ILanguageServerHandler>;
+  status(): LanguageServerStatus;
+}
+
+export enum LanguageServerStatus {
+  NOT_RUNNING,
+  RUNNING,
 }

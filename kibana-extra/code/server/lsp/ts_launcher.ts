@@ -10,17 +10,25 @@ import path from 'path';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { promiseTimeout } from '../utils/timeout';
-import { ILanguageServerLauncher } from './language_server_launcher';
+import { ILanguageServerLauncher, LanguageServerStatus } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
 
 export class TypescriptServerLauncher implements ILanguageServerLauncher {
+  private state: LanguageServerStatus = LanguageServerStatus.NOT_RUNNING;
   constructor(
     readonly targetHost: string,
     readonly detach: boolean,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
   ) {}
+
+  public status(): LanguageServerStatus {
+    if (this.detach) {
+      throw new Error("can't manage server status in detach mode");
+    }
+    return this.state;
+  }
 
   public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
     let port = 2089;
@@ -40,8 +48,8 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
         }
       });
     } else {
-      const spawnTs = () =>
-        spawn(
+      const spawnTs = () => {
+        const p = spawn(
           'node',
           [
             '--max_old_space_size=4096',
@@ -59,6 +67,10 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
             stdio: 'inherit',
           }
         );
+        this.state = LanguageServerStatus.RUNNING;
+        p.on('exit', () => (this.state = LanguageServerStatus.NOT_RUNNING));
+        return p;
+      };
       let child = spawnTs();
       log.info(`Launch Typescript Language Server at port ${port}, pid:${child.pid}`);
       const reconnect = () => {

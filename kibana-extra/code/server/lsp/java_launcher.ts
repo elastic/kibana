@@ -11,17 +11,24 @@ import { platform as getOsPlatform } from 'os';
 import path from 'path';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { ILanguageServerLauncher } from './language_server_launcher';
+import { ILanguageServerLauncher, LanguageServerStatus } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
 
 export class JavaLauncher implements ILanguageServerLauncher {
+  private state: LanguageServerStatus = LanguageServerStatus.NOT_RUNNING;
   constructor(
     readonly targetHost: string,
     readonly detach: boolean,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
   ) {}
+  public status(): LanguageServerStatus {
+    if (this.detach) {
+      throw new Error("can't manage server status in detach mode");
+    }
+    return this.state;
+  }
 
   public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
     let port = 2090;
@@ -50,8 +57,10 @@ export class JavaLauncher implements ILanguageServerLauncher {
         break;
       case 'win32':
         config = './config_win/';
+        break;
       case 'linux':
         config = './config_linux/';
+        break;
       default:
         log.error('Unable to find platform for this os');
     }
@@ -59,7 +68,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     if (!this.detach) {
       process.env.CLIENT_PORT = port.toString();
       const spawnJava = () => {
-        return spawn(
+        const p = spawn(
           'java',
           [
             '-Declipse.application=org.elastic.jdt.ls.core.id1',
@@ -81,6 +90,9 @@ export class JavaLauncher implements ILanguageServerLauncher {
             env: process.env,
           }
         );
+        this.state = LanguageServerStatus.RUNNING;
+        p.on('exit', () => (this.state = LanguageServerStatus.NOT_RUNNING));
+        return p;
       };
       let child = spawnJava();
       log.info(
