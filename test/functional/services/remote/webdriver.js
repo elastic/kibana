@@ -28,7 +28,7 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 
 let attemptCounter = 0;
-async function attemptToCreateCommand(log, driverApi) {
+async function attemptToCreateCommand(log, browserType) {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
 
@@ -63,19 +63,14 @@ async function attemptToCreateCommand(log, driverApi) {
         throw new Error(`${browserType} is not supported yet`);
     }
   };
-  const browserType = driverApi.getRequiredCapabilities().browserType;
   const session = await buildDriverInstance(browserType);
 
-  if (attemptId !== attemptCounter) return; // abort
-
-  log.debug('[webdriver] Registering session for teardown');
-  driverApi.beforeStop(async () => await session.quit());
   if (attemptId !== attemptCounter) return; // abort
 
   return { driver: session, By, Key, until };
 }
 
-export async function initWebDriver({ log, browserDriverApi }) {
+export async function initWebDriver({ log, browserType }) {
   return await Promise.race([
     (async () => {
       await delay(2 * MINUTE);
@@ -86,7 +81,7 @@ export async function initWebDriver({ log, browserDriverApi }) {
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, browserDriverApi)
+          attemptToCreateCommand(log, browserType)
         ]);
 
         if (!command) {

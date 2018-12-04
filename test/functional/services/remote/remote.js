@@ -18,11 +18,9 @@
  */
 
 import { initWebDriver } from './webdriver';
-import { BrowserDriverApi } from './browser_driver_api';
 
 export async function RemoteProvider({ getService }) {
   const lifecycle = getService('lifecycle');
-  const config = getService('config');
   const log = getService('log');
   const possibleBrowsers = ['chrome', 'firefox', 'ie'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
@@ -31,12 +29,7 @@ export async function RemoteProvider({ getService }) {
     throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
   }
 
-  const browserDriverApi = await BrowserDriverApi.factory(log, config.get(browserType + 'driver.url'), browserType);
-  lifecycle.on('cleanup', async () => await browserDriverApi.stop());
-
-  await browserDriverApi.start();
-
-  const { driver, By, Key, until } = await initWebDriver({ log, browserDriverApi: browserDriverApi });
+  const { driver, By, Key, until } = await initWebDriver({ log, browserType });
 
   log.info('Remote initialized');
 
@@ -55,6 +48,8 @@ export async function RemoteProvider({ getService }) {
     const { width, height } = windowSizeStack.shift();
     await driver.manage().window().setRect({ width: width, height: height });
   });
+
+  lifecycle.on('cleanup', async () => await driver.quit());
 
   return { driver, By, Key, until };
 }
