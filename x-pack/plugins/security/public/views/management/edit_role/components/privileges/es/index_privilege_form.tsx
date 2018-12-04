@@ -68,7 +68,7 @@ class IndexPrivilegeFormUI extends Component<Props, State> {
                   aria-label={intl.formatMessage({
                     id:
                       'xpack.security.management.editRoles.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel',
-                    defaultMessage: 'Delete space privilege',
+                    defaultMessage: 'Delete index privilege',
                   })}
                   color={'danger'}
                   onClick={this.props.onDelete}

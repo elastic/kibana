@@ -229,7 +229,7 @@ exports[`it renders without crashing 1`] = `
         hasEmptyLabelSpace={true}
       >
         <EuiButtonIcon
-          aria-label="Delete space privilege"
+          aria-label="Delete index privilege"
           color="danger"
           iconSize="m"
           iconType="trash"
