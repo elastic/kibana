@@ -7,7 +7,7 @@
 import React from 'react';
 import { createSelector } from 'reselect';
 import { Request } from 'react-redux-request';
-import { loadTransactionList } from '../../services/rest/apm';
+import { loadTransactionList } from '../../services/rest/apm/transaction_groups';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionList';

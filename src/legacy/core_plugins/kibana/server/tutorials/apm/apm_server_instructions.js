@@ -122,8 +122,8 @@ PowerShell.\n5. From the PowerShell prompt, run the following commands to instal
         }
       }),
       commands: [
-        `PS > cd 'C:\\Program Files\\APM-Server'`,
-        `PS C:\\Program Files\\APM-Server> .\\install-service-apm-server.ps1`,
+        `cd 'C:\\Program Files\\APM-Server'`,
+        `.\\install-service-apm-server.ps1`,
       ],
       textPost: i18n.translate('kbn.server.tutorials.apm.windowsServerInstructions.textPost', {
         defaultMessage: 'Note: If script execution is disabled on your system, \

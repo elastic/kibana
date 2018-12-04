@@ -47,10 +47,12 @@ import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
     template: editorTemplate,
+    k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
       savedVis: function (savedVisualizations, redirectWhenMissing, $route, Private, i18n) {
         const visTypes = Private(VisTypesRegistryProvider);
@@ -74,6 +76,7 @@ uiRoutes
   })
   .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
     template: editorTemplate,
+    k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
       savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
         return savedVisualizations.get($route.current.params.id)
