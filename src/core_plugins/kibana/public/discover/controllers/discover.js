@@ -49,7 +49,7 @@ import { StateProvider } from 'ui/state_management/state';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
+import { VisualizeLoaderProvider } from 'ui/visualize/loader/visualize_loader';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { getDocLink } from 'ui/documentation_links';
 import '../components/fetch_error';
@@ -157,6 +157,8 @@ function discoverController(
   localStorage,
   breadcrumbState
 ) {
+  const visualizeLoader = Private(VisualizeLoaderProvider);
+  let visualizeHandler;
   const Vis = Private(VisProvider);
   const docTitle = Private(DocTitleProvider);
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
@@ -687,9 +689,7 @@ function discoverController(
         Promise
           .resolve(responseHandler(tabifiedData))
           .then(resp => {
-            $scope.visData = resp;
-            const visEl = $element.find('#discoverHistogram')[0];
-            visualizationLoader.render(visEl, $scope.vis, $scope.visData, $scope.uiState, { listenOnChange: true });
+            visualizeHandler.render(resp);
           });
       }
 
@@ -836,31 +836,43 @@ function discoverController(
     if ($scope.vis) {
       const visState = $scope.vis.getEnabledState();
       visState.aggs = visStateAggs;
-
       $scope.vis.setState(visState);
-    } else {
-      $scope.vis = new Vis($scope.indexPattern, {
-        title: savedSearch.title,
+      return;
+    }
+
+    const visSavedObject = {
+      indexPattern: $scope.indexPattern.id,
+      visState: {
         type: 'histogram',
+        title: savedSearch.title,
         params: {
           addLegend: false,
           addTimeMarker: true
         },
         aggs: visStateAggs
-      });
-
-      $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
-        return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
-      });
-
-      $scope.searchSource.setField('aggs', function () {
-        return $scope.vis.getAggConfig().toDsl();
-      });
-    }
-
-    $scope.vis.filters = {
-      timeRange: timefilter.getTime()
+      }
     };
+
+    $scope.vis = new Vis(
+      $scope.searchSource.getField('index'),
+      visSavedObject.visState
+    );
+    visSavedObject.vis = $scope.vis;
+
+    $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
+      return $scope.vis.getAggConfig().onSearchRequestStart(searchSource, searchRequest);
+    });
+
+    $scope.searchSource.setField('aggs', function () {
+      return $scope.vis.getAggConfig().toDsl();
+    });
+
+    $timeout(async () => {
+      const visEl = $element.find('#discoverHistogram')[0];
+      visualizeHandler = await visualizeLoader.embedVisualizationWithSavedObject(visEl, visSavedObject, {
+        autoFetch: false,
+      });
+    });
   }
 
   function resolveIndexPatternLoading() {

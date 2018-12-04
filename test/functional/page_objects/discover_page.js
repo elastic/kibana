@@ -27,6 +27,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['header', 'common']);
+  const remote = getService('remote');
 
   const getRemote = () => (
     getService('remote')
@@ -119,6 +120,19 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async clickLoadSavedSearchButton() {
       await testSubjects.click('discoverOpenButton');
+    }
+
+    async clickHistogramBar(i) {
+      const bars = await find.allByCssSelector(`.series.histogram rect`);
+      await bars[i].click();
+    }
+
+    async brushHistogram(from, to) {
+      const bars = await find.allByCssSelector('.series.histogram rect');
+      await remote.moveMouseTo(bars[from], 0, -5);
+      await remote.pressMouseButton();
+      await remote.moveMouseTo(bars[to], 0, -5);
+      await remote.releaseMouseButton();
     }
 
     async getCurrentQueryName() {
