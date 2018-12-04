@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { PipelineList } from './pipeline_list';
 
 describe('PipelineList component', () => {
@@ -54,7 +54,7 @@ describe('PipelineList component', () => {
   });
 
   async function renderWithProps() {
-    const wrapper = shallow(<PipelineList {...props} />);
+    const wrapper = shallowWithIntl(<PipelineList.WrappedComponent {...props} />);
     await Promise.all([wrapper.instance().componentDidMount]);
     return wrapper;
   }
