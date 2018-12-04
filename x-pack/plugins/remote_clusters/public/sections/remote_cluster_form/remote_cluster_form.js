@@ -109,7 +109,7 @@ export class RemoteClusterFormUi extends Component {
       errors.name = (
         <FormattedMessage
           id="xpack.remoteClusters.form.errors.nameMissing"
-          defaultMessage="Nickname is required."
+          defaultMessage="Name is required."
         />
       );
     } else if (name.match(/[^a-zA-Z\d]/)) {
