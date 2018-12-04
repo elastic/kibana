@@ -31,5 +31,6 @@ export { EmbeddingProvider } from './embedding';
 export { ComboBoxProvider } from './combo_box';
 export { RenderableProvider } from './renderable';
 export { TableProvider } from './table';
+export { BrowserProvider } from './browser';
 
 export * from './dashboard';
