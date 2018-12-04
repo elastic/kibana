@@ -159,6 +159,30 @@ export interface InfraMetadataAggregationResponse {
   buckets: InfraMetadataAggregationBucket[];
 }
 
+export interface InfraServiceMetadataMetricsResponse {
+  buckets: InfraServiceMetadataMetricsBucket[];
+}
+
+export interface InfraServiceMetadataMetricsBucket {
+  key: string;
+  nodes: {
+    buckets: {
+      containers: { doc_count: number };
+      hosts: { doc_count: number };
+      pods: { doc_count: number };
+    };
+  };
+}
+
+export interface InfraServiceMetadataLogsResponse {
+  buckets: InfraServiceMetadataLogsBucket[];
+}
+
+export interface InfraServiceMetadataLogsBucket {
+  key: string;
+  doc_count: number;
+}
+
 export interface InfraFieldsResponse {
   [name: string]: InfraFieldDef;
 }

@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServiceMetadataQuery } from '../../domains/metadata_domain';
 import { InfraSourceConfiguration } from '../../sources';
-import { InfraFrameworkRequest, InfraMetadataAggregationBucket } from '../framework';
+import {
+  InfraFrameworkRequest,
+  InfraMetadataAggregationBucket,
+  InfraServiceMetadataLogsBucket,
+  InfraServiceMetadataMetricsBucket,
+} from '../framework';
 
 export interface InfraMetadataAdapter {
   getMetricMetadata(
@@ -20,4 +26,18 @@ export interface InfraMetadataAdapter {
     nodeName: string,
     nodeType: string
   ): Promise<InfraMetadataAggregationBucket[]>;
+  getMetricsMetadataForServices(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    start: number,
+    end: number,
+    filterQuery?: ServiceMetadataQuery
+  ): Promise<InfraServiceMetadataMetricsBucket[]>;
+  getLogsMetadataForServices(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    start: number,
+    end: number,
+    filterQuery?: ServiceMetadataQuery
+  ): Promise<InfraServiceMetadataLogsBucket[]>;
 }

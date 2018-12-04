@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServiceMetadataQuery } from '../../domains/metadata_domain';
 import { InfraSourceConfiguration } from '../../sources';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
+  InfraServiceMetadataLogsBucket,
+  InfraServiceMetadataLogsResponse,
+  InfraServiceMetadataMetricsBucket,
+  InfraServiceMetadataMetricsResponse,
 } from '../framework';
 import { InfraMetadataAdapter } from './adapter_types';
 
@@ -112,6 +117,107 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
       ? response.aggregations.metrics.buckets
       : [];
   }
+
+  public async getMetricsMetadataForServices(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    start: number,
+    end: number,
+    filterQuery?: ServiceMetadataQuery
+  ): Promise<InfraServiceMetadataMetricsBucket[]> {
+    const query = {
+      index: sourceConfiguration.metricAlias,
+      body: {
+        query: {
+          bool: {
+            filter: {
+              ...createQueryFilterClauses(filterQuery),
+              range: {
+                [sourceConfiguration.fields.timestamp]: {
+                  gte: start,
+                  lte: end,
+                },
+              },
+            },
+          },
+        },
+        size: 0,
+        aggs: {
+          metrics: {
+            terms: {
+              field: 'metricset.module',
+              size: 1000,
+            },
+            aggs: {
+              nodes: {
+                filters: {
+                  filters: {
+                    hosts: { exists: { field: sourceConfiguration.fields.host } },
+                    pods: { exists: { field: sourceConfiguration.fields.pod } },
+                    containers: { exists: { field: sourceConfiguration.fields.container } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const response = await this.framework.callWithRequest<
+      any,
+      { metrics?: InfraServiceMetadataMetricsResponse }
+    >(req, 'search', query);
+
+    return response.aggregations && response.aggregations.metrics
+      ? response.aggregations.metrics.buckets
+      : [];
+  }
+
+  public async getLogsMetadataForServices(
+    req: InfraFrameworkRequest,
+    sourceConfiguration: InfraSourceConfiguration,
+    start: number,
+    end: number,
+    filterQuery?: ServiceMetadataQuery
+  ): Promise<InfraServiceMetadataLogsBucket[]> {
+    const query = {
+      index: sourceConfiguration.logAlias,
+      body: {
+        query: {
+          bool: {
+            filter: {
+              ...createQueryFilterClauses(filterQuery),
+              range: {
+                [sourceConfiguration.fields.timestamp]: {
+                  gte: start,
+                  lte: end,
+                },
+              },
+            },
+          },
+        },
+        size: 0,
+        aggs: {
+          logs: {
+            terms: {
+              field: 'fileset.module',
+              size: 1000,
+            },
+          },
+        },
+      },
+    };
+
+    const response = await this.framework.callWithRequest<
+      any,
+      { logs?: InfraServiceMetadataLogsResponse }
+    >(req, 'search', query);
+
+    return response.aggregations && response.aggregations.logs
+      ? response.aggregations.logs.buckets
+      : [];
+  }
 }
 
 const getIdFieldName = (sourceConfiguration: InfraSourceConfiguration, nodeType: string) => {
@@ -124,3 +230,6 @@ const getIdFieldName = (sourceConfiguration: InfraSourceConfiguration, nodeType:
       return sourceConfiguration.fields.pod;
   }
 };
+
+const createQueryFilterClauses = (filterQuery: ServiceMetadataQuery | undefined) =>
+  filterQuery ? [filterQuery] : [];

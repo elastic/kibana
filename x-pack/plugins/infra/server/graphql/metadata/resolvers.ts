@@ -36,9 +36,7 @@ export const createMetadataResolvers = (libs: {
       return result;
     },
     async serviceMetadataBetween(source, args, { req }) {
-      const result: any = [
-        { name: 'apache', hosts: true, pods: true, containers: true, logs: true },
-      ];
+      const result = await libs.metadata.getServiceMetadata(req, source.id, args.start, args.end);
       return result;
     },
   },
