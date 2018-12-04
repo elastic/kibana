@@ -22,11 +22,13 @@ import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
 import 'ui/index_patterns';
 import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
+import { getCreateBreadcrumbs } from '../breadcrumbs';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
 
 uiRoutes.when('/management/kibana/index', {
   template: angularTemplate,
+  k7Breadcrumbs: getCreateBreadcrumbs,
   controller: function ($scope, $injector) {
     // Wait for the directives to execute
     const kbnUrl = $injector.get('kbnUrl');

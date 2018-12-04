@@ -92,7 +92,8 @@
     ]
   },
   "dependencies": {
-    "@elastic/eui": "5.0.0",
+    "@elastic/datemath": "5.0.0",
+    "@elastic/eui": "5.3.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana1",
     "@elastic/numeral": "2.3.2",
@@ -100,7 +101,6 @@
     "@kbn/babel-code-parser": "1.0.0",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/config-schema": "1.0.0",
-    "@kbn/datemath": "5.0.0",
     "@kbn/es-query": "1.0.0",
     "@kbn/i18n": "1.0.0",
     "@kbn/interpreter": "1.0.0",
