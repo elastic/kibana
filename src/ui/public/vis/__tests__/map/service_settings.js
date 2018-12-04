@@ -24,6 +24,7 @@ import url from 'url';
 import EMS_CATALOGUE from './ems_mocks/sample_manifest_6.6.json';
 import EMS_FILES from './ems_mocks/sample_files_6.6.json';
 import EMS_TILES from './ems_mocks/sample_tiles_6.6.json';
+import { ORIGIN } from '../../../../../core_plugins/ems_util/common/origin';
 
 describe('service_settings (FKA tilemaptest)', function () {
 
@@ -33,62 +34,7 @@ describe('service_settings (FKA tilemaptest)', function () {
   let tilemapsConfig;
 
   const manifestUrl = 'https://foobar/manifest';
-  // const tmsManifestUrl = `https://tiles.elastic.co/v2/manifest`;
-  // const vectorManifestUrl = `https://layers.geo.elastic.co/v1/manifest`;
   const manifestUrl2 = 'https://foobar_override/v1/manifest';
-  //
-  // const manifest = {
-  //   'services': [{
-  //     'id': 'tiles_v2',
-  //     'name': 'Elastic Tile Service',
-  //     'manifest': tmsManifestUrl,
-  //     'type': 'tms'
-  //   },
-  //   {
-  //     'id': 'geo_layers',
-  //     'name': 'Elastic Layer Service',
-  //     'manifest': vectorManifestUrl,
-  //     'type': 'file'
-  //   }
-  //   ]
-  // };
-  //
-  // const tmsManifest = {
-  //   'services': [{
-  //     'id': 'road_map',
-  //     'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
-  //     'minZoom': 0,
-  //     'maxZoom': 10,
-  //     'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
-  //   }]
-  // };
-  //
-  // const vectorManifest = {
-  //   'layers': [{
-  //     'attribution': '',
-  //     'name': 'US States',
-  //     'format': 'geojson',
-  //     'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVvNGJ0aVNidFNJR2dEQl9rbTBjeXhKMU01WjRBeW1kN3JMXzM2Ry1qc3F6QjF4WE5XdHY2ODlnQkRpZFdCY2g1T2dqUGRHSFhSRTU3amlxTVFwZjNBSFhycEFwV2lYR29vTENjZjh1QTZaZnRpaHBzby5VXzZoNk1paGJYSkNPalpI?elastic_tile_service_tos=agree',
-  //     'fields': [{ 'name': 'postal', 'description': 'Two letter abbreviation' }, {
-  //       'name': 'name',
-  //       'description': 'State name'
-  //     }],
-  //     'created_at': '2017-04-26T19:45:22.377820',
-  //     'id': 5086441721823232
-  //   }, {
-  //     'attribution': 'Â© [Elastic Tile Service](https://www.elastic.co/elastic-maps-service)',
-  //     'name': 'World Countries',
-  //     'format': 'geojson',
-  //     'url': 'https://storage.googleapis.com/elastic-layer.appspot.com/L2FwcGhvc3RpbmdfcHJvZC9ibG9icy9BRW5CMlVwWTZTWnhRRzNmUk9HUE93TENjLXNVd2IwdVNpc09SRXRyRzBVWWdqOU5qY2hldGJLOFNZSFpUMmZmZWdNZGx0NWprT1R1ZkZ0U1JEdFBtRnkwUWo0S0JuLTVYY1I5RFdSMVZ5alBIZkZuME1qVS04TS5oQTRNTl9yRUJCWk9tMk03?elastic_tile_service_tos=agree',
-  //     'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
-  //       'name': 'name',
-  //       'description': 'Country name'
-  //     }, { 'name': 'iso3', 'description': 'Three letter abbreviation' }],
-  //     'created_at': '2017-04-26T17:12:15.978370',
-  //     'id': 5659313586569216
-  //   }]
-  // };
-
 
   beforeEach(ngMock.module('kibana', ($provide) => {
     $provide.decorator('mapConfig', () => {
@@ -121,22 +67,6 @@ describe('service_settings (FKA tilemaptest)', function () {
 
     manifestServiceUrlOriginal = mapConfig.manifestServiceUrl;
     tilemapsConfigDeprecatedOriginal = tilemapsConfig.deprecated;
-
-    // sinon.stub(serviceSettings, '_getManifest').callsFake((url) => {
-    //   let contents = null;
-    //   if (url.startsWith(tmsManifestUrl)) {
-    //     contents = tmsManifest;
-    //   } else if (url.startsWith(vectorManifestUrl)) {
-    //     contents = vectorManifest;
-    //   } else if (url.startsWith(manifestUrl)) {
-    //     contents = manifest;
-    //   } else if (url.startsWith(manifestUrl2)) {
-    //     contents = manifest;
-    //   }
-    //   return {
-    //     data: contents
-    //   };
-    // });
     $rootScope.$digest();
   }));
 
@@ -305,36 +235,59 @@ describe('service_settings (FKA tilemaptest)', function () {
 
   });
 
-  // describe('File layers', function () {
-  //
-  //   it('should load manifest', async function () {
-  //     serviceSettings.addQueryParams({ foo: 'bar' });
-  //     const fileLayers = await serviceSettings.getFileLayers();
-  //     const asserttions = fileLayers.map(async function (fileLayer, index) {
-  //       const expected = vectorManifest.layers[index];
-  //       expect(expected.attribution).to.eql(fileLayer.attribution);
-  //       expect(expected.format).to.eql(fileLayer.format);
-  //       expect(expected.fields).to.eql(fileLayer.fields);
-  //       expect(expected.name).to.eql(fileLayer.name);
-  //       expect(expected.created_at).to.eql(fileLayer.created_at);
-  //
-  //       const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
-  //       const urlObject = url.parse(fileUrl, true);
-  //       Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach(key => {
-  //         expect(urlObject.query).to.have.property(key, expected[key]);
-  //       });
-  //
-  //     });
-  //
-  //     return Promise.all(asserttions);
-  //   });
-  //
-  //   it('should exclude all when not configured', async () => {
-  //     mapConfig.includeElasticMapsService = false;
-  //     const fileLayers = await serviceSettings.getFileLayers();
-  //     const expected = [];
-  //     expect(fileLayers).to.eql(expected);
-  //   });
-  //
-  // });
+  describe('File layers', function () {
+
+    it('should load manifest (all props)', async function () {
+
+      serviceSettings.addQueryParams({ foo: 'bar' });
+      const fileLayers = await serviceSettings.getFileLayers();
+      expect(fileLayers.length).to.be(18);
+      const assertions = fileLayers.map(async function (fileLayer) {
+
+        expect(fileLayer.origin).to.be(ORIGIN.EMS);
+        const fileUrl = await serviceSettings.getUrlForRegionLayer(fileLayer);
+        const urlObject = url.parse(fileUrl, true);
+        Object.keys({ foo: 'bar', elastic_tile_service_tos: 'agree' }).forEach(key => {
+          expect(urlObject.query).to.have.property(key);
+        });
+      });
+
+      return Promise.all(assertions);
+    });
+
+
+    it('should load manifest (individual props)', async () => {
+
+      const expected = {
+        attribution: '<a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a>|<a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a>',
+        format: 'geojson',
+        fields: [
+          { 'name': 'iso2', 'description': 'ISO 3166-1 alpha-2 code' },
+          { 'name': 'iso3', 'description': 'ISO 3166-1 alpha-3 code' },
+          { 'name': 'name', 'description': 'name' }
+        ],
+        created_at: '2017-04-26T17:12:15.978370', //not present in 6.6
+        name: 'World Countries'
+      };
+
+      const fileLayers = await serviceSettings.getFileLayers();
+      const actual = fileLayers[0];
+
+      expect(expected.attribution).to.eql(actual.attribution);
+      expect(expected.format).to.eql(actual.format);
+      expect(expected.fields).to.eql(actual.fields);
+      expect(expected.name).to.eql(actual.name);
+
+      expect(expected.created_at).to.eql(actual.created_at);
+
+    });
+
+    it('should exclude all when not configured', async () => {
+      mapConfig.includeElasticMapsService = false;
+      const fileLayers = await serviceSettings.getFileLayers();
+      const expected = [];
+      expect(fileLayers).to.eql(expected);
+    });
+
+  });
 });

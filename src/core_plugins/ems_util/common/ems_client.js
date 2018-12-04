@@ -71,6 +71,9 @@ export class EMSClientV66 {
 
 
   getValueInLanguage(i18nObject) {
+    if (!i18nObject) {
+      return '';
+    }
     return i18nObject[this._language] ? i18nObject[this._language] : i18nObject[DEFAULT_LANGUAGE];
   }
 

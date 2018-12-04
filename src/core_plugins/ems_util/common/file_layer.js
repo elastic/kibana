@@ -18,6 +18,8 @@
  */
 
 
+import { ORIGIN } from './origin';
+
 export class FileLayer {
 
   constructor(config, emsClient) {
@@ -33,7 +35,6 @@ export class FileLayer {
 
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
-
       const html = `<a href=${url}>${label}</a>`;
       return this._emsClient.sanitizeHtml(html);
     });
@@ -44,8 +45,7 @@ export class FileLayer {
     return this._config.fields.map(field => {
       return {
         name: field.id,
-        description: this._emsClient.getValueInLanguage(field.label),
-        type: field.type
+        description: this._emsClient.getValueInLanguage(field.label)
       };
     });
   }
@@ -89,5 +89,12 @@ export class FileLayer {
     return this._emsClient.extendUrlWithParams(format.url);
   }
 
+  getCreatedAt() {
+    return this._config.created_at;
+  }
+
+  getOrigin() {
+    return ORIGIN.EMS;
+  }
 
 }
