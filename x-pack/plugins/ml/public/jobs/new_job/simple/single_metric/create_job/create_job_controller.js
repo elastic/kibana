@@ -12,7 +12,7 @@ import { aggTypes } from 'ui/agg_types';
 import { addJobValidationMethods } from 'plugins/ml/../common/util/validation_utils';
 import { parseInterval } from 'plugins/ml/../common/util/parse_interval';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import angular from 'angular';
 
 import uiRoutes from 'ui/routes';
