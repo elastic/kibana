@@ -23,12 +23,11 @@ export default (req, panel, entities) => {
   entities.forEach(entity => {
     bodies.push({
       index: panel.index_pattern,
-      ignore: [404],
-      timeout: '90s',
-      requestTimeout: 90000,
       ignoreUnavailable: true,
     });
-    bodies.push(buildRequestBody(req, panel, entity));
+    const body = buildRequestBody(req, panel, entity);
+    body.timeout = '90s';
+    bodies.push(body);
   });
   return bodies;
 };
