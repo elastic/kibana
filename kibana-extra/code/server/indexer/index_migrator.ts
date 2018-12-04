@@ -129,7 +129,7 @@ export class IndexMigrator {
 export const tryMigrateIndices = async (client: EsClient, log: Log) => {
   log.info('Check the versions of Code indices...');
   const repoObjectClient = new RepositoryObjectClient(client);
-  const repos: Repository[] = await repoObjectClient.getAllRepository();
+  const repos: Repository[] = await repoObjectClient.getAllRepositories();
 
   const migrationPromises = [];
   for (const repo of repos) {

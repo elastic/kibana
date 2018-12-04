@@ -152,7 +152,7 @@ export function repositoryRoute(
         const repoObjectClient = new RepositoryObjectClient(
           req.server.plugins.elasticsearch.getCluster('data').getClient()
         );
-        return await repoObjectClient.getAllRepository();
+        return await repoObjectClient.getAllRepositories();
       } catch (error) {
         const msg = `Get all repositories error: ${error}`;
         log.error(msg);

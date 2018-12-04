@@ -45,7 +45,7 @@ export class RepositoryObjectClient {
     return await this.getRepositoryObject(repoUri, RepositoryReservedField);
   }
 
-  public async getAllRepository(): Promise<Repository[]> {
+  public async getAllRepositories(): Promise<Repository[]> {
     const res = await this.esClient.search({
       index: `${RepositoryIndexNamePrefix}*`,
       type: RepositoryTypeName,
