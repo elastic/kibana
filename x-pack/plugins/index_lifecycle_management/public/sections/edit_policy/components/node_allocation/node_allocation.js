@@ -77,25 +77,27 @@ class NodeAllocationUi extends Component {
       );
     }
     return (
-      <ErrableFormRow
-        id={`${phase}.${PHASE_NODE_ATTRS}`}
-        label={intl.formatMessage({
-          id: 'xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel',
-          defaultMessage: 'Select a node attribute to control shard allocation',
-        })}
-        errorKey={PHASE_NODE_ATTRS}
-        isShowingErrors={isShowingErrors}
-        errors={errors}
-      >
-        <EuiSelect
+      <Fragment>
+        <ErrableFormRow
           id={`${phase}.${PHASE_NODE_ATTRS}`}
-          value={phaseData[PHASE_NODE_ATTRS] || ' '}
-          options={nodeOptions}
-          onChange={async e => {
-            await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
-          }}
-        />
-        <EuiSpacer size="s" />
+          label={intl.formatMessage({
+            id: 'xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel',
+            defaultMessage: 'Select a node attribute to control shard allocation',
+          })}
+          errorKey={PHASE_NODE_ATTRS}
+          isShowingErrors={isShowingErrors}
+          errors={errors}
+        >
+          <EuiSelect
+            id={`${phase}.${PHASE_NODE_ATTRS}`}
+            value={phaseData[PHASE_NODE_ATTRS] || ' '}
+            options={nodeOptions}
+            onChange={async e => {
+              await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+            }}
+          />
+
+        </ErrableFormRow>
         {!!phaseData[PHASE_NODE_ATTRS] ? (
           <EuiButtonEmpty
             flush="left"
@@ -109,7 +111,8 @@ class NodeAllocationUi extends Component {
           </EuiButtonEmpty>
         ) : <div /> }
         {learnMoreLinks}
-      </ErrableFormRow>
+        <EuiSpacer size="m" />
+      </Fragment>
     );
   }
 }
