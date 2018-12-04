@@ -106,8 +106,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.0",
-    "@elastic/eui": "5.0.0",
-    "@elastic/filesaver": "1.1.2",
+    "@elastic/eui": "5.3.0",
     "@elastic/good": "8.1.1-kibana1",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
