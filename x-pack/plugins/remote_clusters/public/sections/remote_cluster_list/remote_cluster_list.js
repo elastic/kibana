@@ -80,18 +80,10 @@ export class RemoteClusterListUi extends Component {
     return null;
   }
 
-  constructor(props) {
-    super(props);
-
-    props.loadClusters();
-
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
-
-    this.state = {};
-  }
-
   componentDidMount() {
+    this.props.loadClusters();
     this.interval = setInterval(this.props.refreshClusters, REFRESH_RATE_MS);
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
   }
 
   componentWillUnmount() {
