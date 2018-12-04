@@ -24,7 +24,6 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiSpacer,
-  EuiTabbedContent,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -44,7 +43,6 @@ export class NewEventModal extends Component {
       startDate,
       endDate,
       description: '',
-      selectedTabId: 'Single day',
       startDateString: startDate.format(TIME_FORMAT),
       endDateString: endDate.format(TIME_FORMAT)
     };
@@ -55,12 +53,6 @@ export class NewEventModal extends Component {
       description: e.target.value,
     });
   };
-
-  onSelectedTabChanged = (tab) => {
-    this.setState({
-      selectedTabId: tab.id,
-    });
-  }
 
   handleAddEvent = () => {
     const { description, startDate, endDate } = this.state;
@@ -165,107 +157,80 @@ export class NewEventModal extends Component {
     }
   }
 
-  getTabs = () => [{
-    id: 'Single day',
-    name: 'Single day',
-    content: (
-      <Fragment>
-        <EuiSpacer size="s" />
-        <EuiDatePicker
-          selected={this.state.startDate}
-          onChange={this.handleSingleDayDateChange}
-          inline
-        />
-      </Fragment>
-    ),
-  }, {
-    id: 'Day range',
-    name: 'Day range',
-    content: this.renderRangedDatePicker()
-  }, {
-    id: 'Time range',
-    name: 'Time range',
-    content: this.renderRangedDatePicker()
-  }];
-
   renderRangedDatePicker = () => {
     const {
       startDate,
       endDate,
       startDateString,
       endDateString,
-      selectedTabId
     } = this.state;
-    const isTimeRange = selectedTabId === 'Time range';
-    let timeInputs = null;
 
-    if (isTimeRange) {
-      timeInputs = (
-        <Fragment>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow label="From:">
-                <EuiFieldText
-                  name="startTime"
-                  onChange={this.handleTimeStartChange}
-                  placeholder={TIME_FORMAT}
-                  value={startDateString}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow label="To:">
-                <EuiFieldText
-                  name="endTime"
-                  onChange={this.handleTimeEndChange}
-                  placeholder={TIME_FORMAT}
-                  value={endDateString}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Fragment>
-      );
-    }
+    const timeInputs = (
+      <Fragment>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow label="From:" helpText={TIME_FORMAT}>
+              <EuiFieldText
+                name="startTime"
+                onChange={this.handleTimeStartChange}
+                placeholder={TIME_FORMAT}
+                value={startDateString}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow label="To:" helpText={TIME_FORMAT}>
+              <EuiFieldText
+                name="endTime"
+                onChange={this.handleTimeEndChange}
+                placeholder={TIME_FORMAT}
+                value={endDateString}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
+    );
 
     return (
       <Fragment>
         <EuiSpacer size="s" />
         {timeInputs}
         <EuiSpacer size="s" />
-        <EuiDatePickerRange
-          iconType={false}
-          startDateControl={
-            <EuiDatePicker
-              fullWidth
-              inline
-              selected={startDate}
-              onChange={this.handleChangeStart}
-              startDate={startDate}
-              endDate={endDate}
-              isInvalid={startDate > endDate}
-              aria-label="Start date"
-              timeFormat={TIME_FORMAT}
-              dateFormat={TIME_FORMAT}
-              // showTimeSelect={isTimeRange}
-            />
-          }
-          endDateControl={
-            <EuiDatePicker
-              fullWidth
-              inline
-              selected={endDate}
-              onChange={this.handleChangeEnd}
-              startDate={startDate}
-              endDate={endDate}
-              isInvalid={startDate > endDate}
-              aria-label="End date"
-              timeFormat={TIME_FORMAT}
-              dateFormat={TIME_FORMAT}
-              // showTimeSelect={isTimeRange}
-            />
-          }
-        />
+        <EuiFormRow fullWidth>
+          <EuiDatePickerRange
+            fullWidth
+            iconType={false}
+            startDateControl={
+              <EuiDatePicker
+                fullWidth
+                inline
+                selected={startDate}
+                onChange={this.handleChangeStart}
+                startDate={startDate}
+                endDate={endDate}
+                isInvalid={startDate > endDate}
+                aria-label="Start date"
+                timeFormat={TIME_FORMAT}
+                dateFormat={TIME_FORMAT}
+              />
+            }
+            endDateControl={
+              <EuiDatePicker
+                fullWidth
+                inline
+                selected={endDate}
+                onChange={this.handleChangeEnd}
+                startDate={startDate}
+                endDate={endDate}
+                isInvalid={startDate > endDate}
+                aria-label="End date"
+                timeFormat={TIME_FORMAT}
+                dateFormat={TIME_FORMAT}
+              />
+            }
+          />
+        </EuiFormRow>
       </Fragment>
     );
   }
@@ -273,7 +238,6 @@ export class NewEventModal extends Component {
   render() {
     const { closeModal } = this.props;
     const { description } = this.state;
-    const tabs = this.getTabs();
 
     return (
       <Fragment>
@@ -301,13 +265,7 @@ export class NewEventModal extends Component {
                   fullWidth
                 />
               </EuiFormRow>
-
-              <EuiTabbedContent
-                size="s"
-                tabs={tabs}
-                initialSelectedTab={tabs[0]}
-                onTabClick={this.onSelectedTabChanged}
-              />
+              {this.renderRangedDatePicker()}
 
             </EuiForm>
           </EuiModalBody>
