@@ -33,12 +33,12 @@ export default function ({ getService, loadTestFile }) {
     });
 
     loadTestFile(require.resolve('./_discover'));
-    // loadTestFile(require.resolve('./_errors'));
-    // loadTestFile(require.resolve('./_field_data'));
-    // loadTestFile(require.resolve('./_shared_links'));
-    // loadTestFile(require.resolve('./_sidebar'));
-    // loadTestFile(require.resolve('./_source_filters'));
-    // loadTestFile(require.resolve('./_large_string'));
-    // loadTestFile(require.resolve('./_inspector'));
+    loadTestFile(require.resolve('./_errors'));
+    loadTestFile(require.resolve('./_field_data'));
+    loadTestFile(require.resolve('./_shared_links'));
+    loadTestFile(require.resolve('./_sidebar'));
+    loadTestFile(require.resolve('./_source_filters'));
+    loadTestFile(require.resolve('./_large_string'));
+    loadTestFile(require.resolve('./_inspector'));
   });
 }
