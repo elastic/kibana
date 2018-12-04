@@ -258,6 +258,7 @@
     "typescript-fsa-reducers": "^0.4.5",
     "ui-select": "0.19.4",
     "unbzip2-stream": "1.0.9",
+    "unstated": "^2.1.1",
     "uuid": "3.0.1",
     "venn.js": "0.2.9",
     "xregexp": "3.2.0"
