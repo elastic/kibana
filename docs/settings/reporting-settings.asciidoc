@@ -93,15 +93,20 @@ Defaults to `3000` (3 seconds).
 `xpack.reporting.capture.browser.type`::
 Specifies the browser to use to capture screenshots. Valid options are `phantom`
 and `chromium`. When `chromium` is set, the settings specified in the <<reporting-chromium-settings, Chromium settings>>
-are respected. This setting will be deprecated in 7.0, when Phantom support is removed.
-Defaults to `chromium`.
+are respected. Defaults to `chromium`.
+
+[NOTE]
+============
+Starting in 7.0, Phantom support will be removed from Kibana, and `chromium`
+will be the only valid option for the `xpack.reporting.capture.browser.type` setting.
+============
 
 
 [float]
 [[reporting-chromium-settings]]
 ==== Chromium Settings
 
-When `xpack.reporting.capture.browser.type` is set to `chromium` you can also specify the following settings.
+When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you can also specify the following settings.
 
 `xpack.reporting.capture.browser.chromium.disableSandbox`::
 Elastic recommends that you research the feasibility of enabling unprivileged user namespaces. 
