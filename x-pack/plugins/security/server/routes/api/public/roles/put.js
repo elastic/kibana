@@ -24,7 +24,7 @@ export function initPutRolesApi(
       kibanaApplicationPrivileges.push({
         privileges: [
           ...kibanaPrivileges.global.minimum ? kibanaPrivileges.global.minimum.map(
-            privilege => PrivilegeSerializer.serializeGlobalReservedPrivilege(privilege)
+            privilege => PrivilegeSerializer.serializeGlobalMinimumPrivilege(privilege)
           ) : [],
           ...kibanaPrivileges.global.feature ? flatten(
             Object.entries(kibanaPrivileges.global.feature).map(
@@ -44,7 +44,7 @@ export function initPutRolesApi(
         kibanaApplicationPrivileges.push({
           privileges: [
             ...spacePrivileges.minimum ? spacePrivileges.minimum.map(
-              privilege => PrivilegeSerializer.serializeSpaceReservedPrivilege(privilege)
+              privilege => PrivilegeSerializer.serializeSpaceMinimumPrivilege(privilege)
             ) : [],
             ...spacePrivileges.feature ? flatten(
               Object.entries(spacePrivileges.feature).map(

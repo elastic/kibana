@@ -6,8 +6,8 @@
 
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
-const reservedPrivilegeNames = ['all', 'read'];
-const spaceReservedPrivilegeNames = reservedPrivilegeNames.map(
+const minimumPrivilegeNames = ['all', 'read'];
+const spaceMinimumPrivilegeNames = minimumPrivilegeNames.map(
   privilegeName => `${spacePrefix}${privilegeName}`
 );
 
@@ -17,25 +17,25 @@ interface FeaturePrivilege {
 }
 
 export class PrivilegeSerializer {
-  public static isReservedGlobalPrivilege(privilegeName: string) {
-    return reservedPrivilegeNames.includes(privilegeName);
+  public static isGlobalMinimumPrivilege(privilegeName: string) {
+    return minimumPrivilegeNames.includes(privilegeName);
   }
 
-  public static isReservedSpacePrivilege(privilegeName: string) {
-    return spaceReservedPrivilegeNames.includes(privilegeName);
+  public static isSpaceMinimumPrivilege(privilegeName: string) {
+    return spaceMinimumPrivilegeNames.includes(privilegeName);
   }
 
-  public static serializeGlobalReservedPrivilege(privilegeName: string) {
-    if (!reservedPrivilegeNames.includes(privilegeName)) {
-      throw new Error('Unrecognized global reserved privilege');
+  public static serializeGlobalMinimumPrivilege(privilegeName: string) {
+    if (!minimumPrivilegeNames.includes(privilegeName)) {
+      throw new Error('Unrecognized global minimum privilege');
     }
 
     return privilegeName;
   }
 
-  public static serializeSpaceReservedPrivilege(privilegeName: string) {
-    if (!reservedPrivilegeNames.includes(privilegeName)) {
-      throw new Error('Unrecognized space reserved privilege');
+  public static serializeSpaceMinimumPrivilege(privilegeName: string) {
+    if (!minimumPrivilegeNames.includes(privilegeName)) {
+      throw new Error('Unrecognized space minimum privilege');
     }
 
     return `${spacePrefix}${privilegeName}`;
@@ -45,63 +45,36 @@ export class PrivilegeSerializer {
     return `${featurePrefix}${featureName}.${privilegeName}`;
   }
 
-  public static serializePrivilegeAssignedGlobally(privilege: string) {
-    if (reservedPrivilegeNames.includes(privilege)) {
-      return privilege;
-    }
-
-    return `${featurePrefix}${privilege}`;
-  }
-
-  public static serializePrivilegeAssignedAtSpace(privilege: string) {
-    if (reservedPrivilegeNames.includes(privilege)) {
-      return `${spacePrefix}${privilege}`;
-    }
-
-    return `${featurePrefix}${privilege}`;
-  }
-
   public static deserializeFeaturePrivilege(privilege: string): FeaturePrivilege {
     if (privilege.indexOf(featurePrefix) !== 0) {
       throw new Error(`privilege '${privilege}' was expected to start with '${featurePrefix}'`);
     }
 
     const withoutPrefix = privilege.slice(featurePrefix.length);
-    const indexOfFirstUnderscore = withoutPrefix.indexOf('.');
+    const parts = withoutPrefix.split('.');
+    if (parts.length !== 2) {
+      throw new Error(`Unable to deserialize feature privilege '${privilege}'`);
+    }
+
     return {
-      featureId: withoutPrefix.slice(0, indexOfFirstUnderscore),
-      privilege: withoutPrefix.slice(indexOfFirstUnderscore + 1),
+      featureId: parts[0],
+      privilege: parts[1],
     };
   }
 
-  public static deserializePrivilegeAssignedGlobally(privilege: string) {
-    if (privilege.startsWith(featurePrefix)) {
-      return privilege.slice(featurePrefix.length);
-    }
-
-    if (reservedPrivilegeNames.includes(privilege)) {
+  public static deserializeGlobalMinimumPrivilege(privilege: string) {
+    if (minimumPrivilegeNames.includes(privilege)) {
       return privilege;
     }
 
-    throw new Error('Unrecognized privilege assigned globally');
+    throw new Error('Unrecognized global minimum privilege');
   }
 
-  public static deserializePrivilegeAssignedAtSpace(privilege: string) {
-    if (privilege.startsWith(featurePrefix)) {
-      return privilege.slice(featurePrefix.length);
+  public static deserializeSpaceMinimumPrivilege(privilege: string) {
+    if (!spaceMinimumPrivilegeNames.includes(privilege)) {
+      throw new Error('Unrecognized space minimum privilege');
     }
 
-    if (!privilege.startsWith(spacePrefix)) {
-      throw new Error(
-        `Unable to deserialize ${privilege}, should have started with ${spacePrefix} or ${featurePrefix}`
-      );
-    }
-
-    const privilegeName = privilege.slice(spacePrefix.length);
-    if (reservedPrivilegeNames.includes(privilegeName)) {
-      return privilegeName;
-    }
-
-    throw new Error('Unrecognized privilege assigned at space');
+    return privilege.slice(spacePrefix.length);
   }
 }

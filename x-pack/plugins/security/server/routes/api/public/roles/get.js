@@ -21,13 +21,13 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
 
     return resourcePrivileges.reduce((result, { resource, privileges }) => {
       if (resource === GLOBAL_RESOURCE) {
-        const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isReservedGlobalPrivilege(privilege));
-        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isReservedGlobalPrivilege(privilege));
+        const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isGlobalMinimumPrivilege(privilege));
+        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isGlobalMinimumPrivilege(privilege));
 
         result.global = {
           minimum: [
             ...result.global.minimum,
-            ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializePrivilegeAssignedGlobally(privilege))
+            ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializeGlobalMinimumPrivilege(privilege))
           ],
           features: {
             ...result.global.features,
@@ -46,13 +46,13 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
         return result;
       }
 
-      const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isReservedSpacePrivilege(privilege));
-      const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isReservedSpacePrivilege(privilege));
+      const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSpaceMinimumPrivilege(privilege));
+      const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSpaceMinimumPrivilege(privilege));
       const spaceId = ResourceSerializer.deserializeSpaceResource(resource);
       result.space[spaceId] = {
         minimum: [
           ...result[spaceId] ? result[spaceId].minimum || [] : [],
-          ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializePrivilegeAssignedAtSpace(privilege))
+          ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializeSpaceMinimumPrivilege(privilege))
         ],
         features: {
           ...result[spaceId] ? result[spaceId].features || [] : [],

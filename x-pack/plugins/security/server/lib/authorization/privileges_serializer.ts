@@ -30,7 +30,7 @@ export const serializePrivileges = (
     [application]: {
       ...Object.entries(privilegeMap.global).reduce(
         (acc, [privilegeName, privilegeActions]) => {
-          const name = PrivilegeSerializer.serializeGlobalReservedPrivilege(privilegeName);
+          const name = PrivilegeSerializer.serializeGlobalMinimumPrivilege(privilegeName);
           acc[name] = {
             application,
             name: privilegeName,
@@ -43,7 +43,7 @@ export const serializePrivileges = (
       ),
       ...Object.entries(privilegeMap.space).reduce(
         (acc, [privilegeName, privilegeActions]) => {
-          const name = PrivilegeSerializer.serializeSpaceReservedPrivilege(privilegeName);
+          const name = PrivilegeSerializer.serializeSpaceMinimumPrivilege(privilegeName);
           acc[name] = {
             application,
             name,
