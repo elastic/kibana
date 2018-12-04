@@ -7,22 +7,10 @@
       i18n-default-message="Interval"
     ></span>
     <icon-tip
-      ng-if="!(agg.buckets.getInterval().scale > 1)"
       ng-show="agg.buckets.getInterval().scaled"
       type="'alert'"
       position="'right'"
-      content="::'common.ui.aggTypes.intervalCreatesTooManyBucketsTooltip' | i18n: { 
-        defaultMessage: 'This interval creates too many buckets to show in the selected time range, so it has been scaled to {bucketDescription}',
-        values: { bucketDescription: agg.buckets.getInterval().description } }"
-    ></icon-tip>
-    <icon-tip
-      ng-if="agg.buckets.getInterval().scale > 1"
-      ng-show="agg.buckets.getInterval().scaled"
-      type="'alert'"
-      position="'right'"
-      content="::'common.ui.aggTypes.intervalCreatesTooLargeBucketsTooltip' | i18n: {
-        defaultMessage: 'This interval creates buckets that are too large to show in the selected time range, so it has been scaled to {bucketDescription}',
-        values: { bucketDescription: agg.buckets.getInterval().description } }"
+      content="agg.params.interval_tooltip"
     ></icon-tip>
   </label>
   <select

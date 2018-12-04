@@ -21,12 +21,19 @@ import _ from 'lodash';
 import editorHtml from '../controls/raw_json.html';
 import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';
+import { i18n } from '@kbn/i18n';
 
 
 createLegacyClass(JsonParamType).inherits(BaseParamType);
 function JsonParamType(config) {
   // force name override
-  config = _.defaults(config, { name: 'json' });
+  config = _.defaults(config, {
+    name: 'json',
+    jsonLabel: i18n.translate('common.ui.aggTypes.jsonInputTooltip', {
+      defaultMessage: `Any JSON formatted properties you add here will be merged with the elasticsearch
+        aggregation definition for this section. For example 'shard_size' on a terms aggregation.`
+    })
+  });
   JsonParamType.Super.call(this, config);
 }
 

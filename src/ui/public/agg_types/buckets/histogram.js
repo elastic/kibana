@@ -183,6 +183,26 @@ export const histogramBucketAgg = new BucketAggType({
           return aggConfig.params.min_doc_count;
         }
       }
+    },
+    {
+      name: 'extended_bounds_tooltip',
+      default: i18n.translate('common.ui.aggTypes.extendedBoundsTooltip', {
+        defaultMessage: 'Min and Max do not filter the results, but rather extend the bounds of the result set'
+      }),
+    },
+    {
+      name: 'show_empty_buckets_tooltip',
+      default: i18n.translate('common.ui.aggTypes.showEmptyBucketsTooltip', {
+        defaultMessage: 'Show all buckets, not only the buckets with results'
+      }),
+    },
+    {
+      name: 'minimum_interval_tooltip',
+      default: i18n.translate('common.ui.aggTypes.minimumIntervalTooltip', {
+        defaultMessage: `Interval will be automatically scaled in the event that the provided
+          value creates more buckets than specified by Advanced Setting's {histogramMaxBars}`,
+        values: { histogramMaxBars: 'histogram:maxBars' }
+      }),
     }
   ]
 });
