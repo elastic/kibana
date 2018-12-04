@@ -26,6 +26,7 @@ import React, { ChangeEvent, Component, Fragment } from 'react';
 
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import { UserProfile } from 'plugins/xpack_main/services/user_profile';
+import chrome from 'ui/chrome';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
 import { isReservedSpace } from '../../../../common';
@@ -34,7 +35,7 @@ import { SpaceAvatar } from '../../../components';
 import { SpacesManager } from '../../../lib';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
-import { toSpaceIdentifier } from '../lib';
+import { getEditBreadcrumbs, toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 import { DeleteSpacesButton } from './delete_spaces_button';
@@ -78,6 +79,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         .getSpace(spaceId)
         .then((result: any) => {
           if (result.data) {
+            chrome.breadcrumbs.set(getEditBreadcrumbs(result.data));
             this.setState({
               space: result.data,
               isLoading: false,
