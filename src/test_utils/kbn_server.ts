@@ -52,7 +52,7 @@ const DEFAULTS_SETTINGS = {
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
-  plugins: { scanDirs: [resolve(__dirname, '../core_plugins')] },
+  plugins: { scanDirs: [resolve(__dirname, '../legacy/core_plugins')] },
   elasticsearch: {
     url: esTestConfig.getUrl(),
     username: kibanaServerTestUser.username,
