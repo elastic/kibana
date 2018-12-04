@@ -29,7 +29,8 @@ export function SearchRequestProvider(Promise) {
       if (!errorHandler) {
         throw new Error(
           i18n.translate('common.ui.courier.fetch.requireErrorHandlerErrorMessage', {
-            defaultMessage: 'errorHandler is required',
+            defaultMessage: '{errorHandler} is required',
+            values: { errorHandler: 'errorHandler' }
           })
         );
       }

@@ -337,7 +337,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
     const displayDuplicateTitleConfirmModal = () => {
       const confirmMessage = i18n.translate('common.ui.courier.savedObject.confirmModal.saveDuplicateConfirmationMessage', {
-        defaultMessage: 'A {name} with the title \'{title}\' already exists. Would you like to save anyway?',
+        defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
         values: { title: this.title, name: this.getDisplayName() }
       });
 
