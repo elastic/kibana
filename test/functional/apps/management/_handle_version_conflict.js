@@ -31,7 +31,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const es = getService('es');
   const retry = getService('retry');
   const scriptedFiledName = 'versionConflictScript';
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('index version conflict', function describeIndexTests() {
     before(async function () {
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
     });
 
