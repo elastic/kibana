@@ -322,6 +322,7 @@ export class SavedObjectsRepository {
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
       ignore: [404],
+      rest_total_hits_as_int: true,
       body: {
         version: true,
         ...getSearchDsl(this._mappings, this._schema, {
