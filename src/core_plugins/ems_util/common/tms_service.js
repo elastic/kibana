@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { ORIGIN } from './origin';
+
 export class TMSService {
 
   constructor(config,  emsClient) {
@@ -46,6 +48,10 @@ export class TMSService {
 
   hasId(id) {
     return this._config.id === id;
+  }
+
+  getOrigin() {
+    return ORIGIN.EMS;
   }
 
 }

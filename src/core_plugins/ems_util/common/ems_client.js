@@ -51,7 +51,7 @@ const DEFAULT_LANGUAGE = 'en';
 export class EMSClientV66 {
 
 
-  constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language }) {
+  constructor({ kbnVersion, manifestServiceUrl, htmlSanitizer, language, landingPageUrl }) {
 
     this._queryParams = {
       my_app_version: kbnVersion
@@ -62,6 +62,7 @@ export class EMSClientV66 {
     this._loadCatalogue = null;
     this._loadFileLayers = null;
     this._loadTMSServices = null;
+    this._emsLandingPageUrl = landingPageUrl;
     this._language = typeof language === 'string' ? language : DEFAULT_LANGUAGE;
 
     this._invalidateSettings();
@@ -151,6 +152,10 @@ export class EMSClientV66 {
 
     });
 
+  }
+
+  getLandingPageUrl() {
+    return this._emsLandingPageUrl;
   }
 
   sanitizeMarkdown(markdown) {

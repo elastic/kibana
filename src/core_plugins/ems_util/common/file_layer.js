@@ -74,6 +74,10 @@ export class FileLayer {
     return this._config.formats[0];
   }
 
+  getEMSHotlink() {
+    const id = `file/${this.getId()}`;
+    return `${this._emsClient.getLandingPageUrl()}#${id}`;
+  }
 
   getDefaultFormatType() {
     const format = this._getDefaultFormat();

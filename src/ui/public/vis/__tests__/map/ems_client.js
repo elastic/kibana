@@ -155,6 +155,9 @@ describe('ems_client', () => {
       type: 'id' },
     { name: 'name', description: 'name', type: 'property' } ]);
 
+
+    expect(layer.getEMSHotlink()).to.be('https://landing.foobar#file/world_countries');
+
   });
 
   it('.findFileLayerById', async () => {
@@ -182,6 +185,7 @@ function getEMSClient(options = {}) {
     kbnVersion: '6.x.x',
     manifestServiceUrl: 'https://foobar',
     htmlSanitizer: x => x,
+    landingPageUrl: 'https://landing.foobar',
     ...options
   });
 

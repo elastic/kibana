@@ -21,7 +21,8 @@ import { uiModules } from '../../modules';
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from '../../url';
-import { ORIGIN } from './origin';
+import { ORIGIN } from '../../../../core_plugins/ems_util/common/origin';
+import { EMSClientV66 } from '../../../../core_plugins/ems_util/common/ems_client';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -52,10 +53,17 @@ uiModules.get('kibana')
     };
 
 
-
     class ServiceSettings {
 
       constructor() {
+
+        this._emsClient = new EMSClientV66({
+          kbnVersion: kbnVersion,
+          manifestServiceUrl: mapConfig.manifestServiceUrl,
+          htmlSanitizer: $sanitize,
+          landingPageUrl: mapConfig.emsLandingPageUrl,
+        });
+
         this._queryParams = {
           my_app_version: kbnVersion
         };
@@ -106,25 +114,25 @@ uiModules.get('kibana')
           return layers;
         });
 
-        this._loadTMSServices = _.once(async () => {
-
-          const catalogue = await this._loadCatalogue();
-          const tmsService = catalogue.services.find((service) => service.type === 'tms');
-          if (!tmsService) {
-            return [];
-          }
-          const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
-          const preppedTMSServices = tmsManifest.data.services.map((tmsService) => {
-            const preppedService = _.cloneDeep(tmsService);
-            preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
-            preppedService.subdomains = preppedService.subdomains || [];
-            preppedService.origin = ORIGIN.EMS;
-            return preppedService;
-          });
-
-          return preppedTMSServices;
-
-        });
+        // this._loadTMSServices = _.once(async () => {
+        //
+        //   const catalogue = await this._loadCatalogue();
+        //   const tmsService = catalogue.services.find((service) => service.type === 'tms');
+        //   if (!tmsService) {
+        //     return [];
+        //   }
+        //   const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
+        //   const preppedTMSServices = tmsManifest.data.services.map((tmsService) => {
+        //     const preppedService = _.cloneDeep(tmsService);
+        //     preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
+        //     preppedService.subdomains = preppedService.subdomains || [];
+        //     preppedService.origin = ORIGIN.EMS;
+        //     return preppedService;
+        //   });
+        //
+        //   return preppedTMSServices;
+        //
+        // });
 
       }
 
@@ -145,6 +153,20 @@ uiModules.get('kibana')
       }
 
 
+      __debugStubManifestCalls(manifestRetrieval) {
+        const oldGetManifest = this._emsClient._getManifest;
+        this._emsClient._getManifest = manifestRetrieval;
+        return {
+          removeStub: () => {
+            delete this._emsClient._getManifest;
+            //not strictly necessary since this is prototype method
+            if (this._emsClient._getManifest !== oldGetManifest) {
+              this._emsClient._getManifest = oldGetManifest;
+            }
+          }
+        };
+      }
+
       async getFileLayers() {
         const fileLayers = await this._loadFileLayers();
         return fileLayers.map(fileLayer => {
@@ -162,7 +184,7 @@ uiModules.get('kibana')
        */
       async getTMSServices() {
 
-        const allServices = [];
+        let allServices = [];
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
           tmsService.id = TMS_IN_YML_ID;
@@ -170,17 +192,33 @@ uiModules.get('kibana')
           allServices.push(tmsService);
         }
 
-        const servicesFromManifest = await this._loadTMSServices();
 
-        const strippedServiceFromManifest = servicesFromManifest.map((service) => {
-          const strippedService = { ...service };
-          //do not expose url. needs to be resolved dynamically
-          delete strippedService.url;
-          strippedService.origin = ORIGIN.EMS;
-          return strippedService;
-        });
+        if  (mapConfig.includeElasticMapsService) {
+          const servicesFromManifest = await this._emsClient.getTMSServices();
+          const strippedServiceFromManifest = servicesFromManifest.map((service) => {
 
-        return allServices.concat(strippedServiceFromManifest);
+            // const strippedService = { ...service };
+            //do not expose url. needs to be resolved dynamically
+            // delete strippedService.url;
+            // strippedService.origin = ORIGIN.EMS;
+
+            //shim for compatibility
+            const shim = {
+              origin: service.getOrigin(),
+              id: service.getId(),
+              minZoom: service.getMinZoom(),
+              maxZoom: service.getMaxZoom(),
+              attribution: service.getHTMLAttribution()
+            };
+
+            return shim;
+          });
+          allServices = allServices.concat(strippedServiceFromManifest);
+        }
+
+
+
+        return allServices;
       }
 
       /**
@@ -189,16 +227,17 @@ uiModules.get('kibana')
        * @param additionalQueryParams
        */
       addQueryParams(additionalQueryParams) {
-        for (const key in additionalQueryParams) {
-          if (additionalQueryParams.hasOwnProperty(key)) {
-            if (additionalQueryParams[key] !== this._queryParams[key]) {
-              //changes detected.
-              this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
-              this._invalidateSettings();
-              break;
-            }
-          }
-        }
+        this._emsClient.addQueryParams(additionalQueryParams);
+        // for (const key in additionalQueryParams) {
+        //   if (additionalQueryParams.hasOwnProperty(key)) {
+        //     if (additionalQueryParams[key] !== this._queryParams[key]) {
+        //       //changes detected.
+        //       this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
+        //       this._invalidateSettings();
+        //       break;
+        //     }
+        //   }
+        // }
       }
 
       async getEMSHotLink(fileLayer) {
@@ -208,11 +247,11 @@ uiModules.get('kibana')
 
 
       async _getUrlTemplateForEMSTMSLayer(tmsServiceConfig) {
-        const tmsServices = await this._loadTMSServices();
-        const serviceConfig = tmsServices.find(service => {
-          return service.id === tmsServiceConfig.id;
+        const tmsServices = await this._emsClient.getTMSServices();
+        const tmsService = tmsServices.find(service => {
+          return service.getId() === tmsServiceConfig.id;
         });
-        return this._extendUrlWithParams(serviceConfig.url);
+        return tmsService.getUrlTemplate();
       }
 
       async getUrlTemplateForTMSLayer(tmsServiceConfig) {
