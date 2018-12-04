@@ -103,7 +103,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
                 title={<h2>All clear!</h2>}
                 body={
                   <Fragment>
-                    <p>
+                    <p data-test-subj="upgradeCheckupIssueSummary">
                       You have no <strong>{checkupType}</strong> issues.
                     </p>
                     <p>Check other tabs for issues or return to the overview for next steps.</p>

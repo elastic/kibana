@@ -53,6 +53,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await find.clickByDisplayedLinkText('Index Patterns');
     }
 
+    async clickElasticsearchUpgradeCheckup() {
+      await find.clickByDisplayedLinkText('Upgrade Checkup');
+    }
+
     async getAdvancedSettings(propertyName) {
       log.debug('in getAdvancedSettings');
       const setting = await testSubjects.find(`advancedSetting-editField-${propertyName}`);

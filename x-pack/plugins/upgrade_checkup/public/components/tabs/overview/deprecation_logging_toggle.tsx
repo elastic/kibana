@@ -7,7 +7,7 @@
 import axios from 'axios';
 import React from 'react';
 
-import { EuiSwitch } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
 import { LoadingState } from '../../types';
@@ -33,8 +33,14 @@ export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLog
   public render() {
     const { loggingEnabled, loadingState } = this.state;
 
+    // Show a spinner until we've done the initial load.
+    if (loadingState === LoadingState.Loading && loggingEnabled === undefined) {
+      return <EuiLoadingSpinner size="l" />;
+    }
+
     return (
       <EuiSwitch
+        data-test-subj="upgradeCheckupDeprecationToggle"
         label={this.renderLoggingState()}
         checked={loggingEnabled}
         onChange={this.toggleLogging}
@@ -48,8 +54,6 @@ export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLog
 
     if (loadingState === LoadingState.Error) {
       return 'Could not load logging state';
-    } else if (loggingEnabled === undefined) {
-      return null; // TODO: Something better to put here than nothing?
     } else if (loggingEnabled) {
       return 'On';
     } else {
@@ -72,12 +76,14 @@ export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLog
 
   private toggleLogging = async () => {
     try {
-      this.setState({ loadingState: LoadingState.Loading });
+      // Optimistically toggle the UI
+      const newEnabled = !this.state.loggingEnabled;
+      this.setState({ loadingState: LoadingState.Loading, loggingEnabled: newEnabled });
 
       const resp = await axios.put(
         chrome.addBasePath('/api/upgrade_checkup/deprecation_logging'),
         {
-          isEnabled: !this.state.loggingEnabled,
+          isEnabled: newEnabled,
         },
         {
           headers: {

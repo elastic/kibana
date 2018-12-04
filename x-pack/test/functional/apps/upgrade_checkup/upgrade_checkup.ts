@@ -18,9 +18,28 @@ export default function upgradeCheckupFunctionalTests({
     before(async () => await esArchiver.load('empty_kibana'));
     after(async () => await esArchiver.unload('empty_kibana'));
 
-    it('allows user to navigate without authentication', async () => {
+    it('allows user to navigate to upgrade checkup', async () => {
       await PageObjects.upgradeCheckup.navigateToPage();
       await PageObjects.upgradeCheckup.expectUpgradeCheckup();
+    });
+
+    it('allows user to toggle deprecation logging', async () => {
+      await PageObjects.upgradeCheckup.navigateToPage();
+      await PageObjects.upgradeCheckup.expectDeprecationLoggingLabel('On');
+      await PageObjects.upgradeCheckup.toggleDeprecationLogging();
+      await PageObjects.upgradeCheckup.expectDeprecationLoggingLabel('Off');
+    });
+
+    it('allows user to open cluster tab', async () => {
+      await PageObjects.upgradeCheckup.navigateToPage();
+      await PageObjects.upgradeCheckup.clickTab('cluster');
+      await PageObjects.upgradeCheckup.expectIssueSummary('You have no cluster issues.');
+    });
+
+    it('allows user to open indices tab', async () => {
+      await PageObjects.upgradeCheckup.navigateToPage();
+      await PageObjects.upgradeCheckup.clickTab('indices');
+      await PageObjects.upgradeCheckup.expectIssueSummary('You have no indices issues.');
     });
   });
 }
