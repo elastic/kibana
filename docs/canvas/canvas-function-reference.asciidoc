@@ -8,9 +8,9 @@ type casting, and sub-expressions.
 For the purpose of this documentation, 
 the Canvas functions are divided by the environment they run in:
 
-* <<canvas-common-functions>> can run anywhere.
-* <<canvas-server-functions>> can only execute on the server.
-* <<canvas-client-functions>> must execute in a browser.
+* <<canvas-common-functions>> can run anywhere
+* <<canvas-server-functions>> can only execute on the server
+* <<canvas-client-functions>> must execute in a browser
 
 The Canvas expression language also supports <<canvas-tinymath-functions>>, which
 perform complex math calculations.
