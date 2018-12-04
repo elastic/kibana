@@ -11,6 +11,9 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiLink,
   EuiInMemoryTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { ConnectionStatus, RemoveClusterButton } from '../components';
@@ -80,12 +83,37 @@ export class RemoteClusterTableUi extends Component {
       ),
       sortable: true,
       truncateText: false,
-      render: (name) => {
-        return (
+      render: (name, { isConfiguredByNode }) => {
+        const link = (
           <EuiLink onClick={() => openDetailPanel(name)}>
             {name}
           </EuiLink>
         );
+
+        if (isConfiguredByNode) {
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {link}
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="alert"
+                  color="warning"
+                  content={(
+                    <FormattedMessage
+                      id="xpack.remoteClusters.remoteClusterList.table.isConfiguredByNodeMessage"
+                      defaultMessage="Defined in elasticsearch.yml"
+                    />
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+
+        return link;
       }
     }, {
       field: 'seeds',
