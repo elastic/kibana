@@ -17,10 +17,22 @@
  * under the License.
  */
 
+import { IRootScopeService } from 'angular';
+
 // @ts-ignore
 import { uiModules } from 'ui/modules';
+import { fatalError } from 'ui/notify/fatal_error';
 import { Breadcrumb, ChromeStartContract } from '../../../../core/public/chrome';
 export { Breadcrumb };
+
+export interface BreadcrumbsApi {
+  get$(): ReturnType<ChromeStartContract['getBreadcrumbs$']>;
+  set(newBreadcrumbs: Breadcrumb[]): void;
+}
+
+export interface WithBreadcrumbsApi {
+  breadcrumbs: BreadcrumbsApi;
+}
 
 let newPlatformChrome: ChromeStartContract;
 export function __newPlatformInit__(instance: ChromeStartContract) {
@@ -37,13 +49,13 @@ export function initBreadcrumbsApi(
 ) {
   // A flag used to determine if we should automatically
   // clear the breadcrumbs between angular route changes.
-  let shouldClear = false;
+  let breadcrumbSetSinceRouteChange = false;
 
-  // reset shouldClear any time the breadcrumbs change, even
+  // reset breadcrumbSetSinceRouteChange any time the breadcrumbs change, even
   // if it was done directly through the new platform
   newPlatformChrome.getBreadcrumbs$().subscribe({
     next() {
-      shouldClear = false;
+      breadcrumbSetSinceRouteChange = true;
     },
   });
 
@@ -61,14 +73,31 @@ export function initBreadcrumbsApi(
   // bootstraps and lets us integrate with the angular router so that we can
   // automatically clear the breadcrumbs if we switch to a Kibana app that
   // does not use breadcrumbs correctly
-  internals.$setupBreadcrumbsAutoClear = ($rootScope: any) => {
+  internals.$setupBreadcrumbsAutoClear = ($rootScope: IRootScopeService, $injector: any) => {
+    const uiSettings = chrome.getUiSettingsClient();
+    const $route = $injector.has('$route') ? $injector.get('$route') : {};
+
     $rootScope.$on('$routeChangeStart', () => {
-      shouldClear = true;
+      breadcrumbSetSinceRouteChange = false;
     });
 
     $rootScope.$on('$routeChangeSuccess', () => {
-      if (shouldClear) {
+      const current = $route.current || {};
+
+      if (breadcrumbSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
+        return;
+      }
+
+      const k7BreadcrumbsProvider = current.k7Breadcrumbs;
+      if (!k7BreadcrumbsProvider || !uiSettings.get('k7design')) {
         newPlatformChrome.setBreadcrumbs([]);
+        return;
+      }
+
+      try {
+        chrome.breadcrumbs.set($injector.invoke(k7BreadcrumbsProvider));
+      } catch (error) {
+        fatalError(error);
       }
     });
   };
