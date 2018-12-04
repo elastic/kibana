@@ -58,12 +58,13 @@ export function createGenerateCsv(logger) {
     } finally {
       await iterator.return();
     }
+    const size = builder.getSizeInBytes();
+    logger(`finished generating, total size in bytes: ${size}`);
 
-    logger('finished generating');
     return {
       content: builder.getString(),
       maxSizeReached,
-      size: builder.getSizeInBytes(),
+      size,
     };
   };
 }
