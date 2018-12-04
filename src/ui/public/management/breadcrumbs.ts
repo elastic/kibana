@@ -17,15 +17,11 @@
  * under the License.
  */
 
-import { fetchProvider } from './fetch';
+import { i18n } from '@kbn/i18n';
 
-export function makeKQLUsageCollector(server) {
-  const index = server.config().get('kibana.index');
-  const fetch = fetchProvider(index);
-  const kqlUsageCollector = server.usage.collectorSet.makeUsageCollector({
-    type: 'kql',
-    fetch,
-  });
-
-  server.usage.collectorSet.register(kqlUsageCollector);
-}
+export const MANAGEMENT_BREADCRUMB = Object.freeze({
+  text: i18n.translate('common.ui.management.breadcrumb', {
+    defaultMessage: 'Management',
+  }),
+  href: '#/management',
+});
