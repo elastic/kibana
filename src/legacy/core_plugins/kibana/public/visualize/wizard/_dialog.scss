@@ -1,0 +1,104 @@
+.visNewVisDialog {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='166' height='157' viewBox='0 0 166 157'%3E%3Cdefs%3E%3ClinearGradient id='untitled-2-a' x1='0%25' y1='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FFF' stop-opacity='.2'/%3E%3Cstop offset='100%25' stop-opacity='0'/%3E%3C/linearGradient%3E%3CradialGradient id='untitled-2-b' cx='0%25' cy='0%25' r='127.787%25' fx='0%25' fy='0%25' gradientTransform='matrix(.681 .68098 -.63326 .7323 0 0)'%3E%3Cstop offset='0%25' stop-color='%23BBB' stop-opacity='.1'/%3E%3Cstop offset='100%25' stop-opacity='.5'/%3E%3C/radialGradient%3E%3ClinearGradient id='untitled-2-c' x1='0%25' y1='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FFF' stop-opacity='.4'/%3E%3Cstop offset='100%25' stop-opacity='0'/%3E%3C/linearGradient%3E%3CradialGradient id='untitled-2-d' cx='0%25' cy='0%25' r='148.851%25' fx='0%25' fy='0%25' gradientTransform='matrix(.6718 .67182 -.74072 .60932 0 0)'%3E%3Cstop offset='0%25' stop-color='%23FFF' stop-opacity='.101'/%3E%3Cstop offset='100%25' stop-opacity='.15'/%3E%3C/radialGradient%3E%3CradialGradient id='untitled-2-e' cx='0%25' cy='0%25' r='127.349%25' fx='0%25' fy='0%25' gradientTransform='matrix(.68331 .68332 -.73013 .63951 0 0)'%3E%3Cstop offset='0%25' stop-color='%23BBB' stop-opacity='.1'/%3E%3Cstop offset='100%25' stop-opacity='.5'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cg opacity='.5' fill='none' fill-rule='evenodd' transform='matrix(-1 0 0 1 166 0)'%3E%3Cg opacity='.65' transform='matrix(0 -1 -1 0 146 157)'%3E%3Cpolygon fill='%23DD0A73' points='0 0 157 146 0 146' opacity='.418'/%3E%3Cpolygon fill='url(%23untitled-2-a)' points='0 0 157 146 0 146' style='mix-blend-mode:overlay'/%3E%3Cpolygon fill='url(%23untitled-2-b)' points='0 0 157 146 0 146' opacity='.618' style='mix-blend-mode:overlay'/%3E%3C/g%3E%3Cg opacity='.65' transform='translate(88 71)'%3E%3Cpath fill='%23017F75' d='M0,86 L78,86 C74.2038079,48.730962 43.6293886,16.7871605 0,0 L0,86 Z' opacity='.409'/%3E%3Cpath fill='url(%23untitled-2-c)' d='M0,86 L78,86 C74.2038079,48.730962 43.6293886,16.7871605 0,0 L0,86 Z' style='mix-blend-mode:overlay'/%3E%3Cpath fill='url(%23untitled-2-d)' d='M0,86 L78,86 C74.2038079,48.730962 43.6293886,16.7871605 0,0 L0,86 Z' opacity='.663' style='mix-blend-mode:overlay'/%3E%3C/g%3E%3Cg opacity='.15' transform='translate(73 79)'%3E%3Cpolygon fill='%23353535' points='0 0 73 78 0 78' opacity='.38'/%3E%3Cpolygon fill='url(%23untitled-2-a)' points='0 0 73 78 0 78' style='mix-blend-mode:overlay'/%3E%3Cpolygon fill='url(%23untitled-2-e)' points='0 0 73 78 0 78' style='mix-blend-mode:overlay'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A");
+  background-repeat: no-repeat;
+  background-position: calc(100% + 1px) calc(100% + 1px);
+  background-size: 37%;
+}
+
+.visNewVisDialog__body {
+  display: flex;
+  padding: $euiSizeM $euiSizeL 0;
+  min-height: 0;
+}
+.visNewVisDialog__list {
+  min-height: 0;
+}
+
+.visNewVisDialog__searchWrapper {
+  flex-shrink: 0;
+}
+
+.visNewVisDialog__typesWrapper {
+  max-width: $euiSizeXXL * 10;
+  min-height: 0;
+  padding-top: 2px; // Account for search field dropshadow
+  padding-bottom: $euiSize;
+  // Add overflow shadows via pseudo elements
+  position: relative;
+  &::before,
+  &::after {
+    content: "";
+    display: block;
+    position: absolute;
+    height: $euiSizeXXL;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+  }
+
+  &::before {
+    top: -$euiSizeXXL + 2px; // Account for search field dropshadow
+    @include euiOverflowShadowBottom;
+  }
+
+  &::after {
+    bottom: -$euiSizeL;
+    @include euiOverflowShadowTop;
+  }
+}
+
+.visNewVisDialog__types {
+  @include euiScrollBar;
+  // EUITODO: allow for more (calculated) widths of `EuiKeyPadMenu`
+  width: auto;
+  overflow-y: auto;
+  padding-top: $euiSize;
+  justify-content: center;
+  padding-bottom: $euiSize;
+}
+
+.visNewVisDialog__description {
+  width: $euiSizeXL * 10;
+}
+
+.visNewVisDialog__type:disabled {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.visNewVisDialog__typeLegacyIcon {
+  font-size: $euiSizeL;
+  color: $euiColorSecondary;
+}
+
+.visNewVisDialog__typeImage {
+  @include size($euiSizeL);
+}
+
+@include euiBreakpoint('xs', 's') {
+  .visNewVisDialog {
+    background-image: none;
+  }
+
+  .visNewVisDialog__typesWrapper {
+    max-width: none;
+  }
+
+  .visNewVisDialog__types {
+    justify-content: flex-start;
+  }
+
+  .visNewVisDialog__description {
+    display: none;
+  }
+}
+
+@include internetExplorerOnly {
+  .visNewVisDialog {
+    width: 820px;
+  }
+
+  .visNewVisDialog__body {
+    flex-basis: 800px;
+  }
+}
