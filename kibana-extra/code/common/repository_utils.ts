@@ -15,7 +15,10 @@ export class RepositoryUtils {
   // Generate a Repository instance by parsing repository remote url
   public static buildRepository(remoteUrl: string): Repository {
     const repo = GitUrlParse(remoteUrl);
-    const host = repo.source ? repo.source : '';
+    let host = repo.source ? repo.source : '';
+    if (repo.port !== null) {
+      host = host + ':' + repo.port;
+    }
     const name = repo.name ? repo.name : '_';
     const org = repo.owner ? repo.owner.split('/').join('_') : '_';
     const uri: RepositoryUri = host ? `${host}/${org}/${name}` : repo.full_name;

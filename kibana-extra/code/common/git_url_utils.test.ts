@@ -8,30 +8,27 @@ import { isValidGitUrl } from './git_url_utils';
 
 test('Git url validation', () => {
   // An url ends with .git
-  const url1 = 'https://github.com/elastic/elasticsearch.git';
-  expect(isValidGitUrl(url1)).toBeTruthy();
+  expect(isValidGitUrl('https://github.com/elastic/elasticsearch.git')).toBeTruthy();
 
   // An url ends without .git
-  const url2 = 'https://github.com/elastic/elasticsearch';
-  expect(isValidGitUrl(url2)).toBeTruthy();
+  expect(isValidGitUrl('https://github.com/elastic/elasticsearch')).toBeTruthy();
 
   // An url with http://
-  const url3 = 'http://github.com/elastic/elasticsearch';
-  expect(isValidGitUrl(url3)).toBeTruthy();
+  expect(isValidGitUrl('http://github.com/elastic/elasticsearch')).toBeTruthy();
 
   // An url with ssh://
-  const url4 = 'ssh://elastic@github.com/elastic/elasticsearch.git';
-  expect(isValidGitUrl(url4)).toBeTruthy();
+  expect(isValidGitUrl('ssh://elastic@github.com/elastic/elasticsearch.git')).toBeTruthy();
+
+  // An url with ssh:// and port
+  expect(isValidGitUrl('ssh://elastic@github.com:9999/elastic/elasticsearch.git')).toBeTruthy();
 
   // An url with git://
-  const url5 = 'git://elastic@github.com/elastic/elasticsearch.git';
-  expect(isValidGitUrl(url5)).toBeTruthy();
+  expect(isValidGitUrl('git://elastic@github.com/elastic/elasticsearch.git')).toBeTruthy();
 
   // An url with an invalid protocol
-  const url6 = 'file:///Users/elastic/elasticsearch';
-  expect(isValidGitUrl(url6)).toBeFalsy();
+  expect(isValidGitUrl('file:///Users/elastic/elasticsearch')).toBeFalsy();
 
   // An url without protocol
-  const url7 = '/Users/elastic/elasticsearch';
-  expect(isValidGitUrl(url7)).toBeFalsy();
+  expect(isValidGitUrl('/Users/elastic/elasticsearch')).toBeFalsy();
+  expect(isValidGitUrl('github.com/elastic/elasticsearch')).toBeFalsy();
 });

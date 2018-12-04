@@ -47,28 +47,50 @@ test('Repository url parsing', () => {
     name: 'c',
     org: 'b',
   });
+});
 
-  const repo6 = RepositoryUtils.buildRepository('git://a/b/c/d');
-  expect(repo6).toEqual({
+test('Repository url parsing with non standard segments', () => {
+  const repo1 = RepositoryUtils.buildRepository('git://a/b/c/d');
+  expect(repo1).toEqual({
     uri: 'a/b_c/d',
     url: 'git://a/b/c/d',
     name: 'd',
     org: 'b_c',
   });
 
-  const repo7 = RepositoryUtils.buildRepository('git://a/b/c/d/e');
-  expect(repo7).toEqual({
+  const repo2 = RepositoryUtils.buildRepository('git://a/b/c/d/e');
+  expect(repo2).toEqual({
     uri: 'a/b_c_d/e',
     url: 'git://a/b/c/d/e',
     name: 'e',
     org: 'b_c_d',
   });
 
-  const repo8 = RepositoryUtils.buildRepository('git://a');
-  expect(repo8).toEqual({
+  const repo3 = RepositoryUtils.buildRepository('git://a');
+  expect(repo3).toEqual({
     uri: 'a/_/_',
     url: 'git://a',
     name: '_',
     org: '_',
+  });
+});
+
+test('Repository url parsing with port', () => {
+  const repo1 = RepositoryUtils.buildRepository('ssh://mine@mydomain.com:27017/gitolite-admin');
+  expect(repo1).toEqual({
+    uri: 'mydomain.com:27017/mine/gitolite-admin',
+    url: 'ssh://mine@mydomain.com:27017/gitolite-admin',
+    name: 'gitolite-admin',
+    org: 'mine',
+  });
+
+  const repo2 = RepositoryUtils.buildRepository(
+    'ssh://mine@mydomain.com:27017/elastic/gitolite-admin'
+  );
+  expect(repo2).toEqual({
+    uri: 'mydomain.com:27017/elastic/gitolite-admin',
+    url: 'ssh://mine@mydomain.com:27017/elastic/gitolite-admin',
+    name: 'gitolite-admin',
+    org: 'elastic',
   });
 });
