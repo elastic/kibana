@@ -5,3 +5,5 @@
 With security enabled, you can control who has access to specific spaces. You can manage access in **Management > Roles**.
 
 image::spaces/images/securing-spaces.png["Securing spaces"]
+
+Note that kibana ships with a built-in role called ```kibana_user``` which grants the **all** privilege as minimum access to all spaces. In order to restrict a user to only a subset of spaces, remember to not give the ```kibana_user``` role but but instead to create a custom scheme where new roles grant both Index Privileges **manage, read, index, delete** to the pattern ```.kibana*``` and the intended access to the correct subset of spaces.
