@@ -47,8 +47,6 @@ export default function ({ getService }) {
       expect(stats.license.issuer).to.be('elasticsearch');
       expect(stats.license.status).to.be('active');
 
-      expect(stats.stack_stats.kibana.index).to.be('.kibana');
-
       expect(stats.stack_stats.kibana.count).to.be(1);
       expect(stats.stack_stats.kibana.indices).to.be(1);
 
