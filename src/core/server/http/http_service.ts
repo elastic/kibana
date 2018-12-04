@@ -20,13 +20,17 @@
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { CoreService } from '../../types/core_service';
+import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
 import { HttpServer, HttpServerInfo } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 import { Router } from './router';
 
+/** @internal */
+export type HttpServiceStartContract = HttpServerInfo;
+
+/** @internal */
 export class HttpService implements CoreService<HttpServerInfo> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
