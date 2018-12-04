@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { listBreadcrumbLink, editBreadcrumb } from '../../services';
+import { buildListBreadcrumb, editBreadcrumb } from '../../services';
 import { RemoteClusterForm } from '../remote_cluster_form';
 
 const disabledFields = {
@@ -49,8 +49,6 @@ export class RemoteClusterEditUi extends Component {
   constructor(props) {
     super(props);
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumbLink, editBreadcrumb ]);
-
     const {
       match: {
         params: {
@@ -58,6 +56,12 @@ export class RemoteClusterEditUi extends Component {
         },
       },
     } = props;
+
+    chrome.breadcrumbs.set([
+      MANAGEMENT_BREADCRUMB,
+      buildListBreadcrumb(`?cluster=${name}`),
+      editBreadcrumb,
+    ]);
 
     this.state = {
       clusterName: name,

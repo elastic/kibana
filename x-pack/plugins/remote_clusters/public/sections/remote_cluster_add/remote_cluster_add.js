@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { listBreadcrumbLink, addBreadcrumb } from '../../services';
+import { listBreadcrumb, addBreadcrumb } from '../../services';
 import { RemoteClusterForm } from '../remote_cluster_form';
 
 export class RemoteClusterAddUi extends Component {
@@ -33,7 +33,7 @@ export class RemoteClusterAddUi extends Component {
 
   constructor(props) {
     super(props);
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumbLink, addBreadcrumb ]);
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
   }
 
   componentWillUnmount() {

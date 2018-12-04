@@ -19,7 +19,7 @@ export {
 
 export {
   listBreadcrumb,
-  listBreadcrumbLink,
+  buildListBreadcrumb,
   addBreadcrumb,
   editBreadcrumb,
 } from './breadcrumbs';

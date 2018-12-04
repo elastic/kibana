@@ -11,11 +11,16 @@ export const listBreadcrumb = {
   text: i18n.translate('xpack.remoteClusters.listBreadcrumbTitle', {
     defaultMessage: 'Remote Clusters',
   }),
+  href: `#${CRUD_APP_BASE_PATH}/list`,
 };
 
-export const listBreadcrumbLink = {
-  ...listBreadcrumb,
-  href: `#${CRUD_APP_BASE_PATH}`,
+export const buildListBreadcrumb = queryParams => {
+  const { href } = listBreadcrumb;
+
+  return {
+    ...listBreadcrumb,
+    href: `${href}${queryParams}`,
+  };
 };
 
 export const addBreadcrumb = {
