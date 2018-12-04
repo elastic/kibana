@@ -20,12 +20,32 @@ export function remoteClusters(kibana) {
     configPrefix: 'xpack.remote_clusters',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
+
     uiExports: {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: [
         'plugins/remote_clusters',
-      ]
+      ],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          remoteClustersUiEnabled: config.get('xpack.remote_clusters.ui.enabled'),
+        };
+      },
     },
+
+    config(Joi) {
+      return Joi.object({
+        // display menu item
+        ui: Joi.object({
+          enabled: Joi.boolean().default(true)
+        }).default(),
+
+        // enable plugin
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+
     init: function (server) {
       registerLicenseChecker(server);
       registerListRoute(server);
