@@ -7,12 +7,10 @@
 import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
-import { ECS } from '../../../components/timeline/ecs';
 
 export interface TimelineModel {
   id: string;
   dataProviders: DataProvider[];
-  data: ECS[];
   range: Range;
   show: boolean;
   sort: Sort;
@@ -21,13 +19,9 @@ export interface TimelineModel {
 }
 
 export const timelineDefaults: Readonly<
-  Pick<
-    TimelineModel,
-    'dataProviders' | 'data' | 'range' | 'show' | 'sort' | 'activePage' | 'itemsPerPage'
-  >
+  Pick<TimelineModel, 'dataProviders' | 'range' | 'show' | 'sort' | 'activePage' | 'itemsPerPage'>
 > = {
   dataProviders: [],
-  data: [],
   range: '1 Day',
   show: false,
   activePage: 0,

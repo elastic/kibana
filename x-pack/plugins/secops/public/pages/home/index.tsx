@@ -49,7 +49,7 @@ const HomePageComponent = pure<Props>(() => (
     <DragDropContextWrapper>
       <Flyout timelineId="timeline">
         <StatefulTimeline
-          id="timeline"
+          id="timeline-1"
           activePage={0}
           itemsPerPage={5}
           itemsPerPageOptions={[5, 10, 20]}
