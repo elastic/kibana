@@ -717,12 +717,13 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@elastic/datemath@^4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-4.0.2.tgz#91417763fa4ec93ad1426cb69aaf2de2e9914a68"
-  integrity sha1-kUF3Y/pOyTrRQmy2mq8t4umRSmg=
+"@elastic/datemath@5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-5.0.0.tgz#62900ddbdc1c98b2af824073be462c769c582a34"
+  integrity sha512-csUO6qyWK0LKrX9V8WUnZZ2BBy0pB1nf8nNKw+KQz+PbKQeCr30jtk+2+z/u4DWMCQKODa5V5E8C8f9eNmkD9Q==
   dependencies:
     moment "^2.13.0"
+    tslib "^1.9.3"
 
 "@elastic/eui@0.0.23":
   version "0.0.23"
