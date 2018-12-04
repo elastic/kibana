@@ -9,6 +9,7 @@ import ReactDOM from 'react-dom';
 import { constant } from 'lodash';
 
 import { uiModules } from 'ui/modules';
+import chrome from 'ui/chrome';
 
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
 import template from 'plugins/security/views/nav_control/nav_control.html';
@@ -28,7 +29,7 @@ chromeNavControlsRegistry.register(constant({
 }));
 
 const module = uiModules.get('security', ['kibana']);
-module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private) => {
+module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private, i18n) => {
   const xpackInfo = Private(XPackInfoProvider);
   const showSecurityLinks = xpackInfo.get('features.security.showLinks');
   if (Private(PathProvider).isUnauthenticated() || !showSecurityLinks) return;
@@ -44,6 +45,10 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
     }
     return tooltip;
   };
+
+  $scope.logoutLabel = i18n('xpack.security.navControl.logoutLabel', {
+    defaultMessage: "Logout"
+  });
 });
 
 
@@ -58,7 +63,7 @@ chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
 
     const props = {
       user: ShieldUser.getCurrent(),
-      route: `${kbnBaseUrl}#/account`,
+      route: chrome.addBasePath(`${kbnBaseUrl}#/account`),
     };
 
     props.user.$promise.then(() => {
