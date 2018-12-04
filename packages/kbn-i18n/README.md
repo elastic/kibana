@@ -296,10 +296,31 @@ import { Header } from './components/header';
 module.directive('headerGlobalNav', (reactDirective) => {
   return reactDirective(injectI18nProvider(Header));
 });
-
 ```
 
 **NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `injectI18nProvider` or `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
+
+### FormattedRelative
+
+[React-intl readme](https://github.com/yahoo/react-intl/wiki/Components#formattedrelative)\
+`i18n-locale` config variable is used for translation.\
+`formats` field should be one of `'years' | 'months' | 'days' | 'hours' | 'minutes' | 'seconds'`.\
+If `formats` is not provided then it will be chosen automatically:\
+`x seconds ago` for `x < 60`, `1 minute ago` for `60 <= x < 120`, etc.
+
+```jsx
+<FormattedRelative
+  value={Date.now() - 90000}
+  format="seconds"
+/>
+```
+Initial result: `90 seconds ago`
+```jsx
+<FormattedRelative
+  value={Date.now() - 90000}
+/>
+```
+Initial result: `1 minute ago`
 
 ### Attributes translation in React
 
