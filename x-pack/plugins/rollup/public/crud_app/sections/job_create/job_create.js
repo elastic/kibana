@@ -32,7 +32,7 @@ import { fatalError } from 'ui/notify';
 import {
   validateIndexPattern,
   formatFields,
-  listBreadcrumbLink,
+  listBreadcrumb,
   createBreadcrumb,
 } from '../../services';
 
@@ -89,7 +89,7 @@ export class JobCreateUi extends Component {
   constructor(props) {
     super(props);
 
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumbLink, createBreadcrumb ]);
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb ]);
 
     const stepsFields = mapValues(stepIdToStepConfigMap, step => cloneDeep(step.defaultFields || {}));
 

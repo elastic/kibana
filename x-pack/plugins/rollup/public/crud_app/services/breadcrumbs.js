@@ -11,10 +11,6 @@ export const listBreadcrumb = {
   text: i18n.translate('pack.rollupJobs.listBreadcrumbTitle', {
     defaultMessage: 'Rollups Jobs',
   }),
-};
-
-export const listBreadcrumbLink = {
-  ...listBreadcrumb,
   href: `#${CRUD_APP_BASE_PATH}`,
 };
 
