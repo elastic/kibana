@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { supportedConfigs } from './config_schemas';
-import { YamlConfigSchema } from './lib/lib';
+import { YamlConfigSchema } from './lib/types';
 
 interface ConfigSchema {
   text: string;

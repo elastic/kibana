@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFieldText, EuiFieldTextProps, EuiFormRow } from '@elastic/eui';
-import { CommonProps } from '@elastic/eui/src/components/common';
+import { CommonProps, EuiFieldText, EuiFieldTextProps, EuiFormRow } from '@elastic/eui';
 import { FormsyInputProps, withFormsy } from 'formsy-react';
 import React, { Component, InputHTMLAttributes } from 'react';
 

@@ -4,49 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IModule, IScope } from 'angular';
+import { IScope } from 'angular';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-
-import { i18n } from '@kbn/i18n';
+import { UIRoutes } from 'ui/routes';
+import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import {
-  BufferedKibanaServiceCall,
   FrameworkAdapter,
-  KibanaAdapterServiceRefs,
-  KibanaUIConfig,
-} from '../../lib';
+  FrameworkInfo,
+  FrameworkUser,
+  ManagementAPI,
+  RuntimeFrameworkUser,
+} from './adapter_types';
+import { RuntimeFrameworkInfo } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
-  public appState: object;
-
-  private management: any;
-  private adapterService: KibanaAdapterServiceProvider;
-  private rootComponent: React.ReactElement<any> | null = null;
-  private uiModule: IModule;
-  private routes: any;
-  private XPackInfoProvider: any;
-  private xpackInfo: null | any;
-  private chrome: any;
-  private shieldUser: any;
-
-  constructor(
-    uiModule: IModule,
-    management: any,
-    routes: any,
-    chrome: any,
-    XPackInfoProvider: any
-  ) {
-    this.adapterService = new KibanaAdapterServiceProvider();
-    this.management = management;
-    this.uiModule = uiModule;
-    this.routes = routes;
-    this.chrome = chrome;
-    this.XPackInfoProvider = XPackInfoProvider;
-    this.appState = {};
+  public get info() {
+    if (this.xpackInfo) {
+      return this.xpackInfo;
+    } else {
+      throw new Error('framework adapter must have init called before anything else');
+    }
   }
 
-  public get baseURLPath(): string {
-    return this.chrome.getBasePath();
+  public get currentUser() {
+    return this.shieldUser!;
+  }
+  private xpackInfo: FrameworkInfo | null = null;
+  private adapterService: KibanaAdapterServiceProvider;
+  private shieldUser: FrameworkUser | null = null;
+  private settingSubscription: any;
+  constructor(
+    private readonly PLUGIN_ID: string,
+    private readonly management: ManagementAPI,
+    private readonly routes: UIRoutes,
+    private readonly getBasePath: () => string,
+    private readonly onKibanaReady: (Private: any) => void,
+    private readonly XPackInfoProvider: unknown,
+    private readonly uiSettings: any
+  ) {
+    this.adapterService = new KibanaAdapterServiceProvider();
+
+    this.settingSubscription = uiSettings.getUpdate$().subscribe({
+      next: ({ key, newValue }: { key: string; newValue: boolean }) => {
+        if (key === 'k7design' && this.xpackInfo) {
+          this.xpackInfo.k7Design = newValue;
+        }
+      },
+    });
+  }
+
+  // We dont really want to have this, but it's needed to conditionaly render for k7 due to
+  // when that data is needed.
+  public getUISetting(key: 'k7design'): boolean {
+    return this.uiSettings.get(key);
   }
 
   public setUISettings = (key: string, value: any) => {
@@ -55,71 +67,122 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   };
 
-  public render = (component: React.ReactElement<any>) => {
-    this.rootComponent = component;
-  };
+  public waitUntilFrameworkReady(): Promise<void> {
+    return new Promise(resolve => {
+      this.onKibanaReady(async (Private: any, $injector: any) => {
+        const xpackInfo = Private(this.XPackInfoProvider);
+        let xpackInfoUnpacked: FrameworkInfo;
+        try {
+          xpackInfoUnpacked = {
+            basePath: this.getBasePath(),
+            k7Design: this.uiSettings.get('k7design'),
+            license: {
+              type: xpackInfo.getLicense().type,
+              expired: !xpackInfo.getLicense().isActive,
+              expiry_date_in_millis: xpackInfo.getLicense().expiryDateInMillis,
+            },
+            security: {
+              enabled: xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false),
+              available: xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false),
+            },
+            settings: xpackInfo.get(`features.${this.PLUGIN_ID}.settings`),
+          };
+        } catch (e) {
+          throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
+        }
 
-  public hasValidLicense() {
-    if (!this.xpackInfo) {
-      return false;
-    }
-    return this.xpackInfo.get('features.beats_management.licenseValid', false);
+        const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
+        if (assertData.isLeft()) {
+          throw new Error(
+            `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
+          );
+        }
+        this.xpackInfo = xpackInfoUnpacked;
+
+        this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+
+        const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
+        if (assertUser.isLeft()) {
+          throw new Error(
+            `Error parsing user info in ${this.PLUGIN_ID},   ${PathReporter.report(assertUser)[0]}`
+          );
+        }
+
+        resolve();
+      });
+    });
   }
 
-  public licenseExpired() {
-    if (!this.xpackInfo) {
-      return false;
-    }
-    return this.xpackInfo.get('features.beats_management.licenseExpired', false);
-  }
-
-  public securityEnabled() {
-    if (!this.xpackInfo) {
-      return false;
-    }
-
-    return this.xpackInfo.get('features.beats_management.securityEnabled', false);
-  }
-
-  public getDefaultUserRoles() {
-    if (!this.xpackInfo) {
-      return [];
-    }
-
-    return this.xpackInfo.get('features.beats_management.defaultUserRoles');
-  }
-
-  public getCurrentUser() {
-    try {
-      return this.shieldUser;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  public registerManagementSection(pluginId: string, displayName: string, basePath: string) {
-    this.register(this.uiModule);
-
-    this.hookAngular(() => {
-      if (this.hasValidLicense()) {
-        const registerSection = () =>
-          this.management.register(pluginId, {
-            display: i18n.translate('xpack.beatsManagement.beatsDislayName', {
-              defaultMessage: 'Beats',
-            }), // TODO these need to be config options not hard coded in the adapter
-            icon: 'logoBeats',
-            order: 30,
+  public renderUIAtPath(
+    path: string,
+    component: React.ReactElement<any>,
+    toController: 'management' | 'self' = 'self'
+  ) {
+    const DOM_ELEMENT_NAME = this.PLUGIN_ID.replace('_', '-');
+    const adapter = this;
+    this.routes.when(
+      `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
+      {
+        template:
+          toController === 'self'
+            ? `<${DOM_ELEMENT_NAME}><div id="${DOM_ELEMENT_NAME}ReactRoot"></div></${DOM_ELEMENT_NAME}>`
+            : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
+                <div id="${DOM_ELEMENT_NAME}ReactRoot" />
+               </kbn-management-app>`,
+        // tslint:disable-next-line: max-classes-per-file
+        controller: ($scope: any, $route: any) => {
+          $scope.$$postDigest(() => {
+            const elem = document.getElementById(`${DOM_ELEMENT_NAME}ReactRoot`);
+            ReactDOM.render(component, elem);
+            adapter.manageAngularLifecycle($scope, $route, elem);
           });
-        const getSection = () => this.management.getSection(pluginId);
-        const section = this.management.hasItem(pluginId) ? getSection() : registerSection();
-
-        section.register(pluginId, {
-          visible: true,
-          display: displayName,
-          order: 30,
-          url: `#${basePath}`,
-        });
+          $scope.$onInit = () => {
+            $scope.topNavMenu = [];
+          };
+        },
       }
+    );
+  }
+
+  public registerManagementSection(settings: {
+    id?: string;
+    name: string;
+    iconName: string;
+    order?: number;
+  }) {
+    const sectionId = settings.id || this.PLUGIN_ID;
+
+    if (!this.management.hasItem(sectionId)) {
+      this.management.register(sectionId, {
+        display: settings.name,
+        icon: settings.iconName,
+        order: settings.order || 30,
+      });
+    }
+  }
+
+  public registerManagementUI(settings: {
+    sectionId?: string;
+    name: string;
+    basePath: string;
+    visable?: boolean;
+    order?: number;
+  }) {
+    const sectionId = settings.sectionId || this.PLUGIN_ID;
+
+    if (!this.management.hasItem(sectionId)) {
+      throw new Error(
+        `registerManagementUI was called with a sectionId of ${sectionId}, and that is is not yet regestered as a section`
+      );
+    }
+
+    const section = this.management.getSection(sectionId);
+
+    section.register(sectionId, {
+      visible: settings.visable || true,
+      display: settings.name,
+      order: settings.order || 30,
+      url: `#${settings.basePath}`,
     });
   }
 
@@ -131,58 +194,27 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
       if (lastRoute.$$route.template === currentRoute.$$route.template) {
         // this prevents angular from destroying scope
         $route.current = lastRoute;
+      } else {
+        if (elem) {
+          ReactDOM.unmountComponentAtNode(elem);
+          elem.remove();
+          this.settingSubscription.unsubscribe();
+        }
       }
     });
     $scope.$on('$destroy', () => {
       if (deregister) {
         deregister();
       }
+
       // manually unmount component when scope is destroyed
       if (elem) {
         ReactDOM.unmountComponentAtNode(elem);
+        elem.remove();
+        this.settingSubscription.unsubscribe();
       }
     });
   }
-
-  private hookAngular(done: () => any) {
-    this.chrome.dangerouslyGetActiveInjector().then(async ($injector: any) => {
-      const Private = $injector.get('Private');
-      const xpackInfo = Private(this.XPackInfoProvider);
-
-      this.xpackInfo = xpackInfo;
-      if (this.securityEnabled()) {
-        try {
-          this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
-        } catch (e) {
-          // errors when security disabled, even though we check first because angular
-        }
-      }
-
-      done();
-    });
-  }
-
-  private register = (adapterModule: IModule) => {
-    const adapter = this;
-    this.routes.when(`/management/beats_management/:view?/:id?/:other?/:other2?`, {
-      template:
-        '<beats-cm><div id="beatsReactRoot" style="flex-grow: 1; height: 100vh; background: #f5f5f5"></div></beats-cm>',
-      controllerAs: 'beatsManagement',
-      // tslint:disable-next-line: max-classes-per-file
-      controller: class BeatsManagementController {
-        constructor($scope: any, $route: any) {
-          $scope.$$postDigest(() => {
-            const elem = document.getElementById('beatsReactRoot');
-            ReactDOM.render(adapter.rootComponent as React.ReactElement<any>, elem);
-            adapter.manageAngularLifecycle($scope, $route, elem);
-          });
-          $scope.$onInit = () => {
-            $scope.topNavMenu = [];
-          };
-        }
-      },
-    });
-  };
 }
 
 // tslint:disable-next-line: max-classes-per-file
