@@ -8,12 +8,13 @@ import React from 'react';
 import { LicenseDashboard, UploadLicense } from './sections/';
 import { Switch, Route } from 'react-router-dom';
 import { BASE_PATH } from '../common/constants';
+import { EuiPageBody } from '@elastic/eui';
 
 export default () => (
-  <div className="licManagement__pageBody euiPage--restrictWidth-default">
+  <EuiPageBody>
     <Switch>
       <Route path={`${BASE_PATH}upload_license`} component={UploadLicense} />
       <Route path={`${BASE_PATH}`} component={LicenseDashboard} />
     </Switch>
-  </div>
+  </EuiPageBody>
 );

@@ -22,9 +22,9 @@ exports[`SpacesGridPage renders as expected 1`] = `
           component="div"
           grow={false}
         >
-          <EuiText
-            grow={true}
+          <EuiTitle
             size="m"
+            textTransform="none"
           >
             <h1>
               <FormattedMessage
@@ -33,6 +33,15 @@ exports[`SpacesGridPage renders as expected 1`] = `
                 values={Object {}}
               />
             </h1>
+          </EuiTitle>
+          <EuiText
+            color="subdued"
+            grow={true}
+            size="m"
+          >
+            <p>
+              Spaces allow you to silo content into meaningful categories
+            </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem
@@ -55,7 +64,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer
-        size="xl"
+        size="l"
       />
       <EuiInMemoryTable
         columns={

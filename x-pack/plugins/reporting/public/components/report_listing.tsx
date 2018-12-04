@@ -23,6 +23,7 @@ import {
   EuiBasicTable,
   EuiButtonIcon,
   EuiPageContent,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -80,6 +81,10 @@ export class ReportListing extends Component<Props, State> {
         <EuiTitle>
           <h1>Reports</h1>
         </EuiTitle>
+        <EuiText color="subdued">
+          <p>Find reports generated in Kibana applications here</p>
+        </EuiText>
+        <EuiSpacer />
         {this.renderTable()}
       </EuiPageContent>
     );
