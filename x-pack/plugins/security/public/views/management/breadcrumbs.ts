@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management/breadcrumbs';
 
 export function getUsersBreadcrumbs() {
   return [
     MANAGEMENT_BREADCRUMB,
     {
-      text: 'Users',
+      text: i18n.translate('xpack.security.users.breadcrumb', {
+        defaultMessage: 'Users',
+      }),
       href: '#/management/security/users',
     },
   ];
@@ -31,7 +34,9 @@ export function getRolesBreadcrumbs() {
   return [
     MANAGEMENT_BREADCRUMB,
     {
-      text: 'Roles',
+      text: i18n.translate('xpack.security.roles.breadcrumb', {
+        defaultMessage: 'Roles',
+      }),
       href: '#/management/security/roles',
     },
   ];
