@@ -41,6 +41,8 @@
     "test:dev": "grunt test:dev",
     "test:quick": "grunt test:quick",
     "test:browser": "grunt test:browser",
+    "test:jest": "node scripts/jest",
+    "test:mocha": "grunt test:server #server means tests run in node, not browser, poorly named",
     "test:ui": "echo 'use `node scripts/functional_tests`' && false",
     "test:ui:server": "echo 'use `node scripts/functional_tests_server`' && false",
     "test:ui:runner": "echo 'use `node scripts/functional_test_runner`' && false",

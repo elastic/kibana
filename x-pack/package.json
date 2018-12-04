@@ -13,6 +13,8 @@
     "test": "gulp test",
     "test:browser:dev": "gulp testbrowser-dev",
     "test:browser": "gulp testbrowser",
+    "test:jest": "node scripts/jest",
+    "test:mocha": "grunt test:server #server means tests run in node, not browser, poorly named",
     "test:server": "gulp testserver"
   },
   "kibana": {
