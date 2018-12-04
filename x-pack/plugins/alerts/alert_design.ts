@@ -185,35 +185,37 @@ Alerts.register({
     action: { type: 'action:notification', required: false, name: 'Notification action' },
   },
   execute(ctx: any, params: any) {
-    const r = ctx.helper.render;
+    const { search, metric, threshold, comparator } = params;
+    const { title, content, action } = params;
+    const { es, helper, log, task } = ctx;
 
-    ctx.log.info(r('Running search request for { ctx.meta.task_id }'), params.search);
+    log.info(`Running search request for ${task.id}`, search);
 
-    const result = ctx.es.search(params.search);
-    ctx.log.debug('Results of search request', result);
+    const result = es.search(search);
+    log.debug('Results of search request', result);
 
-    const value = ctx.helper.path(result, 'aggregations.' + params.metric);
-    ctx.log.debug(r('Value of metric {params.metric}:'), value);
+    const value = helper.path(result, 'aggregations.' + metric);
+    log.debug(`Value of metric ${metric}:`, value);
 
     if (value === null) {
-      const error = r('Metric {params.metric} not found');
-      ctx.log('error', error);
-      ctx.task.set_status('error', error);
+      const error = `Metric ${metric} not found`;
+      log.error(error);
+      task.set_status('error', error);
       return;
     }
 
-    if (!ctx.helper.compare(params.comparator, value, params.threshold)) {
-      ctx.log('All OK');
-      ctx.task.set_status('ok');
+    if (!helper.compare(comparator, value, threshold)) {
+      log.info('All OK');
+      task.set_status('ok');
       return;
     }
 
-    ctx.log.warning(params.content);
-    ctx.task.set_status('firing');
-    if (params.action) {
-      params.action.fire_throttled(ctx, {
-        title: r(params.title),
-        content: r(params.content),
+    log.warning(content);
+    task.set_status('firing');
+    if (action) {
+      action.fire_throttled(ctx, {
+        title,
+        content,
       });
     }
   },
