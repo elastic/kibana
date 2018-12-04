@@ -117,10 +117,7 @@ class ReportListingUi extends Component<Props, State> {
       <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
         <EuiTitle>
           <h1>
-            <formattedmessage
-              id="xpack.reporting.listing.reportstitle"
-              defaultmessage="reports"
-            />
+            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="reports" />
           </h1>
         </EuiTitle>
         {this.renderTable()}
