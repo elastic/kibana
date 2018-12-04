@@ -5,7 +5,7 @@
  */
 
 import { ApolloClient } from 'apollo-client';
-import { Container, OnMount } from 'constate';
+import { Container as ConstateContainer, OnMount } from 'constate';
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
 import { createSelector } from 'reselect';
@@ -122,7 +122,7 @@ interface WithSourceProps {
 export const WithSource: React.SFC<WithSourceProps> = ({ children }) => (
   <ApolloConsumer>
     {client => (
-      <Container pure {...createContainerProps('default', client)}>
+      <ConstateContainer pure {...createContainerProps('default', client)}>
         {({
           getConfiguredFields,
           getDerivedIndexPattern,
@@ -144,7 +144,7 @@ export const WithSource: React.SFC<WithSourceProps> = ({ children }) => (
             metricIndicesExist: getMetricIndicesExist(),
           })
         }
-      </Container>
+      </ConstateContainer>
     )}
   </ApolloConsumer>
 );
