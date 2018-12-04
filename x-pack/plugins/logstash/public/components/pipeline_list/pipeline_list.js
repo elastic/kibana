@@ -12,6 +12,9 @@ import {
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageContent,
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { InfoAlerts } from './info_alerts';
@@ -268,6 +271,13 @@ class PipelineListUi extends React.Component {
     return (
       <div data-test-subj="pipelineList">
         <EuiPageContent horizontalPosition="center">
+          <EuiTitle size="m">
+            <h1>Pipelines</h1>
+          </EuiTitle>
+          <EuiText color="subdued">
+            <p>Manage logstash event processing and see the result visually</p>
+          </EuiText>
+          <EuiSpacer />
           {this.renderNoPermissionCallOut()}
           <PipelinesTable
             clonePipeline={clonePipeline}

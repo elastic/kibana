@@ -1,56 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LoadingState should render normally 1`] = `
-<EuiPanel
-  grow={true}
-  hasShadow={false}
-  paddingSize="l"
+<EuiFlexGroup
+  alignItems="center"
+  component="div"
+  direction="column"
+  gutterSize="s"
+  justifyContent="center"
+  responsive={true}
+  wrap={false}
 >
-  <EuiFlexGroup
-    alignItems="center"
+  <EuiFlexItem
     component="div"
-    direction="column"
-    gutterSize="s"
-    justifyContent="center"
-    responsive={true}
-    wrap={false}
+    grow={false}
   >
-    <EuiFlexItem
-      component="div"
-      grow={false}
+    <EuiTitle
+      size="s"
+      textTransform="none"
     >
-      <EuiTitle
-        size="s"
-        textTransform="none"
+      <h2
+        style={
+          Object {
+            "textAlign": "center",
+          }
+        }
       >
-        <EuiTextColor
-          color="subdued"
-          component="span"
-        >
-          <h2
-            style={
-              Object {
-                "textAlign": "center",
-              }
-            }
-          >
-            <FormattedMessage
-              defaultMessage="Checking for Elasticsearch data"
-              id="kbn.management.createIndexPattern.loadingState.checkingLabel"
-              values={Object {}}
-            />
-          </h2>
-        </EuiTextColor>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiLoadingSpinner
-        size="l"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</EuiPanel>
+        <FormattedMessage
+          defaultMessage="Checking for Elasticsearch data"
+          id="kbn.management.createIndexPattern.loadingState.checkingLabel"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlexItem>
+  <EuiFlexItem
+    component="div"
+    grow={false}
+  >
+    <EuiLoadingSpinner
+      size="l"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;

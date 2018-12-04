@@ -2,9 +2,7 @@
 
 exports[`AdvancedSettings should render normally 1`] = `
 <I18nProvider>
-  <div
-    className="mgtAdvancedSettings euiPage--restrictWidth-default"
-  >
+  <div>
     <EuiFlexGroup
       alignItems="stretch"
       component="div"
@@ -332,9 +330,7 @@ exports[`AdvancedSettings should render normally 1`] = `
 
 exports[`AdvancedSettings should render specific setting if given setting key 1`] = `
 <I18nProvider>
-  <div
-    className="mgtAdvancedSettings euiPage--restrictWidth-default"
-  >
+  <div>
     <EuiFlexGroup
       alignItems="stretch"
       component="div"

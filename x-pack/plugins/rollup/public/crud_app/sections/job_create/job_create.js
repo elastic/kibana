@@ -494,12 +494,9 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPageContent
-          horizontalPosition="center"
-          className="rollupJobWizardPage"
-        >
+        <EuiPageContent>
           <EuiPageContentHeader>
-            <EuiTitle size="l">
+            <EuiTitle size="m">
               <h1>
                 <FormattedMessage
                   id="xpack.rollupJobs.createTitle"

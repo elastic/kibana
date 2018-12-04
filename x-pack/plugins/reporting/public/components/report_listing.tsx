@@ -26,6 +26,7 @@ import {
   EuiBasicTable,
   EuiButtonIcon,
   EuiPageContent,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -120,6 +121,10 @@ class ReportListingUi extends Component<Props, State> {
             <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="reports" />
           </h1>
         </EuiTitle>
+        <EuiText color="subdued">
+          <p>Find reports generated in Kibana applications here</p>
+        </EuiText>
+        <EuiSpacer />
         {this.renderTable()}
       </EuiPageContent>
     );

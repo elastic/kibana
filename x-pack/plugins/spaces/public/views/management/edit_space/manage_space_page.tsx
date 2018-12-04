@@ -220,7 +220,7 @@ class ManageSpacePageUI extends Component<Props, State> {
 
   public getFormHeading = () => {
     return (
-      <EuiTitle size="l">
+      <EuiTitle size="m">
         <h1>
           {this.getTitle()} <ReservedSpaceBadge space={this.state.space as Space} />
         </h1>

@@ -257,7 +257,7 @@ export class IndexTableUi extends Component {
       <EuiPageContent>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiTitle size="m">
               <h1>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionHeading"

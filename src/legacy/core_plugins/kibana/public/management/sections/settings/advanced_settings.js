@@ -156,7 +156,7 @@ export class AdvancedSettings extends Component {
 
     return (
       <I18nProvider>
-        <div className="mgtAdvancedSettings euiPage--restrictWidth-default">
+        <div>
           <EuiFlexGroup gutterSize="none">
             <EuiFlexItem>
               <PageTitle />

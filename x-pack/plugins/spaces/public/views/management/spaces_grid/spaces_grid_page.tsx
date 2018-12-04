@@ -16,6 +16,7 @@ import {
   EuiPageContent,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 // @ts-ignore
@@ -82,18 +83,21 @@ class SpacesGridPageUI extends Component<Props, State> {
       <Fragment>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem grow={false}>
-            <EuiText>
+            <EuiTitle size="m">
               <h1>
                 <FormattedMessage
                   id="xpack.spaces.management.spacesGridPage.spacesTitle"
                   defaultMessage="Spaces"
                 />
               </h1>
+            </EuiTitle>
+            <EuiText color="subdued">
+              <p>Spaces allow you to silo content into meaningful categories</p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size={'xl'} />
+        <EuiSpacer size="l" />
 
         <EuiInMemoryTable
           itemId={'id'}

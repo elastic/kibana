@@ -11,14 +11,9 @@ kbn-management-objects-view {
 }
 
 // SASSTODO: Remove when Kibana has a proper background color
-.tab-account, .tab-management {
-  background-color: $euiColorEmptyShade;
-}
-
-// SASSTODO: Remove when Kibana has a proper background color
-kbn-management-objects, kbn-management-app {
+kbn-management-objects, kbn-management-app, .tab-management {
   background: $euiColorLightestShade;
-  min-height: 100vh;
+  flex-grow: 1;
 }
 
 .kbn-management-tab:first-letter {
