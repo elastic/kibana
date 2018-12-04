@@ -175,7 +175,7 @@ class EditPolicyUi extends Component {
                     text={
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.learnAboutIndexLifecycleManagementLinkText"
-                        defaultMessage="Learn about index lifecycle management"
+                        defaultMessage="Learn about the index lifecycle"
                       />
                     }
                   />

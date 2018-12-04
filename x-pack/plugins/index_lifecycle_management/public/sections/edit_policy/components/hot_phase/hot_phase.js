@@ -97,11 +97,9 @@ class HotPhaseUi extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.rolloverDescriptionMessage"
-                  defaultMessage="Rollover uses an alias with is_write_index set appropriately.
-                    Only the most recent index receives new data."
+                  defaultMessage="The new index created by rollover is added
+                    to the index alias and designated as the write index."
                 />
-                {' '}
-
               </p>
               <LearnMoreLink
                 text={
@@ -112,17 +110,7 @@ class HotPhaseUi extends PureComponent {
                 }
                 docPath="indices-rollover-index.html"
               />
-              <br/>
-              <LearnMoreLink
-                text={
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.learnAboutIndexAliasesLinkText"
-                    defaultMessage="Learn about index aliases"
-                  />
-
-                }
-                docPath="indices-aliases.html"
-              />
+              <EuiSpacer size="m"/>
             </Fragment>
           }
         >

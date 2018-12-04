@@ -53,7 +53,7 @@ export class ConfirmDeleteUi extends Component {
           <div>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.confirmDelete.undoneWarning"
-              defaultMessage="You cannot recover a deleted policy."
+              defaultMessage="You can't recover a deleted policy."
             />
           </div>
         </EuiConfirmModal>

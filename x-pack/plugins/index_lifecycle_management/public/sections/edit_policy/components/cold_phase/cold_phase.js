@@ -83,7 +83,7 @@ class ColdPhaseUi extends PureComponent {
                 id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseDescriptionText"
                 defaultMessage="You are querying your index less frequently, so you can allocate shards
                   on significantly less performant hardware.
-                  Because your queries are slower, you might consider reducing the number of replicas."
+                  Because your queries are slower, you can reduce the number of replicas."
               />
             </p>
             {phaseData[PHASE_ENABLED] ? (

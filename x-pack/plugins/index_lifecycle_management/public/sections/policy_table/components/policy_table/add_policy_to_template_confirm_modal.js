@@ -51,7 +51,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     } catch (e) {
       const title = intl.formatMessage({
         id: 'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.errorMessage',
-        defaultMessage: 'Error adding policy {policyName} to index template {templateName}',
+        defaultMessage: 'Error adding policy "{policyName}" to index template {templateName}',
       }, { policyName, templateName });
       showApiError(e, title);
     }
