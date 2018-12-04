@@ -34,7 +34,7 @@ routes.defaults(/\/management/, {
             'xpack.security.management.securityTitle', {
               defaultMessage: 'Security',
             }),
-          order: 10,
+          order: 100,
           icon: 'securityApp',
         });
         const getSecurity = () => management.getSection('security');
