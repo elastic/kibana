@@ -149,32 +149,33 @@ uiModules.get('kibana')
           method: 'GET',
           timeout: this.EMS_LOAD_TIMEOUT
         }).then(({ data }) => data.services)
-          .catch(resp => {
+          .catch(() => {
             toastNotifications.addDanger({
-              title: 'EMS unavailable',
+              title: 'Unable to reach configured basemap layer',
               text: (
                 <p>
                   <FormattedMessage
                     id="common.ui.vis.map.serviceSettings.emsManifestUnavailable"
-                    defaultMessage={`Status: {respStatus}, failed to load the
-                    {manifestUrl}. To disable EMS, please refer to the
-                    {kibanaConfigSettings}`}
+                    defaultMessage={`We are unable to reach your configured base
+                    layer map. Please check your network settings and work with
+                    your administrator to ensure the configuration is correct or
+                    use the { defaultSettings } to enable the officially supported
+                    { EMS }.`}
                     values={{
-                      respStatus: resp.status,
-                      manifestUrl: (
-                        <a
-                          target="_blank"
-                          href={manifestUrl}
-                        >
-                          {'EMS manifest'}
-                        </a>
-                      ),
-                      kibanaConfigSettings: (
+                      defaultSettings: (
                         <a
                           target="_blank"
                           href="https://www.elastic.co/guide/en/kibana/current/settings.html"
                         >
-                          {'Kibana configuration settings'}
+                          {'default settings'}
+                        </a>
+                      ),
+                      EMS: (
+                        <a
+                          target="_blank"
+                          href="https://www.elastic.co/elastic-maps-service"
+                        >
+                          {'Elastic Map Service'}
                         </a>
                       )
                     }}
