@@ -29,36 +29,31 @@ describe('service_settings (FKA tilemaptest)', function () {
   let mapConfig;
   let tilemapsConfig;
 
-  const manifestUrl = 'https://geo.elastic.co/v1/manifest';
+  const manifestUrl = 'https://catalogue.maps.elastic.co/v2/manifest';
   const tmsManifestUrl = `https://tiles.elastic.co/v2/manifest`;
-  const vectorManifestUrl = `https://layers.geo.elastic.co/v1/manifest`;
+  const vectorManifestUrl = `http://vector.maps.elastic.co/v2/manifest`;
   const manifestUrl2 = 'https://foobar/v1/manifest';
 
-  const manifest = {
-    'services': [{
-      'id': 'tiles_v2',
-      'name': 'Elastic Tile Service',
-      'manifest': tmsManifestUrl,
-      'type': 'tms'
-    },
-    {
-      'id': 'geo_layers',
-      'name': 'Elastic Layer Service',
-      'manifest': vectorManifestUrl,
-      'type': 'file'
-    }
-    ]
-  };
+  const manifest = [{
+    'id': 'tiles_v2',
+    'name': 'Elastic Tile Service',
+    'manifest': tmsManifestUrl,
+    'type': 'tms'
+  },
+  {
+    'id': 'geo_layers',
+    'name': 'Elastic Layer Service',
+    'manifest': vectorManifestUrl,
+    'type': 'file'
+  }];
 
-  const tmsManifest = {
-    'services': [{
-      'id': 'road_map',
-      'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
-      'minZoom': 0,
-      'maxZoom': 10,
-      'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
-    }]
-  };
+  const tmsManifest = [{
+    'id': 'road_map',
+    'url': 'https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana',
+    'minZoom': 0,
+    'maxZoom': 10,
+    'attribution': '© [OpenStreetMap](http://www.openstreetmap.org/copyright) © [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)'
+  }];
 
   const vectorManifest = {
     'layers': [{
@@ -119,9 +114,7 @@ describe('service_settings (FKA tilemaptest)', function () {
       } else if (url.startsWith(manifestUrl2)) {
         contents = manifest;
       }
-      return {
-        data: contents
-      };
+      return contents;
     });
     $rootScope.$digest();
   }));
@@ -295,7 +288,7 @@ describe('service_settings (FKA tilemaptest)', function () {
     it('should load manifest', async function () {
       serviceSettings.addQueryParams({ foo: 'bar' });
       const fileLayers = await serviceSettings.getFileLayers();
-      const asserttions = fileLayers.map(async function (fileLayer, index) {
+      const assertions = fileLayers.map(async function (fileLayer, index) {
         const expected = vectorManifest.layers[index];
         expect(expected.attribution).to.eql(fileLayer.attribution);
         expect(expected.format).to.eql(fileLayer.format);
@@ -311,7 +304,7 @@ describe('service_settings (FKA tilemaptest)', function () {
 
       });
 
-      return Promise.all(asserttions);
+      return Promise.all(assertions);
     });
 
     it('should exclude all when not configured', async () => {
