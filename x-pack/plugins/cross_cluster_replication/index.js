@@ -15,10 +15,30 @@ export function crossClusterReplication(kibana) {
     configPrefix: 'xpack.cross_cluster_replication',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
+
     uiExports: {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       managementSections: ['plugins/cross_cluster_replication'],
+      injectDefaultVars(server) {
+        const config = server.config();
+        return {
+          ccrUiEnabled: config.get('xpack.cross_cluster_replication.ui.enabled'),
+        };
+      },
     },
+
+    config(Joi) {
+      return Joi.object({
+        // display menu item
+        ui: Joi.object({
+          enabled: Joi.boolean().default(true)
+        }).default(),
+
+        // enable plugin
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+
     init: function initCcrPlugin(server) {
       registerLicenseChecker(server);
       registerRoutes(server);

@@ -6,13 +6,16 @@
 
 import { management } from 'ui/management';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 import { BASE_PATH } from '../common/constants';
 
-const esSection = management.getSection('elasticsearch');
+if (chrome.getInjected('ccrUiEnabled')) {
+  const esSection = management.getSection('elasticsearch');
 
-esSection.register('ccr', {
-  visible: true,
-  display: i18n.translate('xpack.ccr.appTitle', { defaultMessage: 'Cross Cluster Replication' }),
-  order: 3,
-  url: `#${BASE_PATH}`
-});
+  esSection.register('ccr', {
+    visible: true,
+    display: i18n.translate('xpack.ccr.appTitle', { defaultMessage: 'Cross Cluster Replication' }),
+    order: 3,
+    url: `#${BASE_PATH}`
+  });
+}
