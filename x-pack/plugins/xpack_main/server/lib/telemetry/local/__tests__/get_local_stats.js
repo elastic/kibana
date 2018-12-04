@@ -117,11 +117,7 @@ describe('get_local_stats', () => {
       expect(cluster.collection).to.be(combinedStatsResult.collection);
       expect(cluster.cluster_uuid).to.be(combinedStatsResult.cluster_uuid);
       expect(cluster.cluster_name).to.be(combinedStatsResult.cluster_name);
-
-      // kibana stats get chopped up (kibana_stats, plugins) before
-      // handleLocalStats - see test below for `result.stack_stats.kibana`
-      // verification
-      expect(stack.kibana).to.be(undefined);
+      expect(stack.kibana).to.be(undefined); // not mocked for this test
 
       expect(cluster.version).to.eql(combinedStatsResult.version);
       expect(cluster.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
