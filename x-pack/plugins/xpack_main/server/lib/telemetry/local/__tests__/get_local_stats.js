@@ -69,7 +69,7 @@ describe('get_local_stats', () => {
     snow: { chances: 0 },
   };
 
-  const localStats = {
+  const combinedStatsResult = {
     collection: 'local',
     cluster_uuid: clusterUuid,
     cluster_name: clusterName,
@@ -102,9 +102,9 @@ describe('get_local_stats', () => {
   describe('handleLocalStats', () => {
     it('returns expected object without xpack and kibana data', () => {
       const result = handleLocalStats(getMockServer(), clusterInfo, clusterStats);
-      expect(result.cluster_uuid).to.eql(localStats.cluster_uuid);
-      expect(result.cluster_name).to.eql(localStats.cluster_name);
-      expect(result.cluster_stats).to.eql(localStats.cluster_stats);
+      expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
+      expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
+      expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
       expect(result.version).to.be('2.3.4');
       expect(result.collection).to.be('local');
       expect(result.license).to.be(undefined);
@@ -114,19 +114,19 @@ describe('get_local_stats', () => {
     it('returns expected object with xpack', () => {
       const result = handleLocalStats(getMockServer(), clusterInfo, clusterStats, license, xpack);
       const { stack_stats: stack, ...cluster } = result;
-      expect(cluster.collection).to.be(localStats.collection);
-      expect(cluster.cluster_uuid).to.be(localStats.cluster_uuid);
-      expect(cluster.cluster_name).to.be(localStats.cluster_name);
+      expect(cluster.collection).to.be(combinedStatsResult.collection);
+      expect(cluster.cluster_uuid).to.be(combinedStatsResult.cluster_uuid);
+      expect(cluster.cluster_name).to.be(combinedStatsResult.cluster_name);
 
       // kibana stats get chopped up (kibana_stats, plugins) before
       // handleLocalStats - see test below for `result.stack_stats.kibana`
       // verification
       expect(stack.kibana).to.be(undefined);
 
-      expect(cluster.version).to.eql(localStats.version);
-      expect(cluster.cluster_stats).to.eql(localStats.cluster_stats);
-      expect(cluster.license).to.eql(localStats.license);
-      expect(stack.xpack).to.eql(localStats.stack_stats.xpack);
+      expect(cluster.version).to.eql(combinedStatsResult.version);
+      expect(cluster.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
+      expect(cluster.license).to.eql(combinedStatsResult.license);
+      expect(stack.xpack).to.eql(combinedStatsResult.stack_stats.xpack);
     });
   });
 
@@ -143,9 +143,9 @@ describe('get_local_stats', () => {
       );
 
       const result = await getLocalStatsWithCaller(getMockServer(), callClusterUsageFailed);
-      expect(result.cluster_uuid).to.eql(localStats.cluster_uuid);
-      expect(result.cluster_name).to.eql(localStats.cluster_name);
-      expect(result.cluster_stats).to.eql(localStats.cluster_stats);
+      expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
+      expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
+      expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
       expect(result.version).to.be('2.3.4');
       expect(result.collection).to.be('local');
 
@@ -166,8 +166,8 @@ describe('get_local_stats', () => {
       );
 
       const result = await getLocalStatsWithCaller(getMockServer(callCluster, kibana), callCluster);
-      expect(result.stack_stats.xpack).to.eql(localStats.stack_stats.xpack);
-      expect(result.stack_stats.kibana).to.eql(localStats.stack_stats.kibana);
+      expect(result.stack_stats.xpack).to.eql(combinedStatsResult.stack_stats.xpack);
+      expect(result.stack_stats.kibana).to.eql(combinedStatsResult.stack_stats.kibana);
     });
   });
 
@@ -188,10 +188,10 @@ describe('get_local_stats', () => {
       );
 
       const result = await getLocalStats(req);
-      expect(result.cluster_uuid).to.eql(localStats.cluster_uuid);
-      expect(result.cluster_name).to.eql(localStats.cluster_name);
-      expect(result.version).to.eql(localStats.version);
-      expect(result.cluster_stats).to.eql(localStats.cluster_stats);
+      expect(result.cluster_uuid).to.eql(combinedStatsResult.cluster_uuid);
+      expect(result.cluster_name).to.eql(combinedStatsResult.cluster_name);
+      expect(result.version).to.eql(combinedStatsResult.version);
+      expect(result.cluster_stats).to.eql(combinedStatsResult.cluster_stats);
     });
   });
 });
