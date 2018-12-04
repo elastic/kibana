@@ -23,48 +23,50 @@ import { get } from 'lodash';
 const uiSettingDefaults = getUiSettingDefaults();
 const defaultSearchQueryLanguageSetting = uiSettingDefaults['search:queryLanguage'].value;
 
-export async function fetch(callCluster) {
-  const [response, config] = await Promise.all([
-    callCluster('get', {
-      index: '.kibana',
-      type: 'doc',
-      id: 'kql-telemetry:kql-telemetry',
-      ignore: [404],
-    }),
-    callCluster('search', {
-      index: '.kibana',
-      body: { query: { term: { type: 'config' } } },
-      ignore: [404],
-    }),
-  ]);
+export function fetchProvider(index) {
+  return async callCluster => {
+    const [response, config] = await Promise.all([
+      callCluster('get', {
+        index,
+        type: 'doc',
+        id: 'kql-telemetry:kql-telemetry',
+        ignore: [404],
+      }),
+      callCluster('search', {
+        index,
+        body: { query: { term: { type: 'config' } } },
+        ignore: [404],
+      }),
+    ]);
 
-  const queryLanguageConfigValue = get(config, 'hits.hits[0]._source.config.search:queryLanguage');
+    const queryLanguageConfigValue = get(config, 'hits.hits[0]._source.config.search:queryLanguage');
 
-  // search:queryLanguage can potentially be in four states in the .kibana index:
-  // 1. undefined: this means the user has never touched this setting
-  // 2. null: this means the user has touched the setting, but the current value matches the default
-  // 3. 'kuery' or 'lucene': this means the user has explicitly selected the given non-default language
-  //
-  // It's nice to know if the user has never touched the setting or if they tried kuery then
-  // went back to the default, so I preserve this info by prefixing the language name with
-  // 'default-' when the value in .kibana is undefined (case #1).
-  let defaultLanguage;
-  if (queryLanguageConfigValue === undefined) {
-    defaultLanguage = `default-${defaultSearchQueryLanguageSetting}`;
-  } else if (queryLanguageConfigValue === null) {
-    defaultLanguage = defaultSearchQueryLanguageSetting;
-  } else {
-    defaultLanguage = queryLanguageConfigValue;
-  }
+    // search:queryLanguage can potentially be in four states in the .kibana index:
+    // 1. undefined: this means the user has never touched this setting
+    // 2. null: this means the user has touched the setting, but the current value matches the default
+    // 3. 'kuery' or 'lucene': this means the user has explicitly selected the given non-default language
+    //
+    // It's nice to know if the user has never touched the setting or if they tried kuery then
+    // went back to the default, so I preserve this info by prefixing the language name with
+    // 'default-' when the value in .kibana is undefined (case #1).
+    let defaultLanguage;
+    if (queryLanguageConfigValue === undefined) {
+      defaultLanguage = `default-${defaultSearchQueryLanguageSetting}`;
+    } else if (queryLanguageConfigValue === null) {
+      defaultLanguage = defaultSearchQueryLanguageSetting;
+    } else {
+      defaultLanguage = queryLanguageConfigValue;
+    }
 
-  const kqlTelemetryDoc = {
-    optInCount: 0,
-    optOutCount: 0,
-    ...get(response, '_source.kql-telemetry', {}),
-  };
+    const kqlTelemetryDoc = {
+      optInCount: 0,
+      optOutCount: 0,
+      ...get(response, '_source.kql-telemetry', {}),
+    };
 
-  return {
-    ...kqlTelemetryDoc,
-    defaultQueryLanguage: defaultLanguage,
+    return {
+      ...kqlTelemetryDoc,
+      defaultQueryLanguage: defaultLanguage,
+    };
   };
 }
