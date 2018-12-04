@@ -22,6 +22,8 @@ describe('Flyout', () => {
         timelineById: {
           test: {
             id: 'test',
+            activePage: 0,
+            itemsPerPage: 5,
             dataProviders: [],
             data: [],
             range: '1 Day',
