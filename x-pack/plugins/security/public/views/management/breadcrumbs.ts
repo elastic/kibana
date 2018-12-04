@@ -19,7 +19,7 @@ export function getUsersBreadcrumbs() {
   ];
 }
 
-export function getEditUserBreadcrumbs($route: any) {
+export function getEditUserBreadcrumbs($route: Record<string, any>) {
   const { username } = $route.current.params;
   return [
     ...getUsersBreadcrumbs(),
@@ -42,7 +42,7 @@ export function getRolesBreadcrumbs() {
   ];
 }
 
-export function getEditRoleBreadcrumbs($route: any) {
+export function getEditRoleBreadcrumbs($route: Record<string, any>) {
   const { name } = $route.current.params;
   return [
     ...getRolesBreadcrumbs(),
