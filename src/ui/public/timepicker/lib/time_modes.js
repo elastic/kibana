@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import { parseRelativeString } from '../parse_relative_parts';
 
 export const TIME_MODES = {

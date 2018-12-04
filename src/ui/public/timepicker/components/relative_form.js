@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 
 import {
   EuiForm,

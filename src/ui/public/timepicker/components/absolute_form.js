@@ -22,7 +22,7 @@ import React, { Component, Fragment } from 'react';
 
 import moment from 'moment';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 
 import {
   EuiDatePicker,

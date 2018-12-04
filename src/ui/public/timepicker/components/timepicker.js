@@ -22,7 +22,7 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 
 import { QuickForm } from './quick_form';
 import { TimeInput } from './time_input';
