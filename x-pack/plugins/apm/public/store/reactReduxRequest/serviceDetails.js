@@ -8,7 +8,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Request } from 'react-redux-request';
-import { loadServiceDetails } from '../../services/rest/apm';
+import { loadServiceDetails } from '../../services/rest/apm/services';
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'serviceDetails';

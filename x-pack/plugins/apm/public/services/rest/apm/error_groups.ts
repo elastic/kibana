@@ -13,8 +13,6 @@ import { getEncodedEsQuery } from './apm';
 
 interface ErrorGroupListParams extends IUrlParams {
   size: number;
-  sortField: string;
-  sortDirection: string;
 }
 
 export async function loadErrorGroupList({
