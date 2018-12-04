@@ -7,8 +7,24 @@
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
 const reservedPrivilegeNames = ['all', 'read'];
+const spaceReservedPrivilegeNames = reservedPrivilegeNames.map(
+  privilegeName => `${spacePrefix}${privilegeName}`
+);
+
+interface FeaturePrivilege {
+  featureId: string;
+  privilege: string;
+}
 
 export class PrivilegeSerializer {
+  public static isReservedGlobalPrivilege(privilegeName: string) {
+    return reservedPrivilegeNames.includes(privilegeName);
+  }
+
+  public static isReservedSpacePrivilege(privilegeName: string) {
+    return spaceReservedPrivilegeNames.includes(privilegeName);
+  }
+
   public static serializeGlobalReservedPrivilege(privilegeName: string) {
     if (!reservedPrivilegeNames.includes(privilegeName)) {
       throw new Error('Unrecognized global reserved privilege');
@@ -26,7 +42,7 @@ export class PrivilegeSerializer {
   }
 
   public static serializeFeaturePrivilege(featureName: string, privilegeName: string) {
-    return `${featurePrefix}${featureName}_${privilegeName}`;
+    return `${featurePrefix}${featureName}.${privilegeName}`;
   }
 
   public static serializePrivilegeAssignedGlobally(privilege: string) {
@@ -43,6 +59,19 @@ export class PrivilegeSerializer {
     }
 
     return `${featurePrefix}${privilege}`;
+  }
+
+  public static deserializeFeaturePrivilege(privilege: string): FeaturePrivilege {
+    if (privilege.indexOf(featurePrefix) !== 0) {
+      throw new Error(`privilege '${privilege}' was expected to start with '${featurePrefix}'`);
+    }
+
+    const withoutPrefix = privilege.slice(featurePrefix.length);
+    const indexOfFirstUnderscore = withoutPrefix.indexOf('.');
+    return {
+      featureId: withoutPrefix.slice(0, indexOfFirstUnderscore),
+      privilege: withoutPrefix.slice(indexOfFirstUnderscore + 1),
+    };
   }
 
   public static deserializePrivilegeAssignedGlobally(privilege: string) {
