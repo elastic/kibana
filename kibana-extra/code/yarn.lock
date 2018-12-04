@@ -377,6 +377,13 @@
     "@types/react" "*"
     csstype "^2.2.0"
 
+"@types/tar-fs@^1.16.1":
+  version "1.16.1"
+  resolved "http://registry.npm.taobao.org/@types/tar-fs/download/@types/tar-fs-1.16.1.tgz#6e3fba276c173e365ae91e55f7b797a0e64298e5"
+  integrity sha1-bj+6J2wXPjZa6R5V97eXoOZCmOU=
+  dependencies:
+    "@types/node" "*"
+
 abab@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.0.tgz#aba0ab4c5eee2d4c79d3487d85450fb2376ebb0f"
@@ -7250,8 +7257,8 @@ tabbable@^1.0.3, tabbable@^1.1.0:
 
 tar-fs@^1.16.3:
   version "1.16.3"
-  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-1.16.3.tgz#966a628841da2c4010406a82167cbd5e0c72d509"
-  integrity sha512-NvCeXpYx7OsmOh8zIOP/ebG55zZmxLE0etfWRbWok+q2Qo8x/vOR/IJT1taADXPe+jsiu9axDb3X4B+iIgNlKw==
+  resolved "http://registry.npm.taobao.org/tar-fs/download/tar-fs-1.16.3.tgz#966a628841da2c4010406a82167cbd5e0c72d509"
+  integrity sha1-lmpiiEHaLEAQQGqCFny9Xgxy1Qk=
   dependencies:
     chownr "^1.0.1"
     mkdirp "^0.5.1"

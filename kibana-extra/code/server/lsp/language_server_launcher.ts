@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServerOptions } from '../server_options';
+import { LoggerFactory } from '../utils/log_factory';
 import { ILanguageServerHandler } from './proxy';
 
 export interface ILanguageServerLauncher {
@@ -15,4 +17,13 @@ export interface ILanguageServerLauncher {
 export enum LanguageServerStatus {
   NOT_RUNNING,
   RUNNING,
+}
+
+export interface LauncherConstructor {
+  new (
+    targetHost: string,
+    detach: boolean,
+    options: ServerOptions,
+    loggerFactory: LoggerFactory
+  ): ILanguageServerLauncher;
 }

@@ -12,6 +12,8 @@ export class ServerOptions {
 
   public readonly repoPath = resolve(this.config.get('path.data'), 'code/repos');
 
+  public readonly langServerPath = resolve(this.config.get('path.data'), 'code/langserver');
+
   public readonly jdtWorkspacePath = resolve(this.config.get('path.data'), 'code/jdt_ws');
 
   public readonly updateFrequencyMs: number = this.options.updateFreqencyMs;

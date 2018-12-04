@@ -12,10 +12,9 @@ import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { detectLanguage } from '../utils/detect_language';
 import { LoggerFactory } from '../utils/log_factory';
-import { JavaLauncher } from './java_launcher';
 import { ILanguageServerLauncher } from './language_server_launcher';
+import { LanguageServers } from './language_servers';
 import { ILanguageServerHandler } from './proxy';
-import { TypescriptServerLauncher } from './ts_launcher';
 
 export interface LanguageServerHandlerMap {
   [workspaceUri: string]: ILanguageServerHandler;
@@ -47,26 +46,13 @@ export class LanguageServerController implements ILanguageServerHandler {
     readonly loggerFactory: LoggerFactory
   ) {
     this.log = loggerFactory.getLogger([]);
-    this.languageServers = [
-      {
-        builtinWorkspaceFolders: false,
-        languages: ['typescript', 'javascript', 'html'],
-        maxWorkspace: options.maxWorkspace,
-        languageServerHandlers: {},
-        launcher: new TypescriptServerLauncher(
-          this.targetHost,
-          this.detach,
-          options,
-          loggerFactory
-        ),
-      },
-      {
-        builtinWorkspaceFolders: true,
-        languages: ['java'],
-        maxWorkspace: options.maxWorkspace,
-        launcher: new JavaLauncher(this.targetHost, this.detach, options, loggerFactory),
-      },
-    ];
+    this.languageServers = LanguageServers.map(ls => ({
+      builtinWorkspaceFolders: ls.builtinWorkspaceFolders,
+      languages: ls.languages,
+      maxWorkspace: options.maxWorkspace,
+      languageServerHandlers: {},
+      launcher: new ls.launcher(this.targetHost, this.detach, options, loggerFactory),
+    }));
     this.languageServerMap = this.languageServers.reduce(
       (map, ls) => {
         ls.languages.forEach(lang => (map[lang] = ls));
