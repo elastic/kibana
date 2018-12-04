@@ -18,7 +18,7 @@
  */
 
 import d3 from 'd3';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 
 export function VislibVisualizationsTimeMarkerProvider() {
 
