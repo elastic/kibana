@@ -48,12 +48,13 @@ For details on how the internal methods work, [read this readme](../packages/kbn
 If you wish to load up specific es archived data for your test, you can do so via:
 
 ```
-node scripts/es_archiver.js load <archive> [--es-url=http://elastic:changeme@localhost:9200] [--kibana-url=http://elastic:changeme@localhost:5601/{basepath?}]
+node scripts/es_archiver.js load <archive> [--es-url=http://username:password@localhost:9200] [--kibana-url=http://username:password@localhost:5601/{basepath?}]
 ```
 
 That will load the specified archive located in the archive directory specified by the default functional config file, located in `test/functional/config`
 
-*Note:* The `--es-url` and `--kibana-url` options may or may not be neccessary depending on your current Kibana configuration settings.
+*Note:* The `--es-url` and `--kibana-url` options may or may not be neccessary depending on your current Kibana configuration settings, and their values
+may also change based on those settings (for example if you are not running with security you will not need the `username:password` portion).
 
 #### Saving data
 
