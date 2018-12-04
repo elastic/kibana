@@ -22,9 +22,14 @@ export interface HttpContext {
   url?: string;
 }
 
+interface TagsContext {
+  [key: string]: string;
+}
+
 interface Context {
   db?: DbContext;
   http?: HttpContext;
+  tags?: TagsContext;
   service: ContextService;
   [key: string]: unknown;
 }
