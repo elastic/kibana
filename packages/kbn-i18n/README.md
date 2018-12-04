@@ -53,7 +53,7 @@ where `locale` is [ISO 639 language code](https://en.wikipedia.org/wiki/List_of_
 
 For example:
 ```
-src/core_plugins/kibana/translations/fr.json
+src/legacy/core_plugins/kibana/translations/fr.json
 ```
 
 When a new translation file is added, you have to register this file into
