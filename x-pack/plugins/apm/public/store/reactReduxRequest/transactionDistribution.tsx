@@ -7,7 +7,7 @@
 import React from 'react';
 import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
 import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
-import { loadTransactionDistribution } from '../../services/rest/apm';
+import { loadTransactionDistribution } from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
 // @ts-ignore
@@ -41,6 +41,7 @@ export function TransactionDistributionRequest({
 }) {
   const {
     serviceName,
+    transactionType,
     transactionId,
     start,
     end,
@@ -48,7 +49,7 @@ export function TransactionDistributionRequest({
     kuery
   } = urlParams;
 
-  if (!(serviceName && start && end && transactionName)) {
+  if (!(serviceName && transactionType && start && end && transactionName)) {
     return null;
   }
 
@@ -57,7 +58,15 @@ export function TransactionDistributionRequest({
       id={ID}
       fn={loadTransactionDistribution}
       args={[
-        { serviceName, transactionId, start, end, transactionName, kuery }
+        {
+          serviceName,
+          transactionType,
+          transactionId,
+          start,
+          end,
+          transactionName,
+          kuery
+        }
       ]}
       selector={getTransactionDistribution}
       render={render}

@@ -11,7 +11,8 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
-  TRANSACTION_SAMPLED
+  TRANSACTION_SAMPLED,
+  TRANSACTION_TYPE
 } from 'x-pack/plugins/apm/common/constants';
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
@@ -38,6 +39,7 @@ export type ESResponse = AggregationSearchResponse<void, Aggs>;
 export function bucketFetcher(
   serviceName: string,
   transactionName: string,
+  transactionType: string,
   transactionId: string,
   bucketSize: number,
   setup: Setup
@@ -52,6 +54,7 @@ export function bucketFetcher(
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
             { term: { [`${TRANSACTION_NAME}.keyword`]: transactionName } },
             {
               range: {
