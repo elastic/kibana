@@ -167,7 +167,7 @@ test('`start` initializes plugin and calls appropriate lifecycle hook', async ()
   expect(mockPluginInstance.start).toHaveBeenCalledWith(startContext, startDependencies);
 });
 
-test('`stop` does nothing if plugin is not started', async () => {
+test('`stop` fails if plugin is not started', async () => {
   const manifest = createPluginManifest();
   const plugin = new Plugin(
     'plugin-with-initializer-path',
@@ -178,7 +178,9 @@ test('`stop` does nothing if plugin is not started', async () => {
   const mockPluginInstance = { start: jest.fn(), stop: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
 
-  await expect(plugin.stop()).resolves.toBeUndefined();
+  await expect(plugin.stop()).rejects.toMatchInlineSnapshot(
+    `[Error: Plugin "some-plugin-id" can't be stopped since it isn't started.]`
+  );
   expect(mockPluginInstance.stop).not.toHaveBeenCalled();
 });
 

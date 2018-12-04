@@ -131,7 +131,7 @@ export class Plugin<
    */
   public async stop() {
     if (this.instance === undefined) {
-      return;
+      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't started.`);
     }
 
     this.log.info('Stopping plugin');
