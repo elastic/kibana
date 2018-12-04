@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { CRUD_APP_BASE_PATH } from '../constants';
 
 export const listBreadcrumb = {
-  text: i18n.translate('pack.rollupJobs.listBreadcrumbTitle', {
+  text: i18n.translate('xpack.rollupJobs.listBreadcrumbTitle', {
     defaultMessage: 'Rollups Jobs',
   }),
   href: `#${CRUD_APP_BASE_PATH}`,
