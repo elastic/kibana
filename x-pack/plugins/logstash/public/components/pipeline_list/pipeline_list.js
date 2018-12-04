@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import pluralize from 'pluralize';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiCallOut,
@@ -18,7 +18,7 @@ import { InfoAlerts } from './info_alerts';
 import { PipelinesTable } from './pipelines_table';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 
-export class PipelineList extends React.Component {
+class PipelineListUi extends React.Component {
   constructor(props) {
     super(props);
 
@@ -49,28 +49,55 @@ export class PipelineList extends React.Component {
 
   getEmptyPrompt = () => (
     <EuiEmptyPrompt
-      title={<h2>No pipelines</h2>}
+      title={(
+        <h2>
+          <FormattedMessage
+            id="xpack.logstash.pipelineList.noPipelinesTitle"
+            defaultMessage="No pipelines"
+          />
+        </h2>
+      )}
       titleSize="xs"
-      body="There are no pipelines defined."
+      body={(
+        <FormattedMessage
+          id="xpack.logstash.pipelineList.noPipelinesDescription"
+          defaultMessage="There are no pipelines defined."
+        />
+      )}
     />
   );
 
   getErrorPrompt = () => (
     <EuiEmptyPrompt
-      title={<h2>Error</h2>}
+      title={(
+        <h2>
+          <FormattedMessage
+            id="xpack.logstash.pipelineList.pipelinesLoadingErrorTitle"
+            defaultMessage="Error"
+          />
+        </h2>
+      )}
       titleSize="xs"
-      body="Error encountered while loading pipelines."
+      body={(
+        <FormattedMessage
+          id="xpack.logstash.pipelineList.pipelinesLoadingErrorDescription"
+          defaultMessage="Error encountered while loading pipelines."
+        />
+      )}
     />
   );
 
   loadPipelines = () => {
-    const { isReadOnly, licenseService, pipelinesService, toastNotifications } = this.props;
+    const { isReadOnly, licenseService, pipelinesService, toastNotifications, intl } = this.props;
 
     this.setState({
       message: (
         <div>
           <EuiLoadingSpinner size="m" />
-          &nbsp; Loading pipelines....
+          &nbsp; <FormattedMessage
+            id="xpack.logstash.pipelineList.pipelinesLoadingMessage"
+            defaultMessage="Loading pipelines…"
+          />
         </div>
       ),
     });
@@ -109,7 +136,12 @@ export class PipelineList extends React.Component {
             }
           } else {
             this.setState({ isForbidden: false });
-            toastNotifications.addDanger(`Couldn't load pipeline. Error: "${err.statusText}".`);
+            toastNotifications.addDanger(intl.formatMessage({
+              id: 'xpack.logstash.pipelineList.pipelineLoadingErrorNotification',
+              defaultMessage: `Couldn't load pipeline. Error: "{errStatusText}".`
+            }, {
+              errStatusText: err.statusText,
+            }));
           }
         });
       });
@@ -132,9 +164,19 @@ export class PipelineList extends React.Component {
       <EuiCallOut
         color="danger"
         iconType="cross"
-        title="You do not have permission to manage Logstash pipelines."
+        title={(
+          <FormattedMessage
+            id="xpack.logstash.pipelineList.noPermissionToManageTitle"
+            defaultMessage="You do not have permission to manage Logstash pipelines."
+          />
+        )}
       >
-        <p>Please contact your administrator.</p>
+        <p>
+          <FormattedMessage
+            id="xpack.logstash.pipelineList.noPermissionToManageDescription"
+            defaultMessage="Please contact your administrator."
+          />
+        </p>
       </EuiCallOut>
     ) : null;
   };
@@ -157,32 +199,54 @@ export class PipelineList extends React.Component {
 
   deleteSelectedPipelines = () => {
     this.hideDeletePipelinesModal();
-    const { licenseService, pipelinesService, toastNotifications } = this.props;
+    const { licenseService, pipelinesService, toastNotifications, intl } = this.props;
     const { selection } = this.state;
     const numPipelinesSelected = selection.length;
-    const totalPluralized = pluralize('Pipeline', numPipelinesSelected);
 
     const pipelineIds = selection.map(({ id }) => id);
     return pipelinesService
       .deletePipelines(pipelineIds)
       .then(results => {
         const { numSuccesses, numErrors } = results;
-        const errorPluralized = pluralize('Pipeline', numErrors);
 
         if (numSuccesses === 1 && numErrors === 0) {
-          toastNotifications.addSuccess(`Deleted "${selection[0].id}"`);
+          toastNotifications.addSuccess(intl.formatMessage({
+            id: 'xpack.logstash.pipelineList.pipelinesSuccessfullyDeletedNotification',
+            defaultMessage: 'Deleted "{id}"',
+          }, {
+            id: selection[0].id,
+          }));
         } else if (numSuccesses) {
           let text;
           if (numErrors) {
-            text = `But ${numErrors} ${errorPluralized} couldn't be deleted.`;
+            text = intl.formatMessage({
+              id: 'xpack.logstash.pipelineList.pipelinesCouldNotBeDeletedDescription',
+              defaultMessage: `But {numErrors, plural, one {# Pipeline} other {# Pipelines}} couldn't be deleted.`,
+            }, {
+              numErrors,
+            });
           }
 
           toastNotifications.addSuccess({
-            title: `Deleted ${numSuccesses} out of ${numPipelinesSelected} ${totalPluralized}`,
+            title: intl.formatMessage({
+              id: 'xpack.logstash.pipelineList.successfullyDeletedPipelinesNotification',
+              defaultMessage:
+                'Deleted {numSuccesses} out of {numPipelinesSelected, plural, one {# Pipeline} other {# Pipelines}}',
+            }, {
+              numSuccesses,
+              numPipelinesSelected,
+              numPipelinesSelected,
+            }),
             text,
           });
         } else if (numErrors) {
-          toastNotifications.addError(`Failed to delete ${numErrors} ${errorPluralized}`);
+          toastNotifications.addError(intl.formatMessage({
+            id: 'xpack.logstash.pipelineList.couldNotDeletePipelinesNotification',
+            defaultMessage:
+              'Failed to delete {numErrors, plural, one {# Pipeline} other {# Pipelines}}',
+          }, {
+            numErrors,
+          }));
         }
 
         this.loadPipelines();
@@ -232,3 +296,5 @@ export class PipelineList extends React.Component {
     );
   }
 }
+
+export const PipelineList = injectI18n(PipelineListUi);

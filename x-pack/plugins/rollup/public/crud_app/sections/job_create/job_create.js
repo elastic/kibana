@@ -11,9 +11,10 @@ import cloneDeep from 'lodash/lang/cloneDeep';
 import debounce from 'lodash/function/debounce';
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiBreadcrumbs,
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
@@ -26,11 +27,11 @@ import {
 
 import { fatalError } from 'ui/notify';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
-  getRouterLinkProps,
   validateIndexPattern,
   formatFields,
+  listBreadcrumb,
+  createBreadcrumb,
 } from '../../services';
 
 import { Navigation } from './navigation';
@@ -85,6 +86,8 @@ export class JobCreateUi extends Component {
 
   constructor(props) {
     super(props);
+
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb ]);
 
     const stepsFields = mapValues(stepIdToStepConfigMap, step => cloneDeep(step.defaultFields || {}));
 
@@ -443,23 +446,6 @@ export class JobCreateUi extends Component {
   render() {
     const { isSaving, saveError } = this.props;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.jobsText"
-          defaultMessage="Rollup jobs"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.createText"
-          defaultMessage="Create"
-        />
-      ),
-    }];
-
     let savingFeedback;
 
     if (isSaving) {
@@ -512,9 +498,6 @@ export class JobCreateUi extends Component {
           horizontalPosition="center"
           className="rollupJobWizardPage"
         >
-          <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-          <EuiSpacer size="xs" />
-
           <EuiPageContentHeader>
             <EuiTitle size="l">
               <h1>
