@@ -70,7 +70,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     const ids = beatIds.map(beatId => `beat:${beatId}`);
 
     const params = {
-      _source_includes: ['beat.id', 'beat.verified_on'],
       body: {
         ids,
       },
