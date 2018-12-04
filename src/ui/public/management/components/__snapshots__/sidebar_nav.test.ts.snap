@@ -3,11 +3,13 @@
 exports[`Management filters and filters and maps section objects into SidebarNav items 1`] = `
 Array [
   Object {
+    "data-test-subj": "sidenav-activeSection",
     "icon": null,
     "id": "activeSection",
     "isSelected": false,
     "items": Array [
       Object {
+        "data-test-subj": "sidenav-item",
         "icon": null,
         "id": "item",
         "isSelected": false,

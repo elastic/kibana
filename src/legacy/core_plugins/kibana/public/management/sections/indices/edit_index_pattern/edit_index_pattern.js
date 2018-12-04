@@ -35,6 +35,9 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+
+import { getEditBreadcrumbs } from '../breadcrumbs';
 
 const REACT_SOURCE_FILTERS_DOM_ELEMENT_ID = 'reactSourceFiltersTable';
 const REACT_INDEXED_FIELDS_DOM_ELEMENT_ID = 'reactIndexedFieldsTable';
@@ -156,28 +159,25 @@ function destroyIndexedFieldsTable() {
 uiRoutes
   .when('/management/kibana/indices/:indexPatternId', {
     template,
+    k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
       indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
         return indexPatterns
           .get($route.current.params.indexPatternId)
           .catch(redirectWhenMissing('/management/kibana/index'));
       }
-    }
+    },
   });
 
 uiRoutes
   .when('/management/kibana/indices', {
-    resolve: {
-      redirect: function ($location, config) {
-        const defaultIndex = config.get('defaultIndex');
-        let path = '/management/kibana/index';
-
-        if (defaultIndex) {
-          path = `/management/kibana/indices/${defaultIndex}`;
-        }
-
-        $location.path(path).replace();
+    redirectTo() {
+      const defaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
+      if (defaultIndex) {
+        return `/management/kibana/indices/${defaultIndex}`;
       }
+
+      return '/management/kibana/index';
     }
   });
 

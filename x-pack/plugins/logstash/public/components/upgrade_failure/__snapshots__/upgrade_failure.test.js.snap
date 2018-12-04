@@ -2,6 +2,88 @@
 
 exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
 <UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isManualUpgrade={true}
   isNewPipeline={true}
   onClose={[MockFunction]}
@@ -272,7 +354,17 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                               <span
                                 className="euiButtonEmpty__text"
                               >
-                                Go back
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Go back"
+                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                    values={Object {}}
+                                  >
+                                    Go back
+                                  </FormattedMessage>
+                                </span>
                               </span>
                             </span>
                           </button>
@@ -293,6 +385,88 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
 
 exports[`UpgradeFailure component passes expected text for not manual upgrade 1`] = `
 <UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isManualUpgrade={false}
   isNewPipeline={true}
   onClose={[MockFunction]}
@@ -563,7 +737,21 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                               <span
                                 className="euiButtonEmpty__text"
                               >
+<<<<<<< HEAD
                                 Go back
+=======
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Go back"
+                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                    values={Object {}}
+                                  >
+                                    Go back
+                                  </FormattedMessage>
+                                </span>
+>>>>>>> master
                               </span>
                             </span>
                           </button>
@@ -584,6 +772,88 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
 
 exports[`UpgradeFailure component passes expected text for not new pipeline 1`] = `
 <UpgradeFailure
+  intl={
+    Object {
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
   isManualUpgrade={true}
   isNewPipeline={false}
   onClose={[MockFunction]}
@@ -854,7 +1124,21 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                               <span
                                 className="euiButtonEmpty__text"
                               >
+<<<<<<< HEAD
                                 Go back
+=======
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <FormattedMessage
+                                    defaultMessage="Go back"
+                                    id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+                                    values={Object {}}
+                                  >
+                                    Go back
+                                  </FormattedMessage>
+                                </span>
+>>>>>>> master
                               </span>
                             </span>
                           </button>
