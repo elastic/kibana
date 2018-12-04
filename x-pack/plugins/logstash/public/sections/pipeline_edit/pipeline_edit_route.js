@@ -6,6 +6,7 @@
 
 import routes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
+import { i18n } from '@kbn/i18n';
 import template from './pipeline_edit_route.html';
 import 'plugins/logstash/services/pipeline';
 import 'plugins/logstash/services/license';
@@ -50,7 +51,12 @@ routes
             return licenseService.checkValidity()
               .then(() => {
                 if (err.status !== 403) {
-                  toastNotifications.addDanger(`Couldn't load pipeline. Error: '${err.statusText}'.`);
+                  toastNotifications.addDanger(i18n.translate('xpack.logstash.couldNotLoadPipelineErrorNotification', {
+                    defaultMessage: `Couldn't load pipeline. Error: '{errStatusText}'.`,
+                    values: {
+                      errStatusText: err.statusText,
+                    },
+                  }));
                 }
 
                 kbnUrl.redirect('/management/logstash/pipelines');
