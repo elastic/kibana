@@ -32,6 +32,7 @@ export class NewCalendar extends Component {
     this.state = {
       isNewEventModalVisible: false,
       isImportModalVisible: false,
+      isNewCalendarIdValid: false,
       loading: true,
       jobIds: [],
       jobIdOptions: [],
@@ -103,23 +104,17 @@ export class NewCalendar extends Component {
     }
   }
 
-  // TODO: Validate and save - NOTE: can we validate calendar id with just the form on the front-end?
   onCreate = async () => {
     const calendar = this.setUpCalendarForApi();
+    this.setState({ saving: true });
 
-    if (validateCalendarId(calendar.calendarId, { calendarId: { valid: true } })) {
-      this.setState({ saving: true });
-
-      try {
-        await ml.addCalendar(calendar);
-        window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
-      } catch (error) {
-        console.log('Error saving calendar', error);
-        this.setState({ saving: false });
-        toastNotifications.addDanger(`An error occurred creating calendar: ${calendar.calendarId}`);
-      }
-    } else {
-      // Trigger validation error message for form
+    try {
+      await ml.addCalendar(calendar);
+      window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+    } catch (error) {
+      console.log('Error saving calendar', error);
+      this.setState({ saving: false });
+      toastNotifications.addDanger(`An error occurred creating calendar: ${calendar.calendarId}`);
     }
   }
 
@@ -183,8 +178,11 @@ export class NewCalendar extends Component {
   };
 
   onCalendarIdChange = (e) => {
+    const isValid = validateCalendarId(e.target.value);
+
     this.setState({
       formCalendarId: e.target.value,
+      isNewCalendarIdValid: isValid
     });
   };
 
@@ -239,6 +237,7 @@ export class NewCalendar extends Component {
       events,
       isNewEventModalVisible,
       isImportModalVisible,
+      isNewCalendarIdValid,
       formCalendarId,
       description,
       groupIdOptions,
@@ -284,6 +283,7 @@ export class NewCalendar extends Component {
             eventsList={events}
             groupIds={groupIdOptions}
             isEdit={selectedCalendar !== undefined}
+            isNewCalendarIdValid={selectedCalendar ? true : isNewCalendarIdValid}
             jobIds={jobIdOptions}
             onCalendarIdChange={this.onCalendarIdChange}
             onCreate={this.onCreate}

@@ -6,7 +6,6 @@
 
 
 
-import _ from 'lodash';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { jobs } from 'plugins/ml/services/ml_api_service/jobs';
 import { isJobIdValid } from 'plugins/ml/../common/util/job_utils';
@@ -72,27 +71,14 @@ export function getCalendarSettingsData() {
   });
 }
 
-//  Calendar ID requires the same format as a Job ID, therefore isJobIdValid can be used
-// TODO: rewrite this so we can use toast for our error messages
-export function validateCalendarId(calendarId, checks) {
+export function validateCalendarId(calendarId) {
   let valid = true;
 
-  _.each(checks, item => item.valid = true);
-
   if (calendarId === '' || calendarId === undefined) {
-    checks.calendarId.valid = false;
+    valid = false;
   } else if (isJobIdValid(calendarId) === false) {
-    checks.calendarId.valid = false;
-    let msg = 'Calendar ID can contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores; ';
-    msg += 'must start and end with an alphanumeric character';
-    checks.calendarId.message = msg;
+    valid = false;
   }
-
-  _.each(checks, (item) => {
-    if (item.valid === false) {
-      valid = false;
-    }
-  });
 
   return valid;
 }

@@ -29,6 +29,7 @@ export function CalendarForm({
   eventsList,
   groupIds,
   isEdit,
+  isNewCalendarIdValid,
   jobIds,
   onCalendarIdChange,
   onCreate,
@@ -44,12 +45,20 @@ export function CalendarForm({
   selectedJobOptions,
   showNewEventModal
 }) {
+  const msg = `Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;
+    must start and end with an alphanumeric character`;
+  const helpText = (isNewCalendarIdValid === true) ? msg : undefined;
+  const error = (isNewCalendarIdValid === false) ? [msg] : undefined;
+
   return (
     <EuiForm>
 
       <EuiFormRow
         label="Calendar ID"
         fullWidth
+        helpText={helpText}
+        error={error}
+        isInvalid={!isNewCalendarIdValid}
       >
         <EuiFieldText
           name="calendarId"
@@ -122,7 +131,7 @@ export function CalendarForm({
           <EuiButton
             fill
             onClick={isEdit ? onEdit : onCreate}
-            disabled={saving}
+            disabled={saving || !isNewCalendarIdValid}
           >
             {saving ? 'Saving...' : 'Save'}
           </EuiButton>
@@ -145,6 +154,7 @@ CalendarForm.propTypes = {
   description: PropTypes.string.isRequired,
   groupIds: PropTypes.array.isRequired,
   isEdit: PropTypes.bool.isRequired,
+  isNewCalendarIdValid: PropTypes.bool.isRequired,
   jobIds: PropTypes.array.isRequired,
   onCalendarIdChange: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
