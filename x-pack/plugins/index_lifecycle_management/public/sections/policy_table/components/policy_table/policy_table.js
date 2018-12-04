@@ -168,7 +168,7 @@ export class PolicyTableUi extends Component {
       <EuiTableHeaderCell
         key="deleteHeader"
         data-test-subj="policyTableHeaderCell-delete"
-        width={100}
+        width={150}
       />
     );
     return headers;
@@ -317,7 +317,7 @@ export class PolicyTableUi extends Component {
     const button = (
       <EuiButton
         data-test-subj="policyActionsContextMenuButton"
-        iconSide="right"
+        iconSide="left"
         aria-label="Policy options"
         onClick={() => this.togglePolicyPopover(policy)}
         iconType="arrowDown"
@@ -335,7 +335,7 @@ export class PolicyTableUi extends Component {
         key={`delete-${name}`}
         truncateText={false}
         data-test-subj={`policyTableCell-actions-${name}`}
-        style={{ width: 100 }}
+        style={{ width: 150 }}
       >
         <EuiPopover
           id="contextMenuPolicy"
