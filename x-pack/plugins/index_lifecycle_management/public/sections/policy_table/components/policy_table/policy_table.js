@@ -487,7 +487,7 @@ export class PolicyTableUi extends Component {
               <EuiSpacer />
               {content}
               <EuiSpacer size="m" />
-              {policies.length ? this.renderPager() : null}
+              {policies.length && policies.length > 10 ? this.renderPager() : null}
             </div>
           </EuiPageContent>
         </EuiPageBody>
