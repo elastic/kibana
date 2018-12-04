@@ -23,7 +23,9 @@ export function initPutRolesApi(
     if (kibanaPrivileges.global) {
       kibanaApplicationPrivileges.push({
         privileges: [
-          ...kibanaPrivileges.global.minimum ? [PrivilegeSerializer.serializeGlobalReservedPrivilege(kibanaPrivileges.global.minimum)] : [],
+          ...kibanaPrivileges.global.minimum ? kibanaPrivileges.global.minimum.map(
+            privilege => PrivilegeSerializer.serializeGlobalReservedPrivilege(privilege)
+          ) : [],
           ...kibanaPrivileges.global.feature ? flatten(
             Object.entries(kibanaPrivileges.global.feature).map(
               ([featureName, privileges])=> privileges.map(
@@ -41,7 +43,9 @@ export function initPutRolesApi(
       for(const [spaceId, spacePrivileges] of Object.entries(kibanaPrivileges.space)) {
         kibanaApplicationPrivileges.push({
           privileges: [
-            ...spacePrivileges.minimum ? [PrivilegeSerializer.serializeGlobalReservedPrivilege(spacePrivileges.minimum)] : [],
+            ...spacePrivileges.minimum ? spacePrivileges.minimum.map(
+              privilege => PrivilegeSerializer.serializeSpaceReservedPrivilege(privilege)
+            ) : [],
             ...spacePrivileges.feature ? flatten(
               Object.entries(spacePrivileges.feature).map(
                 ([featureName, privileges])=> privileges.map(
@@ -88,7 +92,7 @@ export function initPutRolesApi(
     }), {});
     const featureSchema = Joi.object(featureObject);
     return Joi.object({
-      minimum: Joi.string().valid(Object.keys(privileges.global)),
+      minimum: Joi.array().items(Joi.string().valid(Object.keys(privileges.global))),
       feature: featureSchema,
     });
   };
@@ -96,7 +100,7 @@ export function initPutRolesApi(
   const getSpaceSchema = () => {
     const privileges = authorization.privileges.get();
     return Joi.object().pattern(/^[a-z0-9_-]+$/, Joi.object({
-      minimum: Joi.string().valid(Object.keys(privileges.space)),
+      minimum: Joi.array().items(Joi.string().valid(Object.keys(privileges.space))),
       feature: Joi.object(Object.entries(privileges.features).reduce((acc, [feature, featurePrivileges]) => ({
         ...acc,
         [feature]: Joi.array().items(Joi.string().valid(Object.keys(featurePrivileges)))
