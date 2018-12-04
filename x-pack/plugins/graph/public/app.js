@@ -26,6 +26,7 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
+import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
 
 import './angular-venn-simple.js';
 import gws from './graphClientWorkspace.js';
@@ -70,17 +71,9 @@ if (uiRoutes.enable) {
 }
 
 uiRoutes
-  .defaults(/.*/, {
-    k7Breadcrumbs: () => [
-      {
-        text: 'Graph',
-      }
-    ]
-  });
-
-uiRoutes
   .when('/home', {
     template: appTemplate,
+    k7Breadcrumbs: getHomeBreadcrumbs,
     resolve: {
       //Copied from example found in wizard.js ( Kibana TODO - can't
       // IndexPatternsProvider abstract these implementation details better?)
@@ -104,6 +97,7 @@ uiRoutes
   })
   .when('/workspace/:id', {
     template: appTemplate,
+    k7Breadcrumbs: getWorkspaceBreadcrumbs,
     resolve: {
       savedWorkspace: function (savedGraphWorkspaces, courier, $route, i18n) {
         return savedGraphWorkspaces.get($route.current.params.id)
