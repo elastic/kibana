@@ -317,16 +317,16 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'group_values_tooltip',
       default: i18n.translate('common.ui.aggTypes.otherBucket.groupValuesTooltip', {
-        defaultMessage: `Values not in the top N are grouped in this bucket.
-          To include documents with missing values, enable 'Show missing values'.`,
+        defaultMessage: 'Values not in the top N are grouped in this bucket. ' +
+          `To include documents with missing values, enable 'Show missing values'.`,
       }),
     },
     {
       name: 'show_missing_values_tooltip',
       default: i18n.translate('common.ui.aggTypes.otherBucket.showMissingValuesTooltip', {
-        defaultMessage: `Only works for fields of type 'string'. When enabled, include documents with missing values in the search.
-          If this bucket is in the top N, it appears in the chart. If not in the top N, and you enable
-          'Group other values in separate bucket', Elasticsearch adds the missing values to the 'other' bucket.`,
+        defaultMessage: `Only works for fields of type 'string'. When enabled, include documents with missing values in the search.` +
+          'If this bucket is in the top N, it appears in the chart. If not in the top N, and you enable' +
+          `Group other values in separate bucket', Elasticsearch adds the missing values to the 'other' bucket.`,
       }),
     }
   ]

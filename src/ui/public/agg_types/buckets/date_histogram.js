@@ -209,13 +209,13 @@ export const dateHistogramBucketAgg = new BucketAggType({
       name: 'interval_tooltip',
       default: (agg) => {
         const intervalCreatesTooManyBucketsTooltip = i18n.translate('common.ui.aggTypes.intervalCreatesTooManyBucketsTooltip', {
-          defaultMessage: `This interval creates too many buckets to show in the selected time range,
-            so it has been scaled to {bucketDescription}`,
+          defaultMessage: 'This interval creates too many buckets to show in the selected' +
+            'time range, so it has been scaled to {bucketDescription}',
           values: { bucketDescription: agg.buckets.getInterval().description }
         });
         const intervalCreatesTooLargeBucketsTooltip = i18n.translate('common.ui.aggTypes.intervalCreatesTooLargeBucketsTooltip', {
-          defaultMessage: `This interval creates buckets that are too large to show in the selected time range,
-            so it has been scaled to {bucketDescription}`,
+          defaultMessage: 'This interval creates buckets that are too large to show in the selected' +
+            'time range, so it has been scaled to {bucketDescription}',
           values: { bucketDescription: agg.buckets.getInterval().description }
         });
         return agg.buckets.getInterval().scale > 1 ? intervalCreatesTooLargeBucketsTooltip : intervalCreatesTooManyBucketsTooltip;

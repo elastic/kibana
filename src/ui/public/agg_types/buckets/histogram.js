@@ -199,8 +199,8 @@ export const histogramBucketAgg = new BucketAggType({
     {
       name: 'minimum_interval_tooltip',
       default: i18n.translate('common.ui.aggTypes.minimumIntervalTooltip', {
-        defaultMessage: `Interval will be automatically scaled in the event that the provided
-          value creates more buckets than specified by Advanced Setting's {histogramMaxBars}`,
+        defaultMessage: 'Interval will be automatically scaled in the event that the provided' +
+          `value creates more buckets than specified by Advanced Setting's {histogramMaxBars}`,
         values: { histogramMaxBars: 'histogram:maxBars' }
       }),
     }

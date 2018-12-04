@@ -30,8 +30,8 @@ function JsonParamType(config) {
   config = _.defaults(config, {
     name: 'json',
     jsonLabel: i18n.translate('common.ui.aggTypes.jsonInputTooltip', {
-      defaultMessage: `Any JSON formatted properties you add here will be merged with the elasticsearch
-        aggregation definition for this section. For example 'shard_size' on a terms aggregation.`
+      defaultMessage: 'Any JSON formatted properties you add here will be merged with the elasticsearch' +
+        `aggregation definition for this section. For example 'shard_size' on a terms aggregation.`
     })
   });
   JsonParamType.Super.call(this, config);

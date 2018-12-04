@@ -125,7 +125,8 @@ export const geoHashBucketAgg = new BucketAggType({
     {
       name: 'only_request_data_around_map_extent_tooltip',
       default: i18n.translate('common.ui.aggTypes.onlyRequestDataAroundMapExtentTooltip', {
-        defaultMessage: 'Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar',
+        defaultMessage: 'Apply {geoBoundingBox} filter aggregation to narrow the subject area to the map view box with collar',
+        values: { geoBoundingBox: 'geo_bounding_box' }
       }),
     }
   ],
