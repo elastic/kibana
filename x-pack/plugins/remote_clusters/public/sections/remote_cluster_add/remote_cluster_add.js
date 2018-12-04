@@ -7,9 +7,10 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiBreadcrumbs,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -19,10 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps } from '../../services';
-
+import { listBreadcrumb, addBreadcrumb } from '../../services';
 import { RemoteClusterForm } from '../remote_cluster_form';
-
 
 export class RemoteClusterAddUi extends Component {
   static propTypes = {
@@ -30,6 +29,11 @@ export class RemoteClusterAddUi extends Component {
     isAddingCluster: PropTypes.bool,
     addClusterError: PropTypes.object,
     clearAddClusterErrors: PropTypes.func,
+  }
+
+  constructor(props) {
+    super(props);
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
   }
 
   componentWillUnmount() {
@@ -41,25 +45,13 @@ export class RemoteClusterAddUi extends Component {
     this.props.addCluster(clusterConfig);
   };
 
+  cancel = () => {
+    const { history } = this.props;
+    history.push(CRUD_APP_BASE_PATH);
+  };
+
   render() {
     const { isAddingCluster, addClusterError } = this.props;
-
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.remoteClusters.add.breadcrumbs.listText"
-          defaultMessage="Remote clusters"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.remoteClusters.add.breadcrumbs.addText"
-          defaultMessage="Add"
-        />
-      ),
-    }];
 
     return (
       <Fragment>
@@ -69,7 +61,6 @@ export class RemoteClusterAddUi extends Component {
               horizontalPosition="center"
               className="remoteClusterAddPage"
             >
-              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
               <EuiSpacer size="xs" />
 
               <EuiPageContentHeader>
@@ -87,6 +78,7 @@ export class RemoteClusterAddUi extends Component {
                 isSaving={isAddingCluster}
                 saveError={addClusterError}
                 save={this.save}
+                cancel={this.cancel}
               />
             </EuiPageContent>
           </EuiPageBody>

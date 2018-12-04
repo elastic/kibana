@@ -18,6 +18,18 @@ export {
 } from './api_errors';
 
 export {
+  listBreadcrumb,
+  buildListBreadcrumb,
+  addBreadcrumb,
+  editBreadcrumb,
+} from './breadcrumbs';
+
+export {
+  setRedirect,
+  redirect,
+} from './redirect';
+
+export {
   isSeedNodeValid,
   isSeedNodePortValid,
 } from './validate_seed_node';

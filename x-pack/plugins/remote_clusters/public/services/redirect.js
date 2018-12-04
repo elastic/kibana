@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parse } from 'querystring';
+// This depends upon Angular, which is why we use this provider pattern to access it within
+// our React app.
+let _redirect;
 
-export function extractQueryParams(queryString) {
-  const hrefSplit = queryString.split('?');
-  if (!hrefSplit.length) {
-    return {};
-  }
+export function setRedirect(redirect) {
+  _redirect = redirect;
+}
 
-  return parse(hrefSplit[1]);
+export function redirect(path) {
+  _redirect(path);
 }

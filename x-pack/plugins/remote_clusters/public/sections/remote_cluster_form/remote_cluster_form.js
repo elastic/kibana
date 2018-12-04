@@ -112,6 +112,13 @@ export class RemoteClusterFormUi extends Component {
           defaultMessage="Name is required."
         />
       );
+    } else if (name.match(/[^a-zA-Z\d]/)) {
+      errors.name = (
+        <FormattedMessage
+          id="xpack.remoteClusters.form.errors.lettersAndNumbersOnly"
+          defaultMessage="Name can only contain letters and numbers."
+        />
+      );
     }
 
     if (!seeds.some(seed => Boolean(seed.trim()))) {
@@ -344,7 +351,7 @@ export class RemoteClusterFormUi extends Component {
             noSuggestions
             placeholder={intl.formatMessage({
               id: 'xpack.remoteClusters.remoteClusterForm.fieldSeedsPlaceholder',
-              defaultMessage: 'Type and then hit ENTER',
+              defaultMessage: '127.0.0.1:9400',
             })}
             selectedOptions={formattedSeeds}
             onCreateOption={this.onCreateSeed}
@@ -593,7 +600,7 @@ export class RemoteClusterFormUi extends Component {
                 <h4>
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.sectionNameTitle"
-                    defaultMessage="Remote cluster name"
+                    defaultMessage="Name"
                   />
                 </h4>
               </EuiTitle>
@@ -601,7 +608,8 @@ export class RemoteClusterFormUi extends Component {
             description={(
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionNameDescription"
-                defaultMessage="This is the name of the remote cluster you want to connect to."
+                defaultMessage="Name this remote cluster so you can easily identify
+                it later."
               />
             )}
             fullWidth
@@ -610,7 +618,7 @@ export class RemoteClusterFormUi extends Component {
               label={(
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
-                  defaultMessage="Remote cluster name"
+                  defaultMessage="Name"
                 />
               )}
               error={errorClusterName}

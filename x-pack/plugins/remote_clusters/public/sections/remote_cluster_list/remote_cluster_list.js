@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiButton,
@@ -29,7 +31,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps, extractQueryParams } from '../../services';
+import { getRouterLinkProps, extractQueryParams, listBreadcrumb } from '../../services';
 
 import {
   RemoteClusterTable,
@@ -43,9 +45,11 @@ const REFRESH_RATE_MS = 30000;
 
 export class RemoteClusterListUi extends Component {
   static propTypes = {
-    loadClusters: PropTypes.func,
-    refreshClusters: PropTypes.func,
-    openDetailPanel: PropTypes.func,
+    loadClusters: PropTypes.func.isRequired,
+    refreshClusters: PropTypes.func.isRequired,
+    openDetailPanel: PropTypes.func.isRequired,
+    closeDetailPanel: PropTypes.func.isRequired,
+    isDetailPanelOpen: PropTypes.bool,
     clusters: PropTypes.array,
     isLoading: PropTypes.bool,
     isCopyingCluster: PropTypes.bool,
@@ -55,6 +59,8 @@ export class RemoteClusterListUi extends Component {
   static getDerivedStateFromProps(props) {
     const {
       openDetailPanel,
+      closeDetailPanel,
+      isDetailPanelOpen,
       history: {
         location: {
           search,
@@ -67,21 +73,17 @@ export class RemoteClusterListUi extends Component {
     // Show deeplinked remoteCluster whenever remoteClusters get loaded or the URL changes.
     if (clusterName != null) {
       openDetailPanel(clusterName);
+    } else if (isDetailPanelOpen) {
+      closeDetailPanel();
     }
 
     return null;
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = {};
-
-    props.loadClusters();
-  }
-
   componentDidMount() {
+    this.props.loadClusters();
     this.interval = setInterval(this.props.refreshClusters, REFRESH_RATE_MS);
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
   }
 
   componentWillUnmount() {

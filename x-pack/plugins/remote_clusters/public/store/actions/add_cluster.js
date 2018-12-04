@@ -5,12 +5,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { fatalError } from 'ui/notify';
+import { fatalError, toastNotifications } from 'ui/notify';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   addCluster as sendAddClusterRequest,
   getRouter,
+  extractQueryParams,
+  redirect,
 } from '../../services';
 
 import {
@@ -81,12 +83,26 @@ export const addCluster = (cluster) => async (dispatch) => {
     payload: { cluster: newCluster.data },
   });
 
-  // This will open the new job in the detail panel. Note that we're *not* showing a success toast
-  // here, because it would partially obscure the detail panel.
-  getRouter().history.push({
-    pathname: `${CRUD_APP_BASE_PATH}/list`,
-    search: `?cluster=${cluster.name}`,
-  });
+  const { history, route: { location: { search } }  } = getRouter();
+  const { redirect: redirectUrl } = extractQueryParams(search);
+
+  if (redirectUrl) {
+    // A toast is only needed if we're leaving the app.
+    toastNotifications.addSuccess(i18n.translate('xpack.remoteClusters.addAction.successTitle', {
+      defaultMessage: `Added remote cluster '{name}'`,
+      values: { name: cluster.name },
+    }));
+
+    const decodedRedirect = decodeURIComponent(redirectUrl);
+    redirect(decodedRedirect);
+  } else {
+    // This will open the new job in the detail panel. Note that we're *not* showing a success toast
+    // here, because it would partially obscure the detail panel.
+    history.push({
+      pathname: `${CRUD_APP_BASE_PATH}/list`,
+      search: `?cluster=${cluster.name}`,
+    });
+  }
 };
 
 export const clearAddClusterErrors = () => (dispatch) => {

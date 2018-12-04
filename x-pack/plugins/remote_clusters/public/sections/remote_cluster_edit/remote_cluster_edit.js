@@ -7,9 +7,10 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiBreadcrumbs,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -25,8 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps } from '../../services';
-
+import { buildListBreadcrumb, editBreadcrumb } from '../../services';
 import { RemoteClusterForm } from '../remote_cluster_form';
 
 const disabledFields = {
@@ -56,6 +56,12 @@ export class RemoteClusterEditUi extends Component {
         },
       },
     } = props;
+
+    chrome.breadcrumbs.set([
+      MANAGEMENT_BREADCRUMB,
+      buildListBreadcrumb(`?cluster=${name}`),
+      editBreadcrumb,
+    ]);
 
     this.state = {
       clusterName: name,
@@ -158,23 +164,6 @@ export class RemoteClusterEditUi extends Component {
       clusterName,
     } = this.state;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.remoteClusters.edit.breadcrumbs.listText"
-          defaultMessage="Remote clusters"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.remoteClusters.edit.breadcrumbs.addText"
-          defaultMessage="Edit"
-        />
-      ),
-    }];
-
     return (
       <Fragment>
         <EuiPage>
@@ -183,8 +172,6 @@ export class RemoteClusterEditUi extends Component {
               horizontalPosition="center"
               className="remoteClusterAddPage"
             >
-              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-
               <EuiSpacer size="xs" />
 
               <EuiPageContentHeader>
