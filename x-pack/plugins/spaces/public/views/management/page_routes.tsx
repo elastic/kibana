@@ -133,6 +133,9 @@ routes.when('/management/spaces/edit/:spaceId', {
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
             userProfile={userProfile}
+            setBreadcrumbs={breadcrumbs => {
+              chrome.breadcrumbs.set(breadcrumbs);
+            }}
           />
         </I18nProvider>,
         domNode
