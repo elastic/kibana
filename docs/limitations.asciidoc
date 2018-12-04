@@ -7,7 +7,7 @@
 
 * <<nested-objects>>
 * <<export-data>>
-* <<graph-limitations,Graph analytics>>
+* <<graph-limitations>>
 
 These {stack} features also have limitations that affect {kib}:
 
