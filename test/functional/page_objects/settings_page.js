@@ -42,7 +42,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       //await find.clickByDisplayedLinkText('Advanced Settings');
       // await testSubjects.click
       //find.clickByCssSelector();
-      await testSubjects.click('sidenav-settings');
+      await testSubjects.click('settings');
       console.log('find.clickByDisplayedLinkText');
       await PageObjects.header.waitUntilLoadingHasFinished();
       console.log('PageObjects.header.waitUntilLoadingHasFinished');
