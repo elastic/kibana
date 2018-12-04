@@ -12,6 +12,7 @@ import { StringMap } from 'x-pack/plugins/apm/typings/common';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
 import { HeaderContainer } from '../../shared/UIComponents';
+import { ErrorGroupOverview } from '../ErrorGroupOverview/beta';
 import { TransactionOverview } from '../TransactionOverview/beta';
 import { ServiceIntegrations } from './ServiceIntegrations';
 import { ServiceMetrics } from './ServiceMetrics';
@@ -30,11 +31,12 @@ interface ServiceDetailsProps {
   match: {
     params: StringMap;
   };
+  location: any;
 }
 
 export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
   public render() {
-    const { urlParams, match } = this.props;
+    const { urlParams, match, location } = this.props;
     const { serviceName } = match.params;
     const tabs = [
       {
@@ -52,7 +54,9 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
         name: 'Errors',
         path: `/${serviceName}/errors`,
         component: () => {
-          return <span>Errors?</span>;
+          return (
+            <ErrorGroupOverview urlParams={urlParams} location={location} />
+          );
         }
       },
       {

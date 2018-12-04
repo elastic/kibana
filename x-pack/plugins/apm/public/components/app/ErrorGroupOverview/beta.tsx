@@ -1,0 +1,30 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroupList';
+// @ts-ignore
+import List from './List';
+
+interface ErrorGroupOverviewProps {
+  urlParams: IUrlParams;
+  location: any;
+}
+
+export const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
+  urlParams,
+  location
+}) => {
+  return (
+    <ErrorGroupDetailsRequest
+      urlParams={urlParams}
+      render={({ data }) => (
+        <List urlParams={urlParams} items={data} location={location} />
+      )}
+    />
+  );
+};

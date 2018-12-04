@@ -163,8 +163,8 @@ export interface IUrlParams {
   flyoutDetailTab?: string;
   kuery?: string;
   serviceName?: string;
-  sortDirection?: string;
   sortField?: string;
+  sortDirection?: 'asc' | 'desc';
   start?: number;
   traceId?: string;
   transactionId?: string;
