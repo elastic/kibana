@@ -1,0 +1,26 @@
+[role="xpack"]
+[[logs-ui-settings-kb]]
+=== Logs UI Settings in Kibana
+++++
+<titleabbrev>Logs UI Settings</titleabbrev>
+++++
+
+You do not need to configure any settings to use Logs UI. It is enabled by default.
+
+[float]
+[[general-logs-ui-settings-kb]]
+==== General Logs UI Settings
+
+xpack.infra.enabled:: Set to `false` to disabled the Logs and Infrastructure UI plugin {kib}. Defaults to
+`true`.
+
+xpack.infra.sources.default.logAlias:: Index pattern for matching indices that contain log data. Defaults to
+`filebeat-*`.
+
+xpack.infra.sources.default.metricAlias:: Index pattern for matching indices that contain Metricbeat data. Defaults to
+`metricbeat-*`.
+
+xpack.infra.sources.default.timestamp:: Timestamp used to for sorting log entries. Defaults to
+`@timestamp`.
+
+xpack.infra.sources.default.tiebreaker:: Field used to break ties between two entries with the same timestamp.
