@@ -22,7 +22,7 @@ export const apiMiddleware = ({ dispatch }) => next => async (action) => {
   let response;
 
   try {
-    response = await handler();
+    response = await handler(dispatch);
   } catch (error) {
     dispatch(setApiError({ error, scope }));
     dispatch(apiEnd({ label, scope }));

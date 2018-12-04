@@ -7,18 +7,22 @@
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
-import { deserializeListAutoFollowPatterns, serializeAutoFollowPattern } from '../../lib/auto_follow_pattern_serialization';
+import {
+  deserializeAutoFollowPattern,
+  deserializeListAutoFollowPatterns,
+  serializeAutoFollowPattern
+} from '../../lib/auto_follow_pattern_serialization';
 import { licensePreRoutingFactory } from'../../lib/license_pre_routing_factory';
 import { API_BASE_PATH } from '../../../common/constants';
 
-// import { errors } from '../../mock'; // Temp for development to test ES error in UI
+// import { esErrors } from '../../../fixtures'; // Temp for development to test ES error in UI
 
 export const registerAutoFollowPatternRoutes = (server) => {
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
   /**
-   * Returns a list of all Auto Follow patterns
+   * Returns a list of all Auto follow patterns
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns`,
@@ -29,7 +33,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 
-      // throw wrapEsError(errors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
+      // throw wrapEsError(esErrors[403]); // Temp for development to test ES error in UI. MUST be commented in CR
 
       try {
         const response = await callWithRequest('ccr.autoFollowPatterns');
@@ -44,7 +48,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
   });
 
   /**
-   * Returns a list of all Auto Follow patterns
+   * Returns a list of all Auto follow patterns
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
@@ -59,6 +63,31 @@ export const registerAutoFollowPatternRoutes = (server) => {
 
       try {
         return await callWithRequest('ccr.createAutoFollowPattern', { id, body });
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
+
+  /**
+   * Returns a single Auto follow pattern
+   */
+  server.route({
+    path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
+    method: 'GET',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+
+      try {
+        const response = await callWithRequest('ccr.autoFollowPattern', { id });
+        return deserializeAutoFollowPattern(id, response[id]);
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);

@@ -39,7 +39,7 @@ error403.response = `
   }
 `;
 
-export const errors = {
+export const esErrors = {
   400: error400,
   403: error403
 };

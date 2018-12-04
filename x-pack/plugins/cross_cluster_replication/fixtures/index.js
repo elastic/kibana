@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { errors } from './errors';
+export {
+  getAutoFollowPatternMock,
+  getAutoFollowPatternListMock,
+} from './auto_follow_pattern';
+
+export { esErrors } from './es_errors';

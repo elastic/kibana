@@ -26,7 +26,7 @@ import { AutoFollowPatternForm, RemoteClustersProvider, SectionLoading, SectionE
 
 class AutoFollowPatternAddUi extends PureComponent {
   static propTypes = {
-    createAutoFollowPattern: PropTypes.func.isRequired,
+    saveAutoFollowPattern: PropTypes.func.isRequired,
     clearApiError: PropTypes.func.isRequired,
     apiError: PropTypes.object,
     apiStatus: PropTypes.string.isRequired,
@@ -107,7 +107,7 @@ class AutoFollowPatternAddUi extends PureComponent {
   }
 
   render() {
-    const { createAutoFollowPattern, apiStatus, apiError } = this.props;
+    const { saveAutoFollowPattern, apiStatus, apiError, intl } = this.props;
 
     const breadcrumbs = [{
       text: (
@@ -161,7 +161,11 @@ class AutoFollowPatternAddUi extends PureComponent {
                 }
 
                 if (error) {
-                  return <SectionError title={null} error={error} />;
+                  const title = intl.formatMessage({
+                    id: 'xpack.crossClusterReplication.autoFollowPatternCreateForm.loadingRemoteClustersErrorTitle',
+                    defaultMessage: 'Error loading remote clusters',
+                  });
+                  return <SectionError title={title} error={error} />;
                 }
 
                 if (!remoteClusters.length) {
@@ -177,7 +181,7 @@ class AutoFollowPatternAddUi extends PureComponent {
                     apiStatus={apiStatus}
                     apiError={apiError}
                     remoteClusters={remoteClusters}
-                    createAutoFollowPattern={createAutoFollowPattern}
+                    saveAutoFollowPattern={saveAutoFollowPattern}
                   />
                 );
               }}

@@ -20,17 +20,20 @@ export function setHttpClient(client) {
 
 // ---
 
-export const loadAutoFollowPatterns = async () => {
-  return await httpClient.get(`${apiPrefix}/auto_follow_patterns`)
-    .then(response => response.data);
-};
+const extractData = (response) => response.data;
 
-export async function loadRemoteClusters() {
-  return await httpClient.get(`${apiPrefixRemoteClusters}`)
-    .then(response => response.data);
-}
+export const loadAutoFollowPatterns = () => (
+  httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(extractData)
+);
 
-export async function createAutoFollowPattern(id, autoFollowPattern) {
-  return await httpClient.put(`${apiPrefix}/auto_follow_patterns/${id}`, autoFollowPattern)
-    .then(response => response.data);
-}
+export const getAutoFollowPattern = (id) => (
+  httpClient.get(`${apiPrefix}/auto_follow_patterns/${id}`).then(extractData)
+);
+
+export const loadRemoteClusters = () => (
+  httpClient.get(`${apiPrefixRemoteClusters}`).then(extractData)
+);
+
+export const saveAutoFollowPattern = (id, autoFollowPattern) => (
+  httpClient.put(`${apiPrefix}/auto_follow_patterns/${id}`, autoFollowPattern).then(extractData)
+);

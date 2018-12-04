@@ -5,15 +5,15 @@
  */
 
 import {
-  deserializeAutofollowPattern,
-  deserializeListAutofollowPatterns,
-  serializeAutofolloPattern,
-} from './autofollow_pattern_serialization';
+  deserializeAutoFollowPattern,
+  deserializeListAutoFollowPatterns,
+  serializeAutoFollowPattern,
+} from './auto_follow_pattern_serialization';
 
 describe('[CCR] auto-follow_serialization', () => {
-  describe('deserializeAutofollowPattern()', () => {
+  describe('deserializeAutoFollowPattern()', () => {
     it('should return empty object if name or esObject are not provided', () => {
-      expect(deserializeAutofollowPattern()).toEqual({});
+      expect(deserializeAutoFollowPattern()).toEqual({});
     });
 
     it('should deserialize Elasticsearch object', () => {
@@ -30,7 +30,44 @@ describe('[CCR] auto-follow_serialization', () => {
         follow_index_pattern: expected.followIndexPattern
       };
 
-      expect(deserializeAutofollowPattern('some-name', esObject)).toEqual(expected);
+      expect(deserializeAutoFollowPattern('some-name', esObject)).toEqual(expected);
+    });
+  });
+
+  describe('deserializeListAutoFollowPatterns()', () => {
+    it('should deSerialize list of Elasticsearch objects', () => {
+      const name1 = 'foo1';
+      const name2 = 'foo2';
+
+      const expected = {
+        [name1]: {
+          name: name1,
+          remoteCluster: 'foo1',
+          leaderIndexPatterns: ['foo1-*'],
+          followIndexPattern: 'bar2'
+        },
+        [name2]: {
+          name: name2,
+          remoteCluster: 'foo2',
+          leaderIndexPatterns: ['foo2-*'],
+          followIndexPattern: 'bar2'
+        }
+      };
+
+      const esObjects = {
+        [name1]: {
+          remote_cluster: expected[name1].remoteCluster,
+          leader_index_patterns: expected[name1].leaderIndexPatterns,
+          follow_index_pattern: expected[name1].followIndexPattern
+        },
+        [name2]: {
+          remote_cluster: expected[name2].remoteCluster,
+          leader_index_patterns: expected[name2].leaderIndexPatterns,
+          follow_index_pattern: expected[name2].followIndexPattern
+        }
+      };
+
+      expect(deserializeListAutoFollowPatterns(esObjects)).toEqual(expected);
     });
   });
 
@@ -67,7 +104,7 @@ describe('[CCR] auto-follow_serialization', () => {
         }
       };
 
-      expect(deserializeListAutofollowPatterns(esObjects)).toEqual(expected);
+      expect(deserializeListAutoFollowPatterns(esObjects)).toEqual(expected);
     });
   });
 
@@ -85,7 +122,7 @@ describe('[CCR] auto-follow_serialization', () => {
         followIndexPattern: expected.follow_index_pattern
       };
 
-      expect(serializeAutofolloPattern(object)).toEqual(expected);
+      expect(serializeAutoFollowPattern(object)).toEqual(expected);
     });
   });
 });

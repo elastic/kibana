@@ -7,13 +7,20 @@
 import { SECTIONS, API_STATUS } from '../../constants';
 import {
   loadAutoFollowPatterns as loadAutoFollowPatternsRequest,
-  createAutoFollowPattern as createAutoFollowPatternRequest,
+  getAutoFollowPattern as getAutoFollowPatternRequest,
+  saveAutoFollowPattern as saveAutoFollowPatternRequest,
 } from '../../services/api';
 import routing from '../../services/routing';
 import * as t from '../action_types';
 import { apiAction } from './api';
 
 const { AUTO_FOLLOW_PATTERN: scope } = SECTIONS;
+
+export const selectAutoFollowPattern = (name) => ({
+  type: t.AUTO_FOLLOW_PATTERN_SELECT,
+  payload: name
+});
+
 
 export const loadAutoFollowPatterns = (isUpdating = false) =>
   apiAction({
@@ -25,19 +32,27 @@ export const loadAutoFollowPatterns = (isUpdating = false) =>
     },
   });
 
-export const createAutoFollowPattern = (name, autoFollowPattern) => (
+export const getAutoFollowPattern = (id) =>
+  apiAction({
+    label: t.AUTO_FOLLOW_PATTERN_GET,
+    scope,
+    handler: async (dispatch) => (
+      getAutoFollowPatternRequest(id)
+        .then((response) => {
+          dispatch(selectAutoFollowPattern(id));
+          return response;
+        })
+    )
+  });
+
+export const saveAutoFollowPattern = (name, autoFollowPattern) => (
   apiAction({
     label: t.AUTO_FOLLOW_PATTERN_CREATE,
     status: API_STATUS.SAVING,
     scope,
     handler: async () => {
-      await createAutoFollowPatternRequest(name, autoFollowPattern);
+      await saveAutoFollowPatternRequest(name, autoFollowPattern);
       routing.navigate('/home');
     }
   })
 );
-
-export const selectAutoFollowPattern = (name) => ({
-  type: t.AUTO_FOLLOW_PATTERN_SELECT,
-  payload: name
-});

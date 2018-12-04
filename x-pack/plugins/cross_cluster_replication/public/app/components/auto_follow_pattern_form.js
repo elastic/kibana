@@ -49,9 +49,9 @@ const getEmptyAutoFollowPattern = (remoteClusters) => ({
   followIndexPatternSuffix: '',
 });
 
-class AutoFollowPatternFormUI extends PureComponent {
+export class AutoFollowPatternFormUI extends PureComponent {
   static propTypes = {
-    createAutoFollowPattern: PropTypes.func.isRequired,
+    saveAutoFollowPattern: PropTypes.func.isRequired,
     autoFollowPattern: PropTypes.object,
     apiError: PropTypes.object,
     apiStatus: PropTypes.string.isRequired,
@@ -112,7 +112,7 @@ class AutoFollowPatternFormUI extends PureComponent {
 
   sendForm = () => {
     const { name, ...autoFollowPattern } = this.getFields();
-    this.props.createAutoFollowPattern(name, autoFollowPattern);
+    this.props.saveAutoFollowPattern(name, autoFollowPattern);
   }
 
   cancelForm = () => {
@@ -322,12 +322,20 @@ class AutoFollowPatternFormUI extends PureComponent {
           leaderIndexPatterns
         });
 
+        const title = intl.formatMessage({
+          id: 'xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewTitle',
+          defaultMessage: 'Example of indices that will be generated',
+        });
+
         return (
           <EuiCallOut
-            title="Example of indices that will be generated"
+            title={title}
             iconType="indexMapping"
           >
-            <p>Here are some examples of the indices that might be generated with the above settings:</p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewDescription"
+              defaultMessage="Here are some examples of the indices that might be generated with the above settings:"
+            />
             <ul>
               {indicesPreview.map((followerIndex, i) => <li key={i}>{followerIndex}</li>)}
             </ul>
