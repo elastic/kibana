@@ -96,7 +96,7 @@ ifeval::["{release-state}"!="unreleased"]
 [NOTE]
 ==================================================
 
-An alternative package which contains only features that are available under the
+An alternative package, `kibana-oss`, which contains only features that are available under the
 Apache 2.0 license is also available. To install it, use the following `baseurl` in your `kibana.repo` file:
 
 ifeval::["{release-state}"=="prerelease"]
