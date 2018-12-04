@@ -8,10 +8,7 @@ import axios from 'axios';
 import { findIndex } from 'lodash';
 import React from 'react';
 
-import {
-  // @ts-ignore
-  EuiTabbedContent,
-} from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import chrome from 'ui/chrome';
 
@@ -19,13 +16,6 @@ import { UpgradeCheckupStatus } from '../../server/lib/es_migration_apis';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
 import { LoadingState, UpgradeCheckupTabProps } from './types';
-
-// TODO: replace with types added in https://github.com/elastic/eui/pull/1288
-interface EuiTab {
-  id: string;
-  name: string;
-  content: React.ReactElement<any>;
-}
 
 interface TabsState {
   loadingState: LoadingState;
@@ -60,7 +50,7 @@ export class UpgradeCheckupTabs extends React.Component<{}, TabsState> {
     );
   }
 
-  private onTabClick = (selectedTab: EuiTab) => {
+  private onTabClick = (selectedTab: EuiTabbedContentTab) => {
     const selectedTabIndex = findIndex(this.tabs, { id: selectedTab.id });
     if (selectedTabIndex === -1) {
       throw new Error(`Clicked tab did not exist in tabs array`);

@@ -11,6 +11,7 @@ import {
   // @ts-ignore
   EuiDescribedFormGroup,
   EuiFormRow,
+  EuiFormRowProps,
   EuiHorizontalRule,
   EuiLink,
   EuiPageContent,
@@ -24,6 +25,11 @@ import {
 import { UpgradeCheckupTabComponent } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 import { Summary } from './summary';
+
+// Eui's types don't have this prop
+const EuiFormRowPrime: React.StatelessComponent<
+  EuiFormRowProps & { describedByIds?: string[] }
+> = EuiFormRow;
 
 export class OverviewTab extends UpgradeCheckupTabComponent {
   public render() {
@@ -91,12 +97,12 @@ export class OverviewTab extends UpgradeCheckupTabComponent {
                 </Fragment>
               }
             >
-              <EuiFormRow
+              <EuiFormRowPrime
                 label="Enable deprecation logging?"
                 describedByIds={['deprecation-logging']}
               >
                 <DeprecationLoggingToggle />
-              </EuiFormRow>
+              </EuiFormRowPrime>
             </EuiDescribedFormGroup>
           </EuiPageContentBody>
         </EuiPageContent>
