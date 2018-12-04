@@ -10,7 +10,7 @@ import { parse } from 'url';
 export default function canvasSmokeTest({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['common']);
@@ -49,7 +49,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       await retry.waitFor('workpad page', () => testSubjects.exists('canvasWorkpadPage'));
 
       // check that workpad loaded in url
-      const url = await remote.getCurrentUrl();
+      const url = await browser.getCurrentUrl();
       expect(parse(url).hash).to.equal(`#/workpad/${testWorkpadId}/page/1`);
     });
 

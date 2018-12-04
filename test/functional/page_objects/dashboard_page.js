@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
+import { DashboardConstants } from '../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
@@ -29,7 +29,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const retry = getService('retry');
   const config = getService('config');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
@@ -62,8 +62,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async preserveCrossAppState() {
-      const url = await remote.getCurrentUrl();
-      await remote.get(url, false);
+      const url = await browser.getCurrentUrl();
+      await browser.get(url, false);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -108,7 +108,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getDashboardIdFromCurrentUrl() {
-      const currentUrl = await remote.getCurrentUrl();
+      const currentUrl = await browser.getCurrentUrl();
       const urlSubstring = 'kibana#/dashboard/';
       const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
       const endIndex = currentUrl.indexOf('?');

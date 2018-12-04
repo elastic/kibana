@@ -29,7 +29,7 @@ chromeNavControlsRegistry.register(constant({
 }));
 
 const module = uiModules.get('security', ['kibana']);
-module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private, esDataIsTribe) => {
+module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private, esDataIsTribe, i18n) => {
   const xpackInfo = Private(XPackInfoProvider);
   const showSecurityLinks = xpackInfo.get('features.security.showLinks');
   if (Private(PathProvider).isUnauthenticated() || !showSecurityLinks) return;
@@ -61,6 +61,9 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
     }
   };
 
+  $scope.logoutLabel = i18n('xpack.security.navControl.logoutLabel', {
+    defaultMessage: "Logout"
+  });
 });
 
 
