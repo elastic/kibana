@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.navigateTo();
 
       // Create logstash-readonly role
-      await PageObjects.settings.clickLinkText('Roles');
+      await testSubjects.click('roles');
       await PageObjects.security.clickCreateNewRole();
       await testSubjects.setValue('roleFormNameInput', 'logstash-readonly');
       await PageObjects.security.addIndexToRole('logstash-*');
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.security.clickSaveEditUser();
 
           await PageObjects.settings.navigateTo();
-          await PageObjects.settings.clickLinkText('Users');
+          await testSubjects.click('users');
           await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
