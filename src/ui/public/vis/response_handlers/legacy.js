@@ -70,14 +70,19 @@ const LegacyResponseHandlerProvider = function () {
             }
 
             let previousSplitAgg = new AggConfigResult(splitAgg, null, splitValue, splitValue);
+            previousSplitAgg.rawData = {
+              table: table,
+              column: splitColumnIndex,
+              row: rowIndex,
+            };
             const tableIndex = splitMap[splitValue];
             const newRow = _.map(converted.tables[tableIndex].tables[0].columns, column => {
               const value = row[column.id];
               const aggConfigResult = new AggConfigResult(column.aggConfig, previousSplitAgg, value, value);
               aggConfigResult.rawData = {
                 table: table,
-                columnIndex: table.columns.findIndex(c => c.id === column.id),
-                rowIndex: rowIndex,
+                column: table.columns.findIndex(c => c.id === column.id),
+                row: rowIndex,
               };
               if (column.aggConfig.type.type === 'buckets') {
                 previousSplitAgg = aggConfigResult;
