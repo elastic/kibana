@@ -15,15 +15,15 @@ Uses Canvas workpad asset objects to provide argument values. Usually images.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|string
-<|The ID of the asset value to return
+|_Unnamed_*
+|string
+|The ID of the asset value to return
 |===
 
 *Returns:* string
@@ -64,19 +64,19 @@ Accesses URL parameters and use them in expressions. This will always return a s
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*  (Aliases: `var`, `variable`)
-<|string
-<|The URL hash parameter to access
+|_Unnamed_*  (Aliases: `var`, `variable`)
+|string
+|The URL hash parameter to access
 
-<|default
-<|string
-<|Return this string if the url parameter is not defined  (default: `""`)
+|default
+|string
+|Return this string if the url parameter is not defined  (default: `""`)
 |===
 
 *Returns:* string

@@ -15,15 +15,15 @@ A mock data set that includes project CI times with usernames, countries, and ru
 
 *Accepts:* filter
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_ (Alias: `type`)
-<|string
-<|The name of the demo data set to use  (default: `ci`)
+|_Unnamed_ (Alias: `type`)
+|string
+|The name of the demo data set to use  (default: `ci`)
 |===
 
 *Returns:* datatable
@@ -37,35 +37,35 @@ especially if you are asking for a lot of rows.
 
 *Accepts:* filter
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|index
-<|string
-<|Specify an index pattern, for example, "logstash-*"  (default is `_all`)
+|index
+|string
+|Specify an index pattern, for example, "logstash-*"  (default is `_all`)
 
-<|_Unnamed_ (Aliases: `query`, `q`)
-<|string
-<|A Lucene query string (default: `_index:.kibana`)
+|_Unnamed_ (Aliases: `query`, `q`)
+|string
+|A Lucene query string (default: `_index:.kibana`)
 
-<|sort
-<|string
-<|Sort directions as "field, direction", for example, "@timestamp, desc" or "bytes, asc"
+|sort
+|string
+|Sort directions as "field, direction", for example, "@timestamp, desc" or "bytes, asc"
 
-<|fields
-<|string
-<|Comma separated list of fields. Fewer fields will perform better
+|fields
+|string
+|Comma separated list of fields. Fewer fields will perform better
 
-<|metaFields
-<|string
-<|Comma separated list of meta fields, for example, "_index,_type"
+|metaFields
+|string
+|Comma separated list of meta fields, for example, "_index,_type"
 
-<|count
-<|number
-<|The number of docs to pull back. Smaller numbers perform better (default: `100`)
+|count
+|number
+|The number of docs to pull back. Smaller numbers perform better (default: `100`)
 |===
 
 *Returns:* datatable
@@ -78,19 +78,19 @@ Queries {es} for a count of the number of hits matching a query.
 
 *Accepts:* filter
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|index
-<|string
-<|Specify an index pattern, for example, "logstash-*"  (default: `all`)
+|index
+|string
+|Specify an index pattern, for example, "logstash-*"  (default: `all`)
 
-<|_Unnamed_  (Alias: `query`, `q`)
-<|string
-<|A Lucene query string (default: `"-_index:.kibana"`)
+|_Unnamed_  (Alias: `query`, `q`)
+|string
+|A Lucene query string (default: `"-_index:.kibana"`)
 |===
 
 *Returns:* number
@@ -103,19 +103,19 @@ Specifies an {es} SQL.
 
 *Accepts:* filter
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_  (Alias: `query`, `q`)
-<|string
-<|An SQL query
+|_Unnamed_  (Alias: `query`, `q`)
+|string
+|An SQL query
 
-<|count
-<|number
-<|The default is `1000`
+|count
+|number
+|The default is `1000`
 |===
 
 *Returns:* datatable
@@ -132,31 +132,31 @@ then deduplicated by those keys using the specified TinyMath function.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|x
-<|string
-<|The values along the X-axis
+|x
+|string
+|The values along the X-axis
 
-<|y
-<|string
-<|The values along the Y-axis
+|y
+|string
+|The values along the Y-axis
 
-<|color
-<|string
-<|An expression to use in determining the mark's color
+|color
+|string
+|An expression to use in determining the mark's color
 
-<|size
-<|string
-<|For elements that support it, the size of the marks
+|size
+|string
+|For elements that support it, the size of the marks
 
-<|text
-<|string
-<|For use in charts that support it, the text to show in the mark
+|text
+|string
+|For use in charts that support it, the text to show in the mark
 |===
 
 *Returns:* pointseries
@@ -179,31 +179,31 @@ Uses Timelion to extract one or more time series from many sources.
 
 *Accepts:* filter
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_ (Aliases: `query`, `q`)
-<|string
-<|A Timelion query (default: `".es(*)"`)
+|_Unnamed_ (Aliases: `query`, `q`)
+|string
+|A Timelion query (default: `".es(*)"`)
 
-<|interval
-<|string
-<|Bucket interval for the time series (default: `auto`)
+|interval
+|string
+|Bucket interval for the time series (default: `auto`)
 
-<|from
-<|any
-<|{es} date math string for the start of the time range (default: `now-1y`)
+|from
+|any
+|{es} date math string for the start of the time range (default: `now-1y`)
 
-<|to
-<|any
-<|{es} date math string for the end of the time range (default: `now`)
+|to
+|any
+|{es} date math string for the end of the time range (default: `now`)
 
-<|timezone
-<|any
-<|Time zone for the time range (default: `UTC`)
+|timezone
+|any
+|Time zone for the time range (default: `UTC`)
 |===
 
 *Returns:* datatable

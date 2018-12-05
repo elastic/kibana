@@ -20,7 +20,7 @@ of the inner function matches the acceptable parameter type of the outer functio
 Calculates the absolute value of a number. For arrays, the function will be 
 applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -48,7 +48,7 @@ abs([-1 , -2, 3, -4]) // returns [1, 2, 3, 4]
 Calculates the sum of one or more numbers/arrays passed into the function. If at 
 least one array of numbers is passed into the function, the function will calculate the sum by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -80,7 +80,7 @@ add([1, 2], 3, [4, 5], 6) // returns [(1 + 3 + 4 + 6), (2 + 3 + 5 + 6)] = [14, 1
 Calculates the cube root of a number. For arrays, the function will be applied 
 index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -108,7 +108,7 @@ cbrt([27, 64, 125]) // returns [3, 4, 5]
 Calculates the ceiling of a number, i.e., rounds a number towards positive infinity. 
 For arrays, the function will be applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -136,7 +136,7 @@ ceil([1.1, 2.2, 3.3]) // returns [2, 3, 4]
 Restricts value to a given range and returns closed available value. If only `min` 
 is provided, values are restricted to only a lower bound.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -144,15 +144,15 @@ s|Description
 
 |...a
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 
 |min
 |number \| Array.<number>
-<|(optional) The minimum value this function will return.
+|(optional) The minimum value this function will return.
 
 |max
 |number \| Array.<number>
-<|(optional) The maximum value this function will return.
+|(optional) The maximum value this function will return.
 |===
 
 *Returns*: `number` | `Array.<number>`. The closest value between `min` (inclusive) 
@@ -180,7 +180,7 @@ clamp([1, 9], 3, [4, 5]) // returns [clamp([1, 3, 4]), clamp([9, 3, 5])] = [3, 5
 
 Returns the length of an array. Alias for size.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -209,7 +209,7 @@ count(100) // returns 1
 Calculates the cube of a number. For arrays, the function will be applied 
 index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -236,7 +236,7 @@ cube([3, 4, 5]) // returns [27, 64, 125]
 Divides two numbers. If at least one array of numbers is passed into the function, 
 the function will be applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -244,11 +244,11 @@ s|Description
 
 |a
 |number \| Array.<number>
-<|dividend, a number or an array of numbers
+|dividend, a number or an array of numbers
 
 |b
 |number \| Array.<number>
-<|divisor, a number or an array of numbers, b != 0
+|divisor, a number or an array of numbers, b != 0
 |===
 
 *Returns*: `number` | `Array.<number>`. Returns the quotient of `a` and `b` 
@@ -276,7 +276,7 @@ divide([14, 42, 65, 108], [2, 7, 5, 12]) // returns [7, 6, 13, 9]
 Calculates _e^x_ where _e_ is Euler's number. For arrays, the function will be applied 
 index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -303,7 +303,7 @@ exp([1, 2, 3]) // returns [e^1, e^2, e^3] = [2.718281828459045, 7.38905609893064
 Returns the first element of an array. If anything other than an array is passed 
 in, the input is returned.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -329,7 +329,7 @@ first([1, 2, 3]) // returns 1
 Calculates the fix of a number, i.e., rounds a number towards 0. For arrays, the 
 function will be applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -357,7 +357,7 @@ fix([1.8, 2.9, -3.7, -4.6]) // returns [1, 2, -3, -4]
 Calculates the floor of a number, i.e., rounds a number towards negative infinity. 
 For arrays, the function will be applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -385,7 +385,7 @@ floor([1.7, 2.8, 3.9]) // returns [1, 2, 3]
 Returns the last element of an array. If anything other than an array is passed 
 in, the input is returned.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -411,7 +411,7 @@ last([1, 2, 3]) // returns 3
 Calculates the logarithm of a number. For arrays, the function will be applied 
 index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -419,11 +419,11 @@ s|Description
 
 |a
 |number \| Array.<number>
-<|a number or an array of numbers, `a` must be greater than 0
+|a number or an array of numbers, `a` must be greater than 0
 
 |b
 |Object
-<|(optional) base for the logarithm. If not provided a value, the default base is e, and the natural log is calculated.
+|(optional) base for the logarithm. If not provided a value, the default base is e, and the natural log is calculated.
 |===
 
 *Returns*: `number` | `Array.<number>`.  The logarithm of `a`. Returns an array 
@@ -450,7 +450,7 @@ log([2, 4, 8, 16, 32], 2) // returns [1, 2, 3, 4, 5]
 Calculates the logarithm base 10 of a number. For arrays, the function will be 
 applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -458,7 +458,7 @@ s|Description
 
 |a
 |number \| Array.<number>
-<|a number or an array of numbers, `a` must be greater than 0
+|a number or an array of numbers, `a` must be greater than 0
 |===
 
 *Returns*: `number` | `Array.<number>`. The logarithm of `a`. Returns an array 
@@ -482,7 +482,7 @@ Finds the maximum value of one of more numbers/arrays of numbers passed into the
 If at least one array of numbers is passed into the function, the function will 
 find the maximum by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -490,7 +490,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The maximum value of all numbers if 
@@ -515,7 +515,7 @@ Finds the mean value of one of more numbers/arrays of numbers passed into the fu
 If at least one array of numbers is passed into the function, the function will 
 find the mean by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -523,7 +523,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The maximum value of all numbers if 
@@ -548,7 +548,7 @@ Finds the mean value of one of more numbers/arrays of numbers passed into the fu
 If at least one array of numbers is passed into the function, the function will 
 find the mean by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -556,7 +556,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The mean value of all numbers if `args` 
@@ -579,7 +579,7 @@ Finds the median value(s) of one of more numbers/arrays of numbers passed into t
 If at least one array of numbers is passed into the function, the function will 
 find the median by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -587,7 +587,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The median value of all numbers if `args` 
@@ -611,7 +611,7 @@ Finds the minimum value of one of more numbers/arrays of numbers passed into the
 If at least one array of numbers is passed into the function, the function will 
 find the minimum by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -619,7 +619,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The minimum value of all numbers if 
@@ -643,7 +643,7 @@ min([1, 9], 4, [3, 5]) // returns [min([1, 4, 3]), min([9, 4, 5])] = [1, 4]
 Remainder after dividing two numbers. If at least one array of numbers is passed 
 into the function, the function will be applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -651,11 +651,11 @@ s|Description
 
 |a
 |number \| Array.<number>
-<|dividend, a number or an array of numbers
+|dividend, a number or an array of numbers
 
 |b
 |number \| Array.<number>
-<|divisor, a number or an array of numbers, b != 0
+|divisor, a number or an array of numbers, b != 0
 |===
 
 *Returns*: `number` | `Array.<number>`. The remainder of `a` divided by `b` if 
@@ -684,7 +684,7 @@ Finds the mode value(s) of one of more numbers/arrays of numbers passed into the
 If at least one array of numbers is passed into the function, the function will 
 find the mode by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -692,7 +692,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<Array.<number>>`. An array of mode value(s) of all 
@@ -715,7 +715,7 @@ mode([1, 9], 1, 4, [3, 5]) // returns [mode([1, 1, 4, 3]), mode([9, 1, 4, 5])] =
 Multiplies two numbers. If at least one array of numbers is passed into the function, 
 the function will be applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -723,11 +723,11 @@ s|Description
 
 |a
 |number \| Array.<number>
-<|a number or an array of numbers
+|a number or an array of numbers
 
 |b
 |number \| Array.<number>
-<|a number or an array of numbers
+|a number or an array of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The product of `a` and `b` if both are 
@@ -751,7 +751,7 @@ multiply([1, 2, 3, 4], [2, 7, 5, 12]) // returns [2, 14, 15, 48]
 Calculates the cube root of a number. For arrays, the function will be applied 
 index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -759,11 +759,11 @@ s|Description
 
 |a
 |number \| Array.<number>
-<|a number or an array of numbers
+|a number or an array of numbers
 
 |b
 |number
-<|the power that `a` is raised to
+|the power that `a` is raised to
 |===
 
 *Returns*: `number` | `Array.<number>`. `a` raised to the power of `b`. Returns 
@@ -786,7 +786,7 @@ and the upper bound is exclusive. If no numbers are passed in, it will return a
 number between 0 and 1. If only one number is passed in, it will return a number
 between 0 and the number passed in.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -794,11 +794,11 @@ s|Description
 
 |a
 |number
-<|(optional) must be greater than 0 if `b` is not provided
+|(optional) must be greater than 0 if `b` is not provided
 
 |b
 |number
-<|(optional) must be greater than `a`
+|(optional) must be greater than `a`
 |===
 
 *Returns*: `number`. A random number between 0 and 1 if no numbers are passed in. 
@@ -823,7 +823,7 @@ Finds the range of one of more numbers/arrays of numbers passed into the functio
 least one array of numbers is passed into the function, the function will find 
 the range by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -831,7 +831,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The range value of all numbers if `args` 
@@ -854,7 +854,7 @@ Finds the range of one of more numbers/arrays of numbers into the function. If a
 least one array of numbers is passed into the function, the function will find 
 the range by index.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -862,7 +862,7 @@ s|Description
 
 |...args
 |number \| Array.<number>
-<|one or more numbers or arrays of numbers
+|one or more numbers or arrays of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The range value of all numbers if `args` 
@@ -884,7 +884,7 @@ range([1, 9], 4, [3, 5]) // returns [range([1, 4, 3]), range([9, 4, 5])] = [3, 5
 Rounds a number towards the nearest integer by default, or decimal place (if passed in as `b`). 
 For arrays, the function will be applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -892,11 +892,11 @@ s|Description
 
 |a
 |number \| Array.<number>
-<|a number or an array of numbers
+|a number or an array of numbers
 
 |b
 |number
-<|(optional) number of decimal places, default value: 0
+|(optional) number of decimal places, default value: 0
 |===
 
 *Returns*: `number` | `Array.<number>`. The rounded value of `a`. Returns an 
@@ -917,7 +917,7 @@ round([2.9234, 5.1234, 3.5234, 4.49234324], 2) // returns [2.92, 5.12, 3.52, 4.4
 
 Returns the length of an array. Alias for count.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -946,7 +946,7 @@ size(100) // returns 1
 Calculates the square root of a number. For arrays, the function will be applied 
 index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -976,7 +976,7 @@ sqrt([9, 16, 25]) // returns [3, 4, 5]
 Calculates the square of a number. For arrays, the function will be applied 
 index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -1003,7 +1003,7 @@ square([3, 4, 5]) // returns [9, 16, 25]
 Subtracts two numbers. If at least one array of numbers is passed into the function, 
 the function will be applied index-wise to each element.
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
 s|Param
 s|Type
@@ -1011,11 +1011,11 @@ s|Description
 
 |a
 |number \| Array.<number>
-<|a number or an array of numbers
+|a number or an array of numbers
 
 |b
 |number \| Array.<number>
-<|a number or an array of numbers
+|a number or an array of numbers
 |===
 
 *Returns*: `number` | `Array.<number>`. The difference of `a` and `b` if both are 

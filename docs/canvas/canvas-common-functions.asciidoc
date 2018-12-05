@@ -15,15 +15,15 @@ Returns true if all of the conditions are true.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|boolean
-<|The conditions to check
+|_Unnamed_*
+|boolean
+|The conditions to check
 |===
 
 *Returns:* boolean
@@ -37,23 +37,23 @@ and rename columns.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|column
-<|string
-<|The name of the column to alter
+|column
+|string
+|The name of the column to alter
 
-<|type
-<|string
-<|The type to convert the column to; leave blank to not change type (default: `null`)
+|type
+|string
+|The type to convert the column to; leave blank to not change type (default: `null`)
 
-<|name
-<|string
-<|The resultant column name; leave blank to not rename (default: `null`)
+|name
+|string
+|The resultant column name; leave blank to not rename (default: `null`)
 |===
 
 *Returns:* datatable
@@ -66,15 +66,15 @@ Returns true if any of the conditions are true.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|boolean
-<|The conditions to check
+|_Unnamed_*
+|boolean
+|The conditions to check
 |===
 
 *Returns:* boolean
@@ -87,15 +87,15 @@ Creates a datatable with a single value.
 
 *Accepts:* string, boolean, number, null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Alias: `name`)
-<|string
-<|A name to give the column (default: `value`)
+|_Unnamed_* (Alias: `name`)
+|string
+|A name to give the column (default: `value`)
 |===
 
 *Returns:* datatable
@@ -108,19 +108,19 @@ Configures axis of a visualization.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|show
-<|boolean
-<|default: `true`
+|show
+|boolean
+|default: `true`
 
-<|position
-<|string
-<|The position of the axis labels, for example, top, bottom, left, and right
+|position
+|string
+|The position of the axis labels, for example, top, bottom, left, and right
 |===
 
 *Returns:* axisConfig
@@ -133,25 +133,25 @@ Builds a case (including a condition/result) to pass to the switch function.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_
-<|any
-<|This value is compared to the context to see if the condition 
-is met. It is overridden by the "if" argument if both are provided.
+|_Unnamed_
+|any
+|This value is compared to the context to see if the condition 
+s met. It is overridden by the "if" argument if both are provided.
 
-<|if*
-<|boolean
-<|This value determines whether or not the condition is met. 
+|if*
+|boolean
+|This value determines whether or not the condition is met. 
 It overrides the unnamed argument if both are provided.
 
-<|then
-<|any
-<|The value to return if the condition is met
+|then
+|any
+|The value to return if the condition is met
 |===
 
 *Returns:* case
@@ -173,19 +173,21 @@ Includes or excludes columns from a data table. If you specify both, this will e
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|include
-<|string
-<|A comma separated list of column names to keep in the table (default: `null`)
+|include
+|string
+|A comma separated list of column names to keep in the table 
+(default: `null`)
 
-<|exclude
-<|string
-<|A comma separated list of column names to remove from the table (default: `null`)
+|exclude
+|string
+|A comma separated list of column names to remove from the table 
+(default: `null`)
 |===
 
 *Returns:* datatable
@@ -200,21 +202,21 @@ such as number, string, and boolean.
 
 *Accepts:* null, string, number, boolean
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_ (Alias: `op`)
-<|string
-<|The operator to use in the comparison: 
-`eq` (equal), `ne` (not equal), `lt` (less than), `gt` (greater than), `lte` (less than equal), 
-`gte` (greater than eq). The default is `eq`. 
+|_Unnamed_ (Alias: `op`)
+|string
+|The operator to use in the comparison: `eq` (equal), `ne` (not equal), `lt` 
+(less than), `gt` (greater than), `lte` (less than equal), `gte` (greater than eq). 
+The default is `eq`. 
 
-<|to (Aliases: `this`, `b`)
-<|any
-<|The value to compare the context to, usually returned by a subexpression
+|to (Aliases: `this`, `b`)
+|any
+|The value to compare the context to, usually returned by a subexpression
 |===
 
 *Returns:* boolean
@@ -228,43 +230,43 @@ You would usually use this inside of a charting function.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|border
-<|string
-<|Valid CSS border string
+|border
+|string
+|Valid CSS border string
 
-<|borderRadius
-<|string
-<|Number of pixels to use when rounding the border
+|borderRadius
+|string
+|Number of pixels to use when rounding the border
 
-<|padding
-<|string
-<|Content distance in pixels from border
+|padding
+|string
+|Content distance in pixels from border
 
-<|backgroundColor
-<|string
-<|Valid CSS background color string
+|backgroundColor
+|string
+|Valid CSS background color string
 
-<|backgroundImage
-<|string
-<|Valid CSS background image string
+|backgroundImage
+|string
+|Valid CSS background image string
 
-<|backgroundSize
-<|string
-<|Valid CSS background size string (default: `contain`)
+|backgroundSize
+|string
+|Valid CSS background size string (default: `contain`)
 
-<|backgroundRepeat
-<|string
-<|Valid CSS background repeat string (default: `no-repeat`)
+|backgroundRepeat
+|string
+|Valid CSS background repeat string (default: `no-repeat`)
 
-<|opacity
-<|number
-<|A number between 0 and 1 representing the degree of transparency of the element
+|opacity
+|number
+|A number between 0 and 1 representing the degree of transparency of the element
 |===
 
 *Returns:* containerStyle
@@ -287,23 +289,23 @@ Creates a datatable from CSV input.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* 
-<|string
-<|CSV data to use
+|_Unnamed_* 
+|string
+|CSV data to use
 
-<|delimiter*
-<|string
-<|Data separation character
+|delimiter*
+|string
+|Data separation character
 
-<|newLine*
-<|string
-<|Row separation character
+|newLine*
+|string
+|Row separation character
 |===
 
 *Returns:* containerStyle
@@ -316,21 +318,21 @@ Returns the current time, or a time parsed from a string, as milliseconds since 
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_ 
-<|string
-<|An optional date string to be parsed into milliseconds 
+|_Unnamed_ 
+|string
+|An optional date string to be parsed into milliseconds 
 since epoch. Can be either a valid JavaScript Date input or a string to parse 
 using the format argument. Must be an ISO 8601 string or you must provide the format.
 
-<|format*
-<|string
-<|The Moment.js format for parsing the optional date 
+|format*
+|string
+|The Moment.js format for parsing the optional date 
 string. See the https://momentjs.com/docs/#/displaying/[Moment.js documentation].
 |===
 
@@ -345,15 +347,15 @@ actions producing functions.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_ 
-<|any
-<|One or more sub-expressions. The value of these is not 
+|_Unnamed_ 
+|any
+|One or more sub-expressions. The value of these is not 
 available in the root pipeline as this function simply returns the passed in context.
 |===
 
@@ -367,19 +369,19 @@ Configures a dropdown filter control element.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|filterColumn
-<|any
-<|The column or field to which to attach the filter
+|filterColumn
+|any
+|The column or field to which to attach the filter
 
-<|valueColumn
-<|any
-<|The datatable column from which to extract the unique values 
+|valueColumn
+|any
+|The datatable column from which to extract the unique values 
 for the dropdown
 |===
 
@@ -393,15 +395,15 @@ Returns whether the context is equal to the argument.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|boolean, number, string
-<|The value to which to compare the context
+|_Unnamed_*
+|boolean, number, string
+|The value to which to compare the context
 |===
 
 *Returns:* boolean
@@ -413,19 +415,19 @@ Creates a filter that matches a given column for a perfectly exact value.
 
 *Accepts:* filter
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|column* (Aliases: `field`, `c`)
-<|string
-<|The column or field to attach the filter to
+|column* (Aliases: `field`, `c`)
+|string
+|The column or field to attach the filter to
 
-<|value* (Aliases: `v`, `val`)
-<|string
-<|The value to match exactly, including white space and 
+|value* (Aliases: `v`, `val`)
+|string
+|The value to match exactly, including white space and 
 capitalization
 |===
 
@@ -439,15 +441,15 @@ Filters rows in a datatable based on the return value of a subexpression.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Alias: `fn`)
-<|boolean
-<|An expression to pass into each row in the datatable.
+|_Unnamed_* (Alias: `fn`)
+|boolean
+|An expression to pass into each row in the datatable.
 The expression should return a boolean. A true value preserves the row, 
 and a false value removes it.
 |===
@@ -462,44 +464,44 @@ Creates font style.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|size
-<|number
-<|The font size in pixels (default: `14`)
+|size
+|number
+|The font size in pixels (default: `14`)
 
-<|lHeight* (Alias: `lineHeight`)
-<|number
-<|The line height in pixels
+|lHeight* (Alias: `lineHeight`)
+|number
+|The line height in pixels
 
-<|family
-<|string
-<|An acceptable CSS web font string (default: `"'Open Sans', Helvetica, Arial, sans-serif"`)
+|family
+|string
+|An acceptable CSS web font string (default: `"'Open Sans', Helvetica, Arial, sans-serif"`)
 
-<|color
-<|string
-<|The text color
+|color
+|string
+|The text color
 
-<|weight
-<|string
-<|The font weight, for example, `normal`, `bold`, `bolder`, `lighter`, 
+|weight
+|string
+|The font weight, for example, `normal`, `bold`, `bolder`, `lighter`, 
 `100`, `200`, `300`, `400`, `500`, `600`, `700`, `800`, `900` (default is `normal`)
 
-<|underline
-<|boolean
-<|Underline the text, `true` or `false` (default is `false`)
+|underline
+|boolean
+|Underline the text, `true` or `false` (default is `false`)
 
-<|italic
-<|boolean
-<|Italicize the text, `true` or `false` (default is `false`)
+|italic
+|boolean
+|Italicize the text, `true` or `false` (default is `false`)
 
-<|align
-<|string
-<|The horizontal alignment of text (default is `left`)
+|align
+|string
+|The horizontal alignment of text (default is `left`)
 |===
 
 *Returns:* style
@@ -512,15 +514,15 @@ Outputs milliseconds since epoch as a formatted string.
 
 *Accepts:* number
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* 
-<|string
-<|Moment.js Format with which to bucket, see the https://momentjs.com/docs/#/displaying/[Moment.js documentation]
+|_Unnamed_* 
+|string
+|Moment.js Format with which to bucket, see the https://momentjs.com/docs/#/displaying/[Moment.js documentation]
 |===
 
 *Returns:* string
@@ -533,15 +535,15 @@ Turns a number into a string using a Number.js format.
 
 *Accepts:* number
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* 
-<|string
-<|Numeral.js format string, see the http://numeraljs.com/#format[Numeral.js documentation]
+|_Unnamed_* 
+|string
+|Numeral.js format string, see the http://numeraljs.com/#format[Numeral.js documentation]
 |===
 
 *Returns:* string
@@ -554,19 +556,19 @@ Fetches a single cell in a table.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Aliases: `column`, `c`)
-<|string
-<|The name of the column value to fetch
+|_Unnamed_* (Aliases: `column`, `c`)
+|string
+|The name of the column value to fetch
 
-<|row (Alias: `r`)
-<|number
-<|The row number, starting at 0 (default: `0`)
+|row (Alias: `r`)
+|number
+|The row number, starting at 0 (default: `0`)
 |===
 
 *Returns:* Depends on your input and arguments
@@ -579,15 +581,15 @@ Returns whether the context is greater than the argument.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* 
-<|boolean, number, string
-<|The value to compare the context to
+|_Unnamed_* 
+|boolean, number, string
+|The value to compare the context to
 |===
 
 *Returns:* boolean
@@ -600,15 +602,15 @@ Returns whether the context is greater than or equal to the argument.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* 
-<|boolean, number, string
-<|The value to compare the context to
+|_Unnamed_* 
+|boolean, number, string
+|The value to compare the context to
 |===
 
 *Returns:* boolean
@@ -621,15 +623,15 @@ Gets the first N rows from the datatable. Also see `tail`.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_ 
-<|number
-<|Return this number of rows from the beginning of the datatable (default: `1`)
+|_Unnamed_ 
+|number
+|Return this number of rows from the beginning of the datatable (default: `1`)
 |===
 
 *Returns:* datatable
@@ -642,24 +644,24 @@ Performs conditional logic.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_ (Alias: `condition`)
-<|boolean
-<|A boolean true or false, usually returned by a subexpression. 
+|_Unnamed_ (Alias: `condition`)
+|boolean
+|A boolean true or false, usually returned by a subexpression. 
 If this is not supplied, then the input context will be used.
 
-<|then
-<|any
-<|The return value if true
+|then
+|any
+|The return value if true
 
-<|else
-<|any
-<|The return value if false. If else is not specified, and the condition is false,
+|else
+|any
+|The return value if false. If else is not specified, and the condition is false,
 then the input context to the function will be returned.
 |===
 
@@ -673,20 +675,20 @@ Displays an image.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|dataurl (Alias: `_,`, `url`)
-<|string
-<|An image asset can be provided as a base64 dataurl, or passed in as a subexpression
+|dataurl (Alias: `_,`, `url`)
+|string
+|An image asset can be provided as a base64 dataurl, or passed in as a subexpression
 (see example below)
 
-<|mode
-<|string
-<|`contain`
+|mode
+|string
+|`contain`
 |===
 
 Example value for the `dataurl` argument, formatted as a base64 data URL:
@@ -705,15 +707,15 @@ Returns whether the context is less than the argument passed in.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* 
-<|boolean, number, string
-<|The value to compare the context to
+|_Unnamed_* 
+|boolean, number, string
+|The value to compare the context to
 |===
 
 *Returns:* boolean
@@ -726,15 +728,15 @@ Returns whether the context is less than or equal to the argument passed in.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* 
-<|boolean, number, string
-<|The value to compare the context to
+|_Unnamed_* 
+|boolean, number, string
+|The value to compare the context to
 |===
 
 *Returns:* boolean
@@ -747,19 +749,19 @@ Adds a column calculated as the result of other columns, or not.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Alias: `column`)
-<|string
-<|The name of the resulting column
+|_Unnamed_* (Alias: `column`)
+|string
+|The name of the resulting column
 
-<|expression (Aliases: `exp`, `fn`)
-<|boolean, number, string
-<|A Canvas expression that will be passed to each row as a single row datatable
+|expression (Aliases: `exp`, `fn`)
+|boolean, number, string
+|A Canvas expression that will be passed to each row as a single row datatable
 |===
 
 *Returns:* datatable
@@ -772,20 +774,20 @@ Adds an element for rendering Markdown text. Great for single numbers, metrics, 
 
 *Accepts:* datatable, null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|string
-<|A string containing Markdown. You can pass this multiple 
+|_Unnamed_*
+|string
+|A string containing Markdown. You can pass this multiple 
 times to achieve concatenation (default: `""`).
 
-<|font
-<|style
-<|Font settings. Technically, you can put other styles in here too (default is `{font}`).
+|font
+|style
+|Font settings. Technically, you can put other styles in here too (default is `{font}`).
 |===
 
 *Returns:* render
@@ -800,15 +802,15 @@ available as "value" (without the quotes).
 
 *Accepts:* number, datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|string
-<|An evaluated TinyMath expression, see <<canvas-tinymath-functions>>
+|_Unnamed_*
+|string
+|An evaluated TinyMath expression, see <<canvas-tinymath-functions>>
 |===
 
 *Returns:* number
@@ -821,24 +823,24 @@ A number with a label.
 
 *Accepts:* string, null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_
-<|string
-<|Text describing the metric (default is `""`)
+|_Unnamed_
+|string
+|Text describing the metric (default is `""`)
 
-<|metricFont
-<|style
-<|Font settings for the metric. Technically, you can put other styles in here too.
+|metricFont
+|style
+|Font settings for the metric. Technically, you can put other styles in here too.
 The default is `{font size=48 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center lHeight=48}`.
 
-<|labelFont
-<|style
-<|Font settings for the label. Technically you can put other styles in here too.
+|labelFont
+|style
+|Font settings for the label. Technically you can put other styles in here too.
 The default is `{font size=14 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}`.
 |===
 
@@ -852,15 +854,15 @@ Returns whether the context is not equal to the argument.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|boolean, number, string
-<|The value to compare the context to
+|_Unnamed_*
+|boolean, number, string
+|The value to compare the context to
 |===
 
 *Returns:* boolean
@@ -873,23 +875,23 @@ Creates a color palette.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|string
-<|Palette colors, rgba, hex, or HTML color string; you can pass this multiple times
+|_Unnamed_*
+|string
+|Palette colors, rgba, hex, or HTML color string; you can pass this multiple times
 
-<|gradient
-<|boolean
-<|Make a gradient, where supported (default: `false`)
+|gradient
+|boolean
+|Make a gradient, where supported (default: `false`)
 
-<|reverse
-<|any
-<|Reverse the palette (default is `false`)
+|reverse
+|any
+|Reverse the palette (default is `false`)
 |===
 
 *Returns:* palette
@@ -902,49 +904,49 @@ Configures a pie chart element.
 
 *Accepts:* pointseries
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|palette
-<|palette
-<|A palette object for describing the colors to use on this pie (default: `{palette}`)
+|palette
+|palette
+|A palette object for describing the colors to use on this pie (default: `{palette}`)
 
-<|seriesStyle
-<|seriesStyle
-<|A style of a specific series
+|seriesStyle
+|seriesStyle
+|A style of a specific series
 
-<|radius
-<|any
-<|Radius of the pie as a percentage (between 0 and 1) of the available space. 
+|radius
+|any
+|Radius of the pie as a percentage (between 0 and 1) of the available space. 
 Set to `auto` to automatically set radius (default: `auto`).
 
-<|hole
-<|number
-<|Draw a hole in the pie, 0-100, as a percentage of the pie radius (default: `0`)
+|hole
+|number
+|Draw a hole in the pie, 0-100, as a percentage of the pie radius (default: `0`)
 
-<|labels
-<|boolean
-<|Show pie labels (default: `true`)
+|labels
+|boolean
+|Show pie labels (default: `true`)
 
-<|labelRadius
-<|number
-<|The percentage of the area of container to use as a radius for the label circle 
+|labelRadius
+|number
+|The percentage of the area of container to use as a radius for the label circle 
 (default: `100`)
 
-<|font
-<|style
-<|The label font (default: `{font}`)
+|font
+|style
+|The label font (default: `{font}`)
 
-<|legend
-<|string, boolean
-<|The legend position, `nw`, `sw`, `ne`, `se`, or `false` (default: `false`)
+|legend
+|string, boolean
+|The legend position, `nw`, `sw`, `ne`, `se`, or `false` (default: `false`)
 
-<|tilt
-<|number
-<|The percentage of tilt, where 1 is fully vertical and 0 is completely flat (default: `1`)
+|tilt
+|number
+|The percentage of tilt, where 1 is fully vertical and 0 is completely flat (default: `1`)
 |===
 
 *Returns:* render
@@ -957,39 +959,39 @@ Configures a plot element.
 
 *Accepts:* pointseries
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|seriesStyle
-<|seriesStyle
-<|A style of a specific series
+|seriesStyle
+|seriesStyle
+|A style of a specific series
 
-<|defaultStyle
-<|seriesStyle
-<|The default style to use for every series (default is `{seriesStyle points=5}`)
+|defaultStyle
+|seriesStyle
+|The default style to use for every series (default is `{seriesStyle points=5}`)
 
-<|palette
-<|palette
-<|A palette object for describing the colors to use on this plot (default is `{palette}`)
+|palette
+|palette
+|A palette object for describing the colors to use on this plot (default is `{palette}`)
 
-<|font
-<|style
-<|The legend and tick mark fonts (default is `{font}`)
+|font
+|style
+|The legend and tick mark fonts (default is `{font}`)
 
-<|legend
-<|string, boolean
-<|The legend position, `nw`, `sw`, `ne`, `se`, or `false` (default is `ne`)
+|legend
+|string, boolean
+|The legend position, `nw`, `sw`, `ne`, `se`, or `false` (default is `ne`)
 
-<|yaxis
-<|boolean, axisConfig
-<|Axis configuration, or use `false` to disable (default is `true`)
+|yaxis
+|boolean, axisConfig
+|Axis configuration, or use `false` to disable (default is `true`)
 
-<|xaxis
-<|boolean, axisConfig
-<|Axis configuration, or use `false` to disable (default is `true`)
+|xaxis
+|boolean, axisConfig
+|Axis configuration, or use `false` to disable (default is `true`)
 |===
 
 *Returns:* render
@@ -1003,19 +1005,19 @@ then merges the output.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|by*
-<|string
-<|The column to subdivide
+|by*
+|string
+|The column to subdivide
 
-<|expression* (Alias: `fn`, `function`)
-<|datatable
-<|An expression to pass into each resulting data table.
+|expression* (Alias: `fn`, `function`)
+|datatable
+|An expression to pass into each resulting data table.
 Expressions must return a datatable. Use `as` to turn literals into datatables.				
 Multiple expressions must return the same number of rows. If you need to return 
 a differing row count, pipe into another instance of `ply`.				
@@ -1033,24 +1035,24 @@ such as styling.
 
 *Accepts:* render
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|as
-<|string
-<|The element type to use in rendering. You might want to use a
+|as
+|string
+|The element type to use in rendering. You might want to use a
 specialized function instead, such as `plot` or `grid`.
 
-<|css
-<|string
-<|Any block of custom CSS to be scoped to this element (default is `"* > * {}"`)
+|css
+|string
+|Any block of custom CSS to be scoped to this element (default is `"* > * {}"`)
 
-<|containerStyle
-<|containerStyle
-<|Style for the container, including background, border, and opacity
+|containerStyle
+|containerStyle
+|Style for the container, including background, border, and opacity
 |===
 
 *Returns:* render
@@ -1063,28 +1065,28 @@ Configures a repeating image element.
 
 *Accepts:* number
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|image
-<|string
-<|An image asset can be provided as a base64 dataurl, or passed in as a subexpression
+|image
+|string
+|An image asset can be provided as a base64 dataurl, or passed in as a subexpression
  (see example below)
 
-<|size
-<|number
-<|default: `100`
+|size
+|number
+|default: `100`
 
-<|max
-<|number
-<|default: `100`
+|max
+|number
+|default: `100`
 
-<|emptyImage
-<|string
-<|default: `null`
+|emptyImage
+|string
+|default: `null`
 |===
 
 
@@ -1105,26 +1107,26 @@ Uses a regular expression to replace parts of a string.
 
 *Accepts:* string
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Aliases: `pattern`, `regex`)
-<|string
-<|The text or pattern of a JavaScript regular expression, for example, `"[aeiou]"`. 
+|_Unnamed_* (Aliases: `pattern`, `regex`)
+|string
+|The text or pattern of a JavaScript regular expression, for example, `"[aeiou]"`. 
 You can use capture groups here.
 
-<|flags (Alias: `modifiers`)
-<|datatable
-<|Specify flags. See the
+|flags (Alias: `modifiers`)
+|datatable
+|Specify flags. See the
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp[RegExp documentation]
 for reference (default: `g`).
 
-<|replacement
-<|string
-<|The replacement for the matching parts of string. Capture groups can be accessed 
+|replacement
+|string
+|The replacement for the matching parts of string. Capture groups can be accessed 
 by their index, for example $1 (default: `""`).
 |===
 
@@ -1138,24 +1140,24 @@ Configures an image reveal element.
 
 *Accepts:* number
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|image
-<|string
-<|An image asset can be provided as a base64 dataurl, or passed in as a subexpression 
+|image
+|string
+|An image asset can be provided as a base64 dataurl, or passed in as a subexpression 
 (see example below) 
 
-<|emptyImage
-<|string
-<|default: `null`
+|emptyImage
+|string
+|default: `null`
 
-<|origin
-<|string
-<|default: `bottom`
+|origin
+|string
+|default: `bottom`
 |===
 
 
@@ -1176,15 +1178,15 @@ milliseconds since epoch.
 
 *Accepts:* number
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|string
-<|Moment.js Format with which to bucket. See the 
+|_Unnamed_*
+|string
+|Moment.js Format with which to bucket. See the 
 https://momentjs.com/docs/#/displaying/[MomentJS documentation]. 
 For example, "YYYY-MM" rounds to the month. 
 |===
@@ -1210,44 +1212,44 @@ You typically use this inside of a charting function.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|label*
-<|string
-<|The label of the line this style applies to, not the name you would like to give the line.
+|label*
+|string
+|The label of the line this style applies to, not the name you would like to give the line.
 
-<|color
-<|string
-<|The color to assign the line
+|color
+|string
+|The color to assign the line
 
-<|lines
-<|number
-<|The width of the line (default: `0`)
+|lines
+|number
+|The width of the line (default: `0`)
 
-<|bars
-<|number
-<|The width of bars (default: `0`)
+|bars
+|number
+|The width of bars (default: `0`)
 
-<|points
-<|number
-<|The size of points on line (default: `5`)
+|points
+|number
+|The size of points on line (default: `5`)
 
-<|fill
-<|number, boolean
-<|Designates if points should be filled (default: `false`)
+|fill
+|number, boolean
+|Designates if points should be filled (default: `false`)
 
-<|stack
-<|number
-<|Designates if the series should be stacked? This number is the stack "id"; series 
+|stack
+|number
+|Designates if the series should be stacked? This number is the stack "id"; series 
 with the same stack id are stacked together.
 
-<|horizontalBars
-<|boolean
-<|Sets the orientation of bars in the chart to horizontal (default: `false`)
+|horizontalBars
+|boolean
+|Sets the orientation of bars in the chart to horizontal (default: `false`)
 |===
 
 *Returns:*  Depends on your input and arguments
@@ -1260,31 +1262,31 @@ Creates a shape.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Alias: `shape`)
-<|string
-<|Pick a shape (default: `square`)
+|_Unnamed_* (Alias: `shape`)
+|string
+|Pick a shape (default: `square`)
 
-<|fill
-<|string
-<|Valid CSS color string (default: `black`)
+|fill
+|string
+|Valid CSS color string (default: `black`)
 
-<|border (Alias `stroke`)
-<|number
-<|Valid CSS color string
+|border (Alias `stroke`)
+|number
+|Valid CSS color string
 
-<|borderWidth (Alias: `strokeWidth`)
-<|number
-<|Thickness of the border (default: `0`)
+|borderWidth (Alias: `strokeWidth`)
+|number
+|Thickness of the border (default: `0`)
 
-<|maintainAspect
-<|boolean
-<|Select `true` to maintain aspect ratio (default: `false`)
+|maintainAspect
+|boolean
+|Select `true` to maintain aspect ratio (default: `false`)
 |===
 
 *Returns:* shape
@@ -1297,20 +1299,20 @@ Sorts a datatable on a column.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Alias: `column`)
-<|string
-<|The column to sort on. If column is not specified, the datatable is sorted on 
+|_Unnamed_* (Alias: `column`)
+|string
+|The column to sort on. If column is not specified, the datatable is sorted on 
 the first column.
 
-<|reverse*
-<|boolean
-<|Reverse the sort order. If reverse is not specified, the datatable is sorted 
+|reverse*
+|boolean
+|Reverse the sort order. If reverse is not specified, the datatable is sorted 
 in ascending order.	
 |===
 
@@ -1324,19 +1326,19 @@ Adds a column with a static value.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Alias: `column`)
-<|string
-<|The name of the new column
+|_Unnamed_* (Alias: `column`)
+|string
+|The name of the new column
 
-<|value
-<|string, number, boolean
-<|The value to insert in each column (default: is `null`). Tip: Use a sub-expression 
+|value
+|string, number, boolean
+|The value to insert in each column (default: is `null`). Tip: Use a sub-expression 
 to rollup other columns into a static value. 	
 |===
 
@@ -1351,15 +1353,15 @@ sub-expressions that output a string, or something castable to a string.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|string
-<|One or more strings to join together; include spaces where needed	
+|_Unnamed_*
+|string
+|One or more strings to join together; include spaces where needed	
 |===
 
 *Returns:* string
@@ -1373,19 +1375,19 @@ which builds a case to pass to the switch function.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Alias: `case`)
-<|case
-<|The list of conditions to check
+|_Unnamed_* (Alias: `case`)
+|case
+|The list of conditions to check
 
-<|default (Alias: `finally`)
-<|any
-<|The default case, if no cases match
+|default (Alias: `finally`)
+|any
+|The default case, if no cases match
 |===
 
 *Returns:* Depends on your input and arguments
@@ -1398,28 +1400,28 @@ Configures a data table element.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|font
-<|style
-<|Font style (default: `{font}`)
+|font
+|style
+|Font style (default: `{font}`)
 
-<|paginate
-<|boolean
-<|Show pagination controls (default: `true`). If set to `false` only the first 
+|paginate
+|boolean
+|Show pagination controls (default: `true`). If set to `false` only the first 
 page is displayed.
 
-<|perPage
-<|number
-<|Show this many rows per page (default: `10`)
+|perPage
+|number
+|Show this many rows per page (default: `10`)
 
-<|showHeader
-<|boolean
-<|Show or hide the header row with titles for each column (default: `true`)
+|showHeader
+|boolean
+|Show or hide the header row with titles for each column (default: `true`)
 |===
 
 *Returns:* render
@@ -1432,15 +1434,15 @@ Gets the last N rows from the end of a datatable. See also, `head`.
 
 *Accepts:* datatable
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_*
-<|case
-<|Return this many rows from the end of the datatable
+|_Unnamed_*
+|case
+|Return this many rows from the end of the datatable
 |===
 
 *Returns:* datatable
@@ -1453,23 +1455,23 @@ Creates a time filter for querying a source.
 
 *Accepts:* filter
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|column (Aliases: `field`, `c`)
-<|any
-<|The column or field to attach the filter to (default: `@timestamp`)
+|column (Aliases: `field`, `c`)
+|any
+|The column or field to attach the filter to (default: `@timestamp`)
 
-<|from (Aliases: `f`, `start`)
-<|string
-<|Beginning of the range, in ISO8601 or {es} datemath format
+|from (Aliases: `f`, `start`)
+|string
+|Beginning of the range, in ISO8601 or {es} datemath format
 
-<|to (Aliases: `t`, `end`)
-<|string
-<|End of the range, in ISO8601 or {es} datemath format
+|to (Aliases: `t`, `end`)
+|string
+|End of the range, in ISO8601 or {es} datemath format
 |===
 
 *Returns:* filter
@@ -1482,19 +1484,19 @@ Configures a time filter control element.
 
 *Accepts:* null
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|column (Aliases: `field`, `c`)
-<|any
-<|The column or field to attach the filter to
+|column (Aliases: `field`, `c`)
+|any
+|The column or field to attach the filter to
 
-<|compact
-<|any
-<|Show the time filter as a button that triggers a popover (default: `true`)
+|compact
+|any
+|Show the time filter as a button that triggers a popover (default: `true`)
 |===
 
 *Returns:* render
@@ -1507,15 +1509,15 @@ Explicitly casts from one type to another.
 
 *Accepts:* Anything or nothing
 
-[cols="3*^"]
+[cols="3*^<"]
 |===
-<s|Argument
-<s|Type
-<s|Description
+s|Argument
+s|Type
+s|Description
 
-<|_Unnamed_* (Alias: `type`)
-<|string
-<|A known type
+|_Unnamed_* (Alias: `type`)
+|string
+|A known type
 |===
 
 *Returns:* Depends on your input and arguments
