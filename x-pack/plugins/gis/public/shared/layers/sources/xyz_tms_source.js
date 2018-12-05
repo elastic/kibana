@@ -12,7 +12,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { TMSSource } from './source';
+import { TMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
 
 export class XYZTMSSource extends TMSSource {
