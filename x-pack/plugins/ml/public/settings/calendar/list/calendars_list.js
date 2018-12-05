@@ -21,6 +21,8 @@ import {
 import { CalendarsListTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
+import { checkPermission } from '../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 
 export class CalendarsList extends Component {
   constructor(props) {
@@ -30,6 +32,9 @@ export class CalendarsList extends Component {
       calendars: [],
       isDestroyModalVisible: false,
       calendarId: null,
+      canCreateCalendar: checkPermission('canCreateCalendar'),
+      canDeleteCalendar: checkPermission('canDeleteCalendar'),
+      nodesAvailable: mlNodesAvailable()
     };
   }
 
@@ -86,7 +91,14 @@ export class CalendarsList extends Component {
   }
 
   render() {
-    const { calendars, calendarId, loading } = this.state;
+    const {
+      calendars,
+      calendarId,
+      loading,
+      canCreateCalendar,
+      canDeleteCalendar,
+      nodesAvailable
+    } = this.state;
     let destroyModal = '';
 
     if (this.state.isDestroyModalVisible) {
@@ -118,6 +130,9 @@ export class CalendarsList extends Component {
             loading={loading}
             calendarsList={this.addRequiredFieldsToList(calendars)}
             onDeleteClick={this.showDestroyModal}
+            canCreateCalendar={canCreateCalendar}
+            canDeleteCalendar={canDeleteCalendar}
+            mlNodesAvailable={nodesAvailable}
           />
         </EuiPageContent>
         {destroyModal}

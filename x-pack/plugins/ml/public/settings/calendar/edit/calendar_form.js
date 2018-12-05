@@ -55,7 +55,6 @@ export function CalendarForm({
 
       <EuiFormRow
         label="Calendar ID"
-        fullWidth
         helpText={helpText}
         error={error}
         isInvalid={!isNewCalendarIdValid}
@@ -71,7 +70,6 @@ export function CalendarForm({
 
       <EuiFormRow
         label="Description"
-        fullWidth
       >
         <EuiFieldText
           name="description"
@@ -84,7 +82,6 @@ export function CalendarForm({
 
       <EuiFormRow
         label="Jobs"
-        fullWidth
       >
         <EuiComboBox
           className="ml-calendar-combo-box"
@@ -98,7 +95,6 @@ export function CalendarForm({
 
       <EuiFormRow
         label="Groups"
-        fullWidth
       >
         <EuiComboBox
           className="ml-calendar-combo-box"

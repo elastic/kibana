@@ -7,51 +7,25 @@
 
 
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
+  EuiLink,
   EuiInMemoryTable,
 } from '@elastic/eui';
 
-import { checkPermission } from '../../../privilege/check_privilege';
-import { RowButtons } from './row_buttons';
 import chrome from 'ui/chrome';
 
-
-function NewCalendarButton() {
-  const canCreateCalendar = checkPermission('canCreateCalendar');
-
-  return (
-    <Fragment>
-      <EuiButton
-        fill
-        size="s"
-        key="new_calendar_button"
-        iconType="plusInCircle"
-        href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/new_calendar`}
-        isDisabled={canCreateCalendar === false}
-      >
-        New calendar
-      </EuiButton>
-    </Fragment>
-  );
-}
-
-function renderToolsRight() {
-  return [
-    (
-      <NewCalendarButton
-        key="new_calendar_button"
-      />
-    ),
-  ];
-}
 
 export function CalendarsListTable({
   calendarsList,
   onDeleteClick,
   loading,
+  canCreateCalendar,
+  canDeleteCalendar,
+  mlNodesAvailable,
 }) {
 
   const sorting = {
@@ -72,6 +46,13 @@ export function CalendarsListTable({
       name: 'ID',
       sortable: true,
       truncateText: true,
+      render: (id) => (
+        <EuiLink
+          href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/edit_calendar/${id}`}
+        >
+          {id}
+        </EuiLink>
+      )
     },
     {
       field: 'job_ids_string',
@@ -88,16 +69,33 @@ export function CalendarsListTable({
       field: '',
       name: '',
       render: (calendar) => (
-        <RowButtons
-          onDeleteClick={() => { onDeleteClick(calendar.calendar_id); }}
-          editUrl={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/edit_calendar/${calendar.calendar_id}`}
-        />
+        <EuiButtonEmpty
+          size="xs"
+          color="danger"
+          onClick={() => { onDeleteClick(calendar.calendar_id); }}
+          isDisabled={(canDeleteCalendar === false || mlNodesAvailable === false)}
+        >
+          Delete
+        </EuiButtonEmpty>
       )
     },
   ];
 
   const search = {
-    toolsRight: renderToolsRight(),
+    toolsRight: [
+      (
+        <EuiButton
+          fill
+          size="s"
+          key="new_calendar_button"
+          iconType="plusInCircle"
+          href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/new_calendar`}
+          isDisabled={(canCreateCalendar === false || mlNodesAvailable === false)}
+        >
+          New calendar
+        </EuiButton>
+      ),
+    ],
     box: {
       incremental: true,
     },
@@ -122,5 +120,8 @@ export function CalendarsListTable({
 CalendarsListTable.propTypes = {
   calendarsList: PropTypes.array.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired
+  loading: PropTypes.bool.isRequired,
+  canCreateCalendar: PropTypes.bool.isRequired,
+  canDeleteCalendar: PropTypes.bool.isRequired,
+  mlNodesAvailable: PropTypes.bool.isRequired
 };
