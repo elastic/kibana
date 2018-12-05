@@ -18,7 +18,7 @@ const defaultState = {
   selectedNodeAttrs: '',
   selectedPrimaryShardCount: 1,
   selectedReplicaCount: 1,
-  nodes: [],
+  nodes: undefined,
   details: {},
 };
 
