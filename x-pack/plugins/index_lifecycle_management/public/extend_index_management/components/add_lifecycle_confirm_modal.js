@@ -235,10 +235,6 @@ export class AddLifecyclePolicyConfirmModal extends Component {
                 }
                 color="warning"
               >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPoliciesWarningMessage"
-                  defaultMessage="No index lifecycle policies are defined."
-                />
                 <p>
                   <EuiLink href={`#${BASE_PATH}policies/edit`}>
                     <FormattedMessage
