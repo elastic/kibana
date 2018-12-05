@@ -12,7 +12,7 @@ export function getDashboardBreadcrumbs() {
   return [
     MANAGEMENT_BREADCRUMB,
     {
-      text: i18n.translate('xpack.license_management.dashboard.breadcrumb', {
+      text: i18n.translate('xpack.licenseMgmt.dashboard.breadcrumb', {
         defaultMessage: 'License management'
       }),
       href: `#${BASE_PATH}home`
@@ -24,7 +24,7 @@ export function getUploadBreadcrumbs() {
   return [
     ...getDashboardBreadcrumbs(),
     {
-      text: i18n.translate('xpack.license_management.upload.breadcrumb', {
+      text: i18n.translate('xpack.licenseMgmt.upload.breadcrumb', {
         defaultMessage: 'Upload'
       })
     }

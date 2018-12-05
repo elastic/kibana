@@ -40,7 +40,7 @@ routes.when(`${BASE_PATH}:view?/:id?`, {
   k7Breadcrumbs: () => [
     MANAGEMENT_BREADCRUMB,
     {
-      text: i18n.translate('xpack.index_management.breadcrumb', {
+      text: i18n.translate('xpack.idxMgmt.breadcrumb', {
         defaultMessage: 'Index management'
       }),
     }
