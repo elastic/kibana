@@ -385,6 +385,7 @@ export class IndexTableUi extends Component {
                   defaultQuery={filter}
                   query={filter}
                   box={{
+                    incremental: true,
                     placeholder: intl.formatMessage({
                       id: 'xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder',
                       defaultMessage: 'Search',
