@@ -467,11 +467,29 @@ describe('ElasticIndex', () => {
 
       callCluster
         .onCall(0)
-        .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: _.cloneDeep(batch1) } }))
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'x',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: _.cloneDeep(batch1) },
+          })
+        )
         .onCall(1)
-        .returns(Promise.resolve({ _scroll_id: 'y', hits: { hits: _.cloneDeep(batch2) } }))
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'y',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: _.cloneDeep(batch2) },
+          })
+        )
         .onCall(2)
-        .returns(Promise.resolve({ _scroll_id: 'z', hits: { hits: [] } }))
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'z',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: [] },
+          })
+        )
         .onCall(3)
         .returns(Promise.resolve());
 
@@ -507,9 +525,74 @@ describe('ElasticIndex', () => {
 
       callCluster
         .onCall(0)
-        .returns(Promise.resolve({ _scroll_id: 'x', hits: { hits: _.cloneDeep(batch) } }))
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'x',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: _.cloneDeep(batch) },
+          })
+        )
         .onCall(1)
-        .returns(Promise.resolve({ _scroll_id: 'z', hits: { hits: [] } }));
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'z',
+            _shards: { success: 1, total: 1 },
+            hits: { hits: [] },
+          })
+        );
+
+      const read = Index.reader(callCluster, index, {
+        batchSize: 100,
+        scrollDuration: '5m',
+      });
+
+      expect(await read()).toEqual(batch);
+    });
+
+    test('fails if not all shards were successful', async () => {
+      const index = '.myalias';
+      const callCluster = sinon.stub();
+
+      callCluster.returns(Promise.resolve({ _shards: { successful: 1, total: 2 } }));
+
+      const read = Index.reader(callCluster, index, {
+        batchSize: 100,
+        scrollDuration: '5m',
+      });
+
+      await expect(read()).rejects.toThrow(/shards failed/);
+    });
+
+    test('handles shards not being returned', async () => {
+      const index = '.myalias';
+      const callCluster = sinon.stub();
+      const batch = [
+        {
+          _id: 'such:1',
+          _source: {
+            acls: '3230a',
+            foos: { is: 'fun' },
+            such: { num: 1 },
+            type: 'such',
+          },
+        },
+      ];
+
+      callCluster
+        .onCall(0)
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'x',
+            hits: { hits: _.cloneDeep(batch) },
+          })
+        )
+        .onCall(1)
+        .returns(
+          Promise.resolve({
+            _scroll_id: 'z',
+            hits: { hits: [] },
+          })
+        );
 
       const read = Index.reader(callCluster, index, {
         batchSize: 100,
@@ -535,7 +618,7 @@ describe('ElasticIndex', () => {
           };
         }
         if (path === 'count') {
-          return { count };
+          return { count, _shards: { success: 1, total: 1 } };
         }
         throw new Error(`Unknown command ${path}.`);
       });

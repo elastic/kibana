@@ -39,6 +39,7 @@ import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
+  autoFetch?: boolean;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -83,6 +84,7 @@ export class EmbeddedVisualizeHandler {
   private readonly inspectorAdapters: Adapters = {};
   private actions: any = {};
   private events$: Rx.Observable<any>;
+  private autoFetch: boolean;
 
   constructor(
     private readonly element: HTMLElement,
@@ -91,7 +93,16 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const { appState, uiState, queryFilter, timeRange, filters, query, Private } = params;
+    const {
+      appState,
+      uiState,
+      queryFilter,
+      timeRange,
+      filters,
+      query,
+      Private,
+      autoFetch,
+    } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -103,6 +114,8 @@ export class EmbeddedVisualizeHandler {
       aggs: vis.getAggConfig(),
       forceFetch: false,
     };
+
+    this.autoFetch = !(autoFetch === false);
 
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
@@ -217,6 +230,25 @@ export class EmbeddedVisualizeHandler {
   public getElement(): HTMLElement {
     return this.element;
   }
+
+  /**
+   * renders visualization with provided data
+   * @param visData: visualization data
+   */
+  public render = (visData: any = null) => {
+    return visualizationLoader
+      .render(this.element, this.vis, visData, this.uiState, {
+        listenOnChange: false,
+      })
+      .then(() => {
+        if (!this.loaded) {
+          this.loaded = true;
+          if (this.autoFetch) {
+            this.fetchAndRender();
+          }
+        }
+      });
+  };
 
   /**
    * Opens the inspector for the embedded visualization. This will return an
@@ -350,18 +382,5 @@ export class EmbeddedVisualizeHandler {
       this.dataSubject.next(data);
       return data;
     });
-  };
-
-  private render = (visData: any = null) => {
-    return visualizationLoader
-      .render(this.element, this.vis, visData, this.uiState, {
-        listenOnChange: false,
-      })
-      .then(() => {
-        if (!this.loaded) {
-          this.loaded = true;
-          this.fetchAndRender();
-        }
-      });
   };
 }
