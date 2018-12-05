@@ -31,7 +31,7 @@ import { getConfigFromFiles } from '../../../core/server/config/read_config';
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
 const kibanaPath = follow('../../../../scripts/kibana.js');
 
-const second = 1000 * 60;
+const second = 1000;
 const minute = second * 60;
 
 const tempDir = path.join(os.tmpdir(), 'kbn-reload-test');
@@ -151,11 +151,17 @@ describe('Server logging configuration', function () {
 
       function watchFileUntil(path, matcher, timeout) {
         return new Promise((resolve, reject) => {
+          const timeoutHandle = setTimeout(() => {
+            fs.unwatchFile(path);
+            reject(`watchFileUntil timed out for "${matcher}"`);
+          }, timeout);
+
           fs.watchFile(path, () => {
             try {
               const contents = fs.readFileSync(path);
 
               if (matcher.test(contents)) {
+                clearTimeout(timeoutHandle);
                 fs.unwatchFile(path);
                 resolve(contents);
               }
@@ -163,11 +169,6 @@ describe('Server logging configuration', function () {
               // noop
             }
           });
-
-          setTimeout(() => {
-            fs.unwatchFile(path);
-            reject();
-          }, timeout);
         });
       }
 
@@ -191,7 +192,7 @@ describe('Server logging configuration', function () {
           expect(lines).toHaveLength(2);
           child.kill();
         })
-        .then(done);
+        .then(done, done);
 
     }, 3 * minute);
   }
