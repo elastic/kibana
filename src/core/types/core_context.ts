@@ -17,9 +17,16 @@
  * under the License.
  */
 
-const { resolve } = require('path');
+import { ConfigService, Env } from '../server/config';
+import { LoggerFactory } from '../server/logging';
 
-exports.pluginPaths = {
-  commonFunctions: resolve(__dirname, 'target/plugin/functions/common'),
-  types: resolve(__dirname, 'target/plugin/types'),
-};
+/**
+ * Groups all main Kibana's core modules/systems/services that are consumed in a
+ * variety of places within the core itself.
+ * @internal
+ */
+export interface CoreContext {
+  env: Env;
+  configService: ConfigService;
+  logger: LoggerFactory;
+}

@@ -49,7 +49,7 @@ const DiscoverFetchError = ({ fetchError }) => {
           defaultMessage="You can address this error by editing the {fetchErrorScript} field
             in {managementLink}, under the {scriptedFields} tab."
           values={{
-            fetchErrorScript: '&lsquo;' + fetchError.script + '&rsquo;',
+            fetchErrorScript: `'${fetchError.script}'`,
             scriptedFields: <FormattedMessage
               id="kbn.discover.fetchError.scriptedFieldsText"
               defaultMessage="&ldquo;Scripted fields&rdquo;"

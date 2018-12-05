@@ -26,6 +26,7 @@ import { Config } from './config';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';
 import { getConfigFromFiles } from './read_config';
 
+/** @internal */
 export class RawConfigService {
   /**
    * The stream of configs read from the config file.
