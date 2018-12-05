@@ -5,8 +5,9 @@
  */
 
 import Boom from 'boom';
+import _ from 'lodash';
 
-import { ML_ANNOTATIONS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { ML_ANNOTATIONS_INDEX_ALIAS } from '../../../common/constants/index_patterns';
 
 import {
   Annotation,
@@ -64,7 +65,7 @@ export function annotationProvider(
     }
 
     const params: IndexParams = {
-      index: '.ml-annotations',
+      index: ML_ANNOTATIONS_INDEX_ALIAS,
       type: 'annotation',
       body: annotation,
       refresh: 'wait_for',
@@ -167,7 +168,7 @@ export function annotationProvider(
     }
 
     const params: GetParams = {
-      index: ML_ANNOTATIONS_INDEX_PATTERN,
+      index: ML_ANNOTATIONS_INDEX_ALIAS,
       size: maxAnnotations,
       body: {
         query: {
@@ -215,7 +216,7 @@ export function annotationProvider(
 
   async function deleteAnnotation(id: string) {
     const param: DeleteParams = {
-      index: '.ml-annotations',
+      index: ML_ANNOTATIONS_INDEX_ALIAS,
       type: 'annotation',
       id,
       refresh: 'wait_for',

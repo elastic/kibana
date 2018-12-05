@@ -97,7 +97,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.modelPlotEnabled = false;
   $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
-  $scope.showAnnotations = FEATURE_ANNOTATIONS_ENABLED;            // Toggles display of annotations in the focus chart
+  $scope.showAnnotations = FEATURE_ANNOTATIONS_ENABLED;// Toggles display of annotations in the focus chart
   $scope.showAnnotationsCheckbox = FEATURE_ANNOTATIONS_ENABLED;
   $scope.showForecast = true;               // Toggles display of forecast data in the focus chart
   $scope.showForecastCheckbox = false;
@@ -451,12 +451,12 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Query 4 - load any annotations for the selected job.
     if (FEATURE_ANNOTATIONS_ENABLED) {
-      ml.annotations.getAnnotations(
-        [$scope.selectedJob.job_id],
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
-        MAX_ANNOTATIONS
-      ).then((resp) => {
+      ml.annotations.getAnnotations({
+        jobIds: [$scope.selectedJob.job_id],
+        earliestMs: searchBounds.min.valueOf(),
+        latestMs: searchBounds.max.valueOf(),
+        maxAnnotations: MAX_ANNOTATIONS
+      }).then((resp) => {
         refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id];
         finish();
       }).catch((resp) => {

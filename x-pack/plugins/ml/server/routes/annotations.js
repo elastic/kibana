@@ -12,7 +12,7 @@ import { annotationServiceProvider } from '../models/annotation_service';
 
 export function annotationRoutes(server, commonRouteConfig) {
   server.route({
-    method: 'GET',
+    method: 'POST',
     path: '/api/ml/annotations',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
@@ -45,7 +45,6 @@ export function annotationRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const annotationId = request.params.annotationId;
-
       const { deleteAnnotation } = annotationServiceProvider(callWithRequest);
       return deleteAnnotation(annotationId)
         .catch(resp => wrapError(resp));

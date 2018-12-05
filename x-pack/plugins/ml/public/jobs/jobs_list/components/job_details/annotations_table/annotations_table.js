@@ -45,16 +45,15 @@ class AnnotationsTable extends Component {
   }
 
   getAnnotations() {
-    console.warn('job', this.props.job);
     const dataCounts = this.props.job.data_counts;
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
-      ml.annotations.getAnnotations(
-        [this.props.job.job_id],
-        dataCounts.earliest_record_timestamp,
-        dataCounts.latest_record_timestamp,
-        MAX_ANNOTATIONS
-      ).then((resp) => {
+      ml.annotations.getAnnotations({
+        jobIds: [this.props.job.job_id],
+        earliestMs: dataCounts.earliest_record_timestamp,
+        latestMs: dataCounts.latest_record_timestamp,
+        maxAnnotations: MAX_ANNOTATIONS
+      }).then((resp) => {
         this.setState((prevState, props) => ({
           isLoading: false,
           annotations: resp.annotations[props.job.job_id] || []

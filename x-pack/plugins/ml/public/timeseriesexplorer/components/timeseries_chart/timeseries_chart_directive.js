@@ -44,13 +44,13 @@ module.directive('mlTimeseriesChart', function () {
       svgWidth = Math.max(angular.element('.results-container').width(), 0);
 
       const props = {
-        indexAnnotation: ml.indexAnnotation,
+        indexAnnotation: ml.annotations.indexAnnotation,
         autoZoomDuration: scope.autoZoomDuration,
         contextAggregationInterval: scope.contextAggregationInterval,
         contextChartData: scope.contextChartData,
         contextForecastData: scope.contextForecastData,
         contextChartSelected: contextChartSelected,
-        deleteAnnotation: ml.deleteAnnotation,
+        deleteAnnotation: ml.annotations.deleteAnnotation,
         detectorIndex: scope.detectorIndex,
         focusAnnotationData: scope.focusAnnotationData,
         focusChartData: scope.focusChartData,

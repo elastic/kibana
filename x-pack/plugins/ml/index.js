@@ -9,6 +9,7 @@
 import { resolve } from 'path';
 import Boom from 'boom';
 import { checkLicense } from './server/lib/check_license';
+import { checkAnnotationsIndex } from './server/lib/check_annotations_index';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { annotationRoutes } from './server/routes/annotations';
 import { jobRoutes } from './server/routes/anomaly_detectors';
@@ -54,7 +55,7 @@ export const ml = (kibana) => {
     },
 
 
-    init: function (server) {
+    init: async function (server) {
       const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
       mirrorPluginStatus(xpackMainPlugin, thisPlugin);
@@ -63,6 +64,9 @@ export const ml = (kibana) => {
         // to re-compute the license check results for this plugin
         xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
+
+      // Check and if necessary create annotations index
+      await checkAnnotationsIndex(server);
 
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {

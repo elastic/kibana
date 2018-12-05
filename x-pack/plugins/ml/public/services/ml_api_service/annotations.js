@@ -13,24 +13,24 @@ import { http } from '../../services/http_service';
 const basePath = chrome.addBasePath('/api/ml');
 
 export const annotations = {
-  getAnnotations(id) {
+  getAnnotations(obj) {
+    return http({
+      url: `${basePath}/annotations`,
+      method: 'POST',
+      data: obj
+    });
+  },
+  indexAnnotation(obj) {
+    return http({
+      url: `${basePath}/annotations/index`,
+      method: 'PUT',
+      data: obj
+    });
+  },
+  deleteAnnotation(id) {
     return http({
       url: `${basePath}/annotations/delete/${id}`,
       method: 'DELETE'
-    });
-  },
-  indexAnnotation(obj) {
-    return http({
-      url: `${basePath}/annotations/index`,
-      method: 'PUT',
-      data: obj
-    });
-  },
-  indexAnnotation(obj) {
-    return http({
-      url: `${basePath}/annotations/index`,
-      method: 'PUT',
-      data: obj
     });
   }
 };
