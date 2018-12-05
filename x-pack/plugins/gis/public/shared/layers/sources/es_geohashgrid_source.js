@@ -99,7 +99,8 @@ export class ESGeohashGridSource extends VectorSource {
 
   async getGeoJsonWithMeta({ layerId, layerName }, searchFilters) {
 
-    const targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
+    let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
+    targetPrecision += 2;//just for giggles, shoudl be configurable
     const featureCollection = await this.getGeoJsonPointsWithTotalCount({
       precision: targetPrecision,
       extent: searchFilters.buffer,
@@ -126,6 +127,9 @@ export class ESGeohashGridSource extends VectorSource {
             ]
           ]
         };
+        //give this some meaningful name
+        feature.properties.doc_count = feature.properties.value;
+        delete feature.properties.value;
       });
     }
 
@@ -137,8 +141,8 @@ export class ESGeohashGridSource extends VectorSource {
     };
   }
 
-  isFilterByMapBounds() {
-    return true;
+  async getNumberFields() {
+    return ['doc_count'];
   }
 
 
