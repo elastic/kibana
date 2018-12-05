@@ -17,19 +17,4 @@
  * under the License.
  */
 
-export { IndexPatternSelect } from './components/index_pattern_select';
-
-export { IndexPatternsProvider } from './index_patterns';
-
-export {
-  IndexPatternsApiClientProvider,
-} from './index_patterns_api_client_provider';
-
-export {
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
-
-export {
-  validateIndexPattern
-} from './validate';
+export { validateIndexPattern } from './validate_index_pattern';

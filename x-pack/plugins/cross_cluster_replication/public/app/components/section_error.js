@@ -28,7 +28,7 @@ export function SectionError({ title, error }) {
           <Fragment>
             <EuiSpacer size="m" />
             <ul>
-              { cause.map(message => <li>{message}</li>) }
+              { cause.map((message, i) => <li key={i}>{message}</li>) }
             </ul>
           </Fragment>
         )}

@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Auto-follow pattern validators validateAutoFollowPattern() should set default errors when autoFollowPattern is undefined 1`] = `
+Object {
+  "followIndexPatternPrefix": null,
+  "followIndexPatternSuffix": null,
+  "leaderIndexPatterns": Object {
+    "message": "Index pattern is required.",
+  },
+  "name": Object {
+    "message": "Name is required.",
+  },
+}
+`;
+
+exports[`Auto-follow pattern validators validateAutoFollowPattern() should validate all props from auto-follow patten 1`] = `
+Object {
+  "followIndexPatternPrefix": Object {
+    "message": <FormattedMessage
+      defaultMessage="Remove the characters {characterList} from your {fieldName}."
+      id="common.ui.indexPattern.errors.illegalCharacters"
+      values={
+        Object {
+          "characterList": <strong>
+            ?
+          </strong>,
+          "fieldName": "suffix",
+        }
+      }
+    />,
+  },
+  "followIndexPatternSuffix": Object {
+    "message": <FormattedMessage
+      defaultMessage="Remove the characters {characterList} from your {fieldName}."
+      id="common.ui.indexPattern.errors.illegalCharacters"
+      values={
+        Object {
+          "characterList": <strong>
+            ?
+          </strong>,
+          "fieldName": "suffix",
+        }
+      }
+    />,
+  },
+  "leaderIndexPatterns": null,
+  "name": Object {
+    "message": "Name can not start with the '_' character.",
+  },
+  "otherProp": null,
+}
+`;
