@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import moment from 'moment';
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import * as vega from 'vega-lib';
 import * as vegaLite from 'vega-lite';
 import { Utils } from '../data_model/utils';
