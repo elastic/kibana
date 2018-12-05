@@ -143,7 +143,7 @@ describe('Server logging configuration', function () {
       expect(sawNonjson).toEqual(true);
     }, minute);
 
-    it('should recreate file handler on SIGHUP', function (done) {
+    it.skip('should recreate file handler on SIGHUP', function (done) {
       expect.hasAssertions();
 
       const logPath = path.resolve(tempDir, 'kibana.log');
