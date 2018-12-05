@@ -53,8 +53,8 @@ require('ui/index_patterns/route_setup/load_default')({
 });
 
 
-export function updateHeader(
-  $scope
+export function updateSidebar(
+  items, id
 ) {
   const node = document.getElementById(SIDENAV_ID);
   if (!node) {
@@ -64,8 +64,8 @@ export function updateHeader(
   render(
     <I18nProvider>
       <SidebarNav
-        sections={$scope.sections}
-        selectedId={$scope.section.id}
+        sections={items}
+        selectedId={id}
         style={{ width: 192 }}
       />
     </I18nProvider>,
@@ -73,7 +73,7 @@ export function updateHeader(
   );
 }
 
-export const destroyHeader = () => {
+export const destroySidebar = () => {
   const node = document.getElementById(SIDENAV_ID);
   node && unmountComponentAtNode(node);
 };
@@ -103,8 +103,9 @@ uiModules
           });
         }
 
-        updateHeader($scope);
-        $scope.$on('$destroy', destroyHeader);
+        updateSidebar($scope.sections, $scope.section.id);
+        $scope.$on('$destroy', destroySidebar);
+        management.addListener(() => updateSidebar(management.items.inOrder, $scope.section.id));
       }
     };
   });

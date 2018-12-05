@@ -20,8 +20,9 @@
 import { assign } from 'lodash';
 import { IndexedArray } from '../indexed_array';
 
-export class ManagementSection {
+const listeners = [];
 
+export class ManagementSection {
   /**
    * @param {string} id
    * @param {object} options
@@ -55,6 +56,10 @@ export class ManagementSection {
     return this.items.inOrder.filter(item => item.visible);
   }
 
+  addListener(fn) {
+    listeners.push(fn);
+  }
+
   /**
    * Registers a sub-section
    *
@@ -71,6 +76,7 @@ export class ManagementSection {
     }
 
     this.items.push(item);
+    listeners.forEach(fn => fn(this.items));
 
     return item;
   }
@@ -82,6 +88,7 @@ export class ManagementSection {
   */
   deregister(id) {
     this.items.remove(item => item.id === id);
+    listeners.forEach(fn => fn(this.items));
   }
 
   /**

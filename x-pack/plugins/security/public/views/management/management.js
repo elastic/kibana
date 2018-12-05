@@ -66,16 +66,18 @@ routes.defaults(/\/management/, {
         }
       }
 
-      deregisterSecurity();
-      if (!showSecurityLinks) return;
-
-      // getCurrent will reject if there is no authenticated user, so we prevent them from seeing the security
-      // management screens
-      //
-      // $promise is used here because the result is an ngResource, not a promise itself
-      return ShieldUser.getCurrent().$promise
-        .then(ensureSecurityRegistered)
-        .catch(deregisterSecurity);
+      // this might need changing
+      if (!showSecurityLinks) {
+        deregisterSecurity();
+      } else {
+        // getCurrent will reject if there is no authenticated user, so we prevent them from seeing the security
+        // management screens
+        //
+        // $promise is used here because the result is an ngResource, not a promise itself
+        return ShieldUser.getCurrent().$promise
+          .then(ensureSecurityRegistered)
+          .catch(deregisterSecurity);
+      }
     }
   }
 });
