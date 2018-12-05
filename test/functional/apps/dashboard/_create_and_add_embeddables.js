@@ -21,12 +21,12 @@ import expect from 'expect.js';
 
 import {
   VisualizeConstants
-} from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+} from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
-  const remote = getService('remote');
+  const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('create and add embeddables', async () => {
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('saves the saved visualization url to the app link', async () => {
         await PageObjects.header.clickVisualize();
-        const currentUrl = await remote.getCurrentUrl();
+        const currentUrl = await browser.getCurrentUrl();
         expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
       });
 
