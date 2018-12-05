@@ -1139,10 +1139,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async toggleLegend(show = true) {
-      const isVisible = find.byCssSelector('vislib-legend .legend-ul');
-      if ((show && !isVisible) || (!show && isVisible)) {
-        await testSubjects.click('vislibToggleLegend');
-      }
+      await retry.try(async () => {
+        const isVisible = find.byCssSelector('vislib-legend');
+        if ((show && !isVisible) || (!show && isVisible)) {
+          await testSubjects.click('vislibToggleLegend');
+        }
+      });
     }
 
     async filterLegend(name) {
