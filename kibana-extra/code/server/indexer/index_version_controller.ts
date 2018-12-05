@@ -39,8 +39,8 @@ export class IndexVersionController {
    * Currently there is a simple rule to decide if we need upgrade the index or not: if the index
    * version is smaller than current version specified in the package.json file under `codeIndexVersion`.
    */
-  protected needUpgrade(oldIndex: number): boolean {
-    return oldIndex < this.version;
+  protected needUpgrade(oldIndexVersion: number): boolean {
+    return oldIndexVersion < this.version;
   }
 
   private async getIndexVersionFromES(indexName: string, typeName: string): Promise<number> {
