@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { toSpaceIdentifier, isValidSpaceIdentifier } from './space_identifier_utils';
-
-export { SpaceValidator } from './validate_space';
-
-export { getCreateBreadcrumbs, getEditBreadcrumbs, getListBreadcrumbs } from './breadcrumbs';
+export const clear = () => ({
+  name: 'clear',
+  type: 'null',
+  help: 'Clears context and returns null',
+  args: {},
+  fn: () => null,
+});
