@@ -100,7 +100,7 @@ export class ESGeohashGridSource extends VectorSource {
   async getGeoJsonWithMeta({ layerId, layerName }, searchFilters) {
 
     let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
-    targetPrecision += 1;//just for giggles, shoudl be configurable
+    targetPrecision += 0;//should have refinement param, similar to heatmap style
     const featureCollection = await this.getGeoJsonPointsWithTotalCount({
       precision: targetPrecision,
       extent: searchFilters.buffer,
@@ -132,6 +132,12 @@ export class ESGeohashGridSource extends VectorSource {
         delete feature.properties.value;
       });
     }
+
+    featureCollection.features.forEach((feature) => {
+      //give this some meaningful name
+      feature.properties.doc_count = feature.properties.value;
+      delete feature.properties.value;
+    });
 
     return {
       data: featureCollection,

@@ -202,7 +202,6 @@ export class VectorStyle {
         max = Math.max(max, newValue);
       }
     }
-
     //scale to [0,1]
     const propName = VectorStyle.getComputedFieldName(fieldName);
     for (let i = 0; i < features.length; i++) {
