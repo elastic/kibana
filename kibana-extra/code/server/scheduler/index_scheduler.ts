@@ -21,9 +21,10 @@ export class IndexScheduler extends AbstractScheduler {
     private readonly indexWorker: IndexWorker,
     private readonly serverOptions: ServerOptions,
     protected readonly client: EsClient,
-    protected readonly log: Log
+    protected readonly log: Log,
+    protected readonly onScheduleFinished?: () => void
   ) {
-    super(client, serverOptions.indexFrequencyMs);
+    super(client, serverOptions.indexFrequencyMs, onScheduleFinished);
     this.objectClient = new RepositoryObjectClient(this.client);
   }
 

@@ -25,9 +25,10 @@ export class UpdateScheduler extends AbstractScheduler {
     private readonly updateWorker: UpdateWorker,
     private readonly serverOptions: ServerOptions,
     protected readonly client: EsClient,
-    protected readonly log: Log
+    protected readonly log: Log,
+    protected readonly onScheduleFinished?: () => void
   ) {
-    super(client, serverOptions.updateFrequencyMs);
+    super(client, serverOptions.updateFrequencyMs, onScheduleFinished);
     this.objectClient = new RepositoryObjectClient(this.client);
   }
 
@@ -73,7 +74,6 @@ export class UpdateScheduler extends AbstractScheduler {
             },
           }),
         });
-
         await this.updateWorker.enqueueJob(payload, {});
       } else {
         this.log.info(`Repo ${repo.uri} has not been fully cloned yet or in update. Skip update.`);

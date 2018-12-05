@@ -8,7 +8,9 @@
  * Borrowed from https://github.com/elastic/kibana/blob/master/x-pack/common/poller.js
  */
 
-import { clearTimeout, setTimeout } from 'timers';
+// Because the timers lib is global for Nodejs, it's not necessary to explicit import it.
+// Also explicitly importing this lib is going to make Sinon fake timer fail to work.
+// import { clearTimeout, setTimeout } from 'timers';
 
 const noop = () => {
   // noop

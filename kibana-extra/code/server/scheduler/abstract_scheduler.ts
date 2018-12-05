@@ -16,7 +16,11 @@ import { Poller } from '../poller';
 export abstract class AbstractScheduler {
   private poller: Poller;
 
-  constructor(protected readonly client: EsClient, pollFrequencyMs: number) {
+  constructor(
+    protected readonly client: EsClient,
+    pollFrequencyMs: number,
+    protected readonly onScheduleFinished?: () => void
+  ) {
     this.poller = new Poller({
       functionToPoll: () => {
         return this.schedule();
@@ -36,27 +40,29 @@ export abstract class AbstractScheduler {
     this.poller.stop();
   }
 
-  protected schedule(): Promise<void> {
-    return this.client
-      .search({
-        index: `${RepositoryIndexNamePrefix}*`,
-        type: RepositoryTypeName,
-        body: {
-          query: {
-            exists: {
-              field: RepositoryReservedField,
-            },
+  protected async schedule(): Promise<void> {
+    const res = await this.client.search({
+      index: `${RepositoryIndexNamePrefix}*`,
+      type: RepositoryTypeName,
+      body: {
+        query: {
+          exists: {
+            field: RepositoryReservedField,
           },
         },
-        from: 0,
-        size: 10000,
-      })
-      .then((res: any) => {
-        Array.from(res.hits.hits).map((hit: any) => {
-          const repo: Repository = hit._source[RepositoryReservedField];
-          this.executeSchedulingJob(repo);
-        });
-      });
+      },
+      from: 0,
+      size: 10000,
+    });
+    const schedulingPromises = Array.from(res.hits.hits).map((hit: any) => {
+      const repo: Repository = hit._source[RepositoryReservedField];
+      return this.executeSchedulingJob(repo);
+    });
+    await Promise.all(schedulingPromises);
+    // Execute the callback after each schedule is done.
+    if (this.onScheduleFinished) {
+      this.onScheduleFinished();
+    }
   }
 
   protected repoNextSchedulingTime(): Date {

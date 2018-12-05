@@ -54,7 +54,7 @@ test('CRUD of Repository', async () => {
     name: 'code',
   };
   await repoObjectClient.setRepository(repoUri, cObj);
-  expect(indexSpy.calledOnce);
+  expect(indexSpy.calledOnce).toBeTruthy();
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -67,14 +67,16 @@ test('CRUD of Repository', async () => {
   );
 
   // Read
-  const getFake = sinon.fake.returns({
-    _source: {
-      [RepositoryReservedField]: cObj,
-    },
-  });
+  const getFake = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryReservedField]: cObj,
+      },
+    })
+  );
   esClient.get = getFake;
   await repoObjectClient.getRepository(repoUri);
-  expect(getFake.calledOnce);
+  expect(getFake.calledOnce).toBeTruthy();
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -89,7 +91,7 @@ test('CRUD of Repository', async () => {
     url: 'https://github.com/elastic/codesearch.git',
   };
   await repoObjectClient.updateRepository(repoUri, uObj);
-  expect(updateSpy.calledOnce);
+  expect(updateSpy.calledOnce).toBeTruthy();
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -111,20 +113,22 @@ test('Get All Repositories', async () => {
     org: 'elastic',
     name: 'code',
   };
-  const searchFake = sinon.fake.returns({
-    hits: {
-      hits: [
-        {
-          _source: {
-            [RepositoryReservedField]: cObj,
+  const searchFake = sinon.fake.returns(
+    Promise.resolve({
+      hits: {
+        hits: [
+          {
+            _source: {
+              [RepositoryReservedField]: cObj,
+            },
           },
-        },
-      ],
-    },
-  });
+        ],
+      },
+    })
+  );
   esClient.search = searchFake;
   await repoObjectClient.getAllRepositories();
-  expect(searchFake.calledOnce);
+  expect(searchFake.calledOnce).toBeTruthy();
   expect(searchFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: `${RepositoryIndexNamePrefix}*`,
@@ -144,7 +148,7 @@ test('CRUD of Repository Git Status', async () => {
     timestamp: new Date(),
   };
   await repoObjectClient.setRepositoryGitStatus(repoUri, cObj);
-  expect(indexSpy.calledOnce);
+  expect(indexSpy.calledOnce).toBeTruthy();
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -157,14 +161,16 @@ test('CRUD of Repository Git Status', async () => {
   );
 
   // Read
-  const getFake = sinon.fake.returns({
-    _source: {
-      [RepositoryGitStatusReservedField]: cObj,
-    },
-  });
+  const getFake = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryGitStatusReservedField]: cObj,
+      },
+    })
+  );
   esClient.get = getFake;
   await repoObjectClient.getRepositoryGitStatus(repoUri);
-  expect(getFake.calledOnce);
+  expect(getFake.calledOnce).toBeTruthy();
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -179,7 +185,7 @@ test('CRUD of Repository Git Status', async () => {
     progress: 50,
   };
   await repoObjectClient.updateRepositoryGitStatus(repoUri, uObj);
-  expect(updateSpy.calledOnce);
+  expect(updateSpy.calledOnce).toBeTruthy();
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -205,7 +211,7 @@ test('CRUD of Repository LSP Index Status', async () => {
     timestamp: new Date(),
   };
   await repoObjectClient.setRepositoryLspIndexStatus(repoUri, cObj);
-  expect(indexSpy.calledOnce);
+  expect(indexSpy.calledOnce).toBeTruthy();
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -218,14 +224,16 @@ test('CRUD of Repository LSP Index Status', async () => {
   );
 
   // Read
-  const getFake = sinon.fake.returns({
-    _source: {
-      [RepositoryLspIndexStatusReservedField]: cObj,
-    },
-  });
+  const getFake = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryLspIndexStatusReservedField]: cObj,
+      },
+    })
+  );
   esClient.get = getFake;
   await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
-  expect(getFake.calledOnce);
+  expect(getFake.calledOnce).toBeTruthy();
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -240,7 +248,7 @@ test('CRUD of Repository LSP Index Status', async () => {
     progress: 50,
   };
   await repoObjectClient.updateRepositoryLspIndexStatus(repoUri, uObj);
-  expect(updateSpy.calledOnce);
+  expect(updateSpy.calledOnce).toBeTruthy();
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -266,7 +274,7 @@ test('CRUD of Repository Delete Status', async () => {
     timestamp: new Date(),
   };
   await repoObjectClient.setRepositoryDeleteStatus(repoUri, cObj);
-  expect(indexSpy.calledOnce);
+  expect(indexSpy.calledOnce).toBeTruthy();
   expect(indexSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -279,14 +287,16 @@ test('CRUD of Repository Delete Status', async () => {
   );
 
   // Read
-  const getFake = sinon.fake.returns({
-    _source: {
-      [RepositoryDeleteStatusReservedField]: cObj,
-    },
-  });
+  const getFake = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryDeleteStatusReservedField]: cObj,
+      },
+    })
+  );
   esClient.get = getFake;
   await repoObjectClient.getRepositoryDeleteStatus(repoUri);
-  expect(getFake.calledOnce);
+  expect(getFake.calledOnce).toBeTruthy();
   expect(getFake.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
@@ -301,7 +311,7 @@ test('CRUD of Repository Delete Status', async () => {
     progress: 50,
   };
   await repoObjectClient.updateRepositoryDeleteStatus(repoUri, uObj);
-  expect(updateSpy.calledOnce);
+  expect(updateSpy.calledOnce).toBeTruthy();
   expect(updateSpy.getCall(0).args[0]).toEqual(
     expect.objectContaining({
       index: RepositoryIndexName(repoUri),
