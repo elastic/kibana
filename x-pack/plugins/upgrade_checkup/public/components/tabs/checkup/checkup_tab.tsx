@@ -49,11 +49,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
 
     this.state = {
       // initialize to all filters
-      currentFilter: new Set([
-        LevelFilterOption.info,
-        LevelFilterOption.warning,
-        LevelFilterOption.critical,
-      ]),
+      currentFilter: new Set([LevelFilterOption.warning, LevelFilterOption.critical]),
       search: '',
       currentGroupBy: GroupByOption.message,
     };
