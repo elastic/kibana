@@ -304,7 +304,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           description={(
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternForm.sectionRemoteClusterDescription"
-              defaultMessage="Chose the remote cluster you want to automatically replicate index(ices) from."
+              defaultMessage="Chose the remote cluster you want to automatically replicate indices from."
             />
           )}
           fullWidth
@@ -354,7 +354,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               <h4>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.sectionLeaderIndexPatternsTitle"
-                  defaultMessage="Leader Index Patterns"
+                  defaultMessage="Leader index patterns"
                 />
               </h4>
             </EuiTitle>
@@ -373,7 +373,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
             label={(
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexPatternsLabel"
-                defaultMessage="Leader Index patterns"
+                defaultMessage="Leader index patterns"
               />
             )}
             isInvalid={isInvalid}
@@ -414,7 +414,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
 
         const title = intl.formatMessage({
           id: 'xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewTitle',
-          defaultMessage: 'Example of indices that will be generated',
+          defaultMessage: 'Index name examples',
         });
 
         return (
@@ -424,7 +424,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternForm.indicesPreviewDescription"
-              defaultMessage="Here are some examples of the indices that might be generated with the above settings:"
+              defaultMessage="The above settings will generate index names that look like this:"
             />
             <ul>
               {indicesPreview.map((followerIndex, i) => <li key={i}>{followerIndex}</li>)}
@@ -453,48 +453,55 @@ export class AutoFollowPatternFormUI extends PureComponent {
           )}
           fullWidth
         >
-          <EuiFormRow
-            label={(
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldNameLabel"
-                defaultMessage="Template prefix"
-              />
-            )}
-            error={fieldsErrors.followIndexPatternPrefix}
-            isInvalid={isPrefixInvalid}
-            fullWidth
-          >
-            <EuiFieldText
-              isInvalid={isPrefixInvalid}
-              value={followIndexPatternPrefix}
-              onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
-              fullWidth
-              disabled={false}
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={(
-              <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldNameLabel"
-                defaultMessage="Template suffix"
-              />
-            )}
-            error={fieldsErrors.followIndexPatternSuffix}
-            isInvalid={isSuffixInvalid}
-            fullWidth
-          >
-            <EuiFieldText
-              isInvalid={isSuffixInvalid}
-              value={followIndexPatternSuffix}
-              onChange={e => this.onFieldsChange({ followIndexPatternSuffix: e.target.value })}
-              fullWidth
-              disabled={false}
-            />
-          </EuiFormRow>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiFormRow
+                label={(
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldNameLabel"
+                    defaultMessage="Prefix"
+                  />
+                )}
+                error={fieldsErrors.followIndexPatternPrefix}
+                isInvalid={isPrefixInvalid}
+                fullWidth
+              >
+                <EuiFieldText
+                  isInvalid={isPrefixInvalid}
+                  value={followIndexPatternPrefix}
+                  onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
+                  fullWidth
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiFormRow
+                label={(
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldNameLabel"
+                    defaultMessage="Suffix"
+                  />
+                )}
+                error={fieldsErrors.followIndexPatternSuffix}
+                isInvalid={isSuffixInvalid}
+                fullWidth
+              >
+                <EuiFieldText
+                  isInvalid={isPrefixInvalid}
+                  value={followIndexPatternPrefix}
+                  onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
+                  fullWidth
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
           {!!leaderIndexPatterns.length && (
-            <EuiFormRow>
+            <Fragment>
+              <EuiSpacer size="s" />
               {renderFollowIndicesPreview()}
-            </EuiFormRow>
+            </Fragment>
           )}
         </EuiDescribedFormGroup>
       );
