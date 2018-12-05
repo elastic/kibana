@@ -382,7 +382,6 @@ export class PolicyTableUi extends Component {
       totalNumberOfPolicies,
       policyFilterChanged,
       filter,
-      policies,
       intl,
       policyListLoaded,
     } = this.props;
@@ -393,7 +392,7 @@ export class PolicyTableUi extends Component {
     if (totalNumberOfPolicies || !policyListLoaded) {
       if (!policyListLoaded) {
         tableContent = <EuiLoadingSpinner size="m" />;
-      } else if (policies.length > 0) {
+      } else if (totalNumberOfPolicies > 0) {
         tableContent = (
           <EuiTable>
             <EuiTableHeader>{this.buildHeader()}</EuiTableHeader>
@@ -469,7 +468,7 @@ export class PolicyTableUi extends Component {
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                    {policies.length ? (
+                    {totalNumberOfPolicies ? (
                       <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
                     ) : null}
                   </EuiFlexGroup>
@@ -487,7 +486,7 @@ export class PolicyTableUi extends Component {
               <EuiSpacer />
               {content}
               <EuiSpacer size="m" />
-              {policies.length && policies.length > 10 ? this.renderPager() : null}
+              {totalNumberOfPolicies && totalNumberOfPolicies > 10 ? this.renderPager() : null}
             </div>
           </EuiPageContent>
         </EuiPageBody>
