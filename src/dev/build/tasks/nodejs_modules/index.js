@@ -17,23 +17,4 @@
  * under the License.
  */
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      app: {
-        title: 'Embedding Vis',
-        description: 'This is a sample plugin to test embedding of visualizations',
-        main: 'plugins/visualize_embedding/app',
-      }
-    },
-
-    init(server) {
-      // The following lines copy over some configuration variables from Kibana
-      // to this plugin. This will be needed when embedding visualizations, so that e.g.
-      // region map is able to get its configuration.
-      server.injectUiAppVars('visualize_embedding', async () => {
-        return await server.getInjectedUiAppVars('kibana');
-      });
-    }
-  });
-}
+export { CleanClientModulesOnDLLTask } from './clean_client_modules_on_dll_task';
