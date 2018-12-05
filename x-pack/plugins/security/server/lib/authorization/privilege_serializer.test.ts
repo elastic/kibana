@@ -6,7 +6,37 @@
 
 import { PrivilegeSerializer } from './privilege_serializer';
 
-describe('#serializeGlobalPrivilege', () => {
+describe(`#isGlobalMinimumPrivilege`, () => {
+  ['all', 'read'].forEach(validValue => {
+    test(`returns true for '${validValue}'`, () => {
+      expect(PrivilegeSerializer.isGlobalMinimumPrivilege(validValue)).toBe(true);
+    });
+  });
+
+  ['space_all', 'space_read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(
+    validValue => {
+      test(`returns true for '${validValue}'`, () => {
+        expect(PrivilegeSerializer.isGlobalMinimumPrivilege(validValue)).toBe(false);
+      });
+    }
+  );
+});
+
+describe(`#isSpaceMinimumPrivilege`, () => {
+  ['space_all', 'space_read'].forEach(validValue => {
+    test(`returns true for '${validValue}'`, () => {
+      expect(PrivilegeSerializer.isSpaceMinimumPrivilege(validValue)).toBe(true);
+    });
+  });
+
+  ['all', 'read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(validValue => {
+    test(`returns true for '${validValue}'`, () => {
+      expect(PrivilegeSerializer.isSpaceMinimumPrivilege(validValue)).toBe(false);
+    });
+  });
+});
+
+describe('#serializeGlobalMinimumPrivilege', () => {
   test('throws Error if unrecognized privilege used', () => {
     expect(() =>
       PrivilegeSerializer.serializeGlobalMinimumPrivilege('foo')
@@ -43,19 +73,52 @@ describe('#serializeSpaceMinimumPrivilege', () => {
 });
 
 describe('#serializeFeaturePrivilege', () => {
-  test('returns `feature_${featureName}_${privilegeName}`', () => {
+  test('returns `feature_${featureName}.${privilegeName}`', () => {
     const result = PrivilegeSerializer.serializeFeaturePrivilege('foo', 'bar');
-    expect(result).toBe('feature_foo_bar');
+    expect(result).toBe('feature_foo.bar');
+  });
+});
+
+describe('#deserializeFeaturePrivilege', () => {
+  [
+    {
+      privilege: 'feature_foo.privilege-1',
+      expectedResult: {
+        featureId: 'foo',
+        privilege: 'privilege-1',
+      },
+    },
+    {
+      privilege: 'feature_foo_bar.foo_privilege-1',
+      expectedResult: {
+        featureId: 'foo_bar',
+        privilege: 'foo_privilege-1',
+      },
+    },
+  ].forEach(({ privilege, expectedResult }) => {
+    test(`deserializes '${privilege}' to ${JSON.stringify(expectedResult)}`, () => {
+      const result = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  [
+    'feature-foo.privilege-1', // doesn't start with feature_
+    'foo_feature_foo.privilege-1', // also doesn't start with feature_
+    'feature_foo_privilege-1', // no '.'
+    'feature_foo.', // has a '.' but nothing after it
+    'feature_.privilege-1', // nothing before the '.'
+  ].forEach(privilege => {
+    test(`throws error when deserializing ${privilege}`, () => {
+      expect(() =>
+        PrivilegeSerializer.deserializeFeaturePrivilege(privilege)
+      ).toThrowErrorMatchingSnapshot();
+    });
   });
 });
 
 describe('#deserializeGlobalMinimumPrivilege', () => {
-  test(`if prefixed with 'feature_' removes the prefix`, () => {
-    const result = PrivilegeSerializer.deserializeGlobalMinimumPrivilege('feature_foo');
-    expect(result).toBe('foo');
-  });
-
-  test(`throws Error if not prefixed with feature_ and isn't a reserved privilege`, () => {
+  test(`throws Error if isn't a minimum privilege`, () => {
     expect(() =>
       PrivilegeSerializer.deserializeGlobalMinimumPrivilege('foo')
     ).toThrowErrorMatchingSnapshot();
@@ -73,12 +136,7 @@ describe('#deserializeGlobalMinimumPrivilege', () => {
 });
 
 describe('#deserializeSpaceMinimumPrivilege', () => {
-  test(`if prefixed with 'feature_' removes the prefix`, () => {
-    const result = PrivilegeSerializer.deserializeSpaceMinimumPrivilege('feature_foo');
-    expect(result).toBe('foo');
-  });
-
-  test(`throws Error if not prefixed with space_`, () => {
+  test(`throws Error if provided 'all'`, () => {
     expect(() =>
       PrivilegeSerializer.deserializeSpaceMinimumPrivilege('all')
     ).toThrowErrorMatchingSnapshot();

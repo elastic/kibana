@@ -10,6 +10,9 @@ const minimumPrivilegeNames = ['all', 'read'];
 const spaceMinimumPrivilegeNames = minimumPrivilegeNames.map(
   privilegeName => `${spacePrefix}${privilegeName}`
 );
+const deserializeFeaturePrivilegeRegexp = new RegExp(
+  `^${featurePrefix}([a-zA-Z0-9_-]+)\\.([a-zA-Z0-9_-]+)$`
+);
 
 interface FeaturePrivilege {
   featureId: string;
@@ -46,24 +49,19 @@ export class PrivilegeSerializer {
   }
 
   public static deserializeFeaturePrivilege(privilege: string): FeaturePrivilege {
-    if (privilege.indexOf(featurePrefix) !== 0) {
-      throw new Error(`privilege '${privilege}' was expected to start with '${featurePrefix}'`);
-    }
-
-    const withoutPrefix = privilege.slice(featurePrefix.length);
-    const parts = withoutPrefix.split('.');
-    if (parts.length !== 2) {
-      throw new Error(`Unable to deserialize feature privilege '${privilege}'`);
+    const match = privilege.match(deserializeFeaturePrivilegeRegexp);
+    if (!match) {
+      throw new Error(`Feature privilege '${privilege}' didn't match pattern`);
     }
 
     return {
-      featureId: parts[0],
-      privilege: parts[1],
+      featureId: match[1],
+      privilege: match[2],
     };
   }
 
   public static deserializeGlobalMinimumPrivilege(privilege: string) {
-    if (minimumPrivilegeNames.includes(privilege)) {
+    if (PrivilegeSerializer.isGlobalMinimumPrivilege(privilege)) {
       return privilege;
     }
 
@@ -71,7 +69,7 @@ export class PrivilegeSerializer {
   }
 
   public static deserializeSpaceMinimumPrivilege(privilege: string) {
-    if (!spaceMinimumPrivilegeNames.includes(privilege)) {
+    if (!PrivilegeSerializer.isSpaceMinimumPrivilege(privilege)) {
       throw new Error('Unrecognized space minimum privilege');
     }
 
