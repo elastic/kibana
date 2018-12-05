@@ -39,7 +39,11 @@ export default () => ({
       types: ['string'],
       multi: false,
     },
-    split: {
+    splitRow: {
+      types: ['string'],
+      multi: false,
+    },
+    splitColumn: {
       types: ['string'],
       multi: false,
     },
@@ -68,11 +72,19 @@ export default () => ({
         bucketColumn.aggConfig.schema = 'bucket';
       });
     }
-    if (args.split) {
-      args.split.split(',').forEach(split => {
+    if (args.splitColumn) {
+      args.splitColumn.split(',').forEach(split => {
         const splitColumn = context.columns.find((column, i) =>
           column.id === split || column.name === split || i === parseInt(split));
         splitColumn.aggConfig.schema = 'split';
+      });
+    }
+    if (args.splitRow) {
+      args.splitRow.split(',').forEach(split => {
+        const splitColumn = context.columns.find((column, i) =>
+          column.id === split || column.name === split || i === parseInt(split));
+        splitColumn.aggConfig.schema = 'split';
+        splitColumn.aggConfig.params.row = true;
       });
     }
 

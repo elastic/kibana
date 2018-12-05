@@ -67,7 +67,11 @@ export default () => ({
 
       Object.keys(schemas).forEach(key => {
         schemas[key].forEach(i => {
-          context.columns[i].aggConfig.schema = key;
+          const schema = key.split('_');
+          context.columns[i].aggConfig.schema = schema[0];
+          if (schema[1] === 'row') {
+            context.columns[i].aggConfig.params.row = true;
+          }
         });
       });
     }

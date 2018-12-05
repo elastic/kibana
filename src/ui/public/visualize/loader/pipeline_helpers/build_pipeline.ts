@@ -60,6 +60,9 @@ export const getSchemas = (vis: Vis): Schemas => {
     if (!schemaName) {
       return;
     }
+    if (schemaName === 'split') {
+      schemaName = `split_${agg.params.row ? 'row' : 'column'}`;
+    }
     if (!schemas[schemaName]) {
       schemas[schemaName] = [];
     }
@@ -105,8 +108,11 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   },
   table: (visState, schemas) => {
     let pipeline = `kibana_table ${prepareJson('visConfig', visState.params)}`;
-    if (schemas.split) {
-      pipeline += `split='${schemas.split.join(',')}' `;
+    if (schemas.split_row) {
+      pipeline += `splitRow='${schemas.split_row.join(',')}' `;
+    }
+    if (schemas.split_column) {
+      pipeline += `splitColumn='${schemas.split_column.join(',')}' `;
     }
     if (schemas.bucket) {
       pipeline += `bucket='${schemas.bucket.join(',')}' `;
