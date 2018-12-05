@@ -59,7 +59,7 @@ Note that language servers need to be built separately:
 
   - Typescript: `cd lsp/javascript-typescript-langserver; yarn run build` or `yarn watch` for continuous build
   
-  - Java: `cd lsp/eclipse.jdt.ls; ./mvnw package`
+  - Java: `cd lsp/java-langserver; ./mvnw package`
     
 To start production environment
   - `NODE_ENV=production node $NODE_OPTIONS --no-warnings src/cli --plugin-path ../kibana-extra/codesearch --config ../config/kibana/kibana.yml`

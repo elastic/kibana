@@ -2,9 +2,9 @@
 	path = lsp/javascript-typescript-langserver
 	url = ../javascript-typescript-langserver
 	ignore = untracked
-[submodule "lsp/eclipse.jdt.ls"]
-	path = lsp/eclipse.jdt.ls
-	url = ../eclipse.jdt.ls
 [submodule "kibana"]
 	path = kibana
 	url = ../kibana
+[submodule "lsp/java-langserver"]
+	path = lsp/java-langserver
+	url = ../java-langserver

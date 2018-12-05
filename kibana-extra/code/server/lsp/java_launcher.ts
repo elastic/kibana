@@ -34,7 +34,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     proxy.awaitServerConnection();
     const javaLangserverPath = path.resolve(
       __dirname,
-      '../../../../lsp/eclipse.jdt.ls/org.elastic.jdt.ls.product/target/repository'
+      '../../../../lsp/java-langserver/org.elastic.jdt.ls.product/target/repository'
     );
     const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
       cwd: javaLangserverPath,
