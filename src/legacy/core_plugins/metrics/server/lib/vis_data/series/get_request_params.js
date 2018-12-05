@@ -24,12 +24,10 @@ export default async (req, panel, series, esQueryConfig) => {
   const indexPatternString = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
   const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject);
+  request.timeout = '90s';
   return [
     {
       index: indexPatternString,
-      ignore: [404],
-      timeout: '90s',
-      requestTimeout: 90000,
       ignoreUnavailable: true,
     },
     request,

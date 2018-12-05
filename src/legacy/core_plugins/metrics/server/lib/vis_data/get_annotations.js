@@ -64,12 +64,10 @@ async function getAnnotationBody(req, panel, annotation, esQueryConfig) {
   const indexPatternString = annotation.index_pattern;
   const indexPatternObject = await getIndexPatternObject(req, indexPatternString);
   const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject);
+  request.timeout = '90s';
   return [
     {
       index: indexPatternString,
-      ignore: [404],
-      timeout: '90s',
-      requestTimeout: 90000,
       ignoreUnavailable: true,
     },
     request,
