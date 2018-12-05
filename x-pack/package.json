@@ -21,7 +21,7 @@
     }
   },
   "resolutions": {
-    "**/@types/node": "8.10.21",
+    "**/@types/node": "8.10.38",
     "@types/react": "16.3.14"
   },
   "devDependencies": {
@@ -29,7 +29,7 @@
     "@kbn/es": "1.0.0",
     "@kbn/plugin-helpers": "7.1.5",
     "@kbn/test": "1.0.0",
-    "@types/angular": "^1.6.50",
+    "@types/angular": "1.6.50",
     "@types/d3-array": "^1.2.1",
     "@types/d3-scale": "^2.0.0",
     "@types/d3-shape": "^1.2.2",
@@ -108,7 +108,7 @@
     "supertest-as-promised": "^4.0.2",
     "tmp": "0.0.31",
     "tree-kill": "^1.1.0",
-    "ts-loader": "^3.5.0",
+    "ts-loader": "^5.2.2",
     "typescript": "^3.0.3",
     "vinyl-fs": "^3.0.2",
     "xml-crypto": "^0.10.1",
@@ -140,7 +140,7 @@
     "apollo-server-errors": "^2.0.2",
     "apollo-server-hapi": "^1.3.6",
     "axios": "^0.18.0",
-    "babel-core": "^6.26.0",
+    "babel-core": "^6.26.3",
     "babel-polyfill": "6.20.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-register": "^6.26.0",
