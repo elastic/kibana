@@ -66,10 +66,16 @@ const elementToShape = (element, i) => {
   };
 };
 
-const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, elems) => {
+const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, unsortedElements) => {
+  const ascending = (a, b) => (a.id < b.id ? -1 : 1);
+  const relevant = s => s.type !== 'annotation' && s.subtype !== 'adHocGroup';
+  const elements = unsortedElements.filter(relevant).sort(ascending);
   const repositionings = shapes
+    .filter(relevant)
+    .sort(ascending)
     .map((shape, i) => {
-      const elemPos = elems[i] && elems[i].position;
+      const element = elements[i];
+      const elemPos = element && element.position;
       if (elemPos && gestureEnd) {
         // get existing position information from element
         const oldProps = {
