@@ -42,7 +42,10 @@ describe('buildHierarchicalData', function () {
   const buildHierarchicalData = async (aggs, response) => {
     const vis = new Vis(indexPattern, { type: 'histogram',  aggs: aggs });
     vis.isHierarchical = () => true;
-    const data = tabifyAggResponse(vis.aggs, response, { metricsAtAllLevels: true });
+    const data = tabifyAggResponse(vis.aggs, response, {
+      isHierarchical: true,
+      columnsForAllBuckets: true,
+    });
     return await responseHandler(data);
   };
 
