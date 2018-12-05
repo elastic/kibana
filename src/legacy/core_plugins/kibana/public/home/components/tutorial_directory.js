@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
@@ -34,7 +34,6 @@ import {
   EuiTitle,
   EuiPageBody,
   EuiLink,
-  EuiText,
 } from '@elastic/eui';
 
 
@@ -47,7 +46,7 @@ const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
 const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add Data' });
+const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add data' });
 
 class TutorialDirectoryUi extends React.Component {
 
@@ -201,9 +200,12 @@ class TutorialDirectoryUi extends React.Component {
     let breadcrumbs;
     if (!this.props.isK7Design) {
       breadcrumbs = (
-        <EuiText>
-          <EuiLink href="#/home">{homeTitle}</EuiLink> / {addDataTitle}
-        </EuiText>
+        <Fragment>
+          <div>
+            <EuiLink href="#/home">{homeTitle}</EuiLink> / {addDataTitle}
+          </div>
+          <EuiSpacer size="s" />
+        </Fragment>
       );
     }
 

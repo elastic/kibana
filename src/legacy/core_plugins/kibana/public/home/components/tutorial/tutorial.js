@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
@@ -47,7 +47,7 @@ const INSTRUCTIONS_TYPE = {
 };
 
 const homeTitle = i18n.translate('kbn.home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add Data' });
+const addDataTitle = i18n.translate('kbn.home.breadcrumbs.addDataTitle', { defaultMessage: 'Add data' });
 
 class TutorialUi extends React.Component {
 
@@ -374,11 +374,14 @@ class TutorialUi extends React.Component {
     let breadcrumbs;
     if (!this.props.isK7Design) {
       breadcrumbs = (
-        <EuiText>
-          <EuiLink href="#/home">{homeTitle}</EuiLink> /{' '}
-          <EuiLink href="#/home/tutorial_directory">{addDataTitle}</EuiLink> /{' '}
-          {this.state.tutorial ? this.state.tutorial.name : this.props.tutorialId}
-        </EuiText>
+        <Fragment>
+          <div>
+            <EuiLink href="#/home">{homeTitle}</EuiLink> /{' '}
+            <EuiLink href="#/home/tutorial_directory">{addDataTitle}</EuiLink> /{' '}
+            {this.state.tutorial ? this.state.tutorial.name : this.props.tutorialId}
+          </div>
+          <EuiSpacer size="s" />
+        </Fragment>
       );
     }
 
