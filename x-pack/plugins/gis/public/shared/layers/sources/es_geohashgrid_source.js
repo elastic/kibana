@@ -100,7 +100,7 @@ export class ESGeohashGridSource extends VectorSource {
   async getGeoJsonWithMeta({ layerId, layerName }, searchFilters) {
 
     let targetPrecision = ZOOM_TO_PRECISION[Math.round(searchFilters.zoom)];
-    targetPrecision += 2;//just for giggles, shoudl be configurable
+    targetPrecision += 1;//just for giggles, shoudl be configurable
     const featureCollection = await this.getGeoJsonPointsWithTotalCount({
       precision: targetPrecision,
       extent: searchFilters.buffer,
