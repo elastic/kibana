@@ -57,7 +57,7 @@ export default function ({ getService }) {
 
       it('jobs completed successfully', async () => {
         const stats = await usageAPI.getUsageStats();
-        expectedCompletedReportCount += 5;
+        expectedCompletedReportCount += 3;
         reportingAPI.expectCompletedReportCount(stats, expectedCompletedReportCount);
       });
     });
