@@ -209,7 +209,12 @@ export function explorerChartsContainerServiceFactory(
         const filterField = records[0].by_field_value || records[0].over_field_value;
         chartData = eventDistribution.filter(d => (d.entity !== filterField));
         _.map(metricData, (value, time) => {
-          if (value !== null) {
+          // The filtering for rare/event_distribution charts needs to be handled
+          // differently because of how the source data is structured.
+          if (
+            (chartType === CHART_TYPE.EVENT_DISTRIBUTION && value > 0) ||
+            (chartType !== CHART_TYPE.EVENT_DISTRIBUTION && value !== null)
+          ) {
             chartData.push({
               date: +time,
               value: value,
