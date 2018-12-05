@@ -31,12 +31,10 @@ export default () => ({
     const initialContext = handlers.getInitialContext ? handlers.getInitialContext() : {};
 
     if (context.query) {
-      const contextQueries = Array.isArray(context.query) ? context.query : [context.query];
-      initialContext.query = initialContext.query.concat(contextQueries);
+      initialContext.query = initialContext.query.concat(context.query);
     }
 
     if (context.filters) {
-      // merge filters
       initialContext.filters = initialContext.filters.concat(context.filters);
     }
 

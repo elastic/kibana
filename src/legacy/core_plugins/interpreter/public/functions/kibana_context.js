@@ -67,12 +67,10 @@ export default () => ({
     }
 
     if (context.query) {
-      const contextQueries = Array.isArray(context.query) ? context.query : [context.query];
-      queries = queries.concat(contextQueries);
+      queries = queries.concat(context.query);
     }
 
     if (context.filters) {
-      // merge filters
       filters = filters.concat(context.filters);
     }
 
