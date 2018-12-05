@@ -9,7 +9,6 @@ import { EuiIcon, EuiSideNav } from '@elastic/eui';
 
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { last } from 'rxjs/operators';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
@@ -22,7 +21,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   openedPaths: string[];
 }
 
-class CodeFileTree extends React.Component<Props> {
+export class CodeFileTree extends React.Component<Props> {
   public fetchTree(path = '') {
     const { resource, org, repo, revision } = this.props.match.params;
     this.props.fetchRepoTree({
