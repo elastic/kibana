@@ -23,7 +23,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
   * **Filter**
 
     ```
-    {{ ::'plugin_namespace.message_id' | i18n: {
+    {{ ::'pluginNamespace.messageId' | i18n: {
       defaultMessage: 'Default message string literal, {key}',
       values: { key: 'value' },
       description: 'Message context or description'
@@ -37,7 +37,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
 
     ```html
     <p
-      i18n-id="plugin_namespace.message_id"
+      i18n-id="pluginNamespace.messageId"
       i18n-default-message="Default message string literal, {key}. {emphasizedText}"
       i18n-values="{ key: value, html_emphasizedText: htmlString }"
       i18n-description="Message context or description"
@@ -55,7 +55,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
     return (
       <p>
         <FormattedMessage
-          id="plugin_namespace.message_id"
+          id="pluginNamespace.messageId"
           defaultMessage="Default message string literal, {key}"
           values={{ key: 'value' }}
           description="Message context or description"
@@ -76,7 +76,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
         type="text"
         placeholder={intl.formatMessage(
           {
-            id: 'plugin_namespace.message_id',
+            id: 'pluginNamespace.messageId',
             defaultMessage: 'Default message string literal, {key}',
             description: 'Message context or description'
           },
@@ -93,7 +93,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
 * **JavaScript or TypeScript (primarily server-side) (.js, .ts, .jsx, .tsx)**
 
   ```js
-  i18n('plugin_namespace.message_id', {
+  i18n('pluginNamespace.messageId', {
     defaultMessage: 'Default message string literal, {key}',
     values: {
       key: 'value',
@@ -105,7 +105,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
   or
 
   ```js
-  i18n.translate('plugin_namespace.message_id', {
+  i18n.translate('pluginNamespace.messageId', {
     defaultMessage: 'Default message string literal, {key}',
     values: {
       key: 'value',
@@ -119,7 +119,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
 * **Pug (.pug)**
 
   ```
-  #{i18n('plugin_namespace.message_id', {
+  #{i18n('pluginNamespace.messageId', {
     defaultMessage: 'Default message string literal, {key}',
     values: { key: 'value' },
     description: 'Message context or description',
@@ -131,7 +131,7 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
 * **Handlebars (.handlebars, .hbs)**
 
   ```hbs
-  {{i18n 'plugin_namespace.message_id' '{"defaultMessage": "Default message string literal", "description": "Message context or description"}'}}
+  {{i18n 'pluginNamespace.messageId' '{"defaultMessage": "Default message string literal", "description": "Message context or description"}'}}
   ```
 
   * The `values` and `description` are optional.
@@ -160,8 +160,8 @@ The tool generates a JSON/JSON5 file only if `--output` path is provided. It con
 {
   "formats": {},
   "messages": {
-    "plugin_namespace.message.id-1": "Default message text 1",
-    "plugin_namespace.message.id-2": {
+    "pluginNamespace.message.id-1": "Default message text 1",
+    "pluginNamespace.message.id-2": {
       "text": "Default message text 2",
       "comment": "Message context or description"
     }
