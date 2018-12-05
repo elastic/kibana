@@ -139,59 +139,60 @@ describe('Server logging configuration', function () {
       expect(exitCode).toEqual(0);
       expect(sawJson).toEqual(true);
       expect(sawNonjson).toEqual(true);
-    }, 60000);
-  }
+    }, minute);
 
-  it.skip('should recreate file handler on SIGHUP', function (done) {
-    expect.hasAssertions();
+    it('should recreate file handler on SIGHUP', function (done) {
+      expect.hasAssertions();
 
-    const logPath = path.resolve(tempDir, 'kibana.log');
-    const logPathArchived = path.resolve(tempDir, 'kibana_archive.log');
+      const logPath = path.resolve(tempDir, 'kibana.log');
+      const logPathArchived = path.resolve(tempDir, 'kibana_archive.log');
 
-    function watchFileUntil(path, matcher, timeout) {
-      return new Promise((resolve, reject) => {
-        const timeoutHandle = setTimeout(() => {
-          fs.unwatchFile(path);
-          reject(`watchFileUntil timed out for "${matcher}"`);
-        }, timeout);
+      function watchFileUntil(path, matcher, timeout) {
+        return new Promise((resolve, reject) => {
+          const timeoutHandle = setTimeout(() => {
+            fs.unwatchFile(path);
+            reject(`watchFileUntil timed out for "${matcher}"`);
+          }, timeout);
 
-        fs.watchFile(path, () => {
-          try {
-            const contents = fs.readFileSync(path);
+          fs.watchFile(path, () => {
+            try {
+              const contents = fs.readFileSync(path);
 
-            if (matcher.test(contents)) {
-              clearTimeout(timeoutHandle);
-              fs.unwatchFile(path);
-              resolve(contents);
+              if (matcher.test(contents)) {
+                clearTimeout(timeoutHandle);
+                fs.unwatchFile(path);
+                resolve(contents);
+              }
+            } catch (e) {
+              // noop
             }
-          } catch (e) {
-            // noop
-          }
+          });
         });
-      });
-    }
+      }
 
-    child = spawn(process.execPath, [
-      kibanaPath,
-      '--logging.dest', logPath,
-      '--plugins.initialize', 'false',
-      '--logging.json', 'false'
-    ]);
+      child = spawn(process.execPath, [
+        kibanaPath,
+        '--config', testConfigFile,
+        '--logging.dest', logPath,
+        '--plugins.initialize', 'false',
+        '--logging.json', 'false'
+      ]);
 
-    watchFileUntil(logPath, /Server running at/, 2 * minute)
-      .then(() => {
-        // once the server is running, archive the log file and issue SIGHUP
-        fs.renameSync(logPath, logPathArchived);
-        child.kill('SIGHUP');
-      })
-      .then(() => watchFileUntil(logPath, /Reloaded logging configuration due to SIGHUP/, 10 * second))
-      .then(contents => {
-        const lines = contents.toString().split('\n');
-        // should be the first and only new line of the log file
-        expect(lines).toHaveLength(2);
-        child.kill();
-      })
-      .then(done, done);
+      watchFileUntil(logPath, /Server running at/, 2 * minute)
+        .then(() => {
+          // once the server is running, archive the log file and issue SIGHUP
+          fs.renameSync(logPath, logPathArchived);
+          child.kill('SIGHUP');
+        })
+        .then(() => watchFileUntil(logPath, /Reloaded logging configuration due to SIGHUP/, 10 * second))
+        .then(contents => {
+          const lines = contents.toString().split('\n');
+          // should be the first and only new line of the log file
+          expect(lines).toHaveLength(2);
+          child.kill();
+        })
+        .then(done, done);
 
-  }, 3 * minute);
+    }, 3 * minute);
+  }
 });
