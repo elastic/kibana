@@ -49,11 +49,8 @@ export default function ({ getService, getPageObjects }) {
 
     describe('state:storeInSessionStorage', () => {
       it ('defaults to false', async () => {
-        console.log('defaults to false - nav to settings');
         await PageObjects.settings.clickKibanaSettings();
-        console.log('click worked');
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox('state:storeInSessionStorage');
-        console.log('found check');
         expect(storeInSessionStorage).to.be(false);
       });
 

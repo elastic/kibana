@@ -21,7 +21,6 @@ export default function ({ getService, getPageObjects }) {
       await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('settings');
       await testSubjects.click('watcher');
-      //await PageObjects.settings.clickLinkText('Watcher');
       await PageObjects.watcher.clearAllWatches();
     });
 

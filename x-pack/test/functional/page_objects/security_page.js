@@ -123,12 +123,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
     }
 
     async clickRolesSection() {
-      //await PageObjects.settings.clickLinkText('Roles');
       await testSubjects.click('roles');
     }
 
     async clickUsersSection() {
-      //await PageObjects.settings.clickLinkText('Users');
       await testSubjects.click('users');
     }
 

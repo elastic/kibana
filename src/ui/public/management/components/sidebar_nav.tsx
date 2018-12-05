@@ -38,7 +38,7 @@ const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Sectio
   icon: icon ? <EuiIcon type={icon} /> : null,
   isSelected: selectedId === id,
   onClick: () => url && (window.location.href = url),
-  'data-test-subj': `${id}`,
+  'data-test-subj': id,
 });
 
 export const sideNavItems = (sections: Section[], selectedId: string) =>
