@@ -138,6 +138,16 @@ export class LeadfootElementWrapper {
   }
 
   /**
+   * Gets the tag name of the element. For HTML documents, the value is always lowercase.
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#getTagName
+   *
+   * @return {Promise<string>}
+   */
+  async getTagName() {
+    return await this._leadfootElement.getTagName();
+  }
+
+  /**
    * Gets the position of the element relative to the top-left corner of the document,
    * taking into account scrolling and CSS transformations (if they are supported).
    * https://theintern.io/leadfoot/module-leadfoot_Element.html#getPosition
