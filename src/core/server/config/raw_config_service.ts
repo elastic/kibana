@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { cloneDeep, isEqual, isPlainObject } from 'lodash';
+import { cloneDeep, isPlainObject } from 'lodash';
 import { Observable, ReplaySubject } from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import typeDetect from 'type-detect';
 
 import { Config } from './config';
@@ -42,8 +42,6 @@ export class RawConfigService {
       new ObjectToConfigAdapter(rawConfig)
   ) {
     this.config$ = this.rawConfigFromFile$.pipe(
-      // We only want to update the config if there are changes to it.
-      distinctUntilChanged(isEqual),
       map(rawConfig => {
         if (isPlainObject(rawConfig)) {
           // TODO Make config consistent, e.g. handle dots in keys
