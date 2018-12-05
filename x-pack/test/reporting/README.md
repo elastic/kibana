@@ -3,19 +3,14 @@
 ### Overview
 
 Reporting tests have their own top level test folder because:
-  - We run the same tests with different kibana.yml settings for your browser choice - Chromium or Phantom.
   - Current API tests run with `optimize.enabled=false` flag for performance reasons, but reporting actually requires UI assets.
   - Reporting tests take a lot longer than other test types. This separation allows developers to run them in isolation, or to run other functional or API tests without them.
 
-  Starting in 7.0 Phantom support will be removed and we can remove the phantom test versions.
-
   ### Running the tests
 
-  There is more information on running x-pack tests here: https://github.com/elastic/kibana/blob/master/x-pack/README.md#running-functional-tests. Similar to running the API tests, you need to specify a reporting configuration file.  Reporting currently has four configuration files you can point to:
+  There is more information on running x-pack tests here: https://github.com/elastic/kibana/blob/master/x-pack/README.md#running-functional-tests. Similar to running the API tests, you need to specify a reporting configuration file. Reporting currently has configuration files you can point to:
   - test/reporting/configs/chromium_api.js 
-  - test/reporting/configs/phantom_api.js 
   - test/reporting/configs/chromium_functional.js 
-  - test/reporting/configs/phantom_functional.js 
 
   The `api` versions hit the reporting api and ensure report generation completes successfully, but does not verify the output of the reports. This is done in the `functional` test versions, which does a snapshot comparison of the generated URL against a baseline to determine success.
 
