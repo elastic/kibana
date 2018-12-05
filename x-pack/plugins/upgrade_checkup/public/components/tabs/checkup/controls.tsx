@@ -44,12 +44,11 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
         onChange={e => onSearchChange(e.target.value)}
       />
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
-    </EuiFlexItem>
+
+    {/* These two components provide their own EuiFlexItem wrappers */}
+    <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
+    <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
+
     <EuiFlexItem grow={false}>
       <EuiButton
         fill

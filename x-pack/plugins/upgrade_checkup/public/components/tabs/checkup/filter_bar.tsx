@@ -7,14 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 
-import {
-  // @ts-ignore
-  EuiFilterButton,
-  // @ts-ignore
-  EuiFilterGroup,
-  // @ts-ignore
-  EuiNotificationBadge,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { LevelFilterOption } from '../../types';
 
@@ -40,18 +33,20 @@ export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
     );
 
     return (
-      <EuiFilterGroup>
-        {allFilterOptions.map(option => (
-          <EuiFilterButton
-            key={option}
-            onClick={this.filterClicked.bind(this, option)}
-            hasActiveFilters={currentFilter.has(option)}
-            numFilters={levelCounts[option] || undefined}
-          >
-            {option}
-          </EuiFilterButton>
-        ))}
-      </EuiFilterGroup>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          {allFilterOptions.map(option => (
+            <EuiFilterButton
+              key={option}
+              onClick={this.filterClicked.bind(this, option)}
+              hasActiveFilters={currentFilter.has(option)}
+              numFilters={levelCounts[option] || undefined}
+            >
+              {option}
+            </EuiFilterButton>
+          ))}
+        </EuiFilterGroup>
+      </EuiFlexItem>
     );
   }
 

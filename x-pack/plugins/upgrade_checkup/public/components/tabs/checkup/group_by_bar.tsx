@@ -6,12 +6,7 @@
 
 import React from 'react';
 
-import {
-  // @ts-ignore
-  EuiFilterButton,
-  // @ts-ignore
-  EuiFilterGroup,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
 import { GroupByOption } from '../../types';
 
 // UI labels for the enum type
@@ -36,17 +31,19 @@ export class GroupByBar extends React.Component<GroupByBarProps> {
     }
 
     return (
-      <EuiFilterGroup>
-        {availableGroupByOptions.map(option => (
-          <EuiFilterButton
-            key={option}
-            onClick={this.filterClicked.bind(this, option)}
-            hasActiveFilters={currentGroupBy === option}
-          >
-            {GroupByOptionLabel[option]}
-          </EuiFilterButton>
-        ))}
-      </EuiFilterGroup>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          {availableGroupByOptions.map(option => (
+            <EuiFilterButton
+              key={option}
+              onClick={this.filterClicked.bind(this, option)}
+              hasActiveFilters={currentGroupBy === option}
+            >
+              {GroupByOptionLabel[option]}
+            </EuiFilterButton>
+          ))}
+        </EuiFilterGroup>
+      </EuiFlexItem>
     );
   }
 
