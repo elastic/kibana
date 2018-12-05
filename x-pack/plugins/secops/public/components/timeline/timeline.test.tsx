@@ -12,6 +12,7 @@ import { DragDropContext } from 'react-beautiful-dnd';
 
 import { eventsQuery } from '../../containers/events/events.gql_query';
 import { mockECSData } from '../../mock/mock_ecs';
+import { DEFAULT_PAGE_COUNT } from '../../store/local/timeline/model';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';
@@ -56,7 +57,7 @@ describe('Timeline', () => {
               onFilterChange={noop}
               onRangeSelected={noop}
               onToggleDataProviderEnabled={noop}
-              pageCount={0}
+              pageCount={DEFAULT_PAGE_COUNT}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -120,7 +121,7 @@ describe('Timeline', () => {
               onFilterChange={noop}
               onRangeSelected={noop}
               onToggleDataProviderEnabled={noop}
-              pageCount={0}
+              pageCount={DEFAULT_PAGE_COUNT}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -152,7 +153,7 @@ describe('Timeline', () => {
               onFilterChange={noop}
               onRangeSelected={noop}
               onToggleDataProviderEnabled={noop}
-              pageCount={0}
+              pageCount={DEFAULT_PAGE_COUNT}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -189,7 +190,7 @@ describe('Timeline', () => {
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={0}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -233,7 +234,7 @@ describe('Timeline', () => {
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={0}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -291,7 +292,7 @@ describe('Timeline', () => {
                 onFilterChange={mockOnFilterChange}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={0}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -341,7 +342,7 @@ describe('Timeline', () => {
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                pageCount={0}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -394,7 +395,7 @@ describe('Timeline', () => {
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={0}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -421,13 +422,7 @@ describe('Timeline', () => {
     });
 
     describe('onChangePage', () => {
-      // TODO: This is skipped because right now you cannot get to the rendered paged node
-      // I do not know why but when I open up it up using console.log(wrapper.debug())
-      // I see this non-rendered code instead of it all expanded
-      // <EuiPagination pageCount={0} activePage={0} onPageClick={[Function]}>
-      //   <span />
-      // </EuiPagination>
-      test.skip('it invokes the onChangePage callback when the input is updated', () => {
+      test('it invokes the onChangePage callback when the input is updated', () => {
         const onChangePage = jest.fn();
         const wrapper = mount(
           <DragDropContext onDragEnd={noop}>
@@ -447,7 +442,7 @@ describe('Timeline', () => {
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
-                pageCount={0}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -456,8 +451,11 @@ describe('Timeline', () => {
             </MockedProvider>
           </DragDropContext>
         );
-        wrapper.find('[data-test-subj="pagination-button-0"]').simulate('click');
-        expect(onChangePage.mock.calls[0][0]).toEqual(1);
+        wrapper
+          .find('[data-test-subj="pagination-button-0"]')
+          .first()
+          .simulate('click');
+        expect(onChangePage.mock.calls[0][0]).toEqual(0);
       });
     });
   });

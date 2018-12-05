@@ -8,6 +8,7 @@ import { Range } from '../../../components/timeline/body/column_headers/range_pi
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 
+export const DEFAULT_PAGE_COUNT = 2; // TODO: Figure out why Eui Pager will not render unless this is a minimum of 2 pages.
 export interface TimelineModel {
   id: string;
   dataProviders: DataProvider[];
@@ -15,6 +16,7 @@ export interface TimelineModel {
   show: boolean;
   sort: Sort;
   activePage: number;
+  pageCount: number;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
 }
@@ -29,6 +31,7 @@ export const timelineDefaults: Readonly<
     | 'activePage'
     | 'itemsPerPage'
     | 'itemsPerPageOptions'
+    | 'pageCount'
   >
 > = {
   dataProviders: [],
@@ -36,6 +39,7 @@ export const timelineDefaults: Readonly<
   show: false,
   activePage: 0,
   itemsPerPage: 5,
+  pageCount: DEFAULT_PAGE_COUNT,
   itemsPerPageOptions: [5, 10, 20],
   sort: {
     columnId: 'timestamp',
