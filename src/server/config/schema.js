@@ -259,7 +259,6 @@ export default () => Joi.object({
 
   i18n: Joi.object({
     locale: Joi.string().default('en'),
-    translationsScanDirs: Joi.array().items(Joi.string()).default([]),
   }).default(),
 
 }).default();

@@ -132,12 +132,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       : [],
   )));
 
-  set('i18n.translationsScanDirs', _.compact([].concat(
-    get('plugins.scanDirs'),
-    get('plugins.paths'),
-    resolve(__dirname, '..', '..', 'ui'),
-  )));
-
   merge(extraCliOptions);
   merge(readKeystore(get('path.data')));
 

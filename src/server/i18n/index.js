@@ -21,21 +21,35 @@ import { resolve } from 'path';
 import globby from 'globby';
 import { i18n, i18nLoader } from '@kbn/i18n';
 
+import { fromRoot } from '../../utils';
+
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
-  const groupedEntries = await Promise.all(
-    config.get('i18n.translationsScanDirs').map(async path => {
-      const entries = await globby(
-        ['translations/*.json', '*/translations/*.json', '*/plugins/*/translations/*.json'],
-        {
-          cwd: path,
-        }
-      );
+  const translationsDirs = [fromRoot('src/ui/translations')];
 
+  const groupedEntries = await Promise.all([
+    ...config.get('plugins.scanDirs').map(async path => {
+      const entries = await globby('*/translations/*.json', {
+        cwd: path,
+      });
       return entries.map(entry => resolve(path, entry));
-    })
-  );
+    }),
+
+    ...config.get('plugins.paths').map(async path => {
+      const entries = await globby('plugins/*/translations/*.json', {
+        cwd: path,
+      });
+      return entries.map(entry => resolve(path, entry));
+    }),
+
+    ...translationsDirs.map(async path => {
+      const entries = await globby('*.json', {
+        cwd: path,
+      });
+      return entries.map(entry => resolve(path, entry));
+    }),
+  ]);
 
   const translationPaths = [].concat(...groupedEntries);
 
