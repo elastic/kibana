@@ -95,7 +95,7 @@ export function BrowserProvider({ getService }) {
      */
     async moveMouseTo(element, xOffset, yOffset) {
       if (element) {
-        await element.moveMouseTo();
+        await element.moveMouseTo(xOffset, yOffset);
       } else {
         await leadfoot.moveMouseTo(null, xOffset, yOffset);
       }

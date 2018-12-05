@@ -219,8 +219,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<void>}
    */
-  async moveMouseTo() {
-    return await this._leadfoot.moveMouseTo(this._leadfootElement);
+  async moveMouseTo(...args) {
+    return await this._leadfoot.moveMouseTo(this._leadfootElement, ...args);
   }
 
   /**
