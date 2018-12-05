@@ -102,18 +102,6 @@ test('CRUD of Repository', async () => {
       }),
     })
   );
-
-  // Delete
-  const deleteSpy = sinon.spy(esClient, 'delete');
-  await repoObjectClient.deleteRepository(repoUri);
-  expect(deleteSpy.calledOnce);
-  expect(deleteSpy.getCall(0).args[0]).toEqual(
-    expect.objectContaining({
-      index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
-      id: RepositoryReservedField,
-    })
-  );
 });
 
 test('Get All Repositories', async () => {

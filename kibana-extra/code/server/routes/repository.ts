@@ -77,16 +77,27 @@ export function repositoryRoute(
   server.route({
     path: '/api/code/repo/{uri*3}',
     method: 'DELETE',
-    async handler(req) {
+    async handler(req, h) {
       const repoUri: string = req.params.uri as string;
       const log = new Log(req.server);
       const repoObjectClient = new RepositoryObjectClient(
         req.server.plugins.elasticsearch.getCluster('data').getClient()
       );
       try {
-        // Delete the repository from ES.
-        // If object does not exist in ES, an error will be thrown.
-        await repoObjectClient.deleteRepository(repoUri);
+        // Check if the repository already exists. If not, an error will be thrown.
+        await repoObjectClient.getRepository(repoUri);
+
+        // Check if the repository delete status already exists. If so, we should ignore this
+        // request.
+        try {
+          await repoObjectClient.getRepositoryDeleteStatus(repoUri);
+          const msg = `Repository ${repoUri} is already in delete.`;
+          log.info(msg);
+          return h.response(msg).code(304); // Not Modified
+        } catch (error) {
+          // Do nothing here since this error is expected.
+          log.info(`Repository ${repoUri} delete status does not exist. Go ahead with delete.`);
+        }
 
         const payload = {
           uri: repoUri,

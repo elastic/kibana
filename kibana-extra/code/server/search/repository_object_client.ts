@@ -111,10 +111,6 @@ export class RepositoryObjectClient {
     return await this.updateRepositoryObject(repoUri, RepositoryReservedField, obj);
   }
 
-  public async deleteRepository(repoUri: RepositoryUri) {
-    return await this.deleteRepositoryObject(repoUri, RepositoryReservedField);
-  }
-
   private async getRepositoryObject(
     repoUri: RepositoryUri,
     reservedFieldName: string
@@ -152,14 +148,6 @@ export class RepositoryObjectClient {
           [reservedFieldName]: obj,
         },
       }),
-    });
-  }
-
-  private async deleteRepositoryObject(repoUri: RepositoryUri, reservedFieldName: string) {
-    return await this.esClient.delete({
-      index: RepositoryIndexName(repoUri),
-      type: RepositoryTypeName,
-      id: this.getRepositoryObjectId(reservedFieldName),
     });
   }
 
