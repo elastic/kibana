@@ -17,9 +17,24 @@
  * under the License.
  */
 
-const { resolve } = require('path');
+import { i18n } from '@kbn/i18n';
 
-exports.pluginPaths = {
-  commonFunctions: resolve(__dirname, 'target/plugin/functions/common'),
-  types: resolve(__dirname, 'target/plugin/types'),
-};
+export function getRootBreadcrumbs() {
+  return [
+    {
+      text: i18n.translate('kbn.discover.rootBreadcrumb', {
+        defaultMessage: 'Discover'
+      }),
+      href: '#/discover'
+    }
+  ];
+}
+
+export function getSavedSearchBreadcrumbs($route) {
+  return [
+    ...getRootBreadcrumbs(),
+    {
+      text: $route.current.locals.savedSearch.id,
+    }
+  ];
+}
