@@ -29,6 +29,7 @@ import { uiModules } from 'ui/modules';
 import visualizeWizardStep2Template from './step_2.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { timefilter } from 'ui/timefilter';
+import { getWizardStep2Breadcrumbs } from '../breadcrumbs';
 
 const module = uiModules.get('app/visualize', ['kibana/courier']);
 
@@ -45,6 +46,7 @@ routes.when('/visualize/step/2', {
 
 routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   template: visualizeWizardStep2Template,
+  k7Breadcrumbs: getWizardStep2Breadcrumbs,
   controller: 'VisualizeWizardStep2',
   resolve: {
     indexPatterns: function (Private) {
@@ -59,10 +61,11 @@ routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   }
 });
 
-module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl) {
+module.controller('VisualizeWizardStep2', function ($route, $scope, kbnUrl, config) {
   const type = $route.current.params.type;
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
+  config.bindToScope($scope, 'k7design');
 
   $scope.step2WithSearchUrl = function (hit) {
     if (addToDashMode) {

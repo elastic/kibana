@@ -31,6 +31,7 @@ export async function getSeriesData(req, panel) {
     const bodiesPromises = panel.series.map(series => getRequestParams(req, panel, series, esQueryConfig));
     const bodies = await Promise.all(bodiesPromises);
     const params = {
+      rest_total_hits_as_int: true,
       body: bodies.reduce((acc, items) => acc.concat(items), [])
     };
     return callWithRequest(req, 'msearch', params)

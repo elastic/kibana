@@ -44,6 +44,7 @@ export default async (req, panel, esQueryConfig) => {
   }
   try {
     const resp = await callWithRequest(req, 'msearch', {
+      rest_total_hits_as_int: true,
       body: bodies.reduce((acc, item) => acc.concat(item), [])
     });
     const results = {};
