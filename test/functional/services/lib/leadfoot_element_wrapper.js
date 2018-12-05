@@ -64,8 +64,8 @@ export class LeadfootElementWrapper {
    *
    * @return {Promise<void>}
    */
-  async clearValue(...args) {
-    await this._leadfootElement.clearValue(args);
+  async clearValue() {
+    await this._leadfootElement.clearValue();
   }
 
   /**
@@ -217,10 +217,12 @@ export class LeadfootElementWrapper {
    * of the viewport, the remote driver will attempt to scroll it into view automatically.
    * https://theintern.io/leadfoot/module-leadfoot_Session.html#moveMouseTo
    *
+   * @param {number} xOffset optional - The x-offset of the cursor, maybe in CSS pixels, relative to the left edge of the specified element’s bounding client rectangle.
+   * @param {number} yOffset optional - The y-offset of the cursor, maybe in CSS pixels, relative to the top edge of the specified element’s bounding client rectangle.
    * @return {Promise<void>}
    */
-  async moveMouseTo(...args) {
-    return await this._leadfoot.moveMouseTo(this._leadfootElement, ...args);
+  async moveMouseTo(xOffset, yOffset) {
+    return await this._leadfoot.moveMouseTo(this._leadfootElement, xOffset, yOffset);
   }
 
   /**
