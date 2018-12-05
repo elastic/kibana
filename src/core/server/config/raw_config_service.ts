@@ -43,8 +43,6 @@ export class RawConfigService {
       new ObjectToConfigAdapter(rawConfig)
   ) {
     this.config$ = this.rawConfigFromFile$.pipe(
-      // We only want to update the config if there are changes to it.
-      distinctUntilChanged(isEqual),
       map(rawConfig => {
         if (isPlainObject(rawConfig)) {
           // TODO Make config consistent, e.g. handle dots in keys
