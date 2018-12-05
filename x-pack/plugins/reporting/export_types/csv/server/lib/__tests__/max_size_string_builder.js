@@ -74,7 +74,7 @@ describe('MaxSizeStringBuilder', function () {
       const builder = new MaxSizeStringBuilder(100);
       const stringValue = 'foobar';
       builder.tryAppend(stringValue);
-      expect(builder.getSizeInBytes()).to.be(stringValue.lenth);
+      expect(builder.getSizeInBytes()).to.be(stringValue.length);
     });
   });
 });
