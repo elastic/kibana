@@ -19,6 +19,7 @@
 
 import { EuiIcon, EuiSideNav, IconType } from '@elastic/eui';
 import React from 'react';
+import { IndexedArray } from 'ui/indexed_array';
 
 interface Section {
   disabled: boolean;
@@ -27,7 +28,7 @@ interface Section {
   display: string;
   url?: string;
   icon?: IconType;
-  items: Section[];
+  items: IndexedArray<Section>;
 }
 
 const sectionVisible = (section: Section) => !section.disabled && section.visible;
@@ -45,7 +46,7 @@ export const sideNavItems = (sections: Section[], selectedId: string) =>
     .filter(sectionVisible)
     .filter(section => section.items.filter(sectionVisible).length)
     .map(section => ({
-      items: section.items.inOrder.filter(sectionVisible).map(sectionToNav(selectedId)), // tslint:disable-line no-console
+      items: section.items.inOrder.filter(sectionVisible).map(sectionToNav(selectedId)),
       ...sectionToNav(selectedId)(section),
     }));
 
