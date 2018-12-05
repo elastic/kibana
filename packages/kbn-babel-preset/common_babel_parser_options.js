@@ -17,14 +17,17 @@
  * under the License.
  */
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      app: {
-        title: 'Test Plugin App',
-        description: 'This is a sample plugin for the functional tests.',
-        main: 'plugins/sample_app_plugin/app',
-      }
-    }
-  });
-}
+// The @babel/parser options documentation can be found here:
+// https://babeljs.io/docs/en/babel-parser#options
+module.exports = {
+  sourceType: 'unambiguous',
+  plugins: [
+    'asyncGenerators',
+    'classProperties',
+    'dynamicImport',
+    'exportDefaultFrom',
+    'exportNamespaceFrom',
+    'objectRestSpread',
+    'throwExpressions'
+  ],
+};

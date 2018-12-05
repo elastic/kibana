@@ -17,20 +17,25 @@
  * under the License.
  */
 
-function samplePanelAction(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      contextMenuActions: [
-        'plugins/sample_panel_action/sample_panel_action',
-        'plugins/sample_panel_action/sample_panel_link',
-      ],
-    },
-  });
+export function createProxyBundlesRoute({ host, port }) {
+  return [
+    buildProxyRouteForBundles('/bundles/', host, port),
+    buildProxyRouteForBundles('/dlls/', host, port)
+  ];
 }
 
-module.exports = function (kibana) {
-  return [
-    samplePanelAction(kibana),
-  ];
-};
-
+function buildProxyRouteForBundles(routePath, host, port) {
+  return {
+    path: `${routePath}{path*}`,
+    method: 'GET',
+    handler: {
+      proxy: {
+        host,
+        port,
+        passThrough: true,
+        xforward: true
+      }
+    },
+    config: { auth: false }
+  };
+}
