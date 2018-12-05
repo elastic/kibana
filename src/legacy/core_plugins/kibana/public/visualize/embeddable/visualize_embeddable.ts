@@ -17,42 +17,71 @@
  * under the License.
  */
 
-import { PersistedState } from 'ui/persisted_state';
-import { Embeddable } from 'ui/embeddable';
 import _ from 'lodash';
+import { ContainerState, Embeddable } from 'ui/embeddable';
+import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
+import { Filters, Query, TimeRange } from 'ui/embeddable/types';
+import { PersistedState } from 'ui/persisted_state';
+import { VisualizeLoader } from 'ui/visualize/loader';
+import { EmbeddedVisualizeHandler } from 'ui/visualize/loader/embedded_visualize_handler';
+import {
+  VisSavedObject,
+  VisualizeLoaderParams,
+  VisualizeUpdateParams,
+} from 'ui/visualize/loader/types';
 
-export class VisualizeEmbeddable extends Embeddable  {
-  constructor({ onEmbeddableStateChanged, savedVisualization, editUrl, loader }) {
+export interface VisualizeEmbeddableConfiguration {
+  onEmbeddableStateChanged: OnEmbeddableStateChanged;
+  savedVisualization: VisSavedObject;
+  editUrl?: string;
+  loader: VisualizeLoader;
+}
+
+export class VisualizeEmbeddable extends Embeddable {
+  private onEmbeddableStateChanged: OnEmbeddableStateChanged;
+  private savedVisualization: VisSavedObject;
+  private loader: VisualizeLoader;
+  private uiState: PersistedState;
+  private handler?: EmbeddedVisualizeHandler;
+  private customization?: object;
+  private panelTitle?: string;
+  private timeRange?: TimeRange;
+  private query?: Query;
+  private filters?: Filters;
+
+  constructor({
+    onEmbeddableStateChanged,
+    savedVisualization,
+    editUrl,
+    loader,
+  }: VisualizeEmbeddableConfiguration) {
     super({
       metadata: {
         title: savedVisualization.title,
         editUrl,
-        indexPattern: savedVisualization.vis.indexPattern
-      }
+        indexPattern: savedVisualization.vis.indexPattern,
+      },
     });
-    this._onEmbeddableStateChanged = onEmbeddableStateChanged;
+    this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedVisualization = savedVisualization;
     this.loader = loader;
 
-    const parsedUiState = savedVisualization.uiStateJSON ? JSON.parse(savedVisualization.uiStateJSON) : {};
+    const parsedUiState = savedVisualization.uiStateJSON
+      ? JSON.parse(savedVisualization.uiStateJSON)
+      : {};
     this.uiState = new PersistedState(parsedUiState);
 
-    this.uiState.on('change', this._uiStateChangeHandler);
+    this.uiState.on('change', this.uiStateChangeHandler);
   }
 
-  _uiStateChangeHandler = () => {
-    this.customization = this.uiState.toJSON();
-    this._onEmbeddableStateChanged(this.getEmbeddableState());
-  };
-
-  getInspectorAdapters() {
+  public getInspectorAdapters() {
     if (!this.handler) {
       return undefined;
     }
     return this.handler.inspectorAdapters;
   }
 
-  getEmbeddableState() {
+  public getEmbeddableState() {
     return {
       customization: this.customization,
     };
@@ -62,41 +91,27 @@ export class VisualizeEmbeddable extends Embeddable  {
    * Transfers all changes in the containerState.embeddableCustomization into
    * the uiState of this visualization.
    */
-  transferCustomizationsToUiState(containerState) {
+  public transferCustomizationsToUiState(containerState: ContainerState) {
     // Check for changes that need to be forwarded to the uiState
     // Since the vis has an own listener on the uiState we don't need to
     // pass anything from here to the handler.update method
     const customization = containerState.embeddableCustomization;
-    if (!_.isEqual(this.customization, customization)) {
+    if (customization && !_.isEqual(this.customization, customization)) {
       // Turn this off or the uiStateChangeHandler will fire for every modification.
-      this.uiState.off('change', this._uiStateChangeHandler);
+      this.uiState.off('change', this.uiStateChangeHandler);
       this.uiState.clearAllKeys();
       Object.getOwnPropertyNames(customization).forEach(key => {
         this.uiState.set(key, customization[key]);
       });
       this.customization = customization;
-      this.uiState.on('change', this._uiStateChangeHandler);
+      this.uiState.on('change', this.uiStateChangeHandler);
     }
   }
 
-  /**
-   * Retrieve the panel title for this panel from the container state.
-   * This will either return the overwritten panel title or the visualization title.
-   */
-  getPanelTitle(containerState) {
-    let derivedPanelTitle = '';
-    if (!containerState.hidePanelTitles) {
-      derivedPanelTitle = containerState.customTitle !== undefined ?
-        containerState.customTitle :
-        this.savedVisualization.title;
-    }
-    return derivedPanelTitle;
-  }
-
-  onContainerStateChanged(containerState) {
+  public onContainerStateChanged(containerState: ContainerState) {
     this.transferCustomizationsToUiState(containerState);
 
-    const updatedParams = {};
+    const updatedParams: VisualizeUpdateParams = {};
 
     // Check if timerange has changed
     if (containerState.timeRange !== this.timeRange) {
@@ -134,7 +149,7 @@ export class VisualizeEmbeddable extends Embeddable  {
    * @param {Element} domNode
    * @param {ContainerState} containerState
    */
-  render(domNode, containerState) {
+  public render(domNode: HTMLElement, containerState: ContainerState) {
     this.panelTitle = this.getPanelTitle(containerState);
     this.timeRange = containerState.timeRange;
     this.query = containerState.query;
@@ -142,7 +157,15 @@ export class VisualizeEmbeddable extends Embeddable  {
 
     this.transferCustomizationsToUiState(containerState);
 
-    const handlerParams = {
+    const dataAttrs: { [key: string]: string } = {
+      'shared-item': '',
+      title: this.panelTitle,
+    };
+    if (this.savedVisualization.description) {
+      dataAttrs.description = this.savedVisualization.description;
+    }
+
+    const handlerParams: VisualizeLoaderParams = {
       uiState: this.uiState,
       // Append visualization to container instead of replacing its content
       append: true,
@@ -150,28 +173,42 @@ export class VisualizeEmbeddable extends Embeddable  {
       query: containerState.query,
       filters: containerState.filters,
       cssClass: `panel-content panel-content--fullWidth`,
-      // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
-      // we deem that situation to be more public facing and want to hide more detailed information.
-      dataAttrs: {
-        'shared-item': '',
-        title: this.panelTitle,
-        description: this.savedVisualization.description,
-      }
+      dataAttrs,
     };
 
     this.handler = this.loader.embedVisualizationWithSavedObject(
       domNode,
       this.savedVisualization,
-      handlerParams,
+      handlerParams
     );
   }
 
-  destroy() {
-    this.uiState.off('change', this._uiStateChangeHandler);
+  public destroy() {
+    this.uiState.off('change', this.uiStateChangeHandler);
     this.savedVisualization.destroy();
     if (this.handler) {
       this.handler.destroy();
       this.handler.getElement().remove();
     }
   }
+
+  /**
+   * Retrieve the panel title for this panel from the container state.
+   * This will either return the overwritten panel title or the visualization title.
+   */
+  private getPanelTitle(containerState: ContainerState) {
+    let derivedPanelTitle = '';
+    if (!containerState.hidePanelTitles) {
+      derivedPanelTitle =
+        containerState.customTitle !== undefined
+          ? containerState.customTitle
+          : this.savedVisualization.title;
+    }
+    return derivedPanelTitle;
+  }
+
+  private uiStateChangeHandler = () => {
+    this.customization = this.uiState.toJSON();
+    this.onEmbeddableStateChanged(this.getEmbeddableState());
+  };
 }
