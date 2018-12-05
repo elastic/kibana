@@ -15,9 +15,9 @@ import {
   FrameworkInfo,
   FrameworkUser,
   ManagementAPI,
+  RuntimeFrameworkInfo,
   RuntimeFrameworkUser,
 } from './adapter_types';
-import { RuntimeFrameworkInfo } from './adapter_types';
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public get info() {
@@ -70,22 +70,31 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public waitUntilFrameworkReady(): Promise<void> {
     return new Promise(resolve => {
       this.onKibanaReady(async (Private: any, $injector: any) => {
-        const xpackInfo = Private(this.XPackInfoProvider);
+        let xpackInfo: any;
+        try {
+          xpackInfo = Private(this.XPackInfoProvider);
+        } catch (e) {
+          xpackInfo = false;
+        }
         let xpackInfoUnpacked: FrameworkInfo;
         try {
           xpackInfoUnpacked = {
             basePath: this.getBasePath(),
             k7Design: this.uiSettings.get('k7design'),
             license: {
-              type: xpackInfo.getLicense().type,
-              expired: !xpackInfo.getLicense().isActive,
-              expiry_date_in_millis: xpackInfo.getLicense().expiryDateInMillis,
+              type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
+              expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
+              expiry_date_in_millis: xpackInfo ? xpackInfo.getLicense().expiryDateInMillis : 0,
             },
             security: {
-              enabled: xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false),
-              available: xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false),
+              enabled: xpackInfo
+                ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false)
+                : false,
+              available: xpackInfo
+                ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false)
+                : false,
             },
-            settings: xpackInfo.get(`features.${this.PLUGIN_ID}.settings`),
+            settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
           };
         } catch (e) {
           throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
@@ -99,13 +108,19 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         }
         this.xpackInfo = xpackInfoUnpacked;
 
-        this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+        try {
+          this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+          const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
 
-        const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
-        if (assertUser.isLeft()) {
-          throw new Error(
-            `Error parsing user info in ${this.PLUGIN_ID},   ${PathReporter.report(assertUser)[0]}`
-          );
+          if (assertUser.isLeft()) {
+            throw new Error(
+              `Error parsing user info in ${this.PLUGIN_ID},   ${
+                PathReporter.report(assertUser)[0]
+              }`
+            );
+          }
+        } catch (e) {
+          this.shieldUser = null;
         }
 
         resolve();
