@@ -84,11 +84,11 @@ export class RemoteClusterFormUi extends Component {
           defaultMessage="Name is required."
         />
       );
-    } else if (name.match(/[^a-zA-Z\d]/)) {
+    } else if (name.match(/[^a-zA-Z\d\-_]/)) {
       errors.name = (
         <FormattedMessage
           id="xpack.remoteClusters.form.errors.lettersAndNumbersOnly"
-          defaultMessage="Name can only contain letters and numbers."
+          defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
         />
       );
     }
@@ -289,14 +289,6 @@ export class RemoteClusterFormUi extends Component {
                 are selected to be connected to as part of remote cluster requests."
               />
             </p>
-
-            <p>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription2"
-                defaultMessage="Seed nodes can be defined as IP addresses or host names, but they
-                must contain a port."
-              />
-            </p>
           </Fragment>
         )}
         fullWidth
@@ -306,6 +298,13 @@ export class RemoteClusterFormUi extends Component {
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldSeedsLabel"
               defaultMessage="IP addresses or hostnames"
+            />
+          )}
+          helpText={(
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
+              defaultMessage="Seed nodes can be defined as IP addresses or host names, but they
+                must contain a port, e.g. 127.0.0.1:9400 or localhost:9400."
             />
           )}
           isInvalid={showErrors}
@@ -431,7 +430,7 @@ export class RemoteClusterFormUi extends Component {
     }
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="m">s
+      <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiButton
             color="secondary"
@@ -576,6 +575,12 @@ export class RemoteClusterFormUi extends Component {
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
                   defaultMessage="Name"
+                />
+              )}
+              helpText={(
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.fieldNameLabelHelpText"
+                  defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
                 />
               )}
               error={errorClusterName}
