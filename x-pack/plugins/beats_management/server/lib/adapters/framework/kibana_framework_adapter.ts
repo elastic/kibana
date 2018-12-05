@@ -9,7 +9,6 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { get } from 'lodash';
 // @ts-ignore
 import { mirrorPluginStatus } from '../../../../../../server/lib/mirror_plugin_status';
-import { KibanaUser, RuntimeKibanaUser } from './adapter_types';
 import {
   BackendFrameworkAdapter,
   FrameworkInfo,
@@ -20,7 +19,9 @@ import {
   internalUser,
   KibanaLegacyServer,
   KibanaServerRequest,
+  KibanaUser,
   RuntimeFrameworkInfo,
+  RuntimeKibanaUser,
   XpackInfo,
 } from './adapter_types';
 
@@ -160,7 +161,10 @@ export class KibanaBackendFrameworkAdapter implements BackendFrameworkAdapter {
         license: {
           type: xpackInfo.license.getType(),
           expired: !xpackInfo.license.isActive(),
-          expiry_date_in_millis: xpackInfo.license.getExpiryDateInMillis(),
+          expiry_date_in_millis:
+            xpackInfo.license.getExpiryDateInMillis() !== undefined
+              ? xpackInfo.license.getExpiryDateInMillis()
+              : -1,
         },
         security: {
           enabled: !!xpackInfo.feature('security') && xpackInfo.feature('security').isEnabled(),
