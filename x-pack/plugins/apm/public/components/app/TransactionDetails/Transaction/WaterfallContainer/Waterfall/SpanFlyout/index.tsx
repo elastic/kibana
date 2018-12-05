@@ -30,7 +30,7 @@ import {
 import { px, unit } from '../../../../../../../style/variables';
 
 // @ts-ignore
-import Stacktrace from '../../../../../../shared/Stacktrace';
+import { Stacktrace } from '../../../../../../shared/Stacktrace';
 
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
@@ -85,6 +85,10 @@ export function SpanFlyout({
   const dbContext = span.context.db;
   const httpContext = span.context.http;
   const tagContext = span.context.tags;
+  const tags = keys(tagContext).map(key => ({
+    key,
+    value: get(tagContext, key)
+  }));
 
   return (
     <EuiPortal>
@@ -140,10 +144,7 @@ export function SpanFlyout({
                         },
                         { field: 'value' }
                       ]}
-                      items={keys(tagContext).map(key => ({
-                        key,
-                        value: get(tagContext, key)
-                      }))}
+                      items={tags}
                     />
                   </Fragment>
                 )
