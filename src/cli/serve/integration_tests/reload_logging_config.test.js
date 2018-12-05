@@ -18,8 +18,12 @@
  */
 
 import { spawn } from 'child_process';
-import { writeFileSync } from 'fs';
-import { relative, resolve } from 'path';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import mkdirp from 'mkdirp';
+import rimraf from 'rimraf';
+
 import { safeDump } from 'js-yaml';
 import es from 'event-stream';
 import stripAnsi from 'strip-ansi';
@@ -28,8 +32,14 @@ import { getConfigFromFiles } from '../../../core/server/config';
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
 const kibanaPath = follow('../../../../scripts/kibana.js');
 
+const second = 1000;
+const minute = second * 60;
+
+const tempDir = path.join(os.tmpdir(), 'kbn-reload-test');
+
+
 function follow(file) {
-  return relative(process.cwd(), resolve(__dirname, file));
+  return path.relative(process.cwd(), path.resolve(__dirname, file));
 }
 
 function setLoggingJson(enabled) {
@@ -39,7 +49,7 @@ function setLoggingJson(enabled) {
 
   const yaml = safeDump(conf);
 
-  writeFileSync(testConfigFile, yaml);
+  fs.writeFileSync(testConfigFile, yaml);
 }
 
 const prepareJson = obj => ({
@@ -61,6 +71,8 @@ describe.skip('Server logging configuration', function () {
   beforeEach(() => {
     isJson = true;
     setLoggingJson(true);
+
+    mkdirp.sync(tempDir);
   });
 
   afterEach(() => {
@@ -71,6 +83,8 @@ describe.skip('Server logging configuration', function () {
       child.kill();
       child = undefined;
     }
+
+    rimraf.sync(tempDir);
   });
 
   const isWindows = /^win/.test(process.platform);
@@ -140,6 +154,59 @@ describe.skip('Server logging configuration', function () {
           child.kill('SIGHUP');
         }, 100);
       }
-    }, 60000);
+    }, minute);
   }
+
+  it.skip('should recreate file handler on SIGHUP', function (done) {
+    expect.hasAssertions();
+
+    const logPath = path.resolve(tempDir, 'kibana.log');
+    const logPathArchived = path.resolve(tempDir, 'kibana_archive.log');
+
+    function watchFileUntil(path, matcher, timeout) {
+      return new Promise((resolve, reject) => {
+        const timeoutHandle = setTimeout(() => {
+          fs.unwatchFile(path);
+          reject(`watchFileUntil timed out for "${matcher}"`);
+        }, timeout);
+
+        fs.watchFile(path, () => {
+          try {
+            const contents = fs.readFileSync(path);
+
+            if (matcher.test(contents)) {
+              clearTimeout(timeoutHandle);
+              fs.unwatchFile(path);
+              resolve(contents);
+            }
+          } catch (e) {
+            // noop
+          }
+        });
+      });
+    }
+
+    child = spawn(process.execPath, [
+      kibanaPath,
+      '--logging.dest', logPath,
+      '--plugins.initialize', 'false',
+      '--logging.json', 'false'
+    ]);
+
+    watchFileUntil(logPath, /Server running at/, 2 * minute)
+      .then(() => {
+        // once the server is running, archive the log file and issue SIGHUP
+        fs.renameSync(logPath, logPathArchived);
+        child.kill('SIGHUP');
+      })
+      .then(() => watchFileUntil(logPath, /Reloaded logging configuration due to SIGHUP/, 10 * second))
+      .then(contents => {
+        const lines = contents.toString().split('\n');
+        // should be the first and only new line of the log file
+        expect(lines).toHaveLength(2);
+        child.kill();
+      })
+      .then(done, done);
+
+  }, 3 * minute);
 });
