@@ -6,13 +6,10 @@
 
 // @ts-ignore not typed yed
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-// @ts-ignore not typed yet
-import { management } from 'ui/management';
-// @ts-ignore not typed yet
-import { uiModules } from 'ui/modules';
-
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
+// @ts-ignore not typed yet
+import { management } from 'ui/management';
 import routes from 'ui/routes';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { getSupportedConfig } from '../../config_schemas_translations_map';
@@ -30,7 +27,7 @@ import { PLUGIN } from './../../../common/constants/plugin';
 import { FrameworkLib } from './../framework';
 
 // A super early spot in kibana loading that we can use to hook before most other things
-const onKibanaReady = uiModules.get('kibana').run;
+const onKibanaReady = chrome.dangerouslyGetActiveInjector().then;
 
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
