@@ -170,22 +170,16 @@ export class PageManager extends React.PureComponent {
               <Droppable droppableId="droppable-page-manager" direction="horizontal">
                 {provided => (
                   <div
+                    className={`canvasPageManager__pageList ${
+                      showTrayPop ? 'canvasPageManager--trayPop' : ''
+                    }`}
                     ref={el => {
                       this.pageListRef = el;
                       provided.innerRef(el);
                     }}
                     {...provided.droppableProps}
                   >
-                    {Style.it(
-                      workpadCSS,
-                      <div
-                        className={`canvasPageManager__pageList ${
-                          showTrayPop ? 'canvasPageManager--trayPop' : ''
-                        }`}
-                      >
-                        {pages.map(this.renderPage)}
-                      </div>
-                    )}
+                    {Style.it(workpadCSS, <div>{pages.map(this.renderPage)}</div>)}
                     {provided.placeholder}
                   </div>
                 )}
