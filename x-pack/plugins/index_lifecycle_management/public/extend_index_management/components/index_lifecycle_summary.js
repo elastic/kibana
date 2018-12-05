@@ -180,11 +180,12 @@ export class IndexLifecycleSummary extends Component {
               iconType="cross"
             >
               {ilm.step_info.type}: {ilm.step_info.reason}
+              <EuiSpacer size="s" />
               {this.renderStackPopoverButton(ilm)}
             </EuiCallOut>
           </Fragment>
         ) : null}
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="m"/>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiDescriptionList  type="column">
