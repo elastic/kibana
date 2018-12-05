@@ -138,7 +138,5 @@ EventsTable.propTypes = {
 };
 
 EventsTable.defaultProps = {
-  // showImportModal: PropTypes.func,
-  // showNewEventModal: PropTypes.func,
   showSearchBar: false,
 };

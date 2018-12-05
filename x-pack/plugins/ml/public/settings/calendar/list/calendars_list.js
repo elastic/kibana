@@ -23,6 +23,7 @@ import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
 import { checkPermission } from '../../../privilege/check_privilege';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
+import { deleteCalendars } from './delete_calendars';
 
 export class CalendarsList extends Component {
   constructor(props) {
@@ -32,6 +33,7 @@ export class CalendarsList extends Component {
       calendars: [],
       isDestroyModalVisible: false,
       calendarId: null,
+      selectedForDeletion: [],
       canCreateCalendar: checkPermission('canCreateCalendar'),
       canDeleteCalendar: checkPermission('canDeleteCalendar'),
       nodesAvailable: mlNodesAvailable()
@@ -58,21 +60,19 @@ export class CalendarsList extends Component {
     this.setState({ isDestroyModalVisible: false, calendarId: null });
   }
 
-  showDestroyModal = (calendarId) => {
-    this.setState({ isDestroyModalVisible: true, calendarId });
+  showDestroyModal = () => {
+    this.setState({ isDestroyModalVisible: true });
   }
 
-  deleteCalendar = async () => {
-    const { calendarId } = this.state;
+  setSelectedCalendarList = (selectedCalendars) => {
+    this.setState({ selectedForDeletion: selectedCalendars });
+  }
 
-    try {
-      await ml.deleteCalendar({ calendarId });
-      this.loadCalendars();
-    } catch (error) {
-      console.log(error);
-      this.closeDestroyModal();
-      toastNotifications.addDanger(`An error occurred deleting calendar: ${calendarId}`);
-    }
+  deleteCalendars = () => {
+    const { selectedForDeletion } = this.state;
+
+    this.closeDestroyModal();
+    deleteCalendars(selectedForDeletion, this.loadCalendars);
   }
 
   // TODO: check if events and job_ids always array
@@ -93,7 +93,7 @@ export class CalendarsList extends Component {
   render() {
     const {
       calendars,
-      calendarId,
+      selectedForDeletion,
       loading,
       canCreateCalendar,
       canDeleteCalendar,
@@ -107,13 +107,15 @@ export class CalendarsList extends Component {
           <EuiConfirmModal
             title="Delete calendar"
             onCancel={this.closeDestroyModal}
-            onConfirm={this.deleteCalendar}
+            onConfirm={this.deleteCalendars}
             cancelButtonText="Cancel"
             confirmButtonText="OK"
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           >
-            <p>{`Confirm deletion of ${calendarId}?`}</p>
+            <p>
+              {`Confirm deletion of ${selectedForDeletion.map((c) => c.calendar_id).join(', ')}?`}
+            </p>
           </EuiConfirmModal>
         </EuiOverlayMask>
       );
@@ -133,6 +135,8 @@ export class CalendarsList extends Component {
             canCreateCalendar={canCreateCalendar}
             canDeleteCalendar={canDeleteCalendar}
             mlNodesAvailable={nodesAvailable}
+            setSelectedCalendarList={this.setSelectedCalendarList}
+            itemsSelected={selectedForDeletion.length > 0}
           />
         </EuiPageContent>
         {destroyModal}

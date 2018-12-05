@@ -7,5 +7,5 @@
 
 
 import './settings_controller';
-import './calendar'; //'./scheduled_events';
+import './calendar';
 import './filter_lists';

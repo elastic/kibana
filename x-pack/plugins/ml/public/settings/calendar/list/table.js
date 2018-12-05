@@ -11,7 +11,6 @@ import React from 'react';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiLink,
   EuiInMemoryTable,
 } from '@elastic/eui';
@@ -22,10 +21,12 @@ import chrome from 'ui/chrome';
 export function CalendarsListTable({
   calendarsList,
   onDeleteClick,
+  setSelectedCalendarList,
   loading,
   canCreateCalendar,
   canDeleteCalendar,
   mlNodesAvailable,
+  itemsSelected
 }) {
 
   const sorting = {
@@ -64,37 +65,36 @@ export function CalendarsListTable({
       field: 'events_length',
       name: 'Events',
       sortable: true
-    },
-    {
-      field: '',
-      name: '',
-      render: (calendar) => (
-        <EuiButtonEmpty
-          size="xs"
-          color="danger"
-          onClick={() => { onDeleteClick(calendar.calendar_id); }}
-          isDisabled={(canDeleteCalendar === false || mlNodesAvailable === false)}
-        >
-          Delete
-        </EuiButtonEmpty>
-      )
-    },
+    }
   ];
+
+  const tableSelection = {
+    onSelectionChange: (selection) => setSelectedCalendarList(selection)
+  };
 
   const search = {
     toolsRight: [
       (
         <EuiButton
-          fill
           size="s"
           key="new_calendar_button"
-          iconType="plusInCircle"
           href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/new_calendar`}
           isDisabled={(canCreateCalendar === false || mlNodesAvailable === false)}
         >
-          New calendar
+          New
         </EuiButton>
       ),
+      (
+        <EuiButton
+          size="s"
+          color="danger"
+          iconType="trash"
+          onClick={onDeleteClick}
+          isDisabled={(canDeleteCalendar === false || mlNodesAvailable === false || itemsSelected === false)}
+        >
+          Delete
+        </EuiButton>
+      )
     ],
     box: {
       incremental: true,
@@ -112,6 +112,8 @@ export function CalendarsListTable({
         pagination={pagination}
         sorting={sorting}
         loading={loading}
+        selection={tableSelection}
+        isSelectable={true}
       />
     </React.Fragment>
   );
@@ -123,5 +125,7 @@ CalendarsListTable.propTypes = {
   loading: PropTypes.bool.isRequired,
   canCreateCalendar: PropTypes.bool.isRequired,
   canDeleteCalendar: PropTypes.bool.isRequired,
-  mlNodesAvailable: PropTypes.bool.isRequired
+  mlNodesAvailable: PropTypes.bool.isRequired,
+  setSelectedCalendarList: PropTypes.func.isRequired,
+  itemsSelected: PropTypes.bool.isRequired,
 };

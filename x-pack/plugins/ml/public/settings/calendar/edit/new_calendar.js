@@ -24,7 +24,6 @@ import { NewEventModal } from './new_event_modal';
 import { ImportModal } from './import_modal';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
-// import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 
 export class NewCalendar extends Component {
   constructor(props) {
