@@ -4,6 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * The helper types and functions below are designed to be used with constate
+ * v0.9. From version 1.0 the use of react hooks probably makes them
+ * unnecessary.
+ *
+ * The `inferActionMap`, `inferEffectMap` and `inferSelectorMap` functions
+ * remove the necessity to type out the child-facing interfaces as suggested in
+ * the constate typescript documentation by inferring the `ActionMap`,
+ * `EffectMap` and `SelectorMap` types from the object passed as an argument.
+ * At runtime these functions just return their first argument without
+ * modification.
+ *
+ * Until partial type argument inference is (hopefully) introduced with
+ * TypeScript 3.3, the functions are split into two nested functions to allow
+ * for specifying the `State` type argument while leaving the other type
+ * arguments for inference by the compiler.
+ *
+ * Example Usage:
+ *
+ * ```typescript
+ * const actions = inferActionMap<State>()({
+ *   increment: (amount: number) => state => ({ ...state, count: state.count + amount }),
+ * });
+ * // actions has type ActionMap<State, { increment: (amount: number) => void; }>
+ * ```
+ */
+
 import { ActionMap, EffectMap, EffectProps, SelectorMap } from 'constate';
 
 /**
