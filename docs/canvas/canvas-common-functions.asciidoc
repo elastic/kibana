@@ -43,7 +43,7 @@ s|Argument
 s|Type
 s|Description
 
-|column
+|column*
 |string
 |The name of the column to alter
 
@@ -93,7 +93,7 @@ s|Argument
 s|Type
 s|Description
 
-|_Unnamed_* (Alias: `name`)
+|_Unnamed_ (Alias: `name`)
 |string
 |A name to give the column (default: `value`)
 |===
@@ -780,7 +780,7 @@ s|Argument
 s|Type
 s|Description
 
-|_Unnamed_*
+|_Unnamed_
 |string
 |A string containing Markdown. You can pass this multiple 
 times to achieve concatenation (default: `""`).
@@ -1268,7 +1268,7 @@ s|Argument
 s|Type
 s|Description
 
-|_Unnamed_* (Alias: `shape`)
+|_Unnamed_ (Alias: `shape`)
 |string
 |Pick a shape (default: `square`)
 

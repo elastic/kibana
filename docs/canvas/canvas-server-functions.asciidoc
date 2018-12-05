@@ -109,7 +109,7 @@ s|Argument
 s|Type
 s|Description
 
-|_Unnamed_  (Alias: `query`, `q`)
+|_Unnamed_*  (Alias: `query`, `q`)
 |string
 |An SQL query
 
