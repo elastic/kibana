@@ -6,6 +6,7 @@
 
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Provider as UnstatedProvider, Subscribe } from 'unstated';
@@ -22,17 +23,19 @@ async function startApp(libs: FrontendLibs) {
   libs.framework.renderUIAtPath(
     BASE_PATH,
     <ThemeProvider theme={{ eui: euiVars }}>
-      <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
-        <BreadcrumbProvider>
-          <Subscribe to={[BeatsContainer, TagsContainer]}>
-            {(beats: BeatsContainer, tags: TagsContainer) => (
-              <Background>
-                <AppRouter libs={libs} beatsContainer={beats} tagsContainer={tags} />
-              </Background>
-            )}
-          </Subscribe>
-        </BreadcrumbProvider>
-      </UnstatedProvider>
+      <I18nProvider>
+        <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
+          <BreadcrumbProvider>
+            <Subscribe to={[BeatsContainer, TagsContainer]}>
+              {(beats: BeatsContainer, tags: TagsContainer) => (
+                <Background>
+                  <AppRouter libs={libs} beatsContainer={beats} tagsContainer={tags} />
+                </Background>
+              )}
+            </Subscribe>
+          </BreadcrumbProvider>
+        </UnstatedProvider>
+      </I18nProvider>
     </ThemeProvider>,
     libs.framework.getUISetting('k7design') ? 'management' : 'self'
   );

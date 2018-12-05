@@ -42,7 +42,7 @@ export class RouteTreeBuilder {
     const flatRoutes = this.flatpackRoutes(allRoutes);
     const mappedPaths = Object.keys(mapParams);
     const invalidOverides = difference(mappedPaths, flatRoutes);
-    if (invalidOverides.length > 0) {
+    if (invalidOverides.length > 0 && flatRoutes.length > 0) {
       throw new Error(
         `Invalid overideMap provided to 'routeTreeFromPaths', ${
           invalidOverides[0]
