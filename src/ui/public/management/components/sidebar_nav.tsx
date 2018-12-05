@@ -40,13 +40,12 @@ const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Sectio
   'data-test-subj': `${id}`,
 });
 
-// todo
 export const sideNavItems = (sections: Section[], selectedId: string) =>
   sections
     .filter(sectionVisible)
     .filter(section => section.items.filter(sectionVisible).length)
     .map(section => ({
-      items: section.items.inOrder.filter(sectionVisible).map(sectionToNav(selectedId)),
+      items: section.items.inOrder.filter(sectionVisible).map(sectionToNav(selectedId)), // tslint:disable-line no-console
       ...sectionToNav(selectedId)(section),
     }));
 
