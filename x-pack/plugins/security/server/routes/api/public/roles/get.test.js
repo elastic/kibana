@@ -164,7 +164,7 @@ describe('GET roles', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {},
+                feature: {},
               },
               space: {},
             },
@@ -220,7 +220,7 @@ describe('GET roles', () => {
               kibana: {
                 global: {
                   minimum: ['read', 'all'],
-                  features: {}
+                  feature: {}
                 },
                 space: {},
               },
@@ -275,7 +275,7 @@ describe('GET roles', () => {
               kibana: {
                 global: {
                   minimum: ['read', 'all'],
-                  features: {}
+                  feature: {}
                 },
                 space: {},
               },
@@ -330,7 +330,7 @@ describe('GET roles', () => {
               kibana: {
                 global: {
                   minimum: [],
-                  features: {
+                  feature: {
                     foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
                     bar: ['bar-privilege-1']
                   }
@@ -388,7 +388,7 @@ describe('GET roles', () => {
               kibana: {
                 global: {
                   minimum: [],
-                  features: {
+                  feature: {
                     foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
                     bar: ['bar-privilege-1']
                   }
@@ -453,16 +453,16 @@ describe('GET roles', () => {
               kibana: {
                 global: {
                   minimum: [],
-                  features: {}
+                  feature: {}
                 },
                 space: {
                   marketing: {
                     minimum: ['read', 'all'],
-                    features: {}
+                    feature: {}
                   },
                   engineering: {
                     minimum: ['read'],
-                    features: {}
+                    feature: {}
                   }
                 }
               },
@@ -522,16 +522,16 @@ describe('GET roles', () => {
               kibana: {
                 global: {
                   minimum: [],
-                  features: {}
+                  feature: {}
                 },
                 space: {
                   marketing: {
                     minimum: ['read', 'all'],
-                    features: {}
+                    feature: {}
                   },
                   engineering: {
                     minimum: ['read'],
-                    features: {}
+                    feature: {}
                   }
                 }
               },
@@ -591,19 +591,19 @@ describe('GET roles', () => {
               kibana: {
                 global: {
                   minimum: [],
-                  features: {}
+                  feature: {}
                 },
                 space: {
                   marketing: {
                     minimum: [],
-                    features: {
+                    feature: {
                       foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
                       bar: ['bar-privilege-1']
                     }
                   },
                   engineering: {
                     minimum: [],
-                    features: {
+                    feature: {
                       foo: ['foo-privilege-1']
                     }
                   }
@@ -665,19 +665,19 @@ describe('GET roles', () => {
               kibana: {
                 global: {
                   minimum: [],
-                  features: {}
+                  feature: {}
                 },
                 space: {
                   marketing: {
                     minimum: [],
-                    features: {
+                    feature: {
                       foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
                       bar: ['bar-privilege-1']
                     }
                   },
                   engineering: {
                     minimum: [],
-                    features: {
+                    feature: {
                       foo: ['foo-privilege-1']
                     }
                   }
@@ -730,7 +730,7 @@ describe('GET roles', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {},
+                feature: {},
               },
               space: {}
             },
@@ -780,7 +780,7 @@ describe('GET roles', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {}
+                feature: {}
               },
               space: {},
             },
@@ -946,7 +946,7 @@ describe('GET role', () => {
           kibana: {
             global: {
               minimum: [],
-              features: {},
+              feature: {},
             },
             space: {},
           },
@@ -1001,7 +1001,7 @@ describe('GET role', () => {
             kibana: {
               global: {
                 minimum: ['read', 'all'],
-                features: {}
+                feature: {}
               },
               space: {},
             },
@@ -1055,7 +1055,7 @@ describe('GET role', () => {
             kibana: {
               global: {
                 minimum: ['read', 'all'],
-                features: {}
+                feature: {}
               },
               space: {},
             },
@@ -1109,7 +1109,7 @@ describe('GET role', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {
+                feature: {
                   foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
                   bar: ['bar-privilege-1']
                 }
@@ -1166,7 +1166,7 @@ describe('GET role', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {
+                feature: {
                   foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
                   bar: ['bar-privilege-1']
                 }
@@ -1230,16 +1230,16 @@ describe('GET role', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {}
+                feature: {}
               },
               space: {
                 marketing: {
                   minimum: ['read', 'all'],
-                  features: {}
+                  feature: {}
                 },
                 engineering: {
                   minimum: ['read'],
-                  features: {}
+                  feature: {}
                 }
               }
             },
@@ -1298,16 +1298,16 @@ describe('GET role', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {}
+                feature: {}
               },
               space: {
                 marketing: {
                   minimum: ['read', 'all'],
-                  features: {}
+                  feature: {}
                 },
                 engineering: {
                   minimum: ['read'],
-                  features: {}
+                  feature: {}
                 }
               }
             },
@@ -1366,19 +1366,19 @@ describe('GET role', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {}
+                feature: {}
               },
               space: {
                 marketing: {
                   minimum: [],
-                  features: {
+                  feature: {
                     foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
                     bar: ['bar-privilege-1']
                   }
                 },
                 engineering: {
                   minimum: [],
-                  features: {
+                  feature: {
                     foo: ['foo-privilege-1']
                   }
                 }
@@ -1439,19 +1439,19 @@ describe('GET role', () => {
             kibana: {
               global: {
                 minimum: [],
-                features: {}
+                feature: {}
               },
               space: {
                 marketing: {
                   minimum: [],
-                  features: {
+                  feature: {
                     foo: ['foo-privilege-1', 'foo-privilege-2', 'foo-privilege-3'],
                     bar: ['bar-privilege-1']
                   }
                 },
                 engineering: {
                   minimum: [],
-                  features: {
+                  feature: {
                     foo: ['foo-privilege-1']
                   }
                 }
@@ -1503,7 +1503,7 @@ describe('GET role', () => {
           kibana: {
             global: {
               minimum: [],
-              features: {},
+              feature: {},
             },
             space: {}
           },
@@ -1552,7 +1552,7 @@ describe('GET role', () => {
           kibana: {
             global: {
               minimum: [],
-              features: {}
+              feature: {}
             },
             space: {},
           },

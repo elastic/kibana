@@ -29,7 +29,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
             ...result.global.minimum,
             ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializeGlobalMinimumPrivilege(privilege))
           ]),
-          features: featurePrivileges.reduce((acc, privilege) => {
+          feature: featurePrivileges.reduce((acc, privilege) => {
             const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
             return {
               ...acc,
@@ -38,7 +38,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
                 featurePrivilege.privilege
               ])
             };
-          }, result.global.features)
+          }, result.global.feature)
         };
         return result;
       }
@@ -51,7 +51,7 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
           ...result.space[spaceId] ? result.space[spaceId].minimum || [] : [],
           ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializeSpaceMinimumPrivilege(privilege))
         ]),
-        features: featurePrivileges.reduce((acc, privilege) => {
+        feature: featurePrivileges.reduce((acc, privilege) => {
           const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
           return {
             ...acc,
@@ -60,13 +60,13 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
               featurePrivilege.privilege
             ])
           };
-        }, result.space[spaceId] ? result.space[spaceId].features || {} : {})
+        }, result.space[spaceId] ? result.space[spaceId].feature || {} : {})
       };
       return result;
     }, {
       global: {
         minimum: [],
-        features: {},
+        feature: {},
       },
       space: {},
     });
