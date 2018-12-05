@@ -18,7 +18,7 @@ export function registerClusterCheckupRoutes(server: Server) {
     method: 'GET',
     async handler(request) {
       try {
-        return await getUpgradeCheckupStatus(callWithRequest, request, basePath, false);
+        return await getUpgradeCheckupStatus(callWithRequest, request, basePath, true);
       } catch (e) {
         if (e.status === 403) {
           return Boom.forbidden(e.message);
