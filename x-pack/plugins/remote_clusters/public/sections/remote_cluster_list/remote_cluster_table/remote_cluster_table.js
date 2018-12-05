@@ -7,13 +7,16 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
-  EuiLink,
-  EuiInMemoryTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { ConnectionStatus, RemoveClusterButton } from '../components';
@@ -146,6 +149,51 @@ export class RemoteClusterTableUi extends Component {
       ),
       sortable: true,
       width: '160px',
+    }, {
+      name: (
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterList.table.actionsColumnTitle"
+          defaultMessage="Actions"
+        />
+      ),
+      width: '100px',
+      actions: [{
+        render: ({ name, isConfiguredByNode }) => {
+          const label = i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
+            defaultMessage: 'Delete remote cluster',
+          });
+
+          return (
+            <EuiToolTip
+              content={isConfiguredByNode ? undefined : label}
+              delay="long"
+            >
+              <RemoveClusterButton clusterNames={[name]}>
+                <EuiButtonIcon
+                  aria-label={label}
+                  iconType="trash"
+                  color="danger"
+                  isDisabled={isConfiguredByNode}
+                />
+              </RemoveClusterButton>
+            </EuiToolTip>
+          );
+        },
+      }, {
+        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditAriaLabel', {
+          defaultMessage: 'Edit remote cluster',
+        }),
+        description: i18n.translate('xpack.remoteClusters.remoteClusterList.table.actionEditDescription', {
+          defaultMessage: 'Edit remote cluster',
+        }),
+        color: 'primary',
+        icon: 'pencil',
+        type: 'icon',
+        onClick: () => {},
+        // Implmenet this once EUI supports it.
+        // href: `#${CRUD_APP_BASE_PATH}/edit/${name}`,
+        enabled: ({ isConfiguredByNode }) => !isConfiguredByNode,
+      }],
     }];
 
     const sorting = {

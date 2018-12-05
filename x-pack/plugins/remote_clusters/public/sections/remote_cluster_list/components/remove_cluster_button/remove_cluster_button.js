@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, cloneElement } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
@@ -19,15 +19,24 @@ export class RemoveClusterButtonUi extends Component {
     removeClusters: PropTypes.func.isRequired,
     clusterNames: PropTypes.array.isRequired,
     isSmallButton: PropTypes.bool,
+    children: PropTypes.node,
   };
 
-  constructor(props) {
-    super(props);
+  static defaultProps = {
+    children: (
+      <EuiButton color="danger" />
+    ),
+  };
 
-    this.state = {
-      isModalOpen: false,
-    };
-  }
+  state = {
+    isModalOpen: false,
+  };
+
+  onMouseOverModal = (event) => {
+    // This component can sometimes be used inside of an EuiToolTip, in which case mousing over
+    // the modal can trigger the tooltip. Stopping propagation prevents this.
+    event.stopPropagation();
+  };
 
   showConfirmModal = () => {
     this.setState({
@@ -79,9 +88,13 @@ export class RemoveClusterButtonUi extends Component {
   }
 
   render() {
-    const { intl, clusterNames } = this.props;
+    const { intl, clusterNames, children } = this.props;
     const { isModalOpen } = this.state;
     const isSingleCluster = clusterNames.length === 1;
+
+    const button = cloneElement(children, {
+      onClick: this.showConfirmModal,
+    }, this.renderButtonText());
 
     let modal;
 
@@ -110,6 +123,7 @@ export class RemoveClusterButtonUi extends Component {
 
       modal = (
         <EuiOverlayMask>
+          { /* eslint-disable-next-line jsx-a11y/mouse-events-have-key-events */ }
           <EuiConfirmModal
             title={title}
             onCancel={this.closeConfirmModal}
@@ -127,6 +141,7 @@ export class RemoveClusterButtonUi extends Component {
                 defaultMessage: 'Remove',
               })
             }
+            onMouseOver={this.onMouseOverModal}
           >
             {content}
           </EuiConfirmModal>
@@ -136,12 +151,7 @@ export class RemoveClusterButtonUi extends Component {
 
     return (
       <Fragment>
-        <EuiButton
-          color="danger"
-          onClick={this.showConfirmModal}
-        >
-          {this.renderButtonText()}
-        </EuiButton>
+        {button}
         {modal}
       </Fragment>
     );
