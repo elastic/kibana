@@ -12,6 +12,7 @@ import { DragDropContext } from 'react-beautiful-dnd';
 
 import { eventsQuery } from '../../containers/events/events.gql_query';
 import { mockECSData } from '../../mock/mock_ecs';
+import { DEFAULT_PAGE_COUNT } from '../../store/local/timeline/model';
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { headers } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';
@@ -43,14 +44,20 @@ describe('Timeline', () => {
           <MockedProvider mocks={mocks}>
             <Timeline
               id="foo"
+              activePage={0}
               columnHeaders={headers}
               columnRenderers={columnRenderers}
               dataProviders={mockDataProviders}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              onChangeItemsPerPage={noop}
+              onChangePage={noop}
               onColumnSorted={noop}
               onDataProviderRemoved={noop}
               onFilterChange={noop}
               onRangeSelected={noop}
               onToggleDataProviderEnabled={noop}
+              pageCount={DEFAULT_PAGE_COUNT}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -69,14 +76,20 @@ describe('Timeline', () => {
           <MockedProvider mocks={mocks}>
             <Timeline
               id="foo"
+              activePage={0}
               columnHeaders={headers}
               columnRenderers={columnRenderers}
               dataProviders={mockDataProviders}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              onChangeItemsPerPage={noop}
+              onChangePage={noop}
               onColumnSorted={noop}
               onDataProviderRemoved={noop}
               onFilterChange={noop}
               onRangeSelected={noop}
               onToggleDataProviderEnabled={noop}
+              pageCount={100}
               range={'1 Day'}
               rowRenderers={rowRenderers}
               sort={sort}
@@ -87,6 +100,70 @@ describe('Timeline', () => {
       );
 
       expect(wrapper.find('[data-test-subj="body"]').exists()).toEqual(true);
+    });
+
+    test('it renders the paging footer when you have data', () => {
+      const wrapper = mount(
+        <DragDropContext onDragEnd={noop}>
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              id="foo"
+              activePage={0}
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              onChangeItemsPerPage={noop}
+              onChangePage={noop}
+              onColumnSorted={noop}
+              onDataProviderRemoved={noop}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              onToggleDataProviderEnabled={noop}
+              pageCount={DEFAULT_PAGE_COUNT}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </MockedProvider>
+        </DragDropContext>
+      );
+
+      expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(true);
+    });
+
+    test('it does NOT render the paging footer when you do NOT have any data providers', () => {
+      const wrapper = mount(
+        <DragDropContext onDragEnd={noop}>
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              id="foo"
+              activePage={0}
+              columnHeaders={headers}
+              columnRenderers={columnRenderers}
+              dataProviders={[]}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              onChangeItemsPerPage={noop}
+              onChangePage={noop}
+              onColumnSorted={noop}
+              onDataProviderRemoved={noop}
+              onFilterChange={noop}
+              onRangeSelected={noop}
+              onToggleDataProviderEnabled={noop}
+              pageCount={DEFAULT_PAGE_COUNT}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              sort={sort}
+              width={1000}
+            />
+          </MockedProvider>
+        </DragDropContext>
+      );
+
+      expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
     });
   });
 
@@ -100,14 +177,20 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 id="foo"
+                activePage={0}
                 columnHeaders={headers}
                 columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
                 onColumnSorted={mockOnColumnSorted}
+                onChangeItemsPerPage={noop}
+                onChangePage={noop}
                 onDataProviderRemoved={noop}
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -138,14 +221,20 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 id="foo"
+                activePage={0}
                 columnHeaders={headers}
                 columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                onChangeItemsPerPage={noop}
+                onChangePage={noop}
                 onColumnSorted={noop}
                 onDataProviderRemoved={mockOnDataProviderRemoved}
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -190,14 +279,20 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 id="foo"
+                activePage={0}
                 columnHeaders={allColumnsHaveTextFilters}
                 columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                onChangeItemsPerPage={noop}
+                onChangePage={noop}
                 onColumnSorted={noop}
                 onDataProviderRemoved={noop}
                 onFilterChange={mockOnFilterChange}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={noop}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -234,14 +329,20 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 id="foo"
+                activePage={0}
                 columnHeaders={allColumnsHaveTextFilters}
                 columnRenderers={columnRenderers}
                 dataProviders={mockDataProviders}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                onChangeItemsPerPage={noop}
+                onChangePage={noop}
                 onColumnSorted={noop}
                 onDataProviderRemoved={noop}
                 onFilterChange={noop}
                 onRangeSelected={noop}
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+                pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
                 sort={sort}
@@ -269,6 +370,92 @@ describe('Timeline', () => {
           },
           enabled: false,
         });
+      });
+    });
+
+    describe('onChangeItemsPerPage', () => {
+      test('it invokes the onChangeItemsPerPage callback when the input is updated', () => {
+        const onChangeItemsPerPage = jest.fn();
+
+        const wrapper = mount(
+          <DragDropContext onDragEnd={noop}>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                id="foo"
+                activePage={0}
+                columnHeaders={headers}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                onChangeItemsPerPage={onChangeItemsPerPage}
+                onChangePage={noop}
+                onColumnSorted={noop}
+                onDataProviderRemoved={noop}
+                onFilterChange={noop}
+                onRangeSelected={noop}
+                onToggleDataProviderEnabled={noop}
+                pageCount={DEFAULT_PAGE_COUNT}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={sort}
+                width={1000}
+              />
+            </MockedProvider>
+          </DragDropContext>
+        );
+
+        wrapper
+          .find('[data-test-subj="table-pagination"] button')
+          .at(0)
+          .simulate('click');
+
+        wrapper.update();
+
+        wrapper
+          .find('.euiContextMenuItem')
+          .at(0)
+          .simulate('click');
+
+        expect(onChangeItemsPerPage.mock.calls[0][0]).toEqual(5);
+      });
+    });
+
+    describe('onChangePage', () => {
+      test('it invokes the onChangePage callback when the input is updated', () => {
+        const onChangePage = jest.fn();
+        const wrapper = mount(
+          <DragDropContext onDragEnd={noop}>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                id="foo"
+                activePage={0}
+                columnHeaders={headers}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                onChangeItemsPerPage={noop}
+                onChangePage={onChangePage}
+                onColumnSorted={noop}
+                onDataProviderRemoved={noop}
+                onFilterChange={noop}
+                onRangeSelected={noop}
+                onToggleDataProviderEnabled={noop}
+                pageCount={DEFAULT_PAGE_COUNT}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                sort={sort}
+                width={1000}
+              />
+            </MockedProvider>
+          </DragDropContext>
+        );
+        wrapper
+          .find('[data-test-subj="pagination-button-0"]')
+          .first()
+          .simulate('click');
+        expect(onChangePage.mock.calls[0][0]).toEqual(0);
       });
     });
   });
