@@ -246,7 +246,7 @@ export function explorerChartsContainerServiceFactory(
         if (chartPoint !== undefined) {
           chartPoint.anomalyScore = record.record_score;
 
-          if (_.has(record, 'actual')) {
+          if (record.actual !== undefined) {
             chartPoint.actual = record.actual;
             chartPoint.typical = record.typical;
           } else {
@@ -263,7 +263,7 @@ export function explorerChartsContainerServiceFactory(
             }
           }
 
-          if (_.has(record, 'multi_bucket_impact')) {
+          if (record.multi_bucket_impact !== undefined) {
             chartPoint.multiBucketImpact = record.multi_bucket_impact;
           }
         }
@@ -388,13 +388,13 @@ export function explorerChartsContainerServiceFactory(
         return;
       }
       const jobId = record.job_id;
-      if (!_.has(aggregatedData, jobId)) {
+      if (aggregatedData[jobId] === undefined) {
         aggregatedData[jobId] = {};
       }
       const detectorsForJob = aggregatedData[jobId];
 
       const detectorIndex = record.detector_index;
-      if (!_.has(detectorsForJob, detectorIndex)) {
+      if (detectorsForJob[detectorIndex] === undefined) {
         detectorsForJob[detectorIndex] = {};
       }
 
@@ -404,11 +404,11 @@ export function explorerChartsContainerServiceFactory(
       if (firstFieldName !== undefined) {
         const groupsForDetector = detectorsForJob[detectorIndex];
 
-        if (!_.has(groupsForDetector, firstFieldName)) {
+        if (groupsForDetector[firstFieldName] === undefined) {
           groupsForDetector[firstFieldName] = {};
         }
         const valuesForGroup = groupsForDetector[firstFieldName];
-        if (!_.has(valuesForGroup, firstFieldValue)) {
+        if (valuesForGroup[firstFieldValue] === undefined) {
           valuesForGroup[firstFieldValue] = {};
         }
 
@@ -423,7 +423,7 @@ export function explorerChartsContainerServiceFactory(
         }
 
         if (isSecondSplit === false) {
-          if (!_.has(dataForGroupValue, 'maxScoreRecord')) {
+          if (dataForGroupValue.maxScoreRecord === undefined) {
             dataForGroupValue.maxScore = record.record_score;
             dataForGroupValue.maxScoreRecord = record;
           } else {
@@ -437,17 +437,17 @@ export function explorerChartsContainerServiceFactory(
           const secondFieldName = record.over_field_name || record.by_field_name;
           const secondFieldValue = record.over_field_value || record.by_field_value;
 
-          if (!_.has(dataForGroupValue, secondFieldName)) {
+          if (dataForGroupValue[secondFieldName] === undefined) {
             dataForGroupValue[secondFieldName] = {};
           }
 
           const splitsForGroup = dataForGroupValue[secondFieldName];
-          if (!_.has(splitsForGroup, secondFieldValue)) {
+          if (splitsForGroup[secondFieldValue] === undefined) {
             splitsForGroup[secondFieldValue] = {};
           }
 
           const dataForSplitValue = splitsForGroup[secondFieldValue];
-          if (!_.has(dataForSplitValue, 'maxScoreRecord')) {
+          if (dataForSplitValue.maxScoreRecord === undefined) {
             dataForSplitValue.maxScore = record.record_score;
             dataForSplitValue.maxScoreRecord = record;
           } else {
@@ -460,7 +460,7 @@ export function explorerChartsContainerServiceFactory(
       } else {
         // Detector with no partition or by field.
         const dataForDetector = detectorsForJob[detectorIndex];
-        if (!_.has(dataForDetector, 'maxScoreRecord')) {
+        if (dataForDetector.maxScoreRecord === undefined) {
           dataForDetector.maxScore = record.record_score;
           dataForDetector.maxScoreRecord = record;
         } else {
@@ -478,13 +478,13 @@ export function explorerChartsContainerServiceFactory(
     // Convert to an array of the records with the highest record_score per unique series.
     _.each(aggregatedData, (detectorsForJob) => {
       _.each(detectorsForJob, (groupsForDetector) => {
-        if (_.has(groupsForDetector, 'maxScoreRecord')) {
+        if (groupsForDetector.maxScoreRecord !== undefined) {
           // Detector with no partition / by field.
           recordsForSeries.push(groupsForDetector.maxScoreRecord);
         } else {
           _.each(groupsForDetector, (valuesForGroup) => {
             _.each(valuesForGroup, (dataForGroupValue) => {
-              if (_.has(dataForGroupValue, 'maxScoreRecord')) {
+              if (dataForGroupValue.maxScoreRecord !== undefined) {
                 recordsForSeries.push(dataForGroupValue.maxScoreRecord);
               } else {
                 // Second level of aggregation for partition and by/over.

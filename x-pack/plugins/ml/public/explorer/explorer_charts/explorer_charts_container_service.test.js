@@ -223,4 +223,35 @@ describe('explorerChartsContainerService', () => {
       }
     }
   });
+
+  test('field value with trailing dot should not throw an error', (done) => {
+    let callbackCount = 0;
+    const expectedTestCount = 3;
+
+    const anomalyDataChangeListener = explorerChartsContainerServiceFactory(
+      mockMlSelectSeverityService,
+      callback,
+      mockChartContainer
+    );
+
+    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords);
+    mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
+
+    expect(() => {
+      anomalyDataChangeListener(
+        mockAnomalyChartRecordsClone,
+        1486656000000,
+        1486670399999
+      );
+
+    }).not.toThrow();
+
+    function callback() {
+      callbackCount++;
+
+      if (callbackCount === expectedTestCount) {
+        done();
+      }
+    }
+  });
 });
