@@ -27,6 +27,7 @@ afterAll(() => {
     rimraf(options.workspacePath, resolve);
   });
 });
+
 test('requests should be sequential', async () => {
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
@@ -55,6 +56,7 @@ test('requests should be sequential', async () => {
   // response2 should not be started before repsonse1 ends.
   expect(response1.result.end).toBeLessThanOrEqual(response2.result.start);
 });
+
 test('be able to open multiple workspace', async () => {
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
@@ -107,7 +109,7 @@ test('be able to open multiple workspace', async () => {
   ).toBeTruthy();
 });
 
-test(' be able to swap workspace', async () => {
+test('be able to swap workspace', async () => {
   // @ts-ignore
   const proxyStub = sinon.createStubInstance(LanguageServerProxy, {
     initialize: sinon.stub().callsFake(() => {
