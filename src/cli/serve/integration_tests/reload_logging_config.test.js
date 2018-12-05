@@ -143,7 +143,7 @@ describe('Server logging configuration', function () {
       expect(sawNonjson).toEqual(true);
     }, minute);
 
-    it.skip('should recreate file handler on SIGHUP', function (done) {
+    it('should recreate file handler on SIGHUP', function (done) {
       expect.hasAssertions();
 
       const logPath = path.resolve(tempDir, 'kibana.log');
@@ -174,6 +174,7 @@ describe('Server logging configuration', function () {
 
       child = spawn(process.execPath, [
         kibanaPath,
+        '--config', testConfigFile,
         '--logging.dest', logPath,
         '--plugins.initialize', 'false',
         '--logging.json', 'false'
