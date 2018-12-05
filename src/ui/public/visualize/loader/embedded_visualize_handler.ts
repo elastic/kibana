@@ -94,15 +94,7 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const {
-      appState,
-      uiState,
-      queryFilter,
-      timeRange,
-      filters,
-      query,
-      autoFetch,
-    } = params;
+    const { appState, uiState, queryFilter, timeRange, filters, query, autoFetch } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -250,7 +242,9 @@ export class EmbeddedVisualizeHandler {
       .then(() => {
         if (!this.loaded) {
           this.loaded = true;
-          this.fetchAndRender();
+          if (this.autoFetch) {
+            this.fetchAndRender();
+          }
         }
       });
   };
