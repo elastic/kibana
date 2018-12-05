@@ -20,20 +20,19 @@ import { getKibana, handleKibanaStats } from './get_kibana';
  * @return {Object} A combined object containing the different responses.
  */
 export function handleLocalStats(server, clusterInfo, clusterStats, license, xpack, kibana) {
-  const stats = {
+  return {
     timestamp: (new Date()).toISOString(),
     cluster_uuid: get(clusterInfo, 'cluster_uuid'),
     cluster_name: get(clusterInfo, 'cluster_name'),
     version: get(clusterInfo, 'version.number'),
     cluster_stats: omit(clusterStats, '_nodes', 'cluster_name'),
     collection: 'local',
+    license,
+    stack_stats: {
+      kibana: handleKibanaStats(server, kibana),
+      xpack,
+    }
   };
-
-  stats.license = license;
-  stats.stack_stats = {};
-  stats.stack_stats.kibana = handleKibanaStats(server, kibana);
-  stats.stack_stats.xpack = xpack;
-  return stats;
 }
 
 /**
