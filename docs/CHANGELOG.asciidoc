@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.5.2>>
 * <<release-notes-6.5.1>>
 * <<release-notes-6.5.0>>
 * <<release-notes-6.4.3>>
@@ -79,6 +80,91 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.5.2]]
+== {kib} 6.5.2
+
+[float]
+[[breaking-changes-6.5.2]]
+=== Breaking changes
+
+See <<breaking-changes, Breaking changes>> for the changes to be aware of 
+when migrating your application from one version of Kibana to another.
+
+[float]
+[[enhancements-6.5.2]]
+=== Enhancements
+
+Canvas::
+* Adds support for url params {pull}25828[#25828]
+
+Operations::
+* Bumps node to 8.14.0 {pull}26313[#26313]
+
+[float]
+[[bug-6.5.2]]
+=== Bug fixes
+
+APM::
+* Fixes rtl bug while maintaining dynamic right alignment {pull}25780[#25780]
+
+Canvas::
+* Fixes loading component {pull}25819[#25819]
+* Adds tags to Canvas functional suite {pull}26046[#26046]
+* Fixes reporting import and config checking {pull}25829[#25829]
+* Uses `savedObjectsClient` to get index-patterns {pull}25630[#25630]
+
+Dashboard::
+* Fixes flash of unstyled dashboard content {pull}25559[#25559]
+
+Design::
+* Fixes `EuiComboBox` single selection layout issue in Firefox {pull}26202[#26202]
+
+Geo::
+* Fixes region maps color schema selection {pull}26354[#26354]
+
+Graph::
+* Fixes broken settings in Graph UI {pull}25927[#25927]
+
+{kib} App::
+* Fixes auto refresh so it works after page reload {pull}26088[#26088]
+
+Machine Learning::
+* Fixes recognizer job wizard so it uses dedicated index setting {pull}25706[#25706]
+* Ensures jobs from saved searches are cloned in advanced wizard {pull}26002[#26002]
+* Aggregates anomalies table data using configured {kib} timezone {pull}26192[#26192]
+
+Operations::
+* Fixes `logging.useUTC` deprecation unset {pull}26053[#26053]
+* Ignores packages directory when running from source {pull}26098[#26098]
+* Runs babel-cli with `--quiet` {pull}26097[#26097]
+* Uses disallow license header rule {pull}26309[#26309]
+* Throws error if reindex task fails {pull}26062[#26062]
+* Provides protection against missing shards {pull}26303[#26303]
+* Upgrades npm-run-all to 4.1.5 {pull}26200[#26200]
+
+Platform::
+* Handles deprecated SSL config settings {pull}26196[#26196]
+* Allows packages to define extra paths to kbn clean {pull}26132[#26132]
+* Wraps remote in `browser` service {pull}26394[#26394]
+
+Querying &amp; Filtering::
+* Changes timefilter so it returns strings instead of moments {pull}25625[#25625]
+
+Spaces::
+* Fixes redirect after log in {pull}25546[#25546]
+* Makes short urls space-aware {pull}26181[#26181]
+* Allows the public spaces API to work with a gold license {pull}26270[#26270]
+
+Security::
+* Fixes anonymous access to status page {pull}24706[#24706]
+* Adds `read_ccr` and `manage_ccr` cluster privileges {pull}25605[#25605]
+* Adds `manage_follow_index index` privilege for CCR {pull}25720[#25720]
+
+Visualizations::
+* Ensures custom set axis titles are preserved when loading a saved visualization {pull}24176[#24176]
+* Fixes option for showing partial buckets {pull}25520[#25520]
+* Uses retry to avoid stale element references in the `PageObjects.visualize.filterOnTableCell()` method {pull}25973[#25973]
 
 
 [[release-notes-6.5.1]]
