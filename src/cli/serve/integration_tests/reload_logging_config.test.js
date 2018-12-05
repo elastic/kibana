@@ -143,7 +143,7 @@ describe('Server logging configuration', function () {
       expect(sawNonjson).toEqual(true);
     }, minute);
 
-    it.skip('should recreate file handler on SIGHUP', function (done) {
+    it('should recreate file handler on SIGHUP', function (done) {
       expect.hasAssertions();
 
       const logPath = path.resolve(tempDir, 'kibana.log');
@@ -159,6 +159,8 @@ describe('Server logging configuration', function () {
           fs.watchFile(path, () => {
             try {
               const contents = fs.readFileSync(path);
+
+              console.log(`${matcher}::::${contents}`);
 
               if (matcher.test(contents)) {
                 clearTimeout(timeoutHandle);
@@ -176,7 +178,8 @@ describe('Server logging configuration', function () {
         kibanaPath,
         '--logging.dest', logPath,
         '--plugins.initialize', 'false',
-        '--logging.json', 'false'
+        '--logging.json', 'false',
+        '--config', testConfigFile
       ]);
 
       watchFileUntil(logPath, /Server running at/, 2 * minute)

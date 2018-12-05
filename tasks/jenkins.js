@@ -25,20 +25,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:tslint',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
-    'run:verifyNotice',
-    'test:server',
-    'test:jest',
     'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'run:apiIntegrationTests',
   ]);
 
   grunt.registerTask(
