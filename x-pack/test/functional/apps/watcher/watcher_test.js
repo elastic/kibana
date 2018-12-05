@@ -20,7 +20,8 @@ export default function ({ getService, getPageObjects }) {
     before('initialize tests', async () => {
       await browser.setWindowSize(1600, 1000);
       await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.clickLinkText('Watcher');
+      await testSubjects.click('watcher');
+      //await PageObjects.settings.clickLinkText('Watcher');
       await PageObjects.watcher.clearAllWatches();
     });
 
