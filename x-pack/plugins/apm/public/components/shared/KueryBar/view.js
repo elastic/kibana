@@ -16,6 +16,7 @@ import {
   KibanaLink
 } from '../../../utils/url';
 import { Typeahead } from './Typeahead';
+import chrome from 'ui/chrome';
 import { getAPMIndexPattern } from '../../../services/rest/savedObjects';
 import { convertKueryToEsQuery, getSuggestions } from '../../../services/kuery';
 import styled from 'styled-components';
@@ -88,6 +89,7 @@ class KueryBarView extends Component {
   };
 
   render() {
+    const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
     const indexPatternMissing =
       !this.state.isLoadingIndexPattern && !this.state.indexPattern;
 
@@ -107,8 +109,10 @@ class KueryBarView extends Component {
             style={{ display: 'inline-block', marginTop: '10px' }}
             title={
               <div>
-                There&#39;s no APM index pattern available. To use the Query
-                bar, please choose to import the APM index pattern in the{' '}
+                There&#39;s no APM index pattern with the title &#34;
+                {apmIndexPatternTitle}
+                &#34; available. To use the Query bar, please choose to import
+                the APM index pattern via the{' '}
                 <KibanaLink
                   pathname={'/app/kibana'}
                   hash={`/home/tutorial/apm`}

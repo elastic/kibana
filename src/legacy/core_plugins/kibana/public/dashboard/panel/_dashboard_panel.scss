@@ -1,0 +1,155 @@
+.dshPanel {
+  z-index: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+
+  // SASSTODO: The inheritence factor stemming from embeddables makes this class hard to change
+  .panel-content {
+    display: flex;
+    flex: 1 1 100%;
+    height: auto;
+    z-index: 1;
+    min-height: 0; // Absolute must for Firefox to scroll contents
+  }
+
+  // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
+  // but it MIGHT be fixing IE
+  .panel-content--fullWidth {
+    width: 100%;
+  }
+
+  /**
+   * 1. We want the kbnDocTable__container to scroll only when embedded in a dashboard panel
+   * 2. Fix overflow of vis's specifically for inside dashboard panels, lets the panel decide the overflow
+   * 3. Force a better looking scrollbar
+   */
+  .kbnDocTable__container {
+    flex: 1 1 0; /* 1 */
+    overflow: auto; /* 1 */
+  }
+
+  .visualization {
+    @include euiScrollBar; /* 3 */
+  }
+
+  .visualization .visChart__container {
+    overflow: visible; /* 2 */
+  }
+}
+
+.dshPanel--editing {
+  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  &:hover,
+  &:focus {
+    border-color: $euiColorPrimary;
+    @include euiSlightShadowHover;
+  }
+}
+
+// LAYOUT MODES
+
+// Adjust borders/etc... for non-spaced out and expanded panels
+.dshLayout-withoutMargins,
+.dshDashboardGrid__item--expanded {
+  // Remove border color unless in editing mode
+  .dshPanel:not(.dshPanel--editing) {
+    border-color: transparent;
+  }
+
+  .dshPanel {
+    box-shadow: none;
+    border-radius: 0;
+  }
+}
+
+// HEADER
+
+.dshPanel__header {
+  padding: $euiSizeS;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  display: flex;
+  border: none;
+  transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
+}
+
+.dshPanel__title {
+  font-size: inherit;
+  color: $euiColorDarkShade;
+  transition: color $euiAnimSpeedFast $euiAnimSlightResistance;
+  flex: 1 1 auto;
+  @include euiTextTruncate;
+
+  // flexbox fix for IE10
+  // http://stackoverflow.com/questions/22008135/internet-explorer-10-does-not-apply-flexbox-on-inline-elements
+  display: inline-block;
+}
+
+.dshPanel--editing:hover {
+  .dshPanel__header {
+    background-color: rgba($euiColorFullShade,.05) !important;
+    cursor: move;
+  }
+
+  .dshPanel__title:hover {
+    color: $euiColorPrimary;
+  }
+}
+
+/**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  */
+.dshPanel__header--floater {
+  opacity: 0; /* 1 */
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  background-color: $euiColorEmptyShade;
+  z-index: $euiZLevel1;
+  transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  &:focus { /* 2 */
+    opacity: 1;
+  }
+}
+
+.dshPanel:hover .dshPanel__header--floater {
+  opacity: 1;
+}
+
+// OPTIONS MENU
+
+/**
+  * 1. Use opacity to make this element accessible to screen readers and keyboard.
+  * 2. Show on focus to enable keyboard accessibility.
+  */
+.dshPanel_optionsMenuButton {
+  opacity: 0; /* 1 */
+
+  &:focus { /* 2 */
+    opacity: 1;
+  }
+}
+
+.dshPanel:hover .dshPanel_optionsMenuButton {
+  opacity: 1;
+}
+
+// ERROR
+
+.dshPanel__error {
+  text-align: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: auto;
+
+  .fa-exclamation-triangle {
+    font-size: $euiFontSizeXL;
+    color: $euiColorDanger;
+  }
+}
