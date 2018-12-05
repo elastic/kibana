@@ -5,6 +5,7 @@
  */
 
 import { IconType } from '@elastic/eui';
+import Joi from 'joi';
 import _ from 'lodash';
 
 export interface FeaturePrivilegeDefinition {
@@ -23,7 +24,7 @@ export interface FeaturePrivilegeDefinition {
 export interface Feature {
   id: string;
   name: string;
-  validLicenses?: Array<'basic' | 'gold' | 'platinum'>;
+  validLicenses?: Array<'basic' | 'standard' | 'gold' | 'platinum'>;
   icon?: IconType;
   description?: string;
   navLinkId?: string;
@@ -32,9 +33,50 @@ export interface Feature {
   };
 }
 
+const schema = Joi.object({
+  id: Joi.string()
+    .regex(/^[a-zA-Z0-9_-]+$/)
+    .required(),
+  name: Joi.string().required(),
+  validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
+  icon: Joi.string(),
+  description: Joi.string(),
+  navLinkId: Joi.string(),
+  privileges: Joi.object()
+    .pattern(
+      /^[a-zA-Z0-9_-]+$/,
+      Joi.object({
+        metadata: Joi.object({
+          tooltip: Joi.string(),
+        }),
+        api: Joi.array().items(Joi.string()),
+        app: Joi.array()
+          .items(Joi.string())
+          .required(),
+        savedObject: Joi.object({
+          all: Joi.array()
+            .items(Joi.string())
+            .required(),
+          read: Joi.array()
+            .items(Joi.string())
+            .required(),
+        }).required(),
+        ui: Joi.array()
+          .items(Joi.string())
+          .required(),
+      })
+    )
+    .required(),
+});
+
 const features: Record<string, Feature> = {};
 
 export function registerFeature(feature: Feature) {
+  const validateResult = Joi.validate(feature, schema);
+  if (validateResult.error) {
+    throw validateResult.error;
+  }
+
   if (feature.id in features) {
     throw new Error(`Feature with id ${feature.id} is already registered.`);
   }
