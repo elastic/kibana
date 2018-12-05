@@ -18,6 +18,8 @@
  */
 
 import _ from 'lodash';
+// @ts-ignore ts knows this shouldn't be possible, but just making sure
+import rison from 'rison-node';
 import { ContainerState, Embeddable } from 'ui/embeddable';
 import { OnEmbeddableStateChanged } from 'ui/embeddable/embeddable_factory';
 import { Filters, Query, TimeRange } from 'ui/embeddable/types';
@@ -29,6 +31,8 @@ import {
   VisualizeLoaderParams,
   VisualizeUpdateParams,
 } from 'ui/visualize/loader/types';
+import url from 'url';
+import { VisualizeConstants } from '../visualize_constants';
 
 export interface VisualizeEmbeddableConfiguration {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
@@ -106,6 +110,34 @@ export class VisualizeEmbeddable extends Embeddable {
       this.customization = customization;
       this.uiState.on('change', this.uiStateChangeHandler);
     }
+  }
+
+  /**
+   * Generates an access URL that will be used in creating a PNG report.
+   */
+  public generateAccessLink(containerState: ContainerState) {
+    const id = this.savedVisualization.id;
+
+    const appState = rison.encode({
+      filters: containerState.filters,
+      uiState: containerState.embeddableCustomization,
+      query: containerState.query,
+    });
+
+    const globalState = rison.encode({ time: containerState.timeRange });
+
+    // Use a url service to ensure everything is escaped properly
+    const myurl =
+      `/app/kibana#` +
+      url.format({
+        pathname: VisualizeConstants.EDIT_PATH + '/' + id,
+        query: {
+          _g: globalState,
+          _a: appState,
+        },
+      });
+
+    return myurl.toString();
   }
 
   public onContainerStateChanged(containerState: ContainerState) {

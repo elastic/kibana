@@ -39,7 +39,8 @@ export const reporting = (kibana) => {
         'plugins/reporting/share_context_menu/register_reporting',
       ],
       contextMenuActions: [
-        'plugins/reporting/panel_actions/get_report_panel_action',
+        'plugins/reporting/panel_actions/get_png_report_panel_action',
+        'plugins/reporting/panel_actions/get_csv_report_panel_action',
       ],
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],

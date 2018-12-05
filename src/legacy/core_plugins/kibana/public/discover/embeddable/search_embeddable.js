@@ -17,12 +17,14 @@
  * under the License.
  */
 
+import url from 'url';
 import angular from 'angular';
 import { Embeddable } from 'ui/embeddable';
 import searchTemplate from './search_template.html';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import { getTime } from 'ui/timefilter/get_time';
 import { RequestAdapter } from 'ui/inspector/adapters';
+import rison from 'rison-node';
 
 export class SearchEmbeddable extends Embeddable {
   constructor({ onEmbeddableStateChanged, savedSearch, editUrl, loader, $rootScope, $compile }) {
@@ -56,6 +58,32 @@ export class SearchEmbeddable extends Embeddable {
     return {
       customization: this.customization
     };
+  }
+
+  /**
+   * Generates an access URL that will be used in creating a PNG report.
+  */
+  generateAccessLink(containerState) {
+
+    const id = this.savedSearch.id;
+
+    const appState = rison.encode({ filters: containerState.filters,
+      uiState: containerState.embeddableCustomization,
+      query: containerState.query,
+    });
+
+    const globalState = rison.encode({ time: containerState.timeRange });
+
+    // Use a url service to ensure everything is escaped properly
+    const myurl = `/app/kibana#` +  url.format({
+      pathname: '/visualize/edit/' + id,
+      query: {
+        '_g': globalState,
+        '_a': appState,
+      }
+    });
+
+    return myurl.toString();
   }
 
   pushContainerStateParamsToScope() {

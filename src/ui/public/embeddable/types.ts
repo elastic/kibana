@@ -17,10 +17,6 @@
  * under the License.
  */
 
-export interface SavedVisualization {
-  id?: string;
-  title?: string;
-}
 export interface TimeRange {
   to: string;
   from: string;

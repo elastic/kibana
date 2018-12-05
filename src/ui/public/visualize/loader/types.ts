@@ -49,6 +49,7 @@ export interface Query {
 }
 
 export interface VisSavedObject {
+  id: string;
   vis: Vis;
   description?: string;
   searchSource: SearchSource;
