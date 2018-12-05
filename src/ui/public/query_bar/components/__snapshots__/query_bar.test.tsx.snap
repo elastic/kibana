@@ -57,7 +57,7 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
                 role="textbox"
                 spellCheck={false}
                 type="text"
@@ -98,7 +98,11 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
       onClick={[Function]}
       type="button"
     >
-      Refresh
+      <FormattedMessage
+        defaultMessage="Refresh"
+        id="common.ui.queryBar.refreshButtonLabel"
+        values={Object {}}
+      />
     </EuiButton>
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -161,7 +165,7 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
                 role="textbox"
                 spellCheck={false}
                 type="text"
@@ -202,7 +206,11 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
       onClick={[Function]}
       type="button"
     >
-      Refresh
+      <FormattedMessage
+        defaultMessage="Refresh"
+        id="common.ui.queryBar.refreshButtonLabel"
+        values={Object {}}
+      />
     </EuiButton>
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -265,7 +273,7 @@ exports[`QueryBar Should render the given query 1`] = `
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
-                placeholder="Search... (e.g. status:200 AND extension:PHP)"
+                placeholder="Search… (e.g. status:200 AND extension:PHP)"
                 role="textbox"
                 spellCheck={false}
                 type="text"
@@ -306,7 +314,11 @@ exports[`QueryBar Should render the given query 1`] = `
       onClick={[Function]}
       type="button"
     >
-      Refresh
+      <FormattedMessage
+        defaultMessage="Refresh"
+        id="common.ui.queryBar.refreshButtonLabel"
+        values={Object {}}
+      />
     </EuiButton>
   </EuiFlexItem>
 </EuiFlexGroup>
