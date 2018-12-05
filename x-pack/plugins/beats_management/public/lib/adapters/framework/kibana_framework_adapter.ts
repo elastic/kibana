@@ -69,63 +69,89 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
 
   public waitUntilFrameworkReady(): Promise<void> {
     return new Promise(resolve => {
-      this.onKibanaReady(async (Private: any, $injector: any) => {
-        let xpackInfo: any;
-        try {
-          xpackInfo = Private(this.XPackInfoProvider);
-        } catch (e) {
-          xpackInfo = false;
-        }
+      try {
+        this.onKibanaReady(async (Private: any, $injector: any) => {
+          let xpackInfo: any;
+          try {
+            xpackInfo = Private(this.XPackInfoProvider);
+          } catch (e) {
+            xpackInfo = false;
+          }
 
-        let xpackInfoUnpacked: FrameworkInfo;
-        try {
-          xpackInfoUnpacked = {
-            basePath: this.getBasePath(),
-            k7Design: this.uiSettings.get('k7design'),
-            license: {
-              type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
-              expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
-              expiry_date_in_millis: xpackInfo ? xpackInfo.getLicense().expiryDateInMillis : 0,
-            },
-            security: {
-              enabled: xpackInfo
-                ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false)
-                : false,
-              available: xpackInfo
-                ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false)
-                : false,
-            },
-            settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
-          };
-        } catch (e) {
-          throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
-        }
-
-        const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
-        if (assertData.isLeft()) {
-          throw new Error(
-            `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
-          );
-        }
-        this.xpackInfo = xpackInfoUnpacked;
-
-        try {
-          this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
-          const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
-
-          if (assertUser.isLeft()) {
+          let xpackInfoUnpacked: FrameworkInfo;
+          try {
+            xpackInfoUnpacked = {
+              basePath: this.getBasePath(),
+              k7Design: this.uiSettings.get('k7design'),
+              license: {
+                type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
+                expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
+                expiry_date_in_millis: xpackInfo ? xpackInfo.getLicense().expiryDateInMillis : 0,
+              },
+              security: {
+                enabled: xpackInfo
+                  ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false)
+                  : false,
+                available: xpackInfo
+                  ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false)
+                  : false,
+              },
+              settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
+            };
+          } catch (e) {
             throw new Error(
-              `Error parsing user info in ${this.PLUGIN_ID},   ${
-                PathReporter.report(assertUser)[0]
+              `Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`
+            );
+          }
+
+          const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
+          if (assertData.isLeft()) {
+            throw new Error(
+              `Error parsing xpack info in ${this.PLUGIN_ID},   ${
+                PathReporter.report(assertData)[0]
               }`
             );
           }
-        } catch (e) {
-          this.shieldUser = null;
-        }
+          this.xpackInfo = xpackInfoUnpacked;
 
-        resolve();
-      });
+          try {
+            this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+            const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
+
+            if (assertUser.isLeft()) {
+              throw new Error(
+                `Error parsing user info in ${this.PLUGIN_ID},   ${
+                  PathReporter.report(assertUser)[0]
+                }`
+              );
+            }
+          } catch (e) {
+            this.shieldUser = null;
+          }
+
+          resolve();
+        });
+      } catch (e) {
+        this.shieldUser = null;
+        this.xpackInfo = {
+          basePath: this.getBasePath(),
+          k7Design: this.uiSettings.get('k7design'),
+          license: {
+            type: 'oss',
+            expired: false,
+            expiry_date_in_millis: 0,
+          },
+          security: {
+            enabled: false,
+            available: false,
+          },
+          settings: {
+            defaultUserRoles: ['superuser'],
+            enrollmentTokensTtlInSeconds: 0,
+            encryptionKey: 'none',
+          },
+        };
+      }
     });
   }
 
