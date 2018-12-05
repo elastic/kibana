@@ -11,15 +11,14 @@ import {
   removeTimelineProvider,
   TimelineById,
   updateShowTimeline,
-  updateTimelineData,
   updateTimelineItemsPerPage,
   updateTimelinePageIndex,
   updateTimelineProviderEnabled,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineSort,
+  updateTimelinePerPageOptions,
 } from '.';
-import { mockECSData } from '../../../mock/mock_ecs';
 import { timelineDefaults } from './model';
 
 const timelineByIdMock: TimelineById = {
@@ -36,7 +35,6 @@ const timelineByIdMock: TimelineById = {
         negated: false,
       },
     ],
-    data: [],
     range: '1 Day',
     show: true,
     sort: {
@@ -45,6 +43,7 @@ const timelineByIdMock: TimelineById = {
     },
     activePage: 0,
     itemsPerPage: 5,
+    itemsPerPageOptions: [5, 10, 20],
   },
 };
 
@@ -164,26 +163,6 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#updateTimelineData', () => {
-    test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineData({
-        id: 'foo',
-        data: [mockECSData[0]],
-        timelineById: timelineByIdMock,
-      });
-      expect(update).not.toBe(timelineByIdMock);
-    });
-
-    test('should add a new timeline provider', () => {
-      const update = updateTimelineData({
-        id: 'foo',
-        data: [mockECSData[0]],
-        timelineById: timelineByIdMock,
-      });
-      expect(update).toEqual(set('foo.data', [mockECSData[0]], timelineByIdMock));
-    });
-  });
-
   describe('#updateTimelineProviders', () => {
     test('should return a new reference and not the same reference', () => {
       const update = updateTimelineProviders({
@@ -299,7 +278,7 @@ describe('Timeline', () => {
         enabled: false, // value we are updating from true to false
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual({
+      const expected: TimelineById = {
         foo: {
           id: 'foo',
           dataProviders: [
@@ -313,7 +292,6 @@ describe('Timeline', () => {
               negated: false,
             },
           ],
-          data: [],
           range: '1 Day',
           show: true,
           sort: {
@@ -322,8 +300,10 @@ describe('Timeline', () => {
           },
           activePage: 0,
           itemsPerPage: 5,
+          itemsPerPageOptions: [5, 10, 20],
         },
-      });
+      };
+      expect(update).toEqual(expected);
     });
 
     test('should update only one data provider and not two data providers', () => {
@@ -343,7 +323,7 @@ describe('Timeline', () => {
         enabled: false, // value we are updating from true to false
         timelineById: multiDataProviderMock,
       });
-      expect(update).toEqual({
+      const expected: TimelineById = {
         foo: {
           id: 'foo',
           dataProviders: [
@@ -366,7 +346,6 @@ describe('Timeline', () => {
               negated: false,
             },
           ],
-          data: [],
           range: '1 Day',
           show: true,
           sort: {
@@ -375,8 +354,10 @@ describe('Timeline', () => {
           },
           activePage: 0,
           itemsPerPage: 5,
+          itemsPerPageOptions: [5, 10, 20],
         },
-      });
+      };
+      expect(update).toEqual(expected);
     });
   });
 
@@ -396,7 +377,7 @@ describe('Timeline', () => {
         itemsPerPage: 10, // value we are updating from 5 to 10
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual({
+      const expected: TimelineById = {
         foo: {
           id: 'foo',
           dataProviders: [
@@ -410,7 +391,6 @@ describe('Timeline', () => {
               negated: false,
             },
           ],
-          data: [],
           range: '1 Day',
           show: true,
           sort: {
@@ -419,8 +399,55 @@ describe('Timeline', () => {
           },
           activePage: 0,
           itemsPerPage: 10,
+          itemsPerPageOptions: [5, 10, 20],
         },
+      };
+      expect(update).toEqual(expected);
+    });
+  });
+
+  describe('#updateTimelinePerPageOptions', () => {
+    test('should return a new reference and not the same reference', () => {
+      const update = updateTimelinePerPageOptions({
+        id: 'foo',
+        itemsPerPageOptions: [100, 200, 300], // value we are updating from [5, 10, 20]
+        timelineById: timelineByIdMock,
       });
+      expect(update).not.toBe(timelineByIdMock);
+    });
+
+    test('should update the items per page from 5 to 10', () => {
+      const update = updateTimelinePerPageOptions({
+        id: 'foo',
+        itemsPerPageOptions: [100, 200, 300], // value we are updating from [5, 10, 20]
+        timelineById: timelineByIdMock,
+      });
+      const expected: TimelineById = {
+        foo: {
+          id: 'foo',
+          dataProviders: [
+            {
+              id: '123',
+              name: 'data provider 1',
+              enabled: true,
+              componentQuery: null,
+              componentQueryProps: {},
+              componentResultParam: 'some query',
+              negated: false,
+            },
+          ],
+          range: '1 Day',
+          show: true,
+          sort: {
+            columnId: 'timestamp',
+            sortDirection: 'descending',
+          },
+          activePage: 0,
+          itemsPerPage: 5,
+          itemsPerPageOptions: [100, 200, 300], // value we updating
+        },
+      };
+      expect(update).toEqual(expected);
     });
   });
 
@@ -440,7 +467,7 @@ describe('Timeline', () => {
         activePage: 1, // value we are updating from 0 to 1
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual({
+      const expected: TimelineById = {
         foo: {
           id: 'foo',
           dataProviders: [
@@ -454,7 +481,6 @@ describe('Timeline', () => {
               negated: false,
             },
           ],
-          data: [],
           range: '1 Day',
           show: true,
           sort: {
@@ -463,8 +489,10 @@ describe('Timeline', () => {
           },
           activePage: 1,
           itemsPerPage: 5,
+          itemsPerPageOptions: [5, 10, 20],
         },
-      });
+      };
+      expect(update).toEqual(expected);
     });
   });
 
@@ -503,7 +531,7 @@ describe('Timeline', () => {
         providerId: '123',
         timelineById: multiDataProviderMock,
       });
-      expect(update).toEqual({
+      const expected: TimelineById = {
         foo: {
           id: 'foo',
           dataProviders: [
@@ -517,7 +545,6 @@ describe('Timeline', () => {
               negated: false,
             },
           ],
-          data: [],
           range: '1 Day',
           show: true,
           sort: {
@@ -526,8 +553,10 @@ describe('Timeline', () => {
           },
           activePage: 0,
           itemsPerPage: 5,
+          itemsPerPageOptions: [5, 10, 20],
         },
-      });
+      };
+      expect(update).toEqual(expected);
     });
   });
 });

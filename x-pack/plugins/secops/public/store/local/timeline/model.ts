@@ -16,16 +16,27 @@ export interface TimelineModel {
   sort: Sort;
   activePage: number;
   itemsPerPage: number;
+  itemsPerPageOptions: number[];
 }
 
 export const timelineDefaults: Readonly<
-  Pick<TimelineModel, 'dataProviders' | 'range' | 'show' | 'sort' | 'activePage' | 'itemsPerPage'>
+  Pick<
+    TimelineModel,
+    | 'dataProviders'
+    | 'range'
+    | 'show'
+    | 'sort'
+    | 'activePage'
+    | 'itemsPerPage'
+    | 'itemsPerPageOptions'
+  >
 > = {
   dataProviders: [],
   range: '1 Day',
   show: false,
   activePage: 0,
   itemsPerPage: 5,
+  itemsPerPageOptions: [5, 10, 20],
   sort: {
     columnId: 'timestamp',
     sortDirection: 'descending',

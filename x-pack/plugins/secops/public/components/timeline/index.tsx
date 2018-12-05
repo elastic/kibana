@@ -18,7 +18,6 @@ import { Range } from './body/column_headers/range_picker/ranges';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
-import { ECS } from './ecs';
 import {
   OnChangeItemsPerPage,
   OnChangePage,
@@ -30,17 +29,17 @@ import {
 import { Timeline } from './timeline';
 
 export interface OwnProps {
-  activePage: number;
   id: string;
   headers: ColumnHeader[];
-  itemsPerPage: number;
-  itemsPerPageOptions: number[];
-  pageCount: number;
   width: number;
 }
 
 interface StateReduxProps {
+  activePage?: number;
   dataProviders?: DataProvider[];
+  itemsPerPage?: number;
+  itemsPerPageOptions?: number[];
+  pageCount?: number;
   range?: Range;
   sort?: Sort;
 }
@@ -50,10 +49,6 @@ interface DispatchProps {
   addProvider?: ActionCreator<{
     id: string;
     provider: DataProvider;
-  }>;
-  updateData?: ActionCreator<{
-    id: string;
-    data: ECS[];
   }>;
   updateProviders?: ActionCreator<{
     id: string;
@@ -79,6 +74,10 @@ interface DispatchProps {
   updateItemsPerPage?: ActionCreator<{
     id: string;
     itemsPerPage: number;
+  }>;
+  updateItemsPerPageOptions?: ActionCreator<{
+    id: string;
+    itemsPerPageOptions: number[];
   }>;
   updatePageIndex?: ActionCreator<{
     id: string;
@@ -133,13 +132,13 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
     return (
       <Timeline
-        activePage={activePage}
+        activePage={activePage!}
         columnHeaders={headers}
         columnRenderers={columnRenderers}
         id={id}
         dataProviders={dataProviders!}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
+        itemsPerPage={itemsPerPage!}
+        itemsPerPageOptions={itemsPerPageOptions!}
         onChangeItemsPerPage={onChangeItemsPerPage}
         onChangePage={onChangePage}
         onColumnSorted={onColumnSorted}
@@ -147,7 +146,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
         onRangeSelected={onRangeSelected}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        pageCount={pageCount}
+        pageCount={pageCount!}
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort!}
@@ -169,12 +168,12 @@ export const StatefulTimeline = connect(
   {
     addProvider: timelineActions.addProvider,
     createTimeline: timelineActions.createTimeline,
-    updateData: timelineActions.updateData,
     updateProviders: timelineActions.updateProviders,
     updateRange: timelineActions.updateRange,
     updateSort: timelineActions.updateSort,
     updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
     updateItemsPerPage: timelineActions.updateItemsPerPage,
+    updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
     updatePageIndex: timelineActions.updatePageIndex,
     removeProvider: timelineActions.removeProvider,
   }

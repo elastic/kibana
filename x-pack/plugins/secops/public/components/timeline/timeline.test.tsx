@@ -421,7 +421,7 @@ describe('Timeline', () => {
     });
 
     describe('onChangePage', () => {
-      // TOOD: This is skipped because right now you cannot get to the rendered paged node
+      // TODO: This is skipped because right now you cannot get to the rendered paged node
       // I do not know why but when I open up it up using console.log(wrapper.debug())
       // I see this non-rendered code instead of it all expanded
       // <EuiPagination pageCount={0} activePage={0} onPageClick={[Function]}>

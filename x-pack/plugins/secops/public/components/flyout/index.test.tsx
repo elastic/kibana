@@ -25,7 +25,6 @@ describe('Flyout', () => {
             activePage: 0,
             itemsPerPage: 5,
             dataProviders: [],
-            data: [],
             range: '1 Day',
             show: false,
             sort: {

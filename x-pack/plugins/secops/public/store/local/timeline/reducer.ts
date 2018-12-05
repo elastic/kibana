@@ -10,15 +10,14 @@ import { filter } from 'lodash/fp';
 import { Range } from '../../../components/timeline/body/column_headers/range_picker/ranges';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
-import { ECS } from '../../../components/timeline/ecs';
 import {
   addProvider,
   createTimeline,
   removeProvider,
   showTimeline,
-  updateData,
   updateDataProviderEnabled,
   updateItemsPerPage,
+  updateItemsPerPageOptions,
   updatePageIndex,
   updateProviders,
   updateRange,
@@ -105,27 +104,6 @@ export const addTimelineProvider = ({
     [id]: {
       ...timeline,
       dataProviders,
-    },
-  };
-};
-
-interface UpdateTimelineDataParams {
-  id: string;
-  data: ECS[];
-  timelineById: TimelineById;
-}
-
-export const updateTimelineData = ({
-  id,
-  data,
-  timelineById,
-}: UpdateTimelineDataParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      data,
     },
   };
 };
@@ -259,6 +237,28 @@ export const updateTimelinePageIndex = ({
     },
   };
 };
+
+interface UpdateTimelinePerPageOptionsParams {
+  id: string;
+  itemsPerPageOptions: number[];
+  timelineById: TimelineById;
+}
+
+export const updateTimelinePerPageOptions = ({
+  id,
+  itemsPerPageOptions,
+  timelineById,
+}: UpdateTimelinePerPageOptionsParams) => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      itemsPerPageOptions,
+    },
+  };
+};
+
 interface RemoveTimelineProviderParams {
   id: string;
   providerId: string;
@@ -298,10 +298,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: removeTimelineProvider({ id, providerId, timelineById: state.timelineById }),
   }))
-  .case(updateData, (state, { id, data }) => ({
-    ...state,
-    timelineById: updateTimelineData({ id, data, timelineById: state.timelineById }),
-  }))
   .case(updateProviders, (state, { id, providers }) => ({
     ...state,
     timelineById: updateTimelineProviders({ id, providers, timelineById: state.timelineById }),
@@ -336,6 +332,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: updateTimelinePageIndex({
       id,
       activePage,
+      timelineById: state.timelineById,
+    }),
+  }))
+  .case(updateItemsPerPageOptions, (state, { id, itemsPerPageOptions }) => ({
+    ...state,
+    timelineById: updateTimelinePerPageOptions({
+      id,
+      itemsPerPageOptions,
       timelineById: state.timelineById,
     }),
   }))
