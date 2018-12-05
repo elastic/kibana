@@ -36,5 +36,5 @@ require('./src/directives/sense_welcome');
 
 uiRoutes.when('/dev_tools/console', {
   controller: 'SenseController',
-  template
+  template,
 });
