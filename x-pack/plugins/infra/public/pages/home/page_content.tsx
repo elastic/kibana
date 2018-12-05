@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { oc } from 'ts-optchain';
 
 import { PageContent } from '../../components/page';
 import { Waffle } from '../../components/waffle';
@@ -19,7 +20,7 @@ import { WithSource } from '../../containers/with_source';
 export const HomePageContent: React.SFC = () => (
   <PageContent>
     <WithSource>
-      {({ configuredFields, derivedIndexPattern }) => (
+      {({ configuration, derivedIndexPattern }) => (
         <WithOptions>
           {({ wafflemap, sourceId }) => (
             <WithWaffleFilter indexPattern={derivedIndexPattern}>
@@ -41,7 +42,12 @@ export const HomePageContent: React.SFC = () => (
                               map={nodes}
                               loading={nodes.length > 0 && isAutoReloading ? false : loading}
                               nodeType={nodeType}
-                              options={{ ...wafflemap, metric, fields: configuredFields, groupBy }}
+                              options={{
+                                ...wafflemap,
+                                metric,
+                                fields: oc(configuration).fields(),
+                                groupBy,
+                              }}
                               reload={refetch}
                               onDrilldown={applyFilterQuery}
                               timeRange={currentTimeRange}

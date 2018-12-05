@@ -170,4 +170,16 @@ declare module '@elastic/eui' {
   };
 
   export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
+
+  type EuiDescribedFormGroupTitleSize = 'xxxs' | 'xxs' | 'xs' | 's' | 'm' | 'l';
+  type EuiDescribedFormGroupProps = CommonProps & {
+    children: React.ReactNode;
+    description?: React.ReactNode;
+    fullWidth?: boolean;
+    gutterSize?: FlexGridGutterSize;
+    idAria?: string;
+    title: React.ReactNode;
+    titleSize?: EuiDescribedFormGroupTitleSize;
+  };
+  export const EuiDescribedFormGroup: React.SFC<EuiDescribedFormGroupProps>;
 }
