@@ -76,6 +76,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         } catch (e) {
           xpackInfo = false;
         }
+
         let xpackInfoUnpacked: FrameworkInfo;
         try {
           xpackInfoUnpacked = {
@@ -146,14 +147,18 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
                </kbn-management-app>`,
         // tslint:disable-next-line: max-classes-per-file
         controller: ($scope: any, $route: any) => {
-          $scope.$$postDigest(() => {
-            const elem = document.getElementById(`${DOM_ELEMENT_NAME}ReactRoot`);
-            ReactDOM.render(component, elem);
-            adapter.manageAngularLifecycle($scope, $route, elem);
-          });
-          $scope.$onInit = () => {
-            $scope.topNavMenu = [];
-          };
+          try {
+            $scope.$$postDigest(() => {
+              const elem = document.getElementById(`${DOM_ELEMENT_NAME}ReactRoot`);
+              ReactDOM.render(component, elem);
+              adapter.manageAngularLifecycle($scope, $route, elem);
+            });
+            $scope.$onInit = () => {
+              $scope.topNavMenu = [];
+            };
+          } catch (e) {
+            throw new Error(`Error rendering Beats CM to the dom, ${e.message}`);
+          }
         },
       }
     );
