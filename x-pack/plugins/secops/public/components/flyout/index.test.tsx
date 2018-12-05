@@ -27,6 +27,8 @@ describe('Flyout', () => {
             dataProviders: [],
             range: '1 Day',
             show: false,
+            pageCount: 0,
+            itemsPerPageOptions: [5, 10, 20],
             sort: {
               columnId: 'timestamp',
               sortDirection: 'descending',

@@ -11,15 +11,9 @@ import styled from 'styled-components';
 import { EventItem } from '../../../common/graphql/types';
 import { LoadingPanel } from '../loading';
 
-export interface HoryzontalBarChartData {
-  x: number;
-  y: string;
-}
-
 interface BasicTableProps {
   sortField: string;
-  // tslint:disable-next-line:no-any
-  pageOfItems: any[];
+  pageOfItems: number[];
   columns: Columns[];
   title: string;
   loading: boolean;
