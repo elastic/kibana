@@ -31,6 +31,7 @@ import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 import { ESSourceDetails } from './es_geohashgrid_sourcedetails';
 import { ZOOM_TO_PRECISION } from '../../utils/zoom_to_precision';
+import { VectorStyle } from '../styles/vector_style';
 
 const aggSchemas = new Schemas([
   {
@@ -258,10 +259,23 @@ export class ESGeohashGridSource extends VectorSource {
   }
 
   createDefaultLayer(options) {
-    return new GeohashGridLayer({
-      layerDescriptor: this._createDefaultLayerDescriptor(options),
-      source: this
-    });
+    if (this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_HEATMAP) {
+      return new GeohashGridLayer({
+        layerDescriptor: this._createDefaultLayerDescriptor(options),
+        source: this
+      });
+    } else if (
+      this._descriptor.requestType === REQUEST_TYPE.AS_CENTROID_POINT ||
+      this._descriptor.requestType === REQUEST_TYPE.AS_GEOHASHGRID_POLYGON
+    ) {
+      const layerDescriptor = this._createDefaultLayerDescriptor(options);
+      const style = new VectorStyle(layerDescriptor.style);
+      return new VectorLayer({
+        layerDescriptor: layerDescriptor,
+        source: this,
+        style: style
+      });
+    }
   }
 
 
