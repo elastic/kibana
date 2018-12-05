@@ -13,7 +13,7 @@ import { LoadingPanel } from '../loading';
 
 interface BasicTableProps {
   sortField: string;
-  pageOfItems: number[];
+  pageOfItems: EventItem[];
   columns: Columns[];
   title: string;
   loading: boolean;
