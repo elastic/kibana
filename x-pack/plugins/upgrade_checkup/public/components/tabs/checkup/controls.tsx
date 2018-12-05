@@ -6,12 +6,14 @@
 import React, { StatelessComponent } from 'react';
 
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { GroupByOption, LevelFilterOption, LoadingState } from '../../types';
 import { LevelFilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
 
-interface CheckupControlsProps {
+interface CheckupControlsProps extends ReactIntl.InjectedIntlProps {
   allDeprecations?: DeprecationInfo[];
   loadingState: LoadingState;
   loadData: () => void;
@@ -24,7 +26,7 @@ interface CheckupControlsProps {
   onGroupByChange: (groupBy: GroupByOption) => void;
 }
 
-export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
+export const CheckupControlsUI: StatelessComponent<CheckupControlsProps> = ({
   allDeprecations,
   loadingState,
   loadData,
@@ -35,11 +37,15 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
   availableGroupByOptions,
   currentGroupBy,
   onGroupByChange,
+  intl,
 }) => (
   <EuiFlexGroup alignItems="center" wrap={true} responsive={false}>
     <EuiFlexItem grow={true}>
       <EuiFieldSearch
-        placeholder="Filter list"
+        placeholder={intl.formatMessage({
+          id: 'xpack.upgradeCheckup.checkupTab.controls.searchBarPlaceholder',
+          defaultMessage: 'Filter list',
+        })}
         value={search}
         onChange={e => onSearchChange(e.target.value)}
       />
@@ -56,8 +62,13 @@ export const CheckupControls: StatelessComponent<CheckupControlsProps> = ({
         iconType="refresh"
         isLoading={loadingState === LoadingState.Loading}
       >
-        Refresh
+        <FormattedMessage
+          id="xpack.upgradeCheckup.checkupTab.controls.refreshButtonLabel"
+          defaultMessage="Refresh"
+        />
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+export const CheckupControls = injectI18n(CheckupControlsUI);

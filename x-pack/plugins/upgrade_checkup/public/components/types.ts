@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
-import { UpgradeCheckupStatus } from '../../server/lib/es_migration_apis';
+import { EnrichedDeprecationInfo, UpgradeCheckupStatus } from '../../server/lib/es_migration_apis';
 
 export interface UpgradeCheckupTabProps {
   checkupData?: UpgradeCheckupStatus;
+  deprecations?: EnrichedDeprecationInfo[];
   refreshCheckupData: () => Promise<void>;
   loadingState: LoadingState;
   setSelectedTabIndex: (tabIndex: number) => void;

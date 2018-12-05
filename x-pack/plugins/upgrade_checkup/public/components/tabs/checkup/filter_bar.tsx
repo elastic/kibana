@@ -8,20 +8,20 @@ import _ from 'lodash';
 import React from 'react';
 
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
+
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { LevelFilterOption } from '../../types';
 
-interface LevelFilterBarProps {
+interface LevelFilterBarProps extends ReactIntl.InjectedIntlProps {
   allDeprecations?: DeprecationInfo[];
   currentFilter: Set<LevelFilterOption>;
   onFilterChange(level: LevelFilterOption): void;
 }
 
-const allFilterOptions = Object.keys(LevelFilterOption) as LevelFilterOption[];
-
-export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
+export class LevelFilterBarUI extends React.Component<LevelFilterBarProps> {
   public render() {
-    const { allDeprecations = [], currentFilter } = this.props;
+    const { allDeprecations = [], currentFilter, intl } = this.props;
 
     const levelGroups = _.groupBy(allDeprecations, 'level');
     const levelCounts = Object.keys(levelGroups).reduce(
@@ -35,16 +35,31 @@ export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
     return (
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          {allFilterOptions.map(option => (
-            <EuiFilterButton
-              key={option}
-              onClick={this.filterClicked.bind(this, option)}
-              hasActiveFilters={currentFilter.has(option)}
-              numFilters={levelCounts[option] || undefined}
-            >
-              {option}
-            </EuiFilterButton>
-          ))}
+          {/* Can't loop over LevelFilterOptions because localization strings must be static. */}
+
+          <EuiFilterButton
+            onClick={this.filterClicked.bind(this, LevelFilterOption.warning)}
+            hasActiveFilters={currentFilter.has(LevelFilterOption.warning)}
+            numFilters={levelCounts.warning || undefined}
+          >
+            {/* Must use intl.formatMessage b/c this component changes size based on its
+                contents and is too large with FormatMessage component */}
+            {intl.formatMessage({
+              id: 'xpack.upgradeCheckup.checkupTab.controls.filterBar.warningButtonLabel',
+              defaultMessage: 'warning',
+            })}
+          </EuiFilterButton>
+
+          <EuiFilterButton
+            onClick={this.filterClicked.bind(this, LevelFilterOption.critical)}
+            hasActiveFilters={currentFilter.has(LevelFilterOption.critical)}
+            numFilters={levelCounts.critical || undefined}
+          >
+            {intl.formatMessage({
+              id: 'xpack.upgradeCheckup.checkupTab.controls.filterBar.criticalButtonLabel',
+              defaultMessage: 'critical',
+            })}
+          </EuiFilterButton>
         </EuiFilterGroup>
       </EuiFlexItem>
     );
@@ -54,3 +69,5 @@ export class LevelFilterBar extends React.Component<LevelFilterBarProps> {
     this.props.onFilterChange(level);
   }
 }
+
+export const LevelFilterBar = injectI18n(LevelFilterBarUI);

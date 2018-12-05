@@ -8,9 +8,28 @@ import { countBy } from 'lodash';
 import React, { StatelessComponent } from 'react';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { DeprecationInfo, MIGRATION_DEPRECATION_LEVEL } from 'src/core_plugins/elasticsearch';
-import { ACTION_MAP, COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from './constants';
+import { COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from '../constants';
+
+const LocalizedLevels: { [level: string]: string } = {
+  warning: i18n.translate('xpack.upgradeCheckup.checkupTab.deprecations.warningLabel', {
+    defaultMessage: 'warning',
+  }),
+  critical: i18n.translate('xpack.upgradeCheckup.checkupTab.deprecations.criticalLabel', {
+    defaultMessage: 'critical',
+  }),
+};
+
+export const LocalizedActions: { [level: string]: string } = {
+  warning: i18n.translate('xpack.upgradeCheckup.checkupTab.deprecations.warningActionTooltip', {
+    defaultMessage: 'Resolving this issue is advised but not required to upgrade.',
+  }),
+  critical: i18n.translate('xpack.upgradeCheckup.checkupTab.deprecations.criticalActionTooltip', {
+    defaultMessage: 'This issue must be resolved to upgrade.',
+  }),
+};
 
 interface DeprecationHealthProps {
   deprecations: DeprecationInfo[];
@@ -22,7 +41,7 @@ const SingleHealth: StatelessComponent<{ level: MIGRATION_DEPRECATION_LEVEL; lab
   label,
 }) => (
   <React.Fragment>
-    <EuiToolTip content={ACTION_MAP[level]}>
+    <EuiToolTip content={LocalizedActions[level]}>
       <EuiBadge color={COLOR_MAP[level]}>{label}</EuiBadge>
     </EuiToolTip>
     &emsp;
@@ -48,7 +67,7 @@ export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({
     const highest = Math.max(...levels);
     const highestLevel = REVERSE_LEVEL_MAP[highest];
 
-    return <SingleHealth level={highestLevel} label={highestLevel} />;
+    return <SingleHealth level={highestLevel} label={LocalizedLevels[highestLevel]} />;
   }
 
   const countByLevel = countBy(levels);
@@ -61,8 +80,9 @@ export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({
         .map(level => [level, REVERSE_LEVEL_MAP[level]])
         .map(([numLevel, stringLevel]) => (
           <SingleHealth
+            key={stringLevel}
             level={stringLevel as MIGRATION_DEPRECATION_LEVEL}
-            label={`${countByLevel[numLevel]} ${stringLevel}`}
+            label={`${countByLevel[numLevel]} ${LocalizedLevels[stringLevel]}`}
           />
         ))}
     </React.Fragment>

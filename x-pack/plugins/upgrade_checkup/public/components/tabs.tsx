@@ -9,6 +9,7 @@ import { findIndex } from 'lodash';
 import React from 'react';
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
 import chrome from 'ui/chrome';
 
@@ -23,8 +24,8 @@ interface TabsState {
   selectedTabIndex: number;
 }
 
-export class UpgradeCheckupTabs extends React.Component<{}, TabsState> {
-  constructor(props: {}) {
+export class UpgradeCheckupTabsUI extends React.Component<ReactIntl.InjectedIntlProps, TabsState> {
+  constructor(props: ReactIntl.InjectedIntlProps) {
     super(props);
 
     this.state = {
@@ -78,9 +79,10 @@ export class UpgradeCheckupTabs extends React.Component<{}, TabsState> {
   };
 
   private get tabs() {
+    const { intl } = this.props;
+    const { loadingState, checkupData } = this.state;
     const commonProps: UpgradeCheckupTabProps = {
-      loadingState: this.state.loadingState,
-      checkupData: this.state.checkupData,
+      loadingState,
       refreshCheckupData: this.loadData,
       setSelectedTabIndex: this.setSelectedTabIndex,
     };
@@ -88,19 +90,50 @@ export class UpgradeCheckupTabs extends React.Component<{}, TabsState> {
     return [
       {
         id: 'overview',
-        name: 'Overview',
-        content: <OverviewTab {...commonProps} />,
+        name: intl.formatMessage({
+          id: 'xpack.upgradeCheckup.tabs.overview.title',
+          defaultMessage: 'Overview',
+        }),
+        content: <OverviewTab checkupData={checkupData} {...commonProps} />,
       },
       {
         id: 'cluster',
-        name: 'Cluster',
-        content: <CheckupTab key="cluster" checkupType="cluster" {...commonProps} />,
+        name: intl.formatMessage({
+          id: 'xpack.upgradeCheckup.tabs.cluster.title',
+          defaultMessage: 'Cluster',
+        }),
+        content: (
+          <CheckupTab
+            key="cluster"
+            deprecations={checkupData ? checkupData.cluster : undefined}
+            checkupLabel={intl.formatMessage({
+              id: 'xpack.upgradeCheckup.nouns.cluster',
+              defaultMessage: 'cluster',
+            })}
+            {...commonProps}
+          />
+        ),
       },
       {
         id: 'indices',
-        name: 'Indices',
-        content: <CheckupTab key="indices" checkupType="indices" {...commonProps} />,
+        name: intl.formatMessage({
+          id: 'xpack.upgradeCheckup.tabs.indices.title',
+          defaultMessage: 'Indices',
+        }),
+        content: (
+          <CheckupTab
+            key="indices"
+            deprecations={checkupData ? checkupData.indices : undefined}
+            checkupLabel={intl.formatMessage({
+              id: 'xpack.upgradeCheckup.nouns.index',
+              defaultMessage: 'index',
+            })}
+            {...commonProps}
+          />
+        ),
       },
     ];
   }
 }
+
+export const UpgradeCheckupTabs = injectI18n(UpgradeCheckupTabsUI);

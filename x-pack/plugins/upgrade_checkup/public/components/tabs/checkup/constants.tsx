@@ -23,9 +23,3 @@ export const COLOR_MAP: { [level: string]: IconColor } = {
   warning: 'warning',
   critical: 'danger',
 };
-
-export const ACTION_MAP: { [level: string]: string } = {
-  info: 'No action required, but it is advised to read about the change.',
-  warning: 'Resolving this issue is advised but not required to upgrade.',
-  critical: 'This issue must be resolved to upgrade.',
-};

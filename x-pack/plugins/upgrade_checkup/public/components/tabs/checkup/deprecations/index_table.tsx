@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { EuiBasicTable, EuiButton } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
@@ -19,7 +20,7 @@ export interface IndexDeprecationDetails {
   }>;
 }
 
-interface IndexDeprecationTableProps {
+interface IndexDeprecationTableProps extends ReactIntl.InjectedIntlProps {
   indices: IndexDeprecationDetails[];
 }
 
@@ -30,7 +31,7 @@ interface IndexDeprecationTableState {
   pageSize: number;
 }
 
-export class IndexDeprecationTable extends React.Component<
+export class IndexDeprecationTableUI extends React.Component<
   IndexDeprecationTableProps,
   IndexDeprecationTableState
 > {
@@ -46,11 +47,25 @@ export class IndexDeprecationTable extends React.Component<
   }
 
   public render() {
+    const { intl } = this.props;
     const { pageIndex, pageSize, sortField, sortDirection } = this.state;
 
     const columns = [
-      { field: 'index', name: 'Index', sortable: true },
-      { field: 'details', name: 'Details' },
+      {
+        field: 'index',
+        name: intl.formatMessage({
+          id: 'xpack.upgradeCheckup.checkupTab.deprecations.indexTable.indexColumnLabel',
+          defaultMessage: 'Index',
+        }),
+        sortable: true,
+      },
+      {
+        field: 'details',
+        name: intl.formatMessage({
+          id: 'xpack.upgradeCheckup.checkupTab.deprecations.indexTable.detailsColumnLabel',
+          defaultMessage: 'Details',
+        }),
+      },
     ];
 
     if (this.actionsColumn) {
@@ -140,3 +155,5 @@ export class IndexDeprecationTable extends React.Component<
     };
   }
 }
+
+export const IndexDeprecationTable = injectI18n(IndexDeprecationTableUI);

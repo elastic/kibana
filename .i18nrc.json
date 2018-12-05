@@ -28,7 +28,8 @@
     "xpack.rollupJobs": "x-pack/plugins/rollup",
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.security": "x-pack/plugins/security",
-    "xpack.watcher": "x-pack/plugins/watcher"
+    "xpack.watcher": "x-pack/plugins/watcher",
+    "xpack.upgradeCheckup": "x-pack/plugins/upgrade_checkup"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",

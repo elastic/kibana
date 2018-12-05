@@ -27,10 +27,8 @@ import {
 import { CheckupControls } from './controls';
 import { GroupedDeprecations } from './deprecations';
 
-type CHECKUP_TYPE = 'cluster' | 'nodes' | 'indices';
-
 interface CheckupTabProps extends UpgradeCheckupTabProps {
-  checkupType: CHECKUP_TYPE;
+  checkupLabel: string;
 }
 
 interface CheckupTabState {
@@ -56,7 +54,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
   }
 
   public render() {
-    const { checkupType, loadingState, refreshCheckupData } = this.props;
+    const { checkupLabel, deprecations, loadingState, refreshCheckupData } = this.props;
     const { currentFilter, search, currentGroupBy } = this.state;
 
     return (
@@ -65,7 +63,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
         <EuiText grow={false}>
           <p>
             This tool runs a series of checks against your Elasticsearch{' '}
-            <strong>{checkupType}</strong> to determine whether you can upgrade directly to
+            <strong>{checkupLabel}</strong> to determine whether you can upgrade directly to
             Elasticsearch 7.0, or whether you need to make changes to your data before doing so.
           </p>
         </EuiText>
@@ -76,10 +74,10 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
               <EuiCallOut title="Sorry, there was an error" color="danger" iconType="cross">
                 <p>There was a network error retrieving the checkup results.</p>
               </EuiCallOut>
-            ) : this.deprecations && this.deprecations.length > 0 ? (
+            ) : deprecations && deprecations.length > 0 ? (
               <Fragment>
                 <CheckupControls
-                  allDeprecations={this.deprecations}
+                  allDeprecations={deprecations}
                   loadingState={loadingState}
                   loadData={refreshCheckupData}
                   currentFilter={currentFilter}
@@ -100,7 +98,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
                 body={
                   <Fragment>
                     <p data-test-subj="upgradeCheckupIssueSummary">
-                      You have no <strong>{checkupType}</strong> issues.
+                      You have no <strong>{checkupLabel}</strong> issues.
                     </p>
                     <p>Check other tabs for issues or return to the overview for next steps.</p>
                   </Fragment>
@@ -111,11 +109,6 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
         </EuiPageContent>
       </Fragment>
     );
-  }
-
-  private get deprecations() {
-    const { checkupData, checkupType } = this.props;
-    return checkupData ? checkupData[checkupType] : null;
   }
 
   private changeFilter = (filter: LevelFilterOption) => {
@@ -140,7 +133,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
   };
 
   private availableGroupByOptions() {
-    const deprecations = this.deprecations;
+    const { deprecations } = this.props;
 
     if (!deprecations) {
       return [];
@@ -150,7 +143,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
   }
 
   private renderCheckupData() {
-    const deprecations = this.deprecations!;
+    const { deprecations } = this.props;
     const { currentFilter, currentGroupBy, search } = this.state;
 
     return (

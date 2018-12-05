@@ -18,13 +18,17 @@ import {
   EuiStat,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { LoadingState, UpgradeCheckupTabProps } from '../../types';
 
-export const Summary: React.StatelessComponent<UpgradeCheckupTabProps> = ({
+type SummaryProps = UpgradeCheckupTabProps & ReactIntl.InjectedIntlProps;
+
+export const SummaryUI: React.StatelessComponent<SummaryProps> = ({
   loadingState,
   checkupData,
   setSelectedTabIndex,
+  intl,
 }) => {
   if (loadingState !== LoadingState.Success) {
     return (
@@ -51,15 +55,43 @@ export const Summary: React.StatelessComponent<UpgradeCheckupTabProps> = ({
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem style={{ maxWidth: 220 }}>
           <EuiPanel>
-            <EuiStat title={countByType.cluster} description="Cluster issues">
-              <EuiLink onClick={() => setSelectedTabIndex(1)}>View all</EuiLink>
+            <EuiStat
+              title={countByType.cluster}
+              description={intl.formatMessage(
+                {
+                  id: 'xpack.upgradeCheckup.overview.summary.clusterIssuesLabel',
+                  defaultMessage: 'Cluster {issueCount, plural, one {issue} other {issues}}',
+                },
+                { issueCount: countByType.cluster }
+              )}
+            >
+              <EuiLink onClick={() => setSelectedTabIndex(1)}>
+                <FormattedMessage
+                  id="xpack.upgradeCheckup.overview.summary.viewAllButtonLabel"
+                  defaultMessage="View all"
+                />
+              </EuiLink>
             </EuiStat>
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem style={{ maxWidth: 220 }}>
           <EuiPanel>
-            <EuiStat title={countByType.indices} description="Index issues">
-              <EuiLink onClick={() => setSelectedTabIndex(2)}>View all</EuiLink>
+            <EuiStat
+              title={countByType.indices}
+              description={intl.formatMessage(
+                {
+                  id: 'xpack.upgradeCheckup.overview.summary.indexIssuesLabel',
+                  defaultMessage: 'Index {issueCount, plural, one {issue} other {issues}}',
+                },
+                { issueCount: countByType.indices }
+              )}
+            >
+              <EuiLink onClick={() => setSelectedTabIndex(2)}>
+                <FormattedMessage
+                  id="xpack.upgradeCheckup.overview.summary.viewAllButtonLabel"
+                  defaultMessage="View all"
+                />
+              </EuiLink>
             </EuiStat>
           </EuiPanel>
         </EuiFlexItem>
@@ -82,3 +114,5 @@ export const Summary: React.StatelessComponent<UpgradeCheckupTabProps> = ({
     );
   }
 };
+
+export const Summary = injectI18n(SummaryUI);

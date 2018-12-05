@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
@@ -58,7 +59,10 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
         {docUrl && (
           <div>
             <EuiLink href={docUrl} target="_blank">
-              Documentation
+              <FormattedMessage
+                id="xpack.upgradeCheckup.checkupTab.deprecations.documentationButtonLabel"
+                defaultMessage="Documentation"
+              />
             </EuiLink>
             <EuiSpacer size="s" />
           </div>

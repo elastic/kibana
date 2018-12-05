@@ -7,24 +7,19 @@
 import React from 'react';
 
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
+
 import { GroupByOption } from '../../types';
 
-// UI labels for the enum type
-const GroupByOptionLabel: { [I in GroupByOption]: string } = {
-  [GroupByOption.message]: 'by issue',
-  [GroupByOption.index]: 'by index',
-  [GroupByOption.node]: 'by node',
-};
-
-interface GroupByBarProps {
+interface GroupByBarProps extends ReactIntl.InjectedIntlProps {
   availableGroupByOptions: GroupByOption[];
   currentGroupBy: GroupByOption;
   onGroupByChange: (groupBy: GroupByOption) => void;
 }
 
-export class GroupByBar extends React.Component<GroupByBarProps> {
+export class GroupByBarUI extends React.Component<GroupByBarProps> {
   public render() {
-    const { availableGroupByOptions, currentGroupBy } = this.props;
+    const { availableGroupByOptions, currentGroupBy, intl } = this.props;
 
     if (availableGroupByOptions.length <= 1) {
       return null;
@@ -33,15 +28,29 @@ export class GroupByBar extends React.Component<GroupByBarProps> {
     return (
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          {availableGroupByOptions.map(option => (
-            <EuiFilterButton
-              key={option}
-              onClick={this.filterClicked.bind(this, option)}
-              hasActiveFilters={currentGroupBy === option}
-            >
-              {GroupByOptionLabel[option]}
-            </EuiFilterButton>
-          ))}
+          {/* Can't loop over GroupByOption because localization message ids must be static. */}
+
+          <EuiFilterButton
+            onClick={this.filterClicked.bind(this, GroupByOption.message)}
+            hasActiveFilters={currentGroupBy === GroupByOption.message}
+          >
+            {/* Must use intl.formatMessage b/c this component changes size based on its
+                contents and is too large with FormatMessage component */}
+            {intl.formatMessage({
+              id: 'xpack.upgradeCheckup.checkupTab.controls.groupByBar.byIssueLabel',
+              defaultMessage: 'by issue',
+            })}
+          </EuiFilterButton>
+
+          <EuiFilterButton
+            onClick={this.filterClicked.bind(this, GroupByOption.index)}
+            hasActiveFilters={currentGroupBy === GroupByOption.index}
+          >
+            {intl.formatMessage({
+              id: 'xpack.upgradeCheckup.checkupTab.controls.groupByBar.byIndexLabel',
+              defaultMessage: 'by index',
+            })}
+          </EuiFilterButton>
         </EuiFilterGroup>
       </EuiFlexItem>
     );
@@ -51,3 +60,5 @@ export class GroupByBar extends React.Component<GroupByBarProps> {
     this.props.onGroupByChange(groupBy);
   }
 }
+
+export const GroupByBar = injectI18n(GroupByBarUI);
