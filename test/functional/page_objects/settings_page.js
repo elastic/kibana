@@ -38,21 +38,13 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await find.clickByDisplayedLinkText(text);
     }
     async clickKibanaSettings() {
-      // TODO fix me
-      //await find.clickByDisplayedLinkText('Advanced Settings');
-      // await testSubjects.click
-      //find.clickByCssSelector();
       await testSubjects.click('settings');
-      console.log('find.clickByDisplayedLinkText');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      console.log('PageObjects.header.waitUntilLoadingHasFinished');
-      // Verify navigation is successful.
       await testSubjects.existOrFail('managementSettingsTitle');
-      console.log('testSubjects.existOrFail');
     }
 
     async clickKibanaSavedObjects() {
-      await find.clickByDisplayedLinkText('Saved Objects');
+      await testSubjects.click('objects');
     }
 
     async clickKibanaIndices() {
