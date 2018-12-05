@@ -11,6 +11,13 @@ import { indexLifecycleManagementStore } from '../../public/store';
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { PolicyTable } from '../../public/sections/policy_table';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
+// axios has a $http like interface so using it to simulate $http
+import axios from 'axios';
+import { setHttpClient } from '../../public/services/api';
+setHttpClient(axios.create());
+import sinon from 'sinon';
+let server = null;
+
 let store = null;
 const policies = [];
 for (let i = 0; i < 105; i++) {
@@ -21,6 +28,7 @@ for (let i = 0; i < 105; i++) {
     name: `testy${i}`
   });
 }
+jest.mock('');
 let component = null;
 
 const snapshot = rendered => {
@@ -49,7 +57,7 @@ const testSort = (headerName) => {
   rendered.update();
   snapshot(namesText(rendered));
 };
-const testActionsButton = (buttonIndex) => {
+const openContextMenu = (buttonIndex) => {
   const rendered = mountWithIntl(component);
   const actionsButton = findTestSubject(
     rendered,
@@ -57,9 +65,9 @@ const testActionsButton = (buttonIndex) => {
   );
   actionsButton.at(buttonIndex).simulate('click');
   rendered.update();
-  const contextMenu = rendered.find('.euiContextMenu');
-  mountedSnapshot(contextMenu);
+  return rendered;
 };
+
 describe('policy table', () => {
   beforeEach(() => {
     store = indexLifecycleManagementStore();
@@ -69,6 +77,12 @@ describe('policy table', () => {
       </Provider>
     );
     store.dispatch(fetchedPolicies(policies));
+    server = sinon.fakeServer.create();
+    server.respondWith('/api/index_lifecycle_management/policies', [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(policies)
+    ]);
   });
   test('should show spinner when policies are loading', () => {
     store = indexLifecycleManagementStore();
@@ -125,9 +139,34 @@ describe('policy table', () => {
     testSort('coveredIndices');
   });
   test('should have proper actions in context menu when there are covered indices', () => {
-    testActionsButton(0);
+    const rendered = openContextMenu(0);
+    const buttons = rendered.find('button.euiContextMenuItem');
+    expect(buttons.length).toBe(3);
+    expect(buttons.at(0).text()).toBe('View indices linked to policy');
+    expect(buttons.at(1).text()).toBe('Add policy to index template');
+    expect(buttons.at(2).text()).toBe('Delete policy');
+    expect(buttons.at(2).getDOMNode().disabled).toBeTruthy();
   });
   test('should have proper actions in context menu when there are not covered indices', () => {
-    testActionsButton(1);
+    const rendered = openContextMenu(1);
+    const buttons = rendered.find('button.euiContextMenuItem');
+    expect(buttons.length).toBe(2);
+    expect(buttons.at(0).text()).toBe('Add policy to index template');
+    expect(buttons.at(1).text()).toBe('Delete policy');
+    expect(buttons.at(1).getDOMNode().disabled).toBeFalsy();
+  });
+  test('confirmation modal should show when delete button is pressed', () => {
+    const rendered = openContextMenu(1);
+    const deleteButton = rendered.find('button.euiContextMenuItem').at(1);
+    deleteButton.simulate('click');
+    rendered.update();
+    expect(rendered.exists('.euiModal--confirmation'));
+  });
+  test('confirmation modal should show when add policy to index template button is pressed', () => {
+    const rendered = openContextMenu(1);
+    const deleteButton = rendered.find('button.euiContextMenuItem').at(0);
+    deleteButton.simulate('click');
+    rendered.update();
+    expect(rendered.exists('.euiModal--confirmation'));
   });
 });
