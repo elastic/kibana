@@ -10,17 +10,26 @@ import routes from 'ui/routes';
 import template from './account.html';
 import '../management/change_password_form/change_password_form';
 import '../../services/shield_user';
+import { i18n } from '@kbn/i18n';
 
 routes.when('/account', {
   template,
+  k7Breadcrumbs: () => [
+    {
+      text: i18n.translate('xpack.security.account.breadcrumb', {
+        defaultMessage: 'Account',
+      })
+    }
+  ],
   resolve: {
     user(ShieldUser) {
       return ShieldUser.getCurrent().$promise;
     }
   },
   controllerAs: 'accountController',
-  controller($scope, $route, Notifier) {
+  controller($scope, $route, Notifier, config) {
     $scope.user = $route.current.locals.user;
+    config.bindToScope($scope, 'k7design');
 
     const notifier = new Notifier();
 

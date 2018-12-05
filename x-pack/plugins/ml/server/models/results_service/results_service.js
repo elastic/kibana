@@ -120,6 +120,7 @@ export function resultsServiceProvider(callWithRequest) {
 
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: maxRecords,
       body: {
         query: {
@@ -201,6 +202,7 @@ export function resultsServiceProvider(callWithRequest) {
   async function getCategoryExamples(jobId, categoryIds, maxExamples) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: DEFAULT_QUERY_SIZE,    // Matches size of records in anomaly summary table.
       body: {
         query: {
@@ -235,6 +237,7 @@ export function resultsServiceProvider(callWithRequest) {
   async function getCategoryDefinition(jobId, categoryId) {
     const resp = await callWithRequest('search', {
       index: ML_RESULTS_INDEX_PATTERN,
+      rest_total_hits_as_int: true,
       size: 1,
       body: {
         query: {

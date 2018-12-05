@@ -366,6 +366,7 @@ exports[`NewVisModal should render as expected 1`] = `
                             >
                               <EuiFlexGroup
                                 alignItems="stretch"
+                                className="visNewVisDialog__list"
                                 component="div"
                                 direction="column"
                                 gutterSize="none"
@@ -374,7 +375,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 wrap={false}
                               >
                                 <div
-                                  className="euiFlexGroup euiFlexGroup--directionColumn"
+                                  className="euiFlexGroup euiFlexGroup--directionColumn visNewVisDialog__list"
                                 >
                                   <EuiFlexItem
                                     className="visNewVisDialog__searchWrapper"
