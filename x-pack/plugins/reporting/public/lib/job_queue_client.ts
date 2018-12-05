@@ -21,6 +21,7 @@ export interface JobContent {
 }
 
 export interface JobInfo {
+  browser_type: string;
   created_at: string;
   priority: number;
   jobtype: string;

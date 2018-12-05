@@ -19,6 +19,7 @@
 
 import { Brand } from '../../../core/public/chrome';
 import { WithBreadcrumbsApi } from './api/breadcrumbs';
+export { Breadcrumb } from './api/breadcrumbs';
 
 interface IInjector {
   get<T>(injectable: string): T;
