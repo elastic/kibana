@@ -111,3 +111,25 @@
 
 # Specifies locale to be used for all localizable strings, dates and number formats.
 #i18n.locale: "en"
+
+# Set to false to disabled the APM plugin Kibana. Defaults to true.
+#xpack.apm.enabled: true
+
+# Set to false to hide the APM plugin Kibana from the menu. Defaults to true.
+#xpack.apm.ui.enabled: true
+
+# Index pattern is used for integrations with Machine Learning and Kuery Bar.
+# It must match all apm indices. Defaults to apm-*.
+#apm_oss.indexPattern: "apm-*"
+
+# Matcher for indices containing error documents. Defaults to apm-*.
+#apm_oss.errorIndices: "apm-*"
+#
+# Matcher for indices containing onboarding documents. Defaults to apm-*.
+#apm_oss.onboardingIndices: "apm-*"
+
+# Matcher for indices containing span documents. Defaults to apm-*.
+#apm_oss.spanIndices: "apm-*"
+
+# Matcher for indices containing transaction documents. Defaults to apm-*.
+#apm_oss.transactionIndices: "apm-*"
