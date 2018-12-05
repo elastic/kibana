@@ -5,16 +5,17 @@
  */
 
 import { connect } from 'react-redux';
+import { getLicense } from 'x-pack/plugins/apm/public/store/reactReduxRequest/license';
 import { IReduxState } from 'x-pack/plugins/apm/public/store/rootReducer';
-import { getUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ServiceDetailsView } from './view';
+import { ServiceIntegrationsView } from './view';
 
 function mapStateToProps(state = {} as IReduxState) {
+  const license = getLicense(state).data;
   return {
-    urlParams: getUrlParams(state)
+    mlAvailable:
+      license.features && license.features.ml && license.features.ml.isAvailable
   };
 }
 
-const ServiceDetails = connect(mapStateToProps)(ServiceDetailsView);
-
-export { ServiceDetails };
+const ServiceIntegrations = connect(mapStateToProps)(ServiceIntegrationsView);
+export { ServiceIntegrations };

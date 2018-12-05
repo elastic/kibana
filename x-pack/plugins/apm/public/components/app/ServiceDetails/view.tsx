@@ -72,7 +72,11 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
       <div>
         <HeaderContainer>
           <h1>{serviceName}</h1>
-          <ServiceIntegrations />
+          <ServiceIntegrations
+            location={this.props.location}
+            serviceName={serviceName}
+            transactionType={urlParams.transactionType}
+          />
         </HeaderContainer>
 
         <KueryBar />

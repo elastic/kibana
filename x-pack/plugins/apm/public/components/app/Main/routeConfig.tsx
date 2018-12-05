@@ -101,13 +101,6 @@ export const routes = [
     component: ServiceDetails,
     breadcrumb: 'Metrics'
   },
-  // {
-  //   exact: true,
-  //   path: '/:serviceName/transactions/:transactionType',
-  //   component: ServiceDetails,
-  //   breadcrumb: ({ match }: BreadcrumbArgs) =>
-  //     legacyDecodeURIComponent(match.params.transactionType)
-  // },
   {
     exact: true,
     path: '/:serviceName/transactions/:transactionType/:transactionName',
