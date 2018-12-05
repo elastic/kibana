@@ -133,3 +133,6 @@
 
 # Matcher for indices containing transaction documents. Defaults to apm-*.
 #apm_oss.transactionIndices: "apm-*"
+
+# Number of top transaction groups displayed in APM plugin in Kibana
+#apm_oss.topTransactionGroupsSize: 100

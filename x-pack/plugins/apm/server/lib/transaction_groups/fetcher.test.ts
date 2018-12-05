@@ -17,7 +17,14 @@ describe('transactionGroupsFetcher', () => {
       end: 1528977600000,
       client: clientSpy,
       config: {
-        get: () => 'myIndex' as any
+        get: jest.fn((key: string) => {
+          switch (key) {
+            case 'apm_oss.transactionIndices':
+              return 'myIndex';
+            case 'apm_oss.topTransactionGroupsSize':
+              return 100;
+          }
+        })
       }
     };
     const bodyQuery = { my: 'bodyQuery' };
