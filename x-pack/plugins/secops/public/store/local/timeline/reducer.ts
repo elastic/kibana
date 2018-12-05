@@ -223,6 +223,7 @@ interface UpdateTimelinePageIndexParams {
   activePage: number;
   timelineById: TimelineById;
 }
+
 export const updateTimelinePageIndex = ({
   id,
   activePage,

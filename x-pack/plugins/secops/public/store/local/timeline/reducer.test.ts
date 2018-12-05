@@ -13,11 +13,11 @@ import {
   updateShowTimeline,
   updateTimelineItemsPerPage,
   updateTimelinePageIndex,
+  updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineSort,
-  updateTimelinePerPageOptions,
 } from '.';
 import { timelineDefaults } from './model';
 
