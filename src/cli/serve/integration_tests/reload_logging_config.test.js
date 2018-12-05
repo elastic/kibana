@@ -21,6 +21,8 @@ import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import mkdirp from 'mkdirp';
+import rimraf from 'rimraf';
 
 import { safeDump } from 'js-yaml';
 import { createMapStream, createSplitStream, createPromiseFromStreams } from '../../../utils/streams';
@@ -44,7 +46,7 @@ function setLoggingJson(enabled) {
 
   const yaml = safeDump(conf);
 
-  path.writeFileSync(testConfigFile, yaml);
+  fs.writeFileSync(testConfigFile, yaml);
 }
 
 describe('Server logging configuration', function () {
@@ -54,6 +56,8 @@ describe('Server logging configuration', function () {
   beforeEach(() => {
     isJson = true;
     setLoggingJson(true);
+
+    mkdirp.sync(tempDir);
   });
 
   afterEach(() => {
@@ -64,6 +68,8 @@ describe('Server logging configuration', function () {
       child.kill();
       child = undefined;
     }
+
+    rimraf.sync(tempDir);
   });
 
   const isWindows = /^win/.test(process.platform);
