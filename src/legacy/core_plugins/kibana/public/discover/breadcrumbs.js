@@ -19,9 +19,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MANAGEMENT_BREADCRUMB = Object.freeze({
-  text: i18n.translate('common.ui.management.breadcrumb', {
-    defaultMessage: 'Management'
-  }),
-  href: '#/management'
-});
+export function getRootBreadcrumbs() {
+  return [
+    {
+      text: i18n.translate('kbn.discover.rootBreadcrumb', {
+        defaultMessage: 'Discover'
+      }),
+      href: '#/discover'
+    }
+  ];
+}
+
+export function getSavedSearchBreadcrumbs($route) {
+  return [
+    ...getRootBreadcrumbs(),
+    {
+      text: $route.current.locals.savedSearch.id,
+    }
+  ];
+}
