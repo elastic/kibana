@@ -7,13 +7,10 @@
 import d3 from 'd3';
 
 import { Annotation } from '../../../../common/types/annotations';
-
-interface Job {
-  job_id: string;
-}
+import { MlJob } from '../../../../common/types/jobs';
 
 interface Props {
-  selectedJob: Job;
+  selectedJob: MlJob;
 }
 
 interface State {
