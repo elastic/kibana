@@ -127,9 +127,6 @@ export class ESGeohashGridSource extends VectorSource {
             ]
           ]
         };
-        //give this some meaningful name
-        feature.properties.doc_count = feature.properties.value;
-        delete feature.properties.value;
       });
     }
 
