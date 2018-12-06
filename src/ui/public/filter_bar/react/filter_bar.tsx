@@ -52,9 +52,9 @@ export class FilterBar extends Component<Props> {
   public render() {
     const classes = classNames('globalFilterBar', this.props.className);
 
-    const filterItems = this.props.filters.map(filter => {
+    const filterItems = this.props.filters.map((filter, i) => {
       return (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem key={i} grow={false}>
           <FilterItem
             filter={filter}
             onToggleNegate={this.onToggleNegate}
