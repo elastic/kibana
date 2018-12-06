@@ -18,7 +18,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { debounce } from 'lodash';
+import { debounce, forEach } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { Inspector } from '../../inspector';
@@ -39,6 +39,7 @@ import { VisSavedObject, VisualizeLoaderParams, VisualizeUpdateParams } from './
 interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
+  autoFetch?: boolean;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -57,6 +58,7 @@ export class EmbeddedVisualizeHandler {
    * @ignore
    */
   public readonly data$: Rx.Observable<any>;
+  public readonly inspectorAdapters: Adapters = {};
   private vis: Vis;
   private loaded: boolean = false;
   private destroyed: boolean = false;
@@ -80,7 +82,9 @@ export class EmbeddedVisualizeHandler {
   private uiState: PersistedState;
   private dataLoader: VisualizeDataLoader;
   private dataSubject: Rx.Subject<any>;
-  private inspectorAdapters: Adapters = {};
+  private actions: any = {};
+  private events$: Rx.Observable<any>;
+  private autoFetch: boolean;
 
   constructor(
     private readonly element: HTMLElement,
@@ -89,7 +93,16 @@ export class EmbeddedVisualizeHandler {
   ) {
     const { searchSource, vis } = savedObject;
 
-    const { appState, uiState, queryFilter, timeRange, filters, query, Private } = params;
+    const {
+      appState,
+      uiState,
+      queryFilter,
+      timeRange,
+      filters,
+      query,
+      Private,
+      autoFetch,
+    } = params;
 
     this.dataLoaderParams = {
       searchSource,
@@ -101,6 +114,8 @@ export class EmbeddedVisualizeHandler {
       aggs: vis.getAggConfig(),
       forceFetch: false,
     };
+
+    this.autoFetch = !(autoFetch === false);
 
     // Listen to the first RENDER_COMPLETE_EVENT to resolve this promise
     this.firstRenderComplete = new Promise(resolve => {
@@ -127,6 +142,23 @@ export class EmbeddedVisualizeHandler {
     this.inspectorAdapters = this.getActiveInspectorAdapters();
     this.vis.openInspector = this.openInspector;
     this.vis.hasInspector = this.hasInspector;
+
+    // init default actions
+    forEach(this.vis.type.events, (event, eventName) => {
+      if (event.disabled || !eventName) {
+        return;
+      } else {
+        this.actions[eventName] = event.defaultAction;
+      }
+    });
+
+    this.vis.eventsSubject = new Rx.Subject();
+    this.events$ = this.vis.eventsSubject.asObservable().pipe(share());
+    this.events$.subscribe(event => {
+      if (this.actions[event.name]) {
+        this.actions[event.name](event.data);
+      }
+    });
 
     this.dataSubject = new Rx.Subject();
     this.data$ = this.dataSubject.asObservable().pipe(share());
@@ -198,6 +230,25 @@ export class EmbeddedVisualizeHandler {
   public getElement(): HTMLElement {
     return this.element;
   }
+
+  /**
+   * renders visualization with provided data
+   * @param visData: visualization data
+   */
+  public render = (visData: any = null) => {
+    return visualizationLoader
+      .render(this.element, this.vis, visData, this.uiState, {
+        listenOnChange: false,
+      })
+      .then(() => {
+        if (!this.loaded) {
+          this.loaded = true;
+          if (this.autoFetch) {
+            this.fetchAndRender();
+          }
+        }
+      });
+  };
 
   /**
    * Opens the inspector for the embedded visualization. This will return an
@@ -331,18 +382,5 @@ export class EmbeddedVisualizeHandler {
       this.dataSubject.next(data);
       return data;
     });
-  };
-
-  private render = (visData: any = null) => {
-    return visualizationLoader
-      .render(this.element, this.vis, visData, this.uiState, {
-        listenOnChange: false,
-      })
-      .then(() => {
-        if (!this.loaded) {
-          this.loaded = true;
-          this.fetchAndRender();
-        }
-      });
   };
 }

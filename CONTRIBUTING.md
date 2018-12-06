@@ -230,8 +230,6 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 #### Potential Optimization Pitfalls
 
-In development mode, Kibana runs a customized version of [Webpack](http://webpack.github.io/) with some optimizations enabled to make building the browser bundles as fast as possible. These optimizations make the build process about 2x as fast for initial builds, and about 7x faster for rebuilds, but are labeled "unsafe" by Webpack because they can sometimes cause changes to go unnoticed by the compiler. If you experience any of the scenarios below either restart the dev server, or add `optimize.unsafeCache: false` to your `config/kibana.dev.yml` file to disable these optimizations completely.
-
  - Webpack is trying to include a file in the bundle that I deleted and is now complaining about it is missing
  - A module id that used to resolve to a single file now resolves to a directory, but webpack isn't adapting
  - (if you discover other scenarios, please send a PR!)

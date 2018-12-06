@@ -163,7 +163,7 @@ export default class ClusterManager {
     const { fromRoot } = require('../../utils');
 
     const watchPaths = [
-      fromRoot('src/core_plugins'),
+      fromRoot('src/legacy/core_plugins'),
       fromRoot('src/server'),
       fromRoot('src/ui'),
       fromRoot('src/utils'),

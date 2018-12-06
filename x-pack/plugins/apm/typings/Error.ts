@@ -31,7 +31,7 @@ export interface Error extends APMDocV1 {
       type?: string;
       code?: string;
       module?: string;
-      attributes?: any;
+      attributes?: unknown;
       handled?: boolean;
       stacktrace?: Stackframe[];
     };
