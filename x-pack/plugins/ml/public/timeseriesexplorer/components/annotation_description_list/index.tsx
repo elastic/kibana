@@ -15,7 +15,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
-import { Annotation } from '../../../../common/interfaces/annotations';
+import { Annotation } from '../../../../common/types/annotations';
 
 interface Props {
   annotation: Annotation;

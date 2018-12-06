@@ -14,7 +14,7 @@ import {
   Annotations,
   isAnnotation,
   isAnnotations,
-} from '../../../common/interfaces/annotations';
+} from '../../../common/types/annotations';
 
 interface EsResult {
   _source: object;

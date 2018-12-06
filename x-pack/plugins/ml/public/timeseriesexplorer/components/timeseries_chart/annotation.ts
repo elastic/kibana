@@ -7,78 +7,61 @@
 import d3 from 'd3';
 import moment from 'moment';
 
+import { Annotation, Annotations } from '../../../../common/types/annotations';
+
+// @ts-ignore
 import { mlChartTooltipService } from '../../../components/chart_tooltip/chart_tooltip_service';
+
+import { TimeseriesChart } from './timeseries_chart';
 
 // getAnnotationBrush() is expected to be called like getAnnotationBrush.call(this)
 // so it gets passed on the context of the component it gets called from.
-export function getAnnotationBrush() {
+export function getAnnotationBrush(this: TimeseriesChart) {
   const focusXScale = this.focusXScale;
 
   const annotateBrush = d3.svg
     .brush()
     .x(focusXScale)
-    //.y(focusYScale)
-    .on('brush', brushmove)
-    .on('brushend', brushend);
-
-  function brushmove() {}
+    .on('brushend', brushend.bind(this));
 
   // cast a reference to this so we get the latest state when brushend() gets called
-  const that = this;
-  function brushend() {
-    const {
-      // focusChartData,
-      // refresh,
-      selectedJob
-    } = that.props;
+  function brushend(this: TimeseriesChart) {
+    const { selectedJob } = this.props;
 
-    const extent = annotateBrush.extent();
-    /*
-    const data = focusChartData.filter((d) => {
-      let match = false;
-      if (
-        (d.value >= extent[0][1] && d.value <= extent[1][1]) &&
-        (d.date.getTime() >= extent[0][0].getTime() && d.date.getTime() <= extent[1][0].getTime())
-      ) {
-        match = true;
-      }
-      return match;
-    }).map((d) => {
-      return d.value;
-    });
-    */
+    // TS TODO make this work with the actual types.
+    const extent = annotateBrush.extent() as any;
 
     const timestamp = extent[0].getTime();
     const endTimestamp = extent[1].getTime();
 
     if (timestamp === endTimestamp) {
-      that.closeFlyout();
+      this.closeFlyout();
       return;
     }
 
     const annotation = {
       timestamp,
       end_timestamp: endTimestamp,
-      annotation: that.state.annotation.annotation || '',
+      annotation: this.state.annotation.annotation || '',
       job_id: selectedJob.job_id,
       result_type: 'annotation',
-    };
+    } as Annotation;
 
-    that.showFlyout(annotation);
+    this.showFlyout(annotation);
   }
 
   return annotateBrush;
 }
 
 export function renderAnnotations(
-  focusChart,
-  focusAnnotationData,
-  focusZoomPanelHeight,
-  focusChartHeight,
-  focusXScale,
-  showAnnotations,
-  showFocusChartTooltip,
-  showFlyout
+  focusChart: d3.Selection<[]>,
+  focusAnnotationData: Annotations,
+  focusZoomPanelHeight: number,
+  focusChartHeight: number,
+  focusXScale: TimeseriesChart['focusXScale'],
+  showAnnotations: boolean,
+  showFocusChartTooltip: (d: Annotation, t: object) => {},
+  showFlyout: TimeseriesChart['showFlyout']
 ) {
   const upperRectMargin = 25;
   const upperTextMargin = 18;
@@ -86,36 +69,39 @@ export function renderAnnotations(
   const annotations = focusChart
     .select('.ml-annotations')
     .selectAll('g.ml-annotation')
-    .data(focusAnnotationData || [], d => d._id);
+    .data(focusAnnotationData || [], (d: Annotation) => d._id || '');
 
-  annotations.enter()
+  annotations
+    .enter()
     .append('g')
     .classed('ml-annotation', true);
 
-  const rects = annotations.selectAll('.ml-annotation-rect').data(d => [d]);
+  const rects = annotations.selectAll('.ml-annotation-rect').data((d: Annotation) => [d]);
 
-  rects.enter()
+  rects
+    .enter()
     .append('rect')
     .classed('ml-annotation-rect', true)
-    .on('mouseover', function (d) {
+    .on('mouseover', function(this: object, d: Annotation) {
       showFocusChartTooltip(d, this);
     })
     .on('mouseout', () => mlChartTooltipService.hide())
-    .on('click', function (d) {
+    .on('click', (d: Annotation) => {
       showFlyout(d);
     });
 
   rects
-    .attr('x', (d) => {
+    .attr('x', (d: Annotation) => {
       const date = moment(d.timestamp);
       return focusXScale(date);
     })
     .attr('y', focusZoomPanelHeight + 1 + upperRectMargin)
     .attr('height', focusChartHeight - 2 - upperRectMargin)
-    .attr('width', (d) => {
+    .attr('width', (d: Annotation) => {
       const s = focusXScale(moment(d.timestamp)) + 1;
-      const e = (typeof d.end_timestamp !== 'undefined') ? (focusXScale(moment(d.end_timestamp)) - 1) : (s + 2);
-      const width = Math.max(2, (e - s));
+      const e =
+        typeof d.end_timestamp !== 'undefined' ? focusXScale(moment(d.end_timestamp)) - 1 : s + 2;
+      const width = Math.max(2, e - s);
       return width;
     });
 
@@ -123,21 +109,23 @@ export function renderAnnotations(
 
   const texts = annotations.selectAll('.ml-annotation-text').data(d => [d]);
 
-  texts.enter()
+  texts
+    .enter()
     .append('text')
     .classed('ml-annotation-text', true);
 
   texts
-    .attr('x', (d) => {
+    .attr('x', (d: Annotation) => {
       const date = moment(d.timestamp);
       const x = focusXScale(date);
       const s = focusXScale(moment(d.timestamp)) + 1;
-      const e = (typeof d.end_timestamp !== 'undefined') ? (focusXScale(moment(d.end_timestamp)) - 1) : (s + 2);
-      const width = Math.max(2, (e - s));
-      return x + (width / 2);
+      const e =
+        typeof d.end_timestamp !== 'undefined' ? focusXScale(moment(d.end_timestamp)) - 1 : s + 2;
+      const width = Math.max(2, e - s);
+      return x + width / 2;
     })
     .attr('y', focusZoomPanelHeight + upperTextMargin)
-    .text(d => d.annotation);
+    .text((d: Annotation) => d.annotation);
 
   texts.exit().remove();
 

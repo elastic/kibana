@@ -24,7 +24,7 @@ import {
 
 import { AnnotationDescriptionList } from '../annotation_description_list';
 
-import { Annotation } from '../../../../common/interfaces/annotations';
+import { Annotation } from '../../../../common/types/annotations';
 
 interface Props {
   annotation: Annotation;
