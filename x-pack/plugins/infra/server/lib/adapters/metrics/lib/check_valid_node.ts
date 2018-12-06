@@ -14,6 +14,7 @@ export const checkValidNode = async (
 ): Promise<boolean> => {
   const params = {
     index: indexPattern,
+    rest_total_hits_as_int: true,
     terminateAfter: 1,
     body: {
       size: 0,

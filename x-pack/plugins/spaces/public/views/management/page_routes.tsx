@@ -18,12 +18,14 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
+import { getCreateBreadcrumbs, getEditBreadcrumbs, getListBreadcrumbs } from './lib';
 import { SpacesGridPage } from './spaces_grid';
 
 const reactRootNodeId = 'manageSpacesReactRoot';
 
 routes.when('/management/spaces/list', {
   template,
+  k7Breadcrumbs: getListBreadcrumbs,
   controller(
     $scope: any,
     $http: any,
@@ -62,6 +64,7 @@ routes.when('/management/spaces/list', {
 
 routes.when('/management/spaces/create', {
   template,
+  k7Breadcrumbs: getCreateBreadcrumbs,
   controller(
     $scope: any,
     $http: any,
@@ -104,6 +107,7 @@ routes.when('/management/spaces/edit', {
 
 routes.when('/management/spaces/edit/:spaceId', {
   template,
+  k7Breadcrumbs: () => getEditBreadcrumbs(),
   controller(
     $scope: any,
     $http: any,
@@ -129,6 +133,9 @@ routes.when('/management/spaces/edit/:spaceId', {
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
             userProfile={userProfile}
+            setBreadcrumbs={breadcrumbs => {
+              chrome.breadcrumbs.set(breadcrumbs);
+            }}
           />
         </I18nProvider>,
         domNode
