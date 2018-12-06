@@ -10,7 +10,7 @@ import { Query } from 'react-apollo';
 
 import { WhoAmIQuery } from '../../../common/graphql/types';
 
-import { whoAmIQuery } from './who_am_i.gql_query';
+import { whoAmIQuery } from './index.gql_query';
 
 interface WhoAmIArgs {
   appName: string;

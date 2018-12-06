@@ -11,7 +11,7 @@ import { HostsRequestOptions } from './types';
 
 export const HostsFieldsMap = {
   firstSeen: '@timestamp',
-  name: 'host.name',
+  name: 'system.host.name',
   os: 'system.host.os.name',
   version: 'system.host.os.version',
 };
@@ -51,7 +51,7 @@ export const buildQuery = (options: HostsRequestOptions) => {
   const agg = {
     host_count: {
       cardinality: {
-        field: 'host.name',
+        field: 'system.host.name',
       },
     },
   };
@@ -66,7 +66,7 @@ export const buildQuery = (options: HostsRequestOptions) => {
         group_by_host: {
           composite: {
             size: limit + 1,
-            sources: [{ host_name: { terms: { field: 'host.name' } } }],
+            sources: [{ host_name: { terms: { field: 'system.host.name' } } }],
           },
           aggs: {
             time: {
@@ -81,7 +81,7 @@ export const buildQuery = (options: HostsRequestOptions) => {
                 sort: [
                   {
                     '@timestamp': { order: 'asc' },
-                    'host.name': { order: 'asc' },
+                    'system.host.name': { order: 'asc' },
                   },
                 ],
               },

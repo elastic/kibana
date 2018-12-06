@@ -9,7 +9,7 @@ import React from 'react';
 import { Query } from 'react-apollo';
 
 import { SourceQuery } from '../../../common/graphql/types';
-import { sourceQuery } from './source.gql_query';
+import { sourceQuery } from './index.gql_query';
 
 interface WithSourceArgs {
   auditbeatIndicesExist: boolean;

@@ -11,11 +11,11 @@ import { pure } from 'recompose';
 
 import { EventItem, GetEventsQuery, KpiItem } from '../../../common/graphql/types';
 
-import { eventsQuery } from './events.gql_query';
+import { eventsQuery } from './index.gql_query';
 
 export interface EventsArgs {
-  events: EventItem[];
-  kpiEventType: KpiItem[];
+  events?: EventItem[];
+  kpiEventType?: KpiItem[];
   loading: boolean;
 }
 

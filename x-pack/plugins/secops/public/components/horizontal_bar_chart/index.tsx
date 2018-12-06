@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { pure } from 'recompose';
-
 import { EuiTitle } from '@elastic/eui';
 import {
   // @ts-ignore
@@ -14,6 +11,9 @@ import {
   // @ts-ignore
   EuiSeriesChart,
 } from '@elastic/eui/lib/experimental';
+import React from 'react';
+import { pure } from 'recompose';
+import styled from 'styled-components';
 
 import { LoadingPanel } from '../loading';
 
@@ -33,16 +33,36 @@ interface HorizontalBarChartProps {
 export const HorizontalBarChart = pure<HorizontalBarChartProps>(
   ({ barChartdata, width, height, title, loading }) => {
     return loading ? (
-      <LoadingPanel height="100%" width="100%" text="Loading data" />
+      <LoadingPanel height="auto" width="100%" text="Loading data" />
     ) : (
-      <>
+      <Container>
         <EuiTitle size="s">
           <h3>{title}</h3>
         </EuiTitle>
-        <EuiSeriesChart width={width} height={height} yType="ordinal" orientation="horizontal">
+        <EuiSeriesChart
+          width={width}
+          height={height}
+          yType="ordinal"
+          orientation="horizontal"
+          style={{ height: 'auto' }}
+        >
           <EuiBarSeries name="Tag counts" data={barChartdata} />
         </EuiSeriesChart>
-      </>
+      </Container>
     );
   }
 );
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  height: auto;
+  & > div {
+    .rv-xy-plot {
+      svg {
+        height: fit-content !important;
+      }
+    }
+  }
+`;

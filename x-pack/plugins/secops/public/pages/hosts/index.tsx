@@ -6,153 +6,82 @@
 
 import { getOr, isUndefined } from 'lodash/fp';
 import React from 'react';
-import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import { Dispatch } from 'redux';
-import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
-import { EventItem, KpiItem } from '../../../common/graphql/types';
-import { BasicTable } from '../../components/basic_table';
-import { DraggableWrapper } from '../../components/drag_and_drop/draggable_wrapper';
+import { KpiItem } from '../../../common/graphql/types';
 import { EmptyPage } from '../../components/empty_page';
-import { HorizontalBarChart, HorizontalBarChartData } from '../../components/horizontal_bar_chart';
-import { Pane1FlexContent } from '../../components/page';
-import {
-  Placeholders,
-  ProviderContainer,
-  VisualizationPlaceholder,
-} from '../../components/visualization_placeholder';
+import { HorizontalBarChartData } from '../../components/horizontal_bar_chart';
+import { EventsTable, HostsTable, TypesBar } from '../../components/page/hosts';
+
 import { EventsQuery } from '../../containers/events';
+import { HostsQuery } from '../../containers/hosts';
 import { WithSource } from '../../containers/source';
 
 const basePath = chrome.getBasePath();
 
 // TODO: wire up the date picker to remove the hard-coded start/end dates, which show good data for the KPI event type
-const startDate = 1521830963132;
-const endDate = 1521862432253;
+const startDate = 1514782800000;
+const endDate = 1546318799999;
 
-interface Props {
-  dispatch: Dispatch;
-}
-
-export const Hosts = connect()(
-  pure<Props>(({ dispatch }) => (
-    <WithSource sourceId="default">
-      {({ auditbeatIndicesExist }) =>
-        auditbeatIndicesExist || isUndefined(auditbeatIndicesExist) ? (
+export const Hosts = pure(() => (
+  <WithSource sourceId="default">
+    {({ auditbeatIndicesExist }) =>
+      auditbeatIndicesExist || isUndefined(auditbeatIndicesExist) ? (
+        <>
           <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
-            {({ events, kpiEventType, loading }) => (
-              <Pane1FlexContent data-test-subj="pane1FlexContent">
-                <VisualizationPlaceholder>
-                  <HorizontalBarChart
-                    loading={loading}
-                    title="KPI event types"
-                    width={490}
-                    height={279}
-                    barChartdata={
-                      kpiEventType.map((i: KpiItem) => ({
-                        x: i.count,
-                        y: i.value,
-                      })) as HorizontalBarChartData[]
-                    }
-                  />
-                </VisualizationPlaceholder>
-                <VisualizationPlaceholder>
-                  <BasicTable
-                    columns={getEventsColumns(dispatch)}
-                    loading={loading}
-                    pageOfItems={events}
-                    sortField="host.hostname"
-                    title="Events"
-                  />
-                </VisualizationPlaceholder>
-                <Placeholders count={8} myRoute="Hosts" />
-              </Pane1FlexContent>
+            {({ kpiEventType, loading }) => (
+              <TypesBar
+                loading={loading}
+                data={
+                  kpiEventType!.map((i: KpiItem) => ({
+                    x: i.count,
+                    y: i.value,
+                  })) as HorizontalBarChartData[]
+                }
+              />
             )}
           </EventsQuery>
-        ) : (
-          <EmptyPage
-            title="Looks like you don't have any auditbeat indices."
-            message="Let's add some!"
-            actionLabel="Setup Instructions"
-            actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
-          />
-        )
-      }
-    </WithSource>
-  ))
-);
+          <HostsQuery
+            sourceId="default"
+            startDate={startDate}
+            endDate={endDate}
+            cursor={null}
+            limit={2}
+          >
+            {({ hosts, totalCount, loading, pageInfo, loadMore }) => (
+              <HostsTable
+                loading={loading}
+                data={hosts}
+                totalCount={totalCount}
+                hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                loadMore={loadMore}
+              />
+            )}
+          </HostsQuery>
+          <EventsQuery sourceId="default" startDate={startDate} endDate={endDate}>
+            {({ events, loading }) => (
+              <EventsTable
+                data={events!}
+                loading={loading}
+                startDate={startDate}
+                endDate={endDate}
+              />
+            )}
+          </EventsQuery>
+        </>
+      ) : (
+        <EmptyPage
+          title="Looks like you don't have any auditbeat indices."
+          message="Let's add some!"
+          actionLabel="Setup Instructions"
+          actionUrl={`${basePath}/app/kibana#/home/tutorial_directory/security`}
+        />
+      )
+    }
+  </WithSource>
+));
 
-const EventColumns = styled.div``;
-
-const getEventsColumns = (dispatch: Dispatch) => [
-  {
-    name: 'Host name',
-    sortable: true,
-    truncateText: false,
-    hideForMobile: false,
-    render: (item: EventItem) => {
-      const hostName = getOr('--', 'host.hostname', item);
-      return (
-        <EventColumns>
-          <DraggableWrapper
-            dataProvider={{
-              enabled: true,
-              id: `${item.event!.id}`,
-              name: hostName,
-              negated: false,
-              componentResultParam: 'events',
-              componentQuery: EventsQuery,
-              componentQueryProps: {
-                sourceId: 'default',
-                startDate,
-                endDate,
-                filterQuery: `{"bool":{"should":[{"match":{"host.name":"${hostName}"}}],"minimum_should_match":1}}`,
-              },
-            }}
-            render={() => hostName}
-          />
-        </EventColumns>
-      );
-    },
-  },
-  {
-    name: 'Event type',
-    sortable: true,
-    truncateText: true,
-    hideForMobile: true,
-    render: (item: EventItem) => (
-      <ProviderContainer>{getOr('--', 'event.type', item)}</ProviderContainer>
-    ),
-  },
-  {
-    name: 'Source',
-    truncateText: true,
-    render: (item: EventItem) => (
-      <>
-        {getOr('--', 'source.ip', item).slice(0, 12)} : {getOr('--', 'source.port', item)}
-      </>
-    ),
-  },
-  {
-    name: 'Destination',
-    sortable: true,
-    truncateText: true,
-    render: (item: EventItem) => (
-      <>
-        {getOr('--', 'destination.ip', item).slice(0, 12)} : {getOr('--', 'destination.port', item)}
-      </>
-    ),
-  },
-  {
-    name: 'Location',
-    sortable: true,
-    truncateText: true,
-    render: (item: EventItem) => (
-      <>
-        {getOr('--', 'geo.region_name', item)} - {getOr('--', 'geo.country_iso_code', item)}
-      </>
-    ),
-  },
-];
+/* <Placeholders count={8} myRoute="Hosts" />
+</Pane1FlexContent> */

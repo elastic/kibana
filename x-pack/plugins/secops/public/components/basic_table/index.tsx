@@ -64,7 +64,7 @@ export class BasicTable extends React.PureComponent<BasicTableProps, BasicTableS
     const { columns, title, loading } = this.props;
 
     if (loading) {
-      return <LoadingPanel height="100%" width="100%" text={`Loading ${title}`} />;
+      return <LoadingPanel height="auto" width="100%" text={`Loading ${title}`} />;
     }
 
     const pagination = {
@@ -121,5 +121,5 @@ export const BasicTableContainer = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  height: 100%;
+  height: auto;
 `;
