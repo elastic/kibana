@@ -87,6 +87,7 @@ export function socketApi(server) {
 
     socket.on('run', handler);
     socket.on('disconnect', () => {
+      // stop listening for run events
       socket.removeListener('run', handler);
     });
   });
