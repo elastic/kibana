@@ -12,7 +12,7 @@ import { registerRoutes } from './server/routes/register_routes';
 export function crossClusterReplication(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
-    configPrefix: 'xpack.cross_cluster_replication',
+    configPrefix: 'xpack.ccr',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
 
@@ -22,7 +22,7 @@ export function crossClusterReplication(kibana) {
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          ccrUiEnabled: config.get('xpack.cross_cluster_replication.ui.enabled'),
+          ccrUiEnabled: config.get('xpack.ccr.ui.enabled'),
         };
       },
     },
