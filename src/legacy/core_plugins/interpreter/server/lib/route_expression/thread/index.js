@@ -66,10 +66,18 @@ export function getWorker() {
 export const thread = ({ onFunctionNotFound, serialize, deserialize }) => {
   const getWorkerFunctions = new Promise(resolve => {
     const worker = getWorker();
+
+    function functionListHandler(msg) {
+      // wait for the function list message
+      if (msg.type === 'functionList') {
+        // tear dowm the listener once the function list is provided
+        worker.removeListener('message', functionListHandler);
+        resolve(msg.value);
+      }
+    }
+    worker.on('message', functionListHandler);
+
     worker.send({ type: 'getFunctions' });
-    worker.on('message', msg => {
-      if (msg.type === 'functionList') resolve(msg.value);
-    });
   });
 
   return getWorkerFunctions.then(functions => {
