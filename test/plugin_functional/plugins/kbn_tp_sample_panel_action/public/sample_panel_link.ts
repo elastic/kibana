@@ -16,21 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 
-function samplePanelAction(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      contextMenuActions: [
-        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
-        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
-      ],
-    },
-  });
+class SamplePanelLink extends ContextMenuAction {
+  constructor() {
+    super({
+      displayName: 'Sample Panel Link',
+      id: 'samplePanelLink',
+      parentPanelId: 'mainMenu',
+    });
+  }
+
+  public getHref = () => {
+    return 'https://example.com/kibana/test';
+  };
 }
 
-module.exports = function (kibana) {
-  return [
-    samplePanelAction(kibana),
-  ];
-};
-
+ContextMenuActionsRegistryProvider.register(() => new SamplePanelLink());

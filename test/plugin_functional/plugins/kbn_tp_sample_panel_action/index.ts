@@ -17,8 +17,21 @@
  * under the License.
  */
 
-export { ContextMenuPanel } from './context_menu_panel';
-export { ContextMenuAction } from './context_menu_action';
-export { ContextMenuActionsRegistryProvider } from './context_menu_actions_registry';
-export { buildEuiContextMenuPanels } from './build_eui_context_menu_panels';
-export { PanelActionAPI } from './types';
+// TODO: use something better once https://github.com/elastic/kibana/issues/26555 is
+// figured out.
+type KibanaPlugin = any;
+
+function samplePanelAction(kibana: KibanaPlugin) {
+  return new kibana.Plugin({
+    uiExports: {
+      contextMenuActions: [
+        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
+        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
+      ],
+    },
+  });
+}
+
+module.exports = (kibana: KibanaPlugin) => {
+  return [samplePanelAction(kibana)];
+};
