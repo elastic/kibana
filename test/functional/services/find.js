@@ -86,8 +86,13 @@ export async function FindProvider({ getService }) {
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject
         const input = await this.activeElement();
-        await input.clear();
-        await input.sendKeys(text);
+        if (input) {
+          await input.clear();
+          await input.sendKeys(text);
+        } else {
+          await element.clear();
+          await element.sendKeys(text);
+        }
       });
     }
 
