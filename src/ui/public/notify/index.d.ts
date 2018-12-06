@@ -18,3 +18,4 @@
  */
 
 export { toastNotifications, Toast, ToastInput } from './toasts';
+export { fatalError } from './fatal_error';
