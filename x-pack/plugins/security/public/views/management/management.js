@@ -66,7 +66,6 @@ routes.defaults(/\/management/, {
         }
       }
 
-      // this might need changing
       if (!showSecurityLinks) {
         deregisterSecurity();
       } else {
