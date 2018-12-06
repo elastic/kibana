@@ -41,12 +41,10 @@ export default () => ({
       types: ['string'],
       aliases: ['_'],
       default: '".es(*)"',
-      multi: false,
     },
     interval: {
       types: ['string', 'null'],
       default: 'auto',
-      multi: false,
     }
   },
   async fn(context, args) {

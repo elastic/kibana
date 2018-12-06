@@ -34,12 +34,10 @@ export default () => ({
       aliases: [ '_' ],
       default: '',
       help: 'markdown',
-      multi: false,
     },
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      multi: false,
     }
   },
   fn(context, args) {

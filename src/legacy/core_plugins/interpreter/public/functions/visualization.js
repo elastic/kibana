@@ -66,22 +66,18 @@ export default () => ({
     type: {
       types: ['string'],
       default: '',
-      multi: false,
     },
     schemas: {
       types: ['string'],
       default: '"{}"',
-      multi: false,
     },
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      multi: false,
     },
     uiState: {
       types: ['string'],
       default: '"{}"',
-      multi: false
     }
   },
   async fn(context, args, handlers) {

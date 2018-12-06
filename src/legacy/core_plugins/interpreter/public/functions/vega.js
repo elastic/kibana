@@ -38,7 +38,6 @@ export default () => ({
     spec: {
       types: ['string'],
       default: '',
-      multi: false,
     },
   },
   async fn(context, args) {

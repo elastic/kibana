@@ -34,17 +34,14 @@ export default () => ({
     bucket: {
       types: ['string', 'null'],
       default: null,
-      multi: false,
     },
     metric: {
       types: ['string'],
       default: '1',
-      multi: false,
     },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
-      multi: false,
     },
   },
   fn(context, args) {

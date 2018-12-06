@@ -37,25 +37,20 @@ export default () => ({
   args: {
     bucket: {
       types: ['string'],
-      multi: false,
     },
     splitRow: {
       types: ['string'],
-      multi: false,
     },
     splitColumn: {
       types: ['string'],
-      multi: false,
     },
     metric: {
       types: ['string'],
       default: '1',
-      multi: false,
     },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
-      multi: false,
     },
   },
   async fn(context, args) {

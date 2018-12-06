@@ -32,7 +32,6 @@ export default () => ({
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      multi: false,
     }
   },
   fn(context, args) {

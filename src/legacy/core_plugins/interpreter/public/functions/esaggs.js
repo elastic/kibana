@@ -58,7 +58,6 @@ export default () => ({
     aggConfigs: {
       types: ['string'],
       default: '""',
-      multi: false,
     },
   },
   async fn(context, args, handlers) {

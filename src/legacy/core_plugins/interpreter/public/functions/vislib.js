@@ -37,17 +37,14 @@ export default () => ({
     type: {
       types: ['string'],
       default: 'metric',
-      multi: false,
     },
     schemas: {
       types: ['string'],
       default: '"{}"',
-      multi: false,
     },
     visConfig: {
       types: ['string', 'null'],
       default: '"{}"',
-      multi: false,
     },
   },
   async fn(context, args) {

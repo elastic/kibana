@@ -41,12 +41,10 @@ export default () => ({
     params: {
       types: ['string'],
       default: '"{}"',
-      multi: false,
     },
     uiState: {
       types: ['string'],
       default: '"{}"',
-      multi: false
     }
   },
   async fn(context, args) {
