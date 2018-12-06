@@ -116,13 +116,15 @@ chromeHeaderNavControlsRegistry.register(
       spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       ReactDOM.render(
-        <NavControlPopover
-          spacesManager={spacesManager}
-          activeSpace={activeSpace}
-          userProfile={userProfile}
-          anchorPosition="downLeft"
-          buttonClass={SpacesHeaderNavButton}
-        />,
+        <I18nProvider>
+          <NavControlPopover
+            spacesManager={spacesManager}
+            activeSpace={activeSpace}
+            userProfile={userProfile}
+            anchorPosition="downLeft"
+            buttonClass={SpacesHeaderNavButton}
+          />
+        </I18nProvider>,
         el
       );
     },
