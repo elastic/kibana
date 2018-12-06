@@ -27,9 +27,16 @@ export class PolicyJsonFlyoutUi extends PureComponent {
     close: PropTypes.func.isRequired,
     lifecycle: PropTypes.string.isRequired,
   };
+  getEsJson({ phases }) {
+    return JSON.stringify({
+      policy: {
+        phases
+      }
+    }, null, 4);
+  }
   copyToClipboard(lifecycle) {
     const { intl } = this.props;
-    copy(lifecycle);
+    copy(this.getEsJson(lifecycle));
     toastNotifications.add(intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.editPolicy.policyJsonFlyout.copiedToClipboardMessage',
       defaultMessage: 'JSON copied to clipboard',
@@ -57,7 +64,7 @@ export class PolicyJsonFlyoutUi extends PureComponent {
             <EuiCodeBlock
               language="json"
             >
-              {lifecycle}
+              {this.getEsJson(lifecycle)}
             </EuiCodeBlock>
           </EuiFlyoutBody>
 

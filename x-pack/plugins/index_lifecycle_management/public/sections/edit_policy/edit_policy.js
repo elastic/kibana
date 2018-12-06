@@ -334,7 +334,7 @@ class EditPolicyUi extends Component {
               {this.state.isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout
                   policyName={selectedPolicyName || ''}
-                  lifecycle={JSON.stringify(lifecycle, null, 4)}
+                  lifecycle={lifecycle}
                   close={() => this.setState({ isShowingPolicyJsonFlyout: false })}
                 />
               ) : null}
