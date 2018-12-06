@@ -121,11 +121,11 @@ const makeZoomWarningMsg = (function () {
           <p>
             <FormattedMessage
               id="common.ui.vis.kibanaMap.zoomWarning"
-              defaultMessage={`You've reached the maximum number of zoom
-              levels. To zoom all the way in, upgrade to the
-              {defaultDistribution} of Elasticsearch and Kibana. You'll get
-              access to additional zoom levels for free through the {ems}.
-              Or, you can configure a custom WMS compliant server.`}
+              defaultMessage={'You\'ve reached the maximum number of zoom \
+              levels. To zoom all the way in, upgrade to the \
+              {defaultDistribution} of Elasticsearch and Kibana. You\'ll get \
+              access to additional zoom levels for free through the {ems}. \
+              Or, you can configure a custom WMS compliant server.'}
               values={{
                 defaultDistribution: (
                   <a
