@@ -191,7 +191,10 @@ class ObjectsTableUI extends Component {
         });
       }
       toastNotifications.addDanger({
-        title: `Unable find saved objects`,
+        title: this.props.intl.formatMessage({
+          id: 'kbn.management.objects.objectsTable.unableFindSavedObjectsNotificationMessage',
+          defaultMessage: 'Unable find saved objects'
+        }),
         text: `${error}`,
       });
       return;

@@ -354,7 +354,17 @@ class FieldUI extends PureComponent {
       case 'boolean':
         return (
           <EuiSwitch
-            label={!!unsavedValue ? 'On' : 'Off'}
+            label={!!unsavedValue ? (
+              <FormattedMessage
+                id="kbn.management.settings.field.onLabel"
+                defaultMessage="On"
+              />
+            ) : (
+              <FormattedMessage
+                id="kbn.management.settings.field.offLabel"
+                defaultMessage="Off"
+              />
+            )}
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
             disabled={loading || isOverridden}

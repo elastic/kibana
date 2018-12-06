@@ -29,6 +29,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
 import { getInAppUrl } from './lib/get_in_app_url';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
@@ -70,7 +71,10 @@ function updateObjectsTable($scope, $injector) {
             }
             const serviceName = typeToServiceName(type);
             if (!serviceName) {
-              toastNotifications.addWarning(`Unknown saved object type: ${type}`);
+              toastNotifications.addWarning(i18n.translate('kbn.management.objects.unknownSavedObjectTypeNotificationMessage', {
+                defaultMessage: 'Unknown saved object type: {type}',
+                values: { type }
+              }));
               return null;
             }
 
