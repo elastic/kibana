@@ -17,53 +17,16 @@
  * under the License.
  */
 
-import { readFile } from 'fs';
+import { readFile, stat } from 'fs';
 import { resolve } from 'path';
+import { coerce } from 'semver';
 import { promisify } from 'util';
-import { PackageInfo } from '../../config';
+import { isConfigPath, PackageInfo } from '../../config';
+import { PluginManifest } from '../plugin';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 
 const fsReadFileAsync = promisify(readFile);
-
-/**
- * Describes the set of required and optional properties plugin can define in its
- * mandatory JSON manifest file.
- */
-export interface PluginManifest {
-  /**
-   * Identifier of the plugin.
-   */
-  readonly id: string;
-
-  /**
-   * Version of the plugin.
-   */
-  readonly version: string;
-
-  /**
-   * The version of Kibana the plugin is compatible with, defaults to "version".
-   */
-  readonly kibanaVersion: string;
-
-  /**
-   * An optional list of the other plugins that **must be** installed and enabled
-   * for this plugin to function properly.
-   */
-  readonly requiredPlugins: ReadonlyArray<string>;
-
-  /**
-   * An optional list of the other plugins that if installed and enabled **may be**
-   * leveraged by this plugin for some additional functionality but otherwise are
-   * not required for this plugin to work properly.
-   */
-  readonly optionalPlugins: ReadonlyArray<string>;
-
-  /**
-   * Specifies whether plugin includes some client/browser specific functionality
-   * that should be included into client bundle via `public/ui_plugin.js` file.
-   */
-  readonly ui: boolean;
-}
+const fsStatAsync = promisify(stat);
 
 /**
  * Name of the JSON manifest file that should be located in the plugin directory.
@@ -76,17 +39,12 @@ const MANIFEST_FILE_NAME = 'kibana.json';
 const ALWAYS_COMPATIBLE_VERSION = 'kibana';
 
 /**
- * Regular expression used to extract semantic version part from the plugin or
- * kibana version, e.g. `1.2.3` ---> `1.2.3` and `7.0.0-alpha1` ---> `7.0.0`.
- */
-const SEM_VER_REGEX = /\d+\.\d+\.\d+/;
-
-/**
  * Tries to load and parse the plugin manifest file located at the provided plugin
  * directory path and produces an error result if it fails to do so or plugin manifest
  * isn't valid.
  * @param pluginPath Path to the plugin directory where manifest should be loaded from.
  * @param packageInfo Kibana package info.
+ * @internal
  */
 export async function parseManifest(pluginPath: string, packageInfo: PackageInfo) {
   const manifestPath = resolve(pluginPath, MANIFEST_FILE_NAME);
@@ -126,6 +84,17 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     );
   }
 
+  if (manifest.configPath !== undefined && !isConfigPath(manifest.configPath)) {
+    throw PluginDiscoveryError.invalidManifest(
+      manifestPath,
+      new Error(
+        `The "configPath" in plugin manifest for "${
+          manifest.id
+        }" should either be a string or an array of strings.`
+      )
+    );
+  }
+
   const expectedKibanaVersion =
     typeof manifest.kibanaVersion === 'string' && manifest.kibanaVersion
       ? manifest.kibanaVersion
@@ -147,10 +116,26 @@ export async function parseManifest(pluginPath: string, packageInfo: PackageInfo
     id: manifest.id,
     version: manifest.version,
     kibanaVersion: expectedKibanaVersion,
+    configPath: manifest.configPath || manifest.id,
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
     ui: typeof manifest.ui === 'boolean' ? manifest.ui : false,
   };
+}
+
+/**
+ * Checks whether specified folder contains Kibana new platform plugin. It's only
+ * intended to be used by the legacy systems when they need to check whether specific
+ * plugin path is handled by the core plugin system or not.
+ * @param pluginPath Path to the plugin.
+ * @internal
+ */
+export async function isNewPlatformPlugin(pluginPath: string) {
+  try {
+    return (await fsStatAsync(resolve(pluginPath, MANIFEST_FILE_NAME))).isFile();
+  } catch (err) {
+    return false;
+  }
 }
 
 /**
@@ -163,14 +148,16 @@ function isVersionCompatible(expectedKibanaVersion: string, actualKibanaVersion:
     return true;
   }
 
-  return extractSemVer(actualKibanaVersion) === extractSemVer(expectedKibanaVersion);
-}
+  const coercedActualKibanaVersion = coerce(actualKibanaVersion);
+  if (coercedActualKibanaVersion == null) {
+    return false;
+  }
 
-/**
- * Tries to extract semantic version part from the full version string.
- * @param version
- */
-function extractSemVer(version: string) {
-  const semVerMatch = version.match(SEM_VER_REGEX);
-  return semVerMatch === null ? version : semVerMatch[0];
+  const coercedExpectedKibanaVersion = coerce(expectedKibanaVersion);
+  if (coercedExpectedKibanaVersion == null) {
+    return false;
+  }
+
+  // Compare coerced versions, e.g. `1.2.3` ---> `1.2.3` and `7.0.0-alpha1` ---> `7.0.0`.
+  return coercedActualKibanaVersion.compare(coercedExpectedKibanaVersion) === 0;
 }

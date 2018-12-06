@@ -5,6 +5,7 @@
  */
 
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 
 interface IntervalSizeDescriptor {
@@ -35,7 +36,14 @@ export class LogMinimapScaleControls extends React.PureComponent<LogMinimapScale
     const [currentSizeDescriptor] = availableIntervalSizes.filter(intervalSizeEquals(intervalSize));
 
     return (
-      <EuiFormRow label="Minimap Scale">
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.infra.logs.customizeLogs.minimapScaleFormRowLabel"
+            defaultMessage="Minimap Scale"
+          />
+        }
+      >
         <EuiRadioGroup
           options={availableIntervalSizes.map(sizeDescriptor => ({
             id: getIntervalSizeDescriptorKey(sizeDescriptor),
