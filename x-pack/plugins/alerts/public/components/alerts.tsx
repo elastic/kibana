@@ -8,5 +8,5 @@ import React from 'react';
 import { Page } from './page';
 
 export function Alerts() {
-  return <Page>Alerts Main</Page>;
+  return <Page />;
 }

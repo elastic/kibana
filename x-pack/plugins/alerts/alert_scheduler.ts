@@ -10,4 +10,8 @@ export class AlertScheduler {
   constructor(server: any) {
     this.taskManager = server.plugins.taskManager;
   }
+
+  public schedule(alert: any) {
+    this.taskManager.schedule(alert);
+  }
 }
