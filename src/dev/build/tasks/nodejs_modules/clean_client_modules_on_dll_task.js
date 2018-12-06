@@ -55,6 +55,7 @@ export const CleanClientModulesOnDLLTask = {
 
     // Get the dependencies found searching through the server
     // side code entries that were provided
+    log.debug('Finding dependencies of server modules');
     const serverDependencies = await getDependencies(baseDir, serverEntries);
 
     // Consider this as our whiteList for the modules we can't delete
@@ -68,6 +69,7 @@ export const CleanClientModulesOnDLLTask = {
 
     // Get dll entries filtering out the ones
     // from any whitelisted module
+    log.debug('Finding dependencies included in the DLL');
     const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules);
 
     log.debug('Cleaning bundled module source for %d entry files', dllEntries.length);
