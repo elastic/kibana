@@ -6,20 +6,25 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from 'ui/kuery';
 import { getAutocompleteProvider } from 'ui/autocomplete_providers';
+// @ts-ignore
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+import { getAPMIndexPattern } from './rest/savedObjects';
 
-export function convertKueryToEsQuery(kuery, indexPattern) {
+export function convertKueryToEsQuery(kuery: string, indexPattern: any) {
   const ast = fromKueryExpression(kuery);
   return toElasticsearchQuery(ast, indexPattern);
 }
 
 export async function getSuggestions(
-  query,
-  selectionStart,
-  apmIndexPattern,
-  boolFilter
+  query: string,
+  selectionStart: number,
+  apmIndexPattern: any,
+  boolFilter: any
 ) {
   const autocompleteProvider = getAutocompleteProvider('kuery');
-  if (!autocompleteProvider) return [];
+  if (!autocompleteProvider) {
+    return [];
+  }
   const config = {
     get: () => true
   };
@@ -34,4 +39,19 @@ export async function getSuggestions(
     selectionStart,
     selectionEnd: selectionStart
   });
+}
+
+interface IIndexPatternForKuery {
+  title: string;
+  fields: any[];
+}
+
+export async function getAPMIndexPatternForKuery(): Promise<
+  IIndexPatternForKuery | undefined
+> {
+  const apmIndexPattern = await getAPMIndexPattern();
+  if (!apmIndexPattern) {
+    return;
+  }
+  return getFromSavedObject(apmIndexPattern);
 }
