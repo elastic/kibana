@@ -177,12 +177,6 @@ export async function FindProvider({ getService }) {
       return await this.exists(async driver => wrapAll(await driver.findElements(By.css(selector))), timeout);
     }
 
-    async moveMouseTo(element) {
-      const mouse = driver.actions().mouse();
-      const actions = driver.actions({ bridge: true });
-      await actions.pause(mouse).move({ origin: element._webElement }).perform();
-    }
-
     async clickByCssSelectorWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
       log.debug(`Find.clickByCssSelectorWhenNotDisabled`);
 
@@ -190,7 +184,7 @@ export async function FindProvider({ getService }) {
       // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
       // it's gone.
       const element = await this.byCssSelector(selector, timeout);
-      await this.moveMouseTo(element);
+      await element.moveMouseTo();
       await driver.wait(until.elementIsEnabled(element._webElement), timeout);
       await element.click();
     }
@@ -199,7 +193,7 @@ export async function FindProvider({ getService }) {
       log.debug(`clickByPartialLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byPartialLinkText(linkText, timeout);
-        await this.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -208,7 +202,7 @@ export async function FindProvider({ getService }) {
       log.debug(`clickByLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.byLinkText(linkText, timeout);
-        await this.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -240,7 +234,7 @@ export async function FindProvider({ getService }) {
       log.debug(`clickByCssSelector(${selector})`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
-        await this.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }
@@ -248,14 +242,14 @@ export async function FindProvider({ getService }) {
       log.debug(`clickByDisplayedLinkText(${linkText})`);
       await retry.try(async () => {
         const element = await this.findDisplayedByLinkText(linkText, timeout);
-        await this.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }
     async clickDisplayedByCssSelector(selector, timeout = defaultFindTimeout) {
       await retry.try(async () => {
         const element = await this.findDisplayedByCssSelector(selector, timeout);
-        await this.moveMouseTo(element);
+        await element.moveMouseTo();
         await element.click();
       });
     }

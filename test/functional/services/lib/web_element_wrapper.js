@@ -203,18 +203,15 @@ export class WebElementWrapper {
   }
 
   /**
-   * Moves the remote environment’s mouse cursor to the specified element or relative
-   * position.
+   * Moves the remote environment’s mouse cursor to the current element
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
    *
-   * @param {number} xOffset optional - The x-offset of the cursor, maybe in CSS pixels, relative to the left edge of the specified element’s bounding client rectangle.
-   * @param {number} yOffset optional - The y-offset of the cursor, maybe in CSS pixels, relative to the top edge of the specified element’s bounding client rectangle.
    * @return {Promise<void>}
    */
-  async moveMouseTo(xOffset, yOffset) {
+  async moveMouseTo() {
     const mouse = this._driver.actions().mouse();
     const actions = this._driver.actions({ bridge: true });
-    await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
+    await actions.pause(mouse).move({ origin: this._webElement }).perform();
   }
 
   /**
