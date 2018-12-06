@@ -34,6 +34,7 @@ import { timefilter } from 'ui/timefilter';
 import 'ui/kbn_top_nav';
 
 const SIDENAV_ID = 'management-sidenav';
+const LANDING_ID = 'management-landing';
 
 uiRoutes
   .when('/management', {
@@ -52,6 +53,21 @@ require('ui/index_patterns/route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index'
 });
 
+export function updateLandingPage(version) {
+  const node = document.getElementById(LANDING_ID);
+  if (!node) {
+    return;
+  }
+
+  render(
+    <I18nProvider>
+      <div>
+        Kibana {version}
+      </div>
+    </I18nProvider>,
+    node,
+  );
+}
 
 export function updateSidebar(
   items, id
@@ -73,8 +89,8 @@ export function updateSidebar(
   );
 }
 
-export const destroySidebar = () => {
-  const node = document.getElementById(SIDENAV_ID);
+export const destroyReact = id => {
+  const node = document.getElementById(id);
   node && unmountComponentAtNode(node);
 };
 
@@ -104,8 +120,11 @@ uiModules
         }
 
         updateSidebar($scope.sections, $scope.section.id);
-        $scope.$on('$destroy', destroySidebar);
+        $scope.$on('$destroy', () => destroyReact(SIDENAV_ID));
         management.addListener(() => updateSidebar(management.items.inOrder, $scope.section.id));
+
+        updateLandingPage($scope.$root.chrome.getKibanaVersion());
+        $scope.$on('$destroy', () => destroyReact(LANDING_ID));
       }
     };
   });
