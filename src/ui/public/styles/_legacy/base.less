@@ -1,8 +1,10 @@
 // generic mixins
-@import (reference) "./mixins";
-@import (reference) "./variables";
-@import (reference) "~ui/styles/bootstrap/bootstrap";
-@import "./react-input-range";
+@import (reference) "~ui/styles/_legacy/mixins";
+@import (reference) "~ui/styles/_legacy/variables/index";
+// @import (reference) "~ui/styles/bootstrap/bootstrap";
+// @import "./react-input-range"; I think this already gets compile via styles.js
+
+@localNavDepth: 5;
 
 .small {
   font-size: 0.9em !important;
@@ -326,8 +328,6 @@ style-compile {
 .bsTooltip-inner {
   white-space: pre-wrap !important;
 }
-
-@import '../filter_bar/filter_bar.less';
 
 
 .cell-hover {
@@ -702,4 +702,3 @@ style-compile {
   }
 }
 
-@import "~dragula/dist/dragula.css";
