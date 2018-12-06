@@ -62,3 +62,13 @@ it('deletes files/folders matching regular expression', async () => {
   expect(readdirSync(resolve(TMP, 'a'))).toEqual(['b']);
   expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
 });
+
+it('deletes files/folders where test returns true', async () => {
+  await scanDelete({
+    directory: TMP,
+    test: path => /^.*[\/\\](bar|c)([\/\\]|$)/.test(path),
+  });
+  expect(readdirSync(resolve(TMP, 'foo'))).toEqual([]);
+  expect(readdirSync(resolve(TMP, 'a'))).toEqual(['b']);
+  expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
+});

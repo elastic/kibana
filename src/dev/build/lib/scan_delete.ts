@@ -32,8 +32,9 @@ const getReadDir$ = Rx.bindNodeCallback(Fs.readdir);
 
 interface Options {
   directory: string;
-  regularExpressions: RegExp[];
+  regularExpressions?: RegExp[];
   concurrency?: 20;
+  test?: (path: string) => boolean;
 }
 
 /**
@@ -42,10 +43,11 @@ interface Options {
  *
  * @param options.directory the directory to scan, all files including dot files will be checked
  * @param options.regularExpressions an array of regular expressions, if any matches the file/directory will be deleted
+ * @param options.test a function that is called each each directory and file, if `true` is returned that directory will be deleted
  * @param options.concurrency optional concurrency to run deletes, defaults to 20
  */
 export async function scanDelete(options: Options) {
-  const { directory, regularExpressions, concurrency = 20 } = options;
+  const { directory, regularExpressions = [], test = () => false, concurrency = 20 } = options;
 
   assertAbsolute(directory);
 
@@ -60,7 +62,7 @@ export async function scanDelete(options: Options) {
   // and recursively iterating through all children, unless a child matches
   // one of the supplied regular expressions
   const getPathsToDelete$ = (path: string): Rx.Observable<string> => {
-    if (regularExpressions.some(re => re.test(path))) {
+    if (test(path) || regularExpressions.some(re => re.test(path))) {
       return Rx.of(path);
     }
 
