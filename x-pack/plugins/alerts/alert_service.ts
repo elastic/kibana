@@ -118,15 +118,6 @@ export class AlertService {
         description: template.description,
         timeOut: '500m',
         numWorkers: 1,
-        static: [
-          {
-            id: 'someTaskId',
-            taskType: 'to-be-overriden',
-            scope: 'alert',
-            interval: '1m',
-            params: {},
-          },
-        ],
         createTaskRunner(context: RunContext) {
           return {
             async run() {
