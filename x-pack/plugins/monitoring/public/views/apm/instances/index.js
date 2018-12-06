@@ -22,7 +22,7 @@ uiRoutes.when('/apm/instances', {
     },
   },
   controller: class extends MonitoringViewBaseTableController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
       $scope.cluster = find($route.current.locals.clusters, {
@@ -30,7 +30,12 @@ uiRoutes.when('/apm/instances', {
       });
 
       super({
-        title: 'APM - Instances',
+        title: i18n('xpack.monitoring.apm.instances.routeTitle', {
+          defaultMessage: '{apm} - Instances',
+          values: {
+            apm: 'APM'
+          }
+        }),
         storageKey: 'apm.instances',
         api: `../api/monitoring/v1/clusters/${globalState.cluster_uuid}/apm/instances`,
         defaultData: {},

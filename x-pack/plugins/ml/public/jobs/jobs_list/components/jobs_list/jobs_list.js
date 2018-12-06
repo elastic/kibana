@@ -17,7 +17,6 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../job_message_icon';
-import './styles/main.less';
 
 import {
   EuiBasicTable,

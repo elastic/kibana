@@ -37,7 +37,6 @@ import {
   loadIndexPatterns,
 } from '../edit_utils';
 
-import '../styles/main.less';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const MAX_NUMBER_DASHBOARDS = 1000;

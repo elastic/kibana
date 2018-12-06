@@ -7,13 +7,12 @@
 
 import PropTypes from 'prop-types';
 import React, {
-  Component
+  Component, Fragment
 } from 'react';
 
 import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
 import { GroupSelector } from './group_selector';
-import './styles/main.less';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export class MultiJobActions extends Component {
@@ -28,7 +27,7 @@ export class MultiJobActions extends Component {
     return (
       <div className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}>
         {jobsSelected &&
-          <React.Fragment>
+          <Fragment>
             <span className="jobs-selected-title">
               <FormattedMessage
                 id="xpack.ml.jobsList.multiJobsActions.jobsSelectedLabel"
@@ -51,7 +50,7 @@ export class MultiJobActions extends Component {
               showDeleteJobModal={this.props.showDeleteJobModal}
               refreshJobs={this.props.refreshJobs}
             />
-          </React.Fragment>
+          </Fragment>
         }
       </div>
     );

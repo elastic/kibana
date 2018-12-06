@@ -14,8 +14,6 @@ import {
   EuiDatePicker,
 } from '@elastic/eui';
 
-import './styles/main.less';
-
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n/react';
 
