@@ -38,6 +38,9 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     const { indexName, httpClient, closeModal, reloadIndices } = this.props;
     const { selectedPolicyName, selectedAlias } = this.state;
     if (!selectedPolicyName) {
+      this.setState({ policyError: i18n.translate(
+        'xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.noPolicySelectedErrorMessage',
+        { defaultMessage: 'You must select a policy.' }) });
       return;
     }
     try {
@@ -52,7 +55,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
         i18n.translate(
           'xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.addPolicyToIndexSuccess',
           {
-            defaultMessage: 'Added policy {policyName} to index {indexName}',
+            defaultMessage: 'Added policy {policyName} to index {indexName}.',
             values: {
               policyName: selectedPolicyName,
               indexName,
@@ -141,7 +144,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     );
   };
   renderForm() {
-    const { policies, selectedPolicyName } = this.state;
+    const { policies, selectedPolicyName, policyError } = this.state;
     const selectedPolicy = selectedPolicyName
       ? policies.find(policy => policy.name === selectedPolicyName)
       : null;
@@ -164,6 +167,8 @@ export class AddLifecyclePolicyConfirmModal extends Component {
     return (
       <EuiForm>
         <EuiFormRow
+          isInvalid={!!policyError}
+          error={policyError}
           label={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.choosePolicyLabel"
