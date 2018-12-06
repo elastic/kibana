@@ -9,28 +9,26 @@ import getPort from 'get-port';
 import * as glob from 'glob';
 import { platform as getOsPlatform } from 'os';
 import path from 'path';
+import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
-import { ILanguageServerLauncher, LanguageServerStatus } from './language_server_launcher';
+import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
 
 export class JavaLauncher implements ILanguageServerLauncher {
-  private state: LanguageServerStatus = LanguageServerStatus.NOT_RUNNING;
+  private isRunning: boolean = false;
   constructor(
     readonly targetHost: string,
     readonly detach: boolean,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
   ) {}
-  public status(): LanguageServerStatus {
-    if (this.detach) {
-      throw new Error("can't manage server status in detach mode");
-    }
-    return this.state;
+  public get running(): boolean {
+    return this.isRunning;
   }
 
-  public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
+  public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
     let port = 2090;
 
     if (!this.detach) {
@@ -39,12 +37,46 @@ export class JavaLauncher implements ILanguageServerLauncher {
     const log = this.loggerFactory.getLogger(['LSP', `java@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
     proxy.awaitServerConnection();
-    const javaLangserverPath = path.resolve(
-      __dirname,
-      '../../../../lsp/java-langserver/org.elastic.jdt.ls.product/target/repository'
-    );
+    if (this.detach) {
+      // detach mode
+      proxy.onConnected(() => {
+        this.isRunning = true;
+      });
+      proxy.onDisconnected(() => {
+        this.isRunning = false;
+        if (!proxy.isClosed) {
+          proxy.awaitServerConnection();
+        }
+      });
+    } else {
+      let child = this.spawnJava(installationPath, port, log);
+      proxy.onDisconnected(() => {
+        if (!proxy.isClosed) {
+          child.kill();
+          proxy.awaitServerConnection();
+          log.warn('language server disconnected, restarting it');
+          child = this.spawnJava(installationPath, port, log);
+        } else {
+          child.kill();
+        }
+      });
+      proxy.onExit(() => {
+        if (child) {
+          child.kill();
+        }
+      });
+    }
+    proxy.listen();
+    return new Promise<RequestExpander>(resolve => {
+      proxy.onConnected(() => {
+        resolve(new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options));
+      });
+    });
+  }
+
+  private spawnJava(installationPath: string, port: number, log: Logger) {
     const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
-      cwd: javaLangserverPath,
+      cwd: installationPath,
     });
     if (!launchersFound.length) {
       log.error('cannot find executable jar for JavaLsp');
@@ -64,65 +96,37 @@ export class JavaLauncher implements ILanguageServerLauncher {
       default:
         log.error('Unable to find platform for this os');
     }
+    process.env.CLIENT_PORT = port.toString();
 
-    if (!this.detach) {
-      process.env.CLIENT_PORT = port.toString();
-      const spawnJava = () => {
-        const p = spawn(
-          'java',
-          [
-            '-Declipse.application=org.elastic.jdt.ls.core.id1',
-            '-Dosgi.bundles.defaultStartLevel=4',
-            '-Declipse.product=org.elastic.jdt.ls.core.product',
-            '-Dlog.level=ALL',
-            '-noverify',
-            '-Xmx4G',
-            '-jar',
-            path.resolve(javaLangserverPath, launchersFound[0]),
-            '-configuration',
-            path.resolve(javaLangserverPath, config),
-            '-data',
-            this.options.jdtWorkspacePath,
-          ],
-          {
-            detached: false,
-            stdio: 'inherit',
-            env: process.env,
-          }
-        );
-        this.state = LanguageServerStatus.RUNNING;
-        p.on('exit', () => (this.state = LanguageServerStatus.NOT_RUNNING));
-        return p;
-      };
-      let child = spawnJava();
-      log.info(
-        `Launch Java Language Server at port ${process.env.CLIENT_PORT}, pid:${
-          child.pid
-        }, JAVA_HOME:${process.env.JAVA_HOME}`
-      );
-      proxy.onDisconnected(() => {
-        if (!proxy.isClosed) {
-          child.kill();
-          proxy.awaitServerConnection();
-          log.warn('language server disconnected, restarting it');
-          child = spawnJava();
-        } else {
-          child.kill();
-        }
-      });
-      proxy.onExit(() => {
-        if (child) {
-          child.kill();
-        }
-      });
-    } else {
-      proxy.onDisconnected(() => {
-        if (!proxy.isClosed) {
-          proxy.awaitServerConnection();
-        }
-      });
-    }
-    proxy.listen();
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options);
+    const p = spawn(
+      'java',
+      [
+        '-Declipse.application=org.elastic.jdt.ls.core.id1',
+        '-Dosgi.bundles.defaultStartLevel=4',
+        '-Declipse.product=org.elastic.jdt.ls.core.product',
+        '-Dlog.level=ALL',
+        '-noverify',
+        '-Xmx4G',
+        '-jar',
+        path.resolve(installationPath, launchersFound[0]),
+        '-configuration',
+        path.resolve(installationPath, config),
+        '-data',
+        this.options.jdtWorkspacePath,
+      ],
+      {
+        detached: false,
+        stdio: 'inherit',
+        env: process.env,
+      }
+    );
+    this.isRunning = true;
+    p.on('exit', () => (this.isRunning = false));
+    log.info(
+      `Launch Java Language Server at port ${process.env.CLIENT_PORT}, pid:${p.pid}, JAVA_HOME:${
+        process.env.JAVA_HOME
+      }`
+    );
+    return p;
   }
 }

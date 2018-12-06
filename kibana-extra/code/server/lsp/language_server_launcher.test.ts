@@ -5,16 +5,21 @@
  */
 
 import fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import rimraf = require('rimraf');
 import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
-import { JavaLauncher } from './java_launcher';
-import { LanguageServerStatus } from './language_server_launcher';
+import { TYPESCRIPT } from './language_servers';
+import { TypescriptServerLauncher } from './ts_launcher';
+
+jest.setTimeout(10000);
+const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 
 // @ts-ignore
 const options: ServerOptions = {
-  workspacePath: '/tmp/test/workspace',
-  jdtWorkspacePath: '/tmp/test/jdt',
+  workspacePath: `${tmpDataPath}/workspace`,
+  jdtWorkspacePath: `${tmpDataPath}/jdt`,
 };
 
 beforeAll(async () => {
@@ -25,11 +30,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  return new Promise(resolve => {
-    rimraf(options.workspacePath, () => {
-      rimraf(options.jdtWorkspacePath, resolve);
-    });
-  });
+  rimraf.sync(tmpDataPath);
 });
 
 function delay(seconds: number) {
@@ -38,13 +39,19 @@ function delay(seconds: number) {
   });
 }
 
-test('java language server could be shutdown', async () => {
+test('typescript language server could be shutdown', async () => {
   // @ts-ignore
-  const javaLauncher = new JavaLauncher('localhost', false, options, new ConsoleLoggerFactory());
-  const proxy = await javaLauncher.launch(true, 1);
+  const tsLauncher = new TypescriptServerLauncher(
+    'localhost',
+    false,
+    options,
+    new ConsoleLoggerFactory()
+  );
+  const proxy = await tsLauncher.launch(true, 1, TYPESCRIPT.embedPath!);
+  await proxy.initialize(options.workspacePath);
   await delay(2);
-  expect(javaLauncher.status()).toBe(LanguageServerStatus.RUNNING);
+  expect(tsLauncher.running).toBeTruthy();
   await proxy.exit();
   await delay(2);
-  expect(javaLauncher.status()).toBe(LanguageServerStatus.NOT_RUNNING);
+  expect(tsLauncher.running).toBeFalsy();
 });

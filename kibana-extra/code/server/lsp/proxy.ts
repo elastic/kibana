@@ -41,9 +41,9 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   public get isClosed() {
     return this.closed;
   }
+
   public initialized: boolean = false;
   private socket: any;
-
   private conn: IConnection;
   private clientConnection: MessageConnection | null = null;
   private closed: boolean = false;

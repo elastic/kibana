@@ -17,7 +17,7 @@ import { LanguageServers } from './language_servers';
 import { InstallManager } from "./install_manager";
 import { ServerOptions } from "../server_options";
 import rimraf from 'rimraf';
-import { LanguageServerStatus } from '../../common/install_events';
+import { LanguageServerStatus } from '../../common/language_server';
 
 const LANG_SERVER_NAME = 'Java';
 const langSrvDef = LanguageServers.find(l => l.name === LANG_SERVER_NAME)!;
@@ -67,7 +67,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   rimraf.sync(manager.installationPath(langSrvDef));
-})
+});
 afterAll(() => {
   nock.cleanAll();
   rimraf.sync(fakeTestDir);
@@ -83,11 +83,11 @@ test('it can download a package', async() => {
 });
 
 test('it can install language server', async() => {
-  expect(manager.status(LANG_SERVER_NAME)).toBe(LanguageServerStatus.NOT_INSTALL);
-  const installPromise =  manager.install(LANG_SERVER_NAME);
-  expect(manager.status(LANG_SERVER_NAME)).toBe(LanguageServerStatus.INSTALLING);
+  expect(manager.status(langSrvDef)).toBe(LanguageServerStatus.NOT_INSTALLED);
+  const installPromise =  manager.install(langSrvDef);
+  expect(manager.status(langSrvDef)).toBe(LanguageServerStatus.INSTALLING);
   await installPromise;
-  expect(manager.status(LANG_SERVER_NAME)).toBe(LanguageServerStatus.INSTALLED);
+  expect(manager.status(langSrvDef)).toBe(LanguageServerStatus.READY);
   const installPath = manager.installationPath(langSrvDef);
   const fakeFilePath = path.join(installPath, fakeFile);
   expect(fs.existsSync(fakeFilePath)).toBeTruthy();

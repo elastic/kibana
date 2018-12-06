@@ -7,9 +7,11 @@
 import { EsClient } from '@code/esqueue';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 
+import { LanguageServerStatus } from '../../common/language_server';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { LanguageServerController } from './controller';
+import { InstallManager } from './install_manager';
 import { WorkspaceHandler } from './workspace_handler';
 
 export class LspService {
@@ -19,6 +21,7 @@ export class LspService {
     targetHost: string,
     serverOptions: ServerOptions,
     client: EsClient,
+    installManager: InstallManager,
     loggerFactory: LoggerFactory
   ) {
     this.workspaceHandler = new WorkspaceHandler(
@@ -27,7 +30,12 @@ export class LspService {
       client,
       loggerFactory
     );
-    this.controller = new LanguageServerController(serverOptions, targetHost, loggerFactory);
+    this.controller = new LanguageServerController(
+      serverOptions,
+      targetHost,
+      installManager,
+      loggerFactory
+    );
   }
 
   /**
@@ -48,7 +56,6 @@ export class LspService {
   }
 
   public async launchServers() {
-    // TODO read from config which LSP should be used
     await this.controller.launchServers();
   }
 
@@ -68,5 +75,9 @@ export class LspService {
 
   public supportLanguage(lang: string) {
     return this.controller.supportLanguage(lang);
+  }
+
+  public languageServerStatus(lang: string): LanguageServerStatus {
+    return this.controller.status(lang);
   }
 }

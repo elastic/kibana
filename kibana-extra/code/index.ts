@@ -15,6 +15,7 @@ import {
 } from './server/indexer';
 import { Server } from './server/kibana_types';
 import { Log } from './server/log';
+import { InstallManager } from './server/lsp/install_manager';
 import { LspService } from './server/lsp/lsp_service';
 import {
   CancellationSerivce,
@@ -24,6 +25,7 @@ import {
   UpdateWorker,
 } from './server/queue';
 import { fileRoute } from './server/routes/file';
+import { installRoute } from './server/routes/install';
 import { lspRoute, symbolByQnameRoute } from './server/routes/lsp';
 import { redirectRoute } from './server/routes/redirect';
 import { redirectSocketRoute } from './server/routes/redirect_socket';
@@ -108,13 +110,15 @@ export default (kibana: any) =>
 
       const esClient: EsClient = adminCluster.getClient();
 
-      // Initialize indexing factories.
+      const installManager = new InstallManager(serverOptions);
       const lspService = new LspService(
         '127.0.0.1',
         serverOptions,
         esClient,
+        installManager,
         new ServerLoggerFactory(server)
       );
+      // Initialize indexing factories.
       const lspIndexerFactory = new LspIndexerFactory(lspService, serverOptions, esClient, log);
 
       const repoIndexInitializerFactory = new RepositoryIndexInitializerFactory(esClient, log);
@@ -175,10 +179,7 @@ export default (kibana: any) =>
       symbolByQnameRoute(server, symbolSearchClient);
       socketRoute(server, socketService, log);
       userRoute(server, serverOptions);
-
-      lspService.launchServers().then(() => {
-        // register lsp route after language server launched
-        lspRoute(server, lspService, serverOptions);
-      });
+      installRoute(server, socketService, lspService, installManager, serverOptions);
+      lspRoute(server, lspService, serverOptions);
     },
   });

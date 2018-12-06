@@ -6,6 +6,7 @@
 
 import SocketIO from 'socket.io';
 
+import { InstallEvent } from '../common/install_events';
 import { CloneProgress, RepositoryUri, SocketKind } from '../model';
 import { Server } from './kibana_types';
 import { Log } from './log';
@@ -30,6 +31,10 @@ export class SocketService {
 
   public broadcastDeleteProgress(repoUri: RepositoryUri, progress: number) {
     this.broadcastProgress(SocketKind.DELETE_PROGRESS, repoUri, progress, {});
+  }
+
+  public boradcastInstallProgress(event: InstallEvent) {
+    this.io.sockets.emit(SocketKind.INSTALL_PROGRESS, event);
   }
 
   private broadcastProgress(

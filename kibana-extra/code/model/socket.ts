@@ -8,4 +8,5 @@ export enum SocketKind {
   CLONE_PROGRESS = 'clone-progress',
   DELETE_PROGRESS = 'delete-progress',
   INDEX_PROGRESS = 'index-progress',
+  INSTALL_PROGRESS = 'install-progress',
 }

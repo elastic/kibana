@@ -6,16 +6,15 @@
 
 import { spawn } from 'child_process';
 import getPort from 'get-port';
-import path from 'path';
 import { ServerOptions } from '../server_options';
 import { LoggerFactory } from '../utils/log_factory';
 import { promiseTimeout } from '../utils/timeout';
-import { ILanguageServerLauncher, LanguageServerStatus } from './language_server_launcher';
+import { ILanguageServerLauncher } from './language_server_launcher';
 import { LanguageServerProxy } from './proxy';
 import { RequestExpander } from './request_expander';
 
 export class TypescriptServerLauncher implements ILanguageServerLauncher {
-  private state: LanguageServerStatus = LanguageServerStatus.NOT_RUNNING;
+  private isRunning: boolean = false;
   constructor(
     readonly targetHost: string,
     readonly detach: boolean,
@@ -23,14 +22,11 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
     readonly loggerFactory: LoggerFactory
   ) {}
 
-  public status(): LanguageServerStatus {
-    if (this.detach) {
-      throw new Error("can't manage server status in detach mode");
-    }
-    return this.state;
+  public get running(): boolean {
+    return this.isRunning;
   }
 
-  public async launch(builtinWorkspace: boolean, maxWorkspace: number) {
+  public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
     let port = 2089;
 
     if (!this.detach) {
@@ -41,7 +37,11 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
 
     if (this.detach) {
       log.info('Detach mode, expected LSP launch externally');
+      proxy.onConnected(() => {
+        this.isRunning = true;
+      });
       proxy.onDisconnected(() => {
+        this.isRunning = false;
         if (!proxy.isClosed) {
           log.warn('language server disconnected, reconnecting');
           setTimeout(() => proxy.connect(), 1000);
@@ -51,24 +51,14 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
       const spawnTs = () => {
         const p = spawn(
           'node',
-          [
-            '--max_old_space_size=4096',
-            path.resolve(
-              __dirname,
-              '../../../../lsp/javascript-typescript-langserver/lib/language-server'
-            ),
-            '-p',
-            port.toString(),
-            '-c',
-            '1',
-          ],
+          ['--max_old_space_size=4096', installationPath, '-p', port.toString(), '-c', '1'],
           {
             detached: false,
             stdio: 'inherit',
           }
         );
-        this.state = LanguageServerStatus.RUNNING;
-        p.on('exit', () => (this.state = LanguageServerStatus.NOT_RUNNING));
+        this.isRunning = true;
+        p.on('exit', () => (this.isRunning = false));
         return p;
       };
       let child = spawnTs();

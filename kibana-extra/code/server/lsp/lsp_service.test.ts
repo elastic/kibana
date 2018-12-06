@@ -7,36 +7,38 @@
 
 import fs from 'fs';
 import Git from 'nodegit';
-import rimraf from 'rimraf';
+// import rimraf from 'rimraf';
 import sinon from 'sinon';
 import path from 'path';
+import mkdirp from 'mkdirp';
 
 import { LspService } from "./lsp_service";
 import { ServerOptions } from "../server_options";
 import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
-import { RepositoryGitStatusReservedField, RepositoryTypeName} from '../indexer/schema';
+import { RepositoryGitStatusReservedField, RepositoryTypeName } from '../indexer/schema';
+import { InstallManager } from "./install_manager";
+import * as os from "os";
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 
-function prepareProject(url: string, path: string) {
-  return new Promise(resolve => {
-    if (!fs.existsSync(path)) {
-      rimraf(path, error => {
-        Git.Clone.clone(url, path).then(repo => {
-          resolve(repo);
-        });
-      });
-    } else {
-      resolve();
-    }
-  });
+
+const filename = 'hello.ts';
+
+async function prepareProject(repoPath: string) {
+  mkdirp.sync(repoPath);
+  const repo = await Git.Repository.init(repoPath, 0);
+  const helloContent = "console.log('hello world');";
+  fs.writeFileSync(path.join(repo.workdir(), filename), helloContent, 'utf8');
+  const index = await repo.refreshIndex();
+  await index.addByPath(filename);
+  index.write();
+  const treeId = await index.writeTree();
+  const committer = Git.Signature.create("tester",
+    "test@test.com", Date.now() / 1000, 60);
+  const commit = await repo.createCommit("HEAD", committer, committer, "commit for test", treeId, []);
+  console.log(`created commit ${commit.tostrS()}`);
+  return repo;
 }
-
-// function delay(seconds: number) {
-//   return new Promise(resolve => {
-//     setTimeout(() => resolve(), seconds * 1000);
-//   });
-// }
 
 const options = {
   enabled: true,
@@ -51,15 +53,18 @@ const options = {
   disableScheduler: true, // Temp option to disable all schedulers.
 };
 
+const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
+console.log(`tmp data path is ${tmpDataPath}`);
 const config = {
   get(key: string) {
     if (key === 'path.data') {
-      return '/tmp/test'
+      return tmpDataPath;
     }
   }
 };
 
 const serverOptions = new ServerOptions(options, config);
+const installManager = new InstallManager(serverOptions);
 
 function mockEsClient(): any {
   const api = {
@@ -81,29 +86,18 @@ function mockEsClient(): any {
   return api;
 }
 
-const repoUri = 'github.com/Microsoft/TypeScript-Node-Starter';
+const repoUri = 'github.com/test/test_repo';
 
-function cleanWorkspace() {
-  return new Promise(resolve => {
-    rimraf(serverOptions.workspacePath, resolve);
-  })
-}
 
 beforeAll(async () => {
-  return new Promise(resolve => {
-    rimraf(serverOptions.repoPath, resolve);
-  })
-});
-
-beforeEach(async () => {
   await prepareProject(
-    'https://github.com/Microsoft/TypeScript-Node-Starter.git',
     path.join(serverOptions.repoPath, repoUri)
   );
 });
 
+
 afterAll(() => {
-  return cleanWorkspace();
+  // return rimraf.sync(tmpDataPath);
 });
 
 function comparePath(pathA: string, pathB: string) {
@@ -117,15 +111,15 @@ test('process a hover request', async () => {
   let esClient = mockEsClient();
   const revision = 'master';
 
-  const lspservice = new LspService('127.0.0.1', serverOptions, esClient, new ConsoleLoggerFactory());
+  const lspservice = new LspService('127.0.0.1', serverOptions, esClient, installManager, new ConsoleLoggerFactory());
   try {
     const params = {
       textDocument: {
-        uri: `git://${repoUri}/blob/${revision}/src/app.ts`,
+        uri: `git://${repoUri}/blob/${revision}/${filename}`,
       },
       position: {
-        line: 19,
-        character: 2,
+        line: 0,
+        character: 1,
       }
     };
     const workspaceHandler = lspservice.workspaceHandler;
@@ -151,8 +145,7 @@ test('process a hover request', async () => {
     // workspace handler is working, filled workspacePath
     sinon.assert.calledWith(ctrlSpy, sinon.match.has("workspacePath", sinon.match((value) => comparePath(value, workspacePath))));
     // uri is changed by workspace handler
-    sinon.assert.calledWith(ctrlSpy, sinon.match.hasNested("params.textDocument.uri", `file://${workspacePath}/src/app.ts` ));
-
+    sinon.assert.calledWith(ctrlSpy, sinon.match.hasNested("params.textDocument.uri", `file://${workspacePath}/${filename}`));
 
 
   } finally {
@@ -161,18 +154,18 @@ test('process a hover request', async () => {
   return undefined;
 });
 
-test("unload a workspace", async() => {
+test("unload a workspace", async () => {
   let esClient = mockEsClient();
   const revision = 'master';
-  const lspservice = new LspService('127.0.0.1', serverOptions, esClient, new ConsoleLoggerFactory());
+  const lspservice = new LspService('127.0.0.1', serverOptions, esClient, installManager, new ConsoleLoggerFactory());
   try {
     const params = {
       textDocument: {
-        uri: `git://${repoUri}/blob/${revision}/src/app.ts`,
+        uri: `git://${repoUri}/blob/${revision}/${filename}`,
       },
       position: {
-        line: 19,
-        character: 2,
+        line: 0,
+        character: 1,
       }
     };
 

@@ -41,6 +41,7 @@ const InitializingError = {
 };
 
 export class RequestExpander implements ILanguageServerHandler {
+  public lastAccess: number = 0;
   private proxy: LanguageServerProxy;
   private jobQueue: Job[] = [];
   // a map for workspacePath -> Workspace
@@ -63,6 +64,7 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   public handleRequest(request: LspRequest): Promise<ResponseMessage> {
+    this.lastAccess = Date.now();
     return new Promise<ResponseMessage>((resolve, reject) => {
       this.jobQueue.push({
         request,

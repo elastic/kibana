@@ -9,14 +9,12 @@ import { LoggerFactory } from '../utils/log_factory';
 import { ILanguageServerHandler } from './proxy';
 
 export interface ILanguageServerLauncher {
-  launch(builtinWorkspace: boolean, maxWorkspace: number): Promise<ILanguageServerHandler>;
-  // test only
-  status(): LanguageServerStatus;
-}
-
-export enum LanguageServerStatus {
-  NOT_RUNNING,
-  RUNNING,
+  running: boolean;
+  launch(
+    builtinWorkspace: boolean,
+    maxWorkspace: number,
+    installationPath?: string
+  ): Promise<ILanguageServerHandler>;
 }
 
 export interface LauncherConstructor {

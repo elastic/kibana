@@ -11,60 +11,59 @@ import fetch from 'node-fetch';
 import path from 'path';
 import tar from 'tar-fs';
 import zlib from 'zlib';
-import { InstallEvent, InstallEventType, LanguageServerStatus } from '../../common/install_events';
+import { InstallationType, InstallEvent, InstallEventType } from '../../common/installation';
+import { LanguageServerStatus } from '../../common/language_server';
 import { ServerOptions } from '../server_options';
-import { InstallationType, LanguageServerDefinition, LanguageServers } from './language_servers';
+import { LanguageServerDefinition } from './language_servers';
 
 const DOWNLOAD_PROGRESS_WEIGHT = 0.9;
 
 export class InstallManager {
   private eventEmitter = new EventEmitter();
   private readonly basePath: string;
-  private installing: Set<string> = new Set();
+  private installing: Set<LanguageServerDefinition> = new Set();
 
   constructor(readonly serverOptions: ServerOptions) {
     this.basePath = serverOptions.langServerPath;
   }
 
-  public status(name: string): LanguageServerStatus {
-    const langDef = this.findDefinition(name);
-    if (langDef.installationType === InstallationType.Embed) {
-      return LanguageServerStatus.INSTALLED;
+  public status(def: LanguageServerDefinition): LanguageServerStatus {
+    if (def.installationType === InstallationType.Embed) {
+      return LanguageServerStatus.READY;
     }
-    if (this.installing.has(name)) {
+    if (this.installing.has(def)) {
       return LanguageServerStatus.INSTALLING;
     }
-    const installationPath = this.installationPath(langDef);
+    const installationPath = this.installationPath(def);
     return fs.existsSync(installationPath)
-      ? LanguageServerStatus.INSTALLED
-      : LanguageServerStatus.NOT_INSTALL;
+      ? LanguageServerStatus.READY
+      : LanguageServerStatus.NOT_INSTALLED;
   }
 
   public on(fn: (event: InstallEvent) => void) {
     this.eventEmitter.on('event', fn);
   }
 
-  public async install(langServerName: string) {
-    const def = this.findDefinition(langServerName);
+  public async install(def: LanguageServerDefinition) {
     try {
-      this.installing.add(langServerName);
+      this.installing.add(def);
       const packageFile = await this.downloadFile(def);
       await this.unPack(packageFile, def);
       this.sendEvent({
         langServerName: def.name,
         eventType: InstallEventType.DONE,
         progress: 1,
-        message: `install ${langServerName} done.`,
+        message: `install ${def.name} done.`,
       });
     } catch (e) {
       this.sendEvent({
         langServerName: def.name,
         eventType: InstallEventType.FAIL,
-        message: `install ${langServerName} failed. error: ${e.message}`,
+        message: `install ${def.name} failed. error: ${e.message}`,
       });
       throw e;
     } finally {
-      this.installing.delete(langServerName);
+      this.installing.delete(def);
     }
   }
 
@@ -122,12 +121,16 @@ export class InstallManager {
     });
   }
 
-  public installationPath(def: LanguageServerDefinition) {
-    let version = def.version!;
-    if (def.build) {
-      version += '-' + def.build;
+  public installationPath(def: LanguageServerDefinition): string {
+    if (def.installationType === InstallationType.Embed) {
+      return def.embedPath!;
+    } else {
+      let version = def.version!;
+      if (def.build) {
+        version += '-' + def.build;
+      }
+      return path.join(this.basePath, def.installationFolderName || def.name, version);
     }
-    return path.join(this.basePath, def.installationFolderName || def.name, version);
   }
 
   private async unPack(packageFile: string, def: LanguageServerDefinition) {
@@ -148,14 +151,6 @@ export class InstallManager {
         throw new Error(`unknown extension "${ext}"`);
     }
     // await decompress(packageFile, '/tmp/1/1');
-  }
-
-  private findDefinition(name: string) {
-    const langDef = LanguageServers.find(l => l.name === name);
-    if (!langDef) {
-      throw new Error('unknown language server name ' + name);
-    }
-    return langDef;
   }
 
   private sendEvent(event: InstallEvent) {

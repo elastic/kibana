@@ -5,6 +5,7 @@
  */
 
 import fs from 'fs';
+import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 import { ServerOptions } from '../server_options';
@@ -16,13 +17,13 @@ const options: ServerOptions = {
   workspacePath: '/tmp/test/workspace',
 };
 
-beforeAll(async () => {
+beforeEach(async () => {
   if (!fs.existsSync(options.workspacePath)) {
-    fs.mkdirSync(options.workspacePath);
+    mkdirp.sync(options.workspacePath);
   }
 });
 
-afterAll(() => {
+afterEach(() => {
   return new Promise(resolve => {
     rimraf(options.workspacePath, resolve);
   });
@@ -53,7 +54,7 @@ test('requests should be sequential', async () => {
   const response2Promise = expander.handleRequest(request2);
   const response1 = await response1Promise;
   const response2 = await response2Promise;
-  // response2 should not be started before repsonse1 ends.
+  // response2 should not be started before response1 ends.
   expect(response1.result.end).toBeLessThanOrEqual(response2.result.start);
 });
 
@@ -77,8 +78,8 @@ test('be able to open multiple workspace', async () => {
     params: [],
     workspacePath: '/tmp/test/workspace/2',
   };
-  fs.mkdirSync(request1.workspacePath);
-  fs.mkdirSync(request2.workspacePath);
+  mkdirp.sync(request1.workspacePath);
+  mkdirp.sync(request2.workspacePath);
   await expander.handleRequest(request1);
   await expander.handleRequest(request2);
   expect(proxyStub.initialize.called);
@@ -129,8 +130,8 @@ test('be able to swap workspace', async () => {
     params: [],
     workspacePath: '/tmp/test/workspace/2',
   };
-  fs.mkdirSync(request1.workspacePath);
-  fs.mkdirSync(request2.workspacePath);
+  mkdirp.sync(request1.workspacePath);
+  mkdirp.sync(request2.workspacePath);
   await expander.handleRequest(request1);
   await expander.handleRequest(request2);
   expect(proxyStub.initialize.called);
