@@ -18,12 +18,19 @@
  */
 
 import { safeMakeLabel } from './safe_make_label';
+import { i18n } from '@kbn/i18n';
 
 const siblingPipelineAggController = function (type) {
   return function ($scope) {
+    const metricTitle = i18n.translate('common.ui.aggTypes.metrics.metricTitle', {
+      defaultMessage: 'Metric'
+    });
+    const bucketTitle = i18n.translate('common.ui.aggTypes.metrics.bucketTitle', {
+      defaultMessage: 'Bucket'
+    });
 
     $scope.aggType = type;
-    $scope.aggTitle = type === 'customMetric' ? 'Metric' : 'Bucket';
+    $scope.aggTitle = type === 'customMetric' ? metricTitle : bucketTitle;
     $scope.aggGroup = type === 'customMetric' ? 'metrics' : 'buckets';
     $scope.safeMakeLabel = safeMakeLabel;
 

@@ -21,6 +21,8 @@ import { getConfig, createRunner } from './lib';
 
 import {
   BuildPackagesTask,
+  CleanClientModulesOnDLLTask,
+  CleanEmptyFoldersTask,
   CleanExtraBinScriptsTask,
   CleanExtraBrowsersTask,
   CleanExtraFilesFromModulesTask,
@@ -119,8 +121,10 @@ export async function buildDistributables(options) {
   await run(UpdateLicenseFileTask);
   await run(RemovePackageJsonDepsTask);
   await run(TranspileScssTask);
-  await run(CleanExtraFilesFromModulesTask);
   await run(OptimizeBuildTask);
+  await run(CleanClientModulesOnDLLTask);
+  await run(CleanExtraFilesFromModulesTask);
+  await run(CleanEmptyFoldersTask);
 
   /**
    * copy generic build outputs into platform-specific build

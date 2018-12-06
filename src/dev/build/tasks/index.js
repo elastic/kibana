@@ -29,6 +29,7 @@ export * from './install_dependencies_task';
 export * from './install_archive_source_task';
 export * from './license_file_task';
 export * from './nodejs';
+export * from './nodejs_modules';
 export * from './notice_file_task';
 export * from './optimize_task';
 export * from './os_packages';
