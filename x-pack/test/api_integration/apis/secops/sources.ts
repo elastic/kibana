@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { SourceQuery } from '../../../../plugins/secops/common/graphql/types';
-import { sourceQuery } from '../../../../plugins/secops/public/containers/source/source.gql_query';
+import { sourceQuery } from '../../../../plugins/secops/public/containers/source/index.gql_query';
 
 import { KbnTestProvider } from './types';
 

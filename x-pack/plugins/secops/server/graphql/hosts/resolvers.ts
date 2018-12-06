@@ -38,7 +38,7 @@ export const createHostsResolvers = (
         timerange: args.timerange,
         pagination: args.pagination,
         filterQuery: parseFilterQuery(args.filterQuery || ''),
-        fields: fields.map(f => f.replace('hosts.', '')),
+        fields: fields.map(f => f.replace('edges.host.', '')),
       };
       return libs.hosts.getHosts(req, options);
     },

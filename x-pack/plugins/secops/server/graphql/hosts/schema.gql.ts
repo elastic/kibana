@@ -15,9 +15,15 @@ export const hostsSchema = gql`
     os: String
   }
 
+  type HostsEdges {
+    host: HostItem!
+    cursor: CursorType!
+  }
+
   type HostsData {
-    hosts: [HostItem]!
-    total: Int
+    edges: [HostsEdges]!
+    totalCount: Int!
+    pageInfo: PageInfo!
   }
 
   extend type Source {

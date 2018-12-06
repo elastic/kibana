@@ -16,11 +16,23 @@ export const sharedSchema = gql`
     from: Float!
   }
 
+  type CursorType {
+    value: String!
+    tiebreaker: String
+  }
+
   input PaginationInput {
     "The size parameter allows you to configure the maximum amount of items to be returned"
-    size: Int!
-    "The page parameter defines the offset from the first result you want to fetch"
-    page: Int!
+    limit: Int!
+    "The cursor parameter defines the next result you want to fetch"
+    cursor: String
+    "The tiebreaker parameter allow to be more precise to fetch the next item"
+    tiebreaker: String
+  }
+
+  type PageInfo {
+    endCursor: CursorType
+    hasNextPage: Boolean
   }
 
   enum IndexType {

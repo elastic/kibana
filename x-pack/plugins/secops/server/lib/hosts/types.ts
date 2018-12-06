@@ -25,14 +25,49 @@ export interface HostsRequestOptions {
   fields: string[];
 }
 
+export interface HostHit {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number | null;
+  _source: {
+    '@timestamp': string;
+    system: {
+      host: {
+        os: {
+          name: string;
+          version: string;
+        };
+      };
+    };
+    host: {
+      name: string;
+    };
+  };
+  cursor: string;
+  sort: [string | number];
+}
+
+export interface HostBucket {
+  key: { host_name: string };
+  host: {
+    hits: {
+      total: number;
+      max_score: number | null;
+      hits: HostHit[];
+    };
+  };
+}
+
 export interface HostData extends SearchHit {
   sort: string[];
-  _source: {
-    // tslint:disable-next-line:no-any
-    [field: string]: any;
-  };
   aggregations: {
-    // tslint:disable-next-line:no-any
-    [agg: string]: any;
+    host_count: {
+      value: number;
+    };
+    group_by_host: {
+      after_key: string;
+      buckets: HostBucket[];
+    };
   };
 }

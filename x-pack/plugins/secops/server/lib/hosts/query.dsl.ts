@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { merge } from 'lodash/fp';
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { FilterQuery } from '../types';
 import { HostsRequestOptions } from './types';
@@ -17,7 +18,7 @@ export const HostsFieldsMap = {
 
 export const buildQuery = (options: HostsRequestOptions) => {
   const { to, from } = options.timerange;
-  const { page, size } = options.pagination;
+  const { limit, cursor } = options.pagination;
   const Fields = options.fields;
   const filterQuery = options.filterQuery;
   const EsFields = Fields.reduce(
@@ -55,28 +56,64 @@ export const buildQuery = (options: HostsRequestOptions) => {
     },
   };
 
-  return {
+  const dslQuery = {
     allowNoIndices: true,
     index: options.sourceConfiguration.auditbeatAlias,
     ignoreUnavailable: true,
     body: {
-      aggregations: agg,
+      aggregations: {
+        ...agg,
+        group_by_host: {
+          composite: {
+            size: limit + 1,
+            sources: [{ host_name: { terms: { field: 'host.name' } } }],
+          },
+          aggs: {
+            time: {
+              min: {
+                field: '@timestamp',
+              },
+            },
+            host: {
+              top_hits: {
+                size: 1,
+                _source: EsFields,
+                sort: [
+                  {
+                    '@timestamp': { order: 'asc' },
+                    'host.name': { order: 'asc' },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
       query: {
         bool: {
           filter,
         },
       },
-      collapse: {
-        field: 'host.name',
-      },
-      sort: [
-        {
-          [options.sourceConfiguration.fields.timestamp]: 'desc',
-        },
-      ],
-      _source: EsFields,
-      size,
-      from: page,
+      size: 0,
+      track_total_hits: false,
     },
   };
+
+  if (cursor) {
+    return merge(dslQuery, {
+      body: {
+        aggregations: {
+          group_by_host: {
+            composite: {
+              after: {
+                host_name: cursor,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  return dslQuery;
 };
