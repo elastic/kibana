@@ -114,10 +114,10 @@ function showResults(resp, action) {
     });
   } else if (action === JOB_STATE.CLOSED) {
     actionText = i18n.translate('xpack.ml.jobsList.closeActionStatusText', {
-      defaultMessage: 'stop'
+      defaultMessage: 'close'
     });
     actionTextPT = i18n.translate('xpack.ml.jobsList.closedActionStatusText', {
-      defaultMessage: 'stop'
+      defaultMessage: 'closed'
     });
   }
 

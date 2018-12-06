@@ -29,11 +29,11 @@ function loadGroups() {
         value: g.id,
         view: (
           <div className="group-item">
-            <JobGroup name={g.id} />
+            <JobGroup name={g.id} />&nbsp;
             <span>
               <FormattedMessage
                 id="xpack.ml.jobsList.jobFilterBar.jobGroupTitle"
-                defaultMessage="{jobsCount, plural, one {# job} other {# jobs}}"
+                defaultMessage="({jobsCount, plural, one {# job} other {# jobs}})"
                 values={{ jobsCount: g.jobIds.length }}
               />
             </span>
