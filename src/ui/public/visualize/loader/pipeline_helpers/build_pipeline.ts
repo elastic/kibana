@@ -79,11 +79,13 @@ export const getSchemas = (vis: Vis): Schemas => {
 };
 
 export const prepareJson = (variable: string, data: object): string => {
-  return `${variable}='${JSON.stringify(data).replace(/'/g, `\\'`)}' `;
+  return `${variable}='${JSON.stringify(data)
+    .replace(/\\/g, `\\\\`)
+    .replace(/'/g, `\\'`)}' `;
 };
 
 export const prepareString = (variable: string, data: string): string => {
-  return `${variable}='${data.replace(/'/g, `\\'`)}' `;
+  return `${variable}='${data.replace(/\\/g, `\\\\`).replace(/'/g, `\\'`)}' `;
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {

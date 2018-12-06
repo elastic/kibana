@@ -101,7 +101,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       it('with splits', () => {
         const schemas = {
           metric: [0],
-          split: [1, 2],
+          split_row: [1, 2],
         };
         const actual = buildPipelineVisFunction.table({ params }, schemas);
         expect(actual).toMatchSnapshot();
@@ -110,7 +110,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       it('with splits and buckets', () => {
         const schemas = {
           metric: [0, 1],
-          split: [2, 4],
+          split_row: [2, 4],
           bucket: [3]
         };
         const actual = buildPipelineVisFunction.table({ params }, schemas);

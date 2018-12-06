@@ -14,9 +14,9 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function with metrics and buckets 1`] = `"regionmap visConfig='{\\"foo\\":\\"bar\\"}' bucket='1,2' metric='0' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\"}' split='1,2' metric='0' "`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\"}' splitRow='1,2' metric='0' "`;
 
-exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits and buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\"}' split='2,4' bucket='3' metric='0,1' "`;
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits and buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\"}' splitRow='2,4' bucket='3' metric='0,1' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function without splits or buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\"}' metric='0,1' "`;
 
