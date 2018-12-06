@@ -1,0 +1,640 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render correctly 1`] = `
+<nav
+  className="euiSideNav"
+>
+  <button
+    className="euiSideNav__mobileToggle euiLink"
+    type="button"
+  >
+    <span
+      className="euiSideNav__mobileWrap"
+    >
+      <span
+        className="euiSideNav__mobileTitle"
+      />
+      <svg
+        aria-hidden="true"
+        className="euiIcon euiIcon--medium euiSideNav__mobileIcon"
+        focusable="false"
+        height="16"
+        style={
+          Object {
+            "fill": undefined,
+          }
+        }
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+      >
+        <defs>
+          <path
+            d="M2 4V2h2v2H2zm5 0V2h2v2H7zm5 0V2h2v2h-2zM2 9V7h2v2H2zm5 0V7h2v2H7zm5 0V7h2v2h-2zM2 14v-2h2v2H2zm5 0v-2h2v2H7zm5 0v-2h2v2h-2z"
+            id="apps-a"
+          />
+        </defs>
+        <use
+          xlinkHref="#apps-a"
+        />
+      </svg>
+    </span>
+  </button>
+  <div
+    className="euiSideNav__content"
+    role="menubar"
+  >
+    <div
+      className="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+    >
+      <div
+        aria-label={
+          <span
+            className="euiSideNavItemButton__content"
+          >
+            <span
+              className="euiSideNavItemButton__label"
+            >
+              
+            </span>
+          </span>
+        }
+        className="euiSideNavItemButton"
+      >
+        <span
+          className="euiSideNavItemButton__content"
+        >
+          <span
+            className="euiSideNavItemButton__label"
+          >
+            
+          </span>
+        </span>
+      </div>
+      <div
+        className="euiSideNavItem__items"
+      >
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            <svg
+              className="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            android/
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            <svg
+              className="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            futures/
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            <svg
+              className="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_down-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                xlinkHref="#arrow_down-a"
+              />
+            </svg>
+            guava/
+          </div>
+          <div
+            className="euiSideNavItem__items"
+          >
+            <div
+              className="euiSideNavItem euiSideNavItem--branch"
+            >
+              <div
+                className="fileNode"
+                onClick={[Function]}
+              >
+                <svg
+                  className="euiIcon euiIcon--medium"
+                  focusable="false"
+                  height="16"
+                  style={
+                    Object {
+                      "fill": undefined,
+                    }
+                  }
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                      id="arrow_right-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    transform="matrix(0 1 1 0 0 0)"
+                    xlinkHref="#arrow_right-a"
+                  />
+                </svg>
+                javadoc-link/
+              </div>
+            </div>
+            <div
+              className="euiSideNavItem euiSideNavItem--branch"
+            >
+              <div
+                className="fileNode"
+                onClick={[Function]}
+              >
+                pom.xml
+              </div>
+            </div>
+            <div
+              className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
+            >
+              <div
+                className="activeFileNode"
+                onClick={[Function]}
+              >
+                <svg
+                  className="euiIcon euiIcon--medium"
+                  focusable="false"
+                  height="16"
+                  style={
+                    Object {
+                      "fill": undefined,
+                    }
+                  }
+                  viewBox="0 0 16 16"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                >
+                  <defs>
+                    <path
+                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                      id="arrow_down-a"
+                    />
+                  </defs>
+                  <use
+                    fillRule="nonzero"
+                    xlinkHref="#arrow_down-a"
+                  />
+                </svg>
+                src/com/google/
+              </div>
+              <div
+                className="euiSideNavItem__items"
+              >
+                <div
+                  className="euiSideNavItem euiSideNavItem--branch"
+                >
+                  <div
+                    className="fileNode"
+                    onClick={[Function]}
+                  >
+                    <svg
+                      className="euiIcon euiIcon--medium"
+                      focusable="false"
+                      height="16"
+                      style={
+                        Object {
+                          "fill": undefined,
+                        }
+                      }
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                          id="arrow_right-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        transform="matrix(0 1 1 0 0 0)"
+                        xlinkHref="#arrow_right-a"
+                      />
+                    </svg>
+                    common/
+                  </div>
+                </div>
+                <div
+                  className="euiSideNavItem euiSideNavItem--branch"
+                >
+                  <div
+                    className="fileNode"
+                    onClick={[Function]}
+                  >
+                    <svg
+                      className="euiIcon euiIcon--medium"
+                      focusable="false"
+                      height="16"
+                      style={
+                        Object {
+                          "fill": undefined,
+                        }
+                      }
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                          id="arrow_right-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        transform="matrix(0 1 1 0 0 0)"
+                        xlinkHref="#arrow_right-a"
+                      />
+                    </svg>
+                    thirdparty/publicsuffix/
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            guava-bom/pom.xml
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            <svg
+              className="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            guava-gwt/
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            <svg
+              className="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            guava-testlib/
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            <svg
+              className="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            guava-tests/
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            <svg
+              className="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            refactorings/
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            <svg
+              className="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              style={
+                Object {
+                  "fill": undefined,
+                }
+              }
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                  id="arrow_right-a"
+                />
+              </defs>
+              <use
+                fillRule="nonzero"
+                transform="matrix(0 1 1 0 0 0)"
+                xlinkHref="#arrow_right-a"
+              />
+            </svg>
+            util/
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            .gitattributes
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            .gitignore
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            .travis.yml
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            CONTRIBUTING.md
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            CONTRIBUTORS
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            COPYING
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            README.md
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            cycle_whitelist.txt
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            javadoc-stylesheet.css
+          </div>
+        </div>
+        <div
+          className="euiSideNavItem euiSideNavItem--trunk"
+        >
+          <div
+            className="fileNode"
+            onClick={[Function]}
+          >
+            pom.xml
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+`;

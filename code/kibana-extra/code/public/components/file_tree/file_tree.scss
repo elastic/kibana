@@ -1,0 +1,14 @@
+%fileNode {
+  padding: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fileNode {
+  @extend %fileNode;
+}
+
+.activeFileNode {
+  @extend %fileNode;
+  background: #0079a5;
+}

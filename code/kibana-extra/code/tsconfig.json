@@ -1,0 +1,24 @@
+{
+  "extends": "../../kibana/tsconfig.json",
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "*",
+        "webpackShims/*"
+      ],
+      "ui/*": [
+        "../../kibana/src/ui/public/*"
+      ]
+    }
+  },
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    ".gradle",
+    "node_modules",
+    "build"
+  ]
+}

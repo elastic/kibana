@@ -1,0 +1,15 @@
+optimize:
+  unsafeCache: true
+  sourceMaps: false
+#  sourceMaps: '#cheap-source-map'
+
+code:
+  enableGlobalReference: false
+#  repos:
+#  - repo: 'github.com/Microsoft/TypeScript-Node-Starter'
+#    init:
+#      - 'yarn'
+#      - 'install'
+
+xpack.security.encryptionKey: "something_at_least_32_characters"
+xpack.reporting.encryptionKey: "something_at_least_32_characters"

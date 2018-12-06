@@ -1,0 +1,11 @@
+{
+  "name": "@code/esqueue",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "types": "./types/index.d.ts",
+  "dependencies": {
+    "moment": "^2.20.1",
+    "puid": "1.0.5"
+  }
+}

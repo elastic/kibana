@@ -1,0 +1,115 @@
+.mainRoot {
+  height: 100vh;
+}
+
+.codeMain {
+  margin: 0;
+}
+
+.editorContainer {
+  height: 100%;
+  overflow: auto;
+}
+
+.topBar {
+  padding: 0 1rem;
+  margin: 0;
+}
+
+.fileTreeContainer {
+  border-right: 4px solid grey;
+  width: 16rem;
+}
+
+.spacer {
+  background-color: grey;
+}
+
+.autoOverflow {
+  overflow: auto;
+}
+
+.noOverflow {
+  overflow: hidden;
+}
+
+.directoryView {
+  max-height: 60%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow: auto;
+}
+
+.directoryItem {
+  height: 2rem;
+  line-height: 2rem;
+  margin: 0 0.5rem;
+}
+
+.directoryItem>a {
+  display: block;
+  width: 100px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.commitsHeader {
+  font-size: 1.5rem;
+}
+
+.commitItem {
+  padding: 0.5rem 0;
+  white-space: nowrap;
+}
+
+.contentItem {
+  padding: 0.5rem;
+  border: 1px solid;
+  overflow: auto;
+}
+
+.markdownContainer {
+  padding: 2rem;
+}
+
+.autoMargin {
+  margin: auto;
+}
+
+.searchSettingButtons {
+  padding: 1rem;
+}
+
+.collapseButton {
+  cursor: pointer;
+}
+
+.reverseRow {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.searchTypeTitle {
+  padding: 1rem;
+}
+
+.searchSettings {
+  border: 1px solid;
+  margin: 0 0.5rem;
+}
+
+.editorBlameContainer {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  overflow: auto;
+}
+
+.blameContainer {
+  flex-grow: false;
+  max-width: 25rem;
+  height: 100%;
+  overflow: auto;
+}

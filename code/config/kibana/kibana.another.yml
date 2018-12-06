@@ -1,0 +1,18 @@
+optimize:
+  sourceMaps: false
+#  sourceMaps: '#cheap-source-map'
+
+code:
+  redirectToNode: http://localhost:5601/{baseUrl}
+  enableGlobalReference: false
+#  repos:
+#  - repo: 'github.com/Microsoft/TypeScript-Node-Starter'
+#    init:
+#      - 'yarn'
+#      - 'install'
+
+xpack.security.encryptionKey: "something_at_least_32_characters"
+xpack.reporting.encryptionKey: "something_at_least_32_characters"
+
+elasticsearch.username: "elastic"
+elasticsearch.password: "changeme"

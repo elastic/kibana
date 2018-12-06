@@ -1,0 +1,16 @@
+gen/
+bin/
+!/kibana-extra/code/packages/code-filename-check/bin/
+.DS_Store
+.gradle/
+.idea/
+.cache/
+out/
+.settings/
+build
+*.iws
+*.iml
+*.ipr
+/data/
+.project
+.classpath
