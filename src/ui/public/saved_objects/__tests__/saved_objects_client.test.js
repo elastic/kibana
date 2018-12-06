@@ -138,7 +138,7 @@ describe('SavedObjectsClient', () => {
       }).rejects(new Error('Request failed'));
       try {
         await savedObjectsClient.get(doc.type, doc.id);
-        expect().throw('should have error');
+        throw new Error('should have error');
       } catch (e) {
         expect(e.message).to.be('Request failed');
       }
