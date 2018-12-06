@@ -1,10 +1,10 @@
 [submodule "javascript-typescript-langserver"]
-	path = lsp/javascript-typescript-langserver
+	path = code/lsp/javascript-typescript-langserver
 	url = ../javascript-typescript-langserver
 	ignore = untracked
 [submodule "kibana"]
-	path = kibana
+	path = code/kibana
 	url = ../kibana
 [submodule "lsp/java-langserver"]
-	path = lsp/java-langserver
+	path = code/lsp/java-langserver
 	url = ../java-langserver
