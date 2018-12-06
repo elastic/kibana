@@ -258,10 +258,35 @@ export class ESGeohashGridSource extends VectorSource {
       this._descriptor.requestType === REQUEST_TYPE.AS_GEOHASHGRID_POLYGON
     ) {
       console.warn('should implement this properly, with some default styling');
-      return VectorLayer.createDescriptor({
+      const descriptor = VectorLayer.createDescriptor({
         sourceDescriptor: this._descriptor,
         ...options
       });
+      descriptor.style = {
+        ...descriptor.style,
+        "type": "VECTOR",
+        "properties": {
+          "fillColor": {
+            "type": "DYNAMIC",
+            "options": {
+              "field": {
+                "label": "doc_count",
+                "name": "doc_count",
+                "origin": "source"
+              },
+              "color": "Blues"
+            }
+          },
+          "iconSize": {
+            "type": "STATIC",
+            "options": {
+              "size": 10
+            }
+          },
+          "alphaValue": 0.5
+        }
+      };
+      return descriptor;
     }
   }
 
@@ -277,6 +302,7 @@ export class ESGeohashGridSource extends VectorSource {
     ) {
       const layerDescriptor = this._createDefaultLayerDescriptor(options);
       const style = new VectorStyle(layerDescriptor.style);
+      console.log(style);
       return new VectorLayer({
         layerDescriptor: layerDescriptor,
         source: this,
