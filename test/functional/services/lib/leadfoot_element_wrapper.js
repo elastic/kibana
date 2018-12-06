@@ -304,6 +304,30 @@ export class LeadfootElementWrapper {
   }
 
   /**
+   * Gets a property or attribute of the element according to the WebDriver specification algorithm. Use of this method is not recommended; instead, use leadfoot/Element#getAttribute to retrieve DOM attributes and leadfoot/Element#getProperty to retrieve DOM properties.
+   *
+   * This method uses the following algorithm on the server to determine what value to return:
+   *
+   *  1. If name is 'style', returns the style.cssText property of the element.
+   *  2. If the attribute exists and is a boolean attribute, returns 'true' if the attribute is true, or null otherwise.
+   *  3. If the element is an <option> element and name is 'value', returns the value attribute if it exists, otherwise returns the visible text content of the option.
+   *  4. If the element is a checkbox or radio button and name is 'selected', returns 'true' if the element is checked, or null otherwise.
+   *  5. If the returned value is expected to be a URL (e.g. element is <a> and attribute is href), returns the fully resolved URL from the href/src property of the element, not the attribute.
+   *  6. If name is 'class', returns the className property of the element.
+   *  7. If name is 'readonly', returns 'true' if the readOnly property is true, or null otherwise.
+   *  8. If name corresponds to a property of the element, and the property is not an Object, return the property value coerced to a string.
+   *  9. If name corresponds to an attribute of the element, return the attribute value.
+   *
+   * https://theintern.io/leadfoot/module-leadfoot_Element.html#getSpecAttribute
+   *
+   * @param {string} name
+   * @return {Promise<string>}
+   */
+  async getSpecAttribute(name) {
+    return await this._leadfootElement.getSpecAttribute(name);
+  }
+
+  /**
    * https://theintern.io/leadfoot/module-leadfoot_Element.html#findByXpath
    *
    * @deprecated
