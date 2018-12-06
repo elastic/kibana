@@ -47,6 +47,10 @@ export async function initializeInterpreter() {
   return functionList;
 }
 
+export async function isInterpreterInitialized() {
+  return functionList;
+}
+
 // Use the above promise to seed the interpreter with the functions it can defer to
 export async function interpretAst(ast, context, handlers) {
   // Load plugins before attempting to get functions, otherwise this gets racey

@@ -19,4 +19,4 @@
 
 export { populateBrowserRegistries, getBrowserRegistries } from './browser_registries';
 export { createSocket } from './socket';
-export { initializeInterpreter, interpretAst } from './interpreter';
+export { initializeInterpreter, interpretAst, isInterpreterInitialized } from './interpreter';

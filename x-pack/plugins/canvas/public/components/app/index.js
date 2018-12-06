@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { populateBrowserRegistries } from '@kbn/interpreter/public';
+import { populateBrowserRegistries, isInterpreterInitialized } from '@kbn/interpreter/public';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
@@ -49,6 +49,7 @@ const mapDispatchToProps = dispatch => ({
       // initialize the socket and interpreter
       loadPrivateBrowserFunctions();
       await populateBrowserRegistries(types, basePath);
+      await isInterpreterInitialized();
 
       // set app state to ready
       dispatch(appReady());
