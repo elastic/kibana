@@ -70,13 +70,14 @@ export const CleanClientModulesOnDLLTask = {
     // from any whitelisted module
     const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules);
 
+    log.debug('Cleaning bundled module source for %d entry files', dllEntries.length);
     for (const relativeEntryPath of dllEntries) {
       const entryPath = `${baseDir}/${relativeEntryPath}`;
+      log.verbose('Cleaning bundled module source from entry', entryPath);
 
       // Clean a module included into the dll
       // and then write a blank file for each
       // entry file present into the dll
-      log.debug('Cleaning bundled module source for entry', relativeEntryPath);
       await cleanDllModuleFromEntryPath(entryPath);
       await writeEmptyFileForDllEntry(entryPath);
     }
