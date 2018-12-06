@@ -27,7 +27,7 @@ interface HostsTableReduxProps {
 }
 
 interface HostsTableDispatchProps {
-  updateLimitPagination: ({}) => void;
+  updateLimitPagination: (param: { limit: number }) => void;
 }
 
 type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
