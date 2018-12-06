@@ -33,9 +33,11 @@ export interface Feature {
   };
 }
 
+const featurePrivilegePartRegex = /^[a-zA-Z0-9_-]+$/;
+
 const schema = Joi.object({
   id: Joi.string()
-    .regex(/^[a-zA-Z0-9_-]+$/)
+    .regex(featurePrivilegePartRegex)
     .required(),
   name: Joi.string().required(),
   validLicenses: Joi.array().items(Joi.string().valid('basic', 'standard', 'gold', 'platinum')),
@@ -44,7 +46,7 @@ const schema = Joi.object({
   navLinkId: Joi.string(),
   privileges: Joi.object()
     .pattern(
-      /^[a-zA-Z0-9_-]+$/,
+      featurePrivilegePartRegex,
       Joi.object({
         metadata: Joi.object({
           tooltip: Joi.string(),
