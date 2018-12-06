@@ -7,7 +7,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import CodePreview from '../index';
+import { CodePreview } from '../index';
 import props from './props.json';
 import { toJson } from '../../../../utils/testHelpers';
 

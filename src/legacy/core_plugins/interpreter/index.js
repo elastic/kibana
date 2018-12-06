@@ -19,8 +19,6 @@
 
 import { resolve } from 'path';
 import init from './init';
-import { pathsRegistry } from '@kbn/interpreter/common';
-import { pluginPaths } from '@kbn/interpreter/plugin_paths';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -31,9 +29,6 @@ export default function (kibana) {
       hacks: [
         'plugins/interpreter/load_browser_plugins.js',
       ],
-    },
-    preInit: () => {
-      pathsRegistry.registerAll(pluginPaths);
     },
     init,
   });
