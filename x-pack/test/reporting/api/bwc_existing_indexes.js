@@ -47,17 +47,17 @@ export default function ({ getService }) {
         const reportPaths = [];
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3));
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3));
-        // reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3));
+        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3));
         reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3));
-        // reportPaths.push(await reportingAPI.postJob(
-        //   GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3));
+        reportPaths.push(await reportingAPI.postJob(
+          GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3));
 
         await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
       }).timeout(1540000);
 
       it('jobs completed successfully', async () => {
         const stats = await usageAPI.getUsageStats();
-        expectedCompletedReportCount += 3;
+        expectedCompletedReportCount += 5;
         reportingAPI.expectCompletedReportCount(stats, expectedCompletedReportCount);
       });
     });
