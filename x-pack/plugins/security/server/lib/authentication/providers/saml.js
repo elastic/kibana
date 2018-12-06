@@ -34,7 +34,7 @@ function isAccessTokenExpiredError(err) {
 }
 
 /**
- * Checks the error returned by Elasticsearch as the result of `samlRefreshAccessToken` call and returns `true` if
+ * Checks the error returned by Elasticsearch as the result of `getAccessToken` call and returns `true` if
  * request has been rejected because of invalid refresh token (expired after 24 hours or have been used already),
  * otherwise returns `false`.
  * @param {Object} err Error returned from Elasticsearch.
@@ -269,7 +269,7 @@ export class SAMLAuthenticationProvider {
         access_token: newAccessToken,
         refresh_token: newRefreshToken
       } = await this._options.client.callWithInternalUser(
-        'shield.samlRefreshAccessToken',
+        'shield.getAccessToken',
         { body: { grant_type: 'refresh_token', refresh_token: refreshToken } }
       );
 
