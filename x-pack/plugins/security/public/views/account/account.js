@@ -33,6 +33,9 @@ routes.when('/account', {
 
     const notifier = new Notifier();
 
+    const { authentication_realm: authenticationRealm } = $scope.user;
+    $scope.showChangePassword = authenticationRealm.type === 'reserved' || authenticationRealm.type === 'native';
+
     $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword) => {
       $scope.user.newPassword = newPassword;
       if (currentPassword) {
