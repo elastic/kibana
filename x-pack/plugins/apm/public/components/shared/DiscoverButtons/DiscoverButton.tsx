@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import React from 'react';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
@@ -22,7 +21,7 @@ interface State {
 }
 
 export class DiscoverButton extends React.Component<Props, State> {
-  public state = {};
+  public state: State = {};
   public async componentDidMount() {
     const indexPattern = await getAPMIndexPattern();
     this.setState({ indexPattern });
@@ -30,7 +29,7 @@ export class DiscoverButton extends React.Component<Props, State> {
 
   public render() {
     const { query, children, ...rest } = this.props;
-    const id: string = get(this.state, 'indexPattern.id');
+    const id = this.state.indexPattern && this.state.indexPattern.id;
 
     if (!query._a.index) {
       query._a.index = id;
