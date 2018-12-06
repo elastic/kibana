@@ -9,5 +9,8 @@
   "dependencies": {
     "@elastic/eui": "5.0.0",
     "react": "^16.3.0"
+  },
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js"
   }
 }
