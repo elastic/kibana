@@ -21,21 +21,53 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
 
     return resourcePrivileges.reduce((result, { resource, privileges }) => {
       if (resource === GLOBAL_RESOURCE) {
-        result.global = _.uniq([
-          ...result.global,
-          ...privileges.map(privilege => PrivilegeSerializer.deserializePrivilegeAssignedGlobally(privilege))
-        ]);
+        const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege));
+        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege));
+
+        result.global = {
+          minimum: _.uniq([
+            ...result.global.minimum,
+            ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializeGlobalMinimumPrivilege(privilege))
+          ]),
+          feature: featurePrivileges.reduce((acc, privilege) => {
+            const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
+            return {
+              ...acc,
+              [featurePrivilege.featureId]: _.uniq([
+                ...acc[featurePrivilege.featureId] || [],
+                featurePrivilege.privilege
+              ])
+            };
+          }, result.global.feature)
+        };
         return result;
       }
 
       const spaceId = ResourceSerializer.deserializeSpaceResource(resource);
-      result.space[spaceId] = _.uniq([
-        ...result.space[spaceId] || [],
-        ...privileges.map(privilege => PrivilegeSerializer.deserializePrivilegeAssignedAtSpace(privilege))
-      ]);
+      const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege));
+      const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege));
+      result.space[spaceId] = {
+        minimum: _.uniq([
+          ...result.space[spaceId] ? result.space[spaceId].minimum || [] : [],
+          ...minimumPrivileges.map(privilege => PrivilegeSerializer.deserializeSpaceMinimumPrivilege(privilege))
+        ]),
+        feature: featurePrivileges.reduce((acc, privilege) => {
+          const featurePrivilege = PrivilegeSerializer.deserializeFeaturePrivilege(privilege);
+          return {
+            ...acc,
+            [featurePrivilege.featureId]: _.uniq([
+              ...acc[featurePrivilege.featureId] || [],
+              featurePrivilege.privilege
+            ])
+          };
+        }, result.space[spaceId] ? result.space[spaceId].feature || {} : {})
+      };
       return result;
     }, {
-      global: [],
+      global: {
+        minimum: [],
+        feature: {},
+      },
       space: {},
     });
   };
