@@ -16,7 +16,7 @@ describe(`#isGlobalMinimumPrivilege`, () => {
   ['space_all', 'space_read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(
     validValue => {
       test(`returns false for '${invalidValue}'`, () => {
-        expect(PrivilegeSerializer.isGlobalMinimumPrivilege(validValue)).toBe(false);
+        expect(PrivilegeSerializer.isGlobalMinimumPrivilege(invalidValue)).toBe(false);
       });
     }
   );
