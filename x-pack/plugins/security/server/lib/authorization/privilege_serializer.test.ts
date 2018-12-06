@@ -9,14 +9,14 @@ import { PrivilegeSerializer } from './privilege_serializer';
 describe(`#isGlobalMinimumPrivilege`, () => {
   ['all', 'read'].forEach(validValue => {
     test(`returns true for '${validValue}'`, () => {
-      expect(PrivilegeSerializer.isGlobalMinimumPrivilege(validValue)).toBe(true);
+      expect(PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(validValue)).toBe(true);
     });
   });
 
   ['space_all', 'space_read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(
     invalidValue => {
       test(`returns false for '${invalidValue}'`, () => {
-        expect(PrivilegeSerializer.isGlobalMinimumPrivilege(invalidValue)).toBe(false);
+        expect(PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(invalidValue)).toBe(false);
       });
     }
   );
@@ -25,13 +25,13 @@ describe(`#isGlobalMinimumPrivilege`, () => {
 describe(`#isSpaceMinimumPrivilege`, () => {
   ['space_all', 'space_read'].forEach(validValue => {
     test(`returns true for '${validValue}'`, () => {
-      expect(PrivilegeSerializer.isSpaceMinimumPrivilege(validValue)).toBe(true);
+      expect(PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(validValue)).toBe(true);
     });
   });
 
   ['all', 'read', 'foo', 'bar', 'feature_foo', 'feature_foo.privilege1'].forEach(validValue => {
     test(`returns true for '${validValue}'`, () => {
-      expect(PrivilegeSerializer.isSpaceMinimumPrivilege(validValue)).toBe(false);
+      expect(PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(validValue)).toBe(false);
     });
   });
 });

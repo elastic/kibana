@@ -7,7 +7,8 @@
 const featurePrefix = 'feature_';
 const spacePrefix = 'space_';
 const minimumPrivilegeNames = ['all', 'read'];
-const spaceMinimumPrivilegeNames = minimumPrivilegeNames.map(
+const globalMinimumPrivileges = [...minimumPrivilegeNames];
+const spaceMinimumPrivileges = minimumPrivilegeNames.map(
   privilegeName => `${spacePrefix}${privilegeName}`
 );
 const deserializeFeaturePrivilegeRegexp = new RegExp(
@@ -20,12 +21,12 @@ interface FeaturePrivilege {
 }
 
 export class PrivilegeSerializer {
-  public static isGlobalMinimumPrivilege(privilegeName: string) {
-    return minimumPrivilegeNames.includes(privilegeName);
+  public static isSerializedGlobalMinimumPrivilege(privilegeName: string) {
+    return globalMinimumPrivileges.includes(privilegeName);
   }
 
-  public static isSpaceMinimumPrivilege(privilegeName: string) {
-    return spaceMinimumPrivilegeNames.includes(privilegeName);
+  public static isSerializedSpaceMinimumPrivilege(privilegeName: string) {
+    return spaceMinimumPrivileges.includes(privilegeName);
   }
 
   public static serializeGlobalMinimumPrivilege(privilegeName: string) {
@@ -44,8 +45,8 @@ export class PrivilegeSerializer {
     return `${spacePrefix}${privilegeName}`;
   }
 
-  public static serializeFeaturePrivilege(featureName: string, privilegeName: string) {
-    return `${featurePrefix}${featureName}.${privilegeName}`;
+  public static serializeFeaturePrivilege(featureId: string, privilegeName: string) {
+    return `${featurePrefix}${featureId}.${privilegeName}`;
   }
 
   public static deserializeFeaturePrivilege(privilege: string): FeaturePrivilege {
@@ -61,7 +62,7 @@ export class PrivilegeSerializer {
   }
 
   public static deserializeGlobalMinimumPrivilege(privilege: string) {
-    if (PrivilegeSerializer.isGlobalMinimumPrivilege(privilege)) {
+    if (PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege)) {
       return privilege;
     }
 
@@ -69,7 +70,7 @@ export class PrivilegeSerializer {
   }
 
   public static deserializeSpaceMinimumPrivilege(privilege: string) {
-    if (!PrivilegeSerializer.isSpaceMinimumPrivilege(privilege)) {
+    if (!PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege)) {
       throw new Error('Unrecognized space minimum privilege');
     }
 

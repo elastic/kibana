@@ -21,8 +21,8 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
 
     return resourcePrivileges.reduce((result, { resource, privileges }) => {
       if (resource === GLOBAL_RESOURCE) {
-        const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isGlobalMinimumPrivilege(privilege));
-        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isGlobalMinimumPrivilege(privilege));
+        const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege));
+        const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedGlobalMinimumPrivilege(privilege));
 
         result.global = {
           minimum: _.uniq([
@@ -44,8 +44,8 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
       }
 
       const spaceId = ResourceSerializer.deserializeSpaceResource(resource);
-      const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSpaceMinimumPrivilege(privilege));
-      const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSpaceMinimumPrivilege(privilege));
+      const minimumPrivileges = privileges.filter(privilege => PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege));
+      const featurePrivileges = privileges.filter(privilege => !PrivilegeSerializer.isSerializedSpaceMinimumPrivilege(privilege));
       result.space[spaceId] = {
         minimum: _.uniq([
           ...result.space[spaceId] ? result.space[spaceId].minimum || [] : [],
