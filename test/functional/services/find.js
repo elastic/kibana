@@ -116,10 +116,10 @@ export async function FindProvider({ getService }) {
 
     async descendantDisplayedByCssSelector(selector, parentElement) {
       log.debug('Find.descendantDisplayedByCssSelector: ' + selector);
-      const descendant = await parentElement.findElement(By.css(selector));
+      const descendant = wrap(await parentElement.findElement(By.css(selector)));
       const isDisplayed = await descendant.isDisplayed();
       if (isDisplayed) {
-        return wrap(descendant);
+        return descendant;
       } else {
         throw new Error('Element is not displayed');
       }
@@ -127,10 +127,10 @@ export async function FindProvider({ getService }) {
 
     async allDescendantDisplayedByCssSelector(selector, parentElement) {
       log.debug(`Find.allDescendantDisplayedByCssSelector(${selector})`);
-      const allElements = await parentElement.findElements(By.css(selector));
-      return wrapAll(await Promise.all(
+      const allElements = await wrapAll(parentElement.findElements(By.css(selector)));
+      return await Promise.all(
         allElements.map(async (element) => {return await element.isDisplayed(); })
-      ));
+      );
     }
 
     async displayedByCssSelector(selector, timeout = defaultFindTimeout) {
@@ -159,13 +159,13 @@ export async function FindProvider({ getService }) {
 
     async existsByLinkText(linkText, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByLinkText ${linkText}`);
-      return await this.exists(async driver => await driver.findElements(By.linkText(linkText)), timeout);
+      return await this.exists(async driver => wrapAll(await driver.findElements(By.linkText(linkText))), timeout);
     }
 
     async existsByDisplayedByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByDisplayedByCssSelector ${selector}`);
       return await this.exists(async driver => {
-        const elements = await driver.findElements(By.css(selector));
+        const elements = wrapAll(await driver.findElements(By.css(selector)));
         return await Promise.all(
           elements.map(async (element) => {return await element.isDisplayed(); })
         );
@@ -174,13 +174,13 @@ export async function FindProvider({ getService }) {
 
     async existsByCssSelector(selector, timeout = WAIT_FOR_EXISTS_TIME) {
       log.debug(`existsByCssSelector ${selector}`);
-      return await this.exists(async driver => await driver.findElements(By.css(selector)), timeout);
+      return await this.exists(async driver => wrapAll(await driver.findElements(By.css(selector))), timeout);
     }
 
     async moveMouseTo(element) {
       const mouse = driver.actions().mouse();
       const actions = driver.actions({ bridge: true });
-      await actions.pause(mouse).move({ origin: element }).perform();
+      await actions.pause(mouse).move({ origin: element._webElement }).perform();
     }
 
     async clickByCssSelectorWhenNotDisabled(selector, { timeout } = { timeout: defaultFindTimeout }) {
@@ -191,7 +191,7 @@ export async function FindProvider({ getService }) {
       // it's gone.
       const element = await this.byCssSelector(selector, timeout);
       await this.moveMouseTo(element);
-      await driver.wait(until.elementIsEnabled(element), timeout);
+      await driver.wait(until.elementIsEnabled(element._webElement), timeout);
       await element.click();
     }
 
@@ -216,7 +216,7 @@ export async function FindProvider({ getService }) {
     async byButtonText(buttonText, element = driver, timeout = defaultFindTimeout) {
       log.debug(`byButtonText(${buttonText})`);
       return await retry.tryForTime(timeout, async () => {
-        const allButtons = await element.findElements(By.tagName('button'));
+        const allButtons = wrapAll(await element.findElements(By.tagName('button')));
         const buttonTexts = await Promise.all(allButtons.map(async (el) => {
           return el.getText();
         }));
@@ -224,7 +224,7 @@ export async function FindProvider({ getService }) {
         if (index === -1) {
           throw new Error('Button not found');
         }
-        return wrap(allButtons[index]);
+        return allButtons[index];
       });
     }
 

@@ -30,7 +30,7 @@ export class WebElementWrapper {
   }
 
   _wrap(otherWebElement) {
-    return new WebElementWrapper(otherWebElement, this._driver);
+    return new WebElementWrapper(otherWebElement, this._driver, this._defaultFindTimeout);
   }
 
   _wrapAll(otherWebElements) {
