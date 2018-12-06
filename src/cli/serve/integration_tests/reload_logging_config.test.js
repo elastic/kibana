@@ -25,21 +25,19 @@ import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 
 import { safeDump } from 'js-yaml';
-import es from 'event-stream';
+import { createMapStream, createSplitStream, createPromiseFromStreams } from '../../../utils/streams';
 import { getConfigFromFiles } from '../../../core/server/config/read_config';
 
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
 const kibanaPath = follow('../../../../scripts/kibana.js');
 
-const second = 1000;
-const minute = second * 60;
-
-const tempDir = path.join(os.tmpdir(), 'kbn-reload-test');
-
-
 function follow(file) {
   return path.relative(process.cwd(), path.resolve(__dirname, file));
 }
+
+const second = 1000;
+const minute = second * 60;
+const tempDir = path.join(os.tmpdir(), 'kbn-reload-test');
 
 function setLoggingJson(enabled) {
   const conf = getConfigFromFiles([testConfigFile]);
@@ -80,66 +78,68 @@ describe('Server logging configuration', function () {
       // nothing to do for Windows
     });
   } else {
-    it('should be reloadable via SIGHUP process signaling', function (done) {
+    it('should be reloadable via SIGHUP process signaling', async function () {
       expect.assertions(3);
 
-      child = spawn('node', [kibanaPath, '--config', testConfigFile]);
-
-      child.on('error', err => {
-        done(new Error(`error in child process while attempting to reload config. ${err.stack || err.message || err}`));
+      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile], {
+        stdio: 'pipe'
       });
 
       let sawJson = false;
       let sawNonjson = false;
 
-      child.on('exit', _code => {
-        const code = _code === null ? 0 : _code;
+      const [exitCode] = await Promise.all([
+        Promise.race([
+          new Promise(r => child.once('exit', r))
+            .then(code => code === null ? 0 : code),
 
-        expect(code).toEqual(0);
-        expect(sawJson).toEqual(true);
-        expect(sawNonjson).toEqual(true);
-        done();
-      });
+          new Promise(r => child.once('error', r))
+            .then(err => {
+              throw new Error(`error in child process while attempting to reload config. ${err.stack || err.message || err}`);
+            })
+        ]),
 
-      child.stdout
-        .pipe(es.split())
-        .pipe(es.mapSync(line => {
-          if (!line) {
-            // skip empty lines
-            return;
-          }
-
-          if (isJson) {
-            const data = JSON.parse(line);
-            sawJson = true;
-
-            if (data.tags.includes('listening')) {
-              switchToPlainTextLog();
+        createPromiseFromStreams([
+          child.stdout,
+          createSplitStream('\n'),
+          createMapStream(async (line) => {
+            if (!line) {
+              // skip empty lines
+              return;
             }
-          } else if (line.startsWith('{')) {
-            // We have told Kibana to stop logging json, but it hasn't completed
-            // the switch yet, so we ignore before switching over.
-          } else {
-            // Kibana has successfully stopped logging json, so kill the server.
 
-            sawNonjson = true;
+            if (isJson) {
+              const data = JSON.parse(line);
+              sawJson = true;
 
-            child.kill();
-            child = undefined;
-          }
-        }));
+              if (data.tags.includes('listening')) {
+                isJson = false;
+                setLoggingJson(false);
 
-      function switchToPlainTextLog() {
-        isJson = false;
-        setLoggingJson(false);
+                // Reload logging config. We give it a little bit of time to just make
+                // sure the process sighup handler is registered.
+                await new Promise(r => setTimeout(r, 100));
+                child.kill('SIGHUP');
+              }
+            } else if (line.startsWith('{')) {
+              // We have told Kibana to stop logging json, but it hasn't completed
+              // the switch yet, so we ignore before switching over.
+            } else {
+              // Kibana has successfully stopped logging json, so kill the server.
 
-        // Reload logging config. We give it a little bit of time to just make
-        // sure the process sighup handler is registered.
-        setTimeout(() => {
-          child.kill('SIGHUP');
-        }, 100);
-      }
-    }, minute);
+              sawNonjson = true;
+
+              child.kill();
+              child = undefined;
+            }
+          })
+        ])
+      ]);
+
+      expect(exitCode).toEqual(0);
+      expect(sawJson).toEqual(true);
+      expect(sawNonjson).toEqual(true);
+    }, 60000);
   }
 
   it.skip('should recreate file handler on SIGHUP', function (done) {
