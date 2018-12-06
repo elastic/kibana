@@ -187,6 +187,12 @@ export const metrics = {
     label: 'Metric',
     description: 'Metric events processed'
   }),
+  apm_responses_errors_internal: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.server.response.errors.internal',
+    title: 'Internal',
+    label: 'Internal',
+    description: 'HTTP Requests rejected due to a miscellaneous internal error'
+  }),
 
 
   apm_output_events_total: new ApmEventsRateClusterMetric({
