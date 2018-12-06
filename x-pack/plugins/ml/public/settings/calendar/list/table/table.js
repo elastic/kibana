@@ -77,6 +77,7 @@ export function CalendarsListTable({
       (
         <EuiButton
           size="s"
+          data-testid="new_calendar_button"
           key="new_calendar_button"
           href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/new_calendar`}
           isDisabled={(canCreateCalendar === false || mlNodesAvailable === false)}

@@ -18,7 +18,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { CalendarsListTable } from './table';
+import { CalendarsListTable } from './table/';
 import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
 import { checkPermission } from '../../../privilege/check_privilege';
@@ -76,7 +76,7 @@ export class CalendarsList extends Component {
   }
 
   // TODO: check if events and job_ids always array
-  addRequiredFieldsToList = (calendarsList) => {
+  addRequiredFieldsToList = (calendarsList = []) => {
     for (let i = 0; i < calendarsList.length; i++) {
       const eventLength = calendarsList[i].events.length;
       calendarsList[i].job_ids_string = calendarsList[i].job_ids.join(', ');
