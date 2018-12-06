@@ -59,7 +59,7 @@ export const serializePrivileges = (
           Object.entries(featurePrivileges).forEach(([privilegeName, privilegeActions]) => {
             const name = PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilegeName);
             if (Object.keys(acc).includes(name)) {
-              throw new Error(`Detected conflicting feature privilege name: ${name}`);
+              throw new Error(`Detected duplicate feature privilege name: ${name}`);
             }
             acc[name] = {
               application,
