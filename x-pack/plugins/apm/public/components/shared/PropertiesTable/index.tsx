@@ -9,7 +9,7 @@ import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
-import { StringMap } from '../../../../typings/common';
+import { StringMap } from '../../../../typings/es_schemas/common';
 import {
   colors,
   fontSize,

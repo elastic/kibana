@@ -11,7 +11,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID
 } from '../../../../../../common/constants';
-import { Transaction } from '../../../../../../typings/Transaction';
+import { Transaction } from '../../../../../../typings/es_schemas/Transaction';
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 

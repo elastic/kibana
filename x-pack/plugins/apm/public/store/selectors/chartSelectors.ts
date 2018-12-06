@@ -11,7 +11,7 @@ import { rgba } from 'polished';
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { AnomalyTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_anomaly_data/transform';
 import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from 'x-pack/plugins/apm/typings/es_schemas/common';
 import {
   Coordinate,
   RectCoordinate

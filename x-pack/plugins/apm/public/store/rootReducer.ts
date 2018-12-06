@@ -6,7 +6,7 @@
 
 import { reducer } from 'react-redux-request';
 import { combineReducers } from 'redux';
-import { StringMap } from '../../typings/common';
+import { StringMap } from '../../typings/es_schemas/common';
 // @ts-ignore
 import location from './location';
 import { IUrlParams, urlParamsReducer } from './urlParams';
