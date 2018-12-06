@@ -20,7 +20,25 @@
 export type ConfigPath = string | string[];
 
 /**
+ * Checks whether specified value can be considered as config path.
+ * @param value Value to check.
+ * @internal
+ */
+export function isConfigPath(value: unknown): value is ConfigPath {
+  if (!value) {
+    return false;
+  }
+
+  if (typeof value === 'string') {
+    return true;
+  }
+
+  return Array.isArray(value) && value.every(segment => typeof segment === 'string');
+}
+
+/**
  * Represents config store.
+ * @internal
  */
 export interface Config {
   /**
