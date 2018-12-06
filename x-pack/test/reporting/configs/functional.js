@@ -33,5 +33,3 @@ export async function getFunctionalConfig({ readConfigFile }) {
 }
 
 export default getFunctionalConfig;
-
-
