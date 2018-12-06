@@ -105,7 +105,7 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
 
       const heartbeatState = get(hit, '_source.beats_state.state.heartbeat');
       if (heartbeatState !== undefined) {
-        if (!("heartbeat" in clusters[clusterUuid])) {
+        if (!clusters[clusterUuid].hasOwnProperty('heartbeat')) {
           clusters[clusterUuid].heartbeat = {
             monitors: 0,
             endpoints: 0
@@ -120,7 +120,7 @@ export function processResults(results = [], { clusters, clusterHostSets, cluste
           const val = heartbeatState[proto];
           if (typeof val !== "object") continue;
 
-          if (!(proto in clusters[clusterUuid])) {
+          if (!clusterHb.hasOwnProperty(proto)) {
             clusterHb[proto] = {
               monitors: 0,
               endpoints: 0
