@@ -25,6 +25,7 @@ import { promisify } from 'util';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
 import globby from 'globby';
+import normalizePosixPath from 'normalize-path';
 
 const readAsync = promisify(readFile);
 const writeAsync = promisify(writeFile);
@@ -32,6 +33,7 @@ const writeAsync = promisify(writeFile);
 interface Params {
   log: (tags: string[], data: string) => void;
   outputPath: string;
+  dllsPath: string;
   cachePath: string;
 }
 
@@ -43,6 +45,7 @@ interface WatchCacheStateContent {
 export class WatchCache {
   private readonly log: Params['log'];
   private readonly outputPath: Params['outputPath'];
+  private readonly dllsPath: Params['dllsPath'];
   private readonly cachePath: Params['cachePath'];
   private readonly cacheState: WatchCacheStateContent;
   private statePath: string;
@@ -52,6 +55,7 @@ export class WatchCache {
   constructor(params: Params) {
     this.log = params.log;
     this.outputPath = params.outputPath;
+    this.dllsPath = params.dllsPath;
     this.cachePath = params.cachePath;
 
     this.isInitialized = false;
@@ -92,11 +96,22 @@ export class WatchCache {
 
     // delete everything in optimize/.cache directory
     // except ts-node
-    await del(await globby([this.cachePath, `!${this.cachePath}/ts-node/**`], { dot: true }));
+    await del(
+      await globby(
+        [
+          normalizePosixPath(this.cachePath),
+          `${normalizePosixPath(`!${this.cachePath}/ts-node/**`)}`,
+        ],
+        { dot: true }
+      )
+    );
 
     // delete some empty folder that could be left
     // from the previous cache path reset action
     await deleteEmpty(this.cachePath);
+
+    // delete dlls
+    await del(this.dllsPath);
 
     // re-write new cache state file
     await this.write();
@@ -109,7 +124,7 @@ export class WatchCache {
 
     for (const filePath of filePaths) {
       try {
-        shaHash.update(await readAsync(filePath), 'utf8');
+        shaHash.update(await readAsync(filePath, 'utf8'), 'utf8');
       } catch (e) {
         /* no-op */
       }
@@ -126,8 +141,14 @@ export class WatchCache {
 
   private async buildOptimizerConfigSha() {
     const baseOptimizer = resolve(__dirname, '../base_optimizer.js');
+    const dynamicDllConfigModel = resolve(__dirname, '../dynamic_dll_plugin/dll_config_model.js');
+    const dynamicDllPlugin = resolve(__dirname, '../dynamic_dll_plugin/dynamic_dll_plugin.js');
 
-    return await this.buildShaWithMultipleFiles([baseOptimizer]);
+    return await this.buildShaWithMultipleFiles([
+      baseOptimizer,
+      dynamicDllConfigModel,
+      dynamicDllPlugin,
+    ]);
   }
 
   private isResetNeeded() {
