@@ -20,7 +20,6 @@
 import breadCrumbsTemplate from './bread_crumbs.html';
 import { uiModules } from '../../modules';
 import uiRouter from '../../routes';
-import chrome from '../../chrome';
 
 const module = uiModules.get('kibana');
 
@@ -78,8 +77,6 @@ module.directive('breadCrumbs', function () {
         if ($scope.pageTitle) {
           newBreadcrumbs.push({ text: $scope.pageTitle });
         }
-
-        chrome.breadcrumbs.set(newBreadcrumbs);
       });
     }
   };

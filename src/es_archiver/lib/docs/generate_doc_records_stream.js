@@ -37,7 +37,8 @@ export function createGenerateDocRecordsStream(client, stats) {
               index: index,
               scroll: SCROLL_TIMEOUT,
               size: SCROLL_SIZE,
-              _source: true
+              _source: true,
+              rest_total_hits_as_int: true
             });
             remainingHits = resp.hits.total;
           } else {
