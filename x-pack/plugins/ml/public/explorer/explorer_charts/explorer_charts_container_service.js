@@ -211,6 +211,10 @@ export function explorerChartsContainerServiceFactory(
         _.map(metricData, (value, time) => {
           // The filtering for rare/event_distribution charts needs to be handled
           // differently because of how the source data is structured.
+          // For rare chart values we are only interested wether a value is either `0` or not,
+          // `0` acts like a flag in the chart whether to display the dot/marker.
+          // All other charts (single metric, population) are metric based and with
+          // those a value of `null` acts as the flag to hide a datapoint.
           if (
             (chartType === CHART_TYPE.EVENT_DISTRIBUTION && value > 0) ||
             (chartType !== CHART_TYPE.EVENT_DISTRIBUTION && value !== null)
