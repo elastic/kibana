@@ -39,13 +39,7 @@ export const HorizontalBarChart = pure<HorizontalBarChartProps>(
         <EuiTitle size="s">
           <h3>{title}</h3>
         </EuiTitle>
-        <EuiSeriesChart
-          width={width}
-          height={height}
-          yType="ordinal"
-          orientation="horizontal"
-          style={{ height: 'auto' }}
-        >
+        <EuiSeriesChart width={width} height={height} yType="ordinal" orientation="horizontal">
           <EuiBarSeries name="Tag counts" data={barChartdata} />
         </EuiSeriesChart>
       </Container>

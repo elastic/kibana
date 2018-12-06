@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { dataProvidersSelector, hostsSelector, timelineByIdSelector } from './local';
+export * from './drag_and_drop';
+export * from './hosts';
+export * from './timeline';

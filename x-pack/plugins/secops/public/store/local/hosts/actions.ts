@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { dataProvidersSelector, hostsSelector, timelineByIdSelector } from './local';
+import actionCreatorFactory from 'typescript-fsa';
+
+const actionCreator = actionCreatorFactory('x-pack/secops/local/hosts');
+
+export const updateLimitOfPagination = actionCreator<{ limit: number }>('UPDATE_LIMIT');

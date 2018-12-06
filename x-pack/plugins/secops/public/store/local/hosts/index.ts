@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { dataProvidersSelector, hostsSelector, timelineByIdSelector } from './local';
+import * as hostsActions from './actions';
+
+export { hostsActions };
+export * from './selectors';
+export * from './reducer';

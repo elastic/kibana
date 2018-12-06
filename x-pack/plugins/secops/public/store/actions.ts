@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { timelineActions } from './local';
+export { dragAndDropActions, hostsActions, timelineActions } from './local';

@@ -42,13 +42,7 @@ export const Hosts = pure(() => (
               />
             )}
           </EventsQuery>
-          <HostsQuery
-            sourceId="default"
-            startDate={startDate}
-            endDate={endDate}
-            cursor={null}
-            limit={2}
-          >
+          <HostsQuery sourceId="default" startDate={startDate} endDate={endDate} cursor={null}>
             {({ hosts, totalCount, loading, pageInfo, loadMore }) => (
               <HostsTable
                 loading={loading}

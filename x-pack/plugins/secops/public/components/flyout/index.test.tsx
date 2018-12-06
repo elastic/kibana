@@ -16,6 +16,9 @@ import { DragDropContextWrapper } from '../drag_and_drop/drag_drop_context_wrapp
 describe('Flyout', () => {
   const state: State = {
     local: {
+      hosts: {
+        limit: 2,
+      },
       dragAndDrop: {
         dataProviders: {},
       },

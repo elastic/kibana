@@ -5,30 +5,79 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { defaultTo, getOr } from 'lodash/fp';
 import React from 'react';
+import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { HostItem } from '../../../../../common/graphql/types';
-import { LoadMoreTable } from '../../../load_more_table';
+import { hostsActions, hostsSelector, State } from '../../../../store';
+import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
-interface HostsTableProps {
+interface OwnProps {
   data: HostItem[];
   loading: boolean;
   hasNextPage: boolean;
-  nextCursor: string | null;
+  nextCursor: string;
   totalCount: number;
-  loadMore: (cursor: string, limit: number) => void;
+  loadMore: (cursor: string) => void;
 }
 
-export const HostsTable = pure<HostsTableProps>(
-  ({ data, hasNextPage, loading, loadMore, totalCount, nextCursor }) => (
+interface HostsTableReduxProps {
+  limit: number;
+}
+
+interface HostsTableDispatchProps {
+  updateLimitPagination: ({}) => void;
+}
+
+type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
+
+const rowItems: ItemsPerRow[] = [
+  {
+    text: '2 rows',
+    numberOfRow: 2,
+  },
+  {
+    text: '5 rows',
+    numberOfRow: 5,
+  },
+  {
+    text: '10 rows',
+    numberOfRow: 10,
+  },
+  {
+    text: '20 rows',
+    numberOfRow: 20,
+  },
+  {
+    text: '50 rows',
+    numberOfRow: 50,
+  },
+];
+
+const HostsTableComponent = pure<HostsTableProps>(
+  ({
+    data,
+    hasNextPage,
+    limit,
+    loading,
+    loadMore,
+    totalCount,
+    nextCursor,
+    updateLimitPagination,
+  }) => (
     <LoadMoreTable
       columns={getHostsColumns()}
       loadingTitle="Hosts"
       loading={loading}
       pageOfItems={data}
-      loadMore={() => loadMore(nextCursor!, 2)}
+      loadMore={() => loadMore(nextCursor)}
+      limit={limit}
       hasNextPage={hasNextPage!}
+      itemsPerRow={rowItems}
+      updateLimitPagination={newlimit => {
+        updateLimitPagination({ limit: newlimit });
+      }}
       title={
         <h3>
           Hosts <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -37,6 +86,19 @@ export const HostsTable = pure<HostsTableProps>(
     />
   )
 );
+
+const mapStateToProps = (state: State) => {
+  const limit = defaultTo(2, hostsSelector(state));
+
+  return { limit };
+};
+
+export const HostsTable = connect(
+  mapStateToProps,
+  {
+    updateLimitPagination: hostsActions.updateLimitOfPagination,
+  }
+)(HostsTableComponent);
 
 const getHostsColumns = () => [
   {

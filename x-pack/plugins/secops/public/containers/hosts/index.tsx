@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, merge } from 'lodash/fp';
+import { defaultTo, getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
 import { GetHostsQuery, HostItem, PageInfo } from '../../../common/graphql/types';
 
+import { connect } from 'react-redux';
+import { hostsSelector, State } from '../../store';
 import { hostsQuery } from './index.gql_query';
 
 export interface HostsArgs {
@@ -18,21 +20,26 @@ export interface HostsArgs {
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
-  loadMore: (cursor: string, limit: number) => void;
+  loadMore: (cursor: string) => void;
 }
 
-export interface HostsProps {
+export interface OwnProps {
   children: (args: HostsArgs) => React.ReactNode;
   sourceId: string;
   startDate: number;
   endDate: number;
   filterQuery?: string;
-  limit: number;
   cursor: string | null;
 }
 
-export const HostsQuery = pure<HostsProps>(
-  ({ children, filterQuery, sourceId, startDate, endDate, limit, cursor }) => (
+export interface HostsComponentReduxProps {
+  limit: number;
+}
+
+type HostsProps = OwnProps & HostsComponentReduxProps;
+
+const HostsComponentQuery = pure<HostsProps>(
+  ({ children, filterQuery, sourceId, startDate, endDate, limit = 2, cursor }) => (
     <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
       query={hostsQuery}
       fetchPolicy="no-cache"
@@ -58,12 +65,12 @@ export const HostsQuery = pure<HostsProps>(
           totalCount: getOr(0, 'source.Hosts.totalCount', data),
           hosts: getOr([], 'source.Hosts.edges', data),
           pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
-          loadMore: (newCursor: string, newLimit: number) =>
+          loadMore: (newCursor: string) =>
             fetchMore({
               variables: {
                 pagination: {
-                  limit: newLimit,
                   cursor: newCursor,
+                  limit,
                 },
               },
               updateQuery: (prev, { fetchMoreResult }) => {
@@ -87,3 +94,11 @@ export const HostsQuery = pure<HostsProps>(
     </Query>
   )
 );
+
+const mapStateToProps = (state: State) => {
+  const limit = defaultTo(2, hostsSelector(state));
+
+  return { limit };
+};
+
+export const HostsQuery = connect(mapStateToProps)(HostsComponentQuery);
