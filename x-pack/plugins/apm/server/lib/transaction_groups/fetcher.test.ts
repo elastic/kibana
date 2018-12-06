@@ -21,7 +21,7 @@ describe('transactionGroupsFetcher', () => {
           switch (key) {
             case 'apm_oss.transactionIndices':
               return 'myIndex';
-            case 'apm_oss.topTransactionGroupsSize':
+            case 'xpack.apm.ui.transactionGroupBucketSize':
               return 100;
           }
         })
