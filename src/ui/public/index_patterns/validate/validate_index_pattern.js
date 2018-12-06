@@ -17,22 +17,12 @@
  * under the License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
-export function validateIndexPattern(indexPattern, fieldName = 'index pattern') {
-  if (!indexPattern || !indexPattern.trim()) {
-    return {
-      error: i18n.translate('common.ui.indexPattern.errors.isEmpty', {
-        defaultMessage: '{fieldName} is required.',
-        values: { fieldName }
-      })
-    };
-  }
+export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
+export const CONTAINS_SPACES = 'CONTAINS_SPACES';
 
+function findIllegalCharacters(indexPattern) {
   const illegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((chars, char) => {
     if (indexPattern.includes(char)) {
       chars.push(char);
@@ -41,26 +31,25 @@ export function validateIndexPattern(indexPattern, fieldName = 'index pattern') 
     return chars;
   }, []);
 
+  return illegalCharacters;
+}
+
+function indexPatternContainsSpaces(indexPattern) {
+  return indexPattern.includes(' ');
+}
+
+export function validateIndexPattern(indexPattern) {
+  const errors = {};
+
+  const illegalCharacters = findIllegalCharacters(indexPattern);
+
   if (illegalCharacters.length) {
-    return {
-      error: (
-        <FormattedMessage
-          id="common.ui.indexPattern.errors.illegalCharacters"
-          defaultMessage="Remove the characters {characterList} from your {fieldName}."
-          values={{ characterList: <strong>{illegalCharacters.join(' ')}</strong>, fieldName }}
-        />
-      )
-    };
+    errors[ILLEGAL_CHARACTERS] = illegalCharacters;
   }
 
-  if (indexPattern.includes(' ')) {
-    return {
-      error: i18n.translate('common.ui.indexPattern.errors.noEmptySpace', {
-        defaultMessage: 'Remove the spaces from your {fieldName}.',
-        values: { fieldName }
-      })
-    };
+  if (indexPatternContainsSpaces(indexPattern)) {
+    errors[CONTAINS_SPACES] = true;
   }
 
-  return { error: null };
+  return errors;
 }

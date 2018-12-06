@@ -31,5 +31,7 @@ export {
 } from './constants';
 
 export {
-  validateIndexPattern
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  validateIndexPattern,
 } from './validate';

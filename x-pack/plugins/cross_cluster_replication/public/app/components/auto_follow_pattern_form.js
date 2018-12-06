@@ -50,33 +50,9 @@ const getEmptyAutoFollowPattern = (remoteClusters) => ({
   followIndexPatternSuffix: '',
 });
 
-export const updateFormValues = (fields) => ({ autoFollowPattern }) => {
-  const { leaderIndexPatterns: newLeaderIndexPatterns } = fields;
-
-  let leaderIndexPatterns = autoFollowPattern.leaderIndexPatterns;
-
-  if (newLeaderIndexPatterns) {
-    if (Array.isArray(newLeaderIndexPatterns)) {
-      // We replace the prop value
-      leaderIndexPatterns = newLeaderIndexPatterns;
-    } else {
-      // We add a value into the Array
-      leaderIndexPatterns = [...autoFollowPattern.leaderIndexPatterns, newLeaderIndexPatterns];
-    }
-  }
-
-  return ({
-    autoFollowPattern: {
-      ...autoFollowPattern,
-      ...fields,
-      leaderIndexPatterns
-    },
-  });
-};
-
-export const updateFormErrors = (errors) => ({ fieldsErrors }) => ({
+export const updateFormErrors = (errors, existingErrors) => ({
   fieldsErrors: {
-    ...fieldsErrors,
+    ...existingErrors,
     ...errors,
   }
 });
@@ -111,11 +87,16 @@ export class AutoFollowPatternFormUI extends PureComponent {
   }
 
   onFieldsChange = (fields) => {
-    const errors = validateAutoFollowPattern(fields);
+    this.setState(({ autoFollowPattern }) => ({
+      autoFollowPattern: {
+        ...autoFollowPattern,
+        ...fields,
+      },
+    }));
 
-    this.setState(updateFormValues(fields));
-    this.setState(updateFormErrors(errors));
-  }
+    const errors = validateAutoFollowPattern(fields);
+    this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
+  };
 
   onClusterChange = (remoteCluster) => {
     this.onFieldsChange({ remoteCluster });
@@ -125,20 +106,36 @@ export class AutoFollowPatternFormUI extends PureComponent {
     const error = validateLeaderIndexPattern(indexPattern);
 
     if (error) {
-      this.setState(updateFormErrors({ leaderIndexPatterns: { ...error, alwaysVisible: true } }));
+      const errors = {
+        leaderIndexPatterns:
+        {
+          ...error,
+          alwaysVisible: true,
+        },
+      };
+
+      this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
 
       // Return false to explicitly reject the user's input.
       return false;
     }
 
-    this.onFieldsChange({ leaderIndexPatterns: indexPattern });
-  }
+    const {
+      autoFollowPattern: {
+        leaderIndexPatterns,
+      },
+    } = this.state;
+
+    const newLeaderIndexPatterns = leaderIndexPatterns.slice(0);
+    newLeaderIndexPatterns.push(indexPattern);
+    this.onFieldsChange({ leaderIndexPatterns: newLeaderIndexPatterns });
+  };
 
   onLeaderIndexPatternChange = (indexPatterns) => {
     this.onFieldsChange({
       leaderIndexPatterns: indexPatterns.map(({ label }) => label)
     });
-  }
+  };
 
   onLeaderIndexPatternInputChange = (leaderIndexPattern) => {
     if (!leaderIndexPattern || !leaderIndexPattern.trim()) {
@@ -153,9 +150,17 @@ export class AutoFollowPatternFormUI extends PureComponent {
         id: 'xpack.crossClusterReplication.autoFollowPatternForm.leaderIndexPatternError.duplicateMessage',
         defaultMessage: `Duplicate leader index pattern aren't allowed.`,
       });
-      this.setState(updateFormErrors({ leaderIndexPatterns: { message: errorMsg, alwaysVisible: true } }));
+
+      const errors = {
+        leaderIndexPatterns: {
+          message: errorMsg,
+          alwaysVisible: true,
+        },
+      };
+
+      this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
     }
-  }
+  };
 
   getFields = () => {
     const { autoFollowPattern: stateFields } = this.state;
@@ -165,7 +170,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
       ...rest,
       followIndexPattern: `${followIndexPatternPrefix}{{leader_index}}${followIndexPatternSuffix}`
     };
-  }
+  };
 
   isFormValid() {
     return Object.values(this.state.fieldsErrors).every(error => error === null);
@@ -183,11 +188,11 @@ export class AutoFollowPatternFormUI extends PureComponent {
 
     const { name, ...autoFollowPattern } = this.getFields();
     this.props.saveAutoFollowPattern(name, autoFollowPattern);
-  }
+  };
 
   cancelForm = () => {
     routing.navigate('/home');
-  }
+  };
 
   /**
    * Secctions Renders
@@ -209,7 +214,13 @@ export class AutoFollowPatternFormUI extends PureComponent {
   renderForm = () => {
     const { intl } = this.props;
     const {
-      autoFollowPattern: { name, remoteCluster, leaderIndexPatterns, followIndexPatternPrefix, followIndexPatternSuffix },
+      autoFollowPattern: {
+        name,
+        remoteCluster,
+        leaderIndexPatterns,
+        followIndexPatternPrefix,
+        followIndexPatternSuffix,
+      },
       isNew,
       areErrorsVisible,
       fieldsErrors,
@@ -248,7 +259,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
                 defaultMessage="Name"
               />
             )}
-            error={fieldsErrors.name && fieldsErrors.name.message}
+            error={fieldsErrors.name}
             isInvalid={isInvalid}
             fullWidth
           >
@@ -363,7 +374,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
               />
             )}
             isInvalid={isInvalid}
-            error={fieldsErrors.leaderIndexPatterns && fieldsErrors.leaderIndexPatterns.message}
+            error={fieldsErrors.leaderIndexPatterns}
             fullWidth
           >
             <EuiComboBox
@@ -446,7 +457,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
                 defaultMessage="Template prefix"
               />
             )}
-            error={fieldsErrors.followIndexPatternPrefix && fieldsErrors.followIndexPatternPrefix.message}
+            error={fieldsErrors.followIndexPatternPrefix}
             isInvalid={isPrefixInvalid}
             fullWidth
           >
@@ -465,7 +476,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
                 defaultMessage="Template suffix"
               />
             )}
-            error={fieldsErrors.followIndexPatternSuffix && fieldsErrors.followIndexPatternSuffix.message}
+            error={fieldsErrors.followIndexPatternSuffix}
             isInvalid={isSuffixInvalid}
             fullWidth
           >

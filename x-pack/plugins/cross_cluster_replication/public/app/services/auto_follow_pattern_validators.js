@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { validateIndexPattern } from 'ui/index_patterns';
-import { arrify } from '../../../common/services/utils';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import {
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  validateIndexPattern as getIndexPatternErrors,
+} from 'ui/index_patterns';
 
 export const validateName = (name = '') => {
   let errorMsg = null;
@@ -16,100 +22,148 @@ export const validateName = (name = '') => {
       'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorEmptyName',
       { defaultMessage: 'Name is required.' }
     );
-  }
-
-  if(name.includes(' ')) {
-    errorMsg = i18n.translate('xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorSpace', {
-      defaultMessage: 'Remove the spaces from your name.'
-    });
-  }
-
-  if (name[0] === '_') {
-    errorMsg = i18n.translate(
-      'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorFirstChar',
-      { defaultMessage: "Name can not start with the '_' character." }
-    );
-  }
-
-  if (name.includes(',')) {
-    errorMsg = i18n.translate(
-      'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorFirstChar',
-      { defaultMessage: "Name can not contain a coma (',')." }
-    );
-  }
-
-  return errorMsg === null ? null : { message: errorMsg };
-};
-
-export const validateLeaderIndexPattern = (_indexPatterns) => {
-  let errorMsg;
-  const indexPatterns = arrify(_indexPatterns);
-
-  if (!indexPatterns.length) {
-    // By calling the validator we receive the empty error message translated
-    const { error } = validateIndexPattern();
-    errorMsg = [error];
   } else {
-    errorMsg = indexPatterns
-      .map((pattern) => validateIndexPattern(pattern).error)
-      .filter(error => error !== null);
+    if (name.includes(' ')) {
+      errorMsg = i18n.translate('xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorSpace', {
+        defaultMessage: 'Remove the spaces from the name.'
+      });
+    }
+
+    if (name[0] === '_') {
+      errorMsg = i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorFirstChar',
+        { defaultMessage: "Name can't begin with an underscore." }
+      );
+    }
+
+    if (name.includes(',')) {
+      errorMsg = i18n.translate(
+        'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorFirstChar',
+        { defaultMessage: "Remove commas from the name." }
+      );
+    }
   }
 
-  return errorMsg.length ? { message: errorMsg[0] } : null;
+  return errorMsg;
 };
 
-export const validateFollowIndexPattern = (indexPattern, fieldName = 'prefix') => {
+export const validateLeaderIndexPattern = (indexPattern) => {
+  const errors = getIndexPatternErrors(indexPattern);
+
+  if (errors[ILLEGAL_CHARACTERS]) {
+    return (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
+        defaultMessage="Remove the characters {characterList} from the index pattern."
+        values={{ characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong> }}
+      />
+    );
+  }
+
+  if (errors[CONTAINS_SPACES]) {
+    return (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.noEmptySpace"
+        defaultMessage="Remove spaces from the index pattern."
+      />
+    );
+  }
+
+  return null;
+};
+
+export const validatePrefix = (prefix) => {
   // If it's empty, it is valid
-  if (!indexPattern || !indexPattern.trim()) {
+  if (!prefix || !prefix.trim()) {
     return null;
   }
 
-  const { error } = validateIndexPattern(indexPattern, fieldName);
-  return error === null ? null : { message: error };
-};
+  const errors = getIndexPatternErrors(prefix);
 
-export const validateAutoFollowPattern = (autoFollowPattern) => {
-  if (!autoFollowPattern) {
-    return {
-      name: validateName(),
-      leaderIndexPatterns: validateLeaderIndexPattern(),
-      followIndexPatternPrefix: null,
-      followIndexPatternSuffix: null,
-    };
+  if (errors[ILLEGAL_CHARACTERS]) {
+    return (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.illegalCharacters"
+        defaultMessage="Remove the characters {characterList} from the prefix."
+        values={{ characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong> }}
+      />
+    );
   }
 
+  if (errors[CONTAINS_SPACES]) {
+    return (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.noEmptySpace"
+        defaultMessage="Remove spaces from the prefix."
+      />
+    );
+  }
+
+  return null;
+};
+
+export const validateSuffix = (suffix) => {
+  // If it's empty, it is valid
+  if (!suffix || !suffix.trim()) {
+    return null;
+  }
+
+  const errors = getIndexPatternErrors(suffix);
+
+  if (errors[ILLEGAL_CHARACTERS]) {
+    return (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
+        defaultMessage="Remove the characters {characterList} from the suffix."
+        values={{ characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong> }}
+      />
+    );
+  }
+
+  if (errors[CONTAINS_SPACES]) {
+    return (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPattern.suffixValidation.noEmptySpace"
+        defaultMessage="Remove spaces from the suffix."
+      />
+    );
+  }
+
+  return null;
+};
+
+export const validateAutoFollowPattern = (autoFollowPattern = {}) => {
   const errors = {};
   let error = null;
-  let propValue;
+  let fieldValue;
 
-  Object.keys(autoFollowPattern).forEach((prop) => {
-    propValue = autoFollowPattern[prop];
+  Object.keys(autoFollowPattern).forEach((fieldName) => {
+    fieldValue = autoFollowPattern[fieldName];
     error = null;
 
-    switch(prop) {
-      case 'name': {
-        error = validateName(propValue);
+    switch(fieldName) {
+      case 'name':
+        error = validateName(fieldValue);
         break;
-      }
-      case 'leaderIndexPatterns': {
-        error = validateLeaderIndexPattern(propValue);
 
-        if (Array.isArray(error)) {
-          error = error.join(', ');
+      case 'leaderIndexPatterns':
+        if (!fieldValue.length) {
+          error = i18n.translate('xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.isEmpty', {
+            defaultMessage: 'At least one leader index pattern is required.',
+          });
         }
         break;
-      }
-      case 'followIndexPatternPrefix': {
-        error = validateFollowIndexPattern(propValue, 'prefix');
+
+      case 'followIndexPatternPrefix':
+        error = validatePrefix(fieldValue);
         break;
-      }
-      case 'followIndexPatternSuffix': {
-        error = validateFollowIndexPattern(propValue, 'suffix');
+
+      case 'followIndexPatternSuffix':
+        error = validateSuffix(fieldValue);
         break;
-      }
     }
 
-    errors[prop] = error;
+    errors[fieldName] = error;
   });
 
   return errors;

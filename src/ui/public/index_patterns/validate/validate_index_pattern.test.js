@@ -17,26 +17,23 @@
  * under the License.
  */
 
-import { validateIndexPattern } from './validate_index_pattern';
+import { ILLEGAL_CHARACTERS, CONTAINS_SPACES, validateIndexPattern } from './validate_index_pattern';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
 describe('Index Pattern Validation', () => {
-  it('should not allow empty pattern', () => {
-    expect(typeof validateIndexPattern().error).toBe('string');
-    expect(typeof validateIndexPattern(' ').error).toBe('string');
-  });
-
   it('should not allow space in the pattern', () => {
-    expect(typeof validateIndexPattern('my pattern').error).toBe('string');
+    const errors = validateIndexPattern('my pattern');
+    expect(errors[CONTAINS_SPACES]).toBe(true);
   });
 
   it('should not allow illegal characters', () => {
     INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.forEach((char) => {
-      expect(typeof validateIndexPattern(`pattern${char}`).error).toBe('string');
+      const errors = validateIndexPattern(`pattern${char}`);
+      expect(errors[ILLEGAL_CHARACTERS]).toEqual([ char ]);
     });
   });
 
-  it('should return a "null" error when pattern is valid', () => {
-    expect(validateIndexPattern('my-pattern-*').error).toBe(null);
+  it('should return empty object when there are no errors', () => {
+    expect(validateIndexPattern('my-pattern-*')).toEqual({});
   });
 });

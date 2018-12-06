@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export { validateIndexPattern } from './validate_index_pattern';
+export {
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  validateIndexPattern,
+} from './validate_index_pattern';
