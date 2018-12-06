@@ -15,7 +15,7 @@ import { SPACES_FEATURE_DESCRIPTION } from './lib/constants';
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'spaces',
-    title: i18n.translate('xpack.spaces.featureRegistryTitle', {
+    title: i18n.translate('xpack.spaces.spacesTitle', {
       defaultMessage: 'Spaces',
     }),
     description: SPACES_FEATURE_DESCRIPTION,

@@ -13,7 +13,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'watcher',
     title: 'Watcher',
-    description: i18n.translate('xpack.watcher.registerDescription', {
+    description: i18n.translate('xpack.watcher.watcherDescription', {
       defaultMessage: 'Detect changes in your data by creating, managing, and monitoring alerts.'
     }),
     icon: 'watchesApp',
