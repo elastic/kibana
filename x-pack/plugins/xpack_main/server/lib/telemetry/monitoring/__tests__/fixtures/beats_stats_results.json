@@ -11531,5 +11531,229 @@
       ]
     }
   },
+  {
+    "_index": ".monitoring-beats-6-2018.12.06",
+    "_type": "doc",
+    "_id": "k8ZKgWcBiib8ID6WqivR",
+    "_score" : 1.0,
+    "_source" : {
+      "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
+      "timestamp": "2018-12-06T02:13:33.518Z",
+      "interval_ms" : 10000,
+      "type": "beats_stats",
+      "source_node" : {
+        "uuid": "TpOJ7OKMSmOa_5K-8G1Faw",
+        "host": "127.0.0.1",
+        "transport_address": "127.0.0.1:9300",
+        "ip": "127.0.0.1",
+        "name": "avce.local",
+        "timestamp": "2018-12-06T02:13:33.518Z"
+      },
+      "beats_stats" : {
+        "timestamp": "2018-12-06T02:13:33.517Z",
+        "beat" : {
+          "version": "7.0.0",
+          "name": "avce.local",
+          "host": "avce.local",
+          "uuid": "3cc1126f-3e17-4ae7-9f6d-05f99f41e0b0",
+          "type": "heartbeat"
+        },
+        "metrics" : {
+          "heartbeat" : {
+            "http" : {
+              "endpoint_starts" : 1,
+              "endpoint_stops" : 0,
+              "monitor_starts" : 1,
+              "monitor_stops" : 0
+            },
+            "icmp" : {
+              "endpoint_starts" : 0,
+              "endpoint_stops" : 0,
+              "monitor_starts" : 0,
+              "monitor_stops" : 0
+            },
+            "tcp" : {
+              "endpoint_starts" : 1,
+              "endpoint_stops" : 0,
+              "monitor_starts" : 1,
+              "monitor_stops" : 0
+            }
+          },
+          "system" : {
+            "cpu" : {
+              "cores" : 8
+            },
+            "load" : {
+              "1" : 2.4277,
+              "5" : 2.4463,
+              "15" : 2.4023,
+              "norm" : {
+                "15" : 0.3003,
+                "1" : 0.3035,
+                "5" : 0.3058
+              }
+            }
+          },
+          "beat" : {
+            "info" : {
+              "ephemeral_id": "77a6e381-c84c-4779-82bd-cf486c21bc70",
+              "uptime" : {
+                "ms" : 240056
+              }
+            },
+            "memstats" : {
+              "memory_alloc" : 2710920,
+              "gc_next" : 4194304,
+              "rss" : 23191552,
+              "memory_total" : 31615744
+            },
+            "cpu" : {
+              "system" : {
+                "ticks" : 95,
+                "time" : {
+                  "ms" : 95
+                }
+              },
+              "total" : {
+                "value" : 269,
+                "ticks" : 269,
+                "time" : {
+                  "ms" : 269
+                }
+              },
+              "user" : {
+                "time" : {
+                  "ms" : 174
+                },
+                "ticks" : 174
+              }
+            }
+          },
+          "libbeat" : {
+            "pipeline" : {
+              "events" : {
+                "active" : 2,
+                "total" : 48,
+                "filtered" : 0,
+                "published" : 48,
+                "failed" : 0,
+                "dropped" : 0,
+                "retry" : 2
+              },
+              "queue" : {
+                "acked" : 46
+              },
+              "clients" : 2
+            },
+            "config" : {
+              "reloads" : 0,
+              "module" : {
+                "starts" : 0,
+                "stops" : 0,
+                "running" : 0
+              }
+            },
+            "output" : {
+              "events" : {
+                "duplicates" : 0,
+                "active" : 0,
+                "toomany" : 0,
+                "batches" : 23,
+                "total" : 46,
+                "acked" : 46,
+                "failed" : 0,
+                "dropped" : 0
+              },
+              "write" : {
+                "bytes" : 36876,
+                "errors" : 0
+              },
+              "read" : {
+                "bytes" : 8464,
+                "errors" : 0
+              },
+              "type": "elasticsearch"
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "_index": ".monitoring-beats-6-2018.12.06",
+    "_type": "doc",
+    "_id": "lMZKgWcBiib8ID6WqivX",
+    "_score" : 1.0,
+    "_source" : {
+      "cluster_uuid": "FlV4ckTxQ0a78hmBkzzc9A",
+      "timestamp": "2018-12-06T02:13:33.525Z",
+      "interval_ms" : 60000,
+      "type": "beats_state",
+      "source_node" : {
+        "uuid": "TpOJ7OKMSmOa_5K-8G1Faw",
+        "host": "127.0.0.1",
+        "transport_address": "127.0.0.1:9300",
+        "ip": "127.0.0.1",
+        "name": "avce.local",
+        "timestamp": "2018-12-06T02:13:33.525Z"
+      },
+      "beats_state" : {
+        "timestamp": "2018-12-06T02:13:33.517Z",
+        "beat" : {
+          "name": "avce.local",
+          "host": "avce.local",
+          "uuid": "3cc1126f-3e17-4ae7-9f6d-05f99f41e0b0",
+          "type": "heartbeat",
+          "version": "7.0.0"
+        },
+        "state" : {
+          "management" : {
+            "enabled" : false
+          },
+          "queue" : {
+            "name": "mem"
+          },
+          "output" : {
+            "name": "elasticsearch"
+          },
+          "heartbeat" : {
+            "endpoints" : 2,
+            "http" : {
+              "endpoints" : 1,
+              "monitors" : 1
+            },
+            "icmp" : {
+              "monitors" : 0,
+              "endpoints" : 0
+            },
+            "tcp" : {
+              "monitors" : 1,
+              "endpoints" : 1
+            },
+            "monitors" : 2
+          },
+          "service" : {
+            "name": "heartbeat",
+            "id": "e7ce8ecf-1944-43ec-8f1a-e9aa12539f2b",
+            "version": "7.0.0"
+          },
+          "beat" : {
+            "name": "avce.local"
+          },
+          "host" : {
+            "os" : {
+              "family": "darwin",
+              "kernel": "18.2.0",
+              "build": "18B75",
+              "platform": "darwin",
+              "version": "10.14.1"
+            },
+            "name": "avce.local",
+            "architecture": "x86_64"
+          }
+        }
+      }
+    }
+  },
   {}
 ]
