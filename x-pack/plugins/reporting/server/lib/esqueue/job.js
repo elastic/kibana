@@ -31,6 +31,7 @@ export class Job extends events.EventEmitter {
     this.priority = Math.max(Math.min(options.priority || 10, 20), -20);
     this.doctype = options.doctype || constants.DEFAULT_SETTING_DOCTYPE;
     this.indexSettings = options.indexSettings || {};
+    this.browser_type = options.browser_type;
 
     this.debug = (msg, err) => {
       const logger = options.logger || function () {};
@@ -66,6 +67,7 @@ export class Job extends events.EventEmitter {
         attempts: 0,
         max_attempts: this.maxAttempts,
         status: constants.JOB_STATUS_PENDING,
+        browser_type: this.browser_type,
       }
     };
 
@@ -131,7 +133,8 @@ export class Job extends events.EventEmitter {
       payload: this.payload,
       timeout: this.timeout,
       max_attempts: this.maxAttempts,
-      priority: this.priority
+      priority: this.priority,
+      browser_type: this.browser_type,
     };
   }
 }

@@ -24,7 +24,14 @@
 
 import _ from 'lodash';
 import { MigrationVersion, ROOT_TYPE } from '../../serialization';
-import { AliasAction, CallCluster, IndexMapping, NotFound, RawDoc } from './call_cluster';
+import {
+  AliasAction,
+  CallCluster,
+  IndexMapping,
+  NotFound,
+  RawDoc,
+  ShardsInfo,
+} from './call_cluster';
 
 // Require rather than import gets us around the lack of TypeScript definitions
 // for "getTypes"
@@ -88,6 +95,8 @@ export function reader(
 
   return async function read() {
     const result = await nextBatch();
+    assertResponseIncludeAllShards(result);
+
     const docs = result.hits.hits;
 
     scrollId = result._scroll_id;
@@ -167,7 +176,7 @@ export async function migrationsUpToDate(
       return true;
     }
 
-    const { count } = await callCluster('count', {
+    const response = await callCluster('count', {
       body: {
         query: {
           bool: {
@@ -186,7 +195,9 @@ export async function migrationsUpToDate(
       type: ROOT_TYPE,
     });
 
-    return count === 0;
+    assertResponseIncludeAllShards(response);
+
+    return response.count === 0;
   } catch (e) {
     // retry for Service Unavailable
     if (e.status !== 503 || retryCount === 0) {
@@ -298,6 +309,27 @@ async function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
 }
 
 /**
+ * Provides protection against reading/re-indexing against an index with missing
+ * shards which could result in data loss. This shouldn't be common, as the Saved
+ * Object indices should only ever have a single shard. This is more to handle
+ * instances where customers manually expand the shards of an index.
+ */
+function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
+  if (!_.has(_shards, 'total') || !_.has(_shards, 'successful')) {
+    return;
+  }
+
+  const failed = _shards.total - _shards.successful;
+
+  if (failed > 0) {
+    throw new Error(
+      `Re-index failed :: ${failed} of ${_shards.total} shards failed. ` +
+        `Check Elasticsearch cluster health for more information.`
+    );
+  }
+}
+
+/**
  * Reindexes from source to dest, polling for the reindex completion.
  */
 async function reindex(callCluster: CallCluster, source: string, dest: string, batchSize: number) {
@@ -322,6 +354,13 @@ async function reindex(callCluster: CallCluster, source: string, dest: string, b
 
     completed = await callCluster('tasks.get', {
       taskId: task,
-    }).then(result => result.completed);
+    }).then(result => {
+      if (result.error) {
+        const e = result.error;
+        throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
+      }
+
+      return result.completed;
+    });
   }
 }

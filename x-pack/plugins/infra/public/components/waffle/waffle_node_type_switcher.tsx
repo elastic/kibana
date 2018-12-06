@@ -5,6 +5,7 @@
  */
 
 import { EuiKeyPadMenu, EuiKeyPadMenuItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import {
   InfraMetricInput,
@@ -24,7 +25,15 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
   public render() {
     return (
       <EuiKeyPadMenu>
-        <EuiKeyPadMenuItem label="Hosts" onClick={this.handleClick(InfraNodeType.host)}>
+        <EuiKeyPadMenuItem
+          label={
+            <FormattedMessage
+              id="xpack.infra.waffle.nodeTypeSwitcher.hostsLabel"
+              defaultMessage="Hosts"
+            />
+          }
+          onClick={this.handleClick(InfraNodeType.host)}
+        >
           <img src="../plugins/infra/images/hosts.svg" className="euiIcon euiIcon--large" />
         </EuiKeyPadMenuItem>
         <EuiKeyPadMenuItem label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
