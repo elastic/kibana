@@ -33,6 +33,7 @@ const writeAsync = promisify(writeFile);
 interface Params {
   log: (tags: string[], data: string) => void;
   outputPath: string;
+  dllsPath: string;
   cachePath: string;
 }
 
@@ -44,6 +45,7 @@ interface WatchCacheStateContent {
 export class WatchCache {
   private readonly log: Params['log'];
   private readonly outputPath: Params['outputPath'];
+  private readonly dllsPath: Params['dllsPath'];
   private readonly cachePath: Params['cachePath'];
   private readonly cacheState: WatchCacheStateContent;
   private statePath: string;
@@ -53,6 +55,7 @@ export class WatchCache {
   constructor(params: Params) {
     this.log = params.log;
     this.outputPath = params.outputPath;
+    this.dllsPath = params.dllsPath;
     this.cachePath = params.cachePath;
 
     this.isInitialized = false;
@@ -107,6 +110,9 @@ export class WatchCache {
     // from the previous cache path reset action
     await deleteEmpty(this.cachePath);
 
+    // delete dlls
+    await del(this.dllsPath);
+
     // re-write new cache state file
     await this.write();
 
@@ -135,8 +141,14 @@ export class WatchCache {
 
   private async buildOptimizerConfigSha() {
     const baseOptimizer = resolve(__dirname, '../base_optimizer.js');
+    const dynamicDllConfigModel = resolve(__dirname, '../dynamic_dll_plugin/dll_config_model.js');
+    const dynamicDllPlugin = resolve(__dirname, '../dynamic_dll_plugin/dynamic_dll_plugin.js');
 
-    return await this.buildShaWithMultipleFiles([baseOptimizer]);
+    return await this.buildShaWithMultipleFiles([
+      baseOptimizer,
+      dynamicDllConfigModel,
+      dynamicDllPlugin,
+    ]);
   }
 
   private isResetNeeded() {

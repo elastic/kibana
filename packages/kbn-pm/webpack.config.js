@@ -20,6 +20,7 @@
 const path = require('path');
 
 module.exports = {
+  mode: 'production',
   entry: {
     index: './src/index.ts',
   },
@@ -97,5 +98,9 @@ module.exports = {
 
   watchOptions: {
     ignored: [/node_modules/, /vendor/],
+  },
+
+  optimization: {
+    minimize: false,
   },
 };
