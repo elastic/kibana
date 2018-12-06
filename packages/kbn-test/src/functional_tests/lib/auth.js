@@ -20,12 +20,12 @@
 import { format as formatUrl } from 'url';
 
 import request from 'request';
-import { delay, fromNode as fcb } from 'bluebird';
+import { delay } from 'bluebird';
 
 export const DEFAULT_SUPERUSER_PASS = 'iamsuperuser';
 
 async function updateCredentials(port, auth, username, password, retries = 10) {
-  const result = await fcb(cb =>
+  const result = await new Promise((resolve, reject) =>
     request(
       {
         method: 'PUT',
@@ -40,13 +40,15 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
         body: { password },
       },
       (err, httpResponse, body) => {
-        cb(err, { httpResponse, body });
+        if (err) return reject(err);
+        resolve({ httpResponse, body });
       }
     )
   );
 
   const { body, httpResponse } = result;
   const { statusCode } = httpResponse;
+
   if (statusCode === 200) {
     return;
   }
@@ -59,21 +61,61 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
   throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
 }
 
-export async function setupUsers(log, config) {
-  const esPort = config.get('servers.elasticsearch.port');
-
+export async function setupUsers(log, esPort, updates) {
   // track the current credentials for the `elastic` user as
   // they will likely change as we apply updates
   let auth = `elastic:${DEFAULT_SUPERUSER_PASS}`;
 
-  // list of updates we need to apply
-  const updates = [config.get('servers.elasticsearch'), config.get('servers.kibana')];
+  for (const { username, password, roles } of updates) {
+    // If working with a built-in user, just change the password
+    if (['logstash_system', 'elastic', 'kibana'].includes(username)) {
+      await updateCredentials(esPort, auth, username, password);
+      log.info('setting %j user password to %j', username, password);
 
-  for (const { username, password } of updates) {
-    log.info('setting %j user password to %j', username, password);
-    await updateCredentials(esPort, auth, username, password);
+      // If not a builtin user, add them
+    } else {
+      await insertUser(esPort, auth, username, password, roles);
+      log.info('Added %j user with password to %j', username, password);
+    }
+
     if (username === 'elastic') {
       auth = `elastic:${password}`;
     }
   }
+}
+
+async function insertUser(port, auth, username, password, roles = [], retries = 10) {
+  const result = await new Promise((resolve, reject) =>
+    request(
+      {
+        method: 'POST',
+        uri: formatUrl({
+          protocol: 'http:',
+          auth,
+          hostname: 'localhost',
+          port,
+          pathname: `/_xpack/security/user/${username}`,
+        }),
+        json: true,
+        body: { password, roles },
+      },
+      (err, httpResponse, body) => {
+        if (err) return reject(err);
+        resolve({ httpResponse, body });
+      }
+    )
+  );
+
+  const { body, httpResponse } = result;
+  const { statusCode } = httpResponse;
+  if (statusCode === 200) {
+    return;
+  }
+
+  if (retries > 0) {
+    await delay(2500);
+    return await insertUser(port, auth, username, password, retries - 1);
+  }
+
+  throw new Error(`${statusCode} response, expected 200 -- ${JSON.stringify(body)}`);
 }

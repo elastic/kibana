@@ -10,7 +10,7 @@ import expect from 'expect.js';
 
 import { extract } from '../extract';
 import { ExtractError } from '../extract_error';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 
 const FIXTURES_FOLDER = `${__dirname}/__fixtures__`;
 const SRC_FILE_UNCOMPRESSED = `${FIXTURES_FOLDER}/extract_test_file.js`;

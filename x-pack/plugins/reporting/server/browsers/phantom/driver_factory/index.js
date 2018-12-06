@@ -9,7 +9,7 @@ import { mergeMap } from 'rxjs/operators';
 import phantom from '@elastic/node-phantom-simple';
 import { getPhantomOptions } from './phantom_options';
 import { PhantomDriver } from '../driver';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import { safeChildProcess, exitCodeSuggestion } from '../../safe_child_process';
 
 export class PhantomDriverFactory {
