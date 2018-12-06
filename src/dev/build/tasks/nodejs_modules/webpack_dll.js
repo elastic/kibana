@@ -49,7 +49,7 @@ export async function getDllEntries(manifestPath, whiteListedModules) {
   });
 }
 
-export async function cleanDllModuleFromEntryPath(logger, entryPath) {
+export async function cleanDllModuleFromEntryPath(entryPath) {
   const modulePkgPath = await pkgUp(entryPath);
   const modulePkg = JSON.parse(await read(modulePkgPath));
 

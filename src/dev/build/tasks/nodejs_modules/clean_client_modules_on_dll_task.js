@@ -76,7 +76,8 @@ export const CleanClientModulesOnDLLTask = {
       // Clean a module included into the dll
       // and then write a blank file for each
       // entry file present into the dll
-      await cleanDllModuleFromEntryPath(log, entryPath);
+      log.debug('Cleaning bundled module source for entry', relativeEntryPath);
+      await cleanDllModuleFromEntryPath(entryPath);
       await writeEmptyFileForDllEntry(entryPath);
     }
   }
