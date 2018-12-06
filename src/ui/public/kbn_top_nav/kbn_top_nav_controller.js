@@ -89,12 +89,13 @@ export function KbnTopNavControllerProvider($compile) {
     };
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
+      const optLabel = opt.label ? opt.label : capitalize(opt.key);
       const defaultedOpt = {
-        label: opt.label ? opt.label : capitalize(opt.key),
+        label: optLabel,
         hasFunction: !!opt.run,
-        description: opt.run ? opt.key : i18n.translate('common.ui.topNav.toggleViewAriaLabel', {
-          defaultMessage: 'Toggle {optKey} view',
-          values: { optKey: opt.key }
+        description: opt.run ? optLabel : i18n.translate('common.ui.topNav.toggleViewAriaLabel', {
+          defaultMessage: 'Toggle {optLabel} view',
+          values: { optLabel }
         }),
         run: (item) => this.toggle(item.key),
         ...opt
