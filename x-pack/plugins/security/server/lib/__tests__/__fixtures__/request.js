@@ -8,6 +8,7 @@ import url from 'url';
 export function requestFixture({
   headers = { accept: 'something/html' },
   path = '/wat',
+  basePath = '',
   search = '',
   payload
 } = {}) {
@@ -15,6 +16,7 @@ export function requestFixture({
     raw: { req: { headers } },
     headers,
     url: { path, search },
+    getBasePath: () => basePath,
     query: search ? url.parse(search, { parseQueryString: true }).query : {},
     payload,
     state: { user: 'these are the contents of the user client cookie' }

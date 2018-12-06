@@ -22,7 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
@@ -90,9 +90,9 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should still show all tags after browser was resized very small', async function () {
-      await remote.setWindowSize(200, 200);
+      await browser.setWindowSize(200, 200);
       await PageObjects.common.sleep(1000);
-      await remote.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 800);
       await PageObjects.common.sleep(1000);
       const data = await PageObjects.visualize.getTextTag();
       expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
@@ -143,8 +143,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.openControlsByName(termsField);
         await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.loadSavedVisualization(vizName1);
+        await PageObjects.common.navigateToApp('visualize');
+        await PageObjects.visualize.loadSavedVisualization(vizName1, { navigateToVisualize: false });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForVisualization();

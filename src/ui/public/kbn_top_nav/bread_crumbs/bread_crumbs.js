@@ -46,7 +46,7 @@ module.directive('breadCrumbs', function () {
       useLinks: '='
     },
     template: breadCrumbsTemplate,
-    controller: function ($scope, config, breadcrumbState) {
+    controller: function ($scope, config) {
       config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
       function omitPagesFilter(crumb) {
@@ -77,8 +77,6 @@ module.directive('breadCrumbs', function () {
         if ($scope.pageTitle) {
           newBreadcrumbs.push({ text: $scope.pageTitle });
         }
-
-        breadcrumbState.set(newBreadcrumbs);
       });
     }
   };

@@ -13,22 +13,22 @@ import {
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
-export interface ServiceResponse {
-  service_name: string;
+export interface ServiceAPIResponse {
+  serviceName: string;
   types: string[];
-  agent_name?: string;
+  agentName?: string;
 }
 
 export async function getService(
   serviceName: string,
   setup: Setup
-): Promise<ServiceResponse> {
+): Promise<ServiceAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: [
-      config.get('apm_oss.errorIndices'),
-      config.get('apm_oss.transactionIndices')
+      config.get<string>('apm_oss.errorIndices'),
+      config.get<string>('apm_oss.transactionIndices')
     ],
     body: {
       size: 0,
@@ -72,12 +72,12 @@ export async function getService(
     };
   }
 
-  const resp = await client('search', params);
-  const aggs: Aggs = resp.aggregations;
-
+  const { aggregations } = await client<void, Aggs>('search', params);
   return {
-    service_name: serviceName,
-    types: aggs.types.buckets.map(bucket => bucket.key),
-    agent_name: oc(aggs).agents.buckets[0].key()
+    serviceName,
+    types: oc(aggregations)
+      .types.buckets([])
+      .map(bucket => bucket.key),
+    agentName: oc(aggregations).agents.buckets[0].key()
   };
 }

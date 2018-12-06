@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 
-import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import '../../validate_date_interval';
 import chrome from '../../chrome';
@@ -28,11 +27,14 @@ import { createFilterHistogram } from './create_filter/histogram';
 import intervalTemplate from '../controls/number_interval.html';
 import minDocCountTemplate from '../controls/min_doc_count.html';
 import extendedBoundsTemplate from '../controls/extended_bounds.html';
+import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
 export const histogramBucketAgg = new BucketAggType({
   name: 'histogram',
-  title: 'Histogram',
+  title: i18n.translate('common.ui.aggTypes.buckets.histogramTitle', {
+    defaultMessage: 'Histogram',
+  }),
   ordered: {},
   makeLabel: function (aggConfig) {
     return aggConfig.getFieldDisplayName();

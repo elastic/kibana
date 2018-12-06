@@ -14,23 +14,25 @@ import {
 } from '../../../common/constants';
 import { Setup } from '../helpers/setup_request';
 
-export interface ServiceListItemResponse {
-  service_name: string;
-  agent_name: string | undefined;
-  transactions_per_minute: number;
-  errors_per_minute: number;
-  avg_response_time: number;
+export interface IServiceListItem {
+  serviceName: string;
+  agentName: string | undefined;
+  transactionsPerMinute: number;
+  errorsPerMinute: number;
+  avgResponseTime: number;
 }
+
+export type ServiceListAPIResponse = IServiceListItem[];
 
 export async function getServices(
   setup: Setup
-): Promise<ServiceListItemResponse[]> {
+): Promise<ServiceListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
     index: [
-      config.get('apm_oss.errorIndices'),
-      config.get('apm_oss.transactionIndices')
+      config.get<string>('apm_oss.errorIndices'),
+      config.get<string>('apm_oss.transactionIndices')
     ],
     body: {
       size: 0,
@@ -101,8 +103,8 @@ export async function getServices(
     };
   }
 
-  const resp = await client('search', params);
-  const aggs: Aggs = resp.aggregations;
+  const resp = await client<void, Aggs>('search', params);
+  const aggs = resp.aggregations;
   const serviceBuckets = oc(aggs).services.buckets([]);
 
   return serviceBuckets.map(bucket => {
@@ -118,11 +120,11 @@ export async function getServices(
     const errorsPerMinute = totalErrors / deltaAsMinutes;
 
     return {
-      service_name: bucket.key,
-      agent_name: oc(bucket).agents.buckets[0].key(),
-      transactions_per_minute: transactionsPerMinute,
-      errors_per_minute: errorsPerMinute,
-      avg_response_time: bucket.avg.value
+      serviceName: bucket.key,
+      agentName: oc(bucket).agents.buckets[0].key(),
+      transactionsPerMinute,
+      errorsPerMinute,
+      avgResponseTime: bucket.avg.value
     };
   });
 }
