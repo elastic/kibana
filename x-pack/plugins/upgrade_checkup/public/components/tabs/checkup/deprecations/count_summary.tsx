@@ -33,7 +33,7 @@ export const DeprecationCountSummary: StatelessComponent<{
         <FormattedMessage
           id="xpack.upgradeCheckup.checkupTab.changeFiltersShowMoreLabel"
           description="Explains how to show all deprecations if there are more available."
-          defaultMessage="Change filters to show more."
+          defaultMessage="Change filter to show more."
         />
       </Fragment>
     )}

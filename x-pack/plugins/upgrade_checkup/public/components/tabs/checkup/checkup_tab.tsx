@@ -61,6 +61,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
       deprecations,
       loadingState,
       refreshCheckupData,
+      setSelectedTabIndex,
       showBackupWarning = false,
     } = this.props;
     const { currentFilter, search, currentGroupBy } = this.state;
@@ -70,24 +71,22 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
         <EuiSpacer />
         <EuiText grow={false}>
           <p>
-            This tool runs a series of checks against your Elasticsearch{' '}
-            <strong>{checkupLabel}</strong> to determine whether you can upgrade directly to
-            Elasticsearch 7.0, or whether you need to make changes to your data before doing so.
+            These <strong>{checkupLabel}</strong> issues need your attention. Address them before
+            upgrading to Elasticsearch 7.0.
           </p>
         </EuiText>
         {showBackupWarning && (
           <Fragment>
             <EuiSpacer />
-            <EuiCallOut title="Backup your indices now!" color="warning" iconType="help">
+            <EuiCallOut title="Back up your indices now" color="warning" iconType="help">
               <p>
-                Before starting your upgrade and using these tools, backup your data using the{' '}
+                Back up your data using the{' '}
                 <EuiLink
                   href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
                   target="_blank"
                 >
-                  snapshot / restore API
+                  snapshot and restore APIs.
                 </EuiLink>
-                .
               </p>
             </EuiCallOut>
           </Fragment>
@@ -96,9 +95,11 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
         <EuiPageContent>
           <EuiPageContentBody>
             {loadingState === LoadingState.Error ? (
-              <EuiCallOut title="Sorry, there was an error" color="danger" iconType="cross">
-                <p>There was a network error retrieving the checkup results.</p>
-              </EuiCallOut>
+              <EuiCallOut
+                title="A network error occurred while retrieving the checkup results."
+                color="danger"
+                iconType="cross"
+              />
             ) : deprecations && deprecations.length > 0 ? (
               <Fragment>
                 <CheckupControls
@@ -125,7 +126,11 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
                     <p data-test-subj="upgradeCheckupIssueSummary">
                       You have no <strong>{checkupLabel}</strong> issues.
                     </p>
-                    <p>Check other tabs for issues or return to the overview for next steps.</p>
+                    <p>
+                      Check the{' '}
+                      <EuiLink onClick={() => setSelectedTabIndex(0)}>Overview tab</EuiLink> for
+                      next steps.
+                    </p>
                   </Fragment>
                 }
               />

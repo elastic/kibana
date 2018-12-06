@@ -7,8 +7,7 @@
 import React, { Fragment } from 'react';
 
 import {
-  // @ts-ignore
-  EuiDescribedFormGroup,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -29,20 +28,29 @@ export class OverviewTab extends UpgradeCheckupTabComponent {
     return (
       <Fragment>
         <EuiSpacer />
+
         <EuiText grow={false}>
           <p>
-            This assistant helps you prepare for your upgrade from{' '}
-            <strong>Elasticsearch 6.x</strong> to <strong>Elasticsearch 7.x</strong>. Read more
-            about important changes in the{' '}
+            This assistant checks your cluster and indices and identifies the changes you need to
+            make before upgrading to Elasticsearch 7.0.
+          </p>
+        </EuiText>
+
+        <EuiSpacer />
+
+        <EuiCallOut title="Issues list might be incomplete" color="warning" iconType="help">
+          <p>
+            The complete list of{' '}
             <EuiLink
               href="https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-7.0.html"
               target="_blank"
             >
-              Breaking Changes
+              deprecations and breaking changes
             </EuiLink>{' '}
-            documentation online.
+            in Elasticsearch 7.0 will be available in the final 6.x minor release. When this list is
+            complete, this warning will go away.
           </p>
-        </EuiText>
+        </EuiCallOut>
 
         <EuiSpacer />
 

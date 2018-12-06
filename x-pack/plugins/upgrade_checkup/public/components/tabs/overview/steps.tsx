@@ -7,8 +7,6 @@
 import React, { Fragment, StatelessComponent } from 'react';
 
 import {
-  // @ts-ignore
-  EuiDescribedFormGroup,
   EuiFormRow,
   EuiFormRowProps,
   EuiLink,
@@ -42,6 +40,7 @@ export const Steps: StatelessComponent<UpgradeCheckupTabProps> = ({
 
   return (
     <EuiSteps
+      className="upgSteps"
       headingElement="h2"
       steps={[
         {
@@ -52,16 +51,16 @@ export const Steps: StatelessComponent<UpgradeCheckupTabProps> = ({
               {countByType.cluster ? (
                 <Fragment>
                   <p>
-                    Fix deprecated cluster-wide settings by visiting the{' '}
-                    <EuiLink onClick={() => setSelectedTabIndex(1)}>cluster tab.</EuiLink>
+                    Go to the <EuiLink onClick={() => setSelectedTabIndex(1)}>Cluster tab</EuiLink>{' '}
+                    to update deprecated cluster settings.
                   </p>
                   <p>
                     There are <EuiNotificationBadge>{countByType.cluster}</EuiNotificationBadge>{' '}
-                    issues left to resolve.
+                    issues remaining to resolve.
                   </p>
                 </Fragment>
               ) : (
-                <p>There are no deprecations remaining to resolve with your cluster settings.</p>
+                <p>There are no remaining deprecated cluster settings.</p>
               )}
             </EuiText>
           ),
@@ -74,16 +73,16 @@ export const Steps: StatelessComponent<UpgradeCheckupTabProps> = ({
               {countByType.indices ? (
                 <Fragment>
                   <p>
-                    Fix deprecated index settings and reindex old indices by visiting the{' '}
-                    <EuiLink onClick={() => setSelectedTabIndex(2)}>indices tab.</EuiLink>
+                    Go to the <EuiLink onClick={() => setSelectedTabIndex(2)}>Indices tab</EuiLink>{' '}
+                    to update deprecated index settings.
                   </p>
                   <p>
                     There are <EuiNotificationBadge>{countByType.indices}</EuiNotificationBadge>{' '}
-                    issues left to resolve.
+                    issues remaining to resolve.
                   </p>
                 </Fragment>
               ) : (
-                <p>There are no deprecations remaining to resolve with your index settings.</p>
+                <p>There are no remaining deprecated index settings.</p>
               )}
             </EuiText>
           ),
@@ -92,7 +91,7 @@ export const Steps: StatelessComponent<UpgradeCheckupTabProps> = ({
           title: 'Review Elasticsearch deprecation logs',
           children: (
             <Fragment>
-              <EuiText>
+              <EuiText grow={false}>
                 <p>
                   Find and read through Elasticsearch's{' '}
                   <EuiLink
@@ -108,26 +107,12 @@ export const Steps: StatelessComponent<UpgradeCheckupTabProps> = ({
 
               <EuiSpacer />
 
-              <EuiDescribedFormGroup
-                idAria="deprecation-logging"
-                title={<h3>Deprecation logging</h3>}
-                titleSize="xxs"
-                fullWidth
-                description={
-                  <Fragment>
-                    Elasticsearch comes with a deprecation logger which will log a message whenever
-                    deprecated functionality is used. Enable or disable deprecation logging on your
-                    cluster here. This is enabled by default, beginning in Elasticsearch 5.0.
-                  </Fragment>
-                }
+              <EuiFormRowPrime
+                label="Enable deprecation logging?"
+                describedByIds={['deprecation-logging']}
               >
-                <EuiFormRowPrime
-                  label="Enable deprecation logging?"
-                  describedByIds={['deprecation-logging']}
-                >
-                  <DeprecationLoggingToggle />
-                </EuiFormRowPrime>
-              </EuiDescribedFormGroup>
+                <DeprecationLoggingToggle />
+              </EuiFormRowPrime>
             </Fragment>
           ),
         },

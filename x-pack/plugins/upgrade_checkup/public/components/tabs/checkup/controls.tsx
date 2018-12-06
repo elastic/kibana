@@ -44,7 +44,7 @@ export const CheckupControlsUI: StatelessComponent<CheckupControlsProps> = ({
       <EuiFieldSearch
         placeholder={intl.formatMessage({
           id: 'xpack.upgradeCheckup.checkupTab.controls.searchBarPlaceholder',
-          defaultMessage: 'Filter list',
+          defaultMessage: 'Filter',
         })}
         value={search}
         onChange={e => onSearchChange(e.target.value)}

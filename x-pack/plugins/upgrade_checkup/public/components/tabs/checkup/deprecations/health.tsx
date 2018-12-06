@@ -24,10 +24,10 @@ const LocalizedLevels: { [level: string]: string } = {
 
 export const LocalizedActions: { [level: string]: string } = {
   warning: i18n.translate('xpack.upgradeCheckup.checkupTab.deprecations.warningActionTooltip', {
-    defaultMessage: 'Resolving this issue is advised but not required to upgrade.',
+    defaultMessage: 'Resolving this issue before upgrading is advised, but not required.',
   }),
   critical: i18n.translate('xpack.upgradeCheckup.checkupTab.deprecations.criticalActionTooltip', {
-    defaultMessage: 'This issue must be resolved to upgrade.',
+    defaultMessage: 'Resolve this issue before upgrading.',
   }),
 };
 
