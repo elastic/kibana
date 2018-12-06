@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { resolve } from 'path';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -92,7 +93,7 @@ export const reporting = (kibana) => {
           settleTime: Joi.number().integer().default(1000), //deprecated
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: remove support in 7.0
+            type: Joi.any().valid('phantom', 'chromium').default(await getDefaultBrowser()),  // TODO: make chromium the only valid option in 7.0
             autoDownload: Joi.boolean().when('$dev', {
               is: true,
               then: Joi.default(true),
@@ -150,10 +151,6 @@ export const reporting = (kibana) => {
       validateConfig(config, message => server.log(['reporting', 'warning'], message));
       logConfiguration(config, message => server.log(['reporting', 'debug'], message));
 
-      if (config.get('xpack.reporting.capture.browser.type') === PHANTOM) {
-        server.log(['reporting', 'warning'], 'Phantom browser type for reporting will be deprecated starting in 7.0');
-      }
-
       const { xpack_main: xpackMainPlugin } = server.plugins;
 
       mirrorPluginStatus(xpackMainPlugin, this);
@@ -177,6 +174,15 @@ export const reporting = (kibana) => {
 
     deprecations: function ({ unused }) {
       return [
+        (settings, log) => {
+          const isPhantom = get(settings, 'capture.browser.type') === PHANTOM;
+          if (isPhantom) {
+            log(
+              'Phantom browser support for Reporting will be removed and Chromium will be the only valid option starting in 7.0.0. ' +
+              'Use the default `chromium` value for `xpack.reporting.capture.browser.type` to dismiss this warning.'
+            );
+          }
+        },
         unused("capture.concurrency"),
         unused("capture.timeout"),
         unused("capture.settleTime"),
