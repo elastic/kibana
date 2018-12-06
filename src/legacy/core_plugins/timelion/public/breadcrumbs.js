@@ -19,13 +19,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-export function getNewBreadcrumbs() {
+const ROOT_BREADCRUMB = {
+  text: i18n.translate('timelion.breadcrumbs.root', {
+    defaultMessage: 'Timelion'
+  }),
+  href: '#'
+};
+
+export function getCreateBreadcrumbs() {
   return [
+    ROOT_BREADCRUMB,
     {
-      text: i18n.translate('core.timelion.new.breadcrumb', {
-        defaultMessage: 'Timelion'
+      text: i18n.translate('timelion.breadcrumbs.create', {
+        defaultMessage: 'Create'
       }),
-      href: '#'
     }
   ];
 }
@@ -33,7 +40,7 @@ export function getNewBreadcrumbs() {
 export function getSavedSheetBreadcrumbs($route) {
   const { savedSheet } = $route.current.locals;
   return [
-    ...getNewBreadcrumbs(),
+    ROOT_BREADCRUMB,
     {
       text: savedSheet.title,
     }

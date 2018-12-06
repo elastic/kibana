@@ -25,7 +25,7 @@ import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
-import { getSavedSheetBreadcrumbs, getNewBreadcrumbs } from './breadcrumbs';
+import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
 
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
@@ -61,7 +61,7 @@ require('ui/routes')
     k7Breadcrumbs: ($injector, $route) => $injector.invoke(
       $route.current.params.id
         ? getSavedSheetBreadcrumbs
-        : getNewBreadcrumbs
+        : getCreateBreadcrumbs
     ),
     resolve: {
       savedSheet: function (redirectWhenMissing, savedSheets, $route) {
