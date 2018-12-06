@@ -149,6 +149,7 @@ const makeZoomWarningMsg = (function () {
           <EuiSpacer size="xs"/>
           <EuiButtonEmpty
             size="s"
+            flush="left"
             isDisabled={this.state.disabled}
             onClick={() => {
               this.setState({
