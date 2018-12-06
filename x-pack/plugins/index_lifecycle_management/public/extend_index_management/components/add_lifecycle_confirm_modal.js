@@ -180,7 +180,7 @@ export class AddLifecyclePolicyConfirmModal extends Component {
             options={options}
             value={selectedPolicyName}
             onChange={e => {
-              this.setState({ selectedPolicyName: e.target.value });
+              this.setState({ policyError: null, selectedPolicyName: e.target.value });
             }}
           />
         </EuiFormRow>

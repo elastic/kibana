@@ -35,7 +35,12 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     const { intl, policy, callback, onCancel } = this.props;
     const { templateName, aliasName } = this.state;
     const policyName = policy.name;
-
+    if (!templateName) {
+      this.setState({ templateError: i18n.translate(
+        'xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.noTemplateSelectedErrorMessage',
+        { defaultMessage: 'You must select an index template.' }) });
+      return;
+    }
     try {
       await addLifecyclePolicyToTemplate({
         policyName,
@@ -95,7 +100,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
     return find(templates, template => template.name === templateName);
   }
   renderForm() {
-    const { templates, templateName } = this.state;
+    const { templates, templateName, templateError } = this.state;
     const options = templates.map(({ name }) => {
       return {
         value: name,
@@ -115,6 +120,8 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
       <EuiForm>
         {this.renderTemplateHasPolicyWarning()}
         <EuiFormRow
+          isInvalid={!!templateError}
+          error={templateError}
           label={
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.policyTable.addLifecyclePolicyConfirmModal.chooseTemplateLabel"
@@ -126,7 +133,7 @@ export class AddPolicyToTemplateConfirmModalUi extends Component {
             options={options}
             value={templateName}
             onChange={e => {
-              this.setState({ templateName: e.target.value });
+              this.setState({ templateError: null, templateName: e.target.value });
             }}
           />
         </EuiFormRow>
