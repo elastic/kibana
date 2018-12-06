@@ -128,6 +128,7 @@ export class UpgradeCheckupTabsUI extends React.Component<ReactIntl.InjectedIntl
               id: 'xpack.upgradeCheckup.nouns.index',
               defaultMessage: 'index',
             })}
+            showBackupWarning
             {...commonProps}
           />
         ),

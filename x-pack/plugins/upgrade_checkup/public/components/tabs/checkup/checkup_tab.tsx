@@ -11,6 +11,7 @@ import {
   EuiAccordion,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiLink,
   EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
@@ -25,10 +26,11 @@ import {
   UpgradeCheckupTabProps,
 } from '../../types';
 import { CheckupControls } from './controls';
-import { GroupedDeprecations } from './deprecations';
+import { GroupedDeprecations } from './deprecations/grouped';
 
 interface CheckupTabProps extends UpgradeCheckupTabProps {
   checkupLabel: string;
+  showBackupWarning?: boolean;
 }
 
 interface CheckupTabState {
@@ -54,7 +56,13 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
   }
 
   public render() {
-    const { checkupLabel, deprecations, loadingState, refreshCheckupData } = this.props;
+    const {
+      checkupLabel,
+      deprecations,
+      loadingState,
+      refreshCheckupData,
+      showBackupWarning = false,
+    } = this.props;
     const { currentFilter, search, currentGroupBy } = this.state;
 
     return (
@@ -67,6 +75,23 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
             Elasticsearch 7.0, or whether you need to make changes to your data before doing so.
           </p>
         </EuiText>
+        {showBackupWarning && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiCallOut title="Backup your indices now!" color="warning" iconType="help">
+              <p>
+                Before starting your upgrade and using these tools, backup your data using the{' '}
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+                  target="_blank"
+                >
+                  snapshot / restore API
+                </EuiLink>
+                .
+              </p>
+            </EuiCallOut>
+          </Fragment>
+        )}
         <EuiSpacer />
         <EuiPageContent>
           <EuiPageContentBody>
