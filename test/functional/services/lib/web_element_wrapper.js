@@ -261,6 +261,30 @@ export class WebElementWrapper {
   }
 
   /**
+   * Gets all element inside this element matching the given tag name.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   *
+   * @param {string} tagName
+   * @return {Promise<WebElementWrapper>}
+   */
+  async findByTagName(tagName) {
+    return this._wrap(await this._webElement.findElement(this._By.tagName(tagName)));
+  }
+
+  /**
+   * Gets all elements inside this element matching the given tag name.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   *
+   * @param {string} tagName
+   * @return {Promise<WebElementWrapper[]>}
+   */
+  async findAllByTagName(tagName) {
+    return await this._wrapAll(
+      await this._webElement.findElements(this._By.tagName(tagName))
+    );
+  }
+
+  /**
    * Waits for all elements inside this element matching the given CSS class name to be destroyed.
    *
    * @param {string} className
