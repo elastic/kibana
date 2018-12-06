@@ -26,6 +26,7 @@ export async function exec(log, cmd, args, options = {}) {
   const {
     level = 'debug',
     cwd,
+    env,
     exitAfter,
   } = options;
 
@@ -34,6 +35,7 @@ export async function exec(log, cmd, args, options = {}) {
   const proc = execa(cmd, args, {
     stdio: ['ignore', 'pipe', 'pipe'],
     cwd,
+    env,
   });
 
   await watchStdioForLine(proc, line => log[level](line), exitAfter);

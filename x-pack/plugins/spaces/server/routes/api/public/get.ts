@@ -14,6 +14,8 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
     method: 'GET',
     path: '/api/spaces/space',
     async handler(request: any) {
+      server.log(['spaces', 'debug'], `Inside GET /api/spaces/space`);
+
       const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
         request
       );
@@ -21,8 +23,11 @@ export function initGetSpacesApi(server: any, routePreCheckLicenseFn: any) {
       let spaces: Space[];
 
       try {
+        server.log(['spaces', 'debug'], `Attempting to retrieve all spaces`);
         spaces = await spacesClient.getAll();
+        server.log(['spaces', 'debug'], `Retrieved ${spaces.length} spaces`);
       } catch (error) {
+        server.log(['spaces', 'debug'], `Error retrieving spaces: ${error}`);
         return wrapError(error);
       }
 

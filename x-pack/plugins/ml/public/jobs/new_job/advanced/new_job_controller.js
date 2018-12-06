@@ -19,7 +19,7 @@ import { checkCreateJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import template from './new_job.html';
 import saveStatusTemplate from 'plugins/ml/jobs/new_job/advanced/save_status_modal/save_status_modal.html';
 import {
-  createSearchItems,
+  SearchItemsProvider,
   createJobForSaving,
   checkCardinalitySuccess,
   getMinimalValidJob,
@@ -76,6 +76,7 @@ module.controller('MlNewJob',
     $route,
     $location,
     $modal,
+    Private,
     mlDatafeedService,
     mlConfirmModalService) {
 
@@ -614,10 +615,11 @@ module.controller('MlNewJob',
     // if an index pattern or saved search has been added to the url
     // populate those items in the form and datafeed config
     function populateFormFromUrl() {
+      const createSearchItems = Private(SearchItemsProvider);
       const {
         indexPattern,
         savedSearch,
-        combinedQuery } = createSearchItems($route);
+        combinedQuery } = createSearchItems();
 
       if (indexPattern.id !== undefined) {
         timeBasedIndexCheck(indexPattern, true);

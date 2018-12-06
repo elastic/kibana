@@ -170,6 +170,8 @@ export const MetricDetail = withTheme(
                                                       currentTimeRange={currentTimeRange}
                                                       isLiveStreaming={isAutoReloading}
                                                       onChangeRangeTime={setRangeTime}
+                                                      startLiveStreaming={startMetricsAutoReload}
+                                                      stopLiveStreaming={stopMetricsAutoReload}
                                                     />
                                                   </MetricsTitleTimeRangeContainer>
                                                 </EuiPageHeaderSection>

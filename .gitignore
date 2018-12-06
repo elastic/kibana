@@ -9,6 +9,7 @@ node_modules
 !/src/dev/notice/__fixtures__/node_modules
 trash
 /optimize
+/dlls
 target
 /build
 .jruby
@@ -43,4 +44,3 @@ package-lock.json
 npm-debug.log*
 .tern-project
 **/public/index.css
-/packages/kbn-interpreter/plugin
