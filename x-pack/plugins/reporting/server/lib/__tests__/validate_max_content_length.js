@@ -38,8 +38,9 @@ describe('Reporting: Validate Max Content Length', () => {
     };
 
     expect(async () => validateMaxContentLength(server, log)).not.to.throwError();
-    sinon.assert.calledWithMatch(log, /Setting xpack.reporting.encryptionKey to/);
-    sinon.assert.calledWithMatch(log, /Please set xpack.reporting.encryptionKey/);
+    sinon.assert.calledWithMatch(log, /xpack.reporting.csv.maxSizeBytes (524288000) is is higher than ElasticSearch's (104857600)/);
+    sinon.assert.calledWithMatch(log, /Please set http.max_content_length in ElasticSearch to match/);
+    sinon.assert.calledWithMatch(log, /or lower your xpack.reporting.csv.maxSizeBytes in Kibana/);
   });
 
   it('should do nothing when reporting has the same max-size as elasticsearch', async () => {
