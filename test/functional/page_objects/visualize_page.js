@@ -963,9 +963,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getInspectorTableData() {
-      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
-      const inspectorPanel = await testSubjects.find('inspectorPanel');
-      const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
+      const inspectorTable = await testSubjects.find('inspectorTable');
+      const tableBody = await retry.try(async () => inspectorTable.findByTagName('tbody'));
       // Convert the data into a nested array format:
       // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
       const rows = await tableBody.findAllByTagName('tr');
@@ -976,10 +975,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getInspectorTableHeaders() {
-      // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const dataTableHeader = await retry.try(async () => {
-        const inspectorPanel = await testSubjects.find('inspectorPanel');
-        return await inspectorPanel.findByTagName('thead');
+        const inspectorTable = await testSubjects.find('inspectorTable');
+        return await inspectorTable.findByTagName('thead');
       });
       const cells = await dataTableHeader.findAllByTagName('th');
       return await Promise.all(cells.map(async (cell) => {
@@ -1136,6 +1134,28 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });
+    }
+
+    async filterForInspectorTableCell(column, row) {
+      await retry.try(async () => {
+        const table = await testSubjects.find('inspectorTable');
+        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        await browser.moveMouseTo(cell);
+        const filterBtn = await testSubjects.findDescendant('filterForInspectorCellValue', cell);
+        await filterBtn.click();
+      });
+      await renderable.waitForRender();
+    }
+
+    async filterOutInspectorTableCell(column, row) {
+      await retry.try(async () => {
+        const table = await testSubjects.find('inspectorTable');
+        const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
+        await browser.moveMouseTo(cell);
+        const filterBtn = await testSubjects.findDescendant('filterOutInspectorCellValue', cell);
+        await filterBtn.click();
+      });
+      await renderable.waitForRender();
     }
 
     async toggleLegend(show = true) {
