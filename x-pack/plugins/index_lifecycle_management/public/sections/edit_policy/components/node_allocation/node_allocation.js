@@ -13,15 +13,6 @@ import { LearnMoreLink } from '../../../components/learn_more_link';
 const learnMoreLinks = (
   <Fragment>
     <EuiSpacer size="s" />
-    <LearnMoreLink
-      docPath="indices-rollover-index.html"
-      text={
-        <FormattedMessage
-          id="xpack.indexLifecycleMgmt.editPolicy.learnAboutNodeAttributesLink"
-          defaultMessage="Learn about node attributes"
-        />
-      }
-    />
     <EuiSpacer size="s" />
     <LearnMoreLink
       text={
