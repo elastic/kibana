@@ -31,7 +31,7 @@ export const EventsQuery = pure<EventsProps>(
   ({ children, filterQuery, sourceId, startDate, endDate }) => (
     <Query<GetEventsQuery.Query, GetEventsQuery.Variables>
       query={eventsQuery}
-      fetchPolicy="no-cache"
+      fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
       variables={{
         filterQuery,

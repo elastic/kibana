@@ -42,7 +42,7 @@ const HostsComponentQuery = pure<HostsProps>(
   ({ children, filterQuery, sourceId, startDate, endDate, limit = 2, cursor }) => (
     <Query<GetHostsQuery.Query, GetHostsQuery.Variables>
       query={hostsQuery}
-      fetchPolicy="no-cache"
+      fetchPolicy="cache-and-network"
       notifyOnNetworkStatusChange
       variables={{
         sourceId,
