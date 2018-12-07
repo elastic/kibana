@@ -26,6 +26,7 @@ import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
+import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
 
 import './angular-venn-simple.js';
 import gws from './graphClientWorkspace.js';
@@ -39,7 +40,7 @@ import {
   drillDownIconChoicesByClass
 } from './style_choices';
 import {
-  outlinkEncoders
+  getOutlinkEncoders,
 } from './services/outlink_encoders';
 
 const app = uiModules.get('app/graph');
@@ -72,6 +73,7 @@ if (uiRoutes.enable) {
 uiRoutes
   .when('/home', {
     template: appTemplate,
+    k7Breadcrumbs: getHomeBreadcrumbs,
     resolve: {
       //Copied from example found in wizard.js ( Kibana TODO - can't
       // IndexPatternsProvider abstract these implementation details better?)
@@ -95,12 +97,17 @@ uiRoutes
   })
   .when('/workspace/:id', {
     template: appTemplate,
+    k7Breadcrumbs: getWorkspaceBreadcrumbs,
     resolve: {
-      savedWorkspace: function (savedGraphWorkspaces, courier, $route) {
+      savedWorkspace: function (savedGraphWorkspaces, courier, $route, i18n) {
         return savedGraphWorkspaces.get($route.current.params.id)
           .catch(
             function () {
-              toastNotifications.addDanger('Missing workspace');
+              toastNotifications.addDanger(
+                i18n('xpack.graph.missingWorkspaceErrorMessage', {
+                  defaultMessage: 'Missing workspace',
+                })
+              );
             }
           );
 
@@ -131,7 +138,9 @@ uiRoutes
 
 
 //========  Controller for basic UI ==================
-app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnUrl, Private, Promise, confirmModal, kbnBaseUrl) {
+app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private, Promise, confirmModal, kbnBaseUrl, i18n, config) {
+
+  config.bindToScope($scope, 'k7design');
 
   function handleSuccess(data) {
     return checkLicense(Private, Promise, kbnBaseUrl)
@@ -151,7 +160,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.colors = colorChoices;
   $scope.iconChoicesByClass = iconChoicesByClass;
 
-  $scope.outlinkEncoders = outlinkEncoders;
+  $scope.outlinkEncoders = getOutlinkEncoders(i18n);
 
   $scope.fields = [];
   $scope.canEditDrillDownUrls = chrome.getInjected('canEditDrillDownUrls');
@@ -290,9 +299,13 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     const confirmModalOptions = {
       onConfirm: yesFn,
       onCancel: noFn,
-      confirmButtonText: 'Clear workspace'
+      confirmButtonText: i18n('xpack.graph.clearWorkspace.confirmButtonLabel', {
+        defaultMessage: 'Clear workspace',
+      })
     };
-    confirmModal('This will clear the workspace - are you sure?', confirmModalOptions);
+    confirmModal(i18n('xpack.graph.clearWorkspace.confirmText', {
+      defaultMessage: 'This will clear the workspace - are you sure?',
+    }), confirmModalOptions);
   }
 
   $scope.uiSelectIndex = function () {
@@ -387,7 +400,11 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     return $http.post('../api/graph/graphExplore', request)
       .then(function (resp) {
         if (resp.data.resp.timed_out) {
-          toastNotifications.addWarning('Exploration timed out');
+          toastNotifications.addWarning(
+            i18n('xpack.graph.exploreGraph.timedOutWarningText', {
+              defaultMessage: 'Exploration timed out',
+            })
+          );
         }
         responseHandler(resp.data.resp);
       })
@@ -536,8 +553,15 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     const found = $scope.newUrlTemplate.url.search(drillDownRegex) > -1;
     if (!found) {
       toastNotifications.addWarning({
-        title: 'Invalid URL',
-        text: 'The URL must contain a {{gquery}} string',
+        title: i18n('xpack.graph.settings.drillDowns.invalidUrlWarningTitle', {
+          defaultMessage: 'Invalid URL',
+        }),
+        text: i18n('xpack.graph.settings.drillDowns.invalidUrlWarningText', {
+          defaultMessage: 'The URL must contain a {placeholder} string',
+          values: {
+            placeholder: '{{gquery}}'
+          }
+        }),
       });
       return;
     }
@@ -556,10 +580,18 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.removeUrlTemplate = function (urlTemplate) {
     const i = $scope.urlTemplates.indexOf(urlTemplate);
     if (i != -1) {
-      confirmModal('Remove "' + urlTemplate.description + '" drill-down?', {
-        onConfirm: () => $scope.urlTemplates.splice(i, 1),
-        confirmButtonText: 'Remove drill-down'
-      });
+      confirmModal(
+        i18n('xpack.graph.settings.drillDowns.removeConfirmText', {
+          defaultMessage: 'Remove "{urlTemplateDesciption}" drill-down?',
+          values: { urlTemplateDesciption: urlTemplate.description },
+        }),
+        {
+          onConfirm: () => $scope.urlTemplates.splice(i, 1),
+          confirmButtonText: i18n('xpack.graph.settings.drillDowns.removeConfirmButtonLabel', {
+            defaultMessage: 'Remove drill-down',
+          }),
+        },
+      );
     }
   };
 
@@ -651,7 +683,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
 
       $scope.urlTemplates.push({
         url: discoverUrl,
-        description: 'Raw documents',
+        description: i18n('xpack.graph.settings.drillDowns.defaultUrlTemplateTitle', {
+          defaultMessage: 'Raw documents',
+        }),
         encoder: $scope.outlinkEncoders[0]
       });
     }
@@ -730,30 +764,46 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
   $scope.topNavMenu = [];
   $scope.topNavMenu.push({
     key: 'new',
-    description: 'New Workspace',
-    tooltip: 'Create a new workspace',
+    description: i18n('xpack.graph.topNavMenu.newWorkspaceAriaLabel', {
+      defaultMessage: 'New Workspace',
+    }),
+    tooltip: i18n('xpack.graph.topNavMenu.newWorkspaceTooltip', {
+      defaultMessage: 'Create a new workspace',
+    }),
     run: function () {canWipeWorkspace(function () {kbnUrl.change('/home', {}); });  },
   });
   if (!$scope.allSavingDisabled) {
     $scope.topNavMenu.push({
       key: 'save',
-      description: 'Save Workspace',
-      tooltip: 'Save this workspace',
+      description: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledAriaLabel', {
+        defaultMessage: 'Save Workspace',
+      }),
+      tooltip: i18n('xpack.graph.topNavMenu.saveWorkspace.enabledTooltip', {
+        defaultMessage: 'Save this workspace',
+      }),
       disableButton: function () {return $scope.selectedFields.length === 0;},
       template: require('./templates/save_workspace.html')
     });
   }else {
     $scope.topNavMenu.push({
       key: 'save',
-      description: 'Save Workspace',
-      tooltip: 'No changes to saved workspaces are permitted by the current save policy',
+      description: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledAriaLabel', {
+        defaultMessage: 'Save Workspace',
+      }),
+      tooltip: i18n('xpack.graph.topNavMenu.saveWorkspace.disabledTooltip', {
+        defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
+      }),
       disableButton: true
     });
   }
   $scope.topNavMenu.push({
     key: 'open',
-    description: 'Load Saved Workspace',
-    tooltip: 'Load a saved workspace',
+    description: i18n('xpack.graph.topNavMenu.loadWorkspaceAriaLabel', {
+      defaultMessage: 'Load Saved Workspace',
+    }),
+    tooltip: i18n('xpack.graph.topNavMenu.loadWorkspaceTooltip', {
+      defaultMessage: 'Load a saved workspace',
+    }),
     template: require('./templates/load_workspace.html')
   });
   if (!$scope.allSavingDisabled) {
@@ -762,35 +812,58 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       disableButton: function () {
         return $route.current.locals === undefined || $route.current.locals.savedWorkspace === undefined;
       },
-      description: 'Delete Saved Workspace',
-      tooltip: 'Delete this workspace',
+      description: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledAriaLabel', {
+        defaultMessage: 'Delete Saved Workspace',
+      }),
+      tooltip: i18n('xpack.graph.topNavMenu.deleteWorkspace.enabledAriaTooltip', {
+        defaultMessage: 'Delete this workspace',
+      }),
       run: function () {
         const title = $route.current.locals.savedWorkspace.title;
         function doDelete() {
           $route.current.locals.SavedWorkspacesProvider.delete($route.current.locals.savedWorkspace.id);
           kbnUrl.change('/home', {});
 
-          toastNotifications.addSuccess(`Deleted '${title}'`);
+          toastNotifications.addSuccess(
+            i18n('xpack.graph.topNavMenu.deleteWorkspaceNotification', {
+              defaultMessage: `Deleted '{workspaceTitle}'`,
+              values: { workspaceTitle: title },
+            })
+          );
         }
         const confirmModalOptions = {
           onConfirm: doDelete,
-          confirmButtonText: 'Delete workspace'
+          confirmButtonText: i18n('xpack.graph.topNavMenu.deleteWorkspace.confirmButtonLabel', {
+            defaultMessage: 'Delete workspace',
+          }),
         };
-        confirmModal('Are you sure you want to delete the workspace ' + title + ' ?', confirmModalOptions);
+        confirmModal(
+          i18n('xpack.graph.topNavMenu.deleteWorkspace.confirmText', {
+            defaultMessage: 'Are you sure you want to delete the workspace {title} ?',
+            values: { title },
+          }),
+          confirmModalOptions
+        );
       }
     });
   }else {
     $scope.topNavMenu.push({
       key: 'delete',
       disableButton: true,
-      description: 'Delete Saved Workspace',
-      tooltip: 'No changes to saved workspaces are permitted by the current save policy'
+      description: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledAriaLabel', {
+        defaultMessage: 'Delete Saved Workspace',
+      }),
+      tooltip: i18n('xpack.graph.topNavMenu.deleteWorkspace.disabledTooltip', {
+        defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
+      }),
     });
   }
   $scope.topNavMenu.push({
     key: 'settings',
     disableButton: function () { return $scope.selectedIndex === null; },
-    description: 'Settings',
+    description: i18n('xpack.graph.topNavMenu.settingsAriaLabel', {
+      defaultMessage: 'Settings',
+    }),
     template: require('./templates/settings.html')
   });
 
@@ -829,7 +902,12 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       }
     });
     if(!savedObjectIndexPattern) {
-      toastNotifications.addDanger(`'Missing index pattern ${wsObj.indexPattern}`);
+      toastNotifications.addDanger(
+        i18n('xpack.graph.loadWorkspace.missingIndexPatternErrorMessage', {
+          defaultMessage: `'Missing index pattern {indexPattern}`,
+          values: { indexPattern: wsObj.indexPattern },
+        })
+      );
       return;
     }
 
@@ -946,7 +1024,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
     if ($scope.allSavingDisabled) {
       // It should not be possible to navigate to this function if allSavingDisabled is set
       // but adding check here as a safeguard.
-      toastNotifications.addWarning('Saving is disabled');
+      toastNotifications.addWarning(
+        i18n('xpack.graph.saveWorkspace.disabledWarning', { defaultMessage: 'Saving is disabled' })
+      );
       return;
     }
     initWorkspaceIfRequired();
@@ -1034,10 +1114,15 @@ app.controller('graphuiPlugin', function ($scope, $route, $interval, $http, kbnU
       $scope.kbnTopNav.close('save');
       $scope.userHasConfirmedSaveWorkspaceData = false; //reset flag
       if (id) {
-        const title = `Saved "${$scope.savedWorkspace.title}"`;
+        const title = i18n('xpack.graph.saveWorkspace.successNotificationTitle', {
+          defaultMessage: 'Saved "{workspaceTitle}"',
+          values: { workspaceTitle: $scope.savedWorkspace.title },
+        });
         let text;
         if (!canSaveData && $scope.workspace.nodes.length > 0) {
-          text = 'The configuration was saved, but the data was not saved';
+          text = i18n('xpack.graph.saveWorkspace.successNotification.noDataSavedText', {
+            defaultMessage: 'The configuration was saved, but the data was not saved',
+          });
         }
 
         toastNotifications.addSuccess({

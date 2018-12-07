@@ -40,5 +40,6 @@ export const Toolbar = compose(
       props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
     },
   }),
-  withState('tray', 'setTray', props => props.tray)
+  withState('tray', 'setTray', props => props.tray),
+  withState('showWorkpadManager', 'setShowWorkpadManager', false)
 )(Component);

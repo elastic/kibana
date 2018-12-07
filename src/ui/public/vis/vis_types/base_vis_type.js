@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { CATEGORY } from '../vis_category';
 import _ from 'lodash';
 import { VisFiltersProvider } from '../vis_filters';
 
@@ -45,7 +44,6 @@ export function BaseVisTypeProvider(Private) {
 
       const _defaults = {
         // name, title, description, icon, image
-        category: CATEGORY.OTHER,
         visualization: null,       // must be a class with render/resize/destroy methods
         visConfig: {
           defaults: {},            // default configuration
@@ -69,7 +67,8 @@ export function BaseVisTypeProvider(Private) {
           }
         },
         stage: 'production',
-        feedbackMessage: ''
+        feedbackMessage: '',
+        hidden: false,
       };
 
       _.defaultsDeep(this, opts, _defaults);

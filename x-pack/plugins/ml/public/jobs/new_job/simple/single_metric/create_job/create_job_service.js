@@ -132,12 +132,7 @@ export function SingleMetricJobServiceProvider() {
         function: func
       };
 
-      let query = {
-        match_all: {}
-      };
-      if (formConfig.query.query_string.query !== '*' || formConfig.filters.length) {
-        query = formConfig.combinedQuery;
-      }
+      const query = formConfig.combinedQuery;
 
       if (formConfig.field && formConfig.field.id) {
         dtr.field_name = formConfig.field.id;
@@ -435,6 +430,7 @@ function getSearchJsonFromConfig(formConfig) {
   const json = {
     index: formConfig.indexPattern.title,
     size: 0,
+    rest_total_hits_as_int: true,
     body: {
       query: {},
       aggs: {

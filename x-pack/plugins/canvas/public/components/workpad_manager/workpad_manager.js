@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { WorkpadLoader } from '../workpad_loader';
 import { WorkpadTemplates } from '../workpad_templates';
+import { documentationLinks } from '../../lib/documentation_links';
 
 export const WorkpadManager = ({ onClose }) => {
   const tabs = [
@@ -57,7 +58,7 @@ export const WorkpadManager = ({ onClose }) => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink href="https://canvas.elastic.co" target="_blank">
+            <EuiLink href={documentationLinks.canvas} target="_blank">
               Docs
             </EuiLink>
           </EuiFlexItem>

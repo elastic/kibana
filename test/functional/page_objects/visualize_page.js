@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
 import expect from 'expect.js';
 import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -45,16 +45,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async navigateToNewVisualization() {
-      log.debug('navigateToApp visualize new');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('navigateToApp visualize');
+      await PageObjects.common.navigateToApp('visualize');
+      await testSubjects.click('createNewVis');
       await this.waitForVisualizationSelectPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async waitForVisualizationSelectPage() {
       await retry.try(async () => {
-        const visualizeSelectTypePage = await testSubjects.find('visualizeSelectTypePage');
-        if (!visualizeSelectTypePage.isDisplayed()) {
+        const visualizeSelectTypePage = await testSubjects.find('visNewDialogTypes');
+        if (!await visualizeSelectTypePage.isDisplayed()) {
           throw new Error('wait for visualization select page');
         }
       });
@@ -66,28 +66,23 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickAreaChart() {
-      await find.clickByPartialLinkText('Area');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('area');
     }
 
     async clickDataTable() {
-      await find.clickByPartialLinkText('Data Table');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('table');
     }
 
     async clickLineChart() {
-      await find.clickByPartialLinkText('Line');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('line');
     }
 
     async clickRegionMap() {
-      await find.clickByPartialLinkText('Region Map');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('region_map');
     }
 
     async clickMarkdownWidget() {
-      await find.clickByPartialLinkText('Markdown');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('markdown');
     }
 
     async clickAddMetric() {
@@ -99,38 +94,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickMetric() {
-      await find.clickByPartialLinkText('Metric');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('metric');
     }
 
     async clickGauge() {
-      await find.clickByPartialLinkText('Gauge');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('gauge');
     }
 
     async clickPieChart() {
-      await find.clickByPartialLinkText('Pie');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('pie');
     }
 
     async clickTileMap() {
-      await find.clickByPartialLinkText('Coordinate Map');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('tile_map');
     }
 
     async clickTagCloud() {
-      await find.clickByPartialLinkText('Tag Cloud');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('tagcloud');
     }
 
     async clickVega() {
-      await find.clickByPartialLinkText('Vega');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('vega');
     }
 
     async clickVisualBuilder() {
-      await find.clickByPartialLinkText('Visual Builder');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('metrics');
     }
 
     async clickEditorSidebarCollapse() {
@@ -157,29 +145,23 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickVerticalBarChart() {
-      await find.clickByPartialLinkText('Vertical Bar');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('histogram');
     }
 
     async clickHeatmapChart() {
-      await find.clickByPartialLinkText('Heat Map');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.clickVisType('heatmap');
     }
 
     async clickInputControlVis() {
-      await find.clickByPartialLinkText('Controls');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
-    async getChartTypeCount() {
-      const tags = await find.allByCssSelector('a.wizard-vis-type');
-      return tags.length;
+      await this.clickVisType('input_control_vis');
     }
 
     async getChartTypes() {
-      const chartTypes = await testSubjects.findAll('visualizeWizardChartTypeTitle');
+      const chartTypeField = await testSubjects.find('visNewDialogTypes');
+      const chartTypes = await chartTypeField.findAllByTagName('button');
       async function getChartType(chart) {
-        return await chart.getVisibleText();
+        const label = await testSubjects.findDescendant('visTypeTitle', chart);
+        return await label.getVisibleText();
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
@@ -195,7 +177,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getExperimentalTypeLinks() {
-      return await remote.findAllByPartialLinkText('(Experimental)');
+      return await find.allByCssSelector('[data-vis-stage="experimental"]');
     }
 
     async isExperimentalInfoShown() {
@@ -210,6 +192,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector(
         'ul.nav.nav-pills.nav-stacked.kbn-timepicker-modes:contains("absolute")',
         defaultFindTimeout * 2);
+    }
+
+    async clickDropPartialBuckets() {
+      return await testSubjects.click('dropPartialBucketsCheckbox');
     }
 
     async setMarkdownTxt(markdownTxt) {
@@ -399,7 +385,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const testSubject = type === 'bucket' ? 'bucketsAggGroup' : 'metricsAggGroup';
       await retry.try(async () => {
         const chartTypes = await retry.try(
-          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`));
+          async () => await find.allByCssSelector(`[data-test-subj="${testSubject}"] .list-group-menu-item`)
+        );
         log.debug('found bucket types ' + chartTypes.length);
 
         async function getChartType(chart) {
@@ -429,11 +416,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(myString);
-        await remote.pressKeys('\uE006');
+        await browser.pressKeys('\uE006');
       });
       await PageObjects.common.sleep(500);
     }
 
+    async applyFilters() {
+      return await testSubjects.click('filterBarApplyFilters');
+    }
     /**
      * Set the test for a filter aggregation.
      * @param {*} filterValue the string value of the filter
@@ -502,14 +492,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       const advancedLinkState = await advancedLink.getAttribute('class');
       if (advancedLinkState.includes('fa-caret-right')) {
-        await advancedLink.session.moveMouseTo(advancedLink);
+        await advancedLink.moveMouseTo();
         log.debug('click advancedLink');
         await advancedLink.click();
       }
       const checkbox = await find.byCssSelector('input[ng-model="axis.scale.setYExtents"]');
       const checkboxState = await checkbox.getAttribute('class');
       if (checkboxState.includes('ng-empty')) {
-        await checkbox.session.moveMouseTo(checkbox);
+        await checkbox.moveMouseTo();
         await checkbox.click();
       }
       const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
@@ -537,7 +527,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         await find.clickByCssSelector(selector);
         const input = await find.byCssSelector(`${selector} input.ui-select-search`);
         await input.type(fieldValue);
-        await remote.pressKeys('\uE006');
+        await browser.pressKeys('\uE006');
       });
       await PageObjects.common.sleep(500);
     }
@@ -572,7 +562,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setInterval(newValue) {
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
       await input.type(newValue);
-      await remote.pressKeys(Keys.RETURN);
+      await browser.pressKeys(Keys.RETURN);
     }
 
     async setCustomInterval(newValue) {
@@ -638,7 +628,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async sizeUpEditor() {
       await testSubjects.click('visualizeEditorResizer');
-      await remote.pressKeys(Keys.ARROW_RIGHT);
+      await browser.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -773,19 +763,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVisualizationByName(vizName) {
       log.debug('clickVisualizationByLinkText(' + vizName + ')');
-
-      return retry.try(function tryingForTime() {
-        return remote
-          .setFindTimeout(defaultFindTimeout)
-          .findByPartialLinkText(vizName)
-          .click();
-      });
+      return find.clickByPartialLinkText(vizName);
     }
 
-    // this starts by clicking the Load Saved Viz button, not from the
-    // bottom half of the "Create a new visualization      Step 1" page
-    async loadSavedVisualization(vizName) {
-      await this.clickLoadSavedVisButton();
+    async loadSavedVisualization(vizName, { navigateToVisualize = true } = {}) {
+      if (navigateToVisualize) {
+        await this.clickLoadSavedVisButton();
+      }
       await this.openSavedVisualization(vizName);
     }
 
@@ -1148,17 +1132,19 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         const table = await testSubjects.find('tableVis');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await remote.moveMouseTo(cell);
+        await browser.moveMouseTo(cell);
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });
     }
 
     async toggleLegend(show = true) {
-      const isVisible = remote.findByCssSelector('vislib-legend .legend-ul');
-      if ((show && !isVisible) || (!show && isVisible)) {
-        await testSubjects.click('vislibToggleLegend');
-      }
+      await retry.try(async () => {
+        const isVisible = find.byCssSelector('vislib-legend');
+        if ((show && !isVisible) || (!show && isVisible)) {
+          await testSubjects.click('vislibToggleLegend');
+        }
+      });
     }
 
     async filterLegend(name) {
@@ -1192,8 +1178,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async filterPieSlice(name) {
       const slice = await this.getPieSlice(name);
       // Since slice is an SVG element we can't simply use .click() for it
-      await remote.moveMouseTo(slice);
-      await remote.clickMouseButton();
+      await browser.moveMouseTo(slice);
+      await browser.clickMouseButton();
     }
 
     async getPieSlice(name) {
@@ -1245,7 +1231,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const result = [];
 
       for (let i = 1; true; i++) {
-        const selector = new Array(i).fill('.agg-table-group').join(' ');
+        const selector = new Array(i).fill('.kbnAggTable__group').join(' ');
         const tables = await vis.findAllByCssSelector(selector);
         if (tables.length === 0) {
           break;
