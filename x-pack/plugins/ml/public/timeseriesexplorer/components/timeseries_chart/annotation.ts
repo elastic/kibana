@@ -39,13 +39,13 @@ export function getAnnotationBrush(this: TimeseriesChart) {
       return;
     }
 
-    const annotation = {
+    const annotation: Annotation = {
       timestamp,
       end_timestamp: endTimestamp,
       annotation: this.state.annotation.annotation || '',
       job_id: selectedJob.job_id,
       result_type: 'annotation',
-    } as Annotation;
+    };
 
     this.showFlyout(annotation);
   }

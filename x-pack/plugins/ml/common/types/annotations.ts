@@ -6,8 +6,13 @@
 
 export interface Annotation {
   _id?: string;
-  timestamp: Date;
-  end_timestamp?: Date;
+  create_time?: number;
+  create_username?: string;
+  modified_time?: number;
+  modified_username?: string;
+
+  timestamp: number;
+  end_timestamp?: number;
   annotation: string;
   job_id: string;
   result_type: 'annotation';
@@ -16,8 +21,8 @@ export interface Annotation {
 export function isAnnotation(arg: any): arg is Annotation {
   return (
     arg.timestamp !== undefined &&
-    arg.annotation !== undefined &&
-    arg.job_id !== undefined &&
+    typeof arg.annotation === 'string' &&
+    typeof arg.job_id === 'string' &&
     arg.result_type === 'annotation'
   );
 }

@@ -64,6 +64,14 @@ export function annotationProvider(
       return Promise.reject(new Error('invalid annotation format'));
     }
 
+    if (annotation.create_time === undefined) {
+      annotation.create_time = new Date().getTime();
+      annotation.create_username = '<anonymous>';
+    }
+
+    annotation.modified_time = new Date().getTime();
+    annotation.modified_username = '<anonymous>';
+
     const params: IndexParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS,
       type: 'annotation',

@@ -21,6 +21,10 @@ interface Props {
   annotation: Annotation;
 }
 
+function formatListDate(ts: number) {
+  return formatDate(ts, 'MMMM Do YYYY, HH:mm:ss');
+}
+
 export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
   const listItems = [
     {
@@ -29,13 +33,35 @@ export const AnnotationDescriptionList: React.SFC<Props> = ({ annotation }) => {
     },
     {
       title: 'Start',
-      description: formatDate(annotation.timestamp, 'MMMM Do YYYY, HH:mm:ss'),
-    },
-    {
-      title: 'End',
-      description: formatDate(annotation.end_timestamp, 'MMMM Do YYYY, HH:mm:ss'),
+      description: formatListDate(annotation.timestamp),
     },
   ];
+
+  if (annotation.end_timestamp !== undefined) {
+    listItems.push({
+      title: 'End',
+      description: formatListDate(annotation.end_timestamp),
+    });
+  }
+
+  if (annotation.create_time !== undefined && annotation.modified_time !== undefined) {
+    listItems.push({
+      title: 'Created',
+      description: formatListDate(annotation.create_time),
+    });
+    listItems.push({
+      title: 'Created by',
+      description: annotation.create_username,
+    });
+    listItems.push({
+      title: 'Last modified',
+      description: formatListDate(annotation.modified_time),
+    });
+    listItems.push({
+      title: 'Modified by',
+      description: annotation.modified_username,
+    });
+  }
 
   return (
     <EuiDescriptionList
