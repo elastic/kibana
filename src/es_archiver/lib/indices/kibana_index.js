@@ -161,6 +161,6 @@ export async function createDefaultSpace({ index, client }) {
  */
 async function fetchKibanaIndices(client) {
   const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  const isKibanaIndex = (index) => (/^\.kibana[_]{0,1}[0-9]*$/).test(index);
+  const isKibanaIndex = (index) => (/^\.kibana(:?_\d*)?$/).test(index);
   return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
 }
