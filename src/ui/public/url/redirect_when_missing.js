@@ -23,6 +23,7 @@ import { MarkdownSimple } from 'ui/markdown';
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectNotFound } from '../errors';
 import { uiModules } from '../modules';
+import { i18n } from '@kbn/i18n';
 
 uiModules.get('kibana/url')
   .service('redirectWhenMissing', function (Private) { return Private(RedirectWhenMissingProvider); });
@@ -57,7 +58,9 @@ export function RedirectWhenMissingProvider($location, kbnUrl, Promise) {
       url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${error.savedObjectType}`;
 
       toastNotifications.addWarning({
-        title: 'Saved object is missing',
+        title: i18n.translate('common.ui.url.savedObjectsIsMissingNotificationMessage', {
+          defaultMessage: 'Saved object is missing'
+        }),
         text: <MarkdownSimple>{error.message}</MarkdownSimple>,
       });
 

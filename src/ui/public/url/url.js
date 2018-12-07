@@ -22,6 +22,7 @@ import '../filters/uriescape';
 import '../filters/rison';
 import { uiModules } from '../modules';
 import { AppStateProvider } from '../state_management/app_state';
+import { i18n } from '@kbn/i18n';
 
 uiModules.get('kibana/url')
   .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
@@ -114,7 +115,11 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
 
       // if evaluation can't be made, throw
       if (_.isUndefined(p)) {
-        throw new Error('Replacement failed, unresolved expression: ' + expr);
+        throw new Error(
+          i18n.translate('common.ui.url.replacementFailedErrorMessage', {
+            defaultMessage: 'Replacement failed, unresolved expression: {expr}',
+            values: { expr }
+          }));
       }
 
       // append uriescape filter if not included
