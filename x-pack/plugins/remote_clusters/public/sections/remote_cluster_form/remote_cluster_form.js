@@ -87,7 +87,7 @@ export class RemoteClusterFormUi extends Component {
     } else if (name.match(/[^a-zA-Z\d\-_]/)) {
       errors.name = (
         <FormattedMessage
-          id="xpack.remoteClusters.form.errors.lettersAndNumbersOnly"
+          id="xpack.remoteClusters.form.errors.illegalCharacters"
           defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
         />
       );
