@@ -15,9 +15,9 @@
   shape-rendering: geometricPrecision;
 }
 
-.ml-annotation-rect-highlight {
-  //stroke: #32a7c2;
-}
+/*.ml-annotation-rect-highlight {
+  stroke: #32a7c2;
+}*/
 
 .ml-annotation-rect-blur {
   stroke: rgb(232, 232, 232);
@@ -44,9 +44,9 @@
   transition: fill 125ms;
 }
 
-.ml-annotation-text-rect-highlight {
-  //fill: #32a7c2;
-}
+/*.ml-annotation-text-rect-highlight {
+  fill: #32a7c2;
+}*/
 
 .ml-annotation-hidden {
   display: none;

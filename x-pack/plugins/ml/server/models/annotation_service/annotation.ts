@@ -66,11 +66,11 @@ export function annotationProvider(
 
     if (annotation.create_time === undefined) {
       annotation.create_time = new Date().getTime();
-      annotation.create_username = '<anonymous>';
+      annotation.create_username = '<user unknown>';
     }
 
     annotation.modified_time = new Date().getTime();
-    annotation.modified_username = '<anonymous>';
+    annotation.modified_username = '<user unknown>';
 
     const params: IndexParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS,
@@ -165,7 +165,7 @@ export function annotationProvider(
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
       _.each(jobIds, (jobId, i: number) => {
-        jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id:${jobId}`;
+        jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id.keyword:${jobId}`;
       });
       boolCriteria.push({
         query_string: {

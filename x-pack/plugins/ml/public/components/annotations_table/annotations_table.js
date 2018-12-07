@@ -35,7 +35,7 @@ import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlAnomaliesTableService } from '../anomalies_table/anomalies_table_service';
 
-const MAX_ANNOTATIONS = 500;
+const MAX_ANNOTATIONS = 1000;
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 /**
@@ -235,7 +235,35 @@ class AnnotationsTable extends Component {
         render: (date) => formatDate(date, TIME_FORMAT),
         sortable: true,
         width: '180px'
-      }
+      },
+      {
+        field: 'create_time',
+        name: 'Creation date',
+        dataType: 'date',
+        render: (date) => formatDate(date, TIME_FORMAT),
+        sortable: true,
+        width: '180px'
+      },
+      {
+        field: 'create_username',
+        name: 'Created by',
+        sortable: true,
+        width: '180px'
+      },
+      {
+        field: 'modified_time',
+        name: 'Last modified date',
+        dataType: 'date',
+        render: (date) => formatDate(date, TIME_FORMAT),
+        sortable: true,
+        width: '180px'
+      },
+      {
+        field: 'modified_username',
+        name: 'Last modified by',
+        sortable: true,
+        width: '180px'
+      },
     ];
 
     if (isNumberBadgeVisible) {

@@ -81,7 +81,7 @@ module.controller('MlTimeSeriesExplorerController', function (
 
   const CHARTS_POINT_TARGET = 500;
   const ANOMALIES_MAX_RESULTS = 500;
-  const MAX_ANNOTATIONS = 10;
+  const MAX_ANNOTATIONS = 1000;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
   const TimeBuckets = Private(IntervalHelperProvider);
   const mlJobSelectService = Private(JobSelectServiceProvider);
