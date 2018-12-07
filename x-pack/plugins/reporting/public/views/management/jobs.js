@@ -12,12 +12,22 @@ import routes from 'ui/routes';
 import template from 'plugins/reporting/views/management/jobs.html';
 
 import { ReportListing } from '../../components/report_listing';
+import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'reportListingAnchor';
 
 routes.when('/management/kibana/reporting', {
   template,
+  k7Breadcrumbs: () => [
+    MANAGEMENT_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.reporting.breadcrumb', {
+        defaultMessage: 'Reporting'
+      })
+    }
+  ],
   controllerAs: 'jobsCtrl',
   controller($scope, kbnUrl, Private) {
     const xpackInfo = Private(XPackInfoProvider);

@@ -4,14 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize, isEmpty, first } from 'lodash';
+import { first, isEmpty, memoize } from 'lodash';
 import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { callApi } from './callApi';
 
+export interface ISavedObject {
+  attributes: {
+    title: string;
+  };
+  id: string;
+  type: string;
+}
+
+interface ISavedObjectAPIResponse {
+  savedObjects: ISavedObject[];
+}
+
 export const getAPMIndexPattern = memoize(async () => {
-  const apmIndexPatternTitle = chrome.getInjected('apmIndexPatternTitle');
-  const res = await callApi({
+  const apmIndexPatternTitle: string = chrome.getInjected(
+    'apmIndexPatternTitle'
+  );
+  const res = await callApi<ISavedObjectAPIResponse>({
     pathname: `/api/saved_objects/_find`,
     query: {
       type: 'index-pattern',
@@ -31,9 +44,5 @@ export const getAPMIndexPattern = memoize(async () => {
     )
   );
 
-  if (!apmSavedObject) {
-    return;
-  }
-
-  return getFromSavedObject(apmSavedObject);
+  return apmSavedObject;
 });
