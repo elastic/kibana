@@ -125,7 +125,7 @@ export class AlertService {
                 try {
                   const results =
                     template.check({
-                      state: context.taskInstance.state.state || {},
+                      state: context.taskInstance.state || {},
                       params: context.taskInstance.params,
                     }) || {};
 
