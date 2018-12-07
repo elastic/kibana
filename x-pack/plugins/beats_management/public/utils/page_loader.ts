@@ -41,10 +41,10 @@ export class RouteTreeBuilder {
     // Check that no overide maps are ignored due to being invalid
     const flatRoutes = this.flatpackRoutes(allRoutes);
     const mappedPaths = Object.keys(mapParams);
-    const invalidOverides = difference(mappedPaths, flatRoutes);
-    if (invalidOverides.length > 0 && flatRoutes.length > 0) {
+    const invalidOverrides = difference(mappedPaths, flatRoutes);
+    if (invalidOverrides.length > 0 && flatRoutes.length > 0) {
       throw new Error(
-        `Invalid overideMap provided to 'routeTreeFromPaths', ${
+        `Invalid overrideMap provided to 'routeTreeFromPaths', ${
           invalidOverrides[0]
         } is not a valid route. Only the following are: ${flatRoutes.join(', ')}`
       );
