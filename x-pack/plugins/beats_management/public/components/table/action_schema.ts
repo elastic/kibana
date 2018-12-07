@@ -7,26 +7,34 @@
 import { i18n } from '@kbn/i18n';
 import { AssignmentActionType } from './table';
 
-export interface AssignmentControlSchema {
+export enum ActionComponentType {
+  Action,
+  Popover,
+  SelectionCount,
+  TagBadgeList,
+}
+export interface ControlSchema {
   id?: number;
   name: string;
   danger?: boolean;
+  type: ActionComponentType;
   action?: AssignmentActionType;
+  actionDataKey?: string;
   showWarning?: boolean;
   warningHeading?: string;
   warningMessage?: string;
   lazyLoad?: boolean;
-  panel?: AssignmentControlSchema;
   grow?: boolean;
 }
 
-export const beatsListAssignmentOptions: AssignmentControlSchema[] = [
+export const beatsListActions: ControlSchema[] = [
   {
     grow: false,
     name: i18n.translate('xpack.beatsManagement.beatsListAssignmentOptions.unenrollButtonLabel', {
       defaultMessage: 'Unenroll selected',
     }),
     showWarning: true,
+    type: ActionComponentType.Action,
     warningHeading: i18n.translate(
       'xpack.beatsManagement.beatsListAssignmentOptions.unenrollBeatsWarninigTitle',
       { defaultMessage: 'Unenroll selected beats?' }
@@ -43,23 +51,20 @@ export const beatsListAssignmentOptions: AssignmentControlSchema[] = [
       defaultMessage: 'Set tags',
     }),
     grow: false,
+    type: ActionComponentType.TagBadgeList,
+    actionDataKey: 'tags',
     lazyLoad: true,
-    panel: {
-      id: 1,
-      name: i18n.translate('xpack.beatsManagement.beatsListAssignmentOptions.assignTagsName', {
-        defaultMessage: 'Assign tags',
-      }),
-    },
   },
 ];
 
-export const tagListAssignmentOptions: AssignmentControlSchema[] = [
+export const tagListActions: ControlSchema[] = [
   {
     danger: true,
     grow: false,
     name: i18n.translate('xpack.beatsManagement.tagListAssignmentOptions.removeTagsButtonLabel', {
       defaultMessage: 'Remove tag(s)',
     }),
+    type: ActionComponentType.Action,
     showWarning: true,
     warningHeading: i18n.translate(
       'xpack.beatsManagement.tagListAssignmentOptions.removeTagsWarninigTitle',
@@ -73,13 +78,14 @@ export const tagListAssignmentOptions: AssignmentControlSchema[] = [
   },
 ];
 
-export const tagConfigAssignmentOptions: AssignmentControlSchema[] = [
+export const tagConfigActions: ControlSchema[] = [
   {
     danger: true,
     grow: false,
     name: i18n.translate('xpack.beatsManagement.tagConfigAssignmentOptions.removeTagsButtonLabel', {
       defaultMessage: 'Remove tag(s)',
     }),
+    type: ActionComponentType.Action,
     showWarning: true,
     warningHeading: i18n.translate(
       'xpack.beatsManagement.tagConfigAssignmentOptions.removeTagsWarninigTitle',

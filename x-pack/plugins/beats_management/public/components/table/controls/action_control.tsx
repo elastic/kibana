@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore EuiConfirmModal typings not included in current EUI
-  EuiConfirmModal,
-  EuiOverlayMask,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiButton, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { AssignmentActionType } from '../table';
@@ -47,16 +42,17 @@ export class ActionControl extends React.PureComponent<ActionControlProps, Actio
       warningHeading,
       warningMessage,
     } = this.props;
+
     return (
       <div>
-        <EuiTextColor
-          color={danger ? 'danger' : 'default'}
+        <EuiButton
+          color={danger ? 'danger' : 'primary'}
           onClick={
             showWarning ? () => this.setState({ showModal: true }) : () => actionHandler(action)
           }
         >
           {name}
-        </EuiTextColor>
+        </EuiButton>
         {this.state.showModal && (
           <EuiOverlayMask>
             <EuiConfirmModal
