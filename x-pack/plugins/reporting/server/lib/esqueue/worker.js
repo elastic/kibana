@@ -184,6 +184,7 @@ export class Worker extends events.EventEmitter {
       docOutput.content = output.content;
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
+      docOutput.size = output.size;
     } else {
       docOutput.content = output || defaultOutput;
       docOutput.content_type = unknownMime;
