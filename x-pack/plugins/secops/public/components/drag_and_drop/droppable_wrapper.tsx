@@ -14,18 +14,19 @@ import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 
 interface Props {
   droppableId: string;
+  isDropDisabled?: boolean;
 }
 
 const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
   transition: background-color 0.7s ease;
-  background-color: ${props =>
-    props.isDraggingOver ? '#d9d9d9' : props.theme.eui.euiColorEmptyShade};
+  background-color: ${({ isDraggingOver, theme }) =>
+    isDraggingOver ? '#f0f8ff' : theme.eui.euiColorEmptyShade};
   min-height: 100px;
 `;
 
-export const DroppableWrapper = pure<Props>(({ droppableId, children }) => (
+export const DroppableWrapper = pure<Props>(({ droppableId, isDropDisabled = false, children }) => (
   <ThemeProvider theme={{ eui: euiVars }}>
-    <Droppable droppableId={droppableId}>
+    <Droppable isDropDisabled={isDropDisabled} droppableId={droppableId}>
       {(provided, snapshot) => (
         <ReactDndDropTarget
           innerRef={provided.innerRef}
@@ -33,6 +34,7 @@ export const DroppableWrapper = pure<Props>(({ droppableId, children }) => (
           isDraggingOver={snapshot.isDraggingOver}
         >
           {children}
+          {provided.placeholder}
         </ReactDndDropTarget>
       )}
     </Droppable>

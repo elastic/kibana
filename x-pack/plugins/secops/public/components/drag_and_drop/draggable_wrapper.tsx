@@ -18,14 +18,12 @@ import { State } from '../../store/reducer';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { getDraggableId, getDroppableId } from './helpers';
 
-const ReactDndDropTarget = styled.div``; // required by react-beautiful-dnd:
 const ProviderContainer = styled.div`
   &:hover {
     transition: background-color 0.7s ease;
-    background-color: #d9d9d9;
+    background-color: #f0f8ff;
   }
 `;
-const DraggableContent = styled.div``;
 
 interface OwnProps {
   dataProvider: DataProvider;
@@ -64,13 +62,10 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
     const { dataProvider, render } = this.props;
 
     return (
-      <DraggableContent data-test-subj="draggableWrapperDiv">
-        <Droppable droppableId={getDroppableId(dataProvider.id)}>
+      <div data-test-subj="draggableWrapperDiv">
+        <Droppable isDropDisabled={true} droppableId={getDroppableId(dataProvider.id)}>
           {droppableProvided => (
-            <ReactDndDropTarget
-              innerRef={droppableProvided.innerRef}
-              {...droppableProvided.droppableProps}
-            >
+            <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
               <Draggable
                 draggableId={getDraggableId(dataProvider.id)}
                 index={0}
@@ -91,10 +86,11 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
                   </ProviderContainer>
                 )}
               </Draggable>
-            </ReactDndDropTarget>
+              {droppableProvided.placeholder}
+            </div>
           )}
         </Droppable>
-      </DraggableContent>
+      </div>
     );
   }
 }

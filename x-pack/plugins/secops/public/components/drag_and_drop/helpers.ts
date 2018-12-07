@@ -13,15 +13,17 @@ import { dragAndDropActions } from '../../store/local/drag_and_drop';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 
-export const draggableContentPrefix = 'draggableId.content.';
+export const draggableIdPrefix = 'draggableId';
 
-export const droppableContentPrefix = 'droppableId.content.';
+export const droppableIdPrefix = 'droppableId';
 
-export const droppableTimelineProvidersPrefix = 'droppableId.timelineProviders.';
+export const draggableContentPrefix = `${draggableIdPrefix}.content.`;
 
-export const draggableTimelineFlyoutButtonPrefix = 'draggableFlyoutButton';
+export const droppableContentPrefix = `${droppableIdPrefix}.content.`;
 
-export const droppableTimelineFlyoutButtonPrefix = 'droppableFlyoutButton';
+export const droppableTimelineProvidersPrefix = `${droppableIdPrefix}.timelineProviders.`;
+
+export const droppableTimelineFlyoutButtonPrefix = `${droppableIdPrefix}.flyoutButton.`;
 
 export const getDraggableId = (dataProviderId: string): string =>
   `${draggableContentPrefix}${dataProviderId}`;
@@ -47,7 +49,7 @@ export const destinationIsTimelineButton = (result: DropResult): boolean =>
 
 export const getTimelineIdFromDestination = (result: DropResult): string =>
   result.destination != null &&
-  result.destination.droppableId.startsWith(droppableTimelineProvidersPrefix)
+  (destinationIsTimelineProviders(result) || destinationIsTimelineButton(result))
     ? result.destination.droppableId.substring(result.destination.droppableId.lastIndexOf('.') + 1)
     : '';
 

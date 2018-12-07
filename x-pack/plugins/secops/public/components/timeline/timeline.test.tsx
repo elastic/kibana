@@ -60,6 +60,7 @@ describe('Timeline', () => {
               pageCount={DEFAULT_PAGE_COUNT}
               range={'1 Day'}
               rowRenderers={rowRenderers}
+              show={true}
               sort={sort}
               width={1000}
             />
@@ -92,6 +93,7 @@ describe('Timeline', () => {
               pageCount={100}
               range={'1 Day'}
               rowRenderers={rowRenderers}
+              show={true}
               sort={sort}
               width={1000}
             />
@@ -124,6 +126,7 @@ describe('Timeline', () => {
               pageCount={DEFAULT_PAGE_COUNT}
               range={'1 Day'}
               rowRenderers={rowRenderers}
+              show={true}
               sort={sort}
               width={1000}
             />
@@ -156,6 +159,7 @@ describe('Timeline', () => {
               pageCount={DEFAULT_PAGE_COUNT}
               range={'1 Day'}
               rowRenderers={rowRenderers}
+              show={true}
               sort={sort}
               width={1000}
             />
@@ -193,6 +197,7 @@ describe('Timeline', () => {
                 pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
+                show={true}
                 sort={sort}
                 width={1000}
               />
@@ -237,6 +242,7 @@ describe('Timeline', () => {
                 pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
+                show={true}
                 sort={sort}
                 width={1000}
               />
@@ -295,6 +301,7 @@ describe('Timeline', () => {
                 pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
+                show={true}
                 sort={sort}
                 width={1000}
               />
@@ -345,6 +352,7 @@ describe('Timeline', () => {
                 pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
+                show={true}
                 sort={sort}
                 width={1000}
               />
@@ -398,6 +406,7 @@ describe('Timeline', () => {
                 pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
+                show={true}
                 sort={sort}
                 width={1000}
               />
@@ -445,6 +454,7 @@ describe('Timeline', () => {
                 pageCount={DEFAULT_PAGE_COUNT}
                 range={'1 Day'}
                 rowRenderers={rowRenderers}
+                show={true}
                 sort={sort}
                 width={1000}
               />

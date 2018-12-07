@@ -20,6 +20,7 @@ interface Props {
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
+  show: boolean;
 }
 
 const DropTargetDataProviders = styled.div`
@@ -53,9 +54,9 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
  * the data pro section.
  */
 export const DataProviders = pure<Props>(
-  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled }: Props) => (
+  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled, show }: Props) => (
     <DropTargetDataProviders data-test-subj="dataProviders">
-      <DroppableWrapper droppableId={getDroppableId(id)}>
+      <DroppableWrapper isDropDisabled={!show} droppableId={getDroppableId(id)}>
         {dataProviders.length ? (
           <Providers
             id={id}

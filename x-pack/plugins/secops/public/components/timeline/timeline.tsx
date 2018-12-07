@@ -49,6 +49,7 @@ interface Props {
   range: Range;
   rowRenderers: RowRenderer[];
   sort: Sort;
+  show: boolean;
   width: number;
 }
 
@@ -85,6 +86,7 @@ export const Timeline = pure<Props>(
     pageCount,
     range,
     rowRenderers,
+    show,
     sort,
     width,
   }) => (
@@ -94,6 +96,7 @@ export const Timeline = pure<Props>(
         dataProviders={dataProviders}
         onDataProviderRemoved={onDataProviderRemoved}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+        show={show}
         width={width}
       />
       {dataProviders.map(provider => {
