@@ -28,7 +28,7 @@
             }
           }
         },
-{
+        {
           "_source" : {
             "cluster_uuid": "W7hppdX7R229Oy3KQbZrTw",
             "type": "beats_state",
@@ -54,8 +54,6 @@
             }
           }
         },
-
-
         {
           "_source": {
             "type": "beats_state",
