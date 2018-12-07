@@ -95,7 +95,7 @@ export class LoadMoreTable extends React.PureComponent<BasicTableProps, BasicTab
         color="text"
         iconType="arrowDown"
         iconSide="right"
-        onClick={this.onButtonClick.bind(this)}
+        onClick={this.onButtonClick}
       >
         Rows: {limit}
       </EuiButtonEmpty>
@@ -134,7 +134,7 @@ export class LoadMoreTable extends React.PureComponent<BasicTableProps, BasicTab
                     id="customizablePagination"
                     button={button}
                     isOpen={this.state.isPopoverOpen}
-                    closePopover={this.closePopover.bind(this)}
+                    closePopover={this.closePopover}
                     panelPaddingSize="none"
                   >
                     <EuiContextMenuPanel items={rowItems} />
