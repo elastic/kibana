@@ -1,12 +1,19 @@
-
 /**
  * 1. Encapsulate this fix to avoid modifying global styling.
  */
-.crossClusterReplicationPageContent {
+.ccrPageContent {
   max-width: 1000px !important;
   width: 100% !important;
 
   .euiText .euiButton--warning {
     color: $euiColorWarning; // [1]
   }
+}
+
+.ccrFollowerIndicesFormRow {
+  padding-bottom: 0;
+}
+
+.ccrFollowerIndicesHelpText {
+  transform: translateY(-3px);
 }

@@ -5,24 +5,26 @@ exports[`Auto-follow pattern validators validateAutoFollowPattern() returns empt
 exports[`Auto-follow pattern validators validateAutoFollowPattern() should validate all props from auto-follow patten 1`] = `
 Object {
   "followIndexPatternPrefix": <FormattedMessage
-    defaultMessage="Remove the characters {characterList} from the prefix."
+    defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the prefix."
     id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.illegalCharacters"
     values={
       Object {
         "characterList": <strong>
           ?
         </strong>,
+        "characterListLength": 1,
       }
     }
   />,
   "followIndexPatternSuffix": <FormattedMessage
-    defaultMessage="Remove the characters {characterList} from the suffix."
+    defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the suffix."
     id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
     values={
       Object {
         "characterList": <strong>
           ?
         </strong>,
+        "characterListLength": 1,
       }
     }
   />,
