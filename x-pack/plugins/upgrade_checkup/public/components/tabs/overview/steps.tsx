@@ -17,6 +17,7 @@ import {
   EuiSteps,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { UpgradeCheckupTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
@@ -26,9 +27,10 @@ const EuiFormRowPrime: React.StatelessComponent<
   EuiFormRowProps & { describedByIds?: string[] }
 > = EuiFormRow;
 
-export const Steps: StatelessComponent<UpgradeCheckupTabProps> = ({
+export const StepsUI: StatelessComponent<UpgradeCheckupTabProps & ReactIntl.InjectedIntlProps> = ({
   checkupData,
   setSelectedTabIndex,
+  intl,
 }) => {
   const countByType = Object.keys(checkupData!).reduce(
     (counts, checkupType) => {
@@ -44,71 +46,146 @@ export const Steps: StatelessComponent<UpgradeCheckupTabProps> = ({
       headingElement="h2"
       steps={[
         {
-          title: 'Check for issues with your cluster',
+          title: intl.formatMessage({
+            id: 'xpack.upgradeCheckup.overviewTab.steps.clusterStep.stepTitle',
+            defaultMessage: 'Check for issues with your cluster',
+          }),
           status: countByType.cluster ? 'warning' : 'complete',
           children: (
             <EuiText>
               {countByType.cluster ? (
                 <Fragment>
                   <p>
-                    Go to the <EuiLink onClick={() => setSelectedTabIndex(1)}>Cluster tab</EuiLink>{' '}
-                    to update deprecated cluster settings.
+                    <FormattedMessage
+                      id="xpack.upgradeCheckup.overviewTab.steps.clusterStep.todo.todoDetail"
+                      defaultMessage="Go to the {clusterTabButton} to update deprecated cluster settings."
+                      values={{
+                        clusterTabButton: (
+                          <EuiLink onClick={() => setSelectedTabIndex(1)}>
+                            <FormattedMessage
+                              id="xpack.upgradeCheckup.overviewTab.steps.clusterStep.todo.clusterTabButtonLabel"
+                              defaultMessage="Cluster tab"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </p>
                   <p>
-                    There are <EuiNotificationBadge>{countByType.cluster}</EuiNotificationBadge>{' '}
-                    issues remaining to resolve.
+                    <FormattedMessage
+                      id="xpack.upgradeCheckup.overviewTab.steps.clusterStep.remainingIssuesDetail"
+                      defaultMessage="There are {numIssues} issues remaining to resolve."
+                      values={{
+                        numIssues: (
+                          <EuiNotificationBadge>{countByType.cluster}</EuiNotificationBadge>
+                        ),
+                      }}
+                    />
                   </p>
                 </Fragment>
               ) : (
-                <p>There are no remaining deprecated cluster settings.</p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeCheckup.overviewTab.steps.clusterStep.noRemainingIssuesLabel"
+                    defaultMessage="There are no remaining deprecated cluster settings."
+                  />
+                </p>
               )}
             </EuiText>
           ),
         },
         {
-          title: 'Check for issues with your indices',
+          title: intl.formatMessage({
+            id: 'xpack.upgradeCheckup.overviewTab.steps.indicesStep.stepTitle',
+            defaultMessage: 'Check for issues with your indices',
+          }),
           status: countByType.indices ? 'warning' : 'complete',
           children: (
             <EuiText>
               {countByType.indices ? (
                 <Fragment>
                   <p>
-                    Go to the <EuiLink onClick={() => setSelectedTabIndex(2)}>Indices tab</EuiLink>{' '}
-                    to update deprecated index settings.
+                    <FormattedMessage
+                      id="xpack.upgradeCheckup.overviewTab.steps.indicesStep.todo.todoDetail"
+                      defaultMessage="Go to the {indicesTabButton} to update deprecated index settings."
+                      values={{
+                        indicesTabButton: (
+                          <EuiLink onClick={() => setSelectedTabIndex(2)}>
+                            <FormattedMessage
+                              id="xpack.upgradeCheckup.overviewTab.steps.indicesStep.todo.indicesTabButtonLabel"
+                              defaultMessage="Indices tab"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
                   </p>
                   <p>
-                    There are <EuiNotificationBadge>{countByType.indices}</EuiNotificationBadge>{' '}
-                    issues remaining to resolve.
+                    <FormattedMessage
+                      id="xpack.upgradeCheckup.overviewTab.steps.indicesStep.remainingIssuesDetail"
+                      defaultMessage="There are {numIssues} issues remaining to resolve."
+                      values={{
+                        numIssues: (
+                          <EuiNotificationBadge>{countByType.indices}</EuiNotificationBadge>
+                        ),
+                      }}
+                    />
                   </p>
                 </Fragment>
               ) : (
-                <p>There are no remaining deprecated index settings.</p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeCheckup.overviewTab.steps.indicesStep.noRemainingIssuesLabel"
+                    defaultMessage="There are no remaining deprecated index settings."
+                  />
+                </p>
               )}
             </EuiText>
           ),
         },
         {
-          title: 'Review Elasticsearch deprecation logs',
+          title: intl.formatMessage({
+            id: 'xpack.upgradeCheckup.overviewTab.steps.deprecationLogsStep.stepTitle',
+            defaultMessage: 'Review the Elasticsearch deprecation logs',
+          }),
           children: (
             <Fragment>
               <EuiText grow={false}>
                 <p>
-                  Find and read through Elasticsearch's{' '}
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/logging.html#deprecation-logging"
-                    target="_blank"
-                  >
-                    deprecation logs
-                  </EuiLink>{' '}
-                  to ensure that your applications are not using deprecated features that will be
-                  removed in 7.0.
+                  <FormattedMessage
+                    id={
+                      'xpack.upgradeCheckup.overviewTab.steps.deprecationLogsStep.deprecationLogs.logsDetail'
+                    }
+                    defaultMessage={
+                      'Review the Elasticsearch {deprecationLogsDocButton} to see if your applications' +
+                      'are using functionality that is not available in {nextEsVersion}. You may need to enable deprecation logging.'
+                    }
+                    values={{
+                      deprecationLogsDocButton: (
+                        <EuiLink
+                          href="https://www.elastic.co/guide/en/elasticsearch/reference/current/logging.html#deprecation-logging"
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="xpack.upgradeCheckup.overviewTab.steps.deprecationLogsStep.deprecationLogs.deprecationLogsDocButtonLabel"
+                            defaultMessage="deprecation logs"
+                          />
+                        </EuiLink>
+                      ),
+                      nextEsVersion: '7.0',
+                    }}
+                  />
                 </p>
               </EuiText>
 
               <EuiSpacer />
 
               <EuiFormRowPrime
-                label="Enable deprecation logging?"
+                label={intl.formatMessage({
+                  id:
+                    'xpack.upgradeCheckup.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingLabel',
+                  defaultMessage: 'Enable deprecation logging?',
+                })}
                 describedByIds={['deprecation-logging']}
               >
                 <DeprecationLoggingToggle />
@@ -120,3 +197,5 @@ export const Steps: StatelessComponent<UpgradeCheckupTabProps> = ({
     />
   );
 };
+
+export const Steps = injectI18n(StepsUI);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, StatelessComponent } from 'react';
 
 import {
   EuiCallOut,
@@ -19,55 +19,83 @@ import {
   EuiStat,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LoadingState, UpgradeCheckupTabComponent } from '../../types';
+import { LoadingState, UpgradeCheckupTabProps } from '../../types';
 import { Steps } from './steps';
 
-export class OverviewTab extends UpgradeCheckupTabComponent {
-  public render() {
-    return (
-      <Fragment>
-        <EuiSpacer />
+export const OverviewTab: StatelessComponent<UpgradeCheckupTabProps> = props => (
+  <Fragment>
+    <EuiSpacer />
 
-        <EuiText grow={false}>
-          <p>
-            This assistant checks your cluster and indices and identifies the changes you need to
-            make before upgrading to Elasticsearch 7.0.
-          </p>
-        </EuiText>
+    <EuiText grow={false}>
+      <p>
+        <FormattedMessage
+          id="xpack.upgradeCheckup.overviewTab.tabDetail"
+          defaultMessage={
+            'This assistant checks your cluster and indices and identifies the changes ' +
+            'you need to make before upgrading to Elasticsearch {nextEsVersion}.'
+          }
+          values={{
+            nextEsVersion: '7.x',
+          }}
+        />
+      </p>
+    </EuiText>
 
-        <EuiSpacer />
+    <EuiSpacer />
 
-        <EuiCallOut title="Issues list might be incomplete" color="warning" iconType="help">
-          <p>
-            The complete list of{' '}
-            <EuiLink
-              href="https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-7.0.html"
-              target="_blank"
-            >
-              deprecations and breaking changes
-            </EuiLink>{' '}
-            in Elasticsearch 7.0 will be available in the final 6.x minor release. When this list is
-            complete, this warning will go away.
-          </p>
-        </EuiCallOut>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.upgradeCheckup.overviewTab.incompleteCallout.calloutTitle"
+          defaultMessage="Issues list might be incomplete"
+        />
+      }
+      color="warning"
+      iconType="help"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.upgradeCheckup.overviewTab.incompleteCallout.calloutBody.calloutDetail"
+          defaultMessage={
+            'The complete list of {breakingChangesDocButton} in Elasticsearch {nextEsVersion} ' +
+            'will be available in the final {currentEsVersion} minor release. When this list ' +
+            'is complete, this warning will go away.'
+          }
+          values={{
+            breakingChangesDocButton: (
+              <EuiLink
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-7.0.html"
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.upgradeCheckup.overviewTab.incompleteCallout.calloutBody.breackingChangesDocButtonLabel"
+                  defaultMessage="deprecations and breaking changes"
+                />
+              </EuiLink>
+            ),
+            nextEsVersion: '7.x',
+            currentEsVersion: '6.x',
+          }}
+        />
+      </p>
+    </EuiCallOut>
 
-        <EuiSpacer />
+    <EuiSpacer />
 
-        <EuiPageContent>
-          <EuiPageContentBody>
-            {this.props.loadingState === LoadingState.Success ? (
-              <Steps {...this.props} />
-            ) : (
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </Fragment>
-    );
-  }
-}
+    <EuiPageContent>
+      <EuiPageContentBody>
+        {props.loadingState === LoadingState.Success ? (
+          <Steps {...props} />
+        ) : (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </EuiPageContentBody>
+    </EuiPageContent>
+  </Fragment>
+);

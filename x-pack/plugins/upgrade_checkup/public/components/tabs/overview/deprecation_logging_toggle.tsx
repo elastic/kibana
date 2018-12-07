@@ -8,6 +8,7 @@ import axios from 'axios';
 import React from 'react';
 
 import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 
 import chrome from 'ui/chrome';
 import { LoadingState } from '../../types';
@@ -17,8 +18,11 @@ interface DeprecationLoggingTabState {
   loggingEnabled?: boolean;
 }
 
-export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLoggingTabState> {
-  constructor(props: {}) {
+export class DeprecationLoggingToggleUI extends React.Component<
+  ReactIntl.InjectedIntlProps,
+  DeprecationLoggingTabState
+> {
+  constructor(props: ReactIntl.InjectedIntlProps) {
     super(props);
 
     this.state = {
@@ -50,14 +54,27 @@ export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLog
   }
 
   private renderLoggingState() {
+    const { intl } = this.props;
     const { loggingEnabled, loadingState } = this.state;
 
     if (loadingState === LoadingState.Error) {
-      return 'Could not load logging state';
+      return intl.formatMessage({
+        id:
+          'xpack.upgradeCheckup.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.errorLabel',
+        defaultMessage: 'Could not load logging state',
+      });
     } else if (loggingEnabled) {
-      return 'On';
+      return intl.formatMessage({
+        id:
+          'xpack.upgradeCheckup.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
+        defaultMessage: 'On',
+      });
     } else {
-      return 'Off';
+      return intl.formatMessage({
+        id:
+          'xpack.upgradeCheckup.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.disabledLabel',
+        defaultMessage: 'Off',
+      });
     }
   }
 
@@ -101,3 +118,5 @@ export class DeprecationLoggingToggle extends React.Component<{}, DeprecationLog
     }
   };
 }
+
+export const DeprecationLoggingToggle = injectI18n(DeprecationLoggingToggleUI);
