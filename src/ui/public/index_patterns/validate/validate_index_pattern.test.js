@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { ILLEGAL_CHARACTERS, CONTAINS_SPACES, validateIndexPattern } from './validate_index_pattern';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
+
+import {
+  ILLEGAL_CHARACTERS,
+  CONTAINS_SPACES,
+  validateIndexPattern,
+} from './validate_index_pattern';
 
 describe('Index Pattern Validation', () => {
   it('should not allow space in the pattern', () => {

@@ -14,6 +14,12 @@ import {
   validateIndexPattern as getIndexPatternErrors,
 } from 'ui/index_patterns';
 
+import {
+  indexNameBeginsWithPeriod,
+  findIllegalCharactersInIndexName,
+  indexNameContainsSpaces,
+} from 'ui/indices';
+
 export const validateName = (name = '') => {
   let errorMsg = null;
 
@@ -82,19 +88,33 @@ export const validatePrefix = (prefix) => {
     return null;
   }
 
-  const errors = getIndexPatternErrors(prefix);
-
-  if (errors[ILLEGAL_CHARACTERS]) {
+  // Prefix can't begin with a period, because that's reserved for system indices.
+  if (indexNameBeginsWithPeriod(prefix)) {
     return (
       <FormattedMessage
-        id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.illegalCharacters"
-        defaultMessage="Remove the characters {characterList} from the prefix."
-        values={{ characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong> }}
+        id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.beginsWithPeriod"
+        defaultMessage="The prefix can't begin with a period."
       />
     );
   }
 
-  if (errors[CONTAINS_SPACES]) {
+  const illegalCharacters = findIllegalCharactersInIndexName(prefix);
+
+  if (illegalCharacters.length) {
+    return (
+      <FormattedMessage
+        id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.illegalCharacters"
+        defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the prefix."
+        values={{
+          characterList: <strong>{illegalCharacters.join(' ')}</strong>,
+          characterListLength: illegalCharacters.length,
+        }}
+      />
+    );
+  }
+
+  if (indexNameContainsSpaces(prefix)) {
     return (
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.noEmptySpace"
@@ -112,19 +132,23 @@ export const validateSuffix = (suffix) => {
     return null;
   }
 
-  const errors = getIndexPatternErrors(suffix);
+  const illegalCharacters = findIllegalCharactersInIndexName(suffix);
 
-  if (errors[ILLEGAL_CHARACTERS]) {
+  if (illegalCharacters.length) {
     return (
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
-        defaultMessage="Remove the characters {characterList} from the suffix."
-        values={{ characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong> }}
+        defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the suffix."
+        values={{
+          characterList: <strong>{illegalCharacters.join(' ')}</strong>,
+          characterListLength: illegalCharacters.length,
+        }}
       />
     );
   }
 
-  if (errors[CONTAINS_SPACES]) {
+  if (indexNameContainsSpaces(suffix)) {
     return (
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPattern.suffixValidation.noEmptySpace"

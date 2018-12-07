@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
+import { INDEX_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/indices';
 
 import routing from '../services/routing';
 import { API_STATUS } from '../constants';
@@ -38,14 +39,7 @@ import { getPrefixSuffixFromFollowPattern, getPreviewIndicesFromAutoFollowPatter
 import { validateAutoFollowPattern, validateLeaderIndexPattern } from '../services/auto_follow_pattern_validators';
 
 const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
-
-const indexPatternHelpText = (
-  <FormattedMessage
-    id="xpack.crossClusterReplication.autoFollowPatternForm.fieldIndexPattern.HelpLabel"
-    defaultMessage="Spaces and the characters {characterList} are not allowed."
-    values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
-  />
-);
+const indexNameIllegalCharacters = INDEX_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const getFirstConnectedCluster = (clusters) => {
   for (let i = 0; i < clusters.length; i++) {
@@ -409,7 +403,13 @@ export class AutoFollowPatternFormUI extends PureComponent {
                 defaultMessage="Index patterns"
               />
             )}
-            helpText={indexPatternHelpText}
+            helpText={(
+              <FormattedMessage
+                id="xpack.crossClusterReplication.autoFollowPatternForm.fieldLeaderIndexPatternsHelpLabel"
+                defaultMessage="Spaces and the characters {characterList} are not allowed."
+                values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
+              />
+            )}
             isInvalid={isInvalid}
             error={fieldsErrors.leaderIndexPatterns}
             fullWidth
@@ -424,7 +424,6 @@ export class AutoFollowPatternFormUI extends PureComponent {
               onCreateOption={this.onCreateLeaderIndexPattern}
               onChange={this.onLeaderIndexPatternChange}
               onSearchChange={this.onLeaderIndexPatternInputChange}
-              isInvalid={false}
               fullWidth
             />
           </EuiFormRow>
@@ -536,7 +535,11 @@ export class AutoFollowPatternFormUI extends PureComponent {
           </EuiFlexGroup>
 
           <EuiFormHelpText className={isPrefixInvalid || isSuffixInvalid ? null : 'ccrFollowerIndicesHelpText'}>
-            {indexPatternHelpText}
+            <FormattedMessage
+              id="xpack.crossClusterReplication.autoFollowPatternForm.fieldFollowerIndicesHelpLabel"
+              defaultMessage="Spaces and the characters {characterList} are not allowed."
+              values={{ characterList: <strong>{indexNameIllegalCharacters}</strong> }}
+            />
           </EuiFormHelpText>
 
           {!!leaderIndexPatterns.length && (
