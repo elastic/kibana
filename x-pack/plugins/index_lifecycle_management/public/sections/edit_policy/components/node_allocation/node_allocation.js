@@ -84,7 +84,7 @@ class NodeAllocationUi extends Component {
     return (
       <Fragment>
         <ErrableFormRow
-          id={`${phase}.${PHASE_NODE_ATTRS}`}
+          id={`${phase}-${PHASE_NODE_ATTRS}`}
           label={intl.formatMessage({
             id: 'xpack.indexLifecycleMgmt.editPolicy.nodeAllocationLabel',
             defaultMessage: 'Select a node attribute to control shard allocation',
@@ -94,7 +94,7 @@ class NodeAllocationUi extends Component {
           errors={errors}
         >
           <EuiSelect
-            id={`${phase}.${PHASE_NODE_ATTRS}`}
+            id={`${phase}-${PHASE_NODE_ATTRS}`}
             value={phaseData[PHASE_NODE_ATTRS] || ' '}
             options={nodeOptions}
             onChange={async e => {

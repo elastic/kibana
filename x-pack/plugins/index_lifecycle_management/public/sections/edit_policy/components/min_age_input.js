@@ -17,7 +17,7 @@ const MinAgeInputUi = props => {
     <EuiFlexGroup>
       <EuiFlexItem style={{ maxWidth: 188 }}>
         <ErrableFormRow
-          id={`${phase}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
+          id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
           label={intl.formatMessage({
             id: 'xpack.indexLifecycleMgmt.editPolicy.minimimAgeLabel',
             defaultMessage: 'Move to {phase} phase after',
@@ -27,7 +27,7 @@ const MinAgeInputUi = props => {
           errors={errors}
         >
           <EuiFieldNumber
-            id={`${phase}.${PHASE_ROLLOVER_MINIMUM_AGE}`}
+            id={`${phase}-${PHASE_ROLLOVER_MINIMUM_AGE}`}
             value={phaseData[PHASE_ROLLOVER_MINIMUM_AGE]}
             onChange={async e => {
               setPhaseData(PHASE_ROLLOVER_MINIMUM_AGE, e.target.value);

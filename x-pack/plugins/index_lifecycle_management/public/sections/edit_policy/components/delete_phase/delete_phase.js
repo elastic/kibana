@@ -88,6 +88,7 @@ export class DeletePhase extends PureComponent {
               </EuiButton>
             ) : (
               <EuiButton
+                data-test-subj="activatePhaseButton-delete"
                 onClick={async () => {
                   await setPhaseData(PHASE_ENABLED, true);
                 }}

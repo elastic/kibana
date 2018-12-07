@@ -73,7 +73,7 @@ class EditPolicyUi extends Component {
       fetchPolicies,
       match: {
         params: { policyName },
-      },
+      } = { params: {} },
     } = this.props;
     if (policyName) {
       const decodedPolicyName = decodeURIComponent(policyName);
@@ -206,6 +206,7 @@ class EditPolicyUi extends Component {
                     </Fragment>
                     <EuiFormRow>
                       <EuiSwitch
+                        data-test-subj="saveAsNewSwitch"
                         style={{ maxWidth: '100%' }}
                         checked={saveAsNewPolicy}
                         onChange={async e => {
@@ -249,6 +250,7 @@ class EditPolicyUi extends Component {
                       errors={errors}
                     >
                       <EuiFieldText
+                        data-test-subj="policyNameField"
                         value={selectedPolicyName}
                         onChange={async e => {
                           await setSelectedPolicyName(e.target.value);
@@ -287,6 +289,7 @@ class EditPolicyUi extends Component {
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false}>
                       <EuiButton
+                        data-test-subj="savePolicyButton"
                         fill
                         iconType="check"
                         iconSide="left"
@@ -307,7 +310,7 @@ class EditPolicyUi extends Component {
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty onClick={this.backToPolicyList}>
+                      <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={this.backToPolicyList}>
                         <FormattedMessage
                           id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
                           defaultMessage="Cancel"

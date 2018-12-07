@@ -100,6 +100,7 @@ class ColdPhaseUi extends PureComponent {
               </EuiButton>
             ) : (
               <EuiButton
+                data-test-subj="activatePhaseButton-cold"
                 onClick={async () => {
                   await setPhaseData(PHASE_ENABLED, true);
                 }}
@@ -139,7 +140,7 @@ class ColdPhaseUi extends PureComponent {
               <EuiFlexGroup>
                 <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                   <ErrableFormRow
-                    id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
+                    id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
                     label={
                       <Fragment>
                         <FormattedMessage
@@ -154,7 +155,7 @@ class ColdPhaseUi extends PureComponent {
                     errors={errors}
                   >
                     <EuiFieldNumber
-                      id={`${PHASE_COLD}.${PHASE_REPLICA_COUNT}`}
+                      id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
                       value={phaseData[PHASE_REPLICA_COUNT]}
                       onChange={async e => {
                         await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);

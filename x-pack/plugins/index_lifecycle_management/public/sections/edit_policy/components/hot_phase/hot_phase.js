@@ -91,6 +91,7 @@ class HotPhaseUi extends PureComponent {
         fullWidth
       >
         <EuiFormRow
+          id="rolloverFormRow"
           hasEmptyLabelSpace
           helpText={
             <Fragment>
@@ -131,7 +132,7 @@ class HotPhaseUi extends PureComponent {
             <EuiFlexGroup>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
-                  id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
+                  id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                   label={intl.formatMessage({
                     id: 'xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel',
                     defaultMessage: 'Maximum index size'
@@ -141,7 +142,7 @@ class HotPhaseUi extends PureComponent {
                   errors={errors}
                 >
                   <EuiFieldNumber
-                    id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
+                    id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                     value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
                     onChange={async e => {
                       await setPhaseData(
@@ -155,7 +156,7 @@ class HotPhaseUi extends PureComponent {
               </EuiFlexItem>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
-                  id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS}`}
+                  id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS}`}
                   hasEmptyLabelSpace
                   errorKey={PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS}
                   isShowingErrors={isShowingErrors}
@@ -191,7 +192,7 @@ class HotPhaseUi extends PureComponent {
             <EuiFlexGroup>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
-                  id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_AGE}`}
+                  id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_AGE}`}
                   label={intl.formatMessage({
                     id: 'xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel',
                     defaultMessage: 'Maximum age'
@@ -201,7 +202,7 @@ class HotPhaseUi extends PureComponent {
                   errors={errors}
                 >
                   <EuiFieldNumber
-                    id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_AGE}`}
+                    id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_AGE}`}
                     value={phaseData[PHASE_ROLLOVER_MAX_AGE]}
                     onChange={async e => {
                       await setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
@@ -212,7 +213,7 @@ class HotPhaseUi extends PureComponent {
               </EuiFlexItem>
               <EuiFlexItem style={{ maxWidth: 188 }}>
                 <ErrableFormRow
-                  id={`${PHASE_HOT}.${PHASE_ROLLOVER_MAX_AGE_UNITS}`}
+                  id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_AGE_UNITS}`}
                   hasEmptyLabelSpace
                   errorKey={PHASE_ROLLOVER_MAX_AGE_UNITS}
                   isShowingErrors={isShowingErrors}

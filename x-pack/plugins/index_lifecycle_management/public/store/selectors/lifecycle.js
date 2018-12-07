@@ -34,12 +34,23 @@ import {
   getSelectedOriginalPolicyName,
   getPolicies
 } from '.';
-const numberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberRequiredError', {
+export const numberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberRequiredError', {
   defaultMessage: 'A number is required.'
 });
-const positiveNumberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberRequiredError', {
+export const positiveNumberRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberRequiredError', {
   defaultMessage: 'Only positive numbers are allowed.'
 });
+export const maximumAgeRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError', {
+  defaultMessage: 'A maximum age is required.'
+});
+export const maximumSizeRequiredMessage =
+  i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError', {
+    defaultMessage: 'A maximum index size is required.'
+  });
+export const positiveNumbersAboveZeroErrorMessage =
+  i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
+    defaultMessage: 'Only numbers above 0 are allowed.'
+  });
 export const validatePhase = (type, phase, errors) => {
   const phaseErrors = {};
 
@@ -71,8 +82,9 @@ export const validatePhase = (type, phase, errors) => {
       else if (phase[numberedAttribute] < 0) {
         phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
       }
-      else if (numberedAttribute === PHASE_PRIMARY_SHARD_COUNT && phase[numberedAttribute] < 1) {
-        phaseErrors[numberedAttribute] = [positiveNumberRequiredMessage];
+      else if ((numberedAttribute === PHASE_ROLLOVER_MINIMUM_AGE ||
+        numberedAttribute === PHASE_PRIMARY_SHARD_COUNT) && phase[numberedAttribute] < 1) {
+        phaseErrors[numberedAttribute] = [positiveNumbersAboveZeroErrorMessage];
       }
     }
   }
@@ -82,14 +94,10 @@ export const validatePhase = (type, phase, errors) => {
       !isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])
     ) {
       phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
-        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumAgeMissingError', {
-          defaultMessage: 'A maximum age is required.'
-        })
+        maximumAgeRequiredMessage
       ];
       phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
-        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError', {
-          defaultMessage: 'A maximum index size is required.'
-        })
+        maximumSizeRequiredMessage
       ];
     }
   }
@@ -98,7 +106,7 @@ export const validatePhase = (type, phase, errors) => {
       phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = [numberRequiredMessage];
     }
     else if (phase[PHASE_PRIMARY_SHARD_COUNT] < 1) {
-      phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = [positiveNumberRequiredMessage];
+      phaseErrors[PHASE_PRIMARY_SHARD_COUNT] = [positiveNumbersAboveZeroErrorMessage];
     }
   }
 
@@ -108,9 +116,7 @@ export const validatePhase = (type, phase, errors) => {
     }
     else if (phase[PHASE_FORCE_MERGE_SEGMENTS] < 1) {
       phaseErrors[PHASE_FORCE_MERGE_SEGMENTS] = [
-        i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
-          defaultMessage: 'Only positive numbers above 0 are allowed.'
-        })
+        positiveNumbersAboveZeroErrorMessage
       ];
     }
   }
@@ -120,50 +126,56 @@ export const validatePhase = (type, phase, errors) => {
   };
 };
 
+export const policyNameRequiredMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameRequiredError', {
+  defaultMessage: 'A policy name is required.'
+});
+export const policyNameStartsWithUnderscoreErrorMessage =
+  i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameStartsWithUnderscoreError', {
+    defaultMessage: 'A policy name cannot start with an underscore.'
+  });
+export const policyNameContainsCommaErrorMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameContainsCommaError', {
+  defaultMessage: 'A policy name cannot include a comma.'
+});
+export const policyNameContainsSpaceErrorMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameContainsSpaceError', {
+  defaultMessage: 'A policy name cannot include a space.'
+});
+export const policyNameTooLongErrorMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameTooLongError', {
+  defaultMessage: 'A policy name cannot be longer than 255 bytes.'
+});
+export const policyNameMustBeDifferentErrorMessage =
+  i18n.translate('xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError', {
+    defaultMessage: 'The policy name must be different.'
+  });
+export const policyNameAlreadyUsedErrorMessage = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameAlreadyUsedError', {
+  defaultMessage: 'That policy name is already used.'
+});
 export const validateLifecycle = state => {
   // This method of deep copy does not always work but it should be fine here
   const errors = JSON.parse(JSON.stringify(ERROR_STRUCTURE));
   const policyName = getSelectedPolicyName(state);
   if (!policyName) {
-    errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameRequiredError', {
-      defaultMessage: 'A policy name is required.'
-    }));
+    errors[STRUCTURE_POLICY_NAME].push(policyNameRequiredMessage);
   } else {
     if (policyName.startsWith('_')) {
-      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameStartsWithUnderscoreError', {
-        defaultMessage: 'A policy name cannot start with an underscore.'
-      }));
+      errors[STRUCTURE_POLICY_NAME].push(policyNameStartsWithUnderscoreErrorMessage);
     }
     if (policyName.includes(',')) {
-      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameContainsCommaError', {
-        defaultMessage: 'A policy name cannot include a comma.'
-      }));
+      errors[STRUCTURE_POLICY_NAME].push(policyNameContainsCommaErrorMessage);
     }
     if (policyName.includes(' ')) {
-      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameContainsSpaceError', {
-        defaultMessage: 'A policy name cannot include a space.'
-      }));
+      errors[STRUCTURE_POLICY_NAME].push(policyNameContainsSpaceErrorMessage);
     }
     if (TextEncoder && new TextEncoder('utf-8').encode(policyName).length > 255) {
-      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameTooLongError', {
-        defaultMessage: 'A policy name cannot be longer than 255 bytes.'
-      }));
+      errors[STRUCTURE_POLICY_NAME].push(policyNameTooLongErrorMessage);
     }
   }
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
-    errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError', {
-      defaultMessage: 'The policy name must be different.'
-    }));
+    errors[STRUCTURE_POLICY_NAME].push(policyNameMustBeDifferentErrorMessage);
   }
-
-  if (getSaveAsNewPolicy(state)) {
-    const policyNames = getPolicies(state).map(policy => policy.name);
-    if (policyNames.includes(getSelectedPolicyName(state))) {
-      errors[STRUCTURE_POLICY_NAME].push(i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameAlreadyUsedError', {
-        defaultMessage: 'That policy name is already used.'
-      }));
-    }
+  const policyNames = getPolicies(state).map(policy => policy.name);
+  if (policyNames.includes(getSelectedPolicyName(state))) {
+    errors[STRUCTURE_POLICY_NAME].push(policyNameAlreadyUsedErrorMessage);
   }
 
   const hotPhase = getPhase(state, PHASE_HOT);

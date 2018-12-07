@@ -122,6 +122,7 @@ class WarmPhaseUi extends PureComponent {
                 </EuiButton>
               ) : (
                 <EuiButton
+                  data-test-subj="activatePhaseButton-warm"
                   onClick={async () => {
                     await setPhaseData(PHASE_ENABLED, true);
                   }}
@@ -143,11 +144,12 @@ class WarmPhaseUi extends PureComponent {
                 <Fragment>
                   {hotPhaseRolloverEnabled ? (
                     <EuiFormRow
-                      id={`${PHASE_WARM}.${WARM_PHASE_ON_ROLLOVER}`}
+                      id={`${PHASE_WARM}-${WARM_PHASE_ON_ROLLOVER}`}
                     >
                       <EuiSwitch
+                        data-test-subj="warmPhaseOnRolloverSwitch"
                         label={moveToWarmPhaseOnRolloverLabel}
-                        id={`${PHASE_WARM}.${WARM_PHASE_ON_ROLLOVER}`}
+                        id={`${PHASE_WARM}-${WARM_PHASE_ON_ROLLOVER}`}
                         checked={phaseData[WARM_PHASE_ON_ROLLOVER]}
                         onChange={async e => {
                           await setPhaseData(WARM_PHASE_ON_ROLLOVER, e.target.checked);
@@ -179,7 +181,7 @@ class WarmPhaseUi extends PureComponent {
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false} style={{ maxWidth: 188 }}>
                       <ErrableFormRow
-                        id={`${PHASE_WARM}.${PHASE_REPLICA_COUNT}`}
+                        id={`${PHASE_WARM}-${PHASE_REPLICA_COUNT}`}
                         label={
                           <Fragment>
                             <FormattedMessage
@@ -194,7 +196,7 @@ class WarmPhaseUi extends PureComponent {
                         errors={errors}
                       >
                         <EuiFieldNumber
-                          id={`${PHASE_WARM}.${PHASE_REPLICA_COUNT}`}
+                          id={`${PHASE_WARM}-${PHASE_REPLICA_COUNT}`}
                           value={phaseData[PHASE_REPLICA_COUNT]}
                           onChange={async e => {
                             await setPhaseData(PHASE_REPLICA_COUNT, e.target.value);
@@ -207,11 +209,7 @@ class WarmPhaseUi extends PureComponent {
 
                   <EuiSpacer size="m" />
                 </Fragment>
-              ) : (
-                <EuiFormRow hasEmptyLabelSpace>
-                  <div />
-                </EuiFormRow>
-              )}
+              ) : null }
             </div>
           </Fragment>
         </EuiDescribedFormGroup>
@@ -240,6 +238,7 @@ class WarmPhaseUi extends PureComponent {
             >
               <Fragment>
                 <EuiSwitch
+                  data-test-subj="shrinkSwitch"
                   checked={phaseData[PHASE_SHRINK_ENABLED]}
                   onChange={async e => {
                     await setPhaseData(PHASE_SHRINK_ENABLED, e.target.checked);
@@ -255,7 +254,7 @@ class WarmPhaseUi extends PureComponent {
                       <EuiFlexGroup>
                         <EuiFlexItem grow={false}>
                           <ErrableFormRow
-                            id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
+                            id={`${PHASE_WARM}-${PHASE_PRIMARY_SHARD_COUNT}`}
                             label={intl.formatMessage({
                               id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfPrimaryShardsLabel',
                               defaultMessage: 'Number of primary shards',
@@ -265,7 +264,7 @@ class WarmPhaseUi extends PureComponent {
                             errors={errors}
                           >
                             <EuiFieldNumber
-                              id={`${PHASE_WARM}.${PHASE_PRIMARY_SHARD_COUNT}`}
+                              id={`${PHASE_WARM}-${PHASE_PRIMARY_SHARD_COUNT}`}
                               value={phaseData[PHASE_PRIMARY_SHARD_COUNT]}
                               onChange={async e => {
                                 await setPhaseData(PHASE_PRIMARY_SHARD_COUNT, e.target.value);
@@ -303,6 +302,7 @@ class WarmPhaseUi extends PureComponent {
               fullWidth
             >
               <EuiSwitch
+                data-test-subj="forceMergeSwitch"
                 label={forcemergeLabel}
                 aria-label={forcemergeLabel}
                 checked={phaseData[PHASE_FORCE_MERGE_ENABLED]}
@@ -316,7 +316,7 @@ class WarmPhaseUi extends PureComponent {
               <div id="forcemergeContent" aria-live="polite" role="region">
                 {phaseData[PHASE_FORCE_MERGE_ENABLED] ? (
                   <ErrableFormRow
-                    id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
+                    id={`${PHASE_WARM}-${PHASE_FORCE_MERGE_SEGMENTS}`}
                     label={intl.formatMessage({
                       id: 'xpack.indexLifecycleMgmt.warmPhase.numberOfSegmentsLabel',
                       defaultMessage: 'Number of segments',
@@ -326,7 +326,7 @@ class WarmPhaseUi extends PureComponent {
                     errors={errors}
                   >
                     <EuiFieldNumber
-                      id={`${PHASE_WARM}.${PHASE_FORCE_MERGE_SEGMENTS}`}
+                      id={`${PHASE_WARM}-${PHASE_FORCE_MERGE_SEGMENTS}`}
                       value={phaseData[PHASE_FORCE_MERGE_SEGMENTS]}
                       onChange={async e => {
                         await setPhaseData(PHASE_FORCE_MERGE_SEGMENTS, e.target.value);
