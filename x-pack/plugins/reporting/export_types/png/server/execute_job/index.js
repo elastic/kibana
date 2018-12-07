@@ -26,7 +26,8 @@ function executeJobFn(server) {
       }),
       map(buffer => ({
         content_type: 'image/png',
-        content: buffer.toString('base64')
+        content: buffer.toString('base64'),
+        size: buffer.byteLength,
       }))
     );
 

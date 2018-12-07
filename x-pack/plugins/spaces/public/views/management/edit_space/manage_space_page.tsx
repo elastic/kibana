@@ -22,6 +22,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
 import { uiCapabilities } from 'ui/capabilities';
+import { Breadcrumb } from 'ui/chrome';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
@@ -30,7 +31,7 @@ import { Space } from '../../../../common/model/space';
 import { SpacesManager } from '../../../lib';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
-import { toSpaceIdentifier } from '../lib';
+import { getEditBreadcrumbs, toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
@@ -43,6 +44,7 @@ interface Props {
   spacesNavState: SpacesNavState;
   intl: InjectedIntl;
   features: Feature[];
+  setBreadcrumbs?: (breadcrumbs: Breadcrumb[]) => void;
 }
 
 interface State {
@@ -67,13 +69,17 @@ class ManageSpacePageUI extends Component<Props, State> {
   }
 
   public componentDidMount() {
-    const { spaceId, spacesManager, intl } = this.props;
+    const { spaceId, spacesManager, intl, setBreadcrumbs } = this.props;
 
     if (spaceId) {
       spacesManager
         .getSpace(spaceId)
         .then((result: any) => {
           if (result.data) {
+            if (setBreadcrumbs) {
+              setBreadcrumbs(getEditBreadcrumbs(result.data));
+            }
+
             this.setState({
               space: result.data,
               isLoading: false,
