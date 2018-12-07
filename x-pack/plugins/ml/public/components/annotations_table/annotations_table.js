@@ -51,7 +51,8 @@ class AnnotationsTable extends Component {
   }
 
   getAnnotations() {
-    const dataCounts = this.props.job.data_counts;
+    const job = this.props.jobs[0];
+    const dataCounts = job.data_counts;
 
     this.setState({
       isLoading: true
@@ -60,16 +61,16 @@ class AnnotationsTable extends Component {
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
       ml.annotations.getAnnotations({
-        jobIds: [this.props.job.job_id],
+        jobIds: [job.job_id],
         earliestMs: dataCounts.earliest_record_timestamp,
         latestMs: dataCounts.latest_record_timestamp,
         maxAnnotations: MAX_ANNOTATIONS
       }).then((resp) => {
         this.setState((prevState, props) => ({
-          annotations: resp.annotations[props.job.job_id] || [],
+          annotations: resp.annotations[props.jobs[0].job_id] || [],
           errorMessage: undefined,
           isLoading: false,
-          jobId: props.job.job_id
+          jobId: props.jobs[0].job_id
         }));
       }).catch((resp) => {
         console.log('Error loading list of annoations for jobs list:', resp);
@@ -93,7 +94,7 @@ class AnnotationsTable extends Component {
     if (
       this.props.annotations === undefined &&
       this.state.isLoading === false &&
-      this.state.jobId !== this.props.job.job_id
+      this.state.jobId !== this.props.jobs[0].job_id
     ) {
       this.getAnnotations();
     }
@@ -102,13 +103,13 @@ class AnnotationsTable extends Component {
   openSingleMetricView(annotation) {
     // Creates the link to the Single Metric Viewer.
     // Set the total time range from the start to the end of the annotation,
-    const dataCounts = this.props.job.data_counts;
+    const dataCounts = this.props.jobs[0].data_counts;
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(dataCounts.latest_record_timestamp).toISOString();
 
     const _g = rison.encode({
       ml: {
-        jobIds: [this.props.job.job_id]
+        jobIds: [this.props.jobs[0].job_id]
       },
       refreshInterval: {
         display: 'Off',
@@ -144,7 +145,7 @@ class AnnotationsTable extends Component {
     const _a = rison.encode(appState);
 
     const url = `?_g=${_g}&_a=${_a}`;
-    addItemToRecentlyAccessed('timeseriesexplorer', this.props.job.job_id, url);
+    addItemToRecentlyAccessed('timeseriesexplorer', this.props.jobs[0].job_id, url);
     window.open(`${chrome.getBasePath()}/app/ml#/timeseriesexplorer${url}`, '_self');
   }
 
@@ -320,7 +321,7 @@ class AnnotationsTable extends Component {
 }
 AnnotationsTable.propTypes = {
   annotations: PropTypes.array,
-  job: PropTypes.object,
+  jobs: PropTypes.array,
   isSingleMetricViewerLinkVisible: PropTypes.bool,
   isNumberBadgeVisible: PropTypes.bool
 };

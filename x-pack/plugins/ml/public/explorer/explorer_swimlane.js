@@ -24,10 +24,14 @@ import { getSeverityColor } from '../../common/util/anomaly_utils';
 import { mlEscape } from '../util/string_utils';
 import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip_service';
 import { mlExplorerDashboardService } from './explorer_dashboard_service';
-import { DRAG_SELECT_ACTION } from './explorer_constants';
+import {
+  DRAG_SELECT_ACTION,
+  SWIMLANE_TYPE
+} from './explorer_constants';
 
 export class ExplorerSwimlane extends React.Component {
   static propTypes = {
+    annotations: PropTypes.array,
     chartWidth: PropTypes.number.isRequired,
     MlTimeBuckets: PropTypes.func.isRequired,
     swimlaneData: PropTypes.shape({
@@ -215,12 +219,14 @@ export class ExplorerSwimlane extends React.Component {
     const cellMouseoverActive = this.cellMouseoverActive;
 
     const {
+      annotations = [],
       chartWidth,
       MlTimeBuckets,
       swimlaneData,
       swimlaneType,
       selection
     } = this.props;
+    console.warn('renderSwimlane', swimlaneType);
 
     const {
       laneLabels: lanes,
@@ -428,6 +434,23 @@ export class ExplorerSwimlane extends React.Component {
     if (swimlaneType !== selectedType && selectedType !== undefined) {
       element.selectAll('.lane-label').classed('lane-label-masked', true);
       element.selectAll('.sl-cell-inner').classed('sl-cell-inner-masked', true);
+    }
+
+    // annotations
+    if (swimlaneType === SWIMLANE_TYPE.OVERALL) {
+      const d3Annotations = swimlanes.selectAll('.annotations').data(annotations, d => d._id);
+
+      d3Annotations.enter().append('div')
+        .classed('euiBadge', true)
+        .classed('euiBadge--default', true)
+        .classed('ml-anomaly-explorer-annotation', true);
+
+      d3Annotations
+        .style('left', (d) => `${201 + xAxisScale(d.timestamp)}px`)
+        .text(d => d.key);
+
+      d3Annotations.exit().remove();
+      console.warn('annotations', annotations);
     }
 
     if ((swimlaneType !== selectedType) ||

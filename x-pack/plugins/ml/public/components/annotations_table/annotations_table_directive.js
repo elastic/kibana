@@ -14,27 +14,27 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { AnnotationsTable } from '../../../components/annotations_table';
+import { AnnotationsTable } from './annotations_table';
 
 import 'angular';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-import { FEATURE_ANNOTATIONS_ENABLED } from '../../../../common/constants/feature_flags';
+import { FEATURE_ANNOTATIONS_ENABLED } from '../../../common/constants/feature_flags';
 
 module.directive('mlAnnotationTable', function () {
 
   function link(scope, element) {
     function renderReactComponent() {
-      if (typeof scope.job === 'undefined') {
+      if (typeof scope.jobs === 'undefined') {
         return;
       }
 
       const props = {
         annotations: scope.annotations,
-        job: scope.job,
-        isSingleMetricViewerLinkVisible: false,
+        jobs: scope.jobs,
+        isSingleMetricViewerLinkVisible: scope.drillDown,
         isNumberBadgeVisible: true
       };
 
@@ -70,7 +70,8 @@ module.directive('mlAnnotationTable', function () {
   return {
     scope: {
       annotations: '=',
-      job: '='
+      drillDown: '=',
+      jobs: '='
     },
     link: link
   };

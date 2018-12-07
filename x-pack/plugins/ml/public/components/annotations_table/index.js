@@ -5,3 +5,5 @@
  */
 
 export { AnnotationsTable } from './annotations_table';
+
+import './annotations_table_directive';

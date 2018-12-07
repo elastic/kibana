@@ -15,6 +15,7 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 
+import 'plugins/ml/components/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
@@ -462,7 +463,7 @@ module.controller('MlTimeSeriesExplorerController', function (
             return a.timestamp - b.timestamp;
           })
           .map((d, i) => {
-            d.key = i + 1;
+            d.key = String.fromCharCode(65 + i);
             return d;
           });
 

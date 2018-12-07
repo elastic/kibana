@@ -17,6 +17,7 @@ import $ from 'jquery';
 import DragSelect from 'dragselect';
 import moment from 'moment-timezone';
 
+import 'plugins/ml/components/annotations_table';
 import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 import 'plugins/ml/components/influencers_list';
@@ -46,6 +47,7 @@ import {
   SWIMLANE_DEFAULT_LIMIT,
   SWIMLANE_TYPE
 } from './explorer_constants';
+import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flags';
 
 uiRoutes
   .when('/explorer/?', {
@@ -82,6 +84,7 @@ module.controller('MlExplorerController', function (
   mlSelectIntervalService,
   mlSelectSeverityService) {
 
+  $scope.annotationsData = [];
   $scope.anomalyChartRecords = [];
   $scope.timeFieldName = 'timestamp';
   $scope.loading = true;
@@ -363,6 +366,7 @@ module.controller('MlExplorerController', function (
 
   function mapScopeToSwimlaneProps(swimlaneType) {
     return {
+      annotations: (swimlaneType === SWIMLANE_TYPE.OVERALL) ? $scope.annotationsData : undefined,
       chartWidth: $scope.swimlaneWidth,
       MlTimeBuckets: TimeBuckets,
       swimlaneData: getSwimlaneData(swimlaneType),
@@ -938,6 +942,45 @@ module.controller('MlExplorerController', function (
     }
   }
 
+  const MAX_ANNOTATIONS = 1000;
+  async function loadAnnotationsTableData() {
+    console.warn('loadAnnotationsTableData ---- START');
+    $scope.annotationsData = [];
+
+    const cellData = $scope.cellData;
+    const jobIds = ($scope.cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ?
+      cellData.lanes : $scope.getSelectedJobIds();
+    const timeRange = getSelectionTimeRange(cellData);
+
+
+    if (FEATURE_ANNOTATIONS_ENABLED) {
+      const resp = await ml.annotations.getAnnotations({
+        jobIds,
+        earliestMs: timeRange.earliestMs,
+        latestMs: timeRange.latestMs,
+        maxAnnotations: MAX_ANNOTATIONS
+      });
+
+      $scope.$evalAsync(() => {
+        const annotationsData = resp.annotations[jobIds[0]];
+
+        if (annotationsData === undefined) {
+          return;
+        }
+
+        $scope.annotationsData = annotationsData
+          .sort((a, b) => {
+            return a.timestamp - b.timestamp;
+          })
+          .map((d, i) => {
+            d.key = String.fromCharCode(65 + i);
+            return d;
+          });
+        console.warn('loadAnnotationsTableData ---- DONE', $scope.annotationsData);
+      });
+    }
+  }
+
   function loadAnomaliesTableData() {
     const cellData = $scope.cellData;
     const jobIds = ($scope.cellData !== undefined && cellData.fieldName === VIEW_BY_JOB_LABEL) ?
@@ -1007,8 +1050,10 @@ module.controller('MlExplorerController', function (
     // The following is to avoid running into a race condition where loading a swimlane selection from URL/AppState
     // would fail because the Explorer Charts Container's directive wasn't linked yet and not being subscribed
     // to the anomalyDataChange listener used in loadDataForCharts().
-    function finish() {
+    async function finish() {
       setShowViewBySwimlane();
+
+      await loadAnnotationsTableData();
 
       $timeout(() => {
         if ($scope.overallSwimlaneData !== undefined) {

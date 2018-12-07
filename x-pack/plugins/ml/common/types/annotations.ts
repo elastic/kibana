@@ -10,7 +10,7 @@ export interface Annotation {
   create_username?: string;
   modified_time?: number;
   modified_username?: string;
-  key?: number;
+  key?: string;
 
   timestamp: number;
   end_timestamp?: number;

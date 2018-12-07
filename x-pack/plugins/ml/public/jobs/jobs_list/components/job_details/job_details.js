@@ -106,7 +106,7 @@ export class JobDetails extends Component {
         tabs.push({
           id: 'annotations',
           name: 'Annotations',
-          content: <AnnotationsTable job={job} />,
+          content: <AnnotationsTable jobs={[job]} drillDown={true} />,
         });
       }
 
