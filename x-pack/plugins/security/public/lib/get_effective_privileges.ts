@@ -130,12 +130,18 @@ export function getEffectivePrivileges(
       .getActions(privilege)
       .map(actionToRegExp);
 
-    const hasAllActions = allAssignedActions.every((candidateAction: string) =>
+    const hasAllActions = globalMinimumActions.every((candidateAction: string) =>
       candidateSpacePrivilegeActionExpressions.some((exp: RegExp) => exp.test(candidateAction))
     );
 
     if (hasAllActions) {
       allowedSpaceMinimumPrivileges.push(privilege);
+    } else {
+      // const missingActions = globalMinimumActions.filter(
+      //   (candidateAction: string) =>
+      //     !candidateSpacePrivilegeActionExpressions.some((exp: RegExp) => exp.test(candidateAction))
+      // );
+      // console.log('not assigning space privilege', { privilege, missingActions });
     }
   });
 
