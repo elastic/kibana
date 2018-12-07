@@ -37,6 +37,8 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import { unhashUrl } from '../../state_management/state_hashing';
 import { shortenUrl } from '../lib/url_shortener';
 
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
 // TODO: Remove once EuiIconTip supports "content" prop
 const FixedEuiIconTip = EuiIconTip as React.SFC<any>;
 
@@ -45,6 +47,7 @@ interface Props {
   objectId?: string;
   objectType: string;
   getUnhashableStates: () => object[];
+  intl: InjectedIntl;
 }
 
 enum ExportUrlAsType {
@@ -60,7 +63,7 @@ interface State {
   shortUrlErrorMsg?: string;
 }
 
-export class UrlPanelContent extends Component<Props, State> {
+class UrlPanelContentUI extends Component<Props, State> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
@@ -108,7 +111,17 @@ export class UrlPanelContent extends Component<Props, State> {
                 data-test-subj="copyShareUrlButton"
                 size="s"
               >
-                Copy {this.props.isEmbedded ? 'iFrame code' : 'link'}
+                {this.props.isEmbedded ? (
+                  <FormattedMessage
+                    id="common.ui.share.urlPanel.copyIframeCodeButtonLabel"
+                    defaultMessage="Copy iFrame code"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="common.ui.share.urlPanel.copyLinkButtonLabel"
+                    defaultMessage="Copy link"
+                  />
+                )}
               </EuiButton>
             </EuiFormRow>
           )}
@@ -250,7 +263,15 @@ export class UrlPanelContent extends Component<Props, State> {
           {
             useShortUrl: false,
             isCreatingShortUrl: false,
-            shortUrlErrorMsg: `Unable to create short URL. Error: ${fetchError.message}`,
+            shortUrlErrorMsg: this.props.intl.formatMessage(
+              {
+                id: 'common.ui.share.urlPanel.unableCreateShortUrlErrorMessage',
+                defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
+              },
+              {
+                errorMessage: fetchError.message,
+              }
+            ),
           },
           this.setUrl
         );
@@ -263,9 +284,16 @@ export class UrlPanelContent extends Component<Props, State> {
       {
         id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
         label: this.renderWithIconTip(
-          'Snapshot',
-          `Snapshot URLs encode the current state of the ${this.props.objectType} in the URL itself.
-            Edits to the saved ${this.props.objectType} won't be visible via this URL.`
+          <FormattedMessage
+            id="common.ui.share.urlPanel.snapshotLabel"
+            defaultMessage="Snapshot"
+          />,
+          <FormattedMessage
+            id="common.ui.share.urlPanel.snapshotDescription"
+            defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+            Edits to the saved {objectType} won't be visible via this URL."
+            values={{ objectType: this.props.objectType }}
+          />
         ),
         ['data-test-subj']: 'exportAsSnapshot',
       },
@@ -273,10 +301,15 @@ export class UrlPanelContent extends Component<Props, State> {
         id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
         disabled: this.isNotSaved(),
         label: this.renderWithIconTip(
-          'Saved object',
-          `You can share this URL with people to let them load the most recent saved version of this ${
-            this.props.objectType
-          }.`
+          <FormattedMessage
+            id="common.ui.share.urlPanel.savedObjectLabel"
+            defaultMessage="Saved object"
+          />,
+          <FormattedMessage
+            id="common.ui.share.urlPanel.savedObjectDescription"
+            defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+            values={{ objectType: this.props.objectType }}
+          />
         ),
         ['data-test-subj']: 'exportAsSavedObject',
       },
@@ -295,11 +328,25 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private renderExportAsRadioGroup = () => {
-    const generateLinkAsHelp = this.isNotSaved()
-      ? `Can't share as saved object until the ${this.props.objectType} has been saved.`
-      : undefined;
+    const generateLinkAsHelp = this.isNotSaved() ? (
+      <FormattedMessage
+        id="common.ui.share.urlPanel.canNotShareAsSavedObjectHelpText"
+        defaultMessage="Can't share as saved object until the {objectType} has been saved."
+        values={{ objectType: this.props.objectType }}
+      />
+    ) : (
+      undefined
+    );
     return (
-      <EuiFormRow label="Generate the link as" helpText={generateLinkAsHelp}>
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="common.ui.share.urlPanel.generateLinkAsLabel"
+            defaultMessage="Generate the link as"
+          />
+        }
+        helpText={generateLinkAsHelp}
+      >
         <EuiRadioGroup
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
@@ -313,13 +360,15 @@ export class UrlPanelContent extends Component<Props, State> {
     if (this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       return;
     }
-
+    const shortUrlLabel = (
+      <FormattedMessage id="common.ui.share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
+    );
     const switchLabel = this.state.isCreatingShortUrl ? (
       <span>
-        <EuiLoadingSpinner size="s" /> Short URL
+        <EuiLoadingSpinner size="s" /> {shortUrlLabel}
       </span>
     ) : (
-      'Short URL'
+      shortUrlLabel
     );
     const switchComponent = (
       <EuiSwitch
@@ -329,10 +378,15 @@ export class UrlPanelContent extends Component<Props, State> {
         data-test-subj="useShortUrl"
       />
     );
-    const tipContent = `We recommend sharing shortened snapshot URLs for maximum compatibility.
-      Internet Explorer has URL length restrictions,
-      and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
-      but the short URL should work great.`;
+    const tipContent = (
+      <FormattedMessage
+        id="common.ui.share.urlPanel.shortUrlHelpText"
+        defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
+        Internet Explorer has URL length restrictions,
+        and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
+        but the short URL should work great."
+      />
+    );
 
     return (
       <EuiFormRow helpText={this.state.shortUrlErrorMsg}>
@@ -341,3 +395,5 @@ export class UrlPanelContent extends Component<Props, State> {
     );
   };
 }
+
+export const UrlPanelContent = injectI18n(UrlPanelContentUI);
