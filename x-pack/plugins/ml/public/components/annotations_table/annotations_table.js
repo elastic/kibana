@@ -14,6 +14,7 @@ import React, {
 } from 'react';
 
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
@@ -22,6 +23,11 @@ import {
   EuiLink,
   EuiLoadingSpinner
 } from '@elastic/eui';
+
+import {
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui/lib/services';
+
 import { formatDate } from '@elastic/eui/lib/services/format';
 import chrome from 'ui/chrome';
 
@@ -39,13 +45,19 @@ class AnnotationsTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoading: props.job.data_counts.processed_record_count !== 0,
-      forecasts: []
+      annotations: [],
+      isLoading: false
     };
   }
 
   getAnnotations() {
+    console.warn('getAnnotations');
     const dataCounts = this.props.job.data_counts;
+
+    this.setState({
+      isLoading: true
+    });
+
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
       ml.annotations.getAnnotations({
@@ -55,31 +67,42 @@ class AnnotationsTable extends Component {
         maxAnnotations: MAX_ANNOTATIONS
       }).then((resp) => {
         this.setState((prevState, props) => ({
+          annotations: resp.annotations[props.job.job_id] || [],
+          errorMessage: undefined,
           isLoading: false,
-          annotations: resp.annotations[props.job.job_id] || []
+          jobId: props.job.job_id
         }));
       }).catch((resp) => {
         console.log('Error loading list of annoations for jobs list:', resp);
         this.setState({
-          isLoading: false,
+          annotations: [],
           errorMessage: 'Error loading the list of annotations for this job',
-          annotations: []
+          isLoading: false,
+          jobId: undefined
         });
       });
     }
   }
 
   componentDidMount() {
-    this.getAnnotations();
+    if (this.props.annotations === undefined) {
+      this.getAnnotations();
+    }
   }
 
   componentWillUpdate() {
-    this.getAnnotations();
+    if (
+      this.props.annotations === undefined &&
+      this.state.isLoading === false &&
+      this.state.jobId !== this.props.job.job_id
+    ) {
+      this.getAnnotations();
+    }
   }
 
   openSingleMetricView(annotation) {
     // Creates the link to the Single Metric Viewer.
-    // Set the total time range from the start of the job data to the end of the forecast,
+    // Set the total time range from the start to the end of the annotation,
     const dataCounts = this.props.job.data_counts;
     const from = new Date(dataCounts.earliest_record_timestamp).toISOString();
     const to = new Date(dataCounts.latest_record_timestamp).toISOString();
@@ -127,27 +150,35 @@ class AnnotationsTable extends Component {
   }
 
   render() {
-    if (this.state.isLoading === true) {
-      return (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}><EuiLoadingSpinner size="l"/></EuiFlexItem>
-        </EuiFlexGroup>
-      );
+    console.warn('render');
+    const {
+      isSingleMetricViewerLinkVisible = true,
+      isNumberBadgeVisible = false
+    } = this.props;
+
+    if (this.props.annotations === undefined) {
+      if (this.state.isLoading === true) {
+        return (
+          <EuiFlexGroup justifyContent="spaceAround">
+            <EuiFlexItem grow={false}><EuiLoadingSpinner size="l"/></EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+
+      if (this.state.errorMessage !== undefined) {
+        return (
+          <EuiCallOut
+            title={this.state.errorMessage}
+            color="danger"
+            iconType="cross"
+          />
+        );
+      }
     }
 
-    if (this.state.errorMessage !== undefined) {
-      return (
-        <EuiCallOut
-          title={this.state.errorMessage}
-          color="danger"
-          iconType="cross"
-        />
-      );
-    }
+    const annotations = this.props.annotations || this.state.annotations;
 
-    const annotations = this.state.annotations;
-
-    if (annotations.length === 0 && this.props.renderEmptyMessage) {
+    if (annotations.length === 0) {
       return (
         <EuiCallOut
           title="No annotations created for this job"
@@ -161,10 +192,6 @@ class AnnotationsTable extends Component {
       );
     }
 
-    if (annotations.length === 0 && !this.props.renderEmptyMessage) {
-      return null;
-    }
-
     const columns = [
       {
         field: 'annotation',
@@ -176,16 +203,39 @@ class AnnotationsTable extends Component {
         name: 'From',
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
-        sortable: true
+        sortable: true,
+        width: '180px'
       },
       {
         field: 'end_timestamp',
         name: 'To',
         dataType: 'date',
         render: (date) => formatDate(date, TIME_FORMAT),
-        sortable: true
-      },
-      {
+        sortable: true,
+        width: '180px'
+      }
+    ];
+
+    if (isNumberBadgeVisible) {
+      columns.unshift({
+        field: 'key',
+        name: '#',
+        width: '50px',
+        render: (key) => {
+          console.warn('render', arguments);
+          return (
+            <EuiBadge color="default">
+              {key}
+            </EuiBadge>
+          );
+        }
+      });
+    }
+
+    if (isSingleMetricViewerLinkVisible) {
+      columns.push({
+        align: RIGHT_ALIGNMENT,
+        width: '60px',
         name: 'View',
         render: (annotation) => (
           <EuiButton
@@ -195,8 +245,8 @@ class AnnotationsTable extends Component {
             <i aria-hidden="true" className="fa fa-line-chart"/>
           </EuiButton>
         )
-      }
-    ];
+      });
+    }
 
     return (
       <EuiInMemoryTable
@@ -212,8 +262,10 @@ class AnnotationsTable extends Component {
   }
 }
 AnnotationsTable.propTypes = {
-  job: PropTypes.object.isRequired,
-  renderEmptyMessage: PropTypes.bool
+  annotations: PropTypes.array,
+  job: PropTypes.object,
+  isSingleMetricViewerLinkVisible: PropTypes.bool,
+  isNumberBadgeVisible: PropTypes.bool
 };
 
 export { AnnotationsTable };

@@ -3,29 +3,25 @@
   .euiTable {
      font-size: 12px;
  
-     th:last-child {
-       width: 60px;
-     }
- 
      td {
        .euiTableCellContent {
          padding-top: 4px;
          padding-bottom: 4px;
        }
      }
-   }
+  }
  
-   .view-annotations-btn {
-     width: 35px;
-     min-width: 35px;
-     height: 24px;
+  .view-annotations-btn {
+    width: 35px;
+    min-width: 35px;
+    height: 24px;
+
+    .euiButton__content {
+      padding: 0px 8px;
+    }
+  }
  
-     .euiButton__content {
-       padding: 0px 8px;
-     }
-   }
- 
-   .euiLink {
-     font-family: inherit;
-   }
- }
+  .euiLink {
+    font-family: inherit;
+  }
+}

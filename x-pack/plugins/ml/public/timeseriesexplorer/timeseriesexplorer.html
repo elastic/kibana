@@ -130,18 +130,18 @@
 
       </div>
 
-      <!--
-      <span class="panel-title euiText">
-        Annotations
-      </span>
+      <div ng-show="showAnnotations">
+        <span class="panel-title euiText">
+          Annotations
+        </span>
+  
+        <ml-annotation-table
+          annotations="focusAnnotationData"
+          job="selectedJob"
+        />
 
-      <ml-annotation-table
-        table-data="focusAnnotationData"
-        job="selectedJob"
-      />
-
-      <br /><br />
-      //-->
+        <br /><br />
+      </div>
 
       <span class="panel-title euiText">
         Anomalies

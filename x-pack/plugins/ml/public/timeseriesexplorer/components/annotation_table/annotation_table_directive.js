@@ -14,7 +14,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { AnnotationsTable } from '../../../jobs/jobs_list/components/job_details/annotations_table';
+import { AnnotationsTable } from '../../../components/annotations_table';
 
 import 'angular';
 
@@ -32,9 +32,10 @@ module.directive('mlAnnotationTable', function () {
       }
 
       const props = {
-        focusAnnotationData: scope.focusAnnotationData,
+        annotations: scope.annotations.map((d, i) => ({ ...d, key: (i + 1) })),
         job: scope.job,
-        renderEmptyMessage: false
+        isSingleMetricViewerLinkVisible: false,
+        isNumberBadgeVisible: true
       };
 
       ReactDOM.render(
@@ -54,8 +55,7 @@ module.directive('mlAnnotationTable', function () {
     }
 
     if (FEATURE_ANNOTATIONS_ENABLED) {
-      scope.$watchCollection('focusAnnotationData', renderFocusChart);
-      scope.$watch('showAnnotations', renderFocusChart);
+      scope.$watchCollection('annotations', renderFocusChart);
     }
 
     element.on('$destroy', () => {
@@ -69,7 +69,7 @@ module.directive('mlAnnotationTable', function () {
 
   return {
     scope: {
-      focusAnnotationData: '=',
+      annotations: '=',
       job: '='
     },
     link: link
