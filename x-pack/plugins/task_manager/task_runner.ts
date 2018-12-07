@@ -125,7 +125,7 @@ export class TaskManagerRunner implements TaskRunner {
    * Returns a log-friendly representation of this task.
    */
   public toString() {
-    return `${this.instance.taskType} "${this.instance.id}"`;
+    return `${this.taskType} "${this.id}"`;
   }
 
   /**
