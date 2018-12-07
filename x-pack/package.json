@@ -303,6 +303,7 @@
     "vscode-jsonrpc": "^3.6.2",
     "vscode-languageserver": "^4.2.1",
     "vscode-languageserver-types": "^3.10.0",
+    "elastic-javascript-typescript-langserver": "0.1.4",
     "xregexp": "3.2.0"
   },
   "engines": {

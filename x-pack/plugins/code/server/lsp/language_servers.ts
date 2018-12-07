@@ -25,10 +25,9 @@ export const TYPESCRIPT: LanguageServerDefinition = {
   languages: ['typescript', 'javascript', 'html'],
   launcher: TypescriptServerLauncher,
   installationType: InstallationType.Embed,
-  // todo this path should be changed when we merge repo with kibana
-  embedPath: path.resolve(
-    __dirname,
-    '../../../../lsp/javascript-typescript-langserver/lib/language-server'
+  embedPath: path.join(
+    path.dirname(require.resolve('elastic-javascript-typescript-langserver/package.json')),
+    'lib/language-server.js'
   ),
 };
 export const JAVA: LanguageServerDefinition = {
