@@ -14,6 +14,7 @@ export const hostsQuery = gql`
     $filterQuery: String
   ) {
     source(id: $sourceId) {
+      id
       Hosts(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
         totalCount
         edges {
