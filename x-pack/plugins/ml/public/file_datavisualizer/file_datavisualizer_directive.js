@@ -10,6 +10,7 @@ import 'ngreact';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { getFileDataVisualizerBreadcrumbs } from './breadcrumbs';
 import { checkBasicLicense } from 'plugins/ml/license/check_license';
 import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
@@ -24,6 +25,7 @@ const template = '<ml-nav-menu name="datavisualizer" /><file-datavisualizer-page
 uiRoutes
   .when('/filedatavisualizer/?', {
     template,
+    k7Breadcrumbs: getFileDataVisualizerBreadcrumbs,
     resolve: {
       CheckLicense: checkBasicLicense,
       privileges: checkFindFileStructurePrivilege,

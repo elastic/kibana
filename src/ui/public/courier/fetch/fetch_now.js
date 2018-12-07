@@ -22,6 +22,7 @@ import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
 import { RequestStatus } from './req_status';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Fetch now provider should be used if you want the results searched and returned immediately.
@@ -95,7 +96,11 @@ export function FetchNowProvider(Private, Promise) {
               return null;
             case DUPLICATE:
             case INCOMPLETE:
-              throw new Error('Failed to clear incomplete or duplicate request from responses.');
+              throw new Error(
+                i18n.translate('common.ui.courier.fetch.failedToClearRequestErrorMessage', {
+                  defaultMessage: 'Failed to clear incomplete or duplicate request from responses.',
+                })
+              );
             default:
               return resp;
           }
