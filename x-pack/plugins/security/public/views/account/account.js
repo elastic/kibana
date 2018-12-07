@@ -11,6 +11,7 @@ import template from './account.html';
 import '../management/change_password_form/change_password_form';
 import '../../services/shield_user';
 import { i18n } from '@kbn/i18n';
+import { REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE } from '../../../common/constants';
 
 routes.when('/account', {
   template,
@@ -34,7 +35,7 @@ routes.when('/account', {
     const notifier = new Notifier();
 
     const { authentication_realm: authenticationRealm } = $scope.user;
-    $scope.showChangePassword = authenticationRealm.type === 'reserved' || authenticationRealm.type === 'native';
+    $scope.showChangePassword = !REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(authenticationRealm.type);
 
     $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword) => {
       $scope.user.newPassword = newPassword;
