@@ -66,6 +66,42 @@ export function infra(kibana: any) {
     },
     init(server: KbnServer) {
       initServerWithKibana(server);
+
+      server.plugins.xpack_main.registerFeature({
+        id: 'infrastructure',
+        name: i18n.translate('xpack.infra.linkInfrastructureTitle', {
+          defaultMessage: 'Infrastructure',
+        }),
+        navLinkId: 'infra:home',
+        privileges: {
+          all: {
+            app: [APP_ID],
+            savedObject: {
+              all: [],
+              read: ['config'],
+            },
+            ui: [],
+          },
+        },
+      });
+
+      server.plugins.xpack_main.registerFeature({
+        id: 'logs',
+        name: i18n.translate('xpack.infra.linkLogsTitle', {
+          defaultMessage: 'Logs',
+        }),
+        navLinkId: 'infra:logs',
+        privileges: {
+          all: {
+            app: [APP_ID],
+            savedObject: {
+              all: [],
+              read: ['config'],
+            },
+            ui: [],
+          },
+        },
+      });
     },
   });
 }

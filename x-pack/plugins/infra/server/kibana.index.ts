@@ -12,6 +12,7 @@ import { UsageCollector } from './usage/usage_collector';
 
 export interface KbnServer extends Server {
   usage: any;
+  plugins: any;
 }
 
 export const initServerWithKibana = (kbnServer: KbnServer) => {
