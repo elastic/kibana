@@ -18,43 +18,8 @@
  */
 
 import { set } from 'lodash';
+import { createFilter } from '../vis/vis_filters';
 import { FormattedData } from './adapters/data';
-
-const getTerms = (table, columnIndex, rowIndex) => {
-  if (rowIndex === -1) {
-    return [];
-  }
-
-  // get only rows where cell value matches current row for all the fields before columnIndex
-  const rows = table.rows.filter(row => {
-    return table.columns.every((column, i) => {
-      return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
-    });
-  });
-  const terms = rows.map(row => row[table.columns[columnIndex].id]);
-
-  return [...new Set(terms.filter(term => {
-    const notOther = term !== '__other__';
-    const notMissing = term !== '__missing__';
-    return notOther && notMissing;
-  }))];
-};
-
-const createFilter = (data, columnIndex, rowIndex, cellValue) => {
-  const { aggConfig, id: columnId } = data.columns[columnIndex];
-  let filter = [];
-  const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
-  if (value === null || value === undefined) {
-    return;
-  }
-  if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
-    const terms = getTerms(data, columnIndex, rowIndex);
-    filter = aggConfig.createFilter(value, { terms });
-  } else {
-    filter = aggConfig.createFilter(value);
-  }
-  return filter;
-};
 
 /**
  * This function builds tabular data from the response and attaches it to the
