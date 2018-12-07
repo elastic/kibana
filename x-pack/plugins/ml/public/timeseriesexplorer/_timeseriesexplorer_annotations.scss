@@ -8,10 +8,20 @@
 
 .ml-annotation-rect {
   stroke: #333;
+  transition: stroke 125ms;
   stroke-width: 2;
   stroke-dasharray: 5 2;
   fill-opacity: 0.05;
   shape-rendering: geometricPrecision;
+}
+
+.ml-annotation-rect-highlight {
+  //stroke: #32a7c2;
+}
+
+.ml-annotation-rect-blur {
+  stroke: rgb(232, 232, 232);
+  transition: stroke 125ms;
 }
 
 .ml-annotation-text {
@@ -24,8 +34,18 @@
 
 .ml-annotation-text-rect {
   fill: rgb(217, 217, 217);
+  transition: fill 125ms;
   width: 25px;
   height: 20px;
+}
+
+.ml-annotation-text-rect-blur {
+  fill: rgb(232, 232, 232);
+  transition: fill 125ms;
+}
+
+.ml-annotation-text-rect-highlight {
+  //fill: #32a7c2;
 }
 
 .ml-annotation-hidden {

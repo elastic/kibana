@@ -33,7 +33,7 @@ import chrome from 'ui/chrome';
 
 import { addItemToRecentlyAccessed } from 'plugins/ml/util/recently_accessed';
 import { ml } from 'plugins/ml/services/ml_api_service';
-
+import { mlAnomaliesTableService } from '../anomalies_table/anomalies_table_service';
 
 const MAX_ANNOTATIONS = 500;
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
@@ -51,7 +51,6 @@ class AnnotationsTable extends Component {
   }
 
   getAnnotations() {
-    console.warn('getAnnotations');
     const dataCounts = this.props.job.data_counts;
 
     this.setState({
@@ -149,8 +148,31 @@ class AnnotationsTable extends Component {
     window.open(`${chrome.getBasePath()}/app/ml#/timeseriesexplorer${url}`, '_self');
   }
 
+  onMouseOverRow = (record) => {
+    if (this.mouseOverRecord !== undefined) {
+      if (this.mouseOverRecord.rowId !== record.rowId) {
+        // Mouse is over a different row, fire mouseleave on the previous record.
+        mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord, 'annotation');
+
+        // fire mouseenter on the new record.
+        mlAnomaliesTableService.anomalyRecordMouseenter.changed(record, 'annotation');
+      }
+    } else {
+      // Mouse is now over a row, fire mouseenter on the record.
+      mlAnomaliesTableService.anomalyRecordMouseenter.changed(record, 'annotation');
+    }
+
+    this.mouseOverRecord = record;
+  }
+
+  onMouseLeaveRow = () => {
+    if (this.mouseOverRecord !== undefined) {
+      mlAnomaliesTableService.anomalyRecordMouseleave.changed(this.mouseOverRecord, 'annotation');
+      this.mouseOverRecord = undefined;
+    }
+  };
+
   render() {
-    console.warn('render');
     const {
       isSingleMetricViewerLinkVisible = true,
       isNumberBadgeVisible = false
@@ -195,7 +217,7 @@ class AnnotationsTable extends Component {
     const columns = [
       {
         field: 'annotation',
-        name: 'Annotation text',
+        name: 'Annotation',
         sortable: true
       },
       {
@@ -222,7 +244,6 @@ class AnnotationsTable extends Component {
         name: '#',
         width: '50px',
         render: (key) => {
-          console.warn('render', arguments);
           return (
             <EuiBadge color="default">
               {key}
@@ -248,6 +269,13 @@ class AnnotationsTable extends Component {
       });
     }
 
+    const getRowProps = (item) => {
+      return {
+        onMouseOver: () => this.onMouseOverRow(item),
+        onMouseLeave: () => this.onMouseLeaveRow()
+      };
+    };
+
     return (
       <EuiInMemoryTable
         className="annotations-table"
@@ -257,6 +285,7 @@ class AnnotationsTable extends Component {
           pageSizeOptions: [5, 10, 25]
         }}
         sorting={true}
+        rowProps={getRowProps}
       />
     );
   }
