@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { NEXT_MAJOR_VERSION } from '../../../version';
 import {
   GroupByOption,
   LevelFilterOption,
@@ -80,7 +81,7 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
               }
               values={{
                 strongCheckupLabel: <strong>{checkupLabel}</strong>,
-                nextEsVersion: '7.x',
+                nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
               }}
             />
           </p>

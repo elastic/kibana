@@ -12,6 +12,7 @@ import { uiModules } from 'ui/modules';
 // @ts-ignore
 import routes from 'ui/routes';
 import { RootComponent } from './app';
+import { NEXT_MAJOR_VERSION } from './version';
 
 const BASE_PATH = `/management/upgrade_checkup`;
 
@@ -20,8 +21,7 @@ function startApp() {
     visible: true,
     display: i18n.translate('xpack.upgradeCheckup.appTitle', {
       defaultMessage: '{version} Upgrade Assistant',
-      // TODO: pull the version from the code
-      values: { version: '7.0' },
+      values: { version: `${NEXT_MAJOR_VERSION}.0` },
     }),
     order: 100,
     url: `#${BASE_PATH}`,

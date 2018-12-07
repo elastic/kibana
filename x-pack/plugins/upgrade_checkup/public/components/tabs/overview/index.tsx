@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { CURRENT_MAJOR_VERSION, NEXT_MAJOR_VERSION } from '../../../version';
 import { LoadingState, UpgradeCheckupTabProps } from '../../types';
 import { Steps } from './steps';
 
@@ -37,7 +38,7 @@ export const OverviewTab: StatelessComponent<UpgradeCheckupTabProps> = props => 
             'you need to make before upgrading to Elasticsearch {nextEsVersion}.'
           }
           values={{
-            nextEsVersion: '7.x',
+            nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
           }}
         />
       </p>
@@ -66,7 +67,7 @@ export const OverviewTab: StatelessComponent<UpgradeCheckupTabProps> = props => 
           values={{
             breakingChangesDocButton: (
               <EuiLink
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-7.0.html"
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes.html"
                 target="_blank"
               >
                 <FormattedMessage
@@ -75,8 +76,8 @@ export const OverviewTab: StatelessComponent<UpgradeCheckupTabProps> = props => 
                 />
               </EuiLink>
             ),
-            nextEsVersion: '7.x',
-            currentEsVersion: '6.x',
+            nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
+            currentEsVersion: `${CURRENT_MAJOR_VERSION}.x`,
           }}
         />
       </p>

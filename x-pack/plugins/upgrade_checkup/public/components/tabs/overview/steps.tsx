@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
+import { NEXT_MAJOR_VERSION } from '../../../version';
 import { UpgradeCheckupTabProps } from '../../types';
 import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
@@ -172,7 +173,7 @@ export const StepsUI: StatelessComponent<UpgradeCheckupTabProps & ReactIntl.Inje
                           />
                         </EuiLink>
                       ),
-                      nextEsVersion: '7.0',
+                      nextEsVersion: `${NEXT_MAJOR_VERSION}.0`,
                     }}
                   />
                 </p>

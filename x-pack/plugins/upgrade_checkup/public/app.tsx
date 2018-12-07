@@ -10,31 +10,27 @@ import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageHeaderSection, EuiTitle } f
 import { FormattedMessage, injectI18nProvider } from '@kbn/i18n/react';
 
 import { UpgradeCheckupTabs } from './components/tabs';
+import { NEXT_MAJOR_VERSION } from './version';
 
-export class RootComponentUI extends React.Component {
-  public render() {
-    return (
-      <EuiPage restrictWidth data-test-subj="upgradeCheckupRoot">
-        <EuiPageBody>
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle size="l">
-                <h1>
-                  {/* TODO: pull version from the code */}
-                  <FormattedMessage
-                    id="xpack.upgradeCheckup.appTitle"
-                    defaultMessage="{version} Upgrade Assistant"
-                    values={{ version: '7.0' }}
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-          <UpgradeCheckupTabs />
-        </EuiPageBody>
-      </EuiPage>
-    );
-  }
-}
+export const RootComponentUI: React.StatelessComponent = () => (
+  <EuiPage restrictWidth data-test-subj="upgradeCheckupRoot">
+    <EuiPageBody>
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage
+                id="xpack.upgradeCheckup.appTitle"
+                defaultMessage="{version} Upgrade Assistant"
+                values={{ version: `${NEXT_MAJOR_VERSION}.0` }}
+              />
+            </h1>
+          </EuiTitle>
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <UpgradeCheckupTabs />
+    </EuiPageBody>
+  </EuiPage>
+);
 
 export const RootComponent = injectI18nProvider(RootComponentUI);
