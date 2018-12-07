@@ -190,7 +190,7 @@ class BeatsPageUi extends React.PureComponent<BeatsPageProps, BeatsPageState> {
       await this.props.libs.beats.update(beat.id, { active: false });
     }
 
-    this.notifyBeatDisenrolled(selected);
+    this.notifyBeatUnenrolled(selected);
 
     // because the compile code above has a very minor race condition, we wait,
     // the max race condition time is really 10ms but doing 100 to be safe
@@ -229,7 +229,7 @@ class BeatsPageUi extends React.PureComponent<BeatsPageProps, BeatsPageState> {
     }
   };
 
-  private notifyBeatDisenrolled = async (beats: CMPopulatedBeat[]) => {
+  private notifyBeatUnenrolled = async (beats: CMPopulatedBeat[]) => {
     const { intl } = this.props;
     let title;
     let text;
@@ -237,7 +237,7 @@ class BeatsPageUi extends React.PureComponent<BeatsPageProps, BeatsPageState> {
       title = intl.formatMessage(
         {
           id: 'xpack.beatsManagement.beats.beatDisenrolledNotificationTitle',
-          defaultMessage: '{firstBeatNameOrId} disenrolled',
+          defaultMessage: '{firstBeatNameOrId} unenrolled',
         },
         {
           firstBeatNameOrId: `"${beats[0].name || beats[0].id}"`,
@@ -246,7 +246,7 @@ class BeatsPageUi extends React.PureComponent<BeatsPageProps, BeatsPageState> {
       text = intl.formatMessage(
         {
           id: 'xpack.beatsManagement.beats.beatDisenrolledNotificationDescription',
-          defaultMessage: 'Beat with ID {firstBeatId} was disenrolled.',
+          defaultMessage: 'Beat with ID {firstBeatId} was unenrolled.',
         },
         {
           firstBeatId: `"${beats[0].id}"`,
@@ -256,7 +256,7 @@ class BeatsPageUi extends React.PureComponent<BeatsPageProps, BeatsPageState> {
       title = intl.formatMessage(
         {
           id: 'xpack.beatsManagement.beats.disenrolledBeatsNotificationTitle',
-          defaultMessage: '{beatsLength} beats disenrolled',
+          defaultMessage: '{beatsLength} beats unenrolled',
         },
         {
           beatsLength: beats.length,
@@ -267,7 +267,7 @@ class BeatsPageUi extends React.PureComponent<BeatsPageProps, BeatsPageState> {
     this.setState({
       notifications: this.state.notifications.concat({
         color: 'warning',
-        id: `disenroll_${new Date()}`,
+        id: `unenroll_${new Date()}`,
         title,
         text,
       }),
