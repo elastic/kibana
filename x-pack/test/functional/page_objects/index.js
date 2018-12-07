@@ -15,4 +15,4 @@ export { SpaceSelectorPageProvider } from './space_selector_page';
 export { AccountSettingProvider } from './accountsetting_page';
 export { InfraHomePageProvider } from './infra_home_page';
 export { StatusPagePageProvider } from './status_page';
-export { UpgradeCheckupProvider } from './upgrade_checkup';
+export { UpgradeAssistantProvider } from './upgrade_assistant';

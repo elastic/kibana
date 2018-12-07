@@ -29,7 +29,7 @@
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.security": "x-pack/plugins/security",
     "xpack.watcher": "x-pack/plugins/watcher",
-    "xpack.upgradeCheckup": "x-pack/plugins/upgrade_checkup"
+    "xpack.upgradeAssistant": "x-pack/plugins/upgrade_assistant"
   },
   "exclude": [
     "src/ui/ui_render/bootstrap/app_bootstrap.js",

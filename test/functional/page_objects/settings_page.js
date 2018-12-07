@@ -53,8 +53,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await find.clickByDisplayedLinkText('Index Patterns');
     }
 
-    async clickElasticsearchUpgradeCheckup() {
-      await find.clickByDisplayedLinkText('Upgrade Checkup');
+    async clickElasticsearchUpgradeAssistant() {
+      await testSubjects.click('upgrade_assistant');
     }
 
     async getAdvancedSettings(propertyName) {
