@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
 // @ts-ignore
+import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDetails/Distribution';
+// @ts-ignore
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
+// @ts-ignore
+import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
 import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { MemoryUsageChart } from './MemoryUsageChart';
@@ -32,7 +37,30 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = props => {
           />
         )}
       />
-      <MemoryUsageChart />
+      <EuiFlexGrid columns={2}>
+        <EuiFlexItem>
+          <EuiPanel>
+            <ErrorDistributionRequest
+              urlParams={params}
+              render={({ data }: { data: any }) => (
+                <Distribution
+                  distribution={data}
+                  title={
+                    <EuiTitle size="s">
+                      <span>Error occurrences</span>
+                    </EuiTitle>
+                  }
+                />
+              )}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel>
+            <MemoryUsageChart />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGrid>
     </React.Fragment>
   );
 };

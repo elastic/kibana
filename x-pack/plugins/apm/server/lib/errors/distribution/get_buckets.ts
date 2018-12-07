@@ -20,6 +20,22 @@ export async function getBuckets({
   setup: Setup;
 }) {
   const { start, end, esFilterQuery, client, config } = setup;
+  const filter = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    {
+      range: {
+        '@timestamp': {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis'
+        }
+      }
+    }
+  ];
+
+  if (groupId) {
+    filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
+  }
 
   const params = {
     index: config.get<string>('apm_oss.errorIndices'),
@@ -27,19 +43,7 @@ export async function getBuckets({
       size: 0,
       query: {
         bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [ERROR_GROUP_ID]: groupId } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
+          filter
         }
       },
       aggs: {

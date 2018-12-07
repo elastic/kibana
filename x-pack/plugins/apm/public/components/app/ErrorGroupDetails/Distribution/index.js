@@ -23,7 +23,7 @@ export function getFormattedBuckets(buckets, bucketSize) {
   });
 }
 
-function Distribution({ distribution }) {
+function Distribution({ distribution, title = 'Occurrences' }) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
     distribution.bucketSize
@@ -37,7 +37,7 @@ function Distribution({ distribution }) {
 
   return (
     <div>
-      <HeaderSmall>Occurrences</HeaderSmall>
+      <HeaderSmall>{title}</HeaderSmall>
       <Histogram
         verticalLineHover={bucket => bucket.x}
         xType="time"

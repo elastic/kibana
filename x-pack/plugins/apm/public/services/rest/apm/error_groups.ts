@@ -66,8 +66,12 @@ export async function loadErrorDistribution({
   kuery,
   errorGroupId
 }: IUrlParams) {
+  const pathname = errorGroupId
+    ? `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`
+    : `/api/apm/services/${serviceName}/errors/distribution`;
+
   return callApi<ErrorDistributionAPIResponse>({
-    pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}/distribution`,
+    pathname,
     query: {
       start,
       end,
