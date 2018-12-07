@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiHeader,
   EuiHeaderBreadcrumbs,
   EuiHeaderSection,
   EuiPage,
@@ -17,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Component, ReactNode } from 'react';
+import styled from 'styled-components';
 import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
 type RenderCallback = ((component: () => JSX.Element) => void);
