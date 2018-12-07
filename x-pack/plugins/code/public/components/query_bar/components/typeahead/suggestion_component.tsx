@@ -9,7 +9,7 @@ import {
   euiCodeFontFamily,
   euiColorDarkShade,
   euiColorFullShade,
-  euiColorLightShade,
+  euiColorHighlight,
   euiFontSizeS,
   euiFontSizeXs,
   euiSize,
@@ -32,15 +32,12 @@ interface Props {
   ariaId: string;
 }
 
-interface SuggestionItemProps {
-  active: boolean;
-}
-
 const SuggestionItem = styled.div`
-  background: ${(props: SuggestionItemProps) => (props.active ? euiColorLightShade : 'white')};
+  background: ${(props: any) => (props.active ? euiColorHighlight : 'white')};
   height: 48px;
   margin: 0 ${euiSize};
   border-radius: ${euiSizeXs} ${euiSizeXs} ${euiSizeXs} ${euiSizeXs};
+  cursor: pointer;
 `;
 
 const SuggestionItemInner = styled.div`
@@ -127,6 +124,8 @@ export const SuggestionComponent: SFC<Props> = props => {
       onClick={click}
       active={props.selected}
       onMouseEnter={props.onMouseEnter}
+      // @ts-ignore
+      ref={props.innerRef}
       id={props.ariaId}
       aria-selected={props.selected}
     >

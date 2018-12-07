@@ -30,6 +30,16 @@ export class RepositoryUtils {
     };
   }
 
+  // From uri 'origin/org/name' to 'org'
+  public static orgNameFromUri(repoUri: RepositoryUri): string {
+    const segs = repoUri.split('/');
+    if (segs && segs.length === 3) {
+      return segs[1];
+    } else {
+      return 'invalid';
+    }
+  }
+
   // From uri 'origin/org/name' to 'name'
   public static repoNameFromUri(repoUri: RepositoryUri): string {
     const segs = repoUri.split('/');

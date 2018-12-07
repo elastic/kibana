@@ -32,6 +32,7 @@ exports[`render correctly with empty query string 1`] = `
             onOutsideClick={[Function]}
           >
             <div
+              aria-controls="typeahead-items"
               aria-expanded={false}
               aria-haspopup="true"
               aria-owns="typeahead-items"
@@ -135,11 +136,7 @@ exports[`render correctly with empty query string 1`] = `
                                         className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
                                         focusable="false"
                                         height="16"
-                                        style={
-                                          Object {
-                                            "fill": undefined,
-                                          }
-                                        }
+                                        style={null}
                                         viewBox="0 0 16 16"
                                         width="16"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -150,11 +147,7 @@ exports[`render correctly with empty query string 1`] = `
                                           className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
                                           focusable="false"
                                           height="16"
-                                          style={
-                                            Object {
-                                              "fill": undefined,
-                                            }
-                                          }
+                                          style={null}
                                           viewBox="0 0 16 16"
                                           width="16"
                                           xmlns="http://www.w3.org/2000/svg"
@@ -288,6 +281,7 @@ exports[`render correctly with input query string changed 1`] = `
                 onOutsideClick={[Function]}
               >
                 <div
+                  aria-controls="typeahead-items"
                   aria-expanded={true}
                   aria-haspopup="true"
                   aria-owns="typeahead-items"
@@ -391,11 +385,7 @@ exports[`render correctly with input query string changed 1`] = `
                                             className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
                                             focusable="false"
                                             height="16"
-                                            style={
-                                              Object {
-                                                "fill": undefined,
-                                              }
-                                            }
+                                            style={null}
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -406,11 +396,7 @@ exports[`render correctly with input query string changed 1`] = `
                                               className="euiIcon euiIcon--medium euiFormControlLayoutCustomIcon__icon"
                                               focusable="false"
                                               height="16"
-                                              style={
-                                                Object {
-                                                  "fill": undefined,
-                                                }
-                                              }
+                                              style={null}
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
