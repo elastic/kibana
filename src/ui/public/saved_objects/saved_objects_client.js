@@ -215,6 +215,10 @@ export class SavedObjectsClient {
 
         queueItem.resolve(foundObject);
       });
+    }).catch((err) => {
+      queue.forEach((queueItem) => {
+        queueItem.reject(err);
+      });
     });
 
   }, BATCH_INTERVAL, { leading: false });

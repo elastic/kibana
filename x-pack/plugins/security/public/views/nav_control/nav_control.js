@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { constant } from 'lodash';
@@ -29,7 +30,7 @@ chromeNavControlsRegistry.register(constant({
 }));
 
 const module = uiModules.get('security', ['kibana']);
-module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private) => {
+module.controller('securityNavController', ($scope, ShieldUser, globalNavState, kbnBaseUrl, Private, i18n) => {
   const xpackInfo = Private(XPackInfoProvider);
   const showSecurityLinks = xpackInfo.get('features.security.showLinks');
   if (Private(PathProvider).isUnauthenticated() || !showSecurityLinks) return;
@@ -45,6 +46,10 @@ module.controller('securityNavController', ($scope, ShieldUser, globalNavState, 
     }
     return tooltip;
   };
+
+  $scope.logoutLabel = i18n('xpack.security.navControl.logoutLabel', {
+    defaultMessage: "Logout"
+  });
 });
 
 
@@ -64,7 +69,12 @@ chromeHeaderNavControlsRegistry.register((ShieldUser, kbnBaseUrl, Private) => ({
 
     props.user.$promise.then(() => {
       // Wait for the user to be propogated before rendering into the DOM.
-      ReactDOM.render(<SecurityNavControl {...props} />, el);
+      ReactDOM.render(
+        <I18nProvider>
+          <SecurityNavControl {...props} />
+        </I18nProvider>,
+        el
+      );
     });
 
     return () => ReactDOM.unmountComponentAtNode(el);
