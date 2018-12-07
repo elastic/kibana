@@ -25,7 +25,6 @@ export async function validateMaxContentLength(server: any, log: (message: strin
   if (kibanaMaxContentBytes > elasticSearchMaxContentBytes) {
     log(
       `${KIBANA_MAX_SIZE_BYTES_PATH} (${kibanaMaxContentBytes}) is higher than ElasticSearch's ${ES_MAX_SIZE_BYTES_PATH} (${elasticSearchMaxContentBytes}). ` +
-        `. Setting ${KIBANA_MAX_SIZE_BYTES_PATH} to ${elasticSearchMaxContentBytes}. ` +
         `Please set ${ES_MAX_SIZE_BYTES_PATH} in ElasticSearch to match, or lower your ${KIBANA_MAX_SIZE_BYTES_PATH} in Kibana to avoid this warning.`
     );
   }
