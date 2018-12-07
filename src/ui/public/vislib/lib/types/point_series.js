@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 export function VislibTypesPointSeries() {
 
-  const createSerieFromParams = (cfg, seri) => {
+  const createSeriesFromParams = (cfg, seri) => {
     const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
       return seri.aggId === seriConfig.data.id;
     }) : null;
@@ -55,7 +55,7 @@ export function VislibTypesPointSeries() {
       type: 'point_series',
       addTimeMarker: cfg.addTimeMarker,
       series: _.map(series, (seri) => {
-        return createSerieFromParams(cfg, seri);
+        return createSeriesFromParams(cfg, seri);
       })
     };
   };
