@@ -25,7 +25,7 @@ export const validateName = (name = '') => {
   } else {
     if (name.includes(' ')) {
       errorMsg = i18n.translate('xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorSpace', {
-        defaultMessage: 'Remove the spaces from the name.'
+        defaultMessage: 'Spaces are not allowed in the name.'
       });
     }
 
@@ -39,7 +39,7 @@ export const validateName = (name = '') => {
     if (name.includes(',')) {
       errorMsg = i18n.translate(
         'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorFirstChar',
-        { defaultMessage: "Remove commas from the name." }
+        { defaultMessage: "Commas are not allowed in the name." }
       );
     }
   }
@@ -54,8 +54,12 @@ export const validateLeaderIndexPattern = (indexPattern) => {
     return (
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.illegalCharacters"
-        defaultMessage="Remove the characters {characterList} from the index pattern."
-        values={{ characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong> }}
+        defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the index pattern."
+        values={{
+          characterList: <strong>{errors[ILLEGAL_CHARACTERS].join(' ')}</strong>,
+          characterListLength: errors[ILLEGAL_CHARACTERS].length,
+        }}
       />
     );
   }
@@ -64,7 +68,7 @@ export const validateLeaderIndexPattern = (indexPattern) => {
     return (
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPattern.leaderIndexPatternValidation.noEmptySpace"
-        defaultMessage="Remove spaces from the index pattern."
+        defaultMessage="Spaces are not allowed in the index pattern."
       />
     );
   }
@@ -94,7 +98,7 @@ export const validatePrefix = (prefix) => {
     return (
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPattern.prefixValidation.noEmptySpace"
-        defaultMessage="Remove spaces from the prefix."
+        defaultMessage="Spaces are not allowed in the prefix."
       />
     );
   }
@@ -124,7 +128,7 @@ export const validateSuffix = (suffix) => {
     return (
       <FormattedMessage
         id="xpack.crossClusterReplication.autoFollowPattern.suffixValidation.noEmptySpace"
-        defaultMessage="Remove spaces from the suffix."
+        defaultMessage="Spaces are not allowed in the suffix."
       />
     );
   }

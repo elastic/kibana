@@ -126,8 +126,11 @@ export class AutoFollowPatternFormUI extends PureComponent {
       },
     } = this.state;
 
-    const newLeaderIndexPatterns = leaderIndexPatterns.slice(0);
-    newLeaderIndexPatterns.push(indexPattern);
+    const newLeaderIndexPatterns = [
+      ...leaderIndexPatterns,
+      indexPattern,
+    ];
+
     this.onFieldsChange({ leaderIndexPatterns: newLeaderIndexPatterns });
   };
 
@@ -515,7 +518,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
             title={(
               <FormattedMessage
                 id="xpack.remoteClusters.autoFollowPatternForm.validationErrorTitle"
-                defaultMessage="Fix errors before saving."
+                defaultMessage="Fix errors before continuing."
               />
             )}
             color="danger"
