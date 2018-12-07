@@ -20,6 +20,17 @@ export class BeatsContainer extends Container<ContainerState> {
       list: [],
     };
   }
+
+  public getBeatWithToken = async (token: string) => {
+    const beat = await this.libs.beats.getBeatWithToken(token);
+
+    if (beat) {
+      this.setState({
+        list: [beat as CMPopulatedBeat, ...this.state.list],
+      });
+    }
+  };
+
   public reload = async (kuery?: string) => {
     if (kuery) {
       this.query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);

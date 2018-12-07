@@ -108,7 +108,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
               <EnrollBeat
                 frameworkBasePath={this.props.libs.framework.info.basePath}
                 enrollmentToken={this.props.urlState.enrollmentToken}
-                getBeatWithToken={this.props.libs.beats.getBeatWithToken}
+                getBeatWithToken={this.props.containers.beats.getBeatWithToken}
                 createEnrollmentToken={async () => {
                   const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
                   this.props.setUrlState({
