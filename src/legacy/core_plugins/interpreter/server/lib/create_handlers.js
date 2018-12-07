@@ -27,6 +27,7 @@ export const createHandlers = (request, server) => {
 
   return {
     environment: 'server',
+    sslConfig: server.config().get('server.ssl'),
     serverUri:
       config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
         ? `${server.info.uri}${config.get('server.basePath')}`

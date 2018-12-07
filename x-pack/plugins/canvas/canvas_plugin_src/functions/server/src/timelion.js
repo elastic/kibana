@@ -4,9 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flatten } from 'lodash';
+import https from 'https';
+import { readFileSync } from 'fs';
+import _, { flatten } from 'lodash';
 import { fetch } from '../../../../common/lib/fetch';
 import { buildBoolArray } from '../../../../server/lib/build_bool_array';
+
+const readFile = file => readFileSync(file, 'utf8');
+
+function parseConfig(sslConfig = {}) {
+  const config = {
+    ssl: {
+      rejectUnauthorized: true,
+    },
+  };
+
+  if (_.size(_.get(sslConfig, 'certificateAuthorities')))
+    config.ssl.ca = sslConfig.certificateAuthorities.map(readFile);
+
+  return config;
+}
 
 export const timelion = () => ({
   name: 'timelion',
@@ -77,6 +94,7 @@ export const timelion = () => ({
         ...handlers.httpHeaders,
       },
       data: body,
+      httpsAgent: new https.Agent(parseConfig(handlers.sslConfig).ssl),
     }).then(resp => {
       const seriesList = resp.data.sheet[0].list;
 
