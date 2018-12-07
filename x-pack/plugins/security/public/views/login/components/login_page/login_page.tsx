@@ -122,7 +122,7 @@ export class LoginPage extends Component<Props, {}> {
             title={
               <FormattedMessage
                 id="kbn.login.esUnavailableTitle"
-                defaultMessage="Cannot connect to the Elastiscearch cluster"
+                defaultMessage="Cannot connect to the Elasticsearch cluster"
               />
             }
             message={
