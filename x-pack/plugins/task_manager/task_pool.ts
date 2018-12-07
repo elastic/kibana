@@ -42,11 +42,8 @@ export class TaskPool {
    * Gets how many workers are currently in use.
    */
   get occupiedWorkers() {
-    let total = 0;
-
-    this.running.forEach(({ numWorkers }) => (total += numWorkers));
-
-    return total;
+    const running = Array.from(this.running); // get array from a Set
+    return running.reduce((total, { numWorkers }) => (total += numWorkers), 0);
   }
 
   /**
