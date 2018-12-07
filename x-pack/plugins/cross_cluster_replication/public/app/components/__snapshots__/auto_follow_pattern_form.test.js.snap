@@ -4,43 +4,7 @@ exports[`<AutoFollowPatternForm state update updateFormErrors() should merge err
 Object {
   "fieldsErrors": Object {
     "leaderIndexPatterns": null,
-    "name": Object {
-      "message": "Some error",
-    },
-  },
-}
-`;
-
-exports[`<AutoFollowPatternForm state update updateFormValues() should merge fields with existing state 1`] = `
-Object {
-  "autoFollowPattern": Object {
-    "leaderIndexPatterns": Array [
-      "should not be modified",
-    ],
-    "name": "new value",
-  },
-}
-`;
-
-exports[`<AutoFollowPatternForm state update updateFormValues() should merge leaderIndexPatterns into the existing array 1`] = `
-Object {
-  "autoFollowPattern": Object {
-    "leaderIndexPatterns": Array [
-      "bar",
-      "should be merged",
-    ],
-    "name": "should not be modified",
-  },
-}
-`;
-
-exports[`<AutoFollowPatternForm state update updateFormValues() should replace leaderIndexPatterns value when an Array is provided 1`] = `
-Object {
-  "autoFollowPattern": Object {
-    "leaderIndexPatterns": Array [
-      "new array to replace old one",
-    ],
-    "name": "foo",
+    "name": "Some error",
   },
 }
 `;

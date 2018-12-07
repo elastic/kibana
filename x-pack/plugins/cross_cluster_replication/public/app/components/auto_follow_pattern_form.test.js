@@ -6,6 +6,11 @@
 
 import { updateFormErrors } from './auto_follow_pattern_form';
 
+jest.mock('../services/auto_follow_pattern_validators', () => ({
+  validateAutoFollowPattern: jest.fn(),
+  validateLeaderIndexPattern: jest.fn(),
+}));
+
 describe('<AutoFollowPatternForm state update', () => {
   describe('updateFormErrors()', () => {
     it('should merge errors with existing fieldsErrors', () => {
