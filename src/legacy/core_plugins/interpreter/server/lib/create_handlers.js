@@ -27,7 +27,9 @@ export const createHandlers = (request, server) => {
 
   return {
     environment: 'server',
-    sslConfig: server.config().get('server.ssl'),
+    // A temporary measure to allow the timelion data source to negotiate secure connections to the Kibana server.
+    // See https://github.com/elastic/kibana/pull/26809 and https://github.com/elastic/kibana/issues/26812
+    __dangerouslyUnsupportedSslConfig: server.config().get('server.ssl'),
     serverUri:
       config.has('server.rewriteBasePath') && config.get('server.rewriteBasePath')
         ? `${server.info.uri}${config.get('server.basePath')}`

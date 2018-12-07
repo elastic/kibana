@@ -94,7 +94,7 @@ export const timelion = () => ({
         ...handlers.httpHeaders,
       },
       data: body,
-      httpsAgent: new https.Agent(parseConfig(handlers.sslConfig).ssl),
+      httpsAgent: new https.Agent(parseConfig(handlers.__dangerouslyUnsupportedSslConfig).ssl),
     }).then(resp => {
       const seriesList = resp.data.sheet[0].list;
 
