@@ -32,7 +32,6 @@ export default {
     '<rootDir>/src/utils',
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
-    '<rootDir>/x-pack',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',
