@@ -97,6 +97,8 @@ export class DetailPanelUi extends Component {
       skipUnavailable,
       seeds,
       isConfiguredByNode,
+      maxConnectionsPerCluster,
+      initialConnectTimeout,
     } = cluster;
 
     let configuredByNodeWarning;
@@ -209,6 +211,7 @@ export class DetailPanelUi extends Component {
                   {seeds.map(seed => <EuiText key={seed}>{seed}</EuiText>)}
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
+
               <EuiFlexItem>
                 <EuiDescriptionListTitle>
                   <EuiTitle size="xs">
@@ -221,6 +224,40 @@ export class DetailPanelUi extends Component {
 
                 <EuiDescriptionListDescription>
                   {this.renderSkipUnavailableValue(skipUnavailable)}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.maxConnectionsPerClusterLabel"
+                      defaultMessage="Maximum number of connections"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {maxConnectionsPerCluster}
+                </EuiDescriptionListDescription>
+              </EuiFlexItem>
+
+              <EuiFlexItem>
+                <EuiDescriptionListTitle>
+                  <EuiTitle size="xs">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.detailPanel.initialConnectTimeoutLabel"
+                      defaultMessage="Initial connect timeout"
+                    />
+                  </EuiTitle>
+                </EuiDescriptionListTitle>
+
+                <EuiDescriptionListDescription>
+                  {initialConnectTimeout}
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             </EuiFlexGroup>

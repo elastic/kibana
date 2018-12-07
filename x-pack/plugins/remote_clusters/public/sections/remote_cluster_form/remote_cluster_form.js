@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { merge } from 'lodash';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -20,11 +21,12 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiLoadingKibana,
   EuiLoadingSpinner,
   EuiOverlayMask,
-  EuiRadioGroup,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -38,36 +40,6 @@ const defaultFields = {
   name: '',
   seeds: [],
   skipUnavailable: false,
-};
-
-const skipUnavailableOptions = [
-  {
-    id: 'skipUnavailableOptionFalse',
-    label: (
-      <FormattedMessage
-        id="xpack.remoteClusters.remoteClusterForm.fieldSkipUnavailable.falseOptionLabel"
-        defaultMessage="No"
-      />
-    ),
-  }, {
-    id: 'skipUnavailableOptionTrue',
-    label: (
-      <FormattedMessage
-        id="xpack.remoteClusters.remoteClusterForm.fieldSkipUnavailable.trueOptionLabel"
-        defaultMessage="Yes"
-      />
-    ),
-  },
-];
-
-const skipUnavailableOptionIdToValueMap = {
-  skipUnavailableOptionFalse: false,
-  skipUnavailableOptionTrue: true,
-};
-
-const skipUnavailableOptionValueToIdMap = {
-  [false]: 'skipUnavailableOptionFalse',
-  [true]: 'skipUnavailableOptionTrue',
 };
 
 export class RemoteClusterFormUi extends Component {
@@ -112,11 +84,11 @@ export class RemoteClusterFormUi extends Component {
           defaultMessage="Name is required."
         />
       );
-    } else if (name.match(/[^a-zA-Z\d]/)) {
+    } else if (name.match(/[^a-zA-Z\d\-_]/)) {
       errors.name = (
         <FormattedMessage
-          id="xpack.remoteClusters.form.errors.lettersAndNumbersOnly"
-          defaultMessage="Name can only contain letters and numbers."
+          id="xpack.remoteClusters.form.errors.illegalCharacters"
+          defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
         />
       );
     }
@@ -263,22 +235,15 @@ export class RemoteClusterFormUi extends Component {
     this.onFieldsChange({ seeds: seeds.map(({ label }) => label) });
   };
 
-  clearCurrentFields = () => {
-    const {
-      disabledFields,
-      fields,
-    } = this.props;
+  onSkipUnavailableChange = (e) => {
+    const skipUnavailable = e.target.checked;
+    this.onFieldsChange({ skipUnavailable });
+  };
 
-    const newFields = Object.keys(fields).reduce((accumulator, fieldName) => {
-      // Only clear fields which the user can edit.
-      if (!disabledFields[fieldName]) {
-        accumulator[fieldName] = defaultFields[fieldName];
-      }
-
-      return accumulator;
-    }, {});
-
-    this.onFieldsChange(newFields);
+  resetToDefault = (fieldName) => {
+    this.onFieldsChange({
+      [fieldName]: defaultFields[fieldName],
+    });
   };
 
   renderSeeds() {
@@ -324,14 +289,6 @@ export class RemoteClusterFormUi extends Component {
                 are selected to be connected to as part of remote cluster requests."
               />
             </p>
-
-            <p>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription2"
-                defaultMessage="Seed nodes can be defined as IP addresses or host names, but they
-                must contain a port."
-              />
-            </p>
           </Fragment>
         )}
         fullWidth
@@ -341,6 +298,13 @@ export class RemoteClusterFormUi extends Component {
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldSeedsLabel"
               defaultMessage="IP addresses or hostnames"
+            />
+          )}
+          helpText={(
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText"
+              defaultMessage="Seed nodes can be defined as IP addresses or host names, but they
+                must contain a port, e.g. 127.0.0.1:9400 or localhost:9400."
             />
           )}
           isInvalid={showErrors}
@@ -365,19 +329,12 @@ export class RemoteClusterFormUi extends Component {
     );
   }
 
-  onSkipUnavailableChange = (skipUnavailableOptionId) => {
-    const skipUnavailable = skipUnavailableOptionIdToValueMap[skipUnavailableOptionId];
-    this.onFieldsChange({ skipUnavailable });
-  };
-
   renderSkipUnavailable() {
     const {
       fields: {
         skipUnavailable,
       },
     } = this.state;
-
-    const selectedOptionId = skipUnavailableOptionValueToIdMap[skipUnavailable];
 
     return (
       <EuiDescribedFormGroup
@@ -409,10 +366,22 @@ export class RemoteClusterFormUi extends Component {
         <EuiFormRow
           hasEmptyLabelSpace
           fullWidth
+          helpText={
+            skipUnavailable !== defaultFields.skipUnavailable ? (
+              <EuiLink onClick={() => { this.resetToDefault('skipUnavailable'); }}>
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableResetLabel"
+                  defaultMessage="Reset to default"
+                />
+              </EuiLink>
+            ) : null
+          }
         >
-          <EuiRadioGroup
-            options={skipUnavailableOptions}
-            idSelected={selectedOptionId}
+          <EuiSwitch
+            label={i18n.translate('xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableLabel', {
+              defaultMessage: 'Skip unavailable',
+            })}
+            checked={skipUnavailable}
             onChange={this.onSkipUnavailableChange}
           />
         </EuiFormRow>
@@ -461,35 +430,22 @@ export class RemoteClusterFormUi extends Component {
     }
 
     return (
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="secondary"
-                iconType="check"
-                onClick={this.save}
-                fill
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
-                  defaultMessage="Save"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-
-            {cancelButton}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" onClick={this.clearCurrentFields}>
+          <EuiButton
+            color="secondary"
+            iconType="check"
+            onClick={this.save}
+            fill
+          >
             <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.resetFormButton"
-              defaultMessage="Reset to defaults"
+              id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
+              defaultMessage="Save"
             />
-          </EuiButtonEmpty>
+          </EuiButton>
         </EuiFlexItem>
+
+        {cancelButton}
       </EuiFlexGroup>
     );
   }
@@ -619,6 +575,12 @@ export class RemoteClusterFormUi extends Component {
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.fieldNameLabel"
                   defaultMessage="Name"
+                />
+              )}
+              helpText={(
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.fieldNameLabelHelpText"
+                  defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
                 />
               )}
               error={errorClusterName}

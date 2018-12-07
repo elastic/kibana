@@ -80,6 +80,8 @@ export class RemoteClusterListUi extends Component {
     return null;
   }
 
+  state = {};
+
   componentDidMount() {
     this.props.loadClusters();
     this.interval = setInterval(this.props.refreshClusters, REFRESH_RATE_MS);
