@@ -53,7 +53,8 @@ import {
 } from './services';
 
 import {
-  SecurityProvider
+  SecurityProvider,
+  SpacesProvider,
 } from '../common/services';
 
 // the default export of config files must be a config provider
@@ -113,6 +114,7 @@ export default async function ({ readConfigFile }) {
       aceEditor: AceEditorProvider,
       grokDebugger: GrokDebuggerProvider,
       security: SecurityProvider,
+      spaces: SpacesProvider,
     },
 
     // just like services, PageObjects are defined as a map of

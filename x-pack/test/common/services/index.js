@@ -6,3 +6,4 @@
 
 
 export { SecurityProvider } from './security';
+export { SpacesProvider } from './spaces';
