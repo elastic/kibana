@@ -19,8 +19,7 @@ import { retryLifecycleForIndex } from '../services/api';
 import { EuiSearchBar } from '@elastic/eui';
 
 const stepPath = 'ilm.step';
-
-addActionExtension(indices => {
+export const retryLifecycleActionExtension = indices => {
   const allHaveErrors = every(indices, index => {
     return index.ilm && index.ilm.failed_step;
   });
@@ -43,8 +42,9 @@ addActionExtension(indices => {
       }
     ),
   };
-});
-addActionExtension((indices, reloadIndices) => {
+};
+
+export const removeLifecyclePolicyActionExtension = (indices, reloadIndices) => {
   const allHaveIlm = every(indices, index => {
     return index.ilm && index.ilm.managed;
   });
@@ -69,8 +69,9 @@ addActionExtension((indices, reloadIndices) => {
       defaultMessage: 'Remove lifecycle policy',
     }),
   };
-});
-addActionExtension((indices, reloadIndices) => {
+};
+
+export const addLifecyclePolicyActionExtension = (indices, reloadIndices) => {
   if (indices.length !== 1) {
     return null;
   }
@@ -98,8 +99,13 @@ addActionExtension((indices, reloadIndices) => {
       defaultMessage: 'Add lifecycle policy',
     }),
   };
-});
-addBannerExtension(indices => {
+};
+
+addActionExtension(retryLifecycleActionExtension);
+addActionExtension(removeLifecyclePolicyActionExtension);
+addActionExtension(addLifecyclePolicyActionExtension);
+
+export const ilmBannerExtension = indices => {
   const { Query } = EuiSearchBar;
   if (!indices.length) {
     return null;
@@ -124,11 +130,17 @@ addBannerExtension(indices => {
       values: { numIndicesWithLifecycleErrors },
     }),
   };
-});
-addSummaryExtension(index => {
+};
+
+addBannerExtension(ilmBannerExtension);
+
+export const ilmSummaryExtension = index => {
   return <IndexLifecycleSummary index={index} />;
-});
-addFilterExtension(indices => {
+};
+
+addSummaryExtension(ilmSummaryExtension);
+
+export const ilmFilterExtension = indices => {
   const hasIlm = any(indices, index => index.ilm && index.ilm.managed);
   if (!hasIlm) {
     return [];
@@ -192,4 +204,6 @@ addFilterExtension(indices => {
       },
     ];
   }
-});
+};
+
+addFilterExtension(ilmFilterExtension);
