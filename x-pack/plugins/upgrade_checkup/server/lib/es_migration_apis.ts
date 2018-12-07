@@ -47,6 +47,13 @@ export async function getUpgradeCheckupStatus(
   if (useFakeData) {
     migrationAssistance = _.cloneDeep(fakeAssistance) as AssistanceAPIResponse;
     deprecations = _.cloneDeep(fakeDeprecations) as DeprecationAPIResponse;
+
+    // trigger pagination on cluster tab
+    for (let i = 0; i < 6; i++) {
+      deprecations.cluster_settings = deprecations.cluster_settings.concat(
+        deprecations.cluster_settings.map(cs => ({ ...cs, message: `${cs.message} ${i}` }))
+      );
+    }
   } else {
     const migrationAssistanceReq = callWithRequest(req, 'transport.request', {
       path: '/_xpack/migration/assistance',
