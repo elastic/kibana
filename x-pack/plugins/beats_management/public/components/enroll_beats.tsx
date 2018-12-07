@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  // @ts-ignore typings for EuiBasicTable not present in current version
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -50,6 +49,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
   public pingForBeatWithToken = async (token: string): Promise<CMBeat | void> => {
     try {
       const beats = await this.props.getBeatWithToken(token);
+
       if (!beats) {
         throw new Error('no beats');
       }
@@ -81,7 +81,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
     this.pinging = false;
   };
   public render() {
-    if (!this.props.enrollmentToken) {
+    if (!this.props.enrollmentToken && !this.state.enrolledBeat) {
       return null;
     }
     if (this.props.enrollmentToken && !this.state.enrolledBeat) {

@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import React, { Component } from 'react';
-import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import { Loading } from './components/loading';
 import { ChildRoutes } from './components/navigation/child_routes';
 import { BeatsContainer } from './containers/beats';
@@ -63,82 +63,76 @@ export class AppRouter extends Component<RouterProps, RouterState> {
     }
 
     return (
-      <HashRouter basename="/management/beats_management">
-        <React.Fragment>
-          {/* Redirects mapping */}
-          <Switch>
-            {/* License check (UI displays when license exists but is expired) */}
-            {get(this.props.libs.framework.info, 'license.expired', true) && (
-              <Route
-                render={props =>
-                  !props.location.pathname.includes('/error') ? (
-                    <Redirect to="/error/invalid_license" />
-                  ) : null
-                }
-              />
-            )}
-
-            {/* Ensure security is eanabled for elastic and kibana */}
-            {!get(this.props.libs.framework.info, 'security.enabled', true) && (
-              <Route
-                render={props =>
-                  !props.location.pathname.includes('/error') ? (
-                    <Redirect to="/error/enforce_security" />
-                  ) : null
-                }
-              />
-            )}
-
-            {/* Make sure the user has correct permissions */}
-            {!this.props.libs.framework.currentUserHasOneOfRoles(
-              ['beats_admin'].concat(this.props.libs.framework.info.settings.defaultUserRoles)
-            ) && (
-              <Route
-                render={props =>
-                  !props.location.pathname.includes('/error') ? (
-                    <Redirect to="/error/no_access" />
-                  ) : null
-                }
-              />
-            )}
-
-            {/* If there are no beats or tags yet, redirect to the walkthrough */}
-            {this.state.loadingStatus === 'loaded:empty' && (
-              <Route
-                render={props =>
-                  !props.location.pathname.includes('/walkthrough') ? (
-                    <Redirect to="/walkthrough/initial" />
-                  ) : null
-                }
-              />
-            )}
-
-            {/* This app does not make use of a homepage. The mainpage is overview/enrolled_beats */}
+      <React.Fragment>
+        {/* Redirects mapping */}
+        <Switch>
+          {/* License check (UI displays when license exists but is expired) */}
+          {get(this.props.libs.framework.info, 'license.expired', true) && (
             <Route
-              path="/"
-              exact={true}
-              render={() => <Redirect to="/overview/enrolled_beats" />}
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/invalid_license" />
+                ) : null
+              }
             />
-          </Switch>
+          )}
 
-          {/* Render routes from the FS */}
-          <WithURLState>
-            {(URLProps: URLStateProps) => (
-              <ChildRoutes
-                routes={routesFromFilesystem}
-                {...URLProps}
-                {...{
-                  libs: this.props.libs,
-                  containers: {
-                    beats: this.props.beatsContainer,
-                    tags: this.props.tagsContainer,
-                  },
-                }}
-              />
-            )}
-          </WithURLState>
-        </React.Fragment>
-      </HashRouter>
+          {/* Ensure security is eanabled for elastic and kibana */}
+          {!get(this.props.libs.framework.info, 'security.enabled', true) && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/enforce_security" />
+                ) : null
+              }
+            />
+          )}
+
+          {/* Make sure the user has correct permissions */}
+          {!this.props.libs.framework.currentUserHasOneOfRoles(
+            ['beats_admin'].concat(this.props.libs.framework.info.settings.defaultUserRoles)
+          ) && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/no_access" />
+                ) : null
+              }
+            />
+          )}
+
+          {/* If there are no beats or tags yet, redirect to the walkthrough */}
+          {this.state.loadingStatus === 'loaded:empty' && (
+            <Route
+              render={props =>
+                !props.location.pathname.includes('/walkthrough') ? (
+                  <Redirect to="/walkthrough/initial" />
+                ) : null
+              }
+            />
+          )}
+
+          {/* This app does not make use of a homepage. The mainpage is overview/enrolled_beats */}
+          <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_beats" />} />
+        </Switch>
+
+        {/* Render routes from the FS */}
+        <WithURLState>
+          {(URLProps: URLStateProps) => (
+            <ChildRoutes
+              routes={routesFromFilesystem}
+              {...URLProps}
+              {...{
+                libs: this.props.libs,
+                containers: {
+                  beats: this.props.beatsContainer,
+                  tags: this.props.tagsContainer,
+                },
+              }}
+            />
+          )}
+        </WithURLState>
+      </React.Fragment>
     );
   }
 }
