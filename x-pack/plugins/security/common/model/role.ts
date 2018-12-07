@@ -15,9 +15,19 @@ export interface Role {
     run_as: string[];
   };
   kibana: {
-    global: KibanaPrivilege[];
+    global: {
+      minimum: string[];
+      feature: {
+        [featureId: string]: string[];
+      };
+    };
     space: {
-      [spaceId: string]: KibanaPrivilege[];
+      [spaceId: string]: {
+        minimum: string[];
+        feature: {
+          [featureId: string]: string[];
+        };
+      };
     };
   };
   metadata?: {

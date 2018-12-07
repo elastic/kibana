@@ -5,8 +5,10 @@
  */
 
 import { I18nProvider, InjectedIntl } from '@kbn/i18n/react';
+import { getEffectivePrivileges } from 'plugins/security/lib/get_effective_privileges';
 import React, { Component } from 'react';
 import { UICapabilities } from 'ui/capabilities';
+import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
@@ -23,6 +25,7 @@ interface Props {
   uiCapabilities: UICapabilities;
   features: Feature[];
   editable: boolean;
+  privilegeDefinition: PrivilegeDefinition;
   kibanaAppPrivileges: KibanaPrivilege[];
   onChange: (role: Role) => void;
   validator: RoleValidator;
@@ -43,6 +46,7 @@ export class KibanaPrivileges extends Component<Props, {}> {
   public getForm = () => {
     const {
       kibanaAppPrivileges,
+      privilegeDefinition,
       role,
       spacesEnabled,
       spaces = [],
@@ -56,8 +60,10 @@ export class KibanaPrivileges extends Component<Props, {}> {
     if (spacesEnabled) {
       return (
         <SpaceAwarePrivilegeForm
+          privilegeDefinition={privilegeDefinition}
           kibanaAppPrivileges={kibanaAppPrivileges}
           role={role}
+          effectivePrivileges={getEffectivePrivileges(privilegeDefinition, role)}
           spaces={spaces}
           uiCapabilities={uiCapabilities}
           features={features}
@@ -69,9 +75,11 @@ export class KibanaPrivileges extends Component<Props, {}> {
     } else {
       return (
         <SimplePrivilegeForm
+          privilegeDefinition={privilegeDefinition}
           kibanaAppPrivileges={kibanaAppPrivileges}
           features={features}
           role={role}
+          effectivePrivileges={getEffectivePrivileges(privilegeDefinition, role)}
           onChange={onChange}
           editable={editable}
           intl={this.props.intl}

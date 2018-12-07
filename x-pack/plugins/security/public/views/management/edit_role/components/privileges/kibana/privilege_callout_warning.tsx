@@ -123,31 +123,6 @@ export class PrivilegeCalloutWarning extends Component<Props, State> {
             </p>
           </EuiCallOut>
         );
-      } else {
-        callout = (
-          <EuiCallOut
-            color="primary"
-            iconType="iInCircle"
-            title={
-              <span>
-                <FormattedMessage
-                  id="xpack.security.management.editRoles.privilegeCalloutWarning.minimalPossiblePrivilageTitle"
-                  defaultMessage="The minimal possible privilege is {readText}."
-                  values={{
-                    readText: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.security.management.editRoles.privilegeCalloutWarning.readText"
-                          defaultMessage="read"
-                        />
-                      </strong>
-                    ),
-                  }}
-                />
-              </span>
-            }
-          />
-        );
       }
     }
 

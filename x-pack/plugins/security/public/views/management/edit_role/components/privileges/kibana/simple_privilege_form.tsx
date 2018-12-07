@@ -13,9 +13,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { EffectivePrivileges } from 'plugins/security/lib/get_effective_privileges';
 import React, { Component, Fragment } from 'react';
+import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
+import { KibanaPrivilege, PrivilegeMap } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import { copyRole } from '../../../lib/copy_role';
@@ -24,6 +26,8 @@ import { FeatureTable } from './feature_table/feature_table';
 interface Props {
   kibanaAppPrivileges: KibanaPrivilege[];
   role: Role;
+  privilegeDefinition: PrivilegeDefinition;
+  effectivePrivileges: EffectivePrivileges;
   features: Feature[];
   onChange: (role: Role) => void;
   editable: boolean;
@@ -36,9 +40,9 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
 
     const assignedPrivileges = role.kibana;
 
-    const kibanaPrivilege: KibanaPrivilege =
-      assignedPrivileges.global.length > 0
-        ? (assignedPrivileges.global[0] as KibanaPrivilege)
+    const kibanaPrivilege =
+      assignedPrivileges.global.minimum.length > 0
+        ? assignedPrivileges.global.minimum[0]
         : NO_PRIVILEGE_VALUE;
 
     const description = (
@@ -113,15 +117,15 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
               valueOfSelected={kibanaPrivilege}
             />
           </EuiFormRow>
-          {kibanaPrivilege === 'custom' && (
+          {kibanaPrivilege !== NO_PRIVILEGE_VALUE && (
             <EuiFormRow>
               <FeatureTable
                 role={this.props.role}
+                privilegeDefinition={this.props.privilegeDefinition}
+                effectivePrivileges={this.props.effectivePrivileges}
                 features={this.props.features}
                 intl={this.props.intl}
-                onChange={() => {
-                  return;
-                }}
+                onChange={this.onFeaturePrivilegeChange}
               />
             </EuiFormRow>
           )}
@@ -134,12 +138,18 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
     const role = copyRole(this.props.role);
 
     // Remove base privilege value
-    role.kibana.global = [];
+    role.kibana.global.minimum = [];
 
     if (privilege !== NO_PRIVILEGE_VALUE) {
-      role.kibana.global = [privilege];
+      role.kibana.global.minimum = [privilege];
     }
 
     this.props.onChange(role);
   };
+
+  public onFeaturePrivilegeChange(featureId: string, privileges: string[]) {
+    const role = copyRole(this.props.role);
+    role.kibana.global.feature[featureId] = [...privileges];
+    this.props.onChange(role);
+  }
 }

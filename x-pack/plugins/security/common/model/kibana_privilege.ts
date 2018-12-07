@@ -7,3 +7,11 @@
 export type KibanaPrivilege = 'none' | 'custom' | 'read' | 'all';
 
 export const KibanaAppPrivileges: KibanaPrivilege[] = ['read', 'all'];
+
+export type FeaturesPrivileges = Record<string, Record<string, string[]>>;
+
+export interface PrivilegeMap {
+  global: Record<string, string[]>;
+  features: FeaturesPrivileges;
+  space: Record<string, string[]>;
+}

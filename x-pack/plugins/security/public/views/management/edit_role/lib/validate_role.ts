@@ -192,7 +192,7 @@ export class RoleValidator {
 
     // A Global privilege of "all" will ignore all in progress privileges,
     // so the form should not block saving in this scenario.
-    const shouldValidate = this.shouldValidate && !global.includes('all');
+    const shouldValidate = this.shouldValidate && !global.minimum.includes('all');
 
     if (!shouldValidate) {
       return valid();

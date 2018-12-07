@@ -42,7 +42,7 @@ export default async function(server /*options*/) {
       all: {
         app: ['canvas'],
         savedObject: {
-          all: ['canvas'],
+          all: ['canvas-workpad'],
           read: ['config', 'index-pattern'],
         },
         ui: [],
@@ -51,7 +51,7 @@ export default async function(server /*options*/) {
         app: ['canvas'],
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'canvas'],
+          read: ['config', 'index-pattern', 'canvas-workpad'],
         },
         ui: [],
       },

@@ -61,7 +61,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             run_as: [],
           },
           kibana: {
-            global: [],
+            global: {
+              minimum: [],
+              feature: {}
+            },
             space: {},
           },
           _unrecognized_applications: [],
@@ -85,6 +88,9 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         return new SpacesManager($http, chrome).getSpaces();
       }
       return [];
+    },
+    privileges() {
+      return  kfetch({ method: 'get', pathname: '/api/security/privileges' });
     }
   },
   controllerAs: 'editRole',
@@ -122,7 +128,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       users,
       indexPatterns,
       spaces,
+      privileges,
     } = $route.current.locals;
+
+    console.log({ privileges });
 
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById('editRoleReactRoot');
@@ -145,6 +154,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             spacesEnabled={enableSpaceAwarePrivileges}
             uiCapabilities={uiCapabilities}
             features={features}
+            privileges={privileges}
           />
         </I18nProvider>, domNode);
 

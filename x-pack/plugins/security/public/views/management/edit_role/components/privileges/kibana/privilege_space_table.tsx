@@ -8,23 +8,22 @@ import {
   EuiButtonIcon,
   // @ts-ignore
   EuiInMemoryTable,
+  EuiLink,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
+import { FeaturePrivilegeSet } from 'x-pack/plugins/security/common/model/privileges/feature_privileges';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../spaces/public/components';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
-import { isReservedRole } from '../../../../../../lib/role';
-import { PrivilegeSelector } from './privilege_selector';
 
 interface Props {
   role: Role;
   spaces: Space[];
-  availablePrivileges?: KibanaPrivilege[];
-  spacePrivileges: any;
-  onChange?: (privs: { [spaceId: string]: KibanaPrivilege[] }) => void;
+  onEdit?: (spaceId: string) => void;
+  onDelete?: (spaceId: string) => void;
   readonly?: boolean;
   intl: InjectedIntl;
 }
@@ -43,15 +42,15 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
   };
 
   public render() {
-    const { role, spaces, availablePrivileges, spacePrivileges, intl } = this.props;
+    const { role, spaces, intl } = this.props;
 
     const { searchTerm } = this.state;
 
-    const allTableItems = Object.keys(spacePrivileges)
+    const allTableItems = Object.keys(role.kibana.space)
       .map(spaceId => {
         return {
           space: spaces.find(s => s.id === spaceId) || { id: spaceId, name: '', deleted: true },
-          privilege: spacePrivileges[spaceId][0],
+          privilege: role.kibana.space[spaceId],
         };
       })
       .sort(item1 => {
@@ -72,7 +71,7 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
     return (
       <EuiInMemoryTable
         hasActions
-        columns={this.getTableColumns(role, availablePrivileges)}
+        columns={this.getTableColumns()}
         search={{
           box: {
             incremental: true,
@@ -92,7 +91,7 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
     );
   }
 
-  public getTableColumns = (role: Role, availablePrivileges: KibanaPrivilege[] = []) => {
+  public getTableColumns = () => {
     const { intl } = this.props;
     const columns: any[] = [
       {
@@ -137,20 +136,31 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
           defaultMessage: 'Privilege',
         }),
         width: this.props.readonly ? '25%' : undefined,
-        render: (privilege: KibanaPrivilege, record: any) => {
+        render: (privilege: FeaturePrivilegeSet, record: any) => {
+          const hasCustomPrivileges =
+            privilege.minimum.length === 0 || Object.keys(privilege.feature).length > 0;
+
+          const privilegeLabel = hasCustomPrivileges
+            ? this.props.intl.formatMessage({
+                id: 'xpack.security.management.editRoles.privilegeSpaceTable.customPrivilegeLabel',
+                defaultMessage: 'custom',
+              })
+            : privilege.minimum[0];
+
           if (this.props.readonly || record.space.deleted) {
-            return privilege;
+            return privilegeLabel;
           }
 
           return (
-            <PrivilegeSelector
-              data-test-subj={'privilege-space-table-priv'}
-              availablePrivileges={availablePrivileges}
-              value={privilege}
-              disabled={isReservedRole(role) || this.props.readonly}
-              onChange={this.onSpacePermissionChange(record)}
-              compressed
-            />
+            <EuiLink
+              onClick={() => {
+                if (this.props.onEdit) {
+                  this.props.onEdit(record.space.id);
+                }
+              }}
+            >
+              {privilegeLabel}
+            </EuiLink>
           );
         },
       },
@@ -168,7 +178,11 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
                 <EuiButtonIcon
                   aria-label={'Remove custom privileges for this space'}
                   color={'danger'}
-                  onClick={() => this.onDeleteSpacePermissionsClick(record)}
+                  onClick={() => {
+                    if (this.props.onDelete) {
+                      this.props.onDelete(record.space.id);
+                    }
+                  }}
                   iconType={'trash'}
                 />
               );
@@ -179,30 +193,6 @@ class PrivilegeSpaceTableUI extends Component<Props, State> {
     }
 
     return columns;
-  };
-
-  public onSpacePermissionChange = (record: any) => (selectedPrivilege: KibanaPrivilege) => {
-    const { id: spaceId } = record.space;
-
-    const updatedPrivileges = {
-      ...this.props.spacePrivileges,
-    };
-    updatedPrivileges[spaceId] = [selectedPrivilege];
-    if (this.props.onChange) {
-      this.props.onChange(updatedPrivileges);
-    }
-  };
-
-  public onDeleteSpacePermissionsClick = (record: any) => {
-    const { id: spaceId } = record.space;
-
-    const updatedPrivileges = {
-      ...this.props.spacePrivileges,
-    };
-    delete updatedPrivileges[spaceId];
-    if (this.props.onChange) {
-      this.props.onChange(updatedPrivileges);
-    }
   };
 }
 

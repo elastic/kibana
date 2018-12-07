@@ -20,7 +20,9 @@ export function initPutRolesApi(
 
   const transformKibanaPrivilegesToEs = (kibanaPrivileges) => {
     const kibanaApplicationPrivileges = [];
-    if (kibanaPrivileges.global) {
+    const { minimum = [], feature = {} } = kibanaPrivileges.global || {};
+
+    if (minimum.length > 0 || Object.keys(feature).length > 0) {
       kibanaApplicationPrivileges.push({
         privileges: [
           ...kibanaPrivileges.global.minimum ? kibanaPrivileges.global.minimum.map(
@@ -144,6 +146,8 @@ export function initPutRolesApi(
           request.payload,
           existingRoleResponse[name] ? existingRoleResponse[name].applications : []
         );
+
+        console.log(body);
 
         await callWithRequest(request, 'shield.putRole', { name, body });
         return h.response().code(204);

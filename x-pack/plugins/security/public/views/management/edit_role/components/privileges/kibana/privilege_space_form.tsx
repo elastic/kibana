@@ -6,27 +6,27 @@
 // @ts-ignore
 import { EuiForm, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import {
+  EffectivePrivileges,
+  getEffectivePrivileges,
+} from 'plugins/security/lib/get_effective_privileges';
 import React, { Component } from 'react';
+import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
+import { copyRole } from '../../../lib/copy_role';
 import { RoleValidator } from '../../../lib/validate_role';
 import { FeatureTable } from './feature_table/feature_table';
 import { SpaceSelector } from './space_selector';
 
 interface Props {
-  availableSpaces: Space[];
-  selectedSpaceIds: string[];
-  availablePrivileges: KibanaPrivilege[];
-  selectedPrivilege: KibanaPrivilege | null;
-  onChange: (
-    params: {
-      spaces: string[];
-      privilege: KibanaPrivilege | null;
-    }
-  ) => void;
+  spaces: Space[];
+  spaceId?: string | null;
+  privilegeDefinition: PrivilegeDefinition;
+  effectivePrivileges: EffectivePrivileges;
+  onChange: (role: Role) => void;
   onDelete: () => void;
   validator: RoleValidator;
   disabled?: boolean;
@@ -35,15 +35,40 @@ interface Props {
   role: Role;
 }
 
-export class PrivilegeSpaceForm extends Component<Props, {}> {
+interface State {
+  selectedSpaceIds: string[];
+  selectedMinimumPrivilege: string[];
+  role: Role;
+}
+
+export class PrivilegeSpaceForm extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+
+    const selectedMinimumPrivilege = [];
+
+    if (props.spaceId) {
+      const space = props.role.kibana.space[props.spaceId];
+      selectedMinimumPrivilege.push(...space.minimum);
+    } else {
+      selectedMinimumPrivilege.push(...props.role.kibana.global.minimum);
+    }
+
+    this.state = {
+      selectedSpaceIds: props.spaceId ? [props.spaceId] : [],
+      selectedMinimumPrivilege,
+      role: copyRole(props.role),
+    };
+  }
+
   public render() {
-    const {
-      availableSpaces,
-      selectedSpaceIds,
-      availablePrivileges,
-      selectedPrivilege,
-      validator,
-    } = this.props;
+    const { spaces, effectivePrivileges } = this.props;
+
+    const assignedMimimumPrivilege = this.state.selectedMinimumPrivilege || [];
+    const effectiveMinimumPrivilege = effectivePrivileges.grants.space.minimum || [];
+
+    const actualMinimumPrivilege =
+      assignedMimimumPrivilege.length > 0 ? assignedMimimumPrivilege : effectiveMinimumPrivilege;
 
     return (
       <EuiForm>
@@ -55,9 +80,9 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
           }
         >
           <SpaceSelector
-            spaces={availableSpaces}
-            selectedSpaceIds={selectedSpaceIds}
-            onChange={() => null}
+            spaces={spaces}
+            selectedSpaceIds={this.state.selectedSpaceIds}
+            onChange={this.onSelectedSpacesChange}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -69,9 +94,10 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
         >
           <EuiSuperSelect
             disabled={this.props.disabled}
-            onChange={() => null}
+            onChange={this.onSpaceMinimumPrivilegeChange}
             options={[
               {
+                disabled: effectiveMinimumPrivilege.length > 0,
                 value: NO_PRIVILEGE_VALUE,
                 inputDisplay: <EuiText>None</EuiText>,
                 dropdownDisplay: (
@@ -83,6 +109,7 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
               },
               {
                 value: 'read',
+                disabled: !effectivePrivileges.allows.space.minimum.includes('read'),
                 inputDisplay: <EuiText>Read</EuiText>,
                 dropdownDisplay: (
                   <EuiText>
@@ -93,6 +120,7 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
               },
               {
                 value: 'all',
+                disabled: !effectivePrivileges.allows.space.minimum.includes('all'),
                 inputDisplay: <EuiText>All</EuiText>,
                 dropdownDisplay: (
                   <EuiText>
@@ -103,7 +131,7 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
               },
             ]}
             hasDividers
-            valueOfSelected={NO_PRIVILEGE_VALUE}
+            valueOfSelected={actualMinimumPrivilege[0] || NO_PRIVILEGE_VALUE}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -114,77 +142,94 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
           }
         >
           <FeatureTable
-            onChange={() => null}
+            onChange={this.onFeaturesPrivilegesChange}
             features={this.props.features}
-            role={this.props.role}
+            privilegeDefinition={this.props.privilegeDefinition}
+            effectivePrivileges={getEffectivePrivileges(
+              this.props.privilegeDefinition,
+              this.state.role,
+              this.state.selectedSpaceIds[0]
+            )}
+            spaceId={this.state.selectedSpaceIds[0]}
+            role={this.state.role}
             intl={this.props.intl}
           />
         </EuiFormRow>
       </EuiForm>
     );
-
-    // return (
-    //   <EuiFlexGroup responsive={false}>
-    //     <EuiFlexItem>
-    //       <EuiFormRow
-    //         label={
-    //           <FormattedMessage
-    //             id="xpack.security.management.editRoles.privilegeSpaceForm.spacesFormRowLabel"
-    //             defaultMessage="Spaces"
-    //           />
-    //         }
-    //         {...validator.validateSelectedSpaces(selectedSpaceIds, selectedPrivilege)}
-    //       >
-    //         <SpaceSelector
-    //           spaces={availableSpaces}
-    //           selectedSpaceIds={selectedSpaceIds}
-    //           onChange={this.onSelectedSpacesChange}
-    //         />
-    //       </EuiFormRow>
-    //     </EuiFlexItem>
-    //     <EuiFlexItem>
-    //       <EuiFormRow
-    //         label={
-    //           <FormattedMessage
-    //             id="xpack.security.management.editRoles.privilegeSpaceForm.privilegeFormRowLabel"
-    //             defaultMessage="Privilege"
-    //           />
-    //         }
-    //         {...validator.validateSelectedPrivilege(selectedSpaceIds, selectedPrivilege)}
-    //       >
-    //         <PrivilegeSelector
-    //           data-test-subj={'space-form-priv-selector'}
-    //           availablePrivileges={availablePrivileges}
-    //           value={selectedPrivilege}
-    //           onChange={this.onPrivilegeChange}
-    //         />
-    //       </EuiFormRow>
-    //     </EuiFlexItem>
-    //     <EuiFlexItem grow={false}>
-    //       <EuiFormRow hasEmptyLabelSpace>
-    //         <EuiButtonIcon
-    //           aria-label={'Delete space privilege'}
-    //           color={'danger'}
-    //           onClick={this.props.onDelete}
-    //           iconType={'trash'}
-    //         />
-    //       </EuiFormRow>
-    //     </EuiFlexItem>
-    //   </EuiFlexGroup>
-    // );
   }
 
+  public onSpaceMinimumPrivilegeChange = (minimumPrivilege: string) => {
+    const role = copyRole(this.state.role);
+    role.kibana.space = {
+      default: {
+        minimum: [minimumPrivilege],
+        feature: {
+          ...(role.kibana.space.default || {}).feature,
+        },
+      },
+    };
+
+    this.setState({
+      selectedMinimumPrivilege: [minimumPrivilege],
+      role,
+    });
+
+    this.props.onChange(role);
+  };
+
+  public onFeaturesPrivilegesChange = (featureId: string, privileges: string[]) => {
+    const role: Role = copyRole(this.state.role);
+
+    this.state.selectedSpaceIds.forEach(spaceId => {
+      if (!role.kibana.space[spaceId]) {
+        role.kibana.space[spaceId] = {
+          minimum: [...this.state.selectedMinimumPrivilege],
+          feature: {
+            [featureId]: [...privileges],
+          },
+        };
+      } else {
+        role.kibana.space[spaceId].feature = {
+          ...role.kibana.space[spaceId].feature,
+          [featureId]: [...privileges],
+        };
+      }
+    });
+
+    this.setState({ role });
+    this.props.onChange(role);
+  };
+
   public onSelectedSpacesChange = (selectedSpaceIds: string[]) => {
-    this.props.onChange({
-      spaces: selectedSpaceIds,
-      privilege: this.props.selectedPrivilege,
+    const removedSpaces = _.difference(this.state.selectedSpaceIds, selectedSpaceIds);
+    const addedSpaces = _.difference(selectedSpaceIds, this.state.selectedSpaceIds);
+
+    const role = copyRole(this.state.role);
+
+    // Reset spaces that are no longer being edited by this form
+    removedSpaces.forEach(spaceId => {
+      role.kibana.space[spaceId] = this.props.role.kibana.space[spaceId];
+    });
+
+    // Setup spaces that are being edited by this form
+    addedSpaces.forEach(spaceId => {
+      role.kibana.space[spaceId] = {
+        minimum: [...this.state.selectedMinimumPrivilege],
+        feature: {},
+        // TODO: feature privs
+      };
+    });
+
+    this.setState({
+      selectedSpaceIds,
     });
   };
 
-  public onPrivilegeChange = (privilege: KibanaPrivilege) => {
-    this.props.onChange({
-      spaces: this.props.selectedSpaceIds,
-      privilege,
-    });
-  };
+  private getMinimumPrivilege(role: Role) {
+    if (this.props.spaceId) {
+      return role.kibana.space[this.props.spaceId].minimum;
+    }
+    return;
+  }
 }

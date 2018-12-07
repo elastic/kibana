@@ -25,10 +25,11 @@ import { get } from 'lodash';
 import React, { ChangeEvent, Component, Fragment, HTMLProps } from 'react';
 import { UICapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
+import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
-import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
+import { KibanaPrivilege, PrivilegeMap } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
 import { isReservedRole } from '../../../../lib/role';
 import { deleteRole, saveRole } from '../../../../objects';
@@ -47,6 +48,7 @@ interface Props {
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   kibanaAppPrivileges: KibanaPrivilege[];
+  privileges: PrivilegeMap;
   spaces?: Space[];
   spacesEnabled: boolean;
   intl: InjectedIntl;
@@ -252,6 +254,7 @@ class EditRolePageUI extends Component<Props, State> {
         <EuiSpacer />
         <KibanaPrivileges
           kibanaAppPrivileges={this.props.kibanaAppPrivileges}
+          privilegeDefinition={new PrivilegeDefinition(this.props.privileges)}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}
           features={this.props.features}

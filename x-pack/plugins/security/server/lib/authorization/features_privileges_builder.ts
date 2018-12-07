@@ -5,10 +5,9 @@
  */
 
 import { Dictionary, flatten, mapValues } from 'lodash';
+import { FeaturesPrivileges } from 'x-pack/plugins/security/common/model/kibana_privilege';
 import { Feature } from '../../../../xpack_main/types';
 import { Actions } from './actions';
-
-export type FeaturesPrivileges = Record<string, Record<string, string[]>>;
 
 export class FeaturesPrivilegesBuilder {
   private actions: Actions;
