@@ -10,7 +10,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 import { DeprecationInfo } from 'src/core_plugins/elasticsearch';
 import { GroupByOption, LevelFilterOption, LoadingState } from '../../types';
-import { LevelFilterBar } from './filter_bar';
+import { FilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
 
 interface CheckupControlsProps extends ReactIntl.InjectedIntlProps {
@@ -52,7 +52,7 @@ export const CheckupControlsUI: StatelessComponent<CheckupControlsProps> = ({
     </EuiFlexItem>
 
     {/* These two components provide their own EuiFlexItem wrappers */}
-    <LevelFilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
+    <FilterBar {...{ allDeprecations, currentFilter, onFilterChange }} />
     <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
 
     <EuiFlexItem grow={false}>
