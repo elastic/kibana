@@ -226,10 +226,9 @@ export const getSupportedConfig = () => {
   }
 
   translatedConfigs = cloneDeep(supportedConfigs);
-
-  translatedConfigs.forEach(({ text, config }) => {
+  translatedConfigs.forEach(({ text, config }, index) => {
     if (text) {
-      text = supportedConfigLabelsMap.get(text) || '';
+      translatedConfigs[index].text = supportedConfigLabelsMap.get(text) || '';
     }
 
     config.forEach(yanlConfig => {
