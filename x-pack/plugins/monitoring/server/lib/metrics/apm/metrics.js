@@ -162,6 +162,12 @@ export const metrics = {
     label: 'Closed',
     description: 'HTTP Requests rejected during server shutdown'
   }),
+  apm_responses_errors_internal: new ApmEventsRateClusterMetric({
+    field: 'beats_stats.metrics.apm-server.server.response.errors.internal',
+    title: 'Internal',
+    label: 'Internal',
+    description: 'HTTP Requests rejected due to a miscellaneous internal error'
+  }),
 
   apm_processor_transaction_transformations: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.apm-server.processor.transaction.transformations',
@@ -187,7 +193,6 @@ export const metrics = {
     label: 'Metric',
     description: 'Metric events processed'
   }),
-
 
   apm_output_events_total: new ApmEventsRateClusterMetric({
     field: 'beats_stats.metrics.libbeat.output.events.total',
