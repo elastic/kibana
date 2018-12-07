@@ -163,7 +163,6 @@ Security::
 
 Visualizations::
 * Ensures custom set axis titles are preserved when loading a saved visualization {pull}24176[#24176]
-* Fixes option for showing partial buckets {pull}25520[#25520]
 * Uses retry to avoid stale element references in the `PageObjects.visualize.filterOnTableCell()` method {pull}25973[#25973]
 
 
