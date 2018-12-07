@@ -7,6 +7,9 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+
 import {
   EuiPage,
   EuiPageBody,
@@ -19,6 +22,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { listBreadcrumb } from '../../services/breadcrumbs';
 import routing from '../../services/routing';
 import { AutoFollowPatternList } from './auto_follow_pattern_list';
 import { SectionUnauthorized } from '../../components';
@@ -30,6 +34,10 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
 
   state = {
     sectionActive: 'auto-follow'
+  }
+
+  componentDidMount() {
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
   }
 
   getHeaderSection() {
@@ -46,7 +54,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="xpack.cross_cluster_replication.cross_cluster_replication_title"
+                  id="xpack.crossClusterReplication.crossClusterReplicationTitle"
                   defaultMessage="Cross Cluster Replication"
                 />
               </h1>
@@ -54,7 +62,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
             <EuiText>
               <p>
                 <FormattedMessage
-                  id="xpack.cross_cluster_replication.autofolloPatternList.sectionDescription"
+                  id="xpack.crossClusterReplication.autofolloPatternList.sectionDescription"
                   defaultMessage="Auto-follow patterns replicate leader indices from a remote cluster to follower indices on the local cluster." //eslint-disable-line max-len
                 />
               </p>
@@ -66,7 +74,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
               fill
             >
               <FormattedMessage
-                id="xpack.cross_cluster_replication.add_autofollow_pattern_button_label"
+                id="xpack.crossClusterReplication.addAutofollowPatternButtonLabel"
                 defaultMessage="Create an auto-follow pattern"
               />
             </EuiButton>
@@ -83,7 +91,7 @@ export class CrossClusterReplicationHomeUI extends PureComponent {
       return (
         <SectionUnauthorized>
           <FormattedMessage
-            id="xpack.cross_cluster_replication.autofollow_pattern_list.no_permission_text"
+            id="xpack.crossClusterReplication.autofollowPatternList.noPermissionText"
             defaultMessage="You do not have permission to view or add auto-follow patterns."
           />
         </SectionUnauthorized>
