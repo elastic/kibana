@@ -80,7 +80,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
 
     this.state = {
       autoFollowPattern,
-      fieldsErrors: {},
+      fieldsErrors: validateAutoFollowPattern(autoFollowPattern),
       areErrorsVisible: false,
       isNew,
     };
