@@ -65,7 +65,7 @@ function executeJobFn(server) {
     const maxSizeBytes = config.get('xpack.reporting.csv.maxSizeBytes');
     const scroll = config.get('xpack.reporting.csv.scroll');
 
-    const { content, maxSizeReached } = await generateCsv({
+    const { content, maxSizeReached, size } = await generateCsv({
       searchRequest,
       fields,
       formatsMap,
@@ -84,7 +84,8 @@ function executeJobFn(server) {
     return {
       content_type: 'text/csv',
       content,
-      max_size_reached: maxSizeReached
+      max_size_reached: maxSizeReached,
+      size,
     };
   };
 }
