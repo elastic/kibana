@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore not typed yed
+// @ts-ignore not typed yet
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
