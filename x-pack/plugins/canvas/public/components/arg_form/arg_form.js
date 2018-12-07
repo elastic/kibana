@@ -49,6 +49,7 @@ class ArgFormComponent extends PureComponent {
       setLabel,
       onValueRemove,
       workpad,
+      assets,
       renderError,
       setRenderError,
       resolvedArgValue,
@@ -85,6 +86,7 @@ class ArgFormComponent extends PureComponent {
             label,
             workpad,
             argId,
+            assets,
           };
 
           const expandableLabel = Boolean(hasError || template);

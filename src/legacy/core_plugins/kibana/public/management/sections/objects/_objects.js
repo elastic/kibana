@@ -30,6 +30,8 @@ import { ObjectsTable } from './components/objects_table';
 import { getInAppUrl } from './lib/get_in_app_url';
 import { I18nProvider } from '@kbn/i18n/react';
 
+import { getIndexBreadcrumbs } from './breadcrumbs';
+
 const REACT_OBJECTS_TABLE_DOM_ELEMENT_ID = 'reactSavedObjectsTable';
 
 function updateObjectsTable($scope, $injector) {
@@ -91,8 +93,13 @@ function destroyObjectsTable() {
 }
 
 uiRoutes
-  .when('/management/kibana/objects', { template: objectIndexHTML })
-  .when('/management/kibana/objects/:service', { redirectTo: '/management/kibana/objects' });
+  .when('/management/kibana/objects', {
+    template: objectIndexHTML,
+    k7Breadcrumbs: getIndexBreadcrumbs
+  })
+  .when('/management/kibana/objects/:service', {
+    redirectTo: '/management/kibana/objects'
+  });
 
 uiModules.get('apps/management')
   .directive('kbnManagementObjects', function () {
