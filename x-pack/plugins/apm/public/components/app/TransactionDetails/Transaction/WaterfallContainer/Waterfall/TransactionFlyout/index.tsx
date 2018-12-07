@@ -20,10 +20,10 @@ import {
 import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
+import { DiscoverTransactionButton } from 'x-pack/plugins/apm/public/components/shared/DiscoverButtons/DiscoverTransactionButton';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { APM_AGENT_DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/agents';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { DiscoverTransactionLink } from '../../../ActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
@@ -115,11 +115,11 @@ export function TransactionFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverTransactionLink transaction={transactionDoc}>
+              <DiscoverTransactionButton transaction={transactionDoc}>
                 <EuiButtonEmpty iconType="discoverApp">
                   View transaction in Discover
                 </EuiButtonEmpty>
-              </DiscoverTransactionLink>
+              </DiscoverTransactionButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
