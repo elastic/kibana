@@ -28,7 +28,7 @@ export class WorkpadTemplates extends React.PureComponent {
   };
 
   state = {
-    sortField: 'displayName',
+    sortField: 'name',
     sortDirection: 'asc',
     pageSize: 10,
     searchTerm: '',
@@ -68,17 +68,13 @@ export class WorkpadTemplates extends React.PureComponent {
 
     const columns = [
       {
-        field: 'displayName',
+        field: 'name',
         name: 'Template Name',
         sortable: true,
         width: '30%',
         dataType: 'string',
-        render: (displayName, template) => {
-          const templateName = template.displayName.length ? (
-            template.displayName
-          ) : (
-            <em>{template.id}</em>
-          );
+        render: (name, template) => {
+          const templateName = template.name.length ? template.name : <em>{template.id}</em>;
 
           return (
             <EuiButtonEmpty
@@ -183,27 +179,21 @@ export class WorkpadTemplates extends React.PureComponent {
   render() {
     const { templates } = this.props;
     const { sortField, sortDirection, searchTerm, filterTags } = this.state;
-    const sortedTemplates = sortByOrder(
-      templates,
-      [sortField, 'displayName'],
-      [sortDirection, 'asc']
-    );
+    const sortedTemplates = sortByOrder(templates, [sortField, 'name'], [sortDirection, 'asc']);
 
-    const filteredTemplates = sortedTemplates.filter(
-      ({ displayName = '', help = '', tags = [] }) => {
-        const tagMatch = filterTags.length
-          ? filterTags.every(filterTag => tags.indexOf(filterTag) > -1)
-          : true;
+    const filteredTemplates = sortedTemplates.filter(({ name = '', help = '', tags = [] }) => {
+      const tagMatch = filterTags.length
+        ? filterTags.every(filterTag => tags.indexOf(filterTag) > -1)
+        : true;
 
-        const lowercaseSearch = searchTerm.toLowerCase();
-        const textMatch = lowercaseSearch
-          ? displayName.toLowerCase().indexOf(lowercaseSearch) > -1 ||
-            help.toLowerCase().indexOf(lowercaseSearch) > -1
-          : true;
+      const lowercaseSearch = searchTerm.toLowerCase();
+      const textMatch = lowercaseSearch
+        ? name.toLowerCase().indexOf(lowercaseSearch) > -1 ||
+          help.toLowerCase().indexOf(lowercaseSearch) > -1
+        : true;
 
-        return tagMatch && textMatch;
-      }
-    );
+      return tagMatch && textMatch;
+    });
 
     return (
       <Paginate rows={filteredTemplates}>
