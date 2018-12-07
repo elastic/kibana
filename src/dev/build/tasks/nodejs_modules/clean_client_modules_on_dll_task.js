@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { getDllEntries, cleanDllModuleFromEntryPath, writeEmptyFileForDllEntry } from './webpack_dll';
-import { getDependencies } from './get_dependencies';
+import del from 'del';
 import globby from 'globby';
 import normalizePosixPath from 'normalize-path';
+
+import { getDllEntries, getDllModuleToClean, writeEmptyFileForDllEntry } from './webpack_dll';
+import { getDependencies } from './get_dependencies';
 
 export const CleanClientModulesOnDLLTask = {
   description:
@@ -72,7 +74,9 @@ export const CleanClientModulesOnDLLTask = {
     log.debug('Finding dependencies included in the DLL');
     const dllEntries = await getDllEntries(dllManifestPath, whiteListedModules);
 
-    log.debug('Cleaning bundled module source for %d entry files', dllEntries.length);
+    log.debug('Finding unnecessary files from bundled module source for %d entry files', dllEntries.length);
+    const filesToDelete = new Set();
+
     for (const relativeEntryPath of dllEntries) {
       const entryPath = `${baseDir}/${relativeEntryPath}`;
       log.verbose('Cleaning bundled module source from entry', entryPath);
@@ -80,8 +84,13 @@ export const CleanClientModulesOnDLLTask = {
       // Clean a module included into the dll
       // and then write a blank file for each
       // entry file present into the dll
-      await cleanDllModuleFromEntryPath(entryPath);
+      for (const file of await getDllModuleToClean(entryPath)) {
+        filesToDelete.add(file);
+      }
       await writeEmptyFileForDllEntry(entryPath);
     }
+
+    await del([...filesToDelete]);
+    log.debug('Deleted %d files', filesToDelete.length);
   }
 };

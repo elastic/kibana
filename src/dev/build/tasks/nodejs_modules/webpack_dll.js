@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { scanDelete, read, write } from '../../lib';
-import { dirname, sep, extname } from 'path';
+import { read, write } from '../../lib';
+
+import { dirname, sep } from 'path';
 import pkgUp from 'pkg-up';
+import globby from 'globby';
 
 export async function getDllEntries(manifestPath, whiteListedModules) {
   const manifest = JSON.parse(await read(manifestPath));
@@ -49,14 +51,15 @@ export async function getDllEntries(manifestPath, whiteListedModules) {
   });
 }
 
-export async function cleanDllModuleFromEntryPath(entryPath) {
+export async function getDllModuleToClean(entryPath) {
   const modulePkgPath = await pkgUp(entryPath);
   const modulePkg = JSON.parse(await read(modulePkgPath));
+  const moduleDir = dirname(modulePkgPath);
 
   // Cancel the cleanup for this module as it
   // was already done.
   if (modulePkg.cleaned) {
-    return;
+    return [];
   }
 
   // Clear dependencies from dll module package.json
@@ -71,21 +74,17 @@ export async function cleanDllModuleFromEntryPath(entryPath) {
 
   // Delete module contents. It will delete everything
   // excepts package.json, images and css
-  const EXTENSIONS_TO_KEEP = [
-    '.css',
-    '.gif',
-    '.ico',
-    '.jpeg',
-    '.jpg',
-    '.tiff',
-    '.tif',
-    '.svg',
-    '.png',
-    '.webp',
-  ];
-  await scanDelete({
-    directory: dirname(modulePkgPath),
-    test: path => !(path === modulePkgPath || EXTENSIONS_TO_KEEP.includes(extname(path)))
+  //
+  // NOTE: We can't use cwd option with globby
+  // until the following issue gets closed
+  // https://github.com/sindresorhus/globby/issues/87
+  const filesToDelete = await globby([
+    `${moduleDir}/**`,
+    `!${moduleDir}/**/*.+(css)`,
+    `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
+    `!${modulePkgPath}`,
+  ], {
+    dot: true
   });
 
   // Mark this module as cleaned
@@ -96,6 +95,8 @@ export async function cleanDllModuleFromEntryPath(entryPath) {
     modulePkgPath,
     JSON.stringify(modulePkg, null, 2)
   );
+
+  return filesToDelete;
 }
 
 export async function writeEmptyFileForDllEntry(entryPath) {
