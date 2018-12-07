@@ -45,7 +45,7 @@ export class RouteTreeBuilder {
     if (invalidOverides.length > 0 && flatRoutes.length > 0) {
       throw new Error(
         `Invalid overideMap provided to 'routeTreeFromPaths', ${
-          invalidOverides[0]
+          invalidOverrides[0]
         } is not a valid route. Only the following are: ${flatRoutes.join(', ')}`
       );
     }
