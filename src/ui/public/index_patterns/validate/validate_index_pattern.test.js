@@ -17,21 +17,23 @@
  * under the License.
  */
 
-export { IndexPatternSelect } from './components/index_pattern_select';
+import { ILLEGAL_CHARACTERS, CONTAINS_SPACES, validateIndexPattern } from './validate_index_pattern';
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../constants';
 
-export { IndexPatternsProvider } from './index_patterns';
+describe('Index Pattern Validation', () => {
+  it('should not allow space in the pattern', () => {
+    const errors = validateIndexPattern('my pattern');
+    expect(errors[CONTAINS_SPACES]).toBe(true);
+  });
 
-export {
-  IndexPatternsApiClientProvider,
-} from './index_patterns_api_client_provider';
+  it('should not allow illegal characters', () => {
+    INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.forEach((char) => {
+      const errors = validateIndexPattern(`pattern${char}`);
+      expect(errors[ILLEGAL_CHARACTERS]).toEqual([ char ]);
+    });
+  });
 
-export {
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
-
-export {
-  ILLEGAL_CHARACTERS,
-  CONTAINS_SPACES,
-  validateIndexPattern,
-} from './validate';
+  it('should return empty object when there are no errors', () => {
+    expect(validateIndexPattern('my-pattern-*')).toEqual({});
+  });
+});
