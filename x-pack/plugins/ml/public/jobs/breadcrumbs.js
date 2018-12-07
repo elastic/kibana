@@ -30,7 +30,7 @@ export function getCreateSingleMetricJobBreadcrumbs() {
   return [
     ...getCreateJobBreadcrumbs(),
     {
-      text: 'Single metric job',
+      text: 'Single metric',
       href: ''
     }
   ];
@@ -40,7 +40,7 @@ export function getCreateMultiMetricJobBreadcrumbs() {
   return [
     ...getCreateJobBreadcrumbs(),
     {
-      text: 'Multi metric job',
+      text: 'Multi metric',
       href: ''
     }
   ];
@@ -50,7 +50,7 @@ export function getCreatePopulationJobBreadcrumbs() {
   return [
     ...getCreateJobBreadcrumbs(),
     {
-      text: 'Population job',
+      text: 'Population',
       href: ''
     }
   ];
@@ -60,7 +60,7 @@ export function getAdvancedJobConfigurationBreadcrumbs() {
   return [
     ...getCreateJobBreadcrumbs(),
     {
-      text: 'Advanced job configuration',
+      text: 'Advanced configuration',
       href: ''
     }
   ];

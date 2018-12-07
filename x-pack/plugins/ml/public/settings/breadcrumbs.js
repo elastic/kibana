@@ -30,7 +30,7 @@ export function getCreateCalendarBreadcrumbs() {
   return [
     ...getCalendarManagementBreadcrumbs(),
     {
-      text: 'Create calendar',
+      text: 'Create',
       href: '#/settings/calendars_list/new_calendar'
     }
   ];
@@ -40,7 +40,7 @@ export function getEditCalendarBreadcrumbs() {
   return [
     ...getCalendarManagementBreadcrumbs(),
     {
-      text: 'Edit calendar',
+      text: 'Edit',
       href: '#/settings/calendars_list/edit_calendar'
     }
   ];
@@ -60,7 +60,7 @@ export function getCreateFilterListBreadcrumbs() {
   return [
     ...getFilterListsBreadcrumbs(),
     {
-      text: 'Create filter list',
+      text: 'Create',
       href: '#/settings/filter_lists/new'
     }
   ];
@@ -70,7 +70,7 @@ export function getEditFilterListBreadcrumbs() {
   return [
     ...getFilterListsBreadcrumbs(),
     {
-      text: 'Edit filter list',
+      text: 'Edit',
       href: '#/settings/filter_lists/edit'
     }
   ];
