@@ -4,15 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SERVICE_NAME, ERROR_GROUP_ID } from '../../../../common/constants';
+import { oc } from 'ts-optchain';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../common/constants';
+import { Setup } from '../helpers/setup_request';
 
-export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
+export interface ErrorGroupAPIResponse {
+  error?: APMError;
+  occurrencesCount?: number;
+}
+
+export async function getErrorGroup({
+  serviceName,
+  groupId,
+  setup
+}: {
+  serviceName: string;
+  groupId: string;
+  setup: Setup;
+}): Promise<ErrorGroupAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const params = {
-    index: config.get('apm_oss.errorIndices'),
+    index: config.get<string>('apm_oss.errorIndices'),
     body: {
-      size: 0,
+      size: 1,
       query: {
         bool: {
           filter: [
@@ -30,19 +46,11 @@ export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
           ]
         }
       },
-      aggs: {
-        distribution: {
-          histogram: {
-            field: '@timestamp',
-            min_doc_count: 0,
-            interval: bucketSize,
-            extended_bounds: {
-              min: start,
-              max: end
-            }
-          }
+      sort: [
+        {
+          '@timestamp': 'desc'
         }
-      }
+      ]
     }
   };
 
@@ -50,15 +58,10 @@ export async function getBuckets({ serviceName, groupId, bucketSize, setup }) {
     params.body.query.bool.filter.push(esFilterQuery);
   }
 
-  const resp = await client('search', params);
-
-  const buckets = resp.aggregations.distribution.buckets.map(bucket => ({
-    key: bucket.key,
-    count: bucket.doc_count
-  }));
+  const resp = await client<APMError>('search', params);
 
   return {
-    total_hits: resp.hits.total,
-    buckets
+    error: oc(resp).hits.hits[0]._source(),
+    occurrencesCount: oc(resp).hits.total()
   };
 }
