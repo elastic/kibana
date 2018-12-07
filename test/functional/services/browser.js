@@ -20,9 +20,13 @@
 import { modifyUrl } from '../../../src/core/utils';
 
 export async function BrowserProvider({ getService }) {
-  const { driver } = await getService('__webdriver__').init();
+  const { driver, Key } = await getService('__webdriver__').init();
 
   return new class BrowserService {
+    getKeys() {
+      return Key;
+    }
+
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
@@ -130,16 +134,9 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async pressKeys(...args) {
-      let actions = driver.actions({ async: true });
-      const kb = actions.keyboard();
-      if (Array.isArray(args)) {
-        args.forEach(key => actions = actions.keyDown(key));
-        actions = actions.pause(kb);
-        args.forEach(key => actions = actions.keyUp(key));
-        await actions.perform();
-      } else {
-        await actions.keyDown(args[0]).pause(kb).keyUp(args[0]).perform();
-      }
+      const actions = driver.actions({ bridge: true });
+      const chord = this.getKeys().chord(...args);
+      await actions.sendKeys(chord).perform();
     }
 
     /**

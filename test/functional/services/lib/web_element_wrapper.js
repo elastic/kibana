@@ -127,6 +127,11 @@ export class WebElementWrapper {
    * @param {string} name
    */
   async getAttribute(name) {
+    const rectAttributes = ['height', 'width', 'x', 'y'];
+    if (rectAttributes.includes(name)) {
+      const rect = await this.getSize();
+      return rect[name];
+    }
     return await this._webElement.getAttribute(name);
   }
 
