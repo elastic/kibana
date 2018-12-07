@@ -17,40 +17,85 @@
  * under the License.
  */
 
+import { set } from 'lodash';
 import { FormattedData } from './adapters/data';
+
+const getTerms = (table, columnIndex, rowIndex) => {
+  if (rowIndex === -1) {
+    return [];
+  }
+
+  // get only rows where cell value matches current row for all the fields before columnIndex
+  const rows = table.rows.filter(row => {
+    return table.columns.every((column, i) => {
+      return row[column.id] === table.rows[rowIndex][column.id] || i >= columnIndex;
+    });
+  });
+  const terms = rows.map(row => row[table.columns[columnIndex].id]);
+
+  return [...new Set(terms.filter(term => {
+    const notOther = term !== '__other__';
+    const notMissing = term !== '__missing__';
+    return notOther && notMissing;
+  }))];
+};
+
+const createFilter = (data, columnIndex, rowIndex, cellValue) => {
+  const { aggConfig, id: columnId } = data.columns[columnIndex];
+  let filter = [];
+  const value = rowIndex > -1 ? data.rows[rowIndex][columnId] : cellValue;
+  if (value === null || value === undefined) {
+    return;
+  }
+  if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
+    const terms = getTerms(data, columnIndex, rowIndex);
+    filter = aggConfig.createFilter(value, { terms });
+  } else {
+    filter = aggConfig.createFilter(value);
+  }
+  return filter;
+};
 
 /**
  * This function builds tabular data from the response and attaches it to the
  * inspector. It will only be called when the data view in the inspector is opened.
  */
 export async function buildTabularInspectorData(table, queryFilter) {
-  const columns = table.columns.map((col, index) => {
+  const rows = table.rows.map(row => {
+    return table.columns.reduce((prev, cur, colIndex) => {
+      const value = row[cur.id];
+      const fieldFormatter = cur.aggConfig.fieldFormatter('text');
+      prev[`col-${colIndex}-${cur.aggConfig.id}`] = new FormattedData(value, fieldFormatter(value));
+      return prev;
+    }, {});
+  });
+
+  const columns = table.columns.map((col, colIndex) => {
     const field = col.aggConfig.getField();
     const isCellContentFilterable =
       col.aggConfig.isFilterable()
       && (!field || field.filterable);
     return ({
       name: col.name,
-      field: `col${index}`,
-      filter: isCellContentFilterable && ((value) => {
-        const filter = col.aggConfig.createFilter(value.raw);
+      field: `col-${colIndex}-${col.aggConfig.id}`,
+      filter: isCellContentFilterable && (value => {
+        const rowIndex = rows.findIndex(row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw);
+        const filter = createFilter(table, colIndex, rowIndex, value.raw);
         queryFilter.addFilters(filter);
       }),
-      filterOut: isCellContentFilterable && ((value) => {
-        const filter = col.aggConfig.createFilter(value.raw);
-        filter.meta = filter.meta || {};
-        filter.meta.negate = true;
+      filterOut: isCellContentFilterable && (value => {
+        const rowIndex = rows.findIndex(row => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw);
+        const filter = createFilter(table, colIndex, rowIndex, value.raw);
+        const notOther = value.raw !== '__other__';
+        const notMissing = value.raw !== '__missing__';
+        if (Array.isArray(filter)) {
+          filter.forEach(f => set(f, 'meta.negate', (notOther && notMissing)));
+        } else {
+          set(filter, 'meta.negate', (notOther && notMissing));
+        }
         queryFilter.addFilters(filter);
       }),
     });
-  });
-  const rows = table.rows.map(row => {
-    return table.columns.reduce((prev, cur, index) => {
-      const value = row[cur.id];
-      const fieldFormatter = cur.aggConfig.fieldFormatter('text');
-      prev[`col${index}`] = new FormattedData(value, fieldFormatter(value));
-      return prev;
-    }, {});
   });
 
   return { columns, rows };
