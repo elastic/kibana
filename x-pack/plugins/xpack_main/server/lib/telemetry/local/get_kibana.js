@@ -13,8 +13,8 @@ export function handleKibanaStats(server, response) {
 
   const { kibana, kibana_stats: stats, ...plugins } = response;
 
-  const platform = get(stats, 'os.platform');
-  const platformRelease = get(stats, 'os.platformRelease');
+  const platform = get(stats, 'os.platform', 'unknown');
+  const platformRelease = get(stats, 'os.platformRelease', 'unknown');
 
   let version;
   const { kbnServer } = get(server, 'plugins.xpack_main.status.plugin');
