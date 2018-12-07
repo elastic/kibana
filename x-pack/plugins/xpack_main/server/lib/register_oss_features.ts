@@ -65,7 +65,14 @@ const kibanaFeatures: Feature[] = [
         app: ['kibana'],
         savedObject: {
           all: ['dashboard'],
-          read: ['config', 'index-pattern', 'search', 'visualization', 'timelion', 'canvas'],
+          read: [
+            'config',
+            'index-pattern',
+            'search',
+            'visualization',
+            'timelion-sheet',
+            'canvas-workpad',
+          ],
         },
         ui: ['kibana:dashboard'],
       },
@@ -78,8 +85,8 @@ const kibanaFeatures: Feature[] = [
             'index-pattern',
             'search',
             'visualization',
-            'timelion',
-            'canvas',
+            'timelion-sheet',
+            'canvas-workpad',
             'dashboard',
           ],
         },
@@ -132,7 +139,7 @@ const timelionFeatures: Feature[] = [
       all: {
         app: ['timelion'],
         savedObject: {
-          all: ['timelion'],
+          all: ['timelion-sheet'],
           read: ['config', 'index-pattern'],
         },
         ui: [],
@@ -141,7 +148,7 @@ const timelionFeatures: Feature[] = [
         app: ['timelion'],
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'timelion'],
+          read: ['config', 'index-pattern', 'timelion-sheet'],
         },
         ui: [],
       },
