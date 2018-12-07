@@ -520,7 +520,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
 
           {!!leaderIndexPatterns.length && (
             <Fragment>
-              <EuiSpacer size="s" />
+              <EuiSpacer size="m" />
               {renderFollowIndicesPreview()}
             </Fragment>
           )}
