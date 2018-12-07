@@ -149,7 +149,7 @@ class AutoFollowPatternEditUi extends PureComponent {
         <EuiPageBody>
           <EuiPageContent
             horizontalPosition="center"
-            className="crossClusterReplicationPageContent"
+            className="ccrPageContent"
           >
             <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
             <EuiSpacer size="xs" />

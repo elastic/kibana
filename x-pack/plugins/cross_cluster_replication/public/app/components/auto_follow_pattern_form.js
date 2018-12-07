@@ -7,6 +7,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,6 +18,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormHelpText,
   EuiFormRow,
   EuiLoadingKibana,
   EuiLoadingSpinner,
@@ -27,11 +29,23 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 
+import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from 'ui/index_patterns';
+
 import routing from '../services/routing';
 import { API_STATUS } from '../constants';
 import { SectionError } from './';
 import { getPrefixSuffixFromFollowPattern, getPreviewIndicesFromAutoFollowPattern } from '../services/auto_follow_pattern';
 import { validateAutoFollowPattern, validateLeaderIndexPattern } from '../services/auto_follow_pattern_validators';
+
+const indexPatternIllegalCharacters = INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.join(' ');
+
+const indexPatternHelpText = (
+  <FormattedMessage
+    id="xpack.crossClusterReplication.autoFollowPatternForm.fieldIndexPattern.HelpLabel"
+    defaultMessage="Spaces and the characters {characterList} are not allowed."
+    values={{ characterList: <strong>{indexPatternIllegalCharacters}</strong> }}
+  />
+);
 
 const getFirstConnectedCluster = (clusters) => {
   for (let i = 0; i < clusters.length; i++) {
@@ -312,7 +326,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           <EuiFormRow
             label={(
               <FormattedMessage
-                id="xpack.crossClusterReplication.autoFollowPatternForm.remoteCluster.fieldNameLabel"
+                id="xpack.crossClusterReplication.autoFollowPatternForm.remoteCluster.fieldClusterLabel"
                 defaultMessage="Remote cluster"
               />
             )}
@@ -395,6 +409,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
                 defaultMessage="Index patterns"
               />
             )}
+            helpText={indexPatternHelpText}
             isInvalid={isInvalid}
             error={fieldsErrors.leaderIndexPatterns}
             fullWidth
@@ -477,9 +492,10 @@ export class AutoFollowPatternFormUI extends PureComponent {
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <EuiFormRow
+                className="ccrFollowerIndicesFormRow"
                 label={(
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldNameLabel"
+                    id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldPrefixLabel"
                     defaultMessage="Prefix"
                   />
                 )}
@@ -498,9 +514,10 @@ export class AutoFollowPatternFormUI extends PureComponent {
 
             <EuiFlexItem>
               <EuiFormRow
+                className="ccrFollowerIndicesFormRow"
                 label={(
                   <FormattedMessage
-                    id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldNameLabel"
+                    id="xpack.crossClusterReplication.autoFollowPatternForm.autoFollowPattern.fieldSuffixLabel"
                     defaultMessage="Suffix"
                   />
                 )}
@@ -509,14 +526,18 @@ export class AutoFollowPatternFormUI extends PureComponent {
                 fullWidth
               >
                 <EuiFieldText
-                  isInvalid={isPrefixInvalid}
-                  value={followIndexPatternPrefix}
-                  onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
+                  isInvalid={isSuffixInvalid}
+                  value={followIndexPatternSuffix}
+                  onChange={e => this.onFieldsChange({ followIndexPatternSuffix: e.target.value })}
                   fullWidth
                 />
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          <EuiFormHelpText className={isPrefixInvalid || isSuffixInvalid ? null : 'ccrFollowerIndicesHelpText'}>
+            {indexPatternHelpText}
+          </EuiFormHelpText>
 
           {!!leaderIndexPatterns.length && (
             <Fragment>
