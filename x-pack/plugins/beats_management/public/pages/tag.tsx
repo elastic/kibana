@@ -117,7 +117,7 @@ class TagPageComponent extends React.PureComponent<
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tag_configurations')}>
+              <EuiButtonEmpty onClick={() => this.props.goTo('/overview/configuration_tags')}>
                 <FormattedMessage
                   id="xpack.beatsManagement.tag.cancelButtonLabel"
                   defaultMessage="Cancel"
