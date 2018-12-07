@@ -5,21 +5,30 @@
  */
 
 import { Stackframe } from '../../../../../typings/APMDoc';
-import { getCollapsedLibraryFrames, hasSourceLines } from '../stacktraceUtils';
+import { getGroupedStackframes, hasSourceLines } from '../stacktraceUtils';
 import stacktracesMock from './stacktraces.json';
 
 const stackframeMockWithSource = stacktracesMock[0];
 const stackframeMockWithoutSource = stacktracesMock[1];
 
 describe('stactraceUtils', () => {
-  describe('getCollapsedLibraryFrames', () => {
-    it('should collapse the library frames into a set of grouped, nested stackframes', () => {
-      const result = getCollapsedLibraryFrames(stacktracesMock as Stackframe[]);
-      expect(result.length).toBe(3);
-      expect(result[0].libraryFrame).toBe(false);
-      expect(result[1].libraryFrame).toBe(true);
-      expect(result[1].stackframes).toHaveLength(2); // two nested stackframes
-      expect(result[2].libraryFrame).toBe(false);
+  describe('getGroupedStackframes', () => {
+    it('should collapse the library frames into a set of grouped stackframes', () => {
+      const result = getGroupedStackframes(stacktracesMock as Stackframe[]);
+      expect(result).toMatchSnapshot();
+    });
+
+    it('should handle empty stackframes', () => {
+      const result = getGroupedStackframes([] as Stackframe[]);
+      expect(result).toHaveLength(0);
+    });
+
+    it('should handle one stackframe', () => {
+      const result = getGroupedStackframes([
+        stacktracesMock[0]
+      ] as Stackframe[]);
+      expect(result).toHaveLength(1);
+      expect(result[0].stackframes).toHaveLength(1);
     });
   });
 

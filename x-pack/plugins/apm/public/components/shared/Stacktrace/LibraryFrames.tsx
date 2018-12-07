@@ -20,6 +20,26 @@ const LibraryFrameToggle = styled.div`
   user-select: none;
 `;
 
+interface LibraryStackFrameProps {
+  codeLanguage?: string;
+  stackframe: Stackframe;
+}
+
+const LibraryStackFrame: React.SFC<LibraryStackFrameProps> = ({
+  codeLanguage,
+  stackframe
+}) => {
+  return hasSourceLines(stackframe) ? (
+    <CodePreview
+      stackframe={stackframe}
+      isLibraryFrame
+      codeLanguage={codeLanguage}
+    />
+  ) : (
+    <FrameHeading stackframe={stackframe} isLibraryFrame />
+  );
+};
+
 interface Props {
   visible?: boolean;
   stackframes: Stackframe[];
@@ -33,6 +53,19 @@ export const LibraryFrames: React.SFC<Props> = ({
   codeLanguage,
   onClick
 }) => {
+  if (stackframes.length === 0) {
+    return null;
+  }
+
+  if (stackframes.length === 1) {
+    return (
+      <LibraryStackFrame
+        codeLanguage={codeLanguage}
+        stackframe={stackframes[0]}
+      />
+    );
+  }
+
   return (
     <div>
       <LibraryFrameToggle>
@@ -44,18 +77,13 @@ export const LibraryFrames: React.SFC<Props> = ({
 
       <div>
         {visible &&
-          stackframes.map((stackframe, i) =>
-            hasSourceLines(stackframe) ? (
-              <CodePreview
-                key={i}
-                stackframe={stackframe}
-                isLibraryFrame
-                codeLanguage={codeLanguage}
-              />
-            ) : (
-              <FrameHeading key={i} stackframe={stackframe} isLibraryFrame />
-            )
-          )}
+          stackframes.map((stackframe, i) => (
+            <LibraryStackFrame
+              key={i}
+              codeLanguage={codeLanguage}
+              stackframe={stackframe}
+            />
+          ))}
       </div>
     </div>
   );

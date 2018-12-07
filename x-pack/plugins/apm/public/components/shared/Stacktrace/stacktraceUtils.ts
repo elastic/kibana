@@ -7,35 +7,35 @@
 import { get, isEmpty } from 'lodash';
 import { Stackframe } from '../../../../typings/APMDoc';
 
-export interface StackframeCollapsed extends Stackframe {
-  libraryFrame?: boolean;
-  stackframes?: Stackframe[];
+interface StackframesGroup {
+  isLibraryFrame: boolean;
+  stackframes: Stackframe[];
 }
 
-export function getCollapsedLibraryFrames(
+export function getGroupedStackframes(
   stackframes: Stackframe[]
-): StackframeCollapsed[] {
-  return stackframes.reduce((acc: any, stackframe: StackframeCollapsed) => {
-    if (!stackframe.libraryFrame) {
-      return [...acc, stackframe];
-    }
+): StackframesGroup[] {
+  if (stackframes.length === 0) {
+    return [];
+  }
 
-    // current stackframe is library frame
-    const prevItem: StackframeCollapsed = acc[acc.length - 1];
-    if (!get(prevItem, 'libraryFrame')) {
-      return [...acc, { libraryFrame: true, stackframes: [stackframe] }];
-    }
+  const isLibraryFrame = Boolean(stackframes[0].library_frame);
 
-    return [
-      ...acc.slice(0, -1),
-      {
-        ...prevItem,
-        stackframes: prevItem.stackframes
-          ? [...prevItem.stackframes, stackframe]
-          : [stackframe]
-      }
-    ];
-  }, []);
+  let i = 0;
+  while (
+    i < stackframes.length &&
+    isLibraryFrame === stackframes[i].library_frame &&
+    !stackframes[i].exclude_from_grouping
+  ) {
+    i++;
+  }
+
+  const stackFrameEndIndex = i || 1;
+
+  return [
+    { isLibraryFrame, stackframes: stackframes.slice(0, stackFrameEndIndex) },
+    ...getGroupedStackframes(stackframes.slice(stackFrameEndIndex))
+  ];
 }
 
 export function hasSourceLines(stackframe: Stackframe) {
