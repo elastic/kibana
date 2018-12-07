@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   GroupByOption,
@@ -71,22 +72,50 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
         <EuiSpacer />
         <EuiText grow={false}>
           <p>
-            These <strong>{checkupLabel}</strong> issues need your attention. Address them before
-            upgrading to Elasticsearch 7.0.
+            <FormattedMessage
+              id="xpack.upgradeCheckup.checkupTab.tabDetail"
+              defaultMessage={
+                'These {strongCheckupLabel} issues need your attention. ' +
+                'Address them before upgrading to Elasticsearch {nextEsVersion}.'
+              }
+              values={{
+                strongCheckupLabel: <strong>{checkupLabel}</strong>,
+                nextEsVersion: '7.x',
+              }}
+            />
           </p>
         </EuiText>
         {showBackupWarning && (
           <Fragment>
             <EuiSpacer />
-            <EuiCallOut title="Back up your indices now" color="warning" iconType="help">
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeCheckup.checkupTab.backUpCallout.calloutTitle"
+                  defaultMessage="Back up your indices now"
+                />
+              }
+              color="warning"
+              iconType="help"
+            >
               <p>
-                Back up your data using the{' '}
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
-                  target="_blank"
-                >
-                  snapshot and restore APIs.
-                </EuiLink>
+                <FormattedMessage
+                  id="xpack.upgradeCheckup.checkupTab.backUpCallout.calloutBody.calloutDetail"
+                  defaultMessage="Back up your data using the {snapshotRestoreDocsButton}."
+                  values={{
+                    snapshotRestoreDocsButton: (
+                      <EuiLink
+                        href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          id="xpack.upgradeCheckup.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel"
+                          defaultMessage="snapshot and restore APIs"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
               </p>
             </EuiCallOut>
           </Fragment>
@@ -96,7 +125,12 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
           <EuiPageContentBody>
             {loadingState === LoadingState.Error ? (
               <EuiCallOut
-                title="A network error occurred while retrieving the checkup results."
+                title={
+                  <FormattedMessage
+                    id="xpack.upgradeCheckup.checkupTab.errorCallout.calloutTitle"
+                    defaultMessage="A network error occurred while retrieving the checkup results."
+                  />
+                }
                 color="danger"
                 iconType="cross"
               />
@@ -120,16 +154,40 @@ export class CheckupTab extends UpgradeCheckupTabComponent<CheckupTabProps, Chec
             ) : (
               <EuiEmptyPrompt
                 iconType="faceHappy"
-                title={<h2>All clear!</h2>}
+                title={
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.upgradeCheckup.checkupTab.noIssues.noIssuesTitle"
+                      defaultMessage="All clear!"
+                    />
+                  </h2>
+                }
                 body={
                   <Fragment>
                     <p data-test-subj="upgradeCheckupIssueSummary">
-                      You have no <strong>{checkupLabel}</strong> issues.
+                      <FormattedMessage
+                        id="xpack.upgradeCheckup.checkupTab.noIssues.noIssuesLabel"
+                        defaultMessage="You have no {strongCheckupLabel} issues."
+                        values={{
+                          strongCheckupLabel: <strong>{checkupLabel}</strong>,
+                        }}
+                      />
                     </p>
                     <p>
-                      Check the{' '}
-                      <EuiLink onClick={() => setSelectedTabIndex(0)}>Overview tab</EuiLink> for
-                      next steps.
+                      <FormattedMessage
+                        id="xpack.upgradeCheckup.checkupTab.noIssues.nextStepsDetail"
+                        defaultMessage="Check the {overviewTabButton} for next steps."
+                        values={{
+                          overviewTabButton: (
+                            <EuiLink onClick={() => setSelectedTabIndex(0)}>
+                              <FormattedMessage
+                                id="xpack.upgradeCheckup.checkupTab.noIssues.nextStepsDetail.overviewTabButtonLabel"
+                                defaultMessage="Overview tab"
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
                     </p>
                   </Fragment>
                 }
