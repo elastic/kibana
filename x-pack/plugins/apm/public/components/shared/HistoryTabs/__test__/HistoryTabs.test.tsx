@@ -55,11 +55,11 @@ describe('HistoryTabs', () => {
       }
     ];
 
-    testProps = ({
+    testProps = {
       location: mockLocation,
       history: mockHistory,
       tabs: testTabs
-    } as unknown) as HistoryTabsProps;
+    } as HistoryTabsProps;
   });
 
   it('should render correctly', () => {
