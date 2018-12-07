@@ -28,7 +28,9 @@ export class BeatsContainer extends Container<ContainerState> {
       this.setState({
         list: [beat as CMPopulatedBeat, ...this.state.list],
       });
+      return beat as CMPopulatedBeat;
     }
+    return null;
   };
 
   public reload = async (kuery?: string) => {
