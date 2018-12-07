@@ -33,7 +33,7 @@ export class SocketService {
     this.broadcastProgress(SocketKind.DELETE_PROGRESS, repoUri, progress, {});
   }
 
-  public boradcastInstallProgress(event: InstallEvent) {
+  public broadcastInstallProgress(event: InstallEvent) {
     this.io.sockets.emit(SocketKind.INSTALL_PROGRESS, event);
   }
 

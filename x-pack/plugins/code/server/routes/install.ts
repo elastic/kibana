@@ -19,7 +19,7 @@ export function installRoute(
   installManager: InstallManager,
   serverOptions: ServerOptions
 ) {
-  installManager.on(socketService.boradcastInstallProgress);
+  installManager.on(socketService.broadcastInstallProgress);
 
   const status = (def: LanguageServerDefinition) => ({
     name: def.name,
