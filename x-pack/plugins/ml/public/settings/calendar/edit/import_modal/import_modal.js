@@ -14,7 +14,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCheckbox,
   EuiFilePicker,
   EuiModal,
   EuiModalHeader,
@@ -23,14 +22,10 @@ import {
   EuiModalFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSpacer
 } from '@elastic/eui';
-import moment from 'moment';
 
-import { EventsTable } from './events_table';
-
-const icalendar = require('icalendar');
+import { ImportedEvents } from '../imported_events';
+import { readFile, parseICSFile, filterEvents } from './utils';
 
 const MAX_FILE_SIZE_MB = 100;
 
@@ -41,73 +36,11 @@ export class ImportModal extends Component {
     this.state = {
       includePastEvents: false,
       allImportedEvents: [],
+      selectedEvents: [],
       fileLoading: false,
       fileLoaded: false,
       errorMessage: null,
     };
-  }
-
-  selectedEvents = [];
-
-  static createEvents = (ical) => {
-    const events = ical.events();
-    const mlEvents = [];
-
-    events.forEach((e, i) => {
-      if (e.element === 'VEVENT') {
-        const description = e.properties.SUMMARY;
-        const start = e.properties.DTSTART;
-        const end = e.properties.DTEND;
-        const recurring = (e.properties.RRULE !== undefined);
-
-        if (description && start && end && description.length && start.length && end.length) {
-          // Temp reference to unsaved events to allow removal from table
-          const tempId = `${i}${start[0].value.valueOf()}`;
-
-          mlEvents.push({
-            event_id: tempId,
-            description: description[0].value,
-            start_time: start[0].value.valueOf(),
-            end_time: end[0].value.valueOf(),
-            asterisk: recurring
-          });
-        }
-      }
-    });
-    return mlEvents;
-  }
-
-  static parseICSFile = (data) => {
-    const cal = icalendar.parse_calendar(data);
-    return ImportModal.createEvents(cal);
-  }
-
-  static filterEvents = (events) => {
-    const now = moment().valueOf();
-    return events.filter(e => e.start_time > now);
-  }
-
-  // move to utils?
-  static readFile = (file) => {
-    return new Promise((resolve, reject) => {
-      if (file && file.size) {
-        const reader = new FileReader();
-        reader.readAsText(file);
-
-        reader.onload = (() => {
-          return () => {
-            const data = reader.result;
-            if (data === '') {
-              reject();
-            } else {
-              resolve({ data });
-            }
-          };
-        })(file);
-      } else {
-        reject();
-      }
-    });
   }
 
   handleImport = async (loadedFile) => {
@@ -119,11 +52,12 @@ export class ImportModal extends Component {
       this.setState({ fileLoading: true, fileLoaded: true });
 
       try {
-        const parsedFile = await ImportModal.readFile(incomingFile);
-        events = ImportModal.parseICSFile(parsedFile.data);
+        const parsedFile = await readFile(incomingFile);
+        events = parseICSFile(parsedFile.data);
 
         this.setState({
           allImportedEvents: events,
+          selectedEvents: filterEvents(events),
           fileLoading: false,
           errorMessage: null,
           includePastEvents: false
@@ -142,6 +76,7 @@ export class ImportModal extends Component {
   onEventDelete = (eventId) => {
     this.setState(prevState => ({
       allImportedEvents: prevState.allImportedEvents.filter(event => event.event_id !== eventId),
+      selectedEvents: prevState.selectedEvents.filter(event => event.event_id !== eventId),
     }));
   }
 
@@ -152,7 +87,9 @@ export class ImportModal extends Component {
   };
 
   handleEventsAdd = () => {
-    const events = this.selectedEvents.map((event) => ({
+    const { selectedEvents } = this.state;
+
+    const events = selectedEvents.map((event) => ({
       description: event.description,
       start_time: event.start_time,
       end_time: event.end_time
@@ -167,64 +104,29 @@ export class ImportModal extends Component {
     </EuiCallOut>
   );
 
-  renderImportedEvents = () => {
-    const {
-      allImportedEvents,
-      includePastEvents
-    } = this.state;
-
-    let showRecurringWarning = false;
-
-    if (includePastEvents) {
-      this.selectedEvents = allImportedEvents;
-    } else {
-      this.selectedEvents = ImportModal.filterEvents(allImportedEvents);
-    }
-
-    if (this.selectedEvents.find(e => e.asterisk) !== undefined) {
-      showRecurringWarning = true;
-    }
-
-    return (
-      <Fragment>
-        <EuiSpacer size="s"/>
-        <EuiFlexItem>
-          <EuiText>
-            <h4>Events to import: {this.selectedEvents.length}</h4>
-            {showRecurringWarning && (
-              <EuiText color="danger">
-                <p>Recurring events not supported. Only the first event will be imported.</p>
-              </EuiText>)
-            }
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EventsTable
-            eventsList={this.selectedEvents}
-            onDeleteClick={this.onEventDelete}
-          />
-        </EuiFlexItem>
-        <EuiSpacer size="m" />
-        <EuiFlexItem grow={false}>
-          <EuiCheckbox
-            id="ml-include-past-events"
-            label="Include past events"
-            checked={includePastEvents}
-            onChange={this.onCheckboxToggle}
-          />
-        </EuiFlexItem>
-      </Fragment>
-    );
-  }
-
   render() {
     const { closeImportModal } = this.props;
     const {
       fileLoading,
       fileLoaded,
       allImportedEvents,
-      errorMessage
+      selectedEvents,
+      errorMessage,
+      includePastEvents
     } = this.state;
+
+    let showRecurringWarning = false;
+    let importedEvents;
+
+    if (includePastEvents) {
+      importedEvents = allImportedEvents;
+    } else {
+      importedEvents = selectedEvents;
+    }
+
+    if (importedEvents.find(e => e.asterisk) !== undefined) {
+      showRecurringWarning = true;
+    }
 
     return (
       <Fragment>
@@ -259,7 +161,16 @@ export class ImportModal extends Component {
                 />
               </EuiFlexItem>
               {errorMessage !== null && this.renderCallout()}
-              {allImportedEvents.length > 0 && this.renderImportedEvents()}
+              {
+                allImportedEvents.length > 0 &&
+                <ImportedEvents
+                  events={importedEvents}
+                  showRecurringWarning={showRecurringWarning}
+                  includePastEvents={includePastEvents}
+                  onCheckboxToggle={this.onCheckboxToggle}
+                  onEventDelete={this.onEventDelete}
+                />
+              }
             </EuiFlexGroup>
           </EuiModalBody>
 
