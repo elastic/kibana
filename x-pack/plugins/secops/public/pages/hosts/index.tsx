@@ -76,6 +76,3 @@ export const Hosts = pure(() => (
     }
   </WithSource>
 ));
-
-/* <Placeholders count={8} myRoute="Hosts" />
-</Pane1FlexContent> */

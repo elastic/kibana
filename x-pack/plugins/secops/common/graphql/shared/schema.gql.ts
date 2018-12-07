@@ -22,7 +22,7 @@ export const sharedSchema = gql`
   }
 
   input PaginationInput {
-    "The size parameter allows you to configure the maximum amount of items to be returned"
+    "The limit parameter allows you to configure the maximum amount of items to be returned"
     limit: Int!
     "The cursor parameter defines the next result you want to fetch"
     cursor: String
