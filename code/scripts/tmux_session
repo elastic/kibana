@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-cd $(dirname $0)/..
-
-tmuxp load scripts/tmux_session.yaml

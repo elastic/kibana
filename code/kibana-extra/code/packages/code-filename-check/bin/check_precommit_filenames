@@ -1,3 +1,0 @@
-#!/usr/bin/env node
-require('../../../../../kibana/src/setup_node_env');
-require('../check_precommit_filenames');

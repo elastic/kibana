@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-cd $(dirname $0)/../lsp/javascript-typescript-langserver
-
-git fetch
-git checkout -f master
-git reset --hard origin/master
-git clean -xdf

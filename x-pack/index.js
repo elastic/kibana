@@ -18,6 +18,7 @@ import { dashboardMode } from './plugins/dashboard_mode';
 import { logstash } from './plugins/logstash';
 import { beats } from './plugins/beats_management';
 import { apm } from './plugins/apm';
+import { code } from './plugins/code';
 import { licenseManagement } from './plugins/license_management';
 import { cloud } from './plugins/cloud';
 import { indexManagement } from './plugins/index_management';
@@ -46,6 +47,7 @@ module.exports = function (kibana) {
     logstash(kibana),
     beats(kibana),
     apm(kibana),
+    code(kibana),
     canvas(kibana),
     licenseManagement(kibana),
     cloud(kibana),

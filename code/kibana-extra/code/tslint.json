@@ -1,3 +1,0 @@
-{
-  "extends": ["../../kibana/x-pack/tslint.yaml", "tslint-react"]
-}

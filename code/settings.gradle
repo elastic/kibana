@@ -1,6 +1,0 @@
-//include 'util'
-//include 'elasticsearch'
-
-include 'kibana-extra:code'
-include 'lsp:javascript-typescript-langserver'
-include 'lsp:java-langserver'
