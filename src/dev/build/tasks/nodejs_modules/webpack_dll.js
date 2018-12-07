@@ -83,9 +83,7 @@ export async function getDllModuleToClean(entryPath) {
     `!${moduleDir}/**/*.+(css)`,
     `!${moduleDir}/**/*.+(gif|ico|jpeg|jpg|tiff|tif|svg|png|webp)`,
     `!${modulePkgPath}`,
-  ], {
-    dot: true
-  });
+  ]);
 
   // Mark this module as cleaned
   modulePkg.cleaned = true;
