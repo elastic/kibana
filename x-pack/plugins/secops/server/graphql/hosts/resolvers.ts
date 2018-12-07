@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getOr } from 'lodash/fp';
 import { SourceResolvers } from '../../../common/graphql/types';
 import { AppResolvedResult, AppResolverOf } from '../../lib/framework';
 import { Hosts } from '../../lib/hosts';
@@ -19,7 +20,7 @@ type QueryHostsResolver = AppResolverOf<
   Context
 >;
 
-interface HostsResolversDeps {
+export interface HostsResolversDeps {
   hosts: Hosts;
 }
 
@@ -32,7 +33,7 @@ export const createHostsResolvers = (
 } => ({
   Source: {
     async Hosts(source, args, { req }, info) {
-      const fields = getFields(info.fieldNodes[0]);
+      const fields = getFields(getOr([], 'fieldNodes[0]', info));
       const options: HostsRequestOptions = {
         sourceConfiguration: source.configuration,
         timerange: args.timerange,

@@ -17,7 +17,7 @@ mockGetAll.mockResolvedValue({
     ...mockSourceData.configuration,
   },
 });
-const mockSourcesAdapter: SourcesAdapter = {
+export const mockSourcesAdapter: SourcesAdapter = {
   getAll: mockGetAll,
 };
 
@@ -27,7 +27,7 @@ const mockHasAlias = jest.fn();
 mockHasAlias.mockResolvedValue(false);
 const mockHasIndices = jest.fn();
 mockHasIndices.mockResolvedValue(false);
-const mockSourceStatusAdapter: SourceStatusAdapter = {
+export const mockSourceStatusAdapter: SourceStatusAdapter = {
   getIndexNames: mockGetIndexNames,
   hasAlias: mockHasAlias,
   hasIndices: mockHasIndices,

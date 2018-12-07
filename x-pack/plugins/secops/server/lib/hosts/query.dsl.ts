@@ -51,7 +51,7 @@ export const buildQuery = (options: HostsRequestOptions) => {
   const agg = {
     host_count: {
       cardinality: {
-        field: 'system.host.name',
+        field: 'system.host.id',
       },
     },
   };
@@ -66,7 +66,7 @@ export const buildQuery = (options: HostsRequestOptions) => {
         group_by_host: {
           composite: {
             size: limit + 1,
-            sources: [{ host_name: { terms: { field: 'system.host.name' } } }],
+            sources: [{ host_name: { terms: { field: 'system.host.id' } } }],
           },
           aggs: {
             time: {
