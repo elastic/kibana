@@ -119,7 +119,7 @@ describe('RouteTreeBuilder', () => {
       treeBuilder.routeTreeFromPaths(pages, {
         '/non-existant-path': ['beatId'],
       });
-    }).toThrowError(/Invalid overideMap provided to 'routeTreeFromPaths', \/non-existant-path /);
+    }).toThrowError(/Invalid overrideMap provided to 'routeTreeFromPaths', \/non-existant-path /);
   });
   it('Should rended 404.tsx as a 404 route not /404', () => {
     const mockRequire = jest.fn(path => ({
