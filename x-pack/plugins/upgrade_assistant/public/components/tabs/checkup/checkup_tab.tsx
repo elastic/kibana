@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { find } from 'lodash';
 import React, { Fragment } from 'react';
 
 import {
@@ -228,7 +229,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
       return [];
     }
 
-    return Object.keys(GroupByOption).filter(opt => _.find(deprecations, opt)) as GroupByOption[];
+    return Object.keys(GroupByOption).filter(opt => find(deprecations, opt)) as GroupByOption[];
   }
 
   private renderCheckupData() {

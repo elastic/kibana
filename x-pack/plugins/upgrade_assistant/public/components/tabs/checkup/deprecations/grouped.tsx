@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { groupBy } from 'lodash';
+import { Dictionary, groupBy } from 'lodash';
 import React, { Fragment, StatelessComponent } from 'react';
 
 import {
@@ -55,7 +55,7 @@ const filterDeps = (levels: Set<LevelFilterOption>, search: string) => {
  * A single accordion item for a grouped deprecation item.
  */
 const DeprecationAccordion: StatelessComponent<{
-  groups: _.Dictionary<EnrichedDeprecationInfo[]>;
+  groups: Dictionary<EnrichedDeprecationInfo[]>;
   groupName: string;
   currentGroupBy: GroupByOption;
   forceExpand: boolean;

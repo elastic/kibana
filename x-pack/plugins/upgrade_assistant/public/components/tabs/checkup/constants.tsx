@@ -5,6 +5,7 @@
  */
 
 import { IconColor } from '@elastic/eui';
+import { invert } from 'lodash';
 
 import { MIGRATION_DEPRECATION_LEVEL as LEVEL } from 'src/core_plugins/elasticsearch';
 
@@ -15,7 +16,7 @@ export const LEVEL_MAP = {
   critical: 3,
 };
 
-export const REVERSE_LEVEL_MAP: { [idx: number]: LEVEL } = _.invert(LEVEL_MAP);
+export const REVERSE_LEVEL_MAP: { [idx: number]: LEVEL } = invert(LEVEL_MAP);
 
 export const COLOR_MAP: { [level: string]: IconColor } = {
   none: 'success',

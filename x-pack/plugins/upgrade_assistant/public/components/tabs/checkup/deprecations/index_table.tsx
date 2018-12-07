@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { sortBy } from 'lodash';
 import React from 'react';
 
 import { EuiBasicTable, EuiButton } from '@elastic/eui';
@@ -95,7 +96,7 @@ export class IndexDeprecationTableUI extends React.Component<
     const { sortField, sortDirection, pageIndex, pageSize } = this.state;
     const { indices } = this.props;
 
-    let sorted = _.sortBy(indices, sortField);
+    let sorted = sortBy(indices, sortField);
     if (sortDirection === 'desc') {
       sorted = sorted.reverse();
     }
