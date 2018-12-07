@@ -18,6 +18,11 @@ const urlPartsSchema = () => Joi.object().keys({
   hash: Joi.string().regex(/^\//, 'start with a /')
 }).default();
 
+const appUrlPartsSchema = () => Joi.object().keys({
+  pathname: Joi.string().regex(/^\//, 'start with a /'),
+  hash: Joi.string().regex(/^\//, 'start with a /')
+}).default();
+
 const defaultRelativeToConfigPath = path => {
   const makeDefault = (locals, options) => (
     resolve(dirname(options.context.path), path)
@@ -86,7 +91,7 @@ export const schema = Joi.object().keys({
   // definition of apps that work with `common.navigateToApp()`
   apps: Joi.object().pattern(
     ID_PATTERN,
-    urlPartsSchema()
+    appUrlPartsSchema()
   ).default(),
 
   // settings for the esArchiver module
