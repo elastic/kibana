@@ -35,7 +35,7 @@ routes.when('/account', {
     const notifier = new Notifier();
 
     const { authentication_realm: authenticationRealm } = $scope.user;
-    $scope.showChangePassword = !REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(authenticationRealm.type);
+    $scope.showChangePassword = REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE.includes(authenticationRealm.type);
 
     $scope.saveNewPassword = (newPassword, currentPassword, onSuccess, onIncorrectPassword) => {
       $scope.user.newPassword = newPassword;
