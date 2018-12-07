@@ -64,9 +64,9 @@ export interface RawTaskDoc {
  * interface into the index.
  */
 export class TaskStore {
+  public readonly maxAttempts: number;
   private callCluster: ElasticJs;
   private index: string;
-  private maxAttempts: number;
   private supportedTypes: string[];
   private wasInitialized = false;
 
@@ -223,15 +223,6 @@ export class TaskStore {
 
     return docs;
   };
-
-  /**
-   * getter for maxAttempts
-   *
-   * @returns {number} maxAttempts
-   */
-  public getMaxAttempts(): number {
-    return this.maxAttempts;
-  }
 
   /**
    * Updates the specified doc in the index, returning the doc

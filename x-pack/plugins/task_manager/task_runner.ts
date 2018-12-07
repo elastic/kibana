@@ -35,9 +35,9 @@ export interface TaskRunner {
 }
 
 interface Updatable {
+  readonly maxAttempts: number;
   update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<RemoveResult>;
-  getMaxAttempts(): number;
 }
 
 interface Opts {
@@ -210,7 +210,7 @@ export class TaskManagerRunner implements TaskRunner {
     if (recurring) {
       // recurring task: update the task instance
       const state = result.state || this.instance.state || {};
-      const status = this.instance.attempts < this.store.getMaxAttempts() ? 'idle' : 'failed';
+      const status = this.instance.attempts < this.store.maxAttempts ? 'idle' : 'failed';
 
       let runAt;
       if (status === 'failed') {
