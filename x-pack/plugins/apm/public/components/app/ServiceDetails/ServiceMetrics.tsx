@@ -9,6 +9,7 @@ import React from 'react';
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
 import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { MemoryUsageChart } from './MemoryUsageChart';
 
 interface ServiceMetricsProps {
   serviceName: string;
@@ -20,15 +21,18 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = props => {
   // TODO: Find out why serviceName isn't present in urlParams here?
   const params = { serviceName, ...urlParams };
   return (
-    <TransactionOverviewChartsRequest
-      urlParams={params}
-      render={({ data }) => (
-        <TransactionCharts
-          charts={data}
-          urlParams={params}
-          location={location}
-        />
-      )}
-    />
+    <React.Fragment>
+      <TransactionOverviewChartsRequest
+        urlParams={params}
+        render={({ data }) => (
+          <TransactionCharts
+            charts={data}
+            urlParams={params}
+            location={location}
+          />
+        )}
+      />
+      <MemoryUsageChart />
+    </React.Fragment>
   );
 };
