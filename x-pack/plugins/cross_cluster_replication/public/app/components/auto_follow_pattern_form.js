@@ -250,7 +250,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           description={(
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternForm.sectionAutoFollowPatternNameDescription"
-              defaultMessage="Give your auto-follow pattern a unique name."
+              defaultMessage="A unique name for the auto-follow pattern."
             />
           )}
           fullWidth
@@ -304,8 +304,7 @@ export class AutoFollowPatternFormUI extends PureComponent {
           description={(
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternForm.sectionRemoteClusterDescription"
-              defaultMessage="The auto-follow pattern will replicate data from leader indices on the
-                remote cluster you choose."
+              defaultMessage="The remote cluster to replicate leader indices from."
             />
           )}
           fullWidth
@@ -365,15 +364,16 @@ export class AutoFollowPatternFormUI extends PureComponent {
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.sectionLeaderIndexPatternsDescription1"
-                  defaultMessage="Define index patterns to identify leader indices. As indices which
-                    match these index patterns are created, their data will be replicated to follower indices."
+                  defaultMessage="One or more index patterns that identify the indices you want to
+                    replicate from the remote cluster. As new indices matching these patterns are
+                    created, they are replicated to follower indices on the local cluster."
                 />
               </p>
 
               <p>
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.sectionLeaderIndexPatternsDescription2"
-                  defaultMessage="{note} existing indices which match these index patterns will not be replicated."
+                  defaultMessage="{note} indices that already exist are not replicated."
                   values={{ note: (
                     <strong>
                       <FormattedMessage
@@ -467,9 +467,9 @@ export class AutoFollowPatternFormUI extends PureComponent {
           description={(
             <FormattedMessage
               id="xpack.crossClusterReplication.autoFollowPatternForm.sectionAutoFollowPatternDescription"
-              defaultMessage="By default, the auto-follow pattern will create follower indices with
-                the same names as the leader indices. Applying a prefix and/or suffix to the
-                follower index name can help you differentiate your replicated data from other data."
+              defaultMessage="A custom prefix or suffix to apply to the names of the follower
+                indices so you can more easily identify replicated indices. By default, a follower
+                index has the same name as the leader index."
             />
           )}
           fullWidth
