@@ -3,18 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// @ts-ignore
-import { EuiIcon, EuiInMemoryTable, EuiSuperSelect, EuiText, IconType } from '@elastic/eui';
+
+import {
+  EuiIcon,
+  EuiIconTip,
+  // @ts-ignore
+  EuiInMemoryTable,
+  // @ts-ignore
+  EuiSuperSelect,
+  EuiText,
+  IconType,
+} from '@elastic/eui';
 import { InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import { EffectivePrivileges } from 'plugins/security/lib/get_effective_privileges';
-import React, { ChangeEvent, Component } from 'react';
-import { FeaturePrivilegeSet } from 'x-pack/plugins/security/common/model/privileges/feature_privileges';
+import React, { Component } from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Role } from 'x-pack/plugins/security/common/model/role';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { NO_PRIVILEGE_VALUE } from '../../../../lib/constants';
-import { copyRole } from '../../../../lib/copy_role';
 
 interface Props {
   role: Role;
@@ -24,6 +31,11 @@ interface Props {
   intl: InjectedIntl;
   spaceId?: string;
   onChange: (featureId: string, privileges: string[]) => void;
+}
+
+interface ToolTipDefinition {
+  privilegeId: string;
+  tooltip: string;
 }
 
 export class FeatureTable extends Component<Props, {}> {
@@ -52,10 +64,41 @@ export class FeatureTable extends Component<Props, {}> {
         defaultMessage: 'Feature',
       }),
       render: (feature: Feature) => {
+        const tooltips = Object.entries(feature.privileges).reduce(
+          (acc: ToolTipDefinition[], [privilegeId, privilege]) => {
+            if (!privilege.metadata || !privilege.metadata.tooltip) {
+              return acc;
+            }
+
+            return [
+              ...acc,
+              {
+                privilegeId,
+                tooltip: privilege.metadata.tooltip,
+              },
+            ];
+          },
+          [] as ToolTipDefinition[]
+        );
+
+        let tooltipElement = null;
+        if (tooltips.length > 0) {
+          const tooltipContent = (
+            <EuiText>
+              {tooltips.map(tip => (
+                <p key={tip.privilegeId}>{tip.tooltip}</p>
+              ))}
+            </EuiText>
+          );
+          tooltipElement = (
+            <EuiIconTip type={'iInCircle'} color={'primary'} content={tooltipContent} />
+          );
+        }
+
         return (
           <EuiText>
             <EuiIcon type={feature.icon as IconType} />
-            &ensp; {feature.name}
+            &ensp; {feature.name} {tooltipElement}
           </EuiText>
         );
       },
