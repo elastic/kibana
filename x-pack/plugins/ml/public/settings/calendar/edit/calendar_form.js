@@ -84,7 +84,6 @@ export function CalendarForm({
         label="Jobs"
       >
         <EuiComboBox
-          className="ml-calendar-combo-box"
           fullWidth
           options={jobIds}
           selectedOptions={selectedJobOptions}
@@ -97,7 +96,6 @@ export function CalendarForm({
         label="Groups"
       >
         <EuiComboBox
-          className="ml-calendar-combo-box"
           fullWidth
           onCreateOption={onCreateGroupOption}
           options={groupIds}

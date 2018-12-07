@@ -20,9 +20,9 @@ import { initPromise } from 'plugins/ml/util/promise';
 import uiRoutes from 'ui/routes';
 
 const template = `
-  <ml-nav-menu name="settings"></ml-nav-menu>
-  <div class="ml-calendar-lists">
-    <ml-calendars-list></ml-calendars-list>
+  <ml-nav-menu name="settings" />
+  <div class="mlCalendar_management">
+    <ml-calendars-list />
   </div>
 `;
 
@@ -33,7 +33,7 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-      initPromise: initPromise(true)
+      initPromise: initPromise(false)
     }
   });
 

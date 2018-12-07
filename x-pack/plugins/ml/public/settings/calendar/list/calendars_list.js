@@ -122,9 +122,9 @@ export class CalendarsList extends Component {
     }
 
     return (
-      <EuiPage className="ml-list-calendar">
+      <EuiPage className="mlCalendar_list">
         <EuiPageContent
-          className="ml-list-calendar-content"
+          className="mlCalendar_listContent"
           verticalPosition="center"
           horizontalPosition="center"
         >

@@ -20,9 +20,9 @@ import { initPromise } from 'plugins/ml/util/promise';
 import uiRoutes from 'ui/routes';
 
 const template = `
-  <ml-nav-menu name="settings"></ml-nav-menu>
-  <div class="ml-calendar-lists">
-    <ml-new-calendar></ml-new-calendar>
+  <ml-nav-menu name="settings" />
+  <div class="mlCalendar_management">
+    <ml-new-calendar />
   </div>
 `;
 
@@ -33,7 +33,7 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-      initPromise: initPromise(true)
+      initPromise: initPromise(false)
     }
   })
   .when('/settings/calendars_list/edit_calendar/:calendarId', {
@@ -42,7 +42,7 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-      initPromise: initPromise(true)
+      initPromise: initPromise(false)
     }
   });
 
