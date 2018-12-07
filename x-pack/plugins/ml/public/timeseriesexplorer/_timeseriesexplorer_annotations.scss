@@ -16,8 +16,16 @@
 
 .ml-annotation-text {
   text-anchor: middle;
-  font-size: 16px;
-  color: #333;
+  font-size: 12px;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  font-weight: 600;  
+  color: #000;
+}
+
+.ml-annotation-text-rect {
+  fill: rgb(217, 217, 217);
+  width: 25px;
+  height: 20px;
 }
 
 .ml-annotation-hidden {

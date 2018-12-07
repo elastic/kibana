@@ -457,7 +457,14 @@ module.controller('MlTimeSeriesExplorerController', function (
         latestMs: searchBounds.max.valueOf(),
         maxAnnotations: MAX_ANNOTATIONS
       }).then((resp) => {
-        refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id];
+        refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
+          .map((d, i) => {
+            d.key = i + 1;
+            return d;
+          })
+          .sort((a, b) => {
+            return a.timestamp - b.timestamp;
+          });
         finish();
       }).catch((resp) => {
         toastNotifications.addDanger(`Error fetching annotations: ${JSON.stringify(resp)}`);

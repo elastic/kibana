@@ -107,7 +107,15 @@ export function renderAnnotations(
 
   rects.exit().remove();
 
+  const textRects = annotations.selectAll('.ml-annotation-text-rect').data(d => [d]);
   const texts = annotations.selectAll('.ml-annotation-text').data(d => [d]);
+
+  textRects
+    .enter()
+    .append('rect')
+    .classed('ml-annotation-text-rect', true)
+    .attr('rx', 2)
+    .attr('ry', 2);
 
   texts
     .enter()
@@ -118,15 +126,20 @@ export function renderAnnotations(
     .attr('x', (d: Annotation) => {
       const date = moment(d.timestamp);
       const x = focusXScale(date);
-      const s = focusXScale(moment(d.timestamp)) + 1;
-      const e =
-        typeof d.end_timestamp !== 'undefined' ? focusXScale(moment(d.end_timestamp)) - 1 : s + 2;
-      const width = Math.max(2, e - s);
-      return x + width / 2;
+      return x + 17;
     })
-    .attr('y', focusZoomPanelHeight + upperTextMargin)
-    .text((d: Annotation) => d.annotation);
+    .attr('y', focusZoomPanelHeight + upperTextMargin + 26)
+    .text((d: Annotation) => d.key as any);
 
+  textRects
+    .attr('x', (d: Annotation) => {
+      const date = moment(d.timestamp);
+      const x = focusXScale(date);
+      return x + 5;
+    })
+    .attr('y', focusZoomPanelHeight + upperTextMargin + 12);
+
+  textRects.exit().remove();
   texts.exit().remove();
 
   annotations.classed('ml-annotation-hidden', !showAnnotations);

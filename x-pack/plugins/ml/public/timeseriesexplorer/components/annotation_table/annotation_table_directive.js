@@ -32,7 +32,7 @@ module.directive('mlAnnotationTable', function () {
       }
 
       const props = {
-        annotations: scope.annotations.map((d, i) => ({ ...d, key: (i + 1) })),
+        annotations: scope.annotations,
         job: scope.job,
         isSingleMetricViewerLinkVisible: false,
         isNumberBadgeVisible: true
