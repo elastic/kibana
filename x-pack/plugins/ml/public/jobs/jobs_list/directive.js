@@ -14,6 +14,7 @@ const module = uiModules.get('apps/ml', ['react']);
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { getJobManagementBreadcrumbs } from 'plugins/ml/jobs/breadcrumbs';
 import { loadNewJobDefaults } from 'plugins/ml/jobs/new_job/utils/new_job_defaults';
 import { initPromise } from 'plugins/ml/util/promise';
 
@@ -24,6 +25,7 @@ const template = `<ml-nav-menu name="jobs" /><jobs-page />`;
 uiRoutes
   .when('/jobs/?', {
     template,
+    k7Breadcrumbs: getJobManagementBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,

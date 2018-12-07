@@ -30,6 +30,7 @@ import {
   isModelPlotEnabled,
   mlFunctionToESAggregation } from 'plugins/ml/../common/util/job_utils';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
+import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
 import {
   createTimeSeriesJobData,
   processForecastResults,
@@ -53,6 +54,7 @@ import { initPromise } from 'plugins/ml/util/promise';
 uiRoutes
   .when('/timeseriesexplorer/?', {
     template,
+    k7Breadcrumbs: getSingleMetricViewerBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
