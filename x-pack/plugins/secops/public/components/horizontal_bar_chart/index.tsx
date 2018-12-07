@@ -35,7 +35,7 @@ export const HorizontalBarChart = pure<HorizontalBarChartProps>(
     return loading ? (
       <LoadingPanel height="auto" width="100%" text="Loading data" />
     ) : (
-      <Container>
+      <Container height={height}>
         <EuiTitle size="s">
           <h3>{title}</h3>
         </EuiTitle>
@@ -47,16 +47,14 @@ export const HorizontalBarChart = pure<HorizontalBarChartProps>(
   }
 );
 
-const Container = styled.div`
+const Container = styled.div<{ height?: number }>`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   height: auto;
   & > div {
     .rv-xy-plot {
-      svg {
-        height: fit-content !important;
-      }
+      height: ${({ height }) => (height ? `${height}px !important` : 'auto')};
     }
   }
 `;
