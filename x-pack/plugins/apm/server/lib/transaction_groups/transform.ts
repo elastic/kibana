@@ -44,7 +44,7 @@ export function transactionGroupsTransformer({
   const results = buckets.map(bucket => {
     const averageResponseTime = bucket.avg.value;
     const transactionsPerMinute = bucket.doc_count / minutes;
-    const impact = Math.round(averageResponseTime * transactionsPerMinute);
+    const impact = bucket.sum.value;
     const sample = bucket.sample.hits.hits[0]._source;
 
     return {

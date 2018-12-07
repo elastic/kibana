@@ -5,7 +5,7 @@
  */
 // @ts-ignore
 import { EuiForm, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
   EffectivePrivileges,
   getEffectivePrivileges,
@@ -41,7 +41,7 @@ interface State {
   role: Role;
 }
 
-export class PrivilegeSpaceForm extends Component<Props, State> {
+export class PrivilegeSpaceFormUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
@@ -233,3 +233,5 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     return;
   }
 }
+
+export const PrivilegeSpaceForm = injectI18n(PrivilegeSpaceFormUI);

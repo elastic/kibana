@@ -35,11 +35,9 @@ interface Props {
 export class KibanaPrivileges extends Component<Props, {}> {
   public render() {
     return (
-      <I18nProvider>
-        <CollapsiblePanel iconType={'logoKibana'} title={'Kibana'}>
-          {this.getForm()}
-        </CollapsiblePanel>
-      </I18nProvider>
+      <CollapsiblePanel iconType={'logoKibana'} title={'Kibana'}>
+        {this.getForm()}
+      </CollapsiblePanel>
     );
   }
 

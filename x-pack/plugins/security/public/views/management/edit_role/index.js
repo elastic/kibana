@@ -23,6 +23,7 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
+import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
 import { EditRolePage } from './components';
 
@@ -33,6 +34,11 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
+  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+    $route.current.params.name
+      ? getEditRoleBreadcrumbs
+      : getCreateRoleBreadcrumbs
+  ),
   resolve: {
     role($route, ShieldRole, kbnUrl, Promise, Notifier) {
       const name = $route.current.params.name;
