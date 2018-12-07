@@ -82,10 +82,9 @@ class TagPageComponent extends React.PureComponent<
             onDetachBeat={
               this.mode === 'edit'
                 ? async (beatIds: string[]) => {
-                    await this.props.libs.beats.removeTagsFromBeats(
-                      beatIds.map(id => {
-                        return { beatId: id, tag: this.state.tag.id };
-                      })
+                    await this.props.containers.beats.removeTagsFromBeats(
+                      beatIds,
+                      this.state.tag.id
                     );
                     await this.loadAttachedBeats();
                   }
