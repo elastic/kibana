@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiHeader,
   EuiHeaderBreadcrumbs,
   EuiHeaderSection,
   EuiPage,
@@ -18,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Component, ReactNode } from 'react';
-import styled from 'styled-components';
 import { BreadcrumbConsumer } from '../navigation/breadcrumb';
 
 type RenderCallback = ((component: () => JSX.Element) => void);
@@ -73,8 +71,7 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
                 </EuiTitle>
               </EuiPageHeaderSection>
               <EuiPageHeaderSection>
-                {(this.actionSection && this.actionSection()) ||
-                  this.props.actionSection || <span>Nothing</span>}
+                {(this.actionSection && this.actionSection()) || this.props.actionSection}
               </EuiPageHeaderSection>
             </EuiPageHeader>
             <EuiPageContent>
