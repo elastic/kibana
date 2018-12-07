@@ -467,9 +467,9 @@ module.controller('MlTimeSeriesExplorerController', function (
           });
 
         finish();
-      }).catch((resp) => {
-        toastNotifications.addDanger(`Error fetching annotations: ${JSON.stringify(resp)}`);
-        // still call finish so the chart without annotations is able to load
+      }).catch(() => {
+        // silent fail
+        refreshFocusData.focusAnnotationData = [];
         finish();
       });
     } else {
