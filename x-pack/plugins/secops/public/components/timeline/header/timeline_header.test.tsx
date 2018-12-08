@@ -21,6 +21,7 @@ describe('Header', () => {
             dataProviders={mockDataProviders}
             onDataProviderRemoved={noop}
             onToggleDataProviderEnabled={noop}
+            show={true}
             width={1000}
           />
         </DragDropContext>

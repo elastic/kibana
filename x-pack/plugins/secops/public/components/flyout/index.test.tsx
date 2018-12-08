@@ -11,6 +11,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { set } from 'lodash/fp';
 import { Flyout, FlyoutButton, FlyoutComponent, FlyoutPane } from '.';
 import { createStore, State } from '../../store';
+import { DragDropContextWrapper } from '../drag_and_drop/drag_drop_context_wrapper';
 
 describe('Flyout', () => {
   const state: State = {
@@ -49,7 +50,9 @@ describe('Flyout', () => {
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <Flyout timelineId="test" />
+          <DragDropContextWrapper>
+            <Flyout timelineId="test" />
+          </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
 
@@ -67,7 +70,9 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
-          <Flyout timelineId="test" />
+          <DragDropContextWrapper>
+            <Flyout timelineId="test" />
+          </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
 
@@ -85,7 +90,9 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
-          <Flyout timelineId="test" />
+          <DragDropContextWrapper>
+            <Flyout timelineId="test" />
+          </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
 
@@ -98,9 +105,11 @@ describe('Flyout', () => {
 
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
-          <Flyout timelineId="test">
-            <p>I am a child of flyout</p>
-          </Flyout>
+          <DragDropContextWrapper>
+            <Flyout timelineId="test">
+              <p>I am a child of flyout</p>
+            </Flyout>
+          </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
 
@@ -112,18 +121,20 @@ describe('Flyout', () => {
       ).toContain('I am a child of flyout');
     });
 
-    test('should call the onOpen when the mouse is entered for rendering', () => {
+    test('should call the onOpen when the mouse is clicked for rendering', () => {
       const showTimeline = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <FlyoutComponent show={false} timelineId="test" showTimeline={showTimeline} />
+          <DragDropContextWrapper>
+            <FlyoutComponent show={false} timelineId="test" showTimeline={showTimeline} />
+          </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
 
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')
         .first()
-        .simulate('mouseenter');
+        .simulate('click');
 
       expect(showTimeline).toBeCalled();
     });
@@ -135,7 +146,9 @@ describe('Flyout', () => {
       const showTimeline = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
-          <FlyoutComponent show={true} timelineId="test" showTimeline={showTimeline} />
+          <DragDropContextWrapper>
+            <FlyoutComponent show={true} timelineId="test" showTimeline={showTimeline} />
+          </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
 
@@ -152,9 +165,13 @@ describe('Flyout', () => {
     test('should return the flyout element with a title', () => {
       const closeMock = jest.fn();
       const wrapper = mount(
-        <FlyoutPane onClose={closeMock}>
-          <span>I am a child of flyout</span>,
-        </FlyoutPane>
+        <ReduxStoreProvider store={store}>
+          <DragDropContextWrapper>
+            <FlyoutPane onClose={closeMock}>
+              <span>I am a child of flyout</span>,
+            </FlyoutPane>
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
       );
       expect(
         wrapper
@@ -167,9 +184,13 @@ describe('Flyout', () => {
     test('should return the flyout element with children', () => {
       const closeMock = jest.fn();
       const wrapper = mount(
-        <FlyoutPane onClose={closeMock}>
-          <span>I am a mock child</span>,
-        </FlyoutPane>
+        <ReduxStoreProvider store={store}>
+          <DragDropContextWrapper>
+            <FlyoutPane onClose={closeMock}>
+              <span>I am a mock child</span>,
+            </FlyoutPane>
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
       );
       expect(
         wrapper
@@ -182,9 +203,13 @@ describe('Flyout', () => {
     test('should call the onClose when the close button is clicked', () => {
       const closeMock = jest.fn();
       const wrapper = mount(
-        <FlyoutPane onClose={closeMock}>
-          <span>I am a mock child</span>,
-        </FlyoutPane>
+        <ReduxStoreProvider store={store}>
+          <DragDropContextWrapper>
+            <FlyoutPane onClose={closeMock}>
+              <span>I am a mock child</span>,
+            </FlyoutPane>
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
       );
       wrapper
         .find('[data-test-subj="flyout"] button')
@@ -198,19 +223,37 @@ describe('Flyout', () => {
   describe('showFlyoutButton', () => {
     test('should show the flyout button when show is true', () => {
       const openMock = jest.fn();
-      const wrapper = mount(<FlyoutButton show={true} timelineId="test" onOpen={openMock} />);
+      const wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <DragDropContextWrapper>
+            <FlyoutButton show={true} timelineId="test" onOpen={openMock} />{' '}
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
+      );
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(true);
     });
 
     test('should NOT show the flyout button when show is false', () => {
       const openMock = jest.fn();
-      const wrapper = mount(<FlyoutButton show={false} timelineId="test" onOpen={openMock} />);
+      const wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <DragDropContextWrapper>
+            <FlyoutButton show={false} timelineId="test" onOpen={openMock} />{' '}
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
+      );
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
     });
 
     test('should return the flyout button with text', () => {
       const openMock = jest.fn();
-      const wrapper = mount(<FlyoutButton show={true} timelineId="test" onOpen={openMock} />);
+      const wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <DragDropContextWrapper>
+            <FlyoutButton show={true} timelineId="test" onOpen={openMock} />{' '}
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
+      );
       expect(
         wrapper
           .find('[data-test-subj="flyoutButton"]')
@@ -219,13 +262,19 @@ describe('Flyout', () => {
       ).toContain('T I M E L I N E');
     });
 
-    test('should call the onOpen when the mouse is entered', () => {
+    test('should call the onOpen when it is clicked', () => {
       const openMock = jest.fn();
-      const wrapper = mount(<FlyoutButton show={true} timelineId="test" onOpen={openMock} />);
+      const wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <DragDropContextWrapper>
+            <FlyoutButton show={true} timelineId="test" onOpen={openMock} />
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
+      );
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')
         .first()
-        .simulate('mouseenter');
+        .simulate('click');
 
       expect(openMock).toBeCalled();
     });

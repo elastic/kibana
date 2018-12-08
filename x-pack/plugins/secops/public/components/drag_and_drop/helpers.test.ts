@@ -5,8 +5,14 @@
  */
 
 import {
+  destinationIsTimelineButton,
   destinationIsTimelineProviders,
+  draggableContentPrefix,
+  draggableIdPrefix,
   draggableIsContent,
+  droppableIdPrefix,
+  droppableTimelineFlyoutButtonPrefix,
+  droppableTimelineProvidersPrefix,
   getDraggableId,
   getDroppableId,
   getProviderIdFromDraggable,
@@ -16,11 +22,13 @@ import {
   sourceIsContent,
 } from './helpers';
 
+const DROPPABLE_ID_TIMELINE_PROVIDERS = `${droppableTimelineProvidersPrefix}timeline`;
+
 describe('helpers', () => {
   describe('#getDraggableId', () => {
     test('it returns the expected id', () => {
       const id = getDraggableId('dataProvider1234');
-      const expected = 'draggableId.content.dataProvider1234';
+      const expected = `${draggableContentPrefix}dataProvider1234`;
 
       expect(id).toEqual(expected);
     });
@@ -29,7 +37,7 @@ describe('helpers', () => {
   describe('#getDroppableId', () => {
     test('it returns the expected id', () => {
       const id = getDroppableId('a-visualization');
-      const expected = 'droppableId.content.a-visualization';
+      const expected = `${droppableIdPrefix}.content.a-visualization`;
 
       expect(id).toEqual(expected);
     });
@@ -39,10 +47,10 @@ describe('helpers', () => {
     test('it returns returns true when the source is content', () => {
       expect(
         sourceIsContent({
-          destination: { droppableId: 'droppableId.timelineProviders.timeline', index: 0 },
-          draggableId: 'draggableId.content.2119990039033485',
+          destination: { droppableId: `${droppableIdPrefix}.timelineProviders.timeline`, index: 0 },
+          draggableId: getDraggableId('2119990039033485'),
           reason: 'DROP',
-          source: { index: 0, droppableId: 'droppableId.content.2119990039033485' },
+          source: { index: 0, droppableId: getDroppableId('2119990039033485') },
           type: 'DEFAULT',
         })
       ).toEqual(true);
@@ -51,10 +59,10 @@ describe('helpers', () => {
     test('it returns returns false when the source is NOT content', () => {
       expect(
         sourceIsContent({
-          destination: { droppableId: 'droppableId.timelineProviders.timeline', index: 0 },
-          draggableId: 'draggableId.somethingElse.2119990039033485',
+          destination: { droppableId: `${droppableIdPrefix}.timelineProviders.timeline`, index: 0 },
+          draggableId: `${draggableIdPrefix}.somethingElse.2119990039033485`,
           reason: 'DROP',
-          source: { index: 0, droppableId: 'droppableId.somethingElse.2119990039033485' },
+          source: { index: 0, droppableId: `${droppableIdPrefix}.somethingElse.2119990039033485` },
           type: 'DEFAULT',
         })
       ).toEqual(false);
@@ -66,13 +74,13 @@ describe('helpers', () => {
       expect(
         draggableIsContent({
           destination: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
             index: 0,
           },
-          draggableId: 'draggableId.content.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.content.685260508808089',
+            droppableId: getDroppableId('685260508808089'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -84,10 +92,10 @@ describe('helpers', () => {
       expect(
         draggableIsContent({
           destination: null,
-          draggableId: 'draggableId.timeline.timeline.dataProvider.685260508808089',
+          draggableId: `${draggableIdPrefix}.timeline.timeline.dataProvider.685260508808089`,
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: getDroppableId('timeline'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -101,13 +109,13 @@ describe('helpers', () => {
       expect(
         reasonIsDrop({
           destination: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
             index: 0,
           },
-          draggableId: 'draggableId.content.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.content.685260508808089',
+            droppableId: getDroppableId('685260508808089'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -119,13 +127,13 @@ describe('helpers', () => {
       expect(
         reasonIsDrop({
           destination: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
             index: 0,
           },
-          draggableId: 'draggableId.content.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'CANCEL',
           source: {
-            droppableId: 'droppableId.content.685260508808089',
+            droppableId: getDroppableId('685260508808089'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -139,13 +147,13 @@ describe('helpers', () => {
       expect(
         destinationIsTimelineProviders({
           destination: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
             index: 0,
           },
-          draggableId: 'draggableId.content.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.content.685260508808089',
+            droppableId: getDroppableId('685260508808089'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -157,10 +165,10 @@ describe('helpers', () => {
       expect(
         destinationIsTimelineProviders({
           destination: null,
-          draggableId: 'draggableId.timeline.timeline.dataProvider.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: getDroppableId('timeline'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -172,13 +180,66 @@ describe('helpers', () => {
       expect(
         destinationIsTimelineProviders({
           destination: {
-            droppableId: 'droppableId.somewhere.else',
+            droppableId: `${droppableIdPrefix}.somewhere.else`,
             index: 0,
           },
-          draggableId: 'draggableId.content.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.content.685260508808089',
+            droppableId: getDroppableId('685260508808089'),
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+  });
+
+  describe('#destinationIsTimelineButton', () => {
+    test('it returns returns true when the destination is a flyout button', () => {
+      expect(
+        destinationIsTimelineButton({
+          destination: {
+            droppableId: `${droppableTimelineFlyoutButtonPrefix}.timeline`,
+            index: 0,
+          },
+          draggableId: getDraggableId('685260508808089'),
+          reason: 'DROP',
+          source: {
+            droppableId: getDroppableId('685260508808089'),
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(true);
+    });
+
+    test('it returns returns false when the destination is null', () => {
+      expect(
+        destinationIsTimelineButton({
+          destination: null,
+          draggableId: getDraggableId('685260508808089'),
+          reason: 'DROP',
+          source: {
+            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual(false);
+    });
+
+    test('it returns returns false when the destination is NOT a flyout button', () => {
+      expect(
+        destinationIsTimelineButton({
+          destination: {
+            droppableId: `${droppableIdPrefix}.somewhere.else`,
+            index: 0,
+          },
+          draggableId: getDraggableId('685260508808089'),
+          reason: 'DROP',
+          source: {
+            droppableId: getDroppableId('685260508808089'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -188,17 +249,35 @@ describe('helpers', () => {
   });
 
   describe('#getTimelineIdFromDestination', () => {
-    test('it returns returns the timeline id from the destination', () => {
+    test('it returns returns the timeline id from the destination when it is a provider', () => {
       expect(
         getTimelineIdFromDestination({
           destination: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
             index: 0,
           },
-          draggableId: 'draggableId.content.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.content.685260508808089',
+            droppableId: getDroppableId('685260508808089'),
+            index: 0,
+          },
+          type: 'DEFAULT',
+        })
+      ).toEqual('timeline');
+    });
+
+    test('it returns returns the timeline id from the destination when it is a button', () => {
+      expect(
+        getTimelineIdFromDestination({
+          destination: {
+            droppableId: `${droppableTimelineFlyoutButtonPrefix}timeline`,
+            index: 0,
+          },
+          draggableId: getDraggableId('685260508808089'),
+          reason: 'DROP',
+          source: {
+            droppableId: getDroppableId('685260508808089'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -210,10 +289,10 @@ describe('helpers', () => {
       expect(
         getTimelineIdFromDestination({
           destination: null,
-          draggableId: 'draggableId.timeline.timeline.dataProvider.685260508808089',
+          draggableId: `${draggableIdPrefix}.timeline.timeline.dataProvider.685260508808089`,
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: `${droppableIdPrefix}.timelineProviders.timeline`,
             index: 0,
           },
           type: 'DEFAULT',
@@ -225,13 +304,13 @@ describe('helpers', () => {
       expect(
         getTimelineIdFromDestination({
           destination: {
-            droppableId: 'droppableId.somewhere.else',
+            droppableId: `${droppableIdPrefix}.somewhere.else`,
             index: 0,
           },
-          draggableId: 'draggableId.content.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.content.685260508808089',
+            droppableId: getDroppableId('685260508808089'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -244,13 +323,13 @@ describe('helpers', () => {
     test('it returns the expected id', () => {
       const id = getProviderIdFromDraggable({
         destination: {
-          droppableId: 'droppableId.timelineProviders.timeline',
+          droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
           index: 0,
         },
-        draggableId: 'draggableId.content.2119990039033485',
+        draggableId: getDraggableId('2119990039033485'),
         reason: 'DROP',
         source: {
-          droppableId: 'droppableId.content.2119990039033485',
+          droppableId: getDroppableId('2119990039033485'),
           index: 0,
         },
         type: 'DEFAULT',
@@ -266,13 +345,13 @@ describe('helpers', () => {
       expect(
         providerWasDroppedOnTimeline({
           destination: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
             index: 0,
           },
-          draggableId: 'draggableId.content.2119990039033485',
+          draggableId: getDraggableId('2119990039033485'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.content.2119990039033485',
+            droppableId: getDroppableId('2119990039033485'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -284,13 +363,13 @@ describe('helpers', () => {
       expect(
         providerWasDroppedOnTimeline({
           destination: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS,
             index: 0,
           },
-          draggableId: 'draggableId.content.2119990039033485',
+          draggableId: getDraggableId('2119990039033485'),
           reason: 'CANCEL',
           source: {
-            droppableId: 'droppableId.content.2119990039033485',
+            droppableId: getDroppableId('2119990039033485'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -302,10 +381,10 @@ describe('helpers', () => {
       expect(
         providerWasDroppedOnTimeline({
           destination: null,
-          draggableId: 'draggableId.timeline.timeline.dataProvider.685260508808089',
+          draggableId: `${draggableIdPrefix}.timeline.timeline.dataProvider.685260508808089`,
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.timelineProviders.timeline',
+            droppableId: getDroppableId('timeline'),
             index: 0,
           },
           type: 'DEFAULT',
@@ -316,10 +395,10 @@ describe('helpers', () => {
     test('it returns returns false when the the source is NOT content', () => {
       expect(
         providerWasDroppedOnTimeline({
-          destination: { droppableId: 'droppableId.timelineProviders.timeline', index: 0 },
-          draggableId: 'draggableId.somethingElse.2119990039033485',
+          destination: { droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS, index: 0 },
+          draggableId: `${draggableIdPrefix}.somethingElse.2119990039033485`,
           reason: 'DROP',
-          source: { index: 0, droppableId: 'droppableId.somethingElse.2119990039033485' },
+          source: { index: 0, droppableId: `${droppableIdPrefix}.somethingElse.2119990039033485` },
           type: 'DEFAULT',
         })
       ).toEqual(false);
@@ -329,13 +408,13 @@ describe('helpers', () => {
       expect(
         providerWasDroppedOnTimeline({
           destination: {
-            droppableId: 'droppableId.somewhere.else',
+            droppableId: `${droppableIdPrefix}.somewhere.else`,
             index: 0,
           },
-          draggableId: 'draggableId.content.685260508808089',
+          draggableId: getDraggableId('685260508808089'),
           reason: 'DROP',
           source: {
-            droppableId: 'droppableId.content.685260508808089',
+            droppableId: getDroppableId('685260508808089'),
             index: 0,
           },
           type: 'DEFAULT',

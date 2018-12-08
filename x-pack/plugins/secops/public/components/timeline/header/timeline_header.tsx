@@ -17,6 +17,7 @@ interface Props {
   dataProviders: DataProvider[];
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
+  show: boolean;
   width: number;
 }
 
@@ -27,10 +28,11 @@ const Header = styled.header<{ width: string }>`
 `;
 
 export const TimelineHeader = pure<Props>(
-  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled, width }) => (
+  ({ id, dataProviders, onDataProviderRemoved, onToggleDataProviderEnabled, show, width }) => (
     <Header data-test-subj="timelineHeader" width={`${width}px`}>
       <DataProviders
         id={id}
+        show={show}
         dataProviders={dataProviders}
         onDataProviderRemoved={onDataProviderRemoved}
         onToggleDataProviderEnabled={onToggleDataProviderEnabled}

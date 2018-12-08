@@ -42,6 +42,7 @@ interface StateReduxProps {
   pageCount?: number;
   range?: Range;
   sort?: Sort;
+  show?: boolean;
 }
 
 interface DispatchProps {
@@ -105,6 +106,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
       pageCount,
       range,
       removeProvider,
+      show,
       sort,
       updateRange,
       updateSort,
@@ -150,6 +152,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
         range={range!}
         rowRenderers={rowRenderers}
         sort={sort!}
+        show={show!}
         width={width}
       />
     );
@@ -158,9 +161,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const timeline = timelineByIdSelector(state)[id];
-  const { dataProviders, sort } = timeline || timelineDefaults;
+  const { dataProviders, sort, show } = timeline || timelineDefaults;
 
-  return defaultTo({ id, dataProviders, sort }, timeline);
+  return defaultTo({ id, dataProviders, sort, show }, timeline);
 };
 
 export const StatefulTimeline = connect(
