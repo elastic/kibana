@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[` 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "host": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "firstSeen": "2018-12-06T15:40:53.319Z",
+          "name": "elrond.elstc.co",
+          "os": "Ubuntu",
+          "version": "18.04.1 LTS (Bionic Beaver)",
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "host": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "firstSeen": "2018-12-07T14:12:38.560Z",
+          "name": "siem-kibana",
+          "os": "Debian GNU/Linux",
+          "version": "9 (stretch)",
+        },
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+  totalCount={4}
+/>
+`;
+
+exports[`Load More Table Component rendering it renders the default Hosts table 1`] = `
+<Connect(pure(Component))
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "98966fa2013c396155c460d35c0902be",
+        },
+        "host": Object {
+          "_id": "cPsuhGcB0WOhS6qyTKC0",
+          "firstSeen": "2018-12-06T15:40:53.319Z",
+          "name": "elrond.elstc.co",
+          "os": "Ubuntu",
+          "version": "18.04.1 LTS (Bionic Beaver)",
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+        },
+        "host": Object {
+          "_id": "KwQDiWcB0WOhS6qyXmrW",
+          "firstSeen": "2018-12-07T14:12:38.560Z",
+          "name": "siem-kibana",
+          "os": "Debian GNU/Linux",
+          "version": "9 (stretch)",
+        },
+      },
+    ]
+  }
+  hasNextPage={true}
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="aa7ca589f1b8220002f2fc61c64cfbf1"
+  totalCount={4}
+/>
+`;

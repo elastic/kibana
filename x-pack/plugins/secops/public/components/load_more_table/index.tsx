@@ -85,6 +85,7 @@ export class LoadMoreTable extends React.PureComponent<BasicTableProps, BasicTab
           height="auto"
           width="100%"
           text={`Loading ${loadingTitle ? loadingTitle : title}`}
+          data-test-subj="LoadingPanelLoadMoreTable"
         />
       );
     }
@@ -132,12 +133,13 @@ export class LoadMoreTable extends React.PureComponent<BasicTableProps, BasicTab
                 {!isEmpty(itemsPerRow) && (
                   <EuiPopover
                     id="customizablePagination"
+                    data-test-subj="loadingMoreSizeRowPopover"
                     button={button}
                     isOpen={this.state.isPopoverOpen}
                     closePopover={this.closePopover}
                     panelPaddingSize="none"
                   >
-                    <EuiContextMenuPanel items={rowItems} />
+                    <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
                   </EuiPopover>
                 )}
               </EuiFlexItem>
@@ -149,7 +151,11 @@ export class LoadMoreTable extends React.PureComponent<BasicTableProps, BasicTab
                   direction="row"
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiButton isLoading={loading} onClick={loadMore}>
+                    <EuiButton
+                      data-test-subj="loadingMoreButton"
+                      isLoading={loading}
+                      onClick={loadMore}
+                    >
                       {loading ? 'Loading...' : 'Load More'}
                     </EuiButton>
                   </EuiFlexItem>
