@@ -61,12 +61,9 @@ export class TransactionCharts extends Component<TransactionChartProps> {
           <EuiFlexGrid columns={2}>
             <EuiFlexItem>
               <EuiPanel>
-                <ChartHeader>
-                  <EuiTitle size="s">
-                    <span>{responseTimeLabel(transactionType)}</span>
-                  </EuiTitle>
-                  {ChartHeaderContent}
-                </ChartHeader>
+                <EuiTitle size="s">
+                  <span>{responseTimeLabel(transactionType)}</span>
+                </EuiTitle>
                 <CustomPlot
                   noHits={noHits}
                   series={responseTimeSeries}
@@ -77,13 +74,11 @@ export class TransactionCharts extends Component<TransactionChartProps> {
               </EuiPanel>
             </EuiFlexItem>
 
-            <EuiFlexItem>
+            <EuiFlexItem style={{ flexShrink: 1 }}>
               <EuiPanel>
-                <ChartHeader>
-                  <EuiTitle size="s">
-                    <h6>{tpmLabel(transactionType)}</h6>
-                  </EuiTitle>
-                </ChartHeader>
+                <EuiTitle size="s">
+                  <span>{tpmLabel(transactionType)}</span>
+                </EuiTitle>
                 <CustomPlot
                   noHits={noHits}
                   series={tpmSeries}

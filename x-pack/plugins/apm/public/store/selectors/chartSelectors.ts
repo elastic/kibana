@@ -8,6 +8,7 @@ import d3 from 'd3';
 import { difference, memoize, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
+import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_metrics_chart_data';
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { AnomalyTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_anomaly_data/transform';
 import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
@@ -17,7 +18,7 @@ import {
   RectCoordinate
 } from 'x-pack/plugins/apm/typings/timeseries';
 import { colors } from '../../style/variables';
-import { asDecimal, asMillis, tpmUnit } from '../../utils/formatters';
+import { asDecimal, asGB, asMillis, tpmUnit } from '../../utils/formatters';
 import { IUrlParams } from '../urlParams';
 
 export const getEmptySerie = memoize(
@@ -60,7 +61,7 @@ export interface ITransactionChartData {
   responseTimeSeries: TimeSerie[] | IEmptySeries[];
 }
 
-export function getCharts(
+export function getTransactionCharts(
   urlParams: IUrlParams,
   timeseriesResponse: TimeSeriesAPIResponse
 ) {
@@ -82,6 +83,52 @@ export function getCharts(
   };
 
   return chartsResult;
+}
+
+export interface IMemoryChartData extends MetricsChartAPIResponse {
+  series: TimeSerie[];
+}
+
+export function getMemorySeries(
+  memoryChartResponse: MetricsChartAPIResponse['memory']
+) {
+  // TODO are all of these values already in GB? I don't think so ....
+  const { series, overallValues } = memoryChartResponse;
+  const seriesList: IMemoryChartData['series'] = [
+    {
+      title: 'System total mem.',
+      data: series.totalMemory,
+      type: 'area',
+      color: colors.apmPink,
+      legendValue: asGB(overallValues.totalMemory)
+    },
+    {
+      title: 'System avail. mem.',
+      data: series.freeMemory,
+      type: 'area',
+      color: colors.apmPurple,
+      legendValue: asGB(overallValues.freeMemory)
+    },
+    {
+      title: 'Process RSS',
+      data: series.processMemoryRss,
+      type: 'area',
+      color: colors.apmGreen,
+      legendValue: asGB(overallValues.processMemoryRss)
+    },
+    {
+      title: 'Process mem. size',
+      data: series.processMemorySize,
+      type: 'area',
+      color: colors.apmBlue,
+      legendValue: asGB(overallValues.freeMemory)
+    }
+  ];
+
+  return {
+    ...memoryChartResponse,
+    series: seriesList
+  };
 }
 
 interface TimeSerie {

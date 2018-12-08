@@ -12,7 +12,7 @@ import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { loadOverviewCharts } from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
-import { getCharts } from '../selectors/chartSelectors';
+import { getTransactionCharts } from '../selectors/chartSelectors';
 import { getUrlParams, IUrlParams } from '../urlParams';
 
 const ID = 'transactionOverviewCharts';
@@ -36,7 +36,7 @@ export const getTransactionOverviewCharts = createSelector(
   (urlParams, overviewCharts = {}) => {
     return {
       ...overviewCharts,
-      data: getCharts(urlParams, overviewCharts.data || INITIAL_DATA)
+      data: getTransactionCharts(urlParams, overviewCharts.data || INITIAL_DATA)
     };
   }
 );

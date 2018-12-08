@@ -4,86 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { rgba } from 'polished';
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 // @ts-ignore
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
 import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
-import { colors } from '../../../style/variables';
+import { MemoryChartDataRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceMetricsCharts';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { asGB } from 'x-pack/plugins/apm/public/utils/formatters';
+import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 
-function rand(places = 2) {
-  return Number(
-    (Math.random() * Math.floor(Math.random() * 200)).toFixed(places)
-  );
+interface Props {
+  urlParams: IUrlParams;
 }
 
-function increase(num) {
-  return num + rand();
-}
+const MemoryUsageChart: React.SFC<Props> = ({ urlParams }) => (
+  <MemoryChartDataRequest
+    urlParams={urlParams}
+    render={({ data }) => (
+      <SyncChartGroup
+        render={syncProps => (
+          <React.Fragment>
+            <EuiTitle size="s">
+              <span>Memory usage</span>
+            </EuiTitle>
+            <CustomPlot
+              {...syncProps}
+              series={data.series}
+              tickFormatY={asGB}
+              formatTooltipValue={(c: Coordinate) => asGB(c.y)}
+            />
+          </React.Fragment>
+        )}
+      />
+    )}
+  />
+);
 
-function createStack(nItems, last) {
-  const baseline = { x: 0, y: 0 };
-  return Array(nItems)
-    .fill()
-    .map((_, i) => {
-      const current = last && last[i] ? last[i] : baseline;
-      return { x: i, y: increase(current.y) };
-    });
-}
-
-function generateStackedData(nSeries, nItems) {
-  const stacks = [];
-  for (let i = 0; i < nSeries; i++) {
-    stacks.push(createStack(nItems, i >= 0 ? stacks[i - 1] : []));
-  }
-  return stacks;
-}
-
-//   colors.apmBlue
-//   colors.apmPurple
-//   colors.apmPink
-//   colors.apmTan
-//   colors.apmRed
-//   colors.apmBrown
-
-const meta = [
-  {
-    color: colors.apmBlue,
-    legendValue: '2.4 GB',
-    title: 'Process mem. size',
-    type: 'area'
-  },
-  {
-    color: colors.apmGreen,
-    legendValue: '4.1 GB',
-    title: 'Process RSS',
-    type: 'area'
-  },
-  {
-    color: colors.apmPurple,
-    legendValue: '24.3 GB',
-    title: 'System avail. mem.',
-    type: 'area'
-  },
-  {
-    color: colors.apmPink,
-    legendValue: '99.8 GB',
-    title: 'System total mem.',
-    type: 'area'
-  }
-];
-
-const fakeSeries = generateStackedData(4, 50).map((data, i) => ({
-  data,
-  ...meta[i]
-}));
-
-window._jason_ = { fakeSeries };
-
-export function MemoryUsageChart() {
-  return (
-    <SyncChartGroup
-      render={syncProps => <CustomPlot {...syncProps} series={fakeSeries} />}
-    />
-  );
-}
+export { MemoryUsageChart };

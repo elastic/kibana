@@ -11,7 +11,7 @@ import { ITransactionChartData } from 'x-pack/plugins/apm/public/store/selectors
 import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
 import { loadDetailsCharts } from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
-import { getCharts } from '../selectors/chartSelectors';
+import { getTransactionCharts } from '../selectors/chartSelectors';
 import { getUrlParams, IUrlParams } from '../urlParams';
 
 const ID = 'transactionDetailsCharts';
@@ -35,7 +35,7 @@ export const getTransactionDetailsCharts = createSelector(
   (urlParams, detailCharts = {}) => {
     return {
       ...detailCharts,
-      data: getCharts(urlParams, detailCharts.data || INITIAL_DATA)
+      data: getTransactionCharts(urlParams, detailCharts.data || INITIAL_DATA)
     };
   }
 );

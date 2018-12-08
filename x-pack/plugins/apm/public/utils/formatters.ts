@@ -144,3 +144,7 @@ export function asPercent(
   }
   return numeral(numerator / denominator).format('0.00%');
 }
+
+export function asGB(bytes: number | null, places: number = 1) {
+  return ((bytes || 0) / 1e9).toFixed(places) + ' GB';
+}
