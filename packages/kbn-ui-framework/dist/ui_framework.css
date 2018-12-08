@@ -1610,6 +1610,11 @@ main {
           align-items: flex-start;
   /* 1 */ }
 
+.kuiLocalNav__popover {
+  height: 100%; }
+  .kuiLocalNav__popover .euiPopover__anchor {
+    height: 100%; }
+
 .kuiLocalSearch {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1687,6 +1692,16 @@ main {
       -ms-flex: 1 1 100%;
           flex: 1 1 100%;
   position: relative; }
+
+/**
+ * 1. em used for right padding so documentation link and query string
+ *    won't overlap if the user increases their default browser font size
+ *    This is sized for the 'Uses lucene query syntax' link
+ */
+.kuiLocalSearchInput,
+.kuiLocalSearchAssistedInput__input {
+  padding-right: 6em;
+  /* 1 */ }
 
 /**
    * 1. Vertically center the assistance, regardless of its height.

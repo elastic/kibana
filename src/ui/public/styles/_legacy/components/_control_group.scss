@@ -1,21 +1,13 @@
-@import "~ui/styles/_legacy/variables/index";
-@import "~ui/styles/_legacy/mixins";
-
 .control-group {
   display: flex;
   flex: 0 0 auto;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: stretch;
-
-  padding: @padding-base-vertical @padding-base-horizontal;
-
-  /***
-   * components
-   ***/
+  padding: $padding-base-vertical $padding-base-horizontal;
 
   > * {
-    padding-right: @padding-base-horizontal;
+    padding-right: $padding-base-horizontal;
     flex: 0 0 auto;
 
     &:last-child {
@@ -25,7 +17,7 @@
 
   // horizontal group of buttons/form elements
   .inline-form .input-group {
-    margin-bottom: 0px;
+    margin-bottom: 0;
     display: flex;
 
     > * {
@@ -33,20 +25,22 @@
     }
 
     > :first-child {
-      .border-left-radius(@input-border-radius-base);
+      border-bottom-left-radius: $input-border-radius-base;
+      border-top-left-radius: $input-border-radius-base;
     }
 
     > :last-child {
-      .border-right-radius(@input-border-radius-base);
+      border-bottom-right-radius: $input-border-radius-base;
+      border-top-right-radius: $input-border-radius-base;
     }
   }
 
   .inline-form {
-    .flex-parent(0, 0, auto);
+    @include flex-parent(0, 0, auto);
     display: flex;
 
     > .typeahead {
-      .flex-parent();
+      @include flex-parent();
 
       > .input-group {
         display: flex;
@@ -70,8 +64,4 @@
   > .fill {
     flex: 1 1 1%;
   }
-}
-
-.nav-controls .column {
-  flex-direction: column;
 }

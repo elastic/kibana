@@ -1,26 +1,24 @@
-@import "~ui/styles/_legacy/variables/index";
-
 .hintbox {
-  padding: @hintbox-spacing-vertical @hintbox-spacing-horizontal;
-  border-radius: 5px;
-  margin-bottom: @hintbox-spacing-vertical;
-  background-color: @hintbox-background-color;
-  line-height: 1.5;
+  padding: $euiSizeS $euiSizeM;
+  border-radius: $euiBorderRadius;
+  margin-bottom: $euiSizeS;
+  background-color: $euiColorLightShade;
+  line-height: $euiLineHeight;
 
   a {
-    color: @hintbox-link-color !important;
+    color: $euiLinkColor !important;
 
     &:hover {
-      color: @hintbox-link-hover-color !important;
+      color: darken($euiLinkColor, 10%) !important;
     }
   }
 
   pre {
-    background-color: @hintbox-pre-bg;
+    background-color: $euiColorEmptyShade;
   }
 
   ul, ol {
-    padding-left: 25px;
+    padding-left: $euiSizeL;
   }
 
   // inspired by Bootstrap alerts component
@@ -30,19 +28,19 @@
   }
 
   > * + * {
-    margin-top: @hintbox-spacing-vertical;
+    margin-top: $euiSizeS;
   }
 
   // https://github.com/twbs/bootstrap/blob/2aa102bfd40859d15790febed1939e0111a6fb1a/less/tables.less#L88-L106
   .table-bordered {
-    border: 1px solid @hintbox-table-border-color;
+    border: $euiBorderThin;
     > thead,
     > tbody,
     > tfoot {
       > tr {
         > th,
         > td {
-          border: 1px solid @hintbox-table-border-color;
+          border: $euiBorderThin;
         }
       }
     }

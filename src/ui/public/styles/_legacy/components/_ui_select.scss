@@ -1,35 +1,32 @@
 // Overwrites ui-select classes that are loaded through NPM dependencies.
 // Must use important tags here because those files are loaded later.
 
-@import (reference) "~ui/styles/_legacy/mixins";
-@import (reference) "~ui/styles/_legacy/variables/index";
-
 /**
  * 1. Override Bootstrap ui-select component styles. If side padding is > 5px, the component breaks.
  */
 .ui-select-multiple.ui-select-bootstrap {
   padding: 3px 5px 2px !important; // 1
-  border: 1px solid #D4D4D4; // 1
-  background-color: #ffffff !important; // 1
+  border: $euiBorderThin; // 1
+  background-color: $euiColorEmptyShade; // 1
 
   &.kuiInputError {
-    border-color: #E74C3C; // 1
+    border-color: $euiColorDanger; // 1
   }
 }
 
 .ui-select-bootstrap .ui-select-choices-row.active > span {
-  background-color: @globalColorBlue !important;
+  background-color: $euiColorPrimary !important;
 }
 
 .ui-select-bootstrap > .ui-select-choices, .ui-select-bootstrap > .ui-select-no-choice {
-  margin-top: 2px !important;
+  margin-top: $euiSizeXS / 2 !important;
 }
 
 /**
  * 1. Fix appearance of ui-select in the Filtering UI.
  */
 .btn-default .ui-select-placeholder {
-  color: tint(@globalColorBlue, 70%); /* 1 */
+  color: tint($euiColorPrimary, 70%); /* 1 */
 }
 
 /**
@@ -37,12 +34,12 @@
 */
 .ui-select-match {
   .btn {
-    border: 1px solid @globalColorLightGray; /* 1 */
-    background-color: @white; /* 1 */
-    color: @kibanaGray1; /* 1 */
+    border: $euiBorderThin; /* 1 */
+    background-color: $euiColorEmptyShade; /* 1 */
+    color: $euiColorDarkestShade; /* 1 */
 
     .ui-select-placeholder {
-      color: @input-color-placeholder; /* 1 */
+      color: $euiColorMediumShade; /* 1 */
       padding-right: 1em; /* 1 */
     }
 
@@ -51,8 +48,8 @@
     }
 
     &:active {
-      background-color: @white; /* 1 */
-      color: @kibanaGray1; /* 1 */
+      background-color: $euiColorEmptyShade; /* 1 */
+      color: $euiColorDarkestShade; /* 1 */
     }
   }
 
@@ -61,11 +58,11 @@
     outline: none;
 
     .btn {
-      border-color: @globalColorBlue;
+      border-color: $euiColorPrimary;
     }
   }
 }
 
 .uiSelectMatch--ellipsis {
-  .ellipsis();
+  @include euiTextTruncate;
 }

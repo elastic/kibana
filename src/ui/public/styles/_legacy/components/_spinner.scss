@@ -5,9 +5,8 @@
   transition-delay: 0.25s;
 }
 
-// SASSTODO: Make sure these colors convert to theme variables
-.tab-dashboard.theme-dark {
+.theme-dark {
   .spinner > div {
-    background-color: #fff;
+    background-color: $euiColorEmptyShade;
   }
 }

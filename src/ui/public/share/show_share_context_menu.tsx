@@ -68,7 +68,7 @@ export function showShareContextMenu({
   const element = (
     <I18nProvider>
       <EuiWrappingPopover
-        className="navbar__popover"
+        className="kuiLocalNav__popover"
         id="sharePopover"
         button={anchorElement}
         isOpen={true}

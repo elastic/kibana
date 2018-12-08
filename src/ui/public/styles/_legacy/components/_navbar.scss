@@ -1,0 +1,90 @@
+navbar {
+  @extend .control-group;
+
+  max-height: $navbar-collapse-max-height;
+  margin-bottom: $navbar-margin-bottom;
+  // top and bottom padding are normally calculated and stored in $navbar-padding-vertical, but flexbox
+  padding: 0 $navbar-padding-horizontal 6px;
+  color: $navbar-default-color;
+  background-color: $navbar-default-bg;
+  border: none;
+  z-index: $zindex-navbar;
+
+  > * {
+    padding-right: $navbar-padding-horizontal;
+  }
+
+  .navbar-text {
+    margin-top: $navbar-margin;
+    margin-bottom: $navbar-margin;
+  }
+
+  // the "brand" that is displayed, usually on the left of the navbar
+  > .name {
+    @include euiTextTruncate;
+
+    align-self: center;
+    font-size: $font-size-large;
+  }
+
+  button {
+    color: $navbar-default-link-color;
+    background-color: transparent;
+
+    &:hover {
+      color: $navbar-default-link-hover-color;
+      background-color: $navbar-default-link-hover-bg;
+    }
+
+    &:focus {
+      color: $navbar-default-link-color;
+      background-color: transparent;
+    }
+
+    &:active, &.active {
+      color: $navbar-default-link-active-color;
+      background-color: $navbar-default-link-active-bg;
+      box-shadow: none;
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &[disabled] {
+      color: $navbar-default-link-disabled-color;
+      background-color: $navbar-default-link-disabled-bg;
+    }
+  }
+
+  .inline-form .input-group {
+    button {
+      color: $euiColorEmptyShade;
+      background-color: $euiColorDarkShade;
+      border: none;
+    }
+  }
+
+  // responsive modifications
+
+  // desktop
+  @include euiBreakpoint('l', 'xl') {
+    > .name {
+      // 500px is sort of arbitrary, not sure how to deal with lots of buttons
+      max-width: 500px;
+    }
+  }
+
+  // tablets/phones
+  @include euiBreakpoint('xs', 's', 'm') {
+    > .fill {
+      flex: 1 1 map-get($euiBreakpoints, 'l');
+    }
+  }
+
+  // phones
+  @include euiBreakpoint('xs', 's') {
+    > .name {
+      max-width: 100%;
+    }
+  }
+}
