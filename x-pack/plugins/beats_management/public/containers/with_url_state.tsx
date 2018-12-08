@@ -7,7 +7,7 @@
 import { parse, stringify } from 'querystring';
 import React from 'react';
 import { withRouter } from 'react-router-dom';
-import { FlatObject } from '../app';
+import { FlatObject } from '../frontend_types';
 import { RendererFunction } from '../utils/typed_react';
 
 type StateCallback<T> = (previousState: T) => T;
@@ -88,7 +88,9 @@ export class WithURLStateComponent<URLState extends object> extends React.Compon
 }
 export const WithURLState = withRouter<any>(WithURLStateComponent);
 
-export function withUrlState<OP>(UnwrappedComponent: React.ComponentType<OP>): React.SFC<any> {
+export function withUrlState<OP>(
+  UnwrappedComponent: React.ComponentType<OP & URLStateProps>
+): React.SFC<any> {
   return (origProps: OP) => {
     return (
       <WithURLState>

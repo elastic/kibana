@@ -13,7 +13,7 @@ import { promisify } from 'util';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { TokenEnrollmentData } from '../../lib/adapters/tokens/adapter_types';
 import { compose } from '../../lib/compose/testing';
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { initManagementServer } from './../../management_server';
 
 const readFileAsync = promisify(readFile);

@@ -8,7 +8,7 @@ import React from 'react';
 
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 
-import { FrontendLibs } from '../lib/lib';
+import { FrontendLibs } from '../lib/types';
 import { RendererFunction } from '../utils/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {
