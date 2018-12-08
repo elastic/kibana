@@ -24,7 +24,7 @@ import {
   PropertiesTable,
   getPropertyTabNames
 } from '../../../shared/PropertiesTable';
-import Stacktrace from '../../../shared/Stacktrace';
+import { Stacktrace } from '../../../shared/Stacktrace';
 import {
   SERVICE_AGENT_NAME,
   SERVICE_LANGUAGE_NAME,
