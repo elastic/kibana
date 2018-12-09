@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module '@elastic/eui' {
-  export const EuiOutsideClickDetector: SFC<any>;
-}
-
 import { debounce, isEqual } from 'lodash';
-import React, { Component, SFC } from 'react';
+import React, { Component } from 'react';
 
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';

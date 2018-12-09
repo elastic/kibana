@@ -30,7 +30,7 @@ export function apm(kibana) {
         euiIconType: 'apmApp',
         order: 8100
       },
-      home: ['plugins/apm/register_feature'],
+      home: ['plugins/apm/regi ster_feature'],
       injectDefaultVars(server) {
         const config = server.config();
         return {
