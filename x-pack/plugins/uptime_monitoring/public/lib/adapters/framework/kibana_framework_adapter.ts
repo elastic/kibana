@@ -21,7 +21,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
 
   private register = (rootComponent: React.ReactElement<any>) => {
     this.uiRoutes.enable();
-    this.uiRoutes.when('/home', {
+    this.uiRoutes.otherwise({
       controllerAs: 'uptime',
       // @ts-ignore angular
       controller: ($scope, $route, $http) => {
@@ -41,7 +41,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     const lastRoute = $route.current;
     const deregister = $scope.$on('$locationChangeSuccess', () => {
       const currentRoute = $route.current;
-      if (lastRoute.$$route.template === currentRoute.$$route.template) {
+      if (lastRoute.$$route && lastRoute.$$route.template === currentRoute.$$route.template) {
         $route.current = lastRoute;
       }
     });
