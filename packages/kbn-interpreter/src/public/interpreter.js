@@ -47,7 +47,7 @@ export async function initializeInterpreter() {
   return functionList;
 }
 
-export async function isInterpreterInitialized() {
+export async function getInitializedFunctions() {
   return functionList;
 }
 
