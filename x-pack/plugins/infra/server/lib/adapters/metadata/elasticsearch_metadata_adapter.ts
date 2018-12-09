@@ -130,15 +130,17 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
       body: {
         query: {
           bool: {
-            filter: {
+            filter: [
               ...createQueryFilterClauses(filterQuery),
-              range: {
-                [sourceConfiguration.fields.timestamp]: {
-                  gte: start,
-                  lte: end,
+              {
+                range: {
+                  [sourceConfiguration.fields.timestamp]: {
+                    gte: start,
+                    lte: end,
+                  },
                 },
               },
-            },
+            ],
           },
         },
         size: 0,
@@ -186,15 +188,17 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
       body: {
         query: {
           bool: {
-            filter: {
+            filter: [
               ...createQueryFilterClauses(filterQuery),
-              range: {
-                [sourceConfiguration.fields.timestamp]: {
-                  gte: start,
-                  lte: end,
+              {
+                range: {
+                  [sourceConfiguration.fields.timestamp]: {
+                    gte: start,
+                    lte: end,
+                  },
                 },
               },
-            },
+            ],
           },
         },
         size: 0,

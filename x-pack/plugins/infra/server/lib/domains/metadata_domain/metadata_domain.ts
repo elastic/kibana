@@ -63,14 +63,16 @@ export class InfraMetadataDomain {
       req,
       sourceConfiguration,
       start,
-      end
+      end,
+      filterQuery
     );
 
     const logsPromise = this.adapter.getLogsMetadataForServices(
       req,
       sourceConfiguration,
       start,
-      end
+      end,
+      filterQuery
     );
 
     const metrics = await metricsPromise;

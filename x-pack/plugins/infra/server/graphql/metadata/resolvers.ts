@@ -8,6 +8,7 @@ import { InfraSourceResolvers } from '../../../common/graphql/types';
 import { InfraResolvedResult, InfraResolverOf } from '../../lib/adapters/framework';
 import { InfraMetadataDomain } from '../../lib/domains/metadata_domain';
 import { InfraContext } from '../../lib/infra_types';
+import { parseFilterQuery } from '../../utils/serialized_query';
 import { QuerySourceResolver } from '../sources/resolvers';
 
 type InfraSourceMetadataByNodeResolver = InfraResolverOf<
@@ -36,7 +37,13 @@ export const createMetadataResolvers = (libs: {
       return result;
     },
     async serviceMetadataBetween(source, args, { req }) {
-      const result = await libs.metadata.getServiceMetadata(req, source.id, args.start, args.end);
+      const result = await libs.metadata.getServiceMetadata(
+        req,
+        source.id,
+        args.start,
+        args.end,
+        parseFilterQuery(args.filterQuery)
+      );
       return result;
     },
   },
