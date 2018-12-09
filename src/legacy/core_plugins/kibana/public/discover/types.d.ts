@@ -17,35 +17,18 @@
  * under the License.
  */
 
-export function addColumn(columns, columnName) {
-  if (columns.includes(columnName)) {
-    return;
-  }
+import { SearchSource } from 'ui/courier';
 
-  columns.push(columnName);
+export interface SavedSearch {
+  readonly id: string;
+  title: string;
+  searchSource: SearchSource;
+  description?: string;
+  columns: string[];
+  sort: string[];
+  destroy: () => void;
 }
 
-export function removeColumn(columns, columnName) {
-  if (!columns.includes(columnName)) {
-    return;
-  }
-
-  columns.splice(columns.indexOf(columnName), 1);
-}
-
-export function moveColumn(columns, columnName, newIndex) {
-  if (newIndex < 0) {
-    return;
-  }
-
-  if (newIndex >= columns.length) {
-    return;
-  }
-
-  if (!columns.includes(columnName)) {
-    return;
-  }
-
-  columns.splice(columns.indexOf(columnName), 1);  // remove at old index
-  columns.splice(newIndex, 0, columnName);  // insert before new index
+export interface SavedSearchLoader {
+  get: (id: string) => SavedSearch;
 }

@@ -53,7 +53,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
           onEmbeddableStateChanged,
           savedSearch: savedObject,
           editUrl,
-          loader: this.searchLoader,
           $rootScope: this.$rootScope,
           $compile: this.$compile,
         });

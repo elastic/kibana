@@ -36,7 +36,7 @@ declare const datemath: {
     input: string,
     options?: {
       roundUp?: boolean;
-      forceNow?: boolean;
+      forceNow?: Date;
       momentInstance?: typeof moment;
     }
   ): moment.Moment | undefined;

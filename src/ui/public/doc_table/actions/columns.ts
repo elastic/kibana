@@ -17,34 +17,35 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import dateMath from '@elastic/datemath';
-
-export function calculateBounds(timeRange, options = {}) {
-  return {
-    min: dateMath.parse(timeRange.from, { forceNow: options.forceNow }),
-    max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: options.forceNow })
-  };
-}
-
-export function getTime(indexPattern, timeRange, forceNow) {
-  if (!indexPattern) {
-    //in CI, we sometimes seem to fail here.
+export function addColumn(columns: string[], columnName: string) {
+  if (columns.includes(columnName)) {
     return;
   }
 
-  let filter;
-  const timefield = indexPattern.timeFieldName && _.find(indexPattern.fields, { name: indexPattern.timeFieldName });
+  columns.push(columnName);
+}
 
-  if (timefield) {
-    const bounds = calculateBounds(timeRange, { forceNow });
-    filter = { range: {} };
-    filter.range[timefield.name] = {
-      gte: bounds.min.valueOf(),
-      lte: bounds.max.valueOf(),
-      format: 'epoch_millis'
-    };
+export function removeColumn(columns: string[], columnName: string) {
+  if (!columns.includes(columnName)) {
+    return;
   }
 
-  return filter;
+  columns.splice(columns.indexOf(columnName), 1);
+}
+
+export function moveColumn(columns: string[], columnName: string, newIndex: number) {
+  if (newIndex < 0) {
+    return;
+  }
+
+  if (newIndex >= columns.length) {
+    return;
+  }
+
+  if (!columns.includes(columnName)) {
+    return;
+  }
+
+  columns.splice(columns.indexOf(columnName), 1); // remove at old index
+  columns.splice(newIndex, 0, columnName); // insert before new index
 }
