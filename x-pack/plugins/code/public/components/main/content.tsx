@@ -49,6 +49,11 @@ const Button = styled.button`
     outline: none;
     box-shadow: none;
   }
+  a,
+  a:focus {
+    outline: none;
+    box-shadow: none;
+  }
 `;
 
 const EditorBlameContainer = styled.div`
@@ -125,9 +130,13 @@ class CodeContent extends React.PureComponent<Props, State> {
   };
 
   public renderButtons() {
+    const { path, resource, org, repo, revision } = this.props.match.params;
+    const repoUri = `${resource}/${org}/${repo}`;
     return (
       <ButtonsContainer>
-        <Button onClick={this.hideBlame}>Raw</Button>
+        <Button onClick={this.hideBlame}>
+          <a href={`../api/code/repo/${repoUri}/blob/${revision}/${path}`}>Raw</a>
+        </Button>
         <Button onClick={this.showBlame}>Blame</Button>
         <Button onClick={this.hideBlame}>History</Button>
       </ButtonsContainer>
