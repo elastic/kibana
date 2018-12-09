@@ -19,4 +19,4 @@
 
 import './settings';
 import './objects';
-import './indices';
+import './index_patterns';
