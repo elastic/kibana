@@ -33,7 +33,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { RepoConfigs, Repository } from '../../../model';
-import { deleteRepo, importRepo, indexRepo, initRepoCommand } from '../../actions';
+import { deleteRepo, hideCallOut, importRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RootState } from '../../reducers';
 import { CallOutType } from '../../reducers/repository';
 import { FlexGrowContainer } from '../../styled_components/flex_grow_container';
@@ -41,8 +41,9 @@ import { RelativeContainer } from '../../styled_components/relative_container';
 import { InlineProgressContainer } from './inline_progress_container';
 
 const callOutTitle = {
-  [CallOutType.danger]: 'Sorry, there was an error',
+  [CallOutType.danger]: 'Sorry, there was an error.',
   [CallOutType.success]: 'Successfully Imported!',
+  [CallOutType.warning]: 'Successfully Imported!',
 };
 
 enum Tabs {
@@ -242,6 +243,7 @@ class AdminPage extends React.PureComponent<Props, State> {
 
   public closeModal = () => {
     this.setState({ isModalVisible: false });
+    this.props.hideCallOut();
   };
 
   public getDeleteRepoHandler = (uri: string) => () => {
@@ -375,6 +377,7 @@ const mapDispatchToProps = {
   importRepo,
   indexRepo,
   initRepoCommand,
+  hideCallOut,
 };
 
 export const Admin = connect(

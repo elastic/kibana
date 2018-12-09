@@ -21,9 +21,11 @@ export const indexRepo = createAction<string>('INDEX REPOS');
 export const indexRepoSuccess = createAction<string>('INDEX REPOS SUCCESS');
 export const indexRepoFailed = createAction<Error>('INDEX REPOS FAILED');
 
-export const importRepo = createAction<string>('IMPORT REPOS');
-export const importRepoSuccess = createAction<string>('IMPORT REPOS SUCCESS');
-export const importRepoFailed = createAction<Error>('IMPORT REPOS FAILED');
+export const importRepo = createAction<string>('IMPORT REPO');
+export const importRepoSuccess = createAction<string>('IMPORT REPO SUCCESS');
+export const importRepoFailed = createAction<Error>('IMPORT REPO FAILED');
+
+export const hideCallOut = createAction('HIDE CALL OUT');
 
 export const fetchRepoConfigs = createAction('FETCH REPO CONFIGS');
 export const fetchRepoConfigSuccess = createAction<RepoConfigs>('FETCH REPO CONFIGS SUCCESS');
