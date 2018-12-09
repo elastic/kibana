@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export default () => ({
+export const regionmap = () => ({
   name: 'regionmap',
   type: 'render',
   context: {

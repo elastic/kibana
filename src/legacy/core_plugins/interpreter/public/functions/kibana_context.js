@@ -20,7 +20,7 @@
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 
-export default () => ({
+export const kibanaContext = () => ({
   name: 'kibana_context',
   type: 'kibana_context',
   context: {

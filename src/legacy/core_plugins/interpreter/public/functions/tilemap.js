@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 const responseHandler = makeGeoJsonResponseHandler();
 
-export default () => ({
+export const tilemap = () => ({
   name: 'tilemap',
   type: 'render',
   context: {

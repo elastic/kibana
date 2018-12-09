@@ -22,7 +22,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import chrome from 'ui/chrome';
 
-export default () => ({
+export const vislib = () => ({
   name: 'vislib',
   type: 'render',
   context: {

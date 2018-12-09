@@ -32,7 +32,7 @@ import chrome from 'ui/chrome';
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
-export default () => ({
+export const esaggs = () => ({
   name: 'esaggs',
   type: 'kibana_table',
   context: {

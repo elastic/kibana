@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line new-cap
 const responseHandler = LegacyResponseHandlerProvider().handler;
 
-export default () => ({
+export const kibanaTable = () => ({
   name: 'kibana_table',
   type: 'render',
   context: {

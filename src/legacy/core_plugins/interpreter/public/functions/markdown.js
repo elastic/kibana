@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export default () => ({
+export const kibanaMarkdown = () => ({
   name: 'kibana_markdown',
   type: 'render',
   context: {

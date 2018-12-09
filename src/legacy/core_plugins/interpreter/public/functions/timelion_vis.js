@@ -24,7 +24,7 @@ import { TimelionRequestHandlerProvider } from 'plugins/timelion/vis/timelion_re
 
 import chrome from 'ui/chrome';
 
-export default () => ({
+export const timelionVis = () => ({
   name: 'timelion_vis',
   type: 'render',
   context: {

@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export default () => ({
+export const metric = () => ({
   name: 'kibana_metric',
   type: 'render',
   context: {

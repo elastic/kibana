@@ -25,7 +25,7 @@ import { PersistedState } from 'ui/persisted_state';
 import chrome from 'ui/chrome';
 
 
-export default () => ({
+export const tsvb = () => ({
   name: 'tsvb',
   type: 'render',
   context: {

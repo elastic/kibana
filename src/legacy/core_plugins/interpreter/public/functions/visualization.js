@@ -41,7 +41,7 @@ function getHandler(from, type) {
   return handlerDesc.handler;
 }
 
-export default () => ({
+export const visualization = () => ({
   name: 'visualization',
   type: 'render',
   context: {

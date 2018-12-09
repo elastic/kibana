@@ -22,7 +22,7 @@ import { VislibSlicesResponseHandlerProvider } from 'ui/vis/response_handlers/vi
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 
-export default () => ({
+export const kibanaPie = () => ({
   name: 'kibana_pie',
   type: 'render',
   context: {

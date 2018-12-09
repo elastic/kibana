@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
 import { VegaRequestHandlerProvider } from 'plugins/vega/vega_request_handler';
 
-export default () => ({
+export const vega = () => ({
   name: 'vega',
   type: 'render',
   context: {

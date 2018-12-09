@@ -17,24 +17,24 @@
  * under the License.
  */
 
-import esaggs from './esaggs';
-import kibana from './kibana';
-import kibanaContext from './kibana_context';
-import vega from './vega';
-import timelion from './timelion_vis';
-import tsvb from './tsvb';
-import markdown from './markdown';
-import inputControl from './input_control';
-import metric from './metric';
-import pie from './pie';
-import regionMap from './regionmap';
-import tileMap from './tilemap';
-import table from './table';
-import tagCloud from './tagcloud';
-import vislib from './vislib';
-import visualization from './visualization';
+import { esaggs } from './esaggs';
+import { kibana } from './kibana';
+import { kibanaContext } from './kibana_context';
+import { vega } from './vega';
+import { timelionVis } from './timelion_vis';
+import { tsvb } from './tsvb';
+import { kibanaMarkdown } from './markdown';
+import { inputControlVis } from './input_control';
+import { metric } from './metric';
+import { kibanaPie } from './pie';
+import { regionmap } from './regionmap';
+import { tilemap } from './tilemap';
+import { kibanaTable } from './table';
+import { tagcloud } from './tagcloud';
+import { vislib } from './vislib';
+import { visualization } from './visualization';
 
 export const functions = [
-  esaggs, kibana, kibanaContext, vega, timelion, tsvb, markdown, inputControl,
-  metric, pie, regionMap, tileMap, table, tagCloud, vislib, visualization
+  esaggs, kibana, kibanaContext, vega, timelionVis, tsvb, kibanaMarkdown, inputControlVis,
+  metric, kibanaPie, regionmap, tilemap, kibanaTable, tagcloud, vislib, visualization
 ];
