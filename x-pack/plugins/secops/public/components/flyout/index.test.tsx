@@ -12,6 +12,7 @@ import { set } from 'lodash/fp';
 import { Flyout, FlyoutButton, FlyoutComponent, FlyoutPane } from '.';
 import { createStore, State } from '../../store';
 import { DragDropContextWrapper } from '../drag_and_drop/drag_drop_context_wrapper';
+import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 
 describe('Flyout', () => {
   const state: State = {
@@ -124,12 +125,72 @@ describe('Flyout', () => {
       ).toContain('I am a child of flyout');
     });
 
+    test('it does render the data providers badge when the number is greater than 0', () => {
+      const stateWithDataProviders = set(
+        'local.timeline.timelineById.test.dataProviders',
+        mockDataProviders,
+        state
+      );
+      const storeWithDataProviders = createStore(stateWithDataProviders);
+
+      const wrapper = mount(
+        <ReduxStoreProvider store={storeWithDataProviders}>
+          <DragDropContextWrapper>
+            <Flyout timelineId="test" />
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="badge"]').exists()).toEqual(true);
+    });
+
+    test('it renders the correct number of data providers badge when the number is greater than 0', () => {
+      const stateWithDataProviders = set(
+        'local.timeline.timelineById.test.dataProviders',
+        mockDataProviders,
+        state
+      );
+      const storeWithDataProviders = createStore(stateWithDataProviders);
+
+      const wrapper = mount(
+        <ReduxStoreProvider store={storeWithDataProviders}>
+          <DragDropContextWrapper>
+            <Flyout timelineId="test" />
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="badge"]')
+          .first()
+          .text()
+      ).toContain('10');
+    });
+
+    test('it does NOT render the data providers badge when the number is equal to 0', () => {
+      const wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <DragDropContextWrapper>
+            <Flyout timelineId="test" />
+          </DragDropContextWrapper>
+        </ReduxStoreProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="badge"]').exists()).toEqual(false);
+    });
+
     test('should call the onOpen when the mouse is clicked for rendering', () => {
       const showTimeline = jest.fn();
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
           <DragDropContextWrapper>
-            <FlyoutComponent show={false} timelineId="test" showTimeline={showTimeline} />
+            <FlyoutComponent
+              dataProviders={mockDataProviders}
+              show={false}
+              timelineId="test"
+              showTimeline={showTimeline}
+            />
           </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
@@ -150,7 +211,12 @@ describe('Flyout', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={storeShowIsTrue}>
           <DragDropContextWrapper>
-            <FlyoutComponent show={true} timelineId="test" showTimeline={showTimeline} />
+            <FlyoutComponent
+              dataProviders={mockDataProviders}
+              show={true}
+              timelineId="test"
+              showTimeline={showTimeline}
+            />
           </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
@@ -229,7 +295,12 @@ describe('Flyout', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
           <DragDropContextWrapper>
-            <FlyoutButton show={true} timelineId="test" onOpen={openMock} />{' '}
+            <FlyoutButton
+              dataProviders={mockDataProviders}
+              show={true}
+              timelineId="test"
+              onOpen={openMock}
+            />{' '}
           </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
@@ -241,7 +312,12 @@ describe('Flyout', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
           <DragDropContextWrapper>
-            <FlyoutButton show={false} timelineId="test" onOpen={openMock} />{' '}
+            <FlyoutButton
+              dataProviders={mockDataProviders}
+              show={false}
+              timelineId="test"
+              onOpen={openMock}
+            />{' '}
           </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
@@ -253,7 +329,12 @@ describe('Flyout', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
           <DragDropContextWrapper>
-            <FlyoutButton show={true} timelineId="test" onOpen={openMock} />{' '}
+            <FlyoutButton
+              dataProviders={mockDataProviders}
+              show={true}
+              timelineId="test"
+              onOpen={openMock}
+            />{' '}
           </DragDropContextWrapper>
         </ReduxStoreProvider>
       );
@@ -270,7 +351,12 @@ describe('Flyout', () => {
       const wrapper = mount(
         <ReduxStoreProvider store={store}>
           <DragDropContextWrapper>
-            <FlyoutButton show={true} timelineId="test" onOpen={openMock} />
+            <FlyoutButton
+              dataProviders={mockDataProviders}
+              show={true}
+              timelineId="test"
+              onOpen={openMock}
+            />
           </DragDropContextWrapper>
         </ReduxStoreProvider>
       );

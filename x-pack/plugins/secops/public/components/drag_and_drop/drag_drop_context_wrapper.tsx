@@ -39,7 +39,6 @@ const onDragEndHandler = ({ result, dataProviders, dispatch }: OnDragEndHandlerP
 
   if (providerWasDroppedOnTimelineButton(result)) {
     addProviderToTimeline({ dataProviders, result, dispatch });
-    updateShowTimeline({ result, show: true, dispatch });
   }
 };
 

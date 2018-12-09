@@ -26,7 +26,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
 
 export const DroppableWrapper = pure<Props>(({ droppableId, isDropDisabled = false, children }) => (
   <ThemeProvider theme={{ eui: euiVars }}>
-    <Droppable isDropDisabled={isDropDisabled} droppableId={droppableId}>
+    <Droppable isDropDisabled={isDropDisabled} droppableId={droppableId} direction={'horizontal'}>
       {(provided, snapshot) => (
         <ReactDndDropTarget
           innerRef={provided.innerRef}
