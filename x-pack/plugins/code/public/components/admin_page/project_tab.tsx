@@ -29,8 +29,8 @@ const NewProjectButton = styled(EuiButton)`
 
 // TODO(qianliang)
 const sortOptions = [
-  { value: 'alpabetical_asc', text: 'A to Z' },
-  { value: 'alpabetical_desc', text: 'Z to A' },
+  { value: 'alphabetical_asc', text: 'A to Z' },
+  { value: 'alphabetical_desc', text: 'Z to A' },
   { value: 'updated_asc', text: 'Last Updated ASC' },
   { value: 'updated_desc', text: 'Last Updated DESC' },
   { value: 'recently_added', text: 'Recently Added' },
@@ -109,9 +109,4 @@ const mapStateToProps = (state: RootState) => ({
   isAdmin: state.userConfig.isAdmin,
 });
 
-const mapDispatchToProps = {};
-
-export const ProjectTab = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(CodeProjectTab);
+export const ProjectTab = connect(mapStateToProps)(CodeProjectTab);

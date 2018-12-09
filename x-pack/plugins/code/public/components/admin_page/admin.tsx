@@ -8,12 +8,13 @@ import React from 'react';
 
 import { connect } from 'react-redux';
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 
 import styled from 'styled-components';
 
 import { Repository } from '../../../model';
 import { RootState } from '../../reducers';
+import { CallOutType } from '../../reducers/repository';
 import { EmptyProject } from './empty_project';
 import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
@@ -40,11 +41,20 @@ interface Props {
   repositories: Repository[];
   repositoryLoading: boolean;
   isAdmin: boolean;
+  callOutType?: CallOutType;
+  callOutMessage?: string;
+  showCallOut?: boolean;
 }
 
 interface State {
   tab: AdminTabs;
 }
+
+const callOutTitle = {
+  [CallOutType.danger]: 'Sorry, there was an error.',
+  [CallOutType.success]: 'Successfully Imported!',
+  [CallOutType.warning]: 'Already Imported!',
+};
 
 class AdminPage extends React.PureComponent<Props, State> {
   public state = {
@@ -108,10 +118,20 @@ class AdminPage extends React.PureComponent<Props, State> {
   };
 
   public render() {
+    const { callOutMessage, callOutType, showCallOut } = this.props;
+    const callOut = showCallOut && (
+      <React.Fragment>
+        <EuiSpacer />
+        <EuiCallOut color={callOutType} title={callOutTitle[callOutType!]}>
+          {callOutMessage}
+        </EuiCallOut>
+      </React.Fragment>
+    );
     return (
       <Root>
         <SideBar />
         <Container>
+          {callOut}
           {this.renderTabs()}
           {this.renderTabContent()}
         </Container>
@@ -124,6 +144,9 @@ const mapStateToProps = (state: RootState) => ({
   repositories: state.repository.repositories,
   repositoryLoading: state.repository.loading,
   isAdmin: state.userConfig.isAdmin,
+  showCallOut: state.repository.showCallOut,
+  callOutMessage: state.repository.callOutMessage,
+  callOutType: state.repository.callOutType,
 });
 
 export const Admin = connect(mapStateToProps)(AdminPage);
