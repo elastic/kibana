@@ -208,47 +208,57 @@ export class TaskManagerRunner implements TaskRunner {
     return result || {};
   }
 
-  private async processResult(result: RunResult): Promise<RunResult> {
-    const recurring = result.runAt || this.instance.interval || result.error;
-    if (recurring) {
-      // recurring task: update the task instance
-      const state = result.state || this.instance.state || {};
-      const status = this.instance.attempts < this.store.maxAttempts ? 'idle' : 'failed';
+  private async processResultForRecurringTask(result: RunResult): Promise<RunResult> {
+    // recurring task: update the task instance
+    const state = result.state || this.instance.state || {};
+    const status = this.instance.attempts < this.store.maxAttempts ? 'idle' : 'failed';
 
-      let runAt;
-      if (status === 'failed') {
-        // task run errored, keep the same runAt
-        runAt = this.instance.runAt;
-      } else {
-        runAt =
-          result.runAt ||
-          intervalFromNow(this.instance.interval) ||
-          // when result.error is truthy, then we're retrying because it failed
-          minutesFromNow((this.instance.attempts + 1) * 5); // incrementally backs off an extra 5m per failure
-      }
-
-      await this.store.update({
-        ...this.instance,
-        runAt,
-        state,
-        status,
-        attempts: result.error ? this.instance.attempts + 1 : 0,
-      });
+    let runAt;
+    if (status === 'failed') {
+      // task run errored, keep the same runAt
+      runAt = this.instance.runAt;
     } else {
-      // not a recurring task: clean up by removing the task instance from store
-      try {
-        await this.store.remove(this.instance.id);
-      } catch (err) {
-        if (err.statusCode === 404) {
-          this.logger.warning(
-            `Task cleanup of ${this} failed in processing. Was remove called twice?`
-          );
-        } else {
-          throw err;
-        }
+      runAt =
+        result.runAt ||
+        intervalFromNow(this.instance.interval) ||
+        // when result.error is truthy, then we're retrying because it failed
+        minutesFromNow((this.instance.attempts + 1) * 5); // incrementally backs off an extra 5m per failure
+    }
+
+    await this.store.update({
+      ...this.instance,
+      runAt,
+      state,
+      status,
+      attempts: result.error ? this.instance.attempts + 1 : 0,
+    });
+
+    return result;
+  }
+
+  private async processResultWhenDone(result: RunResult): Promise<RunResult> {
+    // not a recurring task: clean up by removing the task instance from store
+    try {
+      await this.store.remove(this.instance.id);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        this.logger.warning(
+          `Task cleanup of ${this} failed in processing. Was remove called twice?`
+        );
+      } else {
+        throw err;
       }
     }
 
+    return result;
+  }
+
+  private async processResult(result: RunResult): Promise<RunResult> {
+    if (result.runAt || this.instance.interval || result.error) {
+      await this.processResultForRecurringTask(result);
+    } else {
+      await this.processResultWhenDone(result);
+    }
     return result;
   }
 }
