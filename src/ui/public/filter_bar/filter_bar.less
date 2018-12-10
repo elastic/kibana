@@ -4,13 +4,13 @@
 @filter-bar-confirm-border: #ccc;
 @filter-bar-confirm-filter-bg: @gray-light;
 
-@filter-bar-bar-bg: @globalColorLightestGray;
-@filter-bar-bar-border: @globalColorLightGray;
-@filter-bar-bar-condensed-bg: tint(@globalColorBlue, 90%);
+@filter-bar-bar-bg: #F6F6F6;
+@filter-bar-bar-border: @gray-lighter;
+@filter-bar-bar-condensed-bg: tint(@blue, 90%);
 
-@filter-bar-bar-filter-bg: @action-add;
+@filter-bar-bar-filter-bg: @blue;
 @filter-bar-bar-filter-color: @white;
-@filter-bar-bar-filter-negate-bg: @action-remove;
+@filter-bar-bar-filter-negate-bg: @brand-danger;
 @filterBarDepth: 4;
 
 filter-bar {
@@ -84,7 +84,7 @@ filter-bar {
 .filter-bar {
   padding: 6px 10px 1px 10px;
   background: @filter-bar-bar-bg;
-  border-bottom: solid 1px @globalColorLightGray;
+  border-bottom: solid 1px @gray-lighter;
 
   .ace_editor {
     height: 175px;
@@ -227,12 +227,12 @@ filter-bar {
 
 // SASSTODO: Make sure these colors convert to theme variables
 .tab-dashboard.theme-dark {
-  @filter-bar-confirm-bg:                       @gray3;
-  @filter-bar-confirm-filter-color:             @gray3;
-  @filter-bar-confirm-border:                   @black;
+  @filter-bar-confirm-bg:                       @brand-primary;
+  @filter-bar-confirm-filter-color:             @brand-primary;
+  @filter-bar-confirm-border:                   @gray-base;
   @filter-bar-confirm-filter-bg:                @gray12;
-  @filter-bar-bar-bg:                           @gray3;
-  @filter-bar-bar-border:                       @black;
+  @filter-bar-bar-bg:                           @brand-primary;
+  @filter-bar-bar-border:                       @gray-base;
   @filter-bar-bar-condensed-bg:                 darken(@filter-bar-bar-bg, 5%);
   @filter-bar-bar-filter-bg:                    desaturate(@brand-success, 30%);
   @filter-bar-bar-filter-color:                 @white;
