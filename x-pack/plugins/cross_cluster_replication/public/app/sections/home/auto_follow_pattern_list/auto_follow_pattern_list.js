@@ -49,6 +49,10 @@ export class AutoFollowPatternListUI extends PureComponent {
         )}
         body={
           <Fragment>
+            <h2>
+              Auto-follow patterns
+            </h2>
+
             <p>
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternList.emptyPromptDescription"
