@@ -227,7 +227,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     >
       <FormattedMessage
         defaultMessage="Index lifecycle management"
-        id="xpack.indexLifecycleMgmt.indexManagementTable.summaryTitle"
+        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
         values={Object {}}
       >
         Index lifecycle management
@@ -248,7 +248,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     title={
       <FormattedMessage
         defaultMessage="Index lifecycle error"
-        id="xpack.indexLifecycleMgmt.indexManagementTable.summaryErrorMessage"
+        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
         values={Object {}}
       />
     }
@@ -313,7 +313,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
         >
           <FormattedMessage
             defaultMessage="Index lifecycle error"
-            id="xpack.indexLifecycleMgmt.indexManagementTable.summaryErrorMessage"
+            id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
             values={Object {}}
           >
             Index lifecycle error
@@ -348,7 +348,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
               >
                 <FormattedMessage
                   defaultMessage="Stack trace"
-                  id="xpack.indexLifecycleMgmt.indexManagementTable.stackTraceButton"
+                  id="xpack.idxMgmt.indexLifecycleMgmtSummary.stackTraceButton"
                   values={Object {}}
                 />
               </EuiButtonEmpty>
@@ -391,7 +391,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                         >
                           <FormattedMessage
                             defaultMessage="Stack trace"
-                            id="xpack.indexLifecycleMgmt.indexManagementTable.stackTraceButton"
+                            id="xpack.idxMgmt.indexLifecycleMgmtSummary.stackTraceButton"
                             values={Object {}}
                           >
                             Stack trace
@@ -584,7 +584,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                   >
                     <FormattedMessage
                       defaultMessage="Show phase definition"
-                      id="xpack.indexLifecycleMgmt.indexManagementTable.showPhaseDefinitionButton"
+                      id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                       values={Object {}}
                     />
                   </EuiLink>
@@ -622,7 +622,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
                         >
                           <FormattedMessage
                             defaultMessage="Show phase definition"
-                            id="xpack.indexLifecycleMgmt.indexManagementTable.showPhaseDefinitionButton"
+                            id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
                             values={Object {}}
                           >
                             Show phase definition
@@ -763,7 +763,7 @@ exports[`ilm summary extension should return extension when index has lifecycle 
     >
       <FormattedMessage
         defaultMessage="Index lifecycle management"
-        id="xpack.indexLifecycleMgmt.indexManagementTable.summaryTitle"
+        id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
         values={Object {}}
       >
         Index lifecycle management
