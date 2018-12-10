@@ -5,15 +5,16 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { range } from 'lodash/fp';
+import { noop, range } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import styled from 'styled-components';
 
 import { WhoAmI } from '../containers/who_am_i';
-import { DraggableWrapper } from './drag_and_drop/draggable_wrapper';
+import { DragEffects, DraggableWrapper } from './drag_and_drop/draggable_wrapper';
 import { mockDataProviders } from './timeline/data_providers/mock/mock_data_providers';
+import { Provider } from './timeline/data_providers/provider';
 
 export const VisualizationPlaceholder = styled(EuiPanel)`
   && {
@@ -33,8 +34,6 @@ export const ProviderContainer = styled.div`
   margin: 5px;
   user-select: none;
 `;
-
-export const PlaceholdersContainer = styled.div``; // required by react-beautiful-dnd
 
 interface Props {
   count: number;
@@ -63,9 +62,19 @@ class PlaceholdersComponent extends React.PureComponent<Props> {
             </WhoAmI>
             <DraggableWrapper
               dataProvider={mockDataProviders[i]}
-              render={() => {
-                return mockDataProviders[i].name;
-              }}
+              render={(dataProvider, _, snapshot) =>
+                snapshot.isDragging ? (
+                  <DragEffects>
+                    <Provider
+                      dataProvider={dataProvider}
+                      onDataProviderRemoved={noop}
+                      onToggleDataProviderEnabled={noop}
+                    />
+                  </DragEffects>
+                ) : (
+                  mockDataProviders[i].name
+                )
+              }
             />
           </VisualizationPlaceholder>
         ))}

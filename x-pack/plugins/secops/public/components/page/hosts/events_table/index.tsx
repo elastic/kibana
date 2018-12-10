@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { getOr, noop } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import { EventItem } from '../../../../../common/graphql/types';
 import { EventsQuery } from '../../../../containers/events';
 import { BasicTable } from '../../../basic_table';
-import { DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
+import { Provider } from '../../../timeline/data_providers/provider';
 import { ProviderContainer } from '../../../visualization_placeholder';
 
 interface EventsTableProps {
@@ -55,7 +56,19 @@ const getEventsColumns = (startDate: number, endDate: number) => [
                 filterQuery: `{"bool":{"should":[{"match":{"host.name":"${hostName}"}}],"minimum_should_match":1}}`,
               },
             }}
-            render={() => hostName}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider
+                    dataProvider={dataProvider}
+                    onDataProviderRemoved={noop}
+                    onToggleDataProviderEnabled={noop}
+                  />
+                </DragEffects>
+              ) : (
+                hostName
+              )
+            }
           />
         </>
       );

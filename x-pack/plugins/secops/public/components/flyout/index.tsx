@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiBadge,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -23,6 +24,7 @@ import { timelineByIdSelector } from '../../store/selectors';
 import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { droppableTimelineFlyoutButtonPrefix } from '../drag_and_drop/helpers';
 import { defaultWidth } from '../timeline/body';
+import { DataProvider } from '../timeline/data_providers/data_provider';
 
 const Container = styled.div`
   overflow-x: auto;
@@ -33,8 +35,8 @@ const Container = styled.div`
   min-width: 30px;
   max-width: 200px;
   z-index: 1;
-  height: 206px;
-  max-height: 206px;
+  height: 210px;
+  max-height: 210px;
 `;
 
 export const Button = styled(EuiPanel)`
@@ -56,6 +58,15 @@ export const Text = styled(EuiText)`
   z-index: 3;
 `;
 
+export const Badge = styled(EuiBadge)`
+  position: absolute;
+  padding-left: 4px;
+  padding-right: 4px;
+  right: 0%;
+  top: 0%;
+  border-bottom-left-radius: 5px;
+`;
+
 const Visible = styled.div<{ show: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
 `;
@@ -73,6 +84,7 @@ interface DispatchProps {
 
 interface StateReduxProps {
   show: boolean;
+  dataProviders: DataProvider[];
 }
 
 type Props = OwnProps & DispatchProps & StateReduxProps;
@@ -104,15 +116,21 @@ export const FlyoutPane = pure(({ onClose, children }: FlyoutPaneProps) => (
 interface FlyoutButtonProps {
   onOpen: () => void;
   show: boolean;
+  dataProviders: DataProvider[];
   timelineId: string;
 }
 
 export const FlyoutButton = pure(
-  ({ onOpen, show, timelineId }: FlyoutButtonProps) =>
+  ({ onOpen, show, dataProviders, timelineId }: FlyoutButtonProps) =>
     show ? (
       <Container>
         <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>
           <div data-test-subj="flyoutOverlay" onClick={onOpen}>
+            {dataProviders.length !== 0 && (
+              <Badge data-test-subj="badge" color="primary">
+                {dataProviders.length}
+              </Badge>
+            )}
             <Button>
               <Text data-test-subj="flyoutButton">T I M E L I N E</Text>
             </Button>
@@ -122,26 +140,29 @@ export const FlyoutButton = pure(
     ) : null
 );
 
-export const FlyoutComponent = pure<Props>(({ show, timelineId, showTimeline, children }) => (
-  <>
-    <Visible show={show}>
-      <FlyoutPane onClose={() => showTimeline({ id: timelineId, show: false })}>
-        {children}
-      </FlyoutPane>
-    </Visible>
-    <FlyoutButton
-      show={!show}
-      timelineId={timelineId}
-      onOpen={() => showTimeline({ id: timelineId, show: true })}
-    />
-  </>
-));
+export const FlyoutComponent = pure<Props>(
+  ({ show, dataProviders, timelineId, showTimeline, children }) => (
+    <>
+      <Visible show={show}>
+        <FlyoutPane onClose={() => showTimeline({ id: timelineId, show: false })}>
+          {children}
+        </FlyoutPane>
+      </Visible>
+      <FlyoutButton
+        dataProviders={dataProviders}
+        show={!show}
+        timelineId={timelineId}
+        onOpen={() => showTimeline({ id: timelineId, show: true })}
+      />
+    </>
+  )
+);
 
 const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
   const timelineById = defaultTo({}, timelineByIdSelector(state));
   const show = getOr('false', `${timelineId}.show`, timelineById);
-
-  return { show };
+  const dataProviders = getOr([], `${timelineId}.dataProviders`, timelineById);
+  return { show, dataProviders };
 };
 
 export const Flyout = connect(

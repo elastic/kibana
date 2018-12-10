@@ -6,9 +6,14 @@
 
 import { defaultTo } from 'lodash/fp';
 import * as React from 'react';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import {
+  Draggable,
+  DraggableProvided,
+  DraggableStateSnapshot,
+  Droppable,
+} from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { dragAndDropActions } from '../../store/local/drag_and_drop';
@@ -17,6 +22,24 @@ import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors
 import { State } from '../../store/reducer';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { getDraggableId, getDroppableId } from './helpers';
+
+const dropInEffect = keyframes`
+  0% {
+    transform: scale(1);
+  }
+  
+  50% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+`;
+
+export const DragEffects = styled.div`
+  animation: ${dropInEffect} 250ms;
+`;
 
 const ProviderContainer = styled.div`
   &:hover {
@@ -27,7 +50,11 @@ const ProviderContainer = styled.div`
 
 interface OwnProps {
   dataProvider: DataProvider;
-  render: (props: DataProvider) => React.ReactNode;
+  render: (
+    props: DataProvider,
+    provided: DraggableProvided,
+    state: DraggableStateSnapshot
+  ) => React.ReactNode;
 }
 
 interface StateReduxProps {
@@ -71,7 +98,7 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
                 index={0}
                 key={dataProvider.id}
               >
-                {provided => (
+                {(provided, snapshot) => (
                   <ProviderContainer
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
@@ -82,7 +109,7 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
                       zIndex: 9000, // EuiFlyout has a z-index of 8000
                     }}
                   >
-                    {render(dataProvider)}
+                    {render(dataProvider, provided, snapshot)}
                   </ProviderContainer>
                 )}
               </Draggable>
