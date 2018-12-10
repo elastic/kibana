@@ -51,12 +51,11 @@ export const AdvancedFailureComponent = props => {
         <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
           Apply
         </EuiButton>
-        {defaultValue &&
-          defaultValue.length && (
-            <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
-              Reset
-            </EuiButtonEmpty>
-          )}
+        {defaultValue && defaultValue.length && (
+          <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
+            Reset
+          </EuiButtonEmpty>
+        )}
       </div>
     </EuiForm>
   );

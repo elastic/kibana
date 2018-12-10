@@ -10,7 +10,7 @@ import yaml from 'js-yaml';
 import { get } from 'lodash';
 import React from 'react';
 import { ConfigurationBlock } from '../../../../common/domain_types';
-import { YamlConfigSchema } from '../../../lib/lib';
+import { YamlConfigSchema } from '../../../lib/types';
 import {
   FormsyEuiCodeEditor,
   FormsyEuiFieldText,
