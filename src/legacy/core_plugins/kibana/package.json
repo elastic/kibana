@@ -5,5 +5,8 @@
     "@elastic/eslint-import-resolver-kibana": {
       "projectRoot": false
     }
+  },
+  "devDependencies": {
+    "@types/expect.js": "^0.3.29"
   }
 }

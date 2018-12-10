@@ -43,11 +43,11 @@ describe('embeddableIsInitializing', () => {
   test('clears the error', () => {
     store.dispatch(embeddableIsInitializing('foo1'));
     const initialized = getEmbeddableInitialized(store.getState(), 'foo1');
-    expect(initialized).equal(false);
+    expect(initialized).toEqual(false);
   });
 
   test('and clears the error', () => {
     const error = getEmbeddableError(store.getState(), 'foo1');
-    expect(error).equal(undefined);
+    expect(error).toEqual(undefined);
   });
 });
