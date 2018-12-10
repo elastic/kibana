@@ -163,14 +163,13 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
 
   public onSpaceMinimumPrivilegeChange = (minimumPrivilege: string) => {
     const role = copyRole(this.state.role);
-    role.kibana.space = {
-      default: {
-        minimum: [minimumPrivilege],
-        feature: {
-          ...(role.kibana.space.default || {}).feature,
-        },
-      },
-    };
+
+    this.state.selectedSpaceIds.forEach(spaceId => {
+      const spacePrivileges = role.kibana.space[spaceId] || { minimum: [], feature: {} };
+      spacePrivileges.minimum = [minimumPrivilege];
+
+      role.kibana.space[spaceId] = spacePrivileges;
+    });
 
     this.setState({
       selectedMinimumPrivilege: [minimumPrivilege],
@@ -211,7 +210,7 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
 
     // Reset spaces that are no longer being edited by this form
     removedSpaces.forEach(spaceId => {
-      role.kibana.space[spaceId] = this.props.role.kibana.space[spaceId];
+      delete role.kibana.space[spaceId];
     });
 
     // Setup spaces that are being edited by this form
