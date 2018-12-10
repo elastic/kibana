@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import React, { Component } from 'react';
 import './share_panel_content.less';
 
@@ -132,25 +133,25 @@ export class ShareContextMenu extends Component<Props> {
         id: panels.length + 1,
         title: `Share this ${this.props.objectType}`,
         items: menuItems
-          .map(menuItem => {
-            menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
-            if (!menuItem.sortOrder) {
-              menuItem.sortOrder = 0;
-            }
-            return menuItem;
-          })
           // Sorts ascending on sort order first and then ascending on name
           .sort((a, b) => {
-            if (a.sortOrder > b.sortOrder) {
+            const aSortOrder = _.get(a, 'sortOrder', 0);
+            const bSortOrder = _.get(b, 'sortOrder', 0);
+            if (aSortOrder > bSortOrder) {
               return 1;
             }
-            if (a.sortOrder < b.sortOrder) {
+            if (aSortOrder < bSortOrder) {
               return -1;
             }
             if (a.name.toLowerCase().localeCompare(b.name.toLowerCase()) > 0) {
               return 1;
             }
             return -1;
+          })
+          .map(menuItem => {
+            menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
+            delete menuItem.sortOrder;
+            return menuItem;
           }),
       };
       panels.push(topLevelMenuPanel);
