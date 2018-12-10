@@ -61,7 +61,6 @@ export function CalendarForm({
       >
         <EuiFieldText
           name="calendarId"
-          fullWidth
           value={calendarId}
           onChange={onCalendarIdChange}
           disabled={isEdit === true || saving === true}
@@ -73,7 +72,6 @@ export function CalendarForm({
       >
         <EuiFieldText
           name="description"
-          fullWidth
           value={description}
           onChange={onDescriptionChange}
           disabled={isEdit === true || saving === true}
@@ -84,7 +82,6 @@ export function CalendarForm({
         label="Jobs"
       >
         <EuiComboBox
-          fullWidth
           options={jobIds}
           selectedOptions={selectedJobOptions}
           onChange={onJobSelection}
@@ -96,7 +93,6 @@ export function CalendarForm({
         label="Groups"
       >
         <EuiComboBox
-          fullWidth
           onCreateOption={onCreateGroupOption}
           options={groupIds}
           selectedOptions={selectedGroupOptions}

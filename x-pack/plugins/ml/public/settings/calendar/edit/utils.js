@@ -7,13 +7,12 @@
 
 
 import { ml } from 'plugins/ml/services/ml_api_service';
-import { jobs } from 'plugins/ml/services/ml_api_service/jobs';
 import { isJobIdValid } from 'plugins/ml/../common/util/job_utils';
 
 
 function getJobIds() {
   return new Promise((resolve, reject) => {
-    jobs.jobsSummary()
+    ml.jobs.jobsSummary()
       .then((resp) => {
         resolve(resp.map((job) => job.id));
       })
@@ -27,7 +26,7 @@ function getJobIds() {
 
 function getGroupIds() {
   return new Promise((resolve, reject) => {
-    jobs.groups()
+    ml.jobs.groups()
       .then((resp) => {
         resolve(resp.map((group) => group.id));
       })
