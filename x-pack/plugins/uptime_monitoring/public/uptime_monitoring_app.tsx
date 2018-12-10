@@ -19,7 +19,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { Breadcrumb } from 'ui/chrome';
 import { overviewBreadcrumb } from './breadcrumbs';
-import { UpdateBreadcrumbs, UptimeAppProps } from './lib/lib';
+import { UMUpdateBreadcrumbs, UptimeAppProps } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 
 interface UptimeAppState {
@@ -27,7 +27,7 @@ interface UptimeAppState {
 }
 
 class Application extends React.Component<UptimeAppProps, UptimeAppState> {
-  private setBreadcrumbs: UpdateBreadcrumbs;
+  private setBreadcrumbs: UMUpdateBreadcrumbs;
   constructor(props: UptimeAppProps) {
     super(props);
 
@@ -92,8 +92,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   }
 
   private concatBreadcrumb = (nextBreadcrumb: Breadcrumb) => {
-    const breadcrumbs = this.state.breadcrumbs.concat(nextBreadcrumb);
-    this.setState({ breadcrumbs });
+    this.setBreadcrumbs(this.state.breadcrumbs.concat(nextBreadcrumb));
   };
 }
 

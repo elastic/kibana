@@ -11,11 +11,11 @@ export interface UMFrontendLibs {
   framework: UMFrameworkAdapter;
 }
 
-export type UpdateBreadcrumbs = (breadcrumbs: Breadcrumb[]) => void;
+export type UMUpdateBreadcrumbs = (breadcrumbs: Breadcrumb[]) => void;
 
 export interface UptimeAppProps {
   isUsingK7Design: boolean;
-  updateBreadcrumbs: UpdateBreadcrumbs;
+  updateBreadcrumbs: UMUpdateBreadcrumbs;
   kibanaBreadcrumbs: Breadcrumb[];
 }
 
