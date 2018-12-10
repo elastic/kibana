@@ -96,6 +96,7 @@ class NodeAllocationUi extends Component {
         </ErrableFormRow>
         {!!phaseData[PHASE_NODE_ATTRS] ? (
           <EuiButtonEmpty
+            data-test-subj={`${phase}-viewNodeDetailsFlyoutButton`}
             flush="left"
             iconType="eye"
             onClick={() => showNodeDetailsFlyout(phaseData[PHASE_NODE_ATTRS])}

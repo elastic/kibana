@@ -285,6 +285,26 @@ describe('edit policy', () => {
       expect(nodeAttributesSelect.exists()).toBeTruthy();
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
+    test('should show view node attributes link when attribute selected and show flyout when clicked', () => {
+      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      activatePhase(rendered, 'warm');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
+      const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'warm');
+      expect(nodeAttributesSelect.exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'warm-viewNodeDetailsFlyoutButton').exists()).toBeFalsy();
+      expect(nodeAttributesSelect.find('option').length).toBe(2);
+      nodeAttributesSelect.simulate('change', { target: { value: 'attribute:true' } });
+      rendered.update();
+      const flyoutButton = findTestSubject(rendered, 'warm-viewNodeDetailsFlyoutButton');
+      expect(flyoutButton.exists()).toBeTruthy();
+      flyoutButton.simulate('click');
+      rendered.update();
+      expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
+    });
   });
   describe('cold phase', () => {
     test('should show positive number required error when trying to save cold phase with 0 for after', () => {
@@ -335,6 +355,26 @@ describe('edit policy', () => {
       const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
       expect(nodeAttributesSelect.find('option').length).toBe(2);
+    });
+    test('should show view node attributes link when attribute selected and show flyout when clicked', () => {
+      store.dispatch(fetchedNodes({ 'attribute:true': [ 'node1' ] }));
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      activatePhase(rendered, 'cold');
+      expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
+      expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
+      const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
+      expect(nodeAttributesSelect.exists()).toBeTruthy();
+      expect(findTestSubject(rendered, 'cold-viewNodeDetailsFlyoutButton').exists()).toBeFalsy();
+      expect(nodeAttributesSelect.find('option').length).toBe(2);
+      nodeAttributesSelect.simulate('change', { target: { value: 'attribute:true' } });
+      rendered.update();
+      const flyoutButton = findTestSubject(rendered, 'cold-viewNodeDetailsFlyoutButton');
+      expect(flyoutButton.exists()).toBeTruthy();
+      flyoutButton.simulate('click');
+      rendered.update();
+      expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
     });
   });
   describe('delete phase', () => {
