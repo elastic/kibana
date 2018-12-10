@@ -33,7 +33,7 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'GET'
   });
 
-  ccr.createAutoFollowPattern = ca({
+  ccr.saveAutoFollowPattern = ca({
     urls: [
       {
         fmt: '/_ccr/auto_follow/<%=id%>',
@@ -46,5 +46,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     ],
     needBody: true,
     method: 'PUT'
+  });
+
+  ccr.deleteAutoFollowPattern = ca({
+    urls: [
+      {
+        fmt: '/_ccr/auto_follow/<%=id%>',
+        req: {
+          id: {
+            type: 'string'
+          }
+        }
+      }
+    ],
+    needBody: true,
+    method: 'DELETE'
   });
 };

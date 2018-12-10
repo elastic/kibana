@@ -64,7 +64,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
       const body = serializeAutoFollowPattern(request.payload);
 
       try {
-        return await callWithRequest('ccr.createAutoFollowPattern', { id, body });
+        return await callWithRequest('ccr.saveAutoFollowPattern', { id, body });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
@@ -92,6 +92,30 @@ export const registerAutoFollowPatternRoutes = (server) => {
         const autoFollowPattern = response.patterns[0];
 
         return deserializeAutoFollowPattern(autoFollowPattern);
+      } catch(err) {
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
+        throw wrapUnknownError(err);
+      }
+    },
+  });
+
+  /**
+   * Delete an auto follow pattern
+   */
+  server.route({
+    path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
+    method: 'DELETE',
+    config: {
+      pre: [ licensePreRouting ]
+    },
+    handler: async (request) => {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { id } = request.params;
+
+      try {
+        return await callWithRequest('ccr.deleteAutoFollowPattern', { id });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
