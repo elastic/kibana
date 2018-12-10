@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.5.3>>
 * <<release-notes-6.5.2>>
 * <<release-notes-6.5.1>>
 * <<release-notes-6.5.0>>
@@ -81,6 +82,61 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+[[release-notes-6.5.3]]
+== {kib} 6.5.3
+coming[6.5.3]
+
+[float]
+[[breaking-changes-6.5.3]]
+=== Breaking changes
+
+See <<breaking-changes, Breaking changes>> for the changes to be aware of 
+when migrating your application from one version of {kib} to another.
+
+[float]
+[[deprecation-6.5.3]]
+=== Deprecations
+Platform::
+* Returns support for `i18n.defaultLocale` and marks it as deprecated {pull}26556[#26556]
++
+`i18n.defaultLocale` has been renamed to `i18n.locale` to better reflect what 
+this setting actually does since the default is always English locale.
+
+[float]
+[[bug-6.5.3]]
+=== Bug fixes
+
+Canvas::
+* Makes error messages consistent between `esdocs` and `essql` {pull}26399[#26399]
+* Reduces HTTP POST generation on selections and drags {pull}26391[#26391]
+
+Dashboard::
+* Fixes an issue where read only roles were unable to view pagination controls 
+on saved searches in a dashboard panel {pull}26224[#26224]
+
+Monitoring::
+* Uses proper {kib} index for KQL telemetry {pull}26479[#26479]
+* Adds missing apm-server response error monitor {pull}26787[#26787]
+
+Querying &amp; Filtering::
+* Specifies the timeout for the `_msearch` in the body {pull}26446[#26446]
++
+Resolves the issue with the `_msearch` timeouts being specified incorrectly, 
+which caused them to be ignored."
+
+Platform::
+* Does not skip config properties with values equal to empty array\object {pull}26690[#26690]
+* Allows SIGHUP to recreate log file handler {pull}26675[#26675]
+
+Security::
+* Fixes documentation links for {es} role privileges {pull}26466[#26466]
++
+Updates documentation links to `run_as`, `index`, and `cluster` privilege categories.
+
+Visualizations::
+* Fixes broken Time Series Visual Builder `group by charts` {pull}26520[#26520]
+
+
 [[release-notes-6.5.2]]
 == {kib} 6.5.2
 
@@ -96,7 +152,7 @@ when migrating your application from one version of Kibana to another.
 === Enhancements
 
 Canvas::
-* Adds support url params {pull}25828[#25828]
+* Adds support for url params {pull}25828[#25828]
 
 Operations::
 * Bumps node to 8.14.0 {pull}26313[#26313]
@@ -145,7 +201,7 @@ Operations::
 
 Platform::
 * Handles deprecated SSL config settings {pull}26196[#26196]
-* Allow packages to define extra paths to kbn clean {pull}26132[#26132]
+* Allows packages to define extra paths to kbn clean {pull}26132[#26132]
 * Wraps remote in `browser` service {pull}26394[#26394]
 
 Querying &amp; Filtering::
