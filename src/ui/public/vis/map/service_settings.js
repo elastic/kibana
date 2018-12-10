@@ -200,7 +200,7 @@ uiModules.get('kibana')
         }
       }
 
-      async getEMSHotLink(fileLayer) {
+      getEMSHotLink(fileLayer) {
         const id = `file/${fileLayer.name}`;
         return `${mapConfig.emsLandingPageUrl}#${id}`;
       }
