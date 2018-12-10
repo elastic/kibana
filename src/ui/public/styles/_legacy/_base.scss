@@ -1,4 +1,4 @@
-@localNavDepth: 5;
+$localNavDepth: 5;
 
 .small {
   font-size: 0.9em !important;
@@ -12,27 +12,27 @@
 
 // Colors available for font awesome icons, these might not look good with normal text
 .text-color-primary {
-  color: @brand-primary;
+  color: $brand-primary;
 }
 
 .text-color-info {
-  color: @brand-info;
+  color: $brand-info;
 }
 
 .text-color-success {
-  color: @brand-success;
+  color: $brand-success;
 }
 
 .text-color-warning {
-  color: @brand-warning;
+  color: $brand-warning;
 }
 
 .text-color-danger {
-  color: @brand-danger;
+  color: $brand-danger;
 }
 
 .text-monospace {
-  font-family: @font-family-monospace;
+  font-family: $font-family-monospace;
 }
 
 ul.navbar-inline li {
@@ -59,7 +59,7 @@ ul.navbar-inline li {
   overflow: hidden;
 
   > nav {
-    z-index: @localNavDepth;
+    z-index: $localNavDepth;
 
     .navbar-right {
       margin-right: 0 !important;
@@ -70,7 +70,7 @@ ul.navbar-inline li {
 .application {
   position: relative;
   z-index: 0;
-  background-color: @white;
+  background-color: $white;
   display: flex;
   flex-grow: 1;
   flex-shrink: 0;
@@ -135,7 +135,7 @@ notifications {
     z-index: 1;
   }
   > navbar { padding-bottom: 4px; }
-  > kbn-top-nav { z-index: @localNavDepth; }
+  > kbn-top-nav { z-index: $localNavDepth; }
 
   > nav,
   > navbar {
@@ -146,8 +146,8 @@ notifications {
 // SASSTODO: Make sure these colors convert to theme variables
 .tab-dashboard.theme-dark {
   .kibana-nav-actions .active {
-    background-color: @gray3;
-    color: @white;
+    background-color: $euiColorDarkestShade;
+    color: $white;
   }
 }
 
@@ -174,18 +174,18 @@ notifications {
 
 .kbn-timepicker .refresh-interval {
   padding: 0.2em 0.4em;
-  border-radius: @border-radius-small;
+  border-radius: $border-radius-small;
 }
 
 .kbn-timepicker .refresh-interval-active {
-  background-color: @brand-info;
-  color: @white;
+  background-color: $brand-info;
+  color: $white;
 }
 
 //== Table
 
 kbn-table, .kbn-table {
-  font-size: @font-size-small;
+  font-size: $font-size-small;
 
   th {
     white-space: nowrap;
@@ -203,11 +203,12 @@ saved-object-finder,
 paginated-selectable-list {
 
   .list-sort-button {
-    .border-top-radius(0) !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
     border: none;
     padding: 8px 15px;
     font-weight: normal;
-    background-color: @kibanaGray6;
+    background-color: $euiColorLightestShade;
   }
 
   ul.li-striped {
@@ -216,16 +217,16 @@ paginated-selectable-list {
     }
 
     li:nth-child(even) {
-      background-color: @kibanaGray6;
+      background-color: $euiColorLightestShade;
     }
 
     li:nth-child(odd) {
-      background-color: @white;
+      background-color: $white;
     }
 
     .paginate-heading {
       font-weight: normal;
-      color: @kibanaGray1;
+      color: $euiColorDarkestShade;
     }
 
     .list-group-item {
@@ -243,16 +244,17 @@ paginated-selectable-list {
 
       a {
         i {
-          color: @saved-object-finder-icon-color !important;
+          color: shade($euiColorPrimary, 10%) !important;
           margin-right: 10px;
         }
 
         display: block;
-        color: @saved-object-finder-link-color !important;
+        color: $euiColorPrimary !important;
       }
 
       &:first-child {
-        .border-top-radius(0) !important;
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 0 !important;
       }
 
       &.list-group-no-results p {
@@ -270,9 +272,9 @@ paginated-selectable-list {
 
 //== inputDatetime
 .input-datetime-format {
-  font-size: @font-size-small;
-  color: @text-muted;
-  padding: @padding-base-vertical @padding-base-horizontal;
+  font-size: $font-size-small;
+  color: $text-muted;
+  padding: $padding-base-vertical $padding-base-horizontal;
 }
 
 //== override the disabled cursor that doesn't work everywhere
@@ -290,10 +292,10 @@ paginated-selectable-list {
 }
 
 .ng-dirty, .ng-touched {
-  input.ng-invalid&,
-  textarea.ng-invalid&,
-  select.ng-invalid& {
-    border-color: @state-danger-bg !important;
+  input.ng-invalid#{&},
+  textarea.ng-invalid#{&},
+  select.ng-invalid#{&} {
+    border-color: $state-danger-bg !important;
   }
 }
 
@@ -311,7 +313,7 @@ input[type="checkbox"],
 }
 
 .field-collapse-toggle {
-  color: @field-collapse-toggle-color;
+  color: #999;
   margin-left: 10px !important;
 }
 
@@ -372,7 +374,7 @@ style-compile {
     &.active,
     &.active:hover,
     &.active:focus {
-      background-color: @list-group-menu-item-active-bg;
+      background-color: $euiColorLightShade;
       cursor: default;
     }
   }
@@ -386,7 +388,7 @@ style-compile {
 }
 
 .page-row-text {
-  color: @kibanaGray2;
+  color: $euiColorDarkShade;
   font-size: 14px;
 }
 
@@ -502,7 +504,7 @@ style-compile {
 }
 
 .kuiSideBarSelect {
-  // TODO: @include kuiSelect styles when this is moved to the UI Framework and we're using SASS.
+  // TODO: $include kuiSelect styles when this is moved to the UI Framework and we're using SASS.
   height: 24px;
   width: 100%;
   font-size: 12px;
@@ -510,7 +512,7 @@ style-compile {
 }
 
 .kuiSideBarInput {
-  // TODO: @include kuiInput styles when this is moved to the UI Framework and we're using SASS.
+  // TODO: $include kuiInput styles when this is moved to the UI Framework and we're using SASS.
   display: block;
   width: 100%;
   height: 24px;
@@ -523,7 +525,7 @@ style-compile {
 
 .kuiSideBarSection {
   margin-bottom: 10px;
-  background-color: @globalColorWhite;
+  background-color: $euiColorEmptyShade;
   padding: 10px;
   border-radius: 4px;
 
@@ -540,12 +542,8 @@ style-compile {
 
 .kuiSideBarSection .kuiSideBarSection .kuiSideBarSection{
   border-radius: 0px;
-  border-left: solid 1px tint(@globalColorBlue, 20%);
+  border-left: solid 1px tint($euiColorPrimary, 20%);
   margin-left: 3px; // Align to caret open
-}
-
-
-.kuiSideBarSection__main {
 }
 
 .kuiSideBarSectionTitle {
@@ -557,7 +555,7 @@ style-compile {
 
 .kuiSideBarSectionTitle__text {
   font-size: 18px;
-  color: @globalColorDarkestGray;
+  color: $euiColorDarkestShade;
 }
 
 /**
@@ -567,11 +565,11 @@ style-compile {
   background-color: transparent; // 1
   padding: 0; // 1
   cursor: pointer;
-  color: @globalColorBlue;
+  color: $euiColorPrimary;
   border: none;
 
   &:hover {
-    color: darken(@globalColorBlue, 10%);
+    color: darken($euiColorPrimary, 10%);
   }
 }
 
@@ -595,12 +593,12 @@ style-compile {
   width: 14px;
   height: 14px;
   font-size: 14px !important; // 1
-  color: @globalColorBlue;
+  color: $euiColorPrimary;
 }
 
 .kuiSideBarCollapsibleTitle__text {
   font-size: 14px;
-  color: @globalColorBlue;
+  color: $euiColorPrimary;
 }
 
 /**
@@ -610,23 +608,21 @@ style-compile {
   background-color: transparent; // 1
   padding: 0; // 1
   cursor: pointer;
-  color: @globalColorBlue;
+  color: $euiColorPrimary;
   border: none;
 
   &:hover {
-    color: darken(@globalColorBlue, 10%);
+    color: darken($euiColorPrimary, 10%);
   }
 }
 
-.kuiSideBarCollapsibleSection {
-}
 
 /**
  * 1. Override Bootstrap h1 styles.
  */
 .kuiSideBarFormSectionTitle {
   font-size: 12px;
-  color: @globalColorDarkGray;
+  color: $euiColorDarkShade;
   margin: 10px 0 !important; // 1
   padding-bottom: 2px;
 }
@@ -669,7 +665,7 @@ style-compile {
   display: flex;
   align-items: baseline;
   font-size: 12px;
-  color: @globalColorBlue !important; // 1
+  color: $euiColorPrimary !important; // 1
 
   &:hover {
     color: #105A73 !important; // 1
@@ -683,6 +679,11 @@ style-compile {
 
 .kuiSideBarOptionsLink__text {
   margin-left: 2px;
+}
+
+.kuiGalleryItem__image img {
+  width: 64px;
+  height: 64px;
 }
 
 .pdf-options label {

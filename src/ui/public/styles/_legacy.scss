@@ -1,19 +1,15 @@
 //
-// BOOTSTRAP
-
-// Overrides
-@import './_legacy/variables/index';
-
-// // Components
-// @import './_legacy/theme/bootstrap';
-// @import './_legacy/theme/font-awesome';
+// BOOTSTRAP && FONT-AWESOME
+@import './_legacy/bootstrap/index';
 
 
 // //
 // // KIBANA THEME
 
-// @import './_legacy/base';
-// @import './_legacy/theme';
+// Overrides
+@import './_legacy/depth';
+@import './_legacy/base';
+@import './_legacy/theme';
 
 // // Components
 // @import '~ui/filter_bar/filter_bar'; // is being converted to EUI, so leaving as LESS
