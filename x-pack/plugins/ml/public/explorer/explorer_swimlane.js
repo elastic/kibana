@@ -450,6 +450,21 @@ export class ExplorerSwimlane extends React.Component {
         .text(d => d.key);
 
       d3Annotations.exit().remove();
+
+      const d3AnnotationsRange = swimlanes.selectAll('.annotations-range').data(annotations, d => d._id);
+
+      d3AnnotationsRange.enter().append('div')
+        .classed('ml-anomaly-explorer-annotation-range', true);
+
+      d3AnnotationsRange
+        .style('left', (d) => `${201 + xAxisScale(d.timestamp)}px`)
+        .style('width', (d) => {
+          const width = xAxisScale(d.end_timestamp) - xAxisScale(d.timestamp);
+          return `${width}px`;
+        });
+
+      d3AnnotationsRange.exit().remove();
+
       console.warn('annotations', annotations);
     }
 

@@ -357,4 +357,12 @@
 .ml-anomaly-explorer-annotation {
   position: absolute;
   top: 0px;
+  margin: 0 !important;
+}
+
+.ml-anomaly-explorer-annotation-range {
+  position: absolute;
+  top: 21px;
+  height: 2px;
+  background-color: #000;
 }
