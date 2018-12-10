@@ -77,8 +77,8 @@ const hoveredShapes = select((shapes, cursorPosition) =>
 )(shapes, cursorPosition);
 
 const depthIndex = 0;
-const hoveredShape = select(
-  hoveredShapes => (hoveredShapes.length ? hoveredShapes[depthIndex] : null)
+const hoveredShape = select(hoveredShapes =>
+  hoveredShapes.length ? hoveredShapes[depthIndex] : null
 )(hoveredShapes);
 
 const draggedShape = select(draggingShape)(scene, hoveredShape, mouseIsDown, mouseDowned);
@@ -94,57 +94,56 @@ const focusedShapes = select((shapes, focusedShape) =>
   shapes.filter(shape => focusedShape && shape.id === focusedShape.id)
 )(shapes, focusedShape);
 
-const keyTransformGesture = select(
-  keys =>
-    config.shortcuts
-      ? Object.keys(keys)
-          .map(keypress => {
-            switch (keypress) {
-              case 'KeyW':
-                return { transform: matrix.translate(0, -5, 0) };
-              case 'KeyA':
-                return { transform: matrix.translate(-5, 0, 0) };
-              case 'KeyS':
-                return { transform: matrix.translate(0, 5, 0) };
-              case 'KeyD':
-                return { transform: matrix.translate(5, 0, 0) };
-              case 'KeyF':
-                return { transform: matrix.translate(0, 0, -20) };
-              case 'KeyC':
-                return { transform: matrix.translate(0, 0, 20) };
-              case 'KeyX':
-                return { transform: matrix.rotateX(Math.PI / 45) };
-              case 'KeyY':
-                return { transform: matrix.rotateY(Math.PI / 45 / 1.3) };
-              case 'KeyZ':
-                return { transform: matrix.rotateZ(Math.PI / 45 / 1.6) };
-              case 'KeyI':
-                return { transform: matrix.scale(1, 1.05, 1) };
-              case 'KeyJ':
-                return { transform: matrix.scale(1 / 1.05, 1, 1) };
-              case 'KeyK':
-                return { transform: matrix.scale(1, 1 / 1.05, 1) };
-              case 'KeyL':
-                return { transform: matrix.scale(1.05, 1, 1) };
-              case 'KeyP':
-                return { transform: matrix.perspective(2000) };
-              case 'KeyR':
-                return { transform: matrix.shear(0.1, 0) };
-              case 'KeyT':
-                return { transform: matrix.shear(-0.1, 0) };
-              case 'KeyU':
-                return { transform: matrix.shear(0, 0.1) };
-              case 'KeyH':
-                return { transform: matrix.shear(0, -0.1) };
-              case 'KeyM':
-                return { transform: matrix.UNITMATRIX, sizes: [1.0, 0, 0, 0, 1.0, 0, 10, 0, 1] };
-              case 'Backspace':
-              case 'Delete':
-                return { transform: matrix.UNITMATRIX, delete: true };
-            }
-          })
-          .filter(identity)
-      : []
+const keyTransformGesture = select(keys =>
+  config.shortcuts
+    ? Object.keys(keys)
+        .map(keypress => {
+          switch (keypress) {
+            case 'KeyW':
+              return { transform: matrix.translate(0, -5, 0) };
+            case 'KeyA':
+              return { transform: matrix.translate(-5, 0, 0) };
+            case 'KeyS':
+              return { transform: matrix.translate(0, 5, 0) };
+            case 'KeyD':
+              return { transform: matrix.translate(5, 0, 0) };
+            case 'KeyF':
+              return { transform: matrix.translate(0, 0, -20) };
+            case 'KeyC':
+              return { transform: matrix.translate(0, 0, 20) };
+            case 'KeyX':
+              return { transform: matrix.rotateX(Math.PI / 45) };
+            case 'KeyY':
+              return { transform: matrix.rotateY(Math.PI / 45 / 1.3) };
+            case 'KeyZ':
+              return { transform: matrix.rotateZ(Math.PI / 45 / 1.6) };
+            case 'KeyI':
+              return { transform: matrix.scale(1, 1.05, 1) };
+            case 'KeyJ':
+              return { transform: matrix.scale(1 / 1.05, 1, 1) };
+            case 'KeyK':
+              return { transform: matrix.scale(1, 1 / 1.05, 1) };
+            case 'KeyL':
+              return { transform: matrix.scale(1.05, 1, 1) };
+            case 'KeyP':
+              return { transform: matrix.perspective(2000) };
+            case 'KeyR':
+              return { transform: matrix.shear(0.1, 0) };
+            case 'KeyT':
+              return { transform: matrix.shear(-0.1, 0) };
+            case 'KeyU':
+              return { transform: matrix.shear(0, 0.1) };
+            case 'KeyH':
+              return { transform: matrix.shear(0, -0.1) };
+            case 'KeyM':
+              return { transform: matrix.UNITMATRIX, sizes: [1.0, 0, 0, 0, 1.0, 0, 10, 0, 1] };
+            case 'Backspace':
+            case 'Delete':
+              return { transform: matrix.UNITMATRIX, delete: true };
+          }
+        })
+        .filter(identity)
+    : []
 )(pressedKeys);
 
 const alterSnapGesture = select(metaHeld => (metaHeld ? ['relax'] : []))(metaHeld);
@@ -189,14 +188,14 @@ const transformGestures = select((keyTransformGesture, mouseTransformGesture) =>
   keyTransformGesture.concat(mouseTransformGesture)
 )(keyTransformGesture, mouseTransformGesture);
 
-const restateShapesEvent = select(
-  action => (action && action.type === 'restateShapesEvent' ? action.payload : null)
+const restateShapesEvent = select(action =>
+  action && action.type === 'restateShapesEvent' ? action.payload : null
 )(primaryUpdate);
 
 // directSelect is an API entry point (via the `shapeSelect` action) that lets the client directly specify what thing
 // is selected, as otherwise selection is driven by gestures and knowledge of element positions
-const directSelect = select(
-  action => (action && action.type === 'shapeSelect' ? action.payload : null)
+const directSelect = select(action =>
+  action && action.type === 'shapeSelect' ? action.payload : null
 )(primaryUpdate);
 
 const selectedShapeObjects = select(scene => scene.selectedShapeObjects || [])(scene);
@@ -480,8 +479,8 @@ const resizeAnnotationManipulation = (transformGestures, directShapes, allShapes
 
 const symmetricManipulation = optionHeld; // as in comparable software applications, todo: make configurable
 
-const resizeManipulator = select(
-  toggle => (toggle ? centeredResizeManipulation : asymmetricResizeManipulation)
+const resizeManipulator = select(toggle =>
+  toggle ? centeredResizeManipulation : asymmetricResizeManipulation
 )(symmetricManipulation);
 
 const transformIntents = select(
@@ -1132,22 +1131,24 @@ const projectAABB = ([[xMin, yMin], [xMax, yMax]]) => {
 
 const dissolveGroups = (preexistingAdHocGroups, shapes, selectedShapes) => {
   return {
-    shapes: shapes.filter(shape => !isAdHocGroup(shape)).map(shape => {
-      const preexistingAdHocGroupParent = preexistingAdHocGroups.find(
-        groupShape => groupShape.id === shape.parent
-      );
-      // if linked, dissociate from ad hoc group parent
-      return preexistingAdHocGroupParent
-        ? {
-            ...shape,
-            parent: null,
-            localTransformMatrix: matrix.multiply(
-              preexistingAdHocGroupParent.localTransformMatrix, // reinstate the group offset onto the child
-              shape.localTransformMatrix
-            ),
-          }
-        : shape;
-    }),
+    shapes: shapes
+      .filter(shape => !isAdHocGroup(shape))
+      .map(shape => {
+        const preexistingAdHocGroupParent = preexistingAdHocGroups.find(
+          groupShape => groupShape.id === shape.parent
+        );
+        // if linked, dissociate from ad hoc group parent
+        return preexistingAdHocGroupParent
+          ? {
+              ...shape,
+              parent: null,
+              localTransformMatrix: matrix.multiply(
+                preexistingAdHocGroupParent.localTransformMatrix, // reinstate the group offset onto the child
+                shape.localTransformMatrix
+              ),
+            }
+          : shape;
+      }),
     selectedShapes,
   };
 };
@@ -1229,8 +1230,8 @@ const getLeafs = (descendCondition, allShapes, shapes) =>
   removeDuplicates(
     s => s.id,
     flatten(
-      shapes.map(
-        shape => (descendCondition(shape) ? allShapes.filter(s => s.parent === shape.id) : shape)
+      shapes.map(shape =>
+        descendCondition(shape) ? allShapes.filter(s => s.parent === shape.id) : shape
       )
     )
   );
