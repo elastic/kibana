@@ -18,10 +18,13 @@
  */
 
 import { AggType } from '../../agg_types/agg_type';
+import { i18n } from '@kbn/i18n';
 
 const allAgg = new AggType({
   name: 'all',
-  title: 'All docs',
+  title: i18n.translate('common.ui.aggResponse.allDocsTitle', {
+    defaultMessage: 'All docs'
+  }),
   ordered: false,
   hasNoDsl: true
 });
