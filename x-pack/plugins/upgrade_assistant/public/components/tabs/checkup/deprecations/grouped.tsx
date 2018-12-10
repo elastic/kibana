@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dictionary, groupBy } from 'lodash';
+import { groupBy } from 'lodash';
 import React, { Fragment, StatelessComponent } from 'react';
 
 import {
@@ -26,7 +26,8 @@ import { DeprecationCountSummary } from './count_summary';
 import { DeprecationHealth } from './health';
 import { DeprecationList } from './list';
 
-const filterDeps = (levels: Set<LevelFilterOption>, search: string) => {
+// exported only for testing
+export const filterDeps = (levels: Set<LevelFilterOption>, search: string = '') => {
   const conditions: Array<(dep: DeprecationInfo) => boolean> = [
     dep => levels.has(dep.level as LevelFilterOption),
   ];
@@ -54,29 +55,30 @@ const filterDeps = (levels: Set<LevelFilterOption>, search: string) => {
 /**
  * A single accordion item for a grouped deprecation item.
  */
-const DeprecationAccordion: StatelessComponent<{
-  groups: Dictionary<EnrichedDeprecationInfo[]>;
-  groupName: string;
+export const DeprecationAccordion: StatelessComponent<{
+  id: string;
+  deprecations: EnrichedDeprecationInfo[];
+  title: string;
   currentGroupBy: GroupByOption;
   forceExpand: boolean;
-}> = ({ groups, groupName, currentGroupBy, forceExpand }) => {
+}> = ({ id, deprecations, title, currentGroupBy, forceExpand }) => {
   const hasIndices = Boolean(
-    currentGroupBy === GroupByOption.message && groups[groupName].filter(g => g.index).length
+    currentGroupBy === GroupByOption.message && deprecations.filter(d => d.index).length
   );
-  const numIndices = hasIndices ? groups[groupName].filter(g => g.index).length : null;
+  const numIndices = hasIndices ? deprecations.length : null;
 
   return (
     <EuiAccordion
+      id={id}
       className="upgDeprecations__item"
       initialIsOpen={forceExpand}
-      id={`depgroup-${groupName}`}
-      buttonContent={<span className="upgDeprecations__itemName">{groupName}</span>}
+      buttonContent={<span className="upgDeprecations__itemName">{title}</span>}
       extraAction={
         <div>
           {hasIndices && (
             <Fragment>
               <EuiBadge color="hollow">
-                {numIndices}{' '}
+                <span data-test-subj="indexCount">{numIndices}</span>{' '}
                 <FormattedMessage
                   id="xpack.upgradeAssistant.checkupTab.indicesBadgeLabel"
                   defaultMessage="{numIndices, plural, one {index} other {indices}}"
@@ -88,12 +90,12 @@ const DeprecationAccordion: StatelessComponent<{
           )}
           <DeprecationHealth
             single={currentGroupBy === GroupByOption.message}
-            deprecations={groups[groupName]}
+            deprecations={deprecations}
           />
         </div>
       }
     >
-      <DeprecationList deprecations={groups[groupName]} currentGroupBy={currentGroupBy} />
+      <DeprecationList deprecations={deprecations} currentGroupBy={currentGroupBy} />
     </EuiAccordion>
   );
 };
@@ -136,10 +138,15 @@ export class GroupedDeprecations extends React.Component<
     const groups = groupBy(deprecations, currentGroupBy);
 
     return (
-      <div>
+      <Fragment>
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" size="s" onClick={() => this.setExpand(true)}>
+            <EuiButtonEmpty
+              flush="left"
+              size="s"
+              onClick={() => this.setExpand(true)}
+              data-test-subj="expandAll"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.controls.expandAllButtonLabel"
                 defaultMessage="Expand all"
@@ -147,7 +154,12 @@ export class GroupedDeprecations extends React.Component<
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" size="s" onClick={() => this.setExpand(false)}>
+            <EuiButtonEmpty
+              flush="left"
+              size="s"
+              onClick={() => this.setExpand(false)}
+              data-test-subj="collapseAll"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.controls.collapseAllButtonLabel"
                 defaultMessage="Collapse all"
@@ -170,11 +182,14 @@ export class GroupedDeprecations extends React.Component<
             .map(groupName => [
               <DeprecationAccordion
                 key={expandNumber}
-                {...{ groups, groupName, currentGroupBy, forceExpand }}
+                id={`depgroup-${groupName}`}
+                title={groupName}
+                deprecations={groups[groupName]}
+                {...{ currentGroupBy, forceExpand }}
               />,
             ])}
 
-          {/* Only show pagination if we have more than the PER_PAGE const. */}
+          {/* Only show pagination if we have more than PER_PAGE. */}
           {Object.keys(groups).length > PER_PAGE && (
             <Fragment>
               <EuiSpacer />
@@ -191,7 +206,7 @@ export class GroupedDeprecations extends React.Component<
             </Fragment>
           )}
         </div>
-      </div>
+      </Fragment>
     );
   }
 

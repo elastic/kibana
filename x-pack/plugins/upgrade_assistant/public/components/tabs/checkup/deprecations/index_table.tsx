@@ -21,7 +21,7 @@ export interface IndexDeprecationDetails {
   }>;
 }
 
-interface IndexDeprecationTableProps extends ReactIntl.InjectedIntlProps {
+export interface IndexDeprecationTableProps extends ReactIntl.InjectedIntlProps {
   indices: IndexDeprecationDetails[];
 }
 
@@ -134,7 +134,7 @@ export class IndexDeprecationTableUI extends React.Component<
 
   private get actionsColumn() {
     // NOTE: this naive implementation assumes all indices in the table have
-    // the same actions. This should work for known usecases.
+    // the same actions (can still have different URLs). This should work for known usecases.
     const { indices } = this.props;
     if (!indices.find(i => i.actions !== undefined)) {
       return null;

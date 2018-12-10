@@ -76,7 +76,6 @@ export class UpgradeAssistantTabsUI extends React.Component<
         checkupData: resp.data,
       });
     } catch (e) {
-      // TODO: show error message?
       this.setState({ loadingState: LoadingState.Error });
     }
   };
