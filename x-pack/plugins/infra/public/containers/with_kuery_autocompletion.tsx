@@ -91,34 +91,17 @@ export const WithKueryAutocompletion = withIndexPattern(
         selectionEnd: cursorPosition,
       });
 
-<<<<<<< HEAD
-      this.setState(
-        state =>
-          state.currentRequest &&
-          state.currentRequest.expression !== expression &&
-          state.currentRequest.cursorPosition !== cursorPosition
-            ? state // ignore this result, since a newer request is in flight
-            : {
-                ...state,
-                currentRequest: null,
-                suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
-              }
+      this.setState(state =>
+        state.currentRequest &&
+        state.currentRequest.expression !== expression &&
+        state.currentRequest.cursorPosition !== cursorPosition
+          ? state // ignore this result, since a newer request is in flight
+          : {
+              ...state,
+              currentRequest: null,
+              suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
+            }
       );
     };
   }
 );
-=======
-    this.setState(state =>
-      state.currentRequest &&
-      state.currentRequest.expression !== expression &&
-      state.currentRequest.cursorPosition !== cursorPosition
-        ? state // ignore this result, since a newer request is in flight
-        : {
-            ...state,
-            currentRequest: null,
-            suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
-          }
-    );
-  };
-}
->>>>>>> 45a67701f2... Upgrade to NodeJS 10 (#25157)
