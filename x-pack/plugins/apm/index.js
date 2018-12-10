@@ -30,7 +30,7 @@ export function apm(kibana) {
         euiIconType: 'apmApp',
         order: 8100
       },
-      home: ['plugins/apm/regi ster_feature'],
+      home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();
         return {
@@ -51,7 +51,8 @@ export function apm(kibana) {
       return Joi.object({
         // display menu item
         ui: Joi.object({
-          enabled: Joi.boolean().default(true)
+          enabled: Joi.boolean().default(true),
+          transactionGroupBucketSize: Joi.number().default(100)
         }).default(),
 
         // enable plugin
