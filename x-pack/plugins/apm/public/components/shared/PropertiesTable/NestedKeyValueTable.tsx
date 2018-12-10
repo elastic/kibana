@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 
-import { StringMap } from '../../../../typings/es_schemas/common';
+import { StringMap } from '../../../../typings/common';
 import {
   colors,
   fontFamilyCode,

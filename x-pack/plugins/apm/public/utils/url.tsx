@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import url from 'url';
-import { StringMap } from '../../typings/es_schemas/common';
+import { StringMap } from '../../typings/common';
 
 // Kibana default set in: https://github.com/elastic/kibana/blob/e13e47fc4eb6112f2a5401408e9f765eae90f55d/x-pack/plugins/apm/public/utils/timepicker/index.js#L31-L35
 // TODO: store this in config or a shared constant?

@@ -7,7 +7,7 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { StringMap } from '../../../../typings/es_schemas/common';
+import { StringMap } from '../../../../typings/common';
 import { legacyDecodeURIComponent } from '../../../utils/url';
 // @ts-ignore
 import ErrorGroupDetails from '../ErrorGroupDetails';
