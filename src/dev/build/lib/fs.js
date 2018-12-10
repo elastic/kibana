@@ -96,6 +96,13 @@ export async function copy(source, destination) {
 }
 
 export async function deleteAll(patterns, log = {}) {
+  if (!log.debug || !log.verbose) {
+    log = {
+      debug: () => { /* NO-OP */},
+      verbose: () => { /* NO-OP */ }
+    };
+  }
+
   if (!Array.isArray(patterns)) {
     throw new TypeError('Expected patterns to be an array');
   }
