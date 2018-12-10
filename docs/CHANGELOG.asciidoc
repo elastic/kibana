@@ -134,7 +134,8 @@ Security::
 Updates documentation links to `run_as`, `index`, and `cluster` privilege categories.
 
 Visualizations::
-* Fixes broken Time Series Visual Builder `group by charts` {pull}26520[#26520]
+* Fixes the `group by terms` functionality in Time Series Visual Builder 
+so it correctly shows the Metric and Gauge visualizations {pull}26520[#26520]
 
 
 [[release-notes-6.5.2]]
