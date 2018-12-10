@@ -11,11 +11,11 @@ import ReactDOM from 'react-dom';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
-// TODO: change to relative paths
-import { checkFullLicense } from 'plugins/ml/license/check_license';
-import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
-import { getMlNodeCount } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
-import { initPromise } from 'plugins/ml/util/promise';
+
+import { checkFullLicense } from '../../../license/check_license';
+import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
+import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
+import { initPromise } from '../../../util/promise';
 
 import uiRoutes from 'ui/routes';
 

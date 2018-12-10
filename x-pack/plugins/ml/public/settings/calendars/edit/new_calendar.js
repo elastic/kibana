@@ -31,7 +31,7 @@ export class NewCalendar extends Component {
     this.state = {
       isNewEventModalVisible: false,
       isImportModalVisible: false,
-      isNewCalendarIdValid: false,
+      isNewCalendarIdValid: null,
       loading: true,
       jobIds: [],
       jobIdOptions: [],
@@ -113,7 +113,7 @@ export class NewCalendar extends Component {
     } catch (error) {
       console.log('Error saving calendar', error);
       this.setState({ saving: false });
-      toastNotifications.addDanger(`An error occurred creating calendar: ${calendar.calendarId}`);
+      toastNotifications.addDanger(`An error occurred creating calendar ${calendar.calendarId}`);
     }
   }
 
@@ -127,7 +127,7 @@ export class NewCalendar extends Component {
     } catch (error) {
       console.log('Error saving calendar', error);
       this.setState({ saving: false });
-      toastNotifications.addDanger(`An error occurred saving calendar: ${calendar.calendarId}. Try refreshing the page.`);
+      toastNotifications.addDanger(`An error occurred saving calendar ${calendar.calendarId}. Try refreshing the page.`);
     }
   }
 
@@ -282,7 +282,7 @@ export class NewCalendar extends Component {
             eventsList={events}
             groupIds={groupIdOptions}
             isEdit={selectedCalendar !== undefined}
-            isNewCalendarIdValid={selectedCalendar ? true : isNewCalendarIdValid}
+            isNewCalendarIdValid={(selectedCalendar || isNewCalendarIdValid === null) ? true : isNewCalendarIdValid}
             jobIds={jobIdOptions}
             onCalendarIdChange={this.onCalendarIdChange}
             onCreate={this.onCreate}

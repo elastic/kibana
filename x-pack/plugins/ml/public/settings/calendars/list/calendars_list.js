@@ -52,7 +52,7 @@ export class CalendarsList extends Component {
     } catch (error) {
       console.log(error);
       this.setState({ loading: false });
-      toastNotifications.addDanger('An error occurred loading calendar list.');
+      toastNotifications.addDanger('An error occurred loading the list of calendars.');
     }
   }
 
@@ -75,7 +75,6 @@ export class CalendarsList extends Component {
     deleteCalendars(selectedForDeletion, this.loadCalendars);
   }
 
-  // TODO: check if events and job_ids always array
   addRequiredFieldsToList = (calendarsList = []) => {
     for (let i = 0; i < calendarsList.length; i++) {
       const eventLength = calendarsList[i].events.length;
@@ -109,12 +108,16 @@ export class CalendarsList extends Component {
             onCancel={this.closeDestroyModal}
             onConfirm={this.deleteCalendars}
             cancelButtonText="Cancel"
-            confirmButtonText="OK"
+            confirmButtonText="Delete"
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
           >
             <p>
-              {`Confirm deletion of ${selectedForDeletion.map((c) => c.calendar_id).join(', ')}?`}
+              {
+                `Delete ${selectedForDeletion.length === 1 ? 'this' : 'these'}
+                calendar${selectedForDeletion.length === 1 ? '' : 's'}?
+                ${selectedForDeletion.map((c) => c.calendar_id).join(', ')}`
+              }
             </p>
           </EuiConfirmModal>
         </EuiOverlayMask>

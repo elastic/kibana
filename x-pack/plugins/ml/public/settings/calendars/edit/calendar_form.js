@@ -47,8 +47,8 @@ export function CalendarForm({
 }) {
   const msg = `Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;
     must start and end with an alphanumeric character`;
-  const helpText = (isNewCalendarIdValid === true) ? msg : undefined;
-  const error = (isNewCalendarIdValid === false) ? [msg] : undefined;
+  const helpText = (isNewCalendarIdValid === true && !isEdit) ? msg : undefined;
+  const error = (isNewCalendarIdValid === false && !isEdit) ? [msg] : undefined;
 
   return (
     <EuiForm>
@@ -121,7 +121,7 @@ export function CalendarForm({
           <EuiButton
             fill
             onClick={isEdit ? onEdit : onCreate}
-            disabled={saving || !isNewCalendarIdValid}
+            disabled={saving || !isNewCalendarIdValid || calendarId === ''}
           >
             {saving ? 'Saving...' : 'Save'}
           </EuiButton>
