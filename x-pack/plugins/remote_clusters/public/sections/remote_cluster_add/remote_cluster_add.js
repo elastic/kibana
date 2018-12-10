@@ -14,14 +14,11 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
-  EuiPageContentHeader,
-  EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
 import { listBreadcrumb, addBreadcrumb } from '../../services';
-import { RemoteClusterForm } from '../remote_cluster_form';
+import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
 export class RemoteClusterAddUi extends Component {
   static propTypes = {
@@ -61,18 +58,14 @@ export class RemoteClusterAddUi extends Component {
               horizontalPosition="center"
               className="remoteClusterAddPage"
             >
-              <EuiSpacer size="xs" />
-
-              <EuiPageContentHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.remoteClusters.addTitle"
-                      defaultMessage="Add remote cluster"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageContentHeader>
+              <RemoteClusterPageTitle
+                title={(
+                  <FormattedMessage
+                    id="xpack.remoteClusters.addTitle"
+                    defaultMessage="Add remote cluster"
+                  />
+                )}
+              />
 
               <RemoteClusterForm
                 isSaving={isAddingCluster}

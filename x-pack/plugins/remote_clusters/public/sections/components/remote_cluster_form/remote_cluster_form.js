@@ -34,7 +34,9 @@ import {
 import {
   isSeedNodeValid,
   isSeedNodePortValid,
-} from '../../services';
+} from '../../../services';
+
+import { skippingDisconnectedClustersUrl } from '../../../services/documentation_links';
 
 const defaultFields = {
   name: '',
@@ -274,7 +276,7 @@ export class RemoteClusterFormUi extends Component {
             <h4>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsTitle"
-                defaultMessage="Seed nodes"
+                defaultMessage="Cluster discovery"
               />
             </h4>
           </EuiTitle>
@@ -284,9 +286,10 @@ export class RemoteClusterFormUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSeedsDescription1"
-                defaultMessage="When connecting to this remote cluster, its cluster state will be
-                retrieved from one of its seed nodes so that by default up to three gateway nodes
-                are selected to be connected to as part of remote cluster requests."
+                defaultMessage={`The local cluster will request the cluster state from
+                  some of the remote cluster's nodes as part of the discovery process. These nodes
+                  are known as "seed nodes". Specify multiple seed nodes so that the discovery
+                  process won't fail if one of them is unavailable.`}
               />
             </p>
           </Fragment>
@@ -343,7 +346,7 @@ export class RemoteClusterFormUi extends Component {
             <h4>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableTitle"
-                defaultMessage="Skip unavailable"
+                defaultMessage="Making requests"
               />
             </h4>
           </EuiTitle>
@@ -353,10 +356,20 @@ export class RemoteClusterFormUi extends Component {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
-                defaultMessage="Per cluster boolean setting that allows to skip specific clusters
-                  when no nodes belonging to them are available and they are the target of a remote
-                  cluster request. Default is false, meaning that all clusters are mandatory by default,
-                  but they can selectively be made optional by setting this setting to true."
+                defaultMessage="The local cluster will send requests to gateway nodes on the remote
+                  cluster. If the gateway nodes are unavailable, the request  will fail. Enable
+                  this option to skip the remote cluster and send the request to other remote
+                  clusters instead. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink href={skippingDisconnectedClustersUrl} target="_blank">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLink"
+                        defaultMessage="Learn more."
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             </p>
           </Fragment>
