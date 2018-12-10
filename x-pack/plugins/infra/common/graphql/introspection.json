@@ -175,7 +175,8 @@
               },
               {
                 "name": "filterQuery",
-                "description": "The query to filter the service metadata by",
+                "description":
+                  "The query to filter the documents by based on which service metadata will be returned",
                 "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }

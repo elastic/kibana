@@ -197,7 +197,9 @@ export namespace InfraSourceResolvers {
   export interface ServiceMetadataBetweenArgs {
     start: number /** The millisecond timestamp that corresponds to the start of the interval */;
     end: number /** The millisecond timestamp that corresponds to the end of the interval */;
-    filterQuery?: string | null /** The query to filter the service metadata by */;
+    filterQuery?:
+      | string
+      | null /** The query to filter the documents by based on which service metadata will be returned */;
   }
 
   export type LogEntriesAroundResolver = Resolver<InfraLogEntryInterval, LogEntriesAroundArgs>;
@@ -533,7 +535,9 @@ export interface MetadataByNodeInfraSourceArgs {
 export interface ServiceMetadataBetweenInfraSourceArgs {
   start: number /** The millisecond timestamp that corresponds to the start of the interval */;
   end: number /** The millisecond timestamp that corresponds to the end of the interval */;
-  filterQuery?: string | null /** The query to filter the service metadata by */;
+  filterQuery?:
+    | string
+    | null /** The query to filter the documents by based on which service metadata will be returned */;
 }
 export interface LogEntriesAroundInfraSourceArgs {
   key: InfraTimeKeyInput /** The sort key that corresponds to the point in time */;
