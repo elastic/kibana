@@ -98,7 +98,6 @@ export class ESSearchSource extends VectorSource {
       throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
     }
 
-    inspectorAdapters.requests.resetRequest(layerId);
     let inspectorRequest;
     let resp;
     try {
@@ -126,7 +125,9 @@ export class ESSearchSource extends VectorSource {
         return filters;
       });
 
-      inspectorRequest = inspectorAdapters.requests.start(layerId, layerName);
+      inspectorRequest = inspectorAdapters.requests.start(
+        layerName,
+        { id: layerId, description: 'Elasticsearch document layer' });
       inspectorRequest.stats(getRequestInspectorStats(searchSource));
       searchSource.getSearchRequestBody().then(body => {
         inspectorRequest.json(body);

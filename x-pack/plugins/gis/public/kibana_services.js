@@ -6,7 +6,7 @@
 
 import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
-import { MappedRequestAdapter } from 'ui/inspector/adapters';
+import { RequestAdapter } from 'ui/inspector/adapters';
 import { MapAdapter } from './inspector/adapters/map_adapter';
 import { timefilter } from 'ui/timefilter/timefilter';
 
@@ -15,7 +15,7 @@ export let indexPatternService;
 export let SearchSource;
 export let emsServiceSettings;
 export const inspectorAdapters = {
-  requests: new MappedRequestAdapter(),
+  requests: new RequestAdapter(),
   map: new MapAdapter(),
 };
 
