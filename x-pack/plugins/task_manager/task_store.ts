@@ -98,7 +98,7 @@ export class TaskStore {
    */
   public async init() {
     if (this.wasInitialized) {
-      return;
+      throw new Error('TaskStore has already been initialized!');
     }
 
     const properties = {
