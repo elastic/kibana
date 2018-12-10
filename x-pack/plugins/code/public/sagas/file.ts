@@ -179,8 +179,7 @@ function* handleFetchFile(action: Action<FetchFilePayload>) {
 
 function* handleFetchDirs(action: Action<FetchRepoTreePayload>) {
   try {
-    // @ts-ignore
-    const dir = yield call(requestRepoTree, action.payload);
+    const dir = yield call(requestRepoTree, action.payload!);
     yield put(fetchDirectorySuccess(dir));
   } catch (err) {
     yield fetchDirectoryFailed(err);

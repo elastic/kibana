@@ -13,7 +13,7 @@ import { loadStatusSuccess } from './actions';
 
 export function bindSocket(store: Store) {
   const basePath = chrome.getBasePath();
-  const socket = io(undefined, { path: `${basePath}/ws` });
+  const socket = io('/', { path: `${basePath}/ws` });
 
   socket.on(SocketKind.CLONE_PROGRESS, (data: any) => {
     const { repoUri, progress, cloneProgress } = data;

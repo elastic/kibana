@@ -5,6 +5,7 @@
  */
 
 import { createAction } from 'redux-actions';
+import { DocumentSearchResult } from '../../model';
 
 export interface DocumentSearchPayload {
   query: string;
@@ -19,12 +20,12 @@ export interface RepositorySearchPayload {
 
 // For document search page
 export const documentSearch = createAction<DocumentSearchPayload>('DOCUMENT SEARCH');
-export const documentSearchSuccess = createAction<string>('DOCUMENT SEARCH SUCCESS');
-export const documentSearchFailed = createAction<string>('DOCUMENT SEARCH FAILED');
+export const documentSearchSuccess = createAction<DocumentSearchResult>('DOCUMENT SEARCH SUCCESS');
+export const documentSearchFailed = createAction<Error>('DOCUMENT SEARCH FAILED');
 
 // For repository search page
 export const repositorySearch = createAction<RepositorySearchPayload>('REPOSITORY SEARCH');
-export const repositorySearchSuccess = createAction<string>('REPOSITORY SEARCH SUCCESS');
+export const repositorySearchSuccess = createAction('REPOSITORY SEARCH SUCCESS');
 export const repositorySearchFailed = createAction<Error>('REPOSITORY SEARCH FAILED');
 
 export const changeSearchScope = createAction<string>('CHANGE SEARCH SCOPE');

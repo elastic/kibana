@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { combineReducers } from 'redux';
 
 import { blame, BlameState } from './blame';
@@ -30,7 +31,7 @@ export interface RootState {
   blame: BlameState;
 }
 
-export const rootReducer = combineReducers({
+const reducers = {
   repository,
   file,
   symbol,
@@ -42,4 +43,7 @@ export const rootReducer = combineReducers({
   userConfig,
   commit,
   blame,
-});
+};
+
+// @ts-ignore
+export const rootReducer = combineReducers<RootState>(reducers);

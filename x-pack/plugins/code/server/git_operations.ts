@@ -48,8 +48,8 @@ function entry2Tree(entry: TreeEntry): FileTree {
     type: entry.isDirectory()
       ? FileTreeItemType.Directory
       : entry.isSubmodule()
-        ? FileTreeItemType.Submodule
-        : FileTreeItemType.File,
+      ? FileTreeItemType.Submodule
+      : FileTreeItemType.File,
   };
 }
 

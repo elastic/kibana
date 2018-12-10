@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { ChangeEvent, ReactNode } from 'react';
 
 import { connect } from 'react-redux';
 
@@ -24,6 +24,7 @@ import {
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiProgress,
+  // @ts-ignore
   EuiSearchBar,
   EuiSideNav,
   EuiTitle,
@@ -92,7 +93,12 @@ const Caption = styled.div`
   line-height: 16px;
 `;
 
-const Progress = props => (
+interface ProgressProps {
+  progress: number;
+  children: ReactNode;
+}
+
+const Progress = (props: ProgressProps) => (
   <InlineProgressContainer>
     <RelativeContainer>
       <EuiProgress size="l" value={props.progress} max={100} />
@@ -114,11 +120,9 @@ const RepositoryItem = (props: RepositoryItemProps) => {
       }`
     : '';
 
-  const progress = props.status &&
-    props.status.progress &&
-    props.status.progress < 100 && (
-      <Progress progress={props.status.progress}>{progressPrompt}</Progress>
-    );
+  const progress = props.status && props.status.progress && props.status.progress < 100 && (
+    <Progress progress={props.status.progress}>{progressPrompt}</Progress>
+  );
 
   const adminButtons = props.isAdmin ? (
     <div>
@@ -165,13 +169,13 @@ class AdminPage extends React.PureComponent<Props, State> {
         {
           isSelected: true,
           name: 'Git Address',
-          id: Tabs.GitAddress,
+          id: String(Tabs.GitAddress),
           onClick: this.getTabClickHandler(Tabs.GitAddress),
         },
         {
           isSelected: false,
           name: 'GitHub',
-          id: Tabs.GitHub,
+          id: String(Tabs.GitHub),
           onClick: this.getTabClickHandler(Tabs.GitHub),
         },
       ];
@@ -180,22 +184,22 @@ class AdminPage extends React.PureComponent<Props, State> {
         {
           isSelected: false,
           name: 'Git Address',
-          id: Tabs.GitAddress,
+          id: String(Tabs.GitAddress),
           onClick: this.getTabClickHandler(Tabs.GitAddress),
         },
         {
           isSelected: true,
           name: 'GitHub',
-          id: Tabs.GitHub,
+          id: String(Tabs.GitHub),
           onClick: this.getTabClickHandler(Tabs.GitHub),
         },
       ];
     } else {
-      throw new Error('Unknown Tab');
+      return [];
     }
   };
 
-  public onImportAddressChange = (e: React.MouseEvent<HTMLInputElement>) => {
+  public onImportAddressChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({ importRepoAddress: e.target.value });
   };
 
@@ -272,7 +276,13 @@ class AdminPage extends React.PureComponent<Props, State> {
   public render() {
     const repos = this.filterRepos();
     const repositoriesCount = repos.length;
-    const items = this.getSideNavItems();
+    const items = [
+      {
+        name: '',
+        id: '',
+        items: this.getSideNavItems(),
+      },
+    ];
     const { callOutMessage, status, showCallOut, callOutType, isAdmin } = this.props;
 
     const callOut = showCallOut && (

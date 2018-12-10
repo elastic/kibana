@@ -35,7 +35,7 @@ export class Poller<T = void> {
   private readonly continuePollingOnError: boolean;
   private readonly pollFrequencyErrorMultiplier: number;
 
-  private timeoutId?: ReturnType<typeof setTimeout>;
+  private timeoutId?: NodeJS.Timer;
 
   constructor(options: PollerOptions<T>) {
     this.functionToPoll = options.functionToPoll; // Must return a Promise
@@ -57,7 +57,7 @@ export class Poller<T = void> {
     }
 
     if (this.trailing) {
-      this.timeoutId = setTimeout(this.poll.bind(this), this.pollFrequencyInMillis);
+      this.timeoutId = global.setTimeout(this.poll.bind(this), this.pollFrequencyInMillis);
     } else {
       this.poll();
     }
@@ -65,7 +65,7 @@ export class Poller<T = void> {
 
   public stop() {
     if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
+      global.clearTimeout(this.timeoutId);
       this.timeoutId = undefined;
     }
   }
@@ -82,7 +82,7 @@ export class Poller<T = void> {
         return;
       }
 
-      this.timeoutId = setTimeout(this.poll.bind(this), this.pollFrequencyInMillis);
+      this.timeoutId = global.setTimeout(this.poll.bind(this), this.pollFrequencyInMillis);
     } catch (error) {
       await this.errorFunction(error);
 
@@ -91,7 +91,7 @@ export class Poller<T = void> {
       }
 
       if (this.continuePollingOnError) {
-        this.timeoutId = setTimeout(
+        this.timeoutId = global.setTimeout(
           this.poll.bind(this),
           this.pollFrequencyInMillis * this.pollFrequencyErrorMultiplier
         );

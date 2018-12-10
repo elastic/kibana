@@ -16,8 +16,7 @@ interface Props {
 
 export class DiffEditor extends React.Component<Props> {
   private diffEditor: MonacoDiffEditor | null = null;
-  public mountDiffEditor = (container: HTMLElement) => {
-    this.container = container;
+  public mountDiffEditor = (container: HTMLDivElement) => {
     this.diffEditor = new MonacoDiffEditor(
       container,
       this.props.originCode,
@@ -28,12 +27,13 @@ export class DiffEditor extends React.Component<Props> {
     this.diffEditor.init();
   };
 
-  public componentWillReceiveProps(nextProps) {
+  public componentWillReceiveProps(nextProps: Props) {
     this.updateLayout(nextProps.renderSideBySide);
   }
 
   public updateLayout(renderSideBySide: boolean) {
-    this.diffEditor.diffEditor.updateOptions({ renderSideBySide });
+    // @ts-ignore
+    this.diffEditor!.diffEditor!.updateOptions({ renderSideBySide });
   }
 
   public render() {

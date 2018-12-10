@@ -9,7 +9,12 @@ import _ from 'lodash';
 import { Action, handleActions } from 'redux-actions';
 
 import { Location, SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
-import { loadStructure, loadStructureFailed, loadStructureSuccess } from '../actions';
+import {
+  loadStructure,
+  loadStructureFailed,
+  loadStructureSuccess,
+  SymbolsPayload,
+} from '../actions';
 
 const SPECIAL_SYMBOL_NAME = '{...}';
 const SPECIAL_CONTAINER_NAME = '';
@@ -17,6 +22,9 @@ const SPECIAL_CONTAINER_NAME = '';
 export interface SymbolWithMembers extends SymbolInformation {
   members?: Set<SymbolInformation>;
 }
+
+type Container = SymbolWithMembers | undefined;
+
 export interface SymbolState {
   symbols: { [key: string]: SymbolInformation[] };
   structureTree: { [key: string]: SymbolWithMembers[] };
@@ -57,7 +65,7 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
     );
   }
   symbols.forEach((s: SymbolInformation, index: number, arr: SymbolInformation[]) => {
-    let container = null;
+    let container: Container;
     /**
      * For Enum class in Java, the container name and symbol name that LSP gives are special.
      * For more information, see https://github.com/elastic/codesearch/issues/580
@@ -68,7 +76,7 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
         (sy: SymbolInformation) => sy.name === SPECIAL_SYMBOL_NAME
       );
     } else {
-      container = findContainer(s.containerName, s.location);
+      container = findContainer(s.containerName || '', s.location);
     }
     if (container) {
       if (container.members) {
@@ -91,10 +99,10 @@ export const symbol = handleActions(
         draft.loading = true;
         draft.lastRequestPath = action.payload || '';
       }),
-    [String(loadStructureSuccess)]: (state: SymbolState, action: Action<SymbolInformation[]>) =>
+    [String(loadStructureSuccess)]: (state: SymbolState, action: Action<SymbolsPayload>) =>
       produce<SymbolState>(state, draft => {
         draft.loading = false;
-        const { path, data } = action.payload;
+        const { path, data } = action.payload!;
         draft.structureTree[path] = generateStructureTree(data);
         draft.symbols = {
           ...state.symbols,

@@ -71,7 +71,7 @@ function mergeTree(draft: FileState, tree: FileTree, path: string) {
       const idx = current.children!.findIndex(child => child.name === p);
       const index = node.children!.findIndex(child => child.name === p);
       if (idx >= 0 && index >= 0) {
-        node = node.children[index];
+        node = node.children![index];
         if (pidx === pLastIndex) {
           current.children![idx!] = node;
         }

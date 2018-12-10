@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action } from 'redux';
+import { Action } from 'redux-actions';
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
+import { Match } from '../actions';
 import { loadBlame, loadBlameFailed, LoadBlamePayload, loadBlameSuccess } from '../actions/blame';
 import { sourceFilePattern } from './patterns';
 
@@ -14,9 +15,9 @@ function requestBlame(repoUri: string, revision: string, path: string) {
   return kfetch({ pathname: `../api/code/repo/${repoUri}/blame/${revision}/${path}` });
 }
 
-function* handleFetchBlame(action: any) {
+function* handleFetchBlame(action: Action<LoadBlamePayload>) {
   try {
-    const { repoUri, revision, path } = action.payload;
+    const { repoUri, revision, path } = action.payload!;
     const blame = yield call(requestBlame, repoUri, revision, path);
     yield put(loadBlameSuccess(blame));
   } catch (err) {
@@ -28,8 +29,8 @@ export function* watchLoadBlame() {
   yield takeEvery(String(loadBlame), handleFetchBlame);
 }
 
-function* handleBlame(action: Action<LoadBlamePayload>) {
-  const { resource, org, repo, revision, path } = action.payload.params;
+function* handleBlame(action: Action<Match>) {
+  const { resource, org, repo, revision, path } = action.payload!.params;
   const repoUri = `${resource}/${org}/${repo}`;
   yield put(loadBlame({ repoUri, revision, path }));
 }

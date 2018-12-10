@@ -5,8 +5,13 @@
  */
 
 import { createAction } from 'redux-actions';
-import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
+import { SymbolInformation } from 'vscode-languageserver-types/lib/esm/main';
+
+export interface SymbolsPayload {
+  path: string;
+  data: SymbolInformation[];
+}
 
 export const loadStructure = createAction<string>('LOAD STRUCTURE');
-export const loadStructureSuccess = createAction<ResponseMessage>('LOAD STRUCTURE SUCCESS');
+export const loadStructureSuccess = createAction<SymbolsPayload>('LOAD STRUCTURE SUCCESS');
 export const loadStructureFailed = createAction<Error>('LOAD STRUCTURE FAILED');

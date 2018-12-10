@@ -11,9 +11,8 @@ import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload } from '../../actions';
-import { MainRouteParams, PathTypes } from '../../common/types';
+import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
-
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
   closeTreePath: (path: string) => void;
@@ -60,8 +59,9 @@ export class CodeFileTree extends React.Component<Props> {
     const onClick = () => this.onClick(node);
     switch (node.type) {
       case FileTreeItemType.Directory: {
-        const onFolderClick = e => {
-          if (e.target.tagName === 'DIV') {
+        const onFolderClick = (e: React.MouseEvent<HTMLDivElement>) => {
+          const target = e.target as HTMLElement;
+          if (target.tagName === 'DIV') {
             this.onClick(node);
           } else {
             this.getTreeToggler(node.path || '')();
@@ -91,14 +91,15 @@ export class CodeFileTree extends React.Component<Props> {
     }
   };
 
-  public treeToItems = (node: Tree): any => {
+  public treeToItems = (node: Tree): EuiSideNavItem => {
     const forceOpen = this.props.openedPaths.includes(node.path!);
-    const data = {
+    const data: EuiSideNavItem = {
       id: node.name,
       name: node.name,
       isSelected: false,
       renderItem: this.getItemRenderer(node, forceOpen),
       forceOpen,
+      onClick: () => void 0,
     };
     if (node.type === FileTreeItemType.Directory && Number(node.childrenCount) > 0) {
       const nodes = this.flattenDirectory(node);

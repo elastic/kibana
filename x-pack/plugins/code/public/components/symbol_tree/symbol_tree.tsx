@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Location } from 'vscode-languageserver-types/lib/esm/main';
 import { RepositoryUtils } from '../../../common/repository_utils';
+import { EuiSideNavItem } from '../../common/types';
 import { RootState } from '../../reducers';
 import { SymbolWithMembers } from '../../reducers/symbol';
 import { structureSelector } from '../../selectors';
@@ -33,22 +34,20 @@ class CodeSymbolTree extends React.PureComponent<Props> {
     </div>
   );
 
-  public symbolsToSideNavItems = (symbolsWithMembers: SymbolWithMembers[]) => {
-    return symbolsWithMembers
-      .map((s: SymbolWithMembers, index: number) => {
-        const item = {
-          location: s.location,
-          name: s.name,
-          id: `${s.name}_${index}`,
-          renderItem: this.getStructureTreeItemRenderer(s.location, s.name),
-        };
-        if (s.members) {
-          item.items = this.symbolsToSideNavItems(Array.from(s.members));
-          item.forceOpen = true;
-        }
-        return item;
-      })
-      .sort(sortSymbol);
+  public symbolsToSideNavItems = (symbolsWithMembers: SymbolWithMembers[]): EuiSideNavItem[] => {
+    return symbolsWithMembers.sort(sortSymbol).map((s: SymbolWithMembers, index: number) => {
+      const item: EuiSideNavItem = {
+        name: s.name,
+        id: `${s.name}_${index}`,
+        renderItem: this.getStructureTreeItemRenderer(s.location, s.name),
+        onClick: () => void 0,
+      };
+      if (s.members) {
+        item.items = this.symbolsToSideNavItems(Array.from(s.members));
+        item.forceOpen = true;
+      }
+      return item;
+    });
   };
 
   public render() {

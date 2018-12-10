@@ -21,7 +21,7 @@ function requestStructure(uri?: string) {
 function* handleLoadStructure(action: Action<string>) {
   try {
     const data = yield call(requestStructure, `git:/${action.payload}`);
-    yield put(loadStructureSuccess({ path: action.payload, data }));
+    yield put(loadStructureSuccess({ path: action.payload!, data }));
   } catch (err) {
     yield put(loadStructureFailed(err));
   }

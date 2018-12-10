@@ -68,32 +68,34 @@ export class HoverWidget extends React.PureComponent<HoverWidgetProps> {
   }
 
   private renderContents() {
-    return this.props.contents!.filter(content => !!content).map((markedString, idx) => {
-      let markdown: string;
-      if (typeof markedString === 'string') {
-        markdown = markedString;
-      } else if (markedString.language) {
-        markdown = '```' + markedString.language + '\n' + markedString.value + '\n```';
-      } else {
-        markdown = markedString.value;
-      }
-      const renderedContents: string = renderMarkdown(
-        { value: markdown },
-        {
-          codeBlockRenderer: (language: string, value: string) => {
-            const code = tokenizeToString(value, language);
-            return `<span style="font-family: ${this.props.fontFamily}">${code}</span>`;
-          },
+    return this.props
+      .contents!.filter(content => !!content)
+      .map((markedString, idx) => {
+        let markdown: string;
+        if (typeof markedString === 'string') {
+          markdown = markedString;
+        } else if (markedString.language) {
+          markdown = '```' + markedString.language + '\n' + markedString.value + '\n```';
+        } else {
+          markdown = markedString.value;
         }
-      ).innerHTML;
-      return (
-        <div
-          className="hover-row"
-          key={`hover_${idx}`}
-          dangerouslySetInnerHTML={{ __html: renderedContents }}
-        />
-      );
-    });
+        const renderedContents: string = renderMarkdown(
+          { value: markdown },
+          {
+            codeBlockRenderer: (language: string, value: string) => {
+              const code = tokenizeToString(value, language);
+              return `<span style="font-family: ${this.props.fontFamily}">${code}</span>`;
+            },
+          }
+        ).innerHTML;
+        return (
+          <div
+            className="hover-row"
+            key={`hover_${idx}`}
+            dangerouslySetInnerHTML={{ __html: renderedContents }}
+          />
+        );
+      });
   }
 
   private renderInitialting() {

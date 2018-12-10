@@ -6,7 +6,13 @@
 
 import { EsClient } from '@code/esqueue';
 
-import { CloneWorkerProgress, Repository, RepositoryUri, WorkerProgress } from '../../model';
+import {
+  CloneWorkerProgress,
+  Repository,
+  RepositoryConfig,
+  RepositoryUri,
+  WorkerProgress,
+} from '../../model';
 import {
   RepositoryConfigReservedField,
   RepositoryDeleteStatusReservedField,
@@ -87,8 +93,8 @@ export class RepositoryObjectClient {
     );
   }
 
-  public async setRepositoryConfig(repoUri: RepositoryUri, repo: Repository) {
-    return await this.setRepositoryObject(repoUri, RepositoryConfigReservedField, repo);
+  public async setRepositoryConfig(repoUri: RepositoryUri, config: RepositoryConfig) {
+    return await this.setRepositoryObject(repoUri, RepositoryConfigReservedField, config);
   }
 
   public async setRepository(repoUri: RepositoryUri, repo: Repository) {

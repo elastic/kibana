@@ -6,7 +6,7 @@
 import { Action } from 'redux-actions';
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
-import { loadCommit, loadCommitFailed, loadCommitSuccess } from '../actions';
+import { loadCommit, loadCommitFailed, loadCommitSuccess, Match } from '../actions';
 import { commitRoutePattern } from './patterns';
 
 function requestCommit(repo: string, commitId: string) {
@@ -15,9 +15,9 @@ function requestCommit(repo: string, commitId: string) {
   });
 }
 
-function* handleLoadCommit(action: Action<any>) {
+function* handleLoadCommit(action: Action<Match>) {
   try {
-    const { commitId, resource, org, repo } = action.payload.params;
+    const { commitId, resource, org, repo } = action.payload!.params;
     yield put(loadCommit(commitId));
     const repoUri = `${resource}/${org}/${repo}`;
     const commit = yield call(requestCommit, repoUri, commitId);

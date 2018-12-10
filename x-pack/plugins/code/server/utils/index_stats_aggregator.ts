@@ -13,7 +13,7 @@ export function aggregateIndexStats(stats: IndexStats[]): IndexStats {
     .set(IndexStatsKey.Reference, 0);
   stats.forEach((s: IndexStats) => {
     s.forEach((value: number, key: IndexStatsKey) => {
-      res.set(key, res.get(key) + value);
+      res.set(key, res.get(key)! + value);
     });
   });
   return res;

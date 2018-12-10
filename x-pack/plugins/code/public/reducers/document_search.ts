@@ -31,7 +31,7 @@ const initialState: DocumentSearchState = {
   isLoading: false,
 };
 
-export const documentSearch = handleActions(
+export const documentSearch = handleActions<DocumentSearchState, any>(
   {
     [String(documentSearchQuery)]: (
       state: DocumentSearchState,
@@ -40,7 +40,7 @@ export const documentSearch = handleActions(
       produce<DocumentSearchState>(state, draft => {
         if (action.payload) {
           draft.query = action.payload.query;
-          draft.page = action.payload.page;
+          draft.page = parseInt(action.payload.page as string, 10);
           if (action.payload.languages) {
             draft.languages = new Set(decodeURIComponent(action.payload.languages).split(','));
           } else {
@@ -57,7 +57,10 @@ export const documentSearch = handleActions(
           draft.error = undefined;
         }
       }),
-    [String(documentSearchSuccess)]: (state: DocumentSearchState, action: Action<any>) =>
+    [String(documentSearchSuccess)]: (
+      state: DocumentSearchState,
+      action: Action<DocumentSearchResult>
+    ) =>
       produce<DocumentSearchState>(state, draft => {
         const {
           from,
@@ -67,17 +70,18 @@ export const documentSearch = handleActions(
           total,
           repoAggregations,
           langAggregations,
-        } = action.payload;
+          took,
+        } = action.payload!;
         draft.isLoading = false;
 
-        const repoStats = repoAggregations.map(agg => {
+        const repoStats = repoAggregations!.map(agg => {
           return {
             name: agg.key,
             value: agg.doc_count,
           };
         });
 
-        const languageStats = langAggregations.map(agg => {
+        const languageStats = langAggregations!.map(agg => {
           return {
             name: agg.key,
             value: agg.doc_count,
@@ -87,23 +91,25 @@ export const documentSearch = handleActions(
         draft.searchResult = {
           ...draft.searchResult,
           query: state.query,
+          total,
+          took,
           stats: {
             total,
-            from: from + 1,
-            to: from + results.length,
-            page,
-            totalPage,
+            from: from! + 1,
+            to: from! + results!.length,
+            page: page!,
+            totalPage: totalPage!,
             repoStats,
             languageStats,
           },
           results,
         };
       }),
-    [String(documentSearchFailed)]: (state: DocumentSearchState, action: Action<any>) => {
+    [String(documentSearchFailed)]: (state: DocumentSearchState, action: Action<Error>) => {
       if (action.payload) {
         return produce<DocumentSearchState>(state, draft => {
           draft.isLoading = false;
-          draft.error = action.payload.error;
+          draft.error = action.payload!;
         });
       } else {
         return state;
