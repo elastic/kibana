@@ -302,9 +302,12 @@ module.directive('headerGlobalNav', (reactDirective) => {
 
 ### FormattedRelative
 
-[React-intl readme](https://github.com/yahoo/react-intl/wiki/Components#formattedrelative)\
-`i18n-locale` config variable is used for translation.\
-`formats` field should be one of `'years' | 'months' | 'days' | 'hours' | 'minutes' | 'seconds'`.\
+`FormattedRelative` expects several attributes (read more [here](https://github.com/yahoo/react-intl/wiki/Components#formattedrelative)), including
+
+- `value` that can be parsed as a date,
+- `formats` that should be one of `'years' | 'months' | 'days' | 'hours' | 'minutes' | 'seconds'` (this options are configured in [`formats.ts`](./src/core/formats.ts))
+-  etc.
+
 If `formats` is not provided then it will be chosen automatically:\
 `x seconds ago` for `x < 60`, `1 minute ago` for `60 <= x < 120`, etc.
 

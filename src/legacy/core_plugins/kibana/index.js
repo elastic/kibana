@@ -19,7 +19,6 @@
 
 import Promise from 'bluebird';
 import { mkdirp as mkdirpNode } from 'mkdirp';
-import { resolve } from 'path';
 
 import manageUuid from './server/lib/manage_uuid';
 import { searchApi } from './server/routes/api/search';
@@ -135,9 +134,7 @@ export default function (kibana) {
         };
       },
 
-      translations: [
-        resolve(__dirname, 'translations/fr.json'),
-      ],
+      translations: [],
 
       mappings,
       uiSettingDefaults: getUiSettingDefaults(),
