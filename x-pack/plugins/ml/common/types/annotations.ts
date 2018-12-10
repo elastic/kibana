@@ -17,22 +17,26 @@
 //           "type": "text"
 //         },
 //         "create_time": {
-//           "type": "date"
+//           "type": "date",
+//           "format": "epoch_millis"
 //         },
 //         "create_username": {
 //           "type": "keyword"
 //         },
 //         "timestamp": {
-//           "type": "date"
+//           "type": "date",
+//           "format": "epoch_millis"
 //         },
 //         "end_timestamp": {
-//           "type": "date"
+//           "type": "date",
+//           "format": "epoch_millis"
 //         },
 //         "job_id": {
 //           "type": "keyword"
 //         },
 //         "modified_time": {
-//           "type": "date"
+//           "type": "date",
+//           "format": "epoch_millis"
 //         },
 //         "modified_username": {
 //           "type": "keyword"
