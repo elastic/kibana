@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToken } from '@elastic/eui';
+import { EuiToken, IconType } from '@elastic/eui';
 import {
   euiCodeFontFamily,
   euiColorDarkShade,
@@ -32,8 +32,12 @@ interface Props {
   ariaId: string;
 }
 
+interface SuggestionItemProps {
+  active: boolean;
+}
+
 const SuggestionItem = styled.div`
-  background: ${props => (props.active ? euiColorLightShade : 'white')};
+  background: ${(props: SuggestionItemProps) => (props.active ? euiColorLightShade : 'white')};
   height: 48px;
   margin: 0 ${euiSize};
   border-radius: ${euiSizeXs} ${euiSizeXs} ${euiSizeXs} ${euiSizeXs};
@@ -113,7 +117,7 @@ export const SuggestionComponent: SFC<Props> = props => {
 
   const icon = props.suggestion.tokenType ? (
     <SuggestionItemToken>
-      <EuiToken iconType={props.suggestion.tokenType} />
+      <EuiToken iconType={props.suggestion.tokenType as IconType} />
     </SuggestionItemToken>
   ) : null;
 
@@ -123,7 +127,6 @@ export const SuggestionComponent: SFC<Props> = props => {
       onClick={click}
       active={props.selected}
       onMouseEnter={props.onMouseEnter}
-      ref={props.innerRef}
       id={props.ariaId}
     >
       <SuggestionItemInner>

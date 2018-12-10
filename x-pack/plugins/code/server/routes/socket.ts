@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from 'hapi';
 import { Socket } from 'socket.io';
 
-import { Server } from '../kibana_types';
 import { Log } from '../log';
 import { SocketService } from '../socket_service';
 

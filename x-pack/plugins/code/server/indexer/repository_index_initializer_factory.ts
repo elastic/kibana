@@ -6,14 +6,14 @@
 
 import { EsClient } from '@code/esqueue';
 
+import { Indexer, IndexerFactory, RepositoryIndexInitializer } from '.';
 import { RepositoryUri } from '../../model';
 import { Log } from '../log';
-import { IndexerFactory, RepositoryIndexInitializer } from './';
 
 export class RepositoryIndexInitializerFactory implements IndexerFactory {
   constructor(protected readonly client: EsClient, protected readonly log: Log) {}
 
-  public create(repoUri: RepositoryUri, revision: string) {
+  public create(repoUri: RepositoryUri, revision: string): Indexer {
     return new RepositoryIndexInitializer(repoUri, revision, this.client, this.log);
   }
 }

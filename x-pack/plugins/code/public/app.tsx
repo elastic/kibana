@@ -9,6 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { App } from './components/app';
 import { bindSocket } from './socket';

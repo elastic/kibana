@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToken } from '@elastic/eui';
+import { EuiToken, IconType } from '@elastic/eui';
 import {
   euiBorderColor,
   euiBorderWidthThin,
@@ -139,7 +139,7 @@ export class SuggestionsComponent extends Component<Props> {
         const groupHeader = (
           <SuggestionGroupHeader>
             <SuggestionGroupHeaderTitle>
-              <EuiToken iconType={this.getGroupTokenType(group.type)} />
+              <EuiToken iconType={this.getGroupTokenType(group.type) as IconType} />
               <SuggestionGroupHeaderTitleText>
                 {this.getGroupTitle(group.type)}
               </SuggestionGroupHeaderTitleText>

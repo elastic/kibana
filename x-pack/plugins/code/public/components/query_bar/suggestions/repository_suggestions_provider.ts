@@ -21,7 +21,7 @@ export class RepositorySuggestionsProvider extends AbstractSuggestionsProvider {
       method: 'get',
       query: { q: query },
     });
-    const suggestions = Array.from(res.repositories)
+    const suggestions = Array.from(res.repositories as Repository[])
       .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
       .map((repo: Repository) => {
         return {

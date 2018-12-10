@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from 'hapi';
 import SocketIO from 'socket.io';
 
 import { InstallEvent } from '../common/installation';
 import { CloneProgress, RepositoryUri, SocketKind } from '../model';
-import { Server } from './kibana_types';
 import { Log } from './log';
 
 export class SocketService {

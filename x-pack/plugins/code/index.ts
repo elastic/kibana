@@ -5,6 +5,7 @@
  */
 
 import { EsClient, Esqueue } from '@code/esqueue';
+import { Server } from 'hapi';
 import moment from 'moment';
 import { resolve } from 'path';
 
@@ -13,7 +14,6 @@ import {
   RepositoryIndexInitializerFactory,
   tryMigrateIndices,
 } from './server/indexer';
-import { Server } from './server/kibana_types';
 import { Log } from './server/log';
 import { InstallManager } from './server/lsp/install_manager';
 import { LspService } from './server/lsp/lsp_service';
@@ -87,8 +87,8 @@ export const code = (kibana: any) =>
     },
 
     init: async (server: Server, options: any) => {
-      const queueIndex = server.config().get('xpack.code.queueIndex');
-      const queueTimeout = server.config().get('xpack.code.queueTimeout');
+      const queueIndex: string = server.config().get('xpack.code.queueIndex');
+      const queueTimeout: number = server.config().get('xpack.code.queueTimeout');
       const adminCluster = server.plugins.elasticsearch.getCluster('admin');
       const dataCluster = server.plugins.elasticsearch.getCluster('data');
       const log = new Log(server);

@@ -12,7 +12,7 @@ import {
 } from '@code/esqueue';
 import moment from 'moment';
 
-import { WorkerResult } from 'model/repository';
+import { WorkerResult } from '../../model';
 import { Log } from '../log';
 import { Job } from './job';
 import { Worker } from './worker';

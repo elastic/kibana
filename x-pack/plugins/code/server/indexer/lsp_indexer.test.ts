@@ -12,6 +12,7 @@ import rimraf from 'rimraf';
 import sinon from 'sinon';
 
 import { Log } from '../log';
+import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
 import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
@@ -176,6 +177,7 @@ test('Normal LSP index process.', async () => {
     '127.0.0.1',
     serverOptions,
     esClient as EsClient,
+    {} as InstallManager,
     new ConsoleLoggerFactory()
   );
 
@@ -225,6 +227,7 @@ test('Cancel LSP index process.', async () => {
     '127.0.0.1',
     serverOptions,
     esClient as EsClient,
+    {} as InstallManager,
     new ConsoleLoggerFactory()
   );
 

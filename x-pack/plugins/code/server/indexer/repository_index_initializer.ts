@@ -6,7 +6,7 @@
 
 import { EsClient } from '@code/esqueue';
 
-import { RepositoryUri } from 'model';
+import { RepositoryUri } from '../../model';
 import { Log } from '../log';
 import { AbstractIndexer } from './abstract_indexer';
 import { IndexCreationRequest } from './index_creation_request';
