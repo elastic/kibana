@@ -406,7 +406,7 @@ class ManageSpacePageUI extends Component<Props, State> {
             {
               id:
                 'xpack.spaces.management.manageSpacePage.spaceSuccessfullySavedNotificationMessage',
-              defaultMessage: '{name} space was saved',
+              defaultMessage: `Space {name} was saved.`,
             },
             {
               name: `'${name}'`,
