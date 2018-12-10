@@ -29,6 +29,7 @@ import { initPromise } from 'plugins/ml/util/promise';
 import template from './explorer.html';
 
 import uiRoutes from 'ui/routes';
+import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege } from 'plugins/ml/privilege/check_privilege';
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
@@ -52,6 +53,7 @@ import { FEATURE_ANNOTATIONS_ENABLED } from '../../common/constants/feature_flag
 uiRoutes
   .when('/explorer/?', {
     template,
+    k7Breadcrumbs: getAnomalyExplorerBreadcrumbs,
     resolve: {
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
