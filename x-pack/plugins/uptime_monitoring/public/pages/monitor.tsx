@@ -6,7 +6,7 @@
 
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { monitorBreadcrumb, overviewBreadcrumb } from '../breadcrumbs';
+import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 
 interface MonitorPageProps {
@@ -19,7 +19,7 @@ export class MonitorPage extends React.Component<MonitorPageProps> {
   }
 
   public componentWillMount() {
-    this.props.updateBreadcrumbs([overviewBreadcrumb, monitorBreadcrumb]);
+    this.props.updateBreadcrumbs(getMonitorPageBreadcrumb());
   }
 
   public render() {

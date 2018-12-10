@@ -14,3 +14,7 @@ export const overviewBreadcrumb: Breadcrumb = {
   text: 'Overview',
   href: '#/',
 };
+
+export const getOverviewPageBreadcrumbs = (): Breadcrumb[] => [overviewBreadcrumb];
+
+export const getMonitorPageBreadcrumb = (): Breadcrumb[] => [overviewBreadcrumb, monitorBreadcrumb];
