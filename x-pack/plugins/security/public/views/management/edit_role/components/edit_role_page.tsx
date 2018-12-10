@@ -29,7 +29,7 @@ import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privil
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
-import { KibanaPrivilege, PrivilegeMap } from '../../../../../common/model/kibana_privilege';
+import { PrivilegeMap } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
 import { isReservedRole } from '../../../../lib/role';
 import { deleteRole, saveRole } from '../../../../objects';
@@ -47,7 +47,6 @@ interface Props {
   rbacEnabled: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
-  kibanaAppPrivileges: KibanaPrivilege[];
   privileges: PrivilegeMap;
   spaces?: Space[];
   spacesEnabled: boolean;
@@ -253,7 +252,6 @@ class EditRolePageUI extends Component<Props, State> {
       <div>
         <EuiSpacer />
         <KibanaPrivileges
-          kibanaAppPrivileges={this.props.kibanaAppPrivileges}
           privilegeDefinition={new PrivilegeDefinition(this.props.privileges)}
           spaces={this.props.spaces}
           spacesEnabled={this.props.spacesEnabled}

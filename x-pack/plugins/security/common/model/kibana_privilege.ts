@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type KibanaPrivilege = 'none' | 'custom' | 'read' | 'all';
-
-export const KibanaAppPrivileges: KibanaPrivilege[] = ['read', 'all'];
-
 export type FeaturesPrivileges = Record<string, Record<string, string[]>>;
 
 export interface PrivilegeMap {

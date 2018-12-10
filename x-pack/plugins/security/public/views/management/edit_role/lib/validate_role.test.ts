@@ -22,7 +22,10 @@ describe('validateRoleName', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -39,7 +42,10 @@ describe('validateRoleName', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -59,7 +65,10 @@ describe('validateRoleName', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -81,7 +90,10 @@ describe('validateRoleName', () => {
           run_as: [],
         },
         kibana: {
-          global: [],
+          global: {
+            minimum: [],
+            feature: {},
+          },
           space: {},
         },
       };
@@ -113,7 +125,10 @@ describe('validateIndexPrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -137,7 +152,10 @@ describe('validateIndexPrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -156,7 +174,10 @@ describe('validateIndexPrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -180,7 +201,10 @@ describe('validateInProgressSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -198,7 +222,10 @@ describe('validateInProgressSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -223,7 +250,10 @@ describe('validateInProgressSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -248,7 +278,10 @@ describe('validateInProgressSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -274,7 +307,10 @@ describe('validateInProgressSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: ['all'],
+        global: {
+          minimum: ['all'],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -305,7 +341,10 @@ describe('validateSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -322,7 +361,10 @@ describe('validateSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: ['all'],
+        global: {
+          minimum: ['all'],
+          feature: {},
+        },
         space: {},
       },
     };
@@ -339,9 +381,12 @@ describe('validateSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: {
+          minimum: [],
+          feature: {},
+        },
         space: {
-          marketing: ['read'],
+          marketing: { minimum: ['read'], feature: {} },
         },
       },
     };
@@ -358,10 +403,13 @@ describe('validateSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: ['all'],
+        global: {
+          minimum: ['all'],
+          feature: {},
+        },
         space: {
-          default: ['foo'],
-          marketing: ['read'],
+          default: { minimum: ['foo'], feature: {} },
+          marketing: { minimum: ['read'], feature: {} },
         },
       },
     };
@@ -378,10 +426,13 @@ describe('validateSpacePrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: ['read'],
+        global: {
+          minimum: ['read'],
+          feature: {},
+        },
         space: {
-          default: ['foo'],
-          marketing: ['read'],
+          default: { minimum: ['foo'], feature: {} },
+          marketing: { minimum: ['read'], feature: {} },
         },
       },
     };

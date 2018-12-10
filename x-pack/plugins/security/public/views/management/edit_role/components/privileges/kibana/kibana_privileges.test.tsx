@@ -6,7 +6,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { KibanaPrivilege } from '../../../../../../../../security/common/model/kibana_privilege';
+import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { RoleValidator } from '../../../lib/validate_role';
 import { KibanaPrivileges } from './kibana_privileges';
 import { SimplePrivilegeForm } from './simple_privilege_form';
@@ -22,8 +22,16 @@ const buildProps = (customProps = {}) => {
         run_as: [],
       },
       kibana: {
-        global: [],
-        space: {},
+        global: {
+          minimum: [] as string[],
+          feature: {},
+        },
+        space: {
+          someSpace: {
+            minimum: [] as string[],
+            feature: {},
+          },
+        },
       },
     },
     spacesEnabled: true,
@@ -40,6 +48,13 @@ const buildProps = (customProps = {}) => {
         disabledFeatures: [],
       },
     ],
+    features: [],
+    privilegeDefinition: new PrivilegeDefinition({
+      global: {},
+      space: {},
+      features: {},
+    }),
+    intl: null as any,
     uiCapabilities: {
       navLinks: {},
       spaces: {
@@ -47,7 +62,7 @@ const buildProps = (customProps = {}) => {
       },
     },
     editable: true,
-    kibanaAppPrivileges: ['all' as KibanaPrivilege],
+    kibanaAppPrivileges: ['all'],
     onChange: jest.fn(),
     validator: new RoleValidator(),
     ...customProps,

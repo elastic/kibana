@@ -74,11 +74,10 @@ export function getEffectivePrivileges(
           privilege,
         ];
       } else {
-        const missingActions = privilegeActions.filter(
-          (candidateAction: string) =>
-            !assignedActionExpressions.some((exp: RegExp) => exp.test(candidateAction))
-        );
-
+        // const missingActions = privilegeActions.filter(
+        //   (candidateAction: string) =>
+        //     !assignedActionExpressions.some((exp: RegExp) => exp.test(candidateAction))
+        // );
         // console.log(featureId, 'not granted because of missing actions', {
         //   missingActions,
         //   assignedActionExpressions,
@@ -186,7 +185,7 @@ function getEffectiveSpacePrivileges(
   effectivePrivileges: EffectivePrivileges,
   globalAssignedActions: string[]
 ): EffectivePrivileges {
-  const { global, space } = role.kibana;
+  const { space } = role.kibana;
   const featurePrivileges = privilegeDefinition.getFeaturePrivileges();
 
   const actualSpacePrivileges = space[spaceId] || effectivePrivileges.grants.space;
@@ -233,11 +232,10 @@ function getEffectiveSpacePrivileges(
           privilege,
         ];
       } else {
-        const missingActions = privilegeActions.filter(
-          (candidateAction: string) =>
-            !assignedActionExpressions.some((exp: RegExp) => exp.test(candidateAction))
-        );
-
+        // const missingActions = privilegeActions.filter(
+        //   (candidateAction: string) =>
+        //     !assignedActionExpressions.some((exp: RegExp) => exp.test(candidateAction))
+        // );
         // console.log(featureId, 'not granted because of missing actions', {
         //   spaceId,
         //   missingActions,

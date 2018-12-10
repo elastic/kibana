@@ -18,7 +18,7 @@ test('it renders without crashing', () => {
       run_as: [],
     },
     kibana: {
-      global: [],
+      global: { minimum: [], feature: {} },
       space: {},
     },
   };

@@ -6,11 +6,10 @@
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 
 interface Props {
-  basePrivilege: KibanaPrivilege;
+  basePrivilege: string;
   isReservedRole: boolean;
 }
 

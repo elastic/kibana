@@ -18,8 +18,14 @@ const reservedRole: Role = {
     run_as: [],
   },
   kibana: {
-    global: [],
-    space: {},
+    global: {
+      minimum: ['all'],
+      feature: {},
+    },
+    space: {
+      default: { minimum: ['foo'], feature: {} },
+      marketing: { minimum: ['read'], feature: {} },
+    },
   },
   metadata: {
     _reserved: true,
@@ -34,8 +40,14 @@ const unreservedRole = {
     run_as: [],
   },
   kibana: {
-    global: [],
-    space: {},
+    global: {
+      minimum: ['all'],
+      feature: {},
+    },
+    space: {
+      default: { minimum: ['foo'], feature: {} },
+      marketing: { minimum: ['read'], feature: {} },
+    },
   },
 };
 

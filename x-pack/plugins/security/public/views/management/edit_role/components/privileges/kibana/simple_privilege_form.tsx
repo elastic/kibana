@@ -17,14 +17,12 @@ import { EffectivePrivileges } from 'plugins/security/lib/get_effective_privileg
 import React, { Component, Fragment } from 'react';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
-import { KibanaPrivilege, PrivilegeMap } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import { copyRole } from '../../../lib/copy_role';
 import { FeatureTable } from './feature_table/feature_table';
 
 interface Props {
-  kibanaAppPrivileges: KibanaPrivilege[];
   role: Role;
   privilegeDefinition: PrivilegeDefinition;
   effectivePrivileges: EffectivePrivileges;
@@ -134,7 +132,7 @@ export class SimplePrivilegeForm extends Component<Props, {}> {
     );
   }
 
-  public onKibanaPrivilegeChange = (privilege: KibanaPrivilege) => {
+  public onKibanaPrivilegeChange = (privilege: string) => {
     const role = copyRole(this.props.role);
 
     // Remove base privilege value

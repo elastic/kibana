@@ -6,14 +6,13 @@
 
 import { EuiSelect } from '@elastic/eui';
 import React, { ChangeEvent, Component } from 'react';
-import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 
 interface Props {
   ['data-test-subj']: string;
-  availablePrivileges: KibanaPrivilege[];
-  onChange: (privilege: KibanaPrivilege) => void;
-  value: KibanaPrivilege | null;
+  availablePrivileges: string[];
+  onChange: (privilege: string) => void;
+  value: string | null;
   allowNone?: boolean;
   disabled?: boolean;
   compressed?: boolean;
@@ -52,6 +51,6 @@ export class PrivilegeSelector extends Component<Props, {}> {
   }
 
   public onChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    this.props.onChange(e.target.value as KibanaPrivilege);
+    this.props.onChange(e.target.value);
   };
 }

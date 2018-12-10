@@ -16,9 +16,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { ManageSpacesButton } from '../../../../../../../../spaces/public/components';
-import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
-import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface Props {
@@ -62,24 +60,24 @@ class ImpactedSpacesFlyoutUI extends Component<Props, State> {
     });
   };
 
-  public getHighestPrivilege(...privileges: KibanaPrivilege[]): KibanaPrivilege {
+  public getHighestPrivilege(...privileges: string[]): string {
     const { intl } = this.props;
     if (privileges.indexOf('all') >= 0) {
       return intl.formatMessage({
         id: 'xpack.security.management.editRoles.impactedSpacesFlyout.allLabel',
         defaultMessage: 'all',
-      }) as KibanaPrivilege;
+      });
     }
     if (privileges.indexOf('read') >= 0) {
       return intl.formatMessage({
         id: 'xpack.security.management.editRoles.impactedSpacesFlyout.readLabel',
         defaultMessage: 'read',
-      }) as KibanaPrivilege;
+      });
     }
     return intl.formatMessage({
       id: 'xpack.security.management.editRoles.impactedSpacesFlyout.noneLabel',
       defaultMessage: 'none',
-    }) as KibanaPrivilege;
+    });
   }
 
   public getFlyout = () => {
@@ -88,27 +86,6 @@ class ImpactedSpacesFlyoutUI extends Component<Props, State> {
     }
 
     const { role, spaces } = this.props;
-
-    const assignedPrivileges = role.kibana;
-    const basePrivilege = assignedPrivileges.global.length
-      ? assignedPrivileges.global[0]
-      : NO_PRIVILEGE_VALUE;
-
-    const allSpacePrivileges = spaces.reduce(
-      (acc, space) => {
-        const spacePrivilege = assignedPrivileges.space[space.id]
-          ? assignedPrivileges.space[space.id][0]
-          : basePrivilege;
-        const actualPrivilege = this.getHighestPrivilege(spacePrivilege, basePrivilege);
-
-        return {
-          ...acc,
-          // Use the privilege assigned to the space, if provided. Otherwise, the baes privilege is used.
-          [space.id]: [actualPrivilege],
-        };
-      },
-      { ...role.kibana.space }
-    );
 
     return (
       <EuiFlyout
@@ -127,12 +104,7 @@ class ImpactedSpacesFlyoutUI extends Component<Props, State> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <PrivilegeSpaceTable
-            readonly={true}
-            role={role}
-            spaces={spaces}
-            spacePrivileges={allSpacePrivileges}
-          />
+          <PrivilegeSpaceTable readonly={true} role={role} spaces={spaces} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter className="showImpactedSpaces--flyout--footer">
           {/* TODO: Hide footer if button is not available */}

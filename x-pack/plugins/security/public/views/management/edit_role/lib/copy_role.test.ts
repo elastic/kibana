@@ -17,9 +17,13 @@ describe('copyRole', () => {
         run_as: ['user'],
       },
       kibana: {
-        global: ['read'],
+        global: {
+          minimum: ['all'],
+          feature: {},
+        },
         space: {
-          marketing: ['all'],
+          default: { minimum: ['foo'], feature: {} },
+          marketing: { minimum: ['read'], feature: {} },
         },
       },
     };

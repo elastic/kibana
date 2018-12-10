@@ -225,13 +225,6 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
       selectedSpaceIds,
     });
   };
-
-  private getMinimumPrivilege(role: Role) {
-    if (this.props.spaceId) {
-      return role.kibana.space[this.props.spaceId].minimum;
-    }
-    return;
-  }
 }
 
 export const PrivilegeSpaceForm = injectI18n(PrivilegeSpaceFormUI);

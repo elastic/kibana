@@ -6,16 +6,13 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
+import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { RoleValidator } from '../../../lib/validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 
 const buildProps = (customProps = {}) => {
-  const availablePrivileges: KibanaPrivilege[] = ['all', 'read'];
-  const selectedPrivilege: KibanaPrivilege = 'none';
-
   return {
-    availableSpaces: [
+    spaces: [
       {
         id: 'default',
         name: 'Default Space',
@@ -30,9 +27,32 @@ const buildProps = (customProps = {}) => {
         disabledFeatures: [],
       },
     ],
-    selectedSpaceIds: [],
-    availablePrivileges,
-    selectedPrivilege,
+    spaceId: null,
+    privilegeDefinition: new PrivilegeDefinition({
+      features: {},
+      global: {},
+      space: {},
+    }),
+    effectivePrivileges: {
+      allows: { global: { feature: {} }, space: { minimum: [], feature: {} } },
+      grants: { global: { feature: {} }, space: { minimum: [], feature: {} } },
+    },
+    features: [],
+    role: {
+      name: 'test role',
+      elasticsearch: {
+        cluster: ['all'],
+        indices: [] as any[],
+        run_as: [] as string[],
+      },
+      kibana: {
+        global: {
+          minimum: [],
+          feature: {},
+        },
+        space: {},
+      },
+    },
     onChange: jest.fn(),
     onDelete: jest.fn(),
     validator: new RoleValidator(),

@@ -20,8 +20,16 @@ const buildProps = (customProps = {}) => {
         run_as: [],
       },
       kibana: {
-        global: [],
-        space: {},
+        global: {
+          minimum: [] as string[],
+          feature: {},
+        },
+        space: {
+          someSpace: {
+            minimum: [] as string[],
+            feature: {},
+          },
+        },
       },
     },
     spaces: [
@@ -35,14 +43,6 @@ const buildProps = (customProps = {}) => {
         id: 'marketing',
         name: 'Marketing',
         disabledFeatures: [],
-      },
-    ],
-    kibanaAppPrivileges: [
-      {
-        name: 'all',
-      },
-      {
-        name: 'read',
       },
     ],
     ...customProps,

@@ -21,7 +21,7 @@ test('it renders without crashing', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: { minimum: [], feature: {} },
         space: {},
       },
     },
@@ -50,7 +50,7 @@ test('it renders ClusterPrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: { minimum: [], feature: {} },
         space: {},
       },
     },
@@ -79,7 +79,7 @@ test('it renders IndexPrivileges', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: { minimum: [], feature: {} },
         space: {},
       },
     },

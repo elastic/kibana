@@ -5,7 +5,6 @@
  */
 
 import { IndexPrivilege } from './index_privilege';
-import { KibanaPrivilege } from './kibana_privilege';
 
 export interface Role {
   name: string;

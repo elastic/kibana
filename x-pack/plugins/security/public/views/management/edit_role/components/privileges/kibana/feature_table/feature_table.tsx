@@ -135,7 +135,6 @@ export class FeatureTable extends Component<Props, {}> {
         const allowsNone = effectiveFeaturePrivileges.length === 0;
 
         const privilegeOptions = featurePrivileges.map(privilege => {
-          const isEffectivePrivilege = effectiveFeaturePrivileges.includes(privilege);
           const isAllowedPrivilege = allowedFeaturePrivileges.includes(privilege);
           return {
             disabled: !isAllowedPrivilege,

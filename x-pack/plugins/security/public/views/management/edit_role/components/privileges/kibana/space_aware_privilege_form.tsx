@@ -32,7 +32,6 @@ import { UICapabilities } from 'ui/capabilities';
 import { PrivilegeDefinition } from 'x-pack/plugins/security/common/model/privileges/privilege_definition';
 import { Feature } from 'x-pack/plugins/xpack_main/types';
 import { Space } from '../../../../../../../../spaces/common/model/space';
-import { KibanaPrivilege, PrivilegeMap } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 import { isReservedRole } from '../../../../../../lib/role';
 import { NO_PRIVILEGE_VALUE } from '../../../lib/constants';
@@ -46,7 +45,6 @@ import { PrivilegeSpaceTable } from './privilege_space_table';
 
 interface Props {
   privilegeDefinition: PrivilegeDefinition;
-  kibanaAppPrivileges: KibanaPrivilege[];
   role: Role;
   effectivePrivileges: EffectivePrivileges;
   spaces: Space[];
@@ -60,7 +58,7 @@ interface Props {
 
 interface PrivilegeForm {
   spaces: string[];
-  privilege: KibanaPrivilege | null;
+  privilege: string | null;
 }
 
 interface SpacePrivileges {
@@ -104,7 +102,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
   }
 
   public render() {
-    const { kibanaAppPrivileges, role, uiCapabilities, intl } = this.props;
+    const { role, uiCapabilities, intl } = this.props;
 
     if (!uiCapabilities.spaces.manage) {
       return (
@@ -270,12 +268,12 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
           )}
         </EuiDescribedFormGroup>
 
-        {this.renderSpacePrivileges(basePrivilege, kibanaAppPrivileges)}
+        {this.renderSpacePrivileges(basePrivilege)}
       </Fragment>
     );
   }
 
-  private renderSpacePrivileges = (basePrivilege: string, availablePrivileges: string[]) => {
+  private renderSpacePrivileges = (basePrivilege: string) => {
     const { role, spaces } = this.props;
 
     const canAssignSpacePrivileges = basePrivilege !== 'all';
@@ -346,7 +344,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
 
             {hasAssignedSpacePrivileges && <EuiSpacer />}
 
-            {this.getSpaceForms(basePrivilege)}
+            {this.getSpaceForms()}
           </Fragment>
         )}
 
@@ -377,7 +375,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     );
   };
 
-  private getSpaceForms = (basePrivilege: KibanaPrivilege) => {
+  private getSpaceForms = () => {
     if (!this.props.editable || !this.state.showSpacePrivilegeEditor) {
       return null;
     }
@@ -399,7 +397,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
               validator={this.props.validator}
               role={this.props.role}
               features={this.props.features}
-              intl={this.props.intl}
               onChange={this.onPrivilegeSpaceFormChange}
               onDelete={() => null}
             />
@@ -471,25 +468,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     });
   };
 
-  private onPrivilegeSpacePermissionDelete = (index: number) => () => {
-    const updatedPrivileges = [...this.state.privilegeForms];
-    const removedPrivilege = updatedPrivileges.splice(index, 1)[0];
-
-    this.setState({
-      privilegeForms: updatedPrivileges,
-    });
-
-    const role = copyRole(this.props.role);
-
-    removedPrivilege.spaces.forEach(spaceId => {
-      delete role.kibana.space[spaceId];
-    });
-
-    this.props.validator.setInProgressSpacePrivileges(updatedPrivileges);
-    this.props.onChange(role);
-  };
-
-  private onKibanaBasePrivilegeChange = (privilege: KibanaPrivilege) => {
+  private onKibanaBasePrivilegeChange = (privilege: string) => {
     const role = copyRole(this.props.role);
 
     // Remove base privilege value

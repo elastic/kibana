@@ -12,7 +12,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { IndexPrivilege } from '../../../../../common/model/index_privilege';
-import { KibanaPrivilege } from '../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../common/model/role';
 
 /*
@@ -133,7 +132,7 @@ export class RoleValidator {
 
   public validateSelectedSpaces(
     spaceIds: string[],
-    privilege: KibanaPrivilege | null
+    privilege: string | null
   ): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
@@ -159,7 +158,7 @@ export class RoleValidator {
 
   public validateSelectedPrivilege(
     spaceIds: string[],
-    privilege: KibanaPrivilege | null
+    privilege: string | null
   ): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();

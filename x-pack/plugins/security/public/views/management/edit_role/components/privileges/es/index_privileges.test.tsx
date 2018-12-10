@@ -20,7 +20,7 @@ test('it renders without crashing', () => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: { minimum: [], feature: {} },
         space: {},
       },
     },
@@ -40,7 +40,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
     role: {
       name: '',
       kibana: {
-        global: [],
+        global: { minimum: [], feature: {} },
         space: {},
       },
       elasticsearch: {

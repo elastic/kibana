@@ -16,7 +16,6 @@ import React, { Component } from 'react';
 import { FeaturePrivilegeSet } from 'x-pack/plugins/security/common/model/privileges/feature_privileges';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { SpaceAvatar } from '../../../../../../../../spaces/public/components';
-import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
 import { Role } from '../../../../../../../common/model/role';
 
 interface Props {

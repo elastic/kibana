@@ -19,7 +19,7 @@ const buildProps = (customProps?: any) => {
         run_as: [],
       },
       kibana: {
-        global: [],
+        global: { minimum: [], feature: {} },
         space: {},
       },
     },
