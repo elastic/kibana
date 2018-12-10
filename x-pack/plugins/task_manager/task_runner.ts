@@ -221,7 +221,8 @@ export class TaskManagerRunner implements TaskRunner {
         runAt =
           result.runAt ||
           intervalFromNow(this.instance.interval) ||
-          minutesFromNow((this.instance.attempts + 1) * 5);
+          // when result.error is truthy, then we're retrying because it failed
+          minutesFromNow((this.instance.attempts + 1) * 5); // incrementally backs off an extra 5m per failure
       }
 
       await this.store.update({
