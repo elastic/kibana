@@ -100,7 +100,7 @@ export class TaskPool {
       this.running.delete(task);
       await task.cancel();
     } catch (error) {
-      this.logger.error(`Failed to cancel task ${task}: ${error.stack}`);
+      this.logger.error(`Failed to cancel task ${task}: ${error.stack || error.toString()}`);
     }
   }
 }

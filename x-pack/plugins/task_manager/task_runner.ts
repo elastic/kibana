@@ -88,9 +88,10 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * Gets how many workers are occupied by this task instance.
+   * Per Joi validation logic, this will return a number >= 1
    */
   public get numWorkers() {
-    return this.definition.numWorkers || 1;
+    return this.definition.numWorkers;
   }
 
   /**
