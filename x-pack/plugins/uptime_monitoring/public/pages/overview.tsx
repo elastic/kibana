@@ -29,7 +29,7 @@ export class OverviewPage extends React.Component<OverviewPageProps> {
         <EuiTitle>
           <h4>Overview</h4>
         </EuiTitle>
-        <Link to="/monitor">A monitor's ID</Link>
+        <Link to="/monitor">A monitor&#8217;s ID</Link>
         <p>This is where the Uptime app will live.</p>
       </div>
     );
