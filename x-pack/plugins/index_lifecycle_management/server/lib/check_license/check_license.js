@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { i18n }  from '@kbn/i18n';
 export function checkLicense(xpackLicenseInfo) {
   const pluginName = 'Index Management';
 
@@ -14,7 +14,10 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: `You cannot use ${pluginName} because license information is not available at this time.`
+      message: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader', {
+        defaultMessage: `You cannot use {pluginName} because license information is not available at this time.`,
+        values: { pluginName }
+      })
     };
   }
 
@@ -35,7 +38,10 @@ export function checkLicense(xpackLicenseInfo) {
     return {
       isAvailable: false,
       showLinks: false,
-      message: `Your ${licenseType} license does not support ${pluginName}. Please upgrade your license.`
+      message: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader', {
+        defaultMessage: `Your {licenseType} license does not support ${pluginName}. Please upgrade your license.`,
+        values: { licenseType }
+      })
     };
   }
 
@@ -45,7 +51,10 @@ export function checkLicense(xpackLicenseInfo) {
       isAvailable: false,
       showLinks: true,
       enableLinks: false,
-      message: `You cannot use ${pluginName} because your ${licenseType} license has expired.`
+      message: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader', {
+        defaultMessage: `You cannot use {pluginName} because your {licenseType} license has expired.`,
+        values: { pluginName, licenseType }
+      })
     };
   }
 

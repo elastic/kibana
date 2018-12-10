@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import { i18n }  from '@kbn/i18n';
 import { healthToColor } from '../../../../../services';
 import { getUrlService } from '../../../../../services/navigation';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,34 +21,36 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { getSummaryExtensions } from '../../../../../index_management_extensions';
-const HEADERS = {
-  health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
-    defaultMessage: 'Health',
-  }),
-  status: i18n.translate('xpack.idxMgmt.summary.headers.statusHeader', {
-    defaultMessage: 'Status',
-  }),
-  primary: i18n.translate('xpack.idxMgmt.summary.headers.primaryHeader', {
-    defaultMessage: 'Primaries',
-  }),
-  replica: i18n.translate('xpack.idxMgmt.summary.headers.replicaHeader', {
-    defaultMessage: 'Replicas',
-  }),
-  documents: i18n.translate('xpack.idxMgmt.summary.headers.documentsHeader', {
-    defaultMessage: 'Docs Count',
-  }),
-  documents_deleted: i18n.translate('xpack.idxMgmt.summary.headers.deletedDocumentsHeader', {
-    defaultMessage: 'Docs Deleted',
-  }),
-  size: i18n.translate('xpack.idxMgmt.summary.headers.storageSizeHeader', {
-    defaultMessage: 'Storage Size',
-  }),
-  primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
-    defaultMessage: 'Primary Storage Size',
-  }),
-  aliases: i18n.translate('xpack.idxMgmt.summary.headers.aliases', {
-    defaultMessage: 'Aliases'
-  })
+const getHeaders = () =>{
+  return {
+    health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
+      defaultMessage: 'Health',
+    }),
+    status: i18n.translate('xpack.idxMgmt.summary.headers.statusHeader', {
+      defaultMessage: 'Status',
+    }),
+    primary: i18n.translate('xpack.idxMgmt.summary.headers.primaryHeader', {
+      defaultMessage: 'Primaries',
+    }),
+    replica: i18n.translate('xpack.idxMgmt.summary.headers.replicaHeader', {
+      defaultMessage: 'Replicas',
+    }),
+    documents: i18n.translate('xpack.idxMgmt.summary.headers.documentsHeader', {
+      defaultMessage: 'Docs Count',
+    }),
+    documents_deleted: i18n.translate('xpack.idxMgmt.summary.headers.deletedDocumentsHeader', {
+      defaultMessage: 'Docs Deleted',
+    }),
+    size: i18n.translate('xpack.idxMgmt.summary.headers.storageSizeHeader', {
+      defaultMessage: 'Storage Size',
+    }),
+    primary_size: i18n.translate('xpack.idxMgmt.summary.headers.primaryStorageSizeHeader', {
+      defaultMessage: 'Primary Storage Size',
+    }),
+    aliases: i18n.translate('xpack.idxMgmt.summary.headers.aliases', {
+      defaultMessage: 'Aliases'
+    })
+  };
 };
 
 export class Summary extends React.PureComponent {
@@ -65,11 +68,12 @@ export class Summary extends React.PureComponent {
   }
   buildRows() {
     const { index } = this.props;
+    const headers = getHeaders();
     const rows = {
       left: [],
       right: []
     };
-    Object.keys(HEADERS).forEach((fieldName, arrayIndex) => {
+    Object.keys(headers).forEach((fieldName, arrayIndex) => {
       const value = index[fieldName];
       let content = value;
       if(fieldName === 'health') {
@@ -80,7 +84,7 @@ export class Summary extends React.PureComponent {
       }
       const cell = [
         <EuiDescriptionListTitle key={fieldName}>
-          <strong>{HEADERS[fieldName]}</strong>
+          <strong>{headers[fieldName]}</strong>
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key={fieldName + "_desc"}>
           {content}
@@ -100,7 +104,14 @@ export class Summary extends React.PureComponent {
     const additionalContent = this.getAdditionalContent();
     return (
       <Fragment>
-        <EuiTitle size="s"><h3>General</h3></EuiTitle>
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="i18n.translate('xpack.idxMgmt.summary.summaryTitle"
+              defaultMessage="General"
+            />
+          </h3>
+        </EuiTitle>
         <EuiSpacer size="s"/>
         <EuiFlexGroup>
           <EuiFlexItem>

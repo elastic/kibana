@@ -23,22 +23,24 @@ import {
 import { i18n }  from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getPolicyPath } from '../../services/navigation';
-const HEADERS = {
-  policy: i18n.translate('xpack.indexLifecycleMgmt.summary.headers.lifecyclePolicyHeader', {
-    defaultMessage: 'Lifecycle policy',
-  }),
-  phase: i18n.translate('xpack.indexLifecycleMgmt.summary.headers.currentPhaseHeader', {
-    defaultMessage: 'Current phase',
-  }),
-  action: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.nextActionHeader', {
-    defaultMessage: 'Next action',
-  }),
-  action_time_millis: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.nextActionTimeHeader', {
-    defaultMessage: 'Next action time',
-  }),
-  failed_step: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader', {
-    defaultMessage: 'Failed step',
-  }),
+const getHeaders = () => {
+  return {
+    policy: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader', {
+      defaultMessage: 'Lifecycle policy',
+    }),
+    phase: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.currentPhaseHeader', {
+      defaultMessage: 'Current phase',
+    }),
+    action: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.nextActionHeader', {
+      defaultMessage: 'Next action',
+    }),
+    action_time_millis: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.nextActionTimeHeader', {
+      defaultMessage: 'Next action time',
+    }),
+    failed_step: i18n.translate('xpack.idxMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader', {
+      defaultMessage: 'Failed step',
+    }),
+  };
 };
 export class IndexLifecycleSummary extends Component {
   constructor(props) {
@@ -65,7 +67,7 @@ export class IndexLifecycleSummary extends Component {
       <EuiButtonEmpty onClick={this.toggleStackPopover}>
         <FormattedMessage
           defaultMessage="Stack trace"
-          id="xpack.indexLifecycleMgmt.indexManagementTable.stackTraceButton"
+          id="xpack.idxMgmt.indexLifecycleMgmtSummary.stackTraceButton"
         />
       </EuiButtonEmpty>
     );
@@ -90,7 +92,7 @@ export class IndexLifecycleSummary extends Component {
       <EuiLink onClick={this.togglePhaseExecutionPopover}>
         <FormattedMessage
           defaultMessage="Show phase definition"
-          id="xpack.indexLifecycleMgmt.indexManagementTable.showPhaseDefinitionButton"
+          id="xpack.idxMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
         />
       </EuiLink>
     );
@@ -106,7 +108,7 @@ export class IndexLifecycleSummary extends Component {
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Phase definition"
-            id="xpack.indexLifecycleMgmt.indexManagementTable.phaseDefinitionTitle"
+            id="xpack.idxMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle"
           />
         </EuiPopoverTitle>
         <div style={{ maxHeight: '400px', width: '400px', overflowY: 'scroll' }}>
@@ -117,11 +119,12 @@ export class IndexLifecycleSummary extends Component {
   }
   buildRows() {
     const { index: { ilm = {} } } = this.props;
+    const headers = getHeaders();
     const rows = {
       left: [],
       right: []
     };
-    Object.keys(HEADERS).forEach((fieldName, arrayIndex) => {
+    Object.keys(headers).forEach((fieldName, arrayIndex) => {
       const value = ilm[fieldName];
       let content;
       if (fieldName === 'action_time') {
@@ -134,7 +137,7 @@ export class IndexLifecycleSummary extends Component {
       content = content || '-';
       const cell = [
         <EuiDescriptionListTitle key={fieldName}>
-          <strong>{HEADERS[fieldName]}</strong>
+          <strong>{headers[fieldName]}</strong>
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key={fieldName + "_desc"}>
           {content}
@@ -162,7 +165,7 @@ export class IndexLifecycleSummary extends Component {
           <h3>
             <FormattedMessage
               defaultMessage="Index lifecycle management"
-              id="xpack.indexLifecycleMgmt.indexManagementTable.summaryTitle"
+              id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryTitle"
             />
           </h3>
         </EuiTitle>
@@ -174,7 +177,7 @@ export class IndexLifecycleSummary extends Component {
               title={
                 <FormattedMessage
                   defaultMessage="Index lifecycle error"
-                  id="xpack.indexLifecycleMgmt.indexManagementTable.summaryErrorMessage"
+                  id="xpack.idxMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
                 />
               }
               iconType="cross"

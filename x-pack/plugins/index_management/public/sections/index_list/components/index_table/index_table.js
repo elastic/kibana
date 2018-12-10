@@ -109,6 +109,7 @@ export class IndexTableUi extends Component {
     sortChanged(column, newIsSortAscending);
   };
   renderFilterError() {
+    const { intl } = this.props;
     const { filterError } = this.state;
     if (!filterError) {
       return;
@@ -118,7 +119,12 @@ export class IndexTableUi extends Component {
         <EuiCallOut
           iconType="faceSad"
           color="danger"
-          title={`Invalid search: ${filterError.message}`}
+          title={intl.formatMessage({
+            id: 'xpack.idxMgmt.indexTable.invalidSearchErrorMessage',
+            defaultMessage: 'Invalid search: {errorMessage}',
+          }, {
+            errorMessage: filterError.message
+          })}
         />
         <EuiSpacer size="l"/>
       </Fragment>

@@ -47,7 +47,7 @@ export class RemoveLifecyclePolicyConfirmModal extends Component {
       closeModal();
       toastNotifications.addSuccess(
         i18n.translate(
-          'xxpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removePolicySuccess',
+          'xpack.indexLifecycleMgmt.indexManagementTable.removeLifecyclePolicyConfirmModal.removePolicySuccess',
           {
             defaultMessage: 'Removed lifecycle policy from {target}',
             values: {

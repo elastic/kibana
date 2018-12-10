@@ -45,8 +45,18 @@ export class ConfirmDeleteUi extends Component {
           title={title}
           onCancel={onCancel}
           onConfirm={this.deletePolicy}
-          cancelButtonText="Cancel"
-          confirmButtonText="Delete"
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.confirmDelete.cancelButton"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.confirmDelete.deleteButton"
+              defaultMessage="Delete"
+            />
+          }
           buttonColor="danger"
           onClose={onCancel}
         >
