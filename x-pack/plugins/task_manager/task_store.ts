@@ -89,7 +89,7 @@ export class TaskStore {
     if (!this.wasInitialized) {
       this.supportedTypes = this.supportedTypes.concat(types);
     } else {
-      throw Error('Cannot add task types after initializattion');
+      throw new Error('Cannot add task types after initialization');
     }
   }
 
