@@ -92,7 +92,7 @@ describe('policy table', () => {
       </Provider>
     );
     const rendered = mountWithIntl(component);
-    expect(rendered.exists('.euiLoadingSpinner'));
+    expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
 
   });
   test('should show empty state when there are not any policies', () => {
@@ -160,13 +160,13 @@ describe('policy table', () => {
     const deleteButton = rendered.find('button.euiContextMenuItem').at(1);
     deleteButton.simulate('click');
     rendered.update();
-    expect(rendered.exists('.euiModal--confirmation'));
+    expect(rendered.find('.euiModal--confirmation').exists()).toBeTruthy();
   });
   test('confirmation modal should show when add policy to index template button is pressed', () => {
     const rendered = openContextMenu(1);
     const deleteButton = rendered.find('button.euiContextMenuItem').at(0);
     deleteButton.simulate('click');
     rendered.update();
-    expect(rendered.exists('.euiModal--confirmation'));
+    expect(rendered.find('.euiModal--confirmation').exists()).toBeTruthy();
   });
 });
