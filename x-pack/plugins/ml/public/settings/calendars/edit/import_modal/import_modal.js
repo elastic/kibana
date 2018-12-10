@@ -87,9 +87,10 @@ export class ImportModal extends Component {
   };
 
   handleEventsAdd = () => {
-    const { selectedEvents } = this.state;
+    const { allImportedEvents, selectedEvents, includePastEvents } = this.state;
+    const eventsToImport = includePastEvents ? allImportedEvents : selectedEvents;
 
-    const events = selectedEvents.map((event) => ({
+    const events = eventsToImport.map((event) => ({
       description: event.description,
       start_time: event.start_time,
       end_time: event.end_time
