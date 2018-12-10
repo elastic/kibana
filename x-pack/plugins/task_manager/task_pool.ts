@@ -76,8 +76,8 @@ export class TaskPool {
         this.running.add(task);
         task
           .run()
-          .catch(error => {
-            this.logger.warning(`Task ${task} failed in attempt to run: ${error.stack}`);
+          .catch(err => {
+            this.logger.warning(`Task ${task} failed in attempt to run: ${err}`);
           })
           .then(() => this.running.delete(task));
       }
@@ -99,8 +99,8 @@ export class TaskPool {
       this.logger.debug(`Cancelling expired task ${task}.`);
       this.running.delete(task);
       await task.cancel();
-    } catch (error) {
-      this.logger.error(`Failed to cancel task ${task}: ${error.stack || error.toString()}`);
+    } catch (err) {
+      this.logger.error(`Failed to cancel task ${task}: ${err}`);
     }
   }
 }

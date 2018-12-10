@@ -86,9 +86,8 @@ export class TaskPoller {
 
     try {
       await this.work();
-    } catch (error) {
-      const message = error.stack || error.toString();
-      this.logger.error(`Failed to poll for work: ${message}`);
+    } catch (err) {
+      this.logger.error(`Failed to poll for work: ${err}`);
     } finally {
       this.isWorking = false;
     }

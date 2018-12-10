@@ -147,11 +147,13 @@ export class TaskManagerRunner implements TaskRunner {
       const task = this.definition.createTaskRunner(modifiedContext);
       this.task = task;
       return this.processResult(this.validateResult(await this.task.run()));
-    } catch (error) {
-      this.logger.warning(`Task ${this} failed ${error.stack}`);
-      this.logger.debug(`Task ${JSON.stringify(this.instance)} failed ${error.stack}`);
+    } catch (err) {
+      this.logger.warning(`Task ${this} failed: ${err}`);
+      if (err && err.stack) {
+        this.logger.debug(`Task ${JSON.stringify(this.instance)} failed: ${err}`);
+      }
 
-      return this.processResult({ error });
+      return this.processResult({ error: err });
     }
   }
 
