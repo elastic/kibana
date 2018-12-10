@@ -17,17 +17,8 @@
  * under the License.
  */
 
-import * as PropTypes from 'prop-types';
 import { Adapters } from 'ui/inspector';
 import { ContainerState } from './types';
-
-// TODO: we'll be able to get rid of this shape once all of dashboard is typescriptified too.
-export const embeddableShape = PropTypes.shape({
-  destroy: PropTypes.func.isRequired,
-  metadata: PropTypes.object.isRequired,
-  onContainerStateChanged: PropTypes.func.isRequired,
-  render: PropTypes.func.isRequired,
-});
 
 export interface EmbeddableMetadata {
   // TODO: change to an array, embeddables should be able to specify multiple index patterns they use. Also
@@ -53,39 +44,17 @@ export interface EmbeddableMetadata {
   editUrl?: string;
 }
 
-interface EmbeddableOptions {
-  metadata?: EmbeddableMetadata;
-  render?: (domNode: HTMLElement, containerState: ContainerState) => void;
-  destroy?: () => void;
-  onContainerStateChanged?: (containerState: ContainerState) => void;
-  reload?: () => void;
-}
-
 export abstract class Embeddable {
   public readonly metadata: EmbeddableMetadata = {};
 
   // TODO: Make title and editUrl required and move out of options parameter.
-  constructor(options: EmbeddableOptions = {}) {
-    this.metadata = options.metadata || {};
-
-    if (options.render) {
-      this.render = options.render;
-    }
-
-    if (options.destroy) {
-      this.destroy = options.destroy;
-    }
-
-    if (options.onContainerStateChanged) {
-      this.onContainerStateChanged = options.onContainerStateChanged;
-    }
-
-    if (options.reload) {
-      this.reload = options.reload;
-    }
+  constructor(metadata: EmbeddableMetadata = {}) {
+    this.metadata = metadata || {};
   }
 
-  public abstract onContainerStateChanged(containerState: ContainerState): void;
+  public onContainerStateChanged(containerState: ContainerState): void {
+    return;
+  }
 
   /**
    * Embeddable should render itself at the given domNode.

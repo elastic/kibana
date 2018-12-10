@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
+import { KibanaConfig, SavedVisualizations } from '../types';
+import { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
 
-export function visualizeEmbeddableFactoryProvider(Private) {
+export function visualizeEmbeddableFactoryProvider(Private: any) {
   const VisualizeEmbeddableFactoryProvider = (
-    savedVisualizations,
-    config) => {
+    savedVisualizations: SavedVisualizations,
+    config: KibanaConfig
+  ) => {
     return new VisualizeEmbeddableFactory(savedVisualizations, config);
   };
   return Private(VisualizeEmbeddableFactoryProvider);
