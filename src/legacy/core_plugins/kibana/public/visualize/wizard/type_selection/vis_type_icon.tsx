@@ -45,10 +45,9 @@ export const VisTypeIcon = ({ visType }: VisTypeIconProps) => {
         <img src={visType.image} aria-hidden="true" className="visNewVisDialog__typeImage" />
       )}
       {!visType.image && visType.legacyIcon && <span className={legacyIconClass} />}
-      {!visType.image &&
-        !visType.legacyIcon && (
-          <EuiIcon type={visType.icon || 'empty'} size="l" color="secondary" aria-hidden="true" />
-        )}
+      {!visType.image && !visType.legacyIcon && (
+        <EuiIcon type={visType.icon || 'empty'} size="l" color="secondary" aria-hidden="true" />
+      )}
     </React.Fragment>
   );
 };

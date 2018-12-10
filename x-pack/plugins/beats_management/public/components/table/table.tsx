@@ -102,15 +102,14 @@ export class Table extends React.Component<TableProps, TableState> {
 
     return (
       <TableContainer>
-        {!hideTableControls &&
-          assignmentOptions && (
-            <ControlBar
-              itemType={type.itemType}
-              assignmentOptions={assignmentOptions}
-              kueryBarProps={kueryBarProps}
-              selectionCount={this.state.selection.length}
-            />
-          )}
+        {!hideTableControls && assignmentOptions && (
+          <ControlBar
+            itemType={type.itemType}
+            assignmentOptions={assignmentOptions}
+            kueryBarProps={kueryBarProps}
+            selectionCount={this.state.selection.length}
+          />
+        )}
         <EuiSpacer size="m" />
         <EuiInMemoryTable
           columns={type.columnDefinitions}

@@ -181,7 +181,7 @@ export class BasicCredentials {
       throw new Error('Password should be a valid non-empty string.');
     }
 
-    const basicCredentials = new Buffer(`${username}:${password}`).toString('base64');
+    const basicCredentials = Buffer.from(`${username}:${password}`).toString('base64');
     request.headers.authorization = `Basic ${basicCredentials}`;
     return request;
   }

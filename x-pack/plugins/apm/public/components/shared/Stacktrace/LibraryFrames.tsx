@@ -44,18 +44,17 @@ export const LibraryFrames: React.SFC<Props> = ({
 
       <div>
         {visible &&
-          stackframes.map(
-            (stackframe, i) =>
-              hasSourceLines(stackframe) ? (
-                <CodePreview
-                  key={i}
-                  stackframe={stackframe}
-                  isLibraryFrame
-                  codeLanguage={codeLanguage}
-                />
-              ) : (
-                <FrameHeading key={i} stackframe={stackframe} isLibraryFrame />
-              )
+          stackframes.map((stackframe, i) =>
+            hasSourceLines(stackframe) ? (
+              <CodePreview
+                key={i}
+                stackframe={stackframe}
+                isLibraryFrame
+                codeLanguage={codeLanguage}
+              />
+            ) : (
+              <FrameHeading key={i} stackframe={stackframe} isLibraryFrame />
+            )
           )}
       </div>
     </div>

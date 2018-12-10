@@ -38,8 +38,8 @@ export type SubsetResolverWithFields<R, IncludedFields extends string> = R exten
       ArgsInArray
     >
   : R extends BasicResolver<infer Result, infer Args>
-    ? BasicResolver<Pick<Result, Extract<keyof Result, IncludedFields>>, Args>
-    : never;
+  ? BasicResolver<Pick<Result, Extract<keyof Result, IncludedFields>>, Args>
+  : never;
 
 export type SubsetResolverWithoutFields<R, ExcludedFields extends string> = R extends BasicResolver<
   Array<infer ResultInArray>,
@@ -50,8 +50,8 @@ export type SubsetResolverWithoutFields<R, ExcludedFields extends string> = R ex
       ArgsInArray
     >
   : R extends BasicResolver<infer Result, infer Args>
-    ? BasicResolver<Pick<Result, Exclude<keyof Result, ExcludedFields>>, Args>
-    : never;
+  ? BasicResolver<Pick<Result, Exclude<keyof Result, ExcludedFields>>, Args>
+  : never;
 
 export type InfraResolver<Result, Parent, Args, Context> = (
   parent: Parent,
