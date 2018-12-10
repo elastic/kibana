@@ -22,6 +22,7 @@
     "xpack.idxMgmt": "x-pack/plugins/index_management",
     "xpack.infra": "x-pack/plugins/infra",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
+    "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.monitoring": "x-pack/plugins/monitoring",
     "xpack.reporting": "x-pack/plugins/reporting",

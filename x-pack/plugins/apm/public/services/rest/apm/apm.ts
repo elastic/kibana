@@ -6,17 +6,14 @@
 
 import { Span } from 'x-pack/plugins/apm/typings/Span';
 import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-// @ts-ignore
-import { convertKueryToEsQuery } from '../../kuery';
-// @ts-ignore
-import { getAPMIndexPattern } from '../savedObjects';
+import { convertKueryToEsQuery, getAPMIndexPatternForKuery } from '../../kuery';
 
 export async function getEncodedEsQuery(kuery?: string) {
   if (!kuery) {
     return;
   }
 
-  const indexPattern = await getAPMIndexPattern();
+  const indexPattern = await getAPMIndexPatternForKuery();
   if (!indexPattern) {
     return;
   }

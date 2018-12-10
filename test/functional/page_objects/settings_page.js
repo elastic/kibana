@@ -601,7 +601,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getSavedObjectsInTable() {
       const table = await testSubjects.find('savedObjectsTable');
-      const cells = await table.findAll('css selector', 'td:nth-child(3)');
+      const cells = await table.findAllByCssSelector('td:nth-child(3)');
 
       const objects = [];
       for (const cell of cells) {

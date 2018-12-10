@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore not typed yet
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-// @ts-ignore
 import 'ui/autoload/all';
-// @ts-ignore: path dynamic for kibana
 import chrome from 'ui/chrome';
-// @ts-ignore: path dynamic for kibana
+// @ts-ignore not typed yet
 import { management } from 'ui/management';
-// @ts-ignore: path dynamic for kibana
-import { uiModules } from 'ui/modules';
-// @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
-
 import { INDEX_NAMES } from '../../../common/constants/index_names';
 import { getSupportedConfig } from '../../config_schemas_translations_map';
 import { RestBeatsAdapter } from '../adapters/beats/rest_beats_adapter';
@@ -27,8 +21,13 @@ import { RestTagsAdapter } from '../adapters/tags/rest_tags_adapter';
 import { RestTokensAdapter } from '../adapters/tokens/rest_tokens_adapter';
 import { BeatsLib } from '../beats';
 import { ElasticsearchLib } from '../elasticsearch';
-import { FrontendDomainLibs, FrontendLibs } from '../lib';
 import { TagsLib } from '../tags';
+import { FrontendLibs } from '../types';
+import { PLUGIN } from './../../../common/constants/plugin';
+import { FrameworkLib } from './../framework';
+
+// A super early spot in kibana loading that we can use to hook before most other things
+const onKibanaReady = chrome.dangerouslyGetActiveInjector;
 
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());
@@ -40,25 +39,24 @@ export function compose(): FrontendLibs {
     tags,
   });
 
-  const domainLibs: FrontendDomainLibs = {
-    tags,
-    tokens,
-    beats,
-  };
-  const pluginUIModule = uiModules.get('app/beats_management');
-
-  const framework = new KibanaFrameworkAdapter(
-    pluginUIModule,
-    management,
-    routes,
-    chrome,
-    XPackInfoProvider
+  const framework = new FrameworkLib(
+    new KibanaFrameworkAdapter(
+      PLUGIN.ID,
+      management,
+      routes,
+      chrome.getBasePath,
+      onKibanaReady,
+      XPackInfoProvider,
+      chrome.getUiSettingsClient()
+    )
   );
 
   const libs: FrontendLibs = {
     framework,
     elasticsearch: new ElasticsearchLib(esAdapter),
-    ...domainLibs,
+    tags,
+    tokens,
+    beats,
   };
   return libs;
 }
