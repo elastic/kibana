@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
 import './share_panel_content.less';
 
@@ -135,8 +134,8 @@ export class ShareContextMenu extends Component<Props> {
         items: menuItems
           // Sorts ascending on sort order first and then ascending on name
           .sort((a, b) => {
-            const aSortOrder = _.get(a, 'sortOrder', 0);
-            const bSortOrder = _.get(b, 'sortOrder', 0);
+            const aSortOrder = a.sortOrder || 0;
+            const bSortOrder = b.sortOrder || 0;
             if (aSortOrder > bSortOrder) {
               return 1;
             }
