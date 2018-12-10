@@ -24,6 +24,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
+import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
 
@@ -77,6 +78,10 @@ export default class BaseOptimizer {
     // for the base optimizer
     this.registerCompilerHooks();
 
+    // Run some pre loading in order to prevent
+    // high delay when booting thread loader workers
+    this.warmupThreadLoaderPool();
+
     return this;
   }
 
@@ -100,6 +105,28 @@ export default class BaseOptimizer {
         if (err) throw err;
       });
     });
+  }
+
+  warmupThreadLoaderPool() {
+    threadLoader.warmup(
+      // pool options, like passed to loader options
+      // must match loader options to boot the correct pool
+      this.getThreadLoaderConfig(),
+      [
+        // modules to load on the pool
+        'babel-loader',
+        BABEL_PRESET_PATH
+      ]
+    );
+  }
+
+  getThreadLoaderConfig() {
+    return {
+      name: 'optimizer-thread-loader-main-pool',
+      workerParallelJobs: 50,
+      poolParallelJobs: 50,
+      poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 2000
+    };
   }
 
   getConfig() {
@@ -275,7 +302,10 @@ export default class BaseOptimizer {
           {
             resource: createSourceFileResourceSelector(/\.js$/),
             use: maybeAddCacheLoader('babel', [
-              'thread-loader',
+              {
+                loader: 'thread-loader',
+                options: this.getThreadLoaderConfig()
+              },
               {
                 loader: 'babel-loader',
                 options: {

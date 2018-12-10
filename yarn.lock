@@ -2858,7 +2858,7 @@ async@^2.0.0, async@^2.1.4:
   dependencies:
     lodash "^4.14.0"
 
-async@^2.5.0, async@^2.6.0, async@^2.6.1:
+async@^2.3.0, async@^2.5.0, async@^2.6.0, async@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/async/-/async-2.6.1.tgz#b245a23ca71930044ec53fa46aa00a3e87c6a610"
   integrity sha512-fNEiL2+AZt6AlAw/29Cr0UDe4sRAHCpEHh54WMz+Bb7QfNcFw4h3loofyJpLeQs4Yx7yuqu/2dLgM5hKOs6HlQ==
@@ -19919,6 +19919,7 @@ textextensions@2:
 thread-loader@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/thread-loader/-/thread-loader-1.2.0.tgz#35dedb23cf294afbbce6c45c1339b950ed17e7a4"
+  integrity sha512-acJ0rvUk53+ly9cqYWNOpPqOgCkNpmHLPDGduNm4hDQWF7EDKEJXAopG9iEWsPPcml09wePkq3NF+ZUqnO6tbg==
   dependencies:
     async "^2.3.0"
     loader-runner "^2.3.0"

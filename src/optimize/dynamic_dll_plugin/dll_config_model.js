@@ -78,15 +78,31 @@ function generateDLL(config) {
               exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
             }
           ],
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: [
-                BABEL_PRESET_PATH,
-              ],
+          use: [
+            {
+              loader: 'cache-loader',
+              options: {
+                cacheDirectory: '/Users/tiagocosta/elastic/kibana/optimize/.cache/b5f3dae2ca73f163e95a62be1c99dafb5fd8c378'
+              }
             },
-          }
+            {
+              loader: 'thread-loader',
+              options: {
+                name: 'optimizer-thread-loader-main-pool',
+                workerParallelJobs: 50,
+                poolParallelJobs: 50,
+                poolTimeout: !IS_KIBANA_DISTRIBUTABLE ? Infinity : 2000
+              }
+            },
+            {
+              loader: 'babel-loader',
+              options: {
+                babelrc: false,
+                presets: [
+                  BABEL_PRESET_PATH,
+                ],
+              },
+            }]
         },
         {
           test: /\.(html|tmpl)$/,
