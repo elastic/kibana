@@ -6,6 +6,8 @@ experimental[This functionality is *experimental* and may be changed or removed 
 The update saved object API enables you to update the attributes for an
 existing Kibana saved object.
 
+Note: You cannot access this endpoint via the Console in Kibana.
+
 ==== Request
 
 `PUT /api/saved_objects/<type>/<id>`
