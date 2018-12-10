@@ -26,7 +26,9 @@ const mockSearchResults = [
   {
     took: 1,
     hits: {
-      total: 2,
+      total: {
+        value: 2,
+      },
       hits: [
         {
           _source: {
@@ -82,7 +84,9 @@ const mockSearchResults = [
   {
     took: 1,
     hits: {
-      total: 0,
+      total: {
+        value: 0,
+      },
       hits: [],
     },
   },
