@@ -35,9 +35,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
     if (isUsingK7Design) {
       this.setBreadcrumbs = updateBreadcrumbs;
-      this.state = {
-        breadcrumbs: kibanaBreadcrumbs,
-      };
+      this.state = { breadcrumbs: kibanaBreadcrumbs };
     } else {
       this.setBreadcrumbs = (breadcrumbs: Breadcrumb[]) => this.setState({ breadcrumbs });
       this.state = {
@@ -46,7 +44,12 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     }
   }
 
+  public componentWillMount() {
+    this.setBreadcrumbs([overviewBreadcrumb]);
+  }
+
   public render() {
+    const { isUsingK7Design } = this.props;
     return (
       <Router basename="/app/uptime_monitoring#/">
         <EuiPage className="app-wrapper-panel">
@@ -62,13 +65,15 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                   Uptime Monitoring
                 </EuiHeaderLogo>
               </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem>
-                <EuiHeaderBreadcrumbs
-                  breadcrumbs={this.state.breadcrumbs}
-                  // @ts-ignore TODO: handle style issues outside of code
-                  style={{ paddingTop: '20px', paddingRight: '8px' }}
-                />
-              </EuiHeaderSectionItem>
+              {!isUsingK7Design && (
+                <EuiHeaderSectionItem>
+                  <EuiHeaderBreadcrumbs
+                    breadcrumbs={this.state.breadcrumbs}
+                    // @ts-ignore TODO: handle style issues outside of code
+                    style={{ paddingTop: '20px', paddingRight: '8px' }}
+                  />
+                </EuiHeaderSectionItem>
+              )}
             </EuiHeaderSection>
           </EuiHeader>
           <EuiPageContent>
@@ -80,9 +85,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
               />
               <Route
                 path="/monitor"
-                render={props => (
-                  <MonitorPage {...props} updateBreadcrumbs={this.concatBreadcrumb} />
-                )}
+                render={props => <MonitorPage {...props} updateBreadcrumbs={this.setBreadcrumbs} />}
               />
             </Switch>
           </EuiPageContent>
@@ -90,10 +93,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       </Router>
     );
   }
-
-  private concatBreadcrumb = (nextBreadcrumb: Breadcrumb) => {
-    this.setBreadcrumbs(this.state.breadcrumbs.concat(nextBreadcrumb));
-  };
 }
 
 export const UptimeMonitoringApp = (props: UptimeAppProps) => <Application {...props} />;

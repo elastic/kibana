@@ -18,6 +18,7 @@ export const uptimeMonitoring = (kibana: any) =>
     uiExports: {
       app: {
         description: 'Monitor your endpoints',
+        euiIconType: 'heartbeatApp',
         icon: 'plugins/uptime_monitoring/icons/heartbeat_white.svg',
         title: 'Uptime Monitoring',
         main: 'plugins/uptime_monitoring/app',

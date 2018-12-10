@@ -23,5 +23,4 @@ export type BootstrapUptimeApp = (props: UptimeAppProps) => React.ReactElement<a
 
 export interface UMFrameworkAdapter {
   render(component: BootstrapUptimeApp): void;
-  setBreadcrumbs(breadcrumbs: any[]): void;
 }

@@ -20,10 +20,6 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     this.register(component);
   };
 
-  public setBreadcrumbs = (breadcrumbs: Breadcrumb[]) => {
-    chrome.breadcrumbs.set(breadcrumbs);
-  };
-
   private register = (renderRootComponent: BootstrapUptimeApp) => {
     const route = {
       controllerAs: 'uptime',
@@ -41,7 +37,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           ReactDOM.render(
             renderRootComponent({
               isUsingK7Design: $scope.k7design,
-              updateBreadcrumbs: this.setBreadcrumbs,
+              updateBreadcrumbs: chrome.breadcrumbs.set,
               kibanaBreadcrumbs,
             }),
             elem

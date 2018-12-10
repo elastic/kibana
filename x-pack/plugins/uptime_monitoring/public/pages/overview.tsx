@@ -7,11 +7,11 @@
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Breadcrumb } from 'ui/chrome';
 import { overviewBreadcrumb } from '../breadcrumbs';
+import { UMUpdateBreadcrumbs } from '../lib/lib';
 
 interface OverviewPageProps {
-  setBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
 export class OverviewPage extends React.Component<OverviewPageProps> {
