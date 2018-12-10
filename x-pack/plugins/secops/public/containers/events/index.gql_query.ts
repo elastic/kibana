@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 export const eventsQuery = gql`
   query GetEventsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {
     source(id: $sourceId) {
+      id
       getEvents(timerange: $timerange, filterQuery: $filterQuery) {
         events {
           _id

@@ -61,7 +61,7 @@ const req: FrameworkRequest = {
 const context = { req };
 
 describe('Test Source Resolvers', () => {
-  test('Make sure that getConfiguration have been called', async () => {
+  test('Make sure that getHosts have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
       null,
       { id: 'default' },
