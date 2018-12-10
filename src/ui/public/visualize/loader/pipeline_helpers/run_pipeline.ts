@@ -17,26 +17,13 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
-import { functions } from './functions';
+// @ts-ignore
+import { fromExpression } from '@kbn/interpreter/common';
+// @ts-ignore
+import { interpretAst } from '@kbn/interpreter/public';
 
-const basePath = chrome.getBasePath();
-
-const types = {
-  commonFunctions: functionsRegistry,
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
+export const runPipeline = async (expression: string, context: any, handlers: any) => {
+  const ast = fromExpression(expression);
+  const pipelineResponse = await interpretAst(ast, context, handlers);
+  return pipelineResponse;
 };
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-
-createSocket(basePath).then(async () => {
-  await populateBrowserRegistries(types, basePath);
-  await initializeInterpreter();
-});

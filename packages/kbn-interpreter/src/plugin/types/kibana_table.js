@@ -17,26 +17,25 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { populateBrowserRegistries, createSocket, initializeInterpreter } from '@kbn/interpreter/public';
-import { typesRegistry, functionsRegistry } from '@kbn/interpreter/common';
-import { functions } from './functions';
-
-const basePath = chrome.getBasePath();
-
-const types = {
-  commonFunctions: functionsRegistry,
-  browserFunctions: functionsRegistry,
-  types: typesRegistry
-};
-
-function addFunction(fnDef) {
-  functionsRegistry.register(fnDef);
-}
-
-functions.forEach(addFunction);
-
-createSocket(basePath).then(async () => {
-  await populateBrowserRegistries(types, basePath);
-  await initializeInterpreter();
+export const kibanaTable = () => ({
+  name: 'kibana_table',
+  serialize: context => {
+    context.columns.forEach(column => {
+      column.aggConfig = column.aggConfig.toJSON();
+    });
+    return context;
+  },
+  validate: tabify => {
+    if (!tabify.columns) {
+      throw new Error('tabify must have a columns array, even if it is empty');
+    }
+  },
+  from: {
+    null: () => {
+      return {
+        type: 'kibana_table',
+        columns: [],
+      };
+    },
+  },
 });
