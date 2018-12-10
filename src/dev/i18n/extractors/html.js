@@ -130,30 +130,30 @@ function trimOneTimeBindingOperator(string) {
   return string;
 }
 
+function* extractExpressions(htmlContent) {
+  const elements = cheerio
+    .load(htmlContent)('*')
+    .toArray();
+
+  for (const element of elements) {
+    for (const node of element.children) {
+      if (node.type === 'text') {
+        yield* (node.data.match(ANGULAR_EXPRESSION_REGEX) || [])
+          .filter(expression => expression.includes(I18N_FILTER_MARKER))
+          .map(trimCurlyBraces);
+      }
+    }
+
+    for (const attribute of Object.values(element.attribs)) {
+      if (attribute.includes(I18N_FILTER_MARKER)) {
+        yield trimCurlyBraces(attribute);
+      }
+    }
+  }
+}
+
 function* getFilterMessages(htmlContent) {
-  const allElements = cheerio.load(htmlContent)('*');
-
-  const textStrings = allElements
-    .map((idx, el) =>
-      el.children
-        .filter(node => node.type === 'text')
-        .map(node => node.data.trim())
-        .filter(text => text)
-    )
-    .get();
-
-  const interpolationExpressions = [].concat(
-    ...textStrings.map(a => a.match(ANGULAR_EXPRESSION_REGEX) || [])
-  );
-
-  const attributesValues = allElements.map((idx, el) => Object.values(el.attribs)).get();
-
-  const expressions = []
-    .concat(interpolationExpressions, attributesValues)
-    .filter(expression => expression.includes(I18N_FILTER_MARKER))
-    .map(trimCurlyBraces);
-
-  for (const expression of expressions) {
+  for (const expression of extractExpressions(htmlContent)) {
     const filterStart = expression.indexOf(I18N_FILTER_MARKER);
 
     const idExpression = trimOneTimeBindingOperator(expression.slice(0, filterStart).trim());

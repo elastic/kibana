@@ -38,6 +38,18 @@ Array [
 ]
 `;
 
+exports[`dev/i18n/extractors/html extracts message from i18n filter in interpolating directive 1`] = `
+Array [
+  Array [
+    "namespace.messageId",
+    Object {
+      "description": undefined,
+      "message": "Message",
+    },
+  ],
+]
+`;
+
 exports[`dev/i18n/extractors/html throws on empty i18n-id 1`] = `"Empty \\"i18n-id\\" value in angular directive is not allowed."`;
 
 exports[`dev/i18n/extractors/html throws on i18n filter usage in complex angular expression 1`] = `
