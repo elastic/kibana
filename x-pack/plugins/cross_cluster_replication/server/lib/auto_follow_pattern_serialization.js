@@ -5,7 +5,7 @@
  */
 
 export const deserializeAutoFollowPattern = (
-  { name, remote_cluster, leader_index_patterns, follow_index_pattern } = {} // eslint-disable-line camelcase
+  { name, pattern: { remote_cluster, leader_index_patterns, follow_index_pattern } } = { pattern: {} } // eslint-disable-line camelcase
 ) => ({
   name,
   remoteCluster: remote_cluster,
@@ -14,7 +14,7 @@ export const deserializeAutoFollowPattern = (
 });
 
 export const deserializeListAutoFollowPatterns = autofollowPatterns =>
-  autofollowPatterns.map(({ name, pattern }) => deserializeAutoFollowPattern({ name, ...pattern }));
+  autofollowPatterns.map(deserializeAutoFollowPattern);
 
 export const serializeAutoFollowPattern = ({
   remoteCluster,

@@ -8,21 +8,27 @@ const Chance = require('chance'); // eslint-disable-line import/no-extraneous-de
 const chance = new Chance();
 
 export const getAutoFollowPatternMock = (
+  name = chance.string(),
   remoteCluster = chance.string(),
   leaderIndexPatterns = [chance.string()],
   followIndexPattern = chance.string()
 ) => ({
-  remote_cluster: remoteCluster,
-  leader_index_patterns: leaderIndexPatterns,
-  follow_index_pattern: followIndexPattern
+  name,
+  pattern: {
+    remote_cluster: remoteCluster,
+    leader_index_patterns: leaderIndexPatterns,
+    follow_index_pattern: followIndexPattern
+  }
 });
 
 export const getAutoFollowPatternListMock = (total = 3) => {
-  const list = {};
+  const list = {
+    patterns: []
+  };
 
   let i = total;
   while(i--) {
-    list[chance.string()] = getAutoFollowPatternMock();
+    list.patterns.push(getAutoFollowPatternMock());
   }
 
   return list;

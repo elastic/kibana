@@ -50,7 +50,7 @@ export const registerAutoFollowPatternRoutes = (server) => {
   });
 
   /**
-   * Returns a list of all Auto follow patterns
+   * Save an auto follow patterns
    */
   server.route({
     path: `${API_BASE_PATH}/auto_follow_patterns/{id}`,
@@ -89,7 +89,16 @@ export const registerAutoFollowPatternRoutes = (server) => {
 
       try {
         const response = await callWithRequest('ccr.autoFollowPattern', { id });
-        return deserializeAutoFollowPattern(id, response[id]);
+
+        /**
+         * There is currently a bug in the ES API, instead of returning the auto-follow pattern, it returns
+         * an array with a single element. Until it is fixed, we take care of it here.
+         */
+        const autoFollowPattern = response.patterns === undefined
+          ? response
+          : response.patterns[0];
+
+        return deserializeAutoFollowPattern(autoFollowPattern);
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);
