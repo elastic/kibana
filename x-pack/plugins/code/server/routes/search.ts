@@ -19,11 +19,12 @@ export function repositorySearchRoute(
     method: 'GET',
     async handler(req) {
       let page = 1;
-      if (req.query.p) {
-        page = parseInt(req.query.p, 10);
+      const { p, q } = req.query as hapi.RequestQuery;
+      if (p) {
+        page = parseInt(p as string, 10);
       }
       const searchReq: RepositorySearchRequest = {
-        query: req.query.q,
+        query: q as string,
         page,
       };
       try {
@@ -40,11 +41,12 @@ export function repositorySearchRoute(
     method: 'GET',
     async handler(req) {
       let page = 1;
-      if (req.query.p) {
-        page = parseInt(req.query.p, 10);
+      const { p, q } = req.query as hapi.RequestQuery;
+      if (p) {
+        page = parseInt(p as string, 10);
       }
       const searchReq: RepositorySearchRequest = {
-        query: req.query.q,
+        query: q as string,
         page,
       };
       try {
@@ -63,14 +65,15 @@ export function documentSearchRoute(server: hapi.Server, docSearchClient: Docume
     method: 'GET',
     async handler(req) {
       let page = 1;
-      if (req.query.p) {
-        page = parseInt(req.query.p, 10);
+      const { p, q, langs, repos } = req.query as hapi.RequestQuery;
+      if (p) {
+        page = parseInt(p as string, 10);
       }
       const searchReq: DocumentSearchRequest = {
-        query: req.query.q,
+        query: q as string,
         page,
-        langFilters: req.query.langs ? req.query.langs.split(',') : [],
-        repoFileters: req.query.repos ? decodeURIComponent(req.query.repos).split(',') : [],
+        langFilters: langs ? (langs as string).split(',') : [],
+        repoFileters: repos ? decodeURIComponent(repos as string).split(',') : [],
       };
       try {
         const res = await docSearchClient.search(searchReq);
@@ -86,11 +89,12 @@ export function documentSearchRoute(server: hapi.Server, docSearchClient: Docume
     method: 'GET',
     async handler(req) {
       let page = 1;
-      if (req.query.p) {
-        page = parseInt(req.query.p, 10);
+      const { p, q } = req.query as hapi.RequestQuery;
+      if (p) {
+        page = parseInt(p as string, 10);
       }
       const searchReq: DocumentSearchRequest = {
-        query: req.query.q,
+        query: q as string,
         page,
       };
       try {
@@ -106,11 +110,12 @@ export function documentSearchRoute(server: hapi.Server, docSearchClient: Docume
 export function symbolSearchRoute(server: hapi.Server, symbolSearchClient: SymbolSearchClient) {
   const symbolSearchHandler = async (req: hapi.Request) => {
     let page = 1;
-    if (req.query.p) {
-      page = parseInt(req.query.p, 10);
+    const { p, q } = req.query as hapi.RequestQuery;
+    if (p) {
+      page = parseInt(p as string, 10);
     }
     const searchReq: SymbolSearchRequest = {
-      query: req.query.q,
+      query: q as string,
       page,
     };
     try {

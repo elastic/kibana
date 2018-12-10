@@ -74,7 +74,7 @@ export class RepositoryService {
                     handler(progress, cloneProgress);
                   }
                 },
-              },
+              } as any,
             },
           },
         });

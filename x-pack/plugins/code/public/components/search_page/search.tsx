@@ -182,7 +182,8 @@ class SearchPage extends React.PureComponent<Props, State> {
     );
     if (repositorySearch.scope === SearchScope.repository) {
       const { repositories: repos } = repositorySearch.repositories;
-      const resultComps = repos && repos.map(repo => <RepoItem key={repo.uri} uri={repo.uri} />);
+      const resultComps =
+        repos && repos.map((repo: any) => <RepoItem key={repo.uri} uri={repo.uri} />);
       const mainComp = (
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
@@ -227,9 +228,9 @@ class SearchPage extends React.PureComponent<Props, State> {
 
     if (searchResult) {
       const { stats, results } = searchResult!;
-      const { total, from, to, page, totalPage, repoStats, languageStats } = stats;
+      const { total, from, to, page, totalPage, repoStats, languageStats } = stats as any;
 
-      const repoStatsComp = repoStats.map((item, index) => {
+      const repoStatsComp = repoStats.map((item: any, index: number) => {
         if (!!repositories && repositories.has(item.name)) {
           return (
             <div key={`repostats${index}`}>
@@ -258,7 +259,7 @@ class SearchPage extends React.PureComponent<Props, State> {
         }
       });
 
-      const langStatsComp = languageStats.map((item, index) => {
+      const langStatsComp = languageStats.map((item: any, index: number) => {
         if (languages && languages.has(item.name)) {
           return (
             <div key={`langstats${index}`}>
@@ -416,4 +417,4 @@ const mapDispatchToProps = {
 export const Search = connect(
   mapStateToProps,
   mapDispatchToProps
-)(SearchPage);
+)(SearchPage as any);
