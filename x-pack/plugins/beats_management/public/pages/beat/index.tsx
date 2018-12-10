@@ -72,26 +72,25 @@ class BeatDetailsPageComponent extends React.PureComponent<PageProps, PageState>
             />
           </EuiText>
         </EuiFlexItem>
-        {beat.full_tags &&
-          beat.full_tags.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <FormattedMessage
-                  id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
-                  defaultMessage="Last Config Update: {lastUpdateTime}."
-                  values={{
-                    lastUpdateTime: (
-                      <strong>
-                        {moment(
-                          first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
-                        ).fromNow()}
-                      </strong>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          )}
+        {beat.full_tags && beat.full_tags.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.beatsManagement.beat.lastConfigUpdateMessage"
+                defaultMessage="Last Config Update: {lastUpdateTime}."
+                values={{
+                  lastUpdateTime: (
+                    <strong>
+                      {moment(
+                        first(sortByOrder(beat.full_tags, 'last_updated')).last_updated
+                      ).fromNow()}
+                    </strong>
+                  ),
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     ) : (
       <FormattedMessage
