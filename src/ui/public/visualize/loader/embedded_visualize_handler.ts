@@ -59,6 +59,7 @@ export class EmbeddedVisualizeHandler {
    * @ignore
    */
   public readonly data$: Rx.Observable<any>;
+  public readonly inspectorAdapters: Adapters = {};
   private vis: Vis;
   private loaded: boolean = false;
   private destroyed: boolean = false;
@@ -82,7 +83,6 @@ export class EmbeddedVisualizeHandler {
   private uiState: PersistedState;
   private dataLoader: PipelineDataLoader;
   private dataSubject: Rx.Subject<any>;
-  private readonly inspectorAdapters: Adapters = {};
   private actions: any = {};
   private events$: Rx.Observable<any>;
   private autoFetch: boolean;
