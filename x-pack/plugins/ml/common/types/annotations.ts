@@ -4,6 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// The Annotation interface is based on annotation documents stored in the
+// `.ml-annotations-6` index, accessed via the `.ml-annotations` alias.
+
+// Annotation document mapping:
+// PUT .ml-annotations-6
+// {
+//   "mappings": {
+//     "annotation": {
+//       "properties": {
+//         "annotation": {
+//           "type": "text"
+//         },
+//         "create_time": {
+//           "type": "date"
+//         },
+//         "create_username": {
+//           "type": "keyword"
+//         },
+//         "timestamp": {
+//           "type": "date"
+//         },
+//         "end_timestamp": {
+//           "type": "date"
+//         },
+//         "job_id": {
+//           "type": "keyword"
+//         },
+//         "modified_time": {
+//           "type": "date"
+//         },
+//         "modified_username": {
+//           "type": "keyword"
+//         },
+//         "result_type": {
+//           "type": "keyword"
+//         }
+//       }
+//     }
+//   }
+// }
+
+// Alias
+// POST /_aliases
+// {
+//     "actions" : [
+//         { "add" : { "index" : ".ml-annotations-6", "alias" : ".ml-annotations" } }
+//     ]
+// }
+
 export interface Annotation {
   _id?: string;
   create_time?: number;
