@@ -9,31 +9,34 @@ import React from 'react';
 // @ts-ignore
 import CustomPlot from 'x-pack/plugins/apm/public/components/shared/charts/CustomPlot';
 import { SyncChartGroup } from 'x-pack/plugins/apm/public/components/shared/charts/SyncChartGroup';
-import { asGB } from 'x-pack/plugins/apm/public/utils/formatters';
-import { MemoryChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_memory_chart_data/transformer';
+import { asPercent } from 'x-pack/plugins/apm/public/utils/formatters';
+import { CPUChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_cpu_chart_data/transformer';
 import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 
 interface Props {
-  data: MemoryChartAPIResponse;
+  data: CPUChartAPIResponse;
 }
 
-const MemoryUsageChart: React.SFC<Props> = ({ data }) => (
+const CPUUsageChart: React.SFC<Props> = ({ data }) => (
   <SyncChartGroup
     render={syncProps => (
       <React.Fragment>
         <EuiTitle size="s">
-          <span>Memory usage</span>
+          <span>CPU usage</span>
         </EuiTitle>
         <CustomPlot
           {...syncProps}
           noHits={data.totalHits === 0}
           series={data.series}
-          tickFormatY={asGB}
-          formatTooltipValue={(c: Coordinate) => asGB(c.y)}
+          tickFormatY={(y: number | null) => `${y}%`}
+          formatTooltipValue={(c: Coordinate) => {
+            return asPercent(c.y ? Number(c.y) / 100 : 0);
+          }}
+          yMax={100}
         />
       </React.Fragment>
     )}
   />
 );
 
-export { MemoryUsageChart };
+export { CPUUsageChart };

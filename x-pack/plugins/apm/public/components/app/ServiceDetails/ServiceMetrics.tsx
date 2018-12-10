@@ -18,8 +18,10 @@ import Distribution from 'x-pack/plugins/apm/public/components/app/ErrorGroupDet
 import { TransactionCharts } from 'x-pack/plugins/apm/public/components/shared/charts/TransactionCharts';
 // @ts-ignore
 import { ErrorDistributionRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/errorDistribution';
+import { MetricsChartDataRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceMetricsCharts';
 import { TransactionOverviewChartsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/transactionOverviewCharts';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { CPUUsageChart } from './CPUUsageChart';
 import { MemoryUsageChart } from './MemoryUsageChart';
 
 interface ServiceMetricsProps {
@@ -64,18 +66,27 @@ export const ServiceMetrics: React.SFC<ServiceMetricsProps> = props => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiFlexGrid columns={2}>
-        <EuiFlexItem>
-          <EuiPanel>
-            <MemoryUsageChart urlParams={params} />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel>
-            <MemoryUsageChart urlParams={params} />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGrid>
+      <MetricsChartDataRequest
+        urlParams={params}
+        render={({ data }) => {
+          // console.log('metrics request data??', data);
+          // return null;
+          return (
+            <EuiFlexGrid columns={2}>
+              <EuiFlexItem>
+                <EuiPanel>
+                  <CPUUsageChart data={data.cpu} />
+                </EuiPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiPanel>
+                  <MemoryUsageChart data={data.memory} />
+                </EuiPanel>
+              </EuiFlexItem>
+            </EuiFlexGrid>
+          );
+        }}
+      />
     </React.Fragment>
   );
 };

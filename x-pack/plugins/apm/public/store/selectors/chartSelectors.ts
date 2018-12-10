@@ -18,7 +18,13 @@ import {
   RectCoordinate
 } from 'x-pack/plugins/apm/typings/timeseries';
 import { colors } from '../../style/variables';
-import { asDecimal, asGB, asMillis, tpmUnit } from '../../utils/formatters';
+import {
+  asDecimal,
+  asGB,
+  asMillis,
+  asPercent,
+  tpmUnit
+} from '../../utils/formatters';
 import { IUrlParams } from '../urlParams';
 
 export const getEmptySerie = memoize(
@@ -92,7 +98,6 @@ export interface IMemoryChartData extends MetricsChartAPIResponse {
 export function getMemorySeries(
   memoryChartResponse: MetricsChartAPIResponse['memory']
 ) {
-  // TODO are all of these values already in GB? I don't think so ....
   const { series, overallValues } = memoryChartResponse;
   const seriesList: IMemoryChartData['series'] = [
     {
@@ -129,6 +134,47 @@ export function getMemorySeries(
     ...memoryChartResponse,
     series: seriesList
   };
+}
+
+export interface ICPUChartData extends MetricsChartAPIResponse {
+  series: TimeSerie[];
+}
+
+export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
+  const { series, overallValues } = CPUChartResponse;
+
+  const seriesList: TimeSerie[] = [
+    {
+      title: 'Process average',
+      data: series.processCPUAverage,
+      type: 'line',
+      color: colors.apmPink,
+      legendValue: (overallValues.processCPUAverage || 0).toFixed(2) + '%'
+    },
+    {
+      title: 'Process max',
+      data: series.processCPUMax,
+      type: 'line',
+      color: colors.apmPurple,
+      legendValue: (overallValues.processCPUMax || 0).toFixed(2) + '%'
+    },
+    {
+      title: 'System average',
+      data: series.systemCPUAverage,
+      type: 'line',
+      color: colors.apmGreen,
+      legendValue: (overallValues.systemCPUAverage || 0).toFixed(2) + '%'
+    },
+    {
+      title: 'System max',
+      data: series.systemCPUMax,
+      type: 'line',
+      color: colors.apmBlue,
+      legendValue: (overallValues.systemCPUMax || 0).toFixed(2) + '%'
+    }
+  ];
+
+  return { ...CPUChartResponse, series: seriesList };
 }
 
 interface TimeSerie {
