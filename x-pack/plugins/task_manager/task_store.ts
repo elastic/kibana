@@ -317,7 +317,7 @@ function paginatableSort(sort: any[] = []) {
   return [...sort, sortById];
 }
 
-function rawSource(doc: ConcreteTaskInstance | TaskInstance) {
+function rawSource(doc: TaskInstance) {
   const { id, ...taskFields } = doc;
   const source = {
     ...taskFields,
