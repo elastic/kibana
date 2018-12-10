@@ -24,7 +24,7 @@ export async function fillPool<TRecord, TRunner>(
   run: BatchRun<TRunner>,
   fetchAvailableTasks: Fetcher<TRecord>,
   converter: Converter<TRecord, TRunner>
-) {
+): Promise<void> {
   while (true) {
     const instances = await fetchAvailableTasks();
 

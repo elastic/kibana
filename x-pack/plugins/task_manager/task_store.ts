@@ -205,7 +205,7 @@ export class TaskStore {
    * @prop {number} size - The number of task instances to retrieve
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
-  public fetchAvailableTasks = async () => {
+  public async fetchAvailableTasks(): Promise<ConcreteTaskInstance[]> {
     const { docs } = await this.search({
       query: {
         bool: {
@@ -222,7 +222,7 @@ export class TaskStore {
     });
 
     return docs;
-  };
+  }
 
   /**
    * Updates the specified doc in the index, returning the doc
