@@ -152,7 +152,7 @@ when migrating your application from one version of Kibana to another.
 === Enhancements
 
 Canvas::
-* Adds support url params {pull}25828[#25828]
+* Adds support for url params {pull}25828[#25828]
 
 Operations::
 * Bumps node to 8.14.0 {pull}26313[#26313]
@@ -201,7 +201,7 @@ Operations::
 
 Platform::
 * Handles deprecated SSL config settings {pull}26196[#26196]
-* Allow packages to define extra paths to kbn clean {pull}26132[#26132]
+* Allows packages to define extra paths to kbn clean {pull}26132[#26132]
 * Wraps remote in `browser` service {pull}26394[#26394]
 
 Querying &amp; Filtering::
