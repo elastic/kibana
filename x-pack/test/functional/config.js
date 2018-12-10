@@ -22,6 +22,7 @@ import {
   GisPageProvider,
   StatusPagePageProvider,
   UpgradeAssistantProvider,
+  RollUpPageProvider
 } from './page_objects';
 
 import {
@@ -51,6 +52,9 @@ import {
   RandomProvider,
   AceEditorProvider,
   GrokDebuggerProvider,
+  //RollUpPageProvider
+
+
 } from './services';
 
 // the default export of config files must be a config provider
@@ -80,6 +84,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
       resolve(__dirname, './apps/gis'),
+      resolve(__dirname, './apps/rollupjob'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
     ],
@@ -116,6 +121,7 @@ export default async function ({ readConfigFile }) {
       random: RandomProvider,
       aceEditor: AceEditorProvider,
       grokDebugger: GrokDebuggerProvider,
+      //rollupPage: RollUpPageProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -135,6 +141,8 @@ export default async function ({ readConfigFile }) {
       gis: GisPageProvider,
       statusPage: StatusPagePageProvider,
       upgradeAssistant: UpgradeAssistantProvider,
+      rollup: RollUpPageProvider,
+
     },
 
     servers: kibanaFunctionalConfig.get('servers'),
@@ -196,6 +204,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/canvas',
         hash: '/',
       },
+      rollup_jobs: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/rollup_jobs/',
+      }
     },
 
     // choose where esArchiver should load archives from
@@ -213,4 +225,5 @@ export default async function ({ readConfigFile }) {
       rootDirectory: resolve(__dirname, '../../'),
     },
   };
+
 }
