@@ -775,7 +775,7 @@ function discoverController(
         Promise
           .resolve(responseHandler(tabifiedData))
           .then(resp => {
-            visualizeHandler.render(resp);
+            visualizeHandler.render({ value: resp });
           });
       }
 
