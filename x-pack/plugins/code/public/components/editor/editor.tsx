@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { Hover, Position, TextDocumentPositionParams } from 'vscode-languageserver-protocol';
-import { closeReferences, CodeAndLocation, findReferences, hoverResult } from '../../actions';
+import { closeReferences, findReferences, hoverResult } from '../../actions';
 import { MonacoHelper } from '../../monaco/monaco_helper';
 import { RootState } from '../../reducers';
 import { refUrlSelector } from '../../selectors';
@@ -28,7 +28,7 @@ interface Props extends EditorActions {
   revealPosition?: Position;
   isReferencesOpen: boolean;
   isReferencesLoading: boolean;
-  references: CodeAndLocation[];
+  references: any[];
   fileContent?: string;
   fileLanguage?: string;
   hover?: Hover;

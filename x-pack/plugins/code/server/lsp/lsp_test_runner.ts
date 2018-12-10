@@ -6,6 +6,7 @@
 /* tslint:disable */
 
 import fs from 'fs';
+// @ts-ignore
 import * as sl from 'stats-lite';
 import _ from 'lodash';
 import papa from 'papaparse';
@@ -19,6 +20,8 @@ import { GitOperations } from '../git_operations';
 import { ServerOptions } from "../server_options";
 import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
 import { RepositoryUtils } from '../../common/repository_utils';
+import {JAVA, TYPESCRIPT} from "./language_servers";
+import {InstallManager} from "./install_manager";
 
 const options = {
   enabled: true,
@@ -248,11 +251,12 @@ export class LspTestRunner {
 
   private async launchTypescriptLanguageServer() {
     const launcher = new TypescriptServerLauncher('127.0.0.1', false, serverOptions, new ConsoleLoggerFactory());
-    return launcher.launch(false, 1);
+    return await launcher.launch(false, 1, TYPESCRIPT.embedPath!);
   }
 
   private async launchJavaLanguageServer() {
     const launcher = new JavaLauncher('127.0.0.1', false, serverOptions, new ConsoleLoggerFactory());
-    return launcher.launch(false, 1);
+    const installManager = new InstallManager(serverOptions);
+    return await launcher.launch(false, 1, installManager.installationPath(JAVA));
   }
 }

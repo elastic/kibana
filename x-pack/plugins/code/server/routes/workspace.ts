@@ -6,7 +6,7 @@
 
 import { EsClient } from '@code/esqueue';
 import Boom from 'boom';
-import hapi from 'hapi';
+import hapi, { RequestQuery } from 'hapi';
 
 import { Log } from '../log';
 import { WorkspaceCommand } from '../lsp/workspace_command';
@@ -34,7 +34,7 @@ export function workspaceRoute(
       const repoUri = req.params.uri as string;
       const revision = req.params.revision as string;
       const repoConfig = serverOptions.repoConfigs[repoUri];
-      const force = !!req.query.force;
+      const force = !!(req.query as RequestQuery).force;
       if (repoConfig) {
         const log = new Log(server, ['workspace', repoUri]);
         const workspaceHandler = new WorkspaceHandler(
