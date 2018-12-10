@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { ServiceMetadata } from 'x-pack/plugins/infra/common/graphql/types';
 import { JsonObject } from '../../../../common/typed_json';
 import {
   InfraFrameworkRequest,
@@ -104,7 +105,7 @@ const pickMetadata = (buckets: InfraMetadataAggregationBucket[]): string[] => {
 const collectServiceMetadata = (
   metrics: InfraServiceMetadataMetricsBucket[],
   logs: InfraServiceMetadataLogsBucket[]
-): object[] => {
+): ServiceMetadata[] => {
   const metricsMetaData: MetricsMetaData = metrics.reduce((data: MetricsMetaData, m) => {
     const metaData = {
       hosts: m.nodes.buckets.hosts.doc_count > 0 ? true : false,
