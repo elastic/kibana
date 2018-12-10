@@ -172,11 +172,13 @@ export const validateLifecycle = state => {
 
   if (getSaveAsNewPolicy(state) && getSelectedOriginalPolicyName(state) === getSelectedPolicyName(state)) {
     errors[STRUCTURE_POLICY_NAME].push(policyNameMustBeDifferentErrorMessage);
+  } else {
+    const policyNames = getPolicies(state).map(policy => policy.name);
+    if (policyNames.includes(getSelectedPolicyName(state))) {
+      errors[STRUCTURE_POLICY_NAME].push(policyNameAlreadyUsedErrorMessage);
+    }
   }
-  const policyNames = getPolicies(state).map(policy => policy.name);
-  if (policyNames.includes(getSelectedPolicyName(state))) {
-    errors[STRUCTURE_POLICY_NAME].push(policyNameAlreadyUsedErrorMessage);
-  }
+
 
   const hotPhase = getPhase(state, PHASE_HOT);
   const warmPhase = getPhase(state, PHASE_WARM);

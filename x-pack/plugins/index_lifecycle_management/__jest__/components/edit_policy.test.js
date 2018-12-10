@@ -70,6 +70,7 @@ const activatePhase = (rendered, phase) => {
 const expectedErrorMessages = (rendered, expectedErrorMessages) => {
   expect(rendered.exists('.euiToast'));
   const errorMessages = rendered.find('.euiFormErrorText');
+  expect(errorMessages.length).toBe(expectedErrorMessages.length);
   expectedErrorMessages.forEach(expectedErrorMessage => {
     let foundErrorMessage;
     for (let i = 0; i < errorMessages.length; i++) {
@@ -79,6 +80,20 @@ const expectedErrorMessages = (rendered, expectedErrorMessages) => {
     }
     expect(foundErrorMessage).toBe(true);
   });
+};
+const noRollover = (rendered) => {
+  findTestSubject(rendered, 'rolloverSwitch').simulate('change', { target: { checked: false } });
+  rendered.update();
+};
+const setPolicyName = (rendered, policyName) => {
+  const policyNameField = findTestSubject(rendered, 'policyNameField');
+  policyNameField.simulate('change', { target: { value: policyName } });
+  rendered.update();
+};
+const setPhaseAfter = (rendered, phase, after) => {
+  const afterInput = rendered.find(`input#${phase}-selectedMinimumAge`);
+  afterInput.simulate('change', { target: { value: after } });
+  rendered.update();
 };
 const save = rendered => {
   const saveButton = findTestSubject(rendered, 'savePolicyButton');
@@ -112,16 +127,15 @@ describe('edit policy', () => {
   });
   test('should show error when trying to save policy name with space', () => {
     const rendered = mountWithIntl(component);
-    const policyNameField = findTestSubject(rendered, 'policyNameField');
-    policyNameField.simulate('change', { target: { value: 'my policy' } });
-    rendered.update();
+    noRollover(rendered);
+    setPolicyName(rendered, 'my policy');
     save(rendered);
     expectedErrorMessages(rendered, [policyNameContainsSpaceErrorMessage]);
   });
   test('should show error when trying to save policy name that is already used', () => {
     const rendered = mountWithIntl(component);
-    const policyNameField = findTestSubject(rendered, 'policyNameField');
-    policyNameField.simulate('change', { target: { value: 'testy0' } });
+    noRollover(rendered);
+    setPolicyName(rendered, 'testy0');
     rendered.update();
     save(rendered);
     expectedErrorMessages(rendered, [policyNameAlreadyUsedErrorMessage]);
@@ -135,57 +149,58 @@ describe('edit policy', () => {
     const rendered = mountWithIntl(component);
     findTestSubject(rendered, 'saveAsNewSwitch').simulate('change', { target: { checked: true } });
     rendered.update();
-    const policyNameField = findTestSubject(rendered, 'policyNameField');
-    policyNameField.simulate('change', { target: { value: 'testy0' } });
-    rendered.update();
+    setPolicyName(rendered, 'testy0');
     save(rendered);
     expectedErrorMessages(rendered, [policyNameMustBeDifferentErrorMessage]);
   });
   test('should show error when trying to save policy name with comma', () => {
     const rendered = mountWithIntl(component);
-    const policyNameField = findTestSubject(rendered, 'policyNameField');
-    policyNameField.simulate('change', { target: { value: 'my,policy' } });
-    rendered.update();
+    noRollover(rendered);
+    setPolicyName(rendered, 'my,policy');
     save(rendered);
     expectedErrorMessages(rendered, [policyNameContainsCommaErrorMessage]);
   });
   test('should show error when trying to save policy name starting with underscore', () => {
     const rendered = mountWithIntl(component);
-    const policyNameField = findTestSubject(rendered, 'policyNameField');
-    policyNameField.simulate('change', { target: { value: '_mypolicy' } });
-    rendered.update();
+    noRollover(rendered);
+    setPolicyName(rendered, '_mypolicy');
     save(rendered);
     expectedErrorMessages(rendered, [policyNameStartsWithUnderscoreErrorMessage]);
   });
   test('should show number required error when trying to save empty warm phase', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'warm');
     save(rendered);
     expectedErrorMessages(rendered, [numberRequiredMessage]);
   });
   test('should show positive number required above zero error when trying to save warm phase with 0 for after', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'warm');
-    const afterInput = rendered.find('input#warm-selectedMinimumAge');
-    afterInput.simulate('change', { target: { value: '0' } });
-    rendered.update();
+    setPhaseAfter(rendered, 'warm', 0);
     save(rendered);
     expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
   });
   test('should show positive number required error when trying to save warm phase with -1 for after', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'warm');
-    const afterInput = rendered.find('input#warm-selectedMinimumAge');
-    afterInput.simulate('change', { target: { value: '-1' } });
-    rendered.update();
+    setPhaseAfter(rendered, 'warm', -1);
     save(rendered);
     expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
   });
   test('should show positive number required above zero error when trying to save warm phase with 0 for shrink', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'warm');
     findTestSubject(rendered, 'shrinkSwitch').simulate('change', { target: { checked: true } });
     rendered.update();
+    setPhaseAfter(rendered, 'warm', 1);
     const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
     shrinkInput.simulate('change', { target: { value: '0' } });
     rendered.update();
@@ -194,7 +209,10 @@ describe('edit policy', () => {
   });
   test('should show positive number above 0 required error when trying to save warm phase with -1 for shrink', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'warm');
+    setPhaseAfter(rendered, 'warm', 1);
     findTestSubject(rendered, 'shrinkSwitch').simulate('change', { target: { checked: true } });
     rendered.update();
     const shrinkInput = rendered.find('input#warm-selectedPrimaryShardCount');
@@ -205,7 +223,10 @@ describe('edit policy', () => {
   });
   test('should show positive number required above zero error when trying to save warm phase with 0 for force merge', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'warm');
+    setPhaseAfter(rendered, 'warm', 1);
     findTestSubject(rendered, 'forceMergeSwitch').simulate('change', { target: { checked: true } });
     rendered.update();
     const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
@@ -216,7 +237,10 @@ describe('edit policy', () => {
   });
   test('should show positive number above 0 required error when trying to save warm phase with -1 for force merge', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'warm');
+    setPhaseAfter(rendered, 'warm', 1);
     findTestSubject(rendered, 'forceMergeSwitch').simulate('change', { target: { checked: true } });
     rendered.update();
     const shrinkInput = rendered.find('input#warm-selectedForceMergeSegments');
@@ -225,21 +249,39 @@ describe('edit policy', () => {
     save(rendered);
     expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
   });
+  test('should show positive number required error when trying to save cold phase with 0 for after', () => {
+    const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
+    activatePhase(rendered, 'cold');
+    setPhaseAfter(rendered, 'cold', 0);
+    save(rendered);
+    expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+  });
   test('should show positive number required error when trying to save cold phase with -1 for after', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'cold');
-    const afterInput = rendered.find('input#cold-selectedMinimumAge');
-    afterInput.simulate('change', { target: { value: '-1' } });
-    rendered.update();
+    setPhaseAfter(rendered, 'cold', -1);
     save(rendered);
     expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
   });
+  test('should show positive number required error when trying to save delete phase with 0 for after', () => {
+    const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
+    activatePhase(rendered, 'delete');
+    setPhaseAfter(rendered, 'delete', 0);
+    save(rendered);
+    expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
+  });
   test('should show positive number required error when trying to save delete phase with -1 for after', () => {
     const rendered = mountWithIntl(component);
+    noRollover(rendered);
+    setPolicyName(rendered, 'mypolicy');
     activatePhase(rendered, 'delete');
-    const afterInput = rendered.find('input#delete-selectedMinimumAge');
-    afterInput.simulate('change', { target: { value: '-1' } });
-    rendered.update();
+    setPhaseAfter(rendered, 'delete', -1);
     save(rendered);
     expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
   });

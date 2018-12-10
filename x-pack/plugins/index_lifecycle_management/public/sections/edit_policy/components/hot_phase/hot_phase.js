@@ -116,6 +116,7 @@ class HotPhaseUi extends PureComponent {
           }
         >
           <EuiSwitch
+            data-test-subj="rolloverSwitch"
             checked={phaseData[PHASE_ROLLOVER_ENABLED]}
             onChange={async e => {
               await setPhaseData(PHASE_ROLLOVER_ENABLED, e.target.checked);
