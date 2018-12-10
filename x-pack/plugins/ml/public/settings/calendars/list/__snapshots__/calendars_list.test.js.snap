@@ -2,11 +2,11 @@
 
 exports[`CalendarsList Renders calendar list with calendars 1`] = `
 <EuiPage
-  className="ml-list-calendar"
+  className="mlCalendar_list"
   restrictWidth={false}
 >
   <EuiPageContent
-    className="ml-list-calendar-content"
+    className="mlCalendar_listContent"
     horizontalPosition="center"
     panelPaddingSize="l"
     verticalPosition="center"

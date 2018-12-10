@@ -19,10 +19,10 @@ import {
 
 import chrome from 'ui/chrome';
 import { getCalendarSettingsData, validateCalendarId } from './utils';
-import { CalendarForm } from './calendar_form';
-import { NewEventModal } from './new_event_modal';
+import { CalendarForm } from './calendar_form/';
+import { NewEventModal } from './new_event_modal/';
 import { ImportModal } from './import_modal';
-import { ml } from 'plugins/ml/services/ml_api_service';
+import { ml } from '../../../services/ml_api_service';
 import { toastNotifications } from 'ui/notify';
 
 export class NewCalendar extends Component {

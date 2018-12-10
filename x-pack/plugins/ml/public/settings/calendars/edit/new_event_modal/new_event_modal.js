@@ -28,7 +28,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import moment from 'moment';
-import { TIME_FORMAT } from './events_table';
+import { TIME_FORMAT } from '../events_table/';
 
 const VALID_DATE_STRING_LENGTH = 19;
 
@@ -63,18 +63,6 @@ export class NewEventModal extends Component {
     };
 
     this.props.addEvent(event);
-  }
-
-  handleSingleDayDateChange = (date) => {
-    let start = null;
-    let end = null;
-
-    const startMoment = moment(date);
-    const endMoment = moment(date);
-
-    start = startMoment.startOf('day');
-    end = endMoment.startOf('day').add(1, 'days');
-    this.setState({ startDate: start, endDate: end });
   }
 
   handleChangeStart = (date) => {

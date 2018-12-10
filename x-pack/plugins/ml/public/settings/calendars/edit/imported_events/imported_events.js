@@ -12,7 +12,7 @@ import {
   EuiText,
   EuiSpacer
 } from '@elastic/eui';
-import { EventsTable } from '../events_table';
+import { EventsTable } from '../events_table/';
 
 
 export function ImportedEvents({

@@ -92,6 +92,7 @@ export function EventsTable({
     toolsRight: [(
       <EuiButton
         key="ml_new_event"
+        data-testid="ml_new_event"
         size="s"
         iconType="plusInCircle"
         onClick={showNewEventModal}
@@ -101,6 +102,7 @@ export function EventsTable({
     (
       <EuiButton
         key="ml_import_event"
+        data-testid="ml_import_events"
         size="s"
         iconType="importAction"
         onClick={showImportModal}

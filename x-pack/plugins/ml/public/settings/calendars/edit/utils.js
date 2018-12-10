@@ -6,8 +6,8 @@
 
 
 
-import { ml } from 'plugins/ml/services/ml_api_service';
-import { isJobIdValid } from 'plugins/ml/../common/util/job_utils';
+import { ml } from '../../../services/ml_api_service';
+import { isJobIdValid } from '../../../../common/util/job_utils';
 
 
 function getJobIds() {
