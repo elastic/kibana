@@ -27,7 +27,7 @@ routes.when('/account', {
     }
   },
   controllerAs: 'accountController',
-  controller($scope, $route, Notifier, config) {
+  controller($scope, $route, Notifier, config, i18n) {
     $scope.user = $route.current.locals.user;
     config.bindToScope($scope, 'k7design');
 
@@ -42,7 +42,9 @@ routes.when('/account', {
 
       $scope.user.$changePassword()
         .then(() => toastNotifications.addSuccess({
-          title: 'Updated password',
+          title: i18n('xpack.security.account.updatedPasswordTitle', {
+            defaultMessage: 'Updated password'
+          }),
           'data-test-subj': 'passwordUpdateSuccess',
         }))
         .then(onSuccess)
@@ -56,7 +58,9 @@ routes.when('/account', {
 
     this.getEmail = () => {
       if ($scope.user.email) return $scope.user.email;
-      return '(No email)';
+      return i18n('xpack.security.account.noEmailMessage', {
+        defaultMessage: '(No email)'
+      });
     };
   }
 });
