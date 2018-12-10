@@ -8,6 +8,7 @@ import { get, omit } from 'lodash';
 
 export function handleKibanaStats(server, response) {
   if (!response) {
+    server.log(['warning', 'telemetry', 'local-stats'], 'No Kibana stats returned from usage collectors');
     return;
   }
 

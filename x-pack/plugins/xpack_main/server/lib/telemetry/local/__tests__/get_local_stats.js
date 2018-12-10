@@ -19,6 +19,9 @@ import {
 } from '../get_local_stats';
 
 const getMockServer = (getCluster = sinon.stub(), kibanaUsage = {}) => ({
+  log(tags, message) {
+    console.log({ tags, message });
+  },
   usage: { collectorSet: { bulkFetch: () => kibanaUsage, toObject: data => data } },
   plugins: {
     xpack_main: { status: { plugin: { kbnServer: { version: '8675309-snapshot' } } } },
