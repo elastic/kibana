@@ -69,8 +69,8 @@ async function getUnusedConfigKeys(
   );
 }
 
-export default async function(kbnServer, server, config) {
-  server.decorate('server', 'config', function() {
+export default async function (kbnServer, server, config) {
+  server.decorate('server', 'config', function () {
     return kbnServer.config;
   });
 
@@ -91,8 +91,8 @@ export default async function(kbnServer, server, config) {
 
   const error = new Error(
     `${formatListAsProse(formattedUnusedKeys)} ${desc} not applied. ` +
-      'Check for spelling errors and ensure that expected ' +
-      'plugins are installed.'
+    'Check for spelling errors and ensure that expected ' +
+    'plugins are installed.'
   );
 
   error.code = 'InvalidConfig';
