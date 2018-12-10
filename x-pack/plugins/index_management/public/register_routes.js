@@ -11,6 +11,7 @@ import { HashRouter } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { setHttpClient } from './services/api';
+import { setUrlService } from './services/navigation';
 
 import { App } from './app';
 import { BASE_PATH } from '../common/constants/base_path';
@@ -35,7 +36,7 @@ const renderReact = async (elem) => {
   );
 };
 
-routes.when(`${BASE_PATH}:view?/:id?`, {
+routes.when(`${BASE_PATH}:view?/:action?/:id?`, {
   template: template,
   k7Breadcrumbs: () => [
     MANAGEMENT_BREADCRUMB,
@@ -47,11 +48,16 @@ routes.when(`${BASE_PATH}:view?/:id?`, {
   ],
   controllerAs: 'indexManagement',
   controller: class IndexManagementController {
-    constructor($scope, $route, $http) {
+    constructor($scope, $route, $http, kbnUrl, $rootScope) {
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
       setHttpClient($http);
-
+      setUrlService({
+        change(url) {
+          kbnUrl.change(url);
+          $rootScope.$digest();
+        }
+      });
       $scope.$$postDigest(() => {
         const elem = document.getElementById('indexManagementReactRoot');
         renderReact(elem);
