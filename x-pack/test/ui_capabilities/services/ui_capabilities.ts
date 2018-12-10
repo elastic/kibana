@@ -17,7 +17,7 @@ export interface UICapabilities {
 
 export class UICapabilitiesService {
   private readonly log: LogService;
-  private readonly wreck: Wreck;
+  private readonly wreck: any;
 
   constructor(url: string, log: LogService) {
     this.log = log;
