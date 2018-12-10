@@ -675,6 +675,10 @@ export class TimeseriesChart extends React.Component {
         showFocusChartTooltip,
         showFlyout
       );
+
+      // disable brushing (creation of annotations) when annotations aren't shown
+      focusChart.select('.ml-annotation-brush')
+        .style('pointer-events', (showAnnotations) ? 'all' : 'none');
     }
 
     focusChart.select('.values-line')
