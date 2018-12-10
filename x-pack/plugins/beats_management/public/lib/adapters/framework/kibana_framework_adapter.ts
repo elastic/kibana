@@ -18,6 +18,9 @@ import {
   RuntimeFrameworkInfo,
   RuntimeFrameworkUser,
 } from './adapter_types';
+interface IInjector {
+  get(injectable: string): any;
+}
 
 export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public get info() {
@@ -40,7 +43,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     private readonly management: ManagementAPI,
     private readonly routes: UIRoutes,
     private readonly getBasePath: () => string,
-    private readonly onKibanaReady: (Private: any) => void,
+    private readonly onKibanaReady: () => Promise<IInjector>,
     private readonly XPackInfoProvider: unknown,
     private readonly uiSettings: any
   ) {
@@ -67,92 +70,61 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     });
   };
 
-  public waitUntilFrameworkReady(): Promise<void> {
-    return new Promise(resolve => {
-      try {
-        this.onKibanaReady(async (Private: any, $injector: any) => {
-          let xpackInfo: any;
-          try {
-            xpackInfo = Private(this.XPackInfoProvider);
-          } catch (e) {
-            xpackInfo = false;
-          }
+  public async waitUntilFrameworkReady(): Promise<void> {
+    const $injector = await this.onKibanaReady();
+    const Private: any = $injector.get('Private');
 
-          let xpackInfoUnpacked: FrameworkInfo;
-          try {
-            xpackInfoUnpacked = {
-              basePath: this.getBasePath(),
-              k7Design: this.uiSettings.get('k7design'),
-              license: {
-                type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
-                expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
-                expiry_date_in_millis: xpackInfo ? xpackInfo.getLicense().expiryDateInMillis : 0,
-              },
-              security: {
-                enabled: xpackInfo
-                  ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false)
-                  : false,
-                available: xpackInfo
-                  ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false)
-                  : false,
-              },
-              settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
-            };
-          } catch (e) {
-            throw new Error(
-              `Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`
-            );
-          }
+    let xpackInfo: any;
+    try {
+      xpackInfo = Private(this.XPackInfoProvider);
+    } catch (e) {
+      xpackInfo = false;
+    }
 
-          const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
-          if (assertData.isLeft()) {
-            throw new Error(
-              `Error parsing xpack info in ${this.PLUGIN_ID},   ${
-                PathReporter.report(assertData)[0]
-              }`
-            );
-          }
-          this.xpackInfo = xpackInfoUnpacked;
+    let xpackInfoUnpacked: FrameworkInfo;
+    try {
+      xpackInfoUnpacked = {
+        basePath: this.getBasePath(),
+        k7Design: this.uiSettings.get('k7design'),
+        license: {
+          type: xpackInfo ? xpackInfo.getLicense().type : 'oss',
+          expired: xpackInfo ? !xpackInfo.getLicense().isActive : false,
+          expiry_date_in_millis: xpackInfo ? xpackInfo.getLicense().expiryDateInMillis : 0,
+        },
+        security: {
+          enabled: xpackInfo
+            ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.enabled`, false)
+            : false,
+          available: xpackInfo
+            ? xpackInfo.get(`features.${this.PLUGIN_ID}.security.available`, false)
+            : false,
+        },
+        settings: xpackInfo ? xpackInfo.get(`features.${this.PLUGIN_ID}.settings`) : {},
+      };
+    } catch (e) {
+      throw new Error(`Unexpected data structure from XPackInfoProvider, ${JSON.stringify(e)}`);
+    }
 
-          try {
-            this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
-            const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
+    const assertData = RuntimeFrameworkInfo.decode(xpackInfoUnpacked);
+    if (assertData.isLeft()) {
+      throw new Error(
+        `Error parsing xpack info in ${this.PLUGIN_ID},   ${PathReporter.report(assertData)[0]}`
+      );
+    }
+    this.xpackInfo = xpackInfoUnpacked;
 
-            if (assertUser.isLeft()) {
-              throw new Error(
-                `Error parsing user info in ${this.PLUGIN_ID},   ${
-                  PathReporter.report(assertUser)[0]
-                }`
-              );
-            }
-          } catch (e) {
-            this.shieldUser = null;
-          }
+    try {
+      this.shieldUser = await $injector.get('ShieldUser').getCurrent().$promise;
+      const assertUser = RuntimeFrameworkUser.decode(this.shieldUser);
 
-          resolve();
-        });
-      } catch (e) {
-        this.shieldUser = null;
-        this.xpackInfo = {
-          basePath: this.getBasePath(),
-          k7Design: this.uiSettings.get('k7design'),
-          license: {
-            type: 'oss',
-            expired: false,
-            expiry_date_in_millis: 0,
-          },
-          security: {
-            enabled: false,
-            available: false,
-          },
-          settings: {
-            defaultUserRoles: ['superuser'],
-            enrollmentTokensTtlInSeconds: 0,
-            encryptionKey: 'none',
-          },
-        };
+      if (assertUser.isLeft()) {
+        throw new Error(
+          `Error parsing user info in ${this.PLUGIN_ID},   ${PathReporter.report(assertUser)[0]}`
+        );
       }
-    });
+    } catch (e) {
+      this.shieldUser = null;
+    }
   }
 
   public renderUIAtPath(

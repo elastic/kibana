@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
-
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { sample } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
@@ -83,10 +82,9 @@ class TagPageComponent extends React.PureComponent<
             onDetachBeat={
               this.mode === 'edit'
                 ? async (beatIds: string[]) => {
-                    await this.props.libs.beats.removeTagsFromBeats(
-                      beatIds.map(id => {
-                        return { beatId: id, tag: this.state.tag.id };
-                      })
+                    await this.props.containers.beats.removeTagsFromBeats(
+                      beatIds,
+                      this.state.tag.id
                     );
                     await this.loadAttachedBeats();
                   }
@@ -118,7 +116,7 @@ class TagPageComponent extends React.PureComponent<
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => this.props.goTo('/overview/tag_configurations')}>
+              <EuiButtonEmpty onClick={() => this.props.goTo('/overview/configuration_tags')}>
                 <FormattedMessage
                   id="xpack.beatsManagement.tag.cancelButtonLabel"
                   defaultMessage="Cancel"
@@ -160,7 +158,7 @@ class TagPageComponent extends React.PureComponent<
   };
   private saveTag = async () => {
     await this.props.libs.tags.upsertTag(this.state.tag as BeatTag);
-    this.props.goTo(`/overview/tag_configurations`);
+    this.props.goTo(`/overview/configuration_tags`);
   };
   private getNumExclusiveConfigurationBlocks = () =>
     this.state.tag.configuration_blocks

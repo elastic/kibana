@@ -177,7 +177,7 @@ export const BeatsTableType: TableType = {
     actions: [
       {
         name: i18n.translate('xpack.beatsManagement.beatsTable.disenrollSelectedLabel', {
-          defaultMessage: 'Disenroll Selected',
+          defaultMessage: 'Unenroll Selected',
         }),
         action: 'delete',
         danger: true,

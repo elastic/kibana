@@ -89,6 +89,9 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
         <EuiOverlayMask>
           <EuiModal
             onClose={() => {
+              this.props.setUrlState({
+                enrollmentToken: '',
+              });
               this.props.goTo(`/overview/enrolled_beats`);
             }}
             style={{ width: '640px' }}
@@ -105,7 +108,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
               <EnrollBeat
                 frameworkBasePath={this.props.libs.framework.info.basePath}
                 enrollmentToken={this.props.urlState.enrollmentToken}
-                getBeatWithToken={this.props.libs.beats.getBeatWithToken}
+                getBeatWithToken={this.props.containers.beats.getBeatWithToken}
                 createEnrollmentToken={async () => {
                   const enrollmentToken = await this.props.libs.tokens.createEnrollmentToken();
                   this.props.setUrlState({
@@ -116,9 +119,22 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                   this.props.setUrlState({
                     enrollmentToken: '',
                   });
-                  this.props.goTo('/overview/enrolled_beats');
                 }}
               />
+              {!this.props.urlState.enrollmentToken && (
+                <React.Fragment>
+                  <EuiButton
+                    size="s"
+                    color="primary"
+                    style={{ marginLeft: 10 }}
+                    onClick={async () => {
+                      this.props.goTo('/overview/enrolled_beats');
+                    }}
+                  >
+                    Done
+                  </EuiButton>
+                </React.Fragment>
+              )}
             </EuiModalBody>
           </EuiModal>
         </EuiOverlayMask>

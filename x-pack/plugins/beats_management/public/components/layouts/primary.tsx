@@ -73,8 +73,7 @@ export class PrimaryLayout extends Component<PrimaryLayoutProps> {
                 </EuiTitle>
               </EuiPageHeaderSection>
               <EuiPageHeaderSection>
-                {(this.actionSection && this.actionSection()) ||
-                  this.props.actionSection || <span>Nothing</span>}
+                {(this.actionSection && this.actionSection()) || this.props.actionSection}
               </EuiPageHeaderSection>
             </EuiPageHeader>
             <EuiPageContent>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore not typed yed
+// @ts-ignore not typed yet
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
@@ -27,7 +27,7 @@ import { PLUGIN } from './../../../common/constants/plugin';
 import { FrameworkLib } from './../framework';
 
 // A super early spot in kibana loading that we can use to hook before most other things
-const onKibanaReady = chrome.dangerouslyGetActiveInjector().then;
+const onKibanaReady = chrome.dangerouslyGetActiveInjector;
 
 export function compose(): FrontendLibs {
   const api = new AxiosRestAPIAdapter(chrome.getXsrfToken(), chrome.getBasePath());

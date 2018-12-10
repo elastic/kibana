@@ -20,6 +20,19 @@ export class BeatsContainer extends Container<ContainerState> {
       list: [],
     };
   }
+
+  public getBeatWithToken = async (token: string) => {
+    const beat = await this.libs.beats.getBeatWithToken(token);
+
+    if (beat) {
+      this.setState({
+        list: [beat as CMPopulatedBeat, ...this.state.list],
+      });
+      return beat as CMPopulatedBeat;
+    }
+    return null;
+  };
+
   public reload = async (kuery?: string) => {
     if (kuery) {
       this.query = await this.libs.elasticsearch.convertKueryToEsQuery(kuery);
@@ -54,7 +67,7 @@ export class BeatsContainer extends Container<ContainerState> {
     return 'added';
   };
 
-  public removeTagsFromBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
+  public removeTagsFromBeats = async (beats: CMPopulatedBeat[] | string[], tagId: string) => {
     if (!beats.length) {
       return false;
     }
@@ -63,7 +76,7 @@ export class BeatsContainer extends Container<ContainerState> {
     await this.reload(this.query);
   };
 
-  public assignTagsToBeats = async (beats: CMPopulatedBeat[], tagId: string) => {
+  public assignTagsToBeats = async (beats: CMPopulatedBeat[] | string[], tagId: string) => {
     if (!beats.length) {
       return false;
     }
@@ -73,6 +86,13 @@ export class BeatsContainer extends Container<ContainerState> {
   };
 }
 
-function createBeatTagAssignments(beats: CMPopulatedBeat[], tagId: string): BeatsTagAssignment[] {
-  return beats.map(({ id }) => ({ beatId: id, tag: tagId }));
+function createBeatTagAssignments(
+  beats: CMPopulatedBeat[] | string[],
+  tagId: string
+): BeatsTagAssignment[] {
+  if (typeof beats[0] === 'string') {
+    return (beats as string[]).map(id => ({ beatId: id, tag: tagId }));
+  } else {
+    return (beats as CMPopulatedBeat[]).map(({ id }) => ({ beatId: id, tag: tagId }));
+  }
 }

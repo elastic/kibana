@@ -49,6 +49,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
   public pingForBeatWithToken = async (token: string): Promise<CMBeat | void> => {
     try {
       const beats = await this.props.getBeatWithToken(token);
+
       if (!beats) {
         throw new Error('no beats');
       }
@@ -80,7 +81,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
     this.pinging = false;
   };
   public render() {
-    if (!this.props.enrollmentToken) {
+    if (!this.props.enrollmentToken && !this.state.enrolledBeat) {
       return null;
     }
     if (this.props.enrollmentToken && !this.state.enrolledBeat) {
@@ -147,9 +148,7 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                       text: 'DEB / RPM',
                     },
                     {
-                      value: `PS C:\\Program Files\\${capitalize(
-                        this.state.beatType
-                      )}> {{beatType}}.exe`,
+                      value: `PS C:\\Program Files\\{{beatTypeInCaps)}}> {{beatType}}.exe`,
                       text: 'Windows',
                     },
                     {
@@ -187,12 +186,13 @@ export class EnrollBeat extends React.Component<ComponentProps, ComponentState> 
                       className="euiFieldText euiFieldText--fullWidth"
                       style={{ textAlign: 'left' }}
                     >
-                      {`$ ${this.state.command.replace(
-                        '{{beatType}}',
-                        this.state.beatType
-                      )} enroll ${window.location.protocol}://${window.location.host} ${
-                        this.props.frameworkBasePath
-                      } ${this.props.enrollmentToken}`}
+                      {`$ ${this.state.command
+                        .replace('{{beatType}}', this.state.beatType)
+                        .replace('{{beatTypeInCaps}}', capitalize(this.state.beatType))} enroll ${
+                        window.location.protocol
+                      }://${window.location.host} ${this.props.frameworkBasePath} ${
+                        this.props.enrollmentToken
+                      }`}
                     </div>
                   </div>
                   <br />
