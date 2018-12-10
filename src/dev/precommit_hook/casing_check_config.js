@@ -184,8 +184,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.ttf',
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.woff',
   'src/ui/public/styles/fonts/glyphicons-halflings-regular.woff2',
-  'src/ui/public/styles/_legacy/components/list-group-menu.less',
-  'src/ui/public/styles/_legacy/components/react-input-range.less',
   'src/ui/public/styles/_legacy/theme/font-awesome.less',
   'src/ui/public/styles/_legacy/variables/bootstrap-mods.less',
   'src/ui/public/styles/_legacy/variables/for-theme.less',
