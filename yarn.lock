@@ -19916,6 +19916,14 @@ textextensions@2:
   resolved "https://registry.yarnpkg.com/textextensions/-/textextensions-2.2.0.tgz#38ac676151285b658654581987a0ce1a4490d286"
   integrity sha512-j5EMxnryTvKxwH2Cq+Pb43tsf6sdEgw6Pdwxk83mPaq0ToeFJt6WE4J3s5BqY7vmjlLgkgXvhtXUxo80FyBhCA==
 
+thread-loader@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/thread-loader/-/thread-loader-1.2.0.tgz#35dedb23cf294afbbce6c45c1339b950ed17e7a4"
+  dependencies:
+    async "^2.3.0"
+    loader-runner "^2.3.0"
+    loader-utils "^1.1.0"
+
 throat@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/throat/-/throat-4.1.0.tgz#89037cbc92c56ab18926e6ba4cbb200e15672a6a"
