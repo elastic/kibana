@@ -46,6 +46,8 @@ interface Job {
   status: string;
   statusLabel: string;
   max_size_reached: boolean;
+  attempts: number;
+  max_attempts: number;
 }
 
 interface Props {
@@ -233,7 +235,11 @@ class ReportListingUi extends Component<Props, State> {
             statusTimestamp = this.formatDate(record.completed_at);
           }
 
-          const statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
+          let statusLabel = jobStatusLabelsMap.get(status as JobStatuses) || status;
+
+          if (status === JobStatuses.PROCESSING) {
+            statusLabel = statusLabel + ` (Attempt ${record.attempts} of ${record.max_attempts})`;
+          }
 
           if (statusTimestamp) {
             return (
@@ -406,8 +412,8 @@ class ReportListingUi extends Component<Props, State> {
       this.setState({
         isLoading: false,
         total,
-        jobs: jobs.map((job: JobQueueEntry) => {
-          return {
+        jobs: jobs.map(
+          (job: JobQueueEntry): Job => ({
             id: job._id,
             type: job._source.jobtype,
             object_type: job._source.payload.type,
@@ -420,8 +426,10 @@ class ReportListingUi extends Component<Props, State> {
             statusLabel:
               jobStatusLabelsMap.get(job._source.status as JobStatuses) || job._source.status,
             max_size_reached: job._source.output ? job._source.output.max_size_reached : false,
-          };
-        }),
+            attempts: job._source.attempts,
+            max_attempts: job._source.max_attempts,
+          })
+        ),
       });
     }
   };
