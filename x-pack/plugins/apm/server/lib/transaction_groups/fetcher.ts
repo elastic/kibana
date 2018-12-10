@@ -16,14 +16,9 @@ import { Setup } from '../helpers/setup_request';
 interface Bucket {
   key: string;
   doc_count: number;
-  avg: {
-    value: number;
-  };
-  p95: {
-    values: {
-      '95.0': number;
-    };
-  };
+  avg: { value: number };
+  p95: { values: { '95.0': number } };
+  sum: { value: number };
   sample: {
     hits: {
       total: number;
@@ -57,8 +52,8 @@ export function transactionGroupsFetcher(
         transactions: {
           terms: {
             field: `${TRANSACTION_NAME}.keyword`,
-            order: { avg: 'desc' },
-            size: 100
+            order: { sum: 'desc' },
+            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },
           aggs: {
             sample: {
@@ -73,7 +68,8 @@ export function transactionGroupsFetcher(
             avg: { avg: { field: TRANSACTION_DURATION } },
             p95: {
               percentiles: { field: TRANSACTION_DURATION, percents: [95] }
-            }
+            },
+            sum: { sum: { field: TRANSACTION_DURATION } }
           }
         }
       }

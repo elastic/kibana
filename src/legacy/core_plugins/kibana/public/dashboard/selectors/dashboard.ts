@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { ContainerState, EmbeddableMetadata, Filters, Query, TimeRange } from 'ui/embeddable';
+import { EmbeddableCustomization } from 'ui/embeddable/types';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import {
   DashboardMetadata,
@@ -42,8 +43,10 @@ export const getEmbeddables = (dashboard: DashboardState): EmbeddablesMap => das
 
 // TODO: rename panel.embeddableConfig to embeddableCustomization. Because it's on the panel that's stored on a
 // dashboard, renaming this will require a migration step.
-export const getEmbeddableCustomization = (dashboard: DashboardState, panelId: PanelId): object =>
-  getPanel(dashboard, panelId).embeddableConfig;
+export const getEmbeddableCustomization = (
+  dashboard: DashboardState,
+  panelId: PanelId
+): EmbeddableCustomization => getPanel(dashboard, panelId).embeddableConfig;
 
 export const getEmbeddable = (dashboard: DashboardState, panelId: PanelId): EmbeddableReduxState =>
   dashboard.embeddables[panelId];

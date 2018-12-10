@@ -31,17 +31,16 @@ const primaryUpdate = state => state.primaryUpdate;
  */
 
 // dispatch the various types of actions
-const rawCursorPosition = select(
-  action => (action.type === 'cursorPosition' ? action.payload : null)
+const rawCursorPosition = select(action =>
+  action.type === 'cursorPosition' ? action.payload : null
 )(primaryUpdate);
 
 const mouseButtonEvent = select(action => (action.type === 'mouseEvent' ? action.payload : null))(
   primaryUpdate
 );
 
-const keyFromMouse = select(
-  ({ type, payload: { altKey, metaKey, shiftKey, ctrlKey } }) =>
-    type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey, ctrlKey } : {}
+const keyFromMouse = select(({ type, payload: { altKey, metaKey, shiftKey, ctrlKey } }) =>
+  type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey, ctrlKey } : {}
 )(primaryUpdate);
 
 const metaHeld = select(appleKeyboard ? e => e.metaKey : e => e.altKey)(keyFromMouse);
