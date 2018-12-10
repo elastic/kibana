@@ -532,7 +532,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
           >
             <p>
               <FormattedMessage
-                              defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
+                defaultMessage="You have {totalDashboards} dashboards, but your {listingLimitText} setting prevents the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
                 id="kbn.dashboard.listing.listingLimitExceededDescription"
                 values={
                   Object {
