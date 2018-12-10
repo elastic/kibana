@@ -94,7 +94,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
       {
         id: 'overview',
         name: intl.formatMessage({
-          id: 'xpack.upgradeAssistant.tabs.overview.title',
+          id: 'xpack.upgradeAssistant.overviewTab.overviewTabTitle',
           defaultMessage: 'Overview',
         }),
         content: <OverviewTab checkupData={checkupData} {...commonProps} />,
@@ -102,7 +102,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
       {
         id: 'cluster',
         name: intl.formatMessage({
-          id: 'xpack.upgradeAssistant.tabs.cluster.title',
+          id: 'xpack.upgradeAssistant.checkupTab.clusterTabLabel',
           defaultMessage: 'Cluster',
         }),
         content: (
@@ -110,7 +110,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
             key="cluster"
             deprecations={checkupData ? checkupData.cluster : undefined}
             checkupLabel={intl.formatMessage({
-              id: 'xpack.upgradeAssistant.nouns.cluster',
+              id: 'xpack.upgradeAssistant.tabs.checkupTab.clusterLabel',
               defaultMessage: 'cluster',
             })}
             {...commonProps}
@@ -120,7 +120,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
       {
         id: 'indices',
         name: intl.formatMessage({
-          id: 'xpack.upgradeAssistant.tabs.indices.title',
+          id: 'xpack.upgradeAssistant.checkupTab.indicesTabLabel',
           defaultMessage: 'Indices',
         }),
         content: (
@@ -128,7 +128,7 @@ export class UpgradeAssistantTabsUI extends React.Component<
             key="indices"
             deprecations={checkupData ? checkupData.indices : undefined}
             checkupLabel={intl.formatMessage({
-              id: 'xpack.upgradeAssistant.nouns.index',
+              id: 'xpack.upgradeAssistant.checkupTab.indexLabel',
               defaultMessage: 'index',
             })}
             showBackupWarning

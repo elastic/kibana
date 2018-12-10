@@ -152,13 +152,9 @@ export const StepsUI: StatelessComponent<
               <EuiText grow={false}>
                 <p>
                   <FormattedMessage
-                    id={
-                      'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.deprecationLogs.logsDetail'
-                    }
-                    defaultMessage={
-                      'Read the {deprecationLogsDocButton} to see if your applications ' +
-                      'are using functionality that is not available in {nextEsVersion}. You may need to enable deprecation logging.'
-                    }
+                    id="xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.deprecationLogs.logsDetail"
+                    defaultMessage="Read the {deprecationLogsDocButton} to see if your applications
+                      are using functionality that is not available in {nextEsVersion}. You may need to enable deprecation logging."
                     values={{
                       deprecationLogsDocButton: (
                         <EuiLink

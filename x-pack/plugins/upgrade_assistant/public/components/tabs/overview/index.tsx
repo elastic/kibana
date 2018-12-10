@@ -33,10 +33,8 @@ export const OverviewTab: StatelessComponent<UpgradeAssistantTabProps> = props =
       <p>
         <FormattedMessage
           id="xpack.upgradeAssistant.overviewTab.tabDetail"
-          defaultMessage={
-            'This assistant checks your cluster and indices and identifies the changes ' +
-            'you need to make before upgrading to Elasticsearch {nextEsVersion}.'
-          }
+          defaultMessage="This assistant checks your cluster and indices and identifies the changes
+             you need to make before upgrading to Elasticsearch {nextEsVersion}."
           values={{
             nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
           }}
@@ -59,11 +57,9 @@ export const OverviewTab: StatelessComponent<UpgradeAssistantTabProps> = props =
       <p>
         <FormattedMessage
           id="xpack.upgradeAssistant.overviewTab.incompleteCallout.calloutBody.calloutDetail"
-          defaultMessage={
-            'The complete list of {breakingChangesDocButton} in Elasticsearch {nextEsVersion} ' +
-            'will be available in the final {currentEsVersion} minor release. When the list ' +
-            'is complete, this warning will go away.'
-          }
+          defaultMessage="The complete list of {breakingChangesDocButton} in Elasticsearch {nextEsVersion}
+            will be available in the final {currentEsVersion} minor release. When the list
+            is complete, this warning will go away."
           values={{
             breakingChangesDocButton: (
               <EuiLink

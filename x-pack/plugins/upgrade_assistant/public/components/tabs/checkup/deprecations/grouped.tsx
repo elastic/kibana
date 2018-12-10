@@ -78,7 +78,7 @@ const DeprecationAccordion: StatelessComponent<{
               <EuiBadge color="hollow">
                 {numIndices}{' '}
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.nouns.index"
+                  id="xpack.upgradeAssistant.checkupTab.indicesBadgeLabel"
                   defaultMessage="{numIndices, plural, one {index} other {indices}}"
                   values={{ numIndices }}
                 />
