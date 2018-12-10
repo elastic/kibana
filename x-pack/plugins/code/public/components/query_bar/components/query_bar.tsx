@@ -10,13 +10,7 @@ import React, { Component } from 'react';
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiOutsideClickDetector,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionGroup,
@@ -117,10 +111,8 @@ export class QueryBar extends Component<Props, State> {
     }
     let nextGroupIndex = currGroupIndex;
 
-    if (
-      currItemIndex === null ||
-      nextItemIndex >= this.state.suggestionGroups[currGroupIndex].suggestions.length
-    ) {
+    const group: AutocompleteSuggestionGroup = this.state.suggestionGroups[currGroupIndex];
+    if (currItemIndex === null || nextItemIndex >= group.suggestions.length) {
       nextItemIndex = 0;
       nextGroupIndex = currGroupIndex + 1;
       if (nextGroupIndex >= this.state.suggestionGroups.length) {
@@ -147,7 +139,8 @@ export class QueryBar extends Component<Props, State> {
       if (prevGroupIndex < 0) {
         prevGroupIndex = this.state.suggestionGroups.length - 1;
       }
-      prevItemIndex = this.state.suggestionGroups[prevGroupIndex].suggestions.length - 1;
+      const group: AutocompleteSuggestionGroup = this.state.suggestionGroups[currGroupIndex];
+      prevItemIndex = group.suggestions.length - 1;
     }
 
     this.setState({
@@ -291,13 +284,15 @@ export class QueryBar extends Component<Props, State> {
             this.decrementIndex(groupIndex, itemIndex);
           } else {
             const lastGroupIndex = this.state.suggestionGroups.length - 1;
-            const lastItemIndex =
-              this.state.suggestionGroups[lastGroupIndex].suggestions.length - 1;
-            this.setState({
-              isSuggestionsVisible: true,
-              groupIndex: lastGroupIndex,
-              itemIndex: lastItemIndex,
-            });
+            const group: AutocompleteSuggestionGroup = this.state.suggestionGroups[lastGroupIndex];
+            if (group !== null) {
+              const lastItemIndex = group.suggestions.length - 1;
+              this.setState({
+                isSuggestionsVisible: true,
+                groupIndex: lastGroupIndex,
+                itemIndex: lastItemIndex,
+              });
+            }
           }
           break;
         case KEY_CODES.ENTER:
@@ -308,7 +303,8 @@ export class QueryBar extends Component<Props, State> {
             itemIndex !== null &&
             this.state.suggestionGroups[groupIndex]
           ) {
-            this.selectSuggestion(this.state.suggestionGroups[groupIndex].suggestions[itemIndex]);
+            const group: AutocompleteSuggestionGroup = this.state.suggestionGroups[groupIndex];
+            this.selectSuggestion(group.suggestions[itemIndex]);
           } else {
             this.onSubmit(() => event.preventDefault());
           }

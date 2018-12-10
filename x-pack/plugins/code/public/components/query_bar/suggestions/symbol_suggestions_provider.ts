@@ -24,7 +24,7 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
       method: 'get',
       query: { q: query },
     });
-    const suggestions: AutocompleteSuggestion[] = Array.from(res.symbols)
+    const suggestions = Array.from(res.symbols as DetailSymbolInformation[])
       .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
       .map((symbol: DetailSymbolInformation) => {
         return {
@@ -40,7 +40,7 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
       type: AutocompleteSuggestionType.SYMBOL,
       total: res.total,
       hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
-      suggestions,
+      suggestions: suggestions as AutocompleteSuggestion[],
     };
   }
 

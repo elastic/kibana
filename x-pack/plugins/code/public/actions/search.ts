@@ -8,7 +8,7 @@ import { createAction } from 'redux-actions';
 
 export interface DocumentSearchPayload {
   query: string;
-  page?: number;
+  page?: string;
   languages?: string;
   repositories?: string;
 }

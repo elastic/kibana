@@ -20,7 +20,7 @@ export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
       method: 'get',
       query: { q: query },
     });
-    const suggestions = Array.from(res.results)
+    const suggestions = Array.from(res.results as SearchResultItem[])
       .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
       .map((doc: SearchResultItem) => {
         return {

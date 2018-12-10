@@ -70,16 +70,16 @@ function* handleSearchRouteChange(action: Action<Match>) {
   const { location } = action.payload!;
   const queryParams = queryString.parse(location.search);
   const { q, p, langs, repos, scope } = queryParams;
-  yield put(changeSearchScope(scope));
+  yield put(changeSearchScope(scope as string));
   if (scope === SearchScope.repository) {
-    yield put(repositorySearch({ query: q }));
+    yield put(repositorySearch({ query: q as string }));
   }
   yield put(
     documentSearch({
-      query: q,
-      page: p,
-      languages: langs,
-      repositories: repos,
+      query: q as string,
+      page: p as string,
+      languages: langs as string,
+      repositories: repos as string,
     })
   );
 }
