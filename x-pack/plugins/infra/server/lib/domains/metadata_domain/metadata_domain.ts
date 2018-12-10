@@ -32,7 +32,7 @@ export class InfraMetadataDomain {
     const metrics = await metricsPromise;
     const logs = await logsPromise;
 
-    const metricMetadata = pickMetadata(metrics).map(entry => {
+    const metricMetadata = pickMetadata(metrics.buckets).map(entry => {
       return { name: entry, source: 'metrics' };
     });
 
@@ -40,7 +40,7 @@ export class InfraMetadataDomain {
       return { name: entry, source: 'logs' };
     });
 
-    return metricMetadata.concat(logMetadata);
+    return { id: metrics.id, name: metrics.name, features: metricMetadata.concat(logMetadata) };
   }
 }
 

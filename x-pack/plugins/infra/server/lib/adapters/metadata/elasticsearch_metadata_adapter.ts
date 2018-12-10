@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { first, get } from 'lodash';
 import { InfraSourceConfiguration } from '../../sources';
 import {
   InfraBackendFrameworkAdapter,
@@ -11,7 +12,14 @@ import {
   InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
 } from '../framework';
-import { InfraMetadataAdapter } from './adapter_types';
+import { InfraNodeType } from '../nodes/adapter_types';
+import { InfraMetadataAdapter, InfraMetricsAdapterResponse } from './adapter_types';
+
+const NAME_FIELDS = {
+  [InfraNodeType.host]: 'host.name',
+  [InfraNodeType.pod]: 'kubernetes.pod.name',
+  [InfraNodeType.container]: 'docker.container.name',
+};
 
 export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   private framework: InfraBackendFrameworkAdapter;
@@ -24,7 +32,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
     sourceConfiguration: InfraSourceConfiguration,
     nodeName: string,
     nodeType: 'host' | 'container' | 'pod'
-  ): Promise<InfraMetadataAggregationBucket[]> {
+  ): Promise<InfraMetricsAdapterResponse> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
     const metricQuery = {
       index: sourceConfiguration.metricAlias,
@@ -36,7 +44,8 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
             },
           },
         },
-        size: 0,
+        size: 1,
+        _source: [NAME_FIELDS[nodeType]],
         aggs: {
           metrics: {
             terms: {
@@ -61,9 +70,18 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
       { metrics?: InfraMetadataAggregationResponse }
     >(req, 'search', metricQuery);
 
-    return response.aggregations && response.aggregations.metrics
-      ? response.aggregations.metrics.buckets
-      : [];
+    const buckets =
+      response.aggregations && response.aggregations.metrics
+        ? response.aggregations.metrics.buckets
+        : [];
+
+    const sampleDoc = first(response.hits.hits);
+
+    return {
+      id: nodeName,
+      name: get(sampleDoc._source, NAME_FIELDS[nodeType]),
+      buckets,
+    };
   }
 
   public async getLogMetadata(
