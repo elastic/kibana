@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { Server } from 'hapi';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { getMetricsChartData } from '../lib/metrics/get_metrics_chart_data';
+import { getAllMetricsChartData } from '../lib/metrics/get_all_metrics_chart_data';
 
 const defaultErrorHandler = (err: Error) => {
   // tslint:disable-next-line
@@ -28,7 +28,7 @@ export function initMetricsApi(server: Server) {
     handler: async req => {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
-      return await getMetricsChartData({
+      return await getAllMetricsChartData({
         setup,
         serviceName
       }).catch(defaultErrorHandler);

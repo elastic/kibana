@@ -9,7 +9,7 @@ import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
 import { createSelector } from 'reselect';
 import { loadMetricsChartDataForService } from 'x-pack/plugins/apm/public/services/rest/apm/metrics';
 import { IMemoryChartData } from 'x-pack/plugins/apm/public/store/selectors/chartSelectors';
-import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_metrics_chart_data';
+import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_all_metrics_chart_data';
 import { IReduxState } from '../rootReducer';
 import { getMemorySeries } from '../selectors/chartSelectors';
 import { IUrlParams } from '../urlParams';

@@ -7,51 +7,51 @@ import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
 import { AggValue } from '../query_types';
 import { ESResponse } from './fetcher';
 
-export interface MemoryChartAPIResponse {
+export interface CPUChartAPIResponse {
   series: {
-    totalMemory: Coordinate[];
-    freeMemory: Coordinate[];
-    processMemorySize: Coordinate[];
-    processMemoryRss: Coordinate[];
+    systemCPUAverage: Coordinate[];
+    systemCPUMax: Coordinate[];
+    processCPUAverage: Coordinate[];
+    processCPUMax: Coordinate[];
   };
   // overall totals for the whole time range
   overallValues: {
-    totalMemory: AggValue['value'];
-    freeMemory: AggValue['value'];
-    processMemorySize: AggValue['value'];
-    processMemoryRss: AggValue['value'];
+    systemCPUAverage: AggValue['value'];
+    systemCPUMax: AggValue['value'];
+    processCPUAverage: AggValue['value'];
+    processCPUMax: AggValue['value'];
   };
   totalHits: number;
 }
 
 export type MemoryMetricName =
-  | 'totalMemory'
-  | 'freeMemory'
-  | 'processMemorySize'
-  | 'processMemoryRss';
+  | 'systemCPUAverage'
+  | 'systemCPUMax'
+  | 'processCPUAverage'
+  | 'processCPUMax';
 
 const MEMORY_METRIC_NAMES: MemoryMetricName[] = [
-  'totalMemory',
-  'freeMemory',
-  'processMemorySize',
-  'processMemoryRss'
+  'systemCPUAverage',
+  'systemCPUMax',
+  'processCPUAverage',
+  'processCPUMax'
 ];
 
-export function transform(result: ESResponse): MemoryChartAPIResponse {
+export function transform(result: ESResponse): CPUChartAPIResponse {
   const { aggregations, hits } = result;
   const {
     timeseriesData,
-    totalMemory,
-    freeMemory,
-    processMemorySize,
-    processMemoryRss
+    systemCPUAverage,
+    systemCPUMax,
+    processCPUAverage,
+    processCPUMax
   } = aggregations;
 
-  const series: MemoryChartAPIResponse['series'] = {
-    totalMemory: [],
-    freeMemory: [],
-    processMemorySize: [],
-    processMemoryRss: []
+  const series: CPUChartAPIResponse['series'] = {
+    systemCPUAverage: [],
+    systemCPUMax: [],
+    processCPUAverage: [],
+    processCPUMax: []
   };
 
   // using forEach here to avoid looping over the entire dataset
@@ -65,10 +65,10 @@ export function transform(result: ESResponse): MemoryChartAPIResponse {
   return {
     series,
     overallValues: {
-      totalMemory: totalMemory.value,
-      freeMemory: freeMemory.value,
-      processMemorySize: processMemorySize.value,
-      processMemoryRss: processMemoryRss.value
+      systemCPUAverage: systemCPUAverage.value,
+      systemCPUMax: systemCPUMax.value,
+      processCPUAverage: processCPUAverage.value,
+      processCPUMax: processCPUMax.value
     },
     totalHits: hits.total
   };
