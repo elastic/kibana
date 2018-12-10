@@ -61,7 +61,7 @@ export const OverviewTab: StatelessComponent<UpgradeAssistantTabProps> = props =
           id="xpack.upgradeAssistant.overviewTab.incompleteCallout.calloutBody.calloutDetail"
           defaultMessage={
             'The complete list of {breakingChangesDocButton} in Elasticsearch {nextEsVersion} ' +
-            'will be available in the final {currentEsVersion} minor release. When this list ' +
+            'will be available in the final {currentEsVersion} minor release. When the list ' +
             'is complete, this warning will go away.'
           }
           values={{

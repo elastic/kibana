@@ -73,7 +73,7 @@ export const StepsUI: StatelessComponent<
                   <p>
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overviewTab.steps.clusterStep.remainingIssuesDetail"
-                      defaultMessage="There are {numIssues} issues remaining to resolve."
+                      defaultMessage="{numIssues} issues must be resolved."
                       values={{
                         numIssues: (
                           <EuiNotificationBadge>{countByType.cluster}</EuiNotificationBadge>
@@ -122,7 +122,7 @@ export const StepsUI: StatelessComponent<
                   <p>
                     <FormattedMessage
                       id="xpack.upgradeAssistant.overviewTab.steps.indicesStep.remainingIssuesDetail"
-                      defaultMessage="There are {numIssues} issues remaining to resolve."
+                      defaultMessage="{numIssues} issues must be resolved."
                       values={{
                         numIssues: (
                           <EuiNotificationBadge>{countByType.indices}</EuiNotificationBadge>
@@ -156,7 +156,7 @@ export const StepsUI: StatelessComponent<
                       'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.deprecationLogs.logsDetail'
                     }
                     defaultMessage={
-                      'Review the Elasticsearch {deprecationLogsDocButton} to see if your applications' +
+                      'Read the {deprecationLogsDocButton} to see if your applications ' +
                       'are using functionality that is not available in {nextEsVersion}. You may need to enable deprecation logging.'
                     }
                     values={{

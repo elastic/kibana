@@ -78,7 +78,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
               id="xpack.upgradeAssistant.checkupTab.tabDetail"
               defaultMessage={
                 'These {strongCheckupLabel} issues need your attention. ' +
-                'Address them before upgrading to Elasticsearch {nextEsVersion}.'
+                'Resolve them before upgrading to Elasticsearch {nextEsVersion}.'
               }
               values={{
                 strongCheckupLabel: <strong>{checkupLabel}</strong>,
