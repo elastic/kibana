@@ -17,7 +17,7 @@ import { defaultTo, getOr } from 'lodash/fp';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 
 import { State, timelineActions } from '../../store';
 import { timelineByIdSelector } from '../../store/selectors';

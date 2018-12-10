@@ -18,7 +18,6 @@ import {
   addProviderToTimeline,
   providerWasDroppedOnTimeline,
   providerWasDroppedOnTimelineButton,
-  updateShowTimeline,
 } from './helpers';
 
 interface Props {
