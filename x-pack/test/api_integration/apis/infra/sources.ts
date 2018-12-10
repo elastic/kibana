@@ -6,7 +6,7 @@
 
 import expect from 'expect.js';
 import { SourceQuery } from '../../../../plugins/infra/common/graphql/types';
-import { sourceQuery } from '../../../../plugins/infra/public/store/remote/source/operations/query_source.gql_query';
+import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
 
 import { KbnTestProvider } from './types';
 

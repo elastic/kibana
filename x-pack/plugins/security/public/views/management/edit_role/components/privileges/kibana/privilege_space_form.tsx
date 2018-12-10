@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { KibanaPrivilege } from '../../../../../../../common/model/kibana_privilege';
@@ -26,9 +26,10 @@ interface Props {
   ) => void;
   onDelete: () => void;
   validator: RoleValidator;
+  intl: InjectedIntl;
 }
 
-export class PrivilegeSpaceForm extends Component<Props, {}> {
+class PrivilegeSpaceFormUI extends Component<Props, {}> {
   public render() {
     const {
       availableSpaces,
@@ -36,6 +37,7 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
       availablePrivileges,
       selectedPrivilege,
       validator,
+      intl,
     } = this.props;
 
     return (
@@ -78,7 +80,11 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
             <EuiButtonIcon
-              aria-label={'Delete space privilege'}
+              aria-label={intl.formatMessage({
+                id:
+                  'xpack.security.management.editRoles.privilegeSpaceForm.deleteSpacePrivilegeAriaLabel',
+                defaultMessage: 'Delete space privilege',
+              })}
               color={'danger'}
               onClick={this.props.onDelete}
               iconType={'trash'}
@@ -103,3 +109,5 @@ export class PrivilegeSpaceForm extends Component<Props, {}> {
     });
   };
 }
+
+export const PrivilegeSpaceForm = injectI18n(PrivilegeSpaceFormUI);
