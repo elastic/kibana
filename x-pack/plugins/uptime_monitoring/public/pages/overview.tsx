@@ -4,32 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore missing typings for EuiBreadcrumbs
-import { EuiBreadcrumbs, EuiPage, EuiPageContent, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
-import { Overview } from '../components';
+import { Link } from 'react-router-dom';
+import { Breadcrumb } from 'ui/chrome';
+import { overviewBreadcrumb } from '../breadcrumbs';
 
-const Monitor = () => <div>The monitor page!</div>;
+interface OverviewPageProps {
+  setBreadcrumbs: (breadcrumbs: Breadcrumb[]) => void;
+}
 
-export const MainPage = () => (
-  <Router basename="/app/uptime_monitoring#/">
-    <EuiPage>
-      <EuiPageContent>
-        <EuiBreadcrumbs breadcrumbs={[{ text: 'Parent', href: '#' }, { text: 'Child' }]} />
+export class OverviewPage extends React.Component<OverviewPageProps> {
+  constructor(props: OverviewPageProps) {
+    super(props);
+  }
+
+  public componentWillMount() {
+    this.props.setBreadcrumbs([overviewBreadcrumb]);
+  }
+
+  public render() {
+    return (
+      <div>
         <EuiTitle>
-          <h2>Uptime Monitoring</h2>
+          <h4>Overview</h4>
         </EuiTitle>
-
-        <Link to="/">Home</Link>
-        <Link to="/monitor">Monitor</Link>
-
-        <Switch>
-          <Route path="/" exact component={Overview} />
-          <Route path="/monitor" component={Monitor} />
-        </Switch>
+        <Link to="/monitor">A monitor's ID</Link>
         <p>This is where the Uptime app will live.</p>
-      </EuiPageContent>
-    </EuiPage>
-  </Router>
-);
+      </div>
+    );
+  }
+}

@@ -14,7 +14,7 @@ FeatureCatalogueRegistryProvider.register(() => ({
   title: 'Uptime Monitoring',
   description: 'Perform endpoint health checks and uptime monitoring.',
   icon: 'heartbeatApp',
-  path: `uptime#/home`,
+  path: `uptime_monitoring#/`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));

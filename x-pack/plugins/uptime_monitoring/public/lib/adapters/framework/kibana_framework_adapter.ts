@@ -6,7 +6,8 @@
 
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
-import { UMFrameworkAdapter } from '../../lib';
+import chrome, { Breadcrumb } from 'ui/chrome';
+import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
@@ -15,25 +16,45 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     this.uiRoutes = uiRoutes;
   }
 
-  public render = (component: React.ReactElement<any>) => {
+  public render = (component: BootstrapUptimeApp) => {
     this.register(component);
   };
 
-  private register = (rootComponent: React.ReactElement<any>) => {
-    this.uiRoutes.enable();
-    this.uiRoutes.otherwise({
+  public setBreadcrumbs = (breadcrumbs: Breadcrumb[]) => {
+    chrome.breadcrumbs.set(breadcrumbs);
+  };
+
+  private register = (renderRootComponent: BootstrapUptimeApp) => {
+    const route = {
       controllerAs: 'uptime',
       // @ts-ignore angular
-      controller: ($scope, $route, $http) => {
+      controller: ($scope, $route, $http, config) => {
+        config.bindToScope($scope, 'k7design');
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeMonitoringReactRoot');
-          ReactDOM.render(rootComponent, elem);
+          let kibanaBreadcrumbs: Breadcrumb[] = [];
+          if ($scope.k7design) {
+            chrome.breadcrumbs.get$().subscribe((breadcrumbs: Breadcrumb[]) => {
+              kibanaBreadcrumbs = breadcrumbs;
+            });
+          }
+          ReactDOM.render(
+            renderRootComponent({
+              isUsingK7Design: $scope.k7design,
+              updateBreadcrumbs: this.setBreadcrumbs,
+              kibanaBreadcrumbs,
+            }),
+            elem
+          );
           this.manageAngularLifecycle($scope, $route, elem);
         });
       },
       template:
-        '<uptime-monitoring-app section="kibana" class="ng-scope"><div id="uptimeMonitoringReactRoot"></div></uptime-monitoring-app>',
-    });
+        '<uptime-monitoring-app section="kibana" id="uptimeMonitoringReactRoot" class="app-wrapper-panel"></uptime-monitoring-app>',
+    };
+    this.uiRoutes.enable();
+    // TODO: hack to refer all routes to same endpoint, use a more proper way of achieving this
+    this.uiRoutes.otherwise(route);
   };
 
   // @ts-ignore angular params

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import 'react-vis/dist/style.css';
 import 'ui-bootstrap';
 import 'ui/autoload/all';
@@ -13,8 +12,8 @@ import 'ui/courier';
 import 'ui/persisted_log';
 import 'uiExports/autocompleteProviders';
 import { UMFrontendLibs } from '../lib/lib';
-import { MainPage } from '../pages/overview';
+import { UptimeMonitoringApp } from '../uptime_monitoring_app';
 
 export async function startApp(libs: UMFrontendLibs) {
-  libs.framework.render(<MainPage />);
+  libs.framework.render(UptimeMonitoringApp);
 }

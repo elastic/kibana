@@ -5,11 +5,23 @@
  */
 
 import React from 'react';
+import { Breadcrumb } from 'ui/chrome';
 
 export interface UMFrontendLibs {
   framework: UMFrameworkAdapter;
 }
 
+export type UpdateBreadcrumbs = (breadcrumbs: Breadcrumb[]) => void;
+
+export interface UptimeAppProps {
+  isUsingK7Design: boolean;
+  updateBreadcrumbs: UpdateBreadcrumbs;
+  kibanaBreadcrumbs: Breadcrumb[];
+}
+
+export type BootstrapUptimeApp = (props: UptimeAppProps) => React.ReactElement<any>;
+
 export interface UMFrameworkAdapter {
-  render(component: React.ReactElement<any>): void;
+  render(component: BootstrapUptimeApp): void;
+  setBreadcrumbs(breadcrumbs: any[]): void;
 }

@@ -21,7 +21,7 @@ export const uptimeMonitoring = (kibana: any) =>
         icon: 'plugins/uptime_monitoring/icons/heartbeat_white.svg',
         title: 'Uptime Monitoring',
         main: 'plugins/uptime_monitoring/app',
-        url: '/app/uptime_monitoring#/home',
+        url: '/app/uptime_monitoring#/',
       },
       home: ['plugins/uptime_monitoring/register_feature'],
     },

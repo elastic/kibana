@@ -4,6 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { Breadcrumb } from 'ui/chrome';
 
-export const Overview = () => <div>Overview components belong here</div>;
+export const monitorBreadcrumb = {
+  text: 'Monitor',
+};
+
+export const overviewBreadcrumb: Breadcrumb = {
+  text: 'Overview',
+  href: '#/',
+};
