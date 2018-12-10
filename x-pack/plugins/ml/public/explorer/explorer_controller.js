@@ -946,7 +946,6 @@ module.controller('MlExplorerController', function (
 
   const MAX_ANNOTATIONS = 1000;
   async function loadAnnotationsTableData() {
-    console.warn('loadAnnotationsTableData ---- START');
     $scope.annotationsData = [];
 
     const cellData = $scope.cellData;
@@ -978,7 +977,6 @@ module.controller('MlExplorerController', function (
             d.key = String.fromCharCode(65 + i);
             return d;
           });
-        console.warn('loadAnnotationsTableData ---- DONE', $scope.annotationsData);
       });
     }
   }

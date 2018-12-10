@@ -165,7 +165,7 @@ export function annotationProvider(
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
       _.each(jobIds, (jobId, i: number) => {
-        jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id.keyword:${jobId}`;
+        jobIdFilterStr += `${i! > 0 ? ' OR ' : ''}job_id:${jobId}`;
       });
       boolCriteria.push({
         query_string: {

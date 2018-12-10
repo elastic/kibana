@@ -226,7 +226,6 @@ export class ExplorerSwimlane extends React.Component {
       swimlaneType,
       selection
     } = this.props;
-    console.warn('renderSwimlane', swimlaneType);
 
     const {
       laneLabels: lanes,
@@ -464,8 +463,6 @@ export class ExplorerSwimlane extends React.Component {
         });
 
       d3AnnotationsRange.exit().remove();
-
-      console.warn('annotations', annotations);
     }
 
     if ((swimlaneType !== selectedType) ||
