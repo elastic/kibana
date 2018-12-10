@@ -11,6 +11,7 @@ import {
   EuiInMemoryTable,
   // @ts-ignore
   EuiSuperSelect,
+  EuiSwitch,
   EuiText,
   IconType,
 } from '@elastic/eui';
@@ -53,7 +54,11 @@ export class FeatureTable extends Component<Props, {}> {
   }
 
   public onChange = (featureId: string) => (privilege: string) => {
-    this.props.onChange(featureId, [privilege]);
+    if (privilege === NO_PRIVILEGE_VALUE) {
+      this.props.onChange(featureId, []);
+    } else {
+      this.props.onChange(featureId, [privilege]);
+    }
   };
 
   private getColumns = (effectivePrivileges: EffectivePrivileges) => [
@@ -105,7 +110,6 @@ export class FeatureTable extends Component<Props, {}> {
     },
     {
       field: 'role',
-      align: 'right',
       name: this.props.intl.formatMessage({
         id: 'xpack.roles.management.enabledRoleFeaturesEnabledColumnTitle',
         defaultMessage: 'Privilege',
@@ -134,6 +138,30 @@ export class FeatureTable extends Component<Props, {}> {
 
         const allowsNone = effectiveFeaturePrivileges.length === 0;
 
+        const assignedFeaturePrivileges = this.getAssignedFeaturePrivileges(featureId);
+
+        const actualPrivilegeValue =
+          assignedFeaturePrivileges.length === 0
+            ? effectiveFeaturePrivileges
+            : assignedFeaturePrivileges;
+
+        // if (featurePrivileges.length === 1) {
+        //   const isAllowedPrivilege = allowedFeaturePrivileges.includes(featurePrivileges[0]);
+        //   const isChecked = actualPrivilegeValue.length > 0;
+
+        //   return (
+        //     <EuiSwitch
+        //       checked={actualPrivilegeValue.length > 0}
+        //       disabled={isChecked && !allowsNone}
+        //       onChange={e =>
+        //         this.onChange(featureId)(
+        //           e.target.checked ? featurePrivileges[0] : NO_PRIVILEGE_VALUE
+        //         )
+        //       }
+        //     />
+        //   );
+        // }
+
         const privilegeOptions = featurePrivileges.map(privilege => {
           const isAllowedPrivilege = allowedFeaturePrivileges.includes(privilege);
           return {
@@ -147,13 +175,6 @@ export class FeatureTable extends Component<Props, {}> {
             ),
           };
         });
-
-        const assignedFeaturePrivileges = this.getAssignedFeaturePrivileges(featureId);
-
-        const actualPrivilegeValue =
-          assignedFeaturePrivileges.length === 0
-            ? effectiveFeaturePrivileges
-            : assignedFeaturePrivileges;
 
         return (
           <EuiSuperSelect

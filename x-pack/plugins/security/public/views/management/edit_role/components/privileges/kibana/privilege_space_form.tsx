@@ -23,6 +23,7 @@ import { SpaceSelector } from './space_selector';
 
 interface Props {
   spaces: Space[];
+  mode: 'create' | 'edit';
   spaceId?: string | null;
   privilegeDefinition: PrivilegeDefinition;
   effectivePrivileges: EffectivePrivileges;
@@ -80,6 +81,7 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
           }
         >
           <SpaceSelector
+            disabled={this.props.mode === 'edit'}
             spaces={spaces}
             selectedSpaceIds={this.state.selectedSpaceIds}
             onChange={this.onSelectedSpacesChange}
@@ -224,6 +226,7 @@ export class PrivilegeSpaceFormUI extends Component<Props, State> {
     this.setState({
       selectedSpaceIds,
     });
+    this.props.onChange(role);
   };
 }
 

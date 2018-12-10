@@ -12,6 +12,7 @@ import { PrivilegeSpaceForm } from './privilege_space_form';
 
 const buildProps = (customProps = {}) => {
   return {
+    mode: 'create' as any,
     spaces: [
       {
         id: 'default',

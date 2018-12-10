@@ -56,11 +56,6 @@ interface Props {
   features: Feature[];
 }
 
-interface PrivilegeForm {
-  spaces: string[];
-  privilege: string | null;
-}
-
 interface SpacePrivileges {
   [spaceId: string]: {
     minimum: string[];
@@ -74,7 +69,6 @@ interface State {
   spacePrivileges: SpacePrivileges;
   role: Role | null;
   editingSpaceId: string | null;
-  privilegeForms: PrivilegeForm[];
   showGlobalFeatureTable: boolean;
   showSpacePrivilegeEditor: boolean;
 }
@@ -93,7 +87,6 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
 
     this.state = {
       spacePrivileges,
-      privilegeForms: [],
       showGlobalFeatureTable: hasCustomizedGlobalFeatures,
       showSpacePrivilegeEditor: false,
       role: null,
@@ -279,7 +272,8 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     const canAssignSpacePrivileges = basePrivilege !== 'all';
     const hasAssignedSpacePrivileges = Object.keys(this.state.spacePrivileges).length > 0;
 
-    const showAddPrivilegeButton = canAssignSpacePrivileges;
+    const unassignedSpaces = this.getUnassignedSpaces();
+    const showAddPrivilegeButton = canAssignSpacePrivileges && unassignedSpaces.length > 0;
 
     return (
       <Fragment>
@@ -344,7 +338,7 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
 
             {hasAssignedSpacePrivileges && <EuiSpacer />}
 
-            {this.getSpaceForms()}
+            {this.getSpaceForms(unassignedSpaces)}
           </Fragment>
         )}
 
@@ -375,23 +369,27 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     );
   };
 
-  private getSpaceForms = () => {
+  private getSpaceForms = (unassignedSpaces: Space[]) => {
     if (!this.props.editable || !this.state.showSpacePrivilegeEditor) {
       return null;
     }
+
+    const editing = Boolean(this.state.editingSpaceId);
+    const title = editing ? `Edit space privilege` : `New space privilege`;
 
     return (
       <EuiOverlayMask>
         <EuiFlyout onClose={this.closeFlyout} size="s">
           <EuiFlyoutHeader>
             <EuiTitle>
-              <h1>New space privilege</h1>
+              <h1>{title}</h1>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <PrivilegeSpaceForm
+              mode={editing ? 'edit' : 'create'}
               spaceId={this.state.editingSpaceId}
-              spaces={this.props.spaces}
+              spaces={editing ? this.props.spaces : unassignedSpaces}
               effectivePrivileges={this.props.effectivePrivileges}
               privilegeDefinition={this.props.privilegeDefinition}
               validator={this.props.validator}
@@ -457,14 +455,8 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
 
   private addSpacePrivilege = () => {
     this.setState({
+      editingSpaceId: null,
       showSpacePrivilegeEditor: true,
-      privilegeForms: [
-        ...this.state.privilegeForms,
-        {
-          spaces: [],
-          privilege: null,
-        },
-      ],
     });
   };
 
@@ -486,6 +478,11 @@ class SpaceAwarePrivilegeFormUI extends Component<Props, State> {
     role.kibana.global.feature[featureId] = [...privileges];
     this.props.onChange(role);
   };
+
+  private getUnassignedSpaces() {
+    const assignedSpaceIds = Object.keys(this.props.role.kibana.space);
+    return this.props.spaces.filter(space => !assignedSpaceIds.includes(space.id));
+  }
 }
 
 export const SpaceAwarePrivilegeForm = injectI18n(SpaceAwarePrivilegeFormUI);
