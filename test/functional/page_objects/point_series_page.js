@@ -97,7 +97,7 @@ export function PointSeriesPageProvider({ getService }) {
     }
 
     async setValue(newValue) {
-      await find.click('button[ng-click="numberListCntr.add()"]');
+      await find.clickByCssSelector('button[ng-click="numberListCntr.add()"]');
       await find.setValue('input[ng-model="numberListCntr.getList()[$index]"]', newValue);
     }
 
