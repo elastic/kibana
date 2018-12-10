@@ -72,7 +72,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "8.10.38",
+    "**/@types/node": "10.12.12",
     "@types/react": "16.3.14"
   },
   "workspaces": {
@@ -95,7 +95,7 @@
     "@elastic/datemath": "5.0.1",
     "@elastic/eui": "5.3.0",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/good": "8.1.1-kibana1",
+    "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-code-parser": "1.0.0",
@@ -137,7 +137,7 @@
     "elasticsearch": "^15.2.0",
     "elasticsearch-browser": "^15.2.0",
     "encode-uri-query": "1.0.0",
-    "execa": "^0.10.0",
+    "execa": "^1.0.0",
     "expiry-js": "0.1.7",
     "file-loader": "2.0.0",
     "font-awesome": "4.4.0",
@@ -285,7 +285,7 @@
     "@types/minimatch": "^2.0.29",
     "@types/moment-timezone": "^0.5.8",
     "@types/mustache": "^0.8.31",
-    "@types/node": "^8.10.38",
+    "@types/node": "^10.12.12",
     "@types/opn": "^5.1.0",
     "@types/podium": "^1.0.0",
     "@types/prop-types": "^15.5.3",
@@ -308,7 +308,7 @@
     "angular-mocks": "1.4.7",
     "archiver": "^3.0.0",
     "babel-eslint": "^9.0.0",
-    "babel-jest": "^23.4.2",
+    "babel-jest": "^23.6.0",
     "backport": "4.4.1",
     "chai": "3.5.0",
     "chance": "1.0.10",
@@ -325,7 +325,7 @@
     "eslint-config-prettier": "^3.1.0",
     "eslint-plugin-babel": "^5.2.0",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "^21.22.1",
+    "eslint-plugin-jest": "^21.26.2",
     "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-mocha": "^5.2.0",
     "eslint-plugin-no-unsanitized": "^3.0.2",
@@ -345,13 +345,13 @@
     "grunt-peg": "^2.0.1",
     "grunt-run": "0.7.0",
     "gulp-babel": "^7.0.1",
-    "gulp-sourcemaps": "1.7.3",
+    "gulp-sourcemaps": "2.6.4",
     "has-ansi": "^3.0.0",
     "image-diff": "1.6.0",
     "intl-messageformat-parser": "^1.4.0",
     "istanbul-instrumenter-loader": "3.0.1",
-    "jest": "^23.5.0",
-    "jest-cli": "^23.5.0",
+    "jest": "^23.6.0",
+    "jest-cli": "^23.6.0",
     "jest-raw-loader": "^1.0.1",
     "jimp": "0.2.28",
     "json5": "^1.0.1",
@@ -369,7 +369,6 @@
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.3.0",
     "mocha": "3.3.0",
-    "mock-fs": "^4.4.2",
     "murmurhash3js": "3.0.1",
     "mutation-observer": "^1.0.3",
     "nock": "8.0.0",
@@ -400,7 +399,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": "8.14.0",
+    "node": "10.14.1",
     "yarn": "^1.10.1"
   }
 }
