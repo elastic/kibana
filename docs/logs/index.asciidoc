@@ -23,9 +23,7 @@ instructions.
 [float]
 == Configure data sources 
 
-By default the Logs UI uses the `filebeat-*` index pattern to query the data.
-If your logs are located in a different set of indices, you will need to set `
-xpack.infra.sources.default.logAlias` in `config/kibana.yml` to match your log's index pattern. You can also configure the timestamp field by overriding `xpack.infra.sources.default.timestamp`.
+By default the Logs UI uses the `filebeat-*` index pattern to query the data. If your logs are located in a different set of indices, you will need to set `xpack.infra.sources.default.logAlias` in `config/kibana.yml` to match your log's index pattern. You can also configure the timestamp field by overriding `xpack.infra.sources.default.fields.timestamp`, by default it is set to `@timestamp`. See {logs-ui-settings}[Logs Ui Settings] for a complete list.
 
 --
 
