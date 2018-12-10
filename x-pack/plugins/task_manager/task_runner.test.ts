@@ -234,7 +234,7 @@ describe('TaskManagerRunner', () => {
           runAt: new Date(),
           attempts: 0,
           params: {},
-          scope: 'reporting',
+          scope: ['reporting'],
           state: {},
           status: 'idle',
           user: 'example',

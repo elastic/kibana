@@ -204,7 +204,7 @@ The data stored for a task instance looks something like this:
 
   // An application-specific designation, allowing different Kibana
   // plugins / apps to query for only those tasks they care about.
-  scope: 'alerting',
+  scope: ['alerting'],
 }
 ```
 
@@ -222,7 +222,7 @@ const task = await taskManager.schedule({
   runAt,
   interval,
   params,
-  scope: 'my-fanci-app',
+  scope: ['my-fanci-app'],
 });
 
 // Removes the specified task

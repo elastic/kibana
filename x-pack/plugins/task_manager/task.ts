@@ -192,7 +192,7 @@ export interface TaskInstance {
    * Used to group tasks for querying. So, reporting might schedule tasks with a scope of 'reporting',
    * and then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks.
    */
-  scope?: string | string[];
+  scope?: string[];
 }
 
 /**

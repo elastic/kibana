@@ -54,7 +54,7 @@ export interface RawTaskDoc {
       params: string;
       state: string;
       user?: string;
-      scope?: string | string[];
+      scope?: string[];
     };
   };
 }
