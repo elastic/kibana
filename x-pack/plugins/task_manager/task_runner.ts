@@ -167,7 +167,7 @@ export class TaskManagerRunner implements TaskRunner {
       this.instance = await this.store.update({
         ...this.instance,
         status: 'running',
-        runAt: intervalFromNow(this.definition.timeOut)!,
+        runAt: intervalFromNow(this.definition.timeout)!,
       });
 
       return true;

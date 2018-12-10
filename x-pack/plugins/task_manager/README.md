@@ -67,7 +67,7 @@ taskManager.registerTaskDefinitions({
     // Optional, how long, in minutes, the system should wait before
     // a running instance of this task is considered to be timed out.
     // This defaults to 5 minutes.
-    timeOut: '5m',
+    timeout: '5m',
 
     // The clusterMonitoring task occupies 2 workers, so if the system has 10 worker slots,
     // 5 clusterMonitoring tasks could run concurrently per Kibana instance. This value is

@@ -99,7 +99,7 @@ export interface TaskDefinition {
    * the task takes longer than this, Kibana will send it a kill command and
    * the task will be re-attempted.
    */
-  timeOut?: string;
+  timeout?: string;
 
   /**
    * The numer of workers / slots a running instance of this task occupies.
@@ -125,7 +125,7 @@ export const validateTaskDefinition = Joi.object({
   type: Joi.string().required(),
   title: Joi.string().optional(),
   description: Joi.string().optional(),
-  timeOut: Joi.string().default('5m'),
+  timeout: Joi.string().default('5m'),
   numWorkers: Joi.number().default(1),
   createTaskRunner: Joi.func().required(),
 }).default();
