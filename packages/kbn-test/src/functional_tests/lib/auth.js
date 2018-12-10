@@ -34,7 +34,7 @@ async function updateCredentials(port, auth, username, password, retries = 10) {
           auth,
           hostname: 'localhost',
           port,
-          pathname: `/_xpack/security/user/${username}/_password`,
+          pathname: `/_security/user/${username}/_password`,
         }),
         json: true,
         body: { password },

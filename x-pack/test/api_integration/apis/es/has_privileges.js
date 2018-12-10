@@ -53,7 +53,7 @@ export default function ({ getService }) {
     function createHasPrivilegesRequest(privileges) {
       const supertest = getService('esSupertestWithoutAuth');
       return supertest
-        .post(`/_xpack/security/user/_has_privileges`)
+        .post(`/_security/user/_has_privileges`)
         .auth('testuser', 'testpassword')
         .send({
           applications: [{
